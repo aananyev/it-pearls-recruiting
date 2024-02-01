@@ -20,6 +20,9 @@
                 </property>
                 <property name="recrutier" view="_local"/>
                 <property name="vacancy" view="_local">
+                    <property name="positionType" view="_local"/>
+                    <property name="cities" view="_local"/>
+                    <property name="owner" view="_local"/>
                     <property name="grade" view="_local"/>
                     <property name="projectName" view="_local">
                         <property name="projectDepartment" view="_local"/>

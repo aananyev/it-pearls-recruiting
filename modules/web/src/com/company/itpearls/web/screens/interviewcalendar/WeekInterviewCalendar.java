@@ -1,12 +1,9 @@
 package com.company.itpearls.web.screens.interviewcalendar;
 
 import com.company.itpearls.entity.IteractionList;
-import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Calendar;
 import com.haulmont.cuba.gui.components.calendar.CalendarEventProvider;

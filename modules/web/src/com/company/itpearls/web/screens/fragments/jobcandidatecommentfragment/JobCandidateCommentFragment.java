@@ -1,6 +1,7 @@
 package com.company.itpearls.web.screens.fragments.jobcandidatecommentfragment;
 
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.StandartMapsService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.Iteraction;
@@ -71,6 +72,8 @@ public class JobCandidateCommentFragment extends ScreenFragment {
     private Label<String> starLabel;
     @Inject
     private StarsAndOtherService starsAndOtherService;
+    @Inject
+    private StandartMapsService standartMapsService;
 
     public IteractionList getIteractionList() {
         return iteractionList;
@@ -139,7 +142,7 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                             ratingField.setWidthFull();
                                             ratingField.setCaption(messageBundle.getMessage("msgRating"));
 
-                                            Map<String, Integer> map = new LinkedHashMap<>();
+                                            /* Map<String, Integer> map = new LinkedHashMap<>();
                                             map.put(new StringBuilder()
                                                     .append(starsAndOtherService.setStars(1))
                                                     .append(" Полный негатив")
@@ -159,9 +162,9 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                             map.put(new StringBuilder()
                                                     .append(starsAndOtherService.setStars(5))
                                                     .append(" Отлично!")
-                                                    .toString(), 4);
+                                                    .toString(), 4);*/
 
-                                            ratingField.setOptionsMap(map);
+                                            ratingField.setOptionsMap(standartMapsService.setRatingMap());
 
                                             return ratingField;
                                         })
@@ -214,14 +217,14 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                     ratingField.setWidthFull();
                                     ratingField.setCaption(messageBundle.getMessage("msgRating"));
 
-                                    Map<String, Integer> map = new LinkedHashMap<>();
+/*                                    Map<String, Integer> map = new LinkedHashMap<>();
                                     map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
                                     map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
                                     map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
                                     map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
-                                    map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
+                                    map.put(starsAndOtherService.setStars(5) + " Отлично!", 4); */
 
-                                    ratingField.setOptionsMap(map);
+                                    ratingField.setOptionsMap(standartMapsService.setRatingMap());
 
                                     return ratingField;
                                 })
@@ -327,6 +330,7 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                     openPositionLookupField.setOptionsList(
                                             dataManager.load(OpenPosition.class)
                                                     .query("select e from itpearls_OpenPosition e where not e.openClose = true")
+                                                    .view("openPosition-view")
                                                     .list());
                                     openPositionLookupField.setWidthFull();
                                     openPositionLookupField
@@ -351,14 +355,14 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                     ratingField.setWidthFull();
                                     ratingField.setCaption(messageBundle.getMessage("msgRating"));
 
-                                    Map<String, Integer> map = new LinkedHashMap<>();
+/*                                    Map<String, Integer> map = new LinkedHashMap<>();
                                     map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
                                     map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
                                     map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
                                     map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
-                                    map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
+                                    map.put(starsAndOtherService.setStars(5) + " Отлично!", 4); */
 
-                                    ratingField.setOptionsMap(map);
+                                    ratingField.setOptionsMap(standartMapsService.setRatingMap());
 
                                     return ratingField;
                                 })

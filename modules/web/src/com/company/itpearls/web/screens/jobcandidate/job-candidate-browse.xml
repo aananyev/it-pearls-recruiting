@@ -84,7 +84,7 @@
             <view extends="_local">
                 <property name="user" view="_local"/>
             </view>
-            <loader id="signIconsDl" cacheable="true">
+            <loader id="signIconsDl" cacheable="false">
                 <query>
                     <![CDATA[select e from itpearls_SignIcons e]]>
                     <condition>

@@ -154,6 +154,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private InteractionService interactionService;
     @Inject
     private InteractionListService interactionListService;
+    @Inject
+    private StandartMapsService standartMapsService;
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -1574,7 +1576,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void setPriorityMap() {
-        priorityMap.put(StandartPriorityVacancy.DRAFT_STR,
+/*        priorityMap.put(StandartPriorityVacancy.DRAFT_STR,
                 StandartPriorityVacancy.DRAFT_INT);
         priorityMap.put(StandartPriorityVacancy.PAUSED_STR,
                 StandartPriorityVacancy.PAUSED_INT);
@@ -1585,7 +1587,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         priorityMap.put(StandartPriorityVacancy.HIGH_STR,
                 StandartPriorityVacancy.HIGH_INT);
         priorityMap.put(StandartPriorityVacancy.CRITICAL_STR,
-                StandartPriorityVacancy.CRITICAL_INT);
+                StandartPriorityVacancy.CRITICAL_INT); */
+        priorityMap = standartMapsService.setPriorityMap();
     }
 
     private void setPriorityLabel(HasValue.ValueChangeEvent<OpenPosition> event) {

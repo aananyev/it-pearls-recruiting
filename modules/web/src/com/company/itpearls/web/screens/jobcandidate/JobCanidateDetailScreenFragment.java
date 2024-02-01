@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.core.JobCandidateService;
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.UiComponents;
@@ -94,6 +95,8 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private static final String QUERY_LAST_SALARY = "select e from itpearls_IteractionList e where e.iteractionType = " +
             "(select f from itpearls_Iteraction f where f.iterationName like :iteractionName) and " +
             "e.candidate = :candidate";
+    @Inject
+    private JobCandidateService jobCandidateService;
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
@@ -244,6 +247,10 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                 salaryExpectationLabel.setDescription(getStatistics(iteractionName).getAddString());
             }
         }
+    }
+
+    public void setLastSalaryLabel(JobCandidate jobCandidate) {
+        salaryExpectationLabel.setValue(jobCandidateService.getLastSalaryExpectations(jobCandidate));
     }
 
     public void setVisibleLogo() {

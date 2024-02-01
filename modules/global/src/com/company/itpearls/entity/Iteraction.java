@@ -143,6 +143,9 @@ public class Iteraction extends StandardEntity {
     @Column(name = "SIGN_EMAIL_SEND")
     private Boolean signEmailSend;
 
+    @Column(name = "SIGN_SALARY")
+    private Boolean signSalary;
+
     @Column(name = "OUTSTAFFING_SIGN", nullable = false)
     protected Boolean outstaffingSign = false;
 
@@ -168,6 +171,14 @@ public class Iteraction extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WORK_STATUS_ID")
     private EmployeeWorkStatus workStatus;
+
+    public Boolean getSignSalary() {
+        return signSalary;
+    }
+
+    public void setSignSalary(Boolean signSalary) {
+        this.signSalary = signSalary;
+    }
 
     public Boolean getSignStartCase() {
         return signStartCase;

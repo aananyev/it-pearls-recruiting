@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.core.StandartMapsService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.StandartRegistrationForWork;
 import com.haulmont.cuba.core.entity.Entity;
@@ -26,6 +27,8 @@ public class JobCandidateInProjectBrowse extends StandardLookup<Employee> {
     private RadioButtonGroup recrutingOrAutstaffingRadioButtonGroup;
     @Inject
     private MessageBundle messageBundle;
+    @Inject
+    private StandartMapsService standartMapsService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -41,14 +44,14 @@ public class JobCandidateInProjectBrowse extends StandardLookup<Employee> {
     }
 
     private void setSelectTypeOfWorksRadioButtonGroup() {
-        Map<String, Integer> workStatusMap = new LinkedHashMap<>();
+/*        Map<String, Integer> workStatusMap = new LinkedHashMap<>();
 
         workStatusMap.put("В проекте", 0);
         workStatusMap.put("На бенче", 1);
         workStatusMap.put("Ранее работал на проектах фуллтайм", 2);
-        workStatusMap.put("Ранее работал на проектах парттайм", 3);
+        workStatusMap.put("Ранее работал на проектах парттайм", 3); */
 
-        selectTypeOfWorksRadioButton.setOptionsMap(workStatusMap);
+        selectTypeOfWorksRadioButton.setOptionsMap(standartMapsService.setWorkStatusMap());
 
         Map<String, Integer> recruitingOrOutstaffingMap = new LinkedHashMap<>();
         recruitingOrOutstaffingMap.put(messageBundle.getMessage(StandartRegistrationForWork.ALL_MSG),

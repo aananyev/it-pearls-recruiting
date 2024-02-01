@@ -264,6 +264,8 @@
             <property name="personPosition" view="_local"/>
         </property>
         <property name="vacancy" view="_local">
+            <property name="positionType" view="_local"/>
+            <property name="projectName" view="_local"/>
         </property>
         <property name="iteractionType" view="_local"/>
         <property name="recrutier" view="_local"/>
@@ -281,14 +283,18 @@
         </property>
         <property name="positionType" view="_local">
         </property>
+        <property name="cityPosition" view="_local"/>
     </view>
     <view entity="itpearls_Setup" name="setup-view" extends="_local"/>
     <view entity="itpearls_IteractionList" name="iteractionList-job-candidate" extends="_local">
         <property name="candidate" view="_local">
             <property name="personPosition" view="_local"/>
+            <property name="positionList" view="_local"/>
         </property>
         <property name="vacancy" view="_local">
             <property name="positionType" view="_local"/>
+            <property name="grade" view="_local"/>
+            <property name="projectName" view="_local"/>
         </property>
         <property name="iteractionType" view="_local"/>
         <property name="recrutier" view="_minimal">
@@ -357,12 +363,9 @@
         </property>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-rtasks-view" extends="_local">
-        <property name="projectName" view="_minimal">
-            <property name="projectDepartment" view="_minimal"/>
+        <property name="projectName" view="_local">
         </property>
-        <property name="candidates" view="_minimal">
-            <property name="startDate"/>
-            <property name="endDate"/>
+        <property name="candidates" view="_local">
         </property>
         <property name="grade" view="_local"/>
         <property name="cityPosition" view="_local"/>
@@ -371,6 +374,9 @@
         <property name="owner" view="_local"/>
         <property name="laborAgreement" view="_local"/>
         <property name="skillsList" view="_local"/>
+        <property name="someFiles" view="_local">
+            <property name="fileDescriptor" view="_local"/>
+        </property>
     </view>
     <view entity="itpearls_SomeFiles" name="someFiles-view" extends="_local">
         <property name="fileDescriptor" view="_local">

@@ -16,4 +16,10 @@ public interface StandartMapsService {
     Map<String, Integer> setRemoteWorkMap();
 
     Map<String, Integer> setOnlyOpenedPositionMap();
+
+    Map<String, Integer> setRatingMap();
+
+    Map<String, Integer> setCommunicationTypeMap();
+
+    Map<String, Integer> setWorkStatusMap();
 }

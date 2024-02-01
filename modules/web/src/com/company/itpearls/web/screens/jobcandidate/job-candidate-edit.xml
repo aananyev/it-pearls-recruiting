@@ -111,7 +111,7 @@
                 <property name="grade" view="_local"/>
             </view>
             <loader id="openPositionDl"
-                    cacheable="true">
+                    cacheable="false">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
                     where e.openClose = false or e.openClose is null
@@ -125,7 +125,7 @@
                 <property name="positionType" view="_local"/>
             </view>
             <loader id="suggestOpenPositionDl"
-                    cacheable="true">
+                    cacheable="false">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
                     where e.openClose = false or e.openClose is null
@@ -147,7 +147,7 @@
                     class="com.company.itpearls.entity.Position">
             <view extends="position-view">
             </view>
-            <loader id="personPositionsLc" cacheable="true">
+            <loader id="personPositionsLc" cacheable="false">
                 <query>
                     <![CDATA[select e from itpearls_Position e
                             where e.positionRuName not like '%(не использовать)%'
@@ -158,13 +158,13 @@
         <collection id="currentCompaniesDc"
                     class="com.company.itpearls.entity.Company">
             <view extends="company-view"/>
-            <loader id="currentCompaniesLc" cacheable="true">
+            <loader id="currentCompaniesLc" cacheable="false">
                 <query><![CDATA[select e from itpearls_Company e order by e.comanyName]]></query>
             </loader>
         </collection>
         <collection id="citiesDc" class="com.company.itpearls.entity.City">
             <view extends="city-view"/>
-            <loader id="citiesDl" cacheable="true">
+            <loader id="citiesDl" cacheable="false">
                 <query>
                     <![CDATA[select e from itpearls_City e order by e.cityRuName]]>
                 </query>
@@ -177,7 +177,7 @@
                     <property name="positionType" view="_local"/>
                 </property>
             </view>
-            <loader id="interactionCommentDl" cacheable="true">
+            <loader id="interactionCommentDl" cacheable="false">
                 <query>
                     <![CDATA[select e
                     from itpearls_IteractionList e

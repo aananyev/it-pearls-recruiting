@@ -7,15 +7,15 @@
         <instance id="openPositionNewsDc"
                   class="com.company.itpearls.entity.OpenPositionNews">
             <view extends="_local">
-                <property name="openPosition" view="_minimal">
-                    <property name="openClose"/>
-                    <property name="positionType" view="_minimal"/>
-                    <property name="projectName" view="_minimal"/>
+                <property name="openPosition" view="_local">
+                    <property name="positionType" view="_local"/>
+                    <property name="projectName" view="_local"/>
                 </property>
             </view>
             <loader/>
         </instance>
         <collection id="openPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="_minimal">
+            <view extends="openPosition-view"/>
             <loader id="openPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e order by e.openClose, e.vacansyName]]>

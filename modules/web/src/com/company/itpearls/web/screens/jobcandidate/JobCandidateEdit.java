@@ -29,19 +29,15 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tools.ant.MagicNames;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @UiController("itpearls_JobCandidate.edit")
@@ -256,6 +252,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private ResumeRecognitionService resumeRecognitionService;
     @Inject
     private OpenPositionService openPositionService;
+    @Inject
+    private StandartMapsService standartMapsService;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -841,7 +839,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     } */
 
     private void priorityCommenicationMethodRadioButtonInit() {
-        Map<String, Integer> priorityMap = new LinkedHashMap<>();
+/*        Map<String, Integer> priorityMap = new LinkedHashMap<>();
 
         priorityMap.put("Email", 1);
         priorityMap.put("Phone", 2);
@@ -850,9 +848,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         priorityMap.put("Viber", 5);
         priorityMap.put("WhatsApp", 6);
         priorityMap.put("Social Network", 7);
-        priorityMap.put("Other", 9);
+        priorityMap.put("Other", 9); */
 
-        priorityCommunicationMethodRadioButton.setOptionsMap(priorityMap);
+        priorityCommunicationMethodRadioButton.setOptionsMap(standartMapsService.setCommunicationTypeMap());
     }
 
     private void checkNotUsePosition() {
@@ -3158,6 +3156,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             Iteraction.class)
                     .one();
         } catch (IllegalStateException e) {
+            e.printStackTrace();
         }
 
         if (iteractionComment != null) {
@@ -3293,6 +3292,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void addMissingSocialNetworksListsInvoke() {
         List<SocialNetworkType> socialNetworkTypes = dataManager
                 .load(SocialNetworkType.class)
+                .view("socialNetworkType-view")
                 .list();
 
         for (SocialNetworkType socialNetworkType : socialNetworkTypes) {

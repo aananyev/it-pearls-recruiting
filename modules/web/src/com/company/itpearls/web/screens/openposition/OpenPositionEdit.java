@@ -1382,6 +1382,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
                 .query(QUERY_SELECT_COMMAND)
                 .parameter("parentOpenPosition", getEditedEntity())
+                .view("openPosition-view")
                 .list();
 
         StringBuilder magPos = new StringBuilder();
@@ -1641,10 +1642,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private String getAllSubscibers() {
-        LoadContext<User> loadContext = LoadContext.create(User.class)
+        LoadContext<ExtUser> loadContext = LoadContext.create(ExtUser.class)
                 .setQuery(LoadContext.createQuery("select e from sec$User e"));
 
-        List<User> listManagers = dataManager.loadList(loadContext);
+        List<ExtUser> listManagers = dataManager.loadList(loadContext);
 
         StringBuilder maillist = new StringBuilder();
 
@@ -2966,6 +2967,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             outstaffingRates = dataManager.load(OutstaffingRates.class)
                     .query(QUERY_OUTSTAFF_RATES)
                     .parameter("rate", outstaffingCostTextField.getValue())
+                    .view("outstaffingRates-view")
                     .one();
         } catch (NoResultException | IllegalStateException e) {
             e.printStackTrace();

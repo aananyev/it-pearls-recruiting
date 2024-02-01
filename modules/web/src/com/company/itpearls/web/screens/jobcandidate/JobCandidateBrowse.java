@@ -2,7 +2,6 @@ package com.company.itpearls.web.screens.jobcandidate;
 
 import com.company.itpearls.core.*;
 import com.company.itpearls.entity.*;
-import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.screens.SelectedCloseAction;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.company.itpearls.web.screens.candidatecv.CandidateCVSimpleBrowse;
@@ -75,8 +74,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private ScreenBuilders screenBuilders;
     @Inject
-    private Button buttonExcel;
-    @Inject
     private DataGrid<JobCandidate> jobCandidatesTable;
     @Inject
     private DataManager dataManager;
@@ -124,15 +121,15 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private CollectionLoader<IteractionList> iteractionListDl;
     private CollectionContainer<CandidateCV> candidateCVDc;
     private CollectionLoader<CandidateCV> candidateCVDl;
-    private List<IteractionList> iteractionList = new ArrayList<>();
+//    private List<IteractionList> iteractionList = new ArrayList<>();
     private CandidateCVEdit candidateCVEdit;
     private OnlyTextPersonPosition screenOnlytext;
-    private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
+//    private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
     private List<Employee> employees;
 
-    private static final String EXTENSION_PDF = "pdf";
+/*    private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";
-    private static final String EXTENSION_DOCX = "docx";
+    private static final String EXTENSION_DOCX = "docx";*/
     private static final String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
 
     private static final String separatorChar = "⎯";
@@ -1023,7 +1020,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         mainLayout.add(header2Box);
 
         jobCanidateDetailScreenFragment.setVisibleLogo();
-        jobCanidateDetailScreenFragment.setLastSalaryLabel("Зарплатные ожидания");
+//        jobCanidateDetailScreenFragment.setLastSalaryLabel("Зарплатные ожидания");
+        jobCanidateDetailScreenFragment.setLastSalaryLabel(entity);
         jobCanidateDetailScreenFragment.setStatistics();
         jobCanidateDetailScreenFragment.setLinkButtonTelegrem();
         jobCanidateDetailScreenFragment.setLinkButtonTelegremGroup();

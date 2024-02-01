@@ -215,7 +215,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Map<String, Integer> remoteWork = new LinkedHashMap<>();
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
     private Map<String, Integer> mapWorkExperience = new LinkedHashMap<>();
-    private List<User> users = new ArrayList<>();
+    private List<ExtUser> users = new ArrayList<>();
 
     private final static String QUERY_SELECT_COMMAND
             = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
@@ -304,8 +304,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Action listPrintFormAction = actions.create(ListPrintFormAction.class, "listPrintFormAction");
         openPositionsTable.addAction(listPrintFormAction);
 
-        users = dataManager.load(User.class)
+        users = dataManager.load(ExtUser.class)
                 .query(QUERY_USER)
+                .view("extUser-view")
                 .list();
     }
 
@@ -1548,6 +1549,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         LookupField retField = uiComponents.create(LookupField.NAME);
 
         retField.setOptionsMap(priorityMap);
+        retField.setNullOptionVisible(false);
         retField.setValue(openPosition.getPriority());
         retField.setAlignment(Component.Alignment.TOP_RIGHT);
         retField.addValueChangeListener(f -> {

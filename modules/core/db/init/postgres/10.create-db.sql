@@ -238,6 +238,7 @@ create table ITPEARLS_ITERACTION (
     SIGN_END_PROJECT boolean,
     SIGN_END_PROCESS_VACANCY_CLOSED boolean,
     SIGN_EMAIL_SEND boolean,
+    SIGN_SALARY boolean,
     OUTSTAFFING_SIGN boolean not null,
     NOTIFICATION_NEED_SEND boolean,
     NOTIFICATION_TYPE integer,

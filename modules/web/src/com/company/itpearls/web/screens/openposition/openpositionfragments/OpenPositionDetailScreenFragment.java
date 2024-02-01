@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.openposition.openpositionfragments;
 
+import com.company.itpearls.core.StandartMapsService;
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.UiComponents;
@@ -20,6 +21,8 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
     private CollectionContainer<OpenPosition> openPositionsDc;
     @Inject
     private Image companyLogoImage;
+    @Inject
+    private StandartMapsService standartMapsService;
 
     @Subscribe
     public void onAttach(AttachEvent event) {

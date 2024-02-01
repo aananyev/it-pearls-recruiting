@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate.jobcandidatecomments;
 
+import com.company.itpearls.core.StandartMapsService;
 import com.company.itpearls.core.StarsAndOtherService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.JobCandidateCommentEvent;
@@ -66,6 +67,8 @@ public class JobCandidateComment extends Screen {
     private Label<Position> jobCandidatePositionLabel;
     @Inject
     private StarsAndOtherService starsAndOtherService;
+    @Inject
+    private StandartMapsService standartMapsService;
 
     public JobCandidate getJobCandidate() {
         return jobCandidate;
@@ -172,14 +175,14 @@ public class JobCandidateComment extends Screen {
                                     ratingField.setWidthFull();
                                     ratingField.setCaption(messageBundle.getMessage("msgRating"));
 
-                                    Map<String, Integer> map = new LinkedHashMap<>();
+/*                                    Map<String, Integer> map = new LinkedHashMap<>();
                                     map.put(starsAndOtherService.setStars(1) + " Полный негатив", 0);
                                     map.put(starsAndOtherService.setStars(2) + " Сомнительно", 1);
                                     map.put(starsAndOtherService.setStars(3) + " Нейтрально", 2);
                                     map.put(starsAndOtherService.setStars(4) + " Положительно", 3);
-                                    map.put(starsAndOtherService.setStars(5) + " Отлично!", 4);
+                                    map.put(starsAndOtherService.setStars(5) + " Отлично!", 4); */
 
-                                    ratingField.setOptionsMap(map);
+                                    ratingField.setOptionsMap(standartMapsService.setRatingMap());
 
                                     return ratingField;
                                 })
