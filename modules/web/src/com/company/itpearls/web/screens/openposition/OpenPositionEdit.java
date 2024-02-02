@@ -1281,7 +1281,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             StringBuilder sb = new StringBuilder()
                     .append("❗\uFE0F<b>НОВАЯ ВАКАНСИЯ:</b> ")
-                    .append(numberPositionField.getValue() != null ? "(" + numberPositionField.getValue() + ") " : "")
+                    .append(vacansyIDTextField.getValue() != null ? "(" + vacansyIDTextField.getValue() + ") " : "")
                     .append(vacansyNameField.getValue())
                     .append("\n\n")
                     .append(openPositionRichTextArea.getValue());

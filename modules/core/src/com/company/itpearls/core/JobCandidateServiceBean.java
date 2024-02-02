@@ -4,6 +4,7 @@ import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.JobCandidate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,7 +14,10 @@ public class JobCandidateServiceBean implements JobCandidateService {
     public String getLastSalaryExpectations(JobCandidate jobCandidate) {
         List<IteractionList> iteractionListList = jobCandidate.getIteractionList().stream()
                 .sorted((iteractionList1, iteractionList2)
-                        -> iteractionList2.getNumberIteraction().compareTo(iteractionList1.getNumberIteraction()))
+                        -> (iteractionList2.getNumberIteraction() != null
+                        ? iteractionList2.getNumberIteraction() : BigDecimal.ONE)
+                        .compareTo((iteractionList1.getNumberIteraction() != null
+                                ? iteractionList1.getNumberIteraction() : BigDecimal.ONE)))
                 .collect(Collectors.toList());
 
         for (IteractionList il : iteractionListList) {

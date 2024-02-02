@@ -29,13 +29,28 @@ public class SettingsCommand extends ServiceCommand {
                 this.getCommandIdentifier()));
 
         Settings settings = Bot.getUserSettings(chat.getId());
-        sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
-                String.format("*ТЕКУЩИЕ НАСТРОЙКИ*\n"
-                 + " - приоритет вакансии не ниже *%s (%s)*\n"
-                        + " - публикация новых вакансий *%s*\n",
-                        OpenPositionPriority.fromId(settings.getPriorityNotLower()),
-                        settings.getPriorityNotLower(),
-                        settings.getPublishNewVacancies()));
+
+        if (strings.length == 0) {
+            sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
+                    String.format("*ТЕКУЩИЕ НАСТРОЙКИ*\n"
+                                    + " - приоритет вакансии не ниже *%s (%s)*\n"
+                                    + " - публикация новых вакансий *%s*\n\n" +
+                                    "Для изменения настроек наберите команду */settings*, " +
+                                    "а затем ключи [[приоритет *от 0 до 4* (0 - минимальный приоритет)]] " +
+                                    "и [[публикация новых вакансий *true/false*]]\n" +
+                                    "Например /settings 3 true",
+                            OpenPositionPriority.fromId(settings.getPriorityNotLower()),
+                            settings.getPriorityNotLower(),
+                            settings.getPublishNewVacancies()));
+        } else {
+            sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName, "Изменение настроек");
+
+            settings.setPriorityNotLower(Integer.parseInt(strings[0]));
+            settings.setPublishNewVacancies(strings.equals("true") ? true : false);
+
+            Bot.setUserSettings(chat.getId(), settings);
+
+        }
 
         logger.debug(String.format("Пользователь %s. Завершено выполнение команды %s", userName,
                 this.getCommandIdentifier()));

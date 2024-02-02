@@ -2,11 +2,11 @@ package com.company.itpearls.core.telegrambot.telegram.nonCommand;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Пользовательские настройки
  */
-@Getter
 @EqualsAndHashCode
 public class Settings {
 
@@ -19,6 +19,14 @@ public class Settings {
 
     public Boolean getPublishNewVacancies() {
         return this.publishNewVacancies;
+    }
+
+    public void setPriorityNotLower(int priorityNotLower) {
+        this.priorityNotLower = priorityNotLower;
+    }
+
+    public void setPublishNewVacancies(Boolean publishNewVacancies) {
+        this.publishNewVacancies = publishNewVacancies;
     }
 
     public Settings() {

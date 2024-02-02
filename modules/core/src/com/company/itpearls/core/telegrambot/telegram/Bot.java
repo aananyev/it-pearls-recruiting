@@ -274,9 +274,15 @@ public final class Bot extends TelegramLongPollingCommandBot {
         Map<Long, Settings> userSettings = Bot.getUserSettings();
         Settings settings = userSettings.get(chatId);
         if (settings == null) {
+            userSettings.put(chatId, defaultSettings);
             return defaultSettings;
         }
         return settings;
+    }
+
+    public static void setUserSettings(Long chatId, Settings settings) {
+        userSettings.get(chatId).setPriorityNotLower(settings.getPriorityNotLower());
+        userSettings.get(chatId).setPublishNewVacancies(settings.getPublishNewVacancies());
     }
 
     /**

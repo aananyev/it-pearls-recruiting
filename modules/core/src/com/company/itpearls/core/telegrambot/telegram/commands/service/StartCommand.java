@@ -20,6 +20,8 @@ public class StartCommand extends ServiceCommand {
 
         logger.debug(String.format("Пользователь %s. Начато выполнение команды %s", userName,
                 this.getCommandIdentifier()));
+        sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName, Utils.getHelloMessage());
+
         sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
                 "Давайте начнём! Если Вам нужна помощь, нажмите /help");
         logger.debug(String.format("Пользователь %s. Завершено выполнение команды %s", userName,
