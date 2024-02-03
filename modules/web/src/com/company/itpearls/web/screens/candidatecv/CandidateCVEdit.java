@@ -38,6 +38,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import java.awt.image.*;
 import java.io.*;
 import java.util.*;
@@ -135,6 +136,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Image candidateFaceDefaultImage;
     @Inject
     private ResumeRecognitionService resumeRecognitionService;
+    @Named("tabSheet.tabCV")
+    private VBoxLayout tabCV;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;

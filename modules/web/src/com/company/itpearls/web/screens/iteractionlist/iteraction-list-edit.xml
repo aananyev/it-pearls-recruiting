@@ -156,7 +156,7 @@
                     <textField id="numberIteractionField"
                                dataContainer="iteractionListDc"
                                property="numberIteraction"
-                               editable="false"
+                               editable="true"
                                caption="msg://msgNumber"
                                width="AUTO"
                                align="MIDDLE_LEFT"/>

@@ -1,0 +1,1 @@
+alter table itpearls_candidate_cv_work_place rename to ITPEARLS_CANDIDATE_CV_WORK_PLACE__U10683 ;

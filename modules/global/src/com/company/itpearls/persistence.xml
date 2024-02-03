@@ -60,5 +60,6 @@
         <class>com.company.itpearls.entity.JobCandidateSignIcon</class>
         <class>com.company.itpearls.entity.InternalEmailTemplateInteraction</class>
         <class>com.company.itpearls.entity.ApplicationSetup</class>
+        <class>com.company.itpearls.entity.CandidateCVWorkPlace</class>
     </persistence-unit>
 </persistence>
