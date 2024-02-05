@@ -636,4 +636,60 @@ public class Utils {
             }
         }
     }
+
+    public static List<Position> getActivePositionList(Chat chat) {
+        List<Position> positions = new ArrayList<>();
+        Settings settings = Bot.getUserSettings(chat.getId());
+
+        final String QUERY_ACTIVE_POSITION_LIST
+                = "select e from itpearls_Position e where e in " +
+                "(select f.positionType from itpearls_OpenPosition f " +
+                "where not (f.openClose = true) and f.priority >= :priority)";
+
+        try {
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                // get EntityManager for the current transaction
+                EntityManager em = persistence.getEntityManager();
+                Query query = em.createQuery(QUERY_ACTIVE_POSITION_LIST);
+                query.addView(new View(Position.class)
+                        .addProperty("positionRuName")
+                        .addProperty("positionEnName"));
+                query.setParameter("priority", settings.getPriorityNotLower());
+
+                positions = (List<Position>) query.getResultList();
+                tx.commit();
+            }
+        } catch (Exception e) {
+            logger.error(String.format("SQL error: %s", e.getMessage()));
+        } finally {
+            return positions;
+        }
+    }
+
+    public static int getPositionsVacancyCount(Chat chat, Position position) {
+        final String QUERY_POSITIONVACANCY_COUNT = "select sum(e.numberPosition) from itpearls_OpenPosition e " +
+                "where e.positionType = :position and e.priority >= :priority and not (e.openClose = true)";
+        Long count = null;
+        Settings settings = Bot.getUserSettings(chat.getId());
+
+
+        try {
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                // get EntityManager for the current transaction
+                EntityManager em = persistence.getEntityManager();
+                Query query = em.createQuery(QUERY_POSITIONVACANCY_COUNT);
+                query.setParameter("priority", settings.getPriorityNotLower());
+                query.setParameter("position", position);
+
+                count = (Long) query.getSingleResult();
+                tx.commit();
+            }
+        } catch (Exception e) {
+            logger.error(String.format("SQL error: %s", e.getMessage()));
+        } finally {
+            return Math.toIntExact(count);
+        }
+    }
 }

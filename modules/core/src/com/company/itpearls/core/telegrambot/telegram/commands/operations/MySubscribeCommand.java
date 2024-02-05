@@ -2,7 +2,6 @@ package com.company.itpearls.core.telegrambot.telegram.commands.operations;
 
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.SettingsCommand;
-import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.RecrutiesTasks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

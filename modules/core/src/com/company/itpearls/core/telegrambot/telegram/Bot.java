@@ -74,6 +74,9 @@ public final class Bot extends TelegramLongPollingCommandBot {
         register(new UserSessionTg("usersession", "Пользователи в системе"));
         logger.debug("Команда usersession создана");
 
+        register(new PersonPositionCommand("positions", "Должности"));
+        logger.debug("Команда positions создана");
+
         register(new StartCommand("start", "Старт"));
         logger.debug("Команда start создана");
 
