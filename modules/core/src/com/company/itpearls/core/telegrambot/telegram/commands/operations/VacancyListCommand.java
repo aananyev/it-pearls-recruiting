@@ -34,7 +34,7 @@ public class VacancyListCommand extends OperationCommand {
 
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
                     new StringBuilder()
-                            .append("<b><u>")
+                            .append("БОТ <b><u>")
                             .append(Utils.getBotName())
                             .append("</u></b>\n")
                             .append("<b>Приоритет не ниже:</b> ")
@@ -84,7 +84,7 @@ public class VacancyListCommand extends OperationCommand {
         }
     }
 
-    private InlineKeyboardMarkup setInline(OpenPosition openPosition, Boolean subscribeFlag) {
+    public static InlineKeyboardMarkup setInline(OpenPosition openPosition, Boolean subscribeFlag) {
         InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
         List<InlineKeyboardButton> rowInline = new ArrayList<>();

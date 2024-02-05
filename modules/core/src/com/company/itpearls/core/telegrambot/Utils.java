@@ -354,6 +354,10 @@ public class Utils {
             "select e from itpearls_OpenPosition e " +
                     "where e.id = :uuid";
 
+    private static final String QUERY_LIST_POSITION_OPEN_POSITION_ID =
+            "select e from itpearls_OpenPosition e " +
+                    "where e.priority >= %s and not(e.openClose = true) and e.positionType.id = :uuid";
+
     public static List<OpenPosition> getOpenPosition(Chat chat) {
         int priority = Utils.getPriority(chat);
         String q = String.format(QUERY_LIST_OPEN_POSITION, priority);
@@ -405,6 +409,32 @@ public class Utils {
         return result;
     }
 
+    public static List<OpenPosition> getPositonOpenPosition(Long chatId, String positionCallBack, String positionKey) {
+        Settings settings = Bot.getUserSettings(chatId);
+
+        List<OpenPosition> result = queryListResult(String.format(QUERY_LIST_POSITION_OPEN_POSITION_ID,
+                        settings.getPriorityNotLower()),
+                new View(OpenPosition.class)
+                        .addProperty("openPositionComments", new View(OpenPositionComment.class)
+                                .addProperty("comment"))
+                        .addProperty("vacansyName")
+                        .addProperty("projectName",
+                                new View(Project.class)
+                                        .addProperty("projectName")
+                                        .addProperty("projectOwner",
+                                                new View(Person.class)
+                                                        .addProperty("firstName")
+                                                        .addProperty("secondName")))
+                        .addProperty("positionType",
+                                new View(Position.class)
+                                        .addProperty("positionEnName")
+                                        .addProperty("positionRuName")),
+//                Utils.getUUID(positionCallBack, positionKey));
+                UUID.fromString(positionKey));
+
+        return result;
+    }
+
     public static String getBotName() {
         return queryOneResult("select e.telegramBotName " +
                 "from itpearls_ApplicationSetup e " +
@@ -417,11 +447,12 @@ public class Utils {
 
     public static String getHelloMessage() {
         return new StringBuilder()
-                .append("Бот *")
-                .append(getBotName())
-                .append("*\n\n")
+                .append("БОТ <b><u>")
+                .append(Utils.getBotName())
+                .append("</u></b>\n")
                 .append("ОПИСАНИЕ КОМАНД БОТА:\n")
                 .append("/allvacancy - список открытых вакансий\n")
+                .append("/positions - вакансии по должностям\n")
                 .append("/mysubscribe - мои подписки на вакансии\n")
                 .append("/subscribers - подписчики на вакансии\n")
 //                .append("/settings - настройки\n")
@@ -466,7 +497,11 @@ public class Utils {
 
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("❗\uFE0F❗\uFE0F❗\uFE0FВАКАНСИЯ: ")
+        stringBuilder
+                .append("БОТ <b><u>")
+                .append(Utils.getBotName())
+                .append("</u></b>\n")
+                .append("❗\uFE0FВАКАНСИЯ: ")
                 .append(openPositionComments.get(0).getOpenPosition().getVacansyName())
                 .append("\n\n");
 
@@ -536,7 +571,7 @@ public class Utils {
                         : ""),
                 salary.toString()));
 
-        return "❗\uFE0F❗\uFE0F❗\uFE0F" + ret;
+        return "❗\uFE0F" + ret;
     }
 
     static public String formattedHtml2text(String inputHtml) {
@@ -691,5 +726,33 @@ public class Utils {
         } finally {
             return Math.toIntExact(count);
         }
+    }
+
+    public static String getPositionUUID(String positionID) {
+        final String QUERY_GET_POSITION_NAME = "select e from itpearls_Position e where e.id = :uuid";
+        Position position = null;
+
+        try {
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                // get EntityManager for the current transaction
+                EntityManager em = persistence.getEntityManager();
+                Query query = em.createQuery(QUERY_GET_POSITION_NAME);
+                query.setParameter("uuid", UUID.fromString(positionID));
+
+                position = (Position) query.getSingleResult();
+                tx.commit();
+            }
+        } catch (Exception e) {
+            logger.error(String.format("SQL error: %s", e.getMessage()));
+        } finally {
+            return new StringBuilder()
+                    .append(position.getPositionEnName() != null ? position.getPositionEnName() : "")
+                    .append(" / ")
+                    .append(position.getPositionRuName() != null ? position.getPositionRuName() : "")
+                    .toString();
+        }
+
+
     }
 }

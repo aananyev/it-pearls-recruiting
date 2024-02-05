@@ -4,6 +4,7 @@ package com.company.itpearls.core.telegrambot.telegram;
 import com.company.itpearls.core.telegrambot.exeptions.UserException;
 import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.*;
+import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
@@ -16,6 +17,8 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.*;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.nonCommand.NonCommand;
@@ -148,10 +151,41 @@ public final class Bot extends TelegramLongPollingCommandBot {
                 case CallbackData.SUBSCRIBERS_BUTTON:
                     openPositionSubscribersRecruter(chatId, openPositionKey, openPositionId);
                     break;
+                case CallbackData.VIEW_VACANSIES_BUTTON:
+                    positionOpenPositionView(chatId, update.getCallbackQuery());
+                    break;
                 default:
                     setAnswer(chatId, null, "❌ОШИБКА: Нет действия");
                     break;
             }
+        }
+    }
+
+    private void positionOpenPositionView(Long chatId, CallbackQuery callbackQuery) {
+        String positionId = callbackQuery.getData();
+        String positionKey = positionId.substring(
+                positionId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, positionId.length());
+        Boolean subscribeFlag = Utils.isInternalUser(callbackQuery.getFrom());
+
+        List<OpenPosition> openPositions = Utils.getPositonOpenPosition(chatId, positionId, positionKey);
+        int counter = 0;
+
+        StringBuilder sb = new StringBuilder("<b>Список вакансий для должности</b> <i>\"")
+                .append(Utils.getPositionUUID(positionId.substring(positionId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, positionId.length())))
+                .append("\"</i>\n")
+                .append("Всего вакансий: ")
+                .append(openPositions.size())
+                .append("\n\n");
+
+        sendAnswer(chatId, sb.toString());
+
+        for (OpenPosition openPosition : openPositions) {
+            StringBuilder stringBuilder = new StringBuilder()
+                    .append(++counter)
+                    .append(". ")
+                    .append(openPosition.getVacansyName());
+            sendAnswer(chatId, stringBuilder.toString(),
+                    VacancyListCommand.setInline(openPosition, subscribeFlag));
         }
     }
 
@@ -297,7 +331,12 @@ public final class Bot extends TelegramLongPollingCommandBot {
      */
     private void setAnswer(Long chatId, String userName, String text) {
         SendMessage answer = new SendMessage();
-        answer.setText(text);
+        answer.setText(new StringBuilder()
+                .append("БОТ <b><u>")
+                .append(Utils.getBotName())
+                .append("</u></b>\n")
+                .append(text)
+                .toString());
         answer.setChatId(chatId.toString());
         answer.setParseMode(ParseMode.HTML);
 
@@ -308,6 +347,47 @@ public final class Bot extends TelegramLongPollingCommandBot {
         } catch (TelegramApiException e) {
             logger.error(String.format("*ОШИБКА* %s.\nСообщение %s, не являющееся командой.\nПользователь: **%s**",
                     e.getMessage(), userName));
+            e.printStackTrace();
+        }
+    }
+
+    void sendAnswer(Long chatId, String text,
+                    InlineKeyboardMarkup keyboardMarkup) {
+        SendMessage message = new SendMessage();
+        message.enableMarkdown(true);
+        message.setParseMode(ParseMode.HTML);
+        message.setChatId(chatId.toString());
+        message.setText(new StringBuilder()
+                .append("БОТ <b><u>")
+                .append(Utils.getBotName())
+                .append("</u></b>\n")
+                .append(text)
+                .toString());
+        message.setReplyMarkup(keyboardMarkup);
+
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            logger.error(String.format("Ошибка %s.", e.getMessage()));
+            e.printStackTrace();
+        }
+    }
+
+    void sendAnswer(Long chatId, String text) {
+        SendMessage message = new SendMessage();
+        message.enableMarkdown(true);
+        message.setParseMode(ParseMode.HTML);
+        message.setChatId(chatId.toString());
+        message.setText(new StringBuilder()
+                .append("БОТ <b><u>")
+                .append(Utils.getBotName())
+                .append("</u></b>\n")
+                .append(text).toString());
+
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            logger.error(String.format("Ошибка %s.", e.getMessage()));
             e.printStackTrace();
         }
     }

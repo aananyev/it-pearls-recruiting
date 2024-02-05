@@ -1,6 +1,7 @@
 package com.company.itpearls.core.telegrambot.telegram.commands.service;
 
 
+import com.company.itpearls.core.telegrambot.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.extensions.bots.commandbot.commands.BotCommand;
@@ -24,8 +25,14 @@ abstract class ServiceCommand extends BotCommand {
     void sendAnswer(AbsSender absSender, Long chatId, String commandName, String userName, String text) {
         SendMessage message = new SendMessage();
         message.enableMarkdown(true);
+        message.enableHtml(true);
         message.setChatId(chatId.toString());
-        message.setText(text);
+        message.setText(new StringBuilder()
+//                .append("БОТ <b><u>")
+//                .append(Utils.getBotName())
+//                .append("</u></b>\n")
+                .append(text)
+                .toString());
         try {
             absSender.execute(message);
         } catch (TelegramApiException e) {
