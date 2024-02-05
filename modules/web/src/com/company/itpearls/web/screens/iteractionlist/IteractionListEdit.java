@@ -76,8 +76,9 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private DateField<Date> dateIteractionField;
     @Inject
     private SubscribeDateService subscribeDateService;
-//    @Inject
-//    private TextField<BigDecimal> numberIteractionField;
+
+    @Inject
+    private TextField<BigDecimal> numberIteractionField;
     @Inject
     private Label<String> companyLabel;
     @Inject
@@ -1064,13 +1065,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (parentCandidate != null) {
             getEditedEntity().setCandidate(parentCandidate);
         }
-        ;
+
+        initNumberInteractionField();
         setMostPopularIteraction();
 
         if (PersistenceHelper.isNew(getEditedEntity())) {
             dateIteractionField.setEditable(true);
         } else {
             dateIteractionField.setEditable(false);
+        }
+    }
+
+    private void initNumberInteractionField() {
+        if (numberIteractionField.getValue() == null) {
+            numberIteractionField.setValue(interactionListService.getCountInteraction());
         }
     }
 

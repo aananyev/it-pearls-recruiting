@@ -9,6 +9,7 @@ import com.haulmont.cuba.security.entity.User;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.util.*;
 
 @Service(InteractionService.NAME)
@@ -65,9 +66,12 @@ public class InteractionServiceBean implements InteractionService {
                 if (maxIteraction == null)
                     maxIteraction = iteractionList;
 
-                if (iteractionList.getNumberIteraction() != null) {
-                    if (maxIteraction.getNumberIteraction().compareTo(iteractionList.getNumberIteraction()) < 0) {
-                        maxIteraction = iteractionList;
+                if (maxIteraction.getNumberIteraction() != null) {
+                    if (iteractionList.getNumberIteraction() != null) {
+                        if (maxIteraction.getNumberIteraction()
+                                .compareTo(iteractionList.getNumberIteraction() != null ? iteractionList.getNumberIteraction() : BigDecimal.ZERO) < 0) {
+                            maxIteraction = iteractionList;
+                        }
                     }
                 }
             }

@@ -1190,9 +1190,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                     for (IteractionList list : jobCandidatesTable
                                             .getSingleSelected()
                                             .getIteractionList()) {
-                                        if (maxNumberIteraction.compareTo(list.getNumberIteraction()) < 0) {
-                                            maxNumberIteraction = list.getNumberIteraction();
-                                            lastIteraction = list;
+                                        if (maxNumberIteraction != null) {
+                                            if (list != null) {
+                                                if (maxNumberIteraction.compareTo(list.getNumberIteraction()) < 0) {
+                                                    maxNumberIteraction = list.getNumberIteraction();
+                                                    lastIteraction = list;
+                                                }
+                                            }
                                         }
                                     }
                                 } else {
