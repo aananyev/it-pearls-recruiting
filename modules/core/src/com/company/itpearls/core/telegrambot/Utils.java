@@ -525,13 +525,26 @@ public class Utils {
 
     }
 
-    public static String getOpenPositionJobDescription(String openPosition, String key) {
+    public static String getOpenPositionJobDescription(User user, String openPosition, String key) {
         String openPositionId = openPosition.replace(key, "");
         String QUERY_GET_COMMENT = String.format("select e from itpearls_OpenPosition e where e.id = '%s'",
                 openPositionId.substring(1, openPositionId.length()));
 
         List<OpenPosition> openPositionList = queryListResult(QUERY_GET_COMMENT,
-                new View(OpenPosition.class));
+                new View(OpenPosition.class)
+                        .addProperty("positionType", new View(Position.class)
+                                .addProperty("positionRuName")
+                                .addProperty("positionEnName"))
+                        .addProperty("projectName", new View(Project.class)
+                                .addProperty("projectName"))
+                        .addProperty("numberPosition")
+                        .addProperty("openClose")
+                        .addProperty("priority")
+                        .addProperty("vacansyName")
+                        .addProperty("salaryCandidateRequest")
+                        .addProperty("salaryComment")
+                        .addProperty("salaryMax")
+                        .addProperty("salaryMin"));
         OpenPosition op = (OpenPosition) openPositionList.get(0);
 
         StringBuilder salary = new StringBuilder();
@@ -553,27 +566,32 @@ public class Utils {
                     .append("\n");
         }
 
-        if (op.getSalaryComment() != null) {
-            salary.append("Комментарии по заработной плате: ")
-                    .append(op.getSalaryComment())
-                    .append("\n");
-            salaryFlag = true;
+        if (Utils.isInternalUser(user)) {
+            if (op.getSalaryComment() != null) {
+                salary.append("Комментарии по заработной плате: ")
+                        .append(op.getSalaryComment())
+                        .append("\n");
+                salaryFlag = true;
+            }
         }
 
-        String ret = formattedHtml2text(String.format("%s\n" +
-                        "<b>НАИМЕНОВАНИЕ ВАКАНСИИ:</b>\n" +
-                        "%s\n\n" +
-                        "<b>СРОЧНОСТЬ:</b> %s\n" +
-                        "<b>ОПИСАНИЕ ВАКАНСИИ:</b>\n%s\n\n" +
-                        "<b>ЗАРПЛАТА:</b> %s",
+        String ret = String.format("%s\n" +
+                        "НАИМЕНОВАНИЕ ВАКАНСИИ:\n" +
+                        "<b>%s</b>\n\n" +
+                        "КОЛИЧЕСТВО ПЕРСОНАЛА: <b>%s</b>\n" +
+                        "СРОЧНОСТЬ: <b>%s</b>\n\n" +
+                        "ОПИСАНИЕ ВАКАНСИИ:\n<i>%s</i>\n\n" +
+                        "ЗАРПЛАТА: <b>%s</b>",
                 Utils.getBotName(),
                 op.getVacansyName(),
+                op.getNumberPosition(),
                 OpenPositionPriority.fromId(op.getPriority()),
                 (op.getComment() != null ?
-                        (op.getComment().length() < MAX_TELEGRAM_MESSAGE_LENGTH ?
-                                op.getComment() : op.getComment().substring(0, MAX_TELEGRAM_MESSAGE_LENGTH))
+                        (formattedHtml2text(op.getComment()).length() < MAX_TELEGRAM_MESSAGE_LENGTH ?
+                                formattedHtml2text(op.getComment()) :
+                                formattedHtml2text(op.getComment()).substring(0, MAX_TELEGRAM_MESSAGE_LENGTH))
                         : ""),
-                salary.toString()));
+                salary.toString());
 
         return ret;
     }

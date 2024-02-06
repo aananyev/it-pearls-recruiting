@@ -33,9 +33,9 @@ public class SubscribeCommand extends OperationCommand {
                             .append(Utils.getBotName())
                             .append("\n")
                             .append("<b>ПОДПИСЧИКОВ НА ВАКАНСИИ</b>\n")
-                            .append("<b>ВСЕГО ПОДПИСОК НА ВАКАНСИИ:</b> ")
+                            .append("ВСЕГО ПОДПИСОК НА ВАКАНСИИ: <b>")
                             .append(recrutiesTasks.size())
-                            .append("\n\n")
+                            .append("</b>\n\n")
                             .toString());
 
             for (RecrutiesTasks recrutiesTask : recrutiesTasks) {
@@ -46,14 +46,15 @@ public class SubscribeCommand extends OperationCommand {
                 sb.append(counter++)
                         .append(". ")
                         .append(recrutiesTask.getOpenPosition().getVacansyName())
-                        .append("\nC <i>")
+                        .append("\nC <b>")
                         .append(simpleDateFormat.format(recrutiesTask.getStartDate()))
-                        .append("</i> по <i>")
+                        .append("</b> по <b>")
                         .append(simpleDateFormat.format(recrutiesTask.getEndDate()))
-                        .append("\n</i><b>Рекрутер: </b><i>")
+                        .append("\n</b>\nРекрутер: <b>")
                         .append(recrutiesTask.getReacrutier().getName())
-                        .append("</i>\n<b>Связаться:</b> ")
-                        .append(recrutiesTask.getReacrutier().getEmail() != null ? recrutiesTask.getReacrutier().getEmail() : "");
+                        .append("</b>\nСвязаться: ")
+                        .append(recrutiesTask.getReacrutier().getEmail() != null ? recrutiesTask.getReacrutier().getEmail() : "")
+                        .append("");
 
                 if (recrutiesTask.getReacrutier().getEmail() != null && recrutiesTask.getReacrutier().getTelegram() != null) {
                     sb.append(", ");
@@ -67,7 +68,11 @@ public class SubscribeCommand extends OperationCommand {
         } catch (NullPointerException e) {
             logger.debug("ОШИБКА - не загрузились список подписок");
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), Utils.getUserName(user),
-                    "Нет активных подписок на вакансии");
+                    new StringBuilder()
+                            .append(Utils.getBotName())
+                            .append("\n")
+                            .append("Нет активных подписок на вакансии")
+                            .toString());
         }
 
     }

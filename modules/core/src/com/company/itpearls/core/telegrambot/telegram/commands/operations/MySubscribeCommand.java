@@ -57,20 +57,32 @@ public class MySubscribeCommand extends OperationCommand{
                     }
                 } else {
                     sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(),
-                            Utils.getUserName(user),
-                            "⛔\uFE0F У ВАС НЕТ АКТИВНЫХ ПОДПИСОК НА ВАКАНСИИ.\n" +
-                                    "ПОДПИШИТЕСЬ В РАЗДЕЛЕ /allvacancy или в системе HuntTech: " + Utils.getAppURL());
+                            Utils.getUserName(user), new StringBuilder()
+                                    .append(Utils.getBotName())
+                                    .append("\n")
+                                    .append("⛔\uFE0F У ВАС НЕТ АКТИВНЫХ ПОДПИСОК НА ВАКАНСИИ.\n")
+                                    .append("ПОДПИШИТЕСЬ В РАЗДЕЛЕ /allvacancy или в системе HuntTech: ")
+                                    .append(Utils.getAppURL())
+                                    .toString());
                 }
 
             } catch(NullPointerException e){
                 logger.debug("ОШИБКА - не загрузились список подписок");
                 sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), Utils.getUserName(user),
-                        "Нет активных подписок на вакансии");
+                        new StringBuilder()
+                                .append(Utils.getBotName())
+                                .append("\n")
+                                .append(
+                        "⛔\uFE0F Нет активных подписок на вакансии").toString());
             }
         } else {
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(),
                     Utils.getUserName(user),
-                    "⛔\uFE0F ВЫ НЕ ЯВЛЯЕТЕСЬ РЕКРУТЕРОМ КОМПАНИИ. ОБРАТИТЕСЬ К АДМИНИСТРАТОРУ. @AlekseyAnanyev");
+                    new StringBuilder()
+                            .append(Utils.getBotName())
+                            .append("\n")
+                            .append("⛔\uFE0F ВЫ НЕ ЯВЛЯЕТЕСЬ РЕКРУТЕРОМ КОМПАНИИ. ОБРАТИТЕСЬ К АДМИНИСТРАТОРУ. @AlekseyAnanyev")
+                            .toString());
         }
     }
 }

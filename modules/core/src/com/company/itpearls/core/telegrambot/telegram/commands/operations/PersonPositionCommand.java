@@ -27,23 +27,27 @@ public class PersonPositionCommand extends OperationCommand {
 
         sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
                 new StringBuilder()
-                        .append("<b>Приоритет не ниже:</b> ")
-                        .append(OpenPositionPriority.fromId(Utils.getPriority(chat)))
+                        .append(Utils.getBotName())
                         .append("\n")
-                        .append("<b>Всего открыто вакансий:</b> ")
+                        .append("Приоритет не ниже: <b>")
+                        .append(OpenPositionPriority.fromId(Utils.getPriority(chat)))
+                        .append("</b>\n")
+                        .append("Всего открыто вакансий: <b>")
                         .append(positions.size())
-                        .append("\n\n")
+                        .append("</b>\n\n")
                         .toString());
 
         for (Position position : positions) {
             StringBuilder sb = new StringBuilder();
 
             sb.append(counter++)
-                    .append(". ")
+                    .append(". <b>")
                     .append(position.getPositionRuName())
-                    .append(" (")
+                    .append(" / ")
+                    .append(position.getPositionEnName())
+                    .append("</b> (<b>")
                     .append(Utils.getPositionsVacancyCount(chat, position))
-                    .append(" человек)");
+                    .append("</b> человек)");
 
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
                     sb.toString(), setInline(position, subscribeFlag));

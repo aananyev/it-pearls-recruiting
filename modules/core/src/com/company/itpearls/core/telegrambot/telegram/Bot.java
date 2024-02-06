@@ -135,7 +135,8 @@ public final class Bot extends TelegramLongPollingCommandBot {
             switch (openPositionKey) {
                 case CallbackData.VIEW_DETAIL_BUTTON:
                     sendAnswer(chatId,
-                            Utils.getOpenPositionJobDescription(openPositionId,
+                            Utils.getOpenPositionJobDescription(update.getCallbackQuery().getFrom(),
+                                    openPositionId,
                                     CallbackData.VIEW_DETAIL_BUTTON));
                     break;
                 case CallbackData.COMMENT_VIEW_BUTTON:
@@ -147,7 +148,6 @@ public final class Bot extends TelegramLongPollingCommandBot {
                     openPositionSubscribe(chatId, update.getCallbackQuery().getFrom().getUserName(),
                             update.getCallbackQuery().getFrom(), openPositionKey, openPositionId);
                     break;
-
                 case CallbackData.SUBSCRIBERS_BUTTON:
                     openPositionSubscribersRecruter(chatId, openPositionKey, openPositionId);
                     break;
@@ -172,12 +172,12 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
         StringBuilder sb = new StringBuilder(Utils.getBotName())
                 .append("\n")
-                .append("<b>Список вакансий для должности</b> <i>\"")
+                .append("Список вакансий для должности <b>\"")
                 .append(Utils.getPositionUUID(positionId.substring(positionId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, positionId.length())))
-                .append("\"</i>\n")
-                .append("Всего вакансий: ")
+                .append("\"</b>\n")
+                .append("Всего вакансий: <b>")
                 .append(openPositions.size())
-                .append("\n\n");
+                .append("</b>\n\n");
 
         sendAnswer(chatId, sb.toString());
 
@@ -185,7 +185,10 @@ public final class Bot extends TelegramLongPollingCommandBot {
             StringBuilder stringBuilder = new StringBuilder()
                     .append(++counter)
                     .append(". ")
-                    .append(openPosition.getVacansyName());
+                    .append(openPosition.getVacansyName())
+                    .append(" (Количество человек - <b>")
+                    .append(openPosition.getNumberPosition())
+                    .append("</b>)");
             sendAnswer(chatId, stringBuilder.toString(),
                     VacancyListCommand.setInline(openPosition, subscribeFlag));
         }
@@ -203,18 +206,18 @@ public final class Bot extends TelegramLongPollingCommandBot {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
         StringBuilder sb = new StringBuilder()
-                .append(String.format("\nРекрутеры подписанные на вакансию (%s): ",
+                .append(String.format("\nРекрутеры подписанные на вакансию (<b>%s</b>): ",
                         recrutiesTasks.get(0).getOpenPosition().getVacansyName()))
                 .append("\n\n");
 
         if (recrutiesTasks.size() > 0) {
             for (RecrutiesTasks rt : recrutiesTasks) {
                 sb.append(rt.getReacrutier().getName())
-                        .append(" c ")
+                        .append(" c <b>")
                         .append(sdf.format(rt.getStartDate()))
-                        .append(" по ")
+                        .append("</b> по <b>")
                         .append(sdf.format(rt.getEndDate()))
-                        .append(". Отправить резюме:");
+                        .append("</b>. Отправить резюме:");
                 if (rt.getReacrutier().getEmail() != null)
                     sb.append(" ")
                             .append(rt.getReacrutier().getEmail());
@@ -259,11 +262,11 @@ public final class Bot extends TelegramLongPollingCommandBot {
                 logger.error(String.format("Error: ошибка добавления сущности RecrutiesTask% %s", e.getMessage()));
             }
 
-            setAnswer(chatId, null, String.format("✅User: %s (%s) подписан на вакансию %s", user.getUserName(),
+            setAnswer(chatId, null, String.format("✅User: <b>%s</b> (<b>%s</b>) подписан на вакансию <b>%s</b>", user.getUserName(),
                     Utils.getInternalUser(userName).getName(),
                     Utils.getOpenPosition(openPositionCallBack, openPositionKey).get(0).getVacansyName()));
         } else {
-            setAnswer(chatId, null, String.format("\uD83D\uDED1User: %s (%s) не удалось подписаться на вакансию: %s.",
+            setAnswer(chatId, null, String.format("\uD83D\uDED1User: <b>%s</b> (<b>%s</b>) не удалось подписаться на вакансию: <b>%s</b>.",
                     user.getUserName(),
                     Utils.getInternalUser(userName).getName(),
                     Utils.getOpenPosition(openPositionCallBack, openPositionKey).get(0).getVacansyName()));
@@ -300,7 +303,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
         String command = update.getMessage().getText().substring(1);
         setAnswer(update.getMessage().getChatId(),
                 Utils.getUserName(update.getMessage()),
-                String.format("❌Некорректная команда [%s], доступные команды: %s"
+                String.format("❌Некорректная команда [<b>%s</b>], доступные команды: %s"
                         , command
                         , registeredCommands.toString()));
     }
@@ -344,8 +347,9 @@ public final class Bot extends TelegramLongPollingCommandBot {
         try {
             execute(answer);
         } catch (TelegramApiException e) {
-            logger.error(String.format("*ОШИБКА* %s.\nСообщение %s, не являющееся командой.\nПользователь: **%s**",
+            logger.error(String.format("ОШИБКА %s.\nСообщение %s, не являющееся командой.\nПользователь: %s",
                     e.getMessage(), userName));
+            sendAnswer(chatId, "\uD83E\uDD28Ошибка вывода сообщения. Обратитесь к администратору системы.");
             e.printStackTrace();
         }
     }
@@ -365,6 +369,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
             execute(message);
         } catch (TelegramApiException e) {
             logger.error(String.format("Ошибка %s.", e.getMessage()));
+            sendAnswer(chatId, "\uD83E\uDD28Ошибка вывода сообщения. Обратитесь к администратору системы.");
             e.printStackTrace();
         }
     }
@@ -381,6 +386,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
             execute(message);
         } catch (TelegramApiException e) {
             logger.error(String.format("Ошибка %s.", e.getMessage()));
+            sendAnswer(chatId, "\uD83E\uDD28Ошибка вывода сообщения. Обратитесь к администратору системы.");
             e.printStackTrace();
         }
     }

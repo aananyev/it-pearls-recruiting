@@ -36,36 +36,39 @@ public class VacancyListCommand extends OperationCommand {
                     new StringBuilder()
                             .append(Utils.getBotName())
                             .append("\n")
-                            .append("<b>Приоритет не ниже:</b> ")
+                            .append("Приоритет не ниже: <b>")
                             .append(OpenPositionPriority.fromId(Utils.getPriority(chat)))
-                            .append("\n")
-                            .append("<b>Всего открыто вакансий:</b> ")
+                            .append("</b>\n")
+                            .append("Всего открыто вакансий: <b>")
                             .append(openPositions.size())
-                            .append("\n\n")
+                            .append("</b>\n\n")
                             .toString());
 
             for (OpenPosition openPosition : openPositions) {
                 StringBuilder sb = new StringBuilder();
 
                 sb.append(counter++)
-                        .append(". ")
+                        .append(". <b>")
                         .append(new StringBuilder(openPosition.getPositionType().getPositionEnName())
                                 .append(" / ")
                                 .append(openPosition.getPositionType().getPositionRuName())
+                                .append("</b> (человек - <b>")
+                                .append(openPosition.getNumberPosition())
+                                .append("</b>)")
                                 .append("\n"))
-                        .append("<b>Проект:</b> <i>")
+                        .append("Проект: <b>")
                         .append(openPosition.getProjectName().getProjectName())
-                        .append("</i>\n")
-                        .append("<b>Приоритет:</b> <i>")
+                        .append("</b>\n")
+                        .append("Приоритет: <b>")
                         .append(OpenPositionPriority.fromId(openPosition.getPriority()))
-                        .append("</i>\n");
+                        .append("</b>\n");
 
                 if (subscribeFlag) {
-                    sb.append("<b>Аккаунт\\HR на стороне заказчика: </b><i>")
+                    sb.append("Аккаунт\\HR на стороне заказчика: <b>")
                             .append(openPosition.getProjectName().getProjectOwner().getSecondName())
                             .append(" ")
                             .append(openPosition.getProjectName().getProjectOwner().getFirstName())
-                            .append("</i>")
+                            .append("</b>")
                             .append("\n");
                 }
 
