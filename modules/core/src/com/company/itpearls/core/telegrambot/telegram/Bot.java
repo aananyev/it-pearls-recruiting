@@ -134,12 +134,12 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
             switch (openPositionKey) {
                 case CallbackData.VIEW_DETAIL_BUTTON:
-                    setAnswer(chatId, null,
+                    sendAnswer(chatId,
                             Utils.getOpenPositionJobDescription(openPositionId,
                                     CallbackData.VIEW_DETAIL_BUTTON));
                     break;
                 case CallbackData.COMMENT_VIEW_BUTTON:
-                    setAnswer(chatId, null,
+                    sendAnswer(chatId,
                             Utils.getOpenPositionComments(openPositionId,
                                     CallbackData.COMMENT_VIEW_BUTTON));
                     break;
@@ -170,7 +170,9 @@ public final class Bot extends TelegramLongPollingCommandBot {
         List<OpenPosition> openPositions = Utils.getPositonOpenPosition(chatId, positionId, positionKey);
         int counter = 0;
 
-        StringBuilder sb = new StringBuilder("<b>Список вакансий для должности</b> <i>\"")
+        StringBuilder sb = new StringBuilder(Utils.getBotName())
+                .append("\n")
+                .append("<b>Список вакансий для должности</b> <i>\"")
                 .append(Utils.getPositionUUID(positionId.substring(positionId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, positionId.length())))
                 .append("\"</i>\n")
                 .append("Всего вакансий: ")
@@ -332,9 +334,6 @@ public final class Bot extends TelegramLongPollingCommandBot {
     private void setAnswer(Long chatId, String userName, String text) {
         SendMessage answer = new SendMessage();
         answer.setText(new StringBuilder()
-                .append("БОТ <b><u>")
-                .append(Utils.getBotName())
-                .append("</u></b>\n")
                 .append(text)
                 .toString());
         answer.setChatId(chatId.toString());
@@ -358,9 +357,6 @@ public final class Bot extends TelegramLongPollingCommandBot {
         message.setParseMode(ParseMode.HTML);
         message.setChatId(chatId.toString());
         message.setText(new StringBuilder()
-                .append("БОТ <b><u>")
-                .append(Utils.getBotName())
-                .append("</u></b>\n")
                 .append(text)
                 .toString());
         message.setReplyMarkup(keyboardMarkup);
@@ -379,9 +375,6 @@ public final class Bot extends TelegramLongPollingCommandBot {
         message.setParseMode(ParseMode.HTML);
         message.setChatId(chatId.toString());
         message.setText(new StringBuilder()
-                .append("БОТ <b><u>")
-                .append(Utils.getBotName())
-                .append("</u></b>\n")
                 .append(text).toString());
 
         try {

@@ -91,11 +91,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private TelegramService telegramService;
     @Inject
-    private ApplicationSetupService applicationSetupService;
-    @Inject
     private TextManipulationService textManipulationService;
     @Inject
     private StandartMapsService standartMapsService;
+    @Inject
+    private TelegramBotService telegramBotService;
 
     @Install(to = "openPositionsTable.projectLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -1244,8 +1244,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     new Date(),
                     (ExtUser) userSession.getUser());
 
-            telegramService.sendMessageToChat(openPositionService
-                    .getOpenPositionOpenShortMessage(entity, userSession.getUser()));
+            telegramService.sendMessageToChat(new StringBuilder()
+                    .append(telegramBotService.getBotName())
+                    .append("\n")
+                    .append(openPositionService
+                            .getOpenPositionOpenShortMessage(entity, userSession.getUser())).toString());
 
             entity.setOwner(null);
             entity.setLastOpenDate(null);
@@ -1264,8 +1267,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     new Date(),
                     (ExtUser) userSession.getUser());
 
-            telegramService.sendMessageToChat(openPositionService
-                    .getOpenPositionOpenShortMessage(entity, userSession.getUser()));
+            telegramService.sendMessageToChat(new StringBuilder()
+                    .append(telegramBotService.getBotName())
+                            .append("\n")
+                    .append(openPositionService
+                    .getOpenPositionOpenShortMessage(entity, userSession.getUser()))
+                    .toString());
 
             entity.setOwner((ExtUser) userSession.getUser());
             entity.setLastOpenDate(new Date());
@@ -1572,6 +1579,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             }
 
             StringBuilder sb = new StringBuilder()
+                    .append(telegramBotService.getBotName())
+                    .append("\n")
                     .append("⚡ <b>ИЗМЕНЕН ПРИОРИТЕТ ВАКАНСИИ</b> <i>")
                     .append(openPosition.getVacansyName())
                     .append("</i> на <b>")
@@ -3657,7 +3666,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         if (openPosition != null) {
             StringBuilder sb = new StringBuilder()
-                    .append("❗\uFE0F<b>ВАКАНСИЯ:</b> ")
+                    .append(telegramBotService.getBotName())
+                    .append("\n")
+                    .append("<b>ВАКАНСИЯ:</b> ")
                     .append(openPosition.getVacansyName())
                     .append("\n\n")
                     .append(openPosition.getSalaryComment())

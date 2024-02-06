@@ -28,9 +28,6 @@ abstract class ServiceCommand extends BotCommand {
         message.enableHtml(true);
         message.setChatId(chatId.toString());
         message.setText(new StringBuilder()
-//                .append("БОТ <b><u>")
-//                .append(Utils.getBotName())
-//                .append("</u></b>\n")
                 .append(text)
                 .toString());
         try {

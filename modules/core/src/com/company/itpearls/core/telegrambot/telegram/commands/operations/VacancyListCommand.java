@@ -34,9 +34,8 @@ public class VacancyListCommand extends OperationCommand {
 
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
                     new StringBuilder()
-                            .append("БОТ <b><u>")
                             .append(Utils.getBotName())
-                            .append("</u></b>\n")
+                            .append("\n")
                             .append("<b>Приоритет не ниже:</b> ")
                             .append(OpenPositionPriority.fromId(Utils.getPriority(chat)))
                             .append("\n")

@@ -36,4 +36,6 @@ public interface TelegramBotService {
     BotSession restoreBotSession();
 
     void setApplicationSetup(ApplicationSetup activeApplicationSetup);
+
+    String getBotName();
 }

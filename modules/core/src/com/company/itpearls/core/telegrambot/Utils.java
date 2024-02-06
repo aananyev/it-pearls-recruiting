@@ -436,9 +436,13 @@ public class Utils {
     }
 
     public static String getBotName() {
-        return queryOneResult("select e.telegramBotName " +
+        String botName = queryOneResult("select e.telegramBotName " +
                 "from itpearls_ApplicationSetup e " +
                 "where e.activeSetup = true");
+        return new StringBuilder("\uD83E\uDD16БОТ <b><u>")
+                .append(botName)
+                .append("</u></b>")
+                .toString();
     }
 
     public static String getUserSessions() {
@@ -447,9 +451,8 @@ public class Utils {
 
     public static String getHelloMessage() {
         return new StringBuilder()
-                .append("БОТ <b><u>")
                 .append(Utils.getBotName())
-                .append("</u></b>\n")
+                .append("\n")
                 .append("ОПИСАНИЕ КОМАНД БОТА:\n")
                 .append("/allvacancy - список открытых вакансий\n")
                 .append("/positions - вакансии по должностям\n")
@@ -498,9 +501,8 @@ public class Utils {
         StringBuilder stringBuilder = new StringBuilder();
 
         stringBuilder
-                .append("БОТ <b><u>")
                 .append(Utils.getBotName())
-                .append("</u></b>\n")
+                .append("\n")
                 .append("❗\uFE0FВАКАНСИЯ: ")
                 .append(openPositionComments.get(0).getOpenPosition().getVacansyName())
                 .append("\n\n");
@@ -558,11 +560,13 @@ public class Utils {
             salaryFlag = true;
         }
 
-        String ret = formattedHtml2text(String.format("<b>НАИМЕНОВАНИЕ ВАКАНСИИ:</b>\n" +
+        String ret = formattedHtml2text(String.format("%s\n" +
+                        "<b>НАИМЕНОВАНИЕ ВАКАНСИИ:</b>\n" +
                         "%s\n\n" +
                         "<b>СРОЧНОСТЬ:</b> %s\n" +
                         "<b>ОПИСАНИЕ ВАКАНСИИ:</b>\n%s\n\n" +
                         "<b>ЗАРПЛАТА:</b> %s",
+                Utils.getBotName(),
                 op.getVacansyName(),
                 OpenPositionPriority.fromId(op.getPriority()),
                 (op.getComment() != null ?
@@ -571,7 +575,7 @@ public class Utils {
                         : ""),
                 salary.toString()));
 
-        return "❗\uFE0F" + ret;
+        return ret;
     }
 
     static public String formattedHtml2text(String inputHtml) {

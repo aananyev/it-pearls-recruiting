@@ -56,6 +56,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private TextManipulationService textManipulationService;
     @Inject
     private StandartMapsService standartMapsService;
+    @Inject
+    private TelegramBotService telegramBotService;
 
     @Subscribe("closedVacancyTimer")
     public void onClosedVacancyTimerTimerAction(Timer.TimerActionEvent event) {
@@ -1023,15 +1025,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
                             new StringBuilder("Изменены зарплатные предложение (MAX): старое ")
                                     .append(startSalaryMaxValue.toString().length() >= 3
-                                    ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
-                                    : "НЕ ОПРЕДЕЛЕНО")
+                                            ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
+                                            : "НЕ ОПРЕДЕЛЕНО")
                                     .append(" на новое ")
                                     .append(openPositionFieldSalaryMax.getValue())
                                     .toString(),
                             new StringBuilder("Изменены зарплатные предложение (MAX): старое ")
                                     .append(startSalaryMaxValue.toString().length() >= 3
-                                    ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
-                                    : "НЕ ОПРЕДЕЛЕНО")
+                                            ? startSalaryMaxValue.toString().substring(0, startSalaryMaxValue.toString().length() - 3)
+                                            : "НЕ ОПРЕДЕЛЕНО")
                                     .append(" на новое ")
                                     .append(openPositionFieldSalaryMax.getValue())
                                     .toString(),
@@ -1253,7 +1255,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             .append(openPositionFieldSalaryMax.getValue())
                             .append("\n\n")
                             .append(shortDescriptionTextArea.getValue() != null ?
-                            Jsoup.parse(shortDescriptionTextArea.getValue()).wholeText() : "")
+                                    Jsoup.parse(shortDescriptionTextArea.getValue()).wholeText() : "")
                             .toString(),
                     new Date(),
                     (ExtUser) userSession.getUser());
@@ -1279,8 +1281,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe
     public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            StringBuilder sb = new StringBuilder()
-                    .append("❗\uFE0F<b>НОВАЯ ВАКАНСИЯ:</b> ")
+            StringBuilder sb = new StringBuilder(telegramBotService.getBotName())
+                    .append("\n")
+                    .append("<b>НОВАЯ ВАКАНСИЯ:</b> ")
                     .append(vacansyIDTextField.getValue() != null ? "(" + vacansyIDTextField.getValue() + ") " : "")
                     .append(vacansyNameField.getValue())
                     .append("\n\n")
@@ -1301,26 +1304,29 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             .append(openPositionFieldSalaryMax.getValue());
                 }
             }
-            /* не надо выводить коммент с предельной ставкой - это не для внешнего использования
-                    .append("\n\n(")
-                    .append(salaryCommentTextFiels.getValue())
-                    .append(")\n")
-                    .append(userSession.getUser().getName()); */
-            telegramService.sendMessageToChat(textManipulationService.formattedHtml2text(sb.toString()));
+
+            telegramService.sendMessageToChat(new StringBuilder(telegramBotService.getBotName())
+                    .append("\n")
+                    .append(textManipulationService.formattedHtml2text(sb.toString()))
+                    .toString());
         } else {
 
             Boolean flag = getEditedEntity().getOpenClose() != null ? getEditedEntity().getOpenClose() : false;
 
             if (false) {
 //                if (!flag) {
-                telegramService.sendMessageToChat(textManipulationService
-                        .formattedHtml2text(new StringBuilder("❗\uFE0F<B>ИЗМЕНЕНА ВАКАНСИЯ:</b> ")
-                                .append(vacansyIDTextField.getValue() != null
-                                        ? "(" + vacansyIDTextField.getValue() + ")" : "")
-                                .append(" ")
-                                .append(vacansyNameField.getValue())
-                                .append(userSession.getUser().getName())
-                                .toString()));
+                telegramService.sendMessageToChat(new StringBuilder(telegramBotService.getBotName())
+                        .append("\n")
+                        .append(textManipulationService
+                                .formattedHtml2text(new StringBuilder(telegramBotService.getBotName())
+                                        .append("\n")
+                                        .append("<B>ИЗМЕНЕНА ВАКАНСИЯ:</b> ")
+                                        .append(vacansyIDTextField.getValue() != null
+                                                ? "(" + vacansyIDTextField.getValue() + ")" : "")
+                                        .append(" ")
+                                        .append(vacansyNameField.getValue())
+                                        .append(userSession.getUser().getName())
+                                        .toString())).toString());
             }
         }
     }

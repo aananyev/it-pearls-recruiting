@@ -26,9 +26,8 @@ public class UserSessionTg extends ServiceCommand {
         Stream<UserSession> userSessionsStream = userSessionsApi.getUserSessionsStream(); // TO-DO возвращает инжектирование нулл
         UserSession userSessions[] = userSessionsStream.distinct().toArray(UserSession[]::new);
         StringBuilder sb = new StringBuilder()
-                .append("БОТ <b><u>")
                 .append(Utils.getBotName())
-                .append("</u></b>\n")
+                .append("\n")
                 .append("<b>Список пользователей в системе:</b>\n");
         String userName = Utils.getUserName(user);
 

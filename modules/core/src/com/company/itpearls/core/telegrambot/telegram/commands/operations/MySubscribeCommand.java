@@ -31,9 +31,8 @@ public class MySubscribeCommand extends OperationCommand{
                             this.getCommandIdentifier(),
                             Utils.getUserName(user),
                             new StringBuilder()
-                                    .append("БОТ <b><u>")
                                     .append(Utils.getBotName())
-                                    .append("</u></b>\n")
+                                    .append("\n")
                                     .append("<b>МОИ ПОДПИСКИ НА ВАКАНСИИ</b>\n")
                                     .append("<b>ВСЕГО ПОДПИСОК НА ВАКАНСИИ:</b> <i>")
                                     .append(recrutiesTasks.size())

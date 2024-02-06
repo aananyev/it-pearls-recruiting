@@ -160,8 +160,11 @@ public class OpenPositionServiceBean implements OpenPositionService {
     public String getOpenPositionCloseShortMessage(OpenPosition entity, User user) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("\uD83D\uDCAC Закрыта вакансия: ")
+        sb.append("❌<b>")
+                .append(CLOSE_VACANCY)
+                .append("</b><i>")
                 .append(entity.getVacansyName())
+                .append("</i>")
                 .append("<br><svg align=\"right\" width=\"100%\"><i>")
                 .append(user.getName())
                 .append("</i></svg>");
@@ -174,15 +177,19 @@ public class OpenPositionServiceBean implements OpenPositionService {
 
     @Override
     public String getOpenPositionOpenShortMessage(OpenPosition entity, User user) {
-        StringBuilder sb = new StringBuilder("\uD83D\uDCAC");
+        StringBuilder sb = new StringBuilder();
 
         if (entity.getOpenClose() != null) {
+            sb.append(entity.getOpenClose() ? "❌" : "✅");
             sb.append(entity.getOpenClose() ? CLOSE_VACANCY : OPEN_VACANCY);
         } else {
+            sb.append("✅");
             sb.append(OPEN_VACANCY);
         }
 
-        sb.append(entity.getVacansyName())
+        sb.append("<i>")
+                .append(entity.getVacansyName())
+                .append("</i>")
                 .append("<br><svg align=\"right\" width=\"100%\"><i>")
                 .append(user.getName())
                 .append("</i></svg>");

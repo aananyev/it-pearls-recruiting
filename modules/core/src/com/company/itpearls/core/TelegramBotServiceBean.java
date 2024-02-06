@@ -3,6 +3,11 @@ package com.company.itpearls.core;
 import com.company.itpearls.core.telegrambot.TelegramBotStatus;
 import com.company.itpearls.core.telegrambot.telegram.Bot;
 import com.company.itpearls.entity.ApplicationSetup;
+import com.haulmont.cuba.core.EntityManager;
+import com.haulmont.cuba.core.Persistence;
+import com.haulmont.cuba.core.Query;
+import com.haulmont.cuba.core.Transaction;
+import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.security.app.Authentication;
 import org.slf4j.Logger;
@@ -202,5 +207,34 @@ public class TelegramBotServiceBean implements TelegramBotService, Serializable 
     @Override
     public BotSession restoreBotSession() {
         return TelegramBotStatus.getBotSession();
+    }
+
+    @Override
+    public String getBotName() {
+        String botName = queryOneResult("select e.telegramBotName " +
+                "from itpearls_ApplicationSetup e " +
+                "where e.activeSetup = true");
+        return new StringBuilder("\uD83E\uDD16БОТ <b><u>")
+                .append(botName)
+                .append("</u></b>")
+                .toString();
+    }
+    private static <T> T queryOneResult(String queryStr) {
+        Object retObj = null;
+
+        try {
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                // get EntityManager for the current transaction
+                EntityManager em = persistence.getEntityManager();
+                Query query = em.createQuery(queryStr);
+
+                retObj = (T) query.getFirstResult();
+                tx.commit();
+            }
+
+        } finally {
+            return (T) retObj;
+        }
     }
 }

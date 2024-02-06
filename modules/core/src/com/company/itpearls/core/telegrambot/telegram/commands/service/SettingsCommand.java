@@ -32,13 +32,15 @@ public class SettingsCommand extends ServiceCommand {
 
         if (strings.length == 0) {
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
-                    String.format("*ТЕКУЩИЕ НАСТРОЙКИ*\n"
-                                    + " - приоритет вакансии не ниже *%s (%s)*\n"
-                                    + " - публикация новых вакансий *%s*\n\n" +
-                                    "Для изменения настроек наберите команду */settings*, " +
-                                    "а затем ключи [[приоритет *от 0 до 4* (0 - минимальный приоритет)]] " +
-                                    "и [[публикация новых вакансий *true/false*]]\n" +
+                    String.format("<b>%s</b>\n" +
+                                    "<b>ТЕКУЩИЕ НАСТРОЙКИ</b>\n"
+                                    + " - приоритет вакансии не ниже <b>%s (%s)</b>\n"
+                                    + " - публикация новых вакансий <b>%s</b>\n\n" +
+                                    "Для изменения настроек наберите команду <b>/settings</b>, " +
+                                    "а затем ключи [[приоритет <b>от 0 до 4</b> (0 - минимальный приоритет)]] " +
+                                    "и [[публикация новых вакансий <b>true/false</b>]]\n" +
                                     "Например /settings 3 true",
+                            Utils.getBotName(),
                             OpenPositionPriority.fromId(settings.getPriorityNotLower()),
                             settings.getPriorityNotLower(),
                             settings.getPublishNewVacancies()));
