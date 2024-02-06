@@ -127,7 +127,6 @@ public class OpenPositionServiceBean implements OpenPositionService {
         openPosition.setRemoteWork(0);
         openPosition.setCommandCandidate(0);
         openPosition.setProjectName(projectService.getProjectDefault());
-        ;
         openPosition.setWorkExperience(0);
 
         dataManager.commit(openPosition);
@@ -143,10 +142,10 @@ public class OpenPositionServiceBean implements OpenPositionService {
 
         try {
             openPosition = dataManager
-                    .loadValue("select e from itpearls_OpenPosition e where e.vacansyName like \'"
-                                    + DEFAULT_OPEN_POSITION
-                                    + "\'",
-                            OpenPosition.class)
+                    .load(OpenPosition.class)
+                    .query("select e from itpearls_OpenPosition e where e.vacansyName like \':defaultOpenPositionName\'")
+                    .parameter("defaultOpenPositionName", DEFAULT_OPEN_POSITION)
+                    .view("openPosition-view")
                     .one();
         } catch (Exception e) {
             e.printStackTrace();

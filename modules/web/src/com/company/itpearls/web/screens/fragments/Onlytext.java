@@ -1,12 +1,10 @@
 package com.company.itpearls.web.screens.fragments;
 
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.RichTextArea;
-import com.haulmont.cuba.gui.screen.Screen;
-import com.haulmont.cuba.gui.screen.Subscribe;
-import com.haulmont.cuba.gui.screen.UiController;
-import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
 import java.awt.*;
@@ -23,6 +21,10 @@ public class Onlytext extends Screen {
 
     private String resultText;
     private Boolean cancel;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private MessageBundle messageBundle;
 
     @Subscribe("textRichTextArea")
     public void onTextRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
@@ -49,23 +51,36 @@ public class Onlytext extends Screen {
 
     public void copyFromClipboardButtonInvoke() {
         String result = "";
-        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-        Transferable contents = clipboard.getContents(null);
+        Clipboard clipboard = null;
 
-        boolean hasTransferableText =
-                (contents != null) &&
-                        contents.isDataFlavorSupported(DataFlavor.stringFlavor);
-        if (hasTransferableText) {
-            try {
-                result = (String)contents.getTransferData(DataFlavor.stringFlavor);
-            }
-            catch (UnsupportedFlavorException | IOException ex){
-                System.out.println(ex);
-                ex.printStackTrace();
-            }
+        try {
+            clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        } catch (HeadlessException e) {
+            e.printStackTrace();
+
+            notifications.create(Notifications.NotificationType.SYSTEM)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.getMessage("msgClipboardIsEmpty"))
+                    .show();
         }
 
-        textRichTextArea.setValue(result);
+        if (clipboard != null) {
+            Transferable contents = clipboard.getContents(null);
+
+            boolean hasTransferableText =
+                    (contents != null) &&
+                            contents.isDataFlavorSupported(DataFlavor.stringFlavor);
+            if (hasTransferableText) {
+                try {
+                    result = (String) contents.getTransferData(DataFlavor.stringFlavor);
+                } catch (UnsupportedFlavorException | IOException ex) {
+                    System.out.println(ex);
+                    ex.printStackTrace();
+                }
+            }
+
+            textRichTextArea.setValue(result);
+        }
     }
 
     @Subscribe

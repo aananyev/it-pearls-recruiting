@@ -198,11 +198,13 @@
                     <actions>
                         <action id="loadFromPdf"
                                 icon="FILE_PDF_O"
-                                enable="true"
+                                enable="false"
+                                visible="false"
                                 caption="msg://msgLoadFromPDF"/>
                         <action id="loadFromWord"
                                 icon="FILE_WORD_O"
                                 enable="false"
+                                visible="false"
                                 caption="msg://msgLoadFromWord"/>
                         <action id="loadFromClipboard"
                                 icon="CLIPBOARD"

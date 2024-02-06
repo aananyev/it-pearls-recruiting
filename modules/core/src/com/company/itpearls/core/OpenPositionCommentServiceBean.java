@@ -10,7 +10,6 @@ import javax.inject.Inject;
 
 @Service(OpenPositionCommentService.NAME)
 public class OpenPositionCommentServiceBean implements OpenPositionCommentService {
-
     @Inject
     private Events events;
     @Inject

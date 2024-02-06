@@ -2,8 +2,6 @@ package com.company.itpearls.core;
 
 import com.company.itpearls.entity.SkillTree;
 import com.haulmont.cuba.core.global.DataManager;
-import org.apache.fop.pdf.PDFDocument;
-import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.RandomAccessRead;
 import org.apache.pdfbox.io.RandomAccessReadMemoryMappedFile;

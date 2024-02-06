@@ -1,12 +1,10 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.entity.*;
-import org.eclipse.persistence.annotations.PrivateOwned;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import javax.xml.crypto.Data;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;

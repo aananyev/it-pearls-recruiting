@@ -548,6 +548,7 @@ public class ParseCVServiceBean implements ParseCVService {
     private List<Company> parseCompaniesPriv(String textCV) {
         List<Company> companies = dataManager
                 .load(Company.class)
+                .view("company-view")
                 .list();
         List<Company> retCompanies = new ArrayList<>();
 
@@ -571,7 +572,9 @@ public class ParseCVServiceBean implements ParseCVService {
     }
 
     private List<Position> parsePosition(String textCV) {
-        List<Position> positions = dataManager.load(Position.class).list();
+        List<Position> positions = dataManager.load(Position.class)
+                .view("position-view")
+                .list();
         List<Position> retPositions = new ArrayList<>();
 
         for (Position position : positions) {
@@ -599,7 +602,9 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public String parseCityStr(String textCV) {
-        List<City> cities = dataManager.load(City.class).list();
+        List<City> cities = dataManager.load(City.class)
+                .view("city-view")
+                .list();
         City retCity = null;
 
         List<String> city = dataManager
@@ -613,7 +618,9 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public City parseCity(String textCV) {
-        List<City> cities = dataManager.load(City.class).list();
+        List<City> cities = dataManager.load(City.class)
+                .view("city-view")
+                .list();
         City retCity = null;
 
         if (textCV != null) {
@@ -634,7 +641,9 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public Company parseCompany(String textCV) {
-        List<Company> companies = dataManager.load(Company.class).list();
+        List<Company> companies = dataManager.load(Company.class)
+                .view("company-view")
+                .list();
         Company retCompany = null;
 
         if (textCV != null) {

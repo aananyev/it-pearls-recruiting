@@ -254,6 +254,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private OpenPositionService openPositionService;
     @Inject
     private StandartMapsService standartMapsService;
+    @Inject
+    private InteractionListService interactionListService;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -939,6 +941,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             iteractionList.setCandidate(getEditedEntity());
             iteractionList.setRating(4);
+            iteractionList.setDateIteraction(new Date());
+            iteractionList.setNumberIteraction(interactionListService.getCountInteraction().add(BigDecimal.ONE));
 
             Iteraction iteraction = null;
             OpenPosition openPosition = null;
@@ -3172,6 +3176,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             comment.setCurrentPriority(0);
             comment.setIteractionType(iteractionComment);
             comment.setRating(0);
+            comment.setDateIteraction(new Date());
+            comment.setNumberIteraction(interactionListService.getCountInteraction().add(BigDecimal.ONE));
 
             if (vacancyPopupPickerField.getValue() != null) {
                 comment.setVacancy(vacancyPopupPickerField.getValue());

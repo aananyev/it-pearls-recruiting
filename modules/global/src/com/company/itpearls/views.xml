@@ -78,7 +78,10 @@
             <property name="addDate"/>
             <property name="addString"/>
         </property>
-        <property name="positionList" view="_minimal"/>
+        <property name="positionList" view="_local">
+            <property name="positionList" view="_local"/>
+            <property name="jobCandidate" view="_local"/>
+        </property>
         <property name="personPosition" view="_local"/>
         <property name="candidateCv" view="_local">
             <property name="toVacancy" view="_local">
@@ -341,6 +344,7 @@
             <property name="fileImageFace" view="_local"/>
         </property>
         <property name="fullName"/>
+        <property name="positionList" view="_local"/>
     </view>
     <view entity="itpearls_Company" name="company-view-search" extends="_local">
         <property name="departmentOfCompany" view="_minimal"/>
@@ -404,6 +408,7 @@
                 <property name="positionType" view="_local"/>
             </property>
         </property>
+        <property name="positionList" view="_local"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view-iteraction-list" extends="_local">
         <property name="projectName" view="_minimal">

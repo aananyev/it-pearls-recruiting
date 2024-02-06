@@ -80,25 +80,4 @@ public class InteractionServiceBean implements InteractionService {
         } else
             return null;
     }
-
-/*    @Override
-    public BigDecimal getCountInteraction() {
-        IteractionList e = null;
-
-        try {
-            e = dataManager.load(IteractionList.class)
-                    .query(QUERY_GET_MAX_NUMBER_INTERACTION)
-                    .view("iteractionList-view")
-//                    .cacheable(true)
-                    .one();
-        } catch (IllegalStateException exception) {
-            exception.printStackTrace();
-        } finally {
-            if (e != null) {
-                return e.getNumberIteraction();
-            } else {
-                return BigDecimal.ZERO;
-            }
-        }
-    } */
 }
