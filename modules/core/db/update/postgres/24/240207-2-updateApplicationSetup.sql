@@ -1,0 +1,2 @@
+alter table ITPEARLS_APPLICATION_SETUP add column ADMINISTRATOR_ID uuid ;
+alter table ITPEARLS_APPLICATION_SETUP add column COORDINATOR_ID uuid ;

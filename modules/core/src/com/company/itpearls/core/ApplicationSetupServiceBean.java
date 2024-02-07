@@ -1,5 +1,6 @@
 package com.company.itpearls.core;
 
+import com.company.itpearls.core.telegrambot.TelegramBotStatus;
 import com.company.itpearls.core.telegrambot.telegram.Bot;
 import com.company.itpearls.entity.ApplicationSetup;
 import com.company.itpearls.entity.ExtUser;
@@ -132,25 +133,30 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
     public ApplicationSetup getApplicationSetup() {
         ApplicationSetup applicationSetup;
 
-        try (Transaction tx = persistence.createTransaction()) {
-            EntityManager em = persistence.getEntityManager();
+        if (TelegramBotStatus.getApplicationSetup() != null) {
+            applicationSetup = TelegramBotStatus.getApplicationSetup();
+        } else {
+/*            try (Transaction tx = persistence.createTransaction()) {
+                EntityManager em = persistence.getEntityManager();
 
-            Query query = em.createQuery(QUERY_GET_ACTIVE_SETUP);
-            query.setView(new View(ApplicationSetup.class, "applicationSetup-view"));
-            query.addView(new View(ApplicationSetup.class).addProperty("applicationLogo"));
-            applicationSetup = (ApplicationSetup) query.getFirstResult();
-            tx.commit();
+                Query query = em.createQuery(QUERY_GET_ACTIVE_SETUP);
+                query.setView(new View(ApplicationSetup.class, "applicationSetup-view"));
+                query.addView(new View(ApplicationSetup.class).addProperty("applicationLogo"));
+                applicationSetup = (ApplicationSetup) query.getFirstResult();
+                tx.commit();
+            } */
+
+            applicationSetup = getActiveApplicationSetup();
         }
 
         return applicationSetup;
-
     }
 
     @Override
     public FileDescriptor getActiveCompanyIcon() {
         ApplicationSetup applicationSetup;
 
-        try (Transaction tx = persistence.createTransaction()) {
+/*        try (Transaction tx = persistence.createTransaction()) {
             EntityManager em = persistence.getEntityManager();
 
             Query query = em.createQuery(QUERY_GET_ACTIVE_SETUP);
@@ -158,7 +164,9 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
                     .addProperty("applicationLogo"));
             applicationSetup = (ApplicationSetup) query.getFirstResult();
             tx.commit();
-        }
+        } */
+
+        applicationSetup = getActiveApplicationSetup();
 
         return applicationSetup.getApplicationLogo();
     }
@@ -167,7 +175,7 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
     public FileDescriptor getActiveCompanyLogo() {
         ApplicationSetup applicationSetup;
 
-        try (Transaction tx = persistence.createTransaction()) {
+/*        try (Transaction tx = persistence.createTransaction()) {
             EntityManager em = persistence.getEntityManager();
 
             Query query = em.createQuery(QUERY_GET_ACTIVE_SETUP);
@@ -177,7 +185,9 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
                     .addProperty("applicationLogo"));
             applicationSetup = (ApplicationSetup) query.getFirstResult();
             tx.commit();
-        }
+        } */
+
+        applicationSetup = getActiveApplicationSetup();
 
         return applicationSetup.getApplicationIcon();
     }
@@ -205,8 +215,10 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
                 EntityManager em = persistence.getEntityManager();
                 Query query = em.createQuery(QUERY_GET_ACTIVE_SETUP);
                 query.setView(new View(ApplicationSetup.class, "applicationSetup-view"));
-                query.addView(new View(ApplicationSetup.class).addProperty( "applicationLogo"));
+                query.addView(new View(ApplicationSetup.class).addProperty("applicationLogo"));
                 query.addView(new View(ApplicationSetup.class).addProperty("applicationIcon"));
+                query.addView(new View(ApplicationSetup.class).addProperty("administrator"));
+                query.addView(new View(ApplicationSetup.class).addProperty("coordinator"));
 
                 applicationSetup = (List<ApplicationSetup>) query.getResultList();
                 tx.commit();

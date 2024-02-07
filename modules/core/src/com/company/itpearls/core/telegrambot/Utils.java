@@ -1,6 +1,7 @@
 package com.company.itpearls.core.telegrambot;
 
 import com.company.itpearls.core.telegrambot.telegram.Bot;
+import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.core.telegrambot.telegram.nonCommand.Settings;
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.EntityManager;
@@ -19,7 +20,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
@@ -724,12 +727,20 @@ public class Utils {
         }
     }
 
+    public static String getAdministratorTelegram() {
+        return TelegramBotStatus.getApplicationSetup().getAdministrator().getTelegram();
+    }
+
+    public static String getCoordinatorTelegram() {
+        return TelegramBotStatus.getApplicationSetup().getCoordinator().getTelegram();
+    }
+
     public static int getPositionsVacancyCount(Chat chat, Position position) {
-        final String QUERY_POSITIONVACANCY_COUNT = "select sum(e.numberPosition) from itpearls_OpenPosition e " +
+        final String QUERY_POSITIONVACANCY_COUNT =
+                "select sum(e.numberPosition) from itpearls_OpenPosition e " +
                 "where e.positionType = :position and e.priority >= :priority and not (e.openClose = true)";
         Long count = null;
         Settings settings = Bot.getUserSettings(chat.getId());
-
 
         try {
             Persistence persistence = AppBeans.get(Persistence.class);
@@ -774,7 +785,28 @@ public class Utils {
                     .append(position.getPositionRuName() != null ? position.getPositionRuName() : "")
                     .toString();
         }
+    }
 
+    public static InlineKeyboardMarkup getSendSubscribersKeyboard(String openPositionId) {
+        InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline = new ArrayList<>();
 
+        InlineKeyboardButton viewDetailsButton = new InlineKeyboardButton();
+        viewDetailsButton.setText("Send CV");
+        StringBuilder callBackDataSB = new StringBuilder()
+                .append(CallbackData.SEND_CV_TO_COORDINATOR)
+                .append(CallbackData.CALLBACK_SEPARATOR)
+                .append(openPositionId);
+
+        viewDetailsButton.setCallbackData(callBackDataSB.toString());
+
+        rowInline.add(viewDetailsButton);
+
+        buttons.add(rowInline);
+
+        markupKeyboard.setKeyboard(buttons);
+
+        return markupKeyboard;
     }
 }

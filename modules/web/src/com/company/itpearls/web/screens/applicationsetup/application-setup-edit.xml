@@ -7,11 +7,26 @@
         <instance id="applicationSetupDc"
                   class="com.company.itpearls.entity.ApplicationSetup">
             <view extends="_local">
-                <property name="applicationLogo" view="_local"/>
-                <property name="applicationIcon" view="_local"/>
+                <property name="applicationLogo"
+                          view="_local"/>
+                <property name="applicationIcon"
+                          view="_local"/>
+                <property name="coordinator"
+                          view="_local"/>
+                <property name="administrator"
+                          view="_local"/>
             </view>
             <loader id="applicationSetupDl"/>
         </instance>
+        <collection id="extUserDc"
+                    class="com.company.itpearls.entity.ExtUser">
+            <view extends="extUser-view"/>
+            <loader id="extUserDl">
+                <query>
+                    <![CDATA[select e from itpearls_ExtUser e where e.active = true order by e.name]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>
@@ -22,6 +37,14 @@
               dataContainer="applicationSetupDc"
               width="100%">
             <column width="350px">
+                <lookupField id="coordinatorLookupField"
+                             dataContainer="applicationSetupDc"
+                             property="coordinator"
+                             optionsContainer="extUserDc"/>
+                <lookupField id="administratorLookupField"
+                             dataContainer="applicationSetupDc"
+                             property="administrator"
+                             optionsContainer="extUserDc"/>
                 <textField id="nameField"
                            dataContainer="applicationSetupDc"
                            property="name"
@@ -37,6 +60,7 @@
                           expand="picVBox"
                           stylename="dropzone-container">
                         <vbox id="picVBox">
+
                             <image id="applicationLogoFileImage"
                                    dataContainer="applicationSetupDc"
                                    property="applicationLogo"

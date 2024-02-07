@@ -76,13 +76,22 @@ public class MySubscribeCommand extends OperationCommand{
                         "⛔\uFE0F Нет активных подписок на вакансии").toString());
             }
         } else {
-            sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(),
-                    Utils.getUserName(user),
-                    new StringBuilder()
-                            .append(Utils.getBotName())
-                            .append("\n")
-                            .append("⛔\uFE0F ВЫ НЕ ЯВЛЯЕТЕСЬ РЕКРУТЕРОМ КОМПАНИИ. ОБРАТИТЕСЬ К АДМИНИСТРАТОРУ. @AlekseyAnanyev")
-                            .toString());
+            try {
+                sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(),
+                        Utils.getUserName(user),
+                        new StringBuilder()
+                                .append(Utils.getBotName())
+                                .append("\n")
+                                .append("⛔\uFE0F ВЫ НЕ ЯВЛЯЕТЕСЬ РЕКРУТЕРОМ КОМПАНИИ. ОБРАТИТЕСЬ К АДМИНИСТРАТОРУ ")
+                                .append(Utils.getAdministratorTelegram())
+                                .toString());
+            } catch (Exception e) {
+                sendAnswer(absSender, chat.getId(),
+                        this.getCommandIdentifier(),
+                        Utils.getUserName(user),
+                        new StringBuilder("⛔\uFE0F ОШИБКА ОБРАТИТЕСЬ К АДМИНИСТРАТОРУ СИСТЕМЫ")
+                                .toString());
+            }
         }
     }
 }

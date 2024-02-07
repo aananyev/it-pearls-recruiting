@@ -7,4 +7,5 @@ public abstract class CallbackData {
     public static final String SUBSCRIBERS_BUTTON = "subscribersRecruterButton";
     public static final char CALLBACK_SEPARATOR = '$';
     public static final String VIEW_VACANSIES_BUTTON = "viewVacansiesPersonButton";
+    public static final String SEND_CV_TO_COORDINATOR = "sendCVToCoordinator";
 }

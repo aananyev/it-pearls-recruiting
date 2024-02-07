@@ -1292,6 +1292,8 @@ create table ITPEARLS_APPLICATION_SETUP (
     TELEGRAM_TOKEN varchar(128),
     TELEGRAM_CHAT_OPEN_POSITION varchar(128),
     TELEGRAM_CHAT_JOB_CANDIDATE varchar(128),
+    COORDINATOR_ID uuid,
+    ADMINISTRATOR_ID uuid,
     --
     primary key (ID)
 )^

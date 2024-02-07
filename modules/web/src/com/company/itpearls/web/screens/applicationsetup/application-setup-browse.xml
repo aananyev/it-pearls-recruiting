@@ -10,6 +10,8 @@
             <view extends="_local">
                 <property name="applicationLogo" view="_local"/>
                 <property name="applicationIcon" view="_local"/>
+                <property name="administrator" view="_local"/>
+                <property name="coordinator" view="_local"/>
             </view>
             <loader id="applicationSetupsDl">
                 <query>

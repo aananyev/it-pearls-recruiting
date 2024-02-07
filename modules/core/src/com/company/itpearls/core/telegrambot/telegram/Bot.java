@@ -18,7 +18,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.*;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.nonCommand.NonCommand;
@@ -131,13 +130,19 @@ public final class Bot extends TelegramLongPollingCommandBot {
             String openPositionId = update.getCallbackQuery().getData();
             String openPositionKey = openPositionId.substring(0,
                     openPositionId.indexOf(CallbackData.CALLBACK_SEPARATOR));
+            String openPositionUUID = openPositionId.substring(openPositionKey.length() + 1);
 
             switch (openPositionKey) {
+                case CallbackData.SEND_CV_TO_COORDINATOR:
+                    sendAnswer(chatId, new StringBuilder("\uD83D\uDCC3Отошлите резюме в формате wod или pdf координатору ")
+                            .append(Utils.getCoordinatorTelegram()).toString());
+                    break;
                 case CallbackData.VIEW_DETAIL_BUTTON:
                     sendAnswer(chatId,
                             Utils.getOpenPositionJobDescription(update.getCallbackQuery().getFrom(),
                                     openPositionId,
-                                    CallbackData.VIEW_DETAIL_BUTTON));
+                                    CallbackData.VIEW_DETAIL_BUTTON),
+                            Utils.getSendSubscribersKeyboard(openPositionUUID));
                     break;
                 case CallbackData.COMMENT_VIEW_BUTTON:
                     sendAnswer(chatId,

@@ -3,6 +3,8 @@ package com.company.itpearls.entity;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.annotation.Lookup;
+import com.haulmont.cuba.core.entity.annotation.LookupType;
 
 import javax.persistence.*;
 
@@ -43,6 +45,31 @@ public class ApplicationSetup extends StandardEntity {
 
     @Column(name = "TELEGRAM_CHAT_JOB_CANDIDATE", length = 128)
     private String telegramChatJobCandidate;
+
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "COORDINATOR_ID")
+    private ExtUser coordinator;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ADMINISTRATOR_ID")
+    private ExtUser administrator;
+
+    public ExtUser getAdministrator() {
+        return administrator;
+    }
+
+    public void setAdministrator(ExtUser administrator) {
+        this.administrator = administrator;
+    }
+
+    public ExtUser getCoordinator() {
+        return coordinator;
+    }
+
+    public void setCoordinator(ExtUser coordinator) {
+        this.coordinator = coordinator;
+    }
 
     public Boolean getTelegramBotStarted() {
         return telegramBotStarted;
