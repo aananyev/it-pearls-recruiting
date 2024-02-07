@@ -1,6 +1,7 @@
 
 package com.company.itpearls.core.telegrambot.telegram;
 
+import com.company.itpearls.core.telegrambot.TelegramBotStatus;
 import com.company.itpearls.core.telegrambot.exeptions.UserException;
 import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.*;
@@ -121,6 +122,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
     public void processNonCommandUpdate(Update update) {
         Message msg = update.getMessage();
         Long chatId = update.getCallbackQuery().getMessage().getChatId();
+        TelegramBotStatus.setChatId(chatId);
 
         if (!update.hasCallbackQuery()) {
             String userName = Utils.getUserName(msg);
@@ -320,6 +322,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
     public static Settings getUserSettings(Long chatId) {
         Map<Long, Settings> userSettings = Bot.getUserSettings();
         Settings settings = userSettings.get(chatId);
+        TelegramBotStatus.setChatId(chatId);
         if (settings == null) {
             userSettings.put(chatId, defaultSettings);
             return defaultSettings;
@@ -379,7 +382,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
         }
     }
 
-    void sendAnswer(Long chatId, String text) {
+    public void sendAnswer(Long chatId, String text) {
         SendMessage message = new SendMessage();
         message.enableMarkdown(true);
         message.setParseMode(ParseMode.HTML);
@@ -393,6 +396,12 @@ public final class Bot extends TelegramLongPollingCommandBot {
             logger.error(String.format("Ошибка %s.", e.getMessage()));
             sendAnswer(chatId, "\uD83E\uDD28Ошибка вывода сообщения. Обратитесь к администратору системы.");
             e.printStackTrace();
+        }
+    }
+
+    public void sendAnswerWithSettings(Long chatId, String text) {
+        if (getUserSettings(chatId).getPublishNewVacancies()) {
+            sendAnswer(chatId, text);
         }
     }
 }

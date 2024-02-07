@@ -3998,3 +3998,42 @@ server started
 2024-02-07 15:54:16.010 +04 [43003] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2024-02-07 15:54:16.351 +04 [43005] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2024-02-07 15:54:16.457 +04 [43007] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 20:47:21.017 +04 [44827] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 20:47:21.039 +04 [44829] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 20:47:21.439 +04 [44833] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 20:47:22.149 +04 [44837] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 20:47:22.431 +04 [44839] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:07:02.011 +04 [45327] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:07:02.030 +04 [45329] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:07:02.263 +04 [45331] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:07:02.638 +04 [45333] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:07:02.769 +04 [45335] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:11:19.908 +04 [45577] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:11:19.918 +04 [45579] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:11:20.071 +04 [45581] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:11:20.385 +04 [45583] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:11:20.490 +04 [45585] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:20:22.992 +04 [45880] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:20:22.999 +04 [45882] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:20:23.182 +04 [45884] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:20:23.533 +04 [45886] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:20:23.648 +04 [45888] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:21:29.353 +04 [46114] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:21:29.401 +04 [46116] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:21:29.647 +04 [46118] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:21:30.005 +04 [46120] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:21:30.124 +04 [46122] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:43:39.615 +04 [46594] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:43:39.629 +04 [46596] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:43:39.794 +04 [46598] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:43:40.148 +04 [46600] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-02-07 21:43:40.251 +04 [46602] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+waiting for server to shut down....2024-02-07 21:51:56.543 +04 [35615] LOG:  received fast shutdown request
+2024-02-07 21:51:56.543 +04 [35615] LOG:  aborting any active transactions
+2024-02-07 21:51:56.544 +04 [46615] FATAL:  terminating connection due to administrator command
+2024-02-07 21:51:56.545 +04 [46817] FATAL:  terminating connection due to administrator command
+2024-02-07 21:51:56.556 +04 [35615] LOG:  background worker "logical replication launcher" (PID 35626) exited with exit code 1
+2024-02-07 21:51:56.560 +04 [35621] LOG:  shutting down
+2024-02-07 21:51:56.585 +04 [35615] LOG:  database system is shut down
+ done
+server stopped

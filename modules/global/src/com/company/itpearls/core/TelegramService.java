@@ -5,9 +5,13 @@ public interface TelegramService {
 
     void sendMessageToChat(String txt);
 
-    void sendMessageToChat(String tgToken, int chatId, String txt);
+    void sendMessageToBot(String message);
+    void sendMessageToBotWithSetting(String message);
 
-    void sendMessageToChat(int chatId, String txt);
+    void sendMessageToBot(long chatId, String message);
+    void sendMessageToBotWithSetting(long chatId, String message);
+
+    void sendMessageToChat(String tgToken, int chatId, String txt);
 
     void sendMessageToChat(String chatId, String txt);
 

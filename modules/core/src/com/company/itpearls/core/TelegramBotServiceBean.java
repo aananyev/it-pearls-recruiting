@@ -2,6 +2,7 @@ package com.company.itpearls.core;
 
 import com.company.itpearls.core.telegrambot.TelegramBotStatus;
 import com.company.itpearls.core.telegrambot.telegram.Bot;
+import com.company.itpearls.core.telegrambot.telegram.nonCommand.Settings;
 import com.company.itpearls.entity.ApplicationSetup;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
@@ -20,6 +21,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 import javax.inject.Inject;
 import java.io.Serializable;
+import java.util.Map;
 
 @Service(TelegramBotService.NAME)
 public class TelegramBotServiceBean implements TelegramBotService, Serializable {
@@ -236,5 +238,14 @@ public class TelegramBotServiceBean implements TelegramBotService, Serializable 
         } finally {
             return (T) retObj;
         }
+    }
+    @Override
+    public void sendMessage(long chatId, String message) {
+        TelegramBotStatus.getBot().sendAnswer(chatId, message);
+    }
+
+    @Override
+    public void sendMessageWithSettings(long chatId, String message) {
+        TelegramBotStatus.getBot().sendAnswerWithSettings(chatId, message);
     }
 }

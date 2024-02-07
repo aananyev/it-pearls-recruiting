@@ -4,6 +4,8 @@ import com.company.itpearls.entity.ApplicationSetup;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.generics.BotSession;
 
+import java.util.Map;
+
 public interface TelegramBotService {
     String NAME = "itpearls_TelegramBotService";
 
@@ -38,4 +40,7 @@ public interface TelegramBotService {
     void setApplicationSetup(ApplicationSetup activeApplicationSetup);
 
     String getBotName();
+
+    void sendMessage(long chatId, String message);
+    void sendMessageWithSettings(long chatId, String message);
 }

@@ -1,6 +1,7 @@
 package com.company.itpearls.core.telegrambot.telegram.commands.service;
 
 
+import com.company.itpearls.core.telegrambot.TelegramBotStatus;
 import com.company.itpearls.entity.OpenPositionPriority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ public class SettingsCommand extends ServiceCommand {
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
         String userName = Utils.getUserName(user);
+        TelegramBotStatus.setChatId(chat.getId());
 
             logger.debug(String.format("Пользователь %s. Начато выполнение команды %s", userName,
                 this.getCommandIdentifier()));

@@ -15,6 +15,7 @@ public class TelegramBotStatus implements Serializable {
     private final static String defaultBotName = "ITPearlsTestBot";
     private static BotSession botSession = null;
     private static ApplicationSetup applicationSetup = null;
+    private static Long chatId;
 
     public static TelegramBotsApi getBotsApi() {
         return TelegramBotStatus.botsApi;
@@ -62,5 +63,13 @@ public class TelegramBotStatus implements Serializable {
 
     public static ApplicationSetup getApplicationSetup() {
         return TelegramBotStatus.applicationSetup;
+    }
+
+    public static void setChatId(Long chatId) {
+        TelegramBotStatus.chatId = chatId;
+    }
+
+    public static Long getChatId() {
+        return TelegramBotStatus.chatId;
     }
 }

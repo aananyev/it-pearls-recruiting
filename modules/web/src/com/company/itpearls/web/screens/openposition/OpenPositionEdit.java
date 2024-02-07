@@ -58,50 +58,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private StandartMapsService standartMapsService;
     @Inject
     private TelegramBotService telegramBotService;
-
-    @Subscribe("closedVacancyTimer")
-    public void onClosedVacancyTimerTimerAction(Timer.TimerActionEvent event) {
-        if (closingDateDateField.getValue() != null) {
-            closedVacancyInfoLabel.setValue(new StringBuilder()
-                    .append(messageBundle.getMessage("msgClosingVacancyAfter"))
-                    .append(" ")
-                    .append(getTimerClosingVacancyValue(closingDateDateField.getValue()))
-                    .toString());
-        }
-    }
-
-    public String getTimerClosingVacancyValue(Date closingDate) {
-        StringBuilder sb = new StringBuilder();
-
-        if (closingDate != null) {
-            long diffDate = closingDate.getTime() - new Date().getTime();
-            int days = (int) diffDate / (24 * 60 * 60 * 1000);
-            int hours = (int) ((diffDate - days * (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
-            int minutes = (int) ((diffDate - (days * (24 * 60 * 60 * 1000) + hours * (60 * 60 * 1000))) / (60 * 1000));
-            int seconds = (int) ((diffDate - (days * (24 * 60 * 60 * 1000) + hours * (60 * 60 * 1000) + minutes * (60 * 1000))) / 1000);
-
-            sb.append(days)
-                    .append(" ")
-                    .append(messageBundle.getMessage("msgDays"))
-                    .append(" ")
-                    .append(hours)
-                    .append(" ")
-                    .append(messageBundle.getMessage("msgHours"))
-                    .append(" ")
-                    .append(minutes)
-                    .append(" ")
-                    .append(messageBundle.getMessage("msgMinutes"))
-                    .append(" ")
-                    .append(seconds)
-                    .append(" ")
-                    .append(messageBundle.getMessage("msgSeconds"));
-
-            return sb.toString();
-        }
-
-        return "";
-    }
-
     @Inject
     private LookupPickerField<City> cityOpenPositionField;
     @Inject
@@ -312,6 +268,47 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private Image projectOwnerImage;
 
+    @Subscribe("closedVacancyTimer")
+    public void onClosedVacancyTimerTimerAction(Timer.TimerActionEvent event) {
+        if (closingDateDateField.getValue() != null) {
+            closedVacancyInfoLabel.setValue(new StringBuilder()
+                    .append(messageBundle.getMessage("msgClosingVacancyAfter"))
+                    .append(" ")
+                    .append(getTimerClosingVacancyValue(closingDateDateField.getValue()))
+                    .toString());
+        }
+    }
+    public String getTimerClosingVacancyValue(Date closingDate) {
+        StringBuilder sb = new StringBuilder();
+
+        if (closingDate != null) {
+            long diffDate = closingDate.getTime() - new Date().getTime();
+            int days = (int) diffDate / (24 * 60 * 60 * 1000);
+            int hours = (int) ((diffDate - days * (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+            int minutes = (int) ((diffDate - (days * (24 * 60 * 60 * 1000) + hours * (60 * 60 * 1000))) / (60 * 1000));
+            int seconds = (int) ((diffDate - (days * (24 * 60 * 60 * 1000) + hours * (60 * 60 * 1000) + minutes * (60 * 1000))) / 1000);
+
+            sb.append(days)
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgDays"))
+                    .append(" ")
+                    .append(hours)
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgHours"))
+                    .append(" ")
+                    .append(minutes)
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgMinutes"))
+                    .append(" ")
+                    .append(seconds)
+                    .append(" ")
+                    .append(messageBundle.getMessage("msgSeconds"));
+
+            return sb.toString();
+        }
+
+        return "";
+    }
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
 
@@ -1280,6 +1277,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
+
+/*        telegramService.sendMessageToBotWithSetting(new StringBuilder(telegramBotService.getBotName())
+                .append("\n")
+                .append("ПРОВЕРКА СООБЩЕНИЯ!!!")
+                .toString()); */
+
         if (PersistenceHelper.isNew(getEditedEntity())) {
             StringBuilder sb = new StringBuilder(telegramBotService.getBotName())
                     .append("\n")
@@ -1305,7 +1308,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 }
             }
 
-            telegramService.sendMessageToChat(new StringBuilder(telegramBotService.getBotName())
+
+            telegramService.sendMessageToBotWithSetting(new StringBuilder(telegramBotService.getBotName())
                     .append("\n")
                     .append(textManipulationService.formattedHtml2text(sb.toString()))
                     .toString());
@@ -1315,7 +1319,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
             if (false) {
 //                if (!flag) {
-                telegramService.sendMessageToChat(new StringBuilder(telegramBotService.getBotName())
+                telegramService.sendMessageToBotWithSetting(new StringBuilder(telegramBotService.getBotName())
                         .append("\n")
                         .append(textManipulationService
                                 .formattedHtml2text(new StringBuilder(telegramBotService.getBotName())

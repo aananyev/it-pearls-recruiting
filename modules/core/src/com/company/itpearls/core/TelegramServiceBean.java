@@ -1,5 +1,6 @@
 package com.company.itpearls.core;
 
+import com.company.itpearls.core.telegrambot.TelegramBotStatus;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -30,20 +31,33 @@ public class TelegramServiceBean implements TelegramService {
         }
 
     }
-
     @Override
     public void sendMessageToChat(String tgToken, int chatId, String txt) {
         sendMessageToChat(tgToken, String.valueOf(chatId), txt);
     }
 
     @Override
-    public void sendMessageToChat(int chatId, String txt) {
-        sendMessageToChat(applicationSetupService.getTelegramToken(), String.valueOf(chatId), txt);
+    public void sendMessageToChat(String chatId, String txt) {
+        sendMessageToChat(applicationSetupService.getTelegramToken(), chatId, txt);
+    }
+    @Override
+    public void sendMessageToBot(String message) {
+        TelegramBotStatus.getBot().sendAnswer(TelegramBotStatus.getChatId(), message);
     }
 
     @Override
-    public void sendMessageToChat(String chatId, String txt) {
-        sendMessageToChat(applicationSetupService.getTelegramToken(), chatId, txt);
+    public void sendMessageToBotWithSetting(String message) {
+        TelegramBotStatus.getBot().sendAnswerWithSettings(TelegramBotStatus.getChatId(), message);
+    }
+
+    @Override
+    public void sendMessageToBot(long chatId, String message) {
+        TelegramBotStatus.getBot().sendAnswer(chatId, message);
+    }
+
+    @Override
+    public void sendMessageToBotWithSetting(long chatId, String message) {
+        TelegramBotStatus.getBot().sendAnswerWithSettings(chatId, message);
     }
 
     @Override

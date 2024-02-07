@@ -1244,7 +1244,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     new Date(),
                     (ExtUser) userSession.getUser());
 
-            telegramService.sendMessageToChat(new StringBuilder()
+            telegramService.sendMessageToBotWithSetting(new StringBuilder()
                     .append(telegramBotService.getBotName())
                     .append("\n")
                     .append(openPositionService
@@ -1267,7 +1267,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     new Date(),
                     (ExtUser) userSession.getUser());
 
-            telegramService.sendMessageToChat(new StringBuilder()
+            telegramService.sendMessageToBotWithSetting(new StringBuilder()
                     .append(telegramBotService.getBotName())
                             .append("\n")
                     .append(openPositionService
@@ -1592,7 +1592,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             events.publish(new UiNotificationEvent(this,
                     sb.toString()));
 
-            telegramService.sendMessageToChat(sb.toString());
+            telegramService.sendMessageToBotWithSetting(sb.toString());
 
             if (flagPriority) {
                 openPositionService.setOpenPositionNewsAutomatedMessage(openPosition,
@@ -3680,7 +3680,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     .append(openPosition.getSalaryComment())
                     .append(")\n")
                     .append(userSession.getUser().getName());
-            telegramService.sendMessageToChat(textManipulationService
+            telegramService.sendMessageToBotWithSetting(textManipulationService
                     .formattedHtml2text(sb.toString()));
         }
     }
