@@ -164,9 +164,10 @@ public class OpenPositionServiceBean implements OpenPositionService {
                 .append("</b><i>")
                 .append(entity.getVacansyName())
                 .append("</i>")
-                .append("<br><svg align=\"right\" width=\"100%\"><i>")
+//                .append("<br><svg align=\"right\" width=\"100%\"><i>")
+                .append("<i>\n")
                 .append(user.getName())
-                .append("</i></svg>");
+                .append("</i>");
 
         return sb.toString();
     }
@@ -189,9 +190,10 @@ public class OpenPositionServiceBean implements OpenPositionService {
         sb.append("<i>")
                 .append(entity.getVacansyName())
                 .append("</i>")
-                .append("<br><svg align=\"right\" width=\"100%\"><i>")
+//                .append("<br><svg align=\"right\" width=\"100%\"><i>")
+                .append("<i>")
                 .append(user.getName())
-                .append("</i></svg>");
+                .append("</i>");
 
         return sb.toString();
 

@@ -42,12 +42,16 @@ public class TelegramServiceBean implements TelegramService {
     }
     @Override
     public void sendMessageToBot(String message) {
-        TelegramBotStatus.getBot().sendAnswer(TelegramBotStatus.getChatId(), message);
+        if (TelegramBotStatus.getChatId() != null) {
+            TelegramBotStatus.getBot().sendAnswer(TelegramBotStatus.getChatId(), message);
+        }
     }
 
     @Override
     public void sendMessageToBotWithSetting(String message) {
-        TelegramBotStatus.getBot().sendAnswerWithSettings(TelegramBotStatus.getChatId(), message);
+        if (TelegramBotStatus.getChatId() != null) {
+            TelegramBotStatus.getBot().sendAnswerWithSettings(TelegramBotStatus.getChatId(), message);
+        }
     }
 
     @Override

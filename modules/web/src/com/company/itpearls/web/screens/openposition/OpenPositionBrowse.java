@@ -1585,9 +1585,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     .append(openPosition.getVacansyName())
                     .append("</i> на <b>")
                     .append(result.get())
-                    .append("</b><br><svg align=\"right\" width=\"100%\"><i>")
+//                    .append("</b><br><svg align=\"right\" width=\"100%\"><i>")
+                    .append("</b>/n<i>")
                     .append(userSession.getUser().getName())
-                    .append("</i></svg>");
+                    .append("</i>");
 
             events.publish(new UiNotificationEvent(this,
                     sb.toString()));
