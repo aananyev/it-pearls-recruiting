@@ -1,6 +1,8 @@
 package com.company.itpearls.web.screens.project;
 
 import com.company.itpearls.UiNotificationEvent;
+import com.company.itpearls.core.TelegramBotService;
+import com.company.itpearls.core.TelegramService;
 import com.company.itpearls.entity.CompanyDepartament;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.Person;
@@ -10,7 +12,6 @@ import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Project;
@@ -31,6 +32,10 @@ public class ProjectEdit extends StandardEditor<Project> {
     private Image projectLogoFileImage;
     @Inject
     private FileUploadField projectLogoFileUpload;
+    @Inject
+    private TelegramService telegramService;
+    @Inject
+    private TelegramBotService telegramBotService;
 
     @Subscribe("projectLogoFileUpload")
     public void onProjectLogoFileUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
@@ -151,9 +156,12 @@ public class ProjectEdit extends StandardEditor<Project> {
 
             CommitContext commitContext = new CommitContext(a);
             dataManager.commit(commitContext);
+            StringBuilder sb = new StringBuilder()
+                    .append("❌ЗАКРЫТА ВАКАНСИЯ: ")
+                            .append(a.getVacansyName());
 
-            events.publish(new UiNotificationEvent(this, "Закрыта вакансия: " +
-                    a.getVacansyName()));
+            events.publish(new UiNotificationEvent(this, sb.toString()));
+            telegramService.sendMessageToBotWithSetting(sb.toString());
         }
     }
 
@@ -270,23 +278,23 @@ public class ProjectEdit extends StandardEditor<Project> {
     }
 
     private void sendGlobalEventsMessage(BeforeCommitChangesEvent event) {
-        if(getEditedEntity().getProjectIsClosed() == null) {
+        if (getEditedEntity().getProjectIsClosed() == null) {
             getEditedEntity().setProjectIsClosed(false);
         }
 
-        if(PersistenceHelper.isNew(getEditedEntity())) {
-            if(getEditedEntity().getProjectIsClosed()) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            if (getEditedEntity().getProjectIsClosed()) {
                 sendCloseProjectMessage();
             } else {
                 sendOpenProjectMessage();
             }
         } else {
-            if(getEditedEntity().getProjectIsClosed()) {
-                if(!beforeEdit.getProjectIsClosed().equals(getEditedEntity().getProjectIsClosed())) {
+            if (getEditedEntity().getProjectIsClosed()) {
+                if (!beforeEdit.getProjectIsClosed().equals(getEditedEntity().getProjectIsClosed())) {
                     sendCloseProjectMessage();
                 }
             } else {
-                if(!beforeEdit.getProjectIsClosed().equals(getEditedEntity().getProjectIsClosed())) {
+                if (!beforeEdit.getProjectIsClosed().equals(getEditedEntity().getProjectIsClosed())) {
                     sendOpenProjectMessage();
                 }
             }
@@ -295,13 +303,23 @@ public class ProjectEdit extends StandardEditor<Project> {
 
 
     private void sendCloseProjectMessage() {
-        events.publish(new UiNotificationEvent(this, "Закрыт проект: " +
-                getEditedEntity().getProjectName()));
+        StringBuilder sb = new StringBuilder()
+                .append(telegramBotService.getBotName())
+                .append("\n")
+                .append("❌ЗАКРЫТ ПРОЕКТ: ")
+                .append(getEditedEntity().getProjectName());
+        events.publish(new UiNotificationEvent(this,sb.toString()));
+        telegramService.sendMessageToBotWithSetting(sb.toString());
     }
 
     private void sendOpenProjectMessage() {
-        events.publish(new UiNotificationEvent(this, "Открыт новый проект: " +
-                getEditedEntity().getProjectName()));
+        StringBuilder sb = new StringBuilder()
+                .append(telegramBotService.getBotName())
+                .append("\n")
+                .append("\uD83C\uDD95ОТКРЫТ ПРОЕКТ: ")
+                .append(getEditedEntity().getProjectName());
+        events.publish(new UiNotificationEvent(this, sb.toString()));
+        telegramService.sendMessageToBotWithSetting(sb.toString());
     }
 
     public void gotoChatForCV() {
