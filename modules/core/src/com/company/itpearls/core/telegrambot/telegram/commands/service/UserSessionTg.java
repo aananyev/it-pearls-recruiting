@@ -28,7 +28,7 @@ public class UserSessionTg extends ServiceCommand {
         StringBuilder sb = new StringBuilder()
                 .append(Utils.getBotName())
                 .append("\n")
-                .append("<b>Список пользователей в системе:</b>\n");
+                .append("\uD83D\uDC64<b>Список пользователей в системе:</b>\n");
         String userName = Utils.getUserName(user);
 
         int count = 1;
