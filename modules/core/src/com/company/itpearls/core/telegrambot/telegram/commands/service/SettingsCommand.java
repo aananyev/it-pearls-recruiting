@@ -31,11 +31,12 @@ public class SettingsCommand extends ServiceCommand {
                 this.getCommandIdentifier()));
 
         Settings settings = Bot.getUserSettings(chat.getId());
+        int strings_length = strings != null ? strings.length : 0;
 
-        if (strings.length == 0) {
+        if (strings_length == 0) {
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
                     String.format("<b>%s</b>\n" +
-                                    "<b>ТЕКУЩИЕ НАСТРОЙКИ</b>\n"
+                                    "⚙\uFE0F<b>ТЕКУЩИЕ НАСТРОЙКИ</b>\n"
                                     + " - приоритет вакансии не ниже <b>%s (%s)</b>\n"
                                     + " - публикация новых вакансий <b>%s</b>\n\n" +
                                     "Для изменения настроек наберите команду <b>/settings</b>, " +
@@ -47,12 +48,14 @@ public class SettingsCommand extends ServiceCommand {
                             settings.getPriorityNotLower(),
                             settings.getPublishNewVacancies()));
         } else {
-            sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName, "Изменение настроек");
+            sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName, "⚙\uFE0FИзменение настроек");
 
             settings.setPriorityNotLower(Integer.parseInt(strings[0]));
-            settings.setPublishNewVacancies(strings.equals("true") ? true : false);
+            settings.setPublishNewVacancies(strings[1].equals("true") ? true : false);
 
             Bot.setUserSettings(chat.getId(), settings);
+
+            execute(absSender, user, chat, null);
 
         }
 
