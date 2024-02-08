@@ -337,6 +337,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         initProjectNameField();
         initClosedVacancyTimerFacet();
+        setMapOfPriority();
+    }
+
+    private void setMapOfPriority() {
+        priorityMap = standartMapsService.setPriorityMap();
     }
 
     private void initClosedVacancyTimerFacet() {
@@ -1719,9 +1724,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                                 .map(Map.Entry::getKey)
                                 .findFirst();
 
-                        if (event.getValue() >= 0) {
+                            if (event.getValue() >= 0) {
                             openPositionService.setOpenPositionNewsAutomatedMessage(getEditedEntity(),
-                                    new StringBuilder("Изменен приоритет вакансии на ").append(result.get()).toString(),
+                                    new StringBuilder("Изменен приоритет вакансии на ")
+                                            .append(result.get()).toString(),
                                     "Закрыта вакансия",
                                     new Date(),
                                     (ExtUser) userSession.getUser());
