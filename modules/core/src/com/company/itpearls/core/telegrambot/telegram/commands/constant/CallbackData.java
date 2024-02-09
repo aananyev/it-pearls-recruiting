@@ -8,4 +8,11 @@ public abstract class CallbackData {
     public static final char CALLBACK_SEPARATOR = '$';
     public static final String VIEW_VACANSIES_BUTTON = "viewVacansiesPersonButton";
     public static final String SEND_CV_TO_COORDINATOR = "sendCVToCoordinator";
+    public static final String LOW_PRIORITY_BUTTON = "lowPriorityButton";
+    public static final String NORMAL_PRIORITY_BUTTON = "normalPriorityButton";
+    public static final String HIHG_PRIORITY_BUTTON = "highPriorityButton";
+    public static final String CRITICAL_PRIORITY_BUTTON = "criticalPriorityButton";
+    public static final String PAUSE_PRIORITY_BUTTON = "pausePriorityButton";
+    public static final String TRUE_CV_PUBLISH_BUTTON = "trueCVPublishButton";
+    public static final String FALSE_CV_PUBLISH_BUTTON = "falseCVPublishButton";
 }

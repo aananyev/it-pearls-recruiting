@@ -33,4 +33,13 @@ public enum OpenPositionPriority implements EnumClass<Integer> {
         }
         return null;
     }
+
+    public static OpenPositionPriority fromName(String strName) {
+        for (OpenPositionPriority at : OpenPositionPriority.values()) {
+            if (at.name().equalsIgnoreCase(strName)) {
+                return at;
+            }
+        }
+        return null;
+    }
 }

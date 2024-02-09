@@ -1,16 +1,23 @@
 package com.company.itpearls.core.telegrambot.telegram.commands.service;
 
 
+import com.company.itpearls.core.StdPriority;
 import com.company.itpearls.core.telegrambot.TelegramBotStatus;
+import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.entity.OpenPositionPriority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.Bot;
 import com.company.itpearls.core.telegrambot.telegram.nonCommand.Settings;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Команда получения текущих настроек
@@ -34,6 +41,8 @@ public class SettingsCommand extends ServiceCommand {
         int strings_length = strings != null ? strings.length : 0;
 
         if (strings_length == 0) {
+            InlineKeyboardMarkup keyboardMarkup = settingsInlineKeyboard(settings);
+
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
                     String.format("<b>%s</b>\n" +
                                     "⚙\uFE0F<b>ТЕКУЩИЕ НАСТРОЙКИ</b>\n"
@@ -46,7 +55,7 @@ public class SettingsCommand extends ServiceCommand {
                             Utils.getBotName(),
                             OpenPositionPriority.fromId(settings.getPriorityNotLower()),
                             settings.getPriorityNotLower(),
-                            settings.getPublishNewVacancies()));
+                            settings.getPublishNewVacancies()), keyboardMarkup);
         } else {
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName, "⚙\uFE0FИзменение настроек");
 
@@ -61,5 +70,60 @@ public class SettingsCommand extends ServiceCommand {
 
         logger.debug(String.format("Пользователь %s. Завершено выполнение команды %s", userName,
                 this.getCommandIdentifier()));
+    }
+
+    private InlineKeyboardButton getInlineButton(String textButton, String callbackData, Settings settings) {
+        StringBuilder sb = new StringBuilder(textButton);
+        String s = OpenPositionPriority.fromId(settings.getPriorityNotLower()).name();
+        StringBuilder b = new StringBuilder(s);
+        StringBuilder c = new StringBuilder(textButton);
+        sb.append(b.toString().equalsIgnoreCase(c.toString()) ? "(*)" : "");
+                InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+        inlineKeyboardButton.setText(sb.toString());
+        inlineKeyboardButton.setCallbackData(callbackData);
+
+        return inlineKeyboardButton;
+    }
+
+    private InlineKeyboardMarkup settingsInlineKeyboard(Settings settings) {
+        InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+        List<InlineKeyboardButton> priorityRowInline = new ArrayList<>();
+        List<InlineKeyboardButton> publishVacancyRowInline = new ArrayList<>();
+
+        InlineKeyboardButton pausePriority = getInlineButton(StdPriority.PRIORITY_PAUSED_NAME,
+                CallbackData.PAUSE_PRIORITY_BUTTON, settings);
+        InlineKeyboardButton lowPriority = getInlineButton(StdPriority.PRIORITY_LOW_NAME,
+                CallbackData.LOW_PRIORITY_BUTTON, settings);
+        InlineKeyboardButton normalPriority = getInlineButton(StdPriority.PRIORITY_NORMAL_NAME,
+                CallbackData.NORMAL_PRIORITY_BUTTON, settings);
+        InlineKeyboardButton highPriority = getInlineButton(StdPriority.PRIORITY_HIGH_NAME,
+                CallbackData.HIHG_PRIORITY_BUTTON, settings);
+        InlineKeyboardButton criticalPriority = getInlineButton(StdPriority.PRIORITY_CRITICAL_NAME,
+                CallbackData.CRITICAL_PRIORITY_BUTTON, settings);
+
+        InlineKeyboardButton publishTrue = new InlineKeyboardButton();
+        publishTrue.setText("Да" + (settings.getPublishNewVacancies() ? "(*)" : ""));
+        publishTrue.setCallbackData(CallbackData.TRUE_CV_PUBLISH_BUTTON);
+
+        InlineKeyboardButton publishFalse = new InlineKeyboardButton();
+        publishFalse.setText("Нет" + (!settings.getPublishNewVacancies() ? "(*)" : ""));
+        publishFalse.setCallbackData(CallbackData.FALSE_CV_PUBLISH_BUTTON);
+
+        priorityRowInline.add(pausePriority);
+        priorityRowInline.add(lowPriority);
+        priorityRowInline.add(normalPriority);
+        priorityRowInline.add(highPriority);
+        priorityRowInline.add(criticalPriority);
+
+        publishVacancyRowInline.add(publishTrue);
+        publishVacancyRowInline.add(publishFalse);
+
+        buttons.add(priorityRowInline);
+        buttons.add(publishVacancyRowInline);
+
+        markupKeyboard.setKeyboard(buttons);
+
+        return markupKeyboard;
     }
 }

@@ -6,6 +6,7 @@ import com.company.itpearls.core.telegrambot.exeptions.UserException;
 import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.*;
 import com.company.itpearls.entity.OpenPosition;
+import com.company.itpearls.entity.OpenPositionPriority;
 import com.company.itpearls.entity.RecrutiesTasks;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
@@ -130,11 +131,31 @@ public final class Bot extends TelegramLongPollingCommandBot {
             setAnswer(chatId, userName, answer);
         } else {
             String openPositionId = update.getCallbackQuery().getData();
-            String openPositionKey = openPositionId.substring(0,
-                    openPositionId.indexOf(CallbackData.CALLBACK_SEPARATOR));
-            String openPositionUUID = openPositionId.substring(openPositionKey.length() + 1);
+            String openPositionKey;
+            String openPositionUUID = null;
+
+            if (openPositionId.indexOf(CallbackData.CALLBACK_SEPARATOR) != -1) {
+                openPositionKey = openPositionId.substring(0,
+                        openPositionId.indexOf(CallbackData.CALLBACK_SEPARATOR));
+
+                openPositionUUID = openPositionId.substring(openPositionKey.length() + 1);
+            } else {
+                openPositionKey = openPositionId;
+            }
 
             switch (openPositionKey) {
+                case CallbackData.TRUE_CV_PUBLISH_BUTTON:
+                case CallbackData.FALSE_CV_PUBLISH_BUTTON:
+                    setSettingCVPublish(openPositionKey.equalsIgnoreCase(CallbackData.TRUE_CV_PUBLISH_BUTTON),
+                            chatId);
+                    break;
+                case CallbackData.PAUSE_PRIORITY_BUTTON:
+                case CallbackData.LOW_PRIORITY_BUTTON:
+                case CallbackData.NORMAL_PRIORITY_BUTTON:
+                case CallbackData.HIHG_PRIORITY_BUTTON:
+                case CallbackData.CRITICAL_PRIORITY_BUTTON:
+                    setSettingPriority(openPositionKey, chatId);
+                    break;
                 case CallbackData.SEND_CV_TO_COORDINATOR:
                     sendAnswer(chatId, new StringBuilder("\uD83D\uDCC3Отошлите резюме в формате wod или pdf координатору ")
                             .append(Utils.getCoordinatorTelegram()).toString());
@@ -166,6 +187,31 @@ public final class Bot extends TelegramLongPollingCommandBot {
                     break;
             }
         }
+    }
+
+    private void setSettingPriority(String openPositionKey, Long chatId) {
+        Settings settings = Bot.getUserSettings(TelegramBotStatus.getChatId());
+
+        int priority;
+        priority = OpenPositionPriority.fromName(openPositionKey.substring(0, openPositionKey.indexOf("PriorityButton"))).getId();
+
+        settings.setPriorityNotLower(priority);
+
+        Bot.setUserSettings(TelegramBotStatus.getChatId(), settings);
+        sendAnswer(chatId, new StringBuilder().append(Utils.getBotName())
+                .append("\n")
+                .append("⚙\uFE0FНАСТРОЙКИ СОХРАНЕНЫ").toString());
+    }
+
+    private void setSettingCVPublish(Boolean publish, Long chatId) {
+        Settings settings = Bot.getUserSettings(TelegramBotStatus.getChatId());
+
+        settings.setPublishNewVacancies(publish);
+
+        Bot.setUserSettings(TelegramBotStatus.getChatId(), settings);
+        sendAnswer(chatId, new StringBuilder().append(Utils.getBotName())
+                .append("\n")
+                .append("⚙\uFE0FНАСТРОЙКИ СОХРАНЕНЫ").toString());
     }
 
     private void positionOpenPositionView(Long chatId, CallbackQuery callbackQuery) {
@@ -259,7 +305,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
         recrutiesTasks.setCreateTs(new Date());
         recrutiesTasks.setId(UUID.randomUUID());
 
-        if (!Utils.isRecrutiesTaskValide(recrutiesTasks,user)) {
+        if (!Utils.isRecrutiesTaskValide(recrutiesTasks, user)) {
             Persistence persistence = AppBeans.get(Persistence.class);
             try (Transaction tx = persistence.createTransaction()) {
                 EntityManager em = persistence.getEntityManager();
@@ -300,7 +346,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
                 .map(IBotCommand::getCommandIdentifier)
                 .collect(Collectors.toList());
 
-        for(String command : commands) {
+        for (String command : commands) {
             registeredCommands.add(new StringBuilder("/").append(command).toString());
         }
     }
