@@ -169,5 +169,8 @@
         <entity class="com.company.itpearls.entity.ApplicationSetup">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.CandidateCVWorkPlaces">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

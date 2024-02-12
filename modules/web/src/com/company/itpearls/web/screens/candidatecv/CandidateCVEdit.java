@@ -138,6 +138,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private ResumeRecognitionService resumeRecognitionService;
     @Named("tabSheet.tabCV")
     private VBoxLayout tabCV;
+    @Inject
+    private ScrollBoxLayout workPlacesScrollBox;
+    @Inject
+    private CollectionContainer<Company> companiesDc;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -959,5 +963,60 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     public void setParentDataContext(DataContext parentDataContext) {
         dataContext.setParent(parentDataContext);
+    }
+
+    public void addNewWorkPlaceButtonInvoke() {
+        GroupBoxLayout workPlaceLayout = setNewWorkPlaceLayout();
+
+        workPlacesScrollBox.add(workPlaceLayout);
+    }
+
+    private GroupBoxLayout setNewWorkPlaceLayout() {
+        GroupBoxLayout newWorkPlaceGroupBox = uiComponents.create(GroupBoxLayout.class);
+        newWorkPlaceGroupBox.setWidthFull();
+        newWorkPlaceGroupBox.setHeightAuto();
+        newWorkPlaceGroupBox.setSpacing(true);
+        newWorkPlaceGroupBox.setCaption(messageBundle.getMessage("msgNewWorkPlace"));
+        newWorkPlaceGroupBox.setCollapsable(true);
+
+        LookupPickerField companyLookupPickerField = uiComponents.create(LookupPickerField.class);
+        companyLookupPickerField.setCaption(messageBundle.getMessage("msgCompany"));
+        companyLookupPickerField.setOptionsList(companiesDc.getItems());
+
+        TextField workPlaceCommentTextField = uiComponents.create(TextField.class);
+        workPlaceCommentTextField.setCaption(messageBundle.getMessage("msgWorkPlaceComment"));
+
+        DateField startDateField = uiComponents.create(DateField.class);
+        startDateField.setCaption(messageBundle.getMessage("msgStartDate"));
+
+        DateField endDateField = uiComponents.create(DateField.class);
+        endDateField.setCaption(messageBundle.getMessage("msgEndDate"));
+
+        CheckBox workToThisDayCheckBox = uiComponents.create(CheckBox.class);
+        workToThisDayCheckBox.setCaption(messageBundle.getMessage("msgWorkToThisDay"));
+
+        RichTextArea functionalityAtWorkRichTextArea = uiComponents.create(RichTextArea.class);
+        functionalityAtWorkRichTextArea.setCaption(messageBundle.getMessage("msgFunctionalityAtWork"));
+        functionalityAtWorkRichTextArea.setWidthFull();
+
+        RichTextArea personalRoleRichTextArea = uiComponents.create(RichTextArea.class);
+        personalRoleRichTextArea.setCaption(messageBundle.getMessage("msgPersonalRole"));
+        personalRoleRichTextArea.setWidthFull();
+
+        RichTextArea achievementsRichTextArea = uiComponents.create(RichTextArea.class);
+        achievementsRichTextArea.setCaption(messageBundle.getMessage("msgAchievements"));
+        achievementsRichTextArea.setWidthFull();
+
+        newWorkPlaceGroupBox.add(companyLookupPickerField);
+        newWorkPlaceGroupBox.add(workPlaceCommentTextField);
+        newWorkPlaceGroupBox.add(companyLookupPickerField);
+        newWorkPlaceGroupBox.add(startDateField);
+        newWorkPlaceGroupBox.add(endDateField);
+        newWorkPlaceGroupBox.add(workToThisDayCheckBox);
+        newWorkPlaceGroupBox.add(functionalityAtWorkRichTextArea);
+        newWorkPlaceGroupBox.add(personalRoleRichTextArea);
+        newWorkPlaceGroupBox.add(achievementsRichTextArea);
+
+        return newWorkPlaceGroupBox;
     }
 }

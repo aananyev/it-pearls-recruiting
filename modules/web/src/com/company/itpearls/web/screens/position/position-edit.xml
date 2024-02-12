@@ -19,16 +19,65 @@
         <vbox id="positionEditVBox"
               spacing="true"
               expand="textAreaBox">
-            <textField id="positionRuNameField"
-                       dataContainer="positionDc"
-                       width="100%"
-                       property="positionRuName"
-                       caption="msg://msgPositionEnName"/>
-            <textField id="positionEnNameField"
-                       dataContainer="positionDc"
-                       width="100%"
-                       property="positionEnName"
-                       caption="msg://msgPositionRuName"/>
+            <hbox width="100%"
+                  spacing="true"
+                  expand="positionDescriptionVBox">
+                <vbox id="positionDescriptionVBox"
+                      align="TOP_LEFT"
+                      width="100%"
+                      spacing="true">
+                    <textField id="positionRuNameField"
+                               dataContainer="positionDc"
+                               width="50%"
+                               property="positionRuName"
+                               caption="msg://msgPositionEnName"/>
+                    <textField id="positionEnNameField"
+                               dataContainer="positionDc"
+                               width="50%"
+                               property="positionEnName"
+                               caption="msg://msgPositionRuName"/>
+                </vbox>
+                <vbox id="dropZone"
+                      spacing="true"
+                      width="110px"
+                      height="146px"
+                      align="BOTTOM_RIGHT"
+                      expand="picVBox"
+                      stylename="dropzone-container">
+                    <vbox id="picVBox">
+                        <image id="positionLogoPic"
+                               dataContainer="positionDc"
+                               property="logo"
+                               width="100%"
+                               visible="true"
+                               align="TOP_RIGHT"
+                               stylename="widget-border"
+                               scaleMode="FILL"/>
+                        <image id="logoDefaultPic"
+                               width="100%"
+                               visible="false"
+                               align="TOP_RIGHT"
+                               stylename="widget-border"
+                               scaleMode="FILL">
+                            <theme path="icons/no-programmer.jpeg"/>
+                        </image>
+                    </vbox>
+                    <upload id="fileImageLogoUpload"
+                            fileStoragePutMode="IMMEDIATE"
+                            dataContainer="positionDc"
+                            align="BOTTOM_CENTER"
+                            showFileName="false"
+                            dropZone="dropZone"
+                            clearButtonCaption=""
+                            uploadButtonCaption=""
+                            clearButtonIcon="font-icon:CLOSE"
+                            clearButtonDescription="msg://msgClear"
+                            uploadButtonIcon="font-icon:UPLOAD"
+                            uploadButtonDescription="msg://msgUpload"
+                            showClearButton="true"
+                            property="logo"/>
+                </vbox>
+            </hbox>
             <hbox id="textAreaBox" width="100%" spacing="true">
                 <richTextArea id="standartDescriptionTextArea"
                               dataContainer="positionDc"

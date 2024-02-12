@@ -77,6 +77,13 @@
                 </query>
             </loader>
         </collection>
+        <collection id="companiesDc"
+                    class="com.company.itpearls.entity.Company">
+            <view extends="company-view"/>
+            <loader id="companiesDl" cacheable="false">
+                <query><![CDATA[select e from itpearls_Company e order by e.comanyName]]></query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="800"
                 modal="true"
@@ -360,6 +367,22 @@
                                       stylename="borderless"/>
                     </hbox>
                 </vbox>
+            </tab>
+            <tab id="tabCVWorkPlaces"
+                 caption="msg://msgTabCVWorkPlaces"
+                 visible="true"
+                 icon="font-icon:DOT_CIRCLE_O"
+                 margin="true"
+                 spacing="true">
+                <scrollBox id="workPlacesScrollBox"
+                           orientation="vertical"
+                           width="100%"
+                           height="100%"/>
+                <button id="addNewWorkPlaceButton"
+                        icon="font-icon:WON"
+                        invoke="addNewWorkPlaceButtonInvoke"
+                        width="AUTO"
+                        align="TOP_RIGHT"/>
             </tab>
             <tab id="tabLetter"
                  caption="msg://msgLetter"

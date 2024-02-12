@@ -1,0 +1,2 @@
+alter table ITPEARLS_POSITION add constraint FK_ITPEARLS_POSITION_ON_LOGO foreign key (LOGO_ID) references SYS_FILE(ID);
+create index IDX_ITPEARLS_POSITION_ON_LOGO on ITPEARLS_POSITION (LOGO_ID);

@@ -1,10 +1,7 @@
 package com.company.itpearls.web.screens.position;
 
 import com.haulmont.cuba.core.global.PersistenceHelper;
-import com.haulmont.cuba.gui.components.HasValue;
-import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.TextField;
-import com.haulmont.cuba.gui.components.TextInputField;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Position;
 
@@ -21,10 +18,15 @@ public class PositionEdit extends StandardEditor<Position> {
     private TextField<String> positionEnNameField;
     @Inject
     private TextField<String> positionRuNameField;
+    @Inject
+    private Image positionLogoPic;
+    @Inject
+    private Image logoDefaultPic;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         setLabel();
+        setLogoPicImage();
     }
 
     @Subscribe("positionEnNameField")
@@ -53,4 +55,21 @@ public class PositionEdit extends StandardEditor<Position> {
 
         textPositionName.setValue( a );
     }
+
+    private void setLogoPicImage() {
+        if (getEditedEntity().getLogo() == null) {
+            logoDefaultPic.setVisible(true);
+            positionLogoPic.setVisible(false);
+        } else {
+            logoDefaultPic.setVisible(false);
+            positionLogoPic.setVisible(true);
+        }
+    }
+
+    @Subscribe("positionLogoPic")
+    public void onPositionLogoPicSourceChange(ResourceView.SourceChangeEvent event) {
+        setLogoPicImage();
+
+    }
+
 }

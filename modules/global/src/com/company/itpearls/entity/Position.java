@@ -1,7 +1,10 @@
 package com.company.itpearls.entity;
 
 import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.annotation.Lookup;
+import com.haulmont.cuba.core.entity.annotation.LookupType;
 import com.haulmont.cuba.core.entity.annotation.OnDelete;
 import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
 import com.haulmont.cuba.core.global.DeletePolicy;
@@ -23,6 +26,11 @@ public class Position extends StandardEntity {
     @Column(name = "POSITION_RU_NAME", nullable = false, unique = true, length = 80)
     protected String positionRuName;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "LOGO_ID")
+    private FileDescriptor logo;
+
     @Column(name = "POSITION_EN_NAME", unique = true, length = 80)
     protected String positionEnName;
 
@@ -39,6 +47,14 @@ public class Position extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_CANDIDATE_ID")
     private JobCandidate jobCandidate;
+
+    public FileDescriptor getLogo() {
+        return logo;
+    }
+
+    public void setLogo(FileDescriptor logo) {
+        this.logo = logo;
+    }
 
     public JobCandidate getJobCandidate() {
         return jobCandidate;

@@ -310,6 +310,7 @@ create table ITPEARLS_POSITION (
     DELETED_BY varchar(50),
     --
     POSITION_RU_NAME varchar(80) not null,
+    LOGO_ID uuid,
     POSITION_EN_NAME varchar(80),
     STANDART_DECRIPTION text,
     WHO_IS_THIS_GUY text,
@@ -1298,3 +1299,27 @@ create table ITPEARLS_APPLICATION_SETUP (
     primary key (ID)
 )^
 -- end ITPEARLS_APPLICATION_SETUP
+-- begin ITPEARLS_CANDIDATE_CV_WORK_PLACES
+create table ITPEARLS_CANDIDATE_CV_WORK_PLACES (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    CANDIDATE_CV_ID uuid not null,
+    WORK_PLACE_ID uuid,
+    WORK_PLACE_COMMENT varchar(128),
+    START_DATE date not null,
+    END_DATE date,
+    WORK_TO_THIS_DAY boolean,
+    FUNCTIONALITY_AT_WORK text,
+    PERSONAL_ROLE text,
+    ACHIEVEMENTS text,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_CANDIDATE_CV_WORK_PLACES

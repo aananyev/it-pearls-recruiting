@@ -44,6 +44,7 @@
         <property name="cityOfResidence" view="_minimal"/>
     </view>
     <view entity="itpearls_Position" name="position-view" extends="_local">
+        <property name="logo" view="_local"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true"
           overwrite="true">
@@ -622,5 +623,9 @@
         <property name="applicationIcon" view="_local"/>
         <property name="coordinator" view="_local"/>
         <property name="administrator" view="_local"/>
+    </view>
+    <view entity="itpearls_CandidateCVWorkPlaces" name="candidateCVWorkPlaces-view" extends="_local">
+        <property name="candidateCV" view="candidateCV-view"/>
+        <property name="workPlace" view="company-view"/>
     </view>
 </views>
