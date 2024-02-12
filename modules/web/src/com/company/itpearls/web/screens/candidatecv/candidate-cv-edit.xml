@@ -139,6 +139,7 @@
                  caption="msg://msgCandidate"
                  expand="candidateScrolBox"
                  margin="true,true,true,true"
+                 icon="font-icon:HAND_PEACE_O"
                  spacing="true">
                 <scrollBox id="candidateScrolBox"
                            width="100%"
@@ -326,6 +327,7 @@
                  caption="msg://msgCV"
                  margin="true,true,true,true"
                  expand="cvVbox"
+                 icon="font-icon:PENCIL"
                  spacing="true">
                 <vbox id="cvVbox"
                       spacing="true"
@@ -393,6 +395,7 @@
                  caption="msg://msgLetter"
                  margin="true,true,true,true"
                  expand="letterHBox"
+                 icon="font-icon:ENVELOPE"
                  spacing="true">
                 <hbox id="letterHBox"
                       width="100%"
@@ -487,6 +490,7 @@
                 </vbox>
             </tab>
             <tab id="tabFiles"
+                 icon="font-icon:FILE"
                  caption="mainMsg://msgFiles"
                  margin="true,true,true,true"
                  spacing="true"

@@ -991,6 +991,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         WorkPlacesFragment fragment = fragments.create(this, WorkPlacesFragment.class);
         fragment.setNewWorkPlaceGroupBox(newWorkPlaceGroupBox);
+
+        newWorkPlaceGroupBox.add(deleteWorkPlaceButton);
         newWorkPlaceGroupBox.add(fragment.getFragment());
 
         return newWorkPlaceGroupBox;

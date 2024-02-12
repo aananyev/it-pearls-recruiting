@@ -71,7 +71,16 @@ public class WorkPlacesFragment extends ScreenFragment {
                                                            CheckBox workToThisDayCheckBox) {
         StringBuilder sb = new StringBuilder();
         if (companyLookupPickerField.getValue() != null) {
-            sb.append(((Company)companyLookupPickerField.getValue()).getCompanyShortName());
+            if (((Company) companyLookupPickerField.getValue()).getComanyName() != null) {
+                sb.append(((Company) companyLookupPickerField.getValue()).getComanyName())
+                        .append(" / ");
+            }
+
+            if (((Company) companyLookupPickerField.getValue()).getCompanyShortName() != null) {
+                sb.append(((Company) companyLookupPickerField.getValue()).getCompanyShortName());
+            }
+
+//            sb.append(((Company)companyLookupPickerField.getValue()).getCompanyShortName());
             SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.YYYY");
 
             if ((startDateField.getValue() != null)
