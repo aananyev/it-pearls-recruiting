@@ -2,6 +2,10 @@
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
           xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
     <data>
+        <instance id="workPlaceDc" class="com.company.itpearls.entity.CandidateCVWorkPlaces">
+            <view extends="candidateCVWorkPlaces-view"/>
+            <loader id="workPlaceDl"/>
+        </instance>
         <collection id="companiesDc"
                     class="com.company.itpearls.entity.Company"
                     view="company-view">
@@ -17,6 +21,8 @@
               width="100%" spacing="true"
               expand="companyLookupPickerField">
             <lookupPickerField id="companyLookupPickerField"
+                               dataContainer="workPlaceDc"
+                               property="workPlace"
                                optionsContainer="companiesDc"
                                caption="msg://msgCompany"
                                width="100%"
@@ -32,27 +38,41 @@
                   spacing="true"
                   width="AUTO">
             <dateField id="startDateField"
+                       dataContainer="workPlaceDc"
+                       property="startDate"
                        width="AUTO"
                        caption="msg://msgStartDate"
                        dateFormat="dd.MM.yyyy"/>
                 <dateField id="endDateField"
+                           dataContainer="workPlaceDc"
+                           property="endDate"
                            width="AUTO"
                            caption="msg://msgEndDate"
                            dateFormat="dd.MM.yyyy"/>
                 <checkBox id="workToThisDayCheckBox"
+                          dataContainer="workPlaceDc"
+                          property="workToThisDay"
                           width="AUTO"
                           caption="msg://msgWorkToThisDay"/>
             </vbox>
         </hbox>
         <textField id="workPlaceCommentTextField"
+                   dataContainer="workPlaceDc"
+                   property="workPlaceComment"
                    width="100%" caption="msg://msgWorkPlaceComment"/>
         <richTextArea id="functionalityAtWorkRichTextArea"
+                      dataContainer="workPlaceDc"
+                      property="functionalityAtWork"
                       width="100%"
                       caption="msg://msgFunctionalityAtWork"/>
         <richTextArea id="personalRoleRichTextArea"
+                      dataContainer="workPlaceDc"
+                      property="personalRole"
                       width="100%"
                       caption="msg://msgPersonalRole"/>
         <richTextArea id="achievementsRichTextArea"
+                      dataContainer="workPlaceDc"
+                      property="achievements"
                       width="100%"
                       caption="msg://msgAchievements"/>
     </layout>

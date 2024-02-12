@@ -23,6 +23,28 @@ public class WorkPlacesFragment extends ScreenFragment {
     @Inject
     private LookupPickerField<Company> companyLookupPickerField;
 
+    private Boolean deletedWorkPlace = false;
+    @Inject
+    private TextField<String> workPlaceCommentTextField;
+    @Inject
+    private RichTextArea functionalityAtWorkRichTextArea;
+    @Inject
+    private RichTextArea achievementsRichTextArea;
+    @Inject
+    private RichTextArea personalRoleRichTextArea;
+
+    public Boolean getDeletedWorkPlace() {
+        return deletedWorkPlace;
+    }
+
+    public Company getCompany() {
+        return companyLookupPickerField.getValue();
+    }
+
+    public void setDeletedWorkPlace(Boolean deletedWorkPlace) {
+        this.deletedWorkPlace = deletedWorkPlace;
+    }
+
     public void setNewWorkPlaceGroupBox(GroupBoxLayout newWorkPlaceGroupBox) {
         this.newWorkPlaceGroupBox = newWorkPlaceGroupBox;
     }
@@ -98,5 +120,33 @@ public class WorkPlacesFragment extends ScreenFragment {
 
             newWorkPlaceGroupBox.setCaption(sb.toString());
         }
+    }
+
+    public String getWorkPlaceComment() {
+        return workPlaceCommentTextField.getValue();
+    }
+
+    public String getFunctionalityAtWork() {
+        return functionalityAtWorkRichTextArea.getValue();
+    }
+
+    public String getAchievements() {
+        return achievementsRichTextArea.getValue();
+    }
+
+    public Boolean getWorkToThisDay() {
+        return workToThisDayCheckBox.getValue();
+    }
+
+    public Date getEndDate() {
+        return endDateField.getValue();
+    }
+
+    public Date getStartDate() {
+        return startDateField.getValue();
+    }
+
+    public String getPersonalRole() {
+        return personalRoleRichTextArea.getValue();
     }
 }

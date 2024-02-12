@@ -49,7 +49,7 @@ import java.util.*;
 @LoadDataBeforeShow
 public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
-
+    List<WorkPlacesFragment> workPlacesFragments = new ArrayList<>();
     private static final String NEED_LETTER_NOTIFICATION = "НЕОБХОДИМО ЗАПОЛНИТЬ ШАБЛОН В СОПРОВОДИТЕЛЬНОМ ПИСЬМЕ " +
             "ПО ТРЕБОВАНИЮ ЗАКАЗЧИКА";
     private static final String EXTENSION_PDF = "pdf";
@@ -146,6 +146,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private LookupPickerField<Position> resumePositionField;
     @Inject
     private Fragments fragments;
+    @Inject
+    private Metadata metadata;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -500,6 +502,28 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 }
             } else {
                 getEditedEntity().setContactInfoChecked(false);
+            }
+        }
+
+        commitWorkPlaces();
+    }
+
+    private void commitWorkPlaces() {
+        if (workPlacesFragments.size() > 0) {
+            for (WorkPlacesFragment workPlacesFragment : workPlacesFragments) {
+                CandidateCVWorkPlaces candidateCVWorkPlaces = metadata.create(CandidateCVWorkPlaces.class);
+
+                candidateCVWorkPlaces.setCandidateCV(getEditedEntity());
+                candidateCVWorkPlaces.setWorkPlace(workPlacesFragment.getCompany());
+                candidateCVWorkPlaces.setWorkPlaceComment(workPlacesFragment.getWorkPlaceComment());
+                candidateCVWorkPlaces.setFunctionalityAtWork(workPlacesFragment.getFunctionalityAtWork());
+                candidateCVWorkPlaces.setAchievements(workPlacesFragment.getAchievements());
+                candidateCVWorkPlaces.setWorkToThisDay(workPlacesFragment.getWorkToThisDay());
+                candidateCVWorkPlaces.setEndDate(workPlacesFragment.getEndDate());
+                candidateCVWorkPlaces.setStartDate(workPlacesFragment.getStartDate());
+                candidateCVWorkPlaces.setPersonalRole(workPlacesFragment.getPersonalRole());
+
+                dataManager.commit(candidateCVWorkPlaces);
             }
         }
     }
@@ -984,13 +1008,16 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         GroupBoxLayout newWorkPlaceGroupBox = uiComponents.create(GroupBoxLayout.class);
         Button deleteWorkPlaceButton = uiComponents.create(Button.class);
         deleteWorkPlaceButton.setIcon(CubaIcon.REMOVE_ACTION.source());
-        deleteWorkPlaceButton.addClickListener(e -> deleteWorkPlaceButton(newWorkPlaceGroupBox));
+        deleteWorkPlaceButton.setAlignment(Component.Alignment.TOP_RIGHT);
+        deleteWorkPlaceButton.setDescription(messageBundle.getMessage("msgDelete"));
 
         newWorkPlaceGroupBox.setCaption(messageBundle.getMessage("msgNewWorkPlace"));
         newWorkPlaceGroupBox.setCollapsable(true);
 
         WorkPlacesFragment fragment = fragments.create(this, WorkPlacesFragment.class);
+        deleteWorkPlaceButton.addClickListener(e -> deleteWorkPlaceButton(fragment, newWorkPlaceGroupBox));
         fragment.setNewWorkPlaceGroupBox(newWorkPlaceGroupBox);
+        workPlacesFragments.add(fragment);
 
         newWorkPlaceGroupBox.add(deleteWorkPlaceButton);
         newWorkPlaceGroupBox.add(fragment.getFragment());
@@ -998,8 +1025,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         return newWorkPlaceGroupBox;
     }
 
-    private void deleteWorkPlaceButton(GroupBoxLayout newWorkPlaceGroupBox) {
+    private void deleteWorkPlaceButton(WorkPlacesFragment fragment, GroupBoxLayout newWorkPlaceGroupBox) {
         newWorkPlaceGroupBox.setVisible(false);
+        fragment.setDeletedWorkPlace(true);
     }
 
     private void initPositionTypeField() {
