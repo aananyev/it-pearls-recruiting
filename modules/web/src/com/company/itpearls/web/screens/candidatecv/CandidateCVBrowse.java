@@ -123,13 +123,18 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
         logoImage.setScaleMode(Image.ScaleMode.FILL);
         logoImage.setAlignment(Component.Alignment.MIDDLE_LEFT);
 
-        if (event.getItem().getResumePosition().getLogo() != null) {
-            try {
-                logoImage
-                        .setSource(FileDescriptorResource.class)
-                        .setFileDescriptor(event.getItem().getResumePosition().getLogo());
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (event.getItem().getResumePosition() != null) {
+            if (event.getItem().getResumePosition().getLogo() != null) {
+                try {
+                    logoImage
+                            .setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(event.getItem().getResumePosition().getLogo());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logoImage.setVisible(false);
+                }
+            } else {
+                logoImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
                 logoImage.setVisible(false);
             }
         } else {

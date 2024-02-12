@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
+          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
+    <data>
+        <collection id="companiesDc"
+                    class="com.company.itpearls.entity.Company"
+                    view="company-view">
+            <loader id="companiesDl">
+                <query>
+                    <![CDATA[select e from itpearls_Company e order by e.comanyName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <hbox id="headerHBox"
+              width="100%" spacing="true"
+              expand="companyLookupPickerField">
+            <lookupPickerField id="companyLookupPickerField"
+                               optionsContainer="companiesDc"
+                               caption="msg://msgCompany"
+                               width="100%"
+                               nullOptionVisible="false"
+                               required="true">
+                <actions>
+                    <action id="lookup" type="picker_lookup"/>
+                    <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                </actions>
+            </lookupPickerField>
+            <vbox id="dateVBox"
+                  align="TOP_LEFT"
+                  spacing="true"
+                  width="AUTO">
+            <dateField id="startDateField"
+                       width="AUTO"
+                       caption="msg://msgStartDate"
+                       dateFormat="dd.MM.yyyy"/>
+                <dateField id="endDateField"
+                           width="AUTO"
+                           caption="msg://msgEndDate"
+                           dateFormat="dd.MM.yyyy"/>
+                <checkBox id="workToThisDayCheckBox"
+                          width="AUTO"
+                          caption="msg://msgWorkToThisDay"/>
+            </vbox>
+        </hbox>
+        <textField id="workPlaceCommentTextField"
+                   width="100%" caption="msg://msgWorkPlaceComment"/>
+        <richTextArea id="functionalityAtWorkRichTextArea"
+                      width="100%"
+                      caption="msg://msgFunctionalityAtWork"/>
+        <richTextArea id="personalRoleRichTextArea"
+                      width="100%"
+                      caption="msg://msgPersonalRole"/>
+        <richTextArea id="achievementsRichTextArea"
+                      width="100%"
+                      caption="msg://msgAchievements"/>
+    </layout>
+</fragment>

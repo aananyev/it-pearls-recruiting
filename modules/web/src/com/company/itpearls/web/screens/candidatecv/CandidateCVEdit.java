@@ -6,6 +6,7 @@ import com.company.itpearls.core.ResumeRecognitionService;
 import com.company.itpearls.core.WebLoadService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.SelectedCloseAction;
+import com.company.itpearls.web.screens.fragments.candidatecv.WorkPlacesFragment;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
@@ -15,7 +16,6 @@ import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
-import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
@@ -144,6 +144,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private CollectionContainer<Company> companiesDc;
     @Inject
     private LookupPickerField<Position> resumePositionField;
+    @Inject
+    private Fragments fragments;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -973,51 +975,20 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         workPlacesScrollBox.add(workPlaceLayout);
     }
 
+    @Subscribe
+    public void onInit(InitEvent event) {
+       initPositionTypeField();
+    }
+
     private GroupBoxLayout setNewWorkPlaceLayout() {
         GroupBoxLayout newWorkPlaceGroupBox = uiComponents.create(GroupBoxLayout.class);
-        newWorkPlaceGroupBox.setWidthFull();
-        newWorkPlaceGroupBox.setHeightAuto();
-        newWorkPlaceGroupBox.setSpacing(true);
+
         newWorkPlaceGroupBox.setCaption(messageBundle.getMessage("msgNewWorkPlace"));
         newWorkPlaceGroupBox.setCollapsable(true);
 
-        LookupPickerField companyLookupPickerField = uiComponents.create(LookupPickerField.class);
-        companyLookupPickerField.setCaption(messageBundle.getMessage("msgCompany"));
-        companyLookupPickerField.setOptionsList(companiesDc.getItems());
-
-        TextField workPlaceCommentTextField = uiComponents.create(TextField.class);
-        workPlaceCommentTextField.setCaption(messageBundle.getMessage("msgWorkPlaceComment"));
-
-        DateField startDateField = uiComponents.create(DateField.class);
-        startDateField.setCaption(messageBundle.getMessage("msgStartDate"));
-
-        DateField endDateField = uiComponents.create(DateField.class);
-        endDateField.setCaption(messageBundle.getMessage("msgEndDate"));
-
-        CheckBox workToThisDayCheckBox = uiComponents.create(CheckBox.class);
-        workToThisDayCheckBox.setCaption(messageBundle.getMessage("msgWorkToThisDay"));
-
-        RichTextArea functionalityAtWorkRichTextArea = uiComponents.create(RichTextArea.class);
-        functionalityAtWorkRichTextArea.setCaption(messageBundle.getMessage("msgFunctionalityAtWork"));
-        functionalityAtWorkRichTextArea.setWidthFull();
-
-        RichTextArea personalRoleRichTextArea = uiComponents.create(RichTextArea.class);
-        personalRoleRichTextArea.setCaption(messageBundle.getMessage("msgPersonalRole"));
-        personalRoleRichTextArea.setWidthFull();
-
-        RichTextArea achievementsRichTextArea = uiComponents.create(RichTextArea.class);
-        achievementsRichTextArea.setCaption(messageBundle.getMessage("msgAchievements"));
-        achievementsRichTextArea.setWidthFull();
-
-        newWorkPlaceGroupBox.add(companyLookupPickerField);
-        newWorkPlaceGroupBox.add(workPlaceCommentTextField);
-        newWorkPlaceGroupBox.add(companyLookupPickerField);
-        newWorkPlaceGroupBox.add(startDateField);
-        newWorkPlaceGroupBox.add(endDateField);
-        newWorkPlaceGroupBox.add(workToThisDayCheckBox);
-        newWorkPlaceGroupBox.add(functionalityAtWorkRichTextArea);
-        newWorkPlaceGroupBox.add(personalRoleRichTextArea);
-        newWorkPlaceGroupBox.add(achievementsRichTextArea);
+        WorkPlacesFragment fragment = fragments.create(this, WorkPlacesFragment.class);
+        fragment.setNewWorkPlaceGroupBox(newWorkPlaceGroupBox);
+        newWorkPlaceGroupBox.add(fragment.getFragment());
 
         return newWorkPlaceGroupBox;
     }

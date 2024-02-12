@@ -81,7 +81,9 @@
         </collection>
         <collection id="companiesDc"
                     class="com.company.itpearls.entity.Company">
-            <view extends="company-view"/>
+            <view extends="company-view">
+                <property name="comanyName"/>
+            </view>
             <loader id="companiesDl" cacheable="false">
                 <query><![CDATA[select e from itpearls_Company e order by e.comanyName]]></query>
             </loader>
@@ -375,6 +377,7 @@
                  visible="true"
                  icon="font-icon:DOT_CIRCLE_O"
                  margin="true"
+                 expand="workPlacesScrollBox"
                  spacing="true">
                 <scrollBox id="workPlacesScrollBox"
                            orientation="vertical"
