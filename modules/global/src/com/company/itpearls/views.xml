@@ -112,7 +112,9 @@
         </property>
         <property name="skillTree" view="_local"/>
         <property name="fileImageFace" view="_local"/>
-        <property name="personPosition" view="_local"/>
+        <property name="personPosition" view="_local">
+            <property name="logo" view="_local"/>
+        </property>
         <property name="positionList" view="_local">
             <property name="positionList" view="_local"/>
         </property>
@@ -198,10 +200,13 @@
         <property name="companyGroup" view="_local"/>
     </view>
     <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
-        <property name="resumePosition" view="_minimal"/>
-        <property name="toVacancy" view="_minimal">
-            <property name="positionType" view="_local"/>
-            <property name="projectName" view="_local"/>
+        <property name="resumePosition" view="_local">
+            <property name="logo" view="_local"/>
+        </property>
+        <property name="toVacancy" view="_local">
+            <property name="positionType" view="_local">
+                <property name="logo" view="_local"/>
+            </property>
         </property>
         <property name="owner" view="_minimal">
         </property>
@@ -218,6 +223,9 @@
         <property name="skillTree" view="_minimal">
         </property>
         <property name="candidate" view="_minimal">
+            <property name="personPosition" view="_local">
+                <property name="logo" view="_local"/>
+            </property>
         </property>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">

@@ -335,6 +335,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setCommentsOpenPositionScroll(getEditedEntity(), commentsScrollBox);
         setCommentOpenPositionScrollIteractionList(getEditedEntity(), commentsScrollBox);
 
+        initPositionTypeField();
         initProjectNameField();
         initClosedVacancyTimerFacet();
         setMapOfPriority();
@@ -347,6 +348,25 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private void initClosedVacancyTimerFacet() {
         if (closingDateDateField.getValue() != null) {
             closedVacancyTimer.start();
+        }
+    }
+
+    private void initPositionTypeField() {
+        positionTypeField.setOptionImageProvider(this::positionTypeFieldImageProvider);
+    }
+
+    private Resource positionTypeFieldImageProvider(Position position) {
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setWidth("30px");
+
+        if (position.getLogo() != null) {
+            return retImage.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(position
+                            .getLogo());
+        } else {
+            retImage.setVisible(false);
+            return retImage.createResource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         }
     }
 

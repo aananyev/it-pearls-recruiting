@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.candidatecv;
 
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
@@ -24,6 +25,8 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
     private UserSession userSession;
 
     static String GROUP_INTERN = "Стажер";
+    @Inject
+    private UiComponents uiComponents;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -106,6 +109,48 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
             }
         }
     }
+
+    @Install(to = "candidateCVsTable.resumePosition", subject = "columnGenerator")
+    private Component candidateCVsTableResumePositionColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setWidthFull();
+        retHbox.setHeightFull();
+        retHbox.setSpacing(false);
+
+        Image logoImage = uiComponents.create(Image.class);
+        logoImage.setWidth("20px");
+        logoImage.setStyleName("circle-20px");
+        logoImage.setScaleMode(Image.ScaleMode.FILL);
+        logoImage.setAlignment(Component.Alignment.MIDDLE_LEFT);
+
+        if (event.getItem().getResumePosition().getLogo() != null) {
+            try {
+                logoImage
+                        .setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(event.getItem().getResumePosition().getLogo());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logoImage.setVisible(false);
+            }
+        } else {
+            logoImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            logoImage.setVisible(false);
+        }
+
+        Label positionLabel = uiComponents.create(Label.class);
+        positionLabel.setWidthFull();
+        positionLabel.setHeightFull();
+        positionLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        positionLabel.setValue(event.getItem().getResumePosition());
+
+        retHbox.add(logoImage);
+        retHbox.add(positionLabel);
+        retHbox.expand(positionLabel);
+
+        return retHbox;
+    }
+
+
 
 /*    @Install(to = "candidateCVsTable", subject = "iconProvider")
     protected String candidateCVsTableiconProvider(CandidateCV candidateCV) {

@@ -14,12 +14,14 @@ import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscr
 import com.company.itpearls.web.screens.hrmasters.suggestjobcandidates.Suggestjobcandidate;
 import com.company.itpearls.web.screens.simplebrowsers.JobCandidateSimpleBrowse;
 import com.company.itpearls.web.screens.simplebrowsers.JobCandidateSimpleMailBrowse;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -3103,6 +3105,27 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retHBox.setHeightFull();
         retHBox.setSpacing(true);
 
+        Image logoImage = uiComponents.create(Image.class);
+        logoImage.setWidth("20px");
+        logoImage.setStyleName("circle-20px");
+        logoImage.setScaleMode(Image.ScaleMode.CONTAIN);
+        logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        if (event.getItem().getPositionType().getLogo() != null) {
+            try {
+                logoImage
+                        .setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(event.getItem().getPositionType().getLogo());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logoImage.setVisible(false);
+            }
+        } else {
+            logoImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            logoImage.setVisible(false);
+        }
+
+
         Label newVacancyLabel = uiComponents.create(Label.class);
         if (event.getItem().getSignDraft() != null) {
             if (!event.getItem().getSignDraft()) {
@@ -3152,6 +3175,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retObject.setWidthFull();
 
         Image image = setProjectOwnerImage(event.getItem().getProjectName().getProjectOwner());
+        retHBox.add(logoImage);
         retHBox.add(newVacancyLabel);
         retHBox.add(retObject);
         retHBox.add(image);

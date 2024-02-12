@@ -62,6 +62,96 @@ import java.util.stream.Collectors;
 @LookupComponent("jobCandidatesTable")
 @LoadDataBeforeShow
 public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
+    @Install(to = "jobCandidatesTable.currentCompany", subject = "columnGenerator")
+    private Component jobCandidatesTableCurrentCompanyColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setWidth("100%");
+        retHbox.setHeight("100%");
+        retHbox.setSpacing(false);
+        retHbox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        Image logoImage = uiComponents.create(Image.class);
+        logoImage.setWidth("20px");
+        logoImage.setHeight("20px");
+        logoImage.setStyleName("circle-20px");
+        logoImage.setScaleMode(Image.ScaleMode.FILL);
+        logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        if (event.getItem().getCurrentCompany() != null) {
+            if (event.getItem().getCurrentCompany().getFileCompanyLogo() != null) {
+                try {
+                    logoImage
+                            .setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(event.getItem().getCurrentCompany().getFileCompanyLogo());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logoImage.setVisible(false);
+                }
+            } else {
+                logoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+                logoImage.setVisible(false);
+            }
+        } else {
+            logoImage.setVisible(false);
+        }
+
+        Label companyLabel = uiComponents.create(Label.class);
+        companyLabel.setWidth("100%");
+        companyLabel.setHeight("100%");
+        companyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        companyLabel.setValue(event.getItem().getCurrentCompany());
+
+        retHbox.add(logoImage);
+        retHbox.add(companyLabel);
+        retHbox.expand(companyLabel);
+
+        return retHbox;
+    }
+    @Install(to = "jobCandidatesTable.personPosition", subject = "columnGenerator")
+    private Component jobCandidatesTablePersonPositionColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setWidth("100%");
+        retHbox.setHeight("100%");
+        retHbox.setSpacing(false);
+        retHbox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        Image logoImage = uiComponents.create(Image.class);
+        logoImage.setWidth("20px");
+        logoImage.setHeight("20px");
+        logoImage.setStyleName("circle-20px");
+        logoImage.setScaleMode(Image.ScaleMode.FILL);
+        logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        if (event.getItem().getPersonPosition() != null) {
+            if (event.getItem().getPersonPosition().getLogo() != null) {
+                try {
+                    logoImage
+                            .setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(event.getItem().getPersonPosition().getLogo());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logoImage.setVisible(false);
+                }
+            } else {
+                logoImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+                logoImage.setVisible(false);
+            }
+        } else {
+            logoImage.setVisible(false);
+        }
+
+        Label positionLabel = uiComponents.create(Label.class);
+        positionLabel.setWidth("100%");
+        positionLabel.setHeight("100%");
+        positionLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        positionLabel.setValue(event.getItem().getPersonPosition());
+
+        retHbox.add(logoImage);
+        retHbox.add(positionLabel);
+        retHbox.expand(positionLabel);
+
+        return retHbox;
+    }
 
     @Inject
     private CheckBox checkBoxShowOnlyMy;

@@ -9,6 +9,9 @@
                     class="com.company.itpearls.entity.JobCandidate">
             <view extends="jobCandidate-view"
                   systemProperties="true">
+                <property name="currentCompany" view="_local">
+                    <property name="fileCompanyLogo" view="_local"/>
+                </property>
                 <property name="iteractionList" view="_local">
                     <property name="recrutier" view="_local">
                         <property name="group" view="_local"/>
@@ -145,10 +148,14 @@
                 </column>
                 <column id="personPosition"
                         caption="msg://msgPersonPosition"
-                        property="personPosition"/>
+                        property="personPosition">
+                    <componentRenderer/>
+                </column>
                 <column id="currentCompany"
                         caption="msg://msgCompany"
-                        property="currentCompany"/>
+                        property="currentCompany">
+                    <componentRenderer/>
+                </column>
                 <column id="cityOfResidence"
                         caption="msg://msgCityOfResidence"
                         minimumWidth="150px"

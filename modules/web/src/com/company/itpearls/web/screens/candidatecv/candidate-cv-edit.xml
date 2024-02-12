@@ -58,8 +58,10 @@
                         property="skillTree"/>
         </instance>
         <collection id="resumePositionsDc"
-                    class="com.company.itpearls.entity.Position"
-                    view="_local">
+                    class="com.company.itpearls.entity.Position">
+            <view extends="position-view">
+                <property name="logo" view="_local"/>
+            </view>
             <loader id="resumePositionsLc"
                     cacheable="true">
                 <query>

@@ -629,6 +629,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         initInteractionCommentDl();
+        initPositionTypeField();
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (getEditedEntity().getCandidateCv().isEmpty()) {
@@ -3520,5 +3521,24 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         retBox.add(image);
         return retBox;
+    }
+
+    private void initPositionTypeField() {
+        personPositionField.setOptionImageProvider(this::positionTypeFieldImageProvider);
+    }
+
+    private Resource positionTypeFieldImageProvider(Position position) {
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setWidth("30px");
+
+        if (position.getLogo() != null) {
+            return retImage.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(position
+                            .getLogo());
+        } else {
+            retImage.setVisible(false);
+            return retImage.createResource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+        }
     }
 }

@@ -33,6 +33,7 @@
                 </property>
                 <property name="positionType" view="_local">
                     <property name="standartDescription"/>
+                    <property name="logo" view="_local"/>
                 </property>
                 <property name="templateLetter"/>
                 <property name="someFiles"
@@ -77,6 +78,7 @@
         <collection id="positionTypesDc"
                     class="com.company.itpearls.entity.Position">
             <view extends="position-view">
+                <property name="logo" view="_local"/>
             </view>
             <loader id="positionTypesLc" cacheable="true">
                 <query>

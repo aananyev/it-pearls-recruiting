@@ -142,6 +142,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private ScrollBoxLayout workPlacesScrollBox;
     @Inject
     private CollectionContainer<Company> companiesDc;
+    @Inject
+    private LookupPickerField<Position> resumePositionField;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -1018,5 +1020,24 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         newWorkPlaceGroupBox.add(achievementsRichTextArea);
 
         return newWorkPlaceGroupBox;
+    }
+
+    private void initPositionTypeField() {
+        resumePositionField.setOptionImageProvider(this::positionTypeFieldImageProvider);
+    }
+
+    private Resource positionTypeFieldImageProvider(Position position) {
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setWidth("30px");
+
+        if (position.getLogo() != null) {
+            return retImage.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(position
+                            .getLogo());
+        } else {
+            retImage.setVisible(false);
+            return retImage.createResource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+        }
     }
 }

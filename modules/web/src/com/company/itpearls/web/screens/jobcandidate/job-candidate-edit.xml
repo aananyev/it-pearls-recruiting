@@ -146,6 +146,7 @@
         <collection id="personPositionsDc"
                     class="com.company.itpearls.entity.Position">
             <view extends="position-view">
+                <property name="logo" view="_local"/>
             </view>
             <loader id="personPositionsLc" cacheable="false">
                 <query>

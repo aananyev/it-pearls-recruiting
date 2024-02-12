@@ -8,8 +8,15 @@
         <collection id="candidateCVsDc"
                     class="com.company.itpearls.entity.CandidateCV">
             <view extends="candidateCV-view">
-                <property name="candidate" view="_minimal">
+                <property name="candidate" view="_local">
                     <property name="fullName"/>
+                    <property name="personPosition" view="_local"/>
+                </property>
+                <property name="toVacancy" view="openPosition-view">
+                    <property name="positionType" view="_local"/>
+                </property>
+                <property name="resumePosition" view="_local">
+                    <property name="logo" view="_local"/>
                 </property>
             </view>
             <loader id="candidateCVsDl">
@@ -65,7 +72,9 @@
                         property="resumePosition"
                         width="300px"
                         sortable="true"
-                        caption="msg://msgPosition"/>
+                        caption="msg://msgPosition">
+                    <componentRenderer/>
+                </column>
                 <column id="originalFileCVcolumn"
                         caption="msg://msgOriginalCV"
                         sortable="false"

@@ -15,7 +15,9 @@
                     <property name="owner" view="_local"/>
                 </property>
                 <property name="cityPosition" view="_local"/>
-                <property name="positionType" view="_local"/>
+                <property name="positionType" view="_local">
+                    <property name="logo" view="_local"/>
+                </property>
                 <property name="projectName" view="_local">
                     <property name="projectLogo" view="_local"/>
                     <property name="projectOwner" view="_local">

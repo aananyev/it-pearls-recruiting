@@ -31,6 +31,10 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <column id="logoColumn" width="80px"
+                        caption="msg://msgLogo">
+                    <componentRenderer/>
+                </column>
                 <column id="positionRuName"
                         property="positionRuName"
                         caption="msg://msgPositionEnName"/>

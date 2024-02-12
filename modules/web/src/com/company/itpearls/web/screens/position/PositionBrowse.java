@@ -1,17 +1,34 @@
 package com.company.itpearls.web.screens.position;
 
-import com.haulmont.cuba.gui.components.DataGrid;
+import com.company.itpearls.entity.JobCandidate;
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Position;
+import com.haulmont.cuba.gui.screen.LookupComponent;
 import org.jsoup.Jsoup;
+
+import javax.inject.Inject;
 
 @UiController("itpearls_Position.browse")
 @UiDescriptor("position-browse.xml")
 @LookupComponent("positionsTable")
 @LoadDataBeforeShow
 public class PositionBrowse extends StandardLookup<Position> {
+    @Inject
+    private UiComponents uiComponents;
+    @Inject
+    private DataGrid<Position> positionsTable;
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        logoColumnRenderer();
+    }
+
     @Install(to = "positionsTable.standartDescriptionIcon", subject = "columnGenerator")
     private Icons.Icon positionsTableStandartDescriptionIconColumnGenerator(DataGrid.ColumnGeneratorEvent<Position> event) {
         if(event.getItem().getStandartDescription() == null) {
@@ -62,5 +79,36 @@ public class PositionBrowse extends StandardLookup<Position> {
         } else {
             return null;
         }
+    }
+
+    private void logoColumnRenderer() {
+        positionsTable.addGeneratedColumn("logoColumn", entity -> {
+            HBoxLayout hBox = uiComponents.create(HBoxLayout.class);
+            Image image = uiComponents.create(Image.NAME);
+
+            if (entity.getItem().getLogo() != null) {
+                try {
+                    image.setValueSource(new ContainerValueSource<Position, FileDescriptor>(entity.getContainer(),
+                            "logo"));
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            }
+
+            image.setWidth("20px");
+            image.setStyleName("circle-20px");
+
+            image.setScaleMode(Image.ScaleMode.CONTAIN);
+            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            hBox.setWidthFull();
+            hBox.setHeightFull();
+            hBox.add(image);
+
+            return hBox;
+        });
     }
 }
