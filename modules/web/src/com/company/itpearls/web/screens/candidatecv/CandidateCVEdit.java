@@ -982,6 +982,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     private GroupBoxLayout setNewWorkPlaceLayout() {
         GroupBoxLayout newWorkPlaceGroupBox = uiComponents.create(GroupBoxLayout.class);
+        Button deleteWorkPlaceButton = uiComponents.create(Button.class);
+        deleteWorkPlaceButton.setIcon(CubaIcon.REMOVE_ACTION.source());
+        deleteWorkPlaceButton.addClickListener(e -> deleteWorkPlaceButton(newWorkPlaceGroupBox));
 
         newWorkPlaceGroupBox.setCaption(messageBundle.getMessage("msgNewWorkPlace"));
         newWorkPlaceGroupBox.setCollapsable(true);
@@ -991,6 +994,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         newWorkPlaceGroupBox.add(fragment.getFragment());
 
         return newWorkPlaceGroupBox;
+    }
+
+    private void deleteWorkPlaceButton(GroupBoxLayout newWorkPlaceGroupBox) {
+        newWorkPlaceGroupBox.setVisible(false);
     }
 
     private void initPositionTypeField() {
