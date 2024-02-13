@@ -114,7 +114,7 @@
                         excludeRecursively="true"
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,fileImageFace,priorityContact"/>
         </filter>
-        <dataGrid id="jobCandidatesTable"
+        <dataGrid id="jobCandidatesTable" bodyRowHeight="35px"
                   width="100%"
                   descriptionAsHtml="true"
                   htmlSanitizerEnabled="false"

@@ -59,6 +59,16 @@
   justify-content: center;
 }
 
+.circle-25px-white-border {
+  width: 25px;
+  height: 25px;
+  border: 1px solid white;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .circle-20px-noborder {
   width: 20px;
   height: 20px;

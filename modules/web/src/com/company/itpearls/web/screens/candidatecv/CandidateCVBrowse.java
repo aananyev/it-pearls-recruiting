@@ -115,11 +115,11 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
         retHbox.setWidthFull();
         retHbox.setHeightFull();
-        retHbox.setSpacing(false);
+        retHbox.setSpacing(true);
 
         Image logoImage = uiComponents.create(Image.class);
         logoImage.setWidth("20px");
-        logoImage.setStyleName("circle-20px");
+        logoImage.setStyleName("circle-20px-noborder");
         logoImage.setScaleMode(Image.ScaleMode.FILL);
         logoImage.setAlignment(Component.Alignment.MIDDLE_LEFT);
 
@@ -143,8 +143,8 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
         }
 
         Label positionLabel = uiComponents.create(Label.class);
-        positionLabel.setWidthFull();
-        positionLabel.setHeightFull();
+        positionLabel.setWidthAuto();
+        positionLabel.setHeightAuto();
         positionLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
         positionLabel.setValue(event.getItem().getResumePosition());
 

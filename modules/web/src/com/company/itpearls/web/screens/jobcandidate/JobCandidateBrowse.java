@@ -67,13 +67,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
         retHbox.setWidth("100%");
         retHbox.setHeight("100%");
-        retHbox.setSpacing(false);
+        retHbox.setSpacing(true);
         retHbox.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         Image logoImage = uiComponents.create(Image.class);
         logoImage.setWidth("25px");
         logoImage.setHeight("25px");
-        logoImage.setStyleName("circle-25px-noborder");
+        logoImage.setStyleName("circle-25px-white-border");
         logoImage.setScaleMode(Image.ScaleMode.FILL);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
@@ -96,11 +96,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         Label companyLabel = uiComponents.create(Label.class);
-        companyLabel.setWidth("100%");
-        companyLabel.setHeight("100%");
+        companyLabel.setValue(event.getItem().getCurrentCompany());
+        companyLabel.setWidthAuto();
+        companyLabel.setHeightAuto();
         companyLabel.setStyleName("table-wordwrap");
         companyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        companyLabel.setValue(event.getItem().getCurrentCompany());
 
         retHbox.add(logoImage);
         retHbox.add(companyLabel);
@@ -113,13 +113,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
         retHbox.setWidth("100%");
         retHbox.setHeight("100%");
-        retHbox.setSpacing(false);
+        retHbox.setSpacing(true);
         retHbox.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         Image logoImage = uiComponents.create(Image.class);
         logoImage.setWidth("25px");
         logoImage.setHeight("25px");
-        logoImage.setStyleName("circle-25px-noborder");
+        logoImage.setStyleName("circle-25px-white-border");
         logoImage.setScaleMode(Image.ScaleMode.FILL);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
@@ -142,11 +142,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         Label positionLabel = uiComponents.create(Label.class);
-        positionLabel.setWidth("100%");
-        positionLabel.setHeight("100%");
-        positionLabel.setStyleName("table-wordwrap");
-        positionLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
         positionLabel.setValue(event.getItem().getPersonPosition());
+        positionLabel.setStyleName("table-wordwrap");
+        positionLabel.setHeightAuto();
+        positionLabel.setWidthAuto();
+        positionLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         retHbox.add(logoImage);
         retHbox.add(positionLabel);
