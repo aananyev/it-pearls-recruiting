@@ -88,7 +88,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     logoImage.setVisible(false);
                 }
             } else {
-                logoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+                logoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
                 logoImage.setVisible(false);
             }
         } else {
@@ -108,6 +108,57 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         return retHbox;
     }
+
+    private HBoxLayout columnGeneratorImageText(FileDescriptor fileDescriptor,
+                                                String text,
+                                                String defaultImage,
+                                                String imageWidth) {
+        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setWidth("100%");
+        retHbox.setHeight("100%");
+        retHbox.setSpacing(true);
+        retHbox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        Image logoImage = uiComponents.create(Image.class);
+        logoImage.setWidth(imageWidth);
+        logoImage.setHeight(imageWidth);
+        String style = new StringBuilder("circle-").append(imageWidth).append("-white-border").toString();
+        logoImage.setStyleName(new StringBuilder("circle-").append(imageWidth).append("-white-border").toString());
+        logoImage.setScaleMode(Image.ScaleMode.FILL);
+        logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        logoImage.setDescription(getImage(fileDescriptor));
+
+        if (fileDescriptor != null) {
+            try {
+                logoImage
+                        .setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(fileDescriptor);
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                logoImage.setSource(ThemeResource.class).setPath(defaultImage);
+                logoImage.setVisible(true);
+            }
+        } else {
+            logoImage.setSource(ThemeResource.class).setPath(defaultImage);
+            logoImage.setVisible(true);
+        }
+
+        Label companyLabel = uiComponents.create(Label.class);
+        companyLabel.setValue(text);
+        companyLabel.setWidthAuto();
+        companyLabel.setHeightAuto();
+        companyLabel.setStyleName("table-wordwrap");
+        companyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        retHbox.add(logoImage);
+        retHbox.add(companyLabel);
+        retHbox.expand(companyLabel);
+
+        return retHbox;
+
+    }
+
     @Install(to = "jobCandidatesTable.personPosition", subject = "columnGenerator")
     private Component jobCandidatesTablePersonPositionColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
@@ -134,7 +185,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     logoImage.setVisible(false);
                 }
             } else {
-                logoImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+                logoImage.setSource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
                 logoImage.setVisible(false);
             }
         } else {
@@ -213,15 +264,15 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private CollectionLoader<IteractionList> iteractionListDl;
     private CollectionContainer<CandidateCV> candidateCVDc;
     private CollectionLoader<CandidateCV> candidateCVDl;
-//    private List<IteractionList> iteractionList = new ArrayList<>();
+    //    private List<IteractionList> iteractionList = new ArrayList<>();
     private CandidateCVEdit candidateCVEdit;
     private OnlyTextPersonPosition screenOnlytext;
-//    private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
+    //    private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
     private List<Employee> employees;
 
-/*    private static final String EXTENSION_PDF = "pdf";
-    private static final String EXTENSION_DOC = "doc";
-    private static final String EXTENSION_DOCX = "docx";*/
+    /*    private static final String EXTENSION_PDF = "pdf";
+        private static final String EXTENSION_DOC = "doc";
+        private static final String EXTENSION_DOCX = "docx";*/
     private static final String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
 
     private static final String separatorChar = "⎯";
@@ -1251,7 +1302,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                             if (lastIteraction != null) {
                                 e.setVacancy(lastIteraction.getVacancy());
                                 e.setNumberIteraction(dataManager.loadValue(
-                                        "select max(e.numberIteraction) from itpearls_IteractionList e", BigDecimal.class)
+                                                "select max(e.numberIteraction) from itpearls_IteractionList e", BigDecimal.class)
                                         .one().add(BigDecimal.ONE));
                             }
                         }
@@ -1301,7 +1352,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 if (lastIteraction != null) {
                                     iteractionList1.setVacancy(lastIteraction.getVacancy());
                                     iteractionList1.setNumberIteraction(dataManager.loadValue(
-                                            "select max(e.numberIteraction) from itpearls_IteractionList e", BigDecimal.class)
+                                                    "select max(e.numberIteraction) from itpearls_IteractionList e", BigDecimal.class)
                                             .one().add(BigDecimal.ONE));
                                 }
                             })
@@ -1708,8 +1759,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                             .setSource(FileDescriptorResource.class)
                             .setFileDescriptor(snt.getSocialNetworkURL().getLogo());
                 } else {
-                    image.setSource(ThemeResource.class).setPath("icons/no-company.png");
-
+                    image.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
                 }
 
                 retImage.add(image);
@@ -2153,8 +2203,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 }));
 
 
-        candidateImageColumnRenderer();
-
         DataGrid.ClickableTextRenderer<JobCandidate> jobCandidatesTableLastIteractionRenderer =
                 jobCandidatesTable.createRenderer(DataGrid.ClickableTextRenderer.class);
 
@@ -2257,38 +2305,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         });
     }
 
-
-    private void candidateImageColumnRenderer() {
-        jobCandidatesTable.addGeneratedColumn("fileImageFace", entity -> {
-            HBoxLayout hBox = uiComponents.create(HBoxLayout.class);
-            Image image = uiComponents.create(Image.NAME);
-
-            if (entity.getItem().getFileImageFace() != null) {
-                try {
-                    image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
-                            "fileImageFace"));
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-            }
-
-            image.setWidth("20px");
-            image.setStyleName("circle-20px");
-
-            image.setScaleMode(Image.ScaleMode.CONTAIN);
-            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-            hBox.setWidthFull();
-            hBox.setHeightFull();
-            hBox.add(image);
-
-            return hBox;
-        });
+    @Install(to = "jobCandidatesTable.fullName", subject = "columnGenerator")
+    private Component jobCandidatesTableFullNameColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        return columnGeneratorImageText(event.getItem().getFileImageFace(),
+                event.getItem().getFullName(), StdImage.NO_PROGRAMMER, "30px");
     }
-
     @Install(to = "jobCandidatesTable.personPosition", subject = "descriptionProvider")
     private String jobCandidatesTablePersonPositionDescriptionProvider(JobCandidate jobCandidate) {
         StringBuilder sb = new StringBuilder();
@@ -2952,7 +2973,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .getComponentNN("firstNameField"))
                 .setSearchExecutor((searchString, searchParams) ->
                         parseCVService.getFirstNameList(
-                                ((Onlytext) screenOnlytext).getResultText())
+                                        ((Onlytext) screenOnlytext).getResultText())
                                 .stream()
                                 .filter(str ->
                                         StringUtils
@@ -2965,7 +2986,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .getComponentNN("secondNameField"))
                 .setSearchExecutor((searchString, searchParams) ->
                         parseCVService.getSecondNameList(
-                                ((Onlytext) screenOnlytext).getResultText())
+                                        ((Onlytext) screenOnlytext).getResultText())
                                 .stream()
                                 .filter(str ->
                                         StringUtils
@@ -2976,21 +2997,27 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private void openScreenCVQuickLoadedCandidate(AfterShowEvent eventJobCandidateEdit,
                                                   CandidateCVEdit candidateCVEdit) {
         DataContext dataContext = UiControllerUtils.getScreenData(eventJobCandidateEdit
-                .getSource()
-                .getWindow()
-                .getFrame()
-                .getFrameOwner())
+                        .getSource()
+                        .getWindow()
+                        .getFrame()
+                        .getFrameOwner())
                 .getDataContext();
 
         candidateCVEdit.setParentDataContext(dataContext);
         candidateCVEdit.show();
     }
 
-    @Install(to = "jobCandidatesTable.fileImageFace", subject = "descriptionProvider")
-    private String jobCandidatesTableFileImageFaceDescriptionProvider(JobCandidate jobCandidate) {
+    @Install(to = "jobCandidatesTable.fullName", subject = "descriptionProvider")
+    private String jobCandidatesTableFullNameDescriptionProvider(JobCandidate jobCandidate) {
         FileDescriptor fd = jobCandidate.getFileImageFace();
         return getImage(fd);
     }
+
+/*    @Install(to = "jobCandidatesTable.fileImageFace", subject = "descriptionProvider")
+    private String jobCandidatesTableFileImageFaceDescriptionProvider(JobCandidate jobCandidate) {
+        FileDescriptor fd = jobCandidate.getFileImageFace();
+        return getImage(fd);
+    } */
 
     private String getImage(FileDescriptor fd) {
         //UUID id = UuidProvider.fromString("f5fb2eef-bf8f-af1d-dfed-5b381001579f");

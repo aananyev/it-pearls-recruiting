@@ -131,15 +131,17 @@
                         width="200px">
                     <componentRenderer/>
                 </column>
-                <column id="fileImageFace"
+<!--                <column id="fileImageFace"
                         property="fileImageFace"
                         maximumWidth="50px"
                         width="50px">
                     <componentRenderer/>
-                </column>
+                </column> -->
                 <column id="fullName"
                         caption="mainMsg://msgFullName"
-                        property="fullName"/>
+                        property="fullName">
+                    <componentRenderer/>
+                </column>
                 <column id="rating"
                         minimumWidth="85px"
                         maximumWidth="85px"
