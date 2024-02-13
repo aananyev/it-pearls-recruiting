@@ -98,8 +98,8 @@ public class PositionBrowse extends StandardLookup<Position> {
                 image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
             }
 
-            image.setWidth("20px");
-            image.setStyleName("circle-20px");
+            image.setWidth("30px");
+            image.setStyleName("circle-30px-noborder");
 
             image.setScaleMode(Image.ScaleMode.CONTAIN);
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);

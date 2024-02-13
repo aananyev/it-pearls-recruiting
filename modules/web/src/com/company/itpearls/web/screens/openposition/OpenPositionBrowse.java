@@ -3106,8 +3106,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retHBox.setSpacing(true);
 
         Image logoImage = uiComponents.create(Image.class);
-        logoImage.setWidth("20px");
-        logoImage.setStyleName("circle-20px");
+        logoImage.setWidth("30px");
+        logoImage.setStyleName("circle-30px-noborder");
         logoImage.setScaleMode(Image.ScaleMode.CONTAIN);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
 

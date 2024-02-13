@@ -71,9 +71,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retHbox.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         Image logoImage = uiComponents.create(Image.class);
-        logoImage.setWidth("20px");
-        logoImage.setHeight("20px");
-        logoImage.setStyleName("circle-20px");
+        logoImage.setWidth("25px");
+        logoImage.setHeight("25px");
+        logoImage.setStyleName("circle-25px-noborder");
         logoImage.setScaleMode(Image.ScaleMode.FILL);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
@@ -98,6 +98,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Label companyLabel = uiComponents.create(Label.class);
         companyLabel.setWidth("100%");
         companyLabel.setHeight("100%");
+        companyLabel.setStyleName("table-wordwrap");
         companyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
         companyLabel.setValue(event.getItem().getCurrentCompany());
 
@@ -116,9 +117,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retHbox.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         Image logoImage = uiComponents.create(Image.class);
-        logoImage.setWidth("20px");
-        logoImage.setHeight("20px");
-        logoImage.setStyleName("circle-20px");
+        logoImage.setWidth("25px");
+        logoImage.setHeight("25px");
+        logoImage.setStyleName("circle-25px-noborder");
         logoImage.setScaleMode(Image.ScaleMode.FILL);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
@@ -143,6 +144,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Label positionLabel = uiComponents.create(Label.class);
         positionLabel.setWidth("100%");
         positionLabel.setHeight("100%");
+        positionLabel.setStyleName("table-wordwrap");
         positionLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
         positionLabel.setValue(event.getItem().getPersonPosition());
 
