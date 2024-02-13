@@ -1,5 +1,10 @@
 package com.company.itpearls.web.screens.candidatecv;
 
+import com.company.itpearls.core.StdImage;
+import com.company.itpearls.core.TextManipulationService;
+import com.haulmont.cuba.core.app.FileStorageService;
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
@@ -11,6 +16,8 @@ import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.util.Base64;
+import java.util.Date;
 
 @UiController("itpearls_CandidateCV.browse")
 @UiDescriptor("candidate-cv-browse.xml")
@@ -27,6 +34,10 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
     static String GROUP_INTERN = "Стажер";
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private FileStorageService fileStorageService;
+    @Inject
+    private TextManipulationService textManipulationService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -155,24 +166,92 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
         return retHbox;
     }
 
+    private HBoxLayout columnGeneratorImageText(FileDescriptor fileDescriptor,
+                                                String text,
+                                                String defaultImage,
+                                                String imageWidth) {
+        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setWidth("100%");
+        retHbox.setHeight("100%");
+        retHbox.setSpacing(true);
+        retHbox.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
+        Image logoImage = uiComponents.create(Image.class);
+        logoImage.setWidth(imageWidth);
+        logoImage.setHeight(imageWidth);
+        String style = new StringBuilder("circle-").append(imageWidth).append("-white-border").toString();
+        logoImage.setStyleName(new StringBuilder("circle-").append(imageWidth).append("-white-border").toString());
+        logoImage.setScaleMode(Image.ScaleMode.FILL);
+        logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        logoImage.setDescription(textManipulationService.getImage(fileDescriptor));
 
-/*    @Install(to = "candidateCVsTable", subject = "iconProvider")
-    protected String candidateCVsTableiconProvider(CandidateCV candidateCV) {
-        if (candidateCV.getLetter() != null &&
-                candidateCV.getTextCV() != null &&
-                candidateCV.getLinkItPearlsCV() != null) {
-            return "icons/resume-green.png";
-        } else {
-            if ( ( candidateCV.getLetter() == null ||
-                    candidateCV.getLinkItPearlsCV() == null ) &&
-                    candidateCV.getOriginalFileCV() != null  &&
-                    candidateCV.getTextCV() != null ) {
-                return "icons/resume-yellow.png";
-            } else {
-                return "icons/resume-red.png";
+        if (fileDescriptor != null) {
+            try {
+                logoImage
+                        .setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(fileDescriptor);
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                logoImage.setSource(ThemeResource.class).setPath(defaultImage);
+                logoImage.setVisible(true);
             }
+        } else {
+            logoImage.setSource(ThemeResource.class).setPath(defaultImage);
+            logoImage.setVisible(true);
+        }
+
+        Label companyLabel = uiComponents.create(Label.class);
+        companyLabel.setValue(text);
+        companyLabel.setWidthAuto();
+        companyLabel.setHeightAuto();
+        companyLabel.setStyleName("table-wordwrap");
+        companyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        retHbox.add(logoImage);
+        retHbox.add(companyLabel);
+        retHbox.expand(companyLabel);
+
+        return retHbox;
+
+    }
+    @Install(to = "candidateCVsTable.fullName", subject = "columnGenerator")
+    private Component candidateCVsTableFullNameColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        return columnGeneratorImageText(event.getItem().getFileImageFace(),
+                event.getItem().getCandidate().getFullName(),
+                StdImage.NO_PROGRAMMER,
+                "30px");
+    }
+    @Install(to = "candidateCVsTable.vacansyName", subject = "columnGenerator")
+    private Component candidateCVsTableVacansyNameColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        if (event.getItem().getToVacancy() != null) {
+            FileDescriptor fileDescriptor = null;
+            if (event.getItem().getToVacancy() != null) {
+                if (event.getItem().getToVacancy().getProjectName() != null) {
+                    fileDescriptor = event.getItem().getToVacancy().getProjectName().getProjectLogo();
+                }
+            }
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            if (event.getItem().getToVacancy() != null) {
+                stringBuilder.append(event.getItem().getToVacancy().getVacansyName());
+            }
+
+            return columnGeneratorImageText(fileDescriptor,
+                    stringBuilder.toString(),
+                    StdImage.NO_PROGRAMMER,
+                    "30px");
+        } else {
+            return uiComponents.create(Label.class);
         }
     }
-*/
+
+    @Install(to = "candidateCVsTable.owner", subject = "columnGenerator")
+    private Component candidateCVsTableOwnerColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        return columnGeneratorImageText(event.getItem().getOwner().getFileImageFace(),
+                event.getItem().getOwner().getName(),
+                StdImage.NO_PROGRAMMER,
+                "30px");
+    }
 }

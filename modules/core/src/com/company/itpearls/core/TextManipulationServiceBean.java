@@ -1,11 +1,23 @@
 package com.company.itpearls.core;
 
+import com.haulmont.cuba.core.app.FileStorageService;
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.FileStorageException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 
+import javax.inject.Inject;
+import java.util.Base64;
+import java.util.Date;
+
 @Service(TextManipulationService.NAME)
 public class TextManipulationServiceBean implements TextManipulationService {
+
+    @Inject
+    private FileStorageService fileStorageService;
+    @Inject
+    private TextManipulationService textManipulationService;
 
     @Override
     public String formattedHtml2text(String inputHtml) {
@@ -63,5 +75,54 @@ public class TextManipulationServiceBean implements TextManipulationService {
 
         return sb.toString(); // Return the formated List
     }
+    @Override
+    public String getMailHTMLFooter() {
+        return "</body>\n</html>";
+    }
+    @Override
+    public String getMailHTMLHeader() {
+        return new StringBuilder()
+                .append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n")
+                .append("<html>\n")
+                .append("<head>\n")
+                .append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" >\n")
+                .append("<title></title>\n")
+                .append("<style type=\"text/css\">\n")
+                .append("</style>\n")
+                .append("</head>\n")
+                .append("<body>")
+                .toString();
+    }
+    @Override
+    public String getImage(FileDescriptor fd) {
+        //UUID id = UuidProvider.fromString("f5fb2eef-bf8f-af1d-dfed-5b381001579f");
+        byte[] image;
 
+        if (fd != null) {
+            if (fd.getCreateDate() == null) {
+                fd.setCreateDate(new Date());
+            }
+
+            try {
+                image = fileStorageService.loadFile(fd);
+            } catch (FileStorageException e) {
+                return "";
+            }
+
+            Base64.Encoder encoder = Base64.getEncoder();
+            String encodedString = encoder.encodeToString(image);
+
+            return new StringBuilder()
+                    .append(textManipulationService.getMailHTMLHeader())
+                    .append("\n<img src=\"data:image/")
+                    .append(fd.getExtension())
+                    .append(";base64, ")
+                    .append(encodedString)
+                    .append("\"")
+                    .append(" width=\"220\" height=\"292\">\n")
+                    .append(textManipulationService.getMailHTMLFooter())
+                    .toString();
+        } else
+            return null;
+    }
 }

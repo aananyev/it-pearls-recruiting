@@ -11,12 +11,19 @@
                 <property name="candidate" view="_local">
                     <property name="fullName"/>
                     <property name="personPosition" view="_local"/>
+                    <property name="fileImageFace" view="_local"/>
                 </property>
                 <property name="toVacancy" view="openPosition-view">
                     <property name="positionType" view="_local"/>
+                    <property name="projectName" view="_local">
+                        <property name="projectLogo" view="_local"/>
+                    </property>
                 </property>
                 <property name="resumePosition" view="_local">
                     <property name="logo" view="_local"/>
+                </property>
+                <property name="owner" view="_local">
+                    <property name="fileImageFace" view="_local"/>
                 </property>
             </view>
             <loader id="candidateCVsDl">
@@ -24,7 +31,7 @@
                     <![CDATA[select e from itpearls_CandidateCV e order by e.candidate.fullName, e.datePost desc]]>
                     <condition>
                         <c:jpql>
-                           <c:where>e.createdBy like :userName</c:where>
+                            <c:where>e.createdBy like :userName</c:where>
                         </c:jpql>
                     </condition>
                 </query>
@@ -44,8 +51,8 @@
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <dataGrid id="candidateCVsTable"
-                    width="100%"
-                    dataContainer="candidateCVsDc">
+                  width="100%" bodyRowHeight="35px"
+                  dataContainer="candidateCVsDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
@@ -57,17 +64,19 @@
                         width="80px">
                     <iconRenderer/>
                 </column>
-                <column id="candidate.fullName"
-                        property="candidate.fullName"
+                <column id="fullName"
                         width="350px"
-                        sort="ASCENDING"
                         sortable="true"
-                        caption="msg://msgCandidate"/>
-                <column id="toVacancy.vacansyName"
+                        caption="msg://msgCandidate">
+                    <componentRenderer/>
+                </column>
+                <column id="vacansyName"
                         property="toVacancy.vacansyName"
                         width="300px"
                         sortable="true"
-                        caption="mainMsg://msgCVtoVacansy"/>
+                        caption="mainMsg://msgCVtoVacansy">
+                    <componentRenderer/>
+                </column>
                 <column id="resumePosition"
                         property="resumePosition"
                         width="300px"
@@ -91,7 +100,9 @@
                         property="owner"
                         sortable="true"
                         width="150px"
-                        caption="mainMsg://msgRecrutier"/>
+                        caption="mainMsg://msgRecrutier">
+                    <componentRenderer/>
+                </column>
                 <column id="datePost"
                         property="datePost"
                         width="150px"

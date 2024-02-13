@@ -62,6 +62,9 @@ import java.util.stream.Collectors;
 @LookupComponent("jobCandidatesTable")
 @LoadDataBeforeShow
 public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
+    @Inject
+    private TextManipulationService textManipulationService;
+
     @Install(to = "jobCandidatesTable.currentCompany", subject = "columnGenerator")
     private Component jobCandidatesTableCurrentCompanyColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
@@ -126,7 +129,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         logoImage.setStyleName(new StringBuilder("circle-").append(imageWidth).append("-white-border").toString());
         logoImage.setScaleMode(Image.ScaleMode.FILL);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        logoImage.setDescription(getImage(fileDescriptor));
+        logoImage.setDescription(textManipulationService.getImage(fileDescriptor));
 
         if (fileDescriptor != null) {
             try {
@@ -3010,7 +3013,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Install(to = "jobCandidatesTable.fullName", subject = "descriptionProvider")
     private String jobCandidatesTableFullNameDescriptionProvider(JobCandidate jobCandidate) {
         FileDescriptor fd = jobCandidate.getFileImageFace();
-        return getImage(fd);
+        return textManipulationService.getImage(fd);
     }
 
 /*    @Install(to = "jobCandidatesTable.fileImageFace", subject = "descriptionProvider")
@@ -3019,54 +3022,5 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         return getImage(fd);
     } */
 
-    private String getImage(FileDescriptor fd) {
-        //UUID id = UuidProvider.fromString("f5fb2eef-bf8f-af1d-dfed-5b381001579f");
-        byte[] image;
 
-        if (fd != null) {
-            if (fd.getCreateDate() == null) {
-                fd.setCreateDate(new Date());
-            }
-
-            try {
-                image = fileStorageService.loadFile(fd);
-            } catch (FileStorageException e) {
-                return "";
-            }
-
-            Base64.Encoder encoder = Base64.getEncoder();
-            String encodedString = encoder.encodeToString(image);
-
-            return new StringBuilder()
-                    .append(getMailHTMLHeader())
-                    .append("\n<img src=\"data:image/")
-                    .append(fd.getExtension())
-                    .append(";base64, ")
-                    .append(encodedString)
-                    .append("\"")
-                    .append(" width=\"220\" height=\"292\">\n")
-                    .append(getMailHTMLFooter())
-                    .toString();
-        } else
-            return null;
-    }
-
-
-    private String getMailHTMLFooter() {
-        return "</body>\n</html>";
-    }
-
-    private String getMailHTMLHeader() {
-        return new StringBuilder()
-                .append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n")
-                .append("<html>\n")
-                .append("<head>\n")
-                .append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" >\n")
-                .append("<title></title>\n")
-                .append("<style type=\"text/css\">\n")
-                .append("</style>\n")
-                .append("</head>\n")
-                .append("<body>")
-                .toString();
-    }
 }
