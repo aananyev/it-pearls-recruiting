@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.fragments.candidatecv;
 
+import com.company.itpearls.entity.CandidateCVWorkPlaces;
 import com.company.itpearls.entity.Company;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
@@ -32,6 +33,7 @@ public class WorkPlacesFragment extends ScreenFragment {
     private RichTextArea achievementsRichTextArea;
     @Inject
     private RichTextArea personalRoleRichTextArea;
+    private CandidateCVWorkPlaces candidateCVWorkPlaces;
 
     public Boolean getDeletedWorkPlace() {
         return deletedWorkPlace;
@@ -148,5 +150,20 @@ public class WorkPlacesFragment extends ScreenFragment {
 
     public String getPersonalRole() {
         return personalRoleRichTextArea.getValue();
+    }
+
+    public void setNewWorkPlace(CandidateCVWorkPlaces candidateCVWorkPlaces) {
+        this.candidateCVWorkPlaces = candidateCVWorkPlaces;
+
+        if (candidateCVWorkPlaces != null) {
+            companyLookupPickerField.setValue(candidateCVWorkPlaces.getWorkPlace());
+            startDateField.setValue(candidateCVWorkPlaces.getStartDate());
+            endDateField.setValue(candidateCVWorkPlaces.getEndDate());
+            workToThisDayCheckBox.setValue(candidateCVWorkPlaces.getWorkToThisDay());
+            workPlaceCommentTextField.setValue(candidateCVWorkPlaces.getWorkPlaceComment());
+            functionalityAtWorkRichTextArea.setValue(candidateCVWorkPlaces.getFunctionalityAtWork());
+            personalRoleRichTextArea.setValue(candidateCVWorkPlaces.getPersonalRole());
+            achievementsRichTextArea.setValue(candidateCVWorkPlaces.getAchievements());
+        }
     }
 }

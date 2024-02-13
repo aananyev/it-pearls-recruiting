@@ -994,7 +994,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     public void addNewWorkPlaceButtonInvoke() {
-        GroupBoxLayout workPlaceLayout = setNewWorkPlaceLayout();
+        GroupBoxLayout workPlaceLayout = setNewWorkPlaceLayout(null);
 
         workPlacesScrollBox.add(workPlaceLayout);
     }
@@ -1004,7 +1004,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
        initPositionTypeField();
     }
 
-    private GroupBoxLayout setNewWorkPlaceLayout() {
+    private GroupBoxLayout setNewWorkPlaceLayout(CandidateCVWorkPlaces candidateCVWorkPlaces) {
         GroupBoxLayout newWorkPlaceGroupBox = uiComponents.create(GroupBoxLayout.class);
         Button deleteWorkPlaceButton = uiComponents.create(Button.class);
         deleteWorkPlaceButton.setIcon(CubaIcon.REMOVE_ACTION.source());
@@ -1016,6 +1016,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         WorkPlacesFragment fragment = fragments.create(this, WorkPlacesFragment.class);
         deleteWorkPlaceButton.addClickListener(e -> deleteWorkPlaceButton(fragment, newWorkPlaceGroupBox));
+        fragment.setNewWorkPlace(candidateCVWorkPlaces);
         fragment.setNewWorkPlaceGroupBox(newWorkPlaceGroupBox);
         workPlacesFragments.add(fragment);
 
