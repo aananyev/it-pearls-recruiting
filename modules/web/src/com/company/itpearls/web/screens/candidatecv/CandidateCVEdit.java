@@ -15,6 +15,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.CollectionPropertyContainer;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
@@ -148,6 +149,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Fragments fragments;
     @Inject
     private Metadata metadata;
+    @Inject
+    private CollectionPropertyContainer<CandidateCVWorkPlaces> candidateCVWorkPlacesDc;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -434,6 +437,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void onBeforeShow(BeforeShowEvent event) {
         setOnlyMySubscribeCheckBox();
         convertTextCV();
+        setupWorkPlaces();
 
 /*        if (candidateCVRichTextArea.getValue() != null) {
             textResumeStringBuffer = new StringBuffer(candidateCVRichTextArea.getValue());
@@ -508,29 +512,34 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         commitWorkPlaces();
     }
 
-    private void commitWorkPlaces() {
+    private void commitWorkPlaces() {/*
+//        CommitContext commitContext = new CommitContext();
+
         if (workPlacesFragments.size() > 0) {
             for (WorkPlacesFragment workPlacesFragment : workPlacesFragments) {
-                CandidateCVWorkPlaces candidateCVWorkPlaces = metadata.create(CandidateCVWorkPlaces.class);
+//                CandidateCVWorkPlaces candidateCVWorkPlaces = metadata.create(CandidateCVWorkPlaces.class);
 
-                candidateCVWorkPlaces.setCandidateCV(getEditedEntity());
-                candidateCVWorkPlaces.setWorkPlace(workPlacesFragment.getCompany());
-                candidateCVWorkPlaces.setWorkPlaceComment(workPlacesFragment.getWorkPlaceComment());
-                candidateCVWorkPlaces.setFunctionalityAtWork(workPlacesFragment.getFunctionalityAtWork());
-                candidateCVWorkPlaces.setAchievements(workPlacesFragment.getAchievements());
-                candidateCVWorkPlaces.setWorkToThisDay(workPlacesFragment.getWorkToThisDay());
-                candidateCVWorkPlaces.setEndDate(workPlacesFragment.getEndDate());
-                candidateCVWorkPlaces.setStartDate(workPlacesFragment.getStartDate());
-                candidateCVWorkPlaces.setPersonalRole(workPlacesFragment.getPersonalRole());
+//                candidateCVWorkPlaces.setCandidateCV(getEditedEntity());
+//                candidateCVWorkPlaces.setWorkPlace(workPlacesFragment.getCompany());
+//                candidateCVWorkPlaces.setWorkPlaceComment(workPlacesFragment.getWorkPlaceComment());
+//                candidateCVWorkPlaces.setFunctionalityAtWork(workPlacesFragment.getFunctionalityAtWork());
+//                candidateCVWorkPlaces.setAchievements(workPlacesFragment.getAchievements());
+//                candidateCVWorkPlaces.setWorkToThisDay(workPlacesFragment.getWorkToThisDay());
+//                candidateCVWorkPlaces.setEndDate(workPlacesFragment.getEndDate());
+//                candidateCVWorkPlaces.setStartDate(workPlacesFragment.getStartDate());
+//                candidateCVWorkPlaces.setPersonalRole(workPlacesFragment.getPersonalRole());
 
-                dataManager.commit(candidateCVWorkPlaces);
+//                commitContext.addInstanceToCommit(workPlacesFragment.getCandidateCVWorkPlaces());
+                dataContext.merge(workPlacesFragment.getCandidateCVWorkPlaces());
             }
         }
+
+//        dataManager.commit(commitContext); */
     }
 
-    private String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
+    private final static String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
     final String brHtml = breakLine[0];
-    final String brTemp = "ШbrШ";
+    private final static String brTemp = "ШbrШ";
 
     private String setBreakLine(String text) {
         String retText = text;
@@ -860,20 +869,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-/*    @Install(to = "candidateField", subject = "optionImageProvider")
-    private Resource candidateFieldOptionImageProvider(JobCandidate jobCandidate) {
-
-        if (jobCandidate.getFileImageFace() != null) {
-            Image image = uiComponents.create(Image.NAME);
-            image.setStyleName("round-photo");
-            FileDescriptorResource resource = image.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(jobCandidate.getFileImageFace());
-            return resource;
-        }
-
-        return null;
-    }*/
-
     public void rescanCV() {
         rescanResume();
     }
@@ -1017,6 +1012,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         WorkPlacesFragment fragment = fragments.create(this, WorkPlacesFragment.class);
         deleteWorkPlaceButton.addClickListener(e -> deleteWorkPlaceButton(fragment, newWorkPlaceGroupBox));
         fragment.setNewWorkPlace(candidateCVWorkPlaces);
+        fragment.setCandidateCV(getEditedEntity());
         fragment.setNewWorkPlaceGroupBox(newWorkPlaceGroupBox);
         workPlacesFragments.add(fragment);
 
@@ -1047,6 +1043,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         } else {
             retImage.setVisible(false);
             return retImage.createResource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+        }
+    }
+
+
+    private void setupWorkPlaces() {
+        for (CandidateCVWorkPlaces candidateCVWorkPlaces : candidateCVWorkPlacesDc.getItems()) {
+            setNewWorkPlaceLayout(candidateCVWorkPlaces);
         }
     }
 }

@@ -2,10 +2,6 @@
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
           xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
     <data>
-        <instance id="workPlaceDc" class="com.company.itpearls.entity.CandidateCVWorkPlaces">
-            <view extends="candidateCVWorkPlaces-view"/>
-            <loader id="workPlaceDl"/>
-        </instance>
         <collection id="companiesDc"
                     class="com.company.itpearls.entity.Company"
                     view="company-view">
@@ -20,9 +16,49 @@
         <hbox id="headerHBox"
               width="100%" spacing="true"
               expand="companyLookupPickerField">
+            <vbox id="dateVBox"
+                  align="TOP_LEFT"
+                  spacing="true"
+                  width="AUTO">
+                <dateField id="startDateField"
+                           width="AUTO"
+                           caption="msg://msgStartDate"
+                           dateFormat="dd.MM.yyyy"/>
+                <hbox spacing="true">
+                    <dateField id="endDateField"
+                               align="MIDDLE_LEFT"
+                               width="AUTO"
+                               caption="msg://msgEndDate"
+                               dateFormat="dd.MM.yyyy"/>
+                    <checkBox id="workToThisDayCheckBox"
+                              align="BOTTOM_LEFT"
+                              width="AUTO"
+                              caption="msg://msgWorkToThisDay"/>
+                </hbox>
+            </vbox>
+            <suggestionPickerField id="companySuggestPickerField"
+                                   inputPrompt="msg://msgInputPrompt"
+                                   width="100%"
+                                   caption="msg://msgCompany"
+                                   align="TOP_LEFT"
+                                   metaClass="itpearls_Company">
+                <actions>
+                    <action id="lookup" type="picker_lookup"/>
+                    <action id="open" type="picker_open"/>
+                </actions>
+                <query entityClass="com.company.itpearls.entity.Company"
+                       escapeValueForLike="true"
+                       searchStringFormat="%$searchString%">
+                    select e
+                    from itpearls_Company e
+                    where (lower(e.comanyName) like lower(:searchString) escape '\'
+                    or lower(e.companyShortName) like lower(:searchString) escape '\')
+                    and e.companyShortName not like '%(не использовать'
+                    order by e.comanyName
+                </query>
+            </suggestionPickerField>
             <lookupPickerField id="companyLookupPickerField"
-                               dataContainer="workPlaceDc"
-                               property="workPlace"
+                               visible="false"
                                optionsContainer="companiesDc"
                                caption="msg://msgCompany"
                                width="100%"
@@ -33,46 +69,16 @@
                     <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                 </actions>
             </lookupPickerField>
-            <vbox id="dateVBox"
-                  align="TOP_LEFT"
-                  spacing="true"
-                  width="AUTO">
-            <dateField id="startDateField"
-                       dataContainer="workPlaceDc"
-                       property="startDate"
-                       width="AUTO"
-                       caption="msg://msgStartDate"
-                       dateFormat="dd.MM.yyyy"/>
-                <dateField id="endDateField"
-                           dataContainer="workPlaceDc"
-                           property="endDate"
-                           width="AUTO"
-                           caption="msg://msgEndDate"
-                           dateFormat="dd.MM.yyyy"/>
-                <checkBox id="workToThisDayCheckBox"
-                          dataContainer="workPlaceDc"
-                          property="workToThisDay"
-                          width="AUTO"
-                          caption="msg://msgWorkToThisDay"/>
-            </vbox>
         </hbox>
         <textField id="workPlaceCommentTextField"
-                   dataContainer="workPlaceDc"
-                   property="workPlaceComment"
                    width="100%" caption="msg://msgWorkPlaceComment"/>
         <richTextArea id="functionalityAtWorkRichTextArea"
-                      dataContainer="workPlaceDc"
-                      property="functionalityAtWork"
                       width="100%"
                       caption="msg://msgFunctionalityAtWork"/>
         <richTextArea id="personalRoleRichTextArea"
-                      dataContainer="workPlaceDc"
-                      property="personalRole"
                       width="100%"
                       caption="msg://msgPersonalRole"/>
         <richTextArea id="achievementsRichTextArea"
-                      dataContainer="workPlaceDc"
-                      property="achievements"
                       width="100%"
                       caption="msg://msgAchievements"/>
     </layout>

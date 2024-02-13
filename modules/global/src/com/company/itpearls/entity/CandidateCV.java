@@ -102,6 +102,20 @@ public class CandidateCV extends StandardEntity {
     @Column(name = "CONTACT_INFO_CHECKED")
     private Boolean contactInfoChecked;
 
+    @OrderBy("startDate DESC")
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "candidateCV")
+    private List<CandidateCVWorkPlaces> candidateCVWorkPlaces;
+
+    public List<CandidateCVWorkPlaces> getCandidateCVWorkPlaces() {
+        return candidateCVWorkPlaces;
+    }
+
+    public void setCandidateCVWorkPlaces(List<CandidateCVWorkPlaces> candidateCVWorkPlaces) {
+        this.candidateCVWorkPlaces = candidateCVWorkPlaces;
+    }
+
     public void setOwner(ExtUser owner) {
         this.owner = owner;
     }

@@ -35,7 +35,9 @@
         <instance id="candidateCVDc"
                   class="com.company.itpearls.entity.CandidateCV">
             <view extends="candidateCV-view">
+                <property name="candidateCVWorkPlaces" view="candidateCVWorkPlaces-view"/>
                 <property name="toVacancy" view="_local">
+                    <property name="positionType" view="_local"/>
                     <property name="projectName" view="_local">
                         <property name="projectDepartment" view="_local"/>
                     </property>
@@ -56,7 +58,8 @@
                         property="someFiles"/>
             <collection id="skillTreesDc"
                         property="skillTree"/>
-            <collection id="candidateCVWorkPlacesDc" property="candidateCV"
+            <collection id="candidateCVWorkPlacesDc"
+                        property="candidateCVWorkPlaces"/>
         </instance>
         <collection id="resumePositionsDc"
                     class="com.company.itpearls.entity.Position">
@@ -385,12 +388,14 @@
                 <scrollBox id="workPlacesScrollBox"
                            orientation="vertical"
                            width="100%"
-                           height="100%"/>
+                           height="100%">
                 <button id="addNewWorkPlaceButton"
-                        icon="font-icon:WON"
+                        icon="font-icon:CALENDAR_PLUS_O"
                         invoke="addNewWorkPlaceButtonInvoke"
                         width="AUTO"
+                        caption="msg://msgAddNewWorkplace"
                         align="TOP_RIGHT"/>
+                </scrollBox>
             </tab>
             <tab id="tabLetter"
                  caption="msg://msgLetter"

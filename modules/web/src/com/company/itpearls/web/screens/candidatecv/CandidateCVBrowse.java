@@ -249,8 +249,19 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
 
     @Install(to = "candidateCVsTable.owner", subject = "columnGenerator")
     private Component candidateCVsTableOwnerColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        return columnGeneratorImageText(event.getItem().getOwner().getFileImageFace(),
-                event.getItem().getOwner().getName(),
+        FileDescriptor fileDescriptor = null;
+        StringBuilder stringBuilder = new StringBuilder();
+
+        if (event.getItem().getOwner() != null) {
+            fileDescriptor = event.getItem().getOwner().getFileImageFace();
+        }
+
+        if (event.getItem().getOwner() != null) {
+            stringBuilder.append(event.getItem().getOwner().getName());
+        }
+
+        return columnGeneratorImageText(fileDescriptor,
+                stringBuilder.toString(),
                 StdImage.NO_PROGRAMMER,
                 "30px");
     }

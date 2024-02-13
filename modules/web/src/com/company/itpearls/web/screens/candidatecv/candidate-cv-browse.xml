@@ -51,7 +51,7 @@
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <dataGrid id="candidateCVsTable"
-                  width="100%" bodyRowHeight="35px"
+                  width="100%" bodyRowHeight="38px"
                   dataContainer="candidateCVsDc">
             <actions>
                 <action id="create" type="create"/>
