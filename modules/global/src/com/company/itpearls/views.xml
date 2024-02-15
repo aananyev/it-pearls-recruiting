@@ -51,6 +51,7 @@
         <property name="grade" view="_local"/>
         <property name="cityPosition" view="_local"/>
         <property name="positionType" view="_local">
+            <property name="logo" view="_local"/>
         </property>
         <property name="skillsList" view="_local"/>
         <property name="parentOpenPosition" view="_local">

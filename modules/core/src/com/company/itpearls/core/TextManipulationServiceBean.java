@@ -97,6 +97,7 @@ public class TextManipulationServiceBean implements TextManipulationService {
     public String getImage(FileDescriptor fd) {
         //UUID id = UuidProvider.fromString("f5fb2eef-bf8f-af1d-dfed-5b381001579f");
         byte[] image;
+        StringBuilder retSB = new StringBuilder();
 
         if (fd != null) {
             if (fd.getCreateDate() == null) {
@@ -111,17 +112,26 @@ public class TextManipulationServiceBean implements TextManipulationService {
 
             Base64.Encoder encoder = Base64.getEncoder();
             String encodedString = encoder.encodeToString(image);
+            retSB.append("<img src=\"data:image/")
+                    .append(fd.getExtension())
+                    .append(";base64, ")
+                    .append(encodedString)
+                   .append("\"")
+                    .append(" width=\"220\" height=\"220\">");
+//                    .append("\" width=\"100%\">");
 
-            return new StringBuilder()
-                    .append(textManipulationService.getMailHTMLHeader())
+/*            return new StringBuilder()
+//                    .append(textManipulationService.getMailHTMLHeader())
                     .append("\n<img src=\"data:image/")
                     .append(fd.getExtension())
                     .append(";base64, ")
                     .append(encodedString)
                     .append("\"")
                     .append(" width=\"220\" height=\"292\">\n")
-                    .append(textManipulationService.getMailHTMLFooter())
-                    .toString();
+//                    .append(textManipulationService.getMailHTMLFooter())
+                    .toString(); */
+
+            return retSB.toString();
         } else
             return null;
     }

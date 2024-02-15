@@ -28,8 +28,8 @@ public class CompanyBrowse extends StandardLookup<Company> {
         Image image = uiComponents.create(Image.class);
         image.setDescriptionAsHtml(true);
         image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-        image.setWidth("20px");
-        image.setHeight("20px");
+        image.setWidth("30px");
+//        image.setHeight("20px");
         image.setStyleName("icon-no-border-20px");
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
         image.setDescription("<h4>"

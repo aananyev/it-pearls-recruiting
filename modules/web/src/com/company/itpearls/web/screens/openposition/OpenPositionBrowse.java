@@ -242,9 +242,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             = "select e.iteractionType, count(e.iteractionType) from itpearls_IteractionList e where e.dateIteraction between :startDate and :endDate and (e.vacancy = :vacancy or (e.vacancy in (select f from itpearls_OpenPosition f where f.parentOpenPosition = :vacancy))) and e.iteractionType.statistics = true group by e.iteractionType";
     private static final String QUERY_USER
             = "select e from sec$User e where e.active = true";
-    static final String QUERY_GET_SUBSCRIBER =
+    private static final String QUERY_GET_SUBSCRIBER =
             "select e from itpearls_RecrutiesTasks e where e.openPosition = :openPosition and e.reacrutier = :reacrutier and :current_date between e.startDate and e.endDate";
-    final static String QUERY_CANDIDATES_FROM_CONSIDERATION = "select e from itpearls_JobCandidate e " +
+    private final static String QUERY_CANDIDATES_FROM_CONSIDERATION = "select e from itpearls_JobCandidate e " +
             "where e.iteractionList in (select f from itpearls_IteractionList f where f.candidate = e and f.iteractionType.signSendToClient = true and f.vacancy = :vacancy)";
 
     private final static String font_icon_PLUS_CIRCLE = "font-icon:PLUS_CIRCLE";
@@ -254,6 +254,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private final static String cuba_icon_PLUS_CIRCLE = "PLUS_CIRCLE";
     private final static String cuba_icon_MINUS_CIRCLE = "MINUS_CIRCLE";
     private final static String cuba_icon_QUESTION_CIRCLE = "QUESTION_CIRCLE";
+
+    private final static String open_position_pic_center_large_green = "open-position-pic-center-large-green";
+    private final static String open_position_pic_center_large_yellow = "open-position-pic-center-large-yellow";
+    private final static String open_position_pic_center_large_maroon = "open-position-pic-center-large-maroon";
+    private final static String open_position_pic_center_large_orange = "open-position-pic-center-large-orange";
+    private final static String open_position_pic_center_large_lime = "open-position-pic-center-large-lime";
+    private final static String open_position_pic_center_large_red = "open-position-pic-center-large-red";
+    private Boolean flagPriority = true;
 
     @Inject
     private Button groupSubscribe;
@@ -706,13 +714,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retStr != null ? retStr : "";
     }
 
-    final static String open_position_pic_center_large_green = "open-position-pic-center-large-green";
-    final static String open_position_pic_center_large_yellow = "open-position-pic-center-large-yellow";
-    final static String open_position_pic_center_large_maroon = "open-position-pic-center-large-maroon";
-    final static String open_position_pic_center_large_orange = "open-position-pic-center-large-orange";
-    final static String open_position_pic_center_large_lime = "open-position-pic-center-large-lime";
-    final static String open_position_pic_center_large_red = "open-position-pic-center-large-red";
-
     @Install(to = "openPositionsTable.description", subject = "styleProvider")
     private String openPositionsTableDescriptionStyleProvider(OpenPosition openPosition) {
         if (openPosition.getComment() != null) {
@@ -737,7 +738,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         } else
             return open_position_pic_center_large_red;
     }
-
 
     @Install(to = "openPositionsTable.icon", subject = "styleProvider")
     private String openPositionsTableIconStyleProvider(OpenPosition openPosition) {
@@ -1142,7 +1142,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private Component findSuitableButton(OpenPosition entity) {
-
         if (getSubscubeOpenPosition(entity)) {
 
             if (dataManager.load(CandidateCV.class)
@@ -1551,8 +1550,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         return sb.toString();
     }
-
-    Boolean flagPriority = true;
 
     private Component createPriorityField(OpenPosition openPosition) {
         LookupField retField = uiComponents.create(LookupField.NAME);
@@ -1969,17 +1966,32 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         for (HashMap.Entry op : opList.entrySet()) {
             Integer countOp = 0;
 
+            HBoxLayout hbox = uiComponents.create(HBoxLayout.class);
+            hbox.setSpacing(false);
+            hbox.setMargin(true);
+
             LinkButton label = uiComponents.create(LinkButton.NAME);
+            Image positionIcon = uiComponents.create(Image.class);
+            positionIcon.setHeight("20px");
+            positionIcon.setWidth("20px");
+            positionIcon.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            positionIcon.setScaleMode(Image.ScaleMode.SCALE_DOWN);
 
             StringBuilder sb = new StringBuilder("<b><u>Проекты:</u></b><br>");
 
             for (OpenPosition op1 : openPositions) {
                 if (op1.getPositionType() != null) {
-                    if (op1.getPositionType().getPositionRuName() != null) {
 
+
+                    if (op1.getPositionType().getPositionRuName() != null) {
                         if (op.getKey().equals(op1.getPositionType().getPositionRuName()) &&
                                 (!op1.getOpenClose() || op1.getOpenClose() == null)) {
                             sb.append(op1.getProjectName().getProjectName()).append("<br>");
+
+                            if (op1.getPositionType().getLogo() != null) {
+                                positionIcon.setSource(FileDescriptorResource.class)
+                                        .setFileDescriptor(op1.getPositionType().getLogo());
+                            }
 
                             if (notLowerRatingLookupField.getValue() != null) {
                                 if ((int) notLowerRatingLookupField.getValue() >= 0) {
@@ -2017,7 +2029,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                             }
                         }
                     }
-
                 }
 
                 openPositionsDl.setParameter("rating", opRet.getPriority());
@@ -2027,26 +2038,33 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             switch ((int) op.getValue()) {
                 case 1:
-                    label.setStyleName("label_button_blue");
+                    label.setStyleName("label_priority_button_blue");
+                    hbox.setStyleName("label_priority_button_blue");
                     break;
                 case 2:
-                    label.setStyleName("label_button_green");
+                    label.setStyleName("label_priority_button_green");
+                    hbox.setStyleName("label_priority_button_green");
                     break;
                 case 3:
-                    label.setStyleName("label_button_orange");
+                    label.setStyleName("label_priority_button_orange");
+                    hbox.setStyleName("label_priority_button_orange");
                     break;
                 case 4:
-                    label.setStyleName("label_button_red");
+                    label.setStyleName("label_priority_button_red");
+                    hbox.setStyleName("label_priority_button_red");
                     break;
                 default:
-                    label.setStyleName("label_button_grey");
+                    label.setStyleName("label_priority_button_gray");
+                    hbox.setStyleName("label_priority_button_gray");
                     break;
             }
 
             Label label1 = uiComponents.create(Label.NAME);
             label1.setValue(" ");
+            hbox.add(positionIcon);
+            hbox.add(label);
 
-            urgentlyHBox.add(label);
+            urgentlyHBox.add(hbox);
             urgentlyHBox.add(label1);
         }
     }
@@ -2474,7 +2492,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return setPlusMinusIcon(CubaIcon.valueOf(returnIcon));
     }
 
-    Integer montOfStat = 3;
+    private Integer montOfStat = 3;
 
     @Install(to = "openPositionsTable.idStatistics", subject = "columnGenerator")
     private Object openPositionsTableIdStatisticsColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -3107,24 +3125,25 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         Image logoImage = uiComponents.create(Image.class);
         logoImage.setWidth("30px");
-        logoImage.setStyleName("circle-30px-noborder");
+//        logoImage.setStyleName("circle-30px-noborder");
         logoImage.setScaleMode(Image.ScaleMode.CONTAIN);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-        if (event.getItem().getPositionType().getLogo() != null) {
-            try {
-                logoImage
-                        .setSource(FileDescriptorResource.class)
-                        .setFileDescriptor(event.getItem().getPositionType().getLogo());
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (event.getItem().getPositionType() != null) {
+            if (event.getItem().getPositionType().getLogo() != null) {
+                try {
+                    logoImage
+                            .setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(event.getItem().getPositionType().getLogo());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logoImage.setVisible(false);
+                }
+            } else {
+                logoImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
                 logoImage.setVisible(false);
             }
-        } else {
-            logoImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-            logoImage.setVisible(false);
         }
-
 
         Label newVacancyLabel = uiComponents.create(Label.class);
         if (event.getItem().getSignDraft() != null) {
@@ -3758,7 +3777,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         actionPopupButton.addAction(new BaseAction("separator1Action")
                 .withCaption(separator));
     }
-
 
     private void initActionButtonSeparator(PopupButton actionPopupButton, String baseActionID) {
         actionPopupButton.addAction(new BaseAction(baseActionID)

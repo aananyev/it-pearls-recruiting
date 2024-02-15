@@ -76,7 +76,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Image logoImage = uiComponents.create(Image.class);
         logoImage.setWidth("25px");
         logoImage.setHeight("25px");
-        logoImage.setStyleName("circle-25px-white-border");
+//        logoImage.setStyleName("circle-25px-white-border");
         logoImage.setScaleMode(Image.ScaleMode.FILL);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
@@ -115,7 +115,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private HBoxLayout columnGeneratorImageText(FileDescriptor fileDescriptor,
                                                 String text,
                                                 String defaultImage,
-                                                String imageWidth) {
+                                                String imageWidth, Boolean border) {
         HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
         retHbox.setWidth("100%");
         retHbox.setHeight("100%");
@@ -125,10 +125,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Image logoImage = uiComponents.create(Image.class);
         logoImage.setWidth(imageWidth);
         logoImage.setHeight(imageWidth);
-        String style = new StringBuilder("circle-").append(imageWidth).append("-white-border").toString();
+        if (border)
         logoImage.setStyleName(new StringBuilder("circle-").append(imageWidth).append("-white-border").toString());
         logoImage.setScaleMode(Image.ScaleMode.FILL);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        logoImage.setHtmlSanitizerEnabled(false);
+        logoImage.setDescriptionAsHtml(true);
         logoImage.setDescription(textManipulationService.getImage(fileDescriptor));
 
         if (fileDescriptor != null) {
@@ -173,7 +175,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         Image logoImage = uiComponents.create(Image.class);
         logoImage.setWidth("25px");
         logoImage.setHeight("25px");
-        logoImage.setStyleName("circle-25px-white-border");
         logoImage.setScaleMode(Image.ScaleMode.FILL);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
@@ -2310,8 +2311,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable.fullName", subject = "columnGenerator")
     private Component jobCandidatesTableFullNameColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
-        return columnGeneratorImageText(event.getItem().getFileImageFace(),
-                event.getItem().getFullName(), StdImage.NO_PROGRAMMER, "30px");
+        HBoxLayout retHbox = columnGeneratorImageText(event.getItem().getFileImageFace(),
+                event.getItem().getFullName(), StdImage.NO_PROGRAMMER, "30px", true);
+        retHbox.setDescriptionAsHtml(true);
+        retHbox.setHtmlSanitizerEnabled(false);
+        retHbox.setDescription(textManipulationService.getImage(event.getItem().getFileImageFace()));
+        return retHbox;
     }
     @Install(to = "jobCandidatesTable.personPosition", subject = "descriptionProvider")
     private String jobCandidatesTablePersonPositionDescriptionProvider(JobCandidate jobCandidate) {

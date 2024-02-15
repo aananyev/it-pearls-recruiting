@@ -736,6 +736,15 @@ rating_battery_yellow_3:before {
     font-size: small;
 }
 
+.label_priority_button_blue {
+    background: blue; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 2px; /* Поля вокруг текста */
+    border-radius: 10px;
+    margin: 0px 0px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
 
 .label_button_mostpopular_green {
     background: green; /* Цвет фона */
@@ -759,6 +768,17 @@ rating_battery_yellow_3:before {
     font-size: small;
 }
 
+.label_priority_button_green {
+    background: green; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 2px; /* Поля вокруг текста */
+    margin: 2px;
+    border-radius: 10px;
+    text-weight: normal;
+    margin: 0px 0px 0px 0px;
+    font-size: small;
+}
+
 .label_button_gray {
     background: grey; /* Цвет фона */
     color: #fff; /* Цвет текста */
@@ -779,6 +799,38 @@ rating_battery_yellow_3:before {
     font-size: small;
 }
 
+.label_priority_button_red {
+    background: red; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 2px; /* Поля вокруг текста */
+    margin: 5px;
+    border-radius: 10px;
+    margin: 0px 0px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
+
+.label_button_gray {
+    background: red; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
+
+.label_priority_button_gray {
+    background: gray; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 2px; /* Поля вокруг текста */
+    margin: 5px;
+    border-radius: 10px;
+    margin: 0px 0px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
+
 .label_button_orange {
     background: orange; /* Цвет фона */
     color: #fff; /* Цвет текста */
@@ -789,6 +841,16 @@ rating_battery_yellow_3:before {
     font-size: small;
 }
 
+.label_priority_button_orange {
+    background: orange; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 2px; /* Поля вокруг текста */
+    margin: 5px;
+    border-radius: 10px;
+    margin: 0px 0px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
 
 .label_button_yellow {
     background: yellow; /* Цвет фона */

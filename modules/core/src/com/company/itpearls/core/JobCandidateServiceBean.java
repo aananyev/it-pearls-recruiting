@@ -21,9 +21,11 @@ public class JobCandidateServiceBean implements JobCandidateService {
                 .collect(Collectors.toList());
 
         for (IteractionList il : iteractionListList) {
-            if (il.getIteractionType().getSignSalary() != null) {
-                if (il.getIteractionType().getSignSalary()) {
-                    return il.getAddString();
+            if (il.getIteractionType() != null) {
+                if (il.getIteractionType().getSignSalary() != null) {
+                    if (il.getIteractionType().getSignSalary()) {
+                        return il.getAddString();
+                    }
                 }
             }
         }

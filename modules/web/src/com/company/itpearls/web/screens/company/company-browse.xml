@@ -37,7 +37,7 @@ order by e.comanyName]]>
                         excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <treeDataGrid id="companiesTable"
-                      width="100%"
+                      width="100%" bodyRowHeight="32px"
                       hierarchyProperty="companyGroup"
                       hierarchyColumn="companyGroup"
                       dataContainer="companiesDc">

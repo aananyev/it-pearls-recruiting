@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.position;
 
+import com.company.itpearls.core.StdImage;
 import com.company.itpearls.entity.JobCandidate;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.gui.UiComponents;
@@ -95,11 +96,11 @@ public class PositionBrowse extends StandardLookup<Position> {
                     e.printStackTrace();
                 }
             } else {
-                image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+                image.setSource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
             }
 
             image.setWidth("30px");
-            image.setStyleName("circle-30px-noborder");
+//            image.setStyleName("circle-30px-noborder");
 
             image.setScaleMode(Image.ScaleMode.CONTAIN);
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);

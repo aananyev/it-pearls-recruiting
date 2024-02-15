@@ -38,7 +38,7 @@
                     </property>
                 </property>
             </view>
-            <loader id="jobCandidatesDl">
+            <loader id="jobCandidatesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_JobCandidate e
                              order by e.secondName, e.firstName]]>
@@ -87,7 +87,7 @@
             <view extends="_local">
                 <property name="user" view="_local"/>
             </view>
-            <loader id="signIconsDl" cacheable="false">
+            <loader id="signIconsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_SignIcons e]]>
                     <condition>
@@ -131,12 +131,6 @@
                         width="200px">
                     <componentRenderer/>
                 </column>
-<!--                <column id="fileImageFace"
-                        property="fileImageFace"
-                        maximumWidth="50px"
-                        width="50px">
-                    <componentRenderer/>
-                </column> -->
                 <column id="fullName"
                         caption="mainMsg://msgFullName"
                         property="fullName">

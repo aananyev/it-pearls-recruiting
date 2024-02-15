@@ -179,10 +179,10 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
         Image logoImage = uiComponents.create(Image.class);
         logoImage.setWidth(imageWidth);
         logoImage.setHeight(imageWidth);
-        String style = new StringBuilder("circle-").append(imageWidth).append("-white-border").toString();
         logoImage.setStyleName(new StringBuilder("circle-").append(imageWidth).append("-white-border").toString());
         logoImage.setScaleMode(Image.ScaleMode.FILL);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        logoImage.setDescriptionAsHtml(true);
         logoImage.setDescription(textManipulationService.getImage(fileDescriptor));
 
         if (fileDescriptor != null) {
@@ -207,6 +207,8 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
         companyLabel.setHeightAuto();
         companyLabel.setStyleName("table-wordwrap");
         companyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        companyLabel.setDescriptionAsHtml(true);
+        companyLabel.setDescription(textManipulationService.getImage(fileDescriptor));
 
         retHbox.add(logoImage);
         retHbox.add(companyLabel);
