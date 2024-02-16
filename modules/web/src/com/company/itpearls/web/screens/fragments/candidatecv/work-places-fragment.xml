@@ -2,12 +2,12 @@
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
           xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
     <data>
-        <collection id="companiesDc"
-                    class="com.company.itpearls.entity.Company"
-                    view="company-view">
-            <loader id="companiesDl">
+        <collection id="positionDc"
+                    class="com.company.itpearls.entity.Position"
+                    view="position-view">
+            <loader id="positionDl">
                 <query>
-                    <![CDATA[select e from itpearls_Company e order by e.comanyName]]>
+                    <![CDATA[select f from itpearls_Position f order by f.positionRuName]]>
                 </query>
             </loader>
         </collection>
@@ -24,7 +24,7 @@
                     description="msg://msgDelete"/>
             <hbox id="headerHBox"
                   width="100%" spacing="true"
-                  expand="companySuggestPickerField">
+                  expand="companyHBox">
                 <vbox id="dateVBox"
                       align="TOP_LEFT"
                       spacing="true"
@@ -45,6 +45,8 @@
                                   caption="msg://msgWorkToThisDay"/>
                     </hbox>
                 </vbox>
+                <vbox id="companyHBox"
+                      spacing="true">
                 <suggestionPickerField id="companySuggestPickerField"
                                        inputPrompt="msg://msgInputPrompt"
                                        width="100%"
@@ -66,6 +68,13 @@
                         order by e.comanyName
                     </query>
                 </suggestionPickerField>
+                    <lookupPickerField id="positionLookupPickerField"
+                                       metaClass="itpearls_Position"
+                                       width="100%"
+                                       caption="msg://msgPosition"
+                                       description="msg://msgPositionDesc"
+                                            optionsContainer="positionDc"/>
+                </vbox>
             </hbox>
             <textField id="workPlaceCommentTextField"
                        width="100%" caption="msg://msgWorkPlaceComment"/>

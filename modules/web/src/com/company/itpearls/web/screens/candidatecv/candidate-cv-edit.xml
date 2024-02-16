@@ -41,6 +41,8 @@
                               view="_local"/>
                     <property name="workPlace"
                               view="_local"/>
+                    <property name="position"
+                              view="_local"/>
                 </property>
                 <property name="toVacancy" view="_local">
                     <property name="positionType" view="_local"/>

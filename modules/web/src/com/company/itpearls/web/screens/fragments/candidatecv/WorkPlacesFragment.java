@@ -4,10 +4,10 @@ import com.company.itpearls.core.StdImage;
 import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.CandidateCVWorkPlaces;
 import com.company.itpearls.entity.Company;
-import com.haulmont.cuba.core.entity.Entity;
+import com.company.itpearls.entity.Position;
+import com.company.itpearls.web.screens.company.CompanyEdit;
 import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.gui.BulkEditors;
-import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 
@@ -17,6 +17,7 @@ import java.util.Date;
 
 @UiController("itpearls_WorkPlacesFragment")
 @UiDescriptor("work-places-fragment.xml")
+@LoadDataBeforeShow
 public class WorkPlacesFragment extends ScreenFragment {
     @Inject
     private DateField<Date> endDateField;
@@ -47,6 +48,14 @@ public class WorkPlacesFragment extends ScreenFragment {
     private Button deleteWorkPlaceButton;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private Dialogs dialogs;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private LookupPickerField<Position> positionLookupPickerField;
 
     public Boolean getDeletedWorkPlace() {
         return deletedWorkPlace;
@@ -145,6 +154,13 @@ public class WorkPlacesFragment extends ScreenFragment {
 
         return sb.toString();
     }
+    public Position getPosition() {
+        return positionLookupPickerField.getValue();
+    }
+
+    public RichTextArea getAchievementsRichTextArea() {
+        return achievementsRichTextArea;
+    }
 
     public String getWorkPlaceComment() {
         return workPlaceCommentTextField.getValue();
@@ -176,6 +192,7 @@ public class WorkPlacesFragment extends ScreenFragment {
 
     public void setNewWorkPlace(CandidateCVWorkPlaces candidateCVWorkPlaces) {
         if (candidateCVWorkPlaces != null) {
+            positionLookupPickerField.setValue(candidateCVWorkPlaces.getPosition());
             companySuggestPickerField.setValue(candidateCVWorkPlaces.getWorkPlace());
             startDateField.setValue(candidateCVWorkPlaces.getStartDate());
             endDateField.setValue(candidateCVWorkPlaces.getEndDate());
@@ -235,6 +252,7 @@ public class WorkPlacesFragment extends ScreenFragment {
     }
 
     public CandidateCVWorkPlaces getCandidateCVWorkPlaces() {
+        this.candidateCVWorkPlaces.setPosition(positionLookupPickerField.getValue());
         this.candidateCVWorkPlaces.setWorkPlace(companySuggestPickerField.getValue());
         this.candidateCVWorkPlaces.setStartDate(startDateField.getValue());
         this.candidateCVWorkPlaces.setEndDate(endDateField.getValue());
@@ -253,8 +271,10 @@ public class WorkPlacesFragment extends ScreenFragment {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        getScreenData().loadAll();
         deleteWorkPlaceButton.addClickListener(e -> deleteWorkPlaceButton());
         initCompanyField(); // TO-DO но не работают логотипы компаний на SuggestionPickerField
+        initPositionTypeField();
 
     }
 
@@ -281,4 +301,40 @@ public class WorkPlacesFragment extends ScreenFragment {
             return retImage.createResource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
         }
     }
+
+    private void initPositionTypeField() {
+        positionLookupPickerField.setOptionImageProvider(this::positionLookupPickerFieldImageProvider);
+    }
+
+    private Resource positionLookupPickerFieldImageProvider(Position position) {
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setWidth("30px");
+
+        if (position.getLogo() != null) {
+            return retImage.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(position
+                            .getLogo());
+        } else {
+            retImage.setVisible(false);
+            return retImage.createResource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
+        }
+    }
+
+    @Install(to = "companySuggestPickerField", subject = "enterActionHandler")
+    private void companySuggestPickerFieldEnterActionHandler(String s) {
+        dialogs.createOptionDialog()
+                .withCaption(messageBundle.getMessage("msgWarning"))
+                .withMessage(String.format(messageBundle.getMessage("msgCreateNewCompany"), s))
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                        .withHandler(e -> {
+                            screenBuilders.editor(Company.class, this)
+                                    .newEntity().withScreenClass(CompanyEdit.class)
+                                    .withInitializer(ev -> ev.setComanyName(s))
+                                    .withAfterCloseListener(eacl -> companySuggestPickerField.setValue(eacl.getScreen().getEditedEntity()))
+                                    .show();
+                        }), new DialogAction(DialogAction.Type.NO))
+                .show();
+    }
+
 }

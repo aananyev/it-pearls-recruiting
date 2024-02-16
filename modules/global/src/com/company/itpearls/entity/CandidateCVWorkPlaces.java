@@ -23,6 +23,12 @@ public class CandidateCVWorkPlaces extends StandardEntity {
     @OnDeleteInverse(DeletePolicy.CASCADE)
     private CandidateCV candidateCV;
 
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "POSITION_ID")
+    private Position position;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "WORK_PLACE_ID")
     private Company workPlace;
@@ -53,6 +59,14 @@ public class CandidateCVWorkPlaces extends StandardEntity {
     @Lob
     @Column(name = "ACHIEVEMENTS")
     private String achievements;
+
+    public Position getPosition() {
+        return position;
+    }
+
+    public void setPosition(Position position) {
+        this.position = position;
+    }
 
     public String getWorkPlaceComment() {
         return workPlaceComment;

@@ -20,6 +20,8 @@ public class CompanyEdit extends StandardEditor<Company> {
     private Image companyLogoFileImage;
     @Inject
     private FileUploadField companyLogoFileUpload;
+    @Inject
+    private TextField<String> comanyNameField;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -94,5 +96,9 @@ public class CompanyEdit extends StandardEditor<Company> {
     @Subscribe("companyLogoFileImage")
     public void onCompanyLogoFileImageSourceChange(ResourceView.SourceChangeEvent event) {
         setCompanyPicImage();
+    }
+
+    public void setCompanyNameField(String comanyName) {
+        comanyNameField.setValue(comanyName);
     }
 }

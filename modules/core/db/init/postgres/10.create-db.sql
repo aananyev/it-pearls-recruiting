@@ -1311,6 +1311,7 @@ create table ITPEARLS_CANDIDATE_CV_WORK_PLACES (
     DELETED_BY varchar(50),
     --
     CANDIDATE_CV_ID uuid,
+    POSITION_ID uuid not null,
     WORK_PLACE_ID uuid,
     WORK_PLACE_COMMENT varchar(128),
     START_DATE date not null,
