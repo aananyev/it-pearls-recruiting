@@ -739,10 +739,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             return open_position_pic_center_large_red;
     }
 
-    @Install(to = "openPositionsTable.icon", subject = "styleProvider")
-    private String openPositionsTableIconStyleProvider(OpenPosition openPosition) {
-        return "open-position-pic-center";
-    }
+//    @Install(to = "openPositionsTable.icon", subject = "styleProvider")
+//    private String openPositionsTableIconStyleProvider(OpenPosition openPosition) {
+//        return "open-position-pic-center";
+//    }
 
     @Install(to = "openPositionsTable.remoteWork", subject = "styleProvider")
     private String openPositionsTableRemoteWorkStyleProvider(OpenPosition openPosition) {
@@ -774,7 +774,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return "open-position-pic-center";
     }
 
-    private void addIconColumn() {
+    private void addIconColumn() { /*
         //  обавление светофорчика
         DataGrid.Column<OpenPosition> iconColumn = openPositionsTable.addGeneratedColumn("icon",
                 new DataGrid.ColumnGenerator<OpenPosition, String>() {
@@ -789,7 +789,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     }
                 });
 
-        iconColumn.setRenderer(openPositionsTable.createRenderer(DataGrid.ImageRenderer.class));
+        iconColumn.setRenderer(openPositionsTable.createRenderer(DataGrid.ImageRenderer.class)); */
     }
 
     private void addIconRemoteWork() {
@@ -2059,13 +2059,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     break;
             }
 
+            HBoxLayout label1HBox = uiComponents.create(HBoxLayout.class);
+            label1HBox.setHeightFull();
+
             Label label1 = uiComponents.create(Label.NAME);
-            label1.setValue(" ");
+            label1.setValue("\u25C7");
+            label1.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            label1HBox.add(label1);
+
             hbox.add(positionIcon);
             hbox.add(label);
 
             urgentlyHBox.add(hbox);
-            urgentlyHBox.add(label1);
+            urgentlyHBox.add(label1HBox);
         }
     }
 

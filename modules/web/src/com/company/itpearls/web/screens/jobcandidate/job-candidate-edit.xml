@@ -10,7 +10,9 @@
             <view extends="_local">
                 <property name="candidateCv" view="_local">
                     <property name="candidate" view="_local">
-                        <property name="personPosition" view="_local"/>
+                        <property name="personPosition" view="_local">
+                            <property name="logo" view="_local"/>
+                        </property>
                     </property>
                     <property name="resumePosition" view="_local">
                     </property>
@@ -63,7 +65,9 @@
                 <property name="positionList" view="_local">
                     <property name="positionList" view="_local"/>
                 </property>
-                <property name="personPosition" view="_local"/>
+                <property name="personPosition" view="_local">
+                    <property name="logo" view="_local"/>
+                </property>
             </view>
             <loader id="jobCandidateDl"
                     softDeletion="true"
@@ -205,6 +209,7 @@
                   collapsable="true"
                   spacing="true"
                   stylename="light">
+
             <textField id="fullNameTextField"
                        visible="false"
                        dataContainer="jobCandidateDc"
@@ -213,10 +218,12 @@
                       dataContainer="jobCandidateDc"
                       property="blockCandidate"
                       visible="false"/>
-            <grid spacing="true" height="45px">
-                <columns count="12"/>
+
+            <grid spacing="true" height="45px" width="100%">
+                <columns count="14"/>
                 <rows>
                     <row>
+
                         <label id="iteractionListLabelCandidate"
                                stylename="h3"
                                align="MIDDLE_LEFT"/>
@@ -256,6 +263,34 @@
                         <label id="labelQualityPercent"
                                align="MIDDLE_CENTER"
                                stylename="h3"/>
+                        <hbox>
+                        <image id="candidateFileImageFaceImage"
+                               align="TOP_RIGHT"
+                               width="70px"
+                               height="70px"
+                               visible="true"
+                               stylename="widget-border"
+                               dataContainer="jobCandidateDc"
+                               scaleMode="SCALE_DOWN"
+                               property="fileImageFace"/>
+                        <image id="candidateFileImageFaceDefailtImage"
+                               align="TOP_RIGHT"
+                               width="70px"
+                               height="70px"
+                               visible="false"
+                               stylename="widget-border"
+                               scaleMode="SCALE_DOWN">
+                            <theme path="icons/no-programmer.jpeg"/>
+                        </image>
+                        </hbox>
+                        <image id="personPositionImage"
+                               align="TOP_RIGHT"
+                               width="70px"
+                               height="70px"
+                               stylename="widget-border"
+                               scaleMode="SCALE_DOWN"
+                               dataContainer="jobCandidateDc"
+                               property="personPosition.logo"/>
                     </row>
                 </rows>
             </grid>

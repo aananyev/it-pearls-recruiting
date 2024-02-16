@@ -13,10 +13,7 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
-import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.model.CollectionPropertyContainer;
-import com.haulmont.cuba.gui.model.DataContext;
+import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
@@ -150,7 +147,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private Metadata metadata;
     @Inject
-    private CollectionPropertyContainer<CandidateCVWorkPlaces> candidateCVWorkPlacesDc;
+    private InstanceContainer<CandidateCV> candidateCVDc;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -434,10 +431,14 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     @Subscribe
+    public void onAfterShow3(AfterShowEvent event) {
+        setupWorkPlaces();
+    }
+
+    @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         setOnlyMySubscribeCheckBox();
         convertTextCV();
-        setupWorkPlaces();
 
 /*        if (candidateCVRichTextArea.getValue() != null) {
             textResumeStringBuffer = new StringBuffer(candidateCVRichTextArea.getValue());
@@ -493,7 +494,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             }
         } else {
             if (candidateCVRichTextArea.getValue() != null) {
-                StringBuffer newTextResume = new StringBuffer(candidateCVRichTextArea.getValue());
+                StringBuffer newTextResume = new StringBuffer();
+
+                if (candidateCVRichTextArea.getValue() != null) {
+                    newTextResume.append(candidateCVRichTextArea.getValue());
+                }
 
                 if (newTextResume != null) {
                     if (textResumeStringBuffer.compareTo(newTextResume) != 0) {
@@ -512,29 +517,21 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         commitWorkPlaces();
     }
 
-    private void commitWorkPlaces() {/*
-//        CommitContext commitContext = new CommitContext();
-
+    private void commitWorkPlaces() {
         if (workPlacesFragments.size() > 0) {
             for (WorkPlacesFragment workPlacesFragment : workPlacesFragments) {
-//                CandidateCVWorkPlaces candidateCVWorkPlaces = metadata.create(CandidateCVWorkPlaces.class);
+                CandidateCVWorkPlaces candidateCVWorkPlaces = workPlacesFragment.getCandidateCVWorkPlaces();
+                candidateCVWorkPlaces.setCandidateCV(getEditedEntity());
 
-//                candidateCVWorkPlaces.setCandidateCV(getEditedEntity());
-//                candidateCVWorkPlaces.setWorkPlace(workPlacesFragment.getCompany());
-//                candidateCVWorkPlaces.setWorkPlaceComment(workPlacesFragment.getWorkPlaceComment());
-//                candidateCVWorkPlaces.setFunctionalityAtWork(workPlacesFragment.getFunctionalityAtWork());
-//                candidateCVWorkPlaces.setAchievements(workPlacesFragment.getAchievements());
-//                candidateCVWorkPlaces.setWorkToThisDay(workPlacesFragment.getWorkToThisDay());
-//                candidateCVWorkPlaces.setEndDate(workPlacesFragment.getEndDate());
-//                candidateCVWorkPlaces.setStartDate(workPlacesFragment.getStartDate());
-//                candidateCVWorkPlaces.setPersonalRole(workPlacesFragment.getPersonalRole());
-
-//                commitContext.addInstanceToCommit(workPlacesFragment.getCandidateCVWorkPlaces());
-                dataContext.merge(workPlacesFragment.getCandidateCVWorkPlaces());
+                if (!workPlacesFragment.getDeletedWorkPlace()) {
+                    dataContext.merge(candidateCVWorkPlaces);
+                } else {
+                    dataContext.remove(candidateCVWorkPlaces);
+                }
             }
         }
 
-//        dataManager.commit(commitContext); */
+        dataContext.commit();
     }
 
     private final static String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
@@ -989,42 +986,19 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     public void addNewWorkPlaceButtonInvoke() {
-        GroupBoxLayout workPlaceLayout = setNewWorkPlaceLayout(null);
-
-        workPlacesScrollBox.add(workPlaceLayout);
+        setNewWorkPlaceLayout(null);
     }
 
     @Subscribe
     public void onInit(InitEvent event) {
-       initPositionTypeField();
+        initPositionTypeField();
     }
 
-    private GroupBoxLayout setNewWorkPlaceLayout(CandidateCVWorkPlaces candidateCVWorkPlaces) {
-        GroupBoxLayout newWorkPlaceGroupBox = uiComponents.create(GroupBoxLayout.class);
-        Button deleteWorkPlaceButton = uiComponents.create(Button.class);
-        deleteWorkPlaceButton.setIcon(CubaIcon.REMOVE_ACTION.source());
-        deleteWorkPlaceButton.setAlignment(Component.Alignment.TOP_RIGHT);
-        deleteWorkPlaceButton.setDescription(messageBundle.getMessage("msgDelete"));
-
-        newWorkPlaceGroupBox.setCaption(messageBundle.getMessage("msgNewWorkPlace"));
-        newWorkPlaceGroupBox.setCollapsable(true);
-
+    private void setNewWorkPlaceLayout(CandidateCVWorkPlaces candidateCVWorkPlaces) {
         WorkPlacesFragment fragment = fragments.create(this, WorkPlacesFragment.class);
-        deleteWorkPlaceButton.addClickListener(e -> deleteWorkPlaceButton(fragment, newWorkPlaceGroupBox));
         fragment.setNewWorkPlace(candidateCVWorkPlaces);
-        fragment.setCandidateCV(getEditedEntity());
-        fragment.setNewWorkPlaceGroupBox(newWorkPlaceGroupBox);
         workPlacesFragments.add(fragment);
-
-        newWorkPlaceGroupBox.add(deleteWorkPlaceButton);
-        newWorkPlaceGroupBox.add(fragment.getFragment());
-
-        return newWorkPlaceGroupBox;
-    }
-
-    private void deleteWorkPlaceButton(WorkPlacesFragment fragment, GroupBoxLayout newWorkPlaceGroupBox) {
-        newWorkPlaceGroupBox.setVisible(false);
-        fragment.setDeletedWorkPlace(true);
+        workPlacesScrollBox.add(fragment.getFragment());
     }
 
     private void initPositionTypeField() {
@@ -1048,8 +1022,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
 
     private void setupWorkPlaces() {
-        for (CandidateCVWorkPlaces candidateCVWorkPlaces : candidateCVWorkPlacesDc.getItems()) {
-            setNewWorkPlaceLayout(candidateCVWorkPlaces);
+        List<CandidateCVWorkPlaces> candidateCVWorkPlaces = candidateCVDc.getItem().getCandidateCVWorkPlaces();
+        for (CandidateCVWorkPlaces candidateWorkPlace : candidateCVWorkPlaces) {
+            setNewWorkPlaceLayout(candidateWorkPlace);
         }
     }
 }

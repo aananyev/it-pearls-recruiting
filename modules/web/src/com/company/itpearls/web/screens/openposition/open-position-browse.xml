@@ -204,13 +204,13 @@
                         caption="msg://msgFolder">
                     <componentRenderer/>
                 </column>
-                <column id="icon"
+<!--                <column id="icon"
                         resizable="true"
                         collapsible="true"
                         collapsed="true"
                         width="70px"
                         minimumWidth="35px"
-                        caption="msg://msgPriority"/>
+                        caption="msg://msgPriority"/> -->
                 <column id="rating"
                         minimumWidth="85px"
                         maximumWidth="85px"

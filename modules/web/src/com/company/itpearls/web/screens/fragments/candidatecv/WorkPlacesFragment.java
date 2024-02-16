@@ -18,16 +18,14 @@ import java.util.Date;
 public class WorkPlacesFragment extends ScreenFragment {
     @Inject
     private DateField<Date> endDateField;
-    private GroupBoxLayout newWorkPlaceGroupBox;
+    @Inject
+    private GroupBoxLayout workPlaceGroupBox;
     @Inject
     private DateField<Date> startDateField;
     @Inject
     private CheckBox workToThisDayCheckBox;
     @Inject
     private MessageBundle messageBundle;
-    @Inject
-    private LookupPickerField<Company> companyLookupPickerField;
-
     private Boolean deletedWorkPlace = false;
     @Inject
     private TextField<String> workPlaceCommentTextField;
@@ -43,42 +41,35 @@ public class WorkPlacesFragment extends ScreenFragment {
     @Inject
     private Metadata metadata;
     private CandidateCV candidateCV;
+    @Inject
+    private Button deleteWorkPlaceButton;
 
     public Boolean getDeletedWorkPlace() {
         return deletedWorkPlace;
     }
 
     public Company getCompany() {
-        return companyLookupPickerField.getValue();
+        return companySuggestPickerField.getValue();
     }
 
     public void setDeletedWorkPlace(Boolean deletedWorkPlace) {
         this.deletedWorkPlace = deletedWorkPlace;
     }
 
-    public void setNewWorkPlaceGroupBox(GroupBoxLayout newWorkPlaceGroupBox) {
-        this.newWorkPlaceGroupBox = newWorkPlaceGroupBox;
-    }
-
     @Subscribe("endDateField")
     public void onEndDateFieldValueChange(HasValue.ValueChangeEvent<Date> event) {
-        companyLookupPickerFieldGroupBoxSetHeader(
-                companySuggestPickerField,
-                newWorkPlaceGroupBox,
-                startDateField,
-                endDateField,
-                workToThisDayCheckBox);
+        workPlaceGroupBox.setCaption(groupBoxSetHeader());
 
-        candidateCVWorkPlaces.setEndDate(event.getValue());
+        if (this.candidateCVWorkPlaces != null) {
+            if (event.getValue() != null) {
+                this.candidateCVWorkPlaces.setEndDate(event.getValue());
+            }
+        }
     }
 
     @Subscribe("workToThisDayCheckBox")
     public void onWorkToThisDayCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        companyLookupPickerFieldGroupBoxSetHeader(companySuggestPickerField,
-                newWorkPlaceGroupBox,
-                startDateField,
-                endDateField,
-                workToThisDayCheckBox);
+        workPlaceGroupBox.setCaption(groupBoxSetHeader());
 
         if (event.getValue() != null) {
             if (event.getValue()) {
@@ -90,49 +81,48 @@ public class WorkPlacesFragment extends ScreenFragment {
             endDateField.setEditable(true);
         }
 
-        candidateCVWorkPlaces.setWorkToThisDay(event.getValue());
+        if (this.candidateCVWorkPlaces != null) {
+            if (event.getValue() != null) {
+                this.candidateCVWorkPlaces.setWorkToThisDay(event.getValue());
+            }
+        }
     }
 
     @Subscribe("companySuggestPickerField")
     public void onCompanySuggestPickerFieldValueChange(HasValue.ValueChangeEvent<Company> event) {
-        companyLookupPickerFieldGroupBoxSetHeader(companySuggestPickerField,
-                newWorkPlaceGroupBox,
-                startDateField,
-                endDateField,
-                workToThisDayCheckBox);
+        workPlaceGroupBox.setCaption(groupBoxSetHeader());
 
-        candidateCVWorkPlaces.setWorkPlace(event.getValue());
+        if (this.candidateCVWorkPlaces != null) {
+            if (event.getValue() != null) {
+                this.candidateCVWorkPlaces.setWorkPlace(event.getValue());
+            }
+        }
     }
 
     @Subscribe("startDateField")
     public void onStartDateFieldValueChange(HasValue.ValueChangeEvent<Date> event) {
-        companyLookupPickerFieldGroupBoxSetHeader(companySuggestPickerField,
-                newWorkPlaceGroupBox,
-                startDateField,
-                endDateField,
-                workToThisDayCheckBox);
+        workPlaceGroupBox.setCaption(groupBoxSetHeader());
 
-        candidateCVWorkPlaces.setStartDate(event.getValue());
+        if (this.candidateCVWorkPlaces != null) {
+            if (event.getValue() != null) {
+                this.candidateCVWorkPlaces.setStartDate(event.getValue());
+            }
+        }
     }
 
-    private void companyLookupPickerFieldGroupBoxSetHeader(SuggestionPickerField companyLookupPickerField,
-                                                           GroupBoxLayout newWorkPlaceGroupBox,
-                                                           DateField startDateField,
-                                                           DateField endDateField,
-                                                           CheckBox workToThisDayCheckBox) {
+    private String groupBoxSetHeader() {
         StringBuilder sb = new StringBuilder();
-        if (companyLookupPickerField.getValue() != null && startDateField.getValue() != null &&
+        if (companySuggestPickerField.getValue() != null && startDateField.getValue() != null &&
                 (endDateField.getValue() != null || workToThisDayCheckBox.getValue() == true)) {
-            if (((Company) companyLookupPickerField.getValue()).getComanyName() != null) {
-                sb.append(((Company) companyLookupPickerField.getValue()).getComanyName());
+            if (((Company) companySuggestPickerField.getValue()).getComanyName() != null) {
+                sb.append(((Company) companySuggestPickerField.getValue()).getComanyName());
             }
 
-            if (((Company) companyLookupPickerField.getValue()).getCompanyShortName() != null) {
+            if (((Company) companySuggestPickerField.getValue()).getCompanyShortName() != null) {
                 sb.append(" / ");
-                sb.append(((Company) companyLookupPickerField.getValue()).getCompanyShortName());
+                sb.append(((Company) companySuggestPickerField.getValue()).getCompanyShortName());
             }
 
-//            sb.append(((Company)companyLookupPickerField.getValue()).getCompanyShortName());
             SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.YYYY");
 
             if ((startDateField.getValue() != null)
@@ -147,9 +137,9 @@ public class WorkPlacesFragment extends ScreenFragment {
                                 : sdf.format(endDateField.getValue()))
                         .toString();
             }
-
-            newWorkPlaceGroupBox.setCaption(sb.toString());
         }
+
+        return sb.toString();
     }
 
     public String getWorkPlaceComment() {
@@ -182,7 +172,7 @@ public class WorkPlacesFragment extends ScreenFragment {
 
     public void setNewWorkPlace(CandidateCVWorkPlaces candidateCVWorkPlaces) {
         if (candidateCVWorkPlaces != null) {
-            companyLookupPickerField.setValue(candidateCVWorkPlaces.getWorkPlace());
+            companySuggestPickerField.setValue(candidateCVWorkPlaces.getWorkPlace());
             startDateField.setValue(candidateCVWorkPlaces.getStartDate());
             endDateField.setValue(candidateCVWorkPlaces.getEndDate());
             workToThisDayCheckBox.setValue(candidateCVWorkPlaces.getWorkToThisDay());
@@ -192,6 +182,8 @@ public class WorkPlacesFragment extends ScreenFragment {
             achievementsRichTextArea.setValue(candidateCVWorkPlaces.getAchievements());
 
             this.candidateCVWorkPlaces = candidateCVWorkPlaces;
+            groupBoxSetHeader();
+
         } else {
             createCandidateCVWorkPlaces();
         }
@@ -204,29 +196,65 @@ public class WorkPlacesFragment extends ScreenFragment {
 
     @Subscribe("workPlaceCommentTextField")
     public void onWorkPlaceCommentTextFieldValueChange(HasValue.ValueChangeEvent<String> event) {
-        this.candidateCVWorkPlaces.setWorkPlaceComment(event.getValue());
+        if (this.candidateCVWorkPlaces != null) {
+            if (event.getValue() != null) {
+                this.candidateCVWorkPlaces.setWorkPlaceComment(event.getValue());
+            }
+        }
     }
 
     @Subscribe("functionalityAtWorkRichTextArea")
     public void onFunctionalityAtWorkRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
-        this.candidateCVWorkPlaces.setFunctionalityAtWork(event.getValue());
+        if (this.candidateCVWorkPlaces != null) {
+            if (event.getValue() != null) {
+                this.candidateCVWorkPlaces.setFunctionalityAtWork(event.getValue());
+            }
+        }
     }
 
     @Subscribe("achievementsRichTextArea")
     public void onAchievementsRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
-        this.candidateCVWorkPlaces.setAchievements(event.getValue());
+        if (this.candidateCVWorkPlaces != null) {
+            if (event.getValue() != null) {
+                this.candidateCVWorkPlaces.setAchievements(event.getValue());
+            }
+        }
     }
 
     @Subscribe("personalRoleRichTextArea")
     public void onPersonalRoleRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
-       this.candidateCVWorkPlaces.setPersonalRole(event.getValue());
+        if (this.candidateCVWorkPlaces != null) {
+            if (event.getValue() != null) {
+                this.candidateCVWorkPlaces.setPersonalRole(event.getValue());
+            }
+        }
     }
 
     public CandidateCVWorkPlaces getCandidateCVWorkPlaces() {
+        this.candidateCVWorkPlaces.setWorkPlace(companySuggestPickerField.getValue());
+        this.candidateCVWorkPlaces.setStartDate(startDateField.getValue());
+        this.candidateCVWorkPlaces.setEndDate(endDateField.getValue());
+        this.candidateCVWorkPlaces.setWorkToThisDay(workToThisDayCheckBox.getValue());
+        this.candidateCVWorkPlaces.setWorkPlaceComment(workPlaceCommentTextField.getValue());
+        this.candidateCVWorkPlaces.setFunctionalityAtWork(functionalityAtWorkRichTextArea.getValue());
+        this.candidateCVWorkPlaces.setPersonalRole(personalRoleRichTextArea.getValue());
+        this.candidateCVWorkPlaces.setAchievements(achievementsRichTextArea.getValue());
+
         return this.candidateCVWorkPlaces;
     }
 
     public void createCandidateCVWorkPlaces() {
         this.candidateCVWorkPlaces = metadata.create(CandidateCVWorkPlaces.class);
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        deleteWorkPlaceButton.addClickListener(e -> deleteWorkPlaceButton());
+
+    }
+
+    private void deleteWorkPlaceButton() {
+        workPlaceGroupBox.setVisible(false);
+        setDeletedWorkPlace(true);
     }
 }

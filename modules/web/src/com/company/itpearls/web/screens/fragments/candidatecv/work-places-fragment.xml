@@ -12,74 +12,72 @@
             </loader>
         </collection>
     </data>
-    <layout>
-        <hbox id="headerHBox"
-              width="100%" spacing="true"
-              expand="companyLookupPickerField">
-            <vbox id="dateVBox"
-                  align="TOP_LEFT"
-                  spacing="true"
-                  width="AUTO">
-                <dateField id="startDateField"
-                           width="AUTO"
-                           caption="msg://msgStartDate"
-                           dateFormat="dd.MM.yyyy"/>
-                <hbox spacing="true">
-                    <dateField id="endDateField"
-                               align="MIDDLE_LEFT"
+    <layout width="100%" height="AUTO" expand="workPlaceGroupBox">
+        <groupBox id="workPlaceGroupBox"
+                  width="100%"
+                  height="AUTO"
+                  collapsable="true"
+                  collapsed="false">
+            <button id="deleteWorkPlaceButton"
+                    icon="font-icon:REMOVE"
+                    align="TOP_RIGHT"
+                    description="msg://msgDelete"/>
+            <hbox id="headerHBox"
+                  width="100%" spacing="true"
+                  expand="companySuggestPickerField">
+                <vbox id="dateVBox"
+                      align="TOP_LEFT"
+                      spacing="true"
+                      width="AUTO">
+                    <dateField id="startDateField"
                                width="AUTO"
-                               caption="msg://msgEndDate"
+                               caption="msg://msgStartDate"
                                dateFormat="dd.MM.yyyy"/>
-                    <checkBox id="workToThisDayCheckBox"
-                              align="BOTTOM_LEFT"
-                              width="AUTO"
-                              caption="msg://msgWorkToThisDay"/>
-                </hbox>
-            </vbox>
-            <suggestionPickerField id="companySuggestPickerField"
-                                   inputPrompt="msg://msgInputPrompt"
-                                   width="100%"
-                                   caption="msg://msgCompany"
-                                   align="TOP_LEFT"
-                                   metaClass="itpearls_Company">
-                <actions>
-                    <action id="lookup" type="picker_lookup"/>
-                    <action id="open" type="picker_open"/>
-                </actions>
-                <query entityClass="com.company.itpearls.entity.Company"
-                       escapeValueForLike="true"
-                       searchStringFormat="%$searchString%">
-                    select e
-                    from itpearls_Company e
-                    where (lower(e.comanyName) like lower(:searchString) escape '\'
-                    or lower(e.companyShortName) like lower(:searchString) escape '\')
-                    and e.companyShortName not like '%(не использовать'
-                    order by e.comanyName
-                </query>
-            </suggestionPickerField>
-            <lookupPickerField id="companyLookupPickerField"
-                               visible="false"
-                               optionsContainer="companiesDc"
-                               caption="msg://msgCompany"
-                               width="100%"
-                               nullOptionVisible="false"
-                               required="true">
-                <actions>
-                    <action id="lookup" type="picker_lookup"/>
-                    <action id="open" type="picker_open" icon="EDIT_ACTION"/>
-                </actions>
-            </lookupPickerField>
-        </hbox>
-        <textField id="workPlaceCommentTextField"
-                   width="100%" caption="msg://msgWorkPlaceComment"/>
-        <richTextArea id="functionalityAtWorkRichTextArea"
-                      width="100%"
-                      caption="msg://msgFunctionalityAtWork"/>
-        <richTextArea id="personalRoleRichTextArea"
-                      width="100%"
-                      caption="msg://msgPersonalRole"/>
-        <richTextArea id="achievementsRichTextArea"
-                      width="100%"
-                      caption="msg://msgAchievements"/>
+                    <hbox spacing="true">
+                        <dateField id="endDateField"
+                                   align="MIDDLE_LEFT"
+                                   width="AUTO"
+                                   caption="msg://msgEndDate"
+                                   dateFormat="dd.MM.yyyy"/>
+                        <checkBox id="workToThisDayCheckBox"
+                                  align="BOTTOM_LEFT"
+                                  width="AUTO"
+                                  caption="msg://msgWorkToThisDay"/>
+                    </hbox>
+                </vbox>
+                <suggestionPickerField id="companySuggestPickerField"
+                                       inputPrompt="msg://msgInputPrompt"
+                                       width="100%"
+                                       caption="msg://msgCompany"
+                                       align="TOP_LEFT"
+                                       metaClass="itpearls_Company">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="open" type="picker_open"/>
+                    </actions>
+                    <query entityClass="com.company.itpearls.entity.Company"
+                           escapeValueForLike="true"
+                           searchStringFormat="%$searchString%">
+                        select e
+                        from itpearls_Company e
+                        where (lower(e.comanyName) like lower(:searchString) escape '\'
+                        or lower(e.companyShortName) like lower(:searchString) escape '\')
+                        and e.companyShortName not like '%(не использовать'
+                        order by e.comanyName
+                    </query>
+                </suggestionPickerField>
+            </hbox>
+            <textField id="workPlaceCommentTextField"
+                       width="100%" caption="msg://msgWorkPlaceComment"/>
+            <richTextArea id="functionalityAtWorkRichTextArea"
+                          width="100%"
+                          caption="msg://msgFunctionalityAtWork"/>
+            <richTextArea id="personalRoleRichTextArea"
+                          width="100%"
+                          caption="msg://msgPersonalRole"/>
+            <richTextArea id="achievementsRichTextArea"
+                          width="100%"
+                          caption="msg://msgAchievements"/>
+        </groupBox>
     </layout>
 </fragment>

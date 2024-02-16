@@ -1,5 +1,7 @@
 package com.company.itpearls.web.screens.person;
 
+import com.company.itpearls.core.StdImage;
+import com.company.itpearls.core.TextManipulationService;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
@@ -15,10 +17,14 @@ import javax.inject.Inject;
 public class PersonBrowse extends StandardLookup<Person> {
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private TextManipulationService textManipulationService;
 
     @Install(to = "personsTable.personPicColumn", subject = "columnGenerator")
     private Component personsTablePersonPicColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Person> event) {
+        StringBuilder description = new StringBuilder();
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+
         retBox.setWidthFull();
         retBox.setHeightFull();
 
@@ -29,20 +35,25 @@ public class PersonBrowse extends StandardLookup<Person> {
         image.setHeight("20px");
         image.setStyleName("circle-20px");
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        image.setDescription("<h4>"
-                + event.getItem().getFirstName()
-                + " "
-                + event.getItem().getSecondName()
-                + "</h4>");
 
         if (event.getItem().getFileImageFace() != null) {
             image.setSource(FileDescriptorResource.class)
                     .setFileDescriptor(event
                             .getItem()
                             .getFileImageFace());
+
+            description.append(textManipulationService.getImage(event.getItem().getFileImageFace()));
         } else {
-            image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            image.setSource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
         }
+
+        description.append("<h4>")
+                .append(event.getItem().getFirstName())
+                .append(" ")
+                .append(event.getItem().getSecondName())
+                .append("</h4>");
+
+        image.setDescription(description.toString());
 
         retBox.add(image);
         return retBox;

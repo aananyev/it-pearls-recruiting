@@ -256,6 +256,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private StandartMapsService standartMapsService;
     @Inject
     private InteractionListService interactionListService;
+    @Inject
+    private Image candidateFileImageFaceDefailtImage;
+    @Inject
+    private Image candidateFileImageFaceImage;
 
     private Boolean ifCandidateIsExist() {
         setFullNameCandidate();
@@ -360,6 +364,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         }
     }
+
     private void setCreatedUpdatedLabel() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
         StringBuilder sb = new StringBuilder();
@@ -687,12 +692,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         if (object.getProjectName().getProjectLogo() == null) {
             return imageResource.createResource(ThemeResource.class)
-                    .setPath("icons/no-company.png");
+                    .setPath(StdImage.NO_COMPANY);
         } else {
             return imageResource.createResource(FileDescriptorResource.class)
                     .setFileDescriptor(object.getProjectName()
                             .getProjectLogo());
         }
+    }
+
+    private void setCandidateFileImage() {
+
     }
 
     private void setIteractionListVacancyFilter() {
@@ -717,7 +726,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             .stream()
                             .filter(iteractionList ->
                                     iteractionList.getVacancy() != null ?
-                                        iteractionList.getVacancy().equals(vacancyFilterLookupPickerField.getValue()) : false
+                                            iteractionList.getVacancy().equals(vacancyFilterLookupPickerField.getValue()) : false
                             )
                             .collect(Collectors.toList());
 
@@ -759,9 +768,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (getEditedEntity().getFileImageFace() == null) {
             candidateDefaultPic.setVisible(true);
             candidatePic.setVisible(false);
+            candidateFileImageFaceImage.setVisible(false);
+            candidateFileImageFaceDefailtImage.setVisible(true);
         } else {
             candidateDefaultPic.setVisible(false);
             candidatePic.setVisible(true);
+            candidateFileImageFaceImage.setVisible(true);
+            candidateFileImageFaceDefailtImage.setVisible(false);
         }
     }
 
@@ -2019,8 +2032,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .getTextCV() != null) {
 
                     String inputText = Jsoup.parse(jobCandidateCandidateCvTable
-                            .getSingleSelected()
-                            .getTextCV())
+                                    .getSingleSelected()
+                                    .getTextCV())
                             .text();
 
                     List<SkillTree> skillTrees = pdfParserService.parseSkillTree(inputText);
@@ -2515,7 +2528,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         } else {
             if (getEditedEntity().getCandidateCv() != null) {
                 notifications.create(Notifications
-                        .NotificationType.WARNING)
+                                .NotificationType.WARNING)
                         .withCaption("Не найдено новой контактной информации в резюме кандидата")
                         .show();
             }

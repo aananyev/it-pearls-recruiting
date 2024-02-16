@@ -35,7 +35,13 @@
         <instance id="candidateCVDc"
                   class="com.company.itpearls.entity.CandidateCV">
             <view extends="candidateCV-view">
-                <property name="candidateCVWorkPlaces" view="candidateCVWorkPlaces-view"/>
+                <property name="candidateCVWorkPlaces"
+                          view="_local">
+                    <property name="candidateCV"
+                              view="_local"/>
+                    <property name="workPlace"
+                              view="_local"/>
+                </property>
                 <property name="toVacancy" view="_local">
                     <property name="positionType" view="_local"/>
                     <property name="projectName" view="_local">

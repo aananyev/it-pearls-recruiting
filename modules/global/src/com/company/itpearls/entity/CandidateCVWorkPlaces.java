@@ -1,6 +1,11 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.annotation.Lookup;
+import com.haulmont.cuba.core.entity.annotation.LookupType;
+import com.haulmont.cuba.core.entity.annotation.OnDeleteInverse;
+import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -8,12 +13,14 @@ import java.util.Date;
 
 @Table(name = "ITPEARLS_CANDIDATE_CV_WORK_PLACES")
 @Entity(name = "itpearls_CandidateCVWorkPlaces")
+@NamePattern("%s|candidateCV")
 public class CandidateCVWorkPlaces extends StandardEntity {
     private static final long serialVersionUID = -122028494660854545L;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CANDIDATE_CV_ID")
+    @Lookup(type = LookupType.DROPDOWN, actions = {})
+    @OnDeleteInverse(DeletePolicy.CASCADE)
     private CandidateCV candidateCV;
 
     @ManyToOne(fetch = FetchType.LAZY)
