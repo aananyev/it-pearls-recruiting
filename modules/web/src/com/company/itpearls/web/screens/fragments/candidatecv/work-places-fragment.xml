@@ -23,7 +23,8 @@
                     align="TOP_RIGHT"
                     description="msg://msgDelete"/>
             <hbox id="headerHBox"
-                  width="100%" spacing="true"
+                  width="100%"
+                  spacing="true"
                   expand="companyHBox">
                 <vbox id="dateVBox"
                       align="TOP_LEFT"
@@ -46,34 +47,44 @@
                     </hbox>
                 </vbox>
                 <vbox id="companyHBox"
+                      width="100%"
                       spacing="true">
-                <suggestionPickerField id="companySuggestPickerField"
-                                       inputPrompt="msg://msgInputPrompt"
-                                       width="100%"
-                                       caption="msg://msgCompany"
-                                       align="TOP_LEFT"
-                                       metaClass="itpearls_Company">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                        <action id="open" type="picker_open"/>
-                    </actions>
-                    <query entityClass="com.company.itpearls.entity.Company"
-                           escapeValueForLike="true"
-                           searchStringFormat="%$searchString%">
-                        select e
-                        from itpearls_Company e
-                        where (lower(e.comanyName) like lower(:searchString) escape '\'
-                        or lower(e.companyShortName) like lower(:searchString) escape '\')
-                        and e.companyShortName not like '%(не использовать'
-                        order by e.comanyName
-                    </query>
-                </suggestionPickerField>
+                    <suggestionPickerField id="companySuggestPickerField"
+                                           inputPrompt="msg://msgInputPrompt"
+                                           width="100%"
+                                           caption="msg://msgCompany"
+                                           align="TOP_LEFT"
+                                           metaClass="itpearls_Company">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="open" type="picker_open"/>
+                        </actions>
+                        <query entityClass="com.company.itpearls.entity.Company"
+                               escapeValueForLike="true"
+                               searchStringFormat="%$searchString%">
+                            select e
+                            from itpearls_Company e
+                            where (lower(e.comanyName) like lower(:searchString) escape '\'
+                            or lower(e.companyShortName) like lower(:searchString) escape '\')
+                            and e.companyShortName not like '%(не использовать'
+                            order by e.comanyName
+                        </query>
+                    </suggestionPickerField>
                     <lookupPickerField id="positionLookupPickerField"
                                        metaClass="itpearls_Position"
                                        width="100%"
                                        caption="msg://msgPosition"
                                        description="msg://msgPositionDesc"
-                                            optionsContainer="positionDc"/>
+                                       optionsContainer="positionDc"/>
+                </vbox>
+                <vbox width="AUTO" spacing="true" margin="true">
+                    <image id="projectLogoImage"
+                           width="100px"
+                           height="100px"
+                           visible="true"
+                           align="BOTTOM_RIGHT"
+                           stylename="widget-border"
+                           scaleMode="SCALE_DOWN"/>
                 </vbox>
             </hbox>
             <textField id="workPlaceCommentTextField"

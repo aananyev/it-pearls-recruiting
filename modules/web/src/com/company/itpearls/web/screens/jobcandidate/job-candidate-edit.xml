@@ -120,7 +120,7 @@
                 <property name="grade" view="_local"/>
             </view>
             <loader id="openPositionDl"
-                    cacheable="false">
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
                     where e.openClose = false or e.openClose is null
@@ -134,7 +134,7 @@
                 <property name="positionType" view="_local"/>
             </view>
             <loader id="suggestOpenPositionDl"
-                    cacheable="false">
+                    cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
                     where e.openClose = false or e.openClose is null
@@ -157,7 +157,7 @@
             <view extends="position-view">
                 <property name="logo" view="_local"/>
             </view>
-            <loader id="personPositionsLc" cacheable="false">
+            <loader id="personPositionsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Position e
                             where e.positionRuName not like '%(не использовать)%'
@@ -168,7 +168,7 @@
         <collection id="currentCompaniesDc"
                     class="com.company.itpearls.entity.Company">
             <view extends="company-view"/>
-            <loader id="currentCompaniesLc" cacheable="false">
+            <loader id="currentCompaniesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e order by e.comanyName]]></query>
             </loader>
         </collection>
@@ -187,7 +187,7 @@
                     <property name="positionType" view="_local"/>
                 </property>
             </view>
-            <loader id="interactionCommentDl" cacheable="false">
+            <loader id="interactionCommentDl" cacheable="true">
                 <query>
                     <![CDATA[select e
                     from itpearls_IteractionList e

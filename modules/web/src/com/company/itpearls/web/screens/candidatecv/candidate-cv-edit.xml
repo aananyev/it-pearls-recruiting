@@ -40,9 +40,14 @@
                     <property name="candidateCV"
                               view="_local"/>
                     <property name="workPlace"
-                              view="_local"/>
+                              view="_local">
+                        <property name="fileCompanyLogo"
+                                  view="_local"/>
+                    </property>
                     <property name="position"
-                              view="_local"/>
+                              view="_local">
+                        <property name="logo" view="_local"/>
+                    </property>
                 </property>
                 <property name="toVacancy" view="_local">
                     <property name="positionType" view="_local"/>

@@ -1,0 +1,1 @@
+alter table ITPEARLS_CANDIDATE_CV_WORK_PLACES add column POSITION_ID uuid ;

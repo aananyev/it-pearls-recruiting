@@ -1384,8 +1384,8 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onInit(InitEvent event) {
-        projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
-        candidateImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+        projectLogoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
+        candidateImage.setSource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
         // изначально предполагаем, что это продолжение проекта
         newProject = false;
         // вся сортировка в поле IteractionType
@@ -1486,13 +1486,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     projectLogoImage.setValueSource(
                             new ContainerValueSource<>(iteractionListDc, "vacancy.projectName.projectLogo"));
                 } else {
-                    projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+                    projectLogoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
                 }
             } else {
-                projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+                projectLogoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
             }
         } else {
-            projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            projectLogoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
         }
     }
 

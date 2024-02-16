@@ -1023,6 +1023,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     private void setupWorkPlaces() {
         List<CandidateCVWorkPlaces> candidateCVWorkPlaces = candidateCVDc.getItem().getCandidateCVWorkPlaces();
+        Collections.sort(candidateCVWorkPlaces, new Comparator<CandidateCVWorkPlaces>() {
+            @Override
+            public int compare(CandidateCVWorkPlaces o1, CandidateCVWorkPlaces o2) {
+                return Long.compare(o2.getStartDate().getTime(),o1.getStartDate().getTime());
+            }
+        });
         for (CandidateCVWorkPlaces candidateWorkPlace : candidateCVWorkPlaces) {
             setNewWorkPlaceLayout(candidateWorkPlace);
         }

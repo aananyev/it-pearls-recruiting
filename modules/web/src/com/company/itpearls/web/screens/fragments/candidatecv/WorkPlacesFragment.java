@@ -9,6 +9,7 @@ import com.company.itpearls.web.screens.company.CompanyEdit;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
@@ -56,6 +57,8 @@ public class WorkPlacesFragment extends ScreenFragment {
     private ScreenBuilders screenBuilders;
     @Inject
     private LookupPickerField<Position> positionLookupPickerField;
+    @Inject
+    private Image projectLogoImage;
 
     public Boolean getDeletedWorkPlace() {
         return deletedWorkPlace;
@@ -104,11 +107,26 @@ public class WorkPlacesFragment extends ScreenFragment {
     @Subscribe("companySuggestPickerField")
     public void onCompanySuggestPickerFieldValueChange(HasValue.ValueChangeEvent<Company> event) {
         workPlaceGroupBox.setCaption(groupBoxSetHeader());
+        setProjectImage(event.getValue());
 
         if (this.candidateCVWorkPlaces != null) {
             if (event.getValue() != null) {
                 this.candidateCVWorkPlaces.setWorkPlace(event.getValue());
             }
+        }
+    }
+
+    private void setProjectImage(Company company) {
+        if (company != null) {
+            if (company.getFileCompanyLogo() != null) {
+                FileDescriptorResource resource = projectLogoImage.createResource(FileDescriptorResource.class)
+                        .setFileDescriptor(company.getFileCompanyLogo());
+                projectLogoImage.setSource(resource);
+            } else {
+                projectLogoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
+            }
+        } else {
+            projectLogoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
         }
     }
 
@@ -154,6 +172,7 @@ public class WorkPlacesFragment extends ScreenFragment {
 
         return sb.toString();
     }
+
     public Position getPosition() {
         return positionLookupPickerField.getValue();
     }
@@ -204,6 +223,9 @@ public class WorkPlacesFragment extends ScreenFragment {
 
             this.candidateCVWorkPlaces = candidateCVWorkPlaces;
             groupBoxSetHeader();
+
+            workPlaceGroupBox.setCollapsable(true);
+            workPlaceGroupBox.setStyleName("label_button_grey");
 
         } else {
             createCandidateCVWorkPlaces();
@@ -275,6 +297,16 @@ public class WorkPlacesFragment extends ScreenFragment {
         deleteWorkPlaceButton.addClickListener(e -> deleteWorkPlaceButton());
         initCompanyField(); // TO-DO но не работают логотипы компаний на SuggestionPickerField
         initPositionTypeField();
+        projectLogoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
+    }
+
+    @Subscribe
+    public void onAfterInit(AfterInitEvent event) {
+        setProjectImage(this.candidateCVWorkPlaces.getWorkPlace());
+    }
+
+    @Subscribe("companySuggestPickerField")
+    public void onCompanySuggestPickerFieldValueChange1(HasValue.ValueChangeEvent<Company> event) {
 
     }
 

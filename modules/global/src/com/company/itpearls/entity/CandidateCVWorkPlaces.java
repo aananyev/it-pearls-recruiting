@@ -24,8 +24,7 @@ public class CandidateCVWorkPlaces extends StandardEntity {
     private CandidateCV candidateCV;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "POSITION_ID")
     private Position position;
 
