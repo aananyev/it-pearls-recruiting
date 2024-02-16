@@ -25,7 +25,9 @@
                                 <property name="companyName" view="_local"/>
                             </property>
                         </property>
-                        <property name="owner" view="_local"/>
+                        <property name="owner" view="_local">
+                            <property name="fileImageFace" view="_local"/>
+                        </property>
                     </property>
                     <property name="someFiles" view="_local">
                         <property name="fileOwner" view="_local"/>
@@ -34,6 +36,9 @@
                         <property name="candidateCV" view="_local"/>
                     </property>
                     <property name="fileImageFace" view="_local"/>
+                    <property name="owner" view="_local">
+                        <property name="fileImageFace" view="_local"/>
+                    </property>
                 </property>
                 <property name="iteractionList" view="_local">
                     <property name="candidate" view="_local"/>
@@ -930,7 +935,9 @@
                         </column>
                         <column id="vacancy"
                                 maximumWidth="400px"
-                                property="vacancy"/>
+                                property="vacancy">
+                            <componentRenderer/>
+                        </column>
                         <column id="currentOpenCloseColumn"
                                 caption="mainMsg://msgCurrentOpenClose"
                                 maximumWidth="45px">
@@ -947,7 +954,9 @@
                         </column>
                         <column id="recrutier"
                                 maximumWidth="150px"
-                                property="recrutier"/>
+                                property="recrutier">
+                            <componentRenderer/>
+                        </column>
                         <column id="dateIteraction"
                                 property="dateIteraction"
                                 width="80px"
@@ -997,6 +1006,7 @@
                             <column id="toVacancy"
                                     property="toVacancy"
                                     caption="msg://msgToVacansy">
+                                <componentRenderer/>
                             </column>
                             <column id="resumePosition"
                                     collapsible="true"
@@ -1034,7 +1044,9 @@
                             <column id="createdBy"
                                     property="createdBy"
                                     width="100px"
-                                    caption="msg://msgCreatedBy"/>
+                                    caption="msg://msgCreatedBy">
+                                <componentRenderer/>
+                            </column>
                         </columns>
                         <actions>
                             <action type="create"

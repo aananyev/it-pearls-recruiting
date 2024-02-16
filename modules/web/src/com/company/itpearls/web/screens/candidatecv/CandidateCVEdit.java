@@ -1027,4 +1027,5 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             setNewWorkPlaceLayout(candidateWorkPlace);
         }
     }
+
 }

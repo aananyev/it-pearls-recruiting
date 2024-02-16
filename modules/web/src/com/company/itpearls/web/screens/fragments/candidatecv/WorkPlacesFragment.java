@@ -1,11 +1,13 @@
 package com.company.itpearls.web.screens.fragments.candidatecv;
 
+import com.company.itpearls.core.StdImage;
 import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.entity.CandidateCVWorkPlaces;
 import com.company.itpearls.entity.Company;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.BulkEditors;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 
@@ -43,6 +45,8 @@ public class WorkPlacesFragment extends ScreenFragment {
     private CandidateCV candidateCV;
     @Inject
     private Button deleteWorkPlaceButton;
+    @Inject
+    private UiComponents uiComponents;
 
     public Boolean getDeletedWorkPlace() {
         return deletedWorkPlace;
@@ -250,11 +254,31 @@ public class WorkPlacesFragment extends ScreenFragment {
     @Subscribe
     public void onInit(InitEvent event) {
         deleteWorkPlaceButton.addClickListener(e -> deleteWorkPlaceButton());
+        initCompanyField(); // TO-DO но не работают логотипы компаний на SuggestionPickerField
 
     }
 
     private void deleteWorkPlaceButton() {
         workPlaceGroupBox.setVisible(false);
         setDeletedWorkPlace(true);
+    }
+
+
+    private void initCompanyField() {
+//        companySuggestPickerField.setOptionIconProvider(this::companyTypeFieldImageProvider);
+    }
+
+    private Resource companyTypeFieldImageProvider(Company company) {
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setWidth("30px");
+
+        if (company.getFileCompanyLogo() != null) {
+            return retImage.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(company.getFileCompanyLogo());
+        } else {
+            retImage.setVisible(false);
+            return retImage.createResource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
+        }
     }
 }
