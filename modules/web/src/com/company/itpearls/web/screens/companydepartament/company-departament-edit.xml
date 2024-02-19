@@ -25,7 +25,7 @@
         <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_local">
             <loader id="companyNamesLc">
                 <query><![CDATA[select e from itpearls_Company e
-                where e.comanyName not like '%(не использовать)'
+                where not e.comanyName like '%(не использовать%' and not e.companyShortName like '%(не использовать%'
                 order by e.comanyName]]></query>
             </loader>
         </collection>

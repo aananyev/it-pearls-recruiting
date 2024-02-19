@@ -84,7 +84,9 @@
                            visible="true"
                            align="BOTTOM_RIGHT"
                            stylename="widget-border"
-                           scaleMode="SCALE_DOWN"/>
+                           scaleMode="SCALE_DOWN">
+                        <theme path="icons/no-company.png"/>
+                    </image>
                 </vbox>
             </hbox>
             <textField id="workPlaceCommentTextField"

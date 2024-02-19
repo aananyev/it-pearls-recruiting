@@ -169,7 +169,7 @@
                     class="com.company.itpearls.entity.Company">
             <view extends="company-view"/>
             <loader id="currentCompaniesLc" cacheable="true">
-                <query><![CDATA[select e from itpearls_Company e order by e.comanyName]]></query>
+                <query><![CDATA[select e from itpearls_Company e where not e.comanyName like '%(не использовать%' and not e.companyShortName like '%(не использовать%' order by e.comanyName]]></query>
             </loader>
         </collection>
         <collection id="citiesDc" class="com.company.itpearls.entity.City">

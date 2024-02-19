@@ -191,14 +191,14 @@
                                    align="TOP_RIGHT"
                                    height="100%"
                                    stylename="widget-border"
-                                   scaleMode="FILL"/>
+                                   scaleMode="SCALE_DOWN"/>
                             <image id="companyDefaultLogoFileImage"
                                    width="100%"
                                    visible="false"
                                    align="TOP_RIGHT"
                                    height="100%"
                                    stylename="widget-border"
-                                   scaleMode="FILL">
+                                   scaleMode="SCALE_DOWN">
                                 <theme path="icons/no-company.png"/>
                             </image>
                         </vbox>

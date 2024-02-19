@@ -48,39 +48,71 @@ import java.util.stream.Collectors;
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Install(to = "jobCandidateCandidateCvTable.createdBy", subject = "columnGenerator")
     private Component jobCandidateCandidateCvTableCreatedByColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        return columnGeneratorImageText(event.getItem().getOwner().getFileImageFace(),
-                event.getItem().getOwner().getName(),
-                StdImage.NO_PROGRAMMER,
-                "30px",
-                true);
+        if (event.getItem().getOwner() != null) {
+//            if (event.getItem().getOwner().getFileImageFace() != null) {
+                return columnGeneratorImageText(event.getItem().getOwner().getFileImageFace(),
+                        event.getItem().getOwner().getName(),
+                        StdImage.NO_PROGRAMMER,
+                        "30px",
+                        true);
+//            }
+        }
+
+        return getBlankHBox();
     }
+
     @Inject
     private TextManipulationService textManipulationService;
 
     @Install(to = "jobCandidateCandidateCvTable.toVacancy", subject = "columnGenerator")
     private Component jobCandidateCandidateCvTableToVacancyColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        return columnGeneratorImageText(event.getItem().getToVacancy().getPositionType().getLogo(),
-                event.getItem().getToVacancy().getVacansyName(), null, "30px", false);
+        if (event.getItem().getToVacancy() != null) {
+            if (event.getItem().getToVacancy().getPositionType() != null) {
+//                if (event.getItem().getToVacancy().getPositionType().getLogo() != null) {
+                    return columnGeneratorImageText(event.getItem().getToVacancy().getPositionType().getLogo(),
+                            event.getItem().getToVacancy().getVacansyName(),
+                            StdImage.NO_COMPANY,
+                            "30px",
+                            false);
+//                }
+            }
+        }
+
+        return getBlankHBox();
     }
 
     @Install(to = "jobCandidateIteractionListTable.recrutier", subject = "columnGenerator")
     private Component jobCandidateIteractionListTableRecrutierColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        return columnGeneratorImageText(event.getItem().getRecrutier().getFileImageFace(),
-                event.getItem().getRecrutier().getName(),
-                StdImage.NO_PROGRAMMER,
-                "30px",
-                true);
-    }
+        if (event.getItem().getRecrutier() != null) {
+//            if (event.getItem().getRecrutier().getFileImageFace() != null) {
+                return columnGeneratorImageText(event.getItem().getRecrutier().getFileImageFace(),
+                        event.getItem().getRecrutier().getName(),
+                        StdImage.NO_PROGRAMMER,
+                        "30px",
+                        true);
+            }
+  //      }
 
+        return getBlankHBox();
+    }
 
     @Install(to = "jobCandidateIteractionListTable.vacancy", subject = "columnGenerator")
     private Component jobCandidateIteractionListTableVacancyColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        return columnGeneratorImageText(event.getItem().getVacancy().getPositionType().getLogo(),
-                event.getItem().getVacancy().getVacansyName(),
-                null,
-                "30px",
-                false);
+        if (event.getItem().getVacancy() != null) {
+            if (event.getItem().getVacancy().getPositionType() != null) {
+//                if (event.getItem().getVacancy().getPositionType().getLogo() != null) {
+                    return columnGeneratorImageText(event.getItem().getVacancy().getPositionType().getLogo(),
+                            event.getItem().getVacancy().getVacansyName(),
+                            StdImage.NO_COMPANY,
+                            "30px",
+                            false);
+//                }
+            }
+        }
+
+        return getBlankHBox();
     }
+
     @Inject
     private DataManager dataManager;
     @Inject
@@ -308,30 +340,34 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         retHbox.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         Image logoImage = uiComponents.create(Image.class);
-        logoImage.setWidth(imageWidth);
-        logoImage.setHeight(imageWidth);
-        if (border)
-            logoImage.setStyleName(new StringBuilder("circle-").append(imageWidth).append("-white-border").toString());
-        logoImage.setScaleMode(Image.ScaleMode.FILL);
-        logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        logoImage.setHtmlSanitizerEnabled(false);
-        logoImage.setDescriptionAsHtml(true);
-        logoImage.setDescription(textManipulationService.getImage(fileDescriptor));
-
         if (fileDescriptor != null) {
-            try {
-                logoImage
-                        .setSource(FileDescriptorResource.class)
-                        .setFileDescriptor(fileDescriptor);
-            } catch (Exception e) {
-                e.printStackTrace();
+            logoImage.setWidth(imageWidth);
+            logoImage.setHeight(imageWidth);
+            if (border)
+                logoImage.setStyleName(new StringBuilder("circle-").append(imageWidth).append("-white-border").toString());
+            logoImage.setScaleMode(Image.ScaleMode.FILL);
+            logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            logoImage.setHtmlSanitizerEnabled(false);
+            logoImage.setDescriptionAsHtml(true);
+            logoImage.setDescription(textManipulationService.getImage(fileDescriptor));
 
+            if (fileDescriptor != null) {
+                try {
+                    logoImage
+                            .setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(fileDescriptor);
+                } catch (Exception e) {
+                    e.printStackTrace();
+
+                    logoImage.setSource(ThemeResource.class).setPath(defaultImage);
+                    logoImage.setVisible(true);
+                }
+            } else {
                 logoImage.setSource(ThemeResource.class).setPath(defaultImage);
                 logoImage.setVisible(true);
             }
-        } else {
-            logoImage.setSource(ThemeResource.class).setPath(defaultImage);
-            logoImage.setVisible(true);
+
+            retHbox.add(logoImage);
         }
 
         Label companyLabel = uiComponents.create(Label.class);
@@ -341,12 +377,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         companyLabel.setStyleName("table-wordwrap");
         companyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-        retHbox.add(logoImage);
         retHbox.add(companyLabel);
         retHbox.expand(companyLabel);
 
         return retHbox;
-
     }
 
     private Boolean ifCandidateIsExist() {
@@ -770,9 +804,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         setLastProjectTable();
     }
+
     private void initCurrenCompanyField() {
         currentCompanyField.setOptionImageProvider(this::currentCompanyTypeFieldImageProvider);
     }
+
     @Install(to = "vacancyFilterLookupPickerField", subject = "optionImageProvider")
     private Resource vacancyFilterLookupPickerFieldOptionImageProvider(OpenPosition object) {
         Image imageResource = uiComponents.create(Image.class);
@@ -3657,5 +3693,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             retImage.setVisible(false);
             return retImage.createResource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
         }
+    }
+
+    private HBoxLayout getBlankHBox() {
+        return uiComponents.create(HBoxLayout.class);
     }
 }
