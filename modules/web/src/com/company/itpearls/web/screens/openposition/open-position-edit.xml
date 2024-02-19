@@ -924,6 +924,11 @@
                      spacing="true"
                      expand="templateLetterBox"
                      icon="font-icon:MAIL_FORWARD">
+                    <textField id="templateCVSytemCodeTextField"
+                               dataContainer="openPositionDc"
+                               property="templateCVSytemCode"
+                               caption="msg://msgTemplateCVSytemCode"
+                               description="msg://msgTemplateCVSytemCodeDesc"/>
                     <vbox id="templateLetterBox"
                           width="100%"
                           height="100%"

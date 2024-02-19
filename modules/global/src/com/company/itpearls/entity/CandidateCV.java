@@ -56,6 +56,18 @@ public class CandidateCV extends StandardEntity {
     @Column(name = "COMMENT_LETTER")
     private String commentLetter;
 
+    @Lob
+    @Column(name = "EDUCATION")
+    private String education;
+
+    @Lob
+    @Column(name = "EDUCATION_ADD")
+    private String educationAdd;
+
+    @Lob
+    @Column(name = "ABOUT_ME")
+    private String aboutMe;
+
     @Transient
     @MetaProperty
     @CaseConversion(type = ConversionType.LOWER)
@@ -106,6 +118,30 @@ public class CandidateCV extends StandardEntity {
 
     @Column(name = "CONTACT_INFO_CHECKED")
     private Boolean contactInfoChecked;
+
+    public String getAboutMe() {
+        return aboutMe;
+    }
+
+    public void setAboutMe(String aboutMe) {
+        this.aboutMe = aboutMe;
+    }
+
+    public String getEducationAdd() {
+        return educationAdd;
+    }
+
+    public void setEducationAdd(String educationAdd) {
+        this.educationAdd = educationAdd;
+    }
+
+    public String getEducation() {
+        return education;
+    }
+
+    public void setEducation(String education) {
+        this.education = education;
+    }
 
     public List<CandidateCVWorkPlaces> getCandidateCVWorkPlaces() {
         return candidateCVWorkPlaces;

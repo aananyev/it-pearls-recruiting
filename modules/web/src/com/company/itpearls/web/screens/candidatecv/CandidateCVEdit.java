@@ -17,6 +17,8 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
+import com.haulmont.reports.entity.Report;
+import com.haulmont.reports.gui.ReportGuiManager;
 import net.htmlparser.jericho.Source;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.RandomAccessRead;
@@ -50,6 +52,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     List<WorkPlacesFragment> workPlacesFragments = new ArrayList<>();
     private static final String NEED_LETTER_NOTIFICATION = "НЕОБХОДИМО ЗАПОЛНИТЬ ШАБЛОН В СОПРОВОДИТЕЛЬНОМ ПИСЬМЕ " +
             "ПО ТРЕБОВАНИЮ ЗАКАЗЧИКА";
+    private static final String STD_RESUME = "candidateCVdefault";
     private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";
     private static final String EXTENSION_DOCX = "docx";
@@ -75,8 +78,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Link itpearlsCVLink;
     @Inject
     private Link originalCVLink;
-    @Inject
-    private RichTextArea questionLetterRichTextArea;
+//    @Inject
+//    private RichTextArea questionLetterRichTextArea;
     @Inject
     private RichTextArea candidateCVRichTextArea;
     @Inject
@@ -89,8 +92,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private MessageBundle messageBundle;
     @Inject
     private RichTextArea cvResomandation;
-    @Inject
-    private RichTextArea letterRecommendation;
+//    @Inject
+//    private RichTextArea letterRecommendation;
     @Inject
     private ParseCVService parseCVService;
     @Inject
@@ -148,6 +151,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Metadata metadata;
     @Inject
     private InstanceContainer<CandidateCV> candidateCVDc;
+    @Inject
+    private ReportGuiManager reportGuiManager;
+    @Inject
+    private Button generateCVButton;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -631,12 +638,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                         "\n" +
                         "Алексей в процессе беседы показал себя как сдержанный и вежливый человек. Алексей - надежный сотрудник и не склонен к частой смене работы (время работы в компании Нет Крекер - 5 лет). Алексей командный игрок и комфортно чувствует себя в коллективе единомышленников.\n";
 
-                letterRecommendation.setValue(text);
-                letterRecommendation.setCaption(caption);
-                letterRecommendation.setDescription(example);
-                letterRecommendation.setVisible(true);
+                //letterRecommendation.setValue(text);
+                //letterRecommendation.setCaption(caption);
+                //letterRecommendation.setDescription(example);
+                //letterRecommendation.setVisible(true);
             } else {
-                letterRecommendation.setVisible(false);
+                //letterRecommendation.setVisible(false);
             }
         }
     }
@@ -722,10 +729,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
 
             if (!templateLetter.equals("")) {
-                questionLetterRichTextArea.setVisible(true);
-                questionLetterRichTextArea.setValue(templateLetter);
+//                questionLetterRichTextArea.setVisible(true);
+//                questionLetterRichTextArea.setValue(templateLetter);
             } else {
-                questionLetterRichTextArea.setVisible(false);
+//                questionLetterRichTextArea.setVisible(false);
             }
         }
     }
@@ -734,9 +741,25 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void onCandidateCVFieldOpenPositionValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
         setTemplateLetter();
         setLetterRecommendation();
+        setGenerateCVButton(event.getValue());
 
         if (candidateCVRichTextArea.getValue() != null && !candidateCVRichTextArea.getValue().equals("")) {
             setColorHighlightingCompetencies();
+        }
+    }
+
+    private void setGenerateCVButton(OpenPosition openPosition) {
+        if (openPosition.getTemplateCVSytemCode() != null) {
+            if (!openPosition.getTemplateCVSytemCode().equals("")) {
+                generateCVButton.setCaption("Generate " + openPosition.getTemplateCVSytemCode());
+//                generateCVButton.setEnabled(true);
+            } else {
+//                generateCVButton.setEnabled(false);
+                generateCVButton.setCaption("Generate " + STD_RESUME);
+            }
+        } else {
+//            generateCVButton.setEnabled(false);
+            generateCVButton.setCaption("Generate " + STD_RESUME);
         }
     }
 
@@ -1034,4 +1057,18 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
+    public void generateCVButtonInvoke() {
+        Map<String, Object> reportParams = new HashMap<>();
+        reportParams.put("candidateCV", getEditedEntity());
+        String QUERY = String.format("select p from report$Report p where p.code = '%s'",
+                candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() != null
+                        ? candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() : STD_RESUME);
+
+        LoadContext<Report> loadContext = LoadContext.create(Report.class)
+                .setQuery(LoadContext
+                        .createQuery(QUERY))
+                .setView("report.edit");
+        Report report = dataManager.load(loadContext);
+        reportGuiManager.printReport(report, reportParams);
+    }
 }

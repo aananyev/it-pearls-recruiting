@@ -123,7 +123,7 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
 
     @Install(to = "candidateCVsTable.resumePosition", subject = "columnGenerator")
     private Component candidateCVsTableResumePositionColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+/*        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
         retHbox.setWidthFull();
         retHbox.setHeightFull();
         retHbox.setSpacing(true);
@@ -163,9 +163,35 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
         retHbox.add(positionLabel);
         retHbox.expand(positionLabel);
 
-        return retHbox;
-    }
+        return retHbox; */
 
+        try { // TO-DO куча трукечей, которые никогда не сработают. Убрать надо
+            return columnGeneratorImageText(event.getItem().getResumePosition().getLogo(),
+                    new StringBuilder().append(event.getItem().getResumePosition().getPositionEnName()).append(" / ")
+                            .append(event.getItem().getResumePosition().getPositionRuName()).toString(),
+                    null,
+                    "30px",
+                    false);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+
+            try {
+                return columnGeneratorImageText(null,
+                        new StringBuilder().append(event.getItem().getToVacancy().getPositionType().getPositionEnName()).append(" / ")
+                                .append(event.getItem().getToVacancy().getPositionType().getPositionRuName()).toString(),
+                        null,
+                        "30px",
+                        false);
+            } catch (NullPointerException e1) {
+                e.printStackTrace();
+                return columnGeneratorImageText(null, "",
+                        null,
+                        "30px",
+                        false);
+            }
+        }
+    }
+/*
     private HBoxLayout columnGeneratorImageText(FileDescriptor fileDescriptor,
                                                 String text,
                                                 String defaultImage,
@@ -216,13 +242,69 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
 
         return retHbox;
 
+    } */
+
+    private HBoxLayout columnGeneratorImageText(FileDescriptor fileDescriptor,
+                                                String text,
+                                                String defaultImage,
+                                                String imageWidth, Boolean border) {
+        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setWidth("100%");
+        retHbox.setHeight("100%");
+        retHbox.setSpacing(true);
+        retHbox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        Image logoImage = uiComponents.create(Image.class);
+        logoImage.setWidth(imageWidth);
+        logoImage.setHeight(imageWidth);
+        if (border)
+            logoImage.setStyleName(new StringBuilder("circle-").append(imageWidth).append("-white-border").toString());
+        logoImage.setScaleMode(Image.ScaleMode.FILL);
+        logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        logoImage.setHtmlSanitizerEnabled(false);
+        logoImage.setDescriptionAsHtml(true);
+        logoImage.setDescription(textManipulationService.getImage(fileDescriptor));
+
+        if (fileDescriptor != null) {
+            try {
+                logoImage
+                        .setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(fileDescriptor);
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                logoImage.setSource(ThemeResource.class).setPath(defaultImage);
+                logoImage.setVisible(true);
+            }
+        } else {
+            if (defaultImage != null) {
+                logoImage.setSource(ThemeResource.class).setPath(defaultImage);
+                logoImage.setVisible(true);
+            } else {
+                logoImage.setVisible(false);
+            }
+        }
+
+        Label companyLabel = uiComponents.create(Label.class);
+        companyLabel.setValue(text);
+        companyLabel.setWidthAuto();
+        companyLabel.setHeightAuto();
+        companyLabel.setStyleName("table-wordwrap");
+        companyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        retHbox.add(logoImage);
+        retHbox.add(companyLabel);
+        retHbox.expand(companyLabel);
+
+        return retHbox;
+
     }
     @Install(to = "candidateCVsTable.fullName", subject = "columnGenerator")
     private Component candidateCVsTableFullNameColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         return columnGeneratorImageText(event.getItem().getFileImageFace(),
                 event.getItem().getCandidate().getFullName(),
                 StdImage.NO_PROGRAMMER,
-                "30px");
+                "30px", true);
     }
     @Install(to = "candidateCVsTable.vacansyName", subject = "columnGenerator")
     private Component candidateCVsTableVacansyNameColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
@@ -243,7 +325,7 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
             return columnGeneratorImageText(fileDescriptor,
                     stringBuilder.toString(),
                     StdImage.NO_PROGRAMMER,
-                    "30px");
+                    "30px", false);
         } else {
             return uiComponents.create(Label.class);
         }
@@ -265,6 +347,6 @@ public class CandidateCVBrowse extends StandardLookup<CandidateCV> {
         return columnGeneratorImageText(fileDescriptor,
                 stringBuilder.toString(),
                 StdImage.NO_PROGRAMMER,
-                "30px");
+                "30px", true);
     }
 }

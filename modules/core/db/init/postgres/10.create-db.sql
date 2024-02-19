@@ -127,6 +127,9 @@ create table ITPEARLS_CANDIDATE_CV (
     TEXT_CV text,
     LETTER text,
     COMMENT_LETTER text,
+    EDUCATION text,
+    EDUCATION_ADD text,
+    ABOUT_ME text,
     LINK_IT_PEARLS_CV varchar(255),
     LINK_ORIGINAL_CV varchar(255),
     FILE_CV_ID uuid,
@@ -135,7 +138,6 @@ create table ITPEARLS_CANDIDATE_CV (
     FILE_IMAGE_FACE uuid,
     IMAGE_BYTE_ARRAY bytea,
     CONTACT_INFO_CHECKED boolean,
-    CANDIDATE_CV_WORK_PLACE_ID uuid not null,
     --
     primary key (ID)
 )^
@@ -504,6 +506,7 @@ create table ITPEARLS_OPEN_POSITION (
     MEMO_FOR_INTERVIEW text,
     OWNER_ID uuid,
     CLOSING_DATE date,
+    TEMPLATE_CV_SYTEM_CODE varchar(64),
     --
     primary key (ID)
 )^

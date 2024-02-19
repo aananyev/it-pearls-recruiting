@@ -410,6 +410,32 @@
                         align="TOP_RIGHT"/>
                 </scrollBox>
             </tab>
+            <tab id="educationTab"
+                 caption="msg://msgEducation"
+                 margin="true,true,true,true"
+                 expand="educationHBox"
+                 icon="font-icon:ENVELOPE"
+                 spacing="true">
+                <hbox id="educationHBox"
+                      width="100%"
+                      spacing="true"
+                      height="100%">
+                    <richTextArea id="educationRichTextArea"
+                                  dataContainer="candidateCVDc"
+                                  property="education"
+                                  width="100%"
+                                  editable="true"
+                                  visible="true"
+                                  caption="msg://msgEducation"
+                                  height="100%"/>
+                    <richTextArea id="educationAddRichTextArea"
+                                  width="100%"
+                                  editable="true"
+                                  visible="true"
+                                  caption="msg://msgEducationAdd"
+                                  height="100%"/>
+                </hbox>
+            </tab>
             <tab id="tabLetter"
                  caption="msg://msgLetter"
                  margin="true,true,true,true"
@@ -418,15 +444,25 @@
                  spacing="true">
                 <hbox id="letterHBox"
                       width="100%"
-                      expand="letterVbox"
                       spacing="true"
                       height="100%">
-                    <vbox id="letterVbox"
+                    <richTextArea id="letterRichTextArea"
+                                  dataContainer="candidateCVDc"
+                                  property="letter"
+                                  height="100%"
+                                  caption="msg://msgLetter"
+                                  width="100%"/>
+                    <richTextArea id="aboutMeRichTextArea"
+                                  dataContainer="candidateCVDc"
+                                  property="aboutMe"
+                                  height="100%"
+                                  caption="msg://msgAboutMe"
+                                  width="100%"/>
+<!--                    <vbox id="letterVbox"
                           spacing="true"
                           width="100%"
                           height="100%"
-                          box.expandRatio="4"
-                          expand="letterRichTextArea">
+                          box.expandRatio="4">
                         <richTextArea id="questionLetterRichTextArea"
                                       width="100%"
                                       editable="false"
@@ -434,25 +470,21 @@
                                       caption="msg://msgPatternLetter"
                                       stylename="text-field-title-form"
                                       height="100%"/>
-                        <richTextArea id="letterRichTextArea"
-                                      dataContainer="candidateCVDc"
-                                      property="letter"
-                                      height="100%"
-                                      caption="msg://msgLetter"
-                                      width="100%"/>
+
+
                         <richTextArea id="commentLetterRichTextArea"
                                       dataContainer="candidateCVDc"
                                       property="commentLetter"
                                       caption="msg://msgCommentLetter"
                                       height="25%"/>
-                    </vbox>
+                    </vbox> -
                     <richTextArea id="letterRecommendation"
                                   width="100%"
                                   height="100%"
                                   stylename="borderless"
                                   visible="false"
                                   editable="false"
-                                  box.expandRatio="1"/>
+                                  box.expandRatio="1"/> -->
                 </hbox>
             </tab>
             <tab id="tabSkillTree"
@@ -558,6 +590,10 @@
                        width="AUTO"/>
             <hbox align="BOTTOM_RIGHT"
                   spacing="true">
+                <button id="generateCVButton"
+                        enable="true"
+                        caption="msg://msgGenerateCV"
+                        invoke="generateCVButtonInvoke"/>
                 <button action="windowCommitAndClose"
                         align="BOTTOM_RIGHT"/>
                 <button action="windowClose"

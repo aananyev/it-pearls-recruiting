@@ -225,10 +225,12 @@ public class WorkPlacesFragment extends ScreenFragment {
             groupBoxSetHeader();
 
             workPlaceGroupBox.setCollapsable(true);
+            workPlaceGroupBox.setExpanded(false);
             workPlaceGroupBox.setStyleName("label_button_grey");
 
         } else {
             createCandidateCVWorkPlaces();
+            workPlaceGroupBox.setExpanded(true);
         }
     }
 

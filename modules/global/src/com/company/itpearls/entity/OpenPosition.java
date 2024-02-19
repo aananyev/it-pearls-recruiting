@@ -227,6 +227,17 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "CLOSING_DATE")
     private Date closingDate;
 
+    @Column(name = "TEMPLATE_CV_SYTEM_CODE", length = 64)
+    private String templateCVSytemCode;
+
+    public String getTemplateCVSytemCode() {
+        return templateCVSytemCode;
+    }
+
+    public void setTemplateCVSytemCode(String templateCVSytemCode) {
+        this.templateCVSytemCode = templateCVSytemCode;
+    }
+
     public Date getClosingDate() {
         return closingDate;
     }
