@@ -10,6 +10,8 @@ import java.util.List;
 public interface InteractionService {
     String NAME = "itpearls_InteractionService";
 
+    Iteraction getDefaultInteraction();
+
     List<Iteraction> getMostPolularIteraction(User user, int maxCount);
 
     IteractionList getLastIteraction(JobCandidate jobCandidate);

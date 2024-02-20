@@ -127,7 +127,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         logoImage.setHeight(imageWidth);
         if (border)
         logoImage.setStyleName(new StringBuilder("circle-").append(imageWidth).append("-white-border").toString());
-        logoImage.setScaleMode(Image.ScaleMode.FILL);
+        logoImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
         logoImage.setHtmlSanitizerEnabled(false);
         logoImage.setDescriptionAsHtml(true);

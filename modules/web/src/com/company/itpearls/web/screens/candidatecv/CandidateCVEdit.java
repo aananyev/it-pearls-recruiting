@@ -1,9 +1,6 @@
 package com.company.itpearls.web.screens.candidatecv;
 
-import com.company.itpearls.core.ParseCVService;
-import com.company.itpearls.core.PdfParserService;
-import com.company.itpearls.core.ResumeRecognitionService;
-import com.company.itpearls.core.WebLoadService;
+import com.company.itpearls.core.*;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.SelectedCloseAction;
 import com.company.itpearls.web.screens.fragments.candidatecv.WorkPlacesFragment;
@@ -58,6 +55,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private static final String EXTENSION_DOCX = "docx";
     private FileDescriptor fileDescriptor;
 
+    @Inject
+    private ReportService reportService;
     @Inject
     private UserSession userSession;
     @Inject
@@ -163,20 +162,22 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
         candidateCVFieldOpenPosition.addValueChangeListener(e -> {
-            if (e.getValue().getNeedLetter() != null) {
-                if (e.getValue().getTemplateLetter() != null) {
-                    if (e.getValue().getNeedLetter() && e.getValue().getTemplateLetter() != null) {
-                        if (!e.getValue().getTemplateLetter().equals("")) {
-                            notifications.create(Notifications.NotificationType.WARNING)
-                                    .withDescription(NEED_LETTER_NOTIFICATION)
-                                    .withCaption(messageBundle.getMessage("msgWarning"))
-                                    .withType(Notifications.NotificationType.WARNING)
-                                    .show();
+            if (e.getValue() != null) {
+                if (e.getValue().getNeedLetter() != null) {
+                    if (e.getValue().getTemplateLetter() != null) {
+                        if (e.getValue().getNeedLetter() && e.getValue().getTemplateLetter() != null) {
+                            if (!e.getValue().getTemplateLetter().equals("")) {
+                                notifications.create(Notifications.NotificationType.WARNING)
+                                        .withDescription(NEED_LETTER_NOTIFICATION)
+                                        .withCaption(messageBundle.getMessage("msgWarning"))
+                                        .withType(Notifications.NotificationType.WARNING)
+                                        .show();
 
-                            letterRichTextArea.setValue(letterRichTextArea.getValue()
-                                    + "<hr>"
-                                    + e.getValue().getTemplateLetter()
-                                    + "<hr>");
+                                letterRichTextArea.setValue(letterRichTextArea.getValue()
+                                        + "<hr>"
+                                        + e.getValue().getTemplateLetter()
+                                        + "<hr>");
+                            }
                         }
                     }
                 }
@@ -749,18 +750,28 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     private void setGenerateCVButton(OpenPosition openPosition) {
-        if (openPosition.getTemplateCVSytemCode() != null) {
-            if (!openPosition.getTemplateCVSytemCode().equals("")) {
-                generateCVButton.setCaption("Generate " + openPosition.getTemplateCVSytemCode());
-//                generateCVButton.setEnabled(true);
+        Report report = null;
+        if (openPosition !=  null) {
+            report = reportService.getReport(openPosition.getTemplateCVSytemCode() != null
+                    ? openPosition.getTemplateCVSytemCode() : STD_RESUME);
+        } else {
+            report = reportService.getReport(STD_RESUME);
+        }
+
+        generateCVButton.setCaption(report.getName());
+/*        if (openPosition != null) {
+            if (openPosition.getTemplateCVSytemCode() != null) {
+                if (!openPosition.getTemplateCVSytemCode().equals("")) {
+                    generateCVButton.setCaption("Generate " + openPosition.getTemplateCVSytemCode());
+                } else {
+                    generateCVButton.setCaption(stdCaption.toString());
+                }
             } else {
-//                generateCVButton.setEnabled(false);
-                generateCVButton.setCaption("Generate " + STD_RESUME);
+                generateCVButton.setCaption(stdCaption.toString());
             }
         } else {
-//            generateCVButton.setEnabled(false);
-            generateCVButton.setCaption("Generate " + STD_RESUME);
-        }
+            generateCVButton.setCaption(stdCaption.toString());
+        } */
     }
 
     @Subscribe
@@ -1058,17 +1069,26 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     public void generateCVButtonInvoke() {
+        StringBuilder sb = new StringBuilder();
+        String QUERY_REPORT = "select p from report$Report p where p.code = '%s'";
         Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("candidateCV", getEditedEntity());
-        String QUERY = String.format("select p from report$Report p where p.code = '%s'",
-                candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() != null
-                        ? candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() : STD_RESUME);
+
+        if (candidateCVFieldOpenPosition.getValue() != null) {
+            sb.append(String.format(QUERY_REPORT,
+                    (candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() != null
+                            ? candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() : STD_RESUME)));
+        } else {
+            sb.append(String.format(QUERY_REPORT, STD_RESUME));
+        }
 
         LoadContext<Report> loadContext = LoadContext.create(Report.class)
                 .setQuery(LoadContext
-                        .createQuery(QUERY))
+                        .createQuery(sb.toString()))
                 .setView("report.edit");
+
         Report report = dataManager.load(loadContext);
+        Report report1 = reportService.getReport(sb.toString());
         reportGuiManager.printReport(report, reportParams);
     }
 }

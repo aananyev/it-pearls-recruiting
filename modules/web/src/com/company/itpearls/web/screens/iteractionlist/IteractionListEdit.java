@@ -701,6 +701,22 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
         setChainInteraction(event);
         checkEmployyementStatus(event);
+        checkDefaultInteraction();
+    }
+
+    private void checkDefaultInteraction() {
+        if (iteractionTypeField.getValue() == null) {
+            Iteraction iteraction = interactionService.getDefaultInteraction();
+
+            if (iteraction != null) {
+                iteractionTypeField.setValue(interactionService.getDefaultInteraction());
+            } else {
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withDescription(messageBundle.getMessage("msgNotDefaultInteraction"))
+                        .withCaption(messageBundle.getMessage("msgError"))
+                        .show();
+            }
+        }
     }
 
     private void checkEmployyementStatus(BeforeCommitChangesEvent event) {

@@ -9,6 +9,7 @@
                   class="com.company.itpearls.entity.JobCandidate">
             <view extends="_local">
                 <property name="candidateCv" view="_local">
+                    <property name="candidateCVWorkPlaces" view="candidateCVWorkPlaces-view"/>
                     <property name="candidate" view="_local">
                         <property name="personPosition" view="_local">
                             <property name="logo" view="_local"/>
@@ -920,12 +921,6 @@
                                 minimumWidth="70px">
                             <componentRenderer/>
                         </column>
-                        <column id="numberIteraction"
-                                property="numberIteraction"
-                                sort="DESCENDING"
-                                width="85px"
-                                maximumWidth="100px"
-                                sortable="true"/>
                         <column id="rating"
                                 minimumWidth="85px"
                                 width="85px"
@@ -934,7 +929,7 @@
                             <htmlRenderer nullRepresentation="null"/>
                         </column>
                         <column id="vacancy"
-                                maximumWidth="400px"
+                                width="500px"
                                 property="vacancy">
                             <componentRenderer/>
                         </column>

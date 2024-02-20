@@ -1,5 +1,6 @@
 package com.company.itpearls.core;
 
+import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 
 import java.math.BigDecimal;

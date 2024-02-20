@@ -1,5 +1,6 @@
 package com.company.itpearls.core;
 
+import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.core.global.DataManager;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class InteractionListServiceBean implements InteractionListService {
     }
 
     private final static String QUERY_GET_MAX_NUMBER_INTERACTION = "select e from itpearls_IteractionList e where e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f)";
+
 
     @Override
     public BigDecimal getCountInteraction() {

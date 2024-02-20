@@ -16,6 +16,22 @@ import java.util.*;
 public class InteractionServiceBean implements InteractionService {
     @Inject
     private DataManager dataManager;
+    @Override
+    public Iteraction getDefaultInteraction()
+    {
+        Iteraction iteraction = null;
+
+        try {
+            iteraction = dataManager.load(Iteraction.class)
+                    .query("select e from itpearls_Iteraction e where e.iteractionName like 'Default'")
+                    .view("iteraction-view")
+                    .one();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } finally {
+            return iteraction;
+        }
+    }
 
 //    private final static String QUERY_GET_MAX_NUMBER_INTERACTION = "select e from itpearls_IteractionList e where e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f)";
 

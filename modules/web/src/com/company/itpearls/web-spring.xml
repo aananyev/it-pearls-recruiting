@@ -42,6 +42,7 @@
                 <entry key="itpearls_InteractionListService" value="com.company.itpearls.core.InteractionListService"/>
                 <entry key="itpearls_StandartMapsService" value="com.company.itpearls.core.StandartMapsService"/>
                 <entry key="itpearls_JobCandidateService" value="com.company.itpearls.core.JobCandidateService"/>
+                <entry key="itpearls_ReportService" value="com.company.itpearls.core.ReportService"/>
             </map>
         </property>
     </bean>

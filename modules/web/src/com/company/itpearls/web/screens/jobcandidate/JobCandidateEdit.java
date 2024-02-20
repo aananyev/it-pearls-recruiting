@@ -2056,6 +2056,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                     screen.addAfterCloseListener(afterCloseEvent -> {
                         reloadCV();
+                        jobCandidateCandidateCvTable.repaint();
                     });
 
                     screen.show();
@@ -2074,6 +2075,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 Screen s = screenBuilders.editor(jobCandidateCandidateCvTable)
                         .withParentDataContext(dataContext)
                         .withInitializer(candidate -> {
+                            DataContext dataContext = getScreenData().getDataContext();
+
                             candidate.setCandidate(jobCandidateCandidateCvTable.getSingleSelected().getCandidate());
                             candidate.setTextCV(jobCandidateCandidateCvTable.getSingleSelected().getTextCV());
                             candidate.setLetter(jobCandidateCandidateCvTable.getSingleSelected().getLetter());
@@ -2082,8 +2085,36 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             candidate.setLinkItPearlsCV(jobCandidateCandidateCvTable.getSingleSelected().getLinkItPearlsCV());
                             candidate.setLintToCloudFile(jobCandidateCandidateCvTable.getSingleSelected().getLintToCloudFile());
                             candidate.setOwner((ExtUser) userSession.getUser());
+                            candidate.setAboutMe(jobCandidateCandidateCvTable.getSingleSelected().getAboutMe());
+                            candidate.setEducation(jobCandidateCandidateCvTable.getSingleSelected().getEducation());
+                            candidate.setEducationAdd(jobCandidateCandidateCvTable.getSingleSelected().getEducationAdd());
+                            candidate.setFileImageFace(jobCandidateCandidateCvTable.getSingleSelected().getFileImageFace());
 
-                            DataContext dataContext = getScreenData().getDataContext();
+                            if (jobCandidateCandidateCvTable.getSingleSelected().getCandidateCVWorkPlaces().size() > 0) {
+                                List<CandidateCVWorkPlaces> workPlases = new ArrayList<>();
+
+                                for (CandidateCVWorkPlaces candidateCVWorkPlaces : jobCandidateCandidateCvTable.getSingleSelected().getCandidateCVWorkPlaces()) {
+                                    CandidateCVWorkPlaces wp = metadata.create(CandidateCVWorkPlaces.class);
+
+                                    wp.setWorkPlace(candidateCVWorkPlaces.getWorkPlace());
+                                    wp.setPosition(candidateCVWorkPlaces.getPosition());
+                                    wp.setCandidateCV(candidateCVWorkPlaces.getCandidateCV());
+                                    wp.setAchievements(candidateCVWorkPlaces.getAchievements());
+                                    wp.setPersonalRole(candidateCVWorkPlaces.getPersonalRole());
+                                    wp.setFunctionalityAtWork(candidateCVWorkPlaces.getFunctionalityAtWork());
+                                    wp.setStartDate(candidateCVWorkPlaces.getStartDate());
+                                    wp.setEndDate(candidateCVWorkPlaces.getEndDate());
+                                    wp.setWorkPlaceComment(candidateCVWorkPlaces.getWorkPlaceComment());
+                                    wp.setWorkToThisDay(candidateCVWorkPlaces.getWorkToThisDay());
+
+                                    workPlases.add(wp);
+
+                                }
+
+                                dataContext.merge(workPlases);
+                                candidate.setCandidateCVWorkPlaces(workPlases);
+                            }
+
                             CandidateCV cv = dataContext.merge(candidate);
                             jobCandidateDc.getItem().getCandidateCv().add(cv);
                         })
@@ -2092,7 +2123,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .show();
 
                 s.addAfterCloseListener(e -> {
-                    jobCandidateDl.load();
+//                    jobCandidateDl.load();
+                    jobCandidateCandidateCvTable.repaint();
                     scanContactsFromCVs();
                 });
             }

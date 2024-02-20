@@ -9,6 +9,26 @@
     padding: 3px;
 }
 
+.widget-leaders-table-row-background-gray {
+    background-color: gray;
+    font-weight: bold;
+}
+
+.widget-leaders-table-row-background-white {
+    background-color: white;
+    font-weight: bold;
+
+}
+
+.widget-table-row-background-gray {
+    background-color: gray;
+}
+
+
+.widget-table-row-background-white {
+    background-color: white;
+}
+
 .circle {
   width: 45px;
   height: 45px;
@@ -29,6 +49,46 @@
   justify-content: center;
 }
 
+.circle-25px {
+  width: 25px;
+  height: 25px;
+  border: 1px solid black;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-25px-white-border {
+  width: 25px;
+  height: 25px;
+  border: 1px solid white;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-20px-noborder {
+  width: 20px;
+  height: 20px;
+  border: 0px solid black;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-25px-noborder {
+  width: 25px;
+  height: 25px;
+  border: 0px solid black;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 
 .circle-30px {
   width: 30px;
@@ -40,10 +100,50 @@
   justify-content: center;
 }
 
+.circle-30px-noborder {
+  width: 30px;
+  height: 30px;
+  border: 0px solid black;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-30px-white-border {
+  width: 30px;
+  height: 30px;
+  border: 0px solid white;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .circle-50px {
   width: 50px;
   height: 50px;
   border: 1px solid black;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-50px-noborder {
+  width: 50px;
+  height: 50px;
+  border: 0px solid black;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle-50px-white-border {
+  width: 50px;
+  height: 50px;
+  border: 0px solid white;
   border-radius: 100%;
   display: flex;
   align-items: center;
@@ -84,9 +184,22 @@
   justify-content: center;
 }
 
+.h4-red {
+    color: red;
+    font-size: $v-font-size--h4;
+    font-weight: bold;
+}
+
 .h2-red {
     color: red;
     font-size: $v-font-size--h2;
+    font-weight: bold;
+}
+
+
+.h4-gray {
+    color: gray;
+    font-size: $v-font-size--h4;
     font-weight: bold;
 }
 
@@ -95,7 +208,6 @@
     font-size: $v-font-size--h2;
     font-weight: bold;
 }
-
 
 .h1-red {
     color: red;
@@ -121,6 +233,12 @@
     font-weight: bold;
 }
 
+.h4-green {
+    color: green;
+    font-size: $v-font-size--h4;
+    font-weight: bold;
+}
+
 .h3-green {
     color: green;
     font-size: $v-font-size--h3;
@@ -133,9 +251,21 @@
     font-weight: bold;
 }
 
+.h4-blue {
+    color: blue;
+    font-size: $v-font-size--h4;
+    font-weight: bold;
+}
+
 .h3-blue {
     color: blue;
     font-size: $v-font-size--h3;
+    font-weight: bold;
+}
+
+.h4-orange {
+    color: orange;
+    font-size: $v-font-size--h4;
     font-weight: bold;
 }
 
@@ -518,6 +648,11 @@ rating_battery_yellow_3:before {
     box-shadow: 0 0 0 2px blue, 0 0 13px #333; Параметры теней */
 }
 
+.open_position_sign_label_black {
+    font_size: small;
+    color: black;
+}
+
 @mixin com_company_itpearls-helium-ext {
 
 .rating_box {
@@ -591,134 +726,190 @@ rating_battery_yellow_3:before {
     margin: 1px;
 }
 
+.label_button_blue {
+    background: blue; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
+
+.label_priority_button_blue {
+    background: blue; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 2px; /* Поля вокруг текста */
+    border-radius: 10px;
+    margin: 0px 0px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
+
 .label_button_mostpopular_green {
     background: green; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    border-radius: 15px;
+    border-radius: 10px;
     padding: 5px;
     margin: 5px;
     border-color: #51ff00;
     text-weight: normal;
     margin: 0px 10px 0px 0px;
-    font-size: 12px;
-    vertical-align: middle;
-}
-
-.label_button_blue {
-    background: blue; /* Цвет фона */
-    color: #fff; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 15px;
-    margin: 0px 10px 0px 0px;
-    text-weight: normal;
-    font-size: 12px;
+    font-size: small;
 }
 
 .label_button_green {
     background: green; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 15px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
     text-weight: normal;
     margin: 0px 10px 0px 0px;
-    font-size: 12px;
-    vertical-align: middle;
+    font-size: small;
+}
+
+.label_priority_button_green {
+    background: green; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 2px; /* Поля вокруг текста */
+    margin: 2px;
+    border-radius: 10px;
+    text-weight: normal;
+    margin: 0px 0px 0px 0px;
+    font-size: small;
 }
 
 .label_button_gray {
     background: grey; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 15px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
     text-weight: normal;
     margin: 0px 10px 0px 0px;
-    font-size: 12px;
-    vertical-align: middle;
+    font-size: small;
 }
 
 .label_button_red {
     background: red; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 15px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
     margin: 0px 10px 0px 0px;
     text-weight: normal;
-    font-size: 12px;
-    vertical-align: middle;
+    font-size: small;
+}
+
+.label_priority_button_red {
+    background: red; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 2px; /* Поля вокруг текста */
+    margin: 5px;
+    border-radius: 10px;
+    margin: 0px 0px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
+
+.label_button_gray {
+    background: red; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
+    margin: 0px 10px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
+
+.label_priority_button_gray {
+    background: gray; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 2px; /* Поля вокруг текста */
+    margin: 5px;
+    border-radius: 10px;
+    margin: 0px 0px 0px 0px;
+    text-weight: normal;
+    font-size: small;
 }
 
 .label_button_orange {
     background: orange; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 15px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
     margin: 0px 10px 0px 0px;
     text-weight: normal;
-    font-size: 12px;
-    vertical-align: middle;
+    font-size: small;
 }
 
+.label_priority_button_orange {
+    background: orange; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    padding: 2px; /* Поля вокруг текста */
+    margin: 5px;
+    border-radius: 10px;
+    margin: 0px 0px 0px 0px;
+    text-weight: normal;
+    font-size: small;
+}
 
 .label_button_yellow {
     background: yellow; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 15px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
     margin: 0px 10px 0px 0px;
     text-weight: normal;
-    font-size: 12px;
-    vertical-align: middle;
+    font-size: small;
 }
 
 
 .label_button_brown {
     background: brown; /* Цвет фона */
     color: #fff; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 15px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
     margin: 0px 10px 0px 0px;
     text-weight: normal;
-    font-size: 12px;
-    vertical-align: middle;
+    font-size: small;
 }
 
 
 .label_table_red {
         color: red; /* Цвет текста */
-        padding: 10px; /* Поля вокруг текста */
-        border-radius: 10px;
+        padding: 5px; /* Поля вокруг текста */
+        border-radius: 5px;
         text-weight: bold;
         margin: 0px 10px 0px 0px;
 }
 
 .label_table_brown {
     color: brown; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
     text-weight: bold;
     margin: 0px 10px 0px 0px;
 }
 
 .label_table_gray {
     color: gray; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
     text-weight: bold;
     margin: 0px 10px 0px 0px;
 }
 
 .label_table_orange {
     color: orange; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
     text-weight: bold;
     margin: 0px 10px 0px 0px;
 }
 
 .label_table_blue {
     color: blue; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
     text-weight: bold;
     margin: 0px 10px 0px 0px;
 }
@@ -726,16 +917,16 @@ rating_battery_yellow_3:before {
 
 .label_table_black {
     color: black; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
     text-weight: bold;
     margin: 0px 10px 0px 0px;
 }
 
 .label_table_green {
     color: green; /* Цвет текста */
-    padding: 10px; /* Поля вокруг текста */
-    border-radius: 10px;
+    padding: 5px; /* Поля вокруг текста */
+    border-radius: 5px;
     text-weight: bold;
     margin: 0px 10px 0px 0px;
 }
@@ -820,6 +1011,7 @@ rating_battery_yellow_3:before {
    line-height: 150%;
 }
 
+
 .table-wordwrap-linehight-200 {
    white-space: pre-wrap;      /* CSS3 */
    white-space: -moz-pre-wrap; /* Firefox */
@@ -827,6 +1019,17 @@ rating_battery_yellow_3:before {
    white-space: -o-pre-wrap;   /* Opera 7 */
    word-wrap: break-word;      /* IE */
    line-height: 200%;
+}
+
+
+.detail-candidate-card-wordwrap {
+   white-space: pre-wrap;      /* CSS3 */
+   white-space: -moz-pre-wrap; /* Firefox */
+   white-space: -pre-wrap;     /* Opera <7 */
+   white-space: -o-pre-wrap;   /* Opera 7 */
+   word-wrap: break-word;      /* IE */
+   text-align: center;
+   line-height: 100%;
 }
 
 .table-row-not-visibe {
@@ -916,10 +1119,26 @@ rating_battery_yellow_3:before {
     margin: 0 auto;
 }
 
-.pic-center-large-blue {
-    color: green;
+.pic-center-large-black {
+    color: black;
     text-align: center;
-    text-color: green;
+    text-color: black;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.pic-center-large-lightblue {
+    color: lightblue;
+    text-align: center;
+    text-color: lightblue;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.pic-center-large-blue {
+    color: blue;
+    text-align: center;
+    text-color: blue;
     font-size: large;
     margin: 0 auto;
 }
@@ -1046,9 +1265,9 @@ rating_battery_yellow_3:before {
 }
 
 .pic-center-large-yellow {
-    color: yellow;
+    color: orange;
     text-align: center;
-    text-color: yellow;
+    text-color: orange;
     font-size: large;
     margin: 0 auto;
 }
@@ -1060,7 +1279,6 @@ rating_battery_yellow_3:before {
     font-size: large;
     margin: 0 auto;
 }
-
 
 .pic-center-large-gray {
     color: gray;
@@ -1076,6 +1294,74 @@ rating_battery_yellow_3:before {
     margin: 0 auto;
 }
 
+.star-center-large-yellow {
+    color: orange;
+    text-align: center;
+    text-color: orange;
+    font-size: large;
+    margin: 0 auto;
+}
+
+
+.star-center-large-orange {
+    color: orange;
+    text-align: center;
+    text-color: orange;
+    font-size: large;
+    margin: 0 auto;
+}
+
+
+.flag-center-large-red {
+    color: red;
+    text-align: center;
+    text-color: red;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.star-center-large-red {
+    color: red;
+    text-align: center;
+    text-color: red;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.flag-center-large-yellow {
+    color: yellow;
+    text-align: center;
+    text-color: yellow;
+    font-size: large;
+    margin: 0 auto;
+}
+
+
+.flag-center-large-orange {
+    color: orange;
+    text-align: center;
+    text-color: orange;
+    font-size: large;
+    margin: 0 auto;
+}
+
+.star-center-large-green {
+    color: green;
+    text-align: center;
+    text-color: green;
+    font-size: large;
+    margin: 0 auto;
+}
+
+
+.flag-center-large-green {
+    color: green;
+    text-align: center;
+    text-color: green;
+    font-size: large;
+    margin: 0 auto;
+}
+
 .open-position-pic-center {
     text-align: center;
     margin: 0 auto;
@@ -1085,7 +1371,7 @@ rating_battery_yellow_3:before {
     color: orange;
     text-align: center;
     text-color: orange;
-    font-size: x-large;
+    font-size: large;
     margin: 0 auto;
 }
 
@@ -1093,15 +1379,15 @@ rating_battery_yellow_3:before {
     color: red;
     text-align: center;
     text-color: red;
-    font-size: x-large;
+    font-size: large;
     margin: 0 auto;
 }
 
 .open-position-pic-center-large-yellow {
-    color: yellow;
+    color: orange;
     text-align: center;
-    text-color: yellow;
-    font-size: x-large;
+    text-color: orange;
+    font-size: large;
     margin: 0 auto;
 }
 
@@ -1109,7 +1395,7 @@ rating_battery_yellow_3:before {
     color: blue;
     text-align: center;
     text-color: blue;
-    font-size: x-large;
+    font-size: large;
     margin: 0 auto;
 }
 
@@ -1117,7 +1403,7 @@ rating_battery_yellow_3:before {
     color: gray;
     text-align: center;
     text-color: gray;
-    font-size: x-large;
+    font-size: large;
     margin: 0 auto;
 }
 
@@ -1125,7 +1411,7 @@ rating_battery_yellow_3:before {
     color: green;
     text-align: center;
     text-color: green;
-    font-size: x-large;
+    font-size: large;
     margin: 0 auto;
 }
 
@@ -1133,7 +1419,7 @@ rating_battery_yellow_3:before {
     color: lime;
     text-align: center;
     text-color: green;
-    font-size: x-large;
+    font-size: large;
     margin: 0 auto;
 }
 
@@ -1141,16 +1427,15 @@ rating_battery_yellow_3:before {
     color: orange;
     text-align: center;
     text-color: orange;
+    font-size: 2em;
     margin: 0 auto;
-    font-size: xx-large;
-
 }
 
 .open-position-pic-center-x-large-red {
     color: red;
     text-align: center;
     text-color: red;
-    font-size: xx-large;
+    font-size: 2em;
     margin: 0 auto;
 }
 
@@ -1158,7 +1443,7 @@ rating_battery_yellow_3:before {
     color: yellow;
     text-align: center;
     text-color: yellow;
-    font-size: xx-large;
+    font-size: 2em;
     margin: 0 auto;
 }
 
@@ -1166,7 +1451,7 @@ rating_battery_yellow_3:before {
     color: blue;
     text-align: center;
     text-color: blue;
-    font-size: xx-large;
+    font-size: 2em;
     margin: 0 auto;
 }
 
@@ -1174,7 +1459,7 @@ rating_battery_yellow_3:before {
     color: gray;
     text-align: center;
     text-color: gray;
-    font-size: xx-large;
+    font-size: 2em;
     margin: 0 auto;
 }
 
@@ -1182,7 +1467,7 @@ rating_battery_yellow_3:before {
     color: green;
     text-align: center;
     text-color: green;
-    font-size: xx-large;
+    font-size: 2em;
     margin: 0 auto;
 }
 
@@ -1190,7 +1475,7 @@ rating_battery_yellow_3:before {
     color: lime;
     text-align: center;
     text-color: green;
-    font-size: xx-large;
+    font-size: 2em;
     margin: 0 auto;
 }
 
@@ -1198,7 +1483,7 @@ rating_battery_yellow_3:before {
     color: #dde002;
     text-align: center;
     text-color: orange;
-    font-size: x-large;
+    font-size: large;
     margin: 0 auto;
 }
 
@@ -1206,7 +1491,7 @@ rating_battery_yellow_3:before {
     color: orange;
     text-align: center;
     text-color: orange;
-    font-size: x-large;
+    font-size: large;
     margin: 0 auto;
 }
 
@@ -1214,7 +1499,7 @@ rating_battery_yellow_3:before {
     color: red;
     text-align: center;
     text-color: red;
-    font-size: x-large;
+    font-size: large;
     margin: 0 auto;
 }
 
@@ -1222,12 +1507,12 @@ rating_battery_yellow_3:before {
     color: maroon;
     text-align: center;
     text-color: red;
-    font-size: x-large;
+    font-size: large;
     margin: 0 auto;
 }
 
 .open-position-pic-center-large {
-    font-size: x-large;
+    font-size: large;
     text-align: center;
     margin: 0 auto;
 }
@@ -1573,4 +1858,68 @@ rating_battery_yellow_3:before {
     margin-left: 0;
     margin-right: 5px;
   }
+
+  .text-block-gradient-red {
+        font-weight: bold;
+        background: linear-gradient(45deg, red 33%, pink 66%);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border: 2px solid red;
+        border-radius: 5px;
+        border-color: red;
+        padding: 2px;
+        background-color: #ccc;
+        display: inline-block;
+        margin-left: 5px;
+  }
+
+    .text-block-gradient-green {
+          font-weight: bold;
+          background: linear-gradient(45deg, green 33%, pink 66%);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          border: 2px solid red;
+          border-radius: 5px;
+          border-color: green;
+          padding: 2px;
+          background-color: #ccc;
+          display: inline-block;
+          margin-left: 5px;
+          background-image: linear-gradient(45deg, white, white), linear-gradient(45deg, green, green);
+          background-size: 100% 2px, 0 2px;
+          background-position: 0 100%, 0 0;
+    }
+
+
+    .text-block-gradient-yellow {
+          font-weight: bold;
+          background: linear-gradient(45deg, yellow 33%, pink 66%);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          border: 2px solid yellow;
+          border-radius: 5px;
+          border-color: yellow;
+          padding: 2px;
+          background-color: #ccc;
+          display: inline-block;
+          margin-left: 5px;
+    }
+
+    .my-active-candidate-dashboard-detail-normal {
+          font-weight: normal;
+    }
+
+    .my-active-candidate-dashboard-detail-bold {
+          font-weight: bold;
+    }
+
+    .gradient-text {
+      text-transform: uppercase;
+      background: linear-gradient(45deg, red 33%, blue 66%, orange);
+      white-space: nowrap;
+      color: black;
+    }
 }

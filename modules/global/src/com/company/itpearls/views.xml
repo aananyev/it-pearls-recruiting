@@ -110,6 +110,11 @@
                 <property name="fileType" view="_local"/>
             </property>
             <property name="fileImageFace" view="_minimal"/>
+            <property name="candidateCVWorkPlaces" view="_local">
+                <property name="candidateCV" view="_local"/>
+                <property name="position" view="_local"/>
+                <property name="workPlace" view="_local"/>
+            </property>
         </property>
         <property name="skillTree" view="_local"/>
         <property name="fileImageFace" view="_local"/>
@@ -227,6 +232,11 @@
             <property name="personPosition" view="_local">
                 <property name="logo" view="_local"/>
             </property>
+        </property>
+        <property name="candidateCVWorkPlaces" view="_local">
+            <property name="candidateCV" view="_local"/>
+            <property name="position" view="_local"/>
+            <property name="workPlace" view="_local"/>
         </property>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">
@@ -634,7 +644,16 @@
         <property name="administrator" view="_local"/>
     </view>
     <view entity="itpearls_CandidateCVWorkPlaces" name="candidateCVWorkPlaces-view" extends="_local">
-        <property name="candidateCV" view="candidateCV-view"/>
+        <property name="candidateCV" view="candidateCV-view">
+            <property name="toVacancy" view="_local">
+                <property name="projectName" view="_local">
+                    <property name="projectDepartment" view="_local"/>
+                    <property name="openPosition" view="_local"/>
+                    <property name="projectOwner" view="_local"/>
+                </property>
+            </property>
+        </property>
         <property name="workPlace" view="company-view"/>
+        <property name="position" view="_local"/>
     </view>
 </views>
