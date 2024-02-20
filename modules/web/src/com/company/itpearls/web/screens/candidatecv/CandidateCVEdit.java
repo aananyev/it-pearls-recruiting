@@ -90,8 +90,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private TextArea<String> quoteTextArea;
     @Inject
     private MessageBundle messageBundle;
-    @Inject
-    private RichTextArea cvResomandation;
+//    @Inject
+//    private RichTextArea cvResomandation;
 //    @Inject
 //    private RichTextArea letterRecommendation;
     @Inject
@@ -483,8 +483,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             candidateCVRichTextArea.setEditable(false);
         }
 
-        setCVRecommendation();
-        setLetterRecommendation();
+//        setCVRecommendation();
+//        setLetterRecommendation();
 //        setVisibleLogo();
         setCandidatePicImage();
     }
@@ -582,7 +582,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
     }
 
-    private void setCVRecommendation() {
+/*    private void setCVRecommendation() {
         String text = "<ol>" +
                 "<li>Резюме должно быть информативным и кратким, даже если за плечами 15+ лет опыта. Сфокусируйтесь на трех последних местах работы, это интересует работодателя в первую очередь.</li>" +
                 "<li>Включите в резюме только самые ключевые задачи, функциональные обязанности и достижения. Не используйте закрученных словооборотов, составляйте описание тезисно и лаконично.</li>" +
@@ -592,7 +592,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 "</ol>";
 
         cvResomandation.setValue(text);
-    }
+    } */
 
 /*    public void setVisibleLogo() {
 
@@ -620,7 +620,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         setCandidatePicImage();
     }
 
-    private void setLetterRecommendation() {
+/*    private void setLetterRecommendation() {
         if (candidateCVFieldOpenPosition.getValue() != null) {
             if (candidateCVFieldOpenPosition.getValue().getTemplateLetter() != null) {
                 String caption = "Структура письма:";
@@ -646,7 +646,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 //letterRecommendation.setVisible(false);
             }
         }
-    }
+    } */
 
     /*    private void setLetterRecommendation() {
         String caption = "Структура письма:";
@@ -740,7 +740,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe("candidateCVFieldOpenPosition")
     public void onCandidateCVFieldOpenPositionValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
         setTemplateLetter();
-        setLetterRecommendation();
+//        setLetterRecommendation();
         setGenerateCVButton(event.getValue());
 
         if (candidateCVRichTextArea.getValue() != null && !candidateCVRichTextArea.getValue().equals("")) {

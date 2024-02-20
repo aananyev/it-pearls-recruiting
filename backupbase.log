@@ -5618,3 +5618,23 @@ server started
 2024-02-19 20:14:22.500 +04 [58004] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2024-02-19 20:14:23.136 +04 [58008] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2024-02-19 20:14:23.362 +04 [58010] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+waiting for server to shut down...2024-02-19 20:21:12.508 +04 [55249] LOG:  received fast shutdown request
+.2024-02-19 20:21:12.508 +04 [55249] LOG:  aborting any active transactions
+2024-02-19 20:21:12.509 +04 [58027] FATAL:  terminating connection due to administrator command
+2024-02-19 20:21:12.509 +04 [58029] FATAL:  terminating connection due to administrator command
+2024-02-19 20:21:12.516 +04 [55249] LOG:  background worker "logical replication launcher" (PID 55260) exited with exit code 1
+2024-02-19 20:21:12.517 +04 [55255] LOG:  shutting down
+2024-02-19 20:21:12.549 +04 [55249] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2024-02-19 20:32:50.379 +04 [58476] LOG:  listening on IPv6 address "::1", port 5432
+2024-02-19 20:32:50.379 +04 [58476] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-02-19 20:32:50.379 +04 [58476] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-02-19 20:32:50.395 +04 [58477] LOG:  database system was interrupted; last known up at 2024-02-19 20:31:20 +04
+2024-02-19 20:32:50.616 +04 [58477] LOG:  redo starts at 31/3A000200
+2024-02-19 20:32:50.623 +04 [58477] LOG:  consistent recovery state reached at 31/3A0A08C0
+2024-02-19 20:32:50.624 +04 [58477] LOG:  redo done at 31/3A0A08C0
+2024-02-19 20:32:50.624 +04 [58477] LOG:  last completed transaction was at log time 2024-02-19 20:31:36.201919+04
+2024-02-19 20:32:50.699 +04 [58476] LOG:  database system is ready to accept connections
+ done
+server started
