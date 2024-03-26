@@ -1,0 +1,1 @@
+alter table ITPEARLS_OPEN_POSITION rename column template_cv_sytem_code to template_cv_sytem_code__u40538 ;

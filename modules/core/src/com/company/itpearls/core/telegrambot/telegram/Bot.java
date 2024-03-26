@@ -141,12 +141,12 @@ public final class Bot extends TelegramLongPollingCommandBot {
         }
     }
 
-    @Override
+/*    @Override
     public void onUpdateReceived(Update update) {
         this.update = update;
         onUpdateReceived(update);
 
-/*        if(update.hasMessage()){
+        if(update.hasMessage()){
             if(update.getMessage().hasText()){
                 if(update.getMessage().getText().equals("Hello")){
 //                    try {
@@ -163,6 +163,6 @@ public final class Bot extends TelegramLongPollingCommandBot {
 //                        .setChatId(update.getCallbackQuery().getMessage().getChatId()));
 //            } catch (TelegramApiException e) {
 //                e.printStackTrace();
-           } */
-        }
+           }
+        } */
 }

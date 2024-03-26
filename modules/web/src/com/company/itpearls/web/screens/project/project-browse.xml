@@ -98,6 +98,12 @@
                         collapsed="true">
                     <iconRenderer/>
                 </column>
+                <column id="openPositionsCountColumn"
+                        caption="msg://msgOpenPositionsCount"
+                        collapsible="true"
+                        collapsed="false">
+                    <componentRenderer/>
+                </column>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

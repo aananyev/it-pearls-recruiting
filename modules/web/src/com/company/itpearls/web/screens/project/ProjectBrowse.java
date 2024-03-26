@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.project;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.Person;
 import com.haulmont.chile.core.model.MetaPropertyPath;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.MessageTools;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.UiComponents;
@@ -25,6 +26,8 @@ import java.util.stream.Collectors;
 @LookupComponent("projectsTable")
 @LoadDataBeforeShow
 public class ProjectBrowse extends StandardLookup<Project> {
+    private static final String QUERY_COUNTER_OPEN_POSITION_IN_PROJECT = "select count(e.numberPosition) from itpearls_OpenPosition " +
+            "where not e.openClose = true and e.projectName = :projectName";
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -46,6 +49,8 @@ public class ProjectBrowse extends StandardLookup<Project> {
     private final static String width_50px = "50px";
     private final static String style_circle_30px = "circle-30px";
     private final static String style_table_wordwrap = "table-wordwrap";
+    @Inject
+    private DataManager dataManager;
 
 
     @Install(to = "projectsTable.projectLogoColumn", subject = "columnGenerator")
@@ -314,5 +319,32 @@ public class ProjectBrowse extends StandardLookup<Project> {
         retHBox.expand(retObject);
 
         return retHBox;
+    }
+
+    @Install(to = "projectsTable.openPositionsCountColumn", subject = "columnGenerator")
+    private Object projectsTableOpenPositionsCountColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> columnGeneratorEvent) {
+
+        Integer counter = 0;
+
+        try {
+            counter = dataManager.loadValue(QUERY_COUNTER_OPEN_POSITION_IN_PROJECT, Integer.class)
+                    .parameter("projectName", columnGeneratorEvent.getItem())
+                    .one();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        } finally {
+            HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+            retHbox.setWidthFull();
+            retHbox.setHeightFull();
+
+            Label counterOpenPositionLabel = uiComponents.create(Label.class);
+            counterOpenPositionLabel.setWidthAuto();
+            counterOpenPositionLabel.setHeightAuto();
+            counterOpenPositionLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            counterOpenPositionLabel.setValue(counter);
+
+            retHbox.add(counterOpenPositionLabel);
+            return retHbox;
+        }
     }
 }
