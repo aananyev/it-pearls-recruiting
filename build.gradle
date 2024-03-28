@@ -33,7 +33,7 @@ cuba {
     artifact {
         group = 'com.company.itpearls'
         version = '0.1'
-        isSnapshot = true
+        isSnapshot = false
     }
     tomcat {
         dir = "$project.rootDir/deploy/tomcat"

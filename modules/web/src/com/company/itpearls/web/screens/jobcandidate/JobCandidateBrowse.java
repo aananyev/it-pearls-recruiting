@@ -280,7 +280,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private static final String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
 
     private static final String separatorChar = "⎯";
-    private static final String separator = separatorChar.repeat(22);
+    private static final String separator = StringUtils.repeat(separatorChar, 22);
 
 
     @Inject

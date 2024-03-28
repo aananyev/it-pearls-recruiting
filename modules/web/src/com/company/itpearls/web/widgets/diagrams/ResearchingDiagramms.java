@@ -61,6 +61,8 @@ public class ResearchingDiagramms extends ScreenFragment {
     private static String GRAPH_Y_INTERNAL_INTERVIEW = "internalInterview";
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
+    static private final String QUERY_GET_ITERACTIONS = "select f from itpearls_Iteraction f where f.iterationName like :iteractionName";
+
     @Subscribe
     public void onInit(InitEvent event) {
         setDeafaultTimeInterval();
@@ -89,7 +91,6 @@ public class ResearchingDiagramms extends ScreenFragment {
 
     private ListDataProvider valueGraphs() {
 
-        final String QUERY_GET_ITERACTIONS = "select f from itpearls_Iteraction f where f.iterationName like :iteractionName";
         ListDataProvider dataProvider = new ListDataProvider();
 
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
@@ -157,7 +158,7 @@ public class ResearchingDiagramms extends ScreenFragment {
         List<IteractionList> iteractionLists = new ArrayList<>();
 
          int retInt = 0;
-         try {
+          try {
              iteractionLists = dataManager.load(IteractionList.class)
                      .query(queryGraph)
                      .view("iteractionList-view")

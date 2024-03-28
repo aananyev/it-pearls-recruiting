@@ -28,29 +28,20 @@ public class AppLoginScreen extends LoginScreen {
 
         initBottomPanel();
     }
-
     private void initLoginImage() {
         int count = (int) (Math.random() * 20 + 1);
         backgroundImage
                 .setSource(RelativePathResource.class)
                 .setPath("VAADIN/brand-login-screen/recruit" + count + ".jpg");
-
-/*        FileDescriptor fileDescriptor = applicationSetupService.getActiveCompanyIcon();
-
-        ChangeFaviconExtension extension = new ChangeFaviconExtension();
-        extension.extend(loginWrapper.unwrap(AbstractOrderedLayout.class),
-                "./VAADIN/themes/hover/icons/no-company.png"); */
     }
     @Subscribe("submit")
     public void onSubmit(Action.ActionPerformedEvent event) {
         login();
     }
-
     protected void loadStyles() {
         ScreenDependencyUtils.addScreenDependency(this,
                 "vaadin://brand-login-screen/login.css", Dependency.Type.STYLESHEET);
     }
-
     protected void initBottomPanel() {
         if (!globalConfig.getLocaleSelectVisible()) {
             poweredByLink.setAlignment(Component.Alignment.MIDDLE_CENTER);

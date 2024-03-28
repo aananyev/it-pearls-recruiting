@@ -76,8 +76,8 @@ public class ExtMainScreen extends MainScreen {
     private SignIconService signIconService;
     @Inject
     private ApplicationSetupService applicationSetupService;
-    @Inject
-    private VBoxLayout mainVBox;
+//    @Inject
+//    private VBoxLayout mainVBox;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -97,8 +97,10 @@ public class ExtMainScreen extends MainScreen {
         if (applicationSetupService.getActiveApplicationSetup() != null) {
             if (applicationSetupService.getActiveApplicationSetup().getApplicationIcon() != null) {
                 if (applicationSetupService.getActiveApplicationSetup().getApplicationIcon().getName() != null) {
-                    extension.extend(mainVBox.unwrap(AbstractOrderedLayout.class),
-                            applicationSetupService.getActiveApplicationSetup().getApplicationIcon().getName());
+/*                    extension.extend(
+                            mainVBox.unwrap(AbstractOrderedLayout.class),
+                            applicationSetupService.getActiveApplicationSetup().getApplicationIcon().getName()
+                    ); */
                 }
             }
         }

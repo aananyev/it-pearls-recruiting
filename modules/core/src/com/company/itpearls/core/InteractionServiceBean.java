@@ -16,9 +16,9 @@ import java.util.*;
 public class InteractionServiceBean implements InteractionService {
     @Inject
     private DataManager dataManager;
+
     @Override
-    public Iteraction getDefaultInteraction()
-    {
+    public Iteraction getDefaultInteraction() {
         Iteraction iteraction = null;
 
         try {
@@ -79,7 +79,17 @@ public class InteractionServiceBean implements InteractionService {
             IteractionList maxIteraction = null;
 
             for (IteractionList iteractionList : jobCandidate.getIteractionList()) {
-                if (maxIteraction == null)
+
+                if (maxIteraction == null) {
+                    maxIteraction = iteractionList;
+                }
+
+                if (maxIteraction.getDateIteraction().before(iteractionList.getDateIteraction())) {
+                    maxIteraction = iteractionList;
+                }
+
+
+/*                if (maxIteraction == null)
                     maxIteraction = iteractionList;
 
                 if (maxIteraction.getNumberIteraction() != null) {
@@ -89,7 +99,7 @@ public class InteractionServiceBean implements InteractionService {
                             maxIteraction = iteractionList;
                         }
                     }
-                }
+                } */
             }
 
             return maxIteraction;

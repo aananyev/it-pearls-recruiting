@@ -14,7 +14,6 @@ import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
-import org.graalvm.compiler.graph.Graph;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -28,7 +27,6 @@ public class ResearcherDiagramWidget extends ScreenFragment {
     @WindowParam
     protected Date startDate;
 
-    private List<IteractionList> iteractionList = new ArrayList<>();
     private String ITRKT_NEW_CONTACT = "Новый контакт";
     private String ITRKT_PROPOSE_JOB = "Предложение работы";
     private String ITRKT_ASSIGN_ITPEARKS_INTERVIEW = "Назначено собеседование с рекрутером IT Pearls";
@@ -129,7 +127,7 @@ public class ResearcherDiagramWidget extends ScreenFragment {
     }
 
     private void setValueDiagramData() {
-        String QUERY_FOR_DIAGRAMM = "select f " +
+/*        String QUERY_FOR_DIAGRAMM = "select f " +
                 "from itpearls_IteractionList f " +
                 "where f.dateIteraction between :startDate and :endDate " +
                 "order by f.dateIteraction";
@@ -144,13 +142,13 @@ public class ResearcherDiagramWidget extends ScreenFragment {
                 "where (f.dateIteraction between :startDate and :endDate) and " +
                 "f.iteractionType = (select e from itpearls_Iteraction e where e.iterationName like  \'" +
                 ITRKT_ASSIGN_ITPEARKS_INTERVIEW + "\') "+
-                "order by f.dateIteraction";
+                "order by f.dateIteraction"; */
 
         ListDataProvider dataProvider = new ListDataProvider();
 
         Date d = startDate;
 
-        List<Graph> graphs = new ArrayList<>();
+//        List<Graph> graphs = new ArrayList<>();
 
         do {
             GregorianCalendar calendar = new GregorianCalendar();

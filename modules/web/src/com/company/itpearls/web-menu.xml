@@ -4,8 +4,8 @@
           insertBefore="sec$User.browse" icon="ADJUST"/>
     <separator insertBefore="sec$User.browse"/>
     <menu id="application-calendars" icon="CALENDAR" insertBefore="application-hunting">
-        <item screen="itpearls_Interviewcalendar" icon="CALENDAR"/>
-        <item screen="itpearls_WeekInterviewCalendar" icon="CALENDAR"/>
+        <item screen="itpearls_Interviewcalendar" icon="CALENDAR_CHECK_O"/>
+        <item screen="itpearls_WeekInterviewCalendar" icon="CALENDAR_TIMES_O"/>
     </menu>
     <menu id="application-hrmasters" icon="BALANCE_SCALE" insertAfter="application-calendars">
         <item screen="itpearls_OpenPositionMaster.browse"
