@@ -135,6 +135,8 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     private String CANDIDATE_ACTIVE = "Active";
     @Inject
     private Label<String> reserchingLabel;
+    @Inject
+    private Image candidateFileImageFaceDefailtImage;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -593,11 +595,11 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
         HBoxLayout hBox = uiComponents.create(HBoxLayout.class);
         Image retImage = uiComponents.create(Image.NAME);
-        retImage.setScaleMode(Image.ScaleMode.FILL);
         retImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
         retImage.setWidth("45px");
         retImage.setHeight("45px");
         retImage.setStyleName("circle");
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
 
         if (event.getItem().getCandidate().getFileImageFace() != null) {
             try {
@@ -671,11 +673,18 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 //        candidateCVDl.load();
 
         try {
-            FileDescriptorResource fileDescriptorResource = candidatePic.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(selectedJobCandidate.getFileImageFace());
+            if (selectedJobCandidate.getFileImageFace() != null) {
+                FileDescriptorResource fileDescriptorResource = candidatePic.createResource(FileDescriptorResource.class)
+                        .setFileDescriptor(selectedJobCandidate.getFileImageFace());
 
-            candidatePic.setSource(fileDescriptorResource);
-            candidatePic.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+                candidatePic.setSource(fileDescriptorResource);
+                candidatePic.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+                candidatePic.setVisible(true);
+                candidateFileImageFaceDefailtImage.setVisible(false);
+            } else {
+                candidatePic.setVisible(false);
+                candidateFileImageFaceDefailtImage.setVisible(true);
+            }
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
             String address = String.valueOf(StdPictures.NO_CANDIDATE);
@@ -1079,12 +1088,14 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                 OpenPosition op = entity.getValue("vacancy");
 
                 if (op != null) {
-                    if (iteractionList.getIteractionType().getSignOurInterview() != null) {
-                        if (iteractionList.getVacancy() != null) {
-                            if (iteractionList.getVacancy().equals(op) &&
-                                    iteractionList.getIteractionType().getSignOurInterview()) {
-                                retLabel.setValue(iteractionList.getRecrutier().getName());
-                                retLabel.setDescription(iteractionList.getRecrutier().getName());
+                    if (iteractionList.getIteractionType() != null) {
+                        if (iteractionList.getIteractionType().getSignOurInterview() != null) {
+                            if (iteractionList.getVacancy() != null) {
+                                if (iteractionList.getVacancy().equals(op) &&
+                                        iteractionList.getIteractionType().getSignOurInterview()) {
+                                    retLabel.setValue(iteractionList.getRecrutier().getName());
+                                    retLabel.setDescription(iteractionList.getRecrutier().getName());
+                                }
                             }
                         }
                     }
@@ -1215,10 +1226,12 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
                 Boolean flag = false;
                 for (IteractionList iteractionList : selectedJobCandidate.getIteractionList()) {
                     if (entity.getValue("vacancy").equals(iteractionList.getVacancy())) {
-                        if (iteractionList.getIteractionType().getSignEndCase() != null) {
-                            if (iteractionList.getIteractionType().getSignEndCase()) {
-                                flag = true;
-                                break;
+                        if (iteractionList.getIteractionType() != null) {
+                            if (iteractionList.getIteractionType().getSignEndCase() != null) {
+                                if (iteractionList.getIteractionType().getSignEndCase()) {
+                                    flag = true;
+                                    break;
+                                }
                             }
                         }
                     }

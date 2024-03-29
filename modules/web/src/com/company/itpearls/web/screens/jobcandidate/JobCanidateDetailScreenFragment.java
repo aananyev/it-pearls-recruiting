@@ -1,5 +1,7 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
+import com.company.itpearls.core.InteractionListService;
+import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.core.JobCandidateService;
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
@@ -97,11 +99,19 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
             "e.candidate = :candidate";
     @Inject
     private JobCandidateService jobCandidateService;
+    @Inject
+    private InteractionListService interactionListService;
+    @Inject
+    private InteractionService interactionService;
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
 
         createSocialNetworkFlowBox();
+    }
+
+    public JobCandidate getJobCandidate() {
+        return this.jobCandidate;
     }
 
     private void createSocialNetworkFlowBox() {
@@ -310,8 +320,38 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                                 break;
                             }
         }
+
+        IteractionList lastIteraction = null;
+
+        if (getJobCandidate() != null) {
+            lastIteraction = interactionService.getLastIteraction(getJobCandidate());
+        }
+
+        if (lastIteraction != null) {
+            StringBuilder lastIteractionSb = new StringBuilder();
+
+            if (lastIteraction.getIteractionType() != null) {
+                if (lastIteraction.getIteractionType().getIterationName() != null) {
+                    lastIteractionSb.append(lastIteraction.getIteractionType().getIterationName());
+                }
+            }
+
+            if (lastIteraction.getDateIteraction() != null) {
+                lastIteractionSb.append("(")
+                        .append(simpleDateFormat.format((lastIteraction.getDateIteraction())))
+                        .append(")");
+            }
+
+            lastIteractionLabel.setValue(lastIteractionSb.toString());
+            lastIteractionLabel.setDescription(lastIteractionSb.toString());
+
+            if (candidateFaceImage == null) {
+                String width = String.valueOf(lastIteractionLabel.getWidth() + 20);
+                lastIteractionLabel.setWidth(width);
+            }
+        }
         // последнее взаимодействие
-        if (iteractionList.size() != 0) {
+/*        if (iteractionList.size() != 0) {
 //            String lastIteraction = "";
             StringBuilder lastIteractionSb = new StringBuilder();
 
@@ -337,8 +377,28 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                 lastIteractionLabel.setWidth(width);
             }
         }
+*/
+        if (lastIteraction != null) {
+            String project = "";
 
-        if (iteractionList.size() != 0) {
+            try {
+                project = lastIteraction
+                        .getVacancy()
+                        .getProjectName()
+                        .getProjectDepartment()
+                        .getCompanyName()
+                        .getComanyName();
+            } catch (Exception e) {
+                project = "";
+            }
+
+            if (project != null) {
+                companyLabel.setValue(project);
+                companyLabel.setDescription(project);
+            }
+
+        }
+/*        if (iteractionList.size() != 0) {
             String project = "";
 
             try {
@@ -356,9 +416,28 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                 companyLabel.setValue(project);
                 companyLabel.setDescription(project);
             }
+        } */
+
+        if (lastIteraction != null) {
+            String departament = "";
+
+            try {
+                departament = lastIteraction
+                        .getVacancy()
+                        .getProjectName()
+                        .getProjectDepartment()
+                        .getDepartamentRuName();
+            } catch (Exception e) {
+                departament = "";
+            }
+
+            if (departament != null) {
+                departamentLabel.setValue(departament);
+                departamentLabel.setDescription(departament);
+            }
         }
 
-        if (iteractionList.size() != 0) {
+/*        if (iteractionList.size() != 0) {
             String departament = "";
 
             try {
@@ -375,9 +454,22 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                 departamentLabel.setValue(departament);
                 departamentLabel.setDescription(departament);
             }
+        } */
+        if (lastIteraction != null) {
+            String vacansyName = "";
+
+            try {
+                vacansyName = lastIteraction
+                        .getVacancy()
+                        .getVacansyName();
+            } catch (Exception e) {
+                vacansyName = "";
+            }
+            vacancyNameLabel.setValue(vacansyName);
+            vacancyNameLabel.setDescription(vacansyName);
         }
 
-        if (iteractionList.size() != 0) {
+/*        if (iteractionList.size() != 0) {
             String vacansyName = "";
 
             try {
@@ -389,9 +481,24 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
             }
             vacancyNameLabel.setValue(vacansyName);
             vacancyNameLabel.setDescription(vacansyName);
-        }
+        } */
+            if (lastIteraction != null) {
+                String projectName = "";
 
-        if (iteractionList.size() != 0) {
+                try {
+                    projectName = lastIteraction
+                            .getVacancy()
+                            .getProjectName()
+                            .getProjectName();
+                } catch (Exception e) {
+                    projectName = "";
+                }
+
+                projectNameLabel.setValue(projectName);
+                projectNameLabel.setDescription(projectName);
+            }
+
+/*        if (iteractionList.size() != 0) {
             String projectName = "";
 
             try {
@@ -405,7 +512,7 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
 
             projectNameLabel.setValue(projectName);
             projectNameLabel.setDescription(projectName);
-        }
+        } */
 
         iteractionCountLabel.setValue(String.valueOf(iteractionList.size()));
         resumeCountLabel.setValue(getResumeCount());

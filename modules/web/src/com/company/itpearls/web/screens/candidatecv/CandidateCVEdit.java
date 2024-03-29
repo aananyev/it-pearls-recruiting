@@ -53,7 +53,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";
     private static final String EXTENSION_DOCX = "docx";
-    private FileDescriptor fileDescriptor;
+//    private FileDescriptor fileDescriptor;
 
     @Inject
     private ReportService reportService;
@@ -97,8 +97,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private ParseCVService parseCVService;
     @Inject
     private Label<String> machRegexpFromCV;
-
-    static String referer = "http://www.google.com";
+//    static String referer = "http://www.google.com";
     @Inject
     private Button loadToCVTextArea;
     @Inject
@@ -118,8 +117,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private Screens screens;
     @Inject
-    private FileUploadField fileImageFaceUpload;
-    @Inject
     private FileUploadingAPI fileUploadingAPI;
     @Inject
     private DataManager dataManager;
@@ -132,6 +129,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private CollectionContainer<OpenPosition> openPositionsDc;
     private StringBuffer textResumeStringBuffer = null;
+//    private StringBuilder textResumeStringBuilder = null;
     @Inject
     private Image candidateFaceDefaultImage;
     @Inject
@@ -140,8 +138,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private VBoxLayout tabCV;
     @Inject
     private ScrollBoxLayout workPlacesScrollBox;
-    @Inject
-    private CollectionContainer<Company> companiesDc;
     @Inject
     private LookupPickerField<Position> resumePositionField;
     @Inject
@@ -155,9 +151,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private Button generateCVButton;
 
-    public FileDescriptor getFileDescriptor() {
+/*    public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
-    }
+    } */
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
@@ -278,7 +274,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 RandomAccessRead rad = new RandomAccessReadBuffer(fileLoader.openStream(fileDescriptor));
 
                 PDFParser parser = new PDFParser(rad);
-                PDFTextStripper pdfStripper = new PDFTextStripper();
+//                PDFTextStripper pdfStripper = new PDFTextStripper();
                 PDDocument pdDoc = parser.parse();
 
                 for (PDPage page : pdDoc.getPages()) {
@@ -509,7 +505,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 }
 
                 if (newTextResume != null) {
-                    if (textResumeStringBuffer.compareTo(newTextResume) != 0) {
+                    if (textResumeStringBuffer.toString().compareTo(newTextResume.toString()) != 0) {
                         getEditedEntity().setContactInfoChecked(false);
 
                         if (candidateCVRichTextArea.getValue() != null) {
@@ -758,20 +754,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             report = reportService.getReport(STD_RESUME);
         }
 
-        generateCVButton.setCaption(report.getName());
-/*        if (openPosition != null) {
-            if (openPosition.getTemplateCVSytemCode() != null) {
-                if (!openPosition.getTemplateCVSytemCode().equals("")) {
-                    generateCVButton.setCaption("Generate " + openPosition.getTemplateCVSytemCode());
-                } else {
-                    generateCVButton.setCaption(stdCaption.toString());
-                }
-            } else {
-                generateCVButton.setCaption(stdCaption.toString());
+        if (report != null) {
+            if (report.getName() != null) {
+                generateCVButton.setCaption(report.getName());
             }
-        } else {
-            generateCVButton.setCaption(stdCaption.toString());
-        } */
+        }
     }
 
     @Subscribe

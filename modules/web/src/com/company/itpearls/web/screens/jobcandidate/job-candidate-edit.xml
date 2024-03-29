@@ -882,6 +882,7 @@
                 <dataGrid id="jobCandidateIteractionListTable"
                           dataContainer="jobCandidateIteractionDc"
                           width="100%"
+                          sortable="true"
                           bodyRowHeight="58px"
                           contextMenuEnabled="false"
                           textSelectionEnabled="false"
@@ -953,6 +954,8 @@
                             <componentRenderer/>
                         </column>
                         <column id="dateIteraction"
+                                sort="DESCENDING"
+                                sortable="true"
                                 property="dateIteraction"
                                 width="80px"
                                 caption="msg://msgDate">

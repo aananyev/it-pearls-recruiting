@@ -2612,6 +2612,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .withScreenClass(JobCandidateEdit.class)
                     .withAfterCloseListener(eventAfterClose -> {
                         // тут бы установить на вновь сделанную строку курсор
+                        if (eventAfterClose.getScreen().getEditedEntity() != null) {
+                            jobCandidatesTable.scrollTo(eventAfterClose.getScreen().getEditedEntity());
+                            jobCandidatesTable.setSelected(eventAfterClose.getScreen().getEditedEntity());
+                        }
                     })
                     .withInitializer(e -> {
                         if (!((OnlyTextPersonPosition) screenOnlytext).getCancel()) {

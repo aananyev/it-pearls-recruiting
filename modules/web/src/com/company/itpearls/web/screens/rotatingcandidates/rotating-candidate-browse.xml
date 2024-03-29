@@ -280,6 +280,8 @@
                             <dataGrid id="jobCandidateTable"
                                       width="100%"
                                       colspan="3"
+                                      columnsCollapsingAllowed="false"
+                                      reorderingAllowed="false"
                                       contextMenuEnabled="false"
                                       height="100%"
                                       headerVisible="false"
@@ -328,8 +330,18 @@
                                            width="150px"
                                            height="150px"
                                            align="TOP_RIGHT"
+                                           visible="true"
                                            stylename="widget-border"
-                                           scaleMode="FILL"/>
+                                           scaleMode="SCALE_DOWN"/>
+                                    <image id="candidateFileImageFaceDefailtImage"
+                                           align="TOP_RIGHT"
+                                           width="150px"
+                                           height="150px"
+                                           visible="false"
+                                           stylename="widget-border"
+                                           scaleMode="SCALE_DOWN">
+                                        <theme path="icons/no-programmer.jpeg"/>
+                                    </image>
                                     <vbox id="contactInfoVBox"
                                           spacing="true">
                                         <hbox spacing="true">
