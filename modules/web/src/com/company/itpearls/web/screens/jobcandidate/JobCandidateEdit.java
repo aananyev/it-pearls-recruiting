@@ -50,11 +50,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Component jobCandidateCandidateCvTableCreatedByColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         if (event.getItem().getOwner() != null) {
 //            if (event.getItem().getOwner().getFileImageFace() != null) {
-                return columnGeneratorImageText(event.getItem().getOwner().getFileImageFace(),
-                        event.getItem().getOwner().getName(),
-                        StdImage.NO_PROGRAMMER,
-                        "30px",
-                        true);
+            return columnGeneratorImageText(event.getItem().getOwner().getFileImageFace(),
+                    event.getItem().getOwner().getName(),
+                    StdImage.NO_PROGRAMMER,
+                    "30px",
+                    true);
 //            }
         }
 
@@ -68,13 +68,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Component jobCandidateCandidateCvTableToVacancyColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         if (event.getItem().getToVacancy() != null) {
             if (event.getItem().getToVacancy().getPositionType() != null) {
-//                if (event.getItem().getToVacancy().getPositionType().getLogo() != null) {
-                    return columnGeneratorImageText(event.getItem().getToVacancy().getPositionType().getLogo(),
-                            event.getItem().getToVacancy().getVacansyName(),
-                            StdImage.NO_COMPANY,
-                            "30px",
-                            false);
-//                }
+                return columnGeneratorImageText(event.getItem().getToVacancy().getPositionType().getLogo(),
+                        event.getItem().getToVacancy().getVacansyName(),
+                        StdImage.NO_COMPANY,
+                        "30px",
+                        false);
             }
         }
 
@@ -84,14 +82,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Install(to = "jobCandidateIteractionListTable.recrutier", subject = "columnGenerator")
     private Component jobCandidateIteractionListTableRecrutierColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
         if (event.getItem().getRecrutier() != null) {
-//            if (event.getItem().getRecrutier().getFileImageFace() != null) {
+            try {
                 return columnGeneratorImageText(event.getItem().getRecrutier().getFileImageFace(),
                         event.getItem().getRecrutier().getName(),
                         StdImage.NO_PROGRAMMER,
                         "30px",
                         true);
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+                return getBlankHBox();
             }
-  //      }
+        }
 
         return getBlankHBox();
     }
@@ -100,12 +101,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Component jobCandidateIteractionListTableVacancyColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
         if (event.getItem().getVacancy() != null) {
             if (event.getItem().getVacancy().getPositionType() != null) {
-//                if (event.getItem().getVacancy().getPositionType().getLogo() != null) {
-                    return columnGeneratorImageText(event.getItem().getVacancy().getPositionType().getLogo(),
-                            event.getItem().getVacancy().getVacansyName(),
-                            StdImage.NO_COMPANY,
-                            "30px",
-                            false);
+                return columnGeneratorImageText(event.getItem().getVacancy().getPositionType().getLogo(),
+                        event.getItem().getVacancy().getVacansyName(),
+                        StdImage.NO_COMPANY,
+                        "30px",
+                        false);
 //                }
             }
         }
@@ -3384,6 +3384,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         jobCandidateCommentsDataGrid.repaint();
 
         jobCandidateDl.load();
+        jobCandidateIteractionListTable.sort("dateIteraction", DataGrid.SortDirection.DESCENDING);
+        jobCandidateIteractionListTable.setSelected(interactionService.getLastInteraction(getEditedEntity()));
         jobCandidateIteractionListTable.repaint();
     }
 

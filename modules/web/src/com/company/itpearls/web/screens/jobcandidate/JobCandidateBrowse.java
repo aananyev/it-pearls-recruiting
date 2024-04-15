@@ -2613,8 +2613,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     .withAfterCloseListener(eventAfterClose -> {
                         // тут бы установить на вновь сделанную строку курсор
                         if (eventAfterClose.getScreen().getEditedEntity() != null) {
-                            jobCandidatesTable.scrollTo(eventAfterClose.getScreen().getEditedEntity());
-                            jobCandidatesTable.setSelected(eventAfterClose.getScreen().getEditedEntity());
+                            if (eventAfterClose.getScreen().getEditedEntity() != null) {
+                                try {
+                                    jobCandidatesTable.scrollTo(eventAfterClose.getScreen().getEditedEntity());
+                                    jobCandidatesTable.setSelected(eventAfterClose.getScreen().getEditedEntity());
+                                } catch (NullPointerException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         }
                     })
                     .withInitializer(e -> {
@@ -2643,7 +2649,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                             .parseTelegram(textCV));
                                     e.setSkypeName(parseCVService
                                             .parseSkype(textCV));
-//                                initSocialNeiworkTable(e);
                                     addSocialNetworkList(e, ((OnlyTextPersonPosition) screenOnlytext).getResultText());
 
                                     CandidateCV candidateCV = metadata.create(CandidateCV.class);

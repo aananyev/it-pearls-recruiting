@@ -7,7 +7,7 @@
     <data>
         <instance id="jobCandidateDc"
                   class="com.company.itpearls.entity.JobCandidate">
-            <view extends="_local">
+            <view extends="jobCandidate-view">
                 <property name="candidateCv" view="_local">
                     <property name="candidateCVWorkPlaces" view="candidateCVWorkPlaces-view"/>
                     <property name="candidate" view="_local">
@@ -45,7 +45,9 @@
                     <property name="candidate" view="_local"/>
                     <property name="vacancy" view="_local">
                         <property name="grade" view="_local"/>
-                        <property name="owner" view="_local"/>
+                        <property name="owner" view="_local">
+                            <property name="fileImageFace" view="_local"/>
+                        </property>
                         <property name="positionType" view="_local"/>
                         <property name="projectName" view="_local">
                             <property name="projectLogo" view="_local"/>
@@ -54,7 +56,7 @@
                     </property>
                     <property name="iteractionType" view="_local"/>
                     <property name="recrutier" view="_local">
-                        <property name="fileImageFace"/>
+                        <property name="fileImageFace" view="_local"/>
                     </property>
                 </property>
                 <property name="socialNetwork" view="_local">
