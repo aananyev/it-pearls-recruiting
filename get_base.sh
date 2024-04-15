@@ -1,12 +1,15 @@
-postgre_database=/usr/local/var/postgresql@11
+postgre_version=11
+postgre_subversion=22_1
+postgre_database=/usr/local/var/postgresql@i$postgre_version
 current_catalog=`pwd`
-old_archive=../it-pearls-basebackup-old.tgz
-new_archive=../it-pearls-basebackup.tgz
-postgre_database=/usr/local/var/postgresql@11
+old_archive=../it-pearls-basebackup-old.$postgre_version.$postgre_subversion.tgz
+new_archive=../it-pearls-basebackup.$postgre_version.$postgre_subversion.tgz
+postgre_database=/usr/local/var/postgresql@$postgre_version
 postgre_temp_database=`echo $current_catalog"/postgre_tmp_database"`
 BACKUPBASELOG=backupbase.log
 db_server=hr.it-pearls.ru
-
+PG_CTL=/usr/local/Cellar/postgresql@$postgre_version/$postgre_version.$postgre_subversion/bin/pg_ctl
+PG_BASEBACKUP=/usr/local/Cellar/postgresql@$postgre_version/$postgre_version.$postgre_subversion/bin/pg_basebackup
 
 CWD=$(pwd)
 
@@ -21,6 +24,7 @@ echo "**                                                   **"
 echo "*******************************************************"
 echo "*******************************************************"
 echo "\033[37mОсновная площадка: \033[32m$db_server"
+echo "\033[37mВерсия postgresql: \033[32m$postgre_version.$postgre_subversion"
 echo "\033[37mСоздание временного каталога базы Postgre $postgre_temp_database ...\c"
 mkdir $postgre_temp_database
 if [ $? -eq 0 ]; then
@@ -40,7 +44,8 @@ else
 fi
 
 echo "\033[37mЗагрузка базы с сервера ..."
-pg_basebackup -P -h $db_server -D . -U replica  >>$LOG
+# $postgre_pg_basebackup -P -h $db_server -D . -U replica  >>$LOG
+$PG_BASEBACKUP -P -h $db_server -D . -U replica  >>$LOG
 if [ $? -eq 0 ]; then
         echo "\033[32mOK"
 else
@@ -60,7 +65,8 @@ else
 fi
 
 echo "\033[37mОстановка локальной базы ... \c"
-pg_ctl stop -D . >> $LOG 2>/dev/null
+$PG_CTL stop -D . >> $LOG 2>/dev/null
+
 if [ $? -eq 0 ]; then 
 	echo "\033[32mOK"
 else
@@ -110,7 +116,7 @@ else
 fi
 
 echo "\033[37mЗапуск базы ... \c"
-pg_ctl start -D . >> $LOG 
+$PG_CTL start -D . >> $LOG 
 if [ $? -eq 0 ]; then
 	echo "\033[32mOK"
 else

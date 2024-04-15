@@ -98,6 +98,7 @@ configure(globalModule) {
         compile 'org.projectlombok:lombok:1.18.16'
         compile 'org.telegram:telegrambots:5.5.0'
         compile 'org.telegram:telegrambotsextensions:5.5.0'
+        compile 'org.apache.commons:commons-lang3:3.12.0'
     }
 
     entitiesEnhancing {

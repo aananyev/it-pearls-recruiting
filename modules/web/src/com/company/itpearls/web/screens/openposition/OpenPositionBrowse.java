@@ -33,6 +33,7 @@ import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.reports.entity.Report;
 import com.haulmont.reports.gui.ReportGuiManager;
 import com.haulmont.reports.gui.actions.list.ListPrintFormAction;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.eclipse.persistence.exceptions.QueryException;
 import org.jsoup.Jsoup;
@@ -87,7 +88,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             "select avg(e.rating) from itpearls_OpenPositionComment e where e.openPosition = :openPosition and not e.rating is null";
 
     private final static String separatorChar = "⎯";
-    private final static String separator = separatorChar.repeat(22);
+//    private final static String separator = separatorChar.repeat(22);
+    private final static String separator = StringUtils.repeat(separatorChar, 16);
     @Inject
     private OpenPositionService openPositionService;
     @Inject

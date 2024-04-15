@@ -8,11 +8,7 @@ import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.PersonelReserve;
 import com.company.itpearls.web.extension.ChangeFaviconExtension;
-import com.haulmont.cuba.core.app.ConfigStorageService;
-import com.haulmont.cuba.core.config.AppPropertiesLocator;
-import com.haulmont.cuba.core.config.AppPropertyEntity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.gui.Notifications;
@@ -26,12 +22,8 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import com.haulmont.cuba.web.app.main.MainScreen;
-import com.vaadin.ui.AbstractOrderedLayout;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.event.EventListener;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -82,8 +74,8 @@ public class ExtMainScreen extends MainScreen {
     private UiComponents uiComponents;
     @Inject
     private Image logoImage;
-    @Inject
-    private ConfigStorageService configStorageService;
+//    @Inject
+//    private ConfigStorageService configStorageService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {

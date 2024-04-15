@@ -10,6 +10,7 @@ import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
@@ -59,6 +60,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private Button itercationListButton;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private UiComponents uiComponents;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -361,5 +364,54 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
             }
         } else
             return null;
+    }
+
+    @Install(to = "iteractionListsTable.recrutier", subject = "columnGenerator")
+    private Component iteractionListsTableRecrutierColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> columnGeneratorEvent) {
+        VBoxLayout retVBox = uiComponents.create(VBoxLayout.class);
+        retVBox.setWidthFull();
+        retVBox.setHeightFull();
+
+        Label label = uiComponents.create(Label.class);
+        label.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        label.setValue(columnGeneratorEvent.getItem().getRecrutier() != null ?
+                columnGeneratorEvent.getItem().getRecrutier() : columnGeneratorEvent.getItem().getRecrutierName());
+        label.setStyleName("table-wordwrap");
+
+        retVBox.add(label);
+
+        return retVBox;
+    }
+
+
+    @Install(to = "iteractionListsTable.dateIteractionRenderer", subject = "columnGenerator")
+    private Component iteractionListsTableDateIteractionRendererColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> columnGeneratorEvent) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.YYYY");
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setHeightFull();
+        retBox.setSpacing(false);
+
+        Label label = uiComponents.create(Label.class);
+        label.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        label.setValue(columnGeneratorEvent.getItem().getDateIteraction() != null ?
+                sdf.format(columnGeneratorEvent.getItem().getDateIteraction()).toString() :
+                sdf.format(columnGeneratorEvent.getItem().getCreateTs()).toString());
+        label.setStyleName("table-wordwrap");
+
+        Label labelIndicatop = uiComponents.create(Label.class);
+        labelIndicatop.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        labelIndicatop.setIcon(CubaIcon.CIRCLE.iconName());
+
+        if (columnGeneratorEvent.getItem().getDateIteraction() != null) {
+            labelIndicatop.setStyleName("button_table_green");
+        } else {
+            labelIndicatop.setStyleName("button_table_red");
+        }
+
+        retBox.add(labelIndicatop);
+        retBox.add(label);
+
+        return retBox;
     }
 }

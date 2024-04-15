@@ -3,20 +3,19 @@ package com.company.itpearls.core;
 import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.JobCandidate;
+import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.security.entity.User;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.math.BigDecimal;
 import java.util.*;
 
 @Service(InteractionService.NAME)
 public class InteractionServiceBean implements InteractionService {
     @Inject
     private DataManager dataManager;
-
     @Override
     public Iteraction getDefaultInteraction() {
         Iteraction iteraction = null;
@@ -32,9 +31,7 @@ public class InteractionServiceBean implements InteractionService {
             return iteraction;
         }
     }
-
 //    private final static String QUERY_GET_MAX_NUMBER_INTERACTION = "select e from itpearls_IteractionList e where e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f)";
-
     private final static String QUERY = "select e.iteractionType, count(e.iteractionType) "
             + "from itpearls_IteractionList e "
             + "where "
@@ -72,7 +69,10 @@ public class InteractionServiceBean implements InteractionService {
 
         return retIteraction;
     }
-
+    @Override
+    public IteractionList getLastInteraction(JobCandidate jobCandidate) {
+        return getLastIteraction(jobCandidate);
+    }
     @Override
     public IteractionList getLastIteraction(JobCandidate jobCandidate) {
         if (jobCandidate.getIteractionList() != null) {
@@ -84,7 +84,14 @@ public class InteractionServiceBean implements InteractionService {
                     maxIteraction = iteractionList;
                 }
 
-                if (maxIteraction.getDateIteraction().before(iteractionList.getDateIteraction())) {
+                Date maxDateInteraction = maxIteraction.getDateIteraction() != null ? maxIteraction.getDateIteraction()
+                        : (maxIteraction.getUpdateTs() != null ? maxIteraction.getUpdateTs() : maxIteraction.getCreateTs());
+                Date currentDateInteraction = iteractionList.getDateIteraction() != null ? iteractionList.getDateIteraction() :
+                        (iteractionList.getUpdateTs() != null ? iteractionList.getUpdateTs() : iteractionList.getCreateTs());
+
+                if (maxDateInteraction.before(currentDateInteraction)) {
+
+//                if (maxIteraction.getDateIteraction().before(iteractionList.getDateIteraction())) {
                     maxIteraction = iteractionList;
                 }
 
@@ -100,6 +107,38 @@ public class InteractionServiceBean implements InteractionService {
                         }
                     }
                 } */
+            }
+
+            return maxIteraction;
+        } else
+            return null;
+    }
+    @Override
+    public IteractionList getLastInteraction(JobCandidate jobCandidate, OpenPosition openPosition) {
+        return getLastIteraction(jobCandidate, openPosition);
+    }
+    @Override
+    public IteractionList getLastIteraction(JobCandidate jobCandidate, OpenPosition openPosition) {
+        if (jobCandidate.getIteractionList() != null) {
+            IteractionList maxIteraction = null;
+
+            for (IteractionList iteractionList : jobCandidate.getIteractionList()) {
+                if (iteractionList.getVacancy().equals(openPosition)) {
+
+                    if (maxIteraction == null) {
+                        maxIteraction = iteractionList;
+                    }
+
+                    Date maxDateInteraction = maxIteraction.getDateIteraction() != null ? maxIteraction.getDateIteraction()
+                            : (maxIteraction.getUpdateTs() != null ? maxIteraction.getUpdateTs() : maxIteraction.getCreateTs());
+                    Date currentDateInteraction = iteractionList.getDateIteraction() != null ? iteractionList.getDateIteraction() :
+                            (iteractionList.getUpdateTs() != null ? iteractionList.getUpdateTs() : iteractionList.getCreateTs());
+
+                    if (maxDateInteraction.before(currentDateInteraction)) {
+//                    if (maxIteraction.getDateIteraction().before(iteractionList.getDateIteraction())) {
+                        maxIteraction = iteractionList;
+                    }
+                }
             }
 
             return maxIteraction;

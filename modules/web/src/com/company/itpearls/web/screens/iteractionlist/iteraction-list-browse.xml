@@ -9,6 +9,7 @@
         <collection id="iteractionListsDc"
                     class="com.company.itpearls.entity.IteractionList">
             <view extends="_local">
+                <property name="createTs"/>
                 <property name="candidate" view="_local">
                     <property name="candidateCv" view="_local"/>
                     <property name="socialNetwork" view="_local"/>
@@ -115,10 +116,12 @@
                     <iconRenderer/>
                 </column>
                 <column id="recrutier"
-                        property="recrutier"
-                        caption="msg://msgRecrutier"/>
-                <column id="dateIteraction" property="dateIteraction" caption="msg://msgDate">
-                    <formatter format="dd.MM.yyyy" class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
+                        caption="msg://msgRecrutier">
+                    <componentRenderer/>
+                </column>
+                <column id="dateIteractionRenderer"
+                        caption="msg://msgDate">
+                    <componentRenderer/>
                 </column>
             </columns>
             <rowsCount autoLoad="true"/>

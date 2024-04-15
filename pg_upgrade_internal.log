@@ -1,0 +1,20 @@
+
+-----------------------------------------------------------------
+  pg_upgrade run on Wed Apr 10 17:49:15 2024
+-----------------------------------------------------------------
+
+You must identify the directory where the old cluster binaries reside.
+Please use the -b command-line option or the PGBINOLD environment variable.
+
+-----------------------------------------------------------------
+  pg_upgrade run on Thu Apr 11 17:27:28 2024
+-----------------------------------------------------------------
+
+check for "/usr/local/Cellar/postgresql@11/bin" failed: No such file or directory
+
+
+-----------------------------------------------------------------
+  pg_upgrade run on Thu Apr 11 17:30:25 2024
+-----------------------------------------------------------------
+
+check for "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" failed: cannot execute

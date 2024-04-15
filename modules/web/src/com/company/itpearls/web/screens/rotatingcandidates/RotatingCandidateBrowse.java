@@ -1,5 +1,6 @@
 package com.company.itpearls.web.screens.rotatingcandidates;
 
+import com.company.itpearls.core.InteractionService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
@@ -137,6 +138,8 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     private Label<String> reserchingLabel;
     @Inject
     private Image candidateFileImageFaceDefailtImage;
+    @Inject
+    private InteractionService interactionService;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -888,12 +891,12 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
         if (selectedJobCandidate != null) {
             OpenPosition openPosition = entity.getValue("vacancy");
-            IteractionList lastInteraction = getLastInteraction(selectedJobCandidate, openPosition);
+            IteractionList lastInteraction = interactionService.getLastIteraction(selectedJobCandidate, openPosition);
 
             if (lastInteraction != null) {
                 if (lastInteraction.getIteractionType() != null) {
                     if (lastInteraction.getIteractionType().getIterationName() != null) {
-                        StringBuffer retStr = new StringBuffer(lastInteraction.getIteractionType().getIterationName());
+//                        StringBuffer retStr = new StringBuffer(lastInteraction.getIteractionType().getIterationName());
                         retLabel.setValue(lastInteraction.getIteractionType().getIterationName());
                         retLabel.setDescription(lastInteraction.getIteractionType().getIterationName());
                     }
@@ -904,7 +907,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         return retLabel;
     }
 
-    private IteractionList getLastInteraction(JobCandidate candidate, OpenPosition openPosition) {
+    /* private IteractionList getLastInteraction(JobCandidate candidate, OpenPosition openPosition) {
         IteractionList lastInteraction = null;
 
         if (candidate.getIteractionList().size() != 0) {
@@ -933,7 +936,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         return lastInteraction;
-    }
+    } */
 
     public Component whoIsResearcherGeneratorColumn(Entity entity) {
         Label retLabel = uiComponents.create(Label.NAME);
@@ -1220,7 +1223,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
 
         if (selectedJobCandidate != null) {
             OpenPosition openPosition = entity.getValue("vacancy");
-            IteractionList lastInteraction = getLastInteraction(selectedJobCandidate, openPosition);
+            IteractionList lastInteraction = interactionService.getLastIteraction(selectedJobCandidate, openPosition);
 
             if (lastInteraction != null) {
                 Boolean flag = false;

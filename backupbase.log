@@ -6073,3 +6073,256 @@ server started
 2024-03-29 13:05:49.335 +04 [8901] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2024-03-29 13:05:51.622 +04 [8907] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2024-03-29 13:05:51.769 +04 [8909] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:29:34.817 +04 [11865] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:29:34.831 +04 [11867] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:29:35.032 +04 [11869] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:29:35.781 +04 [11871] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:29:35.959 +04 [11873] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:35:15.663 +04 [12172] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:35:15.674 +04 [12174] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:35:15.889 +04 [12176] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:35:16.616 +04 [12178] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:35:16.779 +04 [12180] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+waiting for server to shut down....2024-03-29 16:35:19.315 +04 [7153] LOG:  received fast shutdown request
+2024-03-29 16:35:19.316 +04 [7153] LOG:  aborting any active transactions
+2024-03-29 16:35:19.317 +04 [12179] FATAL:  terminating connection due to administrator command
+2024-03-29 16:35:19.324 +04 [7153] LOG:  background worker "logical replication launcher" (PID 7160) exited with exit code 1
+2024-03-29 16:35:19.324 +04 [7155] LOG:  shutting down
+2024-03-29 16:35:19.361 +04 [7153] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2024-03-29 16:37:38.058 +04 [12447] LOG:  listening on IPv6 address "::1", port 5432
+2024-03-29 16:37:38.058 +04 [12447] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-03-29 16:37:38.059 +04 [12447] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-03-29 16:37:38.078 +04 [12449] LOG:  database system was interrupted; last known up at 2024-03-29 16:33:22 +04
+2024-03-29 16:37:38.388 +04 [12449] LOG:  redo starts at 34/A7000028
+2024-03-29 16:37:38.397 +04 [12449] LOG:  consistent recovery state reached at 34/A70910D8
+2024-03-29 16:37:38.397 +04 [12449] LOG:  redo done at 34/A70910D8
+2024-03-29 16:37:38.397 +04 [12449] LOG:  last completed transaction was at log time 2024-03-29 16:35:17.78935+04
+2024-03-29 16:37:38.503 +04 [12447] LOG:  database system is ready to accept connections
+ done
+server started
+2024-03-29 16:39:43.263 +04 [12506] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:39:43.291 +04 [12508] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:39:43.495 +04 [12510] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:39:44.185 +04 [12512] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-03-29 16:39:44.348 +04 [12514] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+waiting for server to shut down...2024-03-29 17:30:34.669 +04 [12447] LOG:  received fast shutdown request
+.2024-03-29 17:30:34.669 +04 [12447] LOG:  aborting any active transactions
+2024-03-29 17:30:34.670 +04 [12527] FATAL:  terminating connection due to administrator command
+2024-03-29 17:30:34.670 +04 [12691] FATAL:  terminating connection due to administrator command
+2024-03-29 17:30:34.672 +04 [12447] LOG:  background worker "logical replication launcher" (PID 12455) exited with exit code 1
+2024-03-29 17:30:34.675 +04 [12450] LOG:  shutting down
+2024-03-29 17:30:34.692 +04 [12447] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2024-03-29 17:31:56.398 +04 [13519] LOG:  listening on IPv6 address "::1", port 5432
+2024-03-29 17:31:56.398 +04 [13519] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-03-29 17:31:56.399 +04 [13519] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-03-29 17:31:56.411 +04 [13520] LOG:  database system was interrupted; last known up at 2024-03-29 17:29:23 +04
+2024-03-29 17:31:56.750 +04 [13520] LOG:  redo starts at 34/A9000028
+2024-03-29 17:31:56.759 +04 [13520] LOG:  consistent recovery state reached at 34/A9095B20
+2024-03-29 17:31:56.759 +04 [13520] LOG:  redo done at 34/A9095B20
+2024-03-29 17:31:56.759 +04 [13520] LOG:  last completed transaction was at log time 2024-03-29 17:30:33.860565+04
+2024-03-29 17:31:56.828 +04 [13519] LOG:  database system is ready to accept connections
+ done
+server started
+waiting for server to shut down...2024-04-08 10:11:29.856 +04 [13519] LOG:  received fast shutdown request
+.2024-04-08 10:11:29.857 +04 [13519] LOG:  aborting any active transactions
+2024-04-08 10:11:29.857 +04 [65860] FATAL:  terminating connection due to administrator command
+2024-04-08 10:11:29.857 +04 [13530] FATAL:  terminating connection due to administrator command
+2024-04-08 10:11:29.865 +04 [13519] LOG:  background worker "logical replication launcher" (PID 13526) exited with exit code 1
+2024-04-08 10:11:29.866 +04 [13521] LOG:  shutting down
+2024-04-08 10:11:29.896 +04 [13519] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2024-04-08 10:12:54.357 +04 [50522] LOG:  listening on IPv6 address "::1", port 5432
+2024-04-08 10:12:54.357 +04 [50522] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-04-08 10:12:54.357 +04 [50522] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-04-08 10:12:54.375 +04 [50523] LOG:  database system was interrupted; last known up at 2024-04-08 10:11:11 +04
+2024-04-08 10:12:54.735 +04 [50523] LOG:  redo starts at 34/F0000028
+2024-04-08 10:12:54.740 +04 [50523] LOG:  consistent recovery state reached at 34/F005DA10
+2024-04-08 10:12:54.740 +04 [50523] LOG:  redo done at 34/F005DA10
+2024-04-08 10:12:54.741 +04 [50523] LOG:  last completed transaction was at log time 2024-04-08 10:11:28.865848+04
+2024-04-08 10:12:54.754 +04 [50524] FATAL:  the database system is starting up
+2024-04-08 10:12:54.756 +04 [50525] FATAL:  the database system is starting up
+2024-04-08 10:12:54.758 +04 [50526] FATAL:  the database system is starting up
+2024-04-08 10:12:54.760 +04 [50527] FATAL:  the database system is starting up
+2024-04-08 10:12:54.836 +04 [50522] LOG:  database system is ready to accept connections
+ done
+server started
+2024-04-08 13:45:00.402 +04 [53017] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-08 13:45:00.419 +04 [53019] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-08 13:45:00.699 +04 [53021] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-08 13:45:02.347 +04 [53025] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-08 13:45:02.625 +04 [53027] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-08 14:09:25.772 +04 [53552] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-08 14:09:25.825 +04 [53554] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-08 14:09:26.297 +04 [53557] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-08 14:09:26.891 +04 [53561] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-08 14:09:27.383 +04 [53563] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-10 09:44:21.603 +04 [79867] ERROR:  could not open directory "/usr/local/opt/postgresql@11/share/postgresql@11/timezonesets": No such file or directory
+2024-04-10 09:44:21.603 +04 [79867] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" has been moved away from its proper location.
+2024-04-10 09:44:21.603 +04 [79867] CONTEXT:  while setting parameter "timezone_abbreviations" to "Default"
+2024-04-10 09:44:21.604 +04 [53578] ERROR:  could not open directory "/usr/local/opt/postgresql@11/share/postgresql@11/timezonesets": No such file or directory
+2024-04-10 09:44:21.604 +04 [53578] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" has been moved away from its proper location.
+2024-04-10 09:44:21.604 +04 [53578] CONTEXT:  while setting parameter "timezone_abbreviations" to "Default"
+	parallel worker
+2024-04-10 09:44:21.604 +04 [53578] STATEMENT:  SELECT ID AS a1, CHANGE_TYPE AS a2, CREATE_TS AS a3, CREATED_BY AS a4, ENTITY_ID AS a5, ENTITY_NAME AS a6, FAKE AS a7, INDEXING_HOST AS a8, INT_ENTITY_ID AS a9, LONG_ENTITY_ID AS a10, SOURCE_HOST AS a11, STRING_ENTITY_ID AS a12 FROM SYS_FTS_QUEUE WHERE ((FAKE = $1) AND (INDEXING_HOST IS NULL)) ORDER BY CREATE_TS LIMIT $2 OFFSET $3
+2024-04-10 09:44:21.606 +04 [50522] LOG:  background worker "parallel worker" (PID 79867) exited with exit code 1
+2024-04-10 09:44:51.609 +04 [79872] ERROR:  could not open directory "/usr/local/opt/postgresql@11/share/postgresql@11/timezonesets": No such file or directory
+2024-04-10 09:44:51.609 +04 [79872] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" has been moved away from its proper location.
+2024-04-10 09:44:51.609 +04 [79872] CONTEXT:  while setting parameter "timezone_abbreviations" to "Default"
+2024-04-10 09:44:51.609 +04 [53582] ERROR:  could not open directory "/usr/local/opt/postgresql@11/share/postgresql@11/timezonesets": No such file or directory
+2024-04-10 09:44:51.609 +04 [53582] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" has been moved away from its proper location.
+2024-04-10 09:44:51.609 +04 [53582] CONTEXT:  while setting parameter "timezone_abbreviations" to "Default"
+	parallel worker
+2024-04-10 09:44:51.609 +04 [53582] STATEMENT:  SELECT ID AS a1, CHANGE_TYPE AS a2, CREATE_TS AS a3, CREATED_BY AS a4, ENTITY_ID AS a5, ENTITY_NAME AS a6, FAKE AS a7, INDEXING_HOST AS a8, INT_ENTITY_ID AS a9, LONG_ENTITY_ID AS a10, SOURCE_HOST AS a11, STRING_ENTITY_ID AS a12 FROM SYS_FTS_QUEUE WHERE ((FAKE = $1) AND (INDEXING_HOST IS NULL)) ORDER BY CREATE_TS LIMIT $2 OFFSET $3
+2024-04-10 09:44:51.610 +04 [50522] LOG:  background worker "parallel worker" (PID 79872) exited with exit code 1
+2024-04-10 09:45:21.610 +04 [79878] ERROR:  could not open directory "/usr/local/opt/postgresql@11/share/postgresql@11/timezonesets": No such file or directory
+2024-04-10 09:45:21.610 +04 [79878] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" has been moved away from its proper location.
+2024-04-10 09:45:21.610 +04 [79878] CONTEXT:  while setting parameter "timezone_abbreviations" to "Default"
+2024-04-10 09:45:21.610 +04 [53578] ERROR:  could not open directory "/usr/local/opt/postgresql@11/share/postgresql@11/timezonesets": No such file or directory
+2024-04-10 09:45:21.610 +04 [53578] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" has been moved away from its proper location.
+2024-04-10 09:45:21.610 +04 [53578] CONTEXT:  while setting parameter "timezone_abbreviations" to "Default"
+	parallel worker
+2024-04-10 09:45:21.610 +04 [53578] STATEMENT:  SELECT ID AS a1, CHANGE_TYPE AS a2, CREATE_TS AS a3, CREATED_BY AS a4, ENTITY_ID AS a5, ENTITY_NAME AS a6, FAKE AS a7, INDEXING_HOST AS a8, INT_ENTITY_ID AS a9, LONG_ENTITY_ID AS a10, SOURCE_HOST AS a11, STRING_ENTITY_ID AS a12 FROM SYS_FTS_QUEUE WHERE ((FAKE = $1) AND (INDEXING_HOST IS NULL)) ORDER BY CREATE_TS LIMIT $2 OFFSET $3
+2024-04-10 09:45:21.611 +04 [50522] LOG:  background worker "parallel worker" (PID 79878) exited with exit code 1
+2024-04-10 09:45:51.606 +04 [79979] ERROR:  could not open directory "/usr/local/opt/postgresql@11/share/postgresql@11/timezonesets": No such file or directory
+2024-04-10 09:45:51.606 +04 [79979] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" has been moved away from its proper location.
+2024-04-10 09:45:51.606 +04 [79979] CONTEXT:  while setting parameter "timezone_abbreviations" to "Default"
+2024-04-10 09:45:51.607 +04 [53582] ERROR:  could not open directory "/usr/local/opt/postgresql@11/share/postgresql@11/timezonesets": No such file or directory
+2024-04-10 09:45:51.607 +04 [53582] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" has been moved away from its proper location.
+2024-04-10 09:45:51.607 +04 [53582] CONTEXT:  while setting parameter "timezone_abbreviations" to "Default"
+	parallel worker
+2024-04-10 09:45:51.607 +04 [53582] STATEMENT:  SELECT ID AS a1, CHANGE_TYPE AS a2, CREATE_TS AS a3, CREATED_BY AS a4, ENTITY_ID AS a5, ENTITY_NAME AS a6, FAKE AS a7, INDEXING_HOST AS a8, INT_ENTITY_ID AS a9, LONG_ENTITY_ID AS a10, SOURCE_HOST AS a11, STRING_ENTITY_ID AS a12 FROM SYS_FTS_QUEUE WHERE ((FAKE = $1) AND (INDEXING_HOST IS NULL)) ORDER BY CREATE_TS LIMIT $2 OFFSET $3
+2024-04-10 09:45:51.608 +04 [50522] LOG:  background worker "parallel worker" (PID 79979) exited with exit code 1
+2024-04-10 09:46:21.604 +04 [79996] ERROR:  could not open directory "/usr/local/opt/postgresql@11/share/postgresql@11/timezonesets": No such file or directory
+2024-04-10 09:46:21.604 +04 [79996] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" has been moved away from its proper location.
+2024-04-10 09:46:21.604 +04 [79996] CONTEXT:  while setting parameter "timezone_abbreviations" to "Default"
+2024-04-10 09:46:21.604 +04 [53578] ERROR:  could not open directory "/usr/local/opt/postgresql@11/share/postgresql@11/timezonesets": No such file or directory
+2024-04-10 09:46:21.604 +04 [53578] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" has been moved away from its proper location.
+2024-04-10 09:46:21.604 +04 [53578] CONTEXT:  while setting parameter "timezone_abbreviations" to "Default"
+	parallel worker
+2024-04-10 09:46:21.604 +04 [53578] STATEMENT:  SELECT ID AS a1, CHANGE_TYPE AS a2, CREATE_TS AS a3, CREATED_BY AS a4, ENTITY_ID AS a5, ENTITY_NAME AS a6, FAKE AS a7, INDEXING_HOST AS a8, INT_ENTITY_ID AS a9, LONG_ENTITY_ID AS a10, SOURCE_HOST AS a11, STRING_ENTITY_ID AS a12 FROM SYS_FTS_QUEUE WHERE ((FAKE = $1) AND (INDEXING_HOST IS NULL)) ORDER BY CREATE_TS LIMIT $2 OFFSET $3
+2024-04-10 09:46:21.606 +04 [50522] LOG:  background worker "parallel worker" (PID 79996) exited with exit code 1
+2024-04-10 09:46:51.608 +04 [80012] ERROR:  could not open directory "/usr/local/opt/postgresql@11/share/postgresql@11/timezonesets": No such file or directory
+2024-04-10 09:46:51.608 +04 [80012] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" has been moved away from its proper location.
+2024-04-10 09:46:51.608 +04 [80012] CONTEXT:  while setting parameter "timezone_abbreviations" to "Default"
+2024-04-10 09:46:51.609 +04 [53582] ERROR:  could not open directory "/usr/local/opt/postgresql@11/share/postgresql@11/timezonesets": No such file or directory
+2024-04-10 09:46:51.609 +04 [53582] HINT:  This may indicate an incomplete PostgreSQL installation, or that the file "/usr/local/Cellar/postgresql@11/11.22_1/bin/postgres" has been moved away from its proper location.
+2024-04-10 09:46:51.609 +04 [53582] CONTEXT:  while setting parameter "timezone_abbreviations" to "Default"
+	parallel worker
+2024-04-10 09:46:51.609 +04 [53582] STATEMENT:  SELECT ID AS a1, CHANGE_TYPE AS a2, CREATE_TS AS a3, CREATED_BY AS a4, ENTITY_ID AS a5, ENTITY_NAME AS a6, FAKE AS a7, INDEXING_HOST AS a8, INT_ENTITY_ID AS a9, LONG_ENTITY_ID AS a10, SOURCE_HOST AS a11, STRING_ENTITY_ID AS a12 FROM SYS_FTS_QUEUE WHERE ((FAKE = $1) AND (INDEXING_HOST IS NULL)) ORDER BY CREATE_TS LIMIT $2 OFFSET $3
+2024-04-10 09:46:51.611 +04 [50522] LOG:  background worker "parallel worker" (PID 80012) exited with exit code 1
+waiting for server to shut down....2024-04-10 09:52:46.301 +04 [50522] LOG:  received fast shutdown request
+2024-04-10 09:52:46.302 +04 [50522] LOG:  aborting any active transactions
+2024-04-10 09:52:46.303 +04 [53582] FATAL:  terminating connection due to administrator command
+2024-04-10 09:52:46.303 +04 [53578] FATAL:  terminating connection due to administrator command
+2024-04-10 09:52:46.310 +04 [50522] LOG:  background worker "logical replication launcher" (PID 50533) exited with exit code 1
+2024-04-10 09:52:46.314 +04 [50528] LOG:  shutting down
+2024-04-10 09:52:46.334 +04 [50522] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2024-04-10 17:42:37.378 +04 [16435] FATAL:  database files are incompatible with server
+2024-04-10 17:42:37.378 +04 [16435] DETAIL:  The data directory was initialized by PostgreSQL version 11, which is not compatible with this version 14.11 (Homebrew).
+ stopped waiting
+waiting for server to start....2024-04-11 17:20:18.675 +04 [22737] FATAL:  database files are incompatible with server
+2024-04-11 17:20:18.675 +04 [22737] DETAIL:  The data directory was initialized by PostgreSQL version 11, which is not compatible with this version 14.11 (Homebrew).
+ stopped waiting
+rm: ../it-pearls-basebackup-old.11.22_1.tgz: No such file or directory
+mv: rename ../it-pearls-basebackup.11.22_1.tgz to ../it-pearls-basebackup-old.11.22_1.tgz: No such file or directory
+ожидание завершения работы сервера............................................................... ошибка
+rm: ../it-pearls-basebackup-old.16.2_1.tgz: No such file or directory
+mv: rename ../it-pearls-basebackup.16.2_1.tgz to ../it-pearls-basebackup-old.16.2_1.tgz: No such file or directory
+ожидание запуска сервера....2024-04-12 13:02:04.579 +04 [2258] FATAL:  database files are incompatible with server
+2024-04-12 13:02:04.579 +04 [2258] DETAIL:  The data directory was initialized by PostgreSQL version 11, which is not compatible with this version 16.2 (Homebrew).
+ прекращение ожидания
+waiting for server to shut down.... done
+server stopped
+rm: ../it-pearls-basebackup-old.11.22_1.tgz: No such file or directory
+waiting for server to start....2024-04-12 16:01:21.815 +04 [15928] LOG:  listening on IPv6 address "::1", port 5432
+2024-04-12 16:01:21.815 +04 [15928] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-04-12 16:01:21.816 +04 [15928] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-04-12 16:01:21.835 +04 [15929] LOG:  database system was interrupted; last known up at 2024-04-12 15:59:25 +04
+2024-04-12 16:01:22.139 +04 [15929] LOG:  redo starts at 35/24000028
+2024-04-12 16:01:22.147 +04 [15929] LOG:  consistent recovery state reached at 35/2407C618
+2024-04-12 16:01:22.147 +04 [15929] LOG:  redo done at 35/2407C618
+2024-04-12 16:01:22.148 +04 [15929] LOG:  last completed transaction was at log time 2024-04-12 15:59:43.809358+04
+2024-04-12 16:01:22.247 +04 [15928] LOG:  database system is ready to accept connections
+ done
+server started
+waiting for server to shut down...2024-04-15 11:05:44.108 +04 [15928] LOG:  received fast shutdown request
+.2024-04-15 11:05:44.109 +04 [15928] LOG:  aborting any active transactions
+2024-04-15 11:05:44.111 +04 [15928] LOG:  background worker "logical replication launcher" (PID 15935) exited with exit code 1
+2024-04-15 11:05:44.111 +04 [15930] LOG:  shutting down
+2024-04-15 11:05:44.120 +04 [15928] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2024-04-15 11:07:14.511 +04 [29192] LOG:  listening on IPv6 address "::1", port 5432
+2024-04-15 11:07:14.511 +04 [29192] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-04-15 11:07:14.512 +04 [29192] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-04-15 11:07:14.532 +04 [29193] LOG:  database system was interrupted; last known up at 2024-04-15 11:04:22 +04
+2024-04-15 11:07:14.800 +04 [29193] LOG:  redo starts at 35/39000028
+2024-04-15 11:07:14.810 +04 [29193] LOG:  consistent recovery state reached at 35/39151B30
+2024-04-15 11:07:14.811 +04 [29193] LOG:  redo done at 35/39151B30
+2024-04-15 11:07:14.811 +04 [29193] LOG:  last completed transaction was at log time 2024-04-15 11:05:42.862975+04
+2024-04-15 11:07:14.901 +04 [29192] LOG:  database system is ready to accept connections
+ done
+server started
+2024-04-15 11:25:08.290 +04 [29378] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 11:26:01.157 +04 [29415] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 11:26:01.172 +04 [29417] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 11:26:01.427 +04 [29420] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 11:26:01.890 +04 [29422] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 11:26:02.119 +04 [29424] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 12:35:36.949 +04 [30417] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 12:35:36.961 +04 [30419] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 12:35:37.128 +04 [30421] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 12:35:37.437 +04 [30423] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 12:35:37.492 +04 [30425] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 15:16:06.234 +04 [32205] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 15:16:06.275 +04 [32207] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 15:16:06.451 +04 [32209] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 15:16:06.778 +04 [32211] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 15:16:06.885 +04 [32213] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:24:29.531 +04 [33258] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:24:29.547 +04 [33260] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:24:29.955 +04 [33262] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:24:31.726 +04 [33264] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:24:31.833 +04 [33266] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:29:34.937 +04 [33537] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:29:35.010 +04 [33539] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:29:35.494 +04 [33541] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:29:36.276 +04 [33543] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:29:36.442 +04 [33545] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:43:13.674 +04 [33922] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:43:13.686 +04 [33924] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:43:13.878 +04 [33926] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:43:14.115 +04 [33928] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:43:14.202 +04 [33930] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:54:17.998 +04 [34259] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:54:18.006 +04 [34261] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:54:18.180 +04 [34263] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:54:18.393 +04 [34265] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:54:18.473 +04 [34267] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:59:15.910 +04 [34578] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:59:15.923 +04 [34580] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:59:16.469 +04 [34582] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:59:17.225 +04 [34584] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 16:59:17.430 +04 [34586] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:18:20.145 +04 [35005] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:18:20.154 +04 [35007] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:18:20.321 +04 [35009] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:18:20.506 +04 [35011] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:18:20.582 +04 [35013] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:44:03.455 +04 [35577] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:44:03.464 +04 [35579] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:44:03.725 +04 [35581] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:44:04.092 +04 [35583] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:44:04.180 +04 [35585] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:57:25.368 +04 [36006] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:57:25.379 +04 [36008] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:57:25.539 +04 [36010] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:57:25.865 +04 [36012] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-04-15 17:57:25.948 +04 [36015] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
