@@ -361,6 +361,10 @@ public class Utils {
             "select e from itpearls_OpenPosition e " +
                     "where e.priority >= %s and not(e.openClose = true) and e.positionType.id = :uuid";
 
+    private static final String QUERY_LIST_PROJECT_OPEN_POSITION_ID =
+            "select e from itpearls_OpenPosition e " +
+                    "where e.priority >= %s and not(e.openClose = true) and e.projectName.id = :uuid";
+
     public static List<OpenPosition> getOpenPosition(Chat chat) {
         int priority = Utils.getPriority(chat);
         String q = String.format(QUERY_LIST_OPEN_POSITION, priority);
@@ -433,6 +437,31 @@ public class Utils {
                                         .addProperty("positionEnName")
                                         .addProperty("positionRuName")),
 //                Utils.getUUID(positionCallBack, positionKey));
+                UUID.fromString(positionKey));
+
+        return result;
+    }
+
+    public static List<OpenPosition> getProjectOpenPosition(Long chatId, String projectCallBack, String positionKey) {
+        Settings settings = Bot.getUserSettings(chatId);
+
+        List<OpenPosition> result = queryListResult(String.format(QUERY_LIST_PROJECT_OPEN_POSITION_ID,
+                        settings.getPriorityNotLower()),
+                new View(OpenPosition.class)
+                        .addProperty("openPositionComments", new View(OpenPositionComment.class)
+                                .addProperty("comment"))
+                        .addProperty("vacansyName")
+                        .addProperty("projectName",
+                                new View(Project.class)
+                                        .addProperty("projectName")
+                                        .addProperty("projectOwner",
+                                                new View(Person.class)
+                                                        .addProperty("firstName")
+                                                        .addProperty("secondName")))
+                        .addProperty("positionType",
+                                new View(Position.class)
+                                        .addProperty("positionEnName")
+                                        .addProperty("positionRuName")),
                 UUID.fromString(positionKey));
 
         return result;
@@ -766,6 +795,30 @@ public class Utils {
         }
     }
 
+    public static String getProjectUUID(String positionID) {
+        final String QUERY_GET_POSITION_NAME = "select e from itpearls_Project e where e.id = :uuid";
+        Project project = null;
+
+        try {
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                // get EntityManager for the current transaction
+                EntityManager em = persistence.getEntityManager();
+                Query query = em.createQuery(QUERY_GET_POSITION_NAME);
+                query.setParameter("uuid", UUID.fromString(positionID));
+
+                project = (Project) query.getSingleResult();
+                tx.commit();
+            }
+        } catch (Exception e) {
+            logger.error(String.format("SQL error: %s", e.getMessage()));
+        } finally {
+            return new StringBuilder()
+                    .append(project.getProjectName() != null ? project.getProjectName() : "")
+                    .toString();
+        }
+    }
+
     public static InlineKeyboardMarkup getSendSubscribersKeyboard(String openPositionId) {
         InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
@@ -882,5 +935,28 @@ public class Utils {
                             project.getProjectDescription() : "❗\uFE0FНет описания проекта")
                     .toString();
         }
+    }
+
+    public static InlineKeyboardMarkup getProjectVacansiesKeyboard(String projectId) {
+        InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+        List<InlineKeyboardButton> rowInline = new ArrayList<>();
+
+        InlineKeyboardButton viewProjectOpenPosionsButton = new InlineKeyboardButton();
+        viewProjectOpenPosionsButton.setText("View vacansies");
+        StringBuilder callBackDataSB = new StringBuilder()
+                .append(CallbackData.VIEW_PROJECT_VACANSIES_BUTTON)
+                .append(CallbackData.CALLBACK_SEPARATOR)
+                .append(projectId);
+
+        viewProjectOpenPosionsButton.setCallbackData(callBackDataSB.toString());
+
+        rowInline.add(viewProjectOpenPosionsButton);
+
+        buttons.add(rowInline);
+
+        markupKeyboard.setKeyboard(buttons);
+
+        return markupKeyboard;
     }
 }

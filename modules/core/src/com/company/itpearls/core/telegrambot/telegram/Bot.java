@@ -173,9 +173,11 @@ public final class Bot extends TelegramLongPollingCommandBot {
                 case CallbackData.VIEW_PROJECTS_DETAIL_BUTTON:
                     sendAnswer(chatId,
                             Utils.getProjectDescription(update.getCallbackQuery().getFrom(),
-                                    openPositionUUID));
+                                    openPositionUUID),
+                            Utils.getProjectVacansiesKeyboard(openPositionUUID));
                     break;
                 case CallbackData.VIEW_PROJECT_VACANSIES_BUTTON:
+                    projectOpenPositionView(chatId, update.getCallbackQuery());
                     break;
                 case CallbackData.COMMENT_VIEW_BUTTON:
                     sendAnswer(chatId,
@@ -222,6 +224,39 @@ public final class Bot extends TelegramLongPollingCommandBot {
         sendAnswer(chatId, new StringBuilder().append(Utils.getBotName())
                 .append("\n")
                 .append("⚙\uFE0FНАСТРОЙКИ СОХРАНЕНЫ").toString());
+    }
+
+    private void projectOpenPositionView(Long chatId, CallbackQuery callbackQuery) {
+        String projectId = callbackQuery.getData();
+        String projectKey = projectId.substring(
+                projectId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, projectId.length());
+        Boolean subscribeFlag = Utils.isInternalUser(callbackQuery.getFrom());
+
+        List<OpenPosition> openPositions = Utils.getProjectOpenPosition(chatId, projectId, projectKey);
+        int counter = 0;
+
+        StringBuilder sb = new StringBuilder(Utils.getBotName())
+                .append("\n")
+                .append("Список вакансий для проекта <b>\"")
+                .append(Utils.getProjectUUID(projectId.substring(projectId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, projectId.length())))
+                .append("\"</b>\n")
+                .append("Всего вакансий: <b>")
+                .append(openPositions.size())
+                .append("</b>\n\n");
+
+        sendAnswer(chatId, sb.toString());
+
+        for (OpenPosition openPosition : openPositions) {
+            StringBuilder stringBuilder = new StringBuilder()
+                    .append(++counter)
+                    .append(". ")
+                    .append(openPosition.getVacansyName())
+                    .append(" (Количество человек - <b>")
+                    .append(openPosition.getNumberPosition())
+                    .append("</b>)");
+            sendAnswer(chatId, stringBuilder.toString(),
+                    VacancyListCommand.setInline(openPosition, subscribeFlag));
+        }
     }
 
     private void positionOpenPositionView(Long chatId, CallbackQuery callbackQuery) {

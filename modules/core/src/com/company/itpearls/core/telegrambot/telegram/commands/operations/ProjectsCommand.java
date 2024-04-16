@@ -3,7 +3,6 @@ package com.company.itpearls.core.telegrambot.telegram.commands.operations;
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.entity.OpenPositionPriority;
-import com.company.itpearls.entity.Position;
 import com.company.itpearls.entity.Project;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.User;

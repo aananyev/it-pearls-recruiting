@@ -5,7 +5,7 @@
         <cssLayout id="horizontalWrap">
             <workArea id="workArea">
                 <initialLayout>
-<!--                    <vbox id="mainVBox"
+                    <vbox id="mainVBox"
                           expand="mainDashboard"
                           spacing="true">
                         <dashboard:dashboard id="mainDashboard"
@@ -13,7 +13,7 @@
                                              timerDelay="60"
                                              width="100%">
                         </dashboard:dashboard>
-                    </vbox> -->
+                    </vbox>
                 </initialLayout>
             </workArea>
         </cssLayout>
