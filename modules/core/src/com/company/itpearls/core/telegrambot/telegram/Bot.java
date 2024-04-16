@@ -460,7 +460,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
         message.setParseMode(ParseMode.HTML);
         message.setChatId(chatId.toString());
         message.setText(new StringBuilder()
-                .append(text)
+                .append(Utils.formattedHtml2text(text))
                 .toString());
         message.setReplyMarkup(keyboardMarkup);
 
@@ -479,10 +479,11 @@ public final class Bot extends TelegramLongPollingCommandBot {
         message.setParseMode(ParseMode.HTML);
         message.setChatId(chatId.toString());
         message.setText(new StringBuilder()
-                .append(text
-                        .replace("<div>", "")
-                        .replace("<br>", "\n")
-                        .replace("</div>", "\n"))
+                .append(Utils.formattedHtml2text(text)
+//                        .replace("<div>", "")
+//                        .replace("<br>", "\n")
+//                        .replace("</div>", "\n")
+                )
                 .toString());
 
         try {
