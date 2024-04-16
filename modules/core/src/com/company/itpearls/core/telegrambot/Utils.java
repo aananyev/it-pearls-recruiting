@@ -459,6 +459,7 @@ public class Utils {
                 .append("ОПИСАНИЕ КОМАНД БОТА:\n")
                 .append("/allvacancy - список открытых вакансий\n")
                 .append("/positions - вакансии по должностям\n")
+                .append("/projects - описание проектов и вакансии к ним\n")
                 .append("/mysubscribe - мои подписки на вакансии\n")
                 .append("/subscribers - подписчики на вакансии\n")
 //                .append("/settings - настройки\n")
@@ -736,29 +737,7 @@ public class Utils {
     }
 
     public static int getPositionsVacancyCount(Chat chat, Position position) {
-        final String QUERY_POSITIONVACANCY_COUNT =
-                "select sum(e.numberPosition) from itpearls_OpenPosition e " +
-                "where e.positionType = :position and e.priority >= :priority and not (e.openClose = true)";
-        Long count = null;
-        Settings settings = Bot.getUserSettings(chat.getId());
-
-        try {
-            Persistence persistence = AppBeans.get(Persistence.class);
-            try (Transaction tx = persistence.createTransaction()) {
-                // get EntityManager for the current transaction
-                EntityManager em = persistence.getEntityManager();
-                Query query = em.createQuery(QUERY_POSITIONVACANCY_COUNT);
-                query.setParameter("priority", settings.getPriorityNotLower());
-                query.setParameter("position", position);
-
-                count = (Long) query.getSingleResult();
-                tx.commit();
-            }
-        } catch (Exception e) {
-            logger.error(String.format("SQL error: %s", e.getMessage()));
-        } finally {
-            return Math.toIntExact(count);
-        }
+        return 0;
     }
 
     public static String getPositionUUID(String positionID) {
@@ -808,5 +787,100 @@ public class Utils {
         markupKeyboard.setKeyboard(buttons);
 
         return markupKeyboard;
+    }
+
+    public static List<Project> getActiveProjetsList(Chat chat) {
+        List<Project> projects = new ArrayList<>();
+        Settings settings = Bot.getUserSettings(chat.getId());
+
+        final String QUERY_ACTIVE_PROJECT_LIST
+                = "select e from itpearls_Project e where e in " +
+                "(select f.projectName from itpearls_OpenPosition f " +
+                "where not (f.openClose = true) and f.priority >= :priority)";
+
+        try {
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                // get EntityManager for the current transaction
+                EntityManager em = persistence.getEntityManager();
+
+                Query query = em.createQuery(QUERY_ACTIVE_PROJECT_LIST);
+                query.addView(new View(Project.class)
+                        .addProperty("projectName"));
+                query.setParameter("priority", settings.getPriorityNotLower());
+
+                projects = (List<Project>) query.getResultList();
+                tx.commit();
+            }
+        } catch (Exception e) {
+            logger.error(String.format("SQL error: %s", e.getMessage()));
+        } finally {
+            return projects;
+        }
+    }
+
+    public static int getProjectsVacancyCount(Chat chat, Project project) {
+        final String QUERY_POSITIONVACANCY_COUNT =
+                "select sum(e.numberPosition) from itpearls_OpenPosition e " +
+                        "where e.projectName = :project and e.priority >= :priority and not (e.openClose = true)";
+        Long count = null;
+        Settings settings = Bot.getUserSettings(chat.getId());
+
+        try {
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                // get EntityManager for the current transaction
+                EntityManager em = persistence.getEntityManager();
+                Query query = em.createQuery(QUERY_POSITIONVACANCY_COUNT);
+                query.setParameter("priority", settings.getPriorityNotLower());
+                query.setParameter("project", project);
+
+                count = (Long) query.getSingleResult();
+                tx.commit();
+            }
+        } catch (Exception e) {
+            logger.error(String.format("SQL error: %s", e.getMessage()));
+        } finally {
+            return Math.toIntExact(count);
+        }
+    }
+
+    public static String getProjectDescription(User from, String projectId) {
+        final String QUERY_GET_PROJECT_DESCRIPTION = "select e from itpearls_Project e where e.id = :uuid";
+        Project project = null;
+
+        try {
+            Persistence persistence = AppBeans.get(Persistence.class);
+            try (Transaction tx = persistence.createTransaction()) {
+                // get EntityManager for the current transaction
+                EntityManager em = persistence.getEntityManager();
+                Query query = em.createQuery(QUERY_GET_PROJECT_DESCRIPTION);
+                query.setParameter("uuid", UUID.fromString(projectId));
+                query.setView(new View(Project.class).addProperty("projectDepartment",
+                        new View(CompanyDepartament.class)
+                                .addProperty("departamentRuName")
+                                .addProperty("companyName", new View(Company.class)
+                                        .addProperty("comanyName"))));
+
+                project = (Project) query.getSingleResult();
+                tx.commit();
+            }
+        } catch (Exception e) {
+            logger.error(String.format("SQL error: %s", e.getMessage()));
+        } finally {
+            return new StringBuilder()
+                    .append("<b>Наименование проекта:</b> ")
+                    .append(project.getProjectName())
+                    .append("\n")
+                    .append("<b>Наименование компании:</b> ")
+                    .append(project.getProjectDepartment().getCompanyName().getComanyName())
+                    .append("\n")
+                    .append("<b>Департамент:</b> ")
+                    .append(project.getProjectDepartment().getDepartamentRuName())
+                    .append("\n\n")
+                    .append(project.getProjectDescription() != null ?
+                            project.getProjectDescription() : "❗\uFE0FНет описания проекта")
+                    .toString();
+        }
     }
 }

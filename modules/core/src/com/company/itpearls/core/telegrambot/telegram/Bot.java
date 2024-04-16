@@ -81,6 +81,9 @@ public final class Bot extends TelegramLongPollingCommandBot {
         register(new PersonPositionCommand("positions", "Должности"));
         logger.debug("Команда positions создана");
 
+        register(new ProjectsCommand("projects", "Проекты"));
+        logger.debug("Команда projects создана");
+
         register(new StartCommand("start", "Старт"));
         logger.debug("Команда start создана");
 
@@ -166,6 +169,13 @@ public final class Bot extends TelegramLongPollingCommandBot {
                                     openPositionId,
                                     CallbackData.VIEW_DETAIL_BUTTON),
                             Utils.getSendSubscribersKeyboard(openPositionUUID));
+                    break;
+                case CallbackData.VIEW_PROJECTS_DETAIL_BUTTON:
+                    sendAnswer(chatId,
+                            Utils.getProjectDescription(update.getCallbackQuery().getFrom(),
+                                    openPositionUUID));
+                    break;
+                case CallbackData.VIEW_PROJECT_VACANSIES_BUTTON:
                     break;
                 case CallbackData.COMMENT_VIEW_BUTTON:
                     sendAnswer(chatId,
@@ -434,7 +444,11 @@ public final class Bot extends TelegramLongPollingCommandBot {
         message.setParseMode(ParseMode.HTML);
         message.setChatId(chatId.toString());
         message.setText(new StringBuilder()
-                .append(text).toString());
+                .append(text
+                        .replace("<div>", "")
+                        .replace("<br>", "\n")
+                        .replace("</div>", "\n"))
+                .toString());
 
         try {
             execute(message);
