@@ -24,6 +24,9 @@ public class Project extends StandardEntity {
     @Column(name = "PROJECT_NAME", length = 160)
     protected String projectName;
 
+    @Column(name = "PROJECT_NAME_FOR_CANDIDATE", length = 160)
+    private String projectNameForCandidate;
+
     @JoinColumn(name = "PROJECT_LOGO_ID")
     @ManyToOne(fetch = FetchType.LAZY)
     private FileDescriptor projectLogo;
@@ -68,6 +71,10 @@ public class Project extends StandardEntity {
     protected String projectDescription;
 
     @Lob
+    @Column(name = "PROJECT_DESCRIPTION_FOR_CANDIDATE")
+    private String projectDescriptionForCandidate;
+
+    @Lob
     @Column(name = "TEMPLATE_LETTER")
     protected String templateLetter;
 
@@ -76,6 +83,22 @@ public class Project extends StandardEntity {
 
     @Column(name = "CHAT_FOR_CV")
     private String chatForCV;
+
+    public String getProjectDescriptionForCandidate() {
+        return projectDescriptionForCandidate;
+    }
+
+    public void setProjectDescriptionForCandidate(String projectDescriptionForCandidate) {
+        this.projectDescriptionForCandidate = projectDescriptionForCandidate;
+    }
+
+    public String getProjectNameForCandidate() {
+        return projectNameForCandidate;
+    }
+
+    public void setProjectNameForCandidate(String projectNameForCandidate) {
+        this.projectNameForCandidate = projectNameForCandidate;
+    }
 
     public FileDescriptor getProjectLogo() {
         return projectLogo;

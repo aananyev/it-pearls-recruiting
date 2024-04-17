@@ -278,6 +278,42 @@ public class ProjectBrowse extends StandardLookup<Project> {
         return retHBox;
     }
 
+    @Install(to = "projectsTable.projectNameForCandidate", subject = "columnGenerator")
+    private Object projectsTableProjectNameForCandidateColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+        retHBox.setHeightFull();
+        retHBox.setSpacing(true);
+
+        Label newVacancyLabel = uiComponents.create(Label.class);
+        newVacancyLabel.setValue(messageBundle.getMessage("msgNewReserve"));
+        newVacancyLabel.setStyleName("button_table_red");
+        newVacancyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        newVacancyLabel.setWidthAuto();
+        newVacancyLabel.setHeightAuto();
+
+        GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.setTime(new Date());
+        gregorianCalendar.add(Calendar.DAY_OF_MONTH, -14);
+        if (event.getItem().getStartProjectDate() != null) {
+            if (event.getItem().getStartProjectDate().before(gregorianCalendar.getTime())) {
+                newVacancyLabel.setVisible(false);
+            } else {
+                newVacancyLabel.setVisible(true);
+            }
+        }
+
+        HBoxLayout retObject = setComponentsToOpenPositionsTable(event, event.getItem().getProjectNameForCandidate());
+        retObject.setWidthFull();
+
+        retHBox.add(newVacancyLabel);
+        retHBox.add(retObject);
+        retHBox.expand(retObject);
+
+        return retHBox;
+    }
+
     @Install(to = "projectsTable.projectName", subject = "columnGenerator")
     private Object projectsTableProjectNameColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> event) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);

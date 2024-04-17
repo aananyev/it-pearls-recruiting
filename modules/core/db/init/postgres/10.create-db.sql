@@ -284,6 +284,7 @@ create table ITPEARLS_PROJECT (
     DELETED_BY varchar(50),
     --
     PROJECT_NAME varchar(160),
+    PROJECT_NAME_FOR_CANDIDATE varchar(160),
     PROJECT_LOGO_ID uuid,
     PROJECT_TREE_ID uuid,
     PROJECT_IS_CLOSED boolean,
@@ -293,6 +294,7 @@ create table ITPEARLS_PROJECT (
     PROJECT_DEPARTMENT_ID uuid,
     PROJECT_OWNER_ID uuid,
     PROJECT_DESCRIPTION text,
+    PROJECT_DESCRIPTION_FOR_CANDIDATE text,
     TEMPLATE_LETTER text,
     GENERAL_CHAT varchar(255),
     CHAT_FOR_CV varchar(255),

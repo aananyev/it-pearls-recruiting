@@ -83,6 +83,13 @@
                         property="projectName">
                     <componentRenderer/>
                 </column>
+                <column id="projectNameForCandidate"
+                        collapsible="true"
+                        collapsed="true"
+                        caption="msg://msgProjectNameForCandidate"
+                        property="projectNameForCandidate">
+                    <componentRenderer/>
+                </column>
                 <column id="startProjectDate"
                         width="100px"
                         caption="msg://msgProjectStartDate"
