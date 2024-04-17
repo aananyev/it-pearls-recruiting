@@ -22,7 +22,7 @@ public class MySubscribeCommand extends OperationCommand{
         if (Utils.isInternalUser(user)) {
         try {
                 List<RecrutiesTasks> recrutiesTasks =
-                        Utils.getMyRecrutiesTasks(Utils.getInternalUser(user.getUserName()));
+                        SubscribeCommand.getMyRecrutiesTasks(Utils.getInternalUser(user.getUserName()));
 
                 int counter = 1;
 

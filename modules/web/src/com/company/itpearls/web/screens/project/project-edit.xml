@@ -73,6 +73,7 @@
                   caption="msg://msgTabProject"
                   stylename="framed">
             <tab caption="msg://msgProjectName"
+                 icon="font-icon:USER"
                  margin="true,true,true,true"
                  spacing="true"
                  id="tabProject">
@@ -217,6 +218,7 @@
                 </hbox>
             </tab>
             <tab id="tabProjectDescription"
+                 icon="font-icon:ADDRESS_BOOK"
                  margin="true,true,true,true"
                  spacing="true"
                  expand="projectDescriptionAccordion"
@@ -246,6 +248,7 @@
             </tab>
             <tab id="tabVacansy"
                  margin="true,true,true,true"
+                 icon="font-icon:ARCHIVE"
                  spacing="true"
                  expand="projectOpenPositionTable"
                  caption="msg://msgTabVacancy">
@@ -272,6 +275,7 @@
                 </dataGrid>
             </tab>
             <tab id="tabTemplateLetter"
+                 icon="icons/reports-template-view.png"
                  caption="msg://msgTemplateLetter"
                  margin="true,true,true,true"
                  expand="templateLetterBox"

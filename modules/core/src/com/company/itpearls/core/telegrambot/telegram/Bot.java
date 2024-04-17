@@ -165,23 +165,23 @@ public final class Bot extends TelegramLongPollingCommandBot {
                     break;
                 case CallbackData.VIEW_DETAIL_BUTTON:
                     sendAnswer(chatId,
-                            Utils.getOpenPositionJobDescription(update.getCallbackQuery().getFrom(),
+                            VacancyListCommand.getOpenPositionJobDescription(update.getCallbackQuery().getFrom(),
                                     openPositionId,
                                     CallbackData.VIEW_DETAIL_BUTTON),
-                            Utils.getSendSubscribersKeyboard(openPositionUUID));
+                            SubscribeCommand.getSendSubscribersKeyboard(openPositionUUID));
                     break;
                 case CallbackData.VIEW_PROJECTS_DETAIL_BUTTON:
                     sendAnswer(chatId,
-                            Utils.getProjectDescription(update.getCallbackQuery().getFrom(),
+                            ProjectsCommand.getProjectDescription(update.getCallbackQuery().getFrom(),
                                     openPositionUUID),
-                            Utils.getProjectVacansiesKeyboard(openPositionUUID));
+                            ProjectsCommand.getProjectVacansiesKeyboard(openPositionUUID));
                     break;
                 case CallbackData.VIEW_PROJECT_VACANSIES_BUTTON:
                     projectOpenPositionView(chatId, update.getCallbackQuery());
                     break;
                 case CallbackData.COMMENT_VIEW_BUTTON:
                     sendAnswer(chatId,
-                            Utils.getOpenPositionComments(openPositionId,
+                            VacancyListCommand.getOpenPositionComments(openPositionId,
                                     CallbackData.COMMENT_VIEW_BUTTON));
                     break;
                 case CallbackData.SUBSCRIBE_BUTTON:
@@ -232,13 +232,13 @@ public final class Bot extends TelegramLongPollingCommandBot {
                 projectId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, projectId.length());
         Boolean subscribeFlag = Utils.isInternalUser(callbackQuery.getFrom());
 
-        List<OpenPosition> openPositions = Utils.getProjectOpenPosition(chatId, projectId, projectKey);
+        List<OpenPosition> openPositions = ProjectsCommand.getProjectOpenPosition(chatId, projectId, projectKey);
         int counter = 0;
 
         StringBuilder sb = new StringBuilder(Utils.getBotName())
                 .append("\n")
                 .append("Список вакансий для проекта <b>\"")
-                .append(Utils.getProjectUUID(projectId.substring(projectId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, projectId.length())))
+                .append(ProjectsCommand.getProjectUUID(projectId.substring(projectId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, projectId.length())))
                 .append("\"</b>\n")
                 .append("Всего вакансий: <b>")
                 .append(openPositions.size())
@@ -265,13 +265,13 @@ public final class Bot extends TelegramLongPollingCommandBot {
                 positionId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, positionId.length());
         Boolean subscribeFlag = Utils.isInternalUser(callbackQuery.getFrom());
 
-        List<OpenPosition> openPositions = Utils.getPositonOpenPosition(chatId, positionId, positionKey);
+        List<OpenPosition> openPositions = PersonPositionCommand.getPositonOpenPosition(chatId, positionId, positionKey);
         int counter = 0;
 
         StringBuilder sb = new StringBuilder(Utils.getBotName())
                 .append("\n")
                 .append("Список вакансий для должности <b>\"")
-                .append(Utils.getPositionUUID(positionId.substring(positionId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, positionId.length())))
+                .append(PersonPositionCommand.getPositionUUID(positionId.substring(positionId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, positionId.length())))
                 .append("\"</b>\n")
                 .append("Всего вакансий: <b>")
                 .append(openPositions.size())
@@ -300,7 +300,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
     private void openPositionSubscribersRecruter(Long chatId,
                                                  String openPositionKey,
                                                  String openPositionCallBack) {
-        List<RecrutiesTasks> recrutiesTasks = Utils.isOpenPositionSubscribers(openPositionKey, openPositionCallBack);
+        List<RecrutiesTasks> recrutiesTasks = SubscribeCommand.isOpenPositionSubscribers(openPositionKey, openPositionCallBack);
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
         StringBuilder sb = new StringBuilder()
@@ -340,7 +340,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
         RecrutiesTasks recrutiesTasks = new RecrutiesTasks();
         recrutiesTasks.setSubscribe(false);
-        recrutiesTasks.setOpenPosition(Utils.getOpenPosition(openPositionCallBack, openPositionKey).get(0));
+        recrutiesTasks.setOpenPosition(VacancyListCommand.getOpenPosition(openPositionCallBack, openPositionKey).get(0));
         recrutiesTasks.setClosed(false);
         recrutiesTasks.setRecrutierName(user.getUserName());
         recrutiesTasks.setReacrutier(Utils.getInternalUser(userName));
@@ -350,7 +350,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
         recrutiesTasks.setCreateTs(new Date());
         recrutiesTasks.setId(UUID.randomUUID());
 
-        if (!Utils.isRecrutiesTaskValide(recrutiesTasks, user)) {
+        if (!SubscribeCommand.isRecrutiesTaskValide(recrutiesTasks, user)) {
             Persistence persistence = AppBeans.get(Persistence.class);
             try (Transaction tx = persistence.createTransaction()) {
                 EntityManager em = persistence.getEntityManager();
@@ -362,12 +362,12 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
             setAnswer(chatId, null, String.format("✅User: <b>%s</b> (<b>%s</b>) подписан на вакансию <b>%s</b>", user.getUserName(),
                     Utils.getInternalUser(userName).getName(),
-                    Utils.getOpenPosition(openPositionCallBack, openPositionKey).get(0).getVacansyName()));
+                    VacancyListCommand.getOpenPosition(openPositionCallBack, openPositionKey).get(0).getVacansyName()));
         } else {
             setAnswer(chatId, null, String.format("\uD83D\uDED1User: <b>%s</b> (<b>%s</b>) не удалось подписаться на вакансию: <b>%s</b>.",
                     user.getUserName(),
                     Utils.getInternalUser(userName).getName(),
-                    Utils.getOpenPosition(openPositionCallBack, openPositionKey).get(0).getVacansyName()));
+                    VacancyListCommand.getOpenPosition(openPositionCallBack, openPositionKey).get(0).getVacansyName()));
         }
     }
 
@@ -488,7 +488,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
         try {
             execute(message);
-        } catch (TelegramApiException e) {
+        } catch (TelegramApiException|IllegalStateException e) {
             logger.error(String.format("Ошибка %s.", e.getMessage()));
             sendAnswer(chatId, "\uD83E\uDD28Ошибка вывода сообщения. Обратитесь к администратору системы.");
             e.printStackTrace();

@@ -3,8 +3,12 @@ package com.company.itpearls.core.telegrambot.telegram.commands.operations;
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.SettingsCommand;
-import com.company.itpearls.entity.OpenPosition;
-import com.company.itpearls.entity.OpenPositionPriority;
+import com.company.itpearls.entity.*;
+import com.haulmont.cuba.core.app.ServerConfig;
+import com.haulmont.cuba.core.global.AppBeans;
+import com.haulmont.cuba.core.global.Configuration;
+import com.haulmont.cuba.core.global.GlobalConfig;
+import com.haulmont.cuba.core.global.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -14,6 +18,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +32,7 @@ public class VacancyListCommand extends OperationCommand {
         String userName = Utils.getUserName(user);
 
         try {
-            List<OpenPosition> openPositions = Utils.getOpenPosition(chat);
+            List<OpenPosition> openPositions = VacancyListCommand.getOpenPosition(chat);
 
             int counter = 1;
             Boolean subscribeFlag = Utils.isInternalUser(user);
@@ -93,7 +98,7 @@ public class VacancyListCommand extends OperationCommand {
 
         InlineKeyboardButton viewInHuntTechButton = new InlineKeyboardButton();
         viewInHuntTechButton.setText("View");
-        String urlButton = Utils.getOpenPositionEditorURL(openPosition);
+        String urlButton = getOpenPositionEditorURL(openPosition);
         viewInHuntTechButton.setUrl(urlButton);
 
         InlineKeyboardButton viewDetailsButton = new InlineKeyboardButton();
@@ -133,7 +138,7 @@ public class VacancyListCommand extends OperationCommand {
             }
             rowInline.add(subscribeButton);
         } else {
-            int subscribers_count = Utils.isOpenPositionSubscribers(CallbackData.SUBSCRIBERS_BUTTON,
+            int subscribers_count = SubscribeCommand.isOpenPositionSubscribers(CallbackData.SUBSCRIBERS_BUTTON,
                     CallbackData.SUBSCRIBERS_BUTTON
                             + CallbackData.CALLBACK_SEPARATOR
                             + openPosition.getId().toString()).size();
@@ -161,7 +166,7 @@ public class VacancyListCommand extends OperationCommand {
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
 
         inlineKeyboardButton.setText("View");
-        inlineKeyboardButton.setUrl(Utils.getOpenPositionEditorURL(openPosition));
+        inlineKeyboardButton.setUrl(getOpenPositionEditorURL(openPosition));
 
         rowInline.add(inlineKeyboardButton);
         buttons.add(rowInline);
@@ -169,5 +174,215 @@ public class VacancyListCommand extends OperationCommand {
         markupKeyboard.setKeyboard(buttons);
 
         return markupKeyboard;
+    }
+
+    public static String getOpenPositionJobDescription(User user, String openPosition, String key) {
+        String openPositionId = openPosition.replace(key, "");
+        String QUERY_GET_COMMENT = String.format("select e from itpearls_OpenPosition e where e.id = '%s'",
+                openPositionId.substring(1, openPositionId.length()));
+
+        List<OpenPosition> openPositionList = Utils.queryListResult(QUERY_GET_COMMENT,
+                new View(OpenPosition.class)
+                        .addProperty("positionType", new View(Position.class)
+                                .addProperty("positionRuName")
+                                .addProperty("positionEnName"))
+                        .addProperty("projectName", new View(Project.class)
+                                .addProperty("projectName"))
+                        .addProperty("numberPosition")
+                        .addProperty("openClose")
+                        .addProperty("priority")
+                        .addProperty("vacansyName")
+                        .addProperty("salaryCandidateRequest")
+                        .addProperty("salaryComment")
+                        .addProperty("salaryMax")
+                        .addProperty("salaryMin"));
+        OpenPosition op = (OpenPosition) openPositionList.get(0);
+
+        StringBuilder salary = new StringBuilder();
+        Boolean salaryFlag = false;
+
+        if (op.getSalaryCandidateRequest() != null ? op.getSalaryCandidateRequest() : false) {
+            salary.append("ориентируемся на ожидания кандидатов\n");
+            salaryFlag = true;
+        }
+
+        if (op.getSalaryMin() != null) {
+            salary.append("мин ")
+                    .append(op.getSalaryMin());
+        }
+
+        if (op.getSalaryMax() != null) {
+            salary.append(" макс ")
+                    .append(op.getSalaryMax())
+                    .append("\n");
+        }
+
+        if (Utils.isInternalUser(user)) {
+            if (op.getSalaryComment() != null) {
+                salary.append("Комментарии по заработной плате: ")
+                        .append(op.getSalaryComment())
+                        .append("\n");
+                salaryFlag = true;
+            }
+        }
+
+        String ret = String.format("%s\n" +
+                        "НАИМЕНОВАНИЕ ВАКАНСИИ:\n" +
+                        "<b>%s</b>\n\n" +
+                        "КОЛИЧЕСТВО ПЕРСОНАЛА: <b>%s</b>\n" +
+                        "СРОЧНОСТЬ: <b>%s</b>\n\n" +
+                        "ОПИСАНИЕ ВАКАНСИИ:\n<i>%s</i>\n\n" +
+                        "ЗАРПЛАТА: <b>%s</b>",
+                Utils.getBotName(),
+                op.getVacansyName(),
+                op.getNumberPosition(),
+                OpenPositionPriority.fromId(op.getPriority()),
+                (op.getComment() != null ?
+                        (Utils.formattedHtml2text(op.getComment()).length() < Utils.MAX_TELEGRAM_MESSAGE_LENGTH ?
+                                Utils.formattedHtml2text(op.getComment()) :
+                                Utils.formattedHtml2text(op.getComment()).substring(0, Utils.MAX_TELEGRAM_MESSAGE_LENGTH))
+                        : ""),
+                salary.toString());
+
+        return ret;
+    }
+
+
+    public static String getOpenPositionEditorURL(OpenPosition openPosition, String text) {
+        StringBuilder sb = new StringBuilder();
+
+        String appUrl = AppBeans.get(Configuration.class)
+                .getConfig(ServerConfig.class)
+                .getUserSessionProviderUrl();
+
+        sb.append("<a href=\"http://hr.it-pearls.ru:8080/app/open?screen=itpearls_OpenPosition.edit-")
+                .append(openPosition.getId().toString())
+                .append("\">")
+                .append(text)
+                .append("</a>");
+
+        return sb.toString();
+    }
+
+    /**
+     * @param openPosition
+     * @return
+     */
+
+    public static String getOpenPositionEditorURL(OpenPosition openPosition) {
+        StringBuilder sb = new StringBuilder();
+
+        String appUrl = AppBeans.get(Configuration.class)
+                .getConfig(GlobalConfig.class)
+                .getWebAppUrl();
+
+        sb.append(appUrl.replace("http:/", "http://"))
+                .append("/open?screen=")
+                .append("itpearls_OpenPosition.edit")
+                .append("&item=")
+                .append("itpearls_OpenPosition-")
+                .append(openPosition.getId().toString())
+                .append("-openPosition-view")
+        ;
+
+        return sb.toString();
+    }
+
+
+    private static final String QUERY_LIST_OPEN_POSITION =
+            "select e from itpearls_OpenPosition e " +
+                    "where (e.priority >= %s) and (not e.openClose = true)";
+    private static final String QUERY_LIST_OPEN_POSITION_ID =
+            "select e from itpearls_OpenPosition e " +
+                    "where e.id = :uuid";
+
+
+    public static List<OpenPosition> getOpenPosition(String openPositionCallBack, String openPositionKey) {
+
+        List<OpenPosition> result = Utils.queryListResult(QUERY_LIST_OPEN_POSITION_ID,
+                new View(OpenPosition.class)
+                        .addProperty("vacansyName")
+                        .addProperty("projectName",
+                                new View(Project.class)
+                                        .addProperty("projectName")
+                                        .addProperty("projectOwner",
+                                                new View(Person.class)
+                                                        .addProperty("firstName")
+                                                        .addProperty("secondName")))
+                        .addProperty("positionType",
+                                new View(Position.class)
+                                        .addProperty("positionEnName")
+                                        .addProperty("positionRuName")),
+                Utils.getUUID(openPositionCallBack, openPositionKey));
+
+        return result;
+    }
+
+    public static List<OpenPosition> getOpenPosition(Chat chat) {
+        int priority = Utils.getPriority(chat);
+        String q = String.format(QUERY_LIST_OPEN_POSITION, priority);
+
+        List<OpenPosition> result = Utils.queryListResult(String.format(QUERY_LIST_OPEN_POSITION, priority),
+                new View(OpenPosition.class)
+                        .addProperty("openPositionComments",
+                                new View(OpenPositionComment.class)
+                                        .addProperty("user",
+                                                new View(ExtUser.class)
+                                                        .addProperty("name")))
+                        .addProperty("projectName",
+                                new View(Project.class)
+                                        .addProperty("projectName")
+                                        .addProperty("projectOwner",
+                                                new View(Person.class)
+                                                        .addProperty("firstName")
+                                                        .addProperty("secondName")))
+                        .addProperty("positionType",
+                                new View(Position.class)
+                                        .addProperty("positionEnName")
+                                        .addProperty("positionRuName")));
+
+        return result;
+    }
+
+    public static String getOpenPositionComments(String openPosition, String key) {
+        String openPositionId = openPosition.replace(key, "");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd EEEE yyyy H:m");
+
+        String QUERY_GET_COMMENT = String.format("select e from itpearls_OpenPositionComment e where e.openPosition.id = '%s'",
+                openPositionId.substring(1, openPositionId.length()));
+
+        List<OpenPositionComment> openPositionComments = Utils.queryListResult(QUERY_GET_COMMENT,
+                new View(OpenPositionComment.class)
+                        .addProperty("dateComment")
+                        .addProperty("openPosition", new View(OpenPosition.class)
+                                .addProperty("vacansyName"))
+                        .addProperty("user", new View(ExtUser.class)
+                                .addProperty("name")));
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder
+                .append(Utils.getBotName())
+                .append("\n")
+                .append("❗\uFE0FВАКАНСИЯ: ")
+                .append(openPositionComments.get(0).getOpenPosition().getVacansyName())
+                .append("\n\n");
+
+        int counter = 1;
+
+        for (OpenPositionComment openPositionComment : openPositionComments) {
+            stringBuilder.append(counter++)
+                    .append(". <b>Дата:</b> ")
+                    .append(sdf.format(openPositionComment.getDateComment()))
+                    .append("\n<i>")
+                    .append(openPositionComment.getComment())
+                    .append("</i>\n")
+                    .append("<b>Автор:</b> ")
+                    .append(openPositionComment.getUser().getName())
+                    .append("\n\n");
+        }
+
+        return stringBuilder.toString();
+
     }
 }
