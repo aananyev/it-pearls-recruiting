@@ -51,22 +51,27 @@ public class VacancyListCommand extends OperationCommand {
 
             for (OpenPosition openPosition : openPositions) {
                 StringBuilder sb = new StringBuilder();
+                StringBuilder openPositionCounter = new StringBuilder();
+
+                if (subscribeFlag) {
+                    openPositionCounter.append("</b> (человек - <b>")
+                            .append(openPosition.getNumberPosition())
+                            .append("</b>)")
+                            .append("\n");
+                }
 
                 sb.append(counter++)
                         .append(". <b>")
                         .append(new StringBuilder(openPosition.getPositionType().getPositionEnName())
                                 .append(" / ")
                                 .append(openPosition.getPositionType().getPositionRuName())
-                                .append("</b> (человек - <b>")
-                                .append(openPosition.getNumberPosition())
-                                .append("</b>)")
-                                .append("\n"))
+                                .append(openPositionCounter)
                         .append("Проект: <b>")
                         .append(openPosition.getProjectName().getProjectName())
                         .append("</b>\n")
                         .append("Приоритет: <b>")
                         .append(OpenPositionPriority.fromId(openPosition.getPriority()))
-                        .append("</b>\n");
+                        .append("</b>\n"));
 
                 if (subscribeFlag) {
                     sb.append("Аккаунт\\HR на стороне заказчика: <b>")

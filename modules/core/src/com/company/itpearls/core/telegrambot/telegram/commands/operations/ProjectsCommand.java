@@ -171,6 +171,7 @@ public class ProjectsCommand extends OperationCommand {
     public static String getProjectDescription(User from, String projectId) {
         final String QUERY_GET_PROJECT_DESCRIPTION = "select e from itpearls_Project e where e.id = :uuid";
         Project project = null;
+        Boolean subscribeFlag = Utils.isInternalUser(from);
 
         try {
             Persistence persistence = AppBeans.get(Persistence.class);
@@ -191,6 +192,18 @@ public class ProjectsCommand extends OperationCommand {
         } catch (Exception e) {
             logger.error(String.format("SQL error: %s", e.getMessage()));
         } finally {
+            StringBuilder projectDesc = new StringBuilder();
+
+            if (subscribeFlag) {
+                projectDesc.append(project.getProjectDescription() != null
+                        ? project.getProjectDescription() : "\"❗\\uFE0FНет описания проекта\")");
+            } else {
+                projectDesc.append(project.getProjectDescriptionForCandidate() != null
+                        ? project.getProjectDescriptionForCandidate() :
+                        (project.getProjectDescription() != null
+                        ? project.getProjectDescription() : "\"❗\\uFE0FНет описания проекта\")"));
+            }
+
             return new StringBuilder()
                     .append("<b>Наименование проекта:</b> ")
                     .append(project.getProjectName())
@@ -201,8 +214,7 @@ public class ProjectsCommand extends OperationCommand {
                     .append("<b>Департамент:</b> ")
                     .append(project.getProjectDepartment().getDepartamentRuName())
                     .append("\n\n")
-                    .append(project.getProjectDescription() != null ?
-                            project.getProjectDescription() : "❗\uFE0FНет описания проекта")
+                    .append(projectDesc)
                     .toString();
         }
     }

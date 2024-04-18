@@ -2754,6 +2754,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             .getProjectDescription() : "");
         }
 
+
+        if (jobCandidateIteractionListTable.getSingleSelected().getVacancy().getProjectName().getProjectDescriptionForCandidate() != null) {
+            quickViewOpenPositionDescription.setProjectDescriptionForCandidates(jobCandidateIteractionListTable
+                    .getSingleSelected()
+                    .getVacancy()
+                    .getProjectName()
+                    .getProjectDescription() != null ?
+                    jobCandidateIteractionListTable.getSingleSelected()
+                            .getVacancy()
+                            .getProjectName()
+                            .getProjectDescriptionForCandidate() : "");
+        }
+
         if (jobCandidateIteractionListTable.getSingleSelected()
                 .getVacancy()
                 .getProjectName()

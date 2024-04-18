@@ -20,6 +20,7 @@ public class QuickViewOpenPositionDescription extends Screen {
 
     private String jobDescription = "";
     private String projectDescription = "";
+    private String projectDescriptionForCandidates = "";
     private String companyWorkConditions = "";
     private String companyDescription = "";
     private String jobDescriptionEng = "";
@@ -47,6 +48,8 @@ public class QuickViewOpenPositionDescription extends Screen {
     private VBoxLayout jobDescriptionEngTab;
     @Named("jobDescriptionViewTab.projectDescriptionTab")
     private VBoxLayout projectDescriptionTab;
+    @Named("jobDescriptionViewTab.projectDescriptionForCandidatesTab")
+    private VBoxLayout projectDescriptionForCandidatesTab;
     @Named("jobDescriptionViewTab.workingConditionsTab")
     private VBoxLayout workingConditionsTab;
     @Named("jobDescriptionViewTab.companyDescriptionTab")
@@ -59,6 +62,8 @@ public class QuickViewOpenPositionDescription extends Screen {
     private MessageBundle messageBundle;
     @Inject
     private TextArea<String> jobDesxriptionTextArea;
+    @Inject
+    private RichTextArea projectDescriptionForCandidatesRichTextArea;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -95,6 +100,10 @@ public class QuickViewOpenPositionDescription extends Screen {
         this.projectDescription = projectDescription;
     }
 
+    public void setProjectDescriptionForCandidates(String projectDescriptionForCandidates) {
+        this.projectDescriptionForCandidates = projectDescriptionForCandidates;
+    }
+
     public void setCompanyWorkConditions(String companyCondidions) {
         this.companyWorkConditions = companyCondidions;
     }
@@ -105,6 +114,10 @@ public class QuickViewOpenPositionDescription extends Screen {
 
     public String getProjectDescription() {
         return projectDescription;
+    }
+
+    public String getProjectDescriptionForCandidates() {
+        return projectDescriptionForCandidates;
     }
 
     public void setJobDescriptionEng(String jobDescriptionEng) {
@@ -133,6 +146,14 @@ public class QuickViewOpenPositionDescription extends Screen {
             }
         } else {
             jobDescriptionEngTab.setVisible(false);
+        }
+
+
+        if (projectDescriptionForCandidates != null && !projectDescriptionForCandidates.equals("")) {
+            projectDescriptionRichTextArea.setValue(projectDescriptionForCandidates);
+            projectDescriptionForCandidatesTab.setVisible(true);
+        } else {
+            projectDescriptionForCandidatesTab.setVisible(false);
         }
 
         if (projectDescription != null && !projectDescription.equals("")) {
@@ -178,6 +199,9 @@ public class QuickViewOpenPositionDescription extends Screen {
                 case "projectDescription":
                     retBool = projectDescriptionRichTextArea.getValue() != null ? true : false;
                     break;
+                case "projectDescriptionForCandidates":
+                    retBool = projectDescriptionForCandidatesRichTextArea.getValue() != null ? true : false;
+                    break;
                 case "workingConditionsTab":
                     retBool = companyWorkingConditionsRichTextArea.getValue() != null ? true : false;
                     break;
@@ -205,13 +229,14 @@ public class QuickViewOpenPositionDescription extends Screen {
 
     public void copyToClipboard() {
         String strToCopy = "";
-        String breakStr = "<br>";
-        String breakStr3 = "<br><br><br>";
-        String textVacansyDescription = "ОПИСАНИЕ ВАКАНСИИ";
-        String textVacansyDescriptionEng = "ОПИСАНИЕ ВАКАНСИИ (Eng)";
-        String textProjectDescription = "ОПИСАНИЕ ПРОЕКТА";
-        String textCompanyDescription = "ОПИСАНИЕ КОМПАНИИ";
-        String textCompanyWorkingConditions = "ОПИСАНИЕ ПРЕИМУЩЕСТВ РАБОТЫ В КОМПАНИИ";
+        final String breakStr = "<br>";
+        final String breakStr3 = "<br><br><br>";
+        final String textVacansyDescription = "ОПИСАНИЕ ВАКАНСИИ";
+        final String textVacansyDescriptionEng = "ОПИСАНИЕ ВАКАНСИИ (Eng)";
+        final String textProjectDescription = "ОПИСАНИЕ ПРОЕКТА";
+        final String textProjectDescriptionForCandidates = "ОПИСАНИЕ ПРОЕКТА";
+        final String textCompanyDescription = "ОПИСАНИЕ КОМПАНИИ";
+        final String textCompanyWorkingConditions = "ОПИСАНИЕ ПРЕИМУЩЕСТВ РАБОТЫ В КОМПАНИИ";
 
         if (copyAllToClipboardCheckBox.getValue()) {
             strToCopy = parseCVService.br2nl((new StringBuilder()
@@ -222,6 +247,8 @@ public class QuickViewOpenPositionDescription extends Screen {
                     .append(jobDescriptionEngRichTextArea.getValue())
                     .append(breakStr3)
                     .append(textProjectDescription)
+                    .append(breakStr3)
+                    .append(textProjectDescriptionForCandidates)
                     .append(breakStr)
                     .append(projectDescriptionRichTextArea.getValue())
                     .append(breakStr3)
@@ -261,6 +288,16 @@ public class QuickViewOpenPositionDescription extends Screen {
                                 .append(textProjectDescription)
                                 .append(breakStr)
                                 .append(parseCVService.br2nl(projectDescriptionRichTextArea.getValue()))
+                                .toString()
+                                .replaceAll("\\<.*?\\>", "");
+                    }
+                    break;
+                case "projectDescriptionForCandidates":
+                    if (projectDescriptionForCandidatesRichTextArea.getValue() != null) {
+                        strToCopy = new StringBuilder()
+                                .append(textProjectDescriptionForCandidates)
+                                .append(breakStr)
+                                .append(parseCVService.br2nl(projectDescriptionForCandidatesRichTextArea.getValue()))
                                 .toString()
                                 .replaceAll("\\<.*?\\>", "");
                     }

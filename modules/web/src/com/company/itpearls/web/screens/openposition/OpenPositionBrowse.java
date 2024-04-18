@@ -1098,6 +1098,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                                     .getProjectDescription() : "");
                 }
 
+
+                if (openPositionsTable.getSingleSelected().getProjectName().getProjectDescriptionForCandidate() != null) {
+                    quickViewOpenPositionDescription.setProjectDescriptionForCandidates(openPositionsTable
+                            .getSingleSelected()
+                            .getProjectName()
+                            .getProjectDescriptionForCandidate() != null ?
+                            openPositionsTable.getSingleSelected()
+                                    .getProjectName()
+                                    .getProjectDescriptionForCandidate() : "");
+                }
+
                 if (openPositionsTable.getSingleSelected().getCommentEn() != null) {
                     String a = openPositionsTable.getSingleSelected().getCommentEn();
 

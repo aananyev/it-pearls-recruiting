@@ -8,6 +8,7 @@ import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.PersonelReserve;
 import com.company.itpearls.web.extension.ChangeFaviconExtension;
+import com.haulmont.addon.dashboard.model.Dashboard;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;

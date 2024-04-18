@@ -233,7 +233,7 @@
                                       dataContainer="projectDc"
                                       property="projectDescription"
                                       width="100%"
-                                      height="AUTO"/>
+                                      height="100%"/>
                     </tab>
                     <tab id="projectDescriptionForCandidateTab"
                          caption="msg://msgProjectDescriptionForCandidate"
@@ -242,7 +242,7 @@
                                       dataContainer="projectDc"
                                       property="projectDescriptionForCandidate"
                                       width="100%"
-                                      height="AUTO"/>
+                                      height="100%"/>
                     </tab>
                 </accordion>
             </tab>
@@ -288,7 +288,7 @@
                                   dataContainer="projectDc"
                                   property="templateLetter"
                                   width="100%"
-                                  height="AUTO"
+                                  height="100%"
                                   required="false"/>
                 </vbox>
             </tab>
