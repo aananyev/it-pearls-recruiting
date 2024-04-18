@@ -3,7 +3,9 @@
 *.ipr
 *.iml
 *.iws
+*.log
 build/*
+postgre_tmp_database/*
 deploy/*
 modules/*/build/*
 .idea/*
@@ -12,3 +14,4 @@ test-run
 sql/hr.it-pearls.ru.sql
 sql/basebackup_new.tar.gz
 sql/sql/itpearls.sql
+backupbase.log

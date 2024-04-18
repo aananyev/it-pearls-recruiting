@@ -150,7 +150,7 @@ public class QuickViewOpenPositionDescription extends Screen {
 
 
         if (projectDescriptionForCandidates != null && !projectDescriptionForCandidates.equals("")) {
-            projectDescriptionRichTextArea.setValue(projectDescriptionForCandidates);
+            projectDescriptionForCandidatesRichTextArea.setValue(projectDescriptionForCandidates);
             projectDescriptionForCandidatesTab.setVisible(true);
         } else {
             projectDescriptionForCandidatesTab.setVisible(false);

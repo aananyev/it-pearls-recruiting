@@ -52,12 +52,17 @@ public class VacancyListCommand extends OperationCommand {
             for (OpenPosition openPosition : openPositions) {
                 StringBuilder sb = new StringBuilder();
                 StringBuilder openPositionCounter = new StringBuilder();
+                StringBuilder projectNameSB = new StringBuilder();
 
                 if (subscribeFlag) {
-                    openPositionCounter.append("</b> (человек - <b>")
+                    openPositionCounter.append(" (человек - <b>")
                             .append(openPosition.getNumberPosition())
-                            .append("</b>)")
-                            .append("\n");
+                            .append("</b>)");
+
+                    projectNameSB.append(openPosition.getProjectName().getProjectName());
+                } else {
+                    projectNameSB.append(openPosition.getProjectName().getProjectNameForCandidate() != null ?
+                            openPosition.getProjectName().getProjectNameForCandidate() : openPosition.getProjectName().getProjectName());
                 }
 
                 sb.append(counter++)
@@ -65,9 +70,11 @@ public class VacancyListCommand extends OperationCommand {
                         .append(new StringBuilder(openPosition.getPositionType().getPositionEnName())
                                 .append(" / ")
                                 .append(openPosition.getPositionType().getPositionRuName())
+                                .append("</b>")
                                 .append(openPositionCounter)
+                                .append("\n")
                         .append("Проект: <b>")
-                        .append(openPosition.getProjectName().getProjectName())
+                        .append(projectNameSB)
                         .append("</b>\n")
                         .append("Приоритет: <b>")
                         .append(OpenPositionPriority.fromId(openPosition.getPriority()))
