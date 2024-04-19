@@ -359,6 +359,8 @@ public class Utils {
     }
 
     public static int getPositionsVacancyCount(Chat chat, Position position) {
-        return 0;
+        final String QUERY = String.format("select sum(e.numberPosition) from itpearls_OpenPosition e where e.positionType.id = %s and not (e.openClose = true)", position.getId());
+        int retInt = queryListResult(QUERY);
+        return retInt;
     }
 }
