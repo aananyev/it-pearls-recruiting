@@ -2617,7 +2617,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 try {
                                     jobCandidatesTable.scrollTo(eventAfterClose.getScreen().getEditedEntity());
                                     jobCandidatesTable.setSelected(eventAfterClose.getScreen().getEditedEntity());
-                                } catch (NullPointerException e) {
+                                } catch (NullPointerException|IllegalArgumentException e) {
                                     e.printStackTrace();
                                 }
                             }

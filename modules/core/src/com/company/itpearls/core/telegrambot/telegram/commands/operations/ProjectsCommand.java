@@ -196,17 +196,26 @@ public class ProjectsCommand extends OperationCommand {
 
             if (subscribeFlag) {
                 projectDesc.append(project.getProjectDescription() != null
-                        ? project.getProjectDescription() : "\"❗\\uFE0FНет описания проекта\")");
+                        ? project.getProjectDescription() : "❗Нет описания проекта");
             } else {
                 projectDesc.append(project.getProjectDescriptionForCandidate() != null
                         ? project.getProjectDescriptionForCandidate() :
                         (project.getProjectDescription() != null
-                        ? project.getProjectDescription() : "\"❗\\uFE0FНет описания проекта\")"));
+                        ? project.getProjectDescription() : "❗Нет описания проекта"));
             }
 
+            StringBuilder projectNameSB = new StringBuilder();
+
+            if (subscribeFlag) {
+                projectNameSB.append(project.getProjectName());
+            } else {
+                projectNameSB.append(project.getProjectNameForCandidate() != null ?
+                        project.getProjectNameForCandidate() : project.getProjectName());
+            }
             return new StringBuilder()
                     .append("<b>Наименование проекта:</b> ")
-                    .append(project.getProjectName())
+//                    .append(project.getProjectName())
+                    .append(projectNameSB)
                     .append("\n")
                     .append("<b>Наименование компании:</b> ")
                     .append(project.getProjectDepartment().getCompanyName().getComanyName())

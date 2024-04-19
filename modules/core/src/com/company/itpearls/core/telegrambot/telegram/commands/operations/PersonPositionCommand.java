@@ -52,14 +52,24 @@ public class PersonPositionCommand extends OperationCommand {
         for (Position position : positions) {
             StringBuilder sb = new StringBuilder();
 
+            StringBuilder openPositionCounter = new StringBuilder();
+
+            if (subscribeFlag) {
+                openPositionCounter.append(" (человек - <b>")
+                        .append(Utils.getPositionsVacancyCount(chat, position))
+                        .append("</b>)");
+            }
+
             sb.append(counter++)
                     .append(". <b>")
                     .append(position.getPositionRuName())
                     .append(" / ")
                     .append(position.getPositionEnName())
-                    .append("</b> (<b>")
-                    .append(Utils.getPositionsVacancyCount(chat, position))
-                    .append("</b> человек)");
+                    .append("</b>")
+//                    .append("</b> (<b>")
+//                    .append(Utils.getPositionsVacancyCount(chat, position))
+//                    .append("</b> человек)");
+                    .append(openPositionCounter);
 
             sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName,
                     sb.toString(), setInline(position, subscribeFlag));

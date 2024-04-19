@@ -77,7 +77,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Link itpearlsCVLink;
     @Inject
     private Link originalCVLink;
-//    @Inject
+    //    @Inject
 //    private RichTextArea questionLetterRichTextArea;
     @Inject
     private RichTextArea candidateCVRichTextArea;
@@ -89,7 +89,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private TextArea<String> quoteTextArea;
     @Inject
     private MessageBundle messageBundle;
-//    @Inject
+    //    @Inject
 //    private RichTextArea cvResomandation;
 //    @Inject
 //    private RichTextArea letterRecommendation;
@@ -97,7 +97,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private ParseCVService parseCVService;
     @Inject
     private Label<String> machRegexpFromCV;
-//    static String referer = "http://www.google.com";
+    //    static String referer = "http://www.google.com";
     @Inject
     private Button loadToCVTextArea;
     @Inject
@@ -129,7 +129,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private CollectionContainer<OpenPosition> openPositionsDc;
     private StringBuffer textResumeStringBuffer = null;
-//    private StringBuilder textResumeStringBuilder = null;
+    //    private StringBuilder textResumeStringBuilder = null;
     @Inject
     private Image candidateFaceDefaultImage;
     @Inject
@@ -747,7 +747,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     private void setGenerateCVButton(OpenPosition openPosition) {
         Report report = null;
-        if (openPosition !=  null) {
+        if (openPosition != null) {
             report = reportService.getReport(openPosition.getTemplateCVSytemCode() != null
                     ? openPosition.getTemplateCVSytemCode() : STD_RESUME);
         } else {
@@ -1044,14 +1044,22 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     private void setupWorkPlaces() {
         List<CandidateCVWorkPlaces> candidateCVWorkPlaces = candidateCVDc.getItem().getCandidateCVWorkPlaces();
-        Collections.sort(candidateCVWorkPlaces, new Comparator<CandidateCVWorkPlaces>() {
-            @Override
-            public int compare(CandidateCVWorkPlaces o1, CandidateCVWorkPlaces o2) {
-                return Long.compare(o2.getStartDate().getTime(),o1.getStartDate().getTime());
+
+        if (candidateCVWorkPlaces != null) {
+            try {
+                Collections.sort(candidateCVWorkPlaces, new Comparator<CandidateCVWorkPlaces>() {
+                    @Override
+                    public int compare(CandidateCVWorkPlaces o1, CandidateCVWorkPlaces o2) {
+                        return Long.compare(o2.getStartDate().getTime(), o1.getStartDate().getTime());
+                    }
+                });
+            } catch (NullPointerException e) {
+                e.printStackTrace();
             }
-        });
-        for (CandidateCVWorkPlaces candidateWorkPlace : candidateCVWorkPlaces) {
-            setNewWorkPlaceLayout(candidateWorkPlace);
+
+            for (CandidateCVWorkPlaces candidateWorkPlace : candidateCVWorkPlaces) {
+                setNewWorkPlaceLayout(candidateWorkPlace);
+            }
         }
     }
 
