@@ -4,6 +4,7 @@ import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.OpenPosition;
 import com.haulmont.cuba.security.entity.User;
+import com.haulmont.reports.entity.Report;
 
 import java.util.Date;
 import java.util.List;
@@ -46,4 +47,8 @@ public interface OpenPositionService {
     Map<String, Integer> setCommandExperienceMap();
 
     Map<String, Integer> setWorkExperienceMap();
+
+    String getStdResumeName();
+
+    Report setGenerateCVReportName(OpenPosition openPosition);
 }

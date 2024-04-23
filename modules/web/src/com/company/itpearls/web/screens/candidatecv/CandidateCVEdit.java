@@ -49,7 +49,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     List<WorkPlacesFragment> workPlacesFragments = new ArrayList<>();
     private static final String NEED_LETTER_NOTIFICATION = "НЕОБХОДИМО ЗАПОЛНИТЬ ШАБЛОН В СОПРОВОДИТЕЛЬНОМ ПИСЬМЕ " +
             "ПО ТРЕБОВАНИЮ ЗАКАЗЧИКА";
-    private static final String STD_RESUME = "candidateCVdefault";
     private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";
     private static final String EXTENSION_DOCX = "docx";
@@ -150,6 +149,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private ReportGuiManager reportGuiManager;
     @Inject
     private Button generateCVButton;
+    @Inject
+    private OpenPositionService openPositionService;
 
 /*    public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
@@ -749,9 +750,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         Report report = null;
         if (openPosition != null) {
             report = reportService.getReport(openPosition.getTemplateCVSytemCode() != null
-                    ? openPosition.getTemplateCVSytemCode() : STD_RESUME);
+                    ? openPosition.getTemplateCVSytemCode() : openPositionService.getStdResumeName());
         } else {
-            report = reportService.getReport(STD_RESUME);
+            report = reportService.getReport(openPositionService.getStdResumeName());
         }
 
         if (report != null) {
@@ -1091,9 +1092,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                         if (candidateCVFieldOpenPosition.getValue() != null) {
                             sb.append(String.format(QUERY_REPORT,
                                     (candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() != null
-                                            ? candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() : STD_RESUME)));
+                                            ? candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() : openPositionService.getStdResumeName())));
                         } else {
-                            sb.append(String.format(QUERY_REPORT, STD_RESUME));
+                            sb.append(String.format(QUERY_REPORT, openPositionService.getStdResumeName()));
                         }
 
                         LoadContext<Report> loadContext = LoadContext.create(Report.class)

@@ -202,7 +202,7 @@
         <property name="cityOfCompany" view="_minimal"/>
         <property name="regionOfCompany" view="_minimal"/>
         <property name="countryOfCompany" view="_minimal"/>
-        <property name="fileCompanyLogo" view="_minimal"/>
+        <property name="fileCompanyLogo" view="_local"/>
         <property name="companyDirector" view="_minimal"/>
         <property name="companyGroup" view="_local"/>
     </view>

@@ -1015,6 +1015,8 @@
                                     caption="msg://msgToPosition"/>
                             <column id="iconOriginalCVFile"
                                     width="100px"
+                                    collapsible="true"
+                                    collapsed="true"
                                     maximumWidth="100px"
                                     caption="msg://msgOriginalCV">
                                 <iconRenderer/>
@@ -1045,6 +1047,11 @@
                                     property="createdBy"
                                     width="100px"
                                     caption="msg://msgCreatedBy">
+                                <componentRenderer/>
+                            </column>
+                            <column id="actionButtonColumn"
+                                    width="100px"
+                                    caption="msg://msgActions">
                                 <componentRenderer/>
                             </column>
                         </columns>

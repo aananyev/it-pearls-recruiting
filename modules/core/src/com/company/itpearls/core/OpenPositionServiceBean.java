@@ -8,6 +8,7 @@ import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.security.app.Authentication;
 import com.haulmont.cuba.security.entity.User;
+import com.haulmont.reports.entity.Report;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -30,6 +31,8 @@ public class OpenPositionServiceBean implements OpenPositionService {
     protected Authentication authentication;
     @Inject
     private Persistence persistence;
+    @Inject
+    private ReportService reportService;
 
 
     @Override
@@ -313,5 +316,26 @@ public class OpenPositionServiceBean implements OpenPositionService {
         map.put("5 лет и более", 5);
 
         return map;
+    }
+
+    @Override
+    public String getStdResumeName() {
+        return STD_RESUME;
+    }
+
+    private static final String STD_RESUME = "candidateCVdefault";
+
+    @Override
+    public Report setGenerateCVReportName(OpenPosition openPosition) {
+        Report report = null;
+
+        if (openPosition != null) {
+            report = reportService.getReport(openPosition.getTemplateCVSytemCode() != null
+                    ? openPosition.getTemplateCVSytemCode() : getStdResumeName());
+        } else {
+            report = reportService.getReport(getStdResumeName());
+        }
+
+        return report;
     }
 }

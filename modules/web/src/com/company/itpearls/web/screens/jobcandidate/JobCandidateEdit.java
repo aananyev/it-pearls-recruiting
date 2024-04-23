@@ -29,6 +29,9 @@ import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
+import com.haulmont.reports.app.service.ReportService;
+import com.haulmont.reports.entity.Report;
+import com.haulmont.reports.gui.ReportGuiManager;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
@@ -46,72 +49,11 @@ import java.util.stream.Collectors;
 @EditedEntityContainer("jobCandidateDc")
 @LoadDataBeforeShow
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
-    @Install(to = "jobCandidateCandidateCvTable.createdBy", subject = "columnGenerator")
-    private Component jobCandidateCandidateCvTableCreatedByColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        if (event.getItem().getOwner() != null) {
-//            if (event.getItem().getOwner().getFileImageFace() != null) {
-            return columnGeneratorImageText(event.getItem().getOwner().getFileImageFace(),
-                    event.getItem().getOwner().getName(),
-                    StdImage.NO_PROGRAMMER,
-                    "30px",
-                    true);
-//            }
-        }
-
-        return getBlankHBox();
-    }
-
     @Inject
-    private TextManipulationService textManipulationService;
+    private ReportService reportService;
+    @Inject
+    private ReportGuiManager reportGuiManager;
 
-    @Install(to = "jobCandidateCandidateCvTable.toVacancy", subject = "columnGenerator")
-    private Component jobCandidateCandidateCvTableToVacancyColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        if (event.getItem().getToVacancy() != null) {
-            if (event.getItem().getToVacancy().getPositionType() != null) {
-                return columnGeneratorImageText(event.getItem().getToVacancy().getPositionType().getLogo(),
-                        event.getItem().getToVacancy().getVacansyName(),
-                        StdImage.NO_COMPANY,
-                        "30px",
-                        false);
-            }
-        }
-
-        return getBlankHBox();
-    }
-
-    @Install(to = "jobCandidateIteractionListTable.recrutier", subject = "columnGenerator")
-    private Component jobCandidateIteractionListTableRecrutierColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        if (event.getItem().getRecrutier() != null) {
-            try {
-                return columnGeneratorImageText(event.getItem().getRecrutier().getFileImageFace(),
-                        event.getItem().getRecrutier().getName(),
-                        StdImage.NO_PROGRAMMER,
-                        "30px",
-                        true);
-            } catch (IllegalStateException e) {
-                e.printStackTrace();
-                return getBlankHBox();
-            }
-        }
-
-        return getBlankHBox();
-    }
-
-    @Install(to = "jobCandidateIteractionListTable.vacancy", subject = "columnGenerator")
-    private Component jobCandidateIteractionListTableVacancyColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        if (event.getItem().getVacancy() != null) {
-            if (event.getItem().getVacancy().getPositionType() != null) {
-                return columnGeneratorImageText(event.getItem().getVacancy().getPositionType().getLogo(),
-                        event.getItem().getVacancy().getVacansyName(),
-                        StdImage.NO_COMPANY,
-                        "30px",
-                        false);
-//                }
-            }
-        }
-
-        return getBlankHBox();
-    }
 
     @Inject
     private DataManager dataManager;
@@ -235,7 +177,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private static final String QUERY_GET_OTHER_SOCIAL_NETWORK = "select e from itpearls_SocialNetworkType e where e.socialNetwork = :other";
     private static final String QUERY_GET_CANDIDATE_CV = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
     private static final String TELEGRAM_NAME_URL = "http://t.me/";
-    private static final String QUERY_GET_LAST_ITERACTION = "select e from itpearls_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
+//    private static final String QUERY_GET_LAST_ITERACTION = "select e from itpearls_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
 
     List<Position> setPos = new ArrayList<>();
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
@@ -328,6 +270,74 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Image candidateFileImageFaceDefailtImage;
     @Inject
     private Image candidateFileImageFaceImage;
+
+    @Install(to = "jobCandidateCandidateCvTable.createdBy", subject = "columnGenerator")
+    private Component jobCandidateCandidateCvTableCreatedByColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        if (event.getItem().getOwner() != null) {
+//            if (event.getItem().getOwner().getFileImageFace() != null) {
+            return columnGeneratorImageText(event.getItem().getOwner().getFileImageFace(),
+                    event.getItem().getOwner().getName(),
+                    StdImage.NO_PROGRAMMER,
+                    "30px",
+                    true);
+//            }
+        }
+
+        return getBlankHBox();
+    }
+
+    @Inject
+    private TextManipulationService textManipulationService;
+
+    @Install(to = "jobCandidateCandidateCvTable.toVacancy", subject = "columnGenerator")
+    private Component jobCandidateCandidateCvTableToVacancyColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        if (event.getItem().getToVacancy() != null) {
+            if (event.getItem().getToVacancy().getPositionType() != null) {
+                return columnGeneratorImageText(event.getItem().getToVacancy().getPositionType().getLogo(),
+                        event.getItem().getToVacancy().getVacansyName(),
+                        StdImage.NO_COMPANY,
+                        "30px",
+                        false);
+            }
+        }
+
+        return getBlankHBox();
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.recrutier", subject = "columnGenerator")
+    private Component jobCandidateIteractionListTableRecrutierColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+        if (event.getItem().getRecrutier() != null) {
+            try {
+                return columnGeneratorImageText(event.getItem().getRecrutier().getFileImageFace(),
+                        event.getItem().getRecrutier().getName(),
+                        StdImage.NO_PROGRAMMER,
+                        "30px",
+                        true);
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+                return getBlankHBox();
+            }
+        }
+
+        return getBlankHBox();
+    }
+
+    @Install(to = "jobCandidateIteractionListTable.vacancy", subject = "columnGenerator")
+    private Component jobCandidateIteractionListTableVacancyColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+        if (event.getItem().getVacancy() != null) {
+            if (event.getItem().getVacancy().getPositionType() != null) {
+                return columnGeneratorImageText(event.getItem().getVacancy().getPositionType().getLogo(),
+                        event.getItem().getVacancy().getVacansyName(),
+                        StdImage.NO_COMPANY,
+                        "30px",
+                        false);
+//                }
+            }
+        }
+
+        return getBlankHBox();
+    }
+
 
     private HBoxLayout columnGeneratorImageText(FileDescriptor fileDescriptor,
                                                 String text,
@@ -3744,5 +3754,60 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private HBoxLayout getBlankHBox() {
         return uiComponents.create(HBoxLayout.class);
+    }
+
+    @Install(to = "jobCandidateCandidateCvTable.actionButtonColumn", subject = "columnGenerator")
+    private Component jobCandidateCandidateCvTableActionButtonColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setWidthFull();
+        retHbox.setHeightFull();
+
+        PopupButton popupButton = uiComponents.create(PopupButton.class);
+        popupButton.setWidthAuto();
+        popupButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        popupButton.setIcon(CubaIcon.BARS.source());
+
+        popupButton.addAction(new BaseAction("printStdCVFromForm")
+                .withIcon(CubaIcon.TEXT_WIDTH.source())
+                .withHandler(e1 -> generateCV(event.getItem(), null))
+                .withCaption(new StringBuilder(messageBundle.getMessage("msgPrintStdCV")).toString()));
+
+        if (event.getItem().getToVacancy().getTemplateCVSytemCode() != null) {
+            popupButton.addAction(new BaseAction("printCVFromForm")
+                    .withIcon(CubaIcon.TEXT_WIDTH.source())
+                    .withHandler(e -> generateCV(event.getItem(),
+                            openPositionService.setGenerateCVReportName(event.getItem().getToVacancy()).getName()))
+                    .withCaption(new StringBuilder(messageBundle.getMessage("msgPrintCV"))
+                            .append(" ")
+                            .append(openPositionService
+                                    .setGenerateCVReportName(event.getItem().getToVacancy()).getName()).toString()));
+        }
+
+        retHbox.add(popupButton);
+
+        return retHbox;
+    }
+
+    public void generateCV(CandidateCV candidateCV, String reportName) {
+        StringBuilder sb = new StringBuilder();
+        String QUERY_REPORT = "select p from report$Report p where p.code = '%s'";
+        Map<String, Object> reportParams = new HashMap<>();
+        reportParams.put("candidateCV", candidateCV);
+
+        if (candidateCV.getToVacancy() != null) {
+            sb.append(String.format(QUERY_REPORT,
+                    (candidateCV.getToVacancy().getTemplateCVSytemCode() != null
+                            ? candidateCV.getToVacancy().getTemplateCVSytemCode() : openPositionService.getStdResumeName())));
+        } else {
+            sb.append(String.format(QUERY_REPORT, openPositionService.getStdResumeName()));
+        }
+
+        LoadContext<Report> loadContext = LoadContext.create(Report.class)
+                .setQuery(LoadContext
+                        .createQuery(sb.toString()))
+                .setView("report.edit");
+
+        Report report = dataManager.load(loadContext);
+        reportGuiManager.printReport(report, reportParams);
     }
 }
