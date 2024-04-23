@@ -27,6 +27,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.server.Page;
+import org.apache.commons.lang.StringUtils;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
@@ -171,7 +172,8 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
     }
 
     static final String separatorChar = "⎯";
-    final static String separator = separatorChar.repeat(22);
+//    final static String separator = separatorChar.repeat(22);
+    final static String separator = StringUtils.repeat(separatorChar, 22);
 
     private void initSignFilterPopupButton() {
         for (SignIcons icons : signIconsDc.getItems()) {
@@ -1067,7 +1069,8 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
                 })); */
         final String separatorChar = "⎯";
 
-        String separator = separatorChar.repeat(15);
+//        String separator = separatorChar.repeat(15);
+        String separator = StringUtils.repeat(separatorChar, 15);
 
 /*
         final String separator = "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014";

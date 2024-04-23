@@ -1598,7 +1598,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     .append("</i> на <b>")
                     .append(result.get())
 //                    .append("</b><br><svg align=\"right\" width=\"100%\"><i>")
-                    .append("</b>/n<i>")
+                    .append("</b>\n<i>")
                     .append(userSession.getUser().getName())
                     .append("</i>");
 
@@ -3328,10 +3328,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                                 }
                             } else {
                                 if (!endCase) {
-                                    if (il.getIteractionType().getSignEndCase() != null) {
-                                        if (il.getIteractionType().getSignEndCase()) {
-                                            endCase = true;
-                                            break;
+                                    if(il.getIteractionType() != null) {
+                                        if (il.getIteractionType().getSignEndCase() != null) {
+                                            if (il.getIteractionType().getSignEndCase()) {
+                                                endCase = true;
+                                                break;
+                                            }
                                         }
                                     }
                                 }

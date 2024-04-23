@@ -965,7 +965,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                     + recrutierName : ""; */
                 } else {
                     return iteractionList != null ?
-                            sb.append(simpleDateFormat.format(iteractionList.getDateIteraction()))
+                            sb.append(simpleDateFormat.format(iteractionList.getDateIteraction() != null ? iteractionList.getDateIteraction() : new Date()))
                                     .append("\n")
                                     .append(messageBundle.getMessage("msgInteractionUndefined"))
                                     .append("\n")

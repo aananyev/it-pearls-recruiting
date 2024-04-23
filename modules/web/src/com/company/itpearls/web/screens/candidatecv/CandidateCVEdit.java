@@ -1006,7 +1006,16 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         dataContext.setParent(parentDataContext);
     }
 
+    Boolean flagModificationWorkPlaces = false;
+
     public void addNewWorkPlaceButtonInvoke() {
+        commitWorkPlaces();
+        flagModificationWorkPlaces = true;
+
+        if (currentWorkPlacesFragment != null) {
+            currentWorkPlacesFragment.collepseaWorkPlace();
+        }
+
         setNewWorkPlaceLayout(null);
     }
 
@@ -1015,9 +1024,15 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         initPositionTypeField();
     }
 
+    WorkPlacesFragment currentWorkPlacesFragment;
+
     private void setNewWorkPlaceLayout(CandidateCVWorkPlaces candidateCVWorkPlaces) {
         WorkPlacesFragment fragment = fragments.create(this, WorkPlacesFragment.class);
+        currentWorkPlacesFragment = fragment;
+
         fragment.setNewWorkPlace(candidateCVWorkPlaces);
+        fragment.getCandidateCVWorkPlaces().setCandidateCV(getEditedEntity());
+
         workPlacesFragments.add(fragment);
         workPlacesScrollBox.add(fragment.getFragment());
     }
@@ -1069,21 +1084,28 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("candidateCV", getEditedEntity());
 
-        if (candidateCVFieldOpenPosition.getValue() != null) {
-            sb.append(String.format(QUERY_REPORT,
-                    (candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() != null
-                            ? candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() : STD_RESUME)));
-        } else {
-            sb.append(String.format(QUERY_REPORT, STD_RESUME));
+        if (flagModificationWorkPlaces) {
+            dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                    .withMessage(messageBundle.getMessage("msgSaveResume"))
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                        if (candidateCVFieldOpenPosition.getValue() != null) {
+                            sb.append(String.format(QUERY_REPORT,
+                                    (candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() != null
+                                            ? candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() : STD_RESUME)));
+                        } else {
+                            sb.append(String.format(QUERY_REPORT, STD_RESUME));
+                        }
+
+                        LoadContext<Report> loadContext = LoadContext.create(Report.class)
+                                .setQuery(LoadContext
+                                        .createQuery(sb.toString()))
+                                .setView("report.edit");
+
+                        Report report = dataManager.load(loadContext);
+                        Report report1 = reportService.getReport(sb.toString());
+                        reportGuiManager.printReport(report, reportParams);
+                    }), new DialogAction(DialogAction.Type.NO))
+                    .show();
         }
-
-        LoadContext<Report> loadContext = LoadContext.create(Report.class)
-                .setQuery(LoadContext
-                        .createQuery(sb.toString()))
-                .setView("report.edit");
-
-        Report report = dataManager.load(loadContext);
-        Report report1 = reportService.getReport(sb.toString());
-        reportGuiManager.printReport(report, reportParams);
     }
 }

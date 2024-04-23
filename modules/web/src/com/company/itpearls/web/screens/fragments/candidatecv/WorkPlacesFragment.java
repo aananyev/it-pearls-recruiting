@@ -10,6 +10,7 @@ import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
@@ -20,6 +21,7 @@ import java.util.Date;
 @UiDescriptor("work-places-fragment.xml")
 @LoadDataBeforeShow
 public class WorkPlacesFragment extends ScreenFragment {
+
     @Inject
     private DateField<Date> endDateField;
     @Inject
@@ -59,6 +61,8 @@ public class WorkPlacesFragment extends ScreenFragment {
     private LookupPickerField<Position> positionLookupPickerField;
     @Inject
     private Image projectLogoImage;
+    @Inject
+    private DataContext dataContext;
 
     public Boolean getDeletedWorkPlace() {
         return deletedWorkPlace;
@@ -371,4 +375,13 @@ public class WorkPlacesFragment extends ScreenFragment {
                 .show();
     }
 
+    @Subscribe("workPlaceGroupBox")
+    public void onWorkPlaceGroupBoxExpandedStateChange(Collapsable.ExpandedStateChangeEvent event) {
+        dataContext.commit();
+    }
+
+    public void collepseaWorkPlace() {
+        workPlaceGroupBox.setCollapsable(true);
+        workPlaceGroupBox.setExpanded(false);
+    }
 }
