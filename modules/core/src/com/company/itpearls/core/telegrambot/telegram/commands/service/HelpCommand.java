@@ -25,7 +25,7 @@ public class HelpCommand extends ServiceCommand {
 
         logger.debug(String.format("Пользователь %s. Начато выполнение команды %s", userName,
                 this.getCommandIdentifier()));
-        sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName, Utils.getHelloMessage());
+        sendAnswer(absSender, chat.getId(), this.getCommandIdentifier(), userName, Utils.getHelloMessage(user));
         logger.debug(String.format("Пользователь %s. Завершено выполнение команды %s", userName,
                 this.getCommandIdentifier()));
     }

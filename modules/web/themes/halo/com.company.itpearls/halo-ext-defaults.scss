@@ -27,3 +27,8 @@ $cuba-app-menubar-padding-bottom: 8px;
 
 $cuba-menubar-text-color: #ffffff;
 $cuba-menubar-submenu-padding: 1px;
+
+/* animation for elements is enabled by default */
+$v-animations-enabled: true;
+/* popup window animation is disabled by default */
+$v-window-animations-enabled: true;

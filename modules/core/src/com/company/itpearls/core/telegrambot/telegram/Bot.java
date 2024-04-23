@@ -1,6 +1,7 @@
 
 package com.company.itpearls.core.telegrambot.telegram;
 
+import com.company.itpearls.core.telegrambot.BotInfo;
 import com.company.itpearls.core.telegrambot.TelegramBotStatus;
 import com.company.itpearls.core.telegrambot.exeptions.UserException;
 import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
@@ -177,7 +178,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
                             ProjectsCommand.getProjectVacansiesKeyboard(openPositionUUID));
                     break;
                 case CallbackData.VIEW_PROJECT_VACANSIES_BUTTON:
-                    projectOpenPositionView(chatId, update.getCallbackQuery());
+                    projectOpenPositionView(update.getCallbackQuery().getFrom(), chatId, update.getCallbackQuery());
                     break;
                 case CallbackData.COMMENT_VIEW_BUTTON:
                     sendAnswer(chatId,
@@ -226,7 +227,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
                 .append("⚙\uFE0FНАСТРОЙКИ СОХРАНЕНЫ").toString());
     }
 
-    private void projectOpenPositionView(Long chatId, CallbackQuery callbackQuery) {
+    private void projectOpenPositionView(User user, Long chatId, CallbackQuery callbackQuery) {
         String projectId = callbackQuery.getData();
         String projectKey = projectId.substring(
                 projectId.indexOf(CallbackData.CALLBACK_SEPARATOR) + 1, projectId.length());
@@ -250,7 +251,8 @@ public final class Bot extends TelegramLongPollingCommandBot {
             StringBuilder stringBuilder = new StringBuilder()
                     .append(++counter)
                     .append(". ")
-                    .append(openPosition.getVacansyName())
+//                    .append(openPosition.getVacansyName())
+                    .append(BotInfo.getVacancyName(openPosition, user))
                     .append(" (Количество человек - <b>")
                     .append(openPosition.getNumberPosition())
                     .append("</b>)");

@@ -1,5 +1,6 @@
 package com.company.itpearls.core.telegrambot.telegram.commands.operations;
 
+import com.company.itpearls.core.telegrambot.BotInfo;
 import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.core.telegrambot.telegram.commands.constant.CallbackData;
 import com.company.itpearls.core.telegrambot.telegram.commands.service.SettingsCommand;
@@ -246,7 +247,8 @@ public class VacancyListCommand extends OperationCommand {
                         "ОПИСАНИЕ ВАКАНСИИ:\n<i>%s</i>\n\n" +
                         "ЗАРПЛАТА: <b>%s</b>",
                 Utils.getBotName(),
-                op.getVacansyName(),
+//                op.getVacansyName(),
+                BotInfo.getVacancyName(op, user),
                 op.getNumberPosition(),
                 OpenPositionPriority.fromId(op.getPriority()),
                 (op.getComment() != null ?

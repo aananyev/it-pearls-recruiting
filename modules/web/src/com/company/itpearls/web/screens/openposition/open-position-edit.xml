@@ -53,6 +53,11 @@
             <collection id="someFilesesDc"
                         property="someFiles"/>
         </instance>
+        <collection id="reportDc" class="com.haulmont.reports.entity.Report" view="report.view">
+            <loader id="reportDl" cacheable="true">
+                <query><![CDATA[select p from report$Report p where p.code like 'templateCV%']]></query>
+            </loader>
+        </collection>
         <collection id="procAttachmentsDc"
                     class="com.haulmont.bpm.entity.ProcAttachment"
                     view="procAttachment-browse">
@@ -924,7 +929,11 @@
                      spacing="true"
                      expand="templateLetterBox"
                      icon="font-icon:MAIL_FORWARD">
+                    <lookupField id="reportListLookupField"
+                                 width="AUTO"
+                                 optionsContainer="reportDc"/>
                     <textField id="templateCVSytemCodeTextField"
+                               visible="false"
                                dataContainer="openPositionDc"
                                property="templateCVSytemCode"
                                caption="msg://msgTemplateCVSytemCode"

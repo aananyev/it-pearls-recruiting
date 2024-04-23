@@ -24,6 +24,8 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import com.haulmont.reports.app.service.ReportService;
+import com.haulmont.reports.entity.Report;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 
@@ -42,6 +44,7 @@ import java.util.Calendar;
 @EditedEntityContainer("openPositionDc")
 @LoadDataBeforeShow
 public class OpenPositionEdit extends StandardEditor<OpenPosition> {
+
     @Inject
     private Label<String> closedVacancyInfoLabel;
     @Inject
@@ -267,6 +270,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Image projectLogoImage;
     @Inject
     private Image projectOwnerImage;
+    @Inject
+    private TextField<String> templateCVSytemCodeTextField;
+    @Inject
+    private ReportService reportService;
 
     @Subscribe("closedVacancyTimer")
     public void onClosedVacancyTimerTimerAction(Timer.TimerActionEvent event) {
@@ -3052,6 +3059,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .withDescription(messageBundle.getMessage("msgNotRate")
                             + outstaffingCostTextField.getValue())
                     .show(); */
+        }
+    }
+
+    @Subscribe("reportListLookupField")
+    public void onReportListLookupFieldValueChange(HasValue.ValueChangeEvent<Report> event) {
+        if (event.getValue() != null) {
+            templateCVSytemCodeTextField.setValue(event.getValue().getCode());
+        } else {
+            templateCVSytemCodeTextField.setValue(openPositionService.getStdResumeName());
         }
     }
 }

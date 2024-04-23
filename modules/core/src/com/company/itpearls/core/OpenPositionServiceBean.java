@@ -1,5 +1,7 @@
 package com.company.itpearls.core;
 
+import com.company.itpearls.core.telegrambot.BotInfo;
+import com.company.itpearls.core.telegrambot.Utils;
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
@@ -165,7 +167,8 @@ public class OpenPositionServiceBean implements OpenPositionService {
         sb.append("❌<b>")
                 .append(CLOSE_VACANCY)
                 .append("</b><i>")
-                .append(entity.getVacansyName())
+//                .append(entity.getVacansyName())
+                .append(Utils.isInternalUser(((ExtUser) user).getTelegram()) ? entity.getVacansyName() : BotInfo.getVacancyName(entity, ((ExtUser) user).getTelegram()))
                 .append("</i>")
 //                .append("<br><svg align=\"right\" width=\"100%\"><i>")
                 .append("<i>\n")
@@ -191,9 +194,11 @@ public class OpenPositionServiceBean implements OpenPositionService {
         }
 
         sb.append("<i>")
-                .append(entity.getVacansyName())
+//                .append(entity.getVacansyName())
+                .append(Utils.isInternalUser(((ExtUser) user).getTelegram()) ? entity.getVacansyName() : BotInfo.getVacancyName(entity, ((ExtUser) user).getTelegram()))
                 .append("</i>")
 //                .append("<br><svg align=\"right\" width=\"100%\"><i>")
+                .append("\n")
                 .append("<i>")
                 .append(user.getName())
                 .append("</i>");

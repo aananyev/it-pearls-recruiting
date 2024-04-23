@@ -8,6 +8,8 @@ import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.reports.entity.Report;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service(ReportService.NAME)
 public class ReportServiceBean implements ReportService {
     @Override
@@ -18,6 +20,21 @@ public class ReportServiceBean implements ReportService {
         sb.append(String.format(QUERY_REPORT, reportSystemCode));
 
         return queryOneResult(sb.toString());
+    }
+
+    @Override
+    public List<Report> getReportList() {
+        String QUERY_REPORT = "select p from report$Report p";
+        Report report;
+
+        return queryOneResult(QUERY_REPORT);
+    }
+
+    @Override
+    public List<Report> getReportCVTemplateList() {
+        String QUERY_REPORT = "select p from report$Report p where e.code like 'templateCV%'";
+
+        return queryOneResult(QUERY_REPORT);
     }
 
     private static <T> T queryOneResult(String queryStr) {

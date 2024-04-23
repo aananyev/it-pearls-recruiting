@@ -268,19 +268,12 @@ public class Utils {
         return null;
     }
 
-    public static String botShortDescription() {
-        return new StringBuilder(Utils.getBotName())
-                .append("\n")
-                .append("Вы можете подобрать вакансии или проекты для себя по душе, посмотреть контактную информацию специалиста, который поможет вам с информацией об конкретной вакансии и проекте.")
-                .append("\n")
-                .toString();
-    }
 
-    public static String getHelloMessage() {
+    public static String getHelloMessage(User user) {
         return new StringBuilder()
-                .append(Utils.getBotName())
+//                .append(Utils.getBotName())
                 .append("\n")
-                .append(botShortDescription())
+                .append(BotInfo.botShortDescription(user))
                 .append("\n")
                 .append("ОПИСАНИЕ КОМАНД БОТА:\n")
                 .append("/allvacancy - список открытых вакансий\n")
@@ -330,6 +323,17 @@ public class Utils {
 
     public static Boolean isInternalUser(User user) {
         String query = String.format("select e from itpearls_ExtUser e where e.telegram like '%%%s'", user.getUserName());
+
+        List<ExtUser> extUsers = Utils.queryListResult(query);
+
+        if (extUsers != null)
+            return extUsers.size() > 0;
+        else
+            return false;
+    }
+
+    public static Boolean isInternalUser(String user) {
+        String query = String.format("select e from itpearls_ExtUser e where e.telegram like '%%%s'", user);
 
         List<ExtUser> extUsers = Utils.queryListResult(query);
 
