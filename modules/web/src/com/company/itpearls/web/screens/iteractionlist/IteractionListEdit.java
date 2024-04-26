@@ -911,7 +911,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                             Collections.singletonMap("IteractionList", getEditedEntity()));
 
                     emailInfo.setBodyContentType("text/html; charset=UTF-8");
-                    emailService.sendEmailAsync(emailInfo);
+
+                    try {
+                        emailService.sendEmailAsync(emailInfo);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
                     afterCommitSendMessage = true;
                 }

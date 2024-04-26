@@ -6935,3 +6935,55 @@ server started
 2024-04-23 17:49:18.512 +04 [40704] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2024-04-23 17:49:18.997 +04 [40706] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2024-04-23 17:49:19.034 +04 [40708] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+waiting for server to shut down....2024-04-25 10:32:15.002 +04 [25569] LOG:  received fast shutdown request
+2024-04-25 10:32:15.005 +04 [25569] LOG:  aborting any active transactions
+2024-04-25 10:32:15.012 +04 [25569] LOG:  background worker "logical replication launcher" (PID 25580) exited with exit code 1
+2024-04-25 10:32:15.015 +04 [25575] LOG:  shutting down
+2024-04-25 10:32:15.066 +04 [25569] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2024-04-25 10:33:51.184 +04 [63773] LOG:  listening on IPv6 address "::1", port 5432
+2024-04-25 10:33:51.184 +04 [63773] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-04-25 10:33:51.185 +04 [63773] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-04-25 10:33:51.209 +04 [63775] LOG:  database system was interrupted; last known up at 2024-04-25 10:31:42 +04
+2024-04-25 10:33:51.770 +04 [63775] LOG:  redo starts at 35/93000028
+2024-04-25 10:33:51.786 +04 [63775] LOG:  consistent recovery state reached at 35/93082CA0
+2024-04-25 10:33:51.786 +04 [63775] LOG:  redo done at 35/93082CA0
+2024-04-25 10:33:51.786 +04 [63775] LOG:  last completed transaction was at log time 2024-04-25 10:32:13.914823+04
+2024-04-25 10:33:51.907 +04 [63773] LOG:  database system is ready to accept connections
+ done
+server started
+2024-04-26 13:22:35.419 +04 [63773] LOG:  received fast shutdown request
+2024-04-26 13:22:35.420 +04 [63773] LOG:  aborting any active transactions
+2024-04-26 13:22:35.432 +04 [63773] LOG:  background worker "logical replication launcher" (PID 63781) exited with exit code 1
+2024-04-26 13:22:35.432 +04 [63776] LOG:  shutting down
+2024-04-26 13:22:35.448 +04 [63773] LOG:  database system is shut down
+waiting for server to start....2024-04-26 13:31:44.319 +04 [76472] LOG:  listening on IPv6 address "::1", port 5432
+2024-04-26 13:31:44.319 +04 [76472] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-04-26 13:31:44.320 +04 [76472] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-04-26 13:31:44.342 +04 [76473] LOG:  database system was interrupted; last known up at 2024-04-26 13:28:05 +04
+2024-04-26 13:31:44.662 +04 [76473] LOG:  redo starts at 35/9E000028
+2024-04-26 13:31:44.669 +04 [76473] LOG:  consistent recovery state reached at 35/9E0A88C8
+2024-04-26 13:31:44.669 +04 [76473] LOG:  redo done at 35/9E0A88C8
+2024-04-26 13:31:44.670 +04 [76473] LOG:  last completed transaction was at log time 2024-04-26 13:30:15.447162+04
+2024-04-26 13:31:44.747 +04 [76472] LOG:  database system is ready to accept connections
+ done
+server started
+waiting for server to shut down....2024-04-26 15:40:15.525 +04 [76472] LOG:  received fast shutdown request
+2024-04-26 15:40:15.526 +04 [76472] LOG:  aborting any active transactions
+2024-04-26 15:40:15.530 +04 [76472] LOG:  background worker "logical replication launcher" (PID 76479) exited with exit code 1
+2024-04-26 15:40:15.531 +04 [76474] LOG:  shutting down
+2024-04-26 15:40:15.542 +04 [76472] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2024-04-26 15:42:38.932 +04 [77924] LOG:  listening on IPv6 address "::1", port 5432
+2024-04-26 15:42:38.932 +04 [77924] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-04-26 15:42:38.934 +04 [77924] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-04-26 15:42:38.963 +04 [77925] LOG:  database system was interrupted; last known up at 2024-04-26 15:40:07 +04
+2024-04-26 15:42:39.661 +04 [77925] LOG:  redo starts at 35/A0000028
+2024-04-26 15:42:39.672 +04 [77925] LOG:  consistent recovery state reached at 35/A007E2E8
+2024-04-26 15:42:39.672 +04 [77925] LOG:  redo done at 35/A007E2E8
+2024-04-26 15:42:39.673 +04 [77925] LOG:  last completed transaction was at log time 2024-04-26 15:40:14.502387+04
+2024-04-26 15:42:39.869 +04 [77924] LOG:  database system is ready to accept connections
+ done
+server started

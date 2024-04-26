@@ -3731,7 +3731,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         if (openPosition != null) {
             StringBuilder sb = new StringBuilder()
-                    .append(telegramBotService.getBotName())
+//                    .append(telegramBotService.getBotName())
                     .append("\n")
                     .append("<b>ВАКАНСИЯ:</b> ")
                     .append(openPosition.getVacansyName())

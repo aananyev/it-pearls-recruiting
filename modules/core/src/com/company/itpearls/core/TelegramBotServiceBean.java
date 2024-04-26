@@ -77,7 +77,7 @@ public class TelegramBotServiceBean implements TelegramBotService, Serializable 
                 try {
                     Bot bot = new Bot(NAME, TOKEN);
                     botsApi.registerBot(bot);
-
+// TODO: фигово работает getMainMessage, вернее совсем не работает
                     logger.debug(String.format(messages.getMainMessage("mainmsgTelegramBotInitialised"),
                             applicationSetupService.getTelegramBotName()));
 

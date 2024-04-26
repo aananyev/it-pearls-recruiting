@@ -318,6 +318,23 @@ public class ProjectEdit extends StandardEditor<Project> {
                 .append("\n")
                 .append("\uD83C\uDD95ОТКРЫТ ПРОЕКТ: ")
                 .append(getEditedEntity().getProjectName());
+
+        if (getEditedEntity().getProjectDescriptionForCandidate() != null){
+            sb.append("\n")
+                    .append("ОПИСАНИЕ ПРОЕКТА: ")
+                    .append("\n")
+                    .append(getEditedEntity().getProjectDescriptionForCandidate())
+                    .append("\n");
+        } else {
+            if (getEditedEntity().getProjectDescription() != null) {
+                sb.append("\n")
+                        .append("ОПИСАНИЕ ПРОЕКТА: ")
+                        .append("\n")
+                        .append(getEditedEntity().getProjectDescription())
+                        .append("\n");
+            }
+        }
+
         events.publish(new UiNotificationEvent(this, sb.toString()));
         telegramService.sendMessageToBotWithSetting(sb.toString());
     }
