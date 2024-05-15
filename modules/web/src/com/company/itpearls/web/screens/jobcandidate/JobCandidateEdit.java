@@ -3772,15 +3772,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .withHandler(e1 -> generateCV(event.getItem(), null))
                 .withCaption(new StringBuilder(messageBundle.getMessage("msgPrintStdCV")).toString()));
 
-        if (event.getItem().getToVacancy().getTemplateCVSytemCode() != null) {
-            popupButton.addAction(new BaseAction("printCVFromForm")
-                    .withIcon(CubaIcon.TEXT_WIDTH.source())
-                    .withHandler(e -> generateCV(event.getItem(),
-                            openPositionService.setGenerateCVReportName(event.getItem().getToVacancy()).getName()))
-                    .withCaption(new StringBuilder(messageBundle.getMessage("msgPrintCV"))
-                            .append(" ")
-                            .append(openPositionService
-                                    .setGenerateCVReportName(event.getItem().getToVacancy()).getName()).toString()));
+        if (event.getItem().getToVacancy() != null) {
+            if (event.getItem().getToVacancy().getTemplateCVSytemCode() != null) {
+                String report = openPositionService
+                        .setGenerateCVReportName(event.getItem().getToVacancy()).getName();
+
+                if (report != null) {
+                    popupButton.addAction(new BaseAction("printCVFromForm")
+                            .withIcon(CubaIcon.TEXT_WIDTH.source())
+                            .withHandler(e -> generateCV(event.getItem(),
+                                    openPositionService.setGenerateCVReportName(event.getItem().getToVacancy()).getName()))
+                            .withCaption(new StringBuilder(messageBundle.getMessage("msgPrintCV"))
+                                    .append(" ")
+                                    .append(report).toString()));
+                }
+            }
         }
 
         retHbox.add(popupButton);

@@ -24,7 +24,6 @@ import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
-import com.haulmont.reports.app.service.ReportService;
 import com.haulmont.reports.entity.Report;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
@@ -273,6 +272,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private TextField<String> templateCVSytemCodeTextField;
     @Inject
+    private LookupField<Report> reportListLookupField;
+    @Inject
     private ReportService reportService;
 
     @Subscribe("closedVacancyTimer")
@@ -341,11 +342,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setOpenCloseStart();
         setCommentsOpenPositionScroll(getEditedEntity(), commentsScrollBox);
         setCommentOpenPositionScrollIteractionList(getEditedEntity(), commentsScrollBox);
+//        setReportListLookupField();
 
         initPositionTypeField();
         initProjectNameField();
         initClosedVacancyTimerFacet();
         setMapOfPriority();
+
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            reportListLookupField.setValue(reportService.getDefaultReport());
+        }
     }
 
     private void setMapOfPriority() {
@@ -3068,6 +3074,19 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             templateCVSytemCodeTextField.setValue(event.getValue().getCode());
         } else {
             templateCVSytemCodeTextField.setValue(openPositionService.getStdResumeName());
+        }
+    }
+
+    @Subscribe("templateCVSytemCodeTextField")
+    public void onTemplateCVSytemCodeTextFieldValueChange(HasValue.ValueChangeEvent<String> event) {
+        setReportListLookupField();
+    }
+
+    private void setReportListLookupField() {
+        if (templateCVSytemCodeTextField.getValue() != null) {
+            reportListLookupField.setValue(reportService.getReport(templateCVSytemCodeTextField.getValue()));
+        } else {
+            reportListLookupField.setValue(reportService.getDefaultReport());
         }
     }
 }

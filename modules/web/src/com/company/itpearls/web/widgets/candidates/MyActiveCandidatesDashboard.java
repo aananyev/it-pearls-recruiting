@@ -77,7 +77,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     private Set<OpenPosition> wasOrNowOpenPosition = new TreeSet<>(Comparator.comparing(OpenPosition::getVacansyName));
     private ScrollBoxLayout scrollBoxLayout;
     private Boolean generatedWidget = false;
-    private int candidatesCount = 0;
+//    private int candidatesCount = 0;
 
     private final static String QUERY_MY_CANIDATE_EXCLUDE
             = "select e from itpearls_MyActiveCandidateExclude e where e.jobCandidate = :jobCandidate and e.user = :user";
@@ -93,8 +93,8 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
     private CollectionContainer<InternalEmailTemplate> internalEmailTemplateDc;
     @Inject
     private Screens screens;
-    @Inject
-    private Notifications notifications;
+//    @Inject
+//    private Notifications notifications;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -186,7 +186,7 @@ public class MyActiveCandidatesDashboard extends ScreenFragment {
         Set<JobCandidate> jobCandidateSet = new TreeSet<>(Comparator.comparing(JobCandidate::getFullName));
         Map<JobCandidate, Map.Entry<Integer, Integer>> candidateProjectMap = new HashMap<JobCandidate, Map.Entry<Integer, Integer>>();
 
-        candidatesCount = jobCandidateSet.size();
+//        candidatesCount = jobCandidateSet.size();
 
         for (IteractionList interactionList : iteractionListsDc.getItems()) {
             if (excludeCheckBox.getValue()) {

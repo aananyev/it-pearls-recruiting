@@ -55,7 +55,7 @@
         </instance>
         <collection id="reportDc" class="com.haulmont.reports.entity.Report" view="report.view">
             <loader id="reportDl" cacheable="true">
-                <query><![CDATA[select p from report$Report p where p.code like 'templateCV%']]></query>
+                <query><![CDATA[select p from report$Report p where p.code like 'templateCV%' or p.code like 'candidateCVdefault']]></query>
             </loader>
         </collection>
         <collection id="procAttachmentsDc"

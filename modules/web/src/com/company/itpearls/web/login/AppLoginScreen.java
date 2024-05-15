@@ -34,10 +34,12 @@ public class AppLoginScreen extends LoginScreen {
                 .setSource(RelativePathResource.class)
                 .setPath("VAADIN/brand-login-screen/recruit" + count + ".jpg");
     }
+
     @Subscribe("submit")
     public void onSubmit(Action.ActionPerformedEvent event) {
         login();
     }
+
     protected void loadStyles() {
         ScreenDependencyUtils.addScreenDependency(this,
                 "vaadin://brand-login-screen/login.css", Dependency.Type.STYLESHEET);

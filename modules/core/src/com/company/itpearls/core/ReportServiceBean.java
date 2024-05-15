@@ -13,13 +13,47 @@ import java.util.List;
 @Service(ReportService.NAME)
 public class ReportServiceBean implements ReportService {
     @Override
+    public String getCVDefaultCode() {
+        return "candidateCVdefault";
+    }
+
+    @Override
+    public Report getDefaultReport() {
+        return getReport(getCVDefaultCode()); // TO-DO надо что-то с этим делать. Куда-то в общие настройкк
+    }
+
+    @Override
     public Report getReport(String reportSystemCode) {
         StringBuilder sb = new StringBuilder();
-        String QUERY_REPORT = "select p from report$Report p where p.code = '%s'";
+        String QUERY_REPORT = "select p from report$Report p where p.code like '%s'";
 
         sb.append(String.format(QUERY_REPORT, reportSystemCode));
 
-        return queryOneResult(sb.toString());
+        Report report = null;
+
+        try {
+            report = queryOneResult(sb.toString());
+        } catch (NullPointerException e) {
+            try {
+                report = queryOneResult(new StringBuilder()
+                        .append(String.format(QUERY_REPORT, getCVDefaultCode()))
+                        .toString());
+            } catch (NullPointerException e1) {
+                e.printStackTrace();
+            }
+        }
+
+        if (report == null) {
+            try {
+                report = queryOneResult(new StringBuilder()
+                        .append(String.format(QUERY_REPORT, getCVDefaultCode()))
+                        .toString());
+            } catch (NullPointerException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        return report;
     }
 
     @Override
@@ -32,7 +66,7 @@ public class ReportServiceBean implements ReportService {
 
     @Override
     public List<Report> getReportCVTemplateList() {
-        String QUERY_REPORT = "select p from report$Report p where e.code like 'templateCV%'";
+        String QUERY_REPORT = "select p from report$Report p where p.code like 'templateCV%'";
 
         return queryOneResult(QUERY_REPORT);
     }
