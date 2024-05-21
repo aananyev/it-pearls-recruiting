@@ -217,7 +217,7 @@
                         caption="msg://msgRating">
                     <componentRenderer/>
                 </column>
-                <column id="companyLogoColumn"
+<!--                <column id="companyLogoColumn"
                         resizable="true"
                         collapsible="true"
                         collapsed="true"
@@ -225,7 +225,7 @@
                         width="70px"
                         minimumWidth="70px">
                     <componentRenderer/>
-                </column>
+                </column> -->
                 <column id="projectLogoColumn"
                         resizable="true"
                         collapsible="true"

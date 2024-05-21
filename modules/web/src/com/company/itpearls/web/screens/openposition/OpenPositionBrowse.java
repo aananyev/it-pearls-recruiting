@@ -133,6 +133,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                                 .getItem()
                                 .getProjectName()
                                 .getProjectLogo());
+                image.setDescription(textManipulationService.getImage(event.getItem().getProjectName().getProjectLogo()));
             } else {
                 image.setSource(ThemeResource.class).setPath(icons_no_company_png);
             }
@@ -142,7 +143,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retBox;
     }
 
-    @Install(to = "openPositionsTable.companyLogoColumn", subject = "columnGenerator")
+/*    @Install(to = "openPositionsTable.companyLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableCompanyLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
         retBox.setWidthFull();
@@ -188,8 +189,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         retBox.add(image);
         return retBox;
-    }
-
+    } */
 
     private static final String NULL_SALARY = "0 т.р./0 т.р.";
     @Inject
@@ -3147,6 +3147,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 //        logoImage.setStyleName("circle-30px-noborder");
         logoImage.setScaleMode(Image.ScaleMode.CONTAIN);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        logoImage.setDescriptionAsHtml(true);
+        logoImage.setHtmlSanitizerEnabled(false);
 
         if (event.getItem().getPositionType() != null) {
             if (event.getItem().getPositionType().getLogo() != null) {
@@ -3154,6 +3156,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     logoImage
                             .setSource(FileDescriptorResource.class)
                             .setFileDescriptor(event.getItem().getPositionType().getLogo());
+                    logoImage.setDescription(textManipulationService.getImage(event.getItem().getPositionType().getLogo()));
                 } catch (Exception e) {
                     e.printStackTrace();
                     logoImage.setVisible(false);
@@ -3232,6 +3235,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
         retImage.setAlignment(Component.Alignment.MIDDLE_LEFT);
         retImage.setDescription(sb.toString());
+        retImage.setDescriptionAsHtml(true);
         retImage.setVisible(false);
 
         if (projectOwner != null) {
@@ -3261,6 +3265,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                         .setSource(FileDescriptorResource.class)
                         .setFileDescriptor(projectOwner.getFileImageFace());
                 retImage.setVisible(true);
+                retImage.setDescription(textManipulationService.getImage(projectOwner.getFileImageFace()));
             }
         }
 

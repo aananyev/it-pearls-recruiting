@@ -156,13 +156,13 @@
                         caption="msg://msgCityOfResidence"
                         minimumWidth="150px"
                         property="cityOfResidence"/>
-                <column id="resume"
+<!--                <column id="resume"
                         collapsible="true"
                         collapsed="true"
                         caption="msg://msgResume"
                         width="60px">
                     <iconRenderer/>
-                </column>
+                </column> -->
                 <column id="lastIteraction"
                         caption="msg://msgDateLastIteraction"
                         maximumWidth="90px"

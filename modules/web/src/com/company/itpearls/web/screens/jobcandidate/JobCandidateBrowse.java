@@ -319,6 +319,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private void initActionButton(PopupButton actionsWithCandidateButton) {
 //        final String separatorChar = "⎯";
 //        String separator = separatorChar.repeat(22);
+        JobCandidate jobCandidateSelected = jobCandidatesTable.getSingleSelected();
 
         actionsWithCandidateButton.addAction(new BaseAction("addPersonalReserve")
                 .withIcon(CubaIcon.ADD_TO_SET_ACTION.source())
@@ -343,10 +344,13 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                     else
                                         addPersonalReserveInteraction(currentPersonelReserve.getJobCandidate(), getDefaultOpenPosition());
                                 }
+
+                                jobCandidatesTable.repaint();
+                                jobCandidatesTable.setSelected(jobCandidateSelected);
+                                jobCandidatesTable.scrollTo(jobCandidateSelected);
                             })
                             .build()
                             .show();
-                    jobCandidatesTable.scrollTo(jobCandidatesTable.getSingleSelected());
                 }));
 
         actionsWithCandidateButton.addAction(new BaseAction("addPersonalReserveWithoutConfirm")
@@ -367,22 +371,29 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .withIcon(CubaIcon.ENVELOPE.source())
                 .withCaption(messageBundle.getMessage("msgSendEmail"))
                 .withHandler(actionPerformedAction -> {
-                    screenBuilders.editor(InternalEmailerTemplate.class, this)
+                    Screen screen = screenBuilders.editor(InternalEmailerTemplate.class, this)
                             .newEntity()
                             .withInitializer(event -> {
                                 event.setToEmail(jobCandidatesTable.getSingleSelected());
                             })
-                            .build()
-                            .show();
+                            .build();
 
-                    jobCandidatesTable.scrollTo(jobCandidatesTable.getSingleSelected());
+                    screen.addAfterCloseListener(afterCloseEvent -> {
+                        jobCandidatesTable.repaint();
+                        jobCandidatesTable.setSelected(jobCandidateSelected);
+                        jobCandidatesTable.scrollTo(jobCandidateSelected);
+                    });
+
+                    screen.show();
                 }));
 
         actionsWithCandidateButton.addAction(new BaseAction("addCommentAction")
                 .withIcon(CubaIcon.COMMENTING.source())
                 .withCaption(messageBundle.getMessage("msgComment"))
                 .withHandler(actionPerformedEvent -> {
-
+                    JobCandidateComment screen = screens.create(JobCandidateComment.class);
+                    screen.setJobCandidate(jobCandidateSelected);
+                    screen.show();
                 }));
 
         actionsWithCandidateButton.addAction(new BaseAction("viewCommentAction")
@@ -1016,7 +1027,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             return null;
     } */
 
-    @Install(to = "jobCandidatesTable.resume", subject = "columnGenerator")
+/*    @Install(to = "jobCandidatesTable.resume", subject = "columnGenerator")
     private Icons.Icon jobCandidatesTableResumeColumnGenerator
             (DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         String retStr = "";
@@ -1048,7 +1059,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         } else {
             return "pic-center-large-green";
         }
-    }
+    } */
 
     private JobCandidate jobCandidateFragment = null;
 

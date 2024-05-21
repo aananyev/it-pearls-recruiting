@@ -7212,3 +7212,57 @@ server started
 2024-05-15 17:30:10.651 +04 [17150] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2024-05-15 17:30:11.102 +04 [17152] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2024-05-15 17:30:11.183 +04 [17154] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-05-16 10:59:30.505 +04 [23022] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-05-16 10:59:30.517 +04 [23024] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-05-16 10:59:30.751 +04 [23026] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-05-16 10:59:31.533 +04 [23028] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-05-16 10:59:31.650 +04 [23030] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-05-16 11:07:05.385 +04 [23346] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-05-16 11:07:05.400 +04 [23348] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-05-16 11:07:05.556 +04 [23350] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-05-16 11:07:06.036 +04 [23352] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-05-16 11:07:06.143 +04 [23354] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+waiting for server to shut down...2024-05-20 12:38:06.388 +04 [15622] LOG:  received fast shutdown request
+.2024-05-20 12:38:06.389 +04 [15622] LOG:  aborting any active transactions
+2024-05-20 12:38:06.389 +04 [38014] FATAL:  terminating connection due to administrator command
+2024-05-20 12:38:06.390 +04 [38055] FATAL:  terminating connection due to administrator command
+2024-05-20 12:38:06.397 +04 [15622] LOG:  background worker "logical replication launcher" (PID 15629) exited with exit code 1
+2024-05-20 12:38:06.400 +04 [15624] LOG:  shutting down
+2024-05-20 12:38:06.421 +04 [15622] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2024-05-20 12:39:45.602 +04 [40210] LOG:  listening on IPv6 address "::1", port 5432
+2024-05-20 12:39:45.602 +04 [40210] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-05-20 12:39:45.603 +04 [40210] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-05-20 12:39:45.620 +04 [40211] LOG:  database system was interrupted; last known up at 2024-05-20 12:37:24 +04
+2024-05-20 12:39:45.951 +04 [40211] LOG:  redo starts at 36/59000028
+2024-05-20 12:39:45.959 +04 [40211] LOG:  consistent recovery state reached at 36/5908C500
+2024-05-20 12:39:45.959 +04 [40211] LOG:  redo done at 36/5908C500
+2024-05-20 12:39:45.960 +04 [40211] LOG:  last completed transaction was at log time 2024-05-20 12:38:05.757781+04
+2024-05-20 12:39:46.046 +04 [40210] LOG:  database system is ready to accept connections
+ done
+server started
+2024-05-20 16:44:45.319 +04 [43117] FATAL:  database "carboff" does not exist
+2024-05-20 16:44:47.397 +04 [43118] FATAL:  database "carboff" does not exist
+2024-05-20 16:44:53.421 +04 [43121] ERROR:  relation "databasechangelog" does not exist at character 26
+2024-05-20 16:44:53.421 +04 [43121] STATEMENT:  select filename, id from DATABASECHANGELOG
+2024-05-20 16:44:55.655 +04 [43123] ERROR:  relation "public.databasechangeloglock" does not exist at character 22
+2024-05-20 16:44:55.655 +04 [43123] STATEMENT:  SELECT COUNT(*) FROM public.databasechangeloglock
+waiting for server to shut down....2024-05-21 12:00:47.302 +04 [40210] LOG:  received fast shutdown request
+2024-05-21 12:00:47.304 +04 [40210] LOG:  aborting any active transactions
+2024-05-21 12:00:47.320 +04 [40210] LOG:  background worker "logical replication launcher" (PID 40217) exited with exit code 1
+2024-05-21 12:00:47.321 +04 [40212] LOG:  shutting down
+2024-05-21 12:00:47.356 +04 [40210] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2024-05-21 12:02:26.549 +04 [47969] LOG:  listening on IPv6 address "::1", port 5432
+2024-05-21 12:02:26.549 +04 [47969] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-05-21 12:02:26.550 +04 [47969] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-05-21 12:02:26.581 +04 [47970] LOG:  database system was interrupted; last known up at 2024-05-21 11:59:13 +04
+2024-05-21 12:02:26.876 +04 [47970] LOG:  redo starts at 36/62000028
+2024-05-21 12:02:26.887 +04 [47970] LOG:  consistent recovery state reached at 36/620B7D18
+2024-05-21 12:02:26.887 +04 [47970] LOG:  redo done at 36/620B7D18
+2024-05-21 12:02:26.888 +04 [47970] LOG:  last completed transaction was at log time 2024-05-21 12:00:44.757501+04
+2024-05-21 12:02:26.973 +04 [47969] LOG:  database system is ready to accept connections
+ done
+server started
