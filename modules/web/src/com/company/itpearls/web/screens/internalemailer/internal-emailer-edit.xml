@@ -57,31 +57,60 @@
                                caption="msg://msgFromEmail"
                                width="100%"
                                editable="false"/>
-                    <suggestionPickerField id="toEmailField"
-                                           asyncSearchDelayMs="1000"
-                                           required="true"
-                                           caption="msg://msgToEmail"
-                                           dataContainer="emailerDc"
-                                           inputPrompt="mainMsg://msgStartInput"
-                                           width="100%"
-                                           minSearchStringLength="3"
-                                           property="toEmail">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                            <action id="clear" type="picker_clear"/>
-                        </actions>
-                        <query entityClass="com.company.itpearls.entity.JobCandidate"
-                               escapeValueForLike="true"
-                               view="jobCandidate-view"
-                               searchStringFormat="%$searchString%">
-                            select e
-                            from itpearls_JobCandidate e
-                            where lower(e.fullName) like lower(:searchString) escape '\'
-                            and e.middleName not like '(не использовать)'
-                            and not e.blockCandidate = true
-                            order by e.fullName
-                        </query>
-                    </suggestionPickerField>
+                    <hbox spacing="true"
+                          width="100%"
+                          expand="candidateField">
+                        <suggestionPickerField id="candidateField"
+                                               asyncSearchDelayMs="1000"
+                                               required="true"
+                                               caption="msg://msgToEmail"
+                                               dataContainer="emailerDc"
+                                               inputPrompt="mainMsg://msgStartInput"
+                                               width="AUTO"
+                                               minSearchStringLength="3"
+                                               property="toEmail">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                                <action id="clear" type="picker_clear"/>
+                            </actions>
+                            <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                   escapeValueForLike="true"
+                                   view="jobCandidate-view"
+                                   searchStringFormat="%$searchString%">
+                                select e
+                                from itpearls_JobCandidate e
+                                where lower(e.fullName) like lower(:searchString) escape '\'
+                                and e.middleName not like '(не использовать)'
+                                and not e.blockCandidate = true
+                                and not e.email like ""
+                                order by e.fullName
+                            </query>
+                        </suggestionPickerField>
+
+                        <suggestionPickerField id="toEmailField"
+                                               asyncSearchDelayMs="1000"
+                                               required="true"
+                                               caption="msg://msgToEmail"
+                                               dataContainer="emailerDc"
+                                               inputPrompt="mainMsg://msgStartInput"
+                                               width="AUTO"
+                                               minSearchStringLength="3"
+                                               property="toEmail">
+                            <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                   escapeValueForLike="true"
+                                   view="jobCandidate-view"
+                                   searchStringFormat="%$searchString%">
+                                select e
+                                from itpearls_JobCandidate e
+                                where lower(e.fullName) like lower(:searchString) escape '\'
+                                and e.middleName not like '(не использовать)'
+                                and not e.blockCandidate = true
+                                and not e.email like ""
+                                order by e.fullName
+                            </query>
+                        </suggestionPickerField>
+                    </hbox>
                 </vbox>
                 <vbox id="dateFieldVBox"
                       width="AUTO"
@@ -103,7 +132,7 @@
             </hbox>
         </groupBox>
         <vbox id="subjectGroupBox"
-                  spacing="true">
+              spacing="true">
             <textField id="subjectEmailField"
                        caption="msg://msgSubject"
                        width="100%"
@@ -122,9 +151,9 @@
                     align="MIDDLE_LEFT"
                     width="AUTO"
                     icon="font-icon:SEND"/>
-<!--            <button id="commitAndCloseBtn"
-                    align="MIDDLE_RIGHT"
-                    action="windowCommitAndClose"/> -->
+            <!--            <button id="commitAndCloseBtn"
+                                align="MIDDLE_RIGHT"
+                                action="windowCommitAndClose"/> -->
             <button id="closeBtn"
                     align="MIDDLE_RIGHT"
                     action="windowClose"/>

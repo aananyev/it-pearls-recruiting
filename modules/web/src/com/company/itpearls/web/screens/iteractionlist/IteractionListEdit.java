@@ -185,6 +185,20 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         candidateField.addValueChangeListener(e -> {
             copyAndCheckCandidate();
         });
+
+        candidateField.setSearchExecutor((searchString, searchParams) -> {
+            searchString = QueryUtils.escapeForLike(searchString);
+
+            List<JobCandidate> jobCandidates = dataManager.load(JobCandidate.class)
+                    .query("lower(e.fullName) like lower(?1) " +
+//                                    "and not e.middleName like '(не использовать)' " +
+//                                    "and not (e.blockCandidate = true) " +
+//                                    "and not (e.email like '' ) " +
+                                    "order by e.fullName",
+                            "%" + searchString + "%").list();
+
+            return jobCandidates;
+        });
     }
 
     private void changeField() {

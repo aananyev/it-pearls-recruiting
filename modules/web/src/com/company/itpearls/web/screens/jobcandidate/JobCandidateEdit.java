@@ -53,8 +53,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private ReportService reportService;
     @Inject
     private ReportGuiManager reportGuiManager;
-
-
     @Inject
     private DataManager dataManager;
     @Inject
@@ -171,18 +169,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private TextField<String> wiberNameField;
     @Inject
     private DataGrid<SocialNetworkURLs> socialNetworkTable;
-
-    private static final String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
-    private static final String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
-    private static final String QUERY_GET_OTHER_SOCIAL_NETWORK = "select e from itpearls_SocialNetworkType e where e.socialNetwork = :other";
-    private static final String QUERY_GET_CANDIDATE_CV = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
-    private static final String TELEGRAM_NAME_URL = "http://t.me/";
-//    private static final String QUERY_GET_LAST_ITERACTION = "select e from itpearls_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
-
-    List<Position> setPos = new ArrayList<>();
-    List<IteractionList> iteractionListFromCandidate = new ArrayList();
-    IteractionList lastIteraction = null;
-
     @Inject
     private Button blockCandidateButton;
     @Inject
@@ -209,11 +195,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private KeyValueCollectionLoader lastProjectDl;
     @Inject
     private TabSheet tabSheetSocialNetworks;
-    private boolean cvTabInitialized = false;
-    private boolean interationTabInitialized = false;
-    private Button copyIteractionButton;
-    private boolean candidateInitialized = false;
-    private boolean tabContactInfoInitialized = false;
     @Inject
     private Table lastProjectTable;
     @Inject
@@ -237,7 +218,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private DataGrid<IteractionList> jobCandidateCommentsDataGrid;
     @Inject
     private CollectionLoader<IteractionList> interactionCommentDl;
-    private CollectionContainer<OpenPosition> suggestOpenPositionDc;
     @Inject
     private GridLayout dictionatysTavlesHBox;
     @Inject
@@ -270,6 +250,24 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Image candidateFileImageFaceDefailtImage;
     @Inject
     private Image candidateFileImageFaceImage;
+
+    private boolean cvTabInitialized = false;
+    private boolean interationTabInitialized = false;
+    private Button copyIteractionButton;
+    private boolean candidateInitialized = false;
+    private boolean tabContactInfoInitialized = false;
+
+    private static final String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
+    private static final String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
+    private static final String QUERY_GET_OTHER_SOCIAL_NETWORK = "select e from itpearls_SocialNetworkType e where e.socialNetwork = :other";
+    private static final String QUERY_GET_CANDIDATE_CV = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
+    private static final String TELEGRAM_NAME_URL = "http://t.me/";
+    //    private static final String QUERY_GET_LAST_ITERACTION = "select e from itpearls_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)";
+    private CollectionContainer<OpenPosition> suggestOpenPositionDc;
+
+    List<Position> setPos = new ArrayList<>();
+    List<IteractionList> iteractionListFromCandidate = new ArrayList();
+    IteractionList lastIteraction = null;
 
     @Install(to = "jobCandidateCandidateCvTable.createdBy", subject = "columnGenerator")
     private Component jobCandidateCandidateCvTableCreatedByColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
@@ -733,15 +731,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         }
 
-/*        skypeNameField.setRequired(true);
-        phoneField.setRequired(true);
-        mobilePhoneField.setRequired(true);
-        emailField.setRequired(true);
-        telegramNameField.setRequired(true);
-        whatsupNameField.setRequired(true);
-        wiberNameField.setRequired(true);
-        telegramGroupField.setRequired(true); */
-
         if (!isRequiredAddresField() || !flag) {
             skypeNameField.setRequired(false);
             phoneField.setRequired(false);
@@ -975,21 +964,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         });
     }
 
-/*    private void workStatusRadioButtonInit() {
-        Map<String, Integer> workStatusMap = new LinkedHashMap<>();
-
-        workStatusMap.put("Неопределен", 0);
-        workStatusMap.put("Самозанятый", 1);
-        workStatusMap.put("Индивидуальный предприниматель", 2);
-        workStatusMap.put("Срочный трудовой договор", 3);
-        workStatusMap.put("Договор ГПХ", 4);
-        workStatusMap.put("В штат по ТК РФ", 5);
-
-        workStatusRadioButton.setOptionsMap(workStatusMap);
-
-        lastIteractionCount = 1;
-    } */
-
     private void priorityCommenicationMethodRadioButtonInit() {
 /*        Map<String, Integer> priorityMap = new LinkedHashMap<>();
 
@@ -1102,6 +1076,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .query("select e from itpearls_Iteraction e where e.iterationName like :iteractionName")
                         .view("iteraction-view")
                         .parameter("iteractionName", "Новый контакт")
+                        .cacheable(true)
                         .one();
             } catch (Exception e) {
                 notifications.create(Notifications.NotificationType.ERROR)
@@ -1142,6 +1117,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     "e.personPosition = :personPosition";
             List<JobCandidate> jobCandidates = dataManager.load(JobCandidate.class)
                     .query(queryStr)
+                    .cacheable(true)
                     .parameter("firstName", firstNameField.getValue())
                     .parameter("secondName", secondNameField.getValue())
                     .parameter("cityOfResidence", jobCityCandidateField.getValue())
@@ -2552,6 +2528,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .query(QUERY_GET_OTHER_SOCIAL_NETWORK)
                         .parameter("other", "Other")
                         .view("socialNetworkType-view")
+                        .cacheable(true)
                         .one();
             } catch (IllegalStateException e) {
                 e.printStackTrace();

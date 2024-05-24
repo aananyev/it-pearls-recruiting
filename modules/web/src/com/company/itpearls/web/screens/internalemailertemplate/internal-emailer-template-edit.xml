@@ -10,7 +10,7 @@
                   class="com.company.itpearls.entity.InternalEmailerTemplate">
             <view extends="internalEmailerTemplate-view">
                 <property name="emailTemplate" view="_local">
-                    <property name="templateOpenPosition" view="openPosition-view">
+                    <property name="templateOpenPosition" view="_local">
                         <property name="grade" view="_local"/>
                     </property>
                     <property name="templatePosition" view="_local"/>
@@ -107,14 +107,66 @@
                                  property="fromEmail"
                                  dataContainer="internalEmailerTemplateDc"/>
                     <textField id="fromEmailTextAddressField"/>
-                    <suggestionPickerField id="toEmailField"
+<!--                    <suggestionPickerField id="toEmailField"
                                            property="toEmail"
                                            dataContainer="internalEmailerTemplateDc">
                         <actions>
                             <action id="lookup" type="picker_lookup"/>
                             <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                         </actions>
-                    </suggestionPickerField>
+                    </suggestionPickerField> -->
+                    <hbox spacing="true" width="100%" expand="candidateField">
+                        <suggestionPickerField id="candidateField"
+                                               asyncSearchDelayMs="1000"
+                                               required="true"
+                                               caption="msg://msgToEmail"
+                                               dataContainer="internalEmailerTemplateDc"
+                                               inputPrompt="mainMsg://msgStartInput"
+                                               width="100%"
+                                               minSearchStringLength="3"
+                                               property="toEmail">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                                <action id="clear" type="picker_clear"/>
+                            </actions>
+                            <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                   escapeValueForLike="true"
+                                   view="jobCandidate-view"
+                                   searchStringFormat="%$searchString%">
+                                select e
+                                from itpearls_JobCandidate e
+                                where lower(e.fullName) like lower(:searchString) escape '\'
+                                and e.middleName not like '(не использовать)'
+                                and not e.blockCandidate = true
+                                and LENGTH(e.email) > 0
+                                order by e.fullName
+                            </query>
+                        </suggestionPickerField>
+
+                        <suggestionPickerField id="toEmailField"
+                                               asyncSearchDelayMs="1000"
+                                               required="true"
+                                               caption="msg://msgToEmail"
+                                               dataContainer="internalEmailerTemplateDc"
+                                               inputPrompt="mainMsg://msgStartInput"
+                                               width="AUTO"
+                                               minSearchStringLength="3"
+                                               property="toEmail">
+                            <query entityClass="com.company.itpearls.entity.JobCandidate"
+                                   escapeValueForLike="true"
+                                   view="jobCandidate-view"
+                                   searchStringFormat="%$searchString%">
+                                select e
+                                from itpearls_JobCandidate e
+                                where lower(e.fullName) like lower(:searchString) escape '\'
+                                and e.middleName not like '(не использовать)'
+                                and not e.blockCandidate = true
+                                and LENGTH(e.email) > 0
+                                order by e.fullName
+                            </query>
+                        </suggestionPickerField>
+                    </hbox>
                 </vbox>
                 <vbox id="dateFieldVBox">
                     <dateField id="dateCreateEmailField"

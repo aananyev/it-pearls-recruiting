@@ -22,14 +22,13 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
-import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
+import com.haulmont.cuba.web.gui.components.renderers.WebComponentRenderer;
 import com.vaadin.server.Page;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.pdfbox.cos.COSName;
@@ -126,7 +125,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         logoImage.setWidth(imageWidth);
         logoImage.setHeight(imageWidth);
         if (border)
-        logoImage.setStyleName(new StringBuilder("circle-").append(imageWidth).append("-white-border").toString());
+            logoImage.setStyleName(new StringBuilder("circle-").append(imageWidth).append("-white-border").toString());
         logoImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
         logoImage.setAlignment(Component.Alignment.MIDDLE_CENTER);
         logoImage.setHtmlSanitizerEnabled(false);
@@ -161,7 +160,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retHbox.expand(companyLabel);
 
         return retHbox;
-
     }
 
     @Install(to = "jobCandidatesTable.personPosition", subject = "columnGenerator")
@@ -268,17 +266,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private CollectionLoader<IteractionList> iteractionListDl;
     private CollectionContainer<CandidateCV> candidateCVDc;
     private CollectionLoader<CandidateCV> candidateCVDl;
-    //    private List<IteractionList> iteractionList = new ArrayList<>();
     private CandidateCVEdit candidateCVEdit;
     private OnlyTextPersonPosition screenOnlytext;
-    //    private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
     private List<Employee> employees;
-
-    /*    private static final String EXTENSION_PDF = "pdf";
-        private static final String EXTENSION_DOC = "doc";
-        private static final String EXTENSION_DOCX = "docx";*/
     private static final String[] breakLine = {"<br>", "<br/>", "<br />", "<p>", "</p>", "</div>"};
-
     private static final String separatorChar = "⎯";
     private static final String separator = StringUtils.repeat(separatorChar, 22);
 
@@ -311,15 +302,16 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     private void initActionsWithCandidateButton() {
-        initActionButton(actionsWithCandidateButton);
+        initActionButton(actionsWithCandidateButton, null);
     }
 
     private PersonelReserve currentPersonelReserve = null;
 
-    private void initActionButton(PopupButton actionsWithCandidateButton) {
+    private void initActionButton(PopupButton actionsWithCandidateButton, JobCandidate jobCandidate) {
 //        final String separatorChar = "⎯";
 //        String separator = separatorChar.repeat(22);
-        JobCandidate jobCandidateSelected = jobCandidatesTable.getSingleSelected();
+
+        JobCandidate jobCandidateSelected = jobCandidate;
 
         actionsWithCandidateButton.addAction(new BaseAction("addPersonalReserve")
                 .withIcon(CubaIcon.ADD_TO_SET_ACTION.source())
@@ -345,9 +337,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                         addPersonalReserveInteraction(currentPersonelReserve.getJobCandidate(), getDefaultOpenPosition());
                                 }
 
-                                jobCandidatesTable.repaint();
-                                jobCandidatesTable.setSelected(jobCandidateSelected);
-                                jobCandidatesTable.scrollTo(jobCandidateSelected);
+                                if (jobCandidateSelected != null) {
+                                    jobCandidatesTable.repaint();
+                                    jobCandidatesTable.setSelected(jobCandidateSelected);
+                                    jobCandidatesTable.scrollTo(jobCandidateSelected);
+                                }
                             })
                             .build()
                             .show();
@@ -379,9 +373,11 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                             .build();
 
                     screen.addAfterCloseListener(afterCloseEvent -> {
-                        jobCandidatesTable.repaint();
-                        jobCandidatesTable.setSelected(jobCandidateSelected);
-                        jobCandidatesTable.scrollTo(jobCandidateSelected);
+                        if (jobCandidateSelected != null) {
+                            jobCandidatesTable.repaint();
+                            jobCandidatesTable.setSelected(jobCandidateSelected);
+                            jobCandidatesTable.scrollTo(jobCandidateSelected);
+                        }
                     });
 
                     screen.show();
@@ -402,7 +398,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .withHandler(actionPerformedAction -> {
                     jobCandidatesTable.scrollTo(jobCandidatesTable.getSingleSelected());
                     JobCandidateComment screen = screens.create(JobCandidateComment.class);
-//                    jobCandidatesTable.setSelected(((JobCandidate)actionPerformedAction.getSource()));
                     screen.setJobCandidate(jobCandidatesTable.getSingleSelected());
                     screen.show();
                 }));
@@ -451,6 +446,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         actionsWithCandidateButton.getAction("addCommentAction").setEnabled(false);
         actionsWithCandidateButton.getAction("addCommentAction").setVisible(false);
         actionsWithCandidateButton.getAction("viewCommentAction").setEnabled(true);
+        if (jobCandidateSelected != null) {
+            actionsWithCandidateButton.getAction("sendEmailAction").setEnabled(jobCandidateSelected.getEmail() != null);
+        }
     }
 
     @Subscribe(id = "signIconsDc", target = Target.DATA_CONTAINER)
@@ -718,7 +716,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
             jobCandidatesTable.setSelected(event.getItem());
         });
 
-        initActionButton(actionPopupButton);
+        initActionButton(actionPopupButton, event.getItem());
 
         retHBox.add(actionPopupButton);
 
@@ -2329,6 +2327,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retHbox.setDescription(textManipulationService.getImage(event.getItem().getFileImageFace()));
         return retHbox;
     }
+
     @Install(to = "jobCandidatesTable.personPosition", subject = "descriptionProvider")
     private String jobCandidatesTablePersonPositionDescriptionProvider(JobCandidate jobCandidate) {
         StringBuilder sb = new StringBuilder();
@@ -2628,7 +2627,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                 try {
                                     jobCandidatesTable.scrollTo(eventAfterClose.getScreen().getEditedEntity());
                                     jobCandidatesTable.setSelected(eventAfterClose.getScreen().getEditedEntity());
-                                } catch (NullPointerException|IllegalArgumentException e) {
+                                } catch (NullPointerException | IllegalArgumentException e) {
                                     e.printStackTrace();
                                 }
                             }

@@ -79,7 +79,6 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-
         if (PersistenceHelper.isNew(getEditedEntity())) {
             draftEmailField.setValue(true);
             dateCreateEmailField.setValue(new Date());

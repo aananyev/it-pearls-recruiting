@@ -26,6 +26,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.server.Page;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import javax.persistence.NoResultException;
@@ -78,7 +79,8 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
     private PersonelReserve currentPersonelReserve = null;
     static final String separatorChar = "⎯";
-    final static String separator = separatorChar.repeat(22);
+    final static String separator = StringUtils.repeat(separatorChar, 22);
+//    final static String separator = separatorChar.repeat(22);
     final static String pic_center_large = "pic-center-large-";
     final static String pic_center_large_inject_css = ".pic-center-large-%s {color: #%s; text-align: center; text-color: gray; font-size: large; margin: 0 auto;}";
 

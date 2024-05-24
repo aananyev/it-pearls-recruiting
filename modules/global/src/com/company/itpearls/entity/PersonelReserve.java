@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -9,6 +10,7 @@ import java.util.Date;
 
 @Table(name = "ITPEARLS_PERSONEL_RESERVE")
 @Entity(name = "itpearls_PersonelReserve")
+@NamePattern("%s / %s / %s|jobCandidate,recruter,endDate")
 public class PersonelReserve extends StandardEntity {
     private static final long serialVersionUID = 3132402819849167563L;
 

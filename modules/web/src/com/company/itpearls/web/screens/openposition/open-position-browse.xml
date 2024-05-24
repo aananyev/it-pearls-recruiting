@@ -204,28 +204,12 @@
                         caption="msg://msgFolder">
                     <componentRenderer/>
                 </column>
-<!--                <column id="icon"
-                        resizable="true"
-                        collapsible="true"
-                        collapsed="true"
-                        width="70px"
-                        minimumWidth="35px"
-                        caption="msg://msgPriority"/> -->
                 <column id="rating"
                         minimumWidth="85px"
                         maximumWidth="85px"
                         caption="msg://msgRating">
                     <componentRenderer/>
                 </column>
-<!--                <column id="companyLogoColumn"
-                        resizable="true"
-                        collapsible="true"
-                        collapsed="true"
-                        caption="msg://msgCompany"
-                        width="70px"
-                        minimumWidth="70px">
-                    <componentRenderer/>
-                </column> -->
                 <column id="projectLogoColumn"
                         resizable="true"
                         collapsible="true"
@@ -364,7 +348,7 @@
                         caption="msg://mshLastCVSend">
                     <componentRenderer/>
                 </column>
-                <column id="idStatistics"
+<!--                <column id="idStatistics"
                         collapsible="true"
                         collapsed="true"
                         resizable="true"
@@ -372,7 +356,7 @@
                         minimumWidth="35px"
                         caption="msg://msgStat">
                     <componentRenderer/>
-                </column>
+                </column> -->
                 <column id="owner"
                         collapsed="true"
                         collapsible="true"
@@ -380,14 +364,14 @@
                         width="120px">
                     <componentRenderer/>
                 </column>
-                <column id="candidateSendedColumn"
+<!--                <column id="candidateSendedColumn"
                         collapsed="true"
                         collapsible="true"
                         caption="msg://msgSendedCandidates"
                         width="120px"
                         resizable="true">
                     <componentRenderer/>
-                </column>
+                </column> -->
                 <column id="openPositionActionButtonColumn"
                         collapsed="false"
                         collapsible="true"

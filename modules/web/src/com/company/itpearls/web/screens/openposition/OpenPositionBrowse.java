@@ -14,14 +14,12 @@ import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscr
 import com.company.itpearls.web.screens.hrmasters.suggestjobcandidates.Suggestjobcandidate;
 import com.company.itpearls.web.screens.simplebrowsers.JobCandidateSimpleBrowse;
 import com.company.itpearls.web.screens.simplebrowsers.JobCandidateSimpleMailBrowse;
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -88,7 +86,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             "select avg(e.rating) from itpearls_OpenPositionComment e where e.openPosition = :openPosition and not e.rating is null";
 
     private final static String separatorChar = "⎯";
-//    private final static String separator = separatorChar.repeat(22);
     private final static String separator = StringUtils.repeat(separatorChar, 16);
     @Inject
     private OpenPositionService openPositionService;
@@ -143,54 +140,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retBox;
     }
 
-/*    @Install(to = "openPositionsTable.companyLogoColumn", subject = "columnGenerator")
-    private Object openPositionsTableCompanyLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
-        retBox.setWidthFull();
-        retBox.setHeightFull();
-
-        Image image = uiComponents.create(Image.class);
-        image.setDescriptionAsHtml(true);
-        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-        image.setWidth(width_50px);
-        image.setHeight(width_50px);
-        image.setStyleName(style_icon_no_border_50px);
-        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        if (event.getItem().getProjectName() != null) {
-            if (event.getItem().getProjectName().getProjectDepartment() != null) {
-                if (event.getItem().getProjectName().getProjectDepartment().getCompanyName() != null) {
-                    if (event.getItem().getProjectName().getProjectDepartment().getCompanyName().getCompanyDescription() != null) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(h4_tag);
-                        sb.append(event.getItem().getProjectName().getProjectDepartment().getCompanyName().getComanyName());
-                        sb.append(h4_tag_a);
-                        sb.append(br_tag_a);
-                        sb.append(br_tag_a);
-                        sb.append(event.getItem().getProjectName().getProjectDepartment().getCompanyName().getCompanyDescription());
-
-                        image.setDescription(sb.toString());
-                    }
-
-                    if (event.getItem().getProjectName().getProjectDepartment().getCompanyName().getFileCompanyLogo() != null) {
-                        image.setSource(FileDescriptorResource.class)
-                                .setFileDescriptor(event
-                                        .getItem()
-                                        .getProjectName()
-                                        .getProjectDepartment()
-                                        .getCompanyName()
-                                        .getFileCompanyLogo());
-                    } else {
-                        image.setSource(ThemeResource.class).setPath(String.valueOf(StdPictures.NO_COMPANY));
-                    }
-                }
-            }
-        }
-
-        retBox.add(image);
-        return retBox;
-    } */
-
     private static final String NULL_SALARY = "0 т.р./0 т.р.";
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
@@ -225,14 +174,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             = "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition and e.openClose = false";
     private final static String QUERY_RECRUTIER_TASK
             = "select e from itpearls_RecrutiesTasks e where e.endDate > current_date and e.closed = false and e.openPosition = :openPosition";
-
-//    public final static int PRIORITY_NONE = -2;
-//    public final static int PRIORITY_DRAFT = -1;
-//    public final static int PRIORITY_PAUSED = 0;
-//    public final static int PRIORITY_LOW = 1;
-//    public final static int PRIORITY_NORMAL = 2;
-//    public final static int PRIORITY_HIGH = 3;
-//    public final static int PRIORITY_CRITICAL = 4;
 
     private final static String parameter_subscriber = "subscriber";
     private final static String parameter_notsubscriber = "notsubscriber";
@@ -319,6 +260,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         users = dataManager.load(ExtUser.class)
                 .query(QUERY_USER)
                 .view("extUser-view")
+                .cacheable(true)
                 .list();
     }
 
@@ -821,6 +763,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .view("recrutiesTasks-view")
                 .query(QUERY_RECRUTIER_TASK)
                 .parameter("openPosition", openPosition)
+                .cacheable(true)
                 .list();
 
         if (openPosition.getShortDescription() != null) {
@@ -1197,6 +1140,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .parameter("reacrutier", (ExtUser) userSession.getUser())
                 .parameter("current_date", new Date())
                 .view("recrutiesTasks-view")
+                .cacheable(true)
                 .list().size() > 0) {
             return true;
         } else {
@@ -1356,6 +1300,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .query(QUERY_SELECT_COMMAND)
                 .parameter("parentOpenPosition", event)
                 .view("openPosition-view")
+                .cacheable(true)
                 .list();
 
         String magPos = "";
@@ -2513,11 +2458,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     private Integer montOfStat = 3;
 
-    @Install(to = "openPositionsTable.idStatistics", subject = "columnGenerator")
+/*    @Install(to = "openPositionsTable.idStatistics", subject = "columnGenerator")
     private Object openPositionsTableIdStatisticsColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retObject = setComponentsToOpenPositionsTable(event, getIDStatistics(event));
         return retObject;
-    }
+    } */
 
 
     private String getIDStatistics(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -2551,7 +2496,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return sb.toString();
     }
 
-    @Install(to = "openPositionsTable.idStatistics", subject = "descriptionProvider")
+/*    @Install(to = "openPositionsTable.idStatistics", subject = "descriptionProvider")
     private String openPositionsTableIdStatisticsDescriptionProvider(OpenPosition openPosition) {
 //        String retStr = "Статистика за " + montOfStat + " месяца\n";
         StringBuilder sb = new StringBuilder();
@@ -2590,7 +2535,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return sb.toString();
-    }
+    } */
 
     String more_10_msg = "<font color=red>10</font>";
     String clarification_required = "<font color=blue>???</font>";
@@ -2762,6 +2707,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .query(QUERY_PARENT_OPENPOSITION)
                 .parameter("parentOpenPosition", columnGeneratorEvent.getItem())
                 .view("openPosition-view")
+                .cacheable(true)
                 .list().size() > 0) {
             retStr = "FOLDER";
             styleRetLabel = "open-position-pic-center-x-large-gray";
@@ -3312,6 +3258,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     .query(QUERY_CANDIDATES_FROM_CONSIDERATION)
                     .parameter("vacancy", closeVacancy)
                     .view("jobCandidate-view")
+                    .cacheable(true)
                     .list();
 
             List<JobCandidate> jobCandidatesNotEnded = new ArrayList<>();
@@ -3392,6 +3339,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                                             try {
                                                 iteractionSignEndProcessVacancyClosed = dataManager.load(Iteraction.class)
                                                         .query("select e from itpearls_Iteraction e where e.signEndProcessVacancyClosed = true")
+                                                        .cacheable(true)
                                                         .one();
                                             } catch (IllegalStateException exception) {
                                                 notifications.create(Notifications.NotificationType.ERROR)
@@ -3449,6 +3397,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .query(QUERY)
                 .view("iteractionList-view")
                 .parameter("vacancy", columnGeneratorEvent.getItem())
+                .cacheable(true)
                 .list().size();
 
         labelRet.setWidthAuto();
@@ -3518,7 +3467,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return style_table_wordwrap;
     }
 
-
     private HBoxLayout setSubscribersRecruters(OpenPosition openPosition) {
         final String QUERY_SUBSCRIBERS = "select e from itpearls_RecrutiesTasks e where e.endDate >= :currentDate and e.openPosition = :openPosition";
 
@@ -3529,6 +3477,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .parameter("openPosition", openPosition)
                 .parameter("currentDate", new Date())
                 .view("recrutiesTasks-view")
+                .cacheable(true)
                 .list();
 
         for (RecrutiesTasks user : tasks) {
@@ -3553,7 +3502,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return recrutersHBox;
     }
 
-    @Install(to = "openPositionsTable.candidateSendedColumn", subject = "columnGenerator")
+/*    @Install(to = "openPositionsTable.candidateSendedColumn", subject = "columnGenerator")
     private Object openPositionsTableCandidateSendedColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout hBoxLayout = uiComponents.create(HBoxLayout.class);
 
@@ -3572,7 +3521,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         hBoxLayout.add(retButton);
         return hBoxLayout;
-    }
+    } */
 
     private HBoxLayout setCenteredCell(String value, String style) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);

@@ -1,5 +1,6 @@
 package com.company.itpearls.entity;
 
+import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
 import com.haulmont.cuba.core.entity.annotation.LookupType;
@@ -10,6 +11,7 @@ import javax.persistence.*;
 
 @Table(name = "ITPEARLS_SIGN_ICONS")
 @Entity(name = "itpearls_SignIcons")
+@NamePattern("%s / %s|iconName,titleRu")
 public class SignIcons extends StandardEntity {
     private static final long serialVersionUID = -8240546117640869291L;
 

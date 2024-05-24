@@ -3,6 +3,8 @@ package com.company.itpearls.web.screens.internalemailertemplate;
 import com.company.itpearls.core.EmailGenerationService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.web.screens.internalemailer.InternalEmailerEdit;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.QueryUtils;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -14,6 +16,7 @@ import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.util.List;
 
 @UiController("itpearls_InternalEmailerTemplate.edit")
 @UiDescriptor("internal-emailer-template-edit.xml")
@@ -55,6 +58,10 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
 
     private OpenPosition currentOpenPosition = null;
     private InternalEmailTemplate emailTemplate = null;
+    @Inject
+    private DataManager dataManager;
+    @Inject
+    private SuggestionPickerField<JobCandidate> candidateField;
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
@@ -67,6 +74,37 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
         setOnlyMySubscribeCheckBox();
         setShowSharedTemplatesCheckBox();
         saveEmailTemplate();
+        setCandidateSuggesionField();
+    }
+
+    private void setCandidateSuggesionField() {
+        toEmailField.setSearchExecutor((searchString, searchParams) -> {
+            searchString = QueryUtils.escapeForLike(searchString);
+
+            List<JobCandidate> jobCandidates = dataManager.load(JobCandidate.class)
+                    .query("lower(e.email) like lower(?1) escape '\\'" +
+//                                    "and not e.middleName like '%(не использовать)%' " +
+//                                    "and not (e.blockCandidate = true) " +
+                                    "and LENGTH(e.email) > 0 " +
+                                    "order by e.fullName",
+                            "%" + searchString + "%").list();
+
+            return jobCandidates;
+        });
+
+        candidateField.setSearchExecutor((searchString, searchParams) -> {
+            searchString = QueryUtils.escapeForLike(searchString);
+
+            List<JobCandidate> jobCandidates = dataManager.load(JobCandidate.class)
+                    .query("lower(e.fullName) like lower(?1) escape '\\'" +
+//                                    "and not e.middleName like '%(не использовать)%' " +
+//                                    "and not (e.blockCandidate = true) " +
+                                    "and LENGTH(e.email) > 0 " +
+                                    "order by e.fullName",
+                            "%" + searchString + "%").list();
+
+            return jobCandidates;
+        });
     }
 
     private void saveEmailTemplate() {
