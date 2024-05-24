@@ -87,7 +87,9 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
 //                                    "and not (e.blockCandidate = true) " +
                                     "and LENGTH(e.email) > 0 " +
                                     "order by e.fullName",
-                            "%" + searchString + "%").list();
+                            "%" + searchString + "%")
+                    .cacheable(true)
+                    .list();
 
             return jobCandidates;
         });
@@ -101,7 +103,9 @@ public class InternalEmailerTemplateEdit extends InternalEmailerEdit<InternalEma
 //                                    "and not (e.blockCandidate = true) " +
                                     "and LENGTH(e.email) > 0 " +
                                     "order by e.fullName",
-                            "%" + searchString + "%").list();
+                            "%" + searchString + "%")
+                    .cacheable(true)
+                    .list();
 
             return jobCandidates;
         });

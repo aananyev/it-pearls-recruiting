@@ -315,6 +315,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
             openPosition = dataManager.load(OpenPosition.class)
                     .query(QUERY_GET_DEFAULT_OPEN_POSITION)
                     .view("openPosition-view")
+                    .cacheable(true)
                     .one();
         } catch (NullPointerException e) {
             log.error("Error", e);
@@ -336,6 +337,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
             retInteraction = dataManager.load(Iteraction.class)
                     .query(QUERY_GET_INTERACTION_SIGN_EMAIL_SEND)
                     .view("iteraction-view")
+                    .cacheable(true)
                     .one();
         } catch (NullPointerException e) {
             log.error("Error", e);
