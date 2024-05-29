@@ -31,14 +31,14 @@
             <collection id="departmentOfCompanyDc" property="departmentOfCompany"/>
         </instance>
         <collection id="companyOwnershipsDc" class="com.company.itpearls.entity.Ownershup" view="_minimal">
-            <loader id="companyOwnershipsLc">
+            <loader id="companyOwnershipsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Ownershup e]]>
                 </query>
             </loader>
         </collection>
         <collection id="companyDirectorsDc" class="com.company.itpearls.entity.Person" view="_minimal">
-            <loader id="companyDirectorsLc">
+            <loader id="companyDirectorsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Person e]]>
                 </query>
@@ -46,23 +46,25 @@
         </collection>
         <collection id="companyGroupDc"
                     class="com.company.itpearls.entity.CompanyGroup"
-                    view="companyGroup-view"/>
+                    view="companyGroup-view">
+            <loader cacheable="true"/>
+        </collection>
         <collection id="cityOfCompaniesDc" class="com.company.itpearls.entity.City" view="city-view">
-            <loader id="cityOfCompaniesLc">
+            <loader id="cityOfCompaniesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_City e]]>
                 </query>
             </loader>
         </collection>
         <collection id="regionOfCompaniesDc" class="com.company.itpearls.entity.Region" view="region-view">
-            <loader id="regionOfCompaniesLc">
+            <loader id="regionOfCompaniesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Region e]]>
                 </query>
             </loader>
         </collection>
         <collection id="countryOfCompaniesDc" class="com.company.itpearls.entity.Country" view="_minimal">
-            <loader id="countryOfCompaniesLc">
+            <loader id="countryOfCompaniesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Country e]]>
                 </query>

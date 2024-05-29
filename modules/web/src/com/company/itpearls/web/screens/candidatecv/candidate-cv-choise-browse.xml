@@ -8,7 +8,7 @@
         <collection id="candidateCVsDc"
                     class="com.company.itpearls.entity.CandidateCV"
                     view="_local">
-            <loader id="candidateCVsDl">
+            <loader id="candidateCVsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_CandidateCV e]]>
                     <condition>

@@ -22,7 +22,7 @@ public class MemoForCandidatesBean {
     public void runReport(){
         LoadContext<Report> loadContext = LoadContext.create(Report.class)
                 .setQuery(LoadContext
-                        .createQuery("select p from report$Report p where p.code = 'memoForCandidates'"))
+                        .createQuery("select p from report$Report p where p.code = 'memoForCandidates'").setCacheable(true))
                 .setView("report.edit");
         Report report = dataManager.load(loadContext);
         FrameOwner window = App.getInstance().getTopLevelWindow().getFrameOwner();

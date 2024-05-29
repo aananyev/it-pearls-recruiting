@@ -100,16 +100,19 @@ public class ResearchingDiagramms extends ScreenFragment {
                 .query(QUERY_GET_ITERACTIONS)
                 .parameter("iteractionName", iteractionName + "%")
                 .view("_minimal")
+                .cacheable(true)
                 .list();
         List<Iteraction> iteractionsExternalInterview = dataManager.load(Iteraction.class)
                 .query(QUERY_GET_ITERACTIONS)
                 .parameter("iteractionName", externalInterview)
                 .view("_minimal")
+                .cacheable(true)
                 .list();
         List<Iteraction> iteractionsInternalInterview = dataManager.load(Iteraction.class)
                 .query(QUERY_GET_ITERACTIONS)
                 .parameter("iteractionName", internalInterview)
                 .view("_minimal")
+                .cacheable(true)
                 .list();
 
         do {
@@ -165,6 +168,7 @@ public class ResearchingDiagramms extends ScreenFragment {
                      .parameter("iteractionType", iteraction)
                      .parameter("startDate", startDate)
                      .parameter("endDate", endDate)
+                     .cacheable(true)
                      .list();
 
              retInt = iteractionLists.size();

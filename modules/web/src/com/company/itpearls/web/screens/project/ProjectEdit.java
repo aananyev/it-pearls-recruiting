@@ -252,6 +252,7 @@ public class ProjectEdit extends StandardEditor<Project> {
         openPositions = dataManager.load(OpenPosition.class)
                 .query(positionsQuery)
                 .parameter("projectName", getEditedEntity())
+                .cacheable(true)
                 .list();
     }
 

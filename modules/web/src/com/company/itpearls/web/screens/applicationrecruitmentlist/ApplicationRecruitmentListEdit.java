@@ -111,7 +111,7 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
             if (PersistenceHelper.isNew(getEditedEntity())) {
 
                 LoadContext staffTable = LoadContext.create(StaffingTable.class)
-                        .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE_RESULT.toString()));
+                        .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE_RESULT.toString()).setCacheable(true));
                 List<StaffingTable> staffingTable = dataManager.loadList(staffTable);
 
                 dataContext.create(ApplicationRecruitment.class);
@@ -122,7 +122,7 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
                 for (StaffingTable st : staffingTable) {
                     LoadContext staffCurrent = LoadContext.create(StaffCurrent.class)
                             .setQuery(LoadContext.createQuery(QUERY_STAFF_CURRENT)
-                                    .setParameter("staffingTable", st))
+                                    .setParameter("staffingTable", st).setCacheable(true))
                             .setView("staffCurrent-view");
 
                     List<StaffCurrent> staffCurrents = dataManager.loadList(staffCurrent);
@@ -272,7 +272,7 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
 
                     LoadContext staffTable = LoadContext.create(StaffingTable.class)
                             .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE.toString())
-                                    .setParameter("projectName", projectLookupPickerField.getValue()));
+                                    .setParameter("projectName", projectLookupPickerField.getValue()).setCacheable(true));
                     List<StaffingTable> staffingTable = dataManager.loadList(staffTable);
 
                     dataContext.create(ApplicationRecruitment.class);
@@ -284,7 +284,8 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
                         LoadContext staffCurrent = LoadContext.create(StaffCurrent.class)
                                 .setQuery(LoadContext.createQuery(QUERY_STAFF_CURRENT)
                                         .setParameter("staffingTable", st)
-                                        .setParameter("projectName", projectLookupPickerField.getValue()))
+                                        .setParameter("projectName", projectLookupPickerField.getValue())
+                                        .setCacheable(true))
                                 .setView("staffCurrent-view");
 
                         List<StaffCurrent> staffCurrents = dataManager.loadList(staffCurrent);
@@ -353,7 +354,8 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
 
                     LoadContext staffTable = LoadContext.create(StaffingTable.class)
                             .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE)
-                                    .setParameter("projectDepartment", projectDepartmentLookupPicketField.getValue()));
+                                    .setParameter("projectDepartment", projectDepartmentLookupPicketField.getValue())
+                                    .setCacheable(true));
                     List<StaffingTable> staffingTable = dataManager.loadList(staffTable);
 
                     dataContext.create(ApplicationRecruitment.class);
@@ -365,7 +367,8 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
                         LoadContext staffCurrent = LoadContext.create(StaffCurrent.class)
                                 .setQuery(LoadContext.createQuery(QUERY_STAFF_CURRENT)
                                         .setParameter("staffingTable", st)
-                                        .setParameter("projectDepartment", projectDepartmentLookupPicketField.getValue()))
+                                        .setParameter("projectDepartment", projectDepartmentLookupPicketField.getValue())
+                                        .setCacheable(true))
                                 .setView("staffCurrent-view");
 
                         List<StaffCurrent> staffCurrents = dataManager.loadList(staffCurrent);
@@ -434,7 +437,7 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
 
                     LoadContext staffTable = LoadContext.create(StaffingTable.class)
                             .setQuery(LoadContext.createQuery(QUERY_STAFFING_TABLE)
-                                    .setParameter("companyName", companyLookupPickerField.getValue()));
+                                    .setParameter("companyName", companyLookupPickerField.getValue()).setCacheable(true));
                     List<StaffingTable> staffingTable = dataManager.loadList(staffTable);
 
                     dataContext.create(ApplicationRecruitment.class);
@@ -446,7 +449,8 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
                         LoadContext staffCurrent = LoadContext.create(StaffCurrent.class)
                                 .setQuery(LoadContext.createQuery(QUERY_STAFF_CURRENT)
                                         .setParameter("staffingTable", st)
-                                        .setParameter("companyName", companyLookupPickerField.getValue()))
+                                        .setParameter("companyName", companyLookupPickerField.getValue())
+                                        .setCacheable(true))
                                 .setView("staffCurrent-view");
 
                         List<StaffCurrent> staffCurrents = dataManager.loadList(staffCurrent);

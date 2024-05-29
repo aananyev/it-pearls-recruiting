@@ -99,6 +99,10 @@ configure(globalModule) {
         compile 'org.telegram:telegrambots:5.5.0'
         compile 'org.telegram:telegrambotsextensions:5.5.0'
         compile 'org.apache.commons:commons-lang3:3.12.0'
+        compile 'com.google.api-client:google-api-client:2.5.1'
+        compile 'com.google.oauth-client:google-oauth-client-jetty:1.36.0'
+        compile 'com.google.http-client:google-http-client-jackson2:1.44.2'
+        compile 'com.google.apis:google-api-services-calendar:v3-rev411-1.25.0'
     }
 
     entitiesEnhancing {

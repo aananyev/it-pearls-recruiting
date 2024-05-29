@@ -177,7 +177,7 @@
         </collection>
         <collection id="citiesDc" class="com.company.itpearls.entity.City">
             <view extends="city-view"/>
-            <loader id="citiesDl" cacheable="false">
+            <loader id="citiesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_City e order by e.cityRuName]]>
                 </query>
@@ -581,7 +581,7 @@
                     <grid id="tabCabdidateGrid"
                           height="100%"
                           spacing="true">
-                        <columns count="2"/>
+                        <columns count="3"/>
                         <rows>
                             <row>
                                 <suggestionField id="firstNameField"
@@ -616,6 +616,26 @@
                                         <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                     </actions>
                                 </lookupPickerField>
+                                <suggestionPickerField id="currentCompanySuggestionField"
+                                                       asyncSearchDelayMs="1000"
+                                                 dataContainer="jobCandidateDc"
+                                                 property="currentCompany"
+                                                 width="100%"
+                                                 caption="msg://msgCompany"
+                                                 rowspan="1"
+                                                 colspan="1"
+                                                 minSearchStringLength="3"
+                                                 required="true"
+                                                 editable="true"
+                                                 inputPrompt="msg://msgPressEnter">
+                                    <query entityClass="com.company.itpearls.entity.Company"
+                                           escapeValueForLike="false"
+                                           view="_local"
+                                           searchStringFormat="%$searchString%">
+                                        select e.comanyName from itpearls_Company e where lower(e.comanyName) like
+                                        lower(:searchString) escape '\'
+                                    </query>
+                                </suggestionPickerField>
                             </row>
                             <row>
                                 <suggestionField id="middleNameField"

@@ -1080,33 +1080,39 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     public void generateCVButtonInvoke() {
+        if (flagModificationWorkPlaces) {
+            dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                    .withMessage(messageBundle.getMessage("msgSaveResume"))
+                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                        generateCV();
+                    }), new DialogAction(DialogAction.Type.NO))
+                    .show();
+        } else {
+            generateCV();
+        }
+    }
+
+    private void generateCV() {
         StringBuilder sb = new StringBuilder();
         String QUERY_REPORT = "select p from report$Report p where p.code = '%s'";
         Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("candidateCV", getEditedEntity());
 
-        if (flagModificationWorkPlaces) {
-            dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
-                    .withMessage(messageBundle.getMessage("msgSaveResume"))
-                    .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
-                        if (candidateCVFieldOpenPosition.getValue() != null) {
-                            sb.append(String.format(QUERY_REPORT,
-                                    (candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() != null
-                                            ? candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() : openPositionService.getStdResumeName())));
-                        } else {
-                            sb.append(String.format(QUERY_REPORT, openPositionService.getStdResumeName()));
-                        }
-
-                        LoadContext<Report> loadContext = LoadContext.create(Report.class)
-                                .setQuery(LoadContext
-                                        .createQuery(sb.toString()))
-                                .setView("report.edit");
-
-                        Report report = dataManager.load(loadContext);
-                        Report report1 = reportService.getReport(sb.toString());
-                        reportGuiManager.printReport(report, reportParams);
-                    }), new DialogAction(DialogAction.Type.NO))
-                    .show();
+        if (candidateCVFieldOpenPosition.getValue() != null) {
+            sb.append(String.format(QUERY_REPORT,
+                    (candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() != null
+                            ? candidateCVFieldOpenPosition.getValue().getTemplateCVSytemCode() : openPositionService.getStdResumeName())));
+        } else {
+            sb.append(String.format(QUERY_REPORT, openPositionService.getStdResumeName()));
         }
+
+        LoadContext<Report> loadContext = LoadContext.create(Report.class)
+                .setQuery(LoadContext
+                        .createQuery(sb.toString()).setCacheable(true))
+                .setView("report.edit");
+
+        Report report = dataManager.load(loadContext);
+//        Report report1 = reportService.getReport(sb.toString());
+        reportGuiManager.printReport(report, reportParams);
     }
 }

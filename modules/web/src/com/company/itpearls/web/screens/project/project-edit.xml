@@ -36,7 +36,7 @@
                     </property>
                 </property>
             </view>
-            <loader id="projectTreeDl">
+            <loader id="projectTreeDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_Project e
                         where not (e.projectIsClosed = true) and
                         e.projectName not like '%(не использовать)'
@@ -50,7 +50,7 @@
                     <property name="fileCompanyLogo" view="_local"/>
                 </property>
             </view>
-            <loader id="projectDepartmentsLc">
+            <loader id="projectDepartmentsLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_CompanyDepartament e
                                         where e.departamentRuName not like '%(не использовать)'
                                         order by e.departamentRuName]]></query>
@@ -59,7 +59,7 @@
         <collection id="projectOwnersDc"
                     class="com.company.itpearls.entity.Person"
                     view="person-view">
-            <loader id="projectOwnersLc">
+            <loader id="projectOwnersLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Person e
                                         order by e.secondName, e.firstName]]></query>
             </loader>

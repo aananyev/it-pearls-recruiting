@@ -7,7 +7,7 @@
         <collection id="citiesDc"
                     class="com.company.itpearls.entity.City"
                     view="city-view">
-            <loader id="citiesDl">
+            <loader id="citiesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_City e
 order by e.cityRuName]]>

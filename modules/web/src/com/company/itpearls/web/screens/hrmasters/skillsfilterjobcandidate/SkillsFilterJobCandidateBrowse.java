@@ -398,6 +398,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 .query(QUERY_SKILL_TREE_ITEM)
                 .parameter("skillGroup", skillTreeGroup)
                 .view("skillTree-view")
+                .cacheable(true)
                 .list();
 
         FlowBoxLayout flowBoxLayoutLeft = setFlowBoxLayout();
@@ -592,6 +593,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         return dataManager.load(SkillTree.class)
                 .query(QUERY_SKILL_TREE_GROUP)
                 .view("skillTree-view")
+                .cacheable(true)
                 .list();
     }
 
@@ -1433,6 +1435,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     .parameter("reacrutier", (ExtUser) userSession.getUser())
                     .parameter("openPosition", selectedOpenPosition)
                     .view("recrutiesTasks-view")
+                    .cacheable(true)
                     .list();
             if (recrutiesTasks.size() > 0 || loadFromVacancyLabel.getValue() == null) {
                 try {
@@ -1441,6 +1444,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                             .view("personelReserve-view")
                             .parameter("jobCandidate", jobCandidate)
                             .parameter("currDate", new Date())
+                            .cacheable(true)
                             .one();
                 } catch (IllegalStateException e) {
                     personelReserveCheck = null;
@@ -1735,6 +1739,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                         .query(QUERY_LOAD_SKILLS_FILTER_LAST_SELECTION)
                         .parameter("user", (ExtUser) userSession.getUser())
                         .view("skillsFilterLastSelection-view")
+                        .cacheable(true)
                         .list();
 
         for (SkillsFilterLastSelection sfls : skillsFilterLastSelection) {
@@ -1765,6 +1770,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                             .query(QUERY_LOAD_SKILLS_FILTER_LAST_SELECTION)
                             .parameter("user", (ExtUser) userSession.getUser())
                             .view("skillsFilterLastSelection-view")
+                            .cacheable(true)
                             .list();
         } catch (Exception e) {
             e.printStackTrace();
@@ -1835,6 +1841,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 .query(QUERY_LOAD_SKILLS_FILTER_LAST_SELECTION)
                 .parameter("user", (ExtUser) userSession.getUser())
                 .view("skillsFilterLastSelection-view")
+                .cacheable(true)
                 .list().size() > 0) {
             foundLastSelection = true;
             menuButton.getAction("loadLast").setEnabled(true);

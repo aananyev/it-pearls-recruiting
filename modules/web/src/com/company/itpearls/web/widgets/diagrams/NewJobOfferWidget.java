@@ -51,6 +51,7 @@ public class NewJobOfferWidget extends ScreenFragment {
                 .parameter("endDate", new Date())
                 .parameter("startDate", gregorianCalendar.getTime())
                 .view("iteractionList-view")
+                        .cacheable(true)
                 .list()
                 .size());
 

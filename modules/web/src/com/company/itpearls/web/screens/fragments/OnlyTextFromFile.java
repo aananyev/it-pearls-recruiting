@@ -11,7 +11,6 @@ import com.haulmont.cuba.gui.components.UploadField;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
-import com.company.itpearls.web.screens.fragments.Onlytext;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import org.apache.pdfbox.io.RandomAccessRead;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;

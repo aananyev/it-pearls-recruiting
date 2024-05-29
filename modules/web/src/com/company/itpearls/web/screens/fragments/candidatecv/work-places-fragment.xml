@@ -5,7 +5,7 @@
         <collection id="positionDc"
                     class="com.company.itpearls.entity.Position"
                     view="position-view">
-            <loader id="positionDl">
+            <loader id="positionDl" cacheable="true">
                 <query>
                     <![CDATA[select f from itpearls_Position f order by f.positionRuName]]>
                 </query>

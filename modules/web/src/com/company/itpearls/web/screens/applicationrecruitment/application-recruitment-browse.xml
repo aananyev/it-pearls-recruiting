@@ -20,7 +20,7 @@
                 </property>
                 <property name="createTs"/>
             </view>
-            <loader id="applicationRecruitmentsDl">
+            <loader id="applicationRecruitmentsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_ApplicationRecruitment e where e.code is not null and e.code not like '']]>
                 </query>

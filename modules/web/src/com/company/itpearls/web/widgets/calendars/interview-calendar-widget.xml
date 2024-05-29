@@ -3,7 +3,7 @@
     <data>
         <collection id="calendarDataDc" class="com.company.itpearls.entity.IteractionList"
                     view="iteractionList-view">
-            <loader id="calendarDataDl">
+            <loader id="calendarDataDl" cacheable="true">
                 <query>
                     select e from itpearls_IteractionList e where e.addDate is not null order by e.addDate DESC
                 </query>

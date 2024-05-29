@@ -17,7 +17,7 @@
                 </property>
                 <property name="owner" view="_local"/>
             </view>
-            <loader id="candidateCVsDl">
+            <loader id="candidateCVsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_CandidateCV e]]>
                     <condition>

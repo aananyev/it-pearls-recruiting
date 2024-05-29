@@ -22,7 +22,8 @@ public class GenerateCVBean {
     public void runReport(){
         LoadContext<Report> loadContext = LoadContext.create(Report.class)
                 .setQuery(LoadContext
-                        .createQuery("select p from report$Report p where p.code = 'generateCV'"))
+                        .createQuery("select p from report$Report p where p.code = 'generateCV'")
+                        .setCacheable(true))
                 .setView("report.edit");
         Report report = dataManager.load(loadContext);
         FrameOwner window = App.getInstance().getTopLevelWindow().getFrameOwner();

@@ -4,7 +4,6 @@ import com.company.itpearls.entity.CandidateCV;
 import com.company.itpearls.web.screens.SelectedCloseAction;
 import com.company.itpearls.web.screens.candidatecv.SelectRenderedImagesFromList;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.gui.Notifications;
@@ -43,8 +42,6 @@ public class OnlyTextPersonPositionLoadPdf extends OnlyTextPersonPosition {
     private FileUploadingAPI fileUploadingAPI;
     @Inject
     private FileUploadField uploadField;
-    @Inject
-    private DataManager dataManager;
 
     private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";

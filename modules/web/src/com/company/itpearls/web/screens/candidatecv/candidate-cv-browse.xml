@@ -26,7 +26,7 @@
                     <property name="fileImageFace" view="_local"/>
                 </property>
             </view>
-            <loader id="candidateCVsDl">
+            <loader id="candidateCVsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_CandidateCV e order by e.candidate.fullName, e.datePost desc]]>
                     <condition>

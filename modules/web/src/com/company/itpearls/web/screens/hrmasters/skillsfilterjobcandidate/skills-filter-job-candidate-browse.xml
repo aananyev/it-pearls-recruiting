@@ -69,7 +69,7 @@
                     class="com.company.itpearls.entity.Position">
             <view extends="position-view">
             </view>
-            <loader id="positionTypesLc">
+            <loader id="positionTypesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Position e
                     where e.positionRuName not like '%(не использовать)%'

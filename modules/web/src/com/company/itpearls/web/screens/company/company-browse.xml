@@ -8,7 +8,7 @@
         <collection id="companiesDc"
                     class="com.company.itpearls.entity.Company"
                     view="company-view">
-            <loader id="companiesDl">
+            <loader id="companiesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Company e
 order by e.comanyName]]>

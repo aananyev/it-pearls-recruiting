@@ -114,6 +114,7 @@ public class RecrutersLeadersWidget extends ScreenFragment {
         List<ExtUser> employees = dataManager.load(ExtUser.class)
                 .query(QUERY_GET_RECRUTERS_LIST)
                 .view("extUser-view")
+                .cacheable(true)
                 .list();
 
         for (ExtUser emloyee : employees) {

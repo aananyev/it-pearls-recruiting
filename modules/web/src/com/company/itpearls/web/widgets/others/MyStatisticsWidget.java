@@ -66,6 +66,7 @@ public class MyStatisticsWidget extends ScreenFragment {
                         .query(query)
                         .parameter("recrutier", userSession.getUser())
                         .view("iteractionList-view")
+                                .cacheable(true)
                         .list()
                         .size()));
     }
@@ -80,6 +81,7 @@ public class MyStatisticsWidget extends ScreenFragment {
                         .query(query)
                         .parameter("recrutier", userSession.getUser())
                         .view("iteractionList-view")
+                                .cacheable(true)
                         .list()
                         .size()));
     }

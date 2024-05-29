@@ -10,7 +10,7 @@
             <loader/>
         </instance>
         <collection id="cityRegionsDc" class="com.company.itpearls.entity.Region" view="_minimal">
-            <loader id="cityRegionsLc">
+            <loader id="cityRegionsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Region e]]>
                 </query>

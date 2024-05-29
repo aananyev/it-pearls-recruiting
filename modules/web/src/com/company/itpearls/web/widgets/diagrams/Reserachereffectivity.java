@@ -133,6 +133,7 @@ public class Reserachereffectivity extends ScreenFragment {
                                         .parameter("user", a)
                                         .parameter("startDate", startDate)
                                         .parameter("endDate", endDate)
+                                        .cacheable(true)
                                         .list()
                                         .size();
 
@@ -142,6 +143,7 @@ public class Reserachereffectivity extends ScreenFragment {
                                         .parameter("user", a)
                                         .parameter("startDate", firsDayOfWeek.getTime())
                                         .parameter("endDate", today.getTime())
+                                        .cacheable(true)
                                         .list()
                                         .size();
                             } else {
@@ -152,6 +154,7 @@ public class Reserachereffectivity extends ScreenFragment {
                                         .parameter("iteractionName", iteractionName)
                                         .parameter("startDate", startDate)
                                         .parameter("endDate", endDate)
+                                        .cacheable(true)
                                         .list()
                                         .size();
 
@@ -163,6 +166,7 @@ public class Reserachereffectivity extends ScreenFragment {
                                         .parameter("iteractionName", iteractionName)
                                         .parameter("startDate", firsDayOfWeek.getTime())
                                         .parameter("endDate", today.getTime())
+                                        .cacheable(true)
                                         .list()
                                         .size();
                             }
@@ -224,6 +228,7 @@ public class Reserachereffectivity extends ScreenFragment {
         Role s = dataManager.load(Role.class)
                 .query("select e from sec$Role e where e.name like :roleName")
                 .parameter("roleName", role)
+                .cacheable(true)
                 .one();
 
         if (role != null) {

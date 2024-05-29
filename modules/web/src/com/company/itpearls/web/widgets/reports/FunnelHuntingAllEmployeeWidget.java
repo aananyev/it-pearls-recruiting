@@ -89,7 +89,8 @@ public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
                         "e.name not like \'Anonymous\' and " +
                         "e.name not like \'%Test%\' and " +
                         "e.name not like \'Administrator\' " +
-                        "order by e.name"))
+                        "order by e.name")
+                        .setCacheable(true))
                 .setView("extUser-view");
 
         reaearchers = dataManager.loadList(loadContext);

@@ -24,6 +24,7 @@ public class InteractionServiceBean implements InteractionService {
             iteraction = dataManager.load(Iteraction.class)
                     .query("select e from itpearls_Iteraction e where e.iteractionName like 'Default'")
                     .view("iteraction-view")
+                    .cacheable(true)
                     .one();
         } catch (NullPointerException e) {
             e.printStackTrace();

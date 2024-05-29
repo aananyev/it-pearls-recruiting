@@ -67,6 +67,7 @@ public class OpenPositionServiceBean implements OpenPositionService {
             openPositions = dataManager.load(OpenPosition.class)
                     .query("select e from itpearls_OpenPosition e where not (e.openClose = true)")
                     .view("openPosition-view")
+                    .cacheable(true)
                     .list();
         } finally {
             authentication.end();
@@ -151,6 +152,7 @@ public class OpenPositionServiceBean implements OpenPositionService {
                     .query("select e from itpearls_OpenPosition e where e.vacansyName like \':defaultOpenPositionName\'")
                     .parameter("defaultOpenPositionName", DEFAULT_OPEN_POSITION)
                     .view("openPosition-view")
+                    .cacheable(true)
                     .one();
         } catch (Exception e) {
             e.printStackTrace();

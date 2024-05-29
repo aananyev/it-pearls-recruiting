@@ -7,7 +7,7 @@
         <collection id="fileTypesDc"
                     class="com.company.itpearls.entity.FileType"
                     view="_local">
-            <loader id="fileTypesDl">
+            <loader id="fileTypesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_FileType e]]>
                 </query>

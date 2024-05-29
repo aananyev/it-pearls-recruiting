@@ -16,7 +16,7 @@
                 </property>
                 <property name="company" view="_local"/>
             </view>
-            <loader id="applicationRecruitmentListsDl">
+            <loader id="applicationRecruitmentListsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_ApplicationRecruitmentList e where e.code is not null and e.code not like '']]>
                 </query>

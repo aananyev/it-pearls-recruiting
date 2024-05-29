@@ -23,7 +23,7 @@
             <collection id="companyDepartamentProjectOfDepartmentsDc" property="projectOfDepartment"/>
         </instance>
         <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_local">
-            <loader id="companyNamesLc">
+            <loader id="companyNamesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e
                 where not e.comanyName like '%(не использовать%' and not e.companyShortName like '%(не использовать%'
                 order by e.comanyName]]></query>
@@ -35,7 +35,7 @@
                 <property name="personPosition"
                           view="_local"/>
             </view>
-            <loader id="departamentHrDirectorsLc">
+            <loader id="departamentHrDirectorsLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Person e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
@@ -45,7 +45,7 @@
                 <property name="personPosition"
                           view="_local"/>
             </view>
-            <loader id="departamentDirectorsLc">
+            <loader id="departamentDirectorsLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Person e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>

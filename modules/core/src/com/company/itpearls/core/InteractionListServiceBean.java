@@ -36,7 +36,7 @@ public class InteractionListServiceBean implements InteractionListService {
             e = dataManager.load(IteractionList.class)
                     .query(QUERY_GET_MAX_NUMBER_INTERACTION)
                     .view("iteractionList-view")
-//                    .cacheable(true)
+                    .cacheable(true)
                     .one();
         } catch (IllegalStateException exception) {
             exception.printStackTrace();

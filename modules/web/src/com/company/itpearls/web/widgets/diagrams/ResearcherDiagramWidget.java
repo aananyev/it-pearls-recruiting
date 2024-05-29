@@ -35,7 +35,7 @@ public class ResearcherDiagramWidget extends ScreenFragment {
     private String ITRKT_PREPARE_TECH_INTERVIEW = "Прошел техническое собеседование";
     private String ITRKT_PREPARE_DIRECTOR_INTERVIEW = "Прошел собеседование с Директором";
 
-    List<GraphTable>    tableGraph = new ArrayList<>();
+    List<GraphTable> tableGraph = new ArrayList<>();
 
     @WidgetParam
     @WindowParam
@@ -55,7 +55,7 @@ public class ResearcherDiagramWidget extends ScreenFragment {
     }
 
     private void setGraphs() {
-        for(GraphTable a : tableGraph ) {
+        for (GraphTable a : tableGraph) {
             com.haulmont.charts.gui.amcharts.model.Graph graph = new com.haulmont.charts.gui.amcharts.model.Graph();
             graph.setType(GraphType.LINE);
             graph.setDescriptionField(a.getGraphName());
@@ -66,10 +66,10 @@ public class ResearcherDiagramWidget extends ScreenFragment {
     }
 
     class GraphTable {
-        String  graphName;
-        String  dataFieldName;
-        String  graphColor;
-        String  query;
+        String graphName;
+        String dataFieldName;
+        String graphColor;
+        String query;
 
         GraphTable(String graphName, String graphColor, String dataFieldName, String query) {
             put(graphName, graphColor, dataFieldName, query);
@@ -117,13 +117,13 @@ public class ResearcherDiagramWidget extends ScreenFragment {
     }
 
     private void setInitHasTable() {
-       tableGraph.add(new GraphTable("new-contacts","YELLOW", "new_contacts", ITRKT_NEW_CONTACT));
-       tableGraph.add(new GraphTable("propose-job", "YELLOW", "propose_job", ITRKT_PROPOSE_JOB));
-       tableGraph.add(new GraphTable("assign-internal-interview", "GREEN", "assign_internal_interview", ITRKT_ASSIGN_ITPEARKS_INTERVIEW));
-       tableGraph.add(new GraphTable("prepare-internal-interview", "GREEN", "prepare_internal_interview", ITRKT_PREPARE_ITPEARKS_INTERVIEW));
-       tableGraph.add(new GraphTable("assign-tech-interview", "GREEN", "assign_tech_interview", ITRKT_ASSIGN_TECH_INTERVIEW));
-       tableGraph.add(new GraphTable("prepare-tech-interview", "GREEN", "prepare_tech_interview", ITRKT_PREPARE_TECH_INTERVIEW));
-       tableGraph.add(new GraphTable("prepare-director-interview", "GREEN", "prepare_director_interview", ITRKT_PREPARE_DIRECTOR_INTERVIEW));
+        tableGraph.add(new GraphTable("new-contacts", "YELLOW", "new_contacts", ITRKT_NEW_CONTACT));
+        tableGraph.add(new GraphTable("propose-job", "YELLOW", "propose_job", ITRKT_PROPOSE_JOB));
+        tableGraph.add(new GraphTable("assign-internal-interview", "GREEN", "assign_internal_interview", ITRKT_ASSIGN_ITPEARKS_INTERVIEW));
+        tableGraph.add(new GraphTable("prepare-internal-interview", "GREEN", "prepare_internal_interview", ITRKT_PREPARE_ITPEARKS_INTERVIEW));
+        tableGraph.add(new GraphTable("assign-tech-interview", "GREEN", "assign_tech_interview", ITRKT_ASSIGN_TECH_INTERVIEW));
+        tableGraph.add(new GraphTable("prepare-tech-interview", "GREEN", "prepare_tech_interview", ITRKT_PREPARE_TECH_INTERVIEW));
+        tableGraph.add(new GraphTable("prepare-director-interview", "GREEN", "prepare_director_interview", ITRKT_PREPARE_DIRECTOR_INTERVIEW));
     }
 
     private void setValueDiagramData() {
@@ -153,18 +153,19 @@ public class ResearcherDiagramWidget extends ScreenFragment {
         do {
             GregorianCalendar calendar = new GregorianCalendar();
             calendar.setTime(d);
-            calendar.add(Calendar.DAY_OF_MONTH,1);
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
 
             Date endDay = calendar.getTime();
             d = calendar.getTime();
 
             MapDataItem dataItem = new MapDataItem();
 
-            for(GraphTable a: tableGraph ) {
+            for (GraphTable a : tableGraph) {
                 List<IteractionList> iteraction = new ArrayList<>();
 
-                LoadContext<IteractionList> loadCont  = LoadContext.create(IteractionList.class)
+                LoadContext<IteractionList> loadCont = LoadContext.create(IteractionList.class)
                         .setQuery(LoadContext.createQuery(a.getQuery())
+                                .setCacheable(true)
                                 .setParameter("startDate", d)
                                 .setParameter("endDate", endDay))
                         .setView("iteractionList-view");

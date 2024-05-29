@@ -41,12 +41,14 @@ public class GetRoleServiceBean implements GetRoleService {
         Role s = dataManager.load(Role.class)
                 .query("select e from sec$Role e where e.name like :roleName")
                 .parameter("roleName", role)
+                .cacheable(true)
                 .one();
 
         UserRole userRole = dataManager.load(UserRole.class)
                 .query("select e from sec$UserRole e where e.user = :user and e.role = :role" )
                 .parameter("user", user)
                 .parameter("role", s)
+                .cacheable(true)
                 .one();
 
         Boolean b = userRole.getRoleName().equals(role);

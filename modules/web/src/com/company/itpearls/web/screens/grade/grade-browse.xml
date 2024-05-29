@@ -8,7 +8,7 @@
         <collection id="gradesDc"
                     class="com.company.itpearls.entity.Grade">
             <view extends="_local"/>
-            <loader id="gradesDl">
+            <loader id="gradesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Grade e]]>
                 </query>

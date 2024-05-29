@@ -331,6 +331,7 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                                             dataManager.load(OpenPosition.class)
                                                     .query("select e from itpearls_OpenPosition e where not e.openClose = true")
                                                     .view("openPosition-view")
+                                                    .cacheable(true)
                                                     .list());
                                     openPositionLookupField.setWidthFull();
                                     openPositionLookupField

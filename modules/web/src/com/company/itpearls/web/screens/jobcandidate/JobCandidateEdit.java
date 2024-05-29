@@ -268,6 +268,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     List<Position> setPos = new ArrayList<>();
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
     IteractionList lastIteraction = null;
+    @Inject
+    private SuggestionPickerField<Company> currentCompanySuggestionField;
 
     @Install(to = "jobCandidateCandidateCvTable.createdBy", subject = "columnGenerator")
     private Component jobCandidateCandidateCvTableCreatedByColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
@@ -751,12 +753,28 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
+    private void setCompanySuggesionField() {
+        currentCompanySuggestionField.setSearchExecutor((searchString, searchParams) -> {
+            searchString = QueryUtils.escapeForLike(searchString);
+
+            List<Company> companies = dataManager.load(Company.class)
+                    .query("lower(e.companyName) like lower(?1) escape '\\'" +
+                                    "order by e.companyName",
+                            "%" + searchString + "%")
+                    .cacheable(true)
+                    .list();
+
+            return companies;
+        });
+    }
+
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         initInteractionCommentDl();
         initPositionTypeField();
         initCurrenCompanyField();
+        setCompanySuggesionField();
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (getEditedEntity().getCandidateCv().isEmpty()) {

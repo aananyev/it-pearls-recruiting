@@ -22,7 +22,8 @@ public class NumberInterviewsRecrutierRunReportBean {
 
     public void runReport(){
         LoadContext<Report> loadContext = LoadContext.create(Report.class)
-                .setQuery(LoadContext.createQuery("select p from report$Report p where p.code = 'numberInterviewsRecrutier'"))
+                .setQuery(LoadContext.createQuery("select p from report$Report p where p.code = 'numberInterviewsRecrutier'")
+                        .setCacheable(true))
                 .setView("report.edit");
 
         Report report = dataManager.load(loadContext);

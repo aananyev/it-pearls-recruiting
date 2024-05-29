@@ -19,7 +19,7 @@ import java.util.List;
 
 @UiController("itpearls_SendEmailCounterWidget")
 @UiDescriptor("send-email-counter-widget.xml")
-@DashboardWidget(name="Send email counter")
+@DashboardWidget(name = "Send email counter")
 public class SendEmailCounterWidget extends ScreenFragment {
 
     @Inject
@@ -50,6 +50,7 @@ public class SendEmailCounterWidget extends ScreenFragment {
                 .parameter("endDate", new Date())
                 .parameter("startDate", gregorianCalendar.getTime())
                 .view("iteractionList-view")
+                .cacheable(true)
                 .list()
                 .size());
 

@@ -18,7 +18,7 @@
                     <property name="fileImageFace" view="_local"/>
                 </property>
             </view>
-            <loader id="projectsDl">
+            <loader id="projectsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Project e
                             order by e.projectIsClosed desc, e.projectName]]>

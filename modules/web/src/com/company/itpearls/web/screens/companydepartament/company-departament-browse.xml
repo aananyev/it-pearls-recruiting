@@ -7,7 +7,7 @@
         <collection id="companyDepartamentsDc"
                     class="com.company.itpearls.entity.CompanyDepartament"
                     view="companyDepartament-view">
-            <loader id="companyDepartamentsDl">
+            <loader id="companyDepartamentsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_CompanyDepartament e
 order by e.departamentRuName]]>

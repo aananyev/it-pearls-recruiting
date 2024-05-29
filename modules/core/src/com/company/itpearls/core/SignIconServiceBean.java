@@ -62,6 +62,7 @@ public class SignIconServiceBean implements SignIconService {
                 .query(QUERY_USER_SIGN_ICONS)
                 .parameter("user", userSessionSource.getUserSession().getUser())
                 .view("signIcons-view")
+                .cacheable(true)
                 .list()
                 .size() == 0) {
             return true;
