@@ -65,8 +65,8 @@
                             select e
                             from itpearls_Company e
                             where (lower(e.comanyName) like lower(:searchString) escape '\'
-                            or lower(e.companyShortName) like lower(:searchString) escape '\')
-                            and e.companyShortName not like '%(не использовать'
+                                or lower(e.companyShortName) like lower(:searchString) escape '\')
+                                and e.companyShortName not like '%(не использовать'
                             order by e.comanyName
                         </query>
                     </suggestionPickerField>

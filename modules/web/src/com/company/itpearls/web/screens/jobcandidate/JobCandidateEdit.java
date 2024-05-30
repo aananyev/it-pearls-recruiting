@@ -4,6 +4,7 @@ import com.company.itpearls.core.*;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
+import com.company.itpearls.web.screens.company.CompanyEdit;
 import com.company.itpearls.web.screens.fragments.Skillsbar;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.openposition.OpenPositionMasterBrowse;
@@ -33,10 +34,12 @@ import com.haulmont.reports.app.service.ReportService;
 import com.haulmont.reports.entity.Report;
 import com.haulmont.reports.gui.ReportGuiManager;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tools.ant.taskdefs.SQLExec;
 import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
+import javax.persistence.Persistence;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -127,8 +130,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private SuggestionField<String> middleNameField;
     @Inject
     private Label<String> positionsLabel;
-    @Inject
-    private LookupPickerField<Company> currentCompanyField;
+//    @Inject
+//    private LookupPickerField<Company> currentCompanyField;
     @Inject
     private LookupPickerField<Position> personPositionField;
     @Inject
@@ -269,7 +272,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
     IteractionList lastIteraction = null;
     @Inject
-    private SuggestionPickerField<Company> currentCompanySuggestionField;
+    private SuggestionPickerField<Company> companySuggestPickerField;
 
     @Install(to = "jobCandidateCandidateCvTable.createdBy", subject = "columnGenerator")
     private Component jobCandidateCandidateCvTableCreatedByColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
@@ -752,29 +755,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             iteractionListFromCandidate = getIteractionListFromCandidate(getEditedEntity());
         }
     }
-
-    private void setCompanySuggesionField() {
-        currentCompanySuggestionField.setSearchExecutor((searchString, searchParams) -> {
-            searchString = QueryUtils.escapeForLike(searchString);
-
-            List<Company> companies = dataManager.load(Company.class)
-                    .query("lower(e.companyName) like lower(?1) escape '\\'" +
-                                    "order by e.companyName",
-                            "%" + searchString + "%")
-                    .cacheable(true)
-                    .list();
-
-            return companies;
-        });
-    }
-
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         initInteractionCommentDl();
         initPositionTypeField();
         initCurrenCompanyField();
-        setCompanySuggesionField();
+//        setCompanySuggesionField();
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (getEditedEntity().getCandidateCv().isEmpty()) {
@@ -823,7 +810,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void initCurrenCompanyField() {
-        currentCompanyField.setOptionImageProvider(this::currentCompanyTypeFieldImageProvider);
+// TO-DO чтото с этим надо делать        currentCompanyField.setOptionImageProvider(this::currentCompanyTypeFieldImageProvider);
     }
 
     @Install(to = "vacancyFilterLookupPickerField", subject = "optionImageProvider")
@@ -1182,7 +1169,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             if (birdhDateField.getValue() != null)         // 1
                 qPercent = ++qPercent;
 
-            if (currentCompanyField.getValue() != null)    // 2
+//            if (currentCompanyField.getValue() != null)    // 2
+//                qPercent = ++qPercent;
+
+            if (companySuggestPickerField.getValue() != null)    // 2
                 qPercent = ++qPercent;
 
             if (emailField.getValue() != null)             // 3
@@ -1395,10 +1385,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private void initTabCandidate() {
         if (!candidateInitialized) {
-            if (currentCompanyField == null) {
+/*            if (currentCompanyField == null) {
                 currentCompanyField = (LookupPickerField<Company>) getWindow()
                         .getComponent("currentCompanyField");
-            }
+            } */
 
             if (personPositionField == null) {
                 personPositionField = (LookupPickerField<Position>) getWindow()
@@ -1769,6 +1759,39 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 secondName.stream()
                         .filter(str -> StringUtils.containsIgnoreCase(str, searchString))
                         .collect(Collectors.toList()));
+    }
+
+/*    @Subscribe("companySuggestPickerField")
+    public void onCompanySuggestPickerFieldValueChange(HasValue.ValueChangeEvent<Company> event) {
+        workPlaceGroupBox.setCaption(groupBoxSetHeader());
+        setProjectImage(event.getValue());
+
+        if (this.candidateCVWorkPlaces != null) {
+            if (event.getValue() != null) {
+                this.candidateCVWorkPlaces.setWorkPlace(event.getValue());
+            }
+        }
+    } */
+
+    @Install(to = "companySuggestPickerField", subject = "enterActionHandler")
+    private void companySuggestPickerFieldEnterActionHandler(String s) {
+        dialogs.createOptionDialog()
+                .withCaption(messageBundle.getMessage("msgWarning"))
+                .withMessage(String.format(messageBundle.getMessage("msgCreateNewCompany"), s))
+                .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
+                        .withHandler(e -> {
+                                screenBuilders.editor(Company.class, this)
+                                        .withOpenMode(OpenMode.DIALOG)
+                                        .withScreenClass(CompanyEdit.class)
+                                        .withInitializer(ev -> ev.setComanyName(s))
+                                        .withParentDataContext(dataContext)
+                                        .withAfterCloseListener(eacl -> {
+                                            companySuggestPickerField.setValue(eacl.getScreen().getEditedEntity());
+                                        })
+                                        .newEntity()
+                                        .show();
+                        }), new DialogAction(DialogAction.Type.NO))
+                .show();
     }
 
     private void addFirstNameSuggestField() {

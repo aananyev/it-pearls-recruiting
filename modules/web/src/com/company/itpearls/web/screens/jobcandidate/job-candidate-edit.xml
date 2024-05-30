@@ -18,7 +18,6 @@
                     <property name="resumePosition" view="_local">
                     </property>
                     <property name="toVacancy" view="_local">
-                        <property name="grade" view="_local"/>
                         <property name="positionType" view="_local"/>
                         <property name="projectName" view="_local">
                             <property name="projectLogo" view="_local"/>
@@ -66,7 +65,7 @@
                 </property>
                 <property name="laborAgreement" view="_local"/>
                 <property name="cityOfResidence" view="_local"/>
-                <property name="currentCompany" view="_local">
+                <property name="currentCompany" view="company-view">
                     <property name="companyGroup" view="_local"/>
                 </property>
                 <property name="fileImageFace" view="_local"/>
@@ -581,7 +580,7 @@
                     <grid id="tabCabdidateGrid"
                           height="100%"
                           spacing="true">
-                        <columns count="3"/>
+                        <columns count="2"/>
                         <rows>
                             <row>
                                 <suggestionField id="firstNameField"
@@ -603,7 +602,7 @@
                                         lower(:searchString) escape '\'
                                     </query>
                                 </suggestionField>
-                                <lookupPickerField id="currentCompanyField"
+<!--                                <lookupPickerField id="currentCompanyField"
                                                    optionsContainer="currentCompaniesDc"
                                                    dataContainer="jobCandidateDc"
                                                    nullOptionVisible="false"
@@ -615,8 +614,30 @@
                                         <action id="lookup" type="picker_lookup"/>
                                         <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                     </actions>
-                                </lookupPickerField>
-                                <suggestionPickerField id="currentCompanySuggestionField"
+                                </lookupPickerField> -->
+                                <suggestionPickerField id="companySuggestPickerField"
+                                                       inputPrompt="msg://msgInputPrompt"
+                                                       width="100%"
+                                                       dataContainer="jobCandidateDc"
+                                                       property="currentCompany"
+                                                       caption="msg://msgCompany"
+                                                       align="TOP_LEFT">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                        <action id="open" type="picker_open"/>
+                                    </actions>
+                                    <query entityClass="com.company.itpearls.entity.Company"
+                                           escapeValueForLike="true"
+                                           searchStringFormat="%$searchString%">
+                                        select e
+                                        from itpearls_Company e
+                                        where (lower(e.comanyName) like lower(:searchString) escape '\'
+                                        or lower(e.companyShortName) like lower(:searchString) escape '\')
+                                        and e.companyShortName not like '%(не использовать'
+                                        order by e.comanyName
+                                    </query>
+                                </suggestionPickerField>
+                                <!-- <suggestionField id="currentCompanySuggestionField"
                                                        asyncSearchDelayMs="1000"
                                                  dataContainer="jobCandidateDc"
                                                  property="currentCompany"
@@ -635,7 +656,7 @@
                                         select e.comanyName from itpearls_Company e where lower(e.comanyName) like
                                         lower(:searchString) escape '\'
                                     </query>
-                                </suggestionPickerField>
+                                </suggestionField> -->
                             </row>
                             <row>
                                 <suggestionField id="middleNameField"

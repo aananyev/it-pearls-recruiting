@@ -196,12 +196,13 @@
         <property name="openPosition" view="_minimal"/>
     </view>
     <view entity="itpearls_Company" name="company-view" extends="_local">
-        <property name="companyOwnership" view="_minimal"/>
-        <property name="departmentOfCompany" view="_minimal">
+        <property name="companyOwnership" view="_local"/>
+        <property name="departmentOfCompany" view="_local">
+            <property name="companyName" view="_local"/>
         </property>
-        <property name="cityOfCompany" view="_minimal"/>
-        <property name="regionOfCompany" view="_minimal"/>
-        <property name="countryOfCompany" view="_minimal"/>
+        <property name="cityOfCompany" view="_local"/>
+        <property name="regionOfCompany" view="_local"/>
+        <property name="countryOfCompany" view="_local"/>
         <property name="fileCompanyLogo" view="_local"/>
         <property name="companyDirector" view="_minimal"/>
         <property name="companyGroup" view="_local"/>
@@ -539,6 +540,9 @@
         <property name="emailTemplate" view="_local">
             <property name="templateOpenPosition" view="_local">
                 <property name="grade" view="_local"/>
+                <property name="projectName" view="_local">
+                    <property name="projectLogo" view="_local"/>
+                </property>
             </property>
             <property name="templatePosition" view="_local"/>
             <property name="templateAuthor" view="_local"/>
@@ -576,7 +580,12 @@
         <property name="user" view="_local"/>
     </view>
     <view entity="itpearls_CompanyGroup" name="companyGroup-view" extends="_local">
-        <property name="company" view="_local"/>
+        <property name="company" view="_local">
+            <property name="companyOwnership" view="_local"/>
+            <property name="companyGroup" view="_local"/>
+            <property name="companyDirector" view="_local"/>
+            <property name="departmentOfCompany" view="_local"/>
+        </property>
     </view>
     <view entity="itpearls_SomeFilesAgreement" name="someFilesAgreement-view" extends="_local">
         <property name="laborAgreement" view="_local"/>

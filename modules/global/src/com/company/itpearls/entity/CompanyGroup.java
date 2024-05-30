@@ -3,6 +3,8 @@ package com.company.itpearls.entity;
 import com.haulmont.chile.core.annotations.Composition;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
+import com.haulmont.cuba.core.entity.annotation.OnDelete;
+import com.haulmont.cuba.core.global.DeletePolicy;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -22,6 +24,7 @@ public class CompanyGroup extends StandardEntity {
 
     @Composition
     @OneToMany(mappedBy = "companyGroup")
+    @OnDelete(DeletePolicy.CASCADE)
     private List<Company> company;
 
     public List<Company> getCompany() {

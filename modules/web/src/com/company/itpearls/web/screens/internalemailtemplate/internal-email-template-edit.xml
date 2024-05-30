@@ -22,7 +22,9 @@
         <collection id="templateOpenPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition">
             <view extends="openPosition-view">
-                <property name="projectName" view="_local"/>
+                <property name="projectName" view="_local">
+                    <property name="projectLogo" view="_local"/>
+                </property>
             </view>
             <loader id="templateOpenPositionsDl" cacheable="true">
                 <query>

@@ -311,10 +311,10 @@ public class WorkPlacesFragment extends ScreenFragment {
         setProjectImage(this.candidateCVWorkPlaces.getWorkPlace());
     }
 
-    @Subscribe("companySuggestPickerField")
+/*    @Subscribe("companySuggestPickerField")
     public void onCompanySuggestPickerFieldValueChange1(HasValue.ValueChangeEvent<Company> event) {
 
-    }
+    } */
 
     private void deleteWorkPlaceButton() {
         workPlaceGroupBox.setVisible(false);
