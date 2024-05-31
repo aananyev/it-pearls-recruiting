@@ -1720,9 +1720,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         checkBoxOnlyOpenedPosition.setValue(true); // только открытые позиции
         buttonExcel.setEnabled(getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER));
 
-        setInternalProjectFilter();
+//        setInternalProjectFilter();
         setSubcribersFilter();
-        setOpenPositionNotPaused();
+//        setOpenPositionNotPaused();
         setStatusNotLower();
         setStatusRemoteWork();
 
@@ -1739,6 +1739,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     public void onAfterShow2(AfterShowEvent event) {
         initOpenCloseButton();
         setButtonsEnableDisable();
+        setInternalProjectFilter();
+//        setSubcribersFilter();
+        setOpenPositionNotPaused();
     }
 
     private void initOpenCloseButton() {

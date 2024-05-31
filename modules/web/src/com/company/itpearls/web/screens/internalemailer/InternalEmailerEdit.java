@@ -9,6 +9,7 @@ import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.screen.*;
+import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
 import org.slf4j.Logger;
 
@@ -72,6 +73,8 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     private final static String QUERY_GEM_MAX_NUMBER_INTERACTION = "select max(e.numberIteraction) from itpearls_IteractionList e";
 
     protected JobCandidate jobCandidate = null;
+    ExtUser user;
+
     @Inject
     private Metadata metadata;
     @Inject
@@ -79,12 +82,15 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        user = (ExtUser) userSession.getUser();
+
         if (PersistenceHelper.isNew(getEditedEntity())) {
             draftEmailField.setValue(true);
             dateCreateEmailField.setValue(new Date());
         }
 
-        setSender((ExtUser) userSession.getUser());
+//        setSender((ExtUser) userSession.getUser());
+        setSender(user);
 
         if (jobCandidate != null) {
             toEmailField.setValue(jobCandidate);
@@ -104,7 +110,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
         }
     }
 
-    private void setSender(ExtUser user) {
+    private void setSender(User user) {
         StringBuilder sb1 = new StringBuilder();
         sb1.append(user.getName())
                 .append(" \"")
@@ -112,7 +118,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                 .append("\"");
         fromEmailTextAddressField.setValue(sb1.toString());
 
-        StringBuilder sb2 = new StringBuilder();
+/*        StringBuilder sb2 = new StringBuilder();
         sb2.append("SMTP server: ")
                 .append(user.getSmtpServer())
                 .append(":")
@@ -127,7 +133,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                 .append(user.getImapServer())
                 .append(":")
                 .append(user.getImapPort());
-        fromEmailTextAddressField.setDescription(sb2.toString());
+        fromEmailTextAddressField.setDescription(sb2.toString()); */
     }
 
     @Install(to = "toEmailField", subject = "optionIconProvider")
@@ -138,7 +144,6 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
             return CubaIcon.MINUS_CIRCLE.source();
         }
     }
-
 
     @Subscribe("toEmailField")
     public void onToEmailFieldValueChange(HasValue.ValueChangeEvent<JobCandidate> event) {
@@ -156,7 +161,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     }
 
     public void sendAndCloseButtonInvoke() {
-        fromEmailField.setValue((ExtUser) userSession.getUser());
+        fromEmailField.setValue(user);
         sendEmail();
         close(StandardOutcome.COMMIT);
     }
@@ -187,10 +192,10 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     }
 
     private void sendByEmailDefaultMailx() throws MessagingException {
-        final String SMTP_SERVER = ((ExtUser) userSession.getUser()).getSmtpServer();
-        final String SMTP_PORT = ((ExtUser) userSession.getUser()).getSmtpPort().toString();
-        final String SMTP_USERNAME = ((ExtUser) userSession.getUser()).getSmtpUser();
-        final String SMTP_PASSWORD = ((ExtUser) userSession.getUser()).getSmtpPassword();
+        final String SMTP_SERVER = user.getSmtpServer();
+        final String SMTP_PORT = user.getSmtpPort().toString();
+        final String SMTP_USERNAME = user.getSmtpUser();
+        final String SMTP_PASSWORD = user.getSmtpPassword();
 
         String to = toEmailField.getValue().getEmail();
         String subject = subjectEmailField.getValue();
@@ -275,8 +280,8 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
     protected IteractionList createIteraction() {
         IteractionList iteractionList = metadata.create(IteractionList.class);
 
-        iteractionList.setRecrutier((ExtUser) userSession.getUser());
-        iteractionList.setRecrutierName(userSession.getUser().getName());
+        iteractionList.setRecrutier(user);
+        iteractionList.setRecrutierName(user.getName());
         iteractionList.setRating(5);
         iteractionList.setDateIteraction(new Date());
         iteractionList.setCandidate(toEmailField.getValue());

@@ -100,6 +100,14 @@
                 </query>
             </loader>
         </collection>
+        <collection id="employeeDc" class="com.company.itpearls.entity.Employee">
+            <view extends="employee-view"/>
+            <loader id="employeeDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_Employee e]]>
+                </query>
+            </loader>
+        </collection>
     </data>
     <dialogMode height="600"
                 width="800"/>

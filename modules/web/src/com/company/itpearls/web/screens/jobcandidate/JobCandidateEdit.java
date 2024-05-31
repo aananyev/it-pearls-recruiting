@@ -611,9 +611,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         setPercentLabel();
+        setupSkillBox();
+        setIteractionListVacancyFilter();
+        setSuggestOpenPositionTable();
 
         Boolean b = getEditedEntity().getBlockCandidate() == null ?
                 false : blockCandidateCheckBox.getValue();
+
+        lastIteraction = interactionService.getLastIteraction(getEditedEntity());
         setBlockUnblockButton(b);
     }
 
@@ -760,7 +765,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onBeforeShow(BeforeShowEvent event) {
         initInteractionCommentDl();
         initPositionTypeField();
-        initCurrenCompanyField();
+//        initCurrenCompanyField();
 //        setCompanySuggesionField();
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {
@@ -769,10 +774,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             } else {
                 labelCV.setValue("Резюме: ДА");
             }
-        }
-
-        // обнулить статус для вновь создаваемного кандидата
-        if (PersistenceHelper.isNew(getEditedEntity())) {
+        } else {
             getEditedEntity().setStatus(0);
         }
 
@@ -783,21 +785,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setLabelTitle();
         setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
-        setupSkillBox();
+//        setupSkillBox();
 
         setLinkButtonEmail();
         setLinkButtonTelegrem();
         setLinkButtonTelegremGroup();
         setLinkButtonSkype();
 
-        setSuggestOpenPositionTable();
+//        setSuggestOpenPositionTable();
         setLastProjectOfCandidate();
         setCandidatePicImage();
         setAddSocialNetworkButtonEnable();
         checkTelegramName();
-        setIteractionListVacancyFilter();
+//        setIteractionListVacancyFilter();
 
-        lastIteraction = interactionService.getLastIteraction(getEditedEntity());
+//        lastIteraction = interactionService.getLastIteraction(getEditedEntity());
 
         if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
@@ -890,7 +892,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private void initInteractionCommentDl() {
         interactionCommentDl.setParameter("candidate", getEditedEntity());
-        interactionCommentDl.setParameter("comment", null);
+//        interactionCommentDl.setParameter("comment", null);
         interactionCommentDl.load();
     }
 

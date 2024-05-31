@@ -63,6 +63,8 @@ import java.util.stream.Collectors;
 public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private TextManipulationService textManipulationService;
+    @Inject
+    private CollectionContainer<Employee> employeeDc;
 
     @Install(to = "jobCandidatesTable.currentCompany", subject = "columnGenerator")
     private Component jobCandidatesTableCurrentCompanyColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
@@ -726,7 +728,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        jobCandidatesTable.setDescriptionAsHtml(true);
+//        jobCandidatesTable.setDescriptionAsHtml(true);
         if (userSession.getUser().getGroup().getName().equals("Стажер")) {
             jobCandidatesDl.setParameter("userName", new StringBuilder()
                     .append("%")
@@ -736,20 +738,28 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
             checkBoxShowOnlyMy.setValue(true);
             checkBoxShowOnlyMy.setEditable(false);
+
+            jobCandidatesDl.load();
         }
 
         checkBoxOnWork.setValue(false);
-        jobCandidatesDl.removeParameter("param1");
-        jobCandidatesDl.removeParameter("param3");
+//        jobCandidatesDl.removeParameter("param1");
+//        jobCandidatesDl.removeParameter("param3");
 
-        jobCandidatesDl.load();
 
 //        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), "Manager"));
 
-        employees = dataManager.load(Employee.class)
-                .view("employee-view")
-                .list();
+//        employees = dataManager.load(Employee.class)
+//                .view("employee-view")
+//                .list();
+        employees = employeeDc.getItems();
 
+//        initSignIconsDataContainer();
+//        initSignFilterPopupButton();
+    }
+
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
         initSignIconsDataContainer();
         initSignFilterPopupButton();
     }

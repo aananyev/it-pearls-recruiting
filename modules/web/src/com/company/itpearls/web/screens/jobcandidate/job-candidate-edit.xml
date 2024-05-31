@@ -194,7 +194,7 @@
                     <![CDATA[select e
                     from itpearls_IteractionList e
                     where e.comment is not null and e.comment not like ''
-                    order by e.deteIteraction desc]]>
+                    order by e.dateIteraction desc]]>
                     <condition>
                         <and>
                             <c:jpql>
@@ -1148,7 +1148,7 @@
                                     sortable="false">
                                 <componentRenderer/>
                             </column>
-                            <column id="dateIteraction"
+                            <!-- <column id="dateIteraction"
                                     sortable="true"
                                     sort="DESCENDING"
                                     width="80px"
@@ -1157,7 +1157,7 @@
                             <column id="recrutier"
                                     collapsed="true"
                                     width="250px"
-                                    property="recrutier"/>
+                                    property="recrutier"/>  -->
                             <column id="comment"
                                     collapsed="true"
                                     sortable="false"
