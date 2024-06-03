@@ -888,7 +888,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                             + parsingTimeSec
                             + " сек. Найдено "
                             + jobCandidatesDc.getItems().size() + " кандидатов с указанными скиллами.")
-                    .withCaption("ВНИМАНИЕ")
+                    .withCaption(messageBundle.getMessage("mshWarning"))
                     .show();
 
             getWindow().setIcon(CubaIcon.FILTER.source());
@@ -1109,12 +1109,13 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
             retStr = "button_table_green";
         }
 
-        return
-                "<div class=\"" +
-                        retStr
-                        + "\">" +
-                        (date != null ? date : "нет")
-                        + "</div>"
+        return new StringBuilder()
+                .append("<div class=\"")
+                .append(retStr)
+                .append("\">")
+                .append(date != null ? date : "нет")
+                .append("</div>")
+                .toString()
                 ;
     }
 
@@ -1263,9 +1264,10 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                 }
             }
 
-            loadFromOpenPositionPopupButton.setDescription(loadFromOpenPositionPopupButton.getDescription()
-                    + ": "
-                    + op.getVacansyName());
+            loadFromOpenPositionPopupButton.setDescription(new StringBuilder(loadFromOpenPositionPopupButton.getDescription())
+                    .append(": ")
+                    .append(op.getVacansyName())
+                    .toString());
 
             loadFromVacancyLabel.setValue(op.getVacansyName());
             loadFromVacancyLabel.setVisible(true);
@@ -1311,13 +1313,15 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
                     }
                 }
 
-                String positionName = op.getPositionEnName()
-                        + " / "
-                        + op.getPositionRuName();
+                String positionName = new StringBuilder(op.getPositionEnName())
+                        .append(" / ")
+                        .append(op.getPositionRuName())
+                        .toString();
 
-                loadFromOpenPositionPopupButton.setDescription(loadFromOpenPositionPopupButton.getDescription()
-                        + ": "
-                        + positionName);
+                loadFromOpenPositionPopupButton.setDescription(new StringBuilder(loadFromOpenPositionPopupButton.getDescription())
+                        .append(": ")
+                        .append(positionName)
+                        .toString());
 
                 loadFromVacancyLabel.setValue(positionName);
                 loadFromVacancyLabel.setVisible(true);
@@ -1413,11 +1417,12 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
     public void putPersonelReserveButtonInvoke() {
         dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
-                .withMessage(messageBundle.getMessage("msgPutToPersonelReserve")
-                        + "\n\nВыбрано: "
-                        + selectedCandidates.size()
-                        + " "
-                        + messageBundle.getMessage("msgCandidatesPoint"))
+                .withMessage(new StringBuilder(messageBundle.getMessage("msgPutToPersonelReserve"))
+                        .append("\n\nВыбрано: ")
+                        .append(selectedCandidates.size())
+                        .append(" ")
+                        .append(messageBundle.getMessage("msgCandidatesPoint"))
+                        .toString())
                 .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY)
                                 .withHandler(e -> putCandidatesToPersonelReserve()),
                         new DialogAction(DialogAction.Type.NO, Action.Status.NORMAL))
@@ -1457,24 +1462,31 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
 
                     notifications.create(Notifications.NotificationType.WARNING)
                             .withCaption("ВНИМАНИЕ")
-                            .withDescription(messageBundle.getMessage("msgCanNotAddToPersonalReserve")
-                                    + ": " + jobCandidate.getFullName()
-                                    + "\n" + messageBundle.getMessage("msgRecruterOwner")
-                                    + " " + personelReserveCheck.getRecruter().getName()
-                                    + "\n" + messageBundle.getMessage("msgEndDateReserve")
-                                    + " " + (personelReserveCheck.getEndDate() != null
+                            .withDescription(new StringBuilder(messageBundle.getMessage("msgCanNotAddToPersonalReserve"))
+                                    .append(": ")
+                                    .append(jobCandidate.getFullName())
+                                    .append("\n")
+                                    .append(messageBundle.getMessage("msgRecruterOwner"))
+                                    .append(" ")
+                                    .append(personelReserveCheck.getRecruter().getName())
+                                    .append("\n")
+                                    .append(messageBundle.getMessage("msgEndDateReserve"))
+                                    .append(" ")
+                                    .append(personelReserveCheck.getEndDate() != null
                                     ? sdf.format(personelReserveCheck.getEndDate())
-                                    : messageBundle.getMessage("msgUnlimited")))
+                                    : messageBundle.getMessage("msgUnlimited")).toString())
                             .withType(Notifications.NotificationType.ERROR)
                             .show();
                 }
             } else {
                 notifications.create(Notifications.NotificationType.ERROR)
                         .withType(Notifications.NotificationType.ERROR)
-                        .withDescription(messageBundle.getMessage("msgCanNotAddToPersonalReserve")
-                                + ": " + jobCandidate.getFullName()
-                                + "\nДобавить кандидата возможно только на те вакансии на которые Вы подписаны." +
-                                "\nОформите подписку на вакании в пункте меню \"Подписки\".")
+                        .withDescription(new StringBuilder(messageBundle.getMessage("msgCanNotAddToPersonalReserve"))
+                        .append(": ")
+                                .append(jobCandidate.getFullName())
+                                .append("\nДобавить кандидата возможно только на те вакансии на которые Вы подписаны.")
+                                .append("\nОформите подписку на вакании в пункте меню \"Подписки\".")
+                                .toString())
                         .withCaption(messageBundle.getMessage("msgError"))
                         .show();
             }
@@ -1483,8 +1495,10 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         selectedCandidates.clear();
         jobCandidatesDl.load();
 
-        counterSelectedCandidatesLabel.setValue(
-                messageBundle.getMessage("msgCounterCandidates") + counter);
+        counterSelectedCandidatesLabel.setValue(new StringBuilder(
+                messageBundle.getMessage("msgCounterCandidates"))
+                .append(counter)
+                .toString());
     }
 
     private void removeAllCheckBoxesPersonalReserve() {
