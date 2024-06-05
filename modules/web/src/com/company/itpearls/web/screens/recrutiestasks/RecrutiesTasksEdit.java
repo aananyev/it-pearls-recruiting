@@ -1,25 +1,20 @@
 package com.company.itpearls.web.screens.recrutiestasks;
 
-import com.company.itpearls.UiNotificationEvent;
 import com.company.itpearls.core.OpenPositionService;
+import com.company.itpearls.core.TimeAndDateService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
-import com.company.itpearls.service.SubscribeDateService;
+import com.company.itpearls.service.RecrutiesTasksService;
 import com.company.itpearls.web.StandartRoles;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
-import com.haulmont.cuba.gui.util.OperationResult;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
-import com.haulmont.cuba.web.gui.components.WebAbstractResource;
-
 import javax.inject.Inject;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -63,17 +58,16 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     @Inject
     private GetRoleService getRoleService;
     @Inject
-    private CollectionContainer<User> usersDc;
-    @Inject
-    private Events events;
-    @Inject
-    private Metadata metadata;
-    @Inject
     private OpenPositionService openPositionService;
 
     private OpenPosition openPosition = null;
     private Boolean fromOpenPosition = false;
     private String ROLE_RESEARCHER = StandartRoles.RESEARCHER;
+    private Boolean deleteTwiceEvent = true;
+    @Inject
+    private RecrutiesTasksService recrutiesTasksService;
+    @Inject
+    private TimeAndDateService timeAndDateService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -120,67 +114,19 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         }
     }
 
-/*    private boolean isAllreadySubscribe() {
-        String QUERY_GET_SUBSCRIBE = "select e from itpearls_RecrutiesTasks e " +
-                "where e.reacrutier = :reacrutier " +
-                "and e.openPosition = :openPosition " +
-                "and current_date between e.startDate and e.endDate";
-        List<RecrutiesTasks> subscribes = dataManager.load(RecrutiesTasks.class)
-                .query(QUERY_GET_SUBSCRIBE)
-                .parameter("reacrutier", recrutiesTasksFieldUser.getValue())
-                .parameter("openPosition", openPositionField.getValue())
-                .list();
-
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-
-        if (subscribes.size() > 0) {
-            for (RecrutiesTasks e : subscribes) {
-                startDateSunscribe = sdf.format(e.getStartDate());
-                endDateSubscribe = sdf.format(e.getEndDate());
-            }
-
-            return true;
-        } else {
-            return false;
-        }
-
-    } */
-
-    Boolean deleteTwiceEvent = true;
-
-
     @Subscribe("windowCommitAndCloseButton")
     public void onOkBtnClick(Button.ClickEvent event) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
-        Date startDate = setStartDay(startDateField.getValue());
-        Date endDate = setEndDay(endDateField.getValue());
+        Date startDate = timeAndDateService.setStartDay(startDateField.getValue());
+        Date endDate = timeAndDateService.setEndDay(endDateField.getValue());
 
         startDateField.setValue(startDate);
         endDateField.setValue(endDate);
 
-        String QUERY = "select e from itpearls_RecrutiesTasks e " +
-                "where e.reacrutier = :reacrutier " +
-                "and e.openPosition = :openPosition " +
-                "and not e.openPosition.openClose = true " +
-                "and not e.closed = true " +
-                "and ((e.startDate between :startDate and :endDate) " +
-                    "or (e.endDate between :startDate and :endDate) or " +
-                "e.startDate = :startDate or e.endDate = :endDate)";
-
-        List<RecrutiesTasks> recrutiesTasks = dataManager.load(RecrutiesTasks.class)
-                .query(QUERY)
-                .view("recrutiesTasks-view")
-                .parameter("reacrutier", recrutiesTasksFieldUser.getValue())
-                .parameter("openPosition", openPositionField.getValue())
-                .parameter("startDate", startDate)
-                .parameter("endDate", endDate)
-                .cacheable(true)
-                .list();
-
         if (deleteTwiceEvent) {
-            if (recrutiesTasks.size() == 0) {
+            if (recrutiesTasksService.isSubscribed(openPositionField.getValue(), (ExtUser) recrutiesTasksFieldUser.getValue(), startDate, endDate)) {
                 openPositionService.setOpenPositionNewsAutomatedMessage(openPositionField.getValue(),
                         recrutiesTasksFieldUser.getValue().getName()
                                 + " подписался на вакансию c "
@@ -215,58 +161,6 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         }
     }
 
-    private Date setStartDay(Date date) {
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(date);
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        date = cal.getTime();
-
-        return date;
-    }
-
-    private Date setEndDay(Date date) {
-        Calendar cal = new GregorianCalendar();
-        cal.setTime(date);
-        cal.set(Calendar.HOUR_OF_DAY, 23);
-        cal.set(Calendar.MINUTE, 59);
-        cal.set(Calendar.SECOND, 59);
-        cal.set(Calendar.MILLISECOND, 0);
-        date = cal.getTime();
-
-        return date;
-    }
-
-
-    /* private void setOpenPositionNewsAutomatedMessage(OpenPosition editedEntity,
-                                                     String subject,
-                                                     String comment,
-                                                     Date date,
-                                                     JobCandidate jobCandidate,
-                                                     User user,
-                                                     Boolean priority) {
-
-        try {
-            OpenPositionNews openPositionNews = metadata.create(OpenPositionNews.class);
-
-            openPositionNews.setOpenPosition(editedEntity);
-            openPositionNews.setAuthor(user);
-            openPositionNews.setDateNews(date);
-            openPositionNews.setSubject(subject);
-            openPositionNews.setComment(comment);
-            openPositionNews.setCandidates(jobCandidate);
-            openPositionNews.setPriorityNews(priority != null ? priority : false);
-
-            CommitContext commitContext = new CommitContext();
-            commitContext.addInstanceToCommit(openPositionNews);
-            dataManager.commit(commitContext);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    } */
-
     @Subscribe("windowCommitAndCloseButton")
     public void onWindowCommitAndCloseButtonClick(Button.ClickEvent event) {
         if (!(openPositionField.getValue().getInternalProject()
@@ -299,8 +193,6 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                     .withType(Notifications.NotificationType.ERROR)
                     .show();
         }
-
-//        close(StandardOutcome.COMMIT);
     }
 
     private static DateFormatSymbols ruDateFormatSymbols = new DateFormatSymbols() {
