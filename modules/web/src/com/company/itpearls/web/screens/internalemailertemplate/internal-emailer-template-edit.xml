@@ -12,8 +12,13 @@
                 <property name="emailTemplate" view="_local">
                     <property name="templateOpenPosition" view="_local">
                         <property name="grade" view="_local"/>
+                        <property name="projectName" view="_local">
+                            <property name="projectLogo" view="_local"/>
+                        </property>
                     </property>
-                    <property name="templatePosition" view="_local"/>
+                    <property name="templatePosition" view="_local">
+                        <property name="logo" view="_local"/>
+                    </property>
                     <property name="templateAuthor" view="_local"/>
                 </property>
                 <property name="fromEmail" view="_local"/>

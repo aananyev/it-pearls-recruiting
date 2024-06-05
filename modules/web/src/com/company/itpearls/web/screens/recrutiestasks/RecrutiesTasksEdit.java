@@ -5,10 +5,12 @@ import com.company.itpearls.core.OpenPositionService;
 import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.service.SubscribeDateService;
+import com.company.itpearls.web.StandartRoles;
 import com.haulmont.cuba.core.app.EmailService;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.InstanceContainer;
@@ -27,6 +29,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.Calendar;
 
 @UiController("itpearls_RecrutiesTasks.edit")
 @UiDescriptor("recruties-tasks-edit.xml")
@@ -65,25 +68,15 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
     private Events events;
     @Inject
     private Metadata metadata;
-
-    private OpenPosition openPosition = null;
-    private Boolean fromOpenPosition = false;
-    private String MANAGER = "Manager";
-    private String ROLE_MANAGER = "Manager";
-    private String ROLE_RESEARCHER = "Researcher";
-    private String startDateSunscribe = "";
-    private String endDateSubscribe = "";
-    private String GROUP_RESEARCHING_NAME = "Ресерчинг";
-    private String GROUP_RECRUTING_NAME = "Рекрутинг";
-    private String GROUP_MANAGEMENT_NAME = "Менеджмент";
-    private String GROUP_ACCOUNTING_NAME = "Аккаунтинг";
     @Inject
     private OpenPositionService openPositionService;
 
+    private OpenPosition openPosition = null;
+    private Boolean fromOpenPosition = false;
+    private String ROLE_RESEARCHER = StandartRoles.RESEARCHER;
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        String role = "Researcher";
-
         if (PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setClosed(false);
         }
@@ -97,10 +90,10 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         // если роль - ресерчер, то автоматически вставить себя
         Collection<String> s = userSessionSource.getUserSession().getRoles();
         // установить поле рекрутера
-        if (s.contains(role) || !fromOpenPosition) {
+        if (s.contains(ROLE_RESEARCHER) || !fromOpenPosition) {
             recrutiesTasksFieldUser.setValue(userSession.getUser());
 
-            if (s.contains(role))
+            if (s.contains(ROLE_RESEARCHER))
                 recrutiesTasksFieldUser.setEnabled(false);
             else
                 recrutiesTasksFieldUser.setEnabled(true);
@@ -127,7 +120,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
         }
     }
 
-    private boolean isAllreadySubscribe() {
+/*    private boolean isAllreadySubscribe() {
         String QUERY_GET_SUBSCRIBE = "select e from itpearls_RecrutiesTasks e " +
                 "where e.reacrutier = :reacrutier " +
                 "and e.openPosition = :openPosition " +
@@ -151,34 +144,43 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
             return false;
         }
 
-    }
+    } */
 
     Boolean deleteTwiceEvent = true;
 
-    @Subscribe
-    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+
+    @Subscribe("windowCommitAndCloseButton")
+    public void onOkBtnClick(Button.ClickEvent event) {
+
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
+        Date startDate = setStartDay(startDateField.getValue());
+        Date endDate = setEndDay(endDateField.getValue());
+
+        startDateField.setValue(startDate);
+        endDateField.setValue(endDate);
+
         String QUERY = "select e from itpearls_RecrutiesTasks e " +
                 "where e.reacrutier = :reacrutier " +
                 "and e.openPosition = :openPosition " +
-                "and e.closed = false " +
-                "and not ((:startDate between e.startDate and e.endDate) " +
-                "or (:endDate between e.startDate and e.endDate) " +
-                "or (e.startDate > :startDate1 and e.endDate < :endDate1))";
+                "and not e.openPosition.openClose = true " +
+                "and not e.closed = true " +
+                "and ((e.startDate between :startDate and :endDate) " +
+                    "or (e.endDate between :startDate and :endDate) or " +
+                "e.startDate = :startDate or e.endDate = :endDate)";
 
         List<RecrutiesTasks> recrutiesTasks = dataManager.load(RecrutiesTasks.class)
                 .query(QUERY)
                 .view("recrutiesTasks-view")
                 .parameter("reacrutier", recrutiesTasksFieldUser.getValue())
                 .parameter("openPosition", openPositionField.getValue())
-                .parameter("startDate", startDateField.getValue())
-                .parameter("startDate1", startDateField.getValue())
-                .parameter("endDate", endDateField.getValue())
-                .parameter("endDate1", endDateField.getValue())
+                .parameter("startDate", startDate)
+                .parameter("endDate", endDate)
+                .cacheable(true)
                 .list();
 
         if (deleteTwiceEvent) {
-            if (recrutiesTasks.size() != 0) {
+            if (recrutiesTasks.size() == 0) {
                 openPositionService.setOpenPositionNewsAutomatedMessage(openPositionField.getValue(),
                         recrutiesTasksFieldUser.getValue().getName()
                                 + " подписался на вакансию c "
@@ -193,6 +195,8 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                 deleteTwiceEvent = false;
             } else {
                 dialogs.createOptionDialog(Dialogs.MessageType.WARNING)
+                        .withType(Dialogs.MessageType.WARNING)
+                        .withContentMode(ContentMode.HTML)
                         .withMessage("Выбранный Вами интервал подписики на вакансию \'"
                                 + openPositionField.getValue().getVacansyName()
                                 + "\' в интервале дат с "
@@ -201,14 +205,38 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
                                 + sdf.format(endDateField.getValue())
                                 + " уже совпадает с одной из ваших подписок на эту вакансию. \n\nХотите продолжить ?")
                         .withActions(new DialogAction(DialogAction.Type.YES, Action.Status.PRIMARY).withHandler(e -> {
+                                    close(StandardOutcome.COMMIT);
                                 }),
                                 new DialogAction(DialogAction.Type.NO, Action.Status.NORMAL).withHandler(g -> {
-                                    event.preventCommit();
                                 }))
                         .withCaption("ВНИМАНИЕ")
                         .show();
             }
         }
+    }
+
+    private Date setStartDay(Date date) {
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        date = cal.getTime();
+
+        return date;
+    }
+
+    private Date setEndDay(Date date) {
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 0);
+        date = cal.getTime();
+
+        return date;
     }
 
 

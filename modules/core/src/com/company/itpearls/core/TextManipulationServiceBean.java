@@ -117,7 +117,7 @@ public class TextManipulationServiceBean implements TextManipulationService {
                     .append(";base64, ")
                     .append(encodedString)
                    .append("\"")
-                    .append(" width=\"220\" height=\"220\">");
+                    .append(" width=\"220\" height=\"220\" class=\"round-100\">");
 //                    .append("\" width=\"100%\">");
 
 /*            return new StringBuilder()

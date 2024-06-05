@@ -19,9 +19,9 @@
                     <property name="logo" view="_local"/>
                 </property>
                 <property name="projectName" view="_local">
-                    <property name="projectLogo" view="_local"/>
+                    <property name="projectLogo" view="_base"/>
                     <property name="projectOwner" view="_local">
-                        <property name="fileImageFace" view="_local"/>
+                        <property name="fileImageFace" view="_base"/>
                         <property name="cityOfResidence" view="_local"/>
                         <property name="companyDepartment" view="_local">
                             <property name="companyName" view="_local">

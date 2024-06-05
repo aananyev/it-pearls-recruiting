@@ -126,7 +126,7 @@
                     visible="false"
                     caption="msg://msgExtend"/>
             <button id="windowCommitAndCloseButton"
-                    action="windowCommitAndClose"
+                    caption="msg://msgOK"
                     align="BOTTOM_RIGHT"/>
             <button action="windowClose"/>
         </hbox>

@@ -61,6 +61,25 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private Metadata metadata;
     @Inject
     private DataContext dataContext;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private UserSessionSource userSessionSource;
+    @Inject
+    private StrSimpleService strSimpleService;
+    @Inject
+    private CollectionContainer<SignIcons> signIconsDc;
+    @Inject
+    private CollectionLoader<SignIcons> signIconsDl;
+    @Inject
+    private PopupButton signFilterButton;
+    @Inject
+    private InteractionService interactionService;
+    @Inject
+    private OpenPositionService openPositionService;
+    @Inject
+    private InteractionListService interactionListService;
+
 
     private static final String QUERY_GET_PERSONEL_RESERVE =
             "select e from itpearls_PersonelReserve e where e.jobCandidate = :jobCandidate and (e.endDate > :currDate or e.endDate is null)";
@@ -80,28 +99,17 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
     private PersonelReserve currentPersonelReserve = null;
     static final String separatorChar = "⎯";
     final static String separator = StringUtils.repeat(separatorChar, 22);
-//    final static String separator = separatorChar.repeat(22);
+    //    final static String separator = separatorChar.repeat(22);
     final static String pic_center_large = "pic-center-large-";
     final static String pic_center_large_inject_css = ".pic-center-large-%s {color: #%s; text-align: center; text-color: gray; font-size: large; margin: 0 auto;}";
-
-    @Inject
-    private Notifications notifications;
-    @Inject
-    private UserSessionSource userSessionSource;
-    @Inject
-    private StrSimpleService strSimpleService;
-    @Inject
-    private CollectionContainer<SignIcons> signIconsDc;
-    @Inject
-    private CollectionLoader<SignIcons> signIconsDl;
-    @Inject
-    private PopupButton signFilterButton;
-    @Inject
-    private InteractionService interactionService;
-    @Inject
-    private OpenPositionService openPositionService;
-    @Inject
-    private InteractionListService interactionListService;
+    private final static String width_50px = "50px";
+    private final static String width_20px = "20px";
+    private final static String height_50px = "50px";
+    private final static String height_20px = "20px";
+    private final static String icons_no_company_png = "icons/no-company.png";
+    private final static String icons_no_programmer_jpeg = "icons/no-programmer.jpeg";
+    private final static String style_table_wordwrap = "table-wordwrap";
+    private final static String style_circle_20px = "circle-20px";
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -352,22 +360,22 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
     @Install(to = "emailersTable.fromEmail", subject = "columnGenerator")
     private Component emailersTableFromEmailColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
-        if (event.getItem().getFromEmail().getFileImageFace() != null) {
-            return generateImageWithLabel(event.getItem().getFromEmail().getFileImageFace(),
-                    event.getItem().getFromEmail().getName());
+        if (event.getItem() != null) {
+            if(event.getItem().getFromEmail() != null) {
+                if (event.getItem().getFromEmail().getFileImageFace() != null) {
+                    return generateImageWithLabel(event.getItem().getFromEmail().getFileImageFace(),
+                            event.getItem().getFromEmail().getName());
+                } else {
+                    return generateImageWithLabel(null, event.getItem().getFromEmail().getName());
+                }
+            } else {
+                return generateImageWithLabel(null, event.getItem().getFromEmail().getName());
+            }
         } else {
             return generateImageWithLabel(null, event.getItem().getFromEmail().getName());
         }
     }
 
-    private final static String width_50px = "50px";
-    private final static String width_20px = "20px";
-    private final static String height_50px = "50px";
-    private final static String height_20px = "20px";
-    private final static String icons_no_company_png = "icons/no-company.png";
-    private final static String icons_no_programmer_jpeg = "icons/no-programmer.jpeg";
-    private final static String style_table_wordwrap = "table-wordwrap";
-    private final static String style_circle_20px = "circle-20px";
 
     private HBoxLayout generateImageWithLabel(FileDescriptor fileDescriptor, String name) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
