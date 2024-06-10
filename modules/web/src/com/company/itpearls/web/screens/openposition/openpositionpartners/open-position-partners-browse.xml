@@ -1,7 +1,118 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         extends="com/company/itpearls/web/screens/openposition/open-position-browse.xml"
         messagesPack="com.company.itpearls.web.screens.openposition.openpositionpartners">
+    <data readOnly="true">
+        <collection id="openPositionsDc"
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="openPosition-view">
+                <property name="owner" view="_local"/>
+                <property name="grade" view="_local"/>
+                <property name="candidates" view="_local"/>
+                <property name="parentOpenPosition" view="_local">
+                    <property name="owner" view="_local"/>
+                </property>
+                <property name="cityPosition" view="_local"/>
+                <property name="positionType" view="_local">
+                    <property name="logo" view="_local"/>
+                </property>
+                <property name="projectName" view="_local">
+                    <property name="projectLogo" view="_base"/>
+                    <property name="projectOwner" view="_local">
+                        <property name="fileImageFace" view="_base"/>
+                        <property name="cityOfResidence" view="_local"/>
+                        <property name="companyDepartment" view="_local">
+                            <property name="companyName" view="_local">
+                                <property name="fileCompanyLogo" view="_local"/>
+                            </property>
+                        </property>
+                        <property name="personPosition" view="_local"/>
+                    </property>
+                    <property name="projectDepartment" view="_local">
+                        <property name="companyName" view="_local">
+                            <property name="fileCompanyLogo" view="_local"/>
+                        </property>
+                        <property name="templateLetter"/>
+                    </property>
+                    <property name="templateLetter"/>
+                    <property name="projectDescription"/>
+                </property>
+                <property name="templateLetter"/>
+                <property name="someFiles" view="_minimal"/>
+            </view>
+            <loader id="openPositionsDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                                    where e in (select a.openPosition from  itpearls_PartnersSubscribeOpenPosition a where e = a.openPosition)
+                                    order by e.vacansyName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.priority = :priority</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>@between(e.lastOpenDate, now - :newOpenPosition, now + 1, day)</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    not e in (select k.openPosition from itpearls_RecrutiesTasks k
+                                    where k.closed = :freesubscriber
+                                    and current_date between k.startDate and k.endDate))
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e in (select k.openPosition from itpearls_RecrutiesTasks k
+                                    where k.reacrutier = :subscriber
+                                    and k.closed = false
+                                    and current_date between k.startDate and k.endDate))
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    not (e in (select x.openPosition from itpearls_RecrutiesTasks x
+                                    where x.reacrutier = :notsubscriber
+                                    and x.closed = false
+                                    and current_date between x.startDate and x.endDate)))
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.openClose = :openClosePos</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.signDraft = :signDraft</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.priority > :paused</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e in
+                                    (select f.openPosition
+                                    from itpearls_RecrutiesTasks f
+                                    where f.reacrutier = :recrutier and :nowDate between f.startDate and f.endDate
+                                    and f.closed = false)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.internalProject = :internalProject</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.priority >= :rating</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.remoteWork = :remoteWork</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.positionType = :positionType</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
     <layout/>
 </window>

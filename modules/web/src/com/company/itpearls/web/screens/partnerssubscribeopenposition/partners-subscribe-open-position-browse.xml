@@ -9,7 +9,11 @@
                     class="com.company.itpearls.entity.PartnersSubscribeOpenPosition">
             <view extends="_local">
                 <property name="partner" view="_local"/>
-                <property name="openPosition" view="_local"/>
+                <property name="openPosition" view="_local">
+                    <property name="projectName" view="_local">
+                        <property name="projectLogo" view="_local"/>
+                    </property>
+                </property>
             </view>
             <loader id="partnersSubscribeOpenPositionsDl">
                 <query>
@@ -36,11 +40,16 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="active"/>
-                <column id="partner" groupAllowed="true"/>
-                <column id="openPosition"/>
-                <column id="startDate"/>
-                <column id="endDate"/>
+                <group>
+                    <column id="partner" width="150px" generator="partnerColumnGenerator">
+                    </column>
+                </group>
+                <column id="active"
+                        width="100px"
+                        align="CENTER"/>
+                <column id="openPosition" generator="openPositionProjectGenerator"/>
+                <column id="startDate" width="150px"/>
+                <column id="endDate" width="150px"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"
