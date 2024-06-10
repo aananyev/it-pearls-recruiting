@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://partnersSubscribeOpenPositionBrowse.caption"
+        focusComponent="partnersSubscribeOpenPositionsTable"
+        messagesPack="com.company.itpearls.web.screens.partnerssubscribeopenposition">
+    <data readOnly="true">
+        <collection id="partnersSubscribeOpenPositionsDc"
+                    class="com.company.itpearls.entity.PartnersSubscribeOpenPosition">
+            <view extends="_local">
+                <property name="partner" view="_local"/>
+                <property name="openPosition" view="_local"/>
+            </view>
+            <loader id="partnersSubscribeOpenPositionsDl">
+                <query>
+                    <![CDATA[select e from itpearls_PartnersSubscribeOpenPosition e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="partnersSubscribeOpenPositionsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="partnersSubscribeOpenPositionsTable"
+                dataLoader="partnersSubscribeOpenPositionsDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="partnersSubscribeOpenPositionsTable"
+                    width="100%"
+                    dataContainer="partnersSubscribeOpenPositionsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="active"/>
+                <column id="partner" groupAllowed="true"/>
+                <column id="openPosition"/>
+                <column id="startDate"/>
+                <column id="endDate"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="partnersSubscribeOpenPositionsTable.create"/>
+                <button id="editBtn" action="partnersSubscribeOpenPositionsTable.edit"/>
+                <button id="removeBtn" action="partnersSubscribeOpenPositionsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

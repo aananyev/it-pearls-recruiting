@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://partnersSubscribeOpenPositionEdit.caption"
+        focusComponent="form"
+        messagesPack="com.company.itpearls.web.screens.partnerssubscribeopenposition">
+    <data>
+        <instance id="partnersSubscribeOpenPositionDc"
+                  class="com.company.itpearls.entity.PartnersSubscribeOpenPosition">
+            <view extends="_local">
+                <property name="partner" view="_local"/>
+                <property name="openPosition" view="_local">
+                    <property name="projectName" view="_local">
+                        <property name="projectLogo" view="_local"/>
+                    </property>
+                </property>
+            </view>
+            <loader/>
+        </instance>
+        <collection id="partnersDc"
+                    class="com.company.itpearls.entity.Partners">
+            <view extends="partners-view"/>
+            <loader id="partnersDl">
+                <query>
+                    <![CDATA[select e from itpearls_Partners e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="openPositionsDc"
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="_local">
+                <property name="projectName" view="_local">
+                    <property name="projectLogo" view="_local"/>
+                </property>
+            </view>
+            <loader id="openPositionsDl">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e where not e.openClose = true]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="AUTO"
+                width="AUTO"
+                modal="true"
+                forceDialog="true"/>
+    <layout expand="editActions" spacing="true">
+        <form id="form" dataContainer="partnersSubscribeOpenPositionDc">
+            <column width="350px">
+                <checkBox id="activeField" property="active"/>
+                <lookupPickerField id="partnerField" optionsContainer="partnersDc" property="partner"/>
+                <lookupPickerField id="openPositionField" optionsContainer="openPositionsDc" property="openPosition"/>
+                <dateField id="startDateField" property="startDate"/>
+                <dateField id="endDateField" property="endDate"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

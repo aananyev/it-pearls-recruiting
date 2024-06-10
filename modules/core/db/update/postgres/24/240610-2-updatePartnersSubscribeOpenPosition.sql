@@ -1,0 +1,1 @@
+alter table ITPEARLS_PARTNERS_SUBSCRIBE_OPEN_POSITION add column ACTIVE boolean ;

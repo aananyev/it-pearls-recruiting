@@ -379,7 +379,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             .getLogo());
         } else {
             retImage.setVisible(false);
-            return retImage.createResource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            return retImage.createResource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
         }
     }
 
@@ -399,7 +399,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             return retImage.createResource(FileDescriptorResource.class)
                     .setFileDescriptor(company.getFileCompanyLogo());
         } else {
-            return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+            return retImage.createResource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
         }
     }
 
@@ -412,7 +412,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             return retImage.createResource(FileDescriptorResource.class)
                     .setFileDescriptor(companyDepartament.getCompanyName().getFileCompanyLogo());
         } else {
-            return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+            return retImage.createResource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
         }
     }
 
@@ -426,7 +426,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .setFileDescriptor(project
                             .getProjectLogo());
         } else {
-            return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
+            return retImage.createResource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
         }
     }
 
@@ -560,11 +560,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             .setFileDescriptor(((ExtUser) iteractionList.getRecrutier()).getFileImageFace());
                 } else {
                     image.setSource(ThemeResource.class)
-                            .setPath("icons/no-programmer.jpeg");
+                            .setPath(StdImage.NO_PROGRAMMER);
                 }
             } else {
                 image.setSource(ThemeResource.class)
-                        .setPath("icons/no-programmer.jpeg");
+                        .setPath(StdImage.NO_PROGRAMMER);
             }
 
             image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
@@ -710,11 +710,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             .setFileDescriptor(((ExtUser) openPositionComment.getUser()).getFileImageFace());
                 } else {
                     image.setSource(ThemeResource.class)
-                            .setPath("icons/no-programmer.jpeg");
+                            .setPath(StdImage.NO_PROGRAMMER);
                 }
             } else {
                 image.setSource(ThemeResource.class)
-                        .setPath("icons/no-programmer.jpeg");
+                        .setPath(StdImage.NO_PROGRAMMER);
             }
 
             image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
@@ -2556,13 +2556,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     projectOwnerImage.setValueSource(
                             new ContainerValueSource<>(openPositionDc, "projectName.projectOwner.fileImageFace"));
                 } else {
-                    projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+                    projectOwnerImage.setSource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
                 }
             } else {
-                projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+                projectOwnerImage.setSource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
             }
         } else {
-            projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            projectOwnerImage.setSource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
         }
     }
 
@@ -2573,13 +2573,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     projectLogoImage.setValueSource(
                             new ContainerValueSource<>(openPositionDc, "projectName.projectLogo"));
                 } else {
-                    projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+                    projectLogoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
                 }
             } else {
-                projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+                projectLogoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
             }
         } else {
-            projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            projectLogoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
         }
     }
 

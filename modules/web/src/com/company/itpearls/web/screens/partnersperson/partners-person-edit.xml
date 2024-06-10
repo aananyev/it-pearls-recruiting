@@ -9,7 +9,7 @@
                   view="partnersPerson-view">
             <loader/>
         </instance>
-        <collection id="partnersDc" class="com.company.itpearls.entity.Partners" view="_local">
+        <collection id="partnersDc" class="com.company.itpearls.entity.Partners" view="partners-view">
             <loader id="partnersDl">
                 <query><![CDATA[select e from itpearls_Partners e]]></query>
             </loader>
@@ -18,13 +18,17 @@
     <layout>
         <hbox id="mainHBox">
             <form id="form">
-                <lookupPickerField id="partnersField" property="partner"
-                                   caption="msg://msgPartner"
-                                   optionsContainer="partnersDc">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
+                <column>
+                    <lookupPickerField id="partnersField"
+                                       property="partner"
+                                       ext:index="0"
+                                       caption="msg://msgPartner"
+                                       optionsContainer="partnersDc">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                        </actions>
+                    </lookupPickerField>
+                </column>
             </form>
         </hbox>
     </layout>

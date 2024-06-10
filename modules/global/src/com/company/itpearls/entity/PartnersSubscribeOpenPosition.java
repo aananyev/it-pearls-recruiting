@@ -15,6 +15,9 @@ import java.util.Date;
 public class PartnersSubscribeOpenPosition extends StandardEntity {
     private static final long serialVersionUID = -2375759603075176457L;
 
+    @Column(name = "ACTIVE")
+    private Boolean active;
+
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @NotNull
     @OnDeleteInverse(DeletePolicy.CASCADE)
@@ -36,6 +39,14 @@ public class PartnersSubscribeOpenPosition extends StandardEntity {
     @Temporal(TemporalType.DATE)
     @Column(name = "END_DATE")
     private Date endDate;
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
     public Date getEndDate() {
         return endDate;

@@ -28,15 +28,6 @@
                   icon="ENVELOPE_SQUARE"/>
         </menu>
     </menu>
-    <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
-        <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"
-              icon="font-icon:ADDRESS_BOOK_O"/>
-        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse"
-              icon="GROUP"/>
-        <item screen="itpearls_ApplicationRecruitment.browse"
-              caption="mainMsg://menu_config.itpearls_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
-        <item screen="itpearls_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
-    </menu>
     <menu id="application-outstaffing" icon="CUBES" insertAfter="application-hrmasters">
         <item screen="itpearls_OpenPositionOutstaff.browse" caption="mainMsg://msgOpenPositionOutstaff.browse"
               icon="COMPASS"/>
@@ -52,15 +43,27 @@
         <item screen="itpearls_OpenPositionRecruiting.browse" caption="mainMsg://msgOpenPositionRecruiting"
               icon="COMPASS" openType="NEW_TAB"/>
     </menu>
+    <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
+        <item screen="itpearls_StaffCurrent.browse" caption="mainMsg://menu_config.itpearls_StaffCurrent.browse"
+              icon="font-icon:ADDRESS_BOOK_O"/>
+        <item screen="itpearls_StaffingTable.browse" caption="mainMsg://menu_config.itpearls_StaffingTable.browse"
+              icon="GROUP"/>
+        <item screen="itpearls_ApplicationRecruitment.browse"
+              caption="mainMsg://menu_config.itpearls_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
+        <item screen="itpearls_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
+    </menu>
     <menu id="application-hunting" icon="PRODUCT_HUNT" insertBefore="application-hadbook">
         <item screen="itpearls_OpenPosition.browse" icon="COMPASS"/>
         <item screen="itpearls_JobCandidate.browse" icon="USER"/>
         <item screen="itpearls_CandidateCV.browse" icon="FILE_WORD_O"/>
         <item screen="itpearls_IteractionList.browse" icon="REORDER"/>
     </menu>
-    <menu id="application-partners" caption="mainMsg://menu_config.partners" insertAfter="application-hunting">
-        <item screen="itpearls_Partners.browse" caption="mainMsg://menu_config.itpearls_Partners.browse"/>
+    <menu id="application-partners" caption="mainMsg://menu_config.partners" icon="font-icon:HANDSHAKE_O"
+          insertAfter="application-hunting">
+        <item screen="itpearls_Partners.browse" caption="mainMsg://menu_config.itpearls_Partners.browse" icon="DOLLAR"/>
         <item screen="itpearls_PartnersPerson.browse" caption="mainMsg://menu_config.itpearls_PartnersPerson.browse"/>
+        <item screen="itpearls_PartnersSubscribeOpenPosition.browse"
+              caption="mainMsg://menu_config.itpearls_PartnersSubscribeOpenPosition.browse"/>
     </menu>
     <menu id="application-project" icon="BUILDING" insertAfter="application-partners">
         <item screen="itpearls_Project.browse" icon="ARCHIVE"/>
