@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:context="http://www.springframework.org/schema/context">
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task">
 
     <!-- Annotation-based beans -->
     <context:component-scan base-package="com.company.itpearls"/>
+
+<!--    <task:scheduled-tasks scheduler="scheduler">
+        <task:scheduled ref="itpearls_RecrutiesTasksBean" method="checkSubscribe" cron="* * * 6 0 MON-FRI"/>
+    </task:scheduled-tasks> -->
+
 </beans>

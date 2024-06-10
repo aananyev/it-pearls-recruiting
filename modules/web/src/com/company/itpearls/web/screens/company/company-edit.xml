@@ -85,7 +85,7 @@
                  spacing="true"
                  expand="mainCompany"
                  id="tabConpanyDetails">
-                <hbox spacing="true">
+                <hbox id="signsHBox" spacing="true">
                     <checkBox id="ourLegalEnityCheckBox"
                               dataContainer="companyDc"
                               caption="msg://msgOurLegalEntity"

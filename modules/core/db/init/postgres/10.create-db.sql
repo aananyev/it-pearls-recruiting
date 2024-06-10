@@ -152,6 +152,7 @@ create table ITPEARLS_COMPANY (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    DTYPE varchar(31),
     --
     OUR_CLIENT boolean,
     OUR_LEGAL_ENTITY boolean,
@@ -167,6 +168,9 @@ create table ITPEARLS_COMPANY (
     ADDRESS_OF_COMPANY text,
     COMPANY_DESCRIPTION text,
     WORKING_CONDITIONS text,
+    --
+    -- from itpearls_Partners
+    SIGN_PARTNER boolean,
     --
     primary key (ID)
 )^
@@ -333,6 +337,7 @@ create table ITPEARLS_PERSON (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    DTYPE varchar(31),
     --
     FIRST_NAME varchar(80),
     MIDDLE_NAME varchar(80),
@@ -1329,3 +1334,22 @@ create table ITPEARLS_CANDIDATE_CV_WORK_PLACES (
     primary key (ID)
 )^
 -- end ITPEARLS_CANDIDATE_CV_WORK_PLACES
+-- begin ITPEARLS_PARTNERS_SUBSCRIBE_OPEN_POSITION
+create table ITPEARLS_PARTNERS_SUBSCRIBE_OPEN_POSITION (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    PARTNER_ID uuid not null,
+    OPEN_POSITION_ID uuid not null,
+    START_DATE date,
+    END_DATE date,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_PARTNERS_SUBSCRIBE_OPEN_POSITION

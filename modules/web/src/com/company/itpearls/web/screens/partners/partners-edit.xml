@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/company/company-edit.xml"
+        messagesPack="com.company.itpearls.web.screens.partners">
+    <data>
+        <instance id="companyDc"
+                  class="com.company.itpearls.entity.Partners">
+            <view extends="_local">
+                <property name="companyGroup" view="_local"/>
+                <property name="cityOfCompany" view="_local">
+                    <property name="cityRegion" view="_local">
+                        <property name="regionCountry" view="_local"/>
+                    </property>
+                </property>
+                <property name="companyOwnership" view="_local"/>
+                <property name="companyDirector" view="_local">
+                    <property name="personPosition" view="_local"/>
+                </property>
+                <property name="countryOfCompany" view="_local"/>
+                <property name="departmentOfCompany" view="_local">
+                    <property name="projectOfDepartment" view="_local"/>
+                    <property name="departamentDirector" view="_local"/>
+                    <property name="departamentHrDirector" view="_local"/>
+                </property>
+                <property name="regionOfCompany" view="_local"/>
+                <property name="fileCompanyLogo" view="_local"/>
+            </view>
+            <loader/>
+            <collection id="departmentOfCompanyDc" property="departmentOfCompany"/>
+        </instance>
+    </data>
+    <layout width="100%" height="100%" expand="mainTab">
+        <tabSheet id="mainTab">
+            <tab id="tabConpanyDetails">
+                <hbox id="signsHBox" spacing="true">
+                    <checkBox id="ourLegalEnityCheckBox" visible="false"/>
+                    <checkBox id="checkBoxOurClient" visible="false"/>
+                    <checkBox id="partnersCheckBox"
+                              dataContainer="companyDc"
+                              property="signPartner"
+                              caption="msg://msgPartners"/>
+                </hbox>
+            </tab>
+        </tabSheet>
+    </layout>
+</window>

@@ -21,7 +21,7 @@
         <collection id="extUserDc"
                     class="com.company.itpearls.entity.ExtUser">
             <view extends="extUser-view"/>
-            <loader id="extUserDl">
+            <loader id="extUserDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_ExtUser e where e.active = true order by e.name]]>
                 </query>

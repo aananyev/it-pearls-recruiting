@@ -31,7 +31,7 @@ public class InterviewCalendarWidget extends ScreenFragment {
     public void onAfterInit(AfterInitEvent event) {
         calendarDataDl.load();
 
-        for( IteractionList list : calendarDataDc.getItems() ) {
+        for(IteractionList list : calendarDataDc.getItems()) {
             SimpleCalendarEvent calendarEvent = new SimpleCalendarEvent();
             calendarEvent.setCaption( list.getCandidate().getFullName() );
             calendarEvent.setStart( list.getAddDate() );

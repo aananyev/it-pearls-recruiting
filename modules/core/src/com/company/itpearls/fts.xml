@@ -172,5 +172,14 @@
         <entity class="com.company.itpearls.entity.CandidateCVWorkPlaces">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.Partners">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.PartnersSubscribeOpenPosition">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.itpearls.entity.PartnersPerson">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

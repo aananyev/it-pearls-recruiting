@@ -19,7 +19,7 @@ import java.util.List;
 
 @UiController("itpearls_NewJobOfferWidget")
 @UiDescriptor("new-job-offer-widget.xml")
-@DashboardWidget(name="Job offer for new candidate")
+@DashboardWidget(name = "Job offer for new candidate")
 public class NewJobOfferWidget extends ScreenFragment {
 
     @Inject
@@ -51,7 +51,7 @@ public class NewJobOfferWidget extends ScreenFragment {
                 .parameter("endDate", new Date())
                 .parameter("startDate", gregorianCalendar.getTime())
                 .view("iteractionList-view")
-                        .cacheable(true)
+                .cacheable(true)
                 .list()
                 .size());
 

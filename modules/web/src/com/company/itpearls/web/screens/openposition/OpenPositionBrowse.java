@@ -3475,62 +3475,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return style_table_wordwrap;
     }
 
-    private HBoxLayout setSubscribersRecruters(OpenPosition openPosition) {
-        final String QUERY_SUBSCRIBERS = "select e from itpearls_RecrutiesTasks e where e.endDate >= :currentDate and e.openPosition = :openPosition";
-
-        HBoxLayout recrutersHBox = uiComponents.create(HBoxLayout.class);
-
-        List<RecrutiesTasks> tasks = dataManager.load(RecrutiesTasks.class)
-                .query(QUERY_SUBSCRIBERS)
-                .parameter("openPosition", openPosition)
-                .parameter("currentDate", new Date())
-                .view("recrutiesTasks-view")
-                .cacheable(true)
-                .list();
-
-        for (RecrutiesTasks user : tasks) {
-            Image image = uiComponents.create(Image.class);
-
-            image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-            image.setWidth("30px");
-            image.setStyleName(style_circle_30px);
-            image.setDescription(user.getReacrutier().getName());
-
-            try {
-                ExtUser extUser = (ExtUser) user.getReacrutier();
-                image.setSource(FileDescriptorResource.class)
-                        .setFileDescriptor(extUser.getFileImageFace());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            recrutersHBox.add(image);
-        }
-
-        return recrutersHBox;
-    }
-
-/*    @Install(to = "openPositionsTable.candidateSendedColumn", subject = "columnGenerator")
-    private Object openPositionsTableCandidateSendedColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        HBoxLayout hBoxLayout = uiComponents.create(HBoxLayout.class);
-
-        hBoxLayout.setWidthFull();
-        hBoxLayout.setHeightFull();
-
-        Button retButton = uiComponents.create(Button.class);
-        retButton.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        retButton.setIconFromSet(CubaIcon.USER_CIRCLE);
-        retButton.addClickListener(event1 -> {
-            JobCandidateSimpleBrowse jobCandidateSimpleBrowse =
-                    screens.create(JobCandidateSimpleBrowse.class);
-            jobCandidateSimpleBrowse.setOpenPosition(event.getItem());
-            jobCandidateSimpleBrowse.show();
-        });
-
-        hBoxLayout.add(retButton);
-        return hBoxLayout;
-    } */
-
     private HBoxLayout setCenteredCell(String value, String style) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
 

@@ -61,5 +61,8 @@
         <class>com.company.itpearls.entity.InternalEmailTemplateInteraction</class>
         <class>com.company.itpearls.entity.ApplicationSetup</class>
         <class>com.company.itpearls.entity.CandidateCVWorkPlaces</class>
+        <class>com.company.itpearls.entity.Partners</class>
+        <class>com.company.itpearls.entity.PartnersSubscribeOpenPosition</class>
+        <class>com.company.itpearls.entity.PartnersPerson</class>
     </persistence-unit>
 </persistence>

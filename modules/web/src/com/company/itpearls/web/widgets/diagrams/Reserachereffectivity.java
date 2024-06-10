@@ -100,7 +100,9 @@ public class Reserachereffectivity extends ScreenFragment {
                     "order by e.recrutier.name";
         }
 
-        List<ExtUser> users = dataManager.load(ExtUser.class).view("extUser-view").list();
+        List<ExtUser> users = dataManager.load(ExtUser.class)
+                .view("extUser-view")
+                .list();
 
         for (ExtUser a : users) {
             if ((a.getDashboards() != null ? a.getDashboards() : false) && (a.getStatistics() != null ? a.getStatistics() : false)) {
