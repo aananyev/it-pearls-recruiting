@@ -667,7 +667,16 @@
         <property name="position" view="_local"/>
     </view>
     <view entity="itpearls_PartnersSubscribeOpenPosition" name="partnersSubscribeOpenPosition-view" extends="_local">
-        <property name="partner" view="_local"/>
+        <property name="partner" view="_local">
+            <property name="companyOwnership" view="_local"/>
+            <property name="companyGroup" view="_local"/>
+            <property name="companyDirector" view="_local"/>
+            <property name="departmentOfCompany" view="_local"/>
+            <property name="cityOfCompany" view="_local"/>
+            <property name="regionOfCompany" view="_local"/>
+            <property name="countryOfCompany" view="_local"/>
+            <property name="fileCompanyLogo" view="_local"/>
+        </property>
         <property name="openPosition" view="openPosition-view"/>
     </view>
     <view entity="itpearls_Partners" name="partners-view" extends="_local">
@@ -681,11 +690,11 @@
         <property name="fileCompanyLogo" view="_local"/>
     </view>
     <view entity="itpearls_PartnersPerson" name="partnersPerson-view" extends="_local">
-        <property name="partner" view="_local"/>
         <property name="positionCountry" view="_local"/>
         <property name="cityOfResidence" view="_local"/>
         <property name="personPosition" view="_local"/>
         <property name="companyDepartment" view="_local"/>
         <property name="fileImageFace" view="_local"/>
+        <property name="partners" view="partners-view"/>
     </view>
 </views>

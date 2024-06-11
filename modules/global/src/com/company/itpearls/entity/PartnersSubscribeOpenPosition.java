@@ -19,9 +19,8 @@ public class PartnersSubscribeOpenPosition extends StandardEntity {
     private Boolean active;
 
     @Lookup(type = LookupType.DROPDOWN, actions = {})
-    @NotNull
     @OnDeleteInverse(DeletePolicy.CASCADE)
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PARTNER_ID")
     private Partners partner;
 

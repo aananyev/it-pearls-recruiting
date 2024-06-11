@@ -20,7 +20,7 @@
             <form id="form">
                 <column>
                     <lookupPickerField id="partnersField"
-                                       property="partner"
+                                       property="partners"
                                        ext:index="0"
                                        caption="msg://msgPartner"
                                        optionsContainer="partnersDc">
@@ -28,6 +28,9 @@
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
+                    <textField id="partnerPersonLoginTextField" property="partnerPersonLogin"
+                               ext:index="1"
+                               caption="msg://msgPartnerPersonLogin"/>
                 </column>
             </form>
         </hbox>

@@ -61,11 +61,12 @@
     <menu id="application-partners" caption="mainMsg://menu_config.partners" icon="font-icon:HANDSHAKE_O"
           insertAfter="application-hunting">
         <item screen="itpearls_OpenPositionPartners.browse"
-              caption="mainMsg://menu_config.itpearls_OpenPositionPartners.browse" openType="NEW_TAB"/>
+              caption="mainMsg://menu_config.itpearls_OpenPositionPartners.browse" openType="NEW_TAB" icon="COMPASS"/>
         <item screen="itpearls_Partners.browse" caption="mainMsg://menu_config.itpearls_Partners.browse" icon="DOLLAR"/>
-        <item screen="itpearls_PartnersPerson.browse" caption="mainMsg://menu_config.itpearls_PartnersPerson.browse"/>
+        <item screen="itpearls_PartnersPerson.browse" caption="mainMsg://menu_config.itpearls_PartnersPerson.browse"
+              icon="GROUP"/>
         <item screen="itpearls_PartnersSubscribeOpenPosition.browse"
-              caption="mainMsg://menu_config.itpearls_PartnersSubscribeOpenPosition.browse"/>
+              caption="mainMsg://menu_config.itpearls_PartnersSubscribeOpenPosition.browse" icon="CUBES"/>
     </menu>
     <menu id="application-project" icon="BUILDING" insertAfter="application-partners">
         <item screen="itpearls_Project.browse" icon="ARCHIVE"/>

@@ -45,10 +45,13 @@
             <loader id="openPositionsDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
-                                    where e in (select a.openPosition from  itpearls_PartnersSubscribeOpenPosition a where e = a.openPosition)
+                                    where e in (select a.openPosition from itpearls_PartnersSubscribeOpenPosition a where e = a.openPosition and a.active = true)
                                     order by e.vacansyName]]>
                     <condition>
                         <and>
+                            <c:jpql>
+                                <c:where>e in (select b.openPosition from itpearls_PartnersSubscribeOpenPosition b where b.partner.partnersPerson = :partnersPerson)</c:where>
+                            </c:jpql>
                             <c:jpql>
                                 <c:where>e.priority = :priority</c:where>
                             </c:jpql>
@@ -114,5 +117,8 @@
             </loader>
         </collection>
     </data>
-    <layout/>
+    <layout>
+        <groupBox id="urgentlyPositons" visible="false"/>
+        <radioButtonGroup id="subscribeRadioButtonGroup" visible="false"/>
+    </layout>
 </window>

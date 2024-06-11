@@ -357,6 +357,10 @@ create table ITPEARLS_PERSON (
     SEND_RESUME_TO_EMAIL boolean,
     FILE_IMAGE_FACE uuid,
     --
+    -- from itpearls_PartnersPerson
+    PARTNERS_ID uuid,
+    PARTNER_PERSON_LOGIN varchar(64),
+    --
     primary key (ID)
 )^
 -- end ITPEARLS_PERSON
@@ -1346,7 +1350,7 @@ create table ITPEARLS_PARTNERS_SUBSCRIBE_OPEN_POSITION (
     DELETED_BY varchar(50),
     --
     ACTIVE boolean,
-    PARTNER_ID uuid not null,
+    PARTNER_ID uuid,
     OPEN_POSITION_ID uuid not null,
     START_DATE date,
     END_DATE date,

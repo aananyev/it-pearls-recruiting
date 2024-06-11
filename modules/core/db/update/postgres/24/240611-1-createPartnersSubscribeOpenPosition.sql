@@ -8,7 +8,8 @@ create table ITPEARLS_PARTNERS_SUBSCRIBE_OPEN_POSITION (
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
     --
-    PARTNER_ID uuid not null,
+    ACTIVE boolean,
+    PARTNER_ID uuid,
     OPEN_POSITION_ID uuid not null,
     START_DATE date,
     END_DATE date,
