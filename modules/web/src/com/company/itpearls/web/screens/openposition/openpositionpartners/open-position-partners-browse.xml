@@ -6,8 +6,8 @@
         messagesPack="com.company.itpearls.web.screens.openposition.openpositionpartners">
     <data readOnly="true">
         <collection id="openPositionsDc"
-                    class="com.company.itpearls.entity.OpenPositionPartners">
-            <view extends="openPositionPartners-view">
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="openPosition-view">
                 <property name="owner" view="_local"/>
                 <property name="grade" view="_local"/>
                 <property name="candidates" view="_local"/>
@@ -44,13 +44,24 @@
             </view>
             <loader id="openPositionsDl" cacheable="true">
                 <query>
-                    <![CDATA[select e from itpearls_OpenPositionPartners e
-                                    where e in (select a.openPosition from itpearls_PartnersSubscribeOpenPosition a where e = a.openPosition and a.active = true)
-                                    order by e.vacansyName]]>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                                      order by e.vacansyName]]>
                     <condition>
                         <and>
                             <c:jpql>
-                                <c:where>e.partners in (select b.partners from itpearls_PartnersPerson b where b.partnerPersonLogin = :partnersPerson)</c:where>
+                                <c:where>
+                                    e in (select b.openPosition from itpearls_PartnersSubscribeOpenPosition b
+                                        where b.active = true
+                                            and (b.endDate >= :currentDate or b.endDate is null)
+                                            and b.partner in
+                                            (select c.partners from itpearls_PartnersPerson c
+                                            where c.partnerPersonLogin like :login))
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+
+                                </c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e.priority = :priority</c:where>
@@ -118,7 +129,42 @@
         </collection>
     </data>
     <layout>
-        <groupBox id="urgentlyPositons" visible="false"/>
-        <radioButtonGroup id="subscribeRadioButtonGroup" visible="false"/>
+        <groupBox id="urgentlyPositons"
+                  visible="false"/>
+        <radioButtonGroup id="subscribeRadioButtonGroup"
+                          visible="false"/>
+        <filter id="filter"
+                dataLoader="openPositionsDl"/>
+        <treeDataGrid id="openPositionsTable"
+                      dataContainer="openPositionsDc">
+            <buttonsPanel id="buttonsPanel">
+                <button id="createBtn"
+                        visible="false"/>
+                <button id="editBtn"
+                        visible="true"
+                        action="openPositionsTable.edit"/>
+                <button id="removeBtn"
+                        disableOnClick="true"
+                        visible="false"/>
+                <popupButton id="openCloseButton"
+                             visible="false"/>
+                <button id="buttonSubscribe"
+                        visible="false"/>
+                <button id="suggestCandidateButton"
+                        visible="false"/>
+                <popupButton id="reportsPopupButton"
+                             visible="false"/>
+                <popupButton id="setRatingButton"
+                             visible="false"/>
+            </buttonsPanel>
+        </treeDataGrid>
+        <hbox id="additionalFilterCheckBoxes">
+            <hbox id="checkBoxsHBox">
+                <checkBox id="signDraftCheckBox"
+                          visible="false"/>
+                <checkBox id="checkBoxOnlyNotPaused"
+                          visible="false"/>
+            </hbox>
+        </hbox>
     </layout>
 </window>

@@ -461,7 +461,8 @@
                 </popupButton>
             </buttonsPanel>
         </treeDataGrid>
-        <hbox spacing="true"
+        <hbox id="additionalFilterCheckBoxes"
+              spacing="true"
               align="MIDDLE_LEFT"
               width="100%">
             <hbox id="checkBoxsHBox"

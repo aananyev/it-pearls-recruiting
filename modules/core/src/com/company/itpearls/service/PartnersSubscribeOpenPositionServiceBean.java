@@ -17,14 +17,14 @@ public class PartnersSubscribeOpenPositionServiceBean implements PartnersSubscri
 
     @Override
     public Boolean checkSubscribePartners(Partners partner, OpenPosition openPosition) {
-        return !dataManager.load(PartnersSubscribeOpenPosition.class)
+        return dataManager.load(PartnersSubscribeOpenPosition.class)
                 .query(QUERY_CHECK_PARTNERS_SUBSCRIBE)
                 .parameter("openPosition", openPosition)
                 .parameter("partner", partner)
                 .cacheable(true)
                 .view("partnersSubscribeOpenPosition-view")
                 .list()
-                .isEmpty();
+                .size() > 0;
     }
 
 }
