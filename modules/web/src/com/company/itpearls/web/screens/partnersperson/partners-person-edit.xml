@@ -21,6 +21,8 @@
                 <column>
                     <lookupPickerField id="partnersField"
                                        property="partners"
+                                       nullOptionVisible="false"
+                                       required="true"
                                        ext:index="0"
                                        caption="msg://msgPartner"
                                        optionsContainer="partnersDc">
@@ -28,9 +30,13 @@
                             <action id="lookup" type="picker_lookup"/>
                         </actions>
                     </lookupPickerField>
-                    <textField id="partnerPersonLoginTextField" property="partnerPersonLogin"
+                    <textField id="partnerPersonLoginTextField"
+                               property="partnerPersonLogin"
+                               required="true"
                                ext:index="1"
                                caption="msg://msgPartnerPersonLogin"/>
+                    <textField id="emailField"
+                               required="true"/>
                 </column>
             </form>
         </hbox>

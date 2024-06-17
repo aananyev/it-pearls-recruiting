@@ -8587,3 +8587,67 @@ server started
 2024-06-11 13:04:45.014 +04 [63008] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2024-06-11 13:04:45.516 +04 [63010] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
 2024-06-11 13:04:45.597 +04 [63012] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:11:59.395 +04 [63442] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:11:59.402 +04 [63444] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:11:59.584 +04 [63446] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:12:00.145 +04 [63448] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:12:00.207 +04 [63451] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:15.529 +04 [64214] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:15.537 +04 [64217] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:17.499 +04 [64222] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:17.607 +04 [64224] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:19.858 +04 [64228] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:22.708 +04 [64231] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:22.714 +04 [64233] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:22.721 +04 [64235] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:22.752 +04 [64237] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:51.172 +04 [64275] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:51.182 +04 [64277] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:51.369 +04 [64279] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:52.142 +04 [64282] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:43:52.313 +04 [64284] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:51:05.672 +04 [64739] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:51:05.685 +04 [64741] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:51:05.896 +04 [64743] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:51:06.443 +04 [64745] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-11 13:51:06.587 +04 [64750] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+waiting for server to shut down...2024-06-17 10:29:05.262 +04 [60116] LOG:  received fast shutdown request
+.2024-06-17 10:29:05.263 +04 [60116] LOG:  aborting any active transactions
+2024-06-17 10:29:05.264 +04 [73715] FATAL:  terminating connection due to administrator command
+2024-06-17 10:29:05.265 +04 [73754] FATAL:  terminating connection due to administrator command
+2024-06-17 10:29:05.275 +04 [60116] LOG:  background worker "logical replication launcher" (PID 60123) exited with exit code 1
+2024-06-17 10:29:05.278 +04 [60118] LOG:  shutting down
+2024-06-17 10:29:05.301 +04 [60116] LOG:  database system is shut down
+ done
+server stopped
+waiting for server to start....2024-06-17 10:31:08.878 +04 [75628] LOG:  listening on IPv6 address "::1", port 5432
+2024-06-17 10:31:08.878 +04 [75628] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2024-06-17 10:31:08.879 +04 [75628] LOG:  listening on Unix socket "/tmp/.s.PGSQL.5432"
+2024-06-17 10:31:08.898 +04 [75629] LOG:  database system was interrupted; last known up at 2024-06-17 10:28:26 +04
+2024-06-17 10:31:09.165 +04 [75629] LOG:  redo starts at 37/51000028
+2024-06-17 10:31:09.179 +04 [75629] LOG:  consistent recovery state reached at 37/5116AC28
+2024-06-17 10:31:09.179 +04 [75629] LOG:  redo done at 37/5116AC28
+2024-06-17 10:31:09.180 +04 [75629] LOG:  last completed transaction was at log time 2024-06-17 10:29:03.890256+04
+2024-06-17 10:31:09.267 +04 [75628] LOG:  database system is ready to accept connections
+ done
+server started
+2024-06-17 11:29:01.148 +04 [76660] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 11:29:01.197 +04 [76662] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 11:56:56.969 +04 [77238] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 11:56:57.868 +04 [77240] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 11:56:58.035 +04 [77242] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 12:44:06.162 +04 [78154] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 12:44:06.178 +04 [78156] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 12:44:06.376 +04 [78158] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 12:44:06.900 +04 [78160] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 12:44:07.057 +04 [78162] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 13:25:56.791 +04 [79294] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 13:25:56.805 +04 [79296] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 13:25:57.004 +04 [79298] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 13:25:57.755 +04 [79300] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 13:25:57.825 +04 [79302] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 13:30:48.255 +04 [79628] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 13:30:48.267 +04 [79630] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 13:30:48.503 +04 [79632] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 13:30:49.145 +04 [79634] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0
+2024-06-17 13:30:49.303 +04 [79636] FATAL:  unsupported frontend protocol 1234.5680: server supports 2.0 to 3.0

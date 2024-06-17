@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.partnerssubscribeopenposition;
 import com.company.itpearls.core.StdImage;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.Partners;
+import com.company.itpearls.service.PartnersSubscribeOpenPositionService;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
@@ -21,11 +22,28 @@ public class PartnersSubscribeOpenPositionEdit extends StandardEditor<PartnersSu
     private UiComponents uiComponents;
     @Inject
     private LookupPickerField<OpenPosition> openPositionField;
+    @Inject
+    private PartnersSubscribeOpenPositionService partnersSubscribeOpenPositionService;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         partnerField.setOptionImageProvider(this::setPartnerField);
+
+        initOpenPositionField();
+    }
+
+    private void initOpenPositionField() {
         openPositionField.setOptionImageProvider(this::setOpenPositionField);
+        openPositionField.setPopupWidth("200%");
+
+        openPositionField.setOptionStyleProvider(openPosition -> {
+            if (partnerField.getValue() != null) {
+                return partnersSubscribeOpenPositionService.checkSubscribePartners(partnerField.getValue(), openPosition) ?
+                        "open-position-lookup-field-gray" : "open-position-lookup-field-black";
+            } else {
+                return "open-position-lookup-field-black";
+            }
+        });
     }
 
     private Resource setOpenPositionField(OpenPosition openPosition) {
@@ -54,5 +72,4 @@ public class PartnersSubscribeOpenPositionEdit extends StandardEditor<PartnersSu
             return retImage.createResource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
         }
     }
-
 }

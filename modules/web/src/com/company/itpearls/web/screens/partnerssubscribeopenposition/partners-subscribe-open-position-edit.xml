@@ -47,8 +47,16 @@
         <form id="form" dataContainer="partnersSubscribeOpenPositionDc">
             <column width="350px">
                 <checkBox id="activeField" property="active"/>
-                <lookupPickerField id="partnerField" optionsContainer="partnersDc" property="partner"/>
-                <lookupPickerField id="openPositionField" optionsContainer="openPositionsDc" property="openPosition"/>
+                <lookupPickerField id="partnerField"
+                                   nullOptionVisible="false"
+                                   required="true"
+                                   optionsContainer="partnersDc"
+                                   property="partner"/>
+                <lookupPickerField id="openPositionField"
+                                   nullOptionVisible="false"
+                                   required="true"
+                                   optionsContainer="openPositionsDc"
+                                   property="openPosition"/>
                 <dateField id="startDateField" property="startDate"/>
                 <dateField id="endDateField" property="endDate"/>
             </column>

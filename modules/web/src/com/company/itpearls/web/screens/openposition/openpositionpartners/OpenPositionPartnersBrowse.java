@@ -20,7 +20,7 @@ public class OpenPositionPartnersBrowse extends OpenPositionBrowse {
 
     @Subscribe
     public void onAfterShow3(AfterShowEvent event) {
-        openPositionsDl.setParameter("partnersPerson", userSession.getUser());
+        openPositionsDl.setParameter("partnersPerson", userSession.getUser().getLogin());
         openPositionsDl.load();
     }
 }

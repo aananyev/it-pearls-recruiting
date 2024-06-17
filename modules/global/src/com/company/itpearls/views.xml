@@ -697,4 +697,9 @@
         <property name="fileImageFace" view="_local"/>
         <property name="partners" view="partners-view"/>
     </view>
+    <view entity="itpearls_OpenPositionPartners" name="openPositionPartners-view" extends="_local">
+        <property name="partners" view="partners-view">
+            <property name="partnersPerson" view="_local"/>
+        </property>
+    </view>
 </views>

@@ -6,8 +6,8 @@
         messagesPack="com.company.itpearls.web.screens.openposition.openpositionpartners">
     <data readOnly="true">
         <collection id="openPositionsDc"
-                    class="com.company.itpearls.entity.OpenPosition">
-            <view extends="openPosition-view">
+                    class="com.company.itpearls.entity.OpenPositionPartners">
+            <view extends="openPositionPartners-view">
                 <property name="owner" view="_local"/>
                 <property name="grade" view="_local"/>
                 <property name="candidates" view="_local"/>
@@ -44,13 +44,13 @@
             </view>
             <loader id="openPositionsDl" cacheable="true">
                 <query>
-                    <![CDATA[select e from itpearls_OpenPosition e
+                    <![CDATA[select e from itpearls_OpenPositionPartners e
                                     where e in (select a.openPosition from itpearls_PartnersSubscribeOpenPosition a where e = a.openPosition and a.active = true)
                                     order by e.vacansyName]]>
                     <condition>
                         <and>
                             <c:jpql>
-                                <c:where>e in (select b.openPosition from itpearls_PartnersSubscribeOpenPosition b where b.partner.partnersPerson = :partnersPerson)</c:where>
+                                <c:where>e.partners in (select b.partners from itpearls_PartnersPerson b where b.partnerPersonLogin = :partnersPerson)</c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e.priority = :priority</c:where>

@@ -14,5 +14,13 @@
             </loader>
         </collection>
     </data>
-    <layout/>
+    <layout>
+        <dataGrid id="personsTable">
+            <columns>
+                <column id="partnerColumn" property="partners"
+                        caption="msg://msgPartner"
+                        ext:index="0"/>
+            </columns>
+        </dataGrid>
+    </layout>
 </window>

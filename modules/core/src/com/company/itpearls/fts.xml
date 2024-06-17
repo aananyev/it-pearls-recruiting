@@ -181,5 +181,8 @@
         <entity class="com.company.itpearls.entity.PartnersPerson">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.OpenPositionPartners">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

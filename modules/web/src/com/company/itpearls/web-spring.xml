@@ -46,6 +46,8 @@
                 <entry key="itpearls_GoogleCalendarService" value="com.company.itpearls.service.GoogleCalendarService"/>
                 <entry key="itpearls_RecrutiesTasksService" value="com.company.itpearls.service.RecrutiesTasksService"/>
                 <entry key="itpearls_TimeAndDateService" value="com.company.itpearls.core.TimeAndDateService"/>
+                <entry key="itpearls_PartnersSubscribeOpenPositionService"
+                       value="com.company.itpearls.service.PartnersSubscribeOpenPositionService"/>
             </map>
         </property>
     </bean>

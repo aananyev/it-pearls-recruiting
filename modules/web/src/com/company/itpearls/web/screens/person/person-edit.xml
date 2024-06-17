@@ -43,13 +43,21 @@
                   width="100%"
                   dataContainer="personDc">
                 <column width="250px">
-                    <textField id="firstNameField" property="firstName" caption="mainMsg://msgFirstName"/>
+                    <textField id="firstNameField"
+                               property="firstName"
+                               required="true"
+                               caption="mainMsg://msgFirstName"/>
                     <textField id="middleNameField" property="middleName" caption="mainMsg://msgMiddleName"/>
-                    <textField id="secondNameField" property="secondName" caption="mainMsg://msgSecondName"/>
+                    <textField id="secondNameField"
+                               required="true"
+                               property="secondName"
+                               caption="mainMsg://msgSecondName"/>
                     <!--                    <lookupPickerField id="personFieldCompanyDepartment" dataContainer="companyDepartamentsDc" property="companyDepartment"
                                                            caption="mainMsg://msgCompanyDepartment" optionsContainer="personPositionsDc"/> -->
                     <dateField id="birdhDateField" property="birdhDate" caption="mainMsg://msgBirthday"/>
-                    <textField id="emailField" property="email" caption="mainMsg://msgEmail"/>
+                    <textField id="emailField" property="email" caption="mainMsg://msgEmail">
+                        <validator class="com.haulmont.cuba.gui.components.validators.EmailValidator"/>
+                    </textField>
                     <textField id="phoneField" property="phone" caption="mainMsg://msgPhone"/>
                     <textField id="mobilePhoneField" caption="msg://msgMobPhone" dataContainer="personDc"
                                property="mobPhone"/>

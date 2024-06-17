@@ -64,5 +64,6 @@
         <class>com.company.itpearls.entity.Partners</class>
         <class>com.company.itpearls.entity.PartnersSubscribeOpenPosition</class>
         <class>com.company.itpearls.entity.PartnersPerson</class>
+        <class>com.company.itpearls.entity.OpenPositionPartners</class>
     </persistence-unit>
 </persistence>

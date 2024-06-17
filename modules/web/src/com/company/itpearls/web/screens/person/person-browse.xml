@@ -53,7 +53,9 @@
                         caption="msg://msgFirstName"/>
                 <column id="middleName"
                         property="middleName"
-                        caption="msg://msgMiddleName"/>
+                        caption="msg://msgMiddleName"
+                        collapsible="true"
+                        collapsed="true"/>
                 <column id="personPosition"
                         property="personPosition"
                         caption="msg://msgPersonPosition"/>
