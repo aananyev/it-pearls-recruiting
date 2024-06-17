@@ -3,5 +3,44 @@
         xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
         extends="com/company/itpearls/web/screens/openposition/open-position-edit.xml"
         messagesPack="com.company.itpearls.web.screens.openposition.openpositionpartners">
-    <layout/>
+    <layout>
+        <vbox id="tabSheetGroupBox">
+            <tabSheet id="tabSheetOpenPosition">
+                <tab id="tabOpenPosition">
+                    <scrollBox orientation="vertical">
+                        <vbox spacing="false">
+                            <hbox id="vacancyNameHBox">
+                                <textField id="vacansyIDTextField" visible="false"/>
+                                <lookupPickerField id="gradeLookupPickerField" visible="false"/>
+                                <button id="generateVacancyNameFieldButton" visible="false"/>
+                            </hbox>
+                            <hbox id="hboxProject1">
+                                <groupBox id="commandFieldHBox">
+                                    <hbox id="hbox1">
+                                        <hbox id="hbox2">
+                                            <checkBox id="signDraftCheckBox" visible="false"/>
+                                            <checkBox id="openClosePositionCheckBox" visible="false"/>
+                                            <checkBox id="internalProjectCheckBox" visible="false"/>
+                                        </hbox>
+                                    </hbox>
+                                </groupBox>
+                            </hbox>
+                            <groupBox id="commandOrVacancyGroupBox" visible="false"/>
+                            <groupBox id="projectCompanyGroupBox" visible="false"/>
+                        </vbox>
+                    </scrollBox>
+                </tab>
+                <tab id="laborAgreementTab" visible="false"/>
+                <tab id="tabFiles" visible="false"/>
+                <tab id="tabMemoForInterview" visible="false"/>
+                <tab id="tabOpenPositionNews" visible="false"/>
+                <tab id="tabApproval" visible="false"/>
+            </tabSheet>
+        </vbox>
+        <vbox id="forExpand">
+            <hbox id="editActions">
+                <button id="subscribePositionButton" visible="false"/>
+            </hbox>
+        </vbox>
+    </layout>
 </window>

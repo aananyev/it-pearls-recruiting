@@ -1639,9 +1639,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return titleLabel;
     }
 
-    private Component createEditButton(OpenPosition entity) {
+    protected Component createEditButton(OpenPosition entity) {
         Button editButton = uiComponents.create(Button.class);
-        editButton.setCaption("Изменить");
+        editButton.setCaption(messageBundle.getMessage("msgEdit"));
         editButton.setIcon(CubaIcon.EDIT.iconName());
         editButton.setAlignment(Component.Alignment.TOP_RIGHT);
 

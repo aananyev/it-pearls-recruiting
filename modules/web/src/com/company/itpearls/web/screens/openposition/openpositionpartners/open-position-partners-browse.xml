@@ -137,14 +137,12 @@
                 dataLoader="openPositionsDl"/>
         <treeDataGrid id="openPositionsTable"
                       dataContainer="openPositionsDc">
-            <buttonsPanel id="buttonsPanel">
+            <buttonsPanel id="buttonsPanel" visible="false">
                 <button id="createBtn"
                         visible="false"/>
                 <button id="editBtn"
-                        visible="true"
-                        action="openPositionsTable.edit"/>
+                        visible="false"/>
                 <button id="removeBtn"
-                        disableOnClick="true"
                         visible="false"/>
                 <popupButton id="openCloseButton"
                              visible="false"/>

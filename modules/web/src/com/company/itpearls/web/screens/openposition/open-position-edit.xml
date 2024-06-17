@@ -323,11 +323,11 @@
                                           stylename="light"
                                           caption="msg://msgCommanSetup"
                                           align="MIDDLE_RIGHT">
-                                    <hbox spacing="true"
+                                    <hbox id="hbox1" spacing="true"
                                           align="MIDDLE_LEFT"
                                           height="AUTO"
                                           width="100%">
-                                        <hbox spacing="true"
+                                        <hbox id="hbox2" spacing="true"
                                               width="100%"
                                               height="100%">
                                             <dateField id="closingDateDateField"
@@ -377,7 +377,8 @@
                                     </hbox>
                                 </groupBox>
                             </hbox>
-                            <groupBox spacing="true"
+                            <groupBox id="commandOrVacancyGroupBox"
+                                      spacing="true"
                                       collapsable="true"
                                       collapsed="false"
                                       caption="msg://msgCommandOrVacancy"
@@ -407,7 +408,8 @@
                                     </hbox>
                                 </hbox>
                             </groupBox>
-                            <groupBox spacing="false"
+                            <groupBox id="projectCompanyGroupBox"
+                                      spacing="false"
                                       stylename="light"
                                       caption="msg://msgTypeOfProject"
                                       collapsed="false"
@@ -1074,7 +1076,10 @@
                 </tab>
             </tabSheet>
         </vbox>
-        <vbox id="forExpand" spacing="false" align="BOTTOM_RIGHT" expand="statusHBox">
+        <vbox id="forExpand"
+              spacing="false"
+              align="BOTTOM_RIGHT"
+              expand="statusHBox">
             <hbox id="statusHBox" width="100%">
                 <textField id="ownerTextField"
                            width="AUTO"
@@ -1088,7 +1093,8 @@
             <hbox id="editActions"
                   spacing="true"
                   align="BOTTOM_RIGHT">
-                <button invoke="subscribePosition"
+                <button id="subscribePositionButton"
+                        invoke="subscribePosition"
                         caption="msg://msgSubscribe"
                         icon="BELL"/>
                 <button id="windowCommitAndCloseButton"
