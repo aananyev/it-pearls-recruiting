@@ -30,6 +30,8 @@ public class JobCandidatePartnersEdit extends JobCandidateEdit {
     private UserSession userSession;
     @Inject
     private CollectionLoader<OpenPosition> openPositionDl;
+    @Inject
+    private Button blockCandidateButton;
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
@@ -58,6 +60,7 @@ public class JobCandidatePartnersEdit extends JobCandidateEdit {
 
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
+        blockCandidateButton.setVisible(false);
         partnersLookupPickerField.setOptionImageProvider(this::setPartnersLogo);
         setPartners();
     }

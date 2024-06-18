@@ -169,11 +169,28 @@
                     </vbox>
                 </scrollBox>
             </tab>
+            <tab id="tabCandidate">
+                <hbox id="cardCandidateBox">
+                    <grid id="tabCabdidateGrid">
+                        <rows>
+                            <row id="row5tabCabdidateGridRow">
+                                <dateField id="birdhDateField"
+                                           required="true"/>
+                            </row>
+                        </rows>
+                    </grid>
+                </hbox>
+            </tab>
             <tab id="commentsTab">
                 <vbox id="tabCommentsVbox">
                     <groupBox id="messageGroupBox">
                         <hbox id="vacancyPopupPickerFieldHBox">
-                            <lookupPickerField id="vacancyPopupPickerField"/>
+                            <lookupPickerField id="vacancyPopupPickerField">
+                                <actions>
+                                    <action id="lookup" type="picker_lookup" visible="false"/>
+                                    <action id="open" type="picker_open" visible="false"/>
+                                </actions>
+                            </lookupPickerField>
                         </hbox>
                     </groupBox>
                 </vbox>

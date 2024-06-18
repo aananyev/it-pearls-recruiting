@@ -136,6 +136,7 @@
             </actions>
             <columns>
                 <column id="status"
+                        caption="msg://msgStatus"
                         width="200px">
                     <componentRenderer/>
                 </column>

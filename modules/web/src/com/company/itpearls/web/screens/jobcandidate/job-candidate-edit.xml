@@ -583,7 +583,7 @@
                           spacing="true">
                         <columns count="2"/>
                         <rows>
-                            <row>
+                            <row id="row1tabCabdidateGridRow">
                                 <suggestionField id="firstNameField"
                                                  dataContainer="jobCandidateDc"
                                                  property="firstName"
@@ -606,6 +606,7 @@
                                 <suggestionPickerField id="companySuggestPickerField"
                                                        inputPrompt="msg://msgInputPrompt"
                                                        width="100%"
+                                                       required="true"
                                                        dataContainer="jobCandidateDc"
                                                        property="currentCompany"
                                                        caption="msg://msgCompany"
@@ -646,7 +647,7 @@
                                     </query>
                                 </suggestionField> -->
                             </row>
-                            <row>
+                            <row id="row2tabCabdidateGridRow">
                                 <suggestionField id="middleNameField"
                                                  dataContainer="jobCandidateDc"
                                                  property="middleName"
@@ -689,7 +690,7 @@
                                             invoke="addPositionList"/>
                                 </hbox>
                             </row>
-                            <row>
+                            <row id="row3tabCabdidateGridRow">
                                 <hbox/>
                                 <hbox align="MIDDLE_RIGHT"
                                       spacing="true"
@@ -700,7 +701,7 @@
                                            align="TOP_RIGHT"/>
                                 </hbox>
                             </row>
-                            <row>
+                            <row id="row4tabCabdidateGridRow">
                                 <suggestionField id="secondNameField"
                                                  dataContainer="jobCandidateDc"
                                                  property="secondName"
@@ -729,9 +730,10 @@
                                     </actions>
                                 </lookupPickerField>
                             </row>
-                            <row>
+                            <row id="row5tabCabdidateGridRow">
                                 <dateField id="birdhDateField"
-                                           dataContainer="jobCandidateDc" property="birdhDate"
+                                           dataContainer="jobCandidateDc"
+                                           property="birdhDate"
                                            width="100%"
                                            caption="msg://msgBirthDate"/>
                             </row>
@@ -906,8 +908,8 @@
                                    visible="true"
                                    width="AUTO">
                     <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                        <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                        <action id="lookup" type="picker_lookup" visible="false"/>
+                        <action id="open" type="picker_open" icon="EDIT_ACTION" visible="false"/>
                     </actions>
                 </lookupPickerField>
                 <dataGrid id="jobCandidateIteractionListTable"
