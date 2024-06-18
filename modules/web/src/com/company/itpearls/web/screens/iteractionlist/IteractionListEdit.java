@@ -186,6 +186,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             copyAndCheckCandidate();
         });
 
+        candidateFieldSearchExecutor();
+    }
+
+    protected void candidateFieldSearchExecutor() {
         candidateField.setSearchExecutor((searchString, searchParams) -> {
             searchString = QueryUtils.escapeForLike(searchString);
 

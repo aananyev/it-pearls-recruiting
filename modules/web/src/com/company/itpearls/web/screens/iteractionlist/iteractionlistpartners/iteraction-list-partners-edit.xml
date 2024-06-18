@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        extends="com/company/itpearls/web/screens/iteractionlist/iteraction-list-edit.xml"
+        messagesPack="com.company.itpearls.web.screens.iteractionlist.iteractionlistpartners">
+    <data>
+        <instance id="iteractionListDc"
+                  class="com.company.itpearls.entity.IteractionListPartners">
+            <view extends="_local">
+                <property name="partner"
+                          view="partners-view"/>
+                <property name="chainInteraction"
+                          view="_local"/>
+                <property name="candidate"
+                          view="_local">
+                    <property name="fileImageFace" view="_local"/>
+                    <property name="personPosition"
+                              view="_local"/>
+                </property>
+                <property name="iteractionType"
+                          view="_local">
+                    <property name="workStatus"
+                              view="employeeWorkStatus-view"/>
+                </property>
+                <property name="vacancy"
+                          view="_local">
+                    <property name="grade"
+                              view="_local"/>
+                    <property name="positionType"
+                              view="_local"/>
+                    <property name="owner"
+                              view="_local"/>
+                    <property name="projectName"
+                              view="_local">
+                        <property name="projectLogo"
+                                  view="_local"/>
+                        <property name="projectTree"
+                                  view="_local"/>
+                        <property name="projectOwner"
+                                  view="_local"/>
+                        <property name="projectDepartment"
+                                  view="_local">
+                            <property name="companyName"
+                                      view="_local">
+                                <property name="fileCompanyLogo" view="_local"/>
+                            </property>
+                        </property>
+                    </property>
+                    <property name="cities"
+                              view="_local"/>
+                </property>
+                <property name="recrutier"
+                          view="_local">
+                    <property name="fileImageFace" view="_local"/>
+                </property>
+            </view>
+            <loader id="iteractionListDl"/>
+        </instance>
+        <collection id="openPositionDc"
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="_local">
+                <property name="grade"
+                          view="_minimal"/>
+                <property name="positionType"
+                          view="_local"/>
+                <property name="owner"
+                          view="_local"/>
+                <property name="projectName"
+                          view="_local">
+                    <property name="projectLogo"
+                              view="_local"/>
+                    <property name="projectDepartment"
+                              view="_local">
+                        <property name="companyName"
+                                  view="_local"/>
+                    </property>
+                </property>
+            </view>
+            <loader id="openPositionsDl"
+                    cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                                order by e.openClose, e.vacansyName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e in (select b.openPosition from itpearls_PartnersSubscribeOpenPosition b
+                                    where b.active = true
+                                    and (b.endDate >= :currentDate or b.endDate is null)
+                                    and b.partner in
+                                    (select c.partners from itpearls_PartnersPerson c
+                                    where c.partnerPersonLogin like :login))
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.companyDepartament = :departament
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e in (select k.openPosition from itpearls_RecrutiesTasks k
+                                    where k.reacrutier = :subscriber
+                                    and k.closed = false
+                                    and current_date between k.startDate and k.endDate)
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="partnersDc"
+                    class="com.company.itpearls.entity.Partners"
+                    view="partners-view">
+            <loader id="partnersDl"
+                    cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_Partners e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <groupBox id="headerGroupBox">
+            <lookupPickerField id="partnersLookupPickerField"
+                               dataContainer="iteractionListDc"
+                               property="partner"
+                               nullOptionVisible="false"
+                               required="true"
+                               editable="false"
+                               caption="msg://msgPartners"
+                               optionsContainer="partnersDc">
+                <actions>
+                    <action id="lookup"
+                            type="picker_lookup"/>
+                    <action id="open"
+                            type="picker_open"
+                            icon="EDIT_ACTION"/>
+                </actions>
+            </lookupPickerField>
+        </groupBox>
+        <tabSheet id="iteractionListTabSheeet">
+            <tab id="iteractionListTab">
+                <scrollBox orientation="vertical">
+
+                    <grid id="gridIterationData">
+                        <rows>
+                            <row id="row">
+                                <suggestionPickerField id="candidateField"
+                                                       inputPrompt="mainMsg://msgStartInput"
+                                                       minSearchStringLength="3"
+                                                       rowspan="1"
+                                                       colspan="1"
+                                                       caption="msg://msgCandidate"
+                                                       width="100%"
+                                                       required="true"
+                                                       dataContainer="iteractionListDc"
+                                                       property="candidate">
+                                    <actions>
+                                        <action id="lookup"
+                                                type="picker_lookup"
+                                                openType="DIALOG"
+                                                visible="false"/>
+                                        <action id="open"
+                                                type="picker_open"
+                                                icon="EDIT_ACTION"
+                                                visible="false"/>
+                                        <action id="clear"
+                                                type="picker_clear"/>
+                                    </actions>
+                                    <query entityClass="com.company.itpearls.entity.JobCandidatePartners"
+                                           escapeValueForLike="true"
+                                           searchStringFormat="%$searchString%">
+                                        <![CDATA[select e
+                                        from itpearls_JobCandidatePartners e
+                                        where
+                                        e.partner = :partner
+                                        and not (e.middleName like '(не использовать)')
+                                        and not (e.blockCandidate = true)
+                                        and lower(e.fullName) like lower(:searchString) escape '\']]>
+                                    </query>
+                                </suggestionPickerField>
+                            </row>
+                        </rows>
+                    </grid>
+                </scrollBox>
+            </tab>
+        </tabSheet>
+    </layout>
+</window>

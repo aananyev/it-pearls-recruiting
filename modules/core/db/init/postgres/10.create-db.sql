@@ -91,6 +91,7 @@ create table ITPEARLS_ITERACTION_LIST (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    DTYPE varchar(31),
     --
     NUMBER_ITERACTION decimal(19, 2),
     ITERACTION_TYPE_ID uuid,
@@ -109,6 +110,9 @@ create table ITPEARLS_ITERACTION_LIST (
     CURRENT_PRIORITY integer,
     CURRENT_OPEN_CLOSE boolean,
     CHAIN_INTERACTION_ID uuid,
+    --
+    -- from itpearls_IteractionListPartners
+    PARTNER_ID uuid,
     --
     primary key (ID)
 )^

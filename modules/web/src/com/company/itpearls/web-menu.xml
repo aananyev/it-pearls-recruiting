@@ -65,6 +65,8 @@
         <item screen="itpearls_JobCandidatePartners.browse"
               caption="mainMsg://menu_config.itpearls_JobCandidatePartners.browse" icon="font-icon:USER"
               openType="NEW_TAB"/>
+        <item screen="itpearls_IteractionListPartners.browse"
+              caption="mainMsg://menu_config.itpearls_IteractionListPartners.browse" icon="REORDER"/>
         <item screen="itpearls_Partners.browse" caption="mainMsg://menu_config.itpearls_Partners.browse" icon="DOLLAR"/>
         <item screen="itpearls_PartnersPerson.browse" caption="mainMsg://menu_config.itpearls_PartnersPerson.browse"
               icon="GROUP"/>

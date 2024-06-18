@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        extends="com/company/itpearls/web/screens/iteractionlist/iteraction-list-browse.xml"
+        messagesPack="com.company.itpearls.web.screens.iteractionlist.iteractionlistpartners">
+    <data>
+        <collection id="iteractionListsDc"
+                    class="com.company.itpearls.entity.IteractionListPartners">
+            <view extends="_local">
+                <property name="partner" view="partners-view"/>
+                <property name="createTs"/>
+                <property name="candidate" view="_local">
+                    <property name="candidateCv" view="_local"/>
+                    <property name="socialNetwork" view="_local"/>
+                    <property name="personPosition" view="_local"/>
+                    <property name="positionList" view="_local"/>
+                    <property name="fileImageFace" view="_local"/>
+                </property>
+                <property name="iteractionType" view="_local">
+                </property>
+                <property name="recrutier" view="_local"/>
+                <property name="vacancy" view="_local">
+                    <property name="positionType" view="_local"/>
+                    <property name="cities" view="_local"/>
+                    <property name="owner" view="_local"/>
+                    <property name="grade" view="_local"/>
+                    <property name="projectName" view="_local">
+                        <property name="projectDepartment" view="_local"/>
+                    </property>
+                </property>
+                <property name="comment"/>
+            </view>
+            <loader id="iteractionListsDl"
+                    cacheable="true">
+                <query><![CDATA[select e
+                        from itpearls_IteractionListPartners e
+                        order by e.numberIteraction desc]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.partner = :partner
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.createdBy like :userName
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.vacancy.internalProject = :internalProject
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.outStaffing = :outStaffing
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout/>
+</window>

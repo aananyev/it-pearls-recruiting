@@ -146,7 +146,8 @@
                 width="1000"/>
     <layout expand="iteractionListTabSheeet"
             spacing="false">
-        <groupBox spacing="false"
+        <groupBox id="headerGroupBox"
+                  spacing="false"
                   collapsable="true"
                   stylename="light"
                   caption="msg://msgHeaderIteraction">
@@ -228,7 +229,6 @@
                            align="MIDDLE_RIGHT"
                            height="50px"/>
                 </hbox>
-
                 <image id="projectLogoImage"
                        width="100px"
                        height="100px"

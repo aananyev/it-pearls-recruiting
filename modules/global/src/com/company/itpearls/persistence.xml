@@ -66,5 +66,6 @@
         <class>com.company.itpearls.entity.PartnersPerson</class>
         <class>com.company.itpearls.entity.OpenPositionPartners</class>
         <class>com.company.itpearls.entity.JobCandidatePartners</class>
+        <class>com.company.itpearls.entity.IteractionListPartners</class>
     </persistence-unit>
 </persistence>
