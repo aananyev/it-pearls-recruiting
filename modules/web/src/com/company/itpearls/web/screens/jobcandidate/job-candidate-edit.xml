@@ -212,7 +212,8 @@
             spacing="true"
             width="100%"
             height="100%">
-        <groupBox caption="msg://msgOptions"
+        <groupBox id="mainGroupBox"
+                caption="msg://msgOptions"
                   collapsable="true"
                   spacing="true"
                   stylename="light">
@@ -225,7 +226,6 @@
                       dataContainer="jobCandidateDc"
                       property="blockCandidate"
                       visible="false"/>
-
             <grid spacing="true" height="45px" width="100%">
                 <columns count="14"/>
                 <rows>
@@ -489,7 +489,8 @@
                         <hbox id="skillBox"
                               width="100%"
                               height="AUTO"/>
-                        <scrollBox id="lastProjectsScrollBox" orientation="vertical">
+                        <scrollBox id="lastProjectsScrollBox"
+                                   orientation="vertical">
                             <groupBox id="lastProjects"
                                       caption="msg://msgCandidateProjects"
                                       collapsable="true"
@@ -501,7 +502,7 @@
                                       width="100%">
                                     <columns count="6"/>
                                     <rows>
-                                        <row>
+                                        <row id="row1Row">
                                             <table id="lastProjectTable"
                                                    width="100%"
                                                    height="100%"
@@ -602,19 +603,6 @@
                                         lower(:searchString) escape '\'
                                     </query>
                                 </suggestionField>
-<!--                                <lookupPickerField id="currentCompanyField"
-                                                   optionsContainer="currentCompaniesDc"
-                                                   dataContainer="jobCandidateDc"
-                                                   nullOptionVisible="false"
-                                                   property="currentCompany"
-                                                   width="100%"
-                                                   caption="msg://msgCorrentCompany"
-                                                   required="true">
-                                    <actions>
-                                        <action id="lookup" type="picker_lookup"/>
-                                        <action id="open" type="picker_open" icon="EDIT_ACTION"/>
-                                    </actions>
-                                </lookupPickerField> -->
                                 <suggestionPickerField id="companySuggestPickerField"
                                                        inputPrompt="msg://msgInputPrompt"
                                                        width="100%"
@@ -1164,13 +1152,17 @@
                                     property="comment"/>
                         </columns>
                     </dataGrid>
-                    <groupBox stylename="well"
+                    <groupBox id="messageGroupBox"
+                            stylename="well"
                               spacing="true"
                               width="100%">
                         <textField id="chatMessageTextField"
                                    stylename="large"
                                    width="100%"/>
-                        <hbox width="100%" expand="vacancyPopupPickerField" spacing="true">
+                        <hbox id="vacancyPopupPickerFieldHBox"
+                                width="100%"
+                              expand="vacancyPopupPickerField"
+                              spacing="true">
                             <lookupPickerField id="vacancyPopupPickerField"
                                                align="MIDDLE_LEFT"
                                                stylename="large"

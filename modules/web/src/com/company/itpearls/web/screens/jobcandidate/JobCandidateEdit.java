@@ -53,8 +53,6 @@ import java.util.stream.Collectors;
 @LoadDataBeforeShow
 public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
-    private ReportService reportService;
-    @Inject
     private ReportGuiManager reportGuiManager;
     @Inject
     private DataManager dataManager;
@@ -130,8 +128,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private SuggestionField<String> middleNameField;
     @Inject
     private Label<String> positionsLabel;
-//    @Inject
-//    private LookupPickerField<Company> currentCompanyField;
     @Inject
     private LookupPickerField<Position> personPositionField;
     @Inject

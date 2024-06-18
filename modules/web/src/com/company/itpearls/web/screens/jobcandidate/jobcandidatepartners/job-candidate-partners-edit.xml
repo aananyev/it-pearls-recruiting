@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        extends="com/company/itpearls/web/screens/jobcandidate/job-candidate-edit.xml"
+        messagesPack="com.company.itpearls.web.screens.jobcandidate.jobcandidatepartners">
+    <data>
+        <instance id="jobCandidateDc"
+                  class="com.company.itpearls.entity.JobCandidatePartners">
+            <view extends="_local">
+                <property name="partners" view="partners-view"/>
+                <property name="candidateCv" view="_local">
+                    <property name="candidateCVWorkPlaces" view="candidateCVWorkPlaces-view"/>
+                    <property name="candidate" view="_local">
+                        <property name="personPosition" view="_local">
+                            <property name="logo" view="_local"/>
+                        </property>
+                    </property>
+                    <property name="resumePosition" view="_local">
+                    </property>
+                    <property name="toVacancy" view="_local">
+                        <property name="positionType" view="_local">
+                            <property name="logo" view="_local"/>
+                        </property>
+                        <property name="projectName" view="_local">
+                            <property name="projectLogo" view="_local"/>
+                            <property name="projectDepartment" view="_local">
+                                <property name="companyName" view="_local"/>
+                            </property>
+                        </property>
+                        <property name="owner" view="_local">
+                            <property name="fileImageFace" view="_local"/>
+                        </property>
+                    </property>
+                    <property name="someFiles" view="_local">
+                        <property name="fileOwner" view="_local"/>
+                        <property name="fileDescriptor" view="_local"/>
+                        <property name="fileType" view="_local"/>
+                        <property name="candidateCV" view="_local"/>
+                    </property>
+                    <property name="fileImageFace" view="_local"/>
+                    <property name="owner" view="_local">
+                        <property name="fileImageFace" view="_local"/>
+                    </property>
+                </property>
+                <property name="iteractionList" view="_local">
+                    <property name="candidate" view="_local"/>
+                    <property name="vacancy" view="_local">
+                        <property name="grade" view="_local"/>
+                        <property name="owner" view="_local">
+                            <property name="fileImageFace" view="_local"/>
+                        </property>
+                        <property name="positionType" view="_local"/>
+                        <property name="projectName" view="_local">
+                            <property name="projectLogo" view="_local"/>
+                            <property name="projectDepartment" view="_local"/>
+                        </property>
+                    </property>
+                    <property name="iteractionType" view="_local"/>
+                    <property name="recrutier" view="_local">
+                        <property name="fileImageFace" view="_local"/>
+                    </property>
+                </property>
+                <property name="socialNetwork" view="_local">
+                    <property name="socialNetworkURL" view="_local">
+                        <property name="logo" view="_local"/>
+                    </property>
+                </property>
+                <property name="laborAgreement" view="_local"/>
+                <property name="cityOfResidence" view="_local"/>
+                <property name="currentCompany" view="company-view">
+                    <property name="companyGroup" view="_local"/>
+                </property>
+                <property name="fileImageFace" view="_local"/>
+                <property name="positionList" view="_local">
+                    <property name="positionList" view="_local"/>
+                </property>
+                <property name="personPosition" view="_local">
+                    <property name="logo" view="_local"/>
+                </property>
+            </view>
+            <loader id="jobCandidateDl"
+                    softDeletion="true"
+                    dynamicAttributes="false"/>
+            <collection id="jobCandidateCandidateCvsDc"
+                        property="candidateCv"/>
+            <collection id="jobCandidateSocialNetworksDc"
+                        property="socialNetwork"/>
+            <collection id="jobCandidateIteractionDc"
+                        property="iteractionList"/>
+            <collection id="jobCandidateLaborAgreementDc"
+                        property="laborAgreement"/>
+        </instance>
+        <collection id="partnersDc"
+                    class="com.company.itpearls.entity.Partners"
+                    view="partners-view">
+            <loader id="partnersDl"
+                    cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_Partners e]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="openPositionDc"
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="_local">
+                <property name="positionType" view="_local"/>
+                <property name="projectName" view="_local">
+                    <property name="projectLogo" view="_local"/>
+                </property>
+                <property name="grade" view="_local"/>
+            </view>
+            <loader id="openPositionDl"
+                    cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                    where e.openClose = false or e.openClose is null
+                    order by e.vacansyName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                e in (select b.openPosition from itpearls_PartnersSubscribeOpenPosition b
+                                where b.active = true
+                                and (b.endDate >= :currentDate or b.endDate is null)
+                                and b.partner in
+                                (select c.partners from itpearls_PartnersPerson c
+                                where c.partnerPersonLogin like :login))
+                            </c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout>
+        <groupBox id="mainGroupBox">
+            <lookupPickerField id="partnersLookupPickerField"
+                               dataContainer="jobCandidateDc"
+                               property="partners"
+                               nullOptionVisible="false"
+                               required="true"
+                               editable="false"
+                               caption="msg://msgPartners"
+                               optionsContainer="partnersDc">
+                <actions>
+                    <action id="lookup"
+                            type="picker_lookup"/>
+                    <action id="open"
+                            type="picker_open"
+                            icon="EDIT_ACTION"/>
+                </actions>
+            </lookupPickerField>
+        </groupBox>
+        <tabSheet id="tabSheetSocialNetworks">
+            <tab id="jobCandidateCard">
+                <scrollBox id="jobCandidateCardScrollBox">
+                    <vbox id="jobCandidateCardVBox">
+                        <scrollBox id="lastProjectsScrollBox">
+                            <groupBox id="lastProjects">
+                                <grid id="dictionatysTavlesHBox">
+                                    <rows>
+                                        <row id="row1Row">
+                                            <table id="suggestVacancyTable" visible="false"/>
+                                        </row>
+                                    </rows>
+                                </grid>
+                            </groupBox>
+                        </scrollBox>
+                    </vbox>
+                </scrollBox>
+            </tab>
+            <tab id="commentsTab">
+                <vbox id="tabCommentsVbox">
+                    <groupBox id="messageGroupBox">
+                        <hbox id="vacancyPopupPickerFieldHBox">
+                            <lookupPickerField id="vacancyPopupPickerField"/>
+                        </hbox>
+                    </groupBox>
+                </vbox>
+            </tab>
+        </tabSheet>
+        <hbox id="editActions">
+            <hbox id="buttonCancelOk">
+                <button id="blockCandidateButton" visible="false"/>
+            </hbox>
+        </hbox>
+    </layout>
+</window>

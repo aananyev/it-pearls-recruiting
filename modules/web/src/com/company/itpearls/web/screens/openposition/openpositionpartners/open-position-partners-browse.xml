@@ -59,11 +59,6 @@
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>
-
-                                </c:where>
-                            </c:jpql>
-                            <c:jpql>
                                 <c:where>e.priority = :priority</c:where>
                             </c:jpql>
                             <c:jpql>
