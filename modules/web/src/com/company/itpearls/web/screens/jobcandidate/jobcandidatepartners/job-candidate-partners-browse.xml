@@ -1,8 +1,92 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
         extends="com/company/itpearls/web/screens/jobcandidate/job-candidate-browse.xml"
         messagesPack="com.company.itpearls.web.screens.jobcandidate.jobcandidatepartners">
+    <data>
+        <collection id="jobCandidatesDc"
+                    class="com.company.itpearls.entity.JobCandidatePartners">
+            <view extends="jobCandidatePartners-view"
+                  systemProperties="true">
+                <property name="currentCompany" view="_local">
+                    <property name="fileCompanyLogo" view="_local"/>
+                </property>
+                <property name="iteractionList" view="_local">
+                    <property name="recrutier" view="_local">
+                        <property name="group" view="_local"/>
+                    </property>)
+                    <property name="iteractionType" view="_local"/>
+                    <property name="vacancy" view="_local">
+                        <property name="owner" view="_local"/>
+                        <property name="grade" view="_local"/>
+                        <property name="positionType" view="_local"/>
+                        <property name="projectName" view="_local">
+                            <property name="projectLogo" view="_local"/>
+                            <property name="projectDepartment" view="_local">
+                                <property name="companyName" view="_local"/>
+                            </property>
+                        </property>
+                    </property>
+                </property>
+                <property name="positionList" view="_local">
+                    <property name="positionList" view="_local"/>
+                </property>
+                <property name="socialNetwork" view="_local">
+                    <property name="socialNetworkURL" view="_local">
+                        <property name="logo" view="_local"/>
+                    </property>
+                </property>
+            </view>
+            <loader id="jobCandidatesDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_JobCandidatePartners e
+                             order by e.secondName, e.firstName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.partners = :partner</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.createdBy like :userName</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>not e.status = :param1</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>not e.status = :param3</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select f.candidate
+                                    from itpearls_IteractionList f
+                                    where f.candidate = :candidate and f.rating >= :rating)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select k.candidate
+                                    from itpearls_IteractionList k
+                                    where k.recrutier = :recrutier)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select g.candidate
+                                    from itpearls_CandidateCV g
+                                    where g.candidate = :candidateCV)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e in (select l.jobCandidate
+                                    from itpearls_JobCandidateSignIcon l
+                                    where l.signIcon = :signIcon)
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
     <layout>
         <dataGrid id="jobCandidatesTable">
             <buttonsPanel id="buttonsPanel">

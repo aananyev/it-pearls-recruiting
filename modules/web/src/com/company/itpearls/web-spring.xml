@@ -48,6 +48,7 @@
                 <entry key="itpearls_TimeAndDateService" value="com.company.itpearls.core.TimeAndDateService"/>
                 <entry key="itpearls_PartnersSubscribeOpenPositionService"
                        value="com.company.itpearls.service.PartnersSubscribeOpenPositionService"/>
+                <entry key="itpearls_PartnerPersonService" value="com.company.itpearls.core.PartnerPersonService"/>
             </map>
         </property>
     </bean>

@@ -27,6 +27,7 @@ create table ITPEARLS_JOB_CANDIDATE (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    DTYPE varchar(31),
     --
     FIRST_NAME varchar(80) not null,
     MIDDLE_NAME varchar(80),
@@ -51,6 +52,9 @@ create table ITPEARLS_JOB_CANDIDATE (
     FILE_IMAGE_FACE uuid,
     WORK_STATUS integer,
     PRIORITY_CONTACT integer,
+    --
+    -- from itpearls_JobCandidatePartners
+    PARTNERS_ID uuid,
     --
     primary key (ID)
 )^

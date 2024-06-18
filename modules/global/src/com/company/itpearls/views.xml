@@ -702,4 +702,17 @@
             <property name="partnersPerson" view="_local"/>
         </property>
     </view>
+    <view entity="itpearls_JobCandidatePartners" name="jobCandidatePartners-view" extends="_local">
+        <property name="partners" view="_local"/>
+        <property name="personPosition" view="_local"/>
+        <property name="currentCompany" view="_local"/>
+        <property name="cityOfResidence" view="_local"/>
+        <property name="iteractionList" view="iteractionList-view"/>
+        <property name="laborAgreement" view="_local"/>
+        <property name="socialNetwork" view="socialNetworkURLs-view"/>
+        <property name="specialisation" view="_local"/>
+        <property name="candidateCv" view="candidateCV-view"/>
+        <property name="skillTree" view="_local"/>
+        <property name="fileImageFace" view="_local"/>
+    </view>
 </views>
