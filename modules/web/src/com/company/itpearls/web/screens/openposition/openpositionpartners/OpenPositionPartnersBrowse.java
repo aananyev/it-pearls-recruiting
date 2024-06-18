@@ -5,6 +5,7 @@ import com.company.itpearls.web.screens.openposition.openpositionfragments.OpenP
 import com.company.itpearls.web.screens.openposition.openpositionfragments.OpenPositionPartnersDetailScreenFragment;
 import com.haulmont.cuba.gui.Fragments;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Component;

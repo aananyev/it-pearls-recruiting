@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/jobcandidate/job-candidate-browse.xml"
+        messagesPack="com.company.itpearls.web.screens.jobcandidate.jobcandidatepartners">
+    <layout>
+        <dataGrid id="jobCandidatesTable">
+            <buttonsPanel id="buttonsPanel">
+                <button id="removeBtn" visible="false"
+                        action="jobCandidatesTable.remove"/>
+                <button id="buttonSubscribe" visible="false"/>
+                <button id="buttonExcel" visible="false"/>
+                <popupButton id="actionsWithCandidateButton" visible="false"/>
+            </buttonsPanel>
+        </dataGrid>
+        <hbox id="bottomPanelHBox">
+            <hbox id="bottomFilterHbox">
+                <checkBox id="checkBoxOnWork" visible="false"/>
+            </hbox>
+        </hbox>
+    </layout>
+</window>

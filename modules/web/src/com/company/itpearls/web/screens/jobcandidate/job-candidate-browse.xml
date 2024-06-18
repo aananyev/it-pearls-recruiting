@@ -248,7 +248,8 @@
                              icon="FILTER"/>
             </buttonsPanel>
         </dataGrid>
-        <hbox align="MIDDLE_LEFT"
+        <hbox id="bottomPanelHBox"
+              align="MIDDLE_LEFT"
               width="100%"
               stylename="card"
               margin="true,true,true,true"

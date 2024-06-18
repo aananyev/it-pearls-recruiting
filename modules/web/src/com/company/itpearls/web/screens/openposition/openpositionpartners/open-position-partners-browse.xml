@@ -136,7 +136,16 @@
         <filter id="filter"
                 dataLoader="openPositionsDl"/>
         <treeDataGrid id="openPositionsTable"
+                      columnsCollapsingAllowed="false"
                       dataContainer="openPositionsDc">
+            <columns>
+                <column id="lastCVSend"
+                        collapsible="true"
+                        collapsed="true"/>
+                <column id="openPositionActionButtonColumn"
+                        collapsible="true"
+                        collapsed="true"/>
+            </columns>
             <buttonsPanel id="buttonsPanel" visible="false">
                 <button id="createBtn"
                         visible="false"/>
