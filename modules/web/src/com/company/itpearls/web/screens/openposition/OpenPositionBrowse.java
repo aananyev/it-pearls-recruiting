@@ -43,6 +43,8 @@ import java.util.*;
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.json.XMLTokener.entity;
+
 @UiController("itpearls_OpenPosition.browse")
 @UiDescriptor("open-position-browse.xml")
 @LookupComponent("openPositionsTable")
@@ -840,16 +842,27 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     @Install(to = "openPositionsTable", subject = "detailsGenerator")
     protected Component openPositionsTableDetailsGenerator(OpenPosition entity) {
 
+        OpenPositionDetailScreenFragment openPositionDetailScreenFragment = createOpenPositionDetailScreenFragment(entity);
+/*                fragments.create(this, OpenPositionDetailScreenFragment.class);
+
+        openPositionDetailScreenFragment.setOpenPosition(entity);
+        openPositionDetailScreenFragment.setLabels();
+        openPositionDetailScreenFragment.setDefaultCompanyLogo(); */
+
+        GroupBoxLayout mainLayout = detailsGenerator(entity, openPositionDetailScreenFragment);
+
+        return mainLayout;
+    }
+
+    protected OpenPositionDetailScreenFragment createOpenPositionDetailScreenFragment(OpenPosition entity) {
         OpenPositionDetailScreenFragment openPositionDetailScreenFragment =
-                fragments.create(this, OpenPositionDetailScreenFragment.class);
+        fragments.create(this, OpenPositionDetailScreenFragment.class);
 
         openPositionDetailScreenFragment.setOpenPosition(entity);
         openPositionDetailScreenFragment.setLabels();
         openPositionDetailScreenFragment.setDefaultCompanyLogo();
 
-        GroupBoxLayout mainLayout = detailsGenerator(entity, openPositionDetailScreenFragment);
-
-        return mainLayout;
+        return openPositionDetailScreenFragment;
     }
 
     protected GroupBoxLayout detailsGenerator(OpenPosition entity, OpenPositionDetailScreenFragment openPositionDetailScreenFragment) {
@@ -918,8 +931,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         closeAllAnoterDetailsScreenFragments();
-
-
         return mainLayout;
     }
 
@@ -975,7 +986,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retButton;
     }
 
-    private Component createSendedCandidatesButton(OpenPosition entity) {
+    protected Component createSendedCandidatesButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.class);
         retButton.setIcon(CubaIcon.USER_CIRCLE.source());
         retButton.setDescription("Отправленные кандидаты заказчику");
@@ -1149,7 +1160,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
-    private Component createOpenCloseButton(OpenPosition entity) {
+    protected Component createOpenCloseButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.NAME);
 
         retButton.setIcon(!entity.getOpenClose() ? CubaIcon.REMOVE_ACTION.iconName() : CubaIcon.ADD_ACTION.iconName());
@@ -1510,7 +1521,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return sb.toString();
     }
 
-    private Component createPriorityField(OpenPosition openPosition) {
+    protected Component createPriorityField(OpenPosition openPosition) {
         LookupField retField = uiComponents.create(LookupField.NAME);
 
         retField.setOptionsMap(priorityMap);
@@ -1657,7 +1668,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return editButton;
     }
 
-    private Component createCloseButton(OpenPosition entity) {
+    protected Component createCloseButton(OpenPosition entity) {
         Button closeButton = uiComponents.create(Button.class);
         closeButton.setIcon("icons/close.png");
         BaseAction closeAction = new BaseAction("closeAction")

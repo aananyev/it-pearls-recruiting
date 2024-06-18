@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd">
-    <data>
+    <data readOnly="true">
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition"
                     provided="true"/>
@@ -46,15 +46,16 @@
                           spacing="false"
                           width="100%">
                         <columns>
-                            <column flex="1"/>
+                            <column id="column1" flex="1"/>
                             <column flex="1"/>
                             <column flex="1"/>
                             <column flex="1"/>
                             <column flex="3"/>
                         </columns>
                         <rows>
-                            <row>
-                                <label value="msg://msgCompany"
+                            <row id="titleRow">
+                                <label id="companyTitle"
+                                       value="msg://msgCompany"
                                        align="BOTTOM_LEFT"
                                        stylename="h3"/>
                                 <label/>
@@ -66,13 +67,13 @@
                                        align="BOTTOM_LEFT"
                                        stylename="h3"/>
                             </row>
-                            <row>
-                                <hbox spacing="true">
-                                    <label value="msg://msgCompanyName"
+                            <row id="row1Row">
+                                <hbox id="companyLabelHbox" spacing="true">
+                                    <label id="companyLabelLabel" value="msg://msgCompanyName"
                                            align="BOTTOM_LEFT"
                                            stylename="bold"/>
                                 </hbox>
-                                <hbox>
+                                <hbox id="conpanyTextFieldHBox">
                                     <label id="conpanyTextField"
                                            dataContainer="openPositionsDc"
                                            stylename="table-wordwrap"
@@ -97,13 +98,14 @@
                                            stylename="bold"/>
                                 </hbox>
                             </row>
-                            <row>
-                                <hbox spacing="true">
+                            <row id="row2Row">
+                                <hbox id="projectLabelHbox"
+                                      spacing="true">
                                     <label stylename="bold"
                                            align="BOTTOM_LEFT"
                                            value="msg://msgProjectDepartament"/>
                                 </hbox>
-                                <hbox>
+                                <hbox id="departamentTextFieldHBox">
                                     <label id="departamentTextField"
                                            align="BOTTOM_LEFT"
                                            dataContainer="openPositionsDc"
@@ -131,13 +133,13 @@
                                               property="shortDescription"/>
                                 </hbox>
                             </row>
-                            <row>
-                                <hbox spacing="true">
+                            <row id="row3Row">
+                                <hbox id="projectLabelHBox" spacing="true">
                                     <label value="msg://msgProject"
                                            align="BOTTOM_LEFT"
                                            stylename="bold"/>
                                 </hbox>
-                                <hbox>
+                                <hbox id="projectTextFieldHBox">
                                     <label id="projectTextField"
                                            align="BOTTOM_LEFT"
                                            width="100%"
@@ -160,13 +162,13 @@
                                     </label>
                                 </hbox>
                             </row>
-                            <row>
-                                <hbox spacing="true">
+                            <row id="row4Row">
+                                <hbox id="cityLabelHBox" spacing="true">
                                     <label value="msg://msgCity"
                                            stylename="bold"/>
 
                                 </hbox>
-                                <hbox>
+                                <hbox id="cityPositionTextFieldHBox">
                                     <label id="cityPositionTextField"
                                            property="cityPosition"
                                            dataContainer="openPositionsDc"/>
@@ -181,13 +183,15 @@
                                            align="BOTTOM_LEFT"/>
                                 </hbox>
                             </row>
-                            <row>
-                                <hbox spacing="true">
+                            <row id="row5Row">
+                                <hbox id="projectOwnerLabelHBox"
+                                      spacing="true">
                                     <label value="msg://msgProjectOwner"
                                            stylename="bold"
                                            align="BOTTOM_LEFT"/>
                                 </hbox>
-                                <hbox spacing="true">
+                                <hbox id="nameTextFieldHBox"
+                                      spacing="true">
                                     <label id="firstNameTextField"
                                            align="MIDDLE_LEFT"
                                            property="projectName.projectOwner.firstName"

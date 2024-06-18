@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        extends="com/company/itpearls/web/screens/openposition/openpositionfragments/open-position-detail-screen-fragment.xml"
+        messagesPack="com.company.itpearls.web.screens.openposition.openpositionfragments">
+    <data/>
+    <layout>
+        <hbox id="mainHBox">
+            <image id="companyLogoImage"
+                   property="projectName.projectLogo"/>
+            <vbox id="mainDetailFragmentVBox">
+                <groupBox id="projectCompanyHBox">
+                    <grid id="projectCompanyFieldGroup">
+                        <columns>
+                            <column id="column1" flex="0"/>
+                        </columns>
+                        <rows>
+                            <row id="titleRow">
+                                <label id="companyTitle" visible="false"/>
+                            </row>
+                            <row id="row1Row">
+                                <hbox id="companyLabelHbox" visible="false"/>
+                                <hbox id="conpanyTextFieldHBox" visible="false"/>
+                            </row>
+                            <row id="row2Row">
+                                <hbox id="projectLabelHbox" visible="false"/>
+                                <hbox id="departamentTextFieldHBox" visible="false"/>
+                            </row>
+                            <row id="row3Row">
+                                <hbox id="projectLabelHBox" visible="false"/>
+                                <hbox id="projectTextFieldHBox" visible="false"/>
+                            </row>
+                            <row id="row4Row">
+                                <hbox id="cityLabelHBox" visible="false"/>
+                                <hbox id="cityPositionTextFieldHBox" visible="false"/>
+                            </row>
+                            <row id="row5Row">
+                                <hbox id="projectOwnerLabelHBox" visible="false"/>
+                                <hbox id="nameTextFieldHBox" visible="false"/>
+                            </row>
+                        </rows>
+                    </grid>
+                </groupBox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>
