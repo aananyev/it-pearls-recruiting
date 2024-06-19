@@ -127,7 +127,8 @@
             <rowsCount autoLoad="true"/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
-                <button id="createBtn" action="iteractionListsTable.create"/>
+                <button id="createBtn"
+                        action="iteractionListsTable.create"/>
                 <button id="buttonCopy"
                         caption="msg://msgCopyButton"
                         enable="false"

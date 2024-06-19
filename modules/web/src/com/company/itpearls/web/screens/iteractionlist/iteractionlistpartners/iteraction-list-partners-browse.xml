@@ -63,5 +63,22 @@
             </loader>
         </collection>
     </data>
-    <layout/>
+    <layout>
+        <dataGrid id="iteractionListsTable">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove" visible="false"/>
+                <action id="excel" type="excel" visible="false"/>
+            </actions>
+            <buttonsPanel id="buttonsPanel">
+                <button id="removeBtn"
+                        visible="false"/>
+                <button id="buttonExcel"
+                        visible="false"/>
+                <button id="clipBtn"
+                        visible="false"/>
+            </buttonsPanel>
+        </dataGrid>
+    </layout>
 </window>
