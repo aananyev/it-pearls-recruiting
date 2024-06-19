@@ -176,7 +176,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             candidateImage.setValueSource(
                     new ContainerValueSource<>(iteractionListDc, "candidate.fileImageFace"));
         } else {
-            candidateImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            candidateImage.setSource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
         }
     }
 
@@ -1093,6 +1093,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         initVacancyFiels();
+        initImages();
         buttonCallAction.setVisible(false);
         // запомнить текущий проект
         candidate = candidateField.getValue();
@@ -1113,6 +1114,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         } else {
             dateIteractionField.setEditable(false);
         }
+    }
+
+    private void initImages() {
+        projectLogoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
+        candidateImage.setSource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
     }
 
     private void initNumberInteractionField() {
@@ -1423,8 +1429,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     @Subscribe
     public void onInit(InitEvent event) {
-        projectLogoImage.setSource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
-        candidateImage.setSource(ThemeResource.class).setPath(StdImage.NO_PROGRAMMER);
         // изначально предполагаем, что это продолжение проекта
         newProject = false;
         // вся сортировка в поле IteractionType

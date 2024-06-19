@@ -182,6 +182,17 @@
                                         and lower(e.fullName) like lower(:searchString) escape '\']]>
                                     </query>
                                 </suggestionPickerField>
+                                <vbox id="vacancyFieldsVBox">
+                                    <lookupPickerField id="vacancyFiels">
+                                        <actions>
+                                            <action id="lookup"
+                                                    visible="false"/>
+                                            <action id="open"
+                                                    visible="false"/>
+                                        </actions>
+                                    </lookupPickerField>
+                                    <checkBox id="onlyMySubscribeCheckBox" visible="false"/>
+                                </vbox>
                             </row>
                         </rows>
                     </grid>

@@ -42,6 +42,8 @@ public class IteractionListPartnersEdit extends IteractionListEdit {
     private SuggestionPickerField<JobCandidate> candidateField;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private CheckBox onlyMySubscribeCheckBox;
 
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
@@ -90,6 +92,7 @@ public class IteractionListPartnersEdit extends IteractionListEdit {
     private void setOpenPositionDl() {
         openPositionsDl.setParameter("login", userSession.getUser().getLogin());
         openPositionsDl.setParameter("currentDate", new Date());
+        onlyMySubscribeCheckBox.setValue(false);
         openPositionsDl.load();
     }
 }
