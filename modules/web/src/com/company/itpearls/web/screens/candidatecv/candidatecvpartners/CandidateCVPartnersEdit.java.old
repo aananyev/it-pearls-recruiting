@@ -1,0 +1,10 @@
+package com.company.itpearls.web.screens.candidatecv.candidatecvpartners;
+
+import com.haulmont.cuba.gui.screen.UiController;
+import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
+
+@UiController("itpearls_CandidateCVPartners.edit")
+@UiDescriptor("candidate-cv-partners-edit.xml")
+public class CandidateCVPartnersEdit extends CandidateCVEdit {
+}

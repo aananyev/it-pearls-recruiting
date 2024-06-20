@@ -190,5 +190,8 @@
         <entity class="com.company.itpearls.entity.IteractionListPartners">
             <include re=".*"/>
         </entity>
+        <entity class="com.company.itpearls.entity.CandidateCVPartners">
+            <include re=".*"/>
+        </entity>
     </entities>
 </fts-config>

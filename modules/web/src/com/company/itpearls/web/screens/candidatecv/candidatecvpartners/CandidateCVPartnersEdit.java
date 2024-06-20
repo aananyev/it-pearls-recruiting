@@ -1,55 +1,63 @@
-package com.company.itpearls.web.screens.iteractionlist.iteractionlistpartners;
+package com.company.itpearls.web.screens.candidatecv.candidatecvpartners;
 
 import com.company.itpearls.core.PartnerPersonService;
-import com.company.itpearls.core.StdImage;
 import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.JobCandidatePartners;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.Partners;
-import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.QueryUtils;
-import com.haulmont.cuba.gui.UiComponents;
-import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.CheckBox;
+import com.haulmont.cuba.gui.components.LookupPickerField;
+import com.haulmont.cuba.gui.components.SuggestionPickerField;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
-import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
+import com.company.itpearls.web.screens.candidatecv.CandidateCVEdit;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-@UiController("itpearls_IteractionListPartners.edit")
-@UiDescriptor("iteraction-list-partners-edit.xml")
-public class IteractionListPartnersEdit extends IteractionListEdit {
+@UiController("itpearls_CandidateCVPartners.edit")
+@UiDescriptor("candidate-cv-partners-edit.xml")
+public class CandidateCVPartnersEdit extends CandidateCVEdit {
+
+    @Inject
+    private LookupPickerField<Partners> partnersLookupPickerField;
+    @Inject
+    private PartnerPersonService partnerPersonService;
+    @Inject
+    private DataManager dataManager;
+    @Inject
+    private SuggestionPickerField<JobCandidate> candidateField;
+    @Inject
+    private CheckBox onlyMySubscribeCheckBox;
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
     @Inject
     private UserSession userSession;
-    @Inject
-    private UiComponents uiComponents;
-    @Inject
-    private LookupPickerField partnersLookupPickerField;
-    @Inject
-    private PartnerPersonService partnerPersonService;
-    @Inject
-    private SuggestionPickerField<JobCandidate> candidateField;
-    @Inject
-    private DataManager dataManager;
-    @Inject
-    private CheckBox onlyMySubscribeCheckBox;
+
+    @Subscribe
+    public void onAfterShow4(AfterShowEvent event) {
+        setPartners();
+        candidateFieldSearchExecutor();
+        setOpenPositionDl();
+    }
 
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
-        setOpenPositionDl();
-//        partnersLookupPickerField.setOptionImageProvider(this::setPartnersLogo);
-        setPartners();
+        onlyMySubscribeCheckBox.setVisible(false);
+        onlyMySubscribeCheckBox.setValue(false);
+    }
+
+    private void setPartners() {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            partnersLookupPickerField.setValue(partnerPersonService.getMyPartner());
+        }
     }
 
     protected void candidateFieldSearchExecutor() {
@@ -67,26 +75,6 @@ public class IteractionListPartnersEdit extends IteractionListEdit {
 
             return jobCandidatePartners;
         });
-    }
-
-    private Resource setPartnersLogo(Partners partners) {
-        Image retImage = uiComponents.create(Image.class);
-        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-        retImage.setWidth("30px");
-
-        if (partners.getFileCompanyLogo() != null) {
-            return retImage.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(partners
-                            .getFileCompanyLogo());
-        } else {
-            return retImage.createResource(ThemeResource.class).setPath(StdImage.NO_COMPANY);
-        }
-    }
-
-    private void setPartners() {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            partnersLookupPickerField.setValue(partnerPersonService.getMyPartner());
-        }
     }
 
     private void setOpenPositionDl() {

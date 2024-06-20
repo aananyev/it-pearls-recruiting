@@ -20,14 +20,16 @@
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e order by e.openClose, e.vacansyName]]>
                     <condition>
-                        <c:jpql>
-                            <c:where>
-                                e in (select k.openPosition from itpearls_RecrutiesTasks k
-                                where k.reacrutier = :subscriber
-                                and k.closed = false
-                                and current_date between k.startDate and k.endDate)
-                            </c:where>
-                        </c:jpql>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e in (select k.openPosition from itpearls_RecrutiesTasks k
+                                    where k.reacrutier = :subscriber
+                                    and k.closed = false
+                                    and current_date between k.startDate and k.endDate)
+                                </c:where>
+                            </c:jpql>
+                        </and>
                     </condition>
                 </query>
             </loader>
@@ -170,7 +172,8 @@
                         <vbox id="groupBox"
                               spacing="true"
                               stylename="light">
-                            <vbox spacing="true">
+                            <vbox id="candidateFieldVBox"
+                                  spacing="true">
                                 <suggestionPickerField id="candidateField"
                                                        inputPrompt="mainMsg://msgStartInput"
                                                        minSearchStringLength="3"
@@ -208,7 +211,9 @@
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
                                 </lookupPickerField>
-                                <vbox width="70%" spacing="true">
+                                <vbox id="candidateCVFieldOpenPositionVBox"
+                                      width="70%"
+                                      spacing="true">
                                     <lookupPickerField id="candidateCVFieldOpenPosition"
                                                        dataContainer="candidateCVDc"
                                                        optionsContainer="openPositionsDc"
@@ -382,12 +387,12 @@
                                       captionAsHtml="true"
                                       descriptionAsHtml="true"
                                       required="true"/>
-<!--                       <richTextArea id="cvResomandation"
-                                      width="100%"
-                                      height="100%"
-                                      editable="false"
-                                      box.expandRatio="1"
-                                      stylename="borderless"/> -->
+                        <!--                       <richTextArea id="cvResomandation"
+                                                              width="100%"
+                                                              height="100%"
+                                                              editable="false"
+                                                              box.expandRatio="1"
+                                                              stylename="borderless"/> -->
                     </hbox>
                 </vbox>
             </tab>
@@ -402,12 +407,12 @@
                            orientation="vertical"
                            width="100%"
                            height="100%">
-                <button id="addNewWorkPlaceButton"
-                        icon="font-icon:CALENDAR_PLUS_O"
-                        invoke="addNewWorkPlaceButtonInvoke"
-                        width="AUTO"
-                        caption="msg://msgAddNewWorkplace"
-                        align="TOP_RIGHT"/>
+                    <button id="addNewWorkPlaceButton"
+                            icon="font-icon:CALENDAR_PLUS_O"
+                            invoke="addNewWorkPlaceButtonInvoke"
+                            width="AUTO"
+                            caption="msg://msgAddNewWorkplace"
+                            align="TOP_RIGHT"/>
                 </scrollBox>
             </tab>
             <tab id="educationTab"
@@ -460,33 +465,33 @@
                                   height="100%"
                                   caption="msg://msgAboutMe"
                                   width="100%"/>
-<!--                    <vbox id="letterVbox"
-                          spacing="true"
-                          width="100%"
-                          height="100%"
-                          box.expandRatio="4">
-                        <richTextArea id="questionLetterRichTextArea"
-                                      width="100%"
-                                      editable="false"
-                                      visible="false"
-                                      caption="msg://msgPatternLetter"
-                                      stylename="text-field-title-form"
-                                      height="100%"/>
+                    <!--                    <vbox id="letterVbox"
+                                              spacing="true"
+                                              width="100%"
+                                              height="100%"
+                                              box.expandRatio="4">
+                                            <richTextArea id="questionLetterRichTextArea"
+                                                          width="100%"
+                                                          editable="false"
+                                                          visible="false"
+                                                          caption="msg://msgPatternLetter"
+                                                          stylename="text-field-title-form"
+                                                          height="100%"/>
 
 
-                        <richTextArea id="commentLetterRichTextArea"
-                                      dataContainer="candidateCVDc"
-                                      property="commentLetter"
-                                      caption="msg://msgCommentLetter"
-                                      height="25%"/>
-                    </vbox> -
-                    <richTextArea id="letterRecommendation"
-                                  width="100%"
-                                  height="100%"
-                                  stylename="borderless"
-                                  visible="false"
-                                  editable="false"
-                                  box.expandRatio="1"/> -->
+                                            <richTextArea id="commentLetterRichTextArea"
+                                                          dataContainer="candidateCVDc"
+                                                          property="commentLetter"
+                                                          caption="msg://msgCommentLetter"
+                                                          height="25%"/>
+                                        </vbox> -
+                                        <richTextArea id="letterRecommendation"
+                                                      width="100%"
+                                                      height="100%"
+                                                      stylename="borderless"
+                                                      visible="false"
+                                                      editable="false"
+                                                      box.expandRatio="1"/> -->
                 </hbox>
             </tab>
             <tab id="tabSkillTree"

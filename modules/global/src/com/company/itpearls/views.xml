@@ -666,20 +666,11 @@
         <property name="workPlace" view="company-view"/>
         <property name="position" view="_local"/>
     </view>
-    <view entity="itpearls_PartnersSubscribeOpenPosition" name="partnersSubscribeOpenPosition-view" extends="_local">
-        <property name="partner" view="_local">
-            <property name="companyOwnership" view="_local"/>
-            <property name="companyGroup" view="_local"/>
-            <property name="companyDirector" view="_local"/>
-            <property name="departmentOfCompany" view="_local"/>
-            <property name="cityOfCompany" view="_local"/>
-            <property name="regionOfCompany" view="_local"/>
-            <property name="countryOfCompany" view="_local"/>
-            <property name="fileCompanyLogo" view="_local"/>
-        </property>
+    <view entity="itpearls_PartnersSubscribeOpenPosition" name="partnersSubscribeOpenPosition-view" extends="_base">
+        <property name="partner" view="partners-view"/>
         <property name="openPosition" view="openPosition-view"/>
     </view>
-    <view entity="itpearls_Partners" name="partners-view" extends="_local">
+    <view entity="itpearls_Partners" name="partners-view" extends="_base">
         <property name="companyOwnership" view="_local"/>
         <property name="companyGroup" view="_local"/>
         <property name="companyDirector" view="_local"/>
@@ -689,7 +680,7 @@
         <property name="countryOfCompany" view="_local"/>
         <property name="fileCompanyLogo" view="_local"/>
     </view>
-    <view entity="itpearls_PartnersPerson" name="partnersPerson-view" extends="_local">
+    <view entity="itpearls_PartnersPerson" name="partnersPerson-view" extends="_base">
         <property name="positionCountry" view="_local"/>
         <property name="cityOfResidence" view="_local"/>
         <property name="personPosition" view="_local"/>
@@ -697,24 +688,25 @@
         <property name="fileImageFace" view="_local"/>
         <property name="partners" view="partners-view"/>
     </view>
-    <view entity="itpearls_OpenPositionPartners" name="openPositionPartners-view" extends="_local">
-        <property name="partners" view="partners-view">
-            <property name="partnersPerson" view="_local"/>
-        </property>
-    </view>
-    <view entity="itpearls_JobCandidatePartners" name="jobCandidatePartners-view" extends="_local">
+    <view entity="itpearls_OpenPositionPartners" name="openPositionPartners-view" extends="_base">
         <property name="partners" view="partners-view"/>
-        <property name="personPosition" view="position-view">
-        </property>
-        <property name="currentCompany" view="company-view"/>
+    </view>
+    <view entity="itpearls_JobCandidatePartners" name="jobCandidatePartners-view" extends="_base">
         <property name="cityOfResidence" view="city-view"/>
+        <property name="currentCompany" view="company-view"/>
+        <property name="positionList" view="_local"/>
+        <property name="personPosition" view="position-view"/>
         <property name="iteractionList" view="iteractionList-view"/>
         <property name="laborAgreement" view="laborAgreement-view"/>
         <property name="socialNetwork" view="socialNetworkURLs-view"/>
-        <property name="specialisation" view="_local"/>
+        <property name="specialisation" view="specialisation-view"/>
         <property name="candidateCv" view="candidateCV-view"/>
-        <property name="skillTree" view="_local"/>
         <property name="fileImageFace" view="_local"/>
-        <property name="positionList" view="_local"/>
+    </view>
+    <view entity="itpearls_CandidateCVPartners" name="candidateCVPartners-view" extends="_base">
+        <property name="partners" view="partners-view"/>
+    </view>
+    <view entity="itpearls_IteractionListPartners" name="iteractionListPartners-view" extends="_base">
+        <property name="partner" view="partners-view"/>
     </view>
 </views>

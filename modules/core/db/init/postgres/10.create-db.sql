@@ -127,6 +127,7 @@ create table ITPEARLS_CANDIDATE_CV (
     UPDATED_BY varchar(50),
     DELETE_TS timestamp,
     DELETED_BY varchar(50),
+    DTYPE varchar(31),
     --
     CANDIDATE_ID uuid not null,
     RESUME_POSITION_ID uuid,
@@ -146,6 +147,9 @@ create table ITPEARLS_CANDIDATE_CV (
     FILE_IMAGE_FACE uuid,
     IMAGE_BYTE_ARRAY bytea,
     CONTACT_INFO_CHECKED boolean,
+    --
+    -- from itpearls_CandidateCVPartners
+    PARTNERS_ID uuid,
     --
     primary key (ID)
 )^

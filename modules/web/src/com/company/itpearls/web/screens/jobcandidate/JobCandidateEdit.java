@@ -1062,7 +1062,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
 
-    private void addIteractionOfNewCandidate() {
+    protected void addIteractionOfNewCandidate() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             IteractionList iteractionList = metadata.create(IteractionList.class);
 

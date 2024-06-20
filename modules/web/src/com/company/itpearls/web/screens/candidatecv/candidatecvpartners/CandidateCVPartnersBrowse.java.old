@@ -1,0 +1,51 @@
+package com.company.itpearls.web.screens.candidatecv.candidatecvpartners;
+
+import com.company.itpearls.core.PartnerPersonService;
+import com.company.itpearls.entity.CandidateCVPartners;
+import com.haulmont.cuba.gui.components.CheckBox;
+import com.haulmont.cuba.gui.components.HasValue;
+import com.haulmont.cuba.gui.model.CollectionContainer;
+import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.UiController;
+import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.company.itpearls.web.screens.candidatecv.CandidateCVBrowse;
+import com.haulmont.cuba.security.global.UserSession;
+
+import javax.inject.Inject;
+
+@UiController("itpearls_CandidateCVPartners.browse")
+@UiDescriptor("candidate-cv-partners-browse.xml")
+public class CandidateCVPartnersBrowse extends CandidateCVBrowse {
+    @Inject
+    private CollectionLoader<CandidateCVPartners> candidateCVsPartnersDl;
+    @Inject
+    private CheckBox checkBoxSetOnlyMy;
+    @Inject
+    private UserSession userSession;
+
+    @Subscribe
+    public void onBeforeShow1(BeforeShowEvent event) {
+        setCandidateCVsDc();
+        checkBoxSetOnlyMy.setValue(true);
+    }
+
+    @Inject
+    private PartnerPersonService partnerPersonService;
+
+    private void setCandidateCVsDc() {
+        candidateCVsPartnersDl.setParameter("partners", partnerPersonService.getMyPartner());
+        candidateCVsPartnersDl.load();
+    }
+
+    @Subscribe("checkBoxSetOnlyMy")
+    public void onCheckBoxSetOnlyMyValueChange1(HasValue.ValueChangeEvent<Boolean> event) {
+        if (checkBoxSetOnlyMy.getValue()) {
+            candidateCVsPartnersDl.setParameter("userName", "%" + userSession.getUser().getLogin() + "%");
+        } else {
+            candidateCVsPartnersDl.removeParameter("userName");
+        }
+
+        candidateCVsPartnersDl.load();
+    }
+}
