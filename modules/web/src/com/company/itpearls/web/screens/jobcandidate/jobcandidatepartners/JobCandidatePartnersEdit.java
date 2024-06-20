@@ -101,6 +101,8 @@ public class JobCandidatePartnersEdit extends JobCandidateEdit {
             iteractionList.setRating(4);
             iteractionList.setDateIteraction(new Date());
             iteractionList.setNumberIteraction(interactionListService.getCountInteraction().add(BigDecimal.ONE));
+            iteractionList.setRecrutier((ExtUser) userSession.getUser());
+            iteractionList.setRecrutierName(userSession.getUser().getName());
 
             Iteraction iteraction = null;
             OpenPosition openPosition = null;

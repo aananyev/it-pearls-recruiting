@@ -1070,6 +1070,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             iteractionList.setRating(4);
             iteractionList.setDateIteraction(new Date());
             iteractionList.setNumberIteraction(interactionListService.getCountInteraction().add(BigDecimal.ONE));
+            iteractionList.setRecrutier((ExtUser) userSession.getUser());
+            iteractionList.setRecrutierName(userSession.getUser().getName());
 
             Iteraction iteraction = null;
             OpenPosition openPosition = null;
@@ -1082,6 +1084,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .cacheable(true)
                         .one();
             } catch (Exception e) {
+                e.printStackTrace();
                 notifications.create(Notifications.NotificationType.ERROR)
                         .withCaption("SQL ERROR")
                         .withDescription("Нет взаимодействия \"Новый контакт\"")
@@ -1091,6 +1094,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             try {
                 openPosition = openPositionService.getOpenPositionDefault();
             } catch (Exception e) {
+                e.printStackTrace();
                 notifications.create(Notifications.NotificationType.ERROR)
                         .withCaption("SQL ERROR")
                         .withDescription("Нет вакансии \"по умолчанию\" Default")

@@ -6,7 +6,6 @@ import com.company.itpearls.entity.JobCandidate;
 import com.company.itpearls.entity.JobCandidatePartners;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.Partners;
-import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.QueryUtils;
@@ -20,10 +19,8 @@ import com.company.itpearls.web.screens.iteractionlist.IteractionListEdit;
 import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @UiController("itpearls_IteractionListPartners.edit")
 @UiDescriptor("iteraction-list-partners-edit.xml")

@@ -360,10 +360,12 @@
                         <button id="rescanSkills"
                                 caption="msg://msgRescanResume"
                                 align="BOTTOM_LEFT"
+                                enable="false"
                                 invoke="rescanCV"/>
                         <button id="resumeRecognitionButton"
                                 caption="msg://msgResumeRecognition"
                                 align="BOTTOM_LEFT"
+                                enable="false"
                                 invoke="resumeRecognition"/>
                         <button id="convertToTextButton"
                                 caption="msg://msgConvertToText"
@@ -373,6 +375,7 @@
                         <button id="showOriginalButon"
                                 caption="msg://msgShowOriginal"
                                 align="BOTTOM_LEFT"
+                                enable="false"
                                 invoke="showOriginalText"/>
                     </hbox>
                     <hbox id="candidateCVHBox"

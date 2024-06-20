@@ -5,9 +5,18 @@
         extends="com/company/itpearls/web/screens/candidatecv/candidate-cv-edit.xml"
         messagesPack="com.company.itpearls.web.screens.candidatecv.candidatecvpartners">
     <data>
-        <collection id="openPositionsDc"
+<!--        <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPositionPartners">
-            <view extends="openPositionPartners-view"/>
+            <view extends="openPositionPartners-view">
+                <property name="partners" view="partners-view"/>
+                <property name="projectName" view="_local">
+                    <property name="projectDepartment" view="_local">
+                        <property name="companyName" view="_local">
+                            <property name="companyOwnership" view="_local"/>
+                        </property>
+                    </property>
+                </property>
+            </view>
             <loader id="openPositionsDl"
                     cacheable="true">
                 <query>
@@ -27,12 +36,52 @@
                             </c:jpql>
                             <c:jpql>
                                 <c:where>
+                                    e in (select k.openPosition from itpearls_RecrutiesTasks k
+                                    where k.reacrutier = :subscriber
+                                    and k.closed = false
+                                    and current_date between k.startDate and k.endDate)
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection> -->
+        <collection id="openPosDc"
+                    class="com.company.itpearls.entity.OpenPosition">
+            <view extends="_local">
+                <property name="grade"
+                          view="_minimal"/>
+                <property name="positionType"
+                          view="_local"/>
+                <property name="owner"
+                          view="_local"/>
+                <property name="projectName"
+                          view="_local">
+                    <property name="projectLogo"
+                              view="_local"/>
+                    <property name="projectDepartment"
+                              view="_local">
+                        <property name="companyName"
+                                  view="_local"/>
+                    </property>
+                </property>
+            </view>
+            <loader id="openPosDl"
+                    cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_OpenPosition e
+                                order by e.openClose, e.vacansyName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
                                     e in (select b.openPosition from itpearls_PartnersSubscribeOpenPosition b
                                     where b.active = true
-                                    and (b.endDate >= :currentDate or b.endDate is null)
+                                    and (b.endDate >= :currDate or b.endDate is null)
                                     and b.partner in
                                     (select c.partners from itpearls_PartnersPerson c
-                                    where c.partnerPersonLogin like :login))
+                                    where c.partnerPersonLogin like :userlogin))
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
@@ -100,7 +149,10 @@
                                     </actions>
                                 </suggestionPickerField>
                                 <vbox id="candidateCVFieldOpenPositionVBox">
-                                    <lookupPickerField id="candidateCVFieldOpenPosition">
+                                    <lookupPickerField id="candidateCVFieldOpenPosition"
+                                                       dataContainer="candidateCVDc"
+                                                       property="toVacancy"
+                                                       optionsContainer="openPosDc">
                                         <actions>
                                             <action id="lookup"
                                                     type="picker_lookup" visible="false"/>

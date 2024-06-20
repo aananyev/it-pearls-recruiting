@@ -1,10 +1,7 @@
 package com.company.itpearls.web.screens.candidatecv.candidatecvpartners;
 
 import com.company.itpearls.core.PartnerPersonService;
-import com.company.itpearls.entity.JobCandidate;
-import com.company.itpearls.entity.JobCandidatePartners;
-import com.company.itpearls.entity.OpenPosition;
-import com.company.itpearls.entity.Partners;
+import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.QueryUtils;
@@ -37,21 +34,22 @@ public class CandidateCVPartnersEdit extends CandidateCVEdit {
     @Inject
     private CheckBox onlyMySubscribeCheckBox;
     @Inject
-    private CollectionLoader<OpenPosition> openPositionsDl;
-    @Inject
     private UserSession userSession;
+    @Inject
+    private CollectionLoader<OpenPosition> openPosDl;
 
     @Subscribe
     public void onAfterShow4(AfterShowEvent event) {
+        onlyMySubscribeCheckBox.setVisible(false);
+        onlyMySubscribeCheckBox.setValue(false);
+
         setPartners();
         candidateFieldSearchExecutor();
-        setOpenPositionDl();
     }
 
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
-        onlyMySubscribeCheckBox.setVisible(false);
-        onlyMySubscribeCheckBox.setValue(false);
+        setOpenPositionDl();
     }
 
     private void setPartners() {
@@ -78,9 +76,8 @@ public class CandidateCVPartnersEdit extends CandidateCVEdit {
     }
 
     private void setOpenPositionDl() {
-        openPositionsDl.setParameter("login", userSession.getUser().getLogin());
-        openPositionsDl.setParameter("currentDate", new Date());
-        onlyMySubscribeCheckBox.setValue(false);
-        openPositionsDl.load();
+        openPosDl.setParameter("userlogin", userSession.getUser().getLogin());
+        openPosDl.setParameter("currDate", new Date());
+        openPosDl.load();
     }
 }
