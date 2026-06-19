@@ -1,11 +1,11 @@
 postgre_database=/usr/local/var/postgresql@11
 current_catalog=`pwd`
-old_archive=../it-pearls-basebackup-old.tgz
-new_archive=../it-pearls-basebackup.tgz
+old_archive=../hunttech-basebackup-old.tgz
+new_archive=../hunttech-basebackup.tgz
 postgre_database=/usr/local/var/postgresql@11
 postgre_temp_database=`echo $current_catalog"/postgre_tmp_database"`
 BACKUPBASELOG=backupbase.log
-db_server=hr.it-pearls.ru
+db_server=hr.hunttech.ru
 
 
 CWD=$(pwd)
@@ -60,7 +60,7 @@ else
 fi
 
 echo "\033[37mОстановка локальной базы ... \c"
-pg_ctl stop -D . >> $LOG 2>/dev/null
+pg_ctl  stop -D . >> $LOG 2>/dev/null
 if [ $? -eq 0 ]; then 
 	echo "\033[32mOK"
 else
@@ -119,8 +119,8 @@ else
 fi
 
 echo "\033[37mКопирование файлов из хранилища в локальное ... "
-# scp -c -v root@hr.it-pearls.ru:/opt/app_home/fileStorage/* /opt/app_home/
-rsync -avrltD --stats --ignore-existing root@hr.it-pearls.ru:/opt/app_home/fileStorage /opt/app_home/ | pv --timer -lep -s 5 > /dev/null
+# scp -c -v root@hr.hunttech.ru:/opt/app_home/fileStorage/* /opt/app_home/
+rsync -avrltD --stats --ignore-existing root@hr.hunttech.ru:/opt/app_home/fileStorage /opt/app_home/ | pv --timer -lep -s 5 > /dev/null
 
 if [ $? -eq 0 ]; then
         echo "\033[32mOK"

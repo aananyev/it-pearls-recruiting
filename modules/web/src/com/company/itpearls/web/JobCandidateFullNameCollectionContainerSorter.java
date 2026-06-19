@@ -9,7 +9,7 @@ import com.haulmont.cuba.gui.model.BaseCollectionLoader;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.impl.CollectionContainerSorter;
 import com.haulmont.cuba.gui.model.impl.EntityValuesComparator;
-import com.sun.istack.Nullable;
+import javax.annotation.Nullable;
 
 import java.util.Comparator;
 import java.util.Objects;

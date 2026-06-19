@@ -14,8 +14,6 @@ import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
-import org.graalvm.compiler.graph.Graph;
-
 import javax.inject.Inject;
 import java.util.*;
 
@@ -149,8 +147,6 @@ public class ResearcherDiagramWidget extends ScreenFragment {
         ListDataProvider dataProvider = new ListDataProvider();
 
         Date d = startDate;
-
-        List<Graph> graphs = new ArrayList<>();
 
         do {
             GregorianCalendar calendar = new GregorianCalendar();

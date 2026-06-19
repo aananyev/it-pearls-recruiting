@@ -93,7 +93,7 @@ configure(globalModule) {
         compile 'javax.ws.rs:javax.ws.rs-api:2.1.1'
         runtime 'io.jsonwebtoken:jjwt-impl:0.11.5'
         runtime 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-        compile 'com.ibm.icu:icu4j:4.8.1.1'
+//        compile 'com.ibm.icu:icu4j:4.8.1.1'
         compile 'commons-lang:commons-lang:2.6'
         compile 'org.projectlombok:lombok:1.18.16'
         compile 'org.telegram:telegrambots:6.8.0'
@@ -265,6 +265,15 @@ configure(webToolkitModule) {
         into "$cuba.tomcat.dir/webapps/${modulePrefix}/WEB-INF/lib"
     }
 }
+
+task copyTomcatSetenv(type: Copy) {
+    description = 'Configure Tomcat to use Java 11'
+    from 'etc/tomcat-setenv.sh'
+    into "$cuba.tomcat.dir/bin"
+    rename 'tomcat-setenv.sh', 'setenv.sh'
+}
+
+start.dependsOn copyTomcatSetenv
 
 task undeploy(type: Delete, dependsOn: ":${modulePrefix}-web:cleanConf") {
     delete("$cuba.tomcat.dir/shared")
