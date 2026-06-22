@@ -1,0 +1,25 @@
+# Локальный PostgreSQL для разработки IT-Pearls Recruiting.
+# Запуск: docker compose up -d
+# Остановка: docker compose down
+
+services:
+  postgres:
+    image: postgres:11
+    container_name: itpearls-postgres
+    restart: unless-stopped
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cuba}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-cuba}
+      POSTGRES_DB: ${POSTGRES_DB:-itpearls}
+    volumes:
+      - itpearls_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cuba} -d ${POSTGRES_DB:-itpearls}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  itpearls_pgdata:

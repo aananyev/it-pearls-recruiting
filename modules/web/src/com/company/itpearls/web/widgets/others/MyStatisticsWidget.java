@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 
 @UiController("itpearls_MyStatisticsWidget")
 @UiDescriptor("my-statistics-widget.xml")
-@DashboardWidget(name = "My Statistics")
+@DashboardWidget(name = "Моя статистика")
 public class MyStatisticsWidget extends ScreenFragment {
     @Inject
     private UserSession userSession;

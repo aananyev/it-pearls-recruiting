@@ -82,7 +82,7 @@ public class SkillTreeBrowse extends StandardLookup<SkillTree> {
                     break;
             }
         } else {
-            retLabel.setValue("Not defined");
+            retLabel.setValue("Не определено");
             retLabel.setStyleName(StandartPrioritySkills.NOT_USED_SKILLS_STYLE);
         }
 

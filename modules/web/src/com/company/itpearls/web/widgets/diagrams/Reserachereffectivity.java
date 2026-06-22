@@ -25,7 +25,7 @@ import java.util.*;
 
 @UiController("itpearls_Reserachereffectivity")
 @UiDescriptor("ReseracherEffectivity.xml")
-@DashboardWidget(name = "Reserarcher effectivity") // ++
+@DashboardWidget(name = "Эффективность ресерчера")
 public class Reserachereffectivity extends ScreenFragment {
 
     @WidgetParam

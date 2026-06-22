@@ -1,7 +1,7 @@
 package com.company.itpearls.web;
 
 public class StandartPrioritySkills {
-    public final static String NOT_USED_SKILLS_STR = "Not used";
+    public final static String NOT_USED_SKILLS_STR = "Не используется";
     public final static Integer NOT_USED_SKILLS_INT = -1;
     public final static String NOT_USED_SKILLS_STYLE = "label_button_gray";
 
@@ -21,7 +21,7 @@ public class StandartPrioritySkills {
     public final static Integer METHODOLORY_INT = 3;
     public final static String METHODOLORY_STYLE = "label_button_orange";
 
-    public final static String PROGRAMMING_LANGUAGE_STR = "Programming language";
+    public final static String PROGRAMMING_LANGUAGE_STR = "Язык программирования";
     public final static Integer PROGRAMMING_LANGUAGE_INT = 4;
     public final static String PROGRAMMING_LANGUAGE_STYLE = "label_button_red";
 }

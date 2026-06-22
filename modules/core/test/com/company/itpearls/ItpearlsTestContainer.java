@@ -26,9 +26,9 @@ public class ItpearlsTestContainer extends TestContainer {
                 "com.haulmont.reports");
         appPropertiesFiles = Arrays.asList(
                 // List the files defined in your web.xml
-                // in appPropertiesConfig context parameter of the core module
+                // в параметре appPropertiesConfig контекста core-модуля
                 "com/company/itpearls/app.properties",
-                // Add this file which is located in CUBA and defines some properties
+                // Добавить файл из CUBA с настройками
                 // specifically for test environment. You can replace it with your own
                 // or add another one in the end.
                 "com/haulmont/cuba/testsupport/test-app.properties");
@@ -74,7 +74,7 @@ public class ItpearlsTestContainer extends TestContainer {
         @Override
         public void after() {
             cleanupContext();
-            // never stops - do not call super
+            // не останавливается — не вызывать super
         }
     }
 }

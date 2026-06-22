@@ -16,7 +16,7 @@ import javax.inject.Inject;
 
 @UiController("itpearls_CompanyLogoWidget")
 @UiDescriptor("company-logo-widget.xml")
-@DashboardWidget(name="Company Logo")
+@DashboardWidget(name="Логотип компании")
 public class CompanyLogoWidget extends ScreenFragment {
     @Inject
     private Image companyLogo;

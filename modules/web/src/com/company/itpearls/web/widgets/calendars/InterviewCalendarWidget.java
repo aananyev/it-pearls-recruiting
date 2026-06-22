@@ -18,7 +18,7 @@ import java.util.GregorianCalendar;
 
 @UiController("itpearls_InterviewCalendarWidget")
 @UiDescriptor("interview-calendar-widget.xml")
-@DashboardWidget( name = "Interview Calendar" )
+@DashboardWidget( name = "Календарь собеседований" )
 public class InterviewCalendarWidget extends ScreenFragment {
     @Inject
     private Calendar<Date> interviewCalendar;

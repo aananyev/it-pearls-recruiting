@@ -35,33 +35,33 @@ public class TextManipulationServiceBean implements TextManipulationService {
     }
 
     public String createList(Element root, int depth) {
-        final String indentation = createIndentation(depth); // create indentation
+        final String indentation = createIndentation(depth); // создать отступ
         StringBuilder sb = new StringBuilder();
 
         final String typeAttr = root.attr("type"); // Get the character used as bullet (= 'type' attribute)
         char type = typeAttr.isEmpty() ? '1' : typeAttr.charAt(0); // if 'type' attribute: use it, else: use '1' instead
 
-        for (Element sub : root.children()) // Iterate over all Childs
+        for (Element sub : root.children()) // Перебор всех дочерних элементов
         {
-            // If Java < 7: use if/else if/else here
-            switch (sub.tagName()) // Check if the element is an item or a sublist
+            // Для Java < 7: использовать if/else if/else
+            switch (sub.tagName()) // Проверка: элемент списка или вложенный список
             {
-                case "li": // Listitem, format and append
+                case "li": // Элемент списка: форматирование и добавление
                     sb.append(indentation).append(type++).append(". ").append(sub.ownText()).append("\n");
                     break;
-                case "ol": // Sublist
+                case "ol": // Вложенный список
                 case "ul":
                     if (!sub.children().isEmpty()) // If sublist is not empty (contains furhter items)
                     {
-                        sb.append(createList(sub, depth + 1)); // Recursive call for the sublist
+                        sb.append(createList(sub, depth + 1)); // Рекурсивный вызов для вложенного списка
                     }
                     break;
                 default: // "Illegal" tag, do furhter processing if required - output as an example here
-                    System.err.println("Not implemented tag: " + sub.tagName());
+                    System.err.println("Нереализованный тег: " + sub.tagName());
             }
         }
 
-        return sb.toString(); // Return the formated List
+        return sb.toString(); // Вернуть отформатированный список
     }
 
 }

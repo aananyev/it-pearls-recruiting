@@ -99,6 +99,6 @@ public class NonCommand {
      * Формирование оповещения о некорректных настройках
      */
     private String createSettingWarning(Settings settings) {
-        return "Ошибка Settings";
+        return "Ошибка настроек";
     }
 }

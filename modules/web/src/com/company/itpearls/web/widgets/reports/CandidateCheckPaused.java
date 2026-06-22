@@ -21,7 +21,7 @@ import java.util.Date;
 
 @UiController("itpearls_CandidateCheckPaused")
 @UiDescriptor("candidate-check-paused.xml")
-@DashboardWidget(name = "Check Candidate in Pause")
+@DashboardWidget(name = "Проверка кандидатов на паузе")
 public class CandidateCheckPaused extends ScreenFragment {
 
     @WidgetParam

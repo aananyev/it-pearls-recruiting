@@ -15,8 +15,8 @@ public class ContactInfo {
 
 
     private JobCandidate jobCandidate;
-    protected String email; // parse
-    protected String phone; // parse
+    protected String email; // разбор
+    protected String phone; // разбор
     protected String mobilePhone;
     protected String skypeName;
     protected String telegramName;

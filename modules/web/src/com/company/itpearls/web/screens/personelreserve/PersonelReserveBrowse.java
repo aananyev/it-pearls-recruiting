@@ -202,7 +202,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
         signFilterButton.addAction(new BaseAction("editSignIconsAction")
                 .withCaption(messageBundle.getMessage("msgEditSignIconsAction"))
-                .withDescription("msgEditSignIconsActionDesc")
+                .withDescription(messageBundle.getMessage("msgEditSignIconsActionDesc"))
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
                     SignIconsBrowse screen  = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
@@ -1305,7 +1305,7 @@ public class PersonelReserveBrowse extends StandardLookup<PersonelReserve> {
 
         actionButton.addAction(new BaseAction("editSignIconsAction")
                 .withCaption(messageBundle.getMessage("msgEditSignIconsAction"))
-                .withDescription("msgEditSignIconsActionDesc")
+                .withDescription(messageBundle.getMessage("msgEditSignIconsActionDesc"))
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
                     personelReservesTable.setSelected(personelReserve);

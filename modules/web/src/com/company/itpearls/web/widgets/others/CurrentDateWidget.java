@@ -13,7 +13,7 @@ import java.util.Date;
 
 @UiController("itpearls_CurrentDateWidget")
 @UiDescriptor("current-date-widget.xml")
-@DashboardWidget(name = "Current Date")
+@DashboardWidget(name = "Текущая дата")
 public class CurrentDateWidget extends ScreenFragment {
     @Inject
     private Label<String> currentTimeLabel;

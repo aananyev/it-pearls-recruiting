@@ -8,7 +8,7 @@
       maxIdle="2"
       maxWaitMillis="5000"
       driverClassName="org.postgresql.Driver"
-      url="jdbc:postgresql://127.0.0.1/itpearls"
+      url="jdbc:postgresql://127.0.0.1:5432/itpearls"
       username="cuba"
       password="cuba"/>
 

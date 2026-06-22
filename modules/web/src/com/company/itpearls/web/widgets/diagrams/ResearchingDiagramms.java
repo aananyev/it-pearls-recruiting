@@ -23,7 +23,7 @@ import java.util.*;
 // Общий счетчик собеседований
 @UiController("itpearls_ResearchingDiagramms")
 @UiDescriptor("researching-diagramms.xml")
-@DashboardWidget(name = "Count interview diagramm") // ++
+@DashboardWidget(name = "Диаграмма количества собеседований")
 public class ResearchingDiagramms extends ScreenFragment {
 
     @WidgetParam

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @UiController("itpearls_RecrutersLeadersWidget")
 @UiDescriptor("recruters-leaders-widget.xml")
-@DashboardWidget(name = "Recruters Leaders")
+@DashboardWidget(name = "Лидеры среди рекрутеров")
 public class RecrutersLeadersWidget extends ScreenFragment {
     List<ExtUser> recruters = new ArrayList<>();
     Map<ExtUser, Integer> grade = new HashedMap();

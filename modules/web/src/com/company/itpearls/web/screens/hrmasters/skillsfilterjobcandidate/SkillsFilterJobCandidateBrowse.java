@@ -1818,7 +1818,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msg://msgError"))
-                    .withDescription("msg://msgErrorUpload")
+                    .withDescription(messageBundle.getMessage("msgErrorUpload"))
                     .withType(Notifications.NotificationType.ERROR)
                     .show();
         }

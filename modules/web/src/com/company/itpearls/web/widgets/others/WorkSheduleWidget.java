@@ -14,7 +14,7 @@ import java.util.List;
 
 @UiController("itpearls_WorkSheduleWidget")
 @UiDescriptor("work-shedule-widget.xml")
-@DashboardWidget(name = "Work Shedule")
+@DashboardWidget(name = "График работы")
 public class WorkSheduleWidget extends ScreenFragment {
     @Inject
     private DataManager dataManager;
@@ -50,9 +50,9 @@ public class WorkSheduleWidget extends ScreenFragment {
                 + messageBundle.getMessage("msgPerDay"));*/
 
         if (allWorkTimeInMonth < 4) {
-            workTimeLabel.setValue("Part time");
+            workTimeLabel.setValue("Неполный день");
         } else {
-            workTimeLabel.setValue("Full time");
+            workTimeLabel.setValue("Полный день");
         }
     }
 

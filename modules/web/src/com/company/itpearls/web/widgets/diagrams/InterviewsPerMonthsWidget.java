@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 
 @UiController("itpearls_InterviewsPerMonthsWidget")
 @UiDescriptor("interviews-per-months-widget.xml")
-@DashboardWidget(name = "Interview per months assigned")
+@DashboardWidget(name = "Собеседования в месяц (назначенные)")
 public class InterviewsPerMonthsWidget extends ScreenFragment {
     @Inject
     private AngularGaugeChart gaugeChart;

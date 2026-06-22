@@ -55,7 +55,7 @@ public class SomeFilesEdit extends StandardEditor<SomeFiles> {
         try {
             fileUploadingAPI.putFileIntoStorage(fileDescriptorField.getFileId(), fd);
         } catch (FileStorageException e) {
-            throw new RuntimeException("Error saving file to FileStorage", e);
+            throw new RuntimeException("Ошибка сохранения файла в FileStorage", e);
         }
 
         dataManager.commit(fd);

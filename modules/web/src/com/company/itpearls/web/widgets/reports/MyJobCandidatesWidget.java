@@ -23,7 +23,7 @@ import java.util.*;
 
 @UiController("itpearls_MyJobCandidatesWidget")
 @UiDescriptor("my-job-candidates-widget.xml")
-@DashboardWidget(name = "Last Status") //+
+@DashboardWidget(name = "Последний статус")
 public class MyJobCandidatesWidget extends ScreenFragment {
     @WidgetParam
     @WindowParam

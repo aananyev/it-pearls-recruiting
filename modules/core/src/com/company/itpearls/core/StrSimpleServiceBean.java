@@ -37,7 +37,7 @@ public class StrSimpleServiceBean implements StrSimpleService {
         while (index != -1)
         {
             builder.replace(index, index + from.length(), to);
-            index += to.length(); // Move to the end of the replacement
+            index += to.length(); // Перейти к концу замены
             index = builder.indexOf(from, index);
         }
 
@@ -52,7 +52,7 @@ public class StrSimpleServiceBean implements StrSimpleService {
         while (index != -1)
         {
             builder.replace(index, index + from.length(), to);
-            index += to.length(); // Move to the end of the replacement
+            index += to.length(); // Перейти к концу замены
             index = builder.indexOf(from, index);
         }
 

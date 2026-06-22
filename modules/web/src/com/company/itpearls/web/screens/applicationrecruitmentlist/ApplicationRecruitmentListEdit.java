@@ -101,7 +101,7 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
 
             StringBuffer QUERY_STAFFING_TABLE_RESULT = new StringBuffer(QUERY_STAFFING_TABLE);
 
-            // Project
+            // Проект
             QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
                     ? " and e.openPosition.projectName.projectName like '" : "");
 
@@ -342,7 +342,7 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
 
                 StringBuffer QUERY_STAFFING_TABLE_RESULT = new StringBuffer(QUERY_STAFFING_TABLE);
 
-                // Project
+                // Проект
                 QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
                         ? " and e.openPosition.projectName.projectName like '" : "");
 
@@ -423,7 +423,7 @@ public class ApplicationRecruitmentListEdit extends StandardEditor<ApplicationRe
 
                 StringBuffer QUERY_STAFFING_TABLE_RESULT = new StringBuffer(QUERY_STAFFING_TABLE);
 
-                // Project
+                // Проект
                 QUERY_STAFFING_TABLE_RESULT.append(projectLookupPickerField.getValue() != null
                         ? " and e.openPosition.projectName.projectName like '" : "");
 

@@ -309,7 +309,7 @@ public class QuickViewOpenPositionDescription extends Screen {
 
     @Subscribe("copyToClipboard")
     public void onCopyToClipboardClick(Button.ClickEvent event) {
-        notifications.create().withCaption("Copied to clipboard").show();
+        notifications.create().withCaption("Скопировано в буфер обмена").show();
     }
 
     @Subscribe("jobDesxriptionRichTextArea")

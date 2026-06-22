@@ -20,7 +20,7 @@ import java.util.*;
 
 @UiController("itpearls_FunnelHuntingRecrutierWidget")
 @UiDescriptor("funnel-hunting-recrutier-widget.xml")
-@DashboardWidget(name = "Funnel Hunting Recruter Widget")
+@DashboardWidget(name = "Воронка хантинга (рекрутер)")
 public class FunnelHuntingRecrutierWidget extends ScreenFragment {
     @Inject
     private UiComponents uiComponents;

@@ -7,6 +7,6 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 
 @UiController("itpearls_ItpearlsLogoWiget")
 @UiDescriptor("itpearls-logo-wiget.xml")
-@DashboardWidget(name="IT Perls Logo")
+@DashboardWidget(name="Логотип IT Pearls")
 public class ItpearlsLogoWiget extends ScreenFragment {
 }

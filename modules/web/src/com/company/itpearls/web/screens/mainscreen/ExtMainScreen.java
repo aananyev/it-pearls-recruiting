@@ -92,16 +92,17 @@ public class ExtMainScreen extends MainScreen {
         setFavicon();
     }
 
+    private static final String DEFAULT_FAVICON = "./VAADIN/themes/hover/favicon.ico";
+
     private void setFavicon() {
         ChangeFaviconExtension extension = new ChangeFaviconExtension();
-        if (applicationSetupService.getActiveApplicationSetup() != null) {
-            if (applicationSetupService.getActiveApplicationSetup().getApplicationIcon() != null) {
-                if (applicationSetupService.getActiveApplicationSetup().getApplicationIcon().getName() != null) {
-                    extension.extend(mainVBox.unwrap(AbstractOrderedLayout.class),
-                            applicationSetupService.getActiveApplicationSetup().getApplicationIcon().getName());
-                }
-            }
+        String faviconUrl = DEFAULT_FAVICON;
+        if (applicationSetupService.getActiveApplicationSetup() != null
+                && applicationSetupService.getActiveApplicationSetup().getApplicationIcon() != null
+                && applicationSetupService.getActiveApplicationSetup().getApplicationIcon().getName() != null) {
+            faviconUrl = applicationSetupService.getActiveApplicationSetup().getApplicationIcon().getName();
         }
+        extension.extend(mainVBox.unwrap(AbstractOrderedLayout.class), faviconUrl);
     }
 
     private void setApplicationLogo() {
@@ -156,7 +157,7 @@ public class ExtMainScreen extends MainScreen {
                             .withDescription(event.getMessage())
                             .withHideDelayMs(10000)
                             .withPosition(Notifications.Position.TOP_RIGHT)
-                            .withCaption("INFO")
+                            .withCaption("ИНФОРМАЦИЯ")
                             .withStyleName("open-position-notification-open")
                             .withContentMode(ContentMode.HTML)
                             .show();
@@ -165,7 +166,7 @@ public class ExtMainScreen extends MainScreen {
                             .withDescription(event.getMessage())
                             .withHideDelayMs(5000)
                             .withPosition(Notifications.Position.TOP_RIGHT)
-                            .withCaption("INFO")
+                            .withCaption("ИНФОРМАЦИЯ")
                             .withContentMode(ContentMode.HTML)
                             .show();
                 }
@@ -396,10 +397,10 @@ public class ExtMainScreen extends MainScreen {
         }
     }
 
-    // screens do not receive non-UI events!
+    // экраны не получают не-UI события!
     @EventListener
     public void onBeanNotificationEvent(BeanNotificationEvent event) {
-        throw new IllegalStateException("Received " + event);
+        throw new IllegalStateException("Получено " + event);
     }
 
     @Override

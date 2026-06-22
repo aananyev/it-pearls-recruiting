@@ -294,7 +294,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .list();
 
                 for (SocialNetworkType s : socialNetworkType) {
-                    // SocialNetworkURLs socialNetworkURLs = dataManager.create(SocialNetworkURLs.class);
+                    // Социальные сетиNetworkURLs socialNetworkURLs = dataManager.create(SocialNetworkURLs.class);
                     SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
 
                     if (!type.contains(s)) {
@@ -525,17 +525,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             @Override
             public void canceled() {
-                // Do something in UI thread if the task is canceled
+                // Действие в UI-потоке при отмене задачи
             }
 
             @Override
             public void done(Void result) {
-                // Do something in UI thread when the task is done
+                // Действие в UI-потоке по завершении задачи
             }
 
             @Override
             public void progress(List<Integer> changes) {
-                // Show current progress in UI thread
+                // Отображение текущего прогресса в UI-потоке
             }
         };
 
@@ -549,17 +549,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             @Override
             public void canceled() {
-                // Do something in UI thread if the task is canceled
+                // Действие в UI-потоке при отмене задачи
             }
 
             @Override
             public void done(Void result) {
-                // Do something in UI thread when the task is done
+                // Действие в UI-потоке по завершении задачи
             }
 
             @Override
             public void progress(List<Integer> changes) {
-                // Show current progress in UI thread
+                // Отображение текущего прогресса в UI-потоке
             }
         };
 
@@ -573,27 +573,27 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             @Override
             public void canceled() {
-                // Do something in UI thread if the task is canceled
+                // Действие в UI-потоке при отмене задачи
             }
 
             @Override
             public void done(Void result) {
-                // Do something in UI thread when the task is done
+                // Действие в UI-потоке по завершении задачи
             }
 
             @Override
             public void progress(List<Integer> changes) {
-                // Show current progress in UI thread
+                // Отображение текущего прогресса в UI-потоке
             }
         };
 
-        // Get task handler object and run the task
+        // Получить обработчик задачи и запустить её
         BackgroundTaskHandler taskHandler1 = backgroundWorker.handle(task1);
         taskHandler1.execute();
-        // Get task handler object and run the task
+        // Получить обработчик задачи и запустить её
         BackgroundTaskHandler taskHandler2 = backgroundWorker.handle(task2);
         taskHandler2.execute();
-        // Get task handler object and run the task
+        // Получить обработчик задачи и запустить её
         BackgroundTaskHandler taskHandler3 = backgroundWorker.handle(task3);
         taskHandler3.execute();
     }
@@ -1007,7 +1007,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .one();
             } catch (Exception e) {
                 notifications.create(Notifications.NotificationType.ERROR)
-                        .withCaption("SQL ERROR")
+                        .withCaption("Ошибка SQL")
                         .withDescription("Нет взаимодействия \"Новый контакт\"")
                         .show();
             }
@@ -1021,7 +1021,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .one(); */
             } catch (Exception e) {
                 notifications.create(Notifications.NotificationType.ERROR)
-                        .withCaption("SQL ERROR")
+                        .withCaption("Ошибка SQL")
                         .withDescription("Нет вакансии \"по умолчанию\" Default")
                         .show();
             }
@@ -2314,7 +2314,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
         }
 
-        // Social
+        // Социальные сети
         if (newSocial.size() != 0) {
             for (String sFromCV : newSocial) {
                 Boolean flagSFromCV = false;

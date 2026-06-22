@@ -7,6 +7,6 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 
 @UiController("itpearls_HunttechLogoWidget")
 @UiDescriptor("hunttech-logo-widget.xml")
-@DashboardWidget(name="HuntTech Logo")
+@DashboardWidget(name="Логотип HuntTech")
 public class HunttechLogoWidget extends ScreenFragment {
 }

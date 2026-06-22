@@ -6,10 +6,10 @@
         <Arg>jdbc/CubaDS</Arg>
         <Arg>
             <New class="org.apache.commons.dbcp2.BasicDataSource">
-                <Set name="driverClassName">org.hsqldb.jdbc.JDBCDriver</Set>
-                <Set name="url">jdbc:hsqldb:hsql://localhost/db</Set>
-                <Set name="username">itpeals</Set>
-                <Set name="password">Vilpecul1971Albireo</Set>
+                <Set name="driverClassName">org.postgresql.Driver</Set>
+                <Set name="url">jdbc:postgresql://localhost:5432/itpearls</Set>
+                <Set name="username">cuba</Set>
+                <Set name="password">cuba</Set>
                 <Set name="maxIdle">2</Set>
                 <Set name="maxTotal">20</Set>
                 <Set name="maxWaitMillis">5000</Set>

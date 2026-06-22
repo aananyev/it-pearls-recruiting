@@ -261,7 +261,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
                 .append(sb)
                 .append("');")
                 .toString());
-        notifications.create().withCaption("Copied to clipboard").show();
+        notifications.create().withCaption("Скопировано в буфер обмена").show();
     }
 
     public void onIteractionListButton() {

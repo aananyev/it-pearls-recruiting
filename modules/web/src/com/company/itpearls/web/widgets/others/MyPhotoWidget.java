@@ -16,7 +16,7 @@ import javax.inject.Inject;
 
 @UiController("itpearls_MyPhotoWidget")
 @UiDescriptor("my-photo-widget.xml")
-@DashboardWidget(name="My Photo")
+@DashboardWidget(name="Моё фото")
 public class MyPhotoWidget extends ScreenFragment {
     @Inject
     private InstanceLoader<ExtUser> userDl;

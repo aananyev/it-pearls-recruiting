@@ -171,7 +171,7 @@ public class InternalEmailerEdit<I extends InternalEmailer> extends StandardEdit
                 .append(") ?");
 
         dialogs.createOptionDialog()
-                .withCaption("Send EMAIL")
+                .withCaption("Отправить EMAIL")
                 .withMessage(sb.toString())
                 .withType(Dialogs.MessageType.CONFIRMATION)
                 .withActions(new DialogAction(DialogAction.Type.YES).withHandler(e ->

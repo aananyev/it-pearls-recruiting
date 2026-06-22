@@ -19,7 +19,7 @@ import java.util.*;
 
 @UiController("itpearls_ResearcherDiagramWidget")
 @UiDescriptor("researcher-repost-diagram-widget.xml")
-@DashboardWidget(name = "Researcher Diagram Widget")
+@DashboardWidget(name = "Диаграмма ресерчера")
 public class ResearcherDiagramWidget extends ScreenFragment {
 
     @WidgetParam

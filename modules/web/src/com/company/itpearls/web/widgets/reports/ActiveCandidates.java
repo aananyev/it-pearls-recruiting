@@ -11,7 +11,7 @@ import javax.inject.Inject;
 
 @UiController("itpearls_ActiveCandidates")
 @UiDescriptor("active-candidates.xml")
-@DashboardWidget(name = "Active Candidates Widget")
+@DashboardWidget(name = "Активные кандидаты")
 public class ActiveCandidates extends ScreenFragment {
     @Inject
     private Label<String> widgetTitle;

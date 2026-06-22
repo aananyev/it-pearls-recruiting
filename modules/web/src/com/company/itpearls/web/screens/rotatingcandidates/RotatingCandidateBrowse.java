@@ -121,7 +121,7 @@ public class RotatingCandidateBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private Label<String> activeInactiveLabel;
 
-    // Fields
+    // Поля
     private JobCandidate selectedJobCandidate;
     private Skillsbar skillBoxFragment = null;
     private boolean reloadDataLoaders = false;

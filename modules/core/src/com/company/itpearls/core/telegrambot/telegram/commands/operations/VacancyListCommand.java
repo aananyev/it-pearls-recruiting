@@ -85,13 +85,13 @@ public class VacancyListCommand extends OperationCommand {
 
         // Просмотр вакансии в базе
         InlineKeyboardButton viewOpenPositionKeyboardButton = new InlineKeyboardButton();
-        viewOpenPositionKeyboardButton.setText("View from HuntTech");
+        viewOpenPositionKeyboardButton.setText("Просмотр в HuntTech");
         String urlButton = Utils.getOpenPositionEditorURL(openPosition);
         viewOpenPositionKeyboardButton.setUrl(urlButton);
 
         // Просмотр описания вакансии
         InlineKeyboardButton postCVCommentKeyboardButton = new InlineKeyboardButton();
-        postCVCommentKeyboardButton.setText("View Job Decription");
+        postCVCommentKeyboardButton.setText("Просмотр описания вакансии");
         postCVCommentKeyboardButton.setCallbackData("ViewJobDescription");
 
         viewFromHuntTech.add(viewOpenPositionKeyboardButton);
@@ -110,7 +110,7 @@ public class VacancyListCommand extends OperationCommand {
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
 
-        inlineKeyboardButton.setText("View");
+        inlineKeyboardButton.setText("Просмотр");
         inlineKeyboardButton.setUrl(Utils.getOpenPositionEditorURL(openPosition));
 
         rowInline.add(inlineKeyboardButton);

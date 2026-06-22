@@ -251,7 +251,7 @@ public class RecrutiesTasksEdit extends StandardEditor<RecrutiesTasks> {
             // если не установлен флаг подписки, то установить его в false
             if (recrutiesTasksSubscribeCheckBox.getValue() == null) {
                 dialogs.createOptionDialog()
-                        .withCaption("Warning")
+                        .withCaption("Внимание")
                         .withMessage("Подписатся на изменение вакансии?")
                         .withActions(
                                 new DialogAction(DialogAction.Type.YES,

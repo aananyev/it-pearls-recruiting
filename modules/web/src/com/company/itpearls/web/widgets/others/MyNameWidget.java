@@ -12,7 +12,7 @@ import javax.inject.Inject;
 
 @UiController("itpearls_MyNameWidget")
 @UiDescriptor("my-name-widget.xml")
-@DashboardWidget(name="My Name")
+@DashboardWidget(name="Моё имя")
 public class MyNameWidget extends ScreenFragment {
 
     @Inject

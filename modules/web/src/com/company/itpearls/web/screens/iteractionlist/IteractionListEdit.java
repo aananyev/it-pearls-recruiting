@@ -364,7 +364,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
                 if (PersistenceHelper.isNew(getEditedEntity())) {
                     dialogs.createOptionDialog()
-                            .withCaption("WARNING")
+                            .withCaption("ВНИМАНИЕ")
                             .withMessage("Вы пытаетесь зарегистрировать взаимодействие по закрытой позиции.\nОтменить действие?")
                             .withActions(new DialogAction(DialogAction.Type.YES,
                                             Action.Status.PRIMARY).withHandler(e -> {
@@ -467,7 +467,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     OpenPosition op = getEditedEntity().getVacancy();
                     if (op == null) {
                         dialogs.createOptionDialog()
-                                .withCaption("Warning")
+                                .withCaption("Внимание")
                                 .withMessage("Скопировать предыдущую запись кандидата?")
                                 .withActions(
                                         new DialogAction(DialogAction.Type.YES,
@@ -1780,7 +1780,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onButtonSubscribeClick() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             dialogs.createOptionDialog()
-                    .withCaption("WARNING!")
+                    .withCaption("ВНИМАНИЕ!")
                     .withMessage("Сохранить изменения?")
                     .withActions(new DialogAction(DialogAction.Type.YES,
                                     Action.Status.PRIMARY).withHandler(e -> {

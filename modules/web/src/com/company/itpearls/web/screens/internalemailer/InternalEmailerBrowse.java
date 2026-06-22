@@ -137,7 +137,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
         signFilterButton.addAction(new BaseAction("editSignIconsAction")
                 .withCaption(messageBundle.getMessage("msgEditSignIconsAction"))
-                .withDescription("msgEditSignIconsActionDesc")
+                .withDescription(messageBundle.getMessage("msgEditSignIconsActionDesc"))
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
                     SignIconsBrowse screen = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
@@ -524,7 +524,7 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
         actionButton.addAction(new BaseAction("editSignIconsAction")
                 .withCaption(messageBundle.getMessage("msgEditSignIconsAction"))
-                .withDescription("msgEditSignIconsActionDesc")
+                .withDescription(messageBundle.getMessage("msgEditSignIconsActionDesc"))
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
                     emailersTable.setSelected((InternalEmailerTemplate) internalEmailer);

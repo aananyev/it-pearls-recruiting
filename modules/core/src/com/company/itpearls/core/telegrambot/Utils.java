@@ -52,7 +52,7 @@ public class Utils {
         try {
             Persistence persistence = AppBeans.get(Persistence.class);
             try (Transaction tx = persistence.createTransaction()) {
-                // get EntityManager for the current transaction
+                // получить EntityManager для текущей транзакции
                 EntityManager em = persistence.getEntityManager();
                 Query query = em.createQuery(queryStr);
                 query.addView(view);
@@ -80,7 +80,7 @@ public class Utils {
         try {
             Persistence persistence = AppBeans.get(Persistence.class);
             try (Transaction tx = persistence.createTransaction()) {
-                // get EntityManager for the current transaction
+                // получить EntityManager для текущей транзакции
                 EntityManager em = persistence.getEntityManager();
                 Query query = em.createQuery(queryStr);
                 query.setParameter(field, date);
@@ -107,7 +107,7 @@ public class Utils {
         try {
             Persistence persistence = AppBeans.get(Persistence.class);
             try (Transaction tx = persistence.createTransaction()) {
-                // get EntityManager for the current transaction
+                // получить EntityManager для текущей транзакции
                 EntityManager em = persistence.getEntityManager();
                 Query query = em.createQuery(queryStr);
                 query.setParameter("startDate", startDate);
@@ -132,7 +132,7 @@ public class Utils {
         try {
             Persistence persistence = AppBeans.get(Persistence.class);
             try (Transaction tx = persistence.createTransaction()) {
-                // get EntityManager for the current transaction
+                // получить EntityManager для текущей транзакции
                 EntityManager em = persistence.getEntityManager();
                 Query query = em.createQuery(queryStr);
 
@@ -154,7 +154,7 @@ public class Utils {
         try {
             Persistence persistence = AppBeans.get(Persistence.class);
             try (Transaction tx = persistence.createTransaction()) {
-                // get EntityManager for the current transaction
+                // получить EntityManager для текущей транзакции
                 EntityManager em = persistence.getEntityManager();
                 Query query = em.createQuery(queryStr);
 
@@ -212,7 +212,7 @@ public class Utils {
         try {
             Persistence persistence = AppBeans.get(Persistence.class);
             try (Transaction tx = persistence.createTransaction()) {
-                // get EntityManager for the current transaction
+                // получить EntityManager для текущей транзакции
                 EntityManager em = persistence.getEntityManager();
                 Query query = em.createQuery(queryStr);
                 query.addView(view);

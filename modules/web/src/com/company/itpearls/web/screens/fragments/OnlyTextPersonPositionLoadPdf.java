@@ -71,7 +71,7 @@ public class OnlyTextPersonPositionLoadPdf extends OnlyTextPersonPosition {
     public void onUploadFieldFileUploadError(UploadField.FileUploadErrorEvent event) {
         notifications.create(Notifications.NotificationType.ERROR)
                 .withCaption(messageBundle.getMessage("msgError"))
-                .withDescription("File upload error")
+                .withDescription("Ошибка загрузки файла")
                 .show();
     }
 
@@ -82,7 +82,7 @@ public class OnlyTextPersonPositionLoadPdf extends OnlyTextPersonPosition {
         if (file != null) {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption(messageBundle.getMessage("msgWarning"))
-                    .withDescription("File is uploaded to temporary storage at " + file.getAbsolutePath())
+                    .withDescription("Файл загружен во временное хранилище: " + file.getAbsolutePath())
                     .show();
         }
 
@@ -91,12 +91,12 @@ public class OnlyTextPersonPositionLoadPdf extends OnlyTextPersonPosition {
         try {
             fileUploadingAPI.putFileIntoStorage(uploadField.getFileId(), fd);
         } catch (FileStorageException e) {
-            throw new RuntimeException("Error saving file to FileStorage", e);
+            throw new RuntimeException("Ошибка сохранения файла в FileStorage", e);
         }
 
         notifications.create(Notifications.NotificationType.WARNING)
                 .withCaption(messageBundle.getMessage("msgWarning"))
-                .withDescription("Uploaded file: " + uploadField.getFileName())
+                .withDescription("Загружен файл: " + uploadField.getFileName())
                 .show();
 
 //        FileDescriptor fdcv = fd.get();

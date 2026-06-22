@@ -19,7 +19,7 @@ public class CustomDbTypeConverter implements DbTypeConverter {
             ResultSetMetaData metaData = resultSet.getMetaData();
 
             if ((columnIndex > metaData.getColumnCount()) || (columnIndex <= 0))
-                throw new IndexOutOfBoundsException("Column index out of bound");
+                throw new IndexOutOfBoundsException("Индекс столбца вне допустимого диапазона");
 
             int sqlType = metaData.getColumnType(columnIndex);
             String typeName = metaData.getColumnTypeName(columnIndex);
@@ -44,7 +44,7 @@ public class CustomDbTypeConverter implements DbTypeConverter {
 
             return value;
         } catch (SQLException e) {
-            throw new RuntimeException("Error converting database value", e);
+            throw new RuntimeException("Ошибка преобразования значения из БД", e);
         }
     }
 

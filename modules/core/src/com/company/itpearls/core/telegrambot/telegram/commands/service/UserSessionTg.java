@@ -20,7 +20,7 @@ public class UserSessionTg extends ServiceCommand {
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] arguments) {
 
-        Stream<UserSession> userSessionsStream = userSessionsAPI.getUserSessionsStream(); // TO-DO возвращает инжектирование нулл
+        Stream<UserSession> userSessionsStream = userSessionsAPI.getUserSessionsStream(); // TO-DO: возвращает null при инжектировании
         UserSession userSessions[] = userSessionsStream.distinct().toArray(UserSession[]::new);
         StringBuilder sb = new StringBuilder("<b>Список пользователей в системе</b>\n");
         String userName = Utils.getUserName(user);

@@ -282,7 +282,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         actionsWithCandidateButton.addAction(new BaseAction("editSignIconsAction")
                 .withCaption(messageBundle.getMessage("msgEditSignIconsAction"))
-                .withDescription("msgEditSignIconsActionDesc")
+                .withDescription(messageBundle.getMessage("msgEditSignIconsActionDesc"))
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
                     SignIconsBrowse screen = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
@@ -636,7 +636,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         signFilterButton.addAction(new BaseAction("editSignIconsAction")
                 .withCaption(messageBundle.getMessage("msgEditSignIconsAction"))
-                .withDescription("msgEditSignIconsActionDesc")
+                .withDescription(messageBundle.getMessage("msgEditSignIconsActionDesc"))
                 .withIcon(CubaIcon.FONTICONS.source())
                 .withHandler(actionPerformedAction -> {
                     SignIconsBrowse screen = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
@@ -1934,19 +1934,19 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         if (s != null) {
             switch (s) {
-                case 0: // WHITE
+                case 0: // БЕЛЫЙ
                     retStr = "pic-center-large-grey";
                     break;
-                case 1: // red
+                case 1: // красный
                     retStr = "pic-center-large-red";
                     break;
-                case 2: // yellow
+                case 2: // жёлтый
                     retStr = "pic-center-large-yellow";
                     break;
-                case 3: // green
+                case 3: // зелёный
                     retStr = "pic-center-large-green";
                     break;
-                case 4: // to client
+                case 4: // заказчику
                     retStr = "pic-center-large-grey";
                     break;
                 case 5:
@@ -1954,7 +1954,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 case 7:
                 case 8:
                 case 9:
-                case 10: // recruiting
+                case 10: // подбор
                     retStr = "pic-center-large-grey";
                     break;
                 default:
@@ -1973,19 +1973,19 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
         if (s != null) {
             switch (s) {
-                case 0: // WHITE
+                case 0: // БЕЛЫЙ
                     retStr = "QUESTION_CIRCLE";
                     break;
-                case 1: // red
+                case 1: // красный
                     retStr = "BOMB";
                     break;
-                case 2: // yellow
+                case 2: // жёлтый
 //                    retStr = "BOMB";
                     break;
-                case 3: // green
+                case 3: // зелёный
 //                    retStr = "BOMB";
                     break;
-                case 4: // to client
+                case 4: // заказчику
                     retStr = "BOMB";
                     break;
                 case 5:
@@ -1993,7 +1993,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 case 7:
                 case 8:
                 case 9:
-                case 10: // recruiting
+                case 10: // подбор
                     retStr = "BOMB";
                     break;
                 default:

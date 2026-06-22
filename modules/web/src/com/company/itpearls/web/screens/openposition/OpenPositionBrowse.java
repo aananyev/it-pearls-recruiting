@@ -1062,7 +1062,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retButton;
     }
 
-    // TODO закрыть все Details другие
+    // TODO: закрыть все остальные Details
     private void closeAllAnoterDetailsScreenFragments() {
         for (OpenPosition op : openPositionsTable.getItems().getItems(0,
                 openPositionsDc.getItems().size())) {

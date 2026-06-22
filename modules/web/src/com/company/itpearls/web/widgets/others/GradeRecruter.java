@@ -14,7 +14,7 @@ import java.util.*;
 
 @UiController("itpearls_GradeRecruter")
 @UiDescriptor("grade-recruter.xml")
-@DashboardWidget(name = "Recruiter's grade")
+@DashboardWidget(name = "Грейд рекрутера")
 public class GradeRecruter extends ScreenFragment {
     @Inject
     private DataManager dataManager;

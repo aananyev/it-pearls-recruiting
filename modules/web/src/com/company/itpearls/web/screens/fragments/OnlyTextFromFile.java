@@ -52,7 +52,7 @@ public class OnlyTextFromFile extends Onlytext {
 
         if (file != null) {
             notifications.create()
-                    .withCaption("File is uploaded to temporary storage at " + file.getAbsolutePath())
+                    .withCaption("Файл загружен во временное хранилище: " + file.getAbsolutePath())
                     .show();
         }
 
@@ -61,13 +61,13 @@ public class OnlyTextFromFile extends Onlytext {
         try {
             fileUploadingAPI.putFileIntoStorage(uploadField.getFileId(), fd);
         } catch (FileStorageException e) {
-            throw new RuntimeException("Error saving file to FileStorage", e);
+            throw new RuntimeException("Ошибка сохранения файла в FileStorage", e);
         }
 
         dataManager.commit(fd);
 
         notifications.create()
-                .withCaption("Uploaded file: " + uploadField.getFileName())
+                .withCaption("Загружен файл: " + uploadField.getFileName())
                 .show();
 
         InputStream inputStream = fileLoader.openStream(fd);
@@ -106,7 +106,7 @@ public class OnlyTextFromFile extends Onlytext {
     @Subscribe("uploadField")
     public void onUploadFieldFileUploadError(UploadField.FileUploadErrorEvent event) {
         notifications.create()
-                .withCaption("File upload error")
+                .withCaption("Ошибка загрузки файла")
                 .show();
     }
 }

@@ -1,10 +1,12 @@
 package com.company.itpearls.web.login;
 
+import com.company.itpearls.web.extension.ChangeFaviconExtension;
 import com.haulmont.cuba.gui.Route;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.web.app.login.LoginScreen;
 import com.haulmont.cuba.web.gui.screen.ScreenDependencyUtils;
+import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Dependency;
 
 import javax.inject.Inject;
@@ -13,6 +15,11 @@ import javax.inject.Inject;
 @UiController("loginBranded")
 @UiDescriptor("app-login-screen.xml")
 public class AppLoginScreen extends LoginScreen {
+
+    private static final String DEFAULT_FAVICON = "./VAADIN/themes/hover/favicon.ico";
+
+    @Inject
+    protected VBoxLayout loginWrapper;
 
     @Inject
     protected HBoxLayout bottomPanel;
@@ -25,8 +32,13 @@ public class AppLoginScreen extends LoginScreen {
     @Subscribe
     public void onAppLoginScreenInit(InitEvent event) {
         loadStyles();
-
+        setFavicon();
         initBottomPanel();
+    }
+
+    private void setFavicon() {
+        ChangeFaviconExtension extension = new ChangeFaviconExtension();
+        extension.extend(loginWrapper.unwrap(AbstractOrderedLayout.class), DEFAULT_FAVICON);
     }
 
     private void initLoginImage() {

@@ -1,6 +1,6 @@
 package com.company.itpearls.web.screens.jobcandidate;
 
-// TO-DO сделат кнопку просмотр кандидата или статистика по кандидату
+// TO-DO: сделать кнопку просмотра кандидата или статистику по кандидату
 
 import com.haulmont.cuba.gui.screen.*;
 

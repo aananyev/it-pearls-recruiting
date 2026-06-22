@@ -43,7 +43,7 @@ public class OpenPositionServiceBean implements OpenPositionService {
         try {
             Persistence persistence = AppBeans.get(Persistence.class);
             try (Transaction tx = persistence.createTransaction()) {
-                // get EntityManager for the current transaction
+                // получить EntityManager для текущей транзакции
                 EntityManager em = persistence.getEntityManager();
                 Query query = em.createQuery("select e from itpearls_OpenPosition e where not e.openClose = true");
 

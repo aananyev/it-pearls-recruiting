@@ -19,7 +19,7 @@ import java.util.List;
 
 @UiController("itpearls_SendEmailCounterWidget")
 @UiDescriptor("send-email-counter-widget.xml")
-@DashboardWidget(name="Send email counter")
+@DashboardWidget(name="Счётчик отправленных писем")
 public class SendEmailCounterWidget extends ScreenFragment {
 
     @Inject

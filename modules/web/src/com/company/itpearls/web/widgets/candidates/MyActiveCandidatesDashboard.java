@@ -29,7 +29,7 @@ import java.util.Calendar;
 
 @UiController("itpearls_MyActiveCandidatesDashboard")
 @UiDescriptor("my-active-candidates-dashboard.xml")
-@DashboardWidget(name = "My Active Candidateses")
+@DashboardWidget(name = "Мои активные кандидаты")
 public class MyActiveCandidatesDashboard extends ScreenFragment {
     @Inject
     private CollectionLoader<IteractionList> iteractionListsDl;
