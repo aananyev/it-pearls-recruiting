@@ -6,58 +6,13 @@
         icon="REORDER">
     <data>
         <instance id="iteractionListDc"
-                  class="com.company.itpearls.entity.IteractionList">
-            <view extends="_local">
-                <property name="chainInteraction"
-                          view="_local"/>
-                <property name="candidate"
-                          view="_local">
-                    <property name="fileImageFace" view="_local"/>
-                    <property name="personPosition"
-                              view="_local"/>
-                </property>
-                <property name="iteractionType"
-                          view="_local">
-                    <property name="workStatus"
-                              view="employeeWorkStatus-view"/>
-                </property>
-                <property name="vacancy"
-                          view="_local">
-                    <property name="grade"
-                              view="_local"/>
-                    <property name="positionType"
-                              view="_local"/>
-                    <property name="owner"
-                              view="_local"/>
-                    <property name="projectName"
-                              view="_local">
-                        <property name="projectLogo"
-                                  view="_local"/>
-                        <property name="projectTree"
-                                  view="_local"/>
-                        <property name="projectOwner"
-                                  view="_local"/>
-                        <property name="projectDepartment"
-                                  view="_local">
-                            <property name="companyName"
-                                      view="_local">
-                                <property name="fileCompanyLogo" view="_local"/>
-                            </property>
-                        </property>
-                    </property>
-                    <property name="cities"
-                              view="_local"/>
-                </property>
-                <property name="recrutier"
-                          view="_local"/>
-            </view>
+                  class="com.company.itpearls.entity.IteractionList"
+                  view="iteractionList-edit-view">
             <loader id="iteractionListDl"/>
         </instance>
         <collection id="iteractionTypesDc"
-                    class="com.company.itpearls.entity.Iteraction">
-            <view extends="_local">
-                <property name="workStatus" view="employeeWorkStatus-view"/>
-            </view>
+                    class="com.company.itpearls.entity.Iteraction"
+                    view="iteraction-list-type-view">
             <loader id="iteractionTypesLc"
                     cacheable="true">
                 <query>
@@ -76,25 +31,8 @@
             </loader>
         </collection>
         <collection id="openPositionDc"
-                    class="com.company.itpearls.entity.OpenPosition">
-            <view extends="_local">
-                <property name="grade"
-                          view="_minimal"/>
-                <property name="positionType"
-                          view="_local"/>
-                <property name="owner"
-                          view="_local"/>
-                <property name="projectName"
-                          view="_local">
-                    <property name="projectLogo"
-                              view="_local"/>
-                    <property name="projectDepartment"
-                              view="_local">
-                        <property name="companyName"
-                                  view="_local"/>
-                    </property>
-                </property>
-            </view>
+                    class="com.company.itpearls.entity.OpenPosition"
+                    view="openPosition-iteraction-list-picker-view">
             <loader id="openPositionsDl"
                     cacheable="true">
                 <query>

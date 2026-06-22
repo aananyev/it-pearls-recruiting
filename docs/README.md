@@ -15,6 +15,7 @@ docs/
 ├── templates/
 │   └── entity-template.md    ← шаблон описания сущности CUBA
 └── entities/
+    └── IteractionList.md      ← взаимодействие с кандидатом
     └── Iteraction.md         ← тип взаимодействия с кандидатом (образец)
 ```
 
@@ -28,6 +29,7 @@ docs/
 | Описать новую сущность | [templates/entity-template.md](templates/entity-template.md) |
 | Оптимизировать существующую сущность | [.cursor/rules/entity-performance-optimization.mdc](../.cursor/rules/entity-performance-optimization.mdc) |
 | Понять устройство типов взаимодействий | [entities/Iteraction.md](entities/Iteraction.md) |
+| Понять записи взаимодействий с кандидатами | [entities/IteractionList.md](entities/IteractionList.md) |
 
 ---
 
@@ -60,7 +62,7 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 | Сущность | Таблица БД | Тип | Документ | Статус |
 |----------|------------|-----|----------|--------|
 | **Iteraction** | `ITPEARLS_ITERACTION` | справочник (дерево) | [entities/Iteraction.md](entities/Iteraction.md) | ✅ заполнен |
-| IteractionList | `ITPEARLS_ITERACTION_LIST` | транзакционная | — | планируется |
+| **IteractionList** | `ITPEARLS_ITERACTION_LIST` | транзакционная | [entities/IteractionList.md](entities/IteractionList.md) | ✅ заполнен |
 | JobCandidate | `ITPEARLS_JOB_CANDIDATE` | транзакционная | — | планируется |
 | OpenPosition | `ITPEARLS_OPEN_POSITION` | транзакционная | — | планируется |
 

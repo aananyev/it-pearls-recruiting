@@ -58,25 +58,23 @@ public class InteractionServiceBean implements InteractionService {
         return retIteraction;
     }
 
+    private static final String QUERY_LAST_BY_CANDIDATE =
+            "select e from itpearls_IteractionList e "
+                    + "where e.candidate = :candidate "
+                    + "order by e.numberIteraction desc";
+
     @Override
     public IteractionList getLastIteraction(JobCandidate jobCandidate) {
-        if (jobCandidate.getIteractionList() != null) {
-            IteractionList maxIteraction = null;
-
-            for (IteractionList iteractionList : jobCandidate.getIteractionList()) {
-                if (maxIteraction == null)
-                    maxIteraction = iteractionList;
-
-                if (iteractionList.getNumberIteraction() != null) {
-                    if (maxIteraction.getNumberIteraction().compareTo(iteractionList.getNumberIteraction()) < 0) {
-                        maxIteraction = iteractionList;
-                    }
-                }
-            }
-
-            return maxIteraction;
-        } else
+        if (jobCandidate == null || jobCandidate.getId() == null) {
             return null;
+        }
+        return dataManager.load(IteractionList.class)
+                .query(QUERY_LAST_BY_CANDIDATE)
+                .parameter("candidate", jobCandidate)
+                .maxResults(1)
+                .view("iteractionList-picker-view")
+                .optional()
+                .orElse(null);
     }
 
     @Override

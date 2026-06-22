@@ -103,6 +103,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     protected Boolean noSubscribe = false;
     private List<Iteraction> mostPopular = new ArrayList<>();
     private Boolean afterCommitSign = true;
+    private boolean commentLoaded = false;
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
 
     @Inject
@@ -535,10 +536,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (getEditedEntity().getIteractionType() != null) {
             if (getEditedEntity().getIteractionType().getNeedSendLetter() != null) {
                 if (getEditedEntity().getIteractionType().getNeedSendLetter()) {
-                    if (getEditedEntity().getIteractionType().getTextEmailToSend() != null) {
+                    Iteraction iteractionType = dataManager.reload(
+                            getEditedEntity().getIteractionType(),
+                            ViewBuilder.of(Iteraction.class).add("textEmailToSend").build());
+                    if (iteractionType.getTextEmailToSend() != null) {
                         if (getEditedEntity().getCandidate().getEmail() != null) {
 
-                            String message = preparingMessage(getEditedEntity().getIteractionType().getTextEmailToSend(),
+                            String message = preparingMessage(iteractionType.getTextEmailToSend(),
                                     getEditedEntity().getCandidate(),
                                     getEditedEntity().getVacancy(),
                                     userSession.getUser(),
@@ -791,7 +795,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     .parameter("vacancy", vacancyFiels.getValue())
                     .parameter("candidate", candidateField.getValue())
                     .maxResults(1)
-                    .view("_local")
+                    .view("_minimal")
                     .optional()
                     .orElse(null);
 
@@ -958,7 +962,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 oldIteraction = dataManager.load(IteractionList.class)
                         .query("select e from itpearls_IteractionList e where e.numberIteraction = :number")
                         .parameter("number", numberIteraction)
-                        .view("iteractionList-view")
+                        .view("iteractionList-edit-view")
                         .cacheable(true)
                         .one();
             } catch (IllegalStateException e) {
@@ -1011,7 +1015,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             duplicateIteraction = dataManager.load(IteractionList.class)
                     .query("select e from itpearls_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f where f.candidate = :candidate)")
                     .parameter("candidate", getEditedEntity().getCandidate())
-                    .view("iteractionList-view")
+                    .view("iteractionList-edit-view")
                     .cacheable(true)
                     .one();
         } catch (IllegalStateException e) {
@@ -1173,6 +1177,17 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             recrutierField.setValue((ExtUser) userSession.getUser());
         }
+        loadCommentIfNeeded();
+    }
+
+    private void loadCommentIfNeeded() {
+        if (commentLoaded || PersistenceHelper.isNew(getEditedEntity())) {
+            return;
+        }
+        IteractionList reloaded = dataManager.reload(getEditedEntity(),
+                ViewBuilder.of(IteractionList.class).add("comment").build());
+        getEditedEntity().setComment(reloaded.getComment());
+        commentLoaded = true;
     }
 
     protected void setCurrentUserName() {

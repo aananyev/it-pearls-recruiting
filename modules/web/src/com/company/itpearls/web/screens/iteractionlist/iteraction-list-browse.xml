@@ -9,8 +9,7 @@
         <collection id="iteractionListsDc"
                     class="com.company.itpearls.entity.IteractionList"
                     view="iteractionList-browse-view">
-            <loader id="iteractionListsDl"
-                    cacheable="true">
+            <loader id="iteractionListsDl">
                 <query><![CDATA[select e
                         from itpearls_IteractionList e
                         order by e.numberIteraction desc]]>
@@ -28,7 +27,12 @@
                             </c:jpql>
                             <c:jpql>
                                 <c:where>
-                                    e.iteractionType.outstaffingSign = :outStaffing
+                                    e.iteractionType.id in :outstaffingTypeIds
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.dateIteraction &gt;= :dateFrom
                                 </c:where>
                             </c:jpql>
                         </and>
@@ -45,7 +49,7 @@
                 applyTo="iteractionListsTable"
                 dataLoader="iteractionListsDl">
             <properties include=".*"
-                        excludeProperties="addDate,addInteger,addString,addType,communicationMethod,ID,iteractionChain,numberIteraction,recrutierName,id,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                        excludeProperties="addDate,addInteger,addString,addType,comment,communicationMethod,ID,iteractionChain,numberIteraction,recrutierName,id,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <dataGrid id="iteractionListsTable"
                   width="100%"
@@ -100,7 +104,8 @@
                     <formatter format="dd.MM.yyyy" class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
                 </column>
             </columns>
-            <rowsCount autoLoad="true"/>
+            <!-- autoLoad=false: COUNT(*) не выполняется при открытии (~40 мс на 68k строк); счётчик по клику -->
+            <rowsCount autoLoad="false"/>
             <buttonsPanel id="buttonsPanel"
                           alwaysVisible="true">
                 <button id="createBtn" action="iteractionListsTable.create"/>
@@ -133,7 +138,10 @@
                         invoke="onIteractionListButton"/>
             </buttonsPanel>
         </dataGrid>
-        <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>
+        <hbox spacing="true">
+            <dateField id="dateFromField" caption="msg://msgDateFrom" dateFormat="dd.MM.yyyy" width="AUTO"/>
+            <checkBox id="checkBoxShowOnlyMy" caption="mainMsg://msgVisibleOnlyMyCandidate"/>
+        </hbox>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

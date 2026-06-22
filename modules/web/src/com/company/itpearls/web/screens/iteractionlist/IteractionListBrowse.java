@@ -16,6 +16,7 @@ import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
+import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.security.global.UserSession;
@@ -29,7 +30,6 @@ import java.util.stream.Collectors;
 @UiController("itpearls_IteractionList.browse")
 @UiDescriptor("iteraction-list-browse.xml")
 @LookupComponent("iteractionListsTable")
-@LoadDataBeforeShow
 public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Inject
     private UserSession userSession;
@@ -61,19 +61,66 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private Button itercationListButton;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private DateField<Date> dateFromField;
+
+    private static final int DEFAULT_DATE_FILTER_DAYS = 90;
+
+    private static final String QUERY_OUTSTAFFING_TYPES =
+            "select e from itpearls_Iteraction e where e.outstaffingSign = true";
 
     private static final String QUERY_ACTIVE_RECRUITER_TASKS_BY_VACANCIES =
             "select e.openPosition, count(e) from itpearls_RecrutiesTasks e "
                     + "where e.openPosition in :vacancies and e.closed = false and e.endDate >= :currentDate "
                     + "group by e.openPosition";
 
+    private static final ThreadLocal<SimpleDateFormat> ADD_DATE_FORMAT =
+            ThreadLocal.withInitial(() -> new SimpleDateFormat("dd-MM-yyyy H:m"));
+
     private Map<UUID, Integer> vacancyRecruiterTaskCountCache = Collections.emptyMap();
+    private Set<UUID> outstaffingTypeIdsCache;
+    private boolean suppressDateFromReload;
+    private boolean listenersAttached;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER));
-        applyBrowseFilters();
-        addTableListeners();
+        suppressDateFromReload = true;
+        try {
+            buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER));
+            dateFromField.setValue(getDefaultDateFrom());
+            applyBrowseFilters();
+        } finally {
+            suppressDateFromReload = false;
+        }
+    }
+
+    private Date getDefaultDateFrom() {
+        GregorianCalendar calendar = new GregorianCalendar();
+        calendar.add(GregorianCalendar.DAY_OF_MONTH, -DEFAULT_DATE_FILTER_DAYS);
+        return calendar.getTime();
+    }
+
+    private void applyDateFromFilter() {
+        Date dateFrom = dateFromField.getValue();
+        if (dateFrom != null) {
+            iteractionListsDl.setParameter("dateFrom", dateFrom);
+        } else {
+            iteractionListsDl.removeParameter("dateFrom");
+        }
+    }
+
+    private Set<UUID> getOutstaffingTypeIds() {
+        if (outstaffingTypeIdsCache == null) {
+            outstaffingTypeIdsCache = dataManager.load(Iteraction.class)
+                    .query(QUERY_OUTSTAFFING_TYPES)
+                    .view("_minimal")
+                    .cacheable(true)
+                    .list()
+                    .stream()
+                    .map(Iteraction::getId)
+                    .collect(Collectors.toSet());
+        }
+        return outstaffingTypeIdsCache;
     }
 
     private void applyBrowseFilters() {
@@ -85,11 +132,36 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         }
 
         if (userSession.getUser().getGroup().getName().equals(StandartRoles.MANAGER)) {
-            iteractionListsDl.setParameter("outStaffing", true);
+            Set<UUID> outstaffingTypeIds = getOutstaffingTypeIds();
+            if (outstaffingTypeIds.isEmpty()) {
+                iteractionListsDl.removeParameter("outstaffingTypeIds");
+            } else {
+                iteractionListsDl.setParameter("outstaffingTypeIds", outstaffingTypeIds);
+            }
         } else {
-            iteractionListsDl.removeParameter("outStaffing");
+            iteractionListsDl.removeParameter("outstaffingTypeIds");
         }
 
+        applyDateFromFilter();
+        applyInternalProjectFilter();
+        iteractionListsDl.load();
+    }
+
+    private void applyInternalProjectFilter() {
+        if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
+                getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
+            iteractionListsDl.removeParameter("internalProject");
+        } else {
+            iteractionListsDl.setParameter("internalProject", false);
+        }
+    }
+
+    @Subscribe("dateFromField")
+    public void onDateFromFieldValueChange(HasValue.ValueChangeEvent<Date> event) {
+        if (suppressDateFromReload) {
+            return;
+        }
+        applyDateFromFilter();
         iteractionListsDl.load();
     }
 
@@ -139,8 +211,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         String add = "";
 
         if (iteractionList.getAddDate() != null) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy H:m");
-            add = dateFormat.format(iteractionList.getAddDate());
+            add = ADD_DATE_FORMAT.get().format(iteractionList.getAddDate());
         }
 
         if (iteractionList.getAddString() != null)
@@ -150,24 +221,9 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
             add = iteractionList.getAddInteger().toString();
 
         return new StringBuilder
-                (iteractionList.getComment() != null ? iteractionList.getComment() : "")
+                (iteractionList.getAddString() != null ? iteractionList.getAddString() : "")
                 .append(add)
                 .toString();
-    }
-
-    private void filterInternalProject() {
-        if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
-                getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
-            iteractionListsDl.removeParameter("internalProject");
-        } else {
-            iteractionListsDl.setParameter("internalProject", false);
-        }
-
-        try {
-            iteractionListsDl.load();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
     }
 
     @Subscribe("checkBoxShowOnlyMy")
@@ -234,9 +290,15 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Subscribe
     public void onInit(InitEvent event) {
         addIconColumn();
+        addTableListeners();
     }
 
     private void addTableListeners() {
+        if (listenersAttached) {
+            return;
+        }
+        listenersAttached = true;
+
         jobCandidateCardButton.setEnabled(false);
 
         iteractionListsTable.addSelectionListener(event -> {

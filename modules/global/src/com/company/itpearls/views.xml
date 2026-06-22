@@ -235,6 +235,30 @@
         <property name="number"/>
         <property name="iterationName"/>
     </view>
+    <view entity="itpearls_Iteraction" name="iteraction-list-type-view" extends="_minimal">
+        <property name="number"/>
+        <property name="iterationName"/>
+        <property name="pic"/>
+        <property name="outstaffingSign"/>
+        <property name="addFlag"/>
+        <property name="addType"/>
+        <property name="addCaption"/>
+        <property name="addField"/>
+        <property name="callForm"/>
+        <property name="callButtonText"/>
+        <property name="callClass"/>
+        <property name="findToDic"/>
+        <property name="setDateTime"/>
+        <property name="signComment"/>
+        <property name="needSendLetter"/>
+        <property name="signStartProject"/>
+        <property name="signEndProject"/>
+        <property name="signPriorityNews"/>
+        <property name="notificationNeedSend"/>
+        <property name="notificationType"/>
+        <property name="notificationWhenSend"/>
+        <property name="workStatus" view="employeeWorkStatus-view"/>
+    </view>
     <view entity="itpearls_Iteraction" name="iteraction-edit-view" extends="_minimal">
         <property name="number"/>
         <property name="mandatoryIteraction"/>
@@ -301,7 +325,14 @@
         </property>
         <property name="workStatus" view="employeeWorkStatus-view"/>
     </view>
-    <view entity="itpearls_IteractionList" name="iteractionList-browse-view" extends="_local">
+    <view entity="itpearls_IteractionList" name="iteractionList-browse-view" extends="_minimal">
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="rating"/>
+        <property name="currentOpenClose"/>
+        <property name="addDate"/>
+        <property name="addString"/>
+        <property name="addInteger"/>
         <property name="candidate" view="_minimal">
             <property name="fullName"/>
         </property>
@@ -321,12 +352,77 @@
                 <property name="projectName"/>
             </property>
         </property>
-        <property name="comment"/>
+    </view>
+    <view entity="itpearls_IteractionList" name="iteractionList-edit-view" extends="_minimal">
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="communicationMethod"/>
+        <property name="addType"/>
         <property name="addDate"/>
         <property name="addString"/>
         <property name="addInteger"/>
-        <property name="currentOpenClose"/>
         <property name="rating"/>
+        <property name="recrutierName"/>
+        <property name="currentPriority"/>
+        <property name="currentOpenClose"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+            <property name="firstName"/>
+            <property name="middleName"/>
+            <property name="secondName"/>
+            <property name="email"/>
+            <property name="status"/>
+            <property name="fileImageFace" view="_minimal"/>
+            <property name="personPosition" view="_minimal"/>
+            <property name="cityOfResidence" view="_minimal"/>
+        </property>
+        <property name="iteractionType" view="iteraction-list-type-view"/>
+        <property name="vacancy" view="openPosition-iteraction-list-picker-view"/>
+        <property name="recrutier" view="_minimal"/>
+        <property name="chainInteraction" view="_minimal"/>
+    </view>
+    <view entity="itpearls_IteractionList" name="iteractionList-simple-browse-view" extends="_minimal">
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="rating"/>
+        <property name="currentOpenClose"/>
+        <property name="addDate"/>
+        <property name="addString"/>
+        <property name="addInteger"/>
+        <property name="comment"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+            <property name="personPosition" view="_minimal"/>
+        </property>
+        <property name="iteractionType" view="_minimal">
+            <property name="iterationName"/>
+            <property name="pic"/>
+        </property>
+        <property name="recrutier" view="_minimal"/>
+        <property name="vacancy" view="_minimal">
+            <property name="vacansyName"/>
+            <property name="openClose"/>
+            <property name="projectName" view="_minimal">
+                <property name="projectName"/>
+                <property name="projectOwner" view="_minimal"/>
+                <property name="projectDepartment" view="_minimal">
+                    <property name="departamentRuName"/>
+                    <property name="companyName" view="_minimal">
+                        <property name="comanyName"/>
+                    </property>
+                </property>
+            </property>
+        </property>
+    </view>
+    <view entity="itpearls_IteractionList" name="iteractionList-picker-view" extends="_minimal">
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+        </property>
+        <property name="iteractionType" view="_minimal">
+            <property name="iterationName"/>
+        </property>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local" systemProperties="true">
         <property name="vacancy" view="_local">
@@ -340,10 +436,7 @@
             <property name="cityPosition" view="_local"/>
             <property name="cities" view="_local"/>
         </property>
-        <property name="iteractionType" view="_local">
-            <property name="workStatus" view="_minimal">
-            </property>
-        </property>
+        <property name="iteractionType" view="iteraction-list-type-view"/>
         <property name="recrutier" view="_local">
             <property name="group" view="_local"/>
             <property name="fileImageFace" view="_local"/>
@@ -352,7 +445,7 @@
             <property name="personPosition" view="_local"/>
             <property name="fileImageFace" view="_local"/>
         </property>
-        <property name="chainInteraction" view="_local"/>
+        <property name="chainInteraction" view="_minimal"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-current-position" extends="_local"
           systemProperties="true">
@@ -386,7 +479,7 @@
         <property name="vacancy" view="_local">
             <property name="positionType" view="_local"/>
         </property>
-        <property name="iteractionType" view="_local"/>
+        <property name="iteractionType" view="iteraction-list-type-view"/>
         <property name="recrutier" view="_minimal">
             <property name="group" view="_minimal">
             </property>
@@ -496,6 +589,37 @@
         <property name="projectName" view="_minimal">
             <property name="projectDepartment" view="_minimal">
                 <property name="companyName" view="_minimal"/>
+            </property>
+        </property>
+    </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-iteraction-list-picker-view" extends="_minimal">
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+        <property name="priority"/>
+        <property name="signDraft"/>
+        <property name="closingDate"/>
+        <property name="outstaffingCost"/>
+        <property name="remoteWork"/>
+        <property name="comment"/>
+        <property name="salaryMin"/>
+        <property name="salaryMax"/>
+        <property name="grade" view="_minimal"/>
+        <property name="positionType" view="_minimal"/>
+        <property name="owner" view="_minimal"/>
+        <property name="cityPosition" view="_minimal"/>
+        <property name="cities" view="_minimal"/>
+        <property name="projectName" view="_minimal">
+            <property name="projectName"/>
+            <property name="projectLogo"/>
+            <property name="projectTree" view="_minimal"/>
+            <property name="projectOwner" view="_minimal"/>
+            <property name="projectDepartment" view="_minimal">
+                <property name="departamentRuName"/>
+                <property name="companyName" view="_minimal">
+                    <property name="companyShortName"/>
+                    <property name="comanyName"/>
+                    <property name="fileCompanyLogo"/>
+                </property>
             </property>
         </property>
     </view>
