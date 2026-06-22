@@ -18,7 +18,7 @@
                 <property name="laborAgreement" view="_minimal"/>
                 <property name="projectName" view="_local">
                     <property name="projectLogo" view="_local"/>
-                    <property name="projectOwner" view="_local">
+                    <property name="projectOwner" view="person-owner-view">
                         <property name="fileImageFace" view="_local"/>
                         <property name="personPosition" view="_local"/>
                         <property name="cityOfResidence" view="_local"/>
@@ -110,7 +110,7 @@
         <collection id="projectNamesDc"
                     class="com.company.itpearls.entity.Project">
             <view extends="project-view">
-                <property name="projectOwner" view="_local">
+                <property name="projectOwner" view="person-owner-view">
                     <property name="personPosition" view="_local"/>
                     <property name="companyDepartment" view="_local"/>
                     <property name="cityOfResidence" view="_local"/>
@@ -179,7 +179,7 @@
         </collection>
         <collection id="citiesDc"
                     class="com.company.itpearls.entity.City"
-                    view="city-view">
+                    view="city-picker-view">
             <loader id="citiesDl" cacheable="true">
                 <query><![CDATA[select e
                 from itpearls_City e

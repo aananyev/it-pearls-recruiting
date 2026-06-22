@@ -12,12 +12,8 @@
                     <property name="fileCompanyLogo" view="_local"/>
                     <property name="companyOwnership" view="_local"/>
                 </property>
-                <property name="departamentDirector" view="_local">
-                    <property name="personPosition" view="_local"/>
-                </property>
-                <property name="departamentHrDirector" view="_local">
-                    <property name="personPosition" view="_local"/>
-                </property>
+                <property name="departamentDirector" view="person-picker-view"/>
+                <property name="departamentHrDirector" view="person-picker-view"/>
             </view>
             <loader/>
             <collection id="companyDepartamentProjectOfDepartmentsDc" property="projectOfDepartment"/>
@@ -30,22 +26,16 @@
             </loader>
         </collection>
         <collection id="departamentHrDirectorsDc"
-                    class="com.company.itpearls.entity.Person">
-            <view extends="_local">
-                <property name="personPosition"
-                          view="_local"/>
-            </view>
-            <loader id="departamentHrDirectorsLc">
+                    class="com.company.itpearls.entity.Person"
+                    view="person-picker-view">
+            <loader id="departamentHrDirectorsLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Person e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>
         <collection id="departamentDirectorsDc"
-                    class="com.company.itpearls.entity.Person">
-            <view extends="_local">
-                <property name="personPosition"
-                          view="_local"/>
-            </view>
-            <loader id="departamentDirectorsLc">
+                    class="com.company.itpearls.entity.Person"
+                    view="person-picker-view">
+            <loader id="departamentDirectorsLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Person e order by e.secondName, e.firstName]]></query>
             </loader>
         </collection>

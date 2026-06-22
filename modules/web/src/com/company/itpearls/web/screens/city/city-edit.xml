@@ -6,11 +6,11 @@
     <data>
         <instance id="cityDc"
                   class="com.company.itpearls.entity.City"
-                  view="city-view">
+                  view="city-edit-view">
             <loader/>
         </instance>
-        <collection id="cityRegionsDc" class="com.company.itpearls.entity.Region" view="_minimal">
-            <loader id="cityRegionsLc">
+        <collection id="cityRegionsDc" class="com.company.itpearls.entity.Region" view="region-picker-view">
+            <loader id="cityRegionsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Region e]]>
                 </query>

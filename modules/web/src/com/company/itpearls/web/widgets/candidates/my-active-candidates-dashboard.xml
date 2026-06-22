@@ -98,7 +98,7 @@
                           view="_local">
                     <property name="projectName"
                               view="_local">
-                        <property name="projectOwner" view="_local"/>
+                        <property name="projectOwner" view="person-owner-view"/>
                     </property>
                 </property>
             </view>

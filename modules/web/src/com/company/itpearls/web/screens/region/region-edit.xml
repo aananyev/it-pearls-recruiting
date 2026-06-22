@@ -6,12 +6,12 @@
     <data>
         <instance id="regionDc"
                   class="com.company.itpearls.entity.Region"
-                  view="region-view">
+                  view="region-edit-view">
             <loader/>
             <collection id="regionRegionOfCitiesDc" property="regionOfCity"/>
         </instance>
-        <collection id="regionCountriesDc" class="com.company.itpearls.entity.Country" view="_minimal">
-            <loader id="regionCountriesLc">
+        <collection id="regionCountriesDc" class="com.company.itpearls.entity.Country" view="country-picker-view">
+            <loader id="regionCountriesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Country e
 order by e.countryRuName]]></query>
             </loader>

@@ -79,7 +79,7 @@
         </collection>
         <collection id="citiesDc"
                     class="com.company.itpearls.entity.City"
-                    view="city-view">
+                    view="city-picker-view">
             <loader id="citiesDl" cacheable="true">
                 <query><![CDATA[select e
                 from itpearls_City e

@@ -18,7 +18,7 @@
                 <property name="positionType" view="_local"/>
                 <property name="projectName" view="_local">
                     <property name="projectLogo" view="_local"/>
-                    <property name="projectOwner" view="_local">
+                    <property name="projectOwner" view="person-owner-view">
                         <property name="fileImageFace" view="_local"/>
                         <property name="cityOfResidence" view="_local"/>
                         <property name="companyDepartment" view="_local">

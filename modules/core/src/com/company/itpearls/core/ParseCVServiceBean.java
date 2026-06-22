@@ -598,7 +598,11 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public String parseCityStr(String textCV) {
-        List<City> cities = dataManager.load(City.class).list();
+        List<City> cities = dataManager.load(City.class)
+                .query("select e from itpearls_City e")
+                .view("city-picker-view")
+                .cacheable(true)
+                .list();
         City retCity = null;
 
         List<String> city = dataManager
@@ -612,7 +616,11 @@ public class ParseCVServiceBean implements ParseCVService {
 
     @Override
     public City parseCity(String textCV) {
-        List<City> cities = dataManager.load(City.class).list();
+        List<City> cities = dataManager.load(City.class)
+                .query("select e from itpearls_City e")
+                .view("city-picker-view")
+                .cacheable(true)
+                .list();
         City retCity = null;
 
         if (textCV != null) {

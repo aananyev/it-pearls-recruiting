@@ -34,6 +34,8 @@ public class SelectCitiesLocation extends Screen {
     public void onBeforeShow(BeforeShowEvent event) {
         cities = dataManager.load(City.class)
                 .query("select e from itpearls_City e order by e.cityRuName")
+                .view("city-picker-view")
+                .cacheable(true)
                 .list();
 
         citiesLocationTwinColumn.setOptionsList(cities);
@@ -60,13 +62,16 @@ public class SelectCitiesLocation extends Screen {
             case 0:
                 cities = dataManager.load(City.class)
                         .query("select e from itpearls_City e order by e.cityRuName")
+                        .view("city-picker-view")
+                        .cacheable(true)
                         .list();
                 break;
             case 1:
                 cities = dataManager.load(City.class)
                         .query(query)
                         .parameter("countries", "Россия")
-                        .view("city-view")
+                        .view("city-location-view")
+                        .cacheable(true)
                         .list();
                 break;
         }

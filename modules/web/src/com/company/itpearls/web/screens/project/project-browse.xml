@@ -11,7 +11,7 @@
                 <property name="projectDepartment" view="_local">
                     <property name="companyName" view="_local"/>
                 </property>
-                <property name="projectOwner" view="_local">
+                <property name="projectOwner" view="person-owner-view">
                     <property name="personPosition" view="_local"/>
                     <property name="companyDepartment" view="_local"/>
                     <property name="cityOfResidence" view="_local"/>

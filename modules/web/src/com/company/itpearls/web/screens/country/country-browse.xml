@@ -6,8 +6,8 @@
     <data readOnly="true">
         <collection id="countriesDc"
                     class="com.company.itpearls.entity.Country"
-                    view="country-view">
-            <loader id="countriesDl">
+                    view="country-browse-view">
+            <loader id="countriesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Country e
 order by e.countryRuName]]>
@@ -23,7 +23,7 @@ order by e.countryRuName]]>
                 applyTo="countriesTable"
                 dataLoader="countriesDl">
             <properties include=".*"
-                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                        excludeProperties="countryOfRegion,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="countriesTable"
                     width="100%"

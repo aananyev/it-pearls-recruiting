@@ -6,7 +6,7 @@
     <data readOnly="true">
         <collection id="personsDc"
                     class="com.company.itpearls.entity.Person"
-                    view="person-view">
+                    view="person-browse-view">
             <loader id="personsDl">
                 <query>
                     <![CDATA[select e from itpearls_Person e order by e.secondName, e.firstName]]>
@@ -22,7 +22,7 @@
                 applyTo="personsTable"
                 dataLoader="personsDl">
             <properties include=".*"
-                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,sendResumeToEmail,fileImageFace,birdhDate,email,phone,mobPhone,skypeName,telegramName,wiberName,watsupName,companyDepartment"/>
         </filter>
         <dataGrid id="personsTable"
                     width="100%"

@@ -9,22 +9,16 @@
             <view extends="_local">
                 <property name="comanyName"/>
                 <property name="companyGroup" view="_local"/>
-                <property name="cityOfCompany" view="_local">
-                    <property name="cityRegion" view="_local">
-                        <property name="regionCountry" view="_local"/>
-                    </property>
-                </property>
+                <property name="cityOfCompany" view="city-picker-view"/>
                 <property name="companyOwnership" view="_minimal"/>
-                <property name="companyDirector" view="_local">
-                    <property name="personPosition" view="_local"/>
-                </property>
-                <property name="countryOfCompany" view="_local"/>
+                <property name="companyDirector" view="person-picker-view"/>
+                <property name="countryOfCompany" view="country-picker-view"/>
                 <property name="departmentOfCompany" view="_local">
                     <property name="projectOfDepartment" view="_local"/>
-                    <property name="departamentDirector" view="_local"/>
-                    <property name="departamentHrDirector" view="_local"/>
+                    <property name="departamentDirector" view="person-picker-view"/>
+                    <property name="departamentHrDirector" view="person-picker-view"/>
                 </property>
-                <property name="regionOfCompany" view="_local"/>
+                <property name="regionOfCompany" view="region-picker-view"/>
                 <property name="fileCompanyLogo" view="_local"/>
             </view>
             <loader/>
@@ -37,8 +31,8 @@
                 </query>
             </loader>
         </collection>
-        <collection id="companyDirectorsDc" class="com.company.itpearls.entity.Person" view="_minimal">
-            <loader id="companyDirectorsLc">
+        <collection id="companyDirectorsDc" class="com.company.itpearls.entity.Person" view="person-picker-view">
+            <loader id="companyDirectorsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Person e]]>
                 </query>
@@ -47,22 +41,22 @@
         <collection id="companyGroupDc"
                     class="com.company.itpearls.entity.CompanyGroup"
                     view="companyGroup-view"/>
-        <collection id="cityOfCompaniesDc" class="com.company.itpearls.entity.City" view="city-view">
-            <loader id="cityOfCompaniesLc">
+        <collection id="cityOfCompaniesDc" class="com.company.itpearls.entity.City" view="city-picker-view">
+            <loader id="cityOfCompaniesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_City e]]>
                 </query>
             </loader>
         </collection>
-        <collection id="regionOfCompaniesDc" class="com.company.itpearls.entity.Region" view="region-view">
-            <loader id="regionOfCompaniesLc">
+        <collection id="regionOfCompaniesDc" class="com.company.itpearls.entity.Region" view="region-picker-view">
+            <loader id="regionOfCompaniesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Region e]]>
                 </query>
             </loader>
         </collection>
-        <collection id="countryOfCompaniesDc" class="com.company.itpearls.entity.Country" view="_minimal">
-            <loader id="countryOfCompaniesLc">
+        <collection id="countryOfCompaniesDc" class="com.company.itpearls.entity.Country" view="country-picker-view">
+            <loader id="countryOfCompaniesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Country e]]>
                 </query>

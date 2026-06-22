@@ -161,7 +161,7 @@
             </loader>
         </collection>
         <collection id="citiesDc" class="com.company.itpearls.entity.City">
-            <view extends="city-view"/>
+            <view extends="city-picker-view"/>
             <loader id="citiesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_City e order by e.cityRuName]]>

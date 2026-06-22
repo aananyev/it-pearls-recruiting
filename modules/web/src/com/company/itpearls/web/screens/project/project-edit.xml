@@ -16,7 +16,7 @@
                         <property name="fileCompanyLogo" view="_local"/>
                     </property>
                 </property>
-                <property name="projectOwner" view="_local"/>
+                <property name="projectOwner" view="person-owner-view"/>
                 <property name="projectTree" view="_local"/>
                 <property name="generalChat"/>
                 <property name="chatForCV"/>
@@ -57,8 +57,8 @@
         </collection>
         <collection id="projectOwnersDc"
                     class="com.company.itpearls.entity.Person"
-                    view="person-view">
-            <loader id="projectOwnersLc">
+                    view="person-picker-view">
+            <loader id="projectOwnersLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Person e
                                         order by e.secondName, e.firstName]]></query>
             </loader>

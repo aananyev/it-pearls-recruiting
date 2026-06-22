@@ -50,6 +50,18 @@ rg "{entityCamelCase}\." modules/ --glob '*.java'
 - N+1 в `rowStyleProvider`, `descriptionProvider`, `columnGenerator`
 - Сервисы без `.view()` / `.cacheable(true)` на DataManager
 
+### 1.6 Baseline производительности (до изменений)
+**Снять до начала Фазы 2** — итоговое сравнение в Фазе 5.
+
+Для каждого основного экрана (Browse, Edit, Tree):
+- `git rev-parse HEAD` (или тег/ветка) — точка отсчёта
+- Имя view, список полей, наличие LOB в view
+- Количество SQL при открытии экрана / первой загрузке таблицы (см. Фаза 5.2)
+- Время загрузки (ручной замер или DevTools Network)
+- Опционально: `EXPLAIN (ANALYZE, BUFFERS)` типичного JPQL/SQL на локальной PostgreSQL (`docs/LOCAL_DATABASE.md`)
+
+Образец: бенчмарк `IteractionListBrowse` — browse без LOB `comment`, batch N+1, узкие FK views (см. `docs/entities/IteractionList.md` §7).
+
 ---
 
 ## Фаза 2: Быстрые победы (реализация)
@@ -147,6 +159,107 @@ rg "{entityCamelCase}\." modules/ --glob '*.java'
 
 ---
 
+## Фаза 5: Финал — бенчмарк производительности (до/после)
+
+Сравнить метрики baseline (Фаза 1.6) с состоянием после Фаз 2–4. Зафиксировать в `docs/entities/{Entity}.md` (раздел «Производительность») или в комментарии к PR.
+
+### 5.1 Экраны для замера
+
+| Экран | Что мерить |
+|-------|------------|
+| Browse | открытие, первая страница таблицы, refresh |
+| Tree Browse | раскрытие корня, scroll/load |
+| Edit | открытие существующей записи, переключение вкладок с LOB/collections |
+| Cross-form | открытие формы, где сущность — FK (если менялись sign/picker views) |
+
+### 5.2 Как снимать метрики
+
+**Количество SQL:**
+- Включить логирование EclipseLink: `eclipselink.logging.level.sql=FINE` (временно в `app.properties` или `logback.xml`)
+- Либо `pg_stat_statements` / лог PostgreSQL на локальной БД
+- Считать DISTINCT запросы за одно действие (открытие Browse, Save Edit)
+
+**«Вес» view:**
+- Имя view, число свойств в `views.xml`, LOB в view (да/нет), глубина `expand`
+
+**Время загрузки:**
+- Ручной замер (секундомер) или DevTools → Network (DOMContentLoaded / полная загрузка)
+- Повторить 3 раза, взять медиану
+
+**EXPLAIN (опционально):**
+```sql
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT ... -- типичный SELECT browse-таблицы или тяжёлый JOIN
+```
+
+### 5.3 Таблица сравнения (обязательна)
+
+| Экран | Метрика | До | После | Δ | Комментарий |
+|-------|---------|-----|-------|---|-------------|
+| IteractionListBrowse | SQL при открытии | N | M | −(N−M) | убран LOB, batch N+1 |
+| IteractionListBrowse | полей в view | … | … | … | `iteractionList-browse-view` |
+| IteractionListBrowse | время открытия, с | … | … | … | медиана 3 замеров |
+| … | … | … | … | … | … |
+
+### 5.4 Остаточные узкие места
+
+После сравнения явно перечислить:
+- legacy views (`_local` / `_base`) у потребителей
+- N+1 в providers, не закрытые batch-загрузкой
+- LOB всё ещё в browse/view
+- отсутствующие индексы на FK / ORDER BY
+- кандидаты на Фазу 3–4 (backlog с приоритетом)
+
+---
+
+## Фаза 6: Автотесты CRUD
+
+Проверить, что оптимизация не сломала базовые сценарии работы с сущностью.
+
+### 6.1 Паттерны проекта (CUBA 7.3)
+
+Тесты — **не** `src/test`, а `modules/core/test/`:
+
+| Файл | Назначение |
+|------|------------|
+| `modules/core/test/com/company/itpearls/ItpearlsTestContainer.java` | TestContainer, подключение к локальной PostgreSQL из `context.xml` |
+| `modules/core/test/com/company/itpearls/core/SampleIntegrationTest.java` | образец: `@ClassRule`, `DataManager`, `Persistence`, транзакции |
+
+Перед написанием — `rg "ServiceTest|IntegrationTest" modules/core/test/` на существующие тесты сущности.
+
+### 6.2 Что покрыть
+
+Класс: `{Entity}ServiceTest` в `modules/core/test/com/company/itpearls/core/` (или screen-тесты, если в проекте есть UI-тесты для экранов).
+
+| Сценарий | Проверка |
+|----------|----------|
+| **Create** | `dataManager.create` + commit, обязательные поля, view `{entity}-edit-view` |
+| **Edit / Save** | загрузка по id с edit-view, изменение поля, `dataManager.commit`, перечитать |
+| **Browse / Load** | JPQL/DataManager с `{entity}-browse-view`, все поля view доступны, **без** неожиданной подгрузки LOB |
+| **Delete** | `dataManager.remove` или soft delete: для `StandardEntity` — `deleteTs` заполнен, запись не в обычном `select` без `deleteTs is null` |
+
+Использовать `.view("{entity}-browse-view")` / `.view("{entity}-edit-view")` — те же views, что на экранах.
+
+### 6.3 Запуск
+
+```bash
+./gradlew :app-core:test --tests "com.company.itpearls.core.{Entity}ServiceTest"
+```
+
+Полный прогон core-тестов:
+```bash
+./gradlew :app-core:test
+```
+
+Требуется доступная локальная БД (как для `ItpearlsTestContainer`).
+
+### 6.4 Scope
+
+- Минимум: один integration-тест-класс на сущность с 4 сценариями CRUD
+- Не коммитить тесты и правки, пока пользователь явно не попросит
+
+---
+
 ## Чеклист перед завершением
 
 - [ ] Browse/Tree открываются без LOB в SQL
@@ -155,6 +268,8 @@ rg "{entityCamelCase}\." modules/ --glob '*.java'
 - [ ] Нет N+1 в providers таблицы
 - [ ] `rg` не находит `_local`/`_base` для этой сущности в browse/edit (кроме legacy view для совместимости)
 - [ ] compileJava + deploy успешны
+- [ ] **Фаза 5:** таблица до/после заполнена, остаточные bottlenecks задокументированы
+- [ ] **Фаза 6:** `{Entity}ServiceTest` проходит (`:app-core:test`)
 
 ## Ключевые файлы проекта
 
@@ -166,3 +281,6 @@ rg "{entityCamelCase}\." modules/ --glob '*.java'
 | Экраны | `modules/web/src/com/company/itpearls/web/screens/{entity}/` |
 | Сервисы | `modules/core/src/com/company/itpearls/core/` |
 | Стили row | `modules/web/themes/hover/com.company.itpearls/hover-ext.scss` |
+| Документация сущности | `docs/entities/{Entity}.md` |
+| Тесты | `modules/core/test/com/company/itpearls/` |
+| TestContainer | `modules/core/test/com/company/itpearls/ItpearlsTestContainer.java` |

@@ -1,13 +1,48 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
 
+    <view entity="itpearls_Region" name="region-country-child-view" extends="_minimal">
+        <property name="regionRuName"/>
+        <property name="regionCode"/>
+    </view>
+    <view entity="itpearls_Region" name="region-browse-view" extends="_minimal">
+        <property name="regionRuName"/>
+        <property name="regionCode"/>
+        <property name="regionCountry" view="country-picker-view"/>
+    </view>
+    <view entity="itpearls_Region" name="region-edit-view" extends="_minimal">
+        <property name="regionRuName"/>
+        <property name="regionCode"/>
+        <property name="regionCountry" view="country-picker-view"/>
+        <property name="regionOfCity" view="city-region-child-view"/>
+    </view>
+    <view entity="itpearls_Region" name="region-picker-view" extends="_minimal">
+        <property name="regionRuName"/>
+        <property name="regionCode"/>
+    </view>
     <view entity="itpearls_Region" name="region-view" extends="_minimal">
-        <property name="regionCountry" view="_minimal">
-            <property name="countryOfRegion" view="_minimal">
-                <property name="regionCountry" view="_minimal"/>
-            </property>
-        </property>
-        <property name="regionOfCity" view="_minimal"/>
+        <property name="regionRuName"/>
+        <property name="regionCode"/>
+        <property name="regionCountry" view="country-picker-view"/>
+    </view>
+    <view entity="itpearls_City" name="city-region-child-view" extends="_minimal">
+        <property name="cityRuName"/>
+        <property name="cityPhoneCode"/>
+    </view>
+    <view entity="itpearls_Country" name="country-browse-view" extends="_minimal">
+        <property name="countryRuName"/>
+        <property name="countryShortName"/>
+        <property name="phoneCode"/>
+    </view>
+    <view entity="itpearls_Country" name="country-edit-view" extends="_minimal">
+        <property name="countryRuName"/>
+        <property name="countryShortName"/>
+        <property name="phoneCode"/>
+        <property name="countryOfRegion" view="region-country-child-view"/>
+    </view>
+    <view entity="itpearls_Country" name="country-picker-view" extends="_minimal">
+        <property name="countryRuName"/>
+        <property name="countryShortName"/>
     </view>
     <view entity="itpearls_Country" name="country-view" extends="_local">
         <property name="countryOfRegion" view="_local"/>
@@ -16,12 +51,12 @@
         <property name="companyName" view="_local">
             <property name="departmentOfCompany" view="_local">
                 <property name="companyName" view="_local">
-                    <property name="cityOfCompany" view="_local"/>
+                    <property name="cityOfCompany" view="city-picker-view"/>
                 </property>
             </property>
         </property>
-        <property name="departamentHrDirector" view="_local"/>
-        <property name="departamentDirector" view="_local"/>
+        <property name="departamentHrDirector" view="person-picker-view"/>
+        <property name="departamentDirector" view="person-picker-view"/>
         <property name="projectOfDepartment" view="_local">
             <property name="projectDepartment" view="_local"/>
         </property>
@@ -29,19 +64,64 @@
     <view entity="itpearls_Project" name="project-view" extends="_local">
         <property name="projectDepartment" view="_minimal">
         </property>
-        <property name="projectOwner" view="_local">
-        </property>
+        <property name="projectOwner" view="person-owner-view"/>
         <property name="projectTree" view="_minimal">
             <property name="projectTree" view="_minimal"/>
         </property>
         <property name="projectLogo" view="_local"/>
     </view>
-    <view entity="itpearls_Person" name="person-view" extends="_local">
-        <property name="positionCountry" view="_minimal"/>
+    <view entity="itpearls_Person" name="person-browse-view" extends="_minimal">
+        <property name="firstName"/>
+        <property name="middleName"/>
+        <property name="secondName"/>
+        <property name="personPosition" view="_minimal"/>
+        <property name="positionCountry" view="country-picker-view"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
+        <property name="fileImageFace" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Person" name="person-edit-view" extends="_minimal">
+        <property name="firstName"/>
+        <property name="middleName"/>
+        <property name="secondName"/>
+        <property name="birdhDate"/>
+        <property name="email"/>
+        <property name="phone"/>
+        <property name="mobPhone"/>
+        <property name="skypeName"/>
+        <property name="telegramName"/>
+        <property name="wiberName"/>
+        <property name="watsupName"/>
+        <property name="sendResumeToEmail"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
+        <property name="positionCountry" view="country-picker-view"/>
         <property name="personPosition" view="_minimal"/>
         <property name="companyDepartment" view="_minimal"/>
         <property name="fileImageFace" view="_minimal"/>
-        <property name="cityOfResidence" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Person" name="person-picker-view" extends="_minimal">
+        <property name="firstName"/>
+        <property name="secondName"/>
+        <property name="middleName"/>
+        <property name="personPosition" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Person" name="person-owner-view" extends="_minimal">
+        <property name="firstName"/>
+        <property name="secondName"/>
+        <property name="middleName"/>
+        <property name="personPosition" view="_minimal"/>
+        <property name="companyDepartment" view="_minimal">
+            <property name="departamentRuName"/>
+            <property name="companyName" view="_minimal"/>
+        </property>
+        <property name="cityOfResidence" view="city-picker-view"/>
+        <property name="fileImageFace" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Person" name="person-view" extends="_local">
+        <property name="positionCountry" view="country-picker-view"/>
+        <property name="personPosition" view="_minimal"/>
+        <property name="companyDepartment" view="_minimal"/>
+        <property name="fileImageFace" view="_minimal"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
     </view>
     <view entity="itpearls_Position" name="position-view" extends="_local">
     </view>
@@ -61,7 +141,7 @@
                 <property name="companyName" view="_local"/>
             </property>
             <property name="projectLogo" view="_local"/>
-            <property name="projectOwner" view="_local"/>
+            <property name="projectOwner" view="person-owner-view"/>
         </property>
         <property name="openPositionComments" view="_local">
             <property name="user" view="_local">
@@ -72,7 +152,7 @@
     </view>
     <view entity="itpearls_JobCandidate" name="JobCandidate-person-position" extends="_local">
         <property name="currentCompany" view="_local"/>
-        <property name="cityOfResidence" view="_minimal"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
         <property name="iteractionList" view="_minimal">
             <property name="addType"/>
             <property name="addDate"/>
@@ -106,7 +186,7 @@
             <property name="positionList" view="_local"/>
         </property>
         <property name="currentCompany" view="_local"/>
-        <property name="cityOfResidence" view="_local"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
         <property name="iteractionList" view="_local">
             <property name="vacancy" view="_local">
                 <property name="owner" view="_local"/>
@@ -145,7 +225,7 @@
         <property name="candidates" view="_local">
             <property name="currentCompany" view="_local"/>
             <property name="personPosition" view="_local"/>
-            <property name="cityOfResidence" view="_local"/>
+            <property name="cityOfResidence" view="city-picker-view"/>
             <property name="iteractionList" view="_local"/>
             <property name="specialisation" view="_local"/>
             <property name="jobHistory" view="_local"/>
@@ -167,22 +247,37 @@
         <property name="currentPosition" view="_local"/>
         <property name="currentCompany" view="_local"/>
     </view>
+    <view entity="itpearls_City" name="city-browse-view" extends="_minimal">
+        <property name="cityRuName"/>
+        <property name="cityPhoneCode"/>
+        <property name="cityRegion" view="region-picker-view"/>
+    </view>
+    <view entity="itpearls_City" name="city-edit-view" extends="_minimal">
+        <property name="cityRuName"/>
+        <property name="cityPhoneCode"/>
+        <property name="cityRegion" view="region-picker-view"/>
+    </view>
+    <view entity="itpearls_City" name="city-picker-view" extends="_minimal">
+        <property name="cityRuName"/>
+        <property name="cityPhoneCode"/>
+    </view>
+    <view entity="itpearls_City" name="city-location-view" extends="_minimal">
+        <property name="cityRuName"/>
+        <property name="cityRegion" view="region-browse-view"/>
+    </view>
     <view entity="itpearls_City" name="city-view" extends="_local">
-        <property name="cityRegion" view="_minimal">
-            <property name="regionCountry" view="_minimal"/>
-            <property name="regionOfCity" view="_minimal"/>
-        </property>
+        <property name="cityRegion" view="region-picker-view"/>
         <property name="openPosition" view="_minimal"/>
     </view>
     <view entity="itpearls_Company" name="company-view" extends="_local">
         <property name="companyOwnership" view="_minimal"/>
         <property name="departmentOfCompany" view="_minimal">
         </property>
-        <property name="cityOfCompany" view="_minimal"/>
-        <property name="regionOfCompany" view="_minimal"/>
-        <property name="countryOfCompany" view="_minimal"/>
+        <property name="cityOfCompany" view="city-picker-view"/>
+        <property name="regionOfCompany" view="region-picker-view"/>
+        <property name="countryOfCompany" view="country-picker-view"/>
         <property name="fileCompanyLogo" view="_minimal"/>
-        <property name="companyDirector" view="_minimal"/>
+        <property name="companyDirector" view="person-picker-view"/>
         <property name="companyGroup" view="_local"/>
     </view>
     <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
@@ -374,7 +469,7 @@
             <property name="status"/>
             <property name="fileImageFace" view="_minimal"/>
             <property name="personPosition" view="_minimal"/>
-            <property name="cityOfResidence" view="_minimal"/>
+            <property name="cityOfResidence" view="city-picker-view"/>
         </property>
         <property name="iteractionType" view="iteraction-list-type-view"/>
         <property name="vacancy" view="openPosition-iteraction-list-picker-view"/>
@@ -429,7 +524,7 @@
             <property name="positionType" view="_local"/>
             <property name="projectName" view="_local">
                 <property name="projectLogo" view="_local"/>
-                <property name="projectOwner" view="_local"/>
+                <property name="projectOwner" view="person-owner-view"/>
             </property>
             <property name="grade" view="_local"/>
             <property name="owner" view="_local"/>
@@ -509,7 +604,7 @@
     </view>
     <view entity="itpearls_JobCandidate" name="jobCandidate-view-search" extends="_minimal">
         <property name="currentCompany" view="_minimal"/>
-        <property name="cityOfResidence" view="_minimal"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
         <property name="iteractionList" view="_minimal">
             <property name="dateIteraction"/>
             <property name="vacancy" view="_minimal"/>
@@ -525,9 +620,9 @@
     </view>
     <view entity="itpearls_Company" name="company-view-search" extends="_local">
         <property name="departmentOfCompany" view="_minimal"/>
-        <property name="cityOfCompany" view="_minimal"/>
-        <property name="regionOfCompany" view="_minimal"/>
-        <property name="countryOfCompany" view="_minimal"/>
+        <property name="cityOfCompany" view="city-picker-view"/>
+        <property name="regionOfCompany" view="region-picker-view"/>
+        <property name="countryOfCompany" view="country-picker-view"/>
     </view>
     <view entity="itpearls_RecrutiesTasks" name="recrutiesTasks-view" extends="_minimal">
         <property name="openPosition" view="_local">
@@ -643,7 +738,7 @@
         <property name="jobCandidate" view="_local">
             <property name="personPosition" view="_local"/>
             <property name="currentCompany" view="_local"/>
-            <property name="cityOfResidence" view="_local"/>
+            <property name="cityOfResidence" view="city-picker-view"/>
             <property name="fileImageFace" view="_local"/>
         </property>
         <property name="additionalLaborAgreement" view="_local"/>

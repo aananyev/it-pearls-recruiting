@@ -6,7 +6,7 @@
     <data>
         <instance id="countryDc"
                   class="com.company.itpearls.entity.Country"
-                  view="country-view">
+                  view="country-edit-view">
             <loader/>
             <collection id="countryCountryOfRegionsDc" property="countryOfRegion"/>
         </instance>

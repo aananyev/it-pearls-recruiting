@@ -21,17 +21,8 @@
             </loader>
             <collection id="cityDc" property="cities"/>
         </instance>
-        <collection id="cityOptionDc" class="com.company.itpearls.entity.City">
-        <view extends="city-view">
-            <property name="openPosition" view="_local"/>
-            <property name="cityRuName"/>
-            <property name="cityRegion" view="region-view">
-                <property name="regionCountry" view="_local">
-                    <property name="countryRuName"/>
-                </property>
-            </property>
-        </view>
-            <loader id="cityOptionDl">
+        <collection id="cityOptionDc" class="com.company.itpearls.entity.City" view="city-location-view">
+            <loader id="cityOptionDl" cacheable="true">
                 <query>
                     <![CDATA[select g from itpearls_City g]]>
                     <condition>

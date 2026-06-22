@@ -15,8 +15,12 @@ docs/
 ├── templates/
 │   └── entity-template.md    ← шаблон описания сущности CUBA
 └── entities/
-    └── IteractionList.md      ← взаимодействие с кандидатом
-    └── Iteraction.md         ← тип взаимодействия с кандидатом (образец)
+    ├── IteractionList.md      ← взаимодействие с кандидатом
+    ├── Iteraction.md         ← тип взаимодействия с кандидатом (образец)
+    ├── Person.md             ← сотрудник / контактное лицо
+    ├── Country.md              ← справочник стран
+    ├── Region.md               ← справочник регионов
+    └── City.md                 ← справочник городов
 ```
 
 ---
@@ -30,6 +34,10 @@ docs/
 | Оптимизировать существующую сущность | [.cursor/rules/entity-performance-optimization.mdc](../.cursor/rules/entity-performance-optimization.mdc) |
 | Понять устройство типов взаимодействий | [entities/Iteraction.md](entities/Iteraction.md) |
 | Понять записи взаимодействий с кандидатами | [entities/IteractionList.md](entities/IteractionList.md) |
+| Понять справочник персон (сотрудники) | [entities/Person.md](entities/Person.md) |
+| Понять справочник стран | [entities/Country.md](entities/Country.md) |
+| Понять справочник городов | [entities/City.md](entities/City.md) |
+| Понять справочник регионов | [entities/Region.md](entities/Region.md) |
 
 ---
 
@@ -63,6 +71,10 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 |----------|------------|-----|----------|--------|
 | **Iteraction** | `ITPEARLS_ITERACTION` | справочник (дерево) | [entities/Iteraction.md](entities/Iteraction.md) | ✅ заполнен |
 | **IteractionList** | `ITPEARLS_ITERACTION_LIST` | транзакционная | [entities/IteractionList.md](entities/IteractionList.md) | ✅ заполнен |
+| **Person** | `ITPEARLS_PERSON` | справочник | [entities/Person.md](entities/Person.md) | ✅ заполнен |
+| **Country** | `ITPEARLS_COUNTRY` | справочник | [entities/Country.md](entities/Country.md) | ✅ заполнен |
+| **Region** | `ITPEARLS_REGION` | справочник | [entities/Region.md](entities/Region.md) | ✅ заполнен |
+| **City** | `ITPEARLS_CITY` | справочник | [entities/City.md](entities/City.md) | ✅ заполнен |
 | JobCandidate | `ITPEARLS_JOB_CANDIDATE` | транзакционная | — | планируется |
 | OpenPosition | `ITPEARLS_OPEN_POSITION` | транзакционная | — | планируется |
 
