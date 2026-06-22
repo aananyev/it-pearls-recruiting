@@ -7,7 +7,7 @@
     <data readOnly="true">
         <collection id="iteractionsDc"
                     class="com.company.itpearls.entity.Iteraction"
-                    view="iteraction-view">
+                    view="iteraction-tree-browse-view">
             <loader id="iteractionsDl">
                 <query>
                     <![CDATA[select e from itpearls_Iteraction e order by e.number]]>
@@ -36,7 +36,8 @@
         <filter id="filter"
                 applyTo="iteractionsTable"
                 dataLoader="iteractionsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="textEmailToSend,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,addField,calendarItemStyle,calendarItemDescription,widgetChackJobCandidates,checkTrace,notificationBeforeAfterDay,notificationPeriodType,notificationWhenSend"/>
         </filter>
         <groupBox id="tableBox"
                   width="100%"

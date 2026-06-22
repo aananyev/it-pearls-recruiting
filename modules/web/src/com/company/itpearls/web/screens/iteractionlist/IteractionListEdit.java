@@ -139,8 +139,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private MessageBundle messageBundle;
     @Inject
-    private CollectionContainer<Employee> employeeDc;
-    @Inject
     private Image projectLogoImage;
     @Inject
     private Image candidateImage;
@@ -152,6 +150,17 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private Label<String> closingDateVacancyLabel;
     @Inject
     private InteractionService interactionService;
+
+    private static final String QUERY_CHAIN_LAST =
+            "select e from itpearls_IteractionList e "
+                    + "where e.vacancy = :vacancy and e.candidate = :candidate and e.iteractionType is not null "
+                    + "order by e.dateIteraction desc";
+
+    private static final String QUERY_COUNT_BY_CANDIDATE_VACANCY =
+            "select count(e) from itpearls_IteractionList e where e.candidate = :candidate and e.vacancy = :vacancy";
+
+    private static final String QUERY_EMPLOYEE_BY_CANDIDATE =
+            "select e from itpearls_Employee e where e.jobCandidate = :jobCandidate";
 
     @Subscribe(id = "iteractionListDc", target = Target.DATA_CONTAINER)
     private void onIteractionListDcItemChange(InstanceContainer.ItemChangeEvent<IteractionList> event) {
@@ -326,23 +335,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         }
 
         if (!isClosedVacancy()) {
-            BigDecimal a = new BigDecimal("0.0");
-
-            // проверка на наличие записей по этой вакансии
-            BigDecimal countIteraction = dataManager.loadValue("select count(e.numberIteraction) from itpearls_IteractionList e where e.candidate = :candidate and e.vacancy = :vacancy",
-                            BigDecimal.class)
+            Integer countIteraction = dataManager.loadValue(QUERY_COUNT_BY_CANDIDATE_VACANCY, Integer.class)
                     .parameter("candidate", getEditedEntity().getCandidate())
                     .parameter("vacancy", getEditedEntity().getVacancy())
                     .one();
 
-            // есть
-            // взаимодействия с кандидатом по этой позиции
-            if (countIteraction.compareTo(a) != 0) {
-                newProject = false;
-            } else {
-                // новое взаимодействие с кандидатом
-                newProject = true;
-            }
+            newProject = countIteraction == 0;
 
             if (newProject) {
                 // это начало цепочки - обрезаем выбор
@@ -697,26 +695,29 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         checkEmployyementStatus(event);
     }
 
+    private Employee findEmployeeForCandidate(JobCandidate jobCandidate) {
+        return dataManager.load(Employee.class)
+                .query(QUERY_EMPLOYEE_BY_CANDIDATE)
+                .parameter("jobCandidate", jobCandidate)
+                .view("employee-view")
+                .optional()
+                .orElse(null);
+    }
+
     private void checkEmployyementStatus(BeforeCommitChangesEvent event) {
         if (getEditedEntity() != null) {
             if (getEditedEntity().getIteractionType() != null) {
                 // если нашли оформление персонала
                 if (getEditedEntity().getIteractionType().getSignStartProject() != null) {
                     if (getEditedEntity().getIteractionType().getSignStartProject()) {
-                        Employee currentEmployee = null;
+                        Employee currentEmployee = findEmployeeForCandidate(getEditedEntity().getCandidate());
 
-                        for (Employee employee : employeeDc.getItems()) {
-                            if (employee.getJobCandidate().equals(getEditedEntity().getCandidate())) {
-                                currentEmployee = employee;
-                                if (checkCandidateIsEmployee(employee.getJobCandidate())) {
-                                    notifications.create(Notifications.NotificationType.ERROR)
-                                            .withType(Notifications.NotificationType.ERROR)
-                                            .withCaption(messageBundle.getMessage("msgError"))
-                                            .withDescription(messageBundle.getMessage("msgCandidateAlreadyInStaff"))
-                                            .show();
-                                }
-                                break;
-                            }
+                        if (currentEmployee != null && checkCandidateIsEmployee(getEditedEntity().getCandidate())) {
+                            notifications.create(Notifications.NotificationType.ERROR)
+                                    .withType(Notifications.NotificationType.ERROR)
+                                    .withCaption(messageBundle.getMessage("msgError"))
+                                    .withDescription(messageBundle.getMessage("msgCandidateAlreadyInStaff"))
+                                    .show();
                         }
 
                         if (currentEmployee == null) {
@@ -734,22 +735,14 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 // а тут увольнение персонала
                 if (getEditedEntity().getIteractionType().getSignEndProject() != null) {
                     if (getEditedEntity().getIteractionType().getSignEndProject()) {
-                        Employee currentEmployee = null;
+                        Employee currentEmployee = findEmployeeForCandidate(getEditedEntity().getCandidate());
 
-                        for (Employee employee : employeeDc.getItems()) {
-                            if (employee.getJobCandidate().equals(getEditedEntity().getCandidate())) {
-                                currentEmployee = employee;
-                                // а если он уже уволен?
-                                if (!checkCandidateIsEmployee(employee.getJobCandidate())) {
-                                    notifications.create(Notifications.NotificationType.ERROR)
-                                            .withType(Notifications.NotificationType.ERROR)
-                                            .withCaption(messageBundle.getMessage("msgError"))
-                                            .withDescription(messageBundle.getMessage("msgCandidateNotInStaff"))
-                                            .show();
-                                }
-
-                                break;
-                            }
+                        if (currentEmployee != null && !checkCandidateIsEmployee(getEditedEntity().getCandidate())) {
+                            notifications.create(Notifications.NotificationType.ERROR)
+                                    .withType(Notifications.NotificationType.ERROR)
+                                    .withCaption(messageBundle.getMessage("msgError"))
+                                    .withDescription(messageBundle.getMessage("msgCandidateNotInStaff"))
+                                    .show();
                         }
 
                         if (currentEmployee == null) {
@@ -791,33 +784,18 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
 
     Boolean setChainFlag = false;
 
-    private static final String QUERY_CHAIN = "select e from itpearls_IteractionList e where e.vacancy = :vacancy and e.candidate = :candidate";
-
     private void setChainInteraction(BeforeCommitChangesEvent event) {
         if (!setChainFlag) {
-            List<IteractionList> iteractionLists = dataManager.load(IteractionList.class)
-                    .query(QUERY_CHAIN)
+            IteractionList lastInteraction = dataManager.load(IteractionList.class)
+                    .query(QUERY_CHAIN_LAST)
                     .parameter("vacancy", vacancyFiels.getValue())
                     .parameter("candidate", candidateField.getValue())
-                    .view("iteractionList-view")
-                    .list();
+                    .maxResults(1)
+                    .view("_local")
+                    .optional()
+                    .orElse(null);
 
-            if (iteractionLists.size() > 0) {
-                IteractionList lastInteraction = iteractionLists.get(0);
-
-                for (IteractionList iL : iteractionLists) {
-                    if (iL.getIteractionType() != null) {
-                        if (iL.getDateIteraction().after(lastInteraction.getDateIteraction())) {
-                            lastInteraction = iL;
-                        }
-                    }
-                }
-
-                getEditedEntity().setChainInteraction(lastInteraction);
-            } else {
-                getEditedEntity().setChainInteraction(null);
-            }
-
+            getEditedEntity().setChainInteraction(lastInteraction);
             setChainFlag = true;
         }
     }
@@ -1551,7 +1529,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 List<OpenPosition> alternatives = dataManager
                         .load(OpenPosition.class)
                         .query(QUERY_STATUS_OF_VACANCY)
-                        .view("openPosition-view")
+                        .view("_minimal")
                         .parameter("positionType", event.getValue().getPositionType())
                         .list();
 

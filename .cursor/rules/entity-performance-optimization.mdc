@@ -1,0 +1,168 @@
+---
+description: >-
+  Оптимизация работы сущности CUBA (фраза-триггер: «давай оптимизировать работу сущности»).
+  Методология по образцу Iteraction — views, loaders, N+1, LOB, индексы.
+alwaysApply: false
+---
+
+# Оптимизация работы сущности (CUBA 7.3)
+
+## Триггер
+
+Когда пользователь пишет **«давай оптимизировать работу сущности»** (с именем сущности или без) — выполнить этот план для указанной сущности и её основных экранов Browse/Edit/Tree.
+
+Проект: CUBA 7.3, тема hover, русский UI. Минимальный scope, существующие конвенции, русские messages/comments. **Не коммитить**, пока пользователь явно не попросит.
+
+---
+
+## Фаза 1: Анализ (только чтение)
+
+### 1.1 Структура сущности
+- Java entity (`modules/global/src/.../entity/`)
+- Metadata XML, DB schema / Liquibase migrations
+- Индексы, LOB-поля (`@Lob`, `text*`, rich text, binary)
+- FK-связи (кто ссылается, кто владеет)
+- Ожидаемый объём: **справочник** (мало строк, часто читается) vs **транзакционная** (много строк)
+
+### 1.2 PostgreSQL
+- Достаточность индексов на FK в дочерних транзакционных таблицах
+- TOAST/LOB: какие колонки уходят в TOAST, влияние на SELECT *
+- Типичные query patterns (browse ORDER BY, фильтры, JOIN по FK)
+- Что **не** индексировать: boolean-флаги с низкой селективностью, редко используемые поля
+
+### 1.3 CUBA
+- `modules/core/src/com/company/itpearls/app.properties` — entity cache (`cuba.entityCache.*`)
+- `cacheable="true"` на loaders справочников
+- `views.xml`: иерархия `_minimal` / `_base` / `_local` — что реально тянется
+- `modules/core/src/com/company/itpearls/fts.xml` — нужен ли FTS для сущности
+
+### 1.4 Карта потребителей
+```bash
+rg "itpearls_{Entity}|{Entity}\." modules/ --glob '*.{java,xml}'
+rg "view=\".*{entity}" modules/ --glob '*.xml'
+rg "{entityCamelCase}\." modules/ --glob '*.java'
+```
+Зафиксировать: какие экраны/сервисы/виджеты грузят сущность, какие view, cross-form через FK (пример: `IteractionList.iteractionType` → нужны только `iterationName`, `pic`, флаги).
+
+### 1.5 JPQL-паттерны
+- Path navigation: `e.iteractionType.signOurInterview` — JOIN на справочник в каждом запросе
+- Subselect по name вместо UUID/id
+- N+1 в `rowStyleProvider`, `descriptionProvider`, `columnGenerator`
+- Сервисы без `.view()` / `.cacheable(true)` на DataManager
+
+---
+
+## Фаза 2: Быстрые победы (реализация)
+
+### 2.1 Специализированные views в `modules/global/src/com/company/itpearls/views.xml`
+
+Именование (заменить `{Entity}` / `{entity}`):
+
+| View | Назначение |
+|------|------------|
+| `{entity}-browse-view` | Browse: `extends="_minimal"`, только колонки таблицы, **без LOB** |
+| `{entity}-tree-browse-view` | Tree browse, если есть tree-экран |
+| `{entity}-edit-view` | Edit: все поля формы **кроме LOB** |
+| `{entity}-picker-view` | Lookup/picker: `_minimal` + display-поля |
+| `{entity}-sign-view` / `{entity}-list-type-view` | Флаги/sign-поля для FK в других формах |
+
+**Образец (Iteraction):**
+- `iteraction-browse-view` — number, iterationName, iteractionTree (_minimal), mandatoryIteraction, callButtonText, callClass
+- `iteraction-edit-view` — все поля кроме `textEmailToSend` (LOB)
+- `iteraction-picker-view` — number, iterationName
+- FK `iteractionTree` в edit → `iteraction-picker-view`, не `_local`
+
+### 2.2 Применить views в XML-дескрипторах
+- `{entity}-browse.xml` → `view="{entity}-browse-view"`
+- `{entity}-tree-browse.xml` → `view="{entity}-tree-browse-view"`
+- `{entity}-edit.xml` → `view="{entity}-edit-view"`
+- Lookup-экраны → `{entity}-picker-view`
+
+### 2.3 Lazy load на вкладках (LOB и тяжёлые loaders)
+
+Паттерн из `IteractionEdit.java`:
+- Флаги `boolean lobLoaded`, `boolean collectionLoaded`
+- `@Subscribe` на `TabSheet.SelectedTabChangeEvent` — загрузка при первом открытии вкладки
+- LOB через `dataManager.reload(entity, ViewBuilder.of(Entity.class).add("lobField").build())`
+- CollectionLoader без автозагрузки — `.load()` в обработчике вкладки
+
+### 2.4 Loaders справочников
+```xml
+<loader id="..." cacheable="true">
+```
+Для статических справочников (Iteraction, EmployeeWorkStatus, tree roots).
+
+### 2.5 Browse data
+```xml
+<data readOnly="true">
+```
+
+### 2.6 Filter: узкий excludeProperties
+Исключить LOB, system fields (`version`, `createTs`, `createdBy`, …), неиспользуемые в фильтре поля.
+Пример: `excludeProperties="textEmailToSend,version,createTs,..."`
+
+### 2.7 UI overhead
+- Убрать `aggregatable="true"` с groupTable, если агрегация не нужна
+- `rowsCount` оставить
+
+### 2.8 Java-исправления
+- **N+1 в rowStyleProvider** → batch-запрос при refresh таблицы, кэш `Map<UUID, T>` (см. `IteractionListBrowse.refreshVacancyRecruiterTaskCountCache`)
+- Вынести логику стиля в helper (`OpenPositionRowStyleHelper`)
+- `maxResults(1)` + `order by ... desc` вместо итерации в Java (`InteractionServiceBean.getLastIteraction` — антипаттерн)
+- DataManager: всегда `.view("...")`, для справочников `.cacheable(true)`
+
+### 2.9 Expand chains в views.xml
+Только прямые дочерние свойства в `expand`; не вкладывать глубокие цепочки `_local` без необходимости.
+
+### 2.10 Колонки таблицы ⊆ view
+Каждая `<column id="..."/>` должна быть в view, иначе lazy N+1 при рендере.
+
+### 2.11 Сборка и проверка
+```bash
+./gradlew compileJava deploy -x test
+```
+Перезапуск Tomcat, ручная проверка Browse/Edit/Tree и cross-form (где сущность — FK).
+
+---
+
+## Фаза 3: Среднесрочно
+
+1. **Заменить `_local`/`_base` на specialized views** во всех потребителях (`rg` по проекту)
+2. **UUID-кэш** вместо subselect по name для часто используемых справочных записей
+3. **DB index** на FK-колонках в дочерних транзакционных таблицах (`ITERACTION_LIST.ITERACTION_TYPE_ID` и т.п.)
+4. **FTS cleanup** — убрать сущность из `fts.xml`, если полнотекст не нужен (Iteraction — справочник типов)
+5. **Удалить мёртвый cache config** из `app.properties`, если entity cache не используется
+6. **`cuba.useReadOnlyTransactionForLoad=true`** для browse-экранов (сейчас `false` в app.properties — оценить глобально или per-screen `readOnly="true"`)
+
+### Cross-form views (пример IteractionList)
+`iteractionList-browse-view`: `iteractionType` → `_minimal` + только `iterationName`, `pic`, `outstaffingSign`; `vacancy` → `_minimal` + поля для rowStyle.
+
+---
+
+## Фаза 4: Архитектура (опционально, по согласованию)
+
+1. **LOB → отдельная 1:1 сущность** (напр. `IteractionEmailTemplate` для `textEmailToSend`)
+2. **Application-level read-only cache** для справочников с редкими изменениями
+3. **JPQL refactor**: `e.iteractionType.signX = true` → `e.iteractionType.id in (:typeIds)` с предзагруженным Set UUID флаговых типов
+
+---
+
+## Чеклист перед завершением
+
+- [ ] Browse/Tree открываются без LOB в SQL
+- [ ] Edit грузит LOB только на нужной вкладке
+- [ ] Все FK-loaders используют picker/sign view
+- [ ] Нет N+1 в providers таблицы
+- [ ] `rg` не находит `_local`/`_base` для этой сущности в browse/edit (кроме legacy view для совместимости)
+- [ ] compileJava + deploy успешны
+
+## Ключевые файлы проекта
+
+| Область | Путь |
+|---------|------|
+| Views | `modules/global/src/com/company/itpearls/views.xml` |
+| FTS | `modules/core/src/com/company/itpearls/fts.xml` |
+| Cache config | `modules/core/src/com/company/itpearls/app.properties` |
+| Экраны | `modules/web/src/com/company/itpearls/web/screens/{entity}/` |
+| Сервисы | `modules/core/src/com/company/itpearls/core/` |
+| Стили row | `modules/web/themes/hover/com.company.itpearls/hover-ext.scss` |

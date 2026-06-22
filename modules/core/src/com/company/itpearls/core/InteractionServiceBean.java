@@ -17,7 +17,8 @@ public class InteractionServiceBean implements InteractionService {
     @Inject
     private DataManager dataManager;
 
-    private final static String QUERY_GET_MAX_NUMBER_INTERACTION = "select e from itpearls_IteractionList e where e.numberIteraction = (select max(f.numberIteraction) from itpearls_IteractionList f)";
+    private static final String QUERY_GET_MAX_NUMBER_INTERACTION =
+            "select max(e.numberIteraction) from itpearls_IteractionList e";
 
     private final static String QUERY = "select e.iteractionType, count(e.iteractionType) "
             + "from itpearls_IteractionList e "
@@ -80,22 +81,8 @@ public class InteractionServiceBean implements InteractionService {
 
     @Override
     public BigDecimal getCountInteraction() {
-        IteractionList e = null;
-
-        try {
-            e = dataManager.load(IteractionList.class)
-                    .query(QUERY_GET_MAX_NUMBER_INTERACTION)
-                    .view("iteractionList-view")
-                    .cacheable(true)
-                    .one();
-        } catch (IllegalStateException exception) {
-            exception.printStackTrace();
-        } finally {
-            if (e != null) {
-                return e.getNumberIteraction();
-            } else {
-                return BigDecimal.ZERO;
-            }
-        }
+        return dataManager.loadValue(QUERY_GET_MAX_NUMBER_INTERACTION, BigDecimal.class)
+                .optional()
+                .orElse(BigDecimal.ZERO);
     }
 }

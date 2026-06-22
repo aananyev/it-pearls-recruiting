@@ -1,9 +1,13 @@
 package com.company.itpearls.web.screens.iteraction;
 
 import com.company.itpearls.core.EmailGenerationService;
+import com.company.itpearls.entity.EmployeeWorkStatus;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.itpearls.entity.Iteraction;
 
@@ -93,6 +97,19 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private CheckBox signPriorityNews;
     @Inject
     private CheckBox signViewOnlyManagersCheckBox;
+
+    @Inject
+    private CollectionLoader<Iteraction> iteractionElementDl;
+
+    @Inject
+    private CollectionLoader<EmployeeWorkStatus> workStatusDl;
+
+    @Inject
+    private DataManager dataManager;
+
+    private boolean iteractionElementsLoaded;
+    private boolean textEmailToSendLoaded;
+    private boolean workStatusLoaded;
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
@@ -372,5 +389,35 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     @Subscribe("notificationNeedSendCheckBox")
     public void onNotificationNeedSendCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         notificationSetupHBox.setEnabled(event.getValue());
+    }
+
+    @Subscribe("tabSheet")
+    public void onTabSheetSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
+        if (event.getSelectedTab() == null) {
+            return;
+        }
+        String tabName = event.getSelectedTab().getName();
+        if ("checkTrace".equals(tabName) && !iteractionElementsLoaded) {
+            iteractionElementDl.load();
+            iteractionElementsLoaded = true;
+        }
+        if ("tabSetup".equals(tabName) && !textEmailToSendLoaded) {
+            loadTextEmailToSend();
+            textEmailToSendLoaded = true;
+        }
+        if ("outstaffingTab".equals(tabName) && !workStatusLoaded) {
+            workStatusDl.load();
+            workStatusLoaded = true;
+        }
+    }
+
+    private void loadTextEmailToSend() {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            return;
+        }
+        Iteraction reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(Iteraction.class)
+                .add("textEmailToSend")
+                .build());
+        getEditedEntity().setTextEmailToSend(reloaded.getTextEmailToSend());
     }
 }

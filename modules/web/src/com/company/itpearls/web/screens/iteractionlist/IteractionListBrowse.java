@@ -6,6 +6,7 @@ import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRoles;
 import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -22,7 +23,8 @@ import com.vaadin.ui.JavaScript;
 
 import javax.inject.Inject;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @UiController("itpearls_IteractionList.browse")
 @UiDescriptor("iteraction-list-browse.xml")
@@ -60,17 +62,28 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     @Inject
     private DataManager dataManager;
 
+    private static final String QUERY_ACTIVE_RECRUITER_TASKS_BY_VACANCIES =
+            "select e.openPosition, count(e) from itpearls_RecrutiesTasks e "
+                    + "where e.openPosition in :vacancies and e.closed = false and e.endDate >= :currentDate "
+                    + "group by e.openPosition";
+
+    private Map<UUID, Integer> vacancyRecruiterTaskCountCache = Collections.emptyMap();
+
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER));
-
-        filterStagerField();
-        filterUoustaffing();
+        applyBrowseFilters();
         addTableListeners();
-//        filterInternalProject();
     }
 
-    private void filterUoustaffing() {
+    private void applyBrowseFilters() {
+        if (userSession.getUser().getGroup().getName().equals(StandartRoles.STAGER)) {
+            iteractionListsDl.setParameter("userName",
+                    "%" + userSession.getUser().getLogin() + "%");
+            checkBoxShowOnlyMy.setValue(true);
+            checkBoxShowOnlyMy.setEditable(false);
+        }
+
         if (userSession.getUser().getGroup().getName().equals(StandartRoles.MANAGER)) {
             iteractionListsDl.setParameter("outStaffing", true);
         } else {
@@ -80,20 +93,45 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         iteractionListsDl.load();
     }
 
-    private void filterStagerField() {
-        if (userSession.getUser().getGroup().getName().equals(StandartRoles.STAGER)) {
-            iteractionListsDl.setParameter("userName",
-                    new StringBuilder()
-                            .append("%")
-                            .append(userSession.getUser().getLogin())
-                            .append("%")
-                            .toString());
+    @Subscribe(id = "iteractionListsDl", target = Target.DATA_LOADER)
+    private void onIteractionListsDlPostLoad(CollectionLoader.PostLoadEvent<IteractionList> event) {
+        refreshVacancyRecruiterTaskCountCache(event.getLoadedEntities());
+    }
 
-            checkBoxShowOnlyMy.setValue(true);
-            checkBoxShowOnlyMy.setEditable(false);
+    private void refreshVacancyRecruiterTaskCountCache(List<IteractionList> items) {
+        List<OpenPosition> vacancies = items.stream()
+                .map(IteractionList::getVacancy)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
 
-            iteractionListsDl.load();
+        if (vacancies.isEmpty()) {
+            vacancyRecruiterTaskCountCache = Collections.emptyMap();
+            return;
         }
+
+        List<KeyValueEntity> counts = dataManager.loadValues(QUERY_ACTIVE_RECRUITER_TASKS_BY_VACANCIES)
+                .properties("openPosition", "count")
+                .parameter("vacancies", vacancies)
+                .parameter("currentDate", new Date())
+                .list();
+
+        Map<UUID, Integer> cache = new HashMap<>();
+        for (KeyValueEntity row : counts) {
+            OpenPosition vacancy = row.getValue("openPosition");
+            Long taskCount = row.getValue("count");
+            if (vacancy != null && vacancy.getId() != null && taskCount != null) {
+                cache.put(vacancy.getId(), taskCount.intValue());
+            }
+        }
+        vacancyRecruiterTaskCountCache = cache;
+    }
+
+    private int getRecruiterTaskCount(OpenPosition openPosition) {
+        if (openPosition == null || openPosition.getId() == null) {
+            return 0;
+        }
+        return vacancyRecruiterTaskCountCache.getOrDefault(openPosition.getId(), 0);
     }
 
     @Install(to = "iteractionListsTable.iteractionType", subject = "descriptionProvider")
@@ -323,43 +361,8 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
     @Install(to = "iteractionListsTable", subject = "rowStyleProvider")
     private String iteractionListsTableRowStyleProvider(IteractionList iteractionList) {
-        if (iteractionList.getVacancy() != null) {
-            OpenPosition openPosition = iteractionList.getVacancy();
-            Integer s = dataManager.loadValue("select count(e.reacrutier) from itpearls_RecrutiesTasks e where e.openPosition = :openPos and e.closed = false and e.endDate >= :currentDate", Integer.class)
-                    .parameter("openPos", openPosition)
-                    .parameter("currentDate", new Date())
-                    .one();
-
-            if (openPosition.getSignDraft() == null ? true : !openPosition.getSignDraft()) {
-                if (openPosition.getInternalProject() != null) {
-                    if (openPosition.getInternalProject()) {
-                        if (s == 0) {
-                            return "open-position-internal-project";
-                        } else {
-                            return "open-position-internal-project-job-recrutier";
-                        }
-                    } else {
-                        if (s == 0)
-                            if ((openPosition.getCommandCandidate() != null ? openPosition.getCommandCandidate() : 2) != 1)
-                                return "open-position-empty-recrutier";
-                            else
-                                return "open-position-job-command";
-                        else
-                            return "open-position-job-recruitier";
-                    }
-                } else {
-                    if (openPosition.getCommandCandidate() != 1) {
-                        if (s == 0)
-                            return "open-position-empty-recrutier";
-                        else
-                            return "open-position-job-recruitier";
-                    } else
-                        return "open-position-job-command";
-                }
-            } else {
-                return "open-position-draft";
-            }
-        } else
-            return null;
+        return OpenPositionRowStyleHelper.resolveStyle(
+                iteractionList.getVacancy(),
+                getRecruiterTaskCount(iteractionList.getVacancy()));
     }
 }

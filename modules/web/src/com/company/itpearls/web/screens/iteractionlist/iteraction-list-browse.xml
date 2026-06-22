@@ -7,26 +7,8 @@
         icon="REORDER">
     <data readOnly="true">
         <collection id="iteractionListsDc"
-                    class="com.company.itpearls.entity.IteractionList">
-            <view extends="_local">
-                <property name="candidate" view="_local">
-                    <property name="candidateCv" view="_local"/>
-                    <property name="socialNetwork" view="_local"/>
-                    <property name="personPosition" view="_local"/>
-                    <property name="positionList" view="_local"/>
-                    <property name="fileImageFace" view="_local"/>
-                </property>
-                <property name="iteractionType" view="_local">
-                </property>
-                <property name="recrutier" view="_local"/>
-                <property name="vacancy" view="_local">
-                    <property name="grade" view="_local"/>
-                    <property name="projectName" view="_local">
-                        <property name="projectDepartment" view="_local"/>
-                    </property>
-                </property>
-                <property name="comment"/>
-            </view>
+                    class="com.company.itpearls.entity.IteractionList"
+                    view="iteractionList-browse-view">
             <loader id="iteractionListsDl"
                     cacheable="true">
                 <query><![CDATA[select e
@@ -46,7 +28,7 @@
                             </c:jpql>
                             <c:jpql>
                                 <c:where>
-                                    e.outStaffing = :outStaffing
+                                    e.iteractionType.outstaffingSign = :outStaffing
                                 </c:where>
                             </c:jpql>
                         </and>

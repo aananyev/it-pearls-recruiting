@@ -53,14 +53,6 @@
             </view>
             <loader id="iteractionListDl"/>
         </instance>
-        <collection id="employeeDc" class="com.company.itpearls.entity.Employee">
-            <view extends="employee-view"/>
-            <loader id="employeeDl" cacheable="true">
-                <query>
-                    <![CDATA[select e from itpearls_Employee e]]>
-                </query>
-            </loader>
-        </collection>
         <collection id="iteractionTypesDc"
                     class="com.company.itpearls.entity.Iteraction">
             <view extends="_local">
@@ -130,11 +122,11 @@
         </collection>
         <collection id="usersDc"
                     class="com.haulmont.cuba.security.entity.User"
-                    view="_local">
+                    view="_minimal">
             <loader id="usersDl"
                     cacheable="true">
                 <query>
-                    <![CDATA[select e from sec$User e order by e.active, e.name]]>
+                    <![CDATA[select e from sec$User e where e.active = true order by e.name]]>
                 </query>
             </loader>
         </collection>

@@ -208,6 +208,83 @@
         <property name="candidate" view="_minimal">
         </property>
     </view>
+    <view entity="itpearls_Iteraction" name="iteraction-browse-view" extends="_minimal">
+        <property name="number"/>
+        <property name="iterationName"/>
+        <property name="iteractionTree" view="_minimal">
+            <property name="number"/>
+            <property name="iterationName"/>
+        </property>
+        <property name="mandatoryIteraction"/>
+        <property name="callButtonText"/>
+        <property name="callClass"/>
+    </view>
+    <view entity="itpearls_Iteraction" name="iteraction-tree-browse-view" extends="_minimal">
+        <property name="number"/>
+        <property name="iterationName"/>
+        <property name="mandatoryIteraction"/>
+        <property name="notificationType"/>
+        <property name="needSendLetter"/>
+        <property name="needSendMemo"/>
+        <property name="iteractionTree" view="_minimal">
+            <property name="number"/>
+            <property name="iterationName"/>
+        </property>
+    </view>
+    <view entity="itpearls_Iteraction" name="iteraction-picker-view" extends="_minimal">
+        <property name="number"/>
+        <property name="iterationName"/>
+    </view>
+    <view entity="itpearls_Iteraction" name="iteraction-edit-view" extends="_minimal">
+        <property name="number"/>
+        <property name="mandatoryIteraction"/>
+        <property name="iterationName"/>
+        <property name="staffInteractionStatus"/>
+        <property name="pic"/>
+        <property name="callButtonText"/>
+        <property name="callClass"/>
+        <property name="callForm"/>
+        <property name="addFlag"/>
+        <property name="setDateTime"/>
+        <property name="addType"/>
+        <property name="checkTrace"/>
+        <property name="addField"/>
+        <property name="addCaption"/>
+        <property name="calendarItem"/>
+        <property name="calendarItemStyle"/>
+        <property name="calendarItemDescription"/>
+        <property name="findToDic"/>
+        <property name="widgetChackJobCandidates"/>
+        <property name="needSendLetter"/>
+        <property name="needSendMemo"/>
+        <property name="signOurInterviewAssigned"/>
+        <property name="signOurInterview"/>
+        <property name="signClientInterview"/>
+        <property name="signSendToClient"/>
+        <property name="signPriorityNews"/>
+        <property name="signViewOnlyManager"/>
+        <property name="signComment"/>
+        <property name="signPersonalReserve"/>
+        <property name="signPersonalReserveDelete"/>
+        <property name="signPersonalReservePut"/>
+        <property name="signPersonalReserveRemove"/>
+        <property name="signStartCase"/>
+        <property name="signEndCase"/>
+        <property name="signFeedback"/>
+        <property name="signStartProject"/>
+        <property name="signEndProject"/>
+        <property name="signEndProcessVacancyClosed"/>
+        <property name="signEmailSend"/>
+        <property name="outstaffingSign"/>
+        <property name="notificationNeedSend"/>
+        <property name="notificationType"/>
+        <property name="notificationPeriodType"/>
+        <property name="notificationBeforeAfterDay"/>
+        <property name="notificationWhenSend"/>
+        <property name="statistics"/>
+        <property name="iteractionTree" view="iteraction-picker-view"/>
+        <property name="workStatus" view="employeeWorkStatus-view"/>
+    </view>
     <view entity="itpearls_Iteraction" name="iteraction-view" extends="_base">
         <property name="iteractionTree" view="_minimal">
             <property name="mandatoryIteraction"/>
@@ -223,6 +300,33 @@
             <property name="addCaption"/>
         </property>
         <property name="workStatus" view="employeeWorkStatus-view"/>
+    </view>
+    <view entity="itpearls_IteractionList" name="iteractionList-browse-view" extends="_local">
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+        </property>
+        <property name="iteractionType" view="_minimal">
+            <property name="iterationName"/>
+            <property name="pic"/>
+            <property name="outstaffingSign"/>
+        </property>
+        <property name="recrutier" view="_minimal"/>
+        <property name="vacancy" view="_minimal">
+            <property name="vacansyName"/>
+            <property name="openClose"/>
+            <property name="signDraft"/>
+            <property name="internalProject"/>
+            <property name="commandCandidate"/>
+            <property name="projectName" view="_minimal">
+                <property name="projectName"/>
+            </property>
+        </property>
+        <property name="comment"/>
+        <property name="addDate"/>
+        <property name="addString"/>
+        <property name="addInteger"/>
+        <property name="currentOpenClose"/>
+        <property name="rating"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local" systemProperties="true">
         <property name="vacancy" view="_local">

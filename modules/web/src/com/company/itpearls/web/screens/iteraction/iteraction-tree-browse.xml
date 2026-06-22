@@ -7,7 +7,7 @@
     <data readOnly="true">
         <collection id="iteractionsTreeDc"
                     class="com.company.itpearls.entity.Iteraction"
-                    view="iteraction-view">
+                    view="iteraction-tree-browse-view">
             <loader id="iteractionsDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_Iteraction e order by e.number]]></query>
             </loader>
@@ -22,7 +22,7 @@
                 dataLoader="iteractionsDl">
             <properties include=".*"
                         exclude="id|addDate|addInteger|addString|addFlag|addType|number|pic|addCaption|addField|iteractionTree|notificationType|callClass|mandatoryIteraction|callButtonText|calendarItem|calendarItemDescription|findToDic|setDateTime|calendarItemStyle|callForm"
-                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                        excludeProperties="textEmailToSend,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,addField,calendarItemStyle,calendarItemDescription,widgetChackJobCandidates,checkTrace,notificationBeforeAfterDay,notificationPeriodType,notificationWhenSend"/>
         </filter>
         <treeDataGrid id="iteractionTreeTable"
                    height="200px"
