@@ -32,7 +32,6 @@ import com.haulmont.reports.entity.Report;
 import com.haulmont.reports.gui.ReportGuiManager;
 import com.haulmont.reports.gui.actions.list.ListPrintFormAction;
 import org.apache.commons.lang3.time.DateUtils;
-import org.eclipse.persistence.exceptions.QueryException;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
@@ -81,8 +80,19 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             "select e from itpearls_OpenPosition e where e.openClose = false and e.priority >= :priority";
     private static final String QUERY_PARENT_OPENPOSITION =
             "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
-    private static final String QUERY_AVERAGE_RATING =
-            "select avg(e.rating) from itpearls_OpenPositionComment e where e.openPosition = :openPosition and not e.rating is null";
+    private static final String QUERY_ACTIVE_RECRUITERS_COUNT_BY_POSITIONS =
+            "select e.openPosition.id as openPositionId, count(e.reacrutier) as cnt from itpearls_RecrutiesTasks e "
+                    + "where e.openPosition.id in :ids and e.closed = false and e.endDate >= :currentDate "
+                    + "group by e.openPosition.id";
+    private static final String QUERY_SENT_CV_COUNT_BY_POSITIONS =
+            "select e.vacancy.id as vacancyId, count(e) as cnt from itpearls_IteractionList e "
+                    + "where e.vacancy.id in :ids and e.iteractionType.signSendToClient = true "
+                    + "and e.vacancy.lastOpenDate < e.dateIteraction "
+                    + "group by e.vacancy.id";
+    private static final String QUERY_AVG_RATING_BY_POSITIONS =
+            "select e.openPosition.id as openPositionId, avg(e.rating) as avgRating from itpearls_OpenPositionComment e "
+                    + "where e.openPosition.id in :ids and not e.rating is null "
+                    + "group by e.openPosition.id";
 
     private final static String separatorChar = "⎯";
     private final static String separator = separatorChar.repeat(22);
@@ -114,9 +124,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             sb.append(h4_tag_a);
             sb.append(br_tag_a);
             sb.append(br_tag_a);
-            sb.append(event.getItem().getProjectName().getProjectDescription());
-            if (event.getItem().getProjectName().getProjectDescription() != null) {
-                image.setDescription(sb.toString());
+            if (event.getItem().getProjectName().getId() != null) {
+                UUID projectId = event.getItem().getProjectName().getId();
+                if (projectDescriptionExistsCache.getOrDefault(projectId, false)) {
+                    String description = getLazyProjectDescription(projectId);
+                    if (description != null) {
+                        sb.append(description);
+                        image.setDescription(sb.toString());
+                    }
+                }
             }
 
             if (event.getItem().getProjectName().getProjectLogo() != null) {
@@ -151,16 +167,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         if (event.getItem().getProjectName() != null) {
             if (event.getItem().getProjectName().getProjectDepartment() != null) {
                 if (event.getItem().getProjectName().getProjectDepartment().getCompanyName() != null) {
-                    if (event.getItem().getProjectName().getProjectDepartment().getCompanyName().getCompanyDescription() != null) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(h4_tag);
-                        sb.append(event.getItem().getProjectName().getProjectDepartment().getCompanyName().getComanyName());
-                        sb.append(h4_tag_a);
-                        sb.append(br_tag_a);
-                        sb.append(br_tag_a);
-                        sb.append(event.getItem().getProjectName().getProjectDepartment().getCompanyName().getCompanyDescription());
+                    UUID companyId = event.getItem().getProjectName().getProjectDepartment().getCompanyName().getId();
+                    if (companyId != null && companyDescriptionExistsCache.getOrDefault(companyId, false)) {
+                        String companyDescription = getLazyCompanyDescription(companyId);
+                        if (companyDescription != null) {
+                            StringBuilder sb = new StringBuilder();
+                            sb.append(h4_tag);
+                            sb.append(event.getItem().getProjectName().getProjectDepartment().getCompanyName().getComanyName());
+                            sb.append(h4_tag_a);
+                            sb.append(br_tag_a);
+                            sb.append(br_tag_a);
+                            sb.append(companyDescription);
 
-                        image.setDescription(sb.toString());
+                            image.setDescription(sb.toString());
+                        }
                     }
 
                     if (event.getItem().getProjectName().getProjectDepartment().getCompanyName().getFileCompanyLogo() != null) {
@@ -186,6 +206,497 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private static final String NULL_SALARY = "0 т.р./0 т.р.";
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
+
+    private static final String QUERY_OPEN_POSITION_COMMENT_EXISTS =
+            "select e.id from itpearls_OpenPosition e "
+                    + "where e.id in :ids and e.comment is not null and length(e.comment) > 0";
+    private static final String QUERY_OPEN_POSITION_COMMENT_POSITIVE =
+            "select e.id from itpearls_OpenPosition e "
+                    + "where e.id in :ids and e.comment is not null and length(e.comment) > 0 "
+                    + "and lower(e.comment) not like :negPrefix";
+    private static final String QUERY_OPEN_POSITION_EXERCISE_EXISTS =
+            "select e.id from itpearls_OpenPosition e "
+                    + "where e.id in :ids and e.exercise is not null and length(e.exercise) > 0";
+    private static final String QUERY_OPEN_POSITION_MEMO_EXISTS =
+            "select e.id from itpearls_OpenPosition e "
+                    + "where e.id in :ids and e.memoForInterview is not null and length(e.memoForInterview) > 0";
+    private static final String QUERY_OPEN_POSITION_TEMPLATE_EXISTS =
+            "select e.id from itpearls_OpenPosition e "
+                    + "where e.id in :ids and e.templateLetter is not null and length(e.templateLetter) > 0";
+    private static final String QUERY_TEMPLATE_LETTER_EXISTS =
+            "select op.id from itpearls_OpenPosition op "
+                    + "left join op.projectName p "
+                    + "left join p.projectDepartment cd "
+                    + "where op.id in :ids and ("
+                    + "(op.templateLetter is not null and length(op.templateLetter) > 0) "
+                    + "or (p.templateLetter is not null and length(p.templateLetter) > 0) "
+                    + "or (cd.templateLetter is not null and length(cd.templateLetter) > 0))";
+    private static final String QUERY_PROJECT_DESCRIPTION_EXISTS =
+            "select e.id from itpearls_Project e "
+                    + "where e.id in :ids and e.projectDescription is not null and length(e.projectDescription) > 0";
+    private static final String QUERY_COMPANY_DESCRIPTION_EXISTS =
+            "select e.id from itpearls_Company e "
+                    + "where e.id in :ids and e.companyDescription is not null and length(e.companyDescription) > 0";
+
+    private Map<UUID, Boolean> commentExistsCache = Collections.emptyMap();
+    private Map<UUID, Boolean> commentPositiveCache = Collections.emptyMap();
+    private Map<UUID, Boolean> exerciseExistsCache = Collections.emptyMap();
+    private Map<UUID, Boolean> memoExistsCache = Collections.emptyMap();
+    private Map<UUID, Boolean> templateLetterExistsCache = Collections.emptyMap();
+    private Map<UUID, Boolean> projectDescriptionExistsCache = Collections.emptyMap();
+    private Map<UUID, Boolean> companyDescriptionExistsCache = Collections.emptyMap();
+    private Map<UUID, String> positionEnNameCache = Collections.emptyMap();
+    private Map<UUID, String> positionRuNameCache = Collections.emptyMap();
+    private Map<UUID, Integer> activeRecruitersCountByPosition = Collections.emptyMap();
+    private Map<UUID, Integer> sentCvCountByPosition = Collections.emptyMap();
+    private Map<UUID, BigDecimal> avgRatingByPosition = Collections.emptyMap();
+
+    private final Map<UUID, String> lazyCommentTextCache = new HashMap<>();
+    private final Map<UUID, String> lazyExerciseTextCache = new HashMap<>();
+    private final Map<UUID, String> lazyMemoTextCache = new HashMap<>();
+    private final Map<UUID, String> lazyTemplateLetterTextCache = new HashMap<>();
+    private final Map<UUID, String> lazyProjectDescriptionCache = new HashMap<>();
+    private final Map<UUID, String> lazyCompanyDescriptionCache = new HashMap<>();
+
+    @Subscribe(id = "openPositionsDl", target = Target.DATA_LOADER)
+    private void onOpenPositionsDlPostLoad(CollectionLoader.PostLoadEvent<OpenPosition> event) {
+        List<OpenPosition> positions = event.getLoadedEntities();
+        clearLazyLobTextCaches();
+        refreshBrowseLobExistsCaches(positions);
+        refreshBrowseAggregateCaches(positions);
+    }
+
+    private void clearLazyLobTextCaches() {
+        lazyCommentTextCache.clear();
+        lazyExerciseTextCache.clear();
+        lazyMemoTextCache.clear();
+        lazyTemplateLetterTextCache.clear();
+        lazyProjectDescriptionCache.clear();
+        lazyCompanyDescriptionCache.clear();
+    }
+
+    private void refreshBrowseLobExistsCaches(List<OpenPosition> positions) {
+        List<UUID> ids = new ArrayList<>();
+        for (OpenPosition position : positions) {
+            if (position.getId() != null) {
+                ids.add(position.getId());
+            }
+        }
+        if (ids.isEmpty()) {
+            commentExistsCache = Collections.emptyMap();
+            commentPositiveCache = Collections.emptyMap();
+            exerciseExistsCache = Collections.emptyMap();
+            memoExistsCache = Collections.emptyMap();
+            templateLetterExistsCache = Collections.emptyMap();
+            projectDescriptionExistsCache = Collections.emptyMap();
+            companyDescriptionExistsCache = Collections.emptyMap();
+            positionEnNameCache = Collections.emptyMap();
+            positionRuNameCache = Collections.emptyMap();
+            return;
+        }
+
+        Map<UUID, Boolean> commentExists = toExistsCache(
+                loadIdsByQuery(QUERY_OPEN_POSITION_COMMENT_EXISTS, ids));
+        Map<UUID, Boolean> commentPositive = toExistsCache(
+                loadIdsByQuery(QUERY_OPEN_POSITION_COMMENT_POSITIVE, ids, "negPrefix", "нет%"));
+        Map<UUID, Boolean> exerciseExists = toExistsCache(
+                loadIdsByQuery(QUERY_OPEN_POSITION_EXERCISE_EXISTS, ids));
+        Map<UUID, Boolean> memoExists = toExistsCache(
+                loadIdsByQuery(QUERY_OPEN_POSITION_MEMO_EXISTS, ids));
+        Set<UUID> templateExistsIds = new HashSet<>(
+                loadIdsByQuery(QUERY_OPEN_POSITION_TEMPLATE_EXISTS, ids));
+        templateExistsIds.addAll(loadIdsByQuery(QUERY_TEMPLATE_LETTER_EXISTS, ids));
+        Map<UUID, Boolean> templateExists = toExistsCache(templateExistsIds);
+        commentExistsCache = commentExists;
+        commentPositiveCache = commentPositive;
+        exerciseExistsCache = exerciseExists;
+        memoExistsCache = memoExists;
+        templateLetterExistsCache = templateExists;
+
+        Set<UUID> projectIds = new HashSet<>();
+        Set<UUID> companyIds = new HashSet<>();
+        for (OpenPosition position : positions) {
+            if (position.getProjectName() != null && position.getProjectName().getId() != null) {
+                projectIds.add(position.getProjectName().getId());
+                if (position.getProjectName().getProjectDepartment() != null
+                        && position.getProjectName().getProjectDepartment().getCompanyName() != null
+                        && position.getProjectName().getProjectDepartment().getCompanyName().getId() != null) {
+                    companyIds.add(position.getProjectName().getProjectDepartment().getCompanyName().getId());
+                }
+            }
+        }
+
+        Map<UUID, Boolean> projectDescriptions = toExistsCache(
+                loadIdsByQuery(QUERY_PROJECT_DESCRIPTION_EXISTS, new ArrayList<>(projectIds)));
+        projectDescriptionExistsCache = projectDescriptions;
+
+        Map<UUID, Boolean> companyDescriptions = toExistsCache(
+                loadIdsByQuery(QUERY_COMPANY_DESCRIPTION_EXISTS, new ArrayList<>(companyIds)));
+        companyDescriptionExistsCache = companyDescriptions;
+
+        Set<UUID> positionTypeIds = new HashSet<>();
+        for (OpenPosition position : positions) {
+            if (position.getPositionType() != null && position.getPositionType().getId() != null) {
+                positionTypeIds.add(position.getPositionType().getId());
+            }
+        }
+        Map<UUID, String> enNames = new HashMap<>();
+        Map<UUID, String> ruNames = new HashMap<>();
+        if (!positionTypeIds.isEmpty()) {
+            for (KeyValueEntity row : dataManager.loadValues(
+                    "select e.id, e.positionEnName, e.positionRuName from itpearls_Position e where e.id in :ids")
+                    .properties("id", "positionEnName", "positionRuName")
+                    .parameter("ids", positionTypeIds)
+                    .list()) {
+                UUID id = row.getValue("id");
+                if (id != null) {
+                    enNames.put(id, row.getValue("positionEnName"));
+                    ruNames.put(id, row.getValue("positionRuName"));
+                }
+            }
+        }
+        positionEnNameCache = enNames;
+        positionRuNameCache = ruNames;
+    }
+
+    private List<UUID> loadIdsByQuery(String query, List<UUID> ids) {
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dataManager.loadValue(query, UUID.class)
+                .parameter("ids", ids)
+                .list();
+    }
+
+    private List<UUID> loadIdsByQuery(String query, List<UUID> ids, String extraParam, Object extraValue) {
+        if (ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return dataManager.loadValue(query, UUID.class)
+                .parameter("ids", ids)
+                .parameter(extraParam, extraValue)
+                .list();
+    }
+
+    private static Map<UUID, Boolean> toExistsCache(Collection<UUID> idsWithFlag) {
+        Map<UUID, Boolean> cache = new HashMap<>();
+        for (UUID id : idsWithFlag) {
+            if (id != null) {
+                cache.put(id, Boolean.TRUE);
+            }
+        }
+        return cache;
+    }
+
+    private static BigDecimal toNumberToBigDecimal(Number value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof BigDecimal) {
+            return (BigDecimal) value;
+        }
+        return BigDecimal.valueOf(value.doubleValue());
+    }
+
+    private static Integer toNumberToInt(Number value) {
+        if (value == null) {
+            return null;
+        }
+        return value.intValue();
+    }
+
+    private void refreshBrowseAggregateCaches(List<OpenPosition> positions) {
+        List<UUID> ids = new ArrayList<>();
+        for (OpenPosition position : positions) {
+            if (position.getId() != null) {
+                ids.add(position.getId());
+            }
+        }
+        if (ids.isEmpty()) {
+            activeRecruitersCountByPosition = Collections.emptyMap();
+            sentCvCountByPosition = Collections.emptyMap();
+            avgRatingByPosition = Collections.emptyMap();
+            return;
+        }
+
+        Date currentDate = new Date();
+
+        Map<UUID, Integer> recruitersCount = new HashMap<>();
+        for (KeyValueEntity row : dataManager.loadValues(QUERY_ACTIVE_RECRUITERS_COUNT_BY_POSITIONS)
+                .properties("openPositionId", "cnt")
+                .parameter("ids", ids)
+                .parameter("currentDate", currentDate)
+                .list()) {
+            UUID id = row.getValue("openPositionId");
+            Integer count = toNumberToInt(row.getValue("cnt"));
+            if (id != null && count != null) {
+                recruitersCount.put(id, count);
+            }
+        }
+        activeRecruitersCountByPosition = recruitersCount;
+
+        Map<UUID, Integer> sentCvCount = new HashMap<>();
+        for (KeyValueEntity row : dataManager.loadValues(QUERY_SENT_CV_COUNT_BY_POSITIONS)
+                .properties("vacancyId", "cnt")
+                .parameter("ids", ids)
+                .list()) {
+            UUID id = row.getValue("vacancyId");
+            Integer count = toNumberToInt(row.getValue("cnt"));
+            if (id != null && count != null) {
+                sentCvCount.put(id, count);
+            }
+        }
+        sentCvCountByPosition = sentCvCount;
+
+        Map<UUID, BigDecimal> avgRatings = new HashMap<>();
+        for (KeyValueEntity row : dataManager.loadValues(QUERY_AVG_RATING_BY_POSITIONS)
+                .properties("openPositionId", "avgRating")
+                .parameter("ids", ids)
+                .list()) {
+            UUID id = row.getValue("openPositionId");
+            BigDecimal avg = toNumberToBigDecimal(row.getValue("avgRating"));
+            if (id != null && avg != null) {
+                avgRatings.put(id, avg);
+            }
+        }
+        avgRatingByPosition = avgRatings;
+    }
+
+    private Position ensurePositionTypeLoaded(Position position) {
+        if (position == null || position.getId() == null) {
+            return position;
+        }
+        if (PersistenceHelper.isLoaded(position, "positionEnName")
+                && PersistenceHelper.isLoaded(position, "positionRuName")) {
+            return position;
+        }
+        return dataManager.reload(position, "position-picker-view");
+    }
+
+    private String getPositionEnName(Position position) {
+        if (position == null || position.getId() == null) {
+            return null;
+        }
+        String cached = positionEnNameCache.get(position.getId());
+        if (cached != null || positionEnNameCache.containsKey(position.getId())) {
+            return cached;
+        }
+        return ensurePositionTypeLoaded(position).getPositionEnName();
+    }
+
+    private String getPositionRuName(Position position) {
+        if (position == null || position.getId() == null) {
+            return null;
+        }
+        String cached = positionRuNameCache.get(position.getId());
+        if (cached != null || positionRuNameCache.containsKey(position.getId())) {
+            return cached;
+        }
+        return ensurePositionTypeLoaded(position).getPositionRuName();
+    }
+
+    private String formatPositionTypeColumnText(Position position) {
+        String notName = messageBundle.getMessage("msgNotNamePosition");
+        if (position == null) {
+            return notName + " / " + notName;
+        }
+        String enName = getPositionEnName(position);
+        if (enName != null) {
+            return enName;
+        }
+        String ruName = getPositionRuName(position);
+        return notName + " / " + (ruName != null ? ruName : notName);
+    }
+
+    private String formatPositionTypeDescription(Position position) {
+        if (position == null) {
+            return "";
+        }
+        String ruName = getPositionRuName(position);
+        String enName = getPositionEnName(position);
+        if (ruName == null) {
+            return enName != null ? enName : "";
+        }
+        return enName != null ? ruName + "/" + enName : ruName;
+    }
+
+    private String buildTemplateLetterText(String openPositionLetter, String projectLetter, String departmentLetter) {
+        StringBuilder sb = new StringBuilder();
+        if (openPositionLetter != null && !openPositionLetter.isEmpty()) {
+            sb.append("Требования к вакансии: ")
+                    .append(Jsoup.parse(openPositionLetter).wholeText())
+                    .append("\n\n");
+        }
+        if (projectLetter != null && !projectLetter.isEmpty()) {
+            sb.append("Требования проекта: ")
+                    .append(Jsoup.parse(projectLetter).wholeText())
+                    .append("\n\n");
+        }
+        if (departmentLetter != null && !departmentLetter.isEmpty()) {
+            sb.append("Требования департамента: ")
+                    .append(Jsoup.parse(departmentLetter).wholeText());
+        }
+        return sb.toString();
+    }
+
+    private boolean hasComment(OpenPosition openPosition) {
+        if (openPosition == null || openPosition.getId() == null) {
+            return false;
+        }
+        return commentExistsCache.getOrDefault(openPosition.getId(), false);
+    }
+
+    private boolean hasPositiveComment(OpenPosition openPosition) {
+        if (openPosition == null || openPosition.getId() == null) {
+            return false;
+        }
+        return commentPositiveCache.getOrDefault(openPosition.getId(), false);
+    }
+
+    private boolean hasExerciseText(OpenPosition openPosition) {
+        if (openPosition == null || openPosition.getId() == null) {
+            return false;
+        }
+        return exerciseExistsCache.getOrDefault(openPosition.getId(), false);
+    }
+
+    private boolean hasMemoForInterview(OpenPosition openPosition) {
+        if (openPosition == null || openPosition.getId() == null) {
+            return false;
+        }
+        return memoExistsCache.getOrDefault(openPosition.getId(), false);
+    }
+
+    private boolean hasTemplateLetter(OpenPosition openPosition) {
+        if (openPosition == null || openPosition.getId() == null) {
+            return false;
+        }
+        return templateLetterExistsCache.getOrDefault(openPosition.getId(), false);
+    }
+
+    private String getLazyCommentText(OpenPosition openPosition) {
+        if (openPosition == null || openPosition.getId() == null) {
+            return null;
+        }
+        UUID id = openPosition.getId();
+        if (!lazyCommentTextCache.containsKey(id)) {
+            dataManager.loadValues("select e.id, e.comment from itpearls_OpenPosition e where e.id = :id")
+                    .properties("id", "comment")
+                    .parameter("id", id)
+                    .optional()
+                    .ifPresent(row -> lazyCommentTextCache.put(id, row.getValue("comment")));
+            lazyCommentTextCache.putIfAbsent(id, null);
+        }
+        return lazyCommentTextCache.get(id);
+    }
+
+    private String getLazyExerciseText(OpenPosition openPosition) {
+        if (openPosition == null || openPosition.getId() == null) {
+            return null;
+        }
+        UUID id = openPosition.getId();
+        if (!lazyExerciseTextCache.containsKey(id)) {
+            dataManager.loadValues("select e.id, e.exercise from itpearls_OpenPosition e where e.id = :id")
+                    .properties("id", "exercise")
+                    .parameter("id", id)
+                    .optional()
+                    .ifPresent(row -> lazyExerciseTextCache.put(id, row.getValue("exercise")));
+            lazyExerciseTextCache.putIfAbsent(id, null);
+        }
+        return lazyExerciseTextCache.get(id);
+    }
+
+    private String getLazyMemoText(OpenPosition openPosition) {
+        if (openPosition == null || openPosition.getId() == null) {
+            return null;
+        }
+        UUID id = openPosition.getId();
+        if (!lazyMemoTextCache.containsKey(id)) {
+            dataManager.loadValues("select e.id, e.memoForInterview from itpearls_OpenPosition e where e.id = :id")
+                    .properties("id", "memoForInterview")
+                    .parameter("id", id)
+                    .optional()
+                    .ifPresent(row -> lazyMemoTextCache.put(id, row.getValue("memoForInterview")));
+            lazyMemoTextCache.putIfAbsent(id, null);
+        }
+        return lazyMemoTextCache.get(id);
+    }
+
+    private String getLazyTemplateLetterText(OpenPosition openPosition) {
+        if (openPosition == null || openPosition.getId() == null) {
+            return "";
+        }
+        UUID id = openPosition.getId();
+        if (!lazyTemplateLetterTextCache.containsKey(id)) {
+            String text = dataManager.loadValues(
+                    "select op.id, op.templateLetter, p.templateLetter, cd.templateLetter "
+                            + "from itpearls_OpenPosition op "
+                            + "left join op.projectName p "
+                            + "left join p.projectDepartment cd "
+                            + "where op.id = :id")
+                    .properties("id", "op.templateLetter", "p.templateLetter", "cd.templateLetter")
+                    .parameter("id", id)
+                    .optional()
+                    .map(row -> buildTemplateLetterText(
+                            row.getValue("op.templateLetter"),
+                            row.getValue("p.templateLetter"),
+                            row.getValue("cd.templateLetter")))
+                    .orElse("");
+            lazyTemplateLetterTextCache.put(id, text);
+        }
+        String cached = lazyTemplateLetterTextCache.get(id);
+        return cached != null ? cached : "";
+    }
+
+    private String getLazyProjectDescription(UUID projectId) {
+        if (projectId == null) {
+            return null;
+        }
+        if (!lazyProjectDescriptionCache.containsKey(projectId)) {
+            dataManager.loadValues("select e.id, e.projectDescription from itpearls_Project e where e.id = :id")
+                    .properties("id", "projectDescription")
+                    .parameter("id", projectId)
+                    .optional()
+                    .ifPresent(row -> lazyProjectDescriptionCache.put(projectId, row.getValue("projectDescription")));
+            lazyProjectDescriptionCache.putIfAbsent(projectId, null);
+        }
+        return lazyProjectDescriptionCache.get(projectId);
+    }
+
+    private String getLazyCompanyDescription(UUID companyId) {
+        if (companyId == null) {
+            return null;
+        }
+        if (!lazyCompanyDescriptionCache.containsKey(companyId)) {
+            dataManager.loadValues("select e.id, e.companyDescription from itpearls_Company e where e.id = :id")
+                    .properties("id", "companyDescription")
+                    .parameter("id", companyId)
+                    .optional()
+                    .ifPresent(row -> lazyCompanyDescriptionCache.put(companyId, row.getValue("companyDescription")));
+            lazyCompanyDescriptionCache.putIfAbsent(companyId, null);
+        }
+        return lazyCompanyDescriptionCache.get(companyId);
+    }
+
+    private OpenPosition loadOpenPositionWithDescriptionLobs(OpenPosition openPosition) {
+        if (openPosition == null || openPosition.getId() == null) {
+            return openPosition;
+        }
+        return dataManager.reload(openPosition, ViewBuilder.of(OpenPosition.class)
+                .add("comment")
+                .add("commentEn")
+                .add("templateLetter")
+                .add("projectName", project -> project
+                        .add("projectDescription")
+                        .add("templateLetter")
+                        .add("projectDepartment", dept -> dept
+                                .add("templateLetter")
+                                .add("companyName", company -> company
+                                        .add("companyDescription")
+                                        .add("workingConditions"))))
+                .build());
+    }
+
     @Inject
     private CheckBox checkBoxOnlyOpenedPosition;
     @Inject
@@ -288,7 +799,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe
     protected void onInit(InitEvent event) {
-        addIconColumn();
         initRemoteWorkMap();
 
         initTableGenerator();
@@ -680,37 +1190,26 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.testExserice", subject = "descriptionProvider")
     private String openPositionsTableTestExsericeDescriptionProvider(OpenPosition openPosition) {
-        if (openPosition.getExercise() != null)
-            return Jsoup.parse(openPosition.getExercise()).wholeText();
+        String exercise = getLazyExerciseText(openPosition);
+        if (exercise != null)
+            return Jsoup.parse(exercise).wholeText();
         else
             return "";
     }
 
     @Install(to = "openPositionsTable.description", subject = "columnGenerator")
     private Object openPositionsTableDescriptionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        String returnIcon = "";
-
-        if (event.getItem().getComment() != null) {
-            if (!event.getItem().getComment().startsWith("нет")) {
-                returnIcon = "FILE_TEXT";
-            } else {
-                returnIcon = "FILE";
-            }
-        } else
-            returnIcon = "FILE";
-
+        String returnIcon = hasPositiveComment(event.getItem()) ? "FILE_TEXT" : "FILE";
         return setPlusMinusIcon(CubaIcon.valueOf(returnIcon));
     }
 
     @Install(to = "openPositionsTable.description", subject = "descriptionProvider")
     private String openPositionsTableDescriptionDescriptionProvider(OpenPosition openPosition) {
-        String retStr = null;
-
-        if (openPosition.getComment() != null) {
-            retStr = Jsoup.parse(openPosition.getComment()).wholeText();
+        String comment = getLazyCommentText(openPosition);
+        if (comment != null) {
+            return Jsoup.parse(comment).wholeText();
         }
-
-        return retStr != null ? retStr : "";
+        return "";
     }
 
     final static String open_position_pic_center_large_green = "open-position-pic-center-large-green";
@@ -722,15 +1221,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.description", subject = "styleProvider")
     private String openPositionsTableDescriptionStyleProvider(OpenPosition openPosition) {
-        if (openPosition.getComment() != null) {
-            if (!openPosition.getComment().startsWith("нет")) {
-                return open_position_pic_center_large_green;
-            } else {
-                return open_position_pic_center_large_red;
-            }
-        } else {
-            return open_position_pic_center_large_red;
+        if (hasPositiveComment(openPosition)) {
+            return open_position_pic_center_large_green;
         }
+        return open_position_pic_center_large_red;
     }
 
     @Install(to = "openPositionsTable.testExserice", subject = "styleProvider")
@@ -781,40 +1275,26 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return "open-position-pic-center";
     }
 
-    private void addIconColumn() {
-        //  обавление светофорчика
-        DataGrid.Column<OpenPosition> iconColumn = openPositionsTable.addGeneratedColumn("icon",
-                new DataGrid.ColumnGenerator<OpenPosition, String>() {
-                    @Override
-                    public String getValue(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-                        return getIcon(event.getItem());
-                    }
+    @Install(to = "openPositionsTable.icon", subject = "columnGenerator")
+    private Object openPositionsTableIconColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+        retHBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-                    @Override
-                    public Class<String> getType() {
-                        return String.class;
-                    }
-                });
+        Image image = uiComponents.create(Image.class);
+        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        image.setWidth("35px");
+        image.setHeight("35px");
+        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-        iconColumn.setRenderer(openPositionsTable.createRenderer(DataGrid.ImageRenderer.class));
-    }
+        String iconPath = getIcon(event.getItem());
+        if (iconPath != null) {
+            image.setSource(ThemeResource.class).setPath(iconPath);
+        }
 
-    private void addIconRemoteWork() {
-        // добавление удаленнной работы
-        DataGrid.Column<OpenPosition> iconRemoteWork = openPositionsTable.addGeneratedColumn("remoteWork",
-                new DataGrid.ColumnGenerator<OpenPosition, String>() {
-                    @Override
-                    public String getValue(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-                        return getIconRemoteWork(event.getItem());
-                    }
-
-                    @Override
-                    public Class<String> getType() {
-                        return String.class;
-                    }
-                });
-
-        iconRemoteWork.setRenderer(openPositionsTable.createRenderer(DataGrid.ImageRenderer.class));
+        retHBox.add(image);
+        return retHBox;
     }
 
     @Install(to = "openPositionsTable.vacansyName", subject = "descriptionProvider")
@@ -872,8 +1352,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.projectName", subject = "descriptionProvider")
     private String openPositionsTableProjectNameDescriptionProvider(OpenPosition openPosition) {
-        String textReturn = openPosition.getProjectName().getProjectDescription();
-        String a = textReturn != null ? Jsoup.parse(textReturn).wholeText() : "";
+        String a = "";
+        if (openPosition.getProjectName() != null && openPosition.getProjectName().getId() != null) {
+            UUID projectId = openPosition.getProjectName().getId();
+            if (projectDescriptionExistsCache.getOrDefault(projectId, false)) {
+                String textReturn = getLazyProjectDescription(projectId);
+                a = textReturn != null ? Jsoup.parse(textReturn).wholeText() : "";
+            }
+        }
         String projectOwner = "";
         StringBuilder sb = new StringBuilder();
         StringBuilder sb1 = new StringBuilder();
@@ -1078,65 +1564,45 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retButton.setDescription("Просмотр описания вакансии и описания проекта");
 
         retButton.addClickListener(e -> {
-
-            if (openPositionsTable.getSingleSelected() != null) {
+            OpenPosition selected = openPositionsTable.getSingleSelected();
+            if (selected != null) {
+                OpenPosition loaded = loadOpenPositionWithDescriptionLobs(selected);
                 QuickViewOpenPositionDescription quickViewOpenPositionDescription = screens.create(QuickViewOpenPositionDescription.class);
-                quickViewOpenPositionDescription.setJobDescription(openPositionsTable.getSingleSelected() != null ?
-                        openPositionsTable.getSingleSelected()
-                                .getComment() : "");
+                quickViewOpenPositionDescription.setJobDescription(loaded.getComment() != null ? loaded.getComment() : "");
 
-                if (openPositionsTable.getSingleSelected().getTemplateLetter() != null) {
-                    quickViewOpenPositionDescription.setCvRequirement(openPositionsTable
-                            .getSingleSelected()
-                            .getTemplateLetter() != null ?
-                            openPositionsTable.getSingleSelected()
-                                    .getTemplateLetter() : "");
+                if (loaded.getTemplateLetter() != null) {
+                    quickViewOpenPositionDescription.setCvRequirement(loaded.getTemplateLetter());
                 }
 
-                if (openPositionsTable.getSingleSelected().getProjectName().getProjectDescription() != null) {
-                    quickViewOpenPositionDescription.setProjectDescription(openPositionsTable
-                            .getSingleSelected()
-                            .getProjectName()
-                            .getProjectDescription() != null ?
-                            openPositionsTable.getSingleSelected()
-                                    .getProjectName()
-                                    .getProjectDescription() : "");
+                if (loaded.getProjectName() != null && loaded.getProjectName().getProjectDescription() != null) {
+                    quickViewOpenPositionDescription.setProjectDescription(loaded.getProjectName().getProjectDescription());
                 }
 
-                if (openPositionsTable.getSingleSelected().getCommentEn() != null) {
-                    String a = openPositionsTable.getSingleSelected().getCommentEn();
-
-                    quickViewOpenPositionDescription.setJobDescriptionEng(openPositionsTable
-                            .getSingleSelected()
-                            .getCommentEn() != null ?
-                            openPositionsTable.getSingleSelected().getCommentEn() : "");
+                if (loaded.getCommentEn() != null) {
+                    quickViewOpenPositionDescription.setJobDescriptionEng(loaded.getCommentEn());
                 }
 
-                if (openPositionsTable.getSingleSelected()
-                        .getProjectName()
-                        .getProjectDepartment()
-                        .getCompanyName()
-                        .getWorkingConditions() != null) {
-                    quickViewOpenPositionDescription.setCompanyWorkConditions(openPositionsTable.getSingleSelected()
-                            .getProjectName()
+                if (loaded.getProjectName() != null
+                        && loaded.getProjectName().getProjectDepartment() != null
+                        && loaded.getProjectName().getProjectDepartment().getCompanyName() != null
+                        && loaded.getProjectName().getProjectDepartment().getCompanyName().getWorkingConditions() != null) {
+                    quickViewOpenPositionDescription.setCompanyWorkConditions(loaded.getProjectName()
                             .getProjectDepartment()
                             .getCompanyName()
                             .getWorkingConditions());
                 }
 
-                if (openPositionsTable.getSingleSelected()
-                        .getProjectName()
-                        .getProjectDepartment()
-                        .getCompanyName() != null) {
-                    quickViewOpenPositionDescription.setCompanyDescription(openPositionsTable.getSingleSelected()
-                            .getProjectName()
+                if (loaded.getProjectName() != null
+                        && loaded.getProjectName().getProjectDepartment() != null
+                        && loaded.getProjectName().getProjectDepartment().getCompanyName() != null) {
+                    quickViewOpenPositionDescription.setCompanyDescription(loaded.getProjectName()
                             .getProjectDepartment()
-                            .getCompanyName().getCompanyDescription());
+                            .getCompanyName()
+                            .getCompanyDescription());
                 }
 
                 quickViewOpenPositionDescription.reloadDescriptions();
                 screens.show(quickViewOpenPositionDescription);
-
             } else {
                 notifications.create(Notifications.NotificationType.WARNING)
                         .withCaption(messageBundle.getMessage("msgWarning"))
@@ -1718,10 +2184,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable", subject = "rowStyleProvider")
     private String openPositionsTableRowStyleProvider(OpenPosition openPosition) {
-        Integer s = dataManager.loadValue("select count(e.reacrutier) from itpearls_RecrutiesTasks e where e.openPosition = :openPos and e.closed = false and e.endDate >= :currentDate", Integer.class)
-                .parameter("openPos", openPosition)
-                .parameter("currentDate", new Date())
-                .one();
+        int s = openPosition.getId() != null
+                ? activeRecruitersCountByPosition.getOrDefault(openPosition.getId(), 0)
+                : 0;
 
         if (openPosition.getSignDraft() == null ? true : !openPosition.getSignDraft()) {
             if (openPosition.getInternalProject() != null) {
@@ -2137,33 +2602,6 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsDl.load();
     }
 
-    private String getIconRemoteWork(OpenPosition openPosition) {
-        String icon = "";
-
-        Integer remoteWork = openPosition.getRemoteWork();
-
-        if (remoteWork != null) {
-            switch (remoteWork) {
-                case 0:
-                    icon = "icons/plus-btn.png";
-                    break;
-                case 1:
-                    icon = "icons/minus.png";
-                    break;
-                case 2:
-                    icon = "icons/to-client.png";
-                    break;
-                default:
-                    icon = "icons/question-white.png";
-                    break;
-            }
-        } else {
-            icon = "icons/question-white.png";
-        }
-
-        return icon;
-    }
-
     private String getIcon(OpenPosition openPosition) {
         String icon = null;
 
@@ -2235,10 +2673,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.positionType", subject = "descriptionProvider")
     private String openPositionsTablePositionTypeDescriptionProvider(OpenPosition openPosition) {
-        return openPosition.getPositionType() != null ? openPosition.getPositionType().getPositionRuName()
-                + (openPosition.getPositionType().getPositionEnName() != null ? "/"
-                + openPosition.getPositionType().getPositionEnName() : "")
-                : "";
+        return formatPositionTypeDescription(openPosition.getPositionType());
     }
 
     @Install(to = "openPositionsTable.cityPositionList", subject = "descriptionProvider")
@@ -2289,50 +2724,11 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private int getQueryQuestion(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-
-        int retInt;
-
-        if (getTemplateLetter(event.getItem()) != "") {
-            retInt = 1;
-        } else {
-            retInt = 0;
-        }
-
-        return retInt;
+        return hasTemplateLetter(event.getItem()) ? 1 : 0;
     }
 
     private String getTemplateLetter(OpenPosition openPosition) {
-        StringBuilder sb = new StringBuilder();
-
-        if (openPosition.getTemplateLetter() != null &&
-                openPosition.getTemplateLetter() != "") {
-            sb.append("Требования к вакансии: ")
-                    .append(Jsoup.parse(openPosition.getTemplateLetter()).wholeText())
-                    .append("\n\n").toString();
-        }
-
-        if (openPosition.getProjectName() != null) {
-            if (openPosition.getProjectName().getTemplateLetter() != null &&
-                    openPosition.getProjectName().getTemplateLetter() != "") {
-                sb.append("Требования проекта: ")
-                        .append(Jsoup.parse(openPosition.getProjectName().getTemplateLetter()).wholeText())
-                        .append("\n\n");
-            }
-        }
-
-        if (openPosition.getProjectName() != null) {
-            if (openPosition.getProjectName().getProjectDepartment() != null) {
-                if (openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != null &&
-                        openPosition.getProjectName().getProjectDepartment().getTemplateLetter() != "") {
-                    sb.append("Требования департамента: ")
-                            .append(Jsoup.parse(openPosition
-                                            .getProjectName().getProjectDepartment().getTemplateLetter())
-                                    .wholeText());
-                }
-            }
-        }
-
-        return sb.toString();
+        return getLazyTemplateLetterText(openPosition);
     }
 
     @Install(to = "openPositionsTable.queryQuestion", subject = "descriptionProvider")
@@ -2342,7 +2738,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.queryQuestion", subject = "styleProvider")
     private String openPositionsTableQueryQuestionStyleProvider(OpenPosition openPosition) {
-        if (!getTemplateLetter(openPosition).equals("")) {
+        if (hasTemplateLetter(openPosition)) {
             return open_position_pic_center_large_green;
         } else {
             return open_position_pic_center_large_red;
@@ -2367,32 +2763,23 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "descriptionProvider")
     private String openPositionsTableMemoForCandidateColumnDescriptionProvider(OpenPosition openPosition) {
-        if (openPosition.getMemoForInterview() != null)
-            return Jsoup.parse(openPosition.getMemoForInterview()).wholeText();
+        String memo = getLazyMemoText(openPosition);
+        if (memo != null)
+            return Jsoup.parse(memo).wholeText();
         else
             return null;
     }
 
     @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "styleProvider")
     private String openPositionsTableMemoForCandidateColumnStyleProvider(OpenPosition openPosition) {
-        if (openPosition.getMemoForInterview() != null) {
-            if (!openPosition.getMemoForInterview().equals("")) {
-                return open_position_pic_center_large_green;
-            } else {
-                return open_position_pic_center_large_red;
-            }
-        } else {
-            return open_position_pic_center_large_red;
+        if (hasMemoForInterview(openPosition)) {
+            return open_position_pic_center_large_green;
         }
-//        return style;
+        return open_position_pic_center_large_red;
     }
 
     @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "columnGenerator")
     private Object openPositionsTableLastOpenCloseColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-
-//    @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "columnGenerator")
-//    private Object openPositionsTableLastOpenCloseColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-
         HBoxLayout retObject = uiComponents.create(HBoxLayout.class);
         Label label = uiComponents.create(Label.class);
 
@@ -2466,16 +2853,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "columnGenerator")
     private Object openPositionsTableMemoForCandidateColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        String returnIcon = CubaIcon.MINUS_CIRCLE.iconName();
-
-        if (event.getItem().getMemoForInterview() != null) {
-            if (event.getItem().getMemoForInterview().equals("")) {
-                returnIcon = CubaIcon.MINUS_CIRCLE.iconName();
-            } else {
-                returnIcon = CubaIcon.PLUS_CIRCLE.iconName();
-            }
-        }
-
+        String returnIcon = hasMemoForInterview(event.getItem())
+                ? CubaIcon.PLUS_CIRCLE.iconName()
+                : CubaIcon.MINUS_CIRCLE.iconName();
         return setPlusMinusIcon(CubaIcon.valueOf(returnIcon));
     }
 
@@ -2976,12 +3356,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retLabel.setIcon(CubaIcon.FILE_WORD_O.source());
 
         if (columnGeneratorEvent.getItem() != null) {
-            if (columnGeneratorEvent.getItem().getComment() != null) {
-                if (columnGeneratorEvent.getItem().getComment().toLowerCase().startsWith("нет")) {
-                    retLabel.setVisible(false);
-                } else {
-                    retLabel.setVisible(true);
-                }
+            if (hasPositiveComment(columnGeneratorEvent.getItem())) {
+                retLabel.setVisible(true);
             } else {
                 retLabel.setVisible(false);
             }
@@ -3016,33 +3392,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Install(to = "openPositionsTable.positionType", subject = "columnGenerator")
     private Object openPositionsTablePositionTypeColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        HBoxLayout retObject;
-        StringBuilder sb = new StringBuilder();
-        sb.append(messageBundle.getMessage("msgNotNamePosition"))
-                .append(" / ")
-                .append(messageBundle.getMessage("msgNotNamePosition"));
-
-        if (event.getItem().getPositionType() != null) {
-            retObject = setComponentsToOpenPositionsTable(event,
-                    event.getItem().getPositionType().getPositionEnName() != null
-                            ? event.getItem().getPositionType().getPositionEnName()
-                            : messageBundle.getMessage("msgNotNamePosition")
-                            + " / "
-                            + event.getItem().getPositionType().getPositionRuName() != null ?
-                            event.getItem().getPositionType().getPositionRuName()
-                            : messageBundle.getMessage("msgNotNamePosition"));
-        } else {
-            retObject = setComponentsToOpenPositionsTable(event, sb.toString());
-        }
-
-        return retObject;
+        Position positionType = event.getItem().getPositionType();
+        return setComponentsToOpenPositionsTable(event, formatPositionTypeColumnText(positionType));
     }
 
     @Install(to = "openPositionsTable.projectName", subject = "columnGenerator")
     private Object openPositionsTableProjectNameColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-        HBoxLayout retObject = setComponentsToOpenPositionsTable(event,
-                event.getItem().getProjectName().getProjectName());
-        return retObject;
+        String projectTitle = event.getItem().getProjectName() != null
+                ? event.getItem().getProjectName().getProjectName() : "";
+        return setComponentsToOpenPositionsTable(event, projectTitle);
     }
 
     private HBoxLayout setComponentsToOpenPositionsTable(DataGrid.ColumnGeneratorEvent<OpenPosition> event,
@@ -3122,7 +3480,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         HBoxLayout retObject = setComponentsToOpenPositionsTable(event, event.getItem().getVacansyName());
         retObject.setWidthFull();
 
-        Image image = setProjectOwnerImage(event.getItem().getProjectName().getProjectOwner());
+        Person projectOwner = event.getItem().getProjectName() != null
+                ? event.getItem().getProjectName().getProjectOwner() : null;
+        Image image = setProjectOwnerImage(projectOwner);
         retHBox.add(newVacancyLabel);
         retHBox.add(retObject);
         retHBox.add(image);
@@ -3306,6 +3666,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                                             }
 
                                             if (iteractionSignEndProcessVacancyClosed != null) {
+                                                CommitContext commitContext = new CommitContext();
 
                                                 for (JobCandidate jc : jobCandidatesNotEnded) {
                                                     IteractionList iteractionList = metadata.create(IteractionList.class);
@@ -3321,9 +3682,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                                                     iteractionList.setNumberIteraction(iteractionMaxNumber);
                                                     iteractionList.setIteractionType(iteractionSignEndProcessVacancyClosed);
 
-                                                    jc.getIteractionList().add(iteractionList);
-                                                    dataManager.commit(jc);
+                                                    commitContext.addInstanceToCommit(iteractionList);
                                                 }
+
+                                                dataManager.commit(commitContext);
 
                                                 sendNotificationsService.SendEmail(
                                                         messageBundle.getMessage("msgEmailSubjCloseOfVacancy"),
@@ -3346,12 +3708,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         retHBox.setStyleName(style_table_wordwrap);
 
         Label labelRet = uiComponents.create(Label.NAME);
-        String QUERY = "select e from itpearls_IteractionList e where e.vacancy = :vacancy and e.iteractionType.signSendToClient = true and e.vacancy.lastOpenDate < e.dateIteraction";
-        Integer countCVsend = dataManager.load(IteractionList.class)
-                .query(QUERY)
-                .view("iteractionList-view")
-                .parameter("vacancy", columnGeneratorEvent.getItem())
-                .list().size();
+        OpenPosition position = columnGeneratorEvent.getItem();
+        int countCVsend = position.getId() != null
+                ? sentCvCountByPosition.getOrDefault(position.getId(), 0)
+                : 0;
 
         labelRet.setWidthAuto();
         labelRet.setHeightAuto();
@@ -3539,21 +3899,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     private Object avgRating(OpenPosition openPosition) {
-        BigDecimal avgRating = null;
+        BigDecimal avgRating = openPosition.getId() != null
+                ? avgRatingByPosition.get(openPosition.getId())
+                : null;
 
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
         retBox.setWidthFull();
         retBox.setHeightFull();
 
         Label starLabel = uiComponents.create(Label.class);
-
-        try {
-            avgRating = dataManager.loadValue(QUERY_AVERAGE_RATING, BigDecimal.class)
-                    .parameter("openPosition", openPosition)
-                    .one();
-        } catch (QueryException e) {
-            e.printStackTrace();
-        }
 
         if (avgRating != null) {
             int avgRatingInt = Integer.valueOf(avgRating.intValue()) + 1;

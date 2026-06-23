@@ -223,9 +223,12 @@ erDiagram
 
 ## 9. История изменений
 
-| Дата | Автор | Изменение |
-|------|-------|-----------|
-| 2026-06-22 | Cursor Agent | Первая оптимизация: specialized views, lazy LOB, batch N+1, документация |
+| Дата | Изменение |
+|------|-----------|
+| 2026-06-22 | Исправление unfetched FK на Edit: `openPosition-iteraction-list-picker-view` — `cityPosition`/`cities` → `city-picker-view` для сравнения локаций в `IteractionListEdit` |
+| 2026-06-23 | Исправление unfetched `recrutier` в JobCandidate: `iteractionList-picker-view` + `iteractionList-job-candidate` → `extUser-picker-view`; FK в `job-candidate-edit.xml` |
+| 2026-06-23 | Исправление `iteractionList-browse-view`: поля @NamePattern для FK-колонок (`iteractionType.number`, `vacancy.vacansyID`, `recrutier.login/firstName/lastName`) |
+| 2026-06-23 | Оптимизация: specialized views, lazy LOB `comment`, batch N+1 RecrutiesTasks, `InteractionServiceBean.getLastIteraction`, документация |
 
 ---
 

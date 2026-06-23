@@ -3,6 +3,7 @@ package com.company.itpearls.web.screens.project;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.Person;
 import com.haulmont.chile.core.model.MetaPropertyPath;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.MessageTools;
 import com.haulmont.cuba.core.global.PersistenceHelper;
@@ -26,8 +27,11 @@ import java.util.stream.Collectors;
 @LookupComponent("projectsTable")
 @LoadDataBeforeShow
 public class ProjectBrowse extends StandardLookup<Project> {
-    private static final String QUERY_COUNTER_OPEN_POSITION_IN_PROJECT = "select count(e.numberPosition) from itpearls_OpenPosition " +
-            "where not e.openClose = true and e.projectName = :projectName";
+    private static final String QUERY_OPEN_POSITION_COUNT_BY_PROJECTS =
+            "select e.projectName, count(e) from itpearls_OpenPosition e "
+                    + "where not e.openClose = true and e.projectName in :projects group by e.projectName";
+    private static final String QUERY_PROJECT_DESCRIPTIONS_BY_IDS =
+            "select e.id, e.projectDescription from itpearls_Project e where e.id in :ids";
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -51,6 +55,75 @@ public class ProjectBrowse extends StandardLookup<Project> {
     private final static String style_table_wordwrap = "table-wordwrap";
     @Inject
     private DataManager dataManager;
+
+    private Map<UUID, Integer> openPositionCountCache = Collections.emptyMap();
+    private Map<UUID, String> projectDescriptionCache = Collections.emptyMap();
+
+    @Subscribe(id = "projectsDl", target = Target.DATA_LOADER)
+    private void onProjectsDlPostLoad(CollectionLoader.PostLoadEvent<Project> event) {
+        refreshOpenPositionCountCache(event.getLoadedEntities());
+        refreshProjectDescriptionCache(event.getLoadedEntities());
+    }
+
+    private void refreshOpenPositionCountCache(List<Project> projects) {
+        if (projects.isEmpty()) {
+            openPositionCountCache = Collections.emptyMap();
+            return;
+        }
+        List<KeyValueEntity> counts = dataManager.loadValues(QUERY_OPEN_POSITION_COUNT_BY_PROJECTS)
+                .properties("project", "count")
+                .parameter("projects", projects)
+                .list();
+        Map<UUID, Integer> cache = new HashMap<>();
+        for (KeyValueEntity row : counts) {
+            Project project = row.getValue("project");
+            Long count = row.getValue("count");
+            if (project != null && project.getId() != null && count != null) {
+                cache.put(project.getId(), count.intValue());
+            }
+        }
+        openPositionCountCache = cache;
+    }
+
+    private void refreshProjectDescriptionCache(List<Project> projects) {
+        List<UUID> ids = projects.stream()
+                .map(Project::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (ids.isEmpty()) {
+            projectDescriptionCache = Collections.emptyMap();
+            return;
+        }
+        List<KeyValueEntity> rows = dataManager.loadValues(QUERY_PROJECT_DESCRIPTIONS_BY_IDS)
+                .properties("id", "projectDescription")
+                .parameter("ids", ids)
+                .list();
+        Map<UUID, String> cache = new HashMap<>();
+        for (KeyValueEntity row : rows) {
+            UUID id = row.getValue("id");
+            String description = row.getValue("projectDescription");
+            if (id != null) {
+                cache.put(id, description);
+            }
+        }
+        projectDescriptionCache = cache;
+    }
+
+    private String getPlainDescription(Project project) {
+        if (project == null || project.getId() == null) {
+            return "";
+        }
+        String description = projectDescriptionCache.get(project.getId());
+        return description != null ? Jsoup.parse(description).text() : "";
+    }
+
+    private boolean hasProjectDescription(Project project) {
+        if (project == null || project.getId() == null) {
+            return false;
+        }
+        String description = projectDescriptionCache.get(project.getId());
+        return description != null && !description.isEmpty();
+    }
 
 
     @Install(to = "projectsTable.projectLogoColumn", subject = "columnGenerator")
@@ -118,7 +191,7 @@ public class ProjectBrowse extends StandardLookup<Project> {
 
     @Install(to = "projectsTable", subject = "rowDescriptionProvider")
     private String projectsTableRowDescriptionProvider(Project project) {
-        return Jsoup.parse(project.getProjectDescription() != null ? project.getProjectDescription() : "").text();
+        return getPlainDescription(project);
     }
 
     private void setProjectClosedFilter() {
@@ -139,7 +212,7 @@ public class ProjectBrowse extends StandardLookup<Project> {
 
     @Install(to = "projectsTable.iconProjectDesc", subject = "columnGenerator")
     private Icons.Icon projectsTableIconProjectDescColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> event) {
-        if (event.getItem().getProjectDescription() != null) {
+        if (hasProjectDescription(event.getItem())) {
             return CubaIcon.PLUS_CIRCLE;
         } else {
             return CubaIcon.MINUS_CIRCLE;
@@ -148,7 +221,7 @@ public class ProjectBrowse extends StandardLookup<Project> {
 
     @Install(to = "projectsTable.iconProjectDesc", subject = "styleProvider")
     private String projectsTableIconProjectDescStyleProvider(Project project) {
-        if (project.getProjectDescription() != null) {
+        if (hasProjectDescription(project)) {
             return "pic-center-large-green";
         } else {
             return "pic-center-large-red";
@@ -157,8 +230,9 @@ public class ProjectBrowse extends StandardLookup<Project> {
 
     @Install(to = "projectsTable.iconProjectDesc", subject = "descriptionProvider")
     private String projectsTableIconProjectDescDescriptionProvider(Project project) {
-        if (project.getProjectDescription() != null) {
-            return Jsoup.parse(project.getProjectDescription()).text();
+        if (hasProjectDescription(project)) {
+            String text = getPlainDescription(project);
+            return text.isEmpty() ? null : text;
         } else {
             return null;
         }
@@ -323,28 +397,23 @@ public class ProjectBrowse extends StandardLookup<Project> {
 
     @Install(to = "projectsTable.openPositionsCountColumn", subject = "columnGenerator")
     private Object projectsTableOpenPositionsCountColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> columnGeneratorEvent) {
-
+        Project project = columnGeneratorEvent.getItem();
         Integer counter = 0;
-
-        try {
-            counter = dataManager.loadValue(QUERY_COUNTER_OPEN_POSITION_IN_PROJECT, Integer.class)
-                    .parameter("projectName", columnGeneratorEvent.getItem())
-                    .one();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        } finally {
-            HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
-            retHbox.setWidthFull();
-            retHbox.setHeightFull();
-
-            Label counterOpenPositionLabel = uiComponents.create(Label.class);
-            counterOpenPositionLabel.setWidthAuto();
-            counterOpenPositionLabel.setHeightAuto();
-            counterOpenPositionLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            counterOpenPositionLabel.setValue(counter);
-
-            retHbox.add(counterOpenPositionLabel);
-            return retHbox;
+        if (project != null && project.getId() != null) {
+            counter = openPositionCountCache.getOrDefault(project.getId(), 0);
         }
+
+        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setWidthFull();
+        retHbox.setHeightFull();
+
+        Label counterOpenPositionLabel = uiComponents.create(Label.class);
+        counterOpenPositionLabel.setWidthAuto();
+        counterOpenPositionLabel.setHeightAuto();
+        counterOpenPositionLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        counterOpenPositionLabel.setValue(counter);
+
+        retHbox.add(counterOpenPositionLabel);
+        return retHbox;
     }
 }

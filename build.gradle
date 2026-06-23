@@ -305,6 +305,7 @@ task restart(dependsOn: ['stop', ":${modulePrefix}-core:deploy", ":${modulePrefi
     }
 }
 restart.finalizedBy start
+restart.dependsOn copyTomcatSetenv
 
 task buildWar(type: CubaWarBuilding) {
     includeJdbcDriver = true

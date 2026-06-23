@@ -6,7 +6,7 @@
     <data>
         <instance id="positionDc"
                   class="com.company.itpearls.entity.Position"
-                  view="position-view">
+                  view="position-edit-view">
             <loader/>
         </instance>
     </data>

@@ -22,9 +22,11 @@ public class ProjectServiceBean implements ProjectService {
 
         try {
             project = dataManager
-                    .loadValue("select e from itpearls_Project e where e.defaultProject = true",
-                            Project.class)
-                    .one();
+                    .load(Project.class)
+                    .query("select e from itpearls_Project e where e.defaultProject = true")
+                    .view("project-picker-view")
+                    .optional()
+                    .orElse(null);
         } catch (Exception e) {
             e.printStackTrace();
             project = createProjectDefault();
@@ -40,7 +42,7 @@ public class ProjectServiceBean implements ProjectService {
         project.setProjectName(DEFAULT_PROJECT);
         project.setProjectDescription(DEFAULT_PROJECT);
 
-        dataManager.commit(project);
+        dataManager.commit(project, "project-edit-view");
 
         return project;
     }

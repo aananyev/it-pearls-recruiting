@@ -92,6 +92,8 @@ psql -h localhost -p 5432 -U cuba -d itpearls -c "SELECT version();"
 
 ## Запуск приложения
 
+Рекомендуемый способ (PostgreSQL + очистка зависшего Tomcat + deploy): `./scripts/start-app.sh`
+
 ```bash
 ./gradlew setupTomcat
 ./gradlew deploy

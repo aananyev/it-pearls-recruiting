@@ -6,7 +6,7 @@
     <data readOnly="true">
         <collection id="positionsDc"
                     class="com.company.itpearls.entity.Position"
-                    view="position-view">
+                    view="position-browse-view">
             <loader id="positionsDl">
                 <query><![CDATA[select e from itpearls_Position e order by e.positionRuName]]></query>
             </loader>

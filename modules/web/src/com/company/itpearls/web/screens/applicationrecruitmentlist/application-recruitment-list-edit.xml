@@ -38,7 +38,7 @@
         </collection>
         <collection id="projectDc"
                     class="com.company.itpearls.entity.Project"
-                    view="project-view">
+                    view="project-picker-view">
             <loader id="projectDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_Project e
                                 order by e.projectName]]>
@@ -54,7 +54,7 @@
         </collection>
         <collection id="projectDepartmentDc"
                     class="com.company.itpearls.entity.CompanyDepartament"
-                    view="companyDepartament-view">
+                    view="companyDepartament-picker-view">
             <loader id="projectDepartmentDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_CompanyDepartament e
@@ -71,7 +71,7 @@
         </collection>
         <collection id="companyDc"
                     class="com.company.itpearls.entity.Company"
-                    view="company-view">
+                    view="company-picker-view">
             <loader id="companyDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Company e order by e.comanyName]]>

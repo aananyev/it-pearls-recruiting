@@ -6,15 +6,13 @@
     <data>
         <instance id="skillTreeDc"
                   class="com.company.itpearls.entity.SkillTree"
-                  view="skillTree-view">
+                  view="skillTree-edit-view">
             <loader/>
-            <collection id="skillTreeCandidatesesDc"
-                        property="candidates"/>
         </instance>
         <collection id="skillTreesDc"
                     class="com.company.itpearls.entity.SkillTree"
-                    view="_minimal">
-            <loader id="skillTreesLc">
+                    view="skillTree-picker-view">
+            <loader id="skillTreesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_SkillTree e
                     where e.skillTree is null
@@ -24,8 +22,8 @@
         </collection>
         <collection id="specialisationDc"
                     class="com.company.itpearls.entity.Specialisation"
-                    view="specialisation-view">
-            <loader id="specialisationDl">
+                    view="specialisation-picker-view">
+            <loader id="specialisationDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Specialisation e order by e.specRuName]]>
                 </query>
@@ -126,7 +124,7 @@
                       expand="skillPic"
                       stylename="dropzone-container">
                     <image id="skillPic"
-                           dataContainer="skillTreesDc"
+                           dataContainer="skillTreeDc"
                            property="fileImageLogo"
                            width="100%"
                            align="TOP_RIGHT"
@@ -135,7 +133,7 @@
                            scaleMode="SCALE_DOWN"/>
                     <upload id="fileImageSkillUpload"
                             fileStoragePutMode="IMMEDIATE"
-                            dataContainer="skillTreesDc"
+                            dataContainer="skillTreeDc"
                             align="BOTTOM_CENTER"
                             showFileName="false"
                             dropZone="dropZone"

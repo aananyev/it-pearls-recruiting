@@ -1,11 +1,13 @@
 package com.company.itpearls.web.screens.company;
 
 import com.company.itpearls.entity.City;
+import com.company.itpearls.entity.Company;
 import com.company.itpearls.entity.Region;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.Company;
 
 import javax.inject.Inject;
 
@@ -20,11 +22,65 @@ public class CompanyEdit extends StandardEditor<Company> {
     private Image companyLogoFileImage;
     @Inject
     private FileUploadField companyLogoFileUpload;
+    @Inject
+    private DataManager dataManager;
+    @Inject
+    private TabSheet mainTab;
+
+    private boolean addressLoaded;
+    private boolean companyDescriptionLoaded;
+    private boolean departmentsLoaded;
+
+    @Subscribe("mainTab")
+    public void onMainTabSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
+        if (event.getSelectedTab() == null || PersistenceHelper.isNew(getEditedEntity())) {
+            return;
+        }
+        String tabName = event.getSelectedTab().getName();
+        if ("tabConpanyDetails".equals(tabName) && !addressLoaded) {
+            loadAddress();
+            addressLoaded = true;
+        }
+        if ("companyDescriptionTab".equals(tabName) && !companyDescriptionLoaded) {
+            loadCompanyDescriptions();
+            companyDescriptionLoaded = true;
+        }
+        if ("tabCompanyDepartament".equals(tabName) && !departmentsLoaded) {
+            loadDepartments();
+            departmentsLoaded = true;
+        }
+    }
+
+    private void loadAddress() {
+        Company reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(Company.class)
+                .add("addressOfCompany")
+                .build());
+        getEditedEntity().setAddressOfCompany(reloaded.getAddressOfCompany());
+    }
+
+    private void loadCompanyDescriptions() {
+        Company reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(Company.class)
+                .add("companyDescription")
+                .add("workingConditions")
+                .build());
+        getEditedEntity().setCompanyDescription(reloaded.getCompanyDescription());
+        getEditedEntity().setWorkingConditions(reloaded.getWorkingConditions());
+    }
+
+    private void loadDepartments() {
+        Company reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(Company.class)
+                .add("departmentOfCompany", "companyDepartament-department-child-view")
+                .build());
+        getEditedEntity().setDepartmentOfCompany(reloaded.getDepartmentOfCompany());
+    }
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setOurClient(false); // установка сразу в "ненашклиент"
+            getEditedEntity().setOurClient(false);
+        } else if (!addressLoaded) {
+            loadAddress();
+            addressLoaded = true;
         }
     }
 
@@ -48,30 +104,29 @@ public class CompanyEdit extends StandardEditor<Company> {
         }
     }
 
-    // установить регион
     @Subscribe("cityOfCompanyField")
     public void onCityOfCompanyFieldValueChange(HasValue.ValueChangeEvent<City> event) {
-        if (!getEditedEntity()
-                .getCityOfCompany()
-                .equals(null)) {
-            getEditedEntity()
-                    .setRegionOfCompany(getEditedEntity()
-                            .getCityOfCompany()
-                            .getCityRegion());
+        City city = event.getValue();
+        if (city == null) {
+            return;
+        }
+        City cityLoaded = dataManager.reload(city, "city-location-view");
+        Region region = cityLoaded.getCityRegion();
+        getEditedEntity().setRegionOfCompany(region);
+        if (region != null) {
+            Region regionLoaded = dataManager.reload(region, "region-browse-view");
+            getEditedEntity().setCountryOfCompany(regionLoaded.getRegionCountry());
         }
     }
 
     @Subscribe("regionOfCompanyField")
     public void onRegionOfCompanyFieldValueChange(HasValue.ValueChangeEvent<Region> event) {
-        if (!getEditedEntity()
-                .getRegionOfCompany()
-                .equals(null)) {
-            getEditedEntity()
-                    .setCountryOfCompany(
-                            getEditedEntity()
-                                    .getRegionOfCompany()
-                                    .getRegionCountry());
+        Region region = event.getValue();
+        if (region == null) {
+            return;
         }
+        Region regionLoaded = dataManager.reload(region, "region-browse-view");
+        getEditedEntity().setCountryOfCompany(regionLoaded.getRegionCountry());
     }
 
     @Subscribe("companyLogoFileUpload")

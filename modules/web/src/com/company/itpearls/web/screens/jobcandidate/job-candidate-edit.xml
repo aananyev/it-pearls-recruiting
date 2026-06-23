@@ -34,20 +34,10 @@
                     <property name="fileImageFace" view="_local"/>
                 </property>
                 <property name="iteractionList" view="_local">
-                    <property name="candidate" view="_local"/>
-                    <property name="vacancy" view="_local">
-                        <property name="grade" view="_local"/>
-                        <property name="owner" view="_local"/>
-                        <property name="positionType" view="_local"/>
-                        <property name="projectName" view="_local">
-                            <property name="projectLogo" view="_local"/>
-                            <property name="projectDepartment" view="_local"/>
-                        </property>
-                    </property>
-                    <property name="iteractionType" view="_local"/>
-                    <property name="recrutier" view="_local">
-                        <property name="fileImageFace"/>
-                    </property>
+                    <property name="candidate" view="_minimal"/>
+                    <property name="vacancy" view="openPosition-iteraction-list-picker-view"/>
+                    <property name="iteractionType" view="iteraction-list-type-view"/>
+                    <property name="recrutier" view="extUser-picker-view"/>
                 </property>
                 <property name="socialNetwork" view="_local">
                     <property name="socialNetworkURL" view="_local">
@@ -155,7 +145,7 @@
         </collection>
         <collection id="currentCompaniesDc"
                     class="com.company.itpearls.entity.Company">
-            <view extends="company-view"/>
+            <view extends="company-picker-view"/>
             <loader id="currentCompaniesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e order by e.comanyName]]></query>
             </loader>
@@ -170,7 +160,12 @@
         </collection>
         <collection id="interactionCommentDc"
                     class="com.company.itpearls.entity.IteractionList">
-            <view extends="_local"/>
+            <view extends="_minimal">
+                <property name="dateIteraction"/>
+                <property name="comment"/>
+                <property name="recrutierName"/>
+                <property name="recrutier" view="extUser-picker-view"/>
+            </view>
             <loader id="interactionCommentDl" cacheable="true">
                 <query>
                     <![CDATA[select e

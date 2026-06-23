@@ -7,16 +7,7 @@
     <data readOnly="true">
         <collection id="recrutiesTasksesDc"
                     class="com.company.itpearls.entity.RecrutiesTasks">
-            <view extends="recrutiesTasks-view">
-                <property name="reacrutier" view="_minimal">
-                    <property name="group" view="_minimal"/>
-                </property>
-                <property name="openPosition" view="_local">
-                    <property name="projectName" view="_local">
-                        <property name="projectLogo" view="_local"/>
-                    </property>
-                </property>
-            </view>
+            <view extends="recrutiesTasks-browse-view"/>
             <loader id="recrutiesTasksesDl">
                 <query>
                     <![CDATA[select e

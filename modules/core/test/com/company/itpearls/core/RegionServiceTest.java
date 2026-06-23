@@ -1,6 +1,7 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.ItpearlsTestContainer;
+import com.company.itpearls.TestEntityTracker;
 import com.company.itpearls.entity.Country;
 import com.company.itpearls.entity.Region;
 import com.haulmont.cuba.core.Persistence;
@@ -9,6 +10,7 @@ import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.View;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -25,11 +27,18 @@ public class RegionServiceTest {
 
     private DataManager dataManager;
     private Persistence persistence;
+    private TestEntityTracker tracker;
 
     @Before
     public void setUp() {
         dataManager = AppBeans.get(DataManager.class);
         persistence = cont.persistence();
+        tracker = new TestEntityTracker(dataManager);
+    }
+
+    @After
+    public void tearDown() {
+        tracker.cleanup();
     }
 
     @Test
@@ -41,7 +50,7 @@ public class RegionServiceTest {
         region.setRegionCode(1000 + (int) (Math.random() * 100000));
         region.setRegionCountry(country);
 
-        Region saved = dataManager.commit(region, "region-edit-view");
+        Region saved = tracker.track(dataManager.commit(region, "region-edit-view"));
 
         assertNotNull(saved.getId());
         assertEquals(uniqueName, saved.getRegionRuName());
@@ -117,7 +126,7 @@ public class RegionServiceTest {
         region.setRegionRuName("TestRegion-" + UUID.randomUUID());
         region.setRegionCode(2000 + (int) (Math.random() * 100000));
         region.setRegionCountry(country);
-        return dataManager.commit(region, "region-edit-view");
+        return tracker.track(dataManager.commit(region, "region-edit-view"));
     }
 
     private Country createTestCountry() {
@@ -125,6 +134,6 @@ public class RegionServiceTest {
         country.setCountryRuName("TestCountry-" + UUID.randomUUID());
         country.setCountryShortName("TR");
         country.setPhoneCode(200);
-        return dataManager.commit(country, "country-edit-view");
+        return tracker.track(dataManager.commit(country, "country-edit-view"));
     }
 }

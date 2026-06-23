@@ -11,6 +11,7 @@ import com.haulmont.bpm.gui.procactionsfragment.ProcActionsFragment;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
@@ -59,13 +60,20 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("closedVacancyTimer")
     public void onClosedVacancyTimerTimerAction(Timer.TimerActionEvent event) {
-        if (closingDateDateField.getValue() != null) {
-            closedVacancyInfoLabel.setValue(new StringBuilder()
-                    .append(messageBundle.getMessage("msgClosingVacancyAfter"))
-                    .append(" ")
-                    .append(getTimerClosingVacancyValue(closingDateDateField.getValue()))
-                    .toString());
-        }
+        updateClosingVacancyLabel();
+    }
+
+    @Subscribe("closingDateDateField")
+    public void onClosingDateDateFieldValueChange(HasValue.ValueChangeEvent<Date> event) {
+        initClosedVacancyTimerFacet();
+    }
+
+    private void updateClosingVacancyLabel() {
+        closedVacancyInfoLabel.setValue(new StringBuilder()
+                .append(messageBundle.getMessage("msgClosingVacancyAfter"))
+                .append(" ")
+                .append(getTimerClosingVacancyValue(closingDateDateField.getValue()))
+                .toString());
     }
 
     private String getTimerClosingVacancyValue(Date closingDate) {
@@ -273,6 +281,20 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private CollectionLoader<ProcAttachment> procAttachmentsDl;
     @Inject
+    private CollectionLoader<SkillTree> openPositionSkillsListsDl;
+    @Inject
+    private CollectionContainer<SkillTree> openPositionSkillsListsDc;
+    @Inject
+    private CollectionLoader<LaborAgreement> laborAgreementDl;
+    @Inject
+    private CollectionContainer<LaborAgreement> laborAgreementDc;
+    @Inject
+    private CollectionLoader<OpenPositionComment> commentsOpenPositionDl;
+    @Inject
+    private CollectionContainer<OpenPositionComment> commentsOpenPositionDc;
+    @Inject
+    private CollectionLoader<SomeFilesOpenPosition> someFilesesDl;
+    @Inject
     private ProcActionsFragment procActionsFragment;
     @Inject
     private LookupPickerField<Grade> gradeLookupPickerField;
@@ -295,7 +317,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Named("tabSheetOpenPosition.tabFiles")
     private VBoxLayout tabFiles;
     @Inject
-    private CollectionPropertyContainer<SomeFilesOpenPosition> someFilesesDc;
+    private CollectionContainer<SomeFilesOpenPosition> someFilesesDc;
     @Inject
     private OpenPositionService openPositionService;
     @Inject
@@ -306,9 +328,39 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Image projectLogoImage;
     @Inject
     private Image projectOwnerImage;
+    @Inject
+    private TabSheet tabSheetOpenPosition;
+
+    private boolean mainTabLobsLoaded;
+    private boolean exerciseLoaded;
+    private boolean memoLoaded;
+    private boolean templateLetterLoaded;
+    private boolean skillsLoaded;
+    private boolean filesLoaded;
+    private boolean commentsTabLoaded;
+    private boolean laborAgreementLoaded;
+    private boolean applyingPositionTypeFromHandler;
+    /** false until onAfterShow completes — blocks RichTextArea ValueChange during @LoadDataBeforeShow bind */
+    private boolean screenFullyLoaded;
+    private boolean skillsRescanned;
+
+    private <E extends Entity> void preventAutoLoadUntilParameterSet(CollectionLoader<E> loader,
+                                                                     String parameterName) {
+        loader.addPreLoadListener(e -> {
+            if (loader.getParameter(parameterName) == null) {
+                e.preventLoad();
+            }
+        });
+    }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            loadMainTabLobs();
+            ensurePositionLobsLoaded();
+            mainTabLobsLoaded = true;
+        }
 
         beforeEdit = getEditedEntity();
         booOpenClosePosition = getEditedEntity().getOpenClose();
@@ -328,18 +380,200 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         changeCityListsLabel();
         standartDescriptionDisable(event);
         whiIsThisGuyDisable(event);
+        initPositionTypeDescriptionFields();
         setOpenPositionNews(event);
         setOpenCloseStart();
-        setCommentsOpenPositionScroll(getEditedEntity(), commentsScrollBox);
-        setCommentOpenPositionScrollIteractionList(getEditedEntity(), commentsScrollBox);
 
         initProjectNameField();
-        initClosedVacancyTimerFacet();
+    }
+
+    @Subscribe("tabSheetOpenPosition")
+    public void onTabSheetOpenPositionSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
+        if (event.getSelectedTab() == null || PersistenceHelper.isNew(getEditedEntity())) {
+            return;
+        }
+        String tabName = event.getSelectedTab().getName();
+        if ("tabExercise".equals(tabName) && !exerciseLoaded) {
+            loadExerciseLob();
+            exerciseLoaded = true;
+        }
+        if ("tabMemoForInterview".equals(tabName) && !memoLoaded) {
+            loadMemoForInterviewLob();
+            memoLoaded = true;
+        }
+        if ("tabTemplateLetter".equals(tabName) && !templateLetterLoaded) {
+            loadTemplateLetterLob();
+            templateLetterLoaded = true;
+        }
+        if ("tabSkills".equals(tabName) && !skillsLoaded) {
+            loadSkillsList();
+            skillsLoaded = true;
+        }
+        if ("tabFiles".equals(tabName) && !filesLoaded) {
+            loadSomeFiles();
+            filesLoaded = true;
+            setIconSomeFileTab();
+        }
+        if ("commentsTab".equals(tabName) && !commentsTabLoaded) {
+            loadCommentsTab();
+            commentsTabLoaded = true;
+        }
+        if ("laborAgreementTab".equals(tabName) && !laborAgreementLoaded) {
+            loadLaborAgreement();
+            laborAgreementLoaded = true;
+        }
+    }
+
+    private void loadMainTabLobs() {
+        OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
+                .add("comment")
+                .add("commentEn")
+                .build());
+        getEditedEntity().setComment(reloaded.getComment());
+        getEditedEntity().setCommentEn(reloaded.getCommentEn());
+    }
+
+    private void ensurePositionLobsLoaded() {
+        Position position = getEditedEntity().getPositionType();
+        if (position == null || position.getId() == null) {
+            return;
+        }
+        if (positionTypeDescriptionLobsLoaded(position)) {
+            return;
+        }
+        setPositionTypeOnEntity(loadPositionWithDescriptionLobs(position.getId()));
+    }
+
+    private boolean positionTypeDescriptionLobsLoaded(Position position) {
+        return position != null
+                && PersistenceHelper.isLoaded(position, "standartDescription")
+                && PersistenceHelper.isLoaded(position, "whoIsThisGuy");
+    }
+
+    private Position loadPositionWithDescriptionLobs(UUID positionId) {
+        return dataManager.load(Position.class)
+                .id(positionId)
+                .view(ViewBuilder.of(Position.class)
+                        .add("positionRuName")
+                        .add("positionEnName")
+                        .add("standartDescription")
+                        .add("whoIsThisGuy")
+                        .build())
+                .one();
+    }
+
+    private void setPositionTypeOnEntity(Position position) {
+        Position current = getEditedEntity().getPositionType();
+        if (current != null && position != null && Objects.equals(current.getId(), position.getId())) {
+            if (positionTypeDescriptionLobsLoaded(current)) {
+                return;
+            }
+        }
+        applyingPositionTypeFromHandler = true;
+        try {
+            getEditedEntity().setPositionType(position);
+        } finally {
+            applyingPositionTypeFromHandler = false;
+        }
+    }
+
+    private void applyPositionTypeDescriptionUi(Position position) {
+        if (position == null) {
+            return;
+        }
+        if (position.getStandartDescription() != null) {
+            openPositionStandartDescriptionRichTextArea.setValue(position.getStandartDescription());
+            openPositionStandartDescriptionAccorden.setVisible(true);
+            openPositionStandartDescriptionRichTextArea.setEnabled(true);
+        } else {
+            openPositionStandartDescriptionAccorden.setVisible(false);
+            openPositionStandartDescriptionRichTextArea.setEnabled(false);
+        }
+        if (position.getWhoIsThisGuy() != null) {
+            openPositionWhoIsThisGuyRichTextArea.setValue(position.getWhoIsThisGuy());
+            openPositionWhoIsThisGuyAccorden.setVisible(true);
+            openPositionWhoIsThisGuyRichTextArea.setEnabled(true);
+        } else {
+            openPositionWhoIsThisGuyAccorden.setVisible(false);
+            openPositionWhoIsThisGuyRichTextArea.setEnabled(false);
+        }
+    }
+
+    private void loadExerciseLob() {
+        OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
+                .add("exercise")
+                .build());
+        getEditedEntity().setExercise(reloaded.getExercise());
+    }
+
+    private void loadMemoForInterviewLob() {
+        OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
+                .add("memoForInterview")
+                .build());
+        getEditedEntity().setMemoForInterview(reloaded.getMemoForInterview());
+    }
+
+    private void loadTemplateLetterLob() {
+        OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
+                .add("templateLetter")
+                .build());
+        getEditedEntity().setTemplateLetter(reloaded.getTemplateLetter());
+    }
+
+    private void loadSkillsList() {
+        openPositionSkillsListsDl.setParameter("openPosition", getEditedEntity());
+        openPositionSkillsListsDl.load();
+        skillTrees = new ArrayList<>(openPositionSkillsListsDc.getItems());
+    }
+
+    private void loadSomeFiles() {
+        someFilesesDl.setParameter("openPosition", getEditedEntity());
+        someFilesesDl.load();
+    }
+
+    private void loadCommentsTab() {
+        commentsOpenPositionDl.setParameter("openPosition", getEditedEntity());
+        commentsOpenPositionDl.load();
+        commentsScrollBox.removeAll();
+        setCommentsOpenPositionScroll(commentsScrollBox);
+        setCommentOpenPositionScrollIteractionList(getEditedEntity(), commentsScrollBox);
+    }
+
+    private void loadLaborAgreement() {
+        laborAgreementDl.setParameter("openPosition", getEditedEntity());
+        laborAgreementDl.load();
+    }
+
+    private void initPositionTypeDescriptionFields() {
+        Position position = getEditedEntity().getPositionType();
+        if (position == null) {
+            return;
+        }
+        if (position.getStandartDescription() != null) {
+            openPositionStandartDescriptionRichTextArea.setValue(position.getStandartDescription());
+        }
+        if (position.getWhoIsThisGuy() != null) {
+            openPositionWhoIsThisGuyRichTextArea.setValue(position.getWhoIsThisGuy());
+        }
+    }
+
+    private void ensureOpenPositionCommentsLoaded() {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            return;
+        }
+        if (!commentsTabLoaded) {
+            loadCommentsTab();
+            commentsTabLoaded = true;
+        }
     }
 
     private void initClosedVacancyTimerFacet() {
         if (closingDateDateField.getValue() != null) {
+            updateClosingVacancyLabel();
             closedVacancyTimer.start();
+        } else {
+            closedVacancyInfoLabel.setValue("");
+            closedVacancyTimer.stop();
         }
     }
 
@@ -412,15 +646,62 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
-    public void setCommentsOpenPositionScroll(OpenPosition editedEntity, ScrollBoxLayout commentsScrollBox) {
-        if (editedEntity.getOpenPositionComments() != null) {
-            for (OpenPositionComment openPositionComment : editedEntity.getOpenPositionComments()) {
-                if (openPositionComment.getComment() != null) {
-                    VBoxLayout commentBox = getCommentBox(openPositionComment);
-                    commentsScrollBox.add(commentBox);
-                }
+    public void setCommentsOpenPositionScroll(ScrollBoxLayout commentsScrollBox) {
+        for (OpenPositionComment openPositionComment : commentsOpenPositionDc.getItems()) {
+            if (openPositionComment.getComment() != null) {
+                VBoxLayout commentBox = getCommentBox(openPositionComment);
+                commentsScrollBox.add(commentBox);
             }
         }
+    }
+
+    private void syncLaborAgreementToEntity() {
+        if (!laborAgreementLoaded) {
+            return;
+        }
+        ensureLaborAgreementLoadedOnEntity();
+        getEditedEntity().setLaborAgreement(new ArrayList<>(laborAgreementDc.getItems()));
+    }
+
+    private void ensureLaborAgreementLoadedOnEntity() {
+        if (!PersistenceHelper.isLoaded(getEditedEntity(), "laborAgreement")) {
+            OpenPosition reloaded = dataManager.reload(getEditedEntity(),
+                    ViewBuilder.of(OpenPosition.class)
+                            .add("laborAgreement", "laborAgreement-openPosition-tab-view")
+                            .build());
+            dataContext.merge(reloaded);
+        }
+    }
+
+    private void syncSkillsListToEntity() {
+        List<SkillTree> items = null;
+        if (skillsLoaded) {
+            items = new ArrayList<>(openPositionSkillsListsDc.getItems());
+        } else if (skillsRescanned && skillTrees != null) {
+            items = new ArrayList<>(skillTrees);
+        }
+        if (items == null) {
+            return;
+        }
+        ensureSkillsListLoadedOnEntity();
+        getEditedEntity().setSkillsList(items);
+    }
+
+    private void ensureSkillsListLoadedOnEntity() {
+        if (!PersistenceHelper.isLoaded(getEditedEntity(), "skillsList")) {
+            OpenPosition reloaded = dataManager.reload(getEditedEntity(),
+                    ViewBuilder.of(OpenPosition.class)
+                            .add("skillsList", "skillTree-openPosition-tab-view")
+                            .build());
+            dataContext.merge(reloaded);
+        }
+    }
+
+    @Install(to = "someFilesTable.create", subject = "newEntitySupplier")
+    private SomeFilesOpenPosition someFilesTableCreateEntitySupplier() {
+        SomeFilesOpenPosition file = metadata.create(SomeFilesOpenPosition.class);
+        file.setOpenPosition(getEditedEntity());
+        return file;
     }
 
     private void setProjectClosedFilter() {
@@ -773,10 +1054,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (commentStr != null) {
             comment.setComment(commentStr);
 
-            List<OpenPositionComment> openPositionComments = getEditedEntity().getOpenPositionComments();
-            openPositionComments.add(comment);
-
+            ensureOpenPositionCommentsLoaded();
             dataContext.merge(comment);
+            commentsOpenPositionDc.getMutableItems().add(comment);
+            commentsScrollBox.removeAll();
+            setCommentsOpenPositionScroll(commentsScrollBox);
+            setCommentOpenPositionScrollIteractionList(getEditedEntity(), commentsScrollBox);
 
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
@@ -887,7 +1170,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     private void whiIsThisGuyDisable(BeforeShowEvent event) {
         if (getEditedEntity().getPositionType() != null) {
-            if (getEditedEntity().getPositionType().getStandartDescription() == null) {
+            if (getEditedEntity().getPositionType().getWhoIsThisGuy() == null) {
                 openPositionWhoIsThisGuyAccorden.setVisible(false);
                 openPositionWhoIsThisGuyRichTextArea.setEnabled(false);
             } else {
@@ -1288,18 +1571,30 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     .append("\n\n(")
                     .append(salaryCommentTextFiels.getValue())
                     .append(")");
-            telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
-                    textManipulationService.formattedHtml2text(sb.toString()));
+            notifyTelegramOpenPositionChange(textManipulationService.formattedHtml2text(sb.toString()));
         } else {
 
             Boolean flag = getEditedEntity().getOpenClose() != null ? getEditedEntity().getOpenClose() : false;
 
             if (!flag) {
-                telegramService.sendMessageToChat(applicationSetupService.getTelegramChatOpenPosition(),
-                        textManipulationService
-                                .formattedHtml2text(new StringBuilder("Изменена вакансия: ")
-                                        .append(vacansyNameField.getValue()).toString()));
+                notifyTelegramOpenPositionChange(textManipulationService
+                        .formattedHtml2text(new StringBuilder("Изменена вакансия: ")
+                                .append(vacansyNameField.getValue()).toString()));
             }
+        }
+    }
+
+    private void notifyTelegramOpenPositionChange(String message) {
+        TelegramSendResult result = telegramService.sendMessageToChatResult(
+                applicationSetupService.getTelegramChatOpenPosition(), message);
+        if (!result.isSuccess()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withDescription(messageBundle.formatMessage(
+                            "msgTelegramNotificationFailedWithReason", result.getFailureReason()))
+                    .withHideDelayMs(8000)
+                    .withPosition(Notifications.Position.DEFAULT)
+                    .show();
         }
     }
 
@@ -1407,9 +1702,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         startLetterText = templateLetterRichTextArea.getValue() != null
                 ? Jsoup.parse(templateLetterRichTextArea.getValue()).wholeText() : null;
         startVacansyName = vacansyNameField.getValue();
+        screenFullyLoaded = true;
+        initClosedVacancyTimerFacet();
     }
 
     private String showKeyCompetition(String value) {
+        if (skillTrees == null) {
+            return value;
+        }
         for (SkillTree skillTree : skillTrees) {
             String keyWithStyle = "<b><font color=\"brown>\" face=\"serif\">"
                     + skillTree.getSkillName()
@@ -1480,6 +1780,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        syncLaborAgreementToEntity();
+        syncSkillsListToEntity();
 
         if (PersistenceHelper.isNew(getEditedEntity())) {
             OpenPosition dublicateOpenPosition = checkDublicateOpenPosition(event);
@@ -1502,37 +1804,42 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 event.preventCommit();
             }
 
-            if (checkDublicatePositionID()) {
-                dialogs.createOptionDialog()
-                        .withCaption(messageBundle.getMessage("msgWarning"))
-                        .withMessage(messageBundle.getMessage("msgDublicateVacancyID"))
-                        .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
-                            event.resume();
-                            // вернуться и не закомитить
-                        }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
-                            // закончить
-                        }))
-                        .show();
+        }
 
-                event.preventCommit();
-            }
+        if (checkDuplicatePositionId()) {
+            dialogs.createOptionDialog()
+                    .withCaption(messageBundle.getMessage("msgWarning"))
+                    .withMessage(messageBundle.getMessage("msgDublicateVacancyID"))
+                    .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
+                        event.resume();
+                        // вернуться и не закомитить
+                    }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
+                        // закончить
+                    }))
+                    .show();
+
+            event.preventCommit();
         }
     }
 
-    private boolean checkDublicatePositionID() {
-        final String QUERY_CHECK_VACANCY_ID
-                = "select e from itpearls_OpenPosition e where e.vacansyID like :vacancyID";
-
-        if (dataManager.load(OpenPosition.class)
-                .query(QUERY_CHECK_VACANCY_ID)
-                .parameter("vacancyID", vacansyIDTextField.getValue())
-                .view("openPosition-view")
-                .list()
-                .size() > 0) {
-            return true;
-        } else {
+    private boolean checkDuplicatePositionId() {
+        String vacancyID = vacansyIDTextField.getValue();
+        if (vacancyID == null) {
             return false;
         }
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            return dataManager.loadValue(
+                    "select count(e) from itpearls_OpenPosition e " +
+                    "where e.vacansyID = :vacancyID and e.id <> :currentId", Long.class)
+                    .parameter("vacancyID", vacancyID)
+                    .parameter("currentId", getEditedEntity().getId())
+                    .one() > 0;
+        }
+        return dataManager.loadValue(
+                "select count(e) from itpearls_OpenPosition e " +
+                "where e.vacansyID = :vacancyID", Long.class)
+                .parameter("vacancyID", vacancyID)
+                .one() > 0;
     }
 
     private void publishEventMessage(BeforeCommitChangesEvent event) {
@@ -2173,6 +2480,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         setTopLabel();
         setIconSomeFileTab();
+        initProjectImagesOnOpen();
 
         if (openPositionRichTextArea.getValue() != null) {
             openPositionRichTextArea.setValue(showKeyCompetition(openPositionRichTextArea.getValue()));
@@ -2184,10 +2492,60 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void setIconSomeFileTab() {
+        if (!filesLoaded && !PersistenceHelper.isNew(getEditedEntity())) {
+            tabFiles.setIconFromSet(CubaIcon.FILE_O);
+            return;
+        }
         if (someFilesesDc.getItems().size() > 0) {
             tabFiles.setIconFromSet(CubaIcon.FILE_TEXT_O);
         } else {
             tabFiles.setIconFromSet(CubaIcon.FILE_O);
+        }
+    }
+
+    private void initProjectImagesOnOpen() {
+        Project project = getEditedEntity().getProjectName();
+        if (project == null) {
+            return;
+        }
+        if (project.getProjectLogo() != null) {
+            projectLogoImage.setValueSource(
+                    new ContainerValueSource<>(openPositionDc, "projectName.projectLogo"));
+        } else {
+            projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        }
+        Person projectOwner = project.getProjectOwner();
+        if (projectOwner == null) {
+            projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(projectOwner.getFirstName() != null ? projectOwner.getFirstName() : "")
+                .append(" ")
+                .append(projectOwner.getSecondName() != null ? projectOwner.getSecondName() : "");
+        if (projectOwner.getPersonPosition() != null) {
+            sb.append(" / ")
+                    .append(projectOwner.getPersonPosition().getPositionRuName());
+        }
+        if (projectOwner.getCompanyDepartment() != null) {
+            sb.append(" / ")
+                    .append(projectOwner.getCompanyDepartment().getDepartamentRuName());
+            if (projectOwner.getCompanyDepartment().getCompanyName() != null) {
+                sb.append(" / ")
+                        .append(projectOwner.getCompanyDepartment().getCompanyName().getComanyName());
+            }
+        }
+        if (projectOwner.getCityOfResidence() != null) {
+            sb.append(" / ")
+                    .append(projectOwner.getCityOfResidence().getCityRuName());
+        }
+        projectOwnerImage.setDescription(sb.toString());
+        if (projectOwner.getFileImageFace() != null) {
+            projectOwnerImage.setVisible(true);
+            projectOwnerImage.setValueSource(
+                    new ContainerValueSource<>(openPositionDc, "projectName.projectOwner.fileImageFace"));
+        } else {
+            projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         }
     }
 
@@ -2270,6 +2628,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        preventAutoLoadUntilParameterSet(laborAgreementDl, "openPosition");
+        preventAutoLoadUntilParameterSet(commentsOpenPositionDl, "openPosition");
+        preventAutoLoadUntilParameterSet(someFilesesDl, "openPosition");
+        preventAutoLoadUntilParameterSet(openPositionSkillsListsDl, "openPosition");
+        preventAutoLoadUntilParameterSet(procAttachmentsDl, "entityId");
+
         setRadioButtons();
         setGroupSubscribeButton();
         setGroupCommandRadioButtin();
@@ -2467,6 +2831,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     private void setProjectOwnerImage(HasValue.ValueChangeEvent<Project> event) {
+        if (event.getValue() == null || event.getValue().getProjectOwner() == null) {
+            projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            return;
+        }
         StringBuilder sb = new StringBuilder();
         sb.append(event.getValue().getProjectOwner().getFirstName())
                 .append(" ")
@@ -2671,17 +3039,45 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /**
+     * Parses skills from job description text. Never reads/writes {@code OpenPosition.skillsList}
+     * on the edited entity — only {@link #skillTrees} and {@link #openPositionSkillsListsDc}.
+     * Entity sync happens in {@link #syncSkillsListToEntity()} on commit.
+     */
     public void rescanJobDescription() {
+        if (openPositionRichTextArea.getValue() == null) {
+            return;
+        }
         String inputText = Jsoup.parse(openPositionRichTextArea.getValue()).wholeText();
-        skillTrees = pdfParserService.parseSkillTree(inputText);
-        getEditedEntity().setSkillsList(skillTrees);
+        if (inputText.trim().isEmpty()) {
+            return;
+        }
+        skillTrees = reloadSkillsForOpenPositionTab(pdfParserService.parseSkillTree(inputText));
+        skillsRescanned = true;
+        if (skillsLoaded) {
+            openPositionSkillsListsDc.setItems(skillTrees);
+        }
+    }
+
+    private List<SkillTree> reloadSkillsForOpenPositionTab(List<SkillTree> skills) {
+        if (skills == null || skills.isEmpty()) {
+            return skills;
+        }
+        return dataManager.load(SkillTree.class)
+                .ids(skills.stream().map(SkillTree::getId).collect(java.util.stream.Collectors.toList()))
+                .view("skillTree-openPosition-tab-view")
+                .list();
     }
 
     @Subscribe("openPositionRichTextArea")
     public void onOpenPositionRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
+        if (!screenFullyLoaded) {
+            return;
+        }
         if (openPositionRichTextArea.getValue() != null &&
-                !openPositionRichTextArea.getValue().trim().equals(""))
+                !openPositionRichTextArea.getValue().trim().equals("")) {
             rescanJobDescription();
+        }
     }
 
     private void skillImageColumnRenderer() {
@@ -2740,15 +3136,21 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     @Subscribe("positionTypeField")
     public void onPositionTypeFieldValueChange1(HasValue.ValueChangeEvent<Position> event) {
-        if (event.getValue() != null) {
-            if (event.getValue().getStandartDescription() != null) {
-                openPositionStandartDescriptionRichTextArea.setValue(event.getValue().getStandartDescription());
-            }
-
-            if (event.getValue().getWhoIsThisGuy() != null) {
-                openPositionWhoIsThisGuyRichTextArea.setValue(event.getValue().getWhoIsThisGuy());
-            }
+        if (applyingPositionTypeFromHandler) {
+            return;
         }
+        if (event.getValue() == null || event.getValue().getId() == null) {
+            return;
+        }
+        Position current = getEditedEntity().getPositionType();
+        UUID positionId = event.getValue().getId();
+        if (current != null && positionId.equals(current.getId()) && positionTypeDescriptionLobsLoaded(current)) {
+            applyPositionTypeDescriptionUi(current);
+            return;
+        }
+        Position reloaded = loadPositionWithDescriptionLobs(positionId);
+        setPositionTypeOnEntity(reloaded);
+        applyPositionTypeDescriptionUi(reloaded);
     }
 
     @Subscribe("more10NumberPositionField")

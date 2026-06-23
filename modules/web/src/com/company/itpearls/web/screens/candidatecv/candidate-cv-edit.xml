@@ -55,7 +55,9 @@
             <collection id="someFilesesDc"
                         property="someFiles"/>
             <collection id="skillTreesDc"
-                        property="skillTree"/>
+                        property="skillTree">
+                <view extends="skillTree-cv-tab-view"/>
+            </collection>
         </instance>
         <collection id="resumePositionsDc"
                     class="com.company.itpearls.entity.Position"

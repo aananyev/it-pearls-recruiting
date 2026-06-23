@@ -7,39 +7,7 @@
     <data readOnly="true">
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition">
-            <view extends="openPosition-view">
-                <property name="owner" view="_local"/>
-                <property name="grade" view="_local"/>
-                <property name="candidates" view="_local"/>
-                <property name="parentOpenPosition" view="_local">
-                    <property name="owner" view="_local"/>
-                </property>
-                <property name="cityPosition" view="_local"/>
-                <property name="positionType" view="_local"/>
-                <property name="projectName" view="_local">
-                    <property name="projectLogo" view="_local"/>
-                    <property name="projectOwner" view="person-owner-view">
-                        <property name="fileImageFace" view="_local"/>
-                        <property name="cityOfResidence" view="_local"/>
-                        <property name="companyDepartment" view="_local">
-                            <property name="companyName" view="_local">
-                                <property name="fileCompanyLogo" view="_local"/>
-                            </property>
-                        </property>
-                        <property name="personPosition" view="_local"/>
-                    </property>
-                    <property name="projectDepartment" view="_local">
-                        <property name="companyName" view="_local">
-                            <property name="fileCompanyLogo" view="_local"/>
-                        </property>
-                        <property name="templateLetter"/>
-                    </property>
-                    <property name="templateLetter"/>
-                    <property name="projectDescription"/>
-                </property>
-                <property name="templateLetter"/>
-                <property name="someFiles" view="_minimal"/>
-            </view>
+            <view extends="openPosition-browse-view"/>
             <loader id="openPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e

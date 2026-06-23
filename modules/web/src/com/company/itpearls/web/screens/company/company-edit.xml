@@ -5,22 +5,8 @@
         messagesPack="com.company.itpearls.web.screens.company" icon="BUILDING">
     <data>
         <instance id="companyDc"
-                  class="com.company.itpearls.entity.Company">
-            <view extends="_local">
-                <property name="comanyName"/>
-                <property name="companyGroup" view="_local"/>
-                <property name="cityOfCompany" view="city-picker-view"/>
-                <property name="companyOwnership" view="_minimal"/>
-                <property name="companyDirector" view="person-picker-view"/>
-                <property name="countryOfCompany" view="country-picker-view"/>
-                <property name="departmentOfCompany" view="_local">
-                    <property name="projectOfDepartment" view="_local"/>
-                    <property name="departamentDirector" view="person-picker-view"/>
-                    <property name="departamentHrDirector" view="person-picker-view"/>
-                </property>
-                <property name="regionOfCompany" view="region-picker-view"/>
-                <property name="fileCompanyLogo" view="_local"/>
-            </view>
+                  class="com.company.itpearls.entity.Company"
+                  view="company-edit-view">
             <loader/>
             <collection id="departmentOfCompanyDc" property="departmentOfCompany"/>
         </instance>
@@ -40,15 +26,21 @@
         </collection>
         <collection id="companyGroupDc"
                     class="com.company.itpearls.entity.CompanyGroup"
-                    view="companyGroup-view"/>
-        <collection id="cityOfCompaniesDc" class="com.company.itpearls.entity.City" view="city-picker-view">
+                    view="companyGroup-picker-view">
+            <loader id="companyGroupLc" cacheable="true">
+                <query>
+                    <![CDATA[select e from itpearls_CompanyGroup e order by e.companyRuGroupName]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="cityOfCompaniesDc" class="com.company.itpearls.entity.City" view="city-location-view">
             <loader id="cityOfCompaniesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_City e]]>
                 </query>
             </loader>
         </collection>
-        <collection id="regionOfCompaniesDc" class="com.company.itpearls.entity.Region" view="region-picker-view">
+        <collection id="regionOfCompaniesDc" class="com.company.itpearls.entity.Region" view="region-browse-view">
             <loader id="regionOfCompaniesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Region e]]>

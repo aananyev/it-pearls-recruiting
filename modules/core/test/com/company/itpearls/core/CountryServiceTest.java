@@ -1,6 +1,7 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.ItpearlsTestContainer;
+import com.company.itpearls.TestEntityTracker;
 import com.company.itpearls.entity.Country;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Transaction;
@@ -8,6 +9,7 @@ import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.View;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -24,11 +26,18 @@ public class CountryServiceTest {
 
     private DataManager dataManager;
     private Persistence persistence;
+    private TestEntityTracker tracker;
 
     @Before
     public void setUp() {
         dataManager = AppBeans.get(DataManager.class);
         persistence = cont.persistence();
+        tracker = new TestEntityTracker(dataManager);
+    }
+
+    @After
+    public void tearDown() {
+        tracker.cleanup();
     }
 
     @Test
@@ -39,7 +48,7 @@ public class CountryServiceTest {
         country.setCountryShortName("TC");
         country.setPhoneCode(999);
 
-        Country saved = dataManager.commit(country, "country-edit-view");
+        Country saved = tracker.track(dataManager.commit(country, "country-edit-view"));
 
         assertNotNull(saved.getId());
         assertEquals(uniqueName, saved.getCountryRuName());
@@ -114,6 +123,6 @@ public class CountryServiceTest {
         country.setCountryRuName("TestCountry-" + UUID.randomUUID());
         country.setCountryShortName("TX");
         country.setPhoneCode(100);
-        return dataManager.commit(country, "country-edit-view");
+        return tracker.track(dataManager.commit(country, "country-edit-view"));
     }
 }

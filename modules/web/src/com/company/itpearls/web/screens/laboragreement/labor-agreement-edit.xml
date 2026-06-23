@@ -33,7 +33,7 @@
         </collection>
         <collection id="companiesDc"
                     class="com.company.itpearls.entity.Company"
-                    view="company-view">
+                    view="company-picker-view">
             <loader id="companiesDl">
                 <query>
                     <![CDATA[select e from itpearls_Company e where e.ourClient = true]]>

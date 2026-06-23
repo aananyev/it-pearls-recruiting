@@ -3,6 +3,7 @@
 > Шаблон документации сущности CUBA 7.3 для проекта **IT Pearls Recruiting** (HuntTech).
 > Скопируйте файл в `docs/entities/{EntityName}.md` и заполните разделы.
 > Триггер оптимизации: «давай оптимизировать работу сущности {EntityName}» — см. [`.cursor/rules/entity-performance-optimization.mdc`](../../.cursor/rules/entity-performance-optimization.mdc).
+> **При любом изменении кода сущности** — обновляйте документ и добавляйте запись в §9 «История изменений» (см. [`.cursor/rules/documentation-with-dates.mdc`](../../.cursor/rules/documentation-with-dates.mdc)).
 
 ---
 
@@ -238,9 +239,13 @@ rg "view=\".*{entity}" modules/ --glob '*.xml'
 
 ## 9. История изменений
 
-| Дата | Автор | Изменение |
-|------|-------|-----------|
-| YYYY-MM-DD | {имя} | Создание документа |
+> **Обязательный раздел.** При каждом изменении entity, views, экранов, сервисов, БД или бизнес-логики добавляйте новую строку **в начало таблицы** с датой **YYYY-MM-DD** и кратким описанием.
+> Правило для агента: [`.cursor/rules/documentation-with-dates.mdc`](../../.cursor/rules/documentation-with-dates.mdc).
+
+| Дата | Изменение |
+|------|-----------|
+| YYYY-MM-DD | Создание документа |
+| 2026-06-22 | Оптимизация browse-view, добавлен {entity}-browse-view |
 
 ---
 
@@ -250,3 +255,4 @@ rg "view=\".*{entity}" modules/ --glob '*.xml'
 - [Шаблон сущности](../templates/entity-template.md)
 - [LOCAL_DATABASE.md](../LOCAL_DATABASE.md)
 - [Оптимизация сущностей](../../.cursor/rules/entity-performance-optimization.mdc)
+- [Документирование изменений с датой](../../.cursor/rules/documentation-with-dates.mdc)

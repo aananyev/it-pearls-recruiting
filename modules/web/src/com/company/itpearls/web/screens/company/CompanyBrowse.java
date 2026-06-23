@@ -1,21 +1,33 @@
 package com.company.itpearls.web.screens.company;
 
+import com.company.itpearls.entity.Company;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.itpearls.entity.Company;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 
 import javax.inject.Inject;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @UiController("itpearls_Company.browse")
 @UiDescriptor("company-browse.xml")
 @LookupComponent("companiesTable")
 @LoadDataBeforeShow
 public class CompanyBrowse extends StandardLookup<Company> {
+    private static final String QUERY_COMPANY_DESCRIPTIONS_BY_IDS =
+            "select e.id, e.companyDescription from itpearls_Company e where e.id in :ids";
+
     @Inject
     private UiComponents uiComponents;
 
@@ -35,7 +47,7 @@ public class CompanyBrowse extends StandardLookup<Company> {
         image.setDescription("<h4>"
                 + event.getItem().getComanyName()
                 + "</h4><br><br>"
-                + event.getItem().getCompanyDescription());
+                + getCompanyDescription(event.getItem()));
 
         if (event.getItem().getFileCompanyLogo() != null) {
             image.setSource(FileDescriptorResource.class)
@@ -56,6 +68,46 @@ public class CompanyBrowse extends StandardLookup<Company> {
     private CollectionLoader<Company> companiesDl;
     @Inject
     private CheckBox checkBoxOnlyLegalEntity;
+    @Inject
+    private DataManager dataManager;
+
+    private Map<UUID, String> companyDescriptionCache = Collections.emptyMap();
+
+    @Subscribe(id = "companiesDl", target = Target.DATA_LOADER)
+    private void onCompaniesDlPostLoad(CollectionLoader.PostLoadEvent<Company> event) {
+        refreshCompanyDescriptionCache(event.getLoadedEntities());
+    }
+
+    private void refreshCompanyDescriptionCache(List<Company> companies) {
+        List<UUID> ids = companies.stream()
+                .map(Company::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (ids.isEmpty()) {
+            companyDescriptionCache = Collections.emptyMap();
+            return;
+        }
+        List<KeyValueEntity> rows = dataManager.loadValues(QUERY_COMPANY_DESCRIPTIONS_BY_IDS)
+                .properties("id", "companyDescription")
+                .parameter("ids", ids)
+                .list();
+        Map<UUID, String> cache = new HashMap<>();
+        for (KeyValueEntity row : rows) {
+            UUID id = row.getValue("id");
+            String description = row.getValue("companyDescription");
+            if (id != null) {
+                cache.put(id, description);
+            }
+        }
+        companyDescriptionCache = cache;
+    }
+
+    private String getCompanyDescription(Company company) {
+        if (company == null || company.getId() == null) {
+            return null;
+        }
+        return companyDescriptionCache.get(company.getId());
+    }
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {

@@ -6,21 +6,10 @@
     <data>
         <instance id="openPositionCommentDc"
                   class="com.company.itpearls.entity.OpenPositionComment">
-            <view extends="_local">
-                <property name="openPosition" view="_local">
-                    <property name="grade" view="_local"/>
-                    <property name="cityPosition" view="_local"/>
-                    <property name="cities" view="_local"/>
-                    <property name="positionType" view="_local"/>
-                    <property name="projectName" view="_local"/>
-                    <property name="skillsList" view="_local"/>
-                    <property name="parentOpenPosition" view="_minimal"/>
-                </property>
-                <property name="user" view="_local"/>
-            </view>
+            <view extends="openPositionComment-edit-view"/>
             <loader/>
         </instance>
-        <collection id="openPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="_minimal">
+        <collection id="openPositionsDc" class="com.company.itpearls.entity.OpenPosition" view="openPosition-picker-view">
             <loader id="openPositionsDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e]]>

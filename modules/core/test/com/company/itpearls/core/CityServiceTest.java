@@ -1,6 +1,7 @@
 package com.company.itpearls.core;
 
 import com.company.itpearls.ItpearlsTestContainer;
+import com.company.itpearls.TestEntityTracker;
 import com.company.itpearls.entity.City;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Transaction;
@@ -8,6 +9,7 @@ import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.View;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -24,11 +26,18 @@ public class CityServiceTest {
 
     private DataManager dataManager;
     private Persistence persistence;
+    private TestEntityTracker tracker;
 
     @Before
     public void setUp() {
         dataManager = AppBeans.get(DataManager.class);
         persistence = cont.persistence();
+        tracker = new TestEntityTracker(dataManager);
+    }
+
+    @After
+    public void tearDown() {
+        tracker.cleanup();
     }
 
     @Test
@@ -38,7 +47,7 @@ public class CityServiceTest {
         city.setCityRuName(uniqueName);
         city.setCityPhoneCode(String.valueOf(UUID.randomUUID().hashCode() & 0xFFFF).substring(0, 4));
 
-        City saved = dataManager.commit(city, "city-edit-view");
+        City saved = tracker.track(dataManager.commit(city, "city-edit-view"));
 
         assertNotNull(saved.getId());
         assertEquals(uniqueName, saved.getCityRuName());
@@ -109,6 +118,6 @@ public class CityServiceTest {
         City city = dataManager.create(City.class);
         city.setCityRuName("TestCity-" + UUID.randomUUID());
         city.setCityPhoneCode(String.valueOf(Math.abs(UUID.randomUUID().hashCode()) % 10000));
-        return dataManager.commit(city, "city-edit-view");
+        return tracker.track(dataManager.commit(city, "city-edit-view"));
     }
 }

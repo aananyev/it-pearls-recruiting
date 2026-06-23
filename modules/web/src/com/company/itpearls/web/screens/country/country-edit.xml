@@ -8,7 +8,8 @@
                   class="com.company.itpearls.entity.Country"
                   view="country-edit-view">
             <loader/>
-            <collection id="countryCountryOfRegionsDc" property="countryOfRegion"/>
+            <collection id="countryCountryOfRegionsDc" property="countryOfRegion"
+                        view="region-country-child-view"/>
         </instance>
     </data>
     <dialogMode height="600"

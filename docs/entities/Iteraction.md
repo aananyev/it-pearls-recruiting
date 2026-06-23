@@ -339,7 +339,9 @@ rg "view=\".*iteraction" modules/ --glob '*.xml'
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-06-22 | Создание документа; зафиксированы оптимизации views, lazy tabs, cacheable loaders |
+| 2026-06-22 | Аудит Edit unfetched FK: `IteractionEdit` — обращения только к полям `iteraction-edit-view`; LOB lazy reload — OK |
+| 2026-06-22 | Исправление `iteraction-browse-view`: поля `iteractionTree` (number, iterationName) для группировки GroupTable |
+| 2026-06-22 | Оптимизация: specialized views (browse/tree-browse/edit/picker), lazy LOB `textEmailToSend` и вкладки checkTrace/outstaffingTab, cacheable loaders, документация |
 
 ---
 

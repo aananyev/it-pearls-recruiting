@@ -7,7 +7,7 @@
     <data readOnly="true">
         <collection id="companiesDc"
                     class="com.company.itpearls.entity.Company"
-                    view="company-view">
+                    view="company-browse-view">
             <loader id="companiesDl">
                 <query>
                     <![CDATA[select e from itpearls_Company e
@@ -34,7 +34,7 @@ order by e.comanyName]]>
                 applyTo="companiesTable"
                 dataLoader="companiesDl">
             <properties include=".*"
-                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                        excludeProperties="addressOfCompany,companyDescription,workingConditions,departmentOfCompany,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <treeDataGrid id="companiesTable"
                       width="100%"

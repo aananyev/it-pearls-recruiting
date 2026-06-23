@@ -20,7 +20,18 @@ docs/
     ├── Person.md             ← сотрудник / контактное лицо
     ├── Country.md              ← справочник стран
     ├── Region.md               ← справочник регионов
-    └── City.md                 ← справочник городов
+    ├── City.md                 ← справочник городов
+    ├── Project.md              ← проекты
+    ├── Company.md              ← компании
+    ├── CompanyDepartament.md   ← департаменты компаний
+    ├── CompanyGroup.md         ← группы компаний
+    ├── SkillTree.md            ← дерево компетенций
+    ├── OpenPosition.md         ← вакансии
+    ├── OpenPositionComment.md  ← комментарии к вакансии
+    ├── OpenPositionNews.md     ← новости вакансии
+    ├── Grade.md                ← грейды
+    ├── Position.md             ← должности
+    └── RecrutiesTasks.md       ← подписки рекрутёров
 ```
 
 ---
@@ -32,12 +43,18 @@ docs/
 | Поднять локальную БД и приложение | [LOCAL_DATABASE.md](LOCAL_DATABASE.md) |
 | Описать новую сущность | [templates/entity-template.md](templates/entity-template.md) |
 | Оптимизировать существующую сущность | [.cursor/rules/entity-performance-optimization.mdc](../.cursor/rules/entity-performance-optimization.mdc) |
+| Зафиксировать изменение в документации | [.cursor/rules/documentation-with-dates.mdc](../.cursor/rules/documentation-with-dates.mdc) |
 | Понять устройство типов взаимодействий | [entities/Iteraction.md](entities/Iteraction.md) |
 | Понять записи взаимодействий с кандидатами | [entities/IteractionList.md](entities/IteractionList.md) |
 | Понять справочник персон (сотрудники) | [entities/Person.md](entities/Person.md) |
 | Понять справочник стран | [entities/Country.md](entities/Country.md) |
 | Понять справочник городов | [entities/City.md](entities/City.md) |
 | Понять справочник регионов | [entities/Region.md](entities/Region.md) |
+| Понять справочник проектов | [entities/Project.md](entities/Project.md) |
+| Понять справочник компаний | [entities/Company.md](entities/Company.md) |
+| Понять департаменты компаний | [entities/CompanyDepartament.md](entities/CompanyDepartament.md) |
+| Понять группы компаний | [entities/CompanyGroup.md](entities/CompanyGroup.md) |
+| Понять дерево компетенций | [entities/SkillTree.md](entities/SkillTree.md) |
 
 ---
 
@@ -75,6 +92,11 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 | **Country** | `ITPEARLS_COUNTRY` | справочник | [entities/Country.md](entities/Country.md) | ✅ заполнен |
 | **Region** | `ITPEARLS_REGION` | справочник | [entities/Region.md](entities/Region.md) | ✅ заполнен |
 | **City** | `ITPEARLS_CITY` | справочник | [entities/City.md](entities/City.md) | ✅ заполнен |
+| **Project** | `ITPEARLS_PROJECT` | мастер-данные | [entities/Project.md](entities/Project.md) | ✅ заполнен |
+| **Company** | `ITPEARLS_COMPANY` | справочник | [entities/Company.md](entities/Company.md) | ✅ заполнен |
+| **CompanyDepartament** | `ITPEARLS_COMPANY_DEPARTAMENT` | справочник | [entities/CompanyDepartament.md](entities/CompanyDepartament.md) | ✅ заполнен |
+| **CompanyGroup** | `ITPEARLS_COMPANY_GROUP` | справочник | [entities/CompanyGroup.md](entities/CompanyGroup.md) | ✅ заполнен |
+| **SkillTree** | `ITPEARLS_SKILL_TREE` | справочник (дерево) | [entities/SkillTree.md](entities/SkillTree.md) | ✅ заполнен |
 | JobCandidate | `ITPEARLS_JOB_CANDIDATE` | транзакционная | — | планируется |
 | OpenPosition | `ITPEARLS_OPEN_POSITION` | транзакционная | — | планируется |
 
@@ -143,3 +165,15 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 - Имена файлов сущностей — как Java-класс: `Iteraction.md`, `IteractionList.md`
 - При изменении views/экранов сущности — обновлять соответствующий `docs/entities/*.md`
 - Не дублировать полные DDL в документах — ссылаться на `modules/core/db/`
+
+### Политика документирования изменений
+
+При изменении структуры сущности, экранов, форм, сервисов, `views.xml`, бизнес-логики или миграций БД — **обновлять** соответствующий `docs/entities/{Entity}.md` и добавлять запись в раздел **«История изменений»**:
+
+| Дата | Изменение |
+|------|-----------|
+| YYYY-MM-DD | Краткое описание изменения |
+
+- Дата — формат **YYYY-MM-DD** (дата внесения изменения)
+- Новые записи — **сверху** таблицы
+- Правило для Cursor-агента: [.cursor/rules/documentation-with-dates.mdc](../.cursor/rules/documentation-with-dates.mdc)

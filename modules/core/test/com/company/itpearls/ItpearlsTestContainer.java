@@ -35,6 +35,10 @@ public class ItpearlsTestContainer extends TestContainer {
         initDbProperties();
     }
 
+    /**
+     * Reads JDBC settings from Tomcat context.xml — the same {@code itpearls} database as local dev.
+     * Integration tests that commit entities must clean up after themselves (see {@link TestEntityTracker}).
+     */
     private void initDbProperties() {
         File contextXmlFile = new File("modules/core/web/META-INF/context.xml");
         if (!contextXmlFile.exists()) {

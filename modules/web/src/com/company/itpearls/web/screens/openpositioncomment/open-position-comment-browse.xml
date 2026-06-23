@@ -7,18 +7,7 @@
     <data readOnly="true">
         <collection id="openPositionCommentsDc"
                     class="com.company.itpearls.entity.OpenPositionComment">
-            <view extends="_local">
-                <property name="openPosition" view="_local">
-                    <property name="grade" view="_local"/>
-                    <property name="cityPosition" view="_local"/>
-                    <property name="cities" view="_local"/>
-                    <property name="positionType" view="_local"/>
-                    <property name="projectName" view="_local"/>
-                    <property name="skillsList" view="_local"/>
-                    <property name="parentOpenPosition" view="_minimal"/>
-                </property>
-                <property name="user" view="_local"/>
-            </view>
+            <view extends="openPositionComment-browse-view"/>
             <loader id="openPositionCommentsDl">
                 <query>
                     <![CDATA[select e from itpearls_OpenPositionComment e]]>
@@ -33,7 +22,8 @@
         <filter id="filter"
                 applyTo="openPositionCommentsTable"
                 dataLoader="openPositionCommentsDl">
-            <properties include=".*"/>
+            <properties include=".*"
+                        excludeProperties="comment,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <dataGrid id="openPositionCommentsTable"
                     width="100%"

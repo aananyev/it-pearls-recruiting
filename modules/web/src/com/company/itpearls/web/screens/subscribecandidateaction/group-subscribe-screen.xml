@@ -26,7 +26,7 @@
                 </query>
             </loader>
         </collection>
-        <collection id="companyDc" class="com.company.itpearls.entity.Company" view="company-view">
+        <collection id="companyDc" class="com.company.itpearls.entity.Company" view="company-picker-view">
             <loader id="compantDl">
                 <query>
                     <![CDATA[select e from itpearls_Company order by e.companyRuName]]>
@@ -34,14 +34,14 @@
             </loader>
         </collection>
         <collection id="departamentDc" class="com.company.itpearls.entity.CompanyDepartament"
-                    view="companyDepartament-view">
+                    view="companyDepartament-picker-view">
             <loader id="departamentDl">
                 <query>
                     <![CDATA[select e from itpearls_CompanyDepartament e order by e.departamentRuName]]>
                 </query>
             </loader>
         </collection>
-        <collection id="projectDc" class="com.company.itpearls.entity.Project" view="project-view">
+        <collection id="projectDc" class="com.company.itpearls.entity.Project" view="project-picker-view">
             <loader id="projectDl">
                 <query>
                     <![CDATA[select e from itpearls_Project e order by e.projectName]]>

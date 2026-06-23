@@ -245,4 +245,6 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-06-23 | Полная оптимизация по методологии entity-performance-optimization |
+| 2026-06-22 | Аудит Edit unfetched FK: `region-edit-view` покрывает `regionCountry`; каскад в `CompanyEdit` reload через `region-browse-view` |
+| 2026-06-23 | Исправление `region-browse-view`: `regionCountry` → `country-browse-view` для колонки и фильтра |
+| 2026-06-23 | Оптимизация: region-browse/edit/picker views, cacheable loaders, `RegionServiceTest`, документация |

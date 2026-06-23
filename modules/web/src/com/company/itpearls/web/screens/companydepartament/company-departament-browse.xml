@@ -6,7 +6,7 @@
     <data readOnly="true">
         <collection id="companyDepartamentsDc"
                     class="com.company.itpearls.entity.CompanyDepartament"
-                    view="companyDepartament-view">
+                    view="companyDepartament-browse-view">
             <loader id="companyDepartamentsDl">
                 <query>
                     <![CDATA[select e from itpearls_CompanyDepartament e
@@ -23,7 +23,7 @@ order by e.departamentRuName]]>
                 applyTo="companyDepartamentsTable"
                 dataLoader="companyDepartamentsDl">
             <properties include=".*"
-                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                        excludeProperties="departamentDescription,templateLetter,projectOfDepartment,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="companyDepartamentsTable"
                     width="100%"
@@ -38,7 +38,6 @@ order by e.departamentRuName]]>
                 <column id="companyName" caption="mainMsg://msgCompany"/>
                 <column id="departamentHrDirector" caption="mainMsg://msgHRDirector"/>
                 <column id="departamentDirector" caption="mainMsg://msgDirector"/>
-                <column id="departamentDescription" caption="mainMsg://msgDescription"/>
                 <column id="departamentNumberOfProgrammers" caption="mainMsg://msgNumberOfVacansies"/>
             </columns>
             <rowsCount/>

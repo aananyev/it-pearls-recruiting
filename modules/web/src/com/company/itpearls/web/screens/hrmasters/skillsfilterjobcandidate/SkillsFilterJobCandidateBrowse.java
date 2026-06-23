@@ -394,7 +394,7 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
         List<SkillTree> skillTree = dataManager.load(SkillTree.class)
                 .query(QUERY_SKILL_TREE_ITEM)
                 .parameter("skillGroup", skillTreeGroup)
-                .view("skillTree-view")
+                .view("skillTree-filter-view")
                 .list();
 
         FlowBoxLayout flowBoxLayoutLeft = setFlowBoxLayout();
@@ -588,7 +588,8 @@ public class SkillsFilterJobCandidateBrowse extends StandardLookup<JobCandidate>
     private List<SkillTree> getSkillTreeGroup() {
         return dataManager.load(SkillTree.class)
                 .query(QUERY_SKILL_TREE_GROUP)
-                .view("skillTree-view")
+                .view("skillTree-picker-view")
+                .cacheable(true)
                 .list();
     }
 

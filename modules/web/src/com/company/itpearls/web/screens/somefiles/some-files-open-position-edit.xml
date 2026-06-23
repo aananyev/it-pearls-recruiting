@@ -6,7 +6,7 @@
     <data>
         <instance id="someFilesDc"
                   class="com.company.itpearls.entity.SomeFilesOpenPosition"
-                  view="someFilesOpenPosition-view">
+                  view="someFilesOpenPosition-edit-view">
             <loader/>
         </instance>
     </data>

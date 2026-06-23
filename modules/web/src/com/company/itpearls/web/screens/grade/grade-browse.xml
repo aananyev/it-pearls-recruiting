@@ -7,7 +7,7 @@
     <data readOnly="true">
         <collection id="gradesDc"
                     class="com.company.itpearls.entity.Grade">
-            <view extends="_local"/>
+            <view extends="grade-browse-view"/>
             <loader id="gradesDl">
                 <query>
                     <![CDATA[select e from itpearls_Grade e]]>

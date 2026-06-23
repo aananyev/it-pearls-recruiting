@@ -23,7 +23,7 @@ order by e.cityRuName]]>
                 applyTo="citiesTable"
                 dataLoader="citiesDl">
             <properties include=".*"
-                        excludeProperties="openPosition,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                        excludeProperties="openPosition,cityRegion.regionOfCity,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="citiesTable"
                     width="100%"

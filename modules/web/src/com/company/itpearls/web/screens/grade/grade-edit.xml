@@ -6,7 +6,7 @@
     <data>
         <instance id="gradeDc"
                   class="com.company.itpearls.entity.Grade">
-            <view extends="_local"/>
+            <view extends="grade-edit-view"/>
             <loader/>
         </instance>
     </data>

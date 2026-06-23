@@ -47,28 +47,285 @@
     <view entity="itpearls_Country" name="country-view" extends="_local">
         <property name="countryOfRegion" view="_local"/>
     </view>
-    <view entity="itpearls_CompanyDepartament" name="companyDepartament-view" extends="_local">
-        <property name="companyName" view="_local">
-            <property name="departmentOfCompany" view="_local">
-                <property name="companyName" view="_local">
-                    <property name="cityOfCompany" view="city-picker-view"/>
-                </property>
-            </property>
-        </property>
+    <view entity="itpearls_CompanyDepartament" name="companyDepartament-browse-view" extends="_minimal">
+        <property name="departamentRuName"/>
+        <property name="departamentNumberOfProgrammers"/>
+        <property name="companyName" view="company-picker-view"/>
         <property name="departamentHrDirector" view="person-picker-view"/>
         <property name="departamentDirector" view="person-picker-view"/>
-        <property name="projectOfDepartment" view="_local">
-            <property name="projectDepartment" view="_local"/>
+    </view>
+    <view entity="itpearls_CompanyDepartament" name="companyDepartament-edit-view" extends="_minimal">
+        <property name="departamentRuName"/>
+        <property name="departamentNumberOfProgrammers"/>
+        <property name="companyName" view="company-picker-view"/>
+        <property name="departamentHrDirector" view="person-picker-view"/>
+        <property name="departamentDirector" view="person-picker-view"/>
+        <property name="projectOfDepartment" view="project-department-child-view"/>
+    </view>
+    <view entity="itpearls_CompanyDepartament" name="companyDepartament-picker-view" extends="_minimal">
+        <property name="departamentRuName"/>
+        <property name="companyName" view="company-picker-view"/>
+    </view>
+    <view entity="itpearls_CompanyDepartament" name="companyDepartament-department-child-view" extends="_minimal">
+        <property name="departamentRuName"/>
+        <property name="departamentDirector" view="person-picker-view"/>
+        <property name="departamentHrDirector" view="person-picker-view"/>
+    </view>
+    <view entity="itpearls_CompanyDepartament" name="companyDepartament-view" extends="_local">
+        <property name="companyName" view="company-picker-view"/>
+        <property name="departamentHrDirector" view="person-picker-view"/>
+        <property name="departamentDirector" view="person-picker-view"/>
+        <property name="projectOfDepartment" view="project-picker-view"/>
+    </view>
+    <view entity="itpearls_Project" name="project-browse-view" extends="_minimal">
+        <property name="projectName"/>
+        <property name="projectIsClosed"/>
+        <property name="defaultProject"/>
+        <property name="startProjectDate"/>
+        <property name="endProjectDate"/>
+        <property name="generalChat"/>
+        <property name="chatForCV"/>
+        <property name="projectLogo" view="_minimal"/>
+        <property name="projectTree" view="project-tree-picker-view"/>
+        <property name="projectDepartment" view="companyDepartament-picker-view"/>
+        <property name="projectOwner" view="person-owner-view"/>
+    </view>
+    <view entity="itpearls_Project" name="project-edit-view" extends="_minimal">
+        <property name="projectName"/>
+        <property name="projectIsClosed"/>
+        <property name="defaultProject"/>
+        <property name="startProjectDate"/>
+        <property name="endProjectDate"/>
+        <property name="generalChat"/>
+        <property name="chatForCV"/>
+        <property name="projectLogo" view="_minimal"/>
+        <property name="projectTree" view="project-tree-picker-view"/>
+        <property name="projectDepartment" view="companyDepartament-picker-view"/>
+        <property name="projectOwner" view="person-owner-view"/>
+    </view>
+    <view entity="itpearls_Project" name="project-picker-view" extends="_minimal">
+        <property name="projectName"/>
+        <property name="projectIsClosed"/>
+    </view>
+    <view entity="itpearls_Project" name="project-tree-picker-view" extends="_minimal">
+        <property name="projectName"/>
+        <property name="projectTree" view="_minimal"/>
+    </view>
+    <view entity="itpearls_Project" name="project-department-child-view" extends="_minimal">
+        <property name="projectName"/>
+        <property name="startProjectDate"/>
+        <property name="endProjectDate"/>
+        <property name="projectIsClosed"/>
+    </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-project-tab-view" extends="_minimal">
+        <property name="openClose"/>
+        <property name="vacansyName"/>
+        <property name="numberPosition"/>
+        <property name="positionType" view="position-picker-view"/>
+        <property name="createTs"/>
+    </view>
+    <view entity="itpearls_Grade" name="grade-browse-view" extends="_minimal">
+        <property name="gradeName"/>
+    </view>
+    <view entity="itpearls_Grade" name="grade-edit-view" extends="_minimal">
+        <property name="gradeName"/>
+    </view>
+    <view entity="itpearls_Grade" name="grade-picker-view" extends="_minimal">
+        <property name="gradeName"/>
+    </view>
+    <view entity="itpearls_Position" name="position-browse-view" extends="_minimal">
+        <property name="positionRuName"/>
+        <property name="positionEnName"/>
+    </view>
+    <view entity="itpearls_Position" name="position-edit-view" extends="_minimal">
+        <property name="positionRuName"/>
+        <property name="positionEnName"/>
+    </view>
+    <view entity="itpearls_Position" name="position-picker-view" extends="_minimal">
+        <property name="positionRuName"/>
+        <property name="positionEnName"/>
+    </view>
+    <view entity="itpearls_ExtUser" name="extUser-picker-view" extends="_minimal">
+        <property name="name"/>
+        <property name="login"/>
+        <property name="fileImageFace" view="_minimal"/>
+    </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-picker-view" extends="_minimal">
+        <property name="vacansyID"/>
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+    </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-parent-picker-view" extends="openPosition-picker-view">
+        <property name="projectName" view="project-picker-view"/>
+    </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-rtasks-browse-view" extends="_minimal">
+        <property name="vacansyName"/>
+        <property name="projectName" view="project-picker-view">
+            <property name="projectLogo" view="_minimal"/>
         </property>
     </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-rtasks-picker-view" extends="_minimal">
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+        <property name="grade" view="grade-picker-view"/>
+        <property name="cityPosition" view="city-picker-view"/>
+        <property name="cities" view="city-picker-view"/>
+        <property name="positionType" view="position-picker-view"/>
+        <property name="projectName" view="project-picker-view"/>
+        <property name="owner" view="extUser-picker-view"/>
+    </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-browse-view" extends="_minimal">
+        <property name="vacansyID"/>
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+        <property name="signDraft"/>
+        <property name="priority"/>
+        <property name="rating"/>
+        <property name="lastOpenDate"/>
+        <property name="closingDate"/>
+        <property name="remoteWork"/>
+        <property name="remoteComment"/>
+        <property name="needExercise"/>
+        <property name="needLetter"/>
+        <property name="needMemoForInterview"/>
+        <property name="salaryMin"/>
+        <property name="salaryMax"/>
+        <property name="salaryComment"/>
+        <property name="salaryFixLimit"/>
+        <property name="salaryCandidateRequest"/>
+        <property name="outstaffingCost"/>
+        <property name="numberPosition"/>
+        <property name="more10NumberPosition"/>
+        <property name="workExperience"/>
+        <property name="commandCandidate"/>
+        <property name="commandExperience"/>
+        <property name="internalProject"/>
+        <property name="shortDescription"/>
+        <property name="grade" view="grade-picker-view"/>
+        <property name="positionType" view="position-picker-view"/>
+        <property name="cityPosition" view="city-picker-view"/>
+        <property name="cities" view="city-picker-view"/>
+        <property name="owner" view="extUser-picker-view"/>
+        <property name="parentOpenPosition" view="openPosition-picker-view"/>
+        <property name="projectName" view="project-picker-view">
+            <property name="projectLogo" view="_minimal"/>
+            <property name="projectDepartment" view="companyDepartament-picker-view">
+                <property name="companyName" view="company-picker-view"/>
+            </property>
+            <property name="projectOwner" view="person-owner-view"/>
+        </property>
+        <property name="candidates" view="_minimal"/>
+        <property name="openPositionComments" view="_minimal"/>
+        <property name="someFiles" view="_minimal"/>
+    </view>
+    <view entity="itpearls_OpenPosition" name="openPosition-edit-view" extends="_minimal">
+        <property name="vacansyID"/>
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+        <property name="signDraft"/>
+        <property name="priority"/>
+        <property name="rating"/>
+        <property name="lastOpenDate"/>
+        <property name="closingDate"/>
+        <property name="remoteWork"/>
+        <property name="registrationForWork"/>
+        <property name="remoteComment"/>
+        <property name="needExercise"/>
+        <property name="needLetter"/>
+        <property name="needMemoForInterview"/>
+        <property name="salaryMin"/>
+        <property name="salaryMax"/>
+        <property name="salaryIE"/>
+        <property name="salaryFixLimit"/>
+        <property name="salaryCandidateRequest"/>
+        <property name="salaryComment"/>
+        <property name="outstaffingCost"/>
+        <property name="numberPosition"/>
+        <property name="more10NumberPosition"/>
+        <property name="workExperience"/>
+        <property name="commandCandidate"/>
+        <property name="commandExperience"/>
+        <property name="internalProject"/>
+        <property name="shortDescription"/>
+        <property name="paymentsType"/>
+        <property name="typeCompanyComission"/>
+        <property name="typeSalaryOfResearcher"/>
+        <property name="typeSalaryOfRecrutier"/>
+        <property name="useTaxNDFL"/>
+        <property name="percentComissionOfCompany"/>
+        <property name="percentSalaryOfResearcher"/>
+        <property name="percentSalaryOfRecrutier"/>
+        <property name="priorityComment"/>
+        <property name="grade" view="grade-picker-view"/>
+        <property name="cityPosition" view="city-picker-view"/>
+        <property name="cities" view="city-picker-view"/>
+        <property name="positionType" view="position-picker-view"/>
+        <property name="projectName" view="project-edit-view"/>
+        <property name="parentOpenPosition" view="openPosition-parent-picker-view"/>
+        <property name="owner" view="extUser-picker-view"/>
+    </view>
+    <view entity="itpearls_OpenPositionComment" name="openPositionComment-browse-view" extends="_minimal">
+        <property name="rating"/>
+        <property name="dateComment"/>
+        <property name="openPosition" view="openPosition-picker-view"/>
+        <property name="user" view="extUser-picker-view"/>
+    </view>
+    <view entity="itpearls_OpenPositionComment" name="openPositionComment-edit-view" extends="_minimal" systemProperties="true">
+        <property name="rating"/>
+        <property name="dateComment"/>
+        <property name="comment"/>
+        <property name="openPosition" view="openPosition-picker-view"/>
+        <property name="user" view="extUser-picker-view"/>
+    </view>
+    <view entity="itpearls_OpenPositionNews" name="openPositionNews-browse-view" extends="_minimal">
+        <property name="subject"/>
+        <property name="dateNews"/>
+        <property name="priorityNews"/>
+        <property name="openPosition" view="openPosition-picker-view"/>
+        <property name="author" view="extUser-picker-view"/>
+        <property name="candidates" view="_minimal"/>
+    </view>
+    <view entity="itpearls_OpenPositionNews" name="openPositionNews-edit-view" extends="_minimal">
+        <property name="subject"/>
+        <property name="dateNews"/>
+        <property name="priorityNews"/>
+        <property name="comment"/>
+        <property name="openPosition" view="openPosition-picker-view"/>
+        <property name="author" view="extUser-picker-view"/>
+        <property name="candidates" view="_minimal"/>
+    </view>
+    <view entity="itpearls_SomeFilesOpenPosition" name="someFilesOpenPosition-edit-view" extends="_minimal">
+        <property name="fileDescription"/>
+        <property name="fileLink"/>
+        <property name="fileComment"/>
+        <property name="fileDescriptor" view="_minimal"/>
+        <property name="fileOwner" view="extUser-picker-view"/>
+        <property name="fileType" view="_minimal"/>
+        <property name="openPosition" view="openPosition-picker-view"/>
+    </view>
+    <view entity="itpearls_RecrutiesTasks" name="recrutiesTasks-browse-view" extends="_minimal">
+        <property name="startDate"/>
+        <property name="endDate"/>
+        <property name="closed"/>
+        <property name="subscribe"/>
+        <property name="planForPeriod"/>
+        <property name="reacrutier" view="extUser-picker-view"/>
+        <property name="openPosition" view="openPosition-rtasks-browse-view"/>
+    </view>
+    <view entity="itpearls_RecrutiesTasks" name="recrutiesTasks-edit-view" extends="_minimal">
+        <property name="startDate"/>
+        <property name="endDate"/>
+        <property name="closed"/>
+        <property name="subscribe"/>
+        <property name="planForPeriod"/>
+        <property name="reacrutier" view="extUser-picker-view"/>
+        <property name="openPosition" view="openPosition-rtasks-picker-view"/>
+    </view>
     <view entity="itpearls_Project" name="project-view" extends="_local">
-        <property name="projectDepartment" view="_minimal">
-        </property>
+        <property name="projectDepartment" view="companyDepartament-picker-view"/>
         <property name="projectOwner" view="person-owner-view"/>
-        <property name="projectTree" view="_minimal">
-            <property name="projectTree" view="_minimal"/>
-        </property>
-        <property name="projectLogo" view="_local"/>
+        <property name="projectTree" view="project-tree-picker-view"/>
+        <property name="projectLogo" view="_minimal"/>
     </view>
     <view entity="itpearls_Person" name="person-browse-view" extends="_minimal">
         <property name="firstName"/>
@@ -108,7 +365,7 @@
         <property name="firstName"/>
         <property name="secondName"/>
         <property name="middleName"/>
-        <property name="personPosition" view="_minimal"/>
+        <property name="personPosition" view="position-picker-view"/>
         <property name="companyDepartment" view="_minimal">
             <property name="departamentRuName"/>
             <property name="companyName" view="_minimal"/>
@@ -131,7 +388,7 @@
         <property name="cityPosition" view="_local"/>
         <property name="positionType" view="_local">
         </property>
-        <property name="skillsList" view="_local"/>
+        <property name="skillsList" view="skillTree-openPosition-tab-view"/>
         <property name="parentOpenPosition" view="_local">
         </property>
         <property name="cities" view="_local"/>
@@ -211,6 +468,68 @@
         </property>
         <property name="jobCandidate" view="_minimal"/>
     </view>
+    <view entity="itpearls_SkillTree" name="skillTree-picker-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="prioritySkill"/>
+    </view>
+    <view entity="itpearls_SkillTree" name="skillTree-browse-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+        <property name="specialisation" view="specialisation-picker-view"/>
+        <property name="wikiPage"/>
+        <property name="prioritySkill"/>
+    </view>
+    <view entity="itpearls_SkillTree" name="skillTree-edit-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="wikiPage"/>
+        <property name="styleHighlighting"/>
+        <property name="notParsing"/>
+        <property name="prioritySkill"/>
+        <property name="comment"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+        <property name="specialisation" view="specialisation-picker-view"/>
+        <property name="fileImageLogo" view="_minimal"/>
+    </view>
+    <view entity="itpearls_SkillTree" name="skillTree-parser-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="notParsing"/>
+        <property name="skillTree" view="skillTree-picker-view">
+            <property name="skillName"/>
+            <property name="notParsing"/>
+        </property>
+    </view>
+    <view entity="itpearls_SkillTree" name="skillTree-browse-check-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="comment"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+    </view>
+    <view entity="itpearls_SkillTree" name="skillTree-filter-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="comment"/>
+        <property name="notParsing"/>
+        <property name="prioritySkill"/>
+        <property name="styleHighlighting"/>
+        <property name="wikiPage"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+        <property name="specialisation" view="specialisation-picker-view"/>
+        <property name="fileImageLogo" view="_minimal"/>
+        <property name="openPosition" view="_minimal"/>
+    </view>
+    <view entity="itpearls_SkillTree" name="skillTree-cv-tab-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="wikiPage"/>
+        <property name="comment"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+        <property name="specialisation" view="specialisation-picker-view"/>
+    </view>
+    <view entity="itpearls_SkillTree" name="skillTree-openPosition-tab-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="wikiPage"/>
+        <property name="comment"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+        <property name="specialisation" view="specialisation-picker-view"/>
+        <property name="fileImageLogo" view="_minimal"/>
+    </view>
     <view entity="itpearls_SkillTree" name="skillTree-view" extends="_local">
         <property name="skillTree" view="_minimal">
             <property name="fileImageLogo" view="_local"/>
@@ -237,6 +556,9 @@
         </property>
         <property name="specialisation" view="_local"/>
         <property name="fileImageLogo" view="_local"/>
+    </view>
+    <view entity="itpearls_Specialisation" name="specialisation-picker-view" extends="_minimal">
+        <property name="specRuName"/>
     </view>
     <view entity="itpearls_Specialisation" name="specialisation-view" extends="_local">
     </view>
@@ -269,16 +591,49 @@
         <property name="cityRegion" view="region-picker-view"/>
         <property name="openPosition" view="_minimal"/>
     </view>
+    <view entity="itpearls_Company" name="company-browse-view" extends="_minimal">
+        <property name="comanyName"/>
+        <property name="companyShortName"/>
+        <property name="ourClient"/>
+        <property name="ourLegalEntity"/>
+        <property name="companyGroup" view="companyGroup-picker-view"/>
+        <property name="cityOfCompany" view="city-picker-view"/>
+        <property name="regionOfCompany" view="region-picker-view"/>
+        <property name="countryOfCompany" view="country-picker-view"/>
+        <property name="fileCompanyLogo" view="_minimal"/>
+        <property name="companyOwnership" view="_minimal"/>
+        <property name="companyDirector" view="person-picker-view"/>
+    </view>
+    <view entity="itpearls_Company" name="company-edit-view" extends="_minimal">
+        <property name="comanyName"/>
+        <property name="companyShortName"/>
+        <property name="ourClient"/>
+        <property name="ourLegalEntity"/>
+        <property name="companyGroup" view="companyGroup-picker-view"/>
+        <property name="companyOwnership" view="_minimal"/>
+        <property name="companyDirector" view="person-picker-view"/>
+        <property name="cityOfCompany" view="city-location-view"/>
+        <property name="regionOfCompany" view="region-browse-view"/>
+        <property name="countryOfCompany" view="country-picker-view"/>
+        <property name="fileCompanyLogo" view="_minimal"/>
+        <property name="departmentOfCompany" view="companyDepartament-department-child-view"/>
+    </view>
+    <view entity="itpearls_Company" name="company-picker-view" extends="_minimal">
+        <property name="comanyName"/>
+        <property name="companyShortName"/>
+        <property name="ourClient"/>
+        <property name="ourLegalEntity"/>
+        <property name="fileCompanyLogo" view="_minimal"/>
+    </view>
     <view entity="itpearls_Company" name="company-view" extends="_local">
         <property name="companyOwnership" view="_minimal"/>
-        <property name="departmentOfCompany" view="_minimal">
-        </property>
+        <property name="departmentOfCompany" view="companyDepartament-department-child-view"/>
         <property name="cityOfCompany" view="city-picker-view"/>
         <property name="regionOfCompany" view="region-picker-view"/>
         <property name="countryOfCompany" view="country-picker-view"/>
         <property name="fileCompanyLogo" view="_minimal"/>
         <property name="companyDirector" view="person-picker-view"/>
-        <property name="companyGroup" view="_local"/>
+        <property name="companyGroup" view="companyGroup-picker-view"/>
     </view>
     <view entity="itpearls_CandidateCV" name="candidateCV-view" extends="_local">
         <property name="resumePosition" view="_minimal"/>
@@ -298,8 +653,7 @@
             </property>
         </property>
         <property name="fileImageFace" view="_minimal"/>
-        <property name="skillTree" view="_minimal">
-        </property>
+        <property name="skillTree" view="skillTree-picker-view"/>
         <property name="candidate" view="_minimal">
         </property>
     </view>
@@ -432,12 +786,14 @@
             <property name="fullName"/>
         </property>
         <property name="iteractionType" view="_minimal">
+            <property name="number"/>
             <property name="iterationName"/>
             <property name="pic"/>
             <property name="outstaffingSign"/>
         </property>
-        <property name="recrutier" view="_minimal"/>
+        <property name="recrutier" view="extUser-picker-view"/>
         <property name="vacancy" view="_minimal">
+            <property name="vacansyID"/>
             <property name="vacansyName"/>
             <property name="openClose"/>
             <property name="signDraft"/>
@@ -517,7 +873,9 @@
         </property>
         <property name="iteractionType" view="_minimal">
             <property name="iterationName"/>
+            <property name="signEmailSend"/>
         </property>
+        <property name="recrutier" view="extUser-picker-view"/>
     </view>
     <view entity="itpearls_IteractionList" name="iteractionList-view" extends="_local" systemProperties="true">
         <property name="vacancy" view="_local">
@@ -575,10 +933,7 @@
             <property name="positionType" view="_local"/>
         </property>
         <property name="iteractionType" view="iteraction-list-type-view"/>
-        <property name="recrutier" view="_minimal">
-            <property name="group" view="_minimal">
-            </property>
-        </property>
+        <property name="recrutier" view="extUser-picker-view"/>
     </view>
     <view entity="itpearls_Iteraction" name="iteraction-view-button" extends="_base">
         <property name="iteractionTree" view="_minimal">
@@ -618,8 +973,12 @@
         </property>
         <property name="fullName"/>
     </view>
-    <view entity="itpearls_Company" name="company-view-search" extends="_local">
-        <property name="departmentOfCompany" view="_minimal"/>
+    <view entity="itpearls_Company" name="company-view-search" extends="_minimal">
+        <property name="comanyName"/>
+        <property name="companyShortName"/>
+        <property name="ourClient"/>
+        <property name="ourLegalEntity"/>
+        <property name="departmentOfCompany" view="companyDepartament-department-child-view"/>
         <property name="cityOfCompany" view="city-picker-view"/>
         <property name="regionOfCompany" view="region-picker-view"/>
         <property name="countryOfCompany" view="country-picker-view"/>
@@ -698,11 +1057,11 @@
         <property name="comment"/>
         <property name="salaryMin"/>
         <property name="salaryMax"/>
-        <property name="grade" view="_minimal"/>
-        <property name="positionType" view="_minimal"/>
+        <property name="grade" view="grade-picker-view"/>
+        <property name="positionType" view="position-picker-view"/>
         <property name="owner" view="_minimal"/>
-        <property name="cityPosition" view="_minimal"/>
-        <property name="cities" view="_minimal"/>
+        <property name="cityPosition" view="city-picker-view"/>
+        <property name="cities" view="city-picker-view"/>
         <property name="projectName" view="_minimal">
             <property name="projectName"/>
             <property name="projectLogo"/>
@@ -722,6 +1081,14 @@
         <property name="iteraction" view="_local"/>
         <property name="iteractionRequirement" view="_local"/>
     </view>
+    <view entity="itpearls_LaborAgeementType" name="laborAgeementType-picker-view" extends="_minimal">
+        <property name="nameAgreement"/>
+    </view>
+    <view entity="itpearls_LaborAgreement" name="laborAgreement-openPosition-tab-view" extends="_minimal">
+        <property name="perhaps"/>
+        <property name="company" view="company-picker-view"/>
+        <property name="laborAgreementType" view="laborAgeementType-picker-view"/>
+    </view>
     <view entity="itpearls_LaborAgreement" name="laborAgreement-view" extends="_local">
         <property name="laborAgreementType" view="_local"/>
         <property name="openPositions" view="_local">
@@ -734,7 +1101,7 @@
                 <property name="projectTree" view="_local"/>
             </property>
         </property>
-        <property name="company" view="company-view"/>
+        <property name="company" view="company-picker-view"/>
         <property name="jobCandidate" view="_local">
             <property name="personPosition" view="_local"/>
             <property name="currentCompany" view="_local"/>
@@ -855,8 +1222,17 @@
         <property name="openPosition" view="_local"/>
         <property name="user" view="_local"/>
     </view>
+    <view entity="itpearls_CompanyGroup" name="companyGroup-browse-view" extends="_minimal">
+        <property name="companyRuGroupName"/>
+    </view>
+    <view entity="itpearls_CompanyGroup" name="companyGroup-edit-view" extends="_minimal">
+        <property name="companyRuGroupName"/>
+    </view>
+    <view entity="itpearls_CompanyGroup" name="companyGroup-picker-view" extends="_minimal">
+        <property name="companyRuGroupName"/>
+    </view>
     <view entity="itpearls_CompanyGroup" name="companyGroup-view" extends="_local">
-        <property name="company" view="_local"/>
+        <property name="company" view="company-picker-view"/>
     </view>
     <view entity="itpearls_SomeFilesAgreement" name="someFilesAgreement-view" extends="_local">
         <property name="laborAgreement" view="_local"/>

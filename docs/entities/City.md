@@ -91,7 +91,7 @@ erDiagram
 ### FK cross-form
 
 - `cityOfResidence` → `city-picker-view`
-- `cityOfCompany` → `city-picker-view`
+- `cityOfCompany` в Company edit → `city-location-view` (каскад регион/страна)
 - `cityRegion` в City → `region-picker-view`
 
 ---
@@ -125,7 +125,7 @@ erDiagram
 |-------|---------------|------|
 | `person-edit.xml` | `positionCityDc` | `city-picker-view` + cacheable |
 | `person-browse.xml` | `cityOfResidence` | `city-picker-view` (через `person-browse-view`) |
-| `company-edit.xml` | `cityOfCompaniesDc`, `cityOfCompany` | `city-picker-view` + cacheable |
+| `company-edit.xml` | `cityOfCompaniesDc`, `cityOfCompany` | `city-location-view` + cacheable (edit-view + loader) |
 | `job-candidate-edit.xml` | `citiesDc` | `city-picker-view` + cacheable |
 | `open-position-edit.xml` | `citiesDc` | `city-picker-view` + cacheable |
 | `skills-filter-job-candidate-browse.xml` | `citiesDc` | `city-picker-view` + cacheable |
@@ -257,4 +257,6 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-06-23 | Полная оптимизация по методологии entity-performance-optimization |
+| 2026-06-22 | Аудит Edit unfetched FK: каскад город→регион использует `city-location-view` в `company-edit-view`; CityEdit без Java-обработчиков вложенных FK — OK |
+| 2026-06-23 | Исправление `city-browse-view`: `cityRegion` → `region-browse-view` с цепочкой `regionCountry` |
+| 2026-06-23 | Оптимизация: city-browse/edit/picker/location views, cacheable loaders, `CityServiceTest`, документация |

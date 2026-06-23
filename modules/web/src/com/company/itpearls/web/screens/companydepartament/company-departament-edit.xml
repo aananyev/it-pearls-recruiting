@@ -5,21 +5,13 @@
         messagesPack="com.company.itpearls.web.screens.companydepartament" icon="GROUP">
     <data>
         <instance id="companyDepartamentDc"
-                  class="com.company.itpearls.entity.CompanyDepartament">
-            <view extends="_local">
-                <property name="projectOfDepartment" view="_local"/>
-                <property name="companyName" view="_local">
-                    <property name="fileCompanyLogo" view="_local"/>
-                    <property name="companyOwnership" view="_local"/>
-                </property>
-                <property name="departamentDirector" view="person-picker-view"/>
-                <property name="departamentHrDirector" view="person-picker-view"/>
-            </view>
+                  class="com.company.itpearls.entity.CompanyDepartament"
+                  view="companyDepartament-edit-view">
             <loader/>
             <collection id="companyDepartamentProjectOfDepartmentsDc" property="projectOfDepartment"/>
         </instance>
-        <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="_local">
-            <loader id="companyNamesLc">
+        <collection id="companyNamesDc" class="com.company.itpearls.entity.Company" view="company-picker-view">
+            <loader id="companyNamesLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_Company e
                 where e.comanyName not like '%(не использовать)'
                 order by e.comanyName]]></query>

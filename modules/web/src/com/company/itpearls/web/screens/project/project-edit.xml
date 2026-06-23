@@ -6,35 +6,21 @@
         messagesPack="com.company.itpearls.web.screens.project" icon="ARCHIVE">
     <data>
         <instance id="projectDc"
-                  class="com.company.itpearls.entity.Project">
-            <view>
-                <property name="openPosition" view="_local">
-                    <property name="positionType" view="_local"/>
-                </property>
-                <property name="projectDepartment" view="_local">
-                    <property name="companyName" view="_local">
-                        <property name="fileCompanyLogo" view="_local"/>
-                    </property>
-                </property>
-                <property name="projectOwner" view="person-owner-view"/>
-                <property name="projectTree" view="_local"/>
-                <property name="generalChat"/>
-                <property name="chatForCV"/>
-                <property name="projectLogo" view="_local"/>
-            </view>
+                  class="com.company.itpearls.entity.Project"
+                  view="project-edit-view">
             <loader/>
-            <collection id="projectOpenPositionsDc" property="openPosition"/>
         </instance>
-        <collection id="projectTreeDc" class="com.company.itpearls.entity.Project">
-            <view>
-                <property name="projectTree" view="_local"/>
-                <property name="projectName"/>
-                <property name="projectDepartment" view="_local">
-                    <property name="companyName" view="_local">
-                        <property name="fileCompanyLogo" view="_local"/>
-                    </property>
-                </property>
-            </view>
+        <collection id="projectOpenPositionsDc"
+                    class="com.company.itpearls.entity.OpenPosition"
+                    view="openPosition-project-tab-view">
+            <loader id="projectOpenPositionsDl">
+                <query><![CDATA[select e from itpearls_OpenPosition e
+                        where e.projectName = :project
+                        order by e.createTs desc]]></query>
+            </loader>
+        </collection>
+        <collection id="projectTreeDc" class="com.company.itpearls.entity.Project"
+                    view="project-tree-picker-view">
             <loader id="projectTreeDl">
                 <query><![CDATA[select e from itpearls_Project e
                         where not (e.projectIsClosed = true) and
@@ -43,13 +29,9 @@
             </loader>
         </collection>
         <collection id="projectDepartmentsDc"
-                    class="com.company.itpearls.entity.CompanyDepartament">
-            <view extends="_local">
-                <property name="companyName" view="_local">
-                    <property name="fileCompanyLogo" view="_local"/>
-                </property>
-            </view>
-            <loader id="projectDepartmentsLc">
+                    class="com.company.itpearls.entity.CompanyDepartament"
+                    view="companyDepartament-picker-view">
+            <loader id="projectDepartmentsLc" cacheable="true">
                 <query><![CDATA[select e from itpearls_CompanyDepartament e
                                         where e.departamentRuName not like '%(не использовать)'
                                         order by e.departamentRuName]]></query>

@@ -243,4 +243,6 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-06-23 | Полная оптимизация по методологии entity-performance-optimization |
+| 2026-06-22 | Аудит Edit unfetched FK: `CountryEdit` без обработчиков вложенных FK; `country-edit-view` покрывает поля формы — OK |
+| 2026-06-23 | Исправление `country-edit.xml`: явный `view="region-country-child-view"` на collection `countryOfRegion` |
+| 2026-06-23 | Оптимизация: country-browse/edit/picker views, cacheable loaders, `CountryServiceTest`, документация |

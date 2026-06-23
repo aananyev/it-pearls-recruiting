@@ -228,9 +228,11 @@ erDiagram
 
 ## 9. История изменений
 
-| Дата | Автор | Изменение |
-|------|-------|-----------|
-| 2026-06-23 | Cursor Agent | Первая оптимизация: specialized views, cacheable loaders, cross-form views, документация |
+| Дата | Изменение |
+|------|-----------|
+| 2026-06-22 | Аудит Edit unfetched FK: `PersonEdit` без каскадных обработчиков; `person-edit-view` покрывает поля формы — OK |
+| 2026-06-23 | Исправление `person-browse-view`: `position-picker-view`, `fileImageFace.name` для ImageRenderer |
+| 2026-06-23 | Оптимизация: person-browse/edit/picker/owner views, cacheable loaders, cross-form в Project/Company/OpenPosition, документация |
 
 ---
 

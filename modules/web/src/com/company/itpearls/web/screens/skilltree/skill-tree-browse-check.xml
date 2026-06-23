@@ -7,7 +7,7 @@
     <data readOnly="true">
         <collection id="skillTreesDc"
                     class="com.company.itpearls.entity.SkillTree">
-            <view extends="skillTree-view"/>
+            <view extends="skillTree-browse-check-view"/>
             <loader id="skillTreesDl">
                 <query>
                     <![CDATA[select e from itpearls_SkillTree e order by e.skillName]]>

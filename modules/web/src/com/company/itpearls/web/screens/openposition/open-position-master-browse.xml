@@ -63,7 +63,7 @@
         </collection>
         <collection id="companyDc"
                     class="com.company.itpearls.entity.Company">
-            <view extends="company-view">
+            <view extends="company-picker-view">
                 <property name="departmentOfCompany" view="_minimal">
                     <property name="projectOfDepartment" view="_minimal">
                         <property name="openPosition" view="_minimal"/>

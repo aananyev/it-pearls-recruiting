@@ -5,15 +5,9 @@
         messagesPack="com.company.itpearls.web.screens.skilltree" icon="CODE_FORK">
     <data readOnly="true">
         <collection id="skillTreesDc"
-                    class="com.company.itpearls.entity.SkillTree">
-            <view>
-                <property name="skillTree" view="_local"/>
-                <property name="skillName"/>
-                <property name="specialisation" view="_minimal"/>
-                <property name="wikiPage"/>
-                <property name="comment"/>
-            </view>
-            <loader id="skillTreesDl">
+                    class="com.company.itpearls.entity.SkillTree"
+                    view="skillTree-browse-view">
+            <loader id="skillTreesDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_SkillTree e]]>
                 </query>
@@ -28,7 +22,7 @@
                 applyTo="skillTreesTable"
                 dataLoader="skillTreesDl">
             <properties include=".*"
-                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,skillTree.CandidateCV,skillTree.comment"/>
+                        excludeProperties="comment,openPosition,candidateCV,candidates,fileImageLogo,styleHighlighting,notParsing,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <groupTable id="skillTreesTable"
                       sortable="true"

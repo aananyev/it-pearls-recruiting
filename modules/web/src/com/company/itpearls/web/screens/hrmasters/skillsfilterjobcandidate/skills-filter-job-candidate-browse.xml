@@ -10,10 +10,7 @@
                     class="com.company.itpearls.entity.JobCandidate">
             <view extends="jobCandidate-view">
                 <property name="skillTree"
-                          view="_local">
-                    <property name="skillTree"
-                              view="_minimal"/>
-                </property>
+                          view="skillTree-picker-view"/>
                 <property name="fileImageFace"
                           view="_local"/>
                 <property name="cityOfResidence"

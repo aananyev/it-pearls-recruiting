@@ -8,64 +8,81 @@
     <data>
         <instance id="openPositionDc"
                   class="com.company.itpearls.entity.OpenPosition">
-            <view extends="openPosition-view">
-                <property name="openPositionComments" view="_local">
-                    <property name="user" view="_local">
-                        <property name="fileImageFace" view="_local"/>
-                    </property>
-                </property>
-                <property name="grade" view="_local"/>
-                <property name="laborAgreement" view="_minimal"/>
-                <property name="projectName" view="_local">
-                    <property name="projectLogo" view="_local"/>
-                    <property name="projectOwner" view="person-owner-view">
-                        <property name="fileImageFace" view="_local"/>
-                        <property name="personPosition" view="_local"/>
-                        <property name="cityOfResidence" view="_local"/>
-                        <property name="companyDepartment" view="_local"/>
-                    </property>
-                    <property name="projectIsClosed"/>
-                    <property name="projectDepartment" view="_local">
-                        <property name="companyName" view="_local">
-                            <property name="cityOfCompany" view="_local"/>
-                        </property>
-                    </property>
-                </property>
-                <property name="positionType" view="_local">
-                    <property name="standartDescription"/>
-                </property>
-                <property name="templateLetter"/>
-                <property name="someFiles"
-                          view="_local">
-                    <property name="fileOwner" view="_local"/>
-                    <property name="fileDescriptor" view="_local"/>
-                    <property name="fileType" view="_local"/>
-                </property>
-            </view>
+            <view extends="openPosition-edit-view"/>
             <loader id="openPositionDl"/>
-            <collection id="openPositionSkillsListsDc"
-                        property="skillsList"/>
-            <collection id="laborAgreementDc"
-                        property="laborAgreement"/>
-            <collection id="commentsOpenPositionDc"
-                        property="openPositionComments"/>
-            <collection id="someFilesesDc"
-                        property="someFiles"/>
         </instance>
+        <collection id="laborAgreementDc"
+                    class="com.company.itpearls.entity.LaborAgreement"
+                    view="laborAgreement-openPosition-tab-view">
+            <loader id="laborAgreementDl">
+                <query><![CDATA[select e from itpearls_LaborAgreement e
+                        join e.openPositions op]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>op = :openPosition</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="commentsOpenPositionDc"
+                    class="com.company.itpearls.entity.OpenPositionComment"
+                    view="openPositionComment-edit-view">
+            <loader id="commentsOpenPositionDl">
+                <query><![CDATA[select e from itpearls_OpenPositionComment e
+                        order by e.dateComment desc]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.openPosition = :openPosition</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="someFilesesDc"
+                    class="com.company.itpearls.entity.SomeFilesOpenPosition"
+                    view="someFilesOpenPosition-edit-view">
+            <loader id="someFilesesDl">
+                <query><![CDATA[select e from itpearls_SomeFilesOpenPosition e]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.openPosition = :openPosition</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="openPositionSkillsListsDc"
+                    class="com.company.itpearls.entity.SkillTree"
+                    view="skillTree-openPosition-tab-view">
+            <loader id="openPositionSkillsListsDl">
+                <query><![CDATA[select e from itpearls_SkillTree e
+                        order by e.skillName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.openPosition = :openPosition</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
         <collection id="procAttachmentsDc"
                     class="com.haulmont.bpm.entity.ProcAttachment"
                     view="procAttachment-browse">
             <loader id="procAttachmentsDl" cacheable="true">
                 <query><![CDATA[select e from bpm$ProcAttachment e
-                                where e.procInstance.entity.entityId  = :entityId
                                 order by e.createTs]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.procInstance.entity.entityId = :entityId</c:where>
+                        </c:jpql>
+                    </condition>
                 </query>
             </loader>
         </collection>
         <collection id="openPositionParentDc"
                     class="com.company.itpearls.entity.OpenPosition">
-            <view extends="openPosition-view">
-            </view>
+            <view extends="openPosition-picker-view"/>
             <loader id="openPositionParentDl" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
@@ -76,8 +93,7 @@
         </collection>
         <collection id="positionTypesDc"
                     class="com.company.itpearls.entity.Position">
-            <view extends="position-view">
-            </view>
+            <view extends="position-picker-view"/>
             <loader id="positionTypesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_Position e
@@ -88,8 +104,7 @@
         </collection>
         <collection id="openPositionNewsDc"
                     class="com.company.itpearls.entity.OpenPositionNews">
-            <view extends="openPositionNews-view">
-            </view>
+            <view extends="openPositionNews-edit-view"/>
             <loader id="openPositionNewsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from itpearls_OpenPositionNews e
@@ -109,7 +124,7 @@
         </collection>
         <collection id="projectNamesDc"
                     class="com.company.itpearls.entity.Project">
-            <view extends="project-view">
+            <view extends="project-picker-view">
                 <property name="projectOwner" view="person-owner-view">
                     <property name="personPosition" view="_local"/>
                     <property name="companyDepartment" view="_local"/>
@@ -149,7 +164,7 @@
         </collection>
         <collection id="companyNamesDc"
                     class="com.company.itpearls.entity.Company">
-            <view extends="company-view"/>
+            <view extends="company-picker-view"/>
             <loader id="companyNamesLc">
                 <query><![CDATA[select e from itpearls_Company e
                         order by e.comanyName]]></query>
@@ -157,7 +172,7 @@
         </collection>
         <collection id="companyDepartamentsDc"
                     class="com.company.itpearls.entity.CompanyDepartament">
-            <view extends="companyDepartament-view">
+            <view extends="companyDepartament-picker-view">
                 <property name="companyName" view="_local">
                     <property name="cityOfCompany" view="_local"/>
                 </property>
@@ -188,14 +203,14 @@
         </collection>
         <collection id="gradeDc"
                     class="com.company.itpearls.entity.Grade"
-                    view="_local">
+                    view="grade-picker-view">
             <loader id="gradeDl" cacheable="true">
                 <query><![CDATA[select e from itpearls_Grade e order by e.gradeName]]></query>
             </loader>
         </collection>
     </data>
     <facets>
-        <timer id="closedVacancyTimer" delay="1000" autostart="true" repeating="true"/>
+        <timer id="closedVacancyTimer" delay="60000" autostart="false" repeating="true"/>
     </facets>
     <dialogMode height="800px"
                 width="1100px"/>

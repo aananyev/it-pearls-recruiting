@@ -6,18 +6,8 @@
         messagesPack="com.company.itpearls.web.screens.project" icon="ARCHIVE">
     <data readOnly="true">
         <collection id="projectsDc"
-                    class="com.company.itpearls.entity.Project">
-            <view extends="project-view">
-                <property name="projectDepartment" view="_local">
-                    <property name="companyName" view="_local"/>
-                </property>
-                <property name="projectOwner" view="person-owner-view">
-                    <property name="personPosition" view="_local"/>
-                    <property name="companyDepartment" view="_local"/>
-                    <property name="cityOfResidence" view="_local"/>
-                    <property name="fileImageFace" view="_local"/>
-                </property>
-            </view>
+                    class="com.company.itpearls.entity.Project"
+                    view="project-browse-view">
             <loader id="projectsDl">
                 <query>
                     <![CDATA[select e from itpearls_Project e
@@ -49,7 +39,7 @@
                 applyTo="projectsTable"
                 dataLoader="projectsDl">
             <properties include=".*"
-                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                        excludeProperties="projectDescription,templateLetter,openPosition,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
         </filter>
         <treeDataGrid id="projectsTable"
                       width="100%"
