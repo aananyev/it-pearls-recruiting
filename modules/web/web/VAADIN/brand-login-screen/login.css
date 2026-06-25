@@ -80,25 +80,37 @@
   padding-left: 10px;
 }
 
-.c-login-powered-by-link {
-  font-size: 11px;
+.ht-powered-by,
+.c-login-powered-by-link .ht-powered-by {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.c-login-powered-by-link a {
-  margin-left: 2px;
+.ht-powered-by-logo {
   display: inline-block;
-  text-decoration: none;
-  font-weight: bold;
-  background: url(IT-Pearls-Logo.jpg) no-repeat left center;
-  background-size: contain;
-  background-clip: border-box;
-  padding-left: 26px;
-  padding-top: 3px;
-  padding-bottom: 3px;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  vertical-align: middle;
 }
 
-.helium.large .v-label.c-login-powered-by-link a {
-  padding-left: 32px;
+.ht-powered-by a,
+.c-login-powered-by-link a {
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.ht-powered-by a:hover,
+.c-login-powered-by-link a:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
 }
 
 @media (max-width: 992px) {

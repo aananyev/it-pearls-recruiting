@@ -12,6 +12,8 @@
 docs/
 ├── README.md                 ← этот файл (индекс)
 ├── LOCAL_DATABASE.md         ← локальная PostgreSQL, миграции, запуск
+├── ui/
+│   └── login-screen.md       ← экран входа HRM HuntTech
 ├── templates/
 │   └── entity-template.md    ← шаблон описания сущности CUBA
 └── entities/
@@ -41,6 +43,7 @@ docs/
 | Задача | Документ |
 |--------|----------|
 | Поднять локальную БД и приложение | [LOCAL_DATABASE.md](LOCAL_DATABASE.md) |
+| Экран входа (login) | [ui/login-screen.md](ui/login-screen.md) |
 | Описать новую сущность | [templates/entity-template.md](templates/entity-template.md) |
 | Оптимизировать существующую сущность | [.cursor/rules/entity-performance-optimization.mdc](../.cursor/rules/entity-performance-optimization.mdc) |
 | Зафиксировать изменение в документации | [.cursor/rules/documentation-with-dates.mdc](../.cursor/rules/documentation-with-dates.mdc) |

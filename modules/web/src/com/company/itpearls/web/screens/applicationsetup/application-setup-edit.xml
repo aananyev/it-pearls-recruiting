@@ -90,7 +90,7 @@
                                    height="100%"
                                    stylename="widget-border"
                                    scaleMode="FILL">
-                                <theme path="icons/no-company.png"/>
+                                <theme path="branding/HuntTech.png"/>
                             </image>
                         </vbox>
                         <upload id="applicationIconField"
