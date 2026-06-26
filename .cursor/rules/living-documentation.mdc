@@ -1,0 +1,138 @@
+---
+description: >-
+  Living Documentation: триггер «Сделай документацию сущности …», синхронизация кода
+  (Entity, экраны, сервисы, фрагменты) со спецификацией в docs/. DoD, Diff-log.
+alwaysApply: true
+---
+
+# Living Documentation (Синхронизация кода и спецификации)
+
+Проект: **CUBA 7.3**, HRM HuntTech. Документация — **на русском**.
+
+Корневой указатель: [`.cursorrules`](../../.cursorrules). Формат дат в истории: [documentation-with-dates.mdc](documentation-with-dates.mdc). Оптимизация: [entity-performance-optimization.mdc](entity-performance-optimization.mdc).
+
+---
+
+## ENTITY DOC TRIGGER (СТРОГИЙ, ПРИОРИТЕТ)
+
+**Фраза:** «Сделай документацию сущности \<Название\>» (например: JobCandidate, OpenPosition).
+
+При совпадении — **единственная задача сессии**; остальное STOP.
+
+### Алгоритм
+
+1. Найти `{EntityName}` в коде (entity, views, services, screens, controllers, fragments, messages, db).
+2. Создать/перезаписать `docs/architecture/{EntityName}_Spec.md`.
+3. Заполнить **6 разделов** только фактами из кода (без заглушек):
+
+| # | Раздел | Источники |
+|---|--------|-----------|
+| 1 | Архитектура Сущности (Data Model Layer) | `entity/`, DDL, Liquibase |
+| 2 | Слой Выборок Данных (Fetch Plans / Views Layer) | `views.xml` |
+| 3 | Списочные интерфейсы (Browse Screens) | `*-browse.xml`, `*Browse.java` |
+| 4 | Формы редактирования (Edit Screens) | `*-edit.xml`, `*Edit.java` |
+| 5 | Компоненты и Фрагменты (UI Fragments & Dialogs) | `*Fragment.java`, `*-fragment.xml`, lookup/view |
+| 6 | Инструкция по развертыванию с нуля (Deployment Guide) | `app.properties`, `fts.xml`, [LOCAL_DATABASE.md](../../docs/LOCAL_DATABASE.md) |
+
+4. Cross-link: если есть `docs/entities/{EntityName}.md` — взаимная ссылка в шапке.
+5. Индекс: `docs/README.md` при новом файле.
+6. История изменений: YYYY-MM-DD сверху.
+
+### DoD (триггер)
+
+- One-pass, все 6 разделов заполнены.
+- Финал ответа:
+
+```
+Документация для сущности <Название> успешно создана/актуализирована в файле <Путь>
+```
+
+---
+
+## Два пути документации
+
+| Сценарий | Путь | Когда |
+|----------|------|-------|
+| Триггерная фраза | `docs/architecture/{EntityName}_Spec.md` | Явный запрос полной спецификации |
+| Living sync (правка кода) | `docs/entities/{EntityName}.md` | create/fix/refactor/optimize entity, screens, services, fragments |
+| UI без entity | `docs/ui/{kebab-name}.md` | Экраны без одной сущности |
+| Шаблон | `docs/templates/entity-template.md` | Ручное создание living-doc |
+
+**Согласование:** Architecture Spec не заменяет `docs/entities/` и наоборот. Триггер пишет только в `architecture/`; living sync — только в `entities/`. Оба файла — cross-links при совместном существовании.
+
+---
+
+## GLOBAL SYNC TRIGGER (изменение кода)
+
+При **create / fix / refactor / optimize**:
+
+| Область кода | Путь в репозитории |
+|--------------|-------------------|
+| Entity, enums, metadata | `modules/global/src/com/company/itpearls/entity/` |
+| Views | `modules/global/src/com/company/itpearls/views.xml` |
+| Browse / Edit / View / Lookup | `modules/web/src/com/company/itpearls/web/screens/**` |
+| Фрагменты | `*Fragment.java`, `*-fragment.xml` в `modules/web/` |
+| Сервисы | `modules/core/src/com/company/itpearls/**/*ServiceBean.java` |
+| Миграции / DDL | `modules/core/db/**` |
+
+→ обновить `docs/entities/{EntityName}.md` в той же сессии.
+
+Если `docs/entities/{Entity}.md` отсутствует — создать из шаблона.
+
+**Не откладывать документацию на «потом».** Код без синхронизированной спецификации = незавершённая задача.
+
+---
+
+## Структура living-doc (`docs/entities/`, 5 блоков)
+
+1. **Архитектура Сущности** (Data Model Layer)
+2. **Интерфейсный Слой** (UI & Layout)
+3. **Бизнес-логика** (Controller Layer)
+4. **Взаимодействие компонентов**
+5. **Инструкция по развертыванию** (Deployment Guide)
+
+Дополнительно при оптимизации: §7 Производительность + [entity-performance-optimization.mdc](entity-performance-optimization.mdc).
+
+---
+
+## Definition of Done (изменение кода)
+
+1. Код изменён → `docs/entities/{EntityName}.md` обновлён в той же сессии.
+2. Затронутые блоки 1–5 переписаны или дополнены (не только «История изменений»).
+3. Новый `.md` → строка в `docs/README.md`.
+4. «История изменений» — YYYY-MM-DD сверху ([documentation-with-dates.mdc](documentation-with-dates.mdc)).
+5. Финал — **Diff-log**:
+
+```
+Синхронизация документации [EntityName]: <что изменено в коде> → <какие разделы документа обновлены>
+```
+
+6. **Не коммитить**, пока пользователь явно не попросит.
+
+---
+
+## Брендинг в документации
+
+Во всех файлах `docs/**/*.md` и `docs/templates/**` — **HRM HuntTech**, не «IT Pearls».
+
+- Не использовать брендинг IT Pearls в prose, кроме цитирования legacy-идентификаторов из кода (`itpearls`, `ITPEARLS_*`, `IT-Pearls-Logo.jpg`, ключи messages и т.д.).
+- Варианты для замены: «IT Pearls», «IT-Pearls», «IT Pearls Recruiting», «компанией IT Pearls».
+
+---
+
+## Быстрый чеклист агента
+
+**Триггер «Сделай документацию сущности …»:**
+- [ ] STOP других задач
+- [ ] Scan: entity, views, services, screens, controllers, fragments, messages, db
+- [ ] `docs/architecture/{Entity}_Spec.md` — 6 разделов, без заглушек
+- [ ] Cross-link с `docs/entities/{Entity}.md` если есть
+- [ ] `docs/README.md` при новом файле
+- [ ] Финал: «Документация для сущности … успешно создана/актуализирована в файле …»
+
+**Living sync (правка кода):**
+- [ ] `docs/entities/{Entity}.md` или `docs/ui/...`
+- [ ] Блоки 1–5 по затронутым областям
+- [ ] `docs/README.md` при новом документе
+- [ ] История изменений YYYY-MM-DD
+- [ ] Diff-log в финальном сообщении

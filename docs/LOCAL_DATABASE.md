@@ -1,4 +1,4 @@
-# Локальная PostgreSQL для IT-Pearls Recruiting
+# Локальная PostgreSQL для HRM HuntTech
 
 Проект — приложение на **CUBA Platform 7.3** с **PostgreSQL** и JNDI-источником данных `jdbc/CubaDS`.
 

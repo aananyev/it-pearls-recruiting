@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        class="com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit"
         caption="msg://editorCaption"
         messagesPack="com.company.itpearls.web.screens.jobcandidate"
         icon="USER">
@@ -8,7 +9,7 @@
         <instance id="jobCandidateDc"
                   class="com.company.itpearls.entity.JobCandidate">
             <view extends="_local">
-                <property name="candidateCv" view="_local">
+                <property name="candidateCv" fetch="BATCH" view="_local">
                     <property name="candidate" view="_local">
                         <property name="personPosition" view="_local"/>
                     </property>
@@ -33,13 +34,13 @@
                     </property>
                     <property name="fileImageFace" view="_local"/>
                 </property>
-                <property name="iteractionList" view="_local">
+                <property name="iteractionList" fetch="BATCH" view="_local">
                     <property name="candidate" view="_minimal"/>
                     <property name="vacancy" view="openPosition-iteraction-list-picker-view"/>
                     <property name="iteractionType" view="iteraction-list-type-view"/>
                     <property name="recrutier" view="extUser-picker-view"/>
                 </property>
-                <property name="socialNetwork" view="_local">
+                <property name="socialNetwork" fetch="BATCH" view="_local">
                     <property name="socialNetworkURL" view="_local">
                         <property name="logo" view="_local"/>
                     </property>
@@ -50,7 +51,7 @@
                     <property name="companyGroup" view="_local"/>
                 </property>
                 <property name="fileImageFace" view="_local"/>
-                <property name="positionList" view="_local">
+                <property name="positionList" fetch="BATCH" view="_local">
                     <property name="positionList" view="_local"/>
                 </property>
                 <property name="personPosition" view="_local"/>
@@ -93,13 +94,7 @@
         </keyValueCollection>
         <collection id="openPositionDc"
                     class="com.company.itpearls.entity.OpenPosition">
-            <view extends="_local">
-                <property name="positionType" view="_local"/>
-                <property name="projectName" view="_local">
-                    <property name="projectLogo" view="_local"/>
-                </property>
-                <property name="grade" view="_local"/>
-            </view>
+            <view extends="openPosition-picker-view"/>
             <loader id="openPositionDl"
                     cacheable="true">
                 <query>

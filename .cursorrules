@@ -1,0 +1,130 @@
+# HRM HuntTech — Living Documentation
+
+> CUBA 7.3 · HuntTech · Документация — на русском.
+> Детали: `.cursor/rules/living-documentation.mdc` · даты в истории: `.cursor/rules/documentation-with-dates.mdc`
+
+---
+
+## ENTITY DOC TRIGGER (СТРОГИЙ)
+
+**Триггерная фраза (точное совпадение по смыслу):**
+
+> «Сделай документацию сущности \<Название\>»
+
+Примеры: `Сделай документацию сущности JobCandidate`, `Сделай документацию сущности OpenPosition`.
+
+### Поведение агента
+
+1. **STOP** — немедленно прекратить другие задачи; выполнять только генерацию/актуализацию документации сущности.
+2. **SCAN** — пройти кодовую базу по сущности:
+   - Entity: `modules/global/src/com/company/itpearls/entity/**/{EntityName}.java`, enums, metadata
+   - Views: `modules/global/src/com/company/itpearls/views.xml` (fetch plans для сущности)
+   - Сервисы: `modules/core/src/com/company/itpearls/**/*ServiceBean.java`, репозитории
+   - Экраны: `modules/web/src/com/company/itpearls/web/screens/**` — `*-browse.xml`, `*-edit.xml`, `*-view.xml`, `*-lookup.xml`
+   - Контроллеры: `*Browse.java`, `*Edit.java`, `*View.java`
+   - Фрагменты: `*Fragment.java`, `*-fragment.xml`
+   - Сообщения: `modules/global/src/com/company/itpearls/messages*.properties`
+   - Миграции: `modules/core/db/**`
+3. **WRITE** — создать или полностью актуализировать файл:
+   - **Путь:** `docs/architecture/{EntityName}_Spec.md`
+4. **CROSS-LINK** — если существует `docs/entities/{EntityName}.md`, добавить взаимные ссылки в шапке обоих файлов.
+5. **INDEX** — добавить/обновить строку в `docs/README.md` (раздел architecture).
+
+### Обязательные 6 разделов (русский, только из реального кода)
+
+Без заглушек, без «TBD», без «будет дополнено». One-pass generation.
+
+1. **Архитектура Сущности** (Data Model Layer) — класс, таблица, поля, FK, DDL/миграции
+2. **Слой Выборок Данных** (Fetch Plans / Views Layer) — views в `views.xml`, fetch plans, exclude/include
+3. **Списочные интерфейсы** (Browse Screens) — browse XML, контроллер, JPQL, фильтры, колонки
+4. **Формы редактирования** (Edit Screens) — edit XML, контроллер, вкладки, валидация, lazy load
+5. **Компоненты и Фрагменты** (UI Fragments & Dialogs) — фрагменты, диалоги, cross-form FK
+6. **Инструкция по развертыванию с нуля** (Deployment Guide) — app.properties, cache, FTS, сборка
+
+Раздел **«История изменений»** — дата YYYY-MM-DD сверху (см. `documentation-with-dates.mdc`).
+
+### Definition of Done (триггер)
+
+- Все 6 разделов заполнены фактами из кода.
+- Файл записан в `docs/architecture/{EntityName}_Spec.md`.
+- `docs/README.md` обновлён при первом создании файла.
+- Завершить ответ **строго** фразой:
+
+```
+Документация для сущности <Название> успешно создана/актуализирована в файле <Путь>
+```
+
+---
+
+## Два пути документации (согласование)
+
+| Сценарий | Путь | Назначение |
+|----------|------|------------|
+| Триггер «Сделай документацию сущности …» | `docs/architecture/{EntityName}_Spec.md` | Полная архитектурная спецификация (6 разделов), one-pass из кода |
+| Living sync при изменении кода | `docs/entities/{EntityName}.md` | Инкрементальная синхронизация в той же сессии с правкой кода |
+| UI без одной entity | `docs/ui/{screen-name}.md` | Экраны и потоки без привязки к одной сущности |
+| Шаблон | `docs/templates/entity-template.md` | Ручное создание living-doc |
+| Индекс | `docs/README.md` | Ссылки на оба каталога |
+| Локальная среда | `docs/LOCAL_DATABASE.md` | БД и деплой |
+
+Имя `{EntityName}` = Java-класс: `JobCandidate`, `OpenPosition`.
+
+**Правило согласования:** не объединять файлы в один путь. Architecture Spec — канон для полной регенерации по триггеру; entities/ — living-doc при правках кода. При наличии обоих — cross-links в шапке; при триггере не удалять и не перезаписывать `docs/entities/{EntityName}.md`.
+
+---
+
+## GLOBAL SYNC TRIGGER (изменение кода)
+
+Любое **создание / исправление / рефакторинг / оптимизация** затрагивающее:
+
+- Entity (`modules/global/.../entity/`, metadata, `views.xml`)
+- Экраны Browse / Edit / View (`modules/web/.../screens/`)
+- Сервисы (`modules/core/.../*ServiceBean.java`)
+- Фрагменты UI (`*Fragment.java`, `*-fragment.xml`)
+
+→ **обязательно** синхронизировать `docs/entities/{EntityName}.md` **в той же сессии** (если документ существует или создаётся по шаблону).
+
+---
+
+## Структура living-doc (`docs/entities/`)
+
+При создании или обновлении `docs/entities/{EntityName}.md` покрыть:
+
+1. **Архитектура Сущности** (Data Model Layer) — класс, таблица, поля, FK, DDL/миграции
+2. **Интерфейсный Слой** (UI & Layout) — views.xml, экраны, фрагменты, layout
+3. **Бизнес-логика** (Controller Layer) — контроллеры экранов, ServiceBean, валидация
+4. **Взаимодействие компонентов** — cross-form FK, потребители, цепочки вызовов
+5. **Инструкция по развертыванию** (Deployment Guide) — app.properties, cache, FTS, сборка
+
+Маппинг на шаблон: §1–3,6 → (1); §4–5 → (2); §2.4 + Java → (3); §5.3, §7.4 → (4); §8 → (5).
+
+---
+
+## Definition of Done (изменение кода)
+
+- Задача **не завершена**, если код изменён, а `docs/entities/{EntityName}.md` — нет.
+- Изменения кода и документации — **в одной сессии**.
+- Завершить ответ блоком **Diff-log**:
+
+```
+Синхронизация документации [Имя_Сущности]: <кратко что обновлено в коде и в каких разделах документа>
+```
+
+- Новая сущность (living): `cp docs/templates/entity-template.md docs/entities/{Entity}.md` + строка в `docs/README.md`.
+- «История изменений»: дата YYYY-MM-DD, новая строка сверху — см. `documentation-with-dates.mdc`.
+
+---
+
+## Прочие правила проекта
+
+- Оптимизация сущности: `.cursor/rules/entity-performance-optimization.mdc`
+- **Не коммитить**, пока пользователь явно не попросит.
+
+---
+
+## Брендинг в документации
+
+Во **всей** документации (`docs/**/*.md`, `docs/templates/**`, architecture spec) использовать **HRM HuntTech** вместо «IT Pearls» / «IT-Pearls» / «IT Pearls Recruiting».
+
+- При создании и обновлении docs **не использовать** брендинг IT Pearls, кроме цитирования legacy-идентификаторов из кода (имена пакетов `itpearls`, таблицы `ITPEARLS_*`, файлы `IT-Pearls-Logo.jpg`, CSS-классы, ключи `messages.properties` и т.п.).
+- Название продукта в prose: **HRM HuntTech** (рекрутинговая система HuntTech).

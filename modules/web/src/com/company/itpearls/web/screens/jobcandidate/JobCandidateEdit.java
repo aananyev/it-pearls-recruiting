@@ -208,6 +208,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private TabSheet tabSheetSocialNetworks;
     private boolean cvTabInitialized = false;
     private boolean interationTabInitialized = false;
+    private boolean commentsTabInitialized = false;
+    private boolean referenceLoadersInitialized = false;
+    private boolean openPositionLoaderInitialized = false;
     private Button copyIteractionButton;
     private boolean candidateInitialized = false;
     private boolean tabContactInfoInitialized = false;
@@ -218,6 +221,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private boolean initSocialNetworkURLs = false;
     @Inject
     private CollectionLoader<OpenPosition> suggestOpenPositionDl;
+    @Inject
+    private CollectionLoader<OpenPosition> openPositionDl;
+    @Inject
+    private CollectionLoader<Company> currentCompaniesLc;
+    @Inject
+    private CollectionLoader<City> citiesDl;
+    @Inject
+    private CollectionLoader<Position> personPositionsLc;
     @Inject
     private Table<OpenPosition> suggestVacancyTable;
     @Inject
@@ -1202,12 +1213,56 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        preventAutoLoadUntilReady(openPositionDl, () -> openPositionLoaderInitialized);
+        preventAutoLoadUntilReady(currentCompaniesLc, () -> referenceLoadersInitialized);
+        preventAutoLoadUntilReady(citiesDl, () -> referenceLoadersInitialized);
+        preventAutoLoadUntilReady(personPositionsLc, () -> referenceLoadersInitialized);
+
         tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
             initTabResume();
             initTabInteractions();
             initTabCandidate();
             initTabContactInfo();
+            initTabComments();
         });
+    }
+
+    private <E extends Entity> void preventAutoLoadUntilReady(CollectionLoader<E> loader,
+                                                               java.util.function.BooleanSupplier ready) {
+        loader.addPreLoadListener(e -> {
+            if (!ready.getAsBoolean()) {
+                e.preventLoad();
+            }
+        });
+    }
+
+    private void ensureReferenceLoadersLoaded() {
+        if (referenceLoadersInitialized) {
+            return;
+        }
+        referenceLoadersInitialized = true;
+        currentCompaniesLc.load();
+        citiesDl.load();
+        personPositionsLc.load();
+    }
+
+    private void ensureOpenPositionLoaded() {
+        if (openPositionLoaderInitialized) {
+            return;
+        }
+        openPositionLoaderInitialized = true;
+        openPositionDl.load();
+    }
+
+    private void initTabComments() {
+        if (commentsTabInitialized) {
+            return;
+        }
+        TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
+        if (selectedTab != null && "commentsTab".equals(selectedTab.getName())) {
+            ensureOpenPositionLoaded();
+            commentsTabInitialized = true;
+        }
     }
 
     private void initTabContactInfo() {
@@ -1311,6 +1366,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private void initTabCandidate() {
         if (!candidateInitialized) {
+            TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
+            if (selectedTab == null || !"tabCandidate".equals(selectedTab.getName())) {
+                return;
+            }
+            ensureReferenceLoadersLoaded();
+
             if (currentCompanyField == null) {
                 currentCompanyField = (LookupPickerField<Company>) getWindow()
                         .getComponent("currentCompanyField");
@@ -3679,28 +3740,42 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         retBox.setWidthFull();
         retBox.setHeightFull();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("<h4>")
-                .append(event.getItem().getSocialNetworkURL().getSocialNetwork())
-                .append("</h4><br><br>")
-                .append((event.getItem().getSocialNetworkURL().getComment() != null
-                        ? event.getItem().getSocialNetworkURL().getComment() : ""));
+        SocialNetworkURLs item = event.getItem();
+        if (item == null) {
+            return retBox;
+        }
+
+        SocialNetworkType socialNetworkType = item.getSocialNetworkURL();
+        if (socialNetworkType == null) {
+            return retBox;
+        }
 
         Image image = uiComponents.create(Image.class);
-        image.setDescriptionAsHtml(true);
         image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
         image.setWidth("30px");
         image.setHeight("30px");
         image.setStyleName("icon-no-border-30px");
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-        image.setDescription(sb.toString());
 
-        if (event.getItem().getSocialNetworkURL().getLogo() != null) {
-            image.setSource(FileDescriptorResource.class)
-                    .setFileDescriptor(event.getItem().getSocialNetworkURL()
-                            .getLogo());
+        if (socialNetworkType.getLogo() != null) {
+            image.setSource(FileDescriptorResource.class).setFileDescriptor(socialNetworkType.getLogo());
         } else {
             image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        }
+
+        String networkName = socialNetworkType.getSocialNetwork();
+        String comment = socialNetworkType.getComment();
+        if (networkName != null || comment != null) {
+            StringBuilder sb = new StringBuilder("<h4>");
+            if (networkName != null) {
+                sb.append(networkName);
+            }
+            sb.append("</h4><br><br>");
+            if (comment != null) {
+                sb.append(comment);
+            }
+            image.setDescriptionAsHtml(true);
+            image.setDescription(sb.toString());
         }
 
         retBox.add(image);

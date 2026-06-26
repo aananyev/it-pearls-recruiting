@@ -1,9 +1,9 @@
 # {Название сущности} (`{EntityName}`)
 
-> Шаблон документации сущности CUBA 7.3 для проекта **IT Pearls Recruiting** (HuntTech).
+> Шаблон документации сущности CUBA 7.3 для проекта **HRM HuntTech**.
 > Скопируйте файл в `docs/entities/{EntityName}.md` и заполните разделы.
 > Триггер оптимизации: «давай оптимизировать работу сущности {EntityName}» — см. [`.cursor/rules/entity-performance-optimization.mdc`](../../.cursor/rules/entity-performance-optimization.mdc).
-> **При любом изменении кода сущности** — обновляйте документ и добавляйте запись в §9 «История изменений» (см. [`.cursor/rules/documentation-with-dates.mdc`](../../.cursor/rules/documentation-with-dates.mdc)).
+> **При любом изменении кода сущности** — синхронизируйте документ в той же сессии ([living-documentation.mdc](../../.cursor/rules/living-documentation.mdc), [`.cursorrules`](../../.cursorrules)) и добавляйте запись в §9 «История изменений» ([documentation-with-dates.mdc](../../.cursor/rules/documentation-with-dates.mdc)).
 
 ---
 

@@ -1,6 +1,6 @@
-# Документация IT Pearls Recruiting
+# Документация HRM HuntTech
 
-Проект рекрутинговой системы на **CUBA Platform 7.3** (HuntTech / IT Pearls).
+Проект рекрутинговой системы **HRM HuntTech** на **CUBA Platform 7.3**.
 
 Документация предназначена для разработчиков: описание сущностей, экранов, схемы БД и практик оптимизации производительности.
 
@@ -12,6 +12,8 @@
 docs/
 ├── README.md                 ← этот файл (индекс)
 ├── LOCAL_DATABASE.md         ← локальная PostgreSQL, миграции, запуск
+├── architecture/             ← полные спецификации по триггеру (см. ниже)
+│   └── README.md
 ├── ui/
 │   └── login-screen.md       ← экран входа HRM HuntTech
 ├── templates/
@@ -33,6 +35,7 @@ docs/
     ├── OpenPositionNews.md     ← новости вакансии
     ├── Grade.md                ← грейды
     ├── Position.md             ← должности
+    ├── JobCandidate.md         ← кандидаты (подсистема: entity + browse + edit)
     └── RecrutiesTasks.md       ← подписки рекрутёров
 ```
 
@@ -46,7 +49,9 @@ docs/
 | Экран входа (login) | [ui/login-screen.md](ui/login-screen.md) |
 | Описать новую сущность | [templates/entity-template.md](templates/entity-template.md) |
 | Оптимизировать существующую сущность | [.cursor/rules/entity-performance-optimization.mdc](../.cursor/rules/entity-performance-optimization.mdc) |
-| Зафиксировать изменение в документации | [.cursor/rules/documentation-with-dates.mdc](../.cursor/rules/documentation-with-dates.mdc) |
+| Living Documentation (код ↔ docs, DoD) | [.cursor/rules/living-documentation.mdc](../.cursor/rules/living-documentation.mdc) · [`.cursorrules`](../.cursorrules) |
+| Полная спецификация сущности (триггер) | «Сделай документацию сущности {Имя}» → [architecture/{Имя}_Spec.md](architecture/README.md) |
+| Зафиксировать дату в «История изменений» | [.cursor/rules/documentation-with-dates.mdc](../.cursor/rules/documentation-with-dates.mdc) |
 | Понять устройство типов взаимодействий | [entities/Iteraction.md](entities/Iteraction.md) |
 | Понять записи взаимодействий с кандидатами | [entities/IteractionList.md](entities/IteractionList.md) |
 | Понять справочник персон (сотрудники) | [entities/Person.md](entities/Person.md) |
@@ -58,6 +63,23 @@ docs/
 | Понять департаменты компаний | [entities/CompanyDepartament.md](entities/CompanyDepartament.md) |
 | Понять группы компаний | [entities/CompanyGroup.md](entities/CompanyGroup.md) |
 | Понять дерево компетенций | [entities/SkillTree.md](entities/SkillTree.md) |
+| Понять подсистему кандидатов | [entities/JobCandidate.md](entities/JobCandidate.md) |
+| Понять подсистему вакансий | [entities/OpenPosition.md](entities/OpenPosition.md) · [architecture/OpenPosition_Spec.md](architecture/OpenPosition_Spec.md) |
+
+---
+
+## Архитектурные спецификации (`docs/architecture/`)
+
+**Триггерная фраза:** «Сделай документацию сущности {Имя}» (например: JobCandidate, OpenPosition)
+
+| Сценарий | Путь | Разделы |
+|----------|------|---------|
+| Триггер (полная регенерация из кода) | `architecture/{EntityName}_Spec.md` | 6: Data Model, Views, Browse, Edit, Fragments, Deployment |
+| Living sync (правка кода в сессии) | `entities/{EntityName}.md` | 5 блоков living-doc |
+
+Оба каталога **не объединяются**: architecture — канон для one-pass спецификации по запросу; entities — инкрементальная синхронизация при изменении кода. При наличии обоих файлов — cross-links в шапке.
+
+Подробности: [architecture/README.md](architecture/README.md)
 
 ---
 
@@ -100,8 +122,8 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 | **CompanyDepartament** | `ITPEARLS_COMPANY_DEPARTAMENT` | справочник | [entities/CompanyDepartament.md](entities/CompanyDepartament.md) | ✅ заполнен |
 | **CompanyGroup** | `ITPEARLS_COMPANY_GROUP` | справочник | [entities/CompanyGroup.md](entities/CompanyGroup.md) | ✅ заполнен |
 | **SkillTree** | `ITPEARLS_SKILL_TREE` | справочник (дерево) | [entities/SkillTree.md](entities/SkillTree.md) | ✅ заполнен |
-| JobCandidate | `ITPEARLS_JOB_CANDIDATE` | транзакционная | — | планируется |
-| OpenPosition | `ITPEARLS_OPEN_POSITION` | транзакционная | — | планируется |
+| **JobCandidate** | `ITPEARLS_JOB_CANDIDATE` | транзакционная | [entities/JobCandidate.md](entities/JobCandidate.md) | ✅ заполнен |
+| **OpenPosition** | `ITPEARLS_OPEN_POSITION` | транзакционная | [entities/OpenPosition.md](entities/OpenPosition.md) · [Spec](architecture/OpenPosition_Spec.md) | ✅ заполнен |
 
 ---
 
@@ -164,14 +186,30 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 
 ## Соглашения
 
+- **Брендинг:** во всей документации (`docs/**/*.md`, шаблоны) — **HRM HuntTech**; не использовать «IT Pearls» / «IT-Pearls» в prose. Исключение — цитирование legacy-идентификаторов из кода (`itpearls`, `ITPEARLS_*`, имена файлов ресурсов, ключи `messages.properties`). Правило для агента: [living-documentation.mdc](../.cursor/rules/living-documentation.mdc), § «Брендинг в документации».
 - Документация сущностей — **на русском языке**
 - Имена файлов сущностей — как Java-класс: `Iteraction.md`, `IteractionList.md`
 - При изменении views/экранов сущности — обновлять соответствующий `docs/entities/*.md`
 - Не дублировать полные DDL в документах — ссылаться на `modules/core/db/`
 
-### Политика документирования изменений
+### Политика Living Documentation
 
-При изменении структуры сущности, экранов, форм, сервисов, `views.xml`, бизнес-логики или миграций БД — **обновлять** соответствующий `docs/entities/{Entity}.md` и добавлять запись в раздел **«История изменений»**:
+**Триггер (приоритет):** «Сделай документацию сущности {Имя}» → STOP остального → scan кода → `docs/architecture/{EntityName}_Spec.md` (6 разделов, one-pass) → финал: `Документация для сущности {Имя} успешно создана/актуализирована в файле {Путь}`
+
+**Изменение кода** (Entity, экраны, сервисы, фрагменты, views, миграции) — синхронизировать в той же сессии:
+
+- Living-doc сущности → `docs/entities/{EntityName}.md`
+- UI без одной entity → `docs/ui/{name}.md`
+- Новый документ → обновить этот `README.md`
+- Правила агента: [living-documentation.mdc](../.cursor/rules/living-documentation.mdc), [`.cursorrules`](../.cursorrules)
+
+Блоки living-doc (`entities/`): (1) Архитектура Сущности, (2) Интерфейсный Слой, (3) Бизнес-логика, (4) Взаимодействие компонентов, (5) Инструкция по развертыванию.
+
+Завершение задачи с правкой кода — Diff-log: `Синхронизация документации [EntityName]: ...`
+
+### История изменений (формат дат)
+
+Добавлять запись в раздел **«История изменений»** соответствующего документа:
 
 | Дата | Изменение |
 |------|-----------|

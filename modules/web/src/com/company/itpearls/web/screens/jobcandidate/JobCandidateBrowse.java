@@ -1530,6 +1530,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         BaseAction editAction = new BaseAction("edit")
                 .withHandler(actionPerformedEvent -> {
                     screenBuilders.editor(JobCandidate.class, this)
+                            .withScreenId("itpearls_JobCandidate.edit")
                             .editEntity(entity)
                             .build()
                             .show();

@@ -116,7 +116,11 @@
                   dataContainer="jobCandidatesDc">
             <actions>
                 <action id="create" type="create"/>
-                <action id="edit" type="edit"/>
+                <action id="edit" type="edit">
+                    <properties>
+                        <property name="screenId" value="itpearls_JobCandidate.edit"/>
+                    </properties>
+                </action>
                 <action id="remove" type="remove"/>
                 <action id="excel" type="excel"/>
             </actions>
