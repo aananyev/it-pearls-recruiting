@@ -25,7 +25,7 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Оптимизированный browse без LOB в SELECT: batch exists-флаги и lazy load текста в tooltip; aggregate-кэши для колонок статистики; batch commit при закрытии. Edit: standalone `CollectionLoader` для skills, comments, files, labor agreement; sync коллекций в entity только перед commit; guards от StackOverflow при смене `positionType` и unfetched при `@LoadDataBeforeShow`. Сервисы core: уведомления, расчёты комиссий (см. §1.5).
+**Browse:** фильтры подписки и приоритета; пакетные кэши для колонок без N+1; закрытие вакансии → массовое завершение кандидатов «на рассмотрении» одним commit. **Edit:** ленивые вкладки LOB/коллекций; sync навыков и labor agreement перед сохранением; проверка дубликатов и vacansyID; Telegram при открытии/изменении (ошибка API не отменяет save).
 
 ---
 
@@ -181,6 +181,15 @@ select e from itpearls_OpenPosition e order by e.vacansyName
 
 **Java-логика (ключевое):** иерархия `parentOpenPosition`; блок «срочные вакансии» (`urgentlyPositons`); batch-кэши LOB exists и агрегатов в PostLoad; `rowStyleProvider` / `descriptionProvider`; закрытие вакансии с batch `CommitContext` для `IteractionList`; интеграция с `RecrutiesTasks`, `JobCandidateSimpleBrowse`, `OpenPositionCommentsView`, `QuickViewOpenPositionDescription`, `Suggestjobcandidate`.
 
+**Поведение для пользователя (простым языком):**
+
+| Действие | Цепочка |
+|----------|---------|
+| Открытие списка | Фильтры «открытые» + «моя подписка»; блок срочных вакансий |
+| Раскрытие строки | Фрагмент + кнопки edit, open/close, комментарии, подбор |
+| Закрыть вакансию | Кандидаты на рассмотрении → диалог → batch end-case → commit |
+| Смена приоритета на Low | Диалог недели закрытия → `closingDate` |
+
 ### 3.2 Производные Browse-экраны
 
 | Экран | ID | Базовый класс | Descriptor |
@@ -217,6 +226,16 @@ select e from itpearls_OpenPosition e order by e.vacansyName
 **Вкладки (`tabSheetOpenPosition`):** `tabOpenPosition` (основная), `laborAgreementTab`, `tabPayments`, описания RU/EN/стандарт/whoIsThisGuy, `tabFiles`, `tabExercise`, `tabMemoForInterview`, `tabTemplateLetter`, `tabSkills`, `tabOpenPositionNews`, `tabApproval`, `commentsTab`.
 
 **Валидация и commit (Java):** проверка дубликата `vacansyID` (`count` с `e.id <> :currentId`); `syncSkillsListToEntity` / `syncLaborAgreementToEntity` перед commit; `ensure*LoadedOnEntity` для unfetched коллекций; таймер `closedVacancyTimer` (60 с) при `closingDate`; Telegram-уведомление через `TelegramService` (ошибки API не блокируют сохранение).
+
+**Поведение для пользователя (простым языком):**
+
+| Момент | Цепочка |
+|--------|---------|
+| Смена вкладки | Первый заход → загрузка LOB/коллекции этой вкладки |
+| Смена positionType/project | Автогенерация vacansyName, логотип, департамент |
+| priority = Low | Диалог недели → closingDate + таймер обратного отсчёта |
+| Сохранение | Дубликат имени/vacansyID → диалог; shortDescription > 250 → блок; sync skills/labor |
+| После сохранения | OpenPositionNews; Telegram; диалог дочерних command-вакансий |
 
 **Lazy LOB:** загрузка `comment`/`commentEn`, `standartDescription`/`whoIsThisGuy`, `templateLetter`, `exercise`, `memoForInterview` по открытию соответствующих вкладок (`ViewBuilder`).
 
@@ -297,5 +316,6 @@ eclipselink.cache.size.itpearls_OpenPosition=500
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §3–4: поведение browse/edit простым языком (deep modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Создание архитектурной спецификации `OpenPosition_Spec.md` (one-pass из кода) |

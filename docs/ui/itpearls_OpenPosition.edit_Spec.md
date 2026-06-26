@@ -17,7 +17,7 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-`tabSheetOpenPosition` с lazy loaders (`PreLoadEvent.preventLoad`); `syncSkillsListToEntity` / `syncLaborAgreementToEntity` перед commit; `closedVacancyTimer`; Telegram notify; уникальность `vacansyID`.
+Много вкладок: основные реквизиты, оплаты, описания, навыки, файлы, BPM, комментарии. Тяжёлые поля и коллекции загружаются при первом открытии вкладки. При сохранении синхронизируются навыки и трудовые договоры; проверяются дубликаты имени и vacansyID; короткое описание не длиннее 250 символов; при открытии/закрытии — уведомления и Telegram.
 
 ---
 
@@ -90,40 +90,63 @@ flowchart TD
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-| Область | Поведение |
-|---------|-----------|
-| `tabSheetOpenPosition` SelectedTabChange | lazy load LOB (`comment`, `templateLetter`, `exercise`, `memoForInterview`) и коллекций вкладок |
-| `closedVacancyTimer` | countdown до `closingDate`; start/stop в `initClosedVacancyTimerFacet` |
-| Salary validators | min ≤ max на `openPositionFieldSalaryMin/Max` |
-| `openClosePositionCheckBox` | смена статуса, даты open/close |
-| `signDraftCheckBox` | черновик |
-| `priorityField` | иконки приоритета (optionIconProvider) |
-| `remoteWorkField`, `registrationForWorkField` | иконки/стили опций |
-| Payments tab | `radioButtonGroupPaymentsType`, NDFL, проценты recruiter/researcher |
-| `openPositionRichTextArea` и др. | Jsoup/sanitize, Telegram notify on commit (не блокирует save) |
-| `onBeforeCommitChanges` | duplicate `vacansyID` check, sync skills/labor agreement с entity |
-| Skills tab | rescan `SkillTree`, row descriptions, comment column |
-| News tab | `detailsGenerator` на `openPostionNewsDataGrid`, filter `priorityNews` |
+### 4.1 Жизненный цикл формы (Lifecycle)
+
+| Этап | Что происходит |
+|------|----------------|
+| Инициализация | Блокировка auto-load у loaders без параметра (laborAgreement, comments, files, skills, BPM-вложения); настройка radio, генераторов, skills renderer |
+| Перед показом | Для существующей — lazy LOB главной вкладки; снимок `beforeEdit`; флаги open/close; шаблон HTML для новой; disable стандартного описания; BPM `openpositionApproval` |
+| После показа | Новая вакансия → openClose=false; фиксация стартовых значений; `screenFullyLoaded=true`; таймер обратного отсчёта до closingDate |
+| Смена вкладки | Lazy-load: exercise, memo, templateLetter, skills, files, comments, laborAgreement |
+| Таймер (60 с) | Обновление label обратного отсчёта |
+| Изменение dataContext | `entityIsChanged=true` |
+
+**Роли:** Manager/Administrator видят все блоки оплат; Researcher/Recruiter — только свой блок (`setHiddeField`).
+
+### 4.2 Скрытые вычисления
+
+| Область | Правило |
+|---------|---------|
+| Комиссия компании | Тип 0 — фикс; 1 — % от годового ×12 × NDFL(1.13); 2 — % от месячной × NDFL |
+| Зарплата ресерчера/рекрутера | Фикс / 20% / 10% / произвольный % от комиссии |
+| Подсветка навыков в описании | Имена skillTree → brown/serif в HTML |
+| Автоимя вакансии | positionType + project + city + grade |
+| OpenPositionNews | Автосообщения при смене salary/description/template/priority/exercise (сравнение со стартовыми значениями) |
+
+### 4.3 Валидация и сохранение
+
+| Момент | Условие | Результат |
+|--------|---------|-----------|
+| Валидатор зарплаты | min > max | Ошибка «минимум больше максимума», сохранение блокируется |
+| Перед commit (1) | Новая запись | lastOpenDate = сейчас; null-safe чекбоксы |
+| Перед commit | Новая запись | Проверка дубликата (positionType+vacansyName+project+parent+remoteWork+city) → диалог → отложенный commit |
+| Перед commit | Любая | Проверка уникальности vacansyID → диалог при совпадении |
+| Перед commit | — | sync laborAgreement и skillsList в entity |
+| Перед commit (2) | shortDescription > 250 | ERROR notification, preventCommit |
+| Перед commit (3) | Смена open/close | UiNotification подписчикам |
+| Перед commit (4) | Новая или изменение открытой | Telegram (ошибка API — warning, commit не блокируется) |
+| После commit | Смена open/close или создание | OpenPositionNews; при переименовании — отдельная новость |
+| После commit (1) | Есть дочерние command-вакансии | Диалог массового open/close дочерних (только в памяти) |
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Вкладка / элемент | Действия |
-|-------------------|----------|
-| `tabOpenPosition` | основные поля: company, department, project, position, grade, cities, salary, flags (`needLetter`, `needExercise`, `remoteWork`, …) |
-| `laborAgreementTab` | CRUD labor agreements |
-| `tabPayments` | тип оплаты, комиссии, проценты |
-| Описания (accordion RU/EN/standard/who) | rich text areas |
-| `tabFiles` | `someFilesTable` create/edit/remove |
-| `tabExercise`, `tabMemoForInterview`, `tabTemplateLetter` | LOB editors |
-| `tabSkills` | skills grid, rescan |
-| `tabOpenPositionNews` | news CRUD |
-| `tabApproval` | BPM proc actions + attachments |
-| `commentsTab` | комментарии к вакансии |
-| Footer | commit/close, draft/open-close controls |
+| Элемент | Цепочка |
+|---------|---------|
+| Подписаться | → `RecrutiesTasks.edit` с текущей вакансией |
+| Открыть/закрыть (чекбокс) | Диалог подтверждения → при открытии `closeWithCommit()` |
+| Добавить города | → `SelectCitiesLocation` → merge в entity |
+| Новость | → editor `OpenPositionNews` |
+| Сгенерировать имя | `generateVacancyName()` или диалог перезаписи |
+| Краткое описание из JD | Парсинг навыков из описания → shortDescription |
+| Rescan навыков | `pdfParserService.parseSkillTree` → skillTrees |
+| positionType / project / company | Каскадное обновление vacansyName, департамента, логотипа, loaders |
+| signDraft | Label «(DRAFT)», priority = -1 или null |
+| priority Low | → `setClosingWeek()` (диалог + closingDate) |
+| Вкладка комментариев: Ответить | → `createComment` → merge в dataContext |
+| Commit / Close | Стандартный editor |
 
-`someFilesTable.create` — `@Install newEntitySupplier` для привязки к `openPosition`.
 
 ---
 
@@ -156,5 +179,6 @@ Header labels: `signDraftLabel`, `labelTopComissionRecrutier`, `labelTopComissio
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (deep modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первичная UI Spec из `open-position-edit.xml` и `OpenPositionEdit.java` |

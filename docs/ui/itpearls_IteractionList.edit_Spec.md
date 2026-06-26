@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Записи взаимодействий кандидата с вакансией. Сложный browse с фильтрами по роли и дате; edit с проверкой подписки, цепочки взаимодействий, статуса кандидата и email после сохранения.
+
 
 ---
 
@@ -91,49 +92,27 @@ select e from itpearls_Iteraction e
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `candidateField` | `onCandidateFieldValueChange` | см. Java |
-| `screen` | `onAfterShow2` | см. Java |
-| `screen` | `onBeforeClose1` | см. Java |
-| `screen` | `onBeforeCommitChanges` | см. Java |
-| `screen` | `onAfterCommitChanges1` | см. Java |
-| `screen` | `onBeforeClose` | см. Java |
-| `screen` | `onBeforeShow` | см. Java |
-| `screen` | `onAfterShow` | см. Java |
-| `iteractionTypeField` | `onIteractionTypeFieldValueChange` | см. Java |
-| `screen` | `onInit` | см. Java |
-| `vacancyFiels` | `onVacancyFielsValueChange` | см. Java |
-| `vacancyFiels` | `onVacancyFielsValueChange2` | см. Java |
-| `addDate` | `onAddDateValueChange` | см. Java |
-| `addString` | `onAddStringValueChange` | см. Java |
-| `addInteger` | `onAddIntegerValueChange` | см. Java |
+Browse: фильтры по роли, 90 дней, outstaffing; icon-колонка. Edit: подписки, popular types, vacancy picker; BeforeCommit — цепочка, Employee; AfterCommit — news + email.
 
+### 4.2 Скрытые вычисления
 
-### @Install (generators / providers)
+Кэш recruiter tasks; rowStyleProvider; звёзды рейтинга; проверка «свой кандидат»; автокомментарий из addDate/addString/addInteger.
 
-| Target | Subject | Назначение |
-|--------|---------|------------|
-| `candidateField` | `optionImageProvider` | см. Java |
-| `ratingField` | `optionStyleProvider` | см. Java |
-| `vacancyFiels` | `optionImageProvider` | см. Java |
-| `vacancyFiels` | `optionIconProvider` | см. Java |
-| `vacancyFiels` | `optionStyleProvider` | см. Java |
-| `recrutierField` | `optionIconProvider` | см. Java |
+### 4.3 Валидация и сохранение
 
+Перед сохранением: chainInteraction, currentPriority/OpenClose, Employee hire/fire. Перед закрытием: статус кандидата, sendMessages/email; диалоги закрытой вакансии и неподписки Researcher.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `lookup` | standard CUBA action | — | CRUD / lookup |
-| `open` | standard CUBA action | — | CRUD / lookup |
+| Копировать | Копия записи с новым номером |
+| Карточка кандидата | Открытие JobCandidate.edit |
+| Подписка / отписка | RecrutiesTasks |
+| Фильтр «только мои» | JPQL по текущему рекрутеру |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -158,5 +137,6 @@ select e from itpearls_Iteraction e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

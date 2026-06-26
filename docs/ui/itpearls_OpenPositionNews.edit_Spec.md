@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Новости по вакансиям. Клик по строке раскрывает полный текст; в форме для новой записи автоматически подставляются дата и автор.
+
 
 ---
 
@@ -82,30 +83,24 @@ select e from itpearls_OpenPosition e order by e.openClose, e.vacansyName
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onAfterShow` | см. Java |
+Browse: клик по строке → details с полным комментарием; PostLoad кэширует LOB. Edit: после показа — dateNews и author = текущий пользователь.
 
+### 4.2 Скрытые вычисления
 
-### @Install (generators / providers)
+Усечение комментария до 120 символов в колонке; scalar-кэш полного текста; иконка открыта/закрыта вакансия в picker.
 
-| Target | Subject | Назначение |
-|--------|---------|------------|
-| `openPositionField` | `optionIconProvider` | см. Java |
+### 4.3 Валидация и сохранение
 
+Стандартный commit.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `lookup` | standard CUBA action | — | CRUD / lookup |
-| `open` | standard CUBA action | — | CRUD / lookup |
+| Клик по строке | Раскрытие details с полным комментарием |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -130,5 +125,6 @@ select e from itpearls_OpenPosition e order by e.openClose, e.vacansyName
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Справочник городов: стандартный список и форма без кастомной логики в Java. При открытии загружается полный список; создание и редактирование — через стандартные действия CUBA.
+
 
 ---
 
@@ -81,24 +82,29 @@ order by e.cityRuName
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл формы (Lifecycle)
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| — | — | Стандартное поведение CUBA (`StandardLookup` / `StandardEditor`) |
+| Этап | Что происходит |
+|------|----------------|
+| Открытие browse | Загрузка всех городов; generic-фильтр CUBA |
+| Открытие edit | Стандартный editor, commit через framework |
 
+### 4.2 Скрытые вычисления
+
+Нет — колонки привязаны к полям сущности.
+
+### 4.3 Валидация и сохранение
+
+Стандартная валидация полей entity и commit editor'а.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `create` | standard CUBA action | — | CRUD / lookup |
-| `edit` | standard CUBA action | — | CRUD / lookup |
-| `remove` | standard CUBA action | — | CRUD / lookup |
+| Элемент | Цепочка |
+|---------|----------|
+| Создать / Изменить / Удалить | Стандартный CUBA CRUD |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -123,5 +129,6 @@ order by e.cityRuName
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

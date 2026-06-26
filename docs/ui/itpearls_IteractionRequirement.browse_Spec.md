@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Связь типов взаимодействий с требованиями цепочки (дерево). При выборе типа в дереве загружаются требования; если записей нет — автоматически создаются для всех типов с iteractionTree.
+
 
 ---
 
@@ -83,25 +84,20 @@ select e from itpearls_Iteraction e order by e.number
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onBeforeShow` | см. Java |
-| `iteractionsTable` | `onIteractionsTableSelection` | см. Java |
+Перед показом и при смене выбора в дереве → setRequirement: загрузка ItearctionRequirements для выбранного Iteraction; если пусто — commit новых записей requirement=false для всех типов с iteractionTree.
 
+### 4.2–4.3
+
+Стандартное редактирование грида требований.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `add` | standard CUBA action | — | CRUD / lookup |
-| `edit` | standard CUBA action | — | CRUD / lookup |
-| `remove` | standard CUBA action | — | CRUD / lookup |
+| Выбор строки в дереве | Перезагрузка таблицы требований |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -126,5 +122,6 @@ select e from itpearls_Iteraction e order by e.number
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

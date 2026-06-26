@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Групповая подписка рекрутёров на вакансии (lookup). Открывается из OpenPositionBrowse; Init пустой — поведение в основном из XML.
+
 
 ---
 
@@ -78,22 +79,16 @@ select e from itpearls_RecruitiesTasks e
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1–4.3
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onInit` | см. Java |
-
+Стандартный lookup RecrutiesTasks; onInit без логики. Выбор строк → возврат в opener.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| create/edit/remove | standard | — | CRUD |
+| Lookup select/cancel | Стандартный lookup CUBA |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -118,5 +113,6 @@ select e from itpearls_RecruitiesTasks e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

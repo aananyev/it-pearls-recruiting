@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Редактирование узла дерева типов взаимодействий. Стандартный editor Iteraction с полем iteractionTree без кастомных @Subscribe в Java.
+
 
 ---
 
@@ -81,22 +82,16 @@ order by e.iterationName
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1–4.3
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| — | — | Стандартное поведение CUBA (`StandardLookup` / `StandardEditor`) |
-
+Стандартный CUBA editor; иерархия задаётся полем iteractionTree в XML/entity.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `lookup` | standard CUBA action | — | CRUD / lookup |
+| Commit | Стандартный editor |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -121,5 +116,6 @@ order by e.iterationName
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

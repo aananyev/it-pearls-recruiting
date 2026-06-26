@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Справочник типов взаимодействий. В форме — флаги уведомлений, lazy-load цепочки и email-шаблона; перед сохранением null-булевы флаги приводятся к false.
+
 
 ---
 
@@ -102,38 +103,25 @@ select e from itpearls_EmployeeWorkStatus e order by e.workStatusName
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onBeforeCommitChanges` | см. Java |
-| `checkBoxCalendar` | `onCheckBoxCalendarValueChange` | см. Java |
-| `screen` | `onInit` | см. Java |
-| `screen` | `onAfterShow1` | см. Java |
-| `whenSendMessageRadioButton` | `onWhenSendMessageRadioButtonValueChange` | см. Java |
-| `notificationPeriodRadioButton` | `onNotificationPeriodRadioButtonValueChange` | см. Java |
-| `typeTraceRadioButtons` | `onTypeTraceRadioButtonsValueChange` | см. Java |
-| `radioButtonAddType` | `onRadioButtonAddTypeValueChange` | см. Java |
-| `screen` | `onBeforeShow` | см. Java |
-| `radioButtonTypeNotifications` | `onRadioButtonTypeNotificationsValueChange` | см. Java |
-| `checkBoxFlag` | `onCheckBoxFlagValueChange` | см. Java |
-| `checkBoxCallDialog` | `onCheckBoxCallDialogValueChange` | см. Java |
-| `iteractionFieldPic` | `onIteractionFieldPicValueChange` | см. Java |
-| `screen` | `onAfterShow` | см. Java |
-| `iteractionCheckBoxMandatory` | `onIteractionCheckBoxMandatoryValueChange` | см. Java |
+Browse стандартный. Edit: radio/maps уведомлений; вкладки lazy-load элементов цепочки, email-шаблона, workStatus.
 
+### 4.2 Скрытые вычисления
+
+Превью иконки; заполнение ключей email из EmailGenerationService; lazy load textEmailToSend.
+
+### 4.3 Валидация и сохранение
+
+Перед сохранением: sign-флаги (endCase, ourInterview, clientInterview, sentToClient, statistics, priorityNews, viewOnlyManagers) null → false.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `lookup` | standard CUBA action | — | CRUD / lookup |
-| `open` | standard CUBA action | — | CRUD / lookup |
-| `clear` | standard CUBA action | — | CRUD / lookup |
+| Чекбоксы calendar/callDialog/flag/mandatory | Вкл./выкл. связанных полей |
+| notificationNeedSend | Блок настроек уведомлений |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -158,5 +146,6 @@ select e from itpearls_EmployeeWorkStatus e order by e.workStatusName
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

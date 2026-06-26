@@ -22,7 +22,8 @@ Read-only сводка по кандидату: фото, ФИО, должнос
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Раскрытая строка кандидата в списке: контакты, статистика взаимодействий, цветные метки «в работе/свободен», ссылки на email и мессенджеры. Кнопки действий создаёт родительский browse.
+
 
 ---
 
@@ -84,34 +85,32 @@ flowchart TD
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-| Метод / событие | Логика |
-|-----------------|--------|
-| `onInit` | `setVisibleContactsLabels()` — скрытие пустых контактов |
-| `setVisibleContactsLabels` | visibility `emailHBox`, `phoneHbox`, … по null-полям |
-| `setStatistics` | последний рекрутер (группа «Хантинг»), researcher («Ресерчинг»), компания/департамент/вакансия/проект из `iteractionList[0].vacancy`, счётчики |
-| `setStatisticsLabel` | динамические badge: активность, даты процессинга, дни свободен, дни на проекте, CV у заказчика, интервью |
-| `createSocialNetworkFlowBox` | Image 25px с logo, click → `webBrowserTools.showWebPage` |
-| `setVisibleLogo` | toggle `candidateFaceImage` / `candidateFaceDefaultImage` (`icons/no-programmer.jpeg`) |
-| Link clicks | `mailto:`, `t.me/`, `skype:?chat` |
+### 4.1 Жизненный цикл
 
-Группы пользователей (константы): `Менеджмент`, `Хантинг`, `Ресерчинг` — для определения роли последнего рекрутера.
+Родитель вызывает `setJobCandidate` → скрытие пустых контактов → построение иконок соцсетей → `setStatistics` и цветные badge в statisticsHLabelBox.
 
-Стили статусов: `button_table_green/yellow/red/gray/blue` по календарным порогам и текущему пользователю.
+### 4.2 Скрытые вычисления
+
+| Что видит пользователь | Правило |
+|------------------------|---------|
+| Последний рекрутер / ресерчер | JPQL всех взаимодействий; группа «Хантинг» / «Ресерчинг» |
+| «В работе» / «СВОБОДЕН» / дни свободен | Календарные пороги + сравнение с текущим пользователем; цвета green/yellow/red/gray |
+| Зарплатные ожидания | Последнее взаимодействие с типом «зарплата» → addString в label |
+| Соцсети | Image 25px, клик → браузер по URL |
+
+### 4.3 Валидация и сохранение
+
+Нет — только отображение.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-Фрагмент не содержит CRUD-кнопок; интерактивные элементы:
+| emailLinkButton | mailto:{email} |
+| telegrammLinkButton | http://t.me/{имя} |
+| skypeLinkButton | skype:{имя}?chat |
+| Иконки соцсетей | Переход по URL |
 
-| Элемент | Действие |
-|---------|----------|
-| `emailLinkButton` | открыть mailto |
-| `skypeLinkButton`, `telegrammLinkButton`, `telegrammGroupLinkButton` | внешние протоколы |
-| Иконки в `socialNetworkFlowBox` | переход по URL |
-| `statisticsGroupBox` | collapsable, заполняется программно |
-
-Кнопки действий (edit, new interaction, CV…) создаются **родительским** `detailsGenerator`, не во фрагменте.
 
 ---
 
@@ -138,5 +137,6 @@ layout (expand=mainHbox)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первичная UI Spec из `job-canidate-detail-screen-fragment.xml` и `JobCanidateDetailScreenFragment.java` |

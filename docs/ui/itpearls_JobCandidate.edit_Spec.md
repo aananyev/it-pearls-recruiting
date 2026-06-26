@@ -17,7 +17,7 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Шесть вкладок TabSheet: карточка (контакты read-only, фото, навыки из последнего CV, проекты и suggest-вакансии), кандидат (ФИО с suggestion, FK), контакты (динамическая required-логика + соцсети), взаимодействия (DataGrid с фильтром по вакансии), резюме (CRUD CV, парсинг контактов, сверка навыков), комментарии (лента + чат). При открытии — рейтинг, процент заполнения (14 полей), подсказки вакансий по `positionType`, агрегат `lastProjectDc`. При первом выборе вкладки — ленивая инициализация колонок-генераторов и справочников (`preventAutoLoadUntilReady` + `PreLoadListener`). Commit: проверка дубликата, нормализация ФИО/telegram, автосоздание `IteractionList` «Новый контакт» для нового кандидата. Блокировка кандидата (`blockCandidate`) отключает грид взаимодействий, кроме ролей Manager/Administrator.
+Шесть вкладок: карточка (контакты, фото, навыки, проекты), кандидат (ФИО с подсказками), контакты (динамическая обязательность полей), взаимодействия, резюме, комментарии-чат. При первом открытии вкладки подгружаются справочники и колонки-генераторы. При сохранении нового кандидата проверяется дубликат по ФИО+город+должность; нормализуются ФИО и Telegram; автоматически создаётся взаимодействие «Новый контакт». Менеджер/администратор может заблокировать кандидата — тогда грид взаимодействий отключается для остальных ролей.
 
 ---
 
@@ -172,182 +172,69 @@ flowchart TD
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Lifecycle и `@Subscribe`
+### 4.1 Жизненный цикл формы (Lifecycle)
 
-| Событие | Метод | Логика |
-|---------|-------|--------|
-| `InitEvent` | `onInit` | `preventAutoLoadUntilReady` на 4 loader'а; `SelectedTabChangeListener` → `initTabResume/Interactions/Candidate/ContactInfo/Comments` |
-| `BeforeShowEvent` | `onBeforeShow` | `interactionCommentDl.load`; метка CV; `status=0` для NEW; рейтинг, skillBox, link buttons, suggest/lastProject loaders, vacancy filter, `blockCandidateButton` visible для Manager/Admin |
-| `AfterShowEvent` | `onAfterShow` | `setPercentLabel`, `setBlockUnblockButton` |
-| `AfterShowEvent` | `onAfterShow1` | кэш `iteractionListFromCandidate` для рейтинга |
-| `BeforeCloseEvent` | `onBeforeClose1` | подмена listener CV collection (repaint без scan) |
-| `AfterCloseEvent` | `onAfterClose` | listener CV collection → repaint таблицы |
-| `BeforeCommitChangesEvent` | `onBeforeCommitChanges1` | `checkDublicateCandidate` → confirmation dialog, `preventCommit` |
-| `BeforeCommitChangesEvent` | `onBeforeCommitChanges` | `replaceE_yo`, `setFullNameCandidate`, `checkTelegramName`, `trimTelegramName`, `addIteractionOfNewCandidate` |
-| `DataContext.ChangeEvent` | `onChange` | пересчёт `labelQualityPercent` |
-| `jobCandidateDc` ItemChange | `onJobCandidateDcItemChange` | `setFullNameCandidate` |
-| `jobCandidateCandidateCvsDc` ItemChange | `onJobCandidateCandidateCvsDcItemChange` | `scanContactsFromCVs()` |
-| `fileImageFaceUpload` BeforeValueClear | | default image вместо фото |
-| `fileImageFaceUpload` FileUploadSucceed | | показ `candidatePic` + `FileDescriptorResource` |
-| `candidatePic` SourceChange | | `setCandidatePicImage()` |
-| Link buttons click | email / telegram / skype | `mailto:`, `http://t.me/`, `skype:…?chat` через `WebBrowserTools` |
-| `phoneField` / `mobilePhoneField` ValueChange | | нормализация через `parseCVService.normalizePhoneStr` |
-| `firstNameField` / `secondNameField` ValueChange | | обновление `iteractionListLabelCandidate`, `fullNameField` |
-| `emailField` / `mobilePhoneField` / `skypeNameField` / `telegramNameField` ValueChange | | синхронизация labels в `msgOptions` |
-| `chatMessageTextField` ValueChange | | enable/disable `sendCommentButton` |
-| `chatMessageTextField` EnterPress | | confirmation → `sendCommentButtonInvoke()` |
+| Этап | Что происходит | Кнопки / роли |
+|------|----------------|---------------|
+| Инициализация | Блокировка ранней загрузки справочников (города, компании, должности, вакансии для комментариев); подписка на смену вкладок → ленивая инициализация каждой вкладки | — |
+| Перед показом | Загрузка ленты комментариев; для нового — status=0; рейтинг, навыки из последнего CV, подсказки вакансий, таблица lastProject; кнопка блокировки видна только Manager/Administrator | `blockCandidateButton` — Manager/Admin |
+| После показа | Процент заполнения карточки (14 полей); состояние кнопки блокировки | — |
+| Смена записи в dataContext | Пересчёт fullName и процента заполнения | — |
+| Первая вкладка «Кандидат» | Загрузка справочников; подсказки ФИО из БД; сброс должности «(не использовать)» | — |
+| Первая вкладка «Контакты» | Слушатели контактов → снятие required если хоть один заполнен; radio приоритета связи; для нового — автостроки соцсетей | — |
+| Первая вкладка «Взаимодействия» | Генераторы колонок, кнопки копирования и популярных типов; грид disabled при blockCandidate (кроме Manager/Admin) | — |
+| Первая вкладка «Резюме» | Генераторы CV-таблицы, scan/skills | `copyCVButton` disabled до выбора строки |
+| Первая вкладка «Комментарии» | Загрузка picker открытых вакансий | `sendCommentButton` disabled при пустом поле |
 
-### Ленивая инициализация вкладок
+### 4.2 Скрытые вычисления
 
-| Вкладка | Флаг | Что инициализируется при первом выборе |
-|---------|------|----------------------------------------|
-| `tabCandidate` | `candidateInitialized` | reference loaders; suggestion Enter handlers; `addSuggestField` (BackgroundTask); `setPositionsLabel`; `checkNotUsePosition` |
-| `tabContactInfo` | `tabContactInfoInitialized` | text listeners → `enableDisableContacts`; `priorityCommenicationMethodRadioButtonInit`; `initSocialNeiworkTable` для NEW |
-| `tabIteraction` | `interationTabInitialized` | icon column, rating generator, comment column, copy/description buttons, `frequentInteractionPopupButton`, enable по `blockCandidate` |
-| `tabResume` | `cvTabInitialized` | CV column generators, copy/scan/skills listeners |
-| `commentsTab` | `commentsTabInitialized` | `ensureOpenPositionLoaded()` |
+| Что видит пользователь | Правило |
+|------------------------|---------|
+| Процент заполнения (quality%) | 14 полей контактной вкладки × 100/14 |
+| Required на контактах | Если заполнен хотя бы один контакт или URL соцсети → required снимается со всех |
+| Звёзды рейтинга в шапке | Среднее rating+1 по взаимодействиям |
+| Фильтр вакансий на вкладке взаимодействий | Список уникальных vacancy из iteractionList; disconnectedItems при выборе |
+| Колонки «кто ресерчер/рекрутер» | Имя по sign-флагам типа взаимодействия на vacancy |
+| Иконка в suggest-вакансиях | CHECK/REFRESH/CLOSE/QUESTION по истории отправок и end-case |
+| Чат-пузыри комментариев | Свои справа, чужие слева; reply button |
+| Нормализация телефонов | parseCVService при изменении phone/mobile |
 
-### Валидация и commit
+### 4.3 Валидация и сохранение
 
-| Этап | Логика |
-|------|--------|
-| XML `required` | `firstName`, `currentCompany`, `personPosition`, `cityOfResidence`; на вкладке контактов — все contact fields + `priorityContact` |
-| Динамическая required | `enableDisableContacts()`: если заполнен хотя бы один контакт **или** URL соцсети — снять required со всех contact fields |
-| `onBeforeCommitChanges1` | дубликат по firstName+secondName+city+position (исключая текущий id) |
-| `onBeforeCommitChanges` | ё→е; `fullName`; telegram без `@` и без `http://t.me/`; NEW → `IteractionList` тип «Новый контакт», rating=4, vacancy Default |
-| `checkNotUsePosition` | сброс должности с «не использовать» в названии |
-
-**Карта `priorityContact` (radio, из Java):**
-
-| Label | Integer |
-|-------|---------|
-| Email | 1 |
-| Phone | 2 |
-| Telegramm | 3 |
-| Skype | 4 |
-| Viber | 5 |
-| WhatsApp | 6 |
-| Social Network | 7 |
-| Other | 9 |
-
-### Блокировка кандидата (`blockCandidateButton`)
-
-- Visible: `GetRoleService.isUserRoles` → `StandartRoles.MANAGER` или `ADMINISTRATOR`
-- Click: confirmation «Запретить/Разрешить взаимодействия…» → toggle `blockCandidateCheckBox`
-- Эффект: caption/icon кнопки; `iteractionListLabelCandidate` style `h2-red`; `jobCandidateIteractionListTable.setEnabled(false)` при блокировке
-- **Исключение:** Manager/Admin — грид взаимодействий остаётся enabled (`initTabInteractions`)
-
-### Социальные сети
-
-| Действие | Метод | Поведение |
-|----------|-------|-----------|
-| Автозаполнение типов (NEW) | `initSocialNeiworkTable` | все `SocialNetworkType` → пустые `SocialNetworkURLs` в DC |
-| Добавить недостающие | `addMissingSocialNetworksListsInvoke` | типы из справочника, отсутствующие в коллекции |
-| Удалить пустые | `removeEmptySocialNetworkListsButton` | `dataManager.remove` где `networkURLS` null/empty |
-| Парсинг из CV | `scanContactsFromCVs` | `ParseCVService` email/phone/urls → InputDialog с чекбоксами замены |
-| Определение типа URL | `getSocialNetworkType` | match host → `SocialNetworkType`; иначе `Other` |
-
-### Фильтр вакансий на вкладке взаимодействий
-
-`vacancyFilterLookupPickerField`: options = distinct `vacancy` из `iteractionList`; при выборе — `jobCandidateIteractionDc.setDisconnectedItems(filtered stream)`.
-
-### Комментарии (чат)
-
-- `createComment`: load `Iteraction` с `signComment=true`; новый `IteractionList` с comment, vacancy из picker или Default; `reloadInteractions()`
-- `commentDialog` generator: пузырь с аватаром рекрутёра, reply → InputDialog «Re:…»
-- Стили: `tailMyMessage` / `tailOtherMessage` по `createdBy` vs current login
-
-### Процент заполнения карточки
-
-`setQualityPercent()`: 14 полей (birthDate, company, email, ФИО, city, position, phone, mobile, skype, telegram, whatsapp, viber) — только после `tabContactInfoInitialized`. Формула: `count * 100 / 14`.
-
-Link buttons на вкладке «Карточка» дублируют контакты из entity (read-only labels + кликабельные ссылки).
+| Момент | Условие | Результат |
+|--------|---------|-----------|
+| XML required | firstName, company, position, city; контакты + priorityContact на вкладке контактов | Блокировка commit framework |
+| Перед сохранением (1) | Новый + дубликат ФИО+город+должность | Диалог «Продолжить?» → OK продолжает, Cancel отменяет |
+| Перед сохранением | Любой | ё→е в ФИО; fullName; telegram без @ и без http://t.me/ |
+| Перед сохранением | Новый | Автовзаимодействие «Новый контакт», rating=4, vacancy Default; ошибка если нет типа или Default |
+| После редактирования соцсети в гриде | EditorPostCommit | Пересчёт required контактов |
+| Комментарий в чате | createComment | Немедленный commit через dataContext + reload взаимодействий |
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-### Нижняя панель `editActions`
+| Элемент | Цепочка |
+|---------|---------|
+| Добавить взаимодействие | → новый `IteractionList` с опциями кандидата |
+| Копировать взаимодействие | Нет выбора + есть последнее → копия с vacancy; нет взаимодействий → диалог; есть выбор → копия выбранной строки |
+| Популярные типы (popup) | До 5 типов → новое взаимодействие с типом и vacancy из строки |
+| Заблокировать кандидата | Диалог → инверсия blockCandidate → красный заголовок, disable грида (кроме Manager/Admin) |
+| Описание вакансии | Выбор строки → QuickView с comment/description/conditions |
+| Мастер вакансий | → `OpenPositionMasterBrowse` с текущим кандидатом |
+| Добавить должности | → `SelectPersonPositions` → уникальные позиции в коллекцию |
+| Копировать CV | Копия выбранного или диалог создания |
+| Scan контактов из CV | Парсинг непроверенных CV → диалог замены email/phone/urls |
+| Сверка навыков с JD | Нужны CV + comment вакансии → `SkillTreeBrowseCheck` |
+| Отправить комментарий / Enter | createComment → новое взаимодействие-comment, reload, очистка поля |
+| Reply в чате | InputDialog → createComment с префиксом Re: |
+| Link email/telegram/skype | mailto / t.me / skype:?chat |
+| Подписка | Новый кандидат → диалог «Записать?» → SubscribeCandidateAction |
+| Соцсети: добавить недостающие | Все типы из справочника, которых нет в коллекции |
+| Соцсети: удалить пустые | dataManager.remove пустых URL |
+| Upload фото | Успех → скрыть placeholder, показать фото; clear → обратно |
+| Commit and Close | Стандартный editor + цепочка BeforeCommit выше |
 
-| Элемент | invoke / action | Условия | Эффект |
-|---------|-----------------|---------|--------|
-| `blockCandidateButton` | `blockCandidateButton` | visible: Manager/Admin | toggle `blockCandidate`, стиль заголовка, enable грида |
-| `buttonSubscribe` | `onButtonSubscribeClick` | `visible="false"` в XML (legacy) | `SubscribeCandidateAction` editor |
-| `windowCommitAndCloseButton` | `windowCommitAndClose` | — | стандартный commit + close |
-| window close | `windowClose` | — | закрытие с discard prompt |
-
-### Вкладка «Кандидат»
-
-| Элемент | Эффект |
-|---------|--------|
-| `addPositions` | `SelectPersonPositions` → merge positions, `setPositionsLabel()` |
-| `firstNameField` / `middleNameField` / `secondNameField` | suggestion + Enter handler |
-| lookup pickers Company/Position/City | options из deferred loaders |
-
-### Вкладка «Контакты»
-
-| Элемент | Эффект |
-|---------|--------|
-| `addMissingSocialNetworkListsButton` | добавить строки для всех типов из справочника |
-| `removeEmptySocialNetworkListsButton` | удалить пустые URL из БД |
-| `addSocialNetworkListsButton` | hidden/disabled (legacy) |
-| DataGrid create/edit/remove | стандартные composition actions на `socialNetwork` |
-
-### Вкладка «Взаимодействия»
-
-| Элемент | Эффект |
-|---------|--------|
-| create / edit / remove | стандартный CRUD `IteractionList` в composition |
-| `copyIteractionButton` | копия с той же vacancy; `numberIteraction` = count+1; если нет выбора — copy last или диалог «Назначить новое» |
-| `frequentInteractionPopupButton` | до 5 популярных типов (`interactionService.getMostPolularIteraction`); new entity с vacancy из selected row |
-| `openPositionProjectDescriptionButton` | enabled при selection; `QuickViewOpenPositionDescription` |
-| `vacancyFilterLookupPickerField` | фильтр disconnected items |
-
-### Вкладка «Резюме»
-
-| Элемент | Эффект |
-|---------|--------|
-| create / edit / remove | CRUD `CandidateCV` |
-| `copyCVButton` | копия selected CV (textCV, letter, links, resumePosition) |
-| `scanContactsFromCVButton` | `scanContactsFromCVs()` — парсинг всех непроверенных CV |
-| `checkSkillFromJD` | `SkillTreeBrowseCheck` — сравнение навыков CV vs comment вакансии (`PdfParserService`) |
-
-### Вкладка «Карточка»
-
-| Элемент | Эффект |
-|---------|--------|
-| `openPositionMasterBrowseButton` | `OpenPositionMasterBrowse` |
-| `fileImageFaceUpload` | IMMEDIATE upload, dropZone |
-| `lastProjectTable` | generators: №, last interaction type, researcher, recruiter, «Просмотр» → `IteractionListSimpleBrowse` |
-| `suggestVacancyTable` | иконка статуса (CHECK/REFRESH/CLOSE/QUESTION) по истории `iteractionList` |
-
-### Вкладка «Комментарии»
-
-| Элемент | Эффект |
-|---------|--------|
-| `sendCommentButton` | `createComment(null)` — новый `IteractionList`-комментарий |
-| `vacancyPopupPickerField` | options `openPositionDc`; icon +/- по `openClose` |
-| reply в пузыре | InputDialog → `createComment("( ) Re:…")` |
-
-### `@Install` column generators / providers
-
-| Компонент | subject | Назначение |
-|-----------|---------|------------|
-| `vacancyFilterLookupPickerField` | optionImageProvider | logo проекта 20px |
-| `vacancyPopupPickerField` | optionIconProvider | PLUS/MINUS по openClose |
-| `socialNetworkTable.linkToWeb` | columnGenerator | LinkButton → URL |
-| `socialNetworkTable.socialNetworkLogoColumn` | columnGenerator | logo 30px + HTML description |
-| `jobCandidateIteractionListTable.projectLogoColumn` | columnGenerator | logo 50px + project description |
-| `jobCandidateIteractionListTable.currentOpenCloseColumn` | columnGenerator, styleProvider, descriptionProvider | иконка open/close |
-| `jobCandidateIteractionListTable.vacancy` | styleProvider | `table-wordwrap` |
-| `jobCandidateIteractionListTable.iteractionType` | styleProvider | `table-wordwrap` |
-| `jobCandidateCandidateCvTable.projectLogoColumn` | columnGenerator | logo CV vacancy |
-| `jobCandidateCandidateCvTable.toVacancy` / `resumePosition` | descriptionProvider, styleProvider | tooltip даты/должности |
-| `jobCandidateCommentsDataGrid.commentDialog` | columnGenerator | чат-пузырь |
-| `suggestVacancyTable.notSendedIconColumn` | columnGenerator | статус отправки CV |
-| `suggestVacancyTable` | itemDescriptionProvider | HTML карточка вакансии |
-
-**Программные generators в `initTabInteractions` / `initTabResume`:** `icon` (ImageRenderer), `rating` (HTML stars), `commentColumn` (PLUS/MINUS icon); CV columns `iconOriginalCVFile`, `iconITPearlsCVFile`, `letter`, link columns.
 
 ---
 
@@ -378,6 +265,7 @@ layout (expand=tabSheetSocialNetworks)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (deep modernization) |
 | 2026-06-26 | Полный разбор `JobCandidateEdit.java`: @Subscribe lifecycle, inject, validation, deferred loaders, соцсети, block/subscribe, generators, dialogs, Data View Integrity для `iteractionList.vacancy` BATCH |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первичная UI Spec из `job-candidate-edit.xml` и `JobCandidateEdit.java` |

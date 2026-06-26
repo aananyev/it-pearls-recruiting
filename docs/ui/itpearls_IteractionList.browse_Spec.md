@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Записи взаимодействий кандидата с вакансией. Сложный browse с фильтрами по роли и дате; edit с проверкой подписки, цепочки взаимодействий, статуса кандидата и email после сохранения.
+
 
 ---
 
@@ -91,41 +92,27 @@ select e
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onBeforeShow` | см. Java |
-| `dateFromField` | `onDateFromFieldValueChange` | см. Java |
-| `checkBoxShowOnlyMy` | `onCheckBoxShowOnlyMyValueChange` | см. Java |
-| `screen` | `onInit` | см. Java |
+Browse: фильтры по роли, 90 дней, outstaffing; icon-колонка. Edit: подписки, popular types, vacancy picker; BeforeCommit — цепочка, Employee; AfterCommit — news + email.
 
+### 4.2 Скрытые вычисления
 
-### @Install (generators / providers)
+Кэш recruiter tasks; rowStyleProvider; звёзды рейтинга; проверка «свой кандидат»; автокомментарий из addDate/addString/addInteger.
 
-| Target | Subject | Назначение |
-|--------|---------|------------|
-| `iteractionListsTable.iteractionType` | `descriptionProvider` | см. Java |
-| `iteractionListsTable.rating` | `columnGenerator` | см. Java |
-| `iteractionListsTable.rating` | `styleProvider` | см. Java |
-| `iteractionListsTable.currentOpenCloseColumn` | `columnGenerator` | см. Java |
-| `iteractionListsTable.currentOpenCloseColumn` | `styleProvider` | см. Java |
-| `iteractionListsTable.currentOpenCloseColumn` | `descriptionProvider` | см. Java |
-| `iteractionListsTable` | `rowStyleProvider` | см. Java |
+### 4.3 Валидация и сохранение
 
+Перед сохранением: chainInteraction, currentPriority/OpenClose, Employee hire/fire. Перед закрытием: статус кандидата, sendMessages/email; диалоги закрытой вакансии и неподписки Researcher.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `create` | standard CUBA action | — | CRUD / lookup |
-| `edit` | standard CUBA action | — | CRUD / lookup |
-| `remove` | standard CUBA action | — | CRUD / lookup |
-| `excel` | standard CUBA action | — | CRUD / lookup |
+| Копировать | Копия записи с новым номером |
+| Карточка кандидата | Открытие JobCandidate.edit |
+| Подписка / отписка | RecrutiesTasks |
+| Фильтр «только мои» | JPQL по текущему рекрутеру |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -150,5 +137,6 @@ select e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

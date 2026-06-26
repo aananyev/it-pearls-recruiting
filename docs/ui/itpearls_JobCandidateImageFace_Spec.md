@@ -17,7 +17,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Диалог увеличенного фото кандидата. Открывается кликом по миниатюре в списке; Java-контроллер пуст — только отображение image из XML.
+
 
 ---
 
@@ -64,15 +65,24 @@ flowchart LR
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-Контроллер не содержит `@Subscribe` / `@Install` — чистое отображение `Image` с `scaleMode` по умолчанию framework.
+### 4.1 Жизненный цикл
 
-Поведение полностью декларативно в XML: `image` привязан к `jobCandidateDc.fileImageFace`, layout `expand="candidateImage"`.
+Родитель передаёт кандидата в instance container → диалог показывает `fileImageFace` на весь layout. Собственной инициализации в Java нет.
+
+### 4.2 Скрытые вычисления
+
+Нет.
+
+### 4.3 Валидация и сохранение
+
+Нет — только просмотр.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-Нет кнопок и actions в XML. Закрытие — стандартный крестик диалога CUBA.
+| Закрытие | Стандартный крестик диалога CUBA |
+
 
 ---
 
@@ -93,5 +103,6 @@ Caption: `msg://jobCandidateImageFace.caption` (`messages.properties` пакет
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первичная UI Spec из `job-candidate-image-face.xml` и `JobCandidateImageFace.java` |

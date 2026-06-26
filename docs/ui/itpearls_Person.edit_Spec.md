@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Справочник персон (контакты). В списке — миниатюра фото с подсказкой ФИО; в форме — переключение placeholder и загруженного фото.
+
 
 ---
 
@@ -93,25 +94,24 @@ select e from itpearls_City e order by e.cityRuName
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `fileImageFaceUpload` | `onFileImageFaceUploadFileUploadSucceed` | см. Java |
-| `screen` | `onBeforeShow` | см. Java |
-| `defaultPeoplePic` | `onDefaultPeoplePicSourceChange` | см. Java |
-| `fileImageFaceUpload` | `onFileImageFaceUploadBeforeValueClear` | см. Java |
+Browse: только генератор колонки аватара. Edit: перед показом — default или загруженное фото; upload/clear обновляет preview.
 
+### 4.2 Скрытые вычисления
+
+Миниатюра 20px, fallback `no-programmer.jpeg`, HTML-tooltip с ФИО.
+
+### 4.3 Валидация и сохранение
+
+Стандартный commit.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `lookup` | standard CUBA action | — | CRUD / lookup |
+| CRUD | Стандартный CUBA |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -136,5 +136,6 @@ select e from itpearls_City e order by e.cityRuName
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

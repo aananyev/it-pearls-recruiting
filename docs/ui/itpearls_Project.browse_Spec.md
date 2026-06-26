@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Проекты заказчиков. В списке — фильтры открытых проектов и проектов с вакансиями, иерархическая таблица, бейдж «новый» для свежих записей. В форме закрытие проекта блокирует поля и предлагает закрыть все открытые вакансии.
+
 
 ---
 
@@ -90,41 +91,27 @@ select e from itpearls_Project e
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onInit` | см. Java |
-| `screen` | `onBeforeShow` | см. Java |
-| `onlyOpenProjectCheckBox` | `onOnlyOpenProjectCheckBoxValueChange` | см. Java |
-| `withOpenPositionCheckBox` | `onWithOpenPositionCheckBoxValueChange` | см. Java |
+Browse: при инициализации — иерархическая колонка; перед показом — фильтры onlyOpenProject / withOpenPosition. Edit: дата старта, загрузка открытых вакансий, ссылки чатов; вкладки lazy-load LOB и вакансий.
 
+### 4.2 Скрытые вычисления
 
-### @Install (generators / providers)
+Кэш счётчиков открытых вакансий и описаний; генераторы логотипа, имени (бейдж <14 дней, фото владельца), иконки описания; preview логотипа при upload.
 
-| Target | Subject | Назначение |
-|--------|---------|------------|
-| `projectsTable.projectLogoColumn` | `columnGenerator` | см. Java |
-| `projectsTable` | `rowDescriptionProvider` | см. Java |
-| `projectsTable.iconProjectDesc` | `columnGenerator` | см. Java |
-| `projectsTable.iconProjectDesc` | `styleProvider` | см. Java |
-| `projectsTable.iconProjectDesc` | `descriptionProvider` | см. Java |
-| `projectsTable.projectOwner` | `columnGenerator` | см. Java |
-| `projectsTable.projectName` | `columnGenerator` | см. Java |
-| `projectsTable.openPositionsCountColumn` | `columnGenerator` | см. Java |
+### 4.3 Валидация и сохранение
 
+Перед сохранением: нормализация флага «проект закрыт»; при открытии/закрытии — глобальное уведомление в системе.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `create` | standard CUBA action | — | CRUD / lookup |
-| `edit` | standard CUBA action | — | CRUD / lookup |
-| `remove` | standard CUBA action | — | CRUD / lookup |
+| Элемент | Цепочка |
+|---------|---------|
+| Фильтры onlyOpen / withOpenPosition | Вкл. → перезагрузка списка |
+| «Проект закрыт» | Вкл. → блокировка ключевых полей, установка endDate → диалог закрытия всех открытых вакансий |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -149,5 +136,6 @@ select e from itpearls_Project e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

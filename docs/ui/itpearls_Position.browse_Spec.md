@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Справочник должностей. В списке — иконки наличия стандартного описания и подсказки; в форме — сводная подпись «EN — RU» при изменении имён.
+
 
 ---
 
@@ -82,36 +83,26 @@ select e from itpearls_Position e order by e.positionRuName
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| — | — | Стандартное поведение CUBA (`StandardLookup` / `StandardEditor`) |
+Browse: после загрузки кэшируются LOB-поля для колонок. Edit: перед показом для существующей записи подгружаются `standartDescription` и `whoIsThisGuy`, обновляется сводный label.
 
+### 4.2 Скрытые вычисления
 
-### @Install (generators / providers)
+| Колонка | Правило |
+|---------|---------|
+| Иконка описания | FILE / FILE_TEXT, цвет и tooltip (plain text из HTML) |
 
-| Target | Subject | Назначение |
-|--------|---------|------------|
-| `positionsTable.standartDescriptionIcon` | `columnGenerator` | см. Java |
-| `positionsTable.standartDescriptionIcon` | `styleProvider` | см. Java |
-| `positionsTable.standartDescriptionIcon` | `descriptionProvider` | см. Java |
-| `positionsTable.whoThisGuyIcon` | `columnGenerator` | см. Java |
-| `positionsTable.whoThisGuyIcon` | `styleProvider` | см. Java |
-| `positionsTable.whoThisGuyIcon` | `descriptionProvider` | см. Java |
+### 4.3 Валидация и сохранение
 
+Стандартный commit.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `create` | standard CUBA action | — | CRUD / lookup |
-| `edit` | standard CUBA action | — | CRUD / lookup |
-| `remove` | standard CUBA action | — | CRUD / lookup |
+| CRUD | Стандартный CUBA |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -136,5 +127,6 @@ select e from itpearls_Position e order by e.positionRuName
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

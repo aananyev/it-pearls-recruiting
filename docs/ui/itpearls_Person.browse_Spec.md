@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Справочник персон (контакты). В списке — миниатюра фото с подсказкой ФИО; в форме — переключение placeholder и загруженного фото.
+
 
 ---
 
@@ -89,31 +90,24 @@ select e from itpearls_Person e order by e.secondName, e.firstName
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| — | — | Стандартное поведение CUBA (`StandardLookup` / `StandardEditor`) |
+Browse: только генератор колонки аватара. Edit: перед показом — default или загруженное фото; upload/clear обновляет preview.
 
+### 4.2 Скрытые вычисления
 
-### @Install (generators / providers)
+Миниатюра 20px, fallback `no-programmer.jpeg`, HTML-tooltip с ФИО.
 
-| Target | Subject | Назначение |
-|--------|---------|------------|
-| `personsTable.personPicColumn` | `columnGenerator` | см. Java |
+### 4.3 Валидация и сохранение
 
+Стандартный commit.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `create` | standard CUBA action | — | CRUD / lookup |
-| `edit` | standard CUBA action | — | CRUD / lookup |
-| `remove` | standard CUBA action | — | CRUD / lookup |
+| CRUD | Стандартный CUBA |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -138,5 +132,6 @@ select e from itpearls_Person e order by e.secondName, e.firstName
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

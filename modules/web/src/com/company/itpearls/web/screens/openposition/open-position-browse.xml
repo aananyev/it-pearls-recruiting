@@ -7,8 +7,21 @@
     <data readOnly="true">
         <collection id="openPositionsDc"
                     class="com.company.itpearls.entity.OpenPosition">
-            <view extends="openPosition-browse-view"/>
-            <loader id="openPositionsDl">
+            <view extends="openPosition-browse-view">
+                <property name="projectName" fetch="BATCH">
+                    <property name="projectLogo" view="_minimal"/>
+                    <property name="projectDepartment" view="companyDepartament-picker-view">
+                        <property name="companyName" view="company-picker-view"/>
+                    </property>
+                    <property name="projectOwner" view="person-owner-view"/>
+                </property>
+                <property name="positionType" fetch="BATCH" view="position-picker-view"/>
+                <property name="owner" fetch="BATCH" view="extUser-picker-view"/>
+                <property name="openPositionComments" fetch="BATCH" view="_minimal"/>
+                <property name="someFiles" fetch="BATCH" view="_minimal"/>
+                <property name="cities" fetch="BATCH" view="city-picker-view"/>
+            </view>
+            <loader id="openPositionsDl" maxResults="40">
                 <query>
                     <![CDATA[select e from itpearls_OpenPosition e
                                       order by e.vacansyName]]>

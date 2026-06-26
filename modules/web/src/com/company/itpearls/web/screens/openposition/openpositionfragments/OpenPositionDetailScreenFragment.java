@@ -2,6 +2,8 @@ package com.company.itpearls.web.screens.openposition.openpositionfragments;
 
 import com.company.itpearls.entity.*;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -16,6 +18,19 @@ import java.util.*;
 @UiController("itpearls_OpenPositionDetailScreenFragment")
 @UiDescriptor("open-position-detail-screen-fragment.xml")
 public class OpenPositionDetailScreenFragment extends ScreenFragment {
+    private static final String QUERY_SUBSCRIBERS =
+            "select e from itpearls_RecrutiesTasks e where e.endDate >= :currentDate and e.openPosition = :openPosition";
+
+    private static final View SUBSCRIBERS_TASKS_VIEW = ViewBuilder.of(RecrutiesTasks.class)
+            .add("reacrutier", recruiter -> recruiter
+                    .add("name")
+                    .add("fileImageFace", file -> file
+                            .add("name")
+                            .add("extension")
+                            .add("size")
+                            .add("createDate")))
+            .build();
+
     @Inject
     private CollectionContainer<OpenPosition> openPositionsDc;
     @Inject
@@ -55,7 +70,6 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
     private Label<String> remoteWorkTextField;
 
     public void setRemoteLabel() {
-        String ret = remoteWork.get(openPosition.getRemoteWork());
         remoteWorkTextField.setValue(remoteWork.get(openPosition.getRemoteWork()));
     }
 
@@ -101,44 +115,49 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
         setRemoteLabel();
     }
 
-    private static final String QUERY_SUBSCRIBERS = "select e from itpearls_RecrutiesTasks e where e.endDate >= :currentDate and e.openPosition = :openPosition";
-
     public void setSubscribersRecruters() {
+        recrutersHBox.removeAll();
+
+        if (openPosition == null) {
+            recrutersGroupBox.setVisible(false);
+            return;
+        }
 
         List<RecrutiesTasks> tasks = dataManager.load(RecrutiesTasks.class)
                 .query(QUERY_SUBSCRIBERS)
                 .parameter("openPosition", openPosition)
                 .parameter("currentDate", new Date())
-                .view("recrutiesTasks-view")
+                .view(SUBSCRIBERS_TASKS_VIEW)
                 .list();
 
-        if (tasks.size() != 0) {
-            for (RecrutiesTasks user : tasks) {
-                Image image = uiComponents.create(Image.class);
-
-                image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-                image.setWidth("30px");
-                image.setStyleName("circle-30px");
-                image.setDescription(user.getReacrutier().getName());
-
-                try {
-                    ExtUser extUser = (ExtUser) user.getReacrutier();
-
-                    if (extUser.getFileImageFace() != null) {
-                        image.setSource(FileDescriptorResource.class)
-                                .setFileDescriptor(extUser.getFileImageFace());
-                    } else {
-                        image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                recrutersHBox.add(image);
-                recrutersGroupBox.setVisible(true);
-            }
-        } else {
+        if (tasks.isEmpty()) {
             recrutersGroupBox.setVisible(false);
+            return;
         }
+
+        recrutersGroupBox.setVisible(true);
+        for (RecrutiesTasks task : tasks) {
+            ExtUser recruiter = task.getReacrutier();
+            if (recruiter == null) {
+                continue;
+            }
+            recrutersHBox.add(createRecruiterAvatarImage(recruiter));
+        }
+    }
+
+    private Image createRecruiterAvatarImage(ExtUser recruiter) {
+        Image image = uiComponents.create(Image.class);
+        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        image.setWidth("30px");
+        image.setStyleName("circle-30px");
+        image.setDescription(recruiter.getName());
+
+        if (recruiter.getFileImageFace() != null) {
+            image.setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(recruiter.getFileImageFace());
+        } else {
+            image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+        }
+        return image;
     }
 }

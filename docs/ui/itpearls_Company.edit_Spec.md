@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Карточка клиента/работодателя. В списке — фильтры «только наши» и «только юрлицо»; в форме при смене города подставляются регион и страна; описание и логотип подгружаются пакетно для ускорения таблицы.
+
 
 ---
 
@@ -97,32 +98,33 @@ select e from itpearls_Ownershup e
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл формы (Lifecycle)
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `mainTab` | `onMainTabSelectedTabChange` | см. Java |
-| `screen` | `onAfterShow` | см. Java |
-| `companyLogoFileUpload` | `onCompanyLogoFileUploadBeforeValueClear` | см. Java |
-| `screen` | `onBeforeShow` | см. Java |
-| `cityOfCompanyField` | `onCityOfCompanyFieldValueChange` | см. Java |
-| `regionOfCompanyField` | `onRegionOfCompanyFieldValueChange` | см. Java |
-| `companyLogoFileUpload` | `onCompanyLogoFileUploadFileUploadSucceed` | см. Java |
-| `companyLogoFileImage` | `onCompanyLogoFileImageSourceChange` | см. Java |
+| Экран | Что происходит при открытии |
+|-------|----------------------------|
+| Browse | Перед показом применяются фильтры «только наш клиент» / «только юрлицо»; после загрузки списка кэшируются текстовые описания для подсказок в колонках |
+| Edit | Для новой записи `ourClient=false`; при первом открытии вкладок лениво подгружаются адрес, описание и департаменты |
 
+### 4.2 Скрытые вычисления
+
+| Что видит пользователь | Правило |
+|------------------------|---------|
+| Логотип с подсказкой | HTML-tooltip с описанием компании из кэша |
+| Иконки ourClient / ourLegalEntity | Цвет и иконка по флагам записи |
+
+### 4.3 Валидация и сохранение
+
+Стандартный commit editor'а; дополнительных BeforeCommit в Java нет.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `lookup` | standard CUBA action | — | CRUD / lookup |
-| `create` | standard CUBA action | — | CRUD / lookup |
-| `edit` | standard CUBA action | — | CRUD / lookup |
-| `remove` | standard CUBA action | — | CRUD / lookup |
+| Элемент | Цепочка |
+|---------|---------|
+| «Только наш клиент» / «Только юрлицо» | Включение чекбокса → перезагрузка списка с параметром loader |
+| Смена города в edit | Выбор города → автозаполнение региона и страны |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -147,5 +149,6 @@ select e from itpearls_Ownershup e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

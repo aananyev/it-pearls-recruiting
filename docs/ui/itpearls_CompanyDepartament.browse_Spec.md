@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Департаменты компаний. В форме редактирования тяжёлые поля (описание, шаблон письма, проекты) загружаются при первом открытии соответствующей вкладки.
+
 
 ---
 
@@ -83,24 +84,24 @@ order by e.departamentRuName
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| — | — | Стандартное поведение CUBA (`StandardLookup` / `StandardEditor`) |
+Browse — стандартный. Edit: после показа для существующей записи подгружается описание департамента; смена вкладки → ленивая загрузка LOB и коллекции проектов.
 
+### 4.2 Скрытые вычисления
+
+Ленивый reload текстовых полей и `projectOfDepartment` только при первом заходе на вкладку.
+
+### 4.3 Валидация и сохранение
+
+Стандартный commit.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `create` | standard CUBA action | — | CRUD / lookup |
-| `edit` | standard CUBA action | — | CRUD / lookup |
-| `remove` | standard CUBA action | — | CRUD / lookup |
+| CRUD | Стандартный CUBA |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -125,5 +126,6 @@ order by e.departamentRuName
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

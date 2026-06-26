@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Карточка клиента/работодателя. В списке — фильтры «только наши» и «только юрлицо»; в форме при смене города подставляются регион и страна; описание и логотип подгружаются пакетно для ускорения таблицы.
+
 
 ---
 
@@ -92,37 +93,33 @@ order by e.comanyName
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл формы (Lifecycle)
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onBeforeShow` | см. Java |
-| `checkBoxOnlyOurClient` | `onCheckBoxOnlyOurClientValueChange` | см. Java |
-| `checkBoxOnlyLegalEntity` | `onCheckBoxOnlyLegalEntityValueChange` | см. Java |
+| Экран | Что происходит при открытии |
+|-------|----------------------------|
+| Browse | Перед показом применяются фильтры «только наш клиент» / «только юрлицо»; после загрузки списка кэшируются текстовые описания для подсказок в колонках |
+| Edit | Для новой записи `ourClient=false`; при первом открытии вкладок лениво подгружаются адрес, описание и департаменты |
 
+### 4.2 Скрытые вычисления
 
-### @Install (generators / providers)
+| Что видит пользователь | Правило |
+|------------------------|---------|
+| Логотип с подсказкой | HTML-tooltip с описанием компании из кэша |
+| Иконки ourClient / ourLegalEntity | Цвет и иконка по флагам записи |
 
-| Target | Subject | Назначение |
-|--------|---------|------------|
-| `companiesTable.companyLogoColumn` | `columnGenerator` | см. Java |
-| `companiesTable.ourCompanyIconColumn` | `columnGenerator` | см. Java |
-| `companiesTable.ourClientIconColumn` | `columnGenerator` | см. Java |
-| `companiesTable.ourCompanyIconColumn` | `styleProvider` | см. Java |
-| `companiesTable.ourClientIconColumn` | `styleProvider` | см. Java |
+### 4.3 Валидация и сохранение
 
+Стандартный commit editor'а; дополнительных BeforeCommit в Java нет.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `create` | standard CUBA action | — | CRUD / lookup |
-| `edit` | standard CUBA action | — | CRUD / lookup |
-| `remove` | standard CUBA action | — | CRUD / lookup |
+| Элемент | Цепочка |
+|---------|---------|
+| «Только наш клиент» / «Только юрлицо» | Включение чекбокса → перезагрузка списка с параметром loader |
+| Смена города в edit | Выбор города → автозаполнение региона и страны |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -147,5 +144,6 @@ order by e.comanyName
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

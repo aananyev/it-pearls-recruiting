@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Подписки рекрутёров на вакансии. В списке — фильтры, стили просроченных задач, факт интервью за период; в форме — проверка пересечения подписок и уведомление после подписки.
+
 
 ---
 
@@ -85,26 +86,27 @@ select e from itpearls_OpenPosition e
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onBeforeShow` | см. Java |
-| `screen` | `onBeforeCommitChanges` | см. Java |
-| `windowCommitAndCloseButton` | `onWindowCommitAndCloseButtonClick` | см. Java |
-| `screen` | `onAfterCommitChanges` | см. Java |
+Browse: стили просроченных, кнопка отписки; дефолтные фильтры перед показом. Edit: роли, даты, рекрутёр; после commit — уведомление о подписке.
 
+### 4.2 Скрытые вычисления
+
+factForPeriod (интервью за период vs план, цвет); иконка статуса вакансии; логотип проекта.
+
+### 4.3 Валидация и сохранение
+
+Перед сохранением: проверка дублирующих подписок (диалог); блокировка Researcher на internalProject; диалог флага подписки на изменения.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `lookup` | standard CUBA action | — | CRUD / lookup |
-| `open` | standard CUBA action | — | CRUD / lookup |
+| Элемент | Цепочка |
+|---------|---------|
+| Отписаться | Нажатие → flip closed + новость по вакансии |
+| Фильтры allRecruters / removeOld | Перезагрузка списка |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -129,5 +131,6 @@ select e from itpearls_OpenPosition e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

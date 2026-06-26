@@ -150,6 +150,9 @@
         <property name="login"/>
         <property name="fileImageFace" view="_minimal"/>
     </view>
+    <view entity="itpearls_ExtUser" name="extUser-recrutier-task-view" extends="extUser-picker-view">
+        <property name="email"/>
+    </view>
     <view entity="itpearls_OpenPosition" name="openPosition-picker-view" extends="_minimal">
         <property name="vacansyID"/>
         <property name="vacansyName"/>
@@ -993,9 +996,7 @@
         <property name="endDate"/>
         <property name="subscribe"/>
         <property name="closed"/>
-        <property name="reacrutier" view="_local">
-            <property name="fileImageFace" view="_minimal"/>
-        </property>
+        <property name="reacrutier" view="extUser-recrutier-task-view"/>
     </view>
     <view entity="itpearls_OpenPosition" name="openPosition-rtasks-view" extends="_local">
         <property name="projectName" view="_minimal">

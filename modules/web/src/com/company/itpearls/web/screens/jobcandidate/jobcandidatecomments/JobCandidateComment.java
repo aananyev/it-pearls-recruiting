@@ -44,6 +44,8 @@ public class JobCandidateComment extends Screen {
 
     private Boolean completeSetJobCandidateFlag = false;
     private Boolean getCompleteSetJobCandidateScreenFlag = false;
+    private OpenPosition defaultOpenPosition;
+    private Iteraction commentIteractionType;
     @Inject
     private Dialogs dialogs;
     @Inject
@@ -95,29 +97,23 @@ public class JobCandidateComment extends Screen {
     }
 
     private void setJobCandidateCollection() {
-        if (this.jobCandidate != null) {
-            if (!completeSetJobCandidateFlag) {
-                candidateCommentDl.setParameter("jobCandidate", this.jobCandidate);
-                candidateCommentDl.load();
-                completeSetJobCandidateFlag = true;
-
-                if (candidateCommentDc.getItems().size() > 0) {
-                    if (candidateCommentDc.getItems().get(0) != null) {
-                        if (candidateCommentDc.getItems().get(0).getCandidate() != null) {
-                            if (candidateCommentDc.getItems().get(0).getCandidate().getFileImageFace() != null) {
-                                faceImage.setSource(FileDescriptorResource.class)
-                                        .setFileDescriptor(candidateCommentDc.getItems().get(0).getCandidate().getFileImageFace());
-                            } else {
-                                faceImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-                            }
-                        }
-                    }
-                }
-
-                jobCandidateLabel.setValue(candidateCommentDc.getItems().get(0).getCandidate().getFullName());
-                jobCandidatePositionLabel.setValue(candidateCommentDc.getItems().get(0).getCandidate().getPersonPosition());
-            }
+        if (this.jobCandidate != null && !completeSetJobCandidateFlag) {
+            candidateCommentDl.setParameter("jobCandidate", this.jobCandidate);
+            candidateCommentDl.load();
+            completeSetJobCandidateFlag = true;
+            setJobCandidateHeader();
         }
+    }
+
+    private void setJobCandidateHeader() {
+        if (jobCandidate.getFileImageFace() != null) {
+            faceImage.setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(jobCandidate.getFileImageFace());
+        } else {
+            faceImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+        }
+        jobCandidateLabel.setValue(jobCandidate.getFullName());
+        jobCandidatePositionLabel.setValue(jobCandidate.getPersonPosition());
     }
 
     public void closeScreenButton() {
@@ -201,19 +197,39 @@ public class JobCandidateComment extends Screen {
 
     }
 
+    private OpenPosition getDefaultOpenPosition() {
+        if (defaultOpenPosition == null) {
+            try {
+                defaultOpenPosition = dataManager
+                        .loadValue("select e from itpearls_OpenPosition e where e.vacansyName like 'Default'",
+                                OpenPosition.class)
+                        .one();
+            } catch (Exception e) {
+                defaultOpenPosition = null;
+            }
+        }
+        return defaultOpenPosition;
+    }
+
+    private Iteraction getCommentIteractionType() {
+        if (commentIteractionType == null) {
+            try {
+                commentIteractionType = dataManager
+                        .loadValue("select e from itpearls_Iteraction e where e.signComment = true",
+                                Iteraction.class)
+                        .one();
+            } catch (IllegalStateException e) {
+                commentIteractionType = null;
+            }
+        }
+        return commentIteractionType;
+    }
+
     private void createComment(IteractionList iteractionList,
                                OpenPosition openPosition,
                                Integer rating,
                                String inputComment) {
-        Iteraction iteractionComment = null;
-
-        try {
-            iteractionComment = dataManager
-                    .loadValue("select e from itpearls_Iteraction e where e.signComment = true",
-                            Iteraction.class)
-                    .one();
-        } catch (IllegalStateException e) {
-        }
+        Iteraction iteractionComment = getCommentIteractionType();
 
         if (iteractionComment != null) {
             BigDecimal numberInteraction = dataManager
@@ -234,21 +250,17 @@ public class JobCandidateComment extends Screen {
 
             comment.setDateIteraction(new Date());
             if (openPosition == null) {
-                try {
-                    openPosition = dataManager
-                            .loadValue("select e from itpearls_OpenPosition e where e.vacansyName like \'Default\'",
-                                    OpenPosition.class)
-                            .one();
-                } catch (Exception e) {
+                openPosition = getDefaultOpenPosition();
+                if (openPosition == null) {
                     notifications.create(Notifications.NotificationType.ERROR)
                             .withType(Notifications.NotificationType.ERROR)
                             .withCaption(messageBundle.getMessage("msgError"))
                             .withDescription(messageBundle.getMessage("msgNotFindDefaultOpenPosition"))
                             .withHideDelayMs(15000)
                             .show();
+                    return;
                 }
             }
-
 
             comment.setCurrentOpenClose(openPosition.getOpenClose() != null ?
                     openPosition.getOpenClose() : false);
@@ -266,14 +278,7 @@ public class JobCandidateComment extends Screen {
             comment.setIteractionType(iteractionComment);
             comment.setNumberIteraction(numberInteraction);
 
-            if (openPosition != null) {
-                comment.setVacancy(openPosition);
-            } else {
-                comment.setVacancy(dataManager
-                        .loadValue("select e from itpearls_OpenPosition e where e.vacansyName like \'Default\'",
-                                OpenPosition.class)
-                        .one());
-            }
+            comment.setVacancy(openPosition);
 
             dataManager.commit(comment);
 

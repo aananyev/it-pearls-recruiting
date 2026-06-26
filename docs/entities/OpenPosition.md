@@ -19,7 +19,9 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Browse: фильтры подписки рекрутёра, приоритета, новых вакансий, удалёнки; batch-кэши exists LOB и агрегатов (число рекрутёров, отправленных CV, средний рейтинг); закрытие вакансии с batch-созданием `IteractionList` для кандидатов «на рассмотрении». Edit: lazy LOB и коллекции по вкладкам (`PreLoadEvent.preventLoad`); rescан навыков из описания должности; таймер `closedVacancyTimer` при `closingDate`; Telegram-уведомление при сохранении (не блокирует commit); проверка уникальности `vacansyID`. Views: `openPosition-browse-view` без LOB; `openPosition-edit-view` без коллекций на instance.
+**Browse:** при открытии — фильтры «только открытые» и «только моя подписка»; пакетная подготовка данных для колонок; раскрытие строки с фрагментом и кнопками; закрытие вакансии может массово завершить взаимодействия с кандидатами «на рассмотрении».
+
+**Edit:** много вкладок с ленивой загрузкой LOB и коллекций; автогенерация имени вакансии; проверка дубликатов и vacansyID; shortDescription ≤ 250 символов; уведомления и Telegram при открытии/закрытии.
 
 ---
 
@@ -66,6 +68,25 @@ Browse: фильтры подписки рекрутёра, приоритета
 | OpenPositionBrowse | `openPosition-browse-view` + batch exists-кэши LOB + lazy load текста |
 | OpenPositionEdit | `openPosition-edit-view` + lazy вкладки |
 
+### Поведение экранов (из Java)
+
+#### OpenPositionBrowse
+
+| Момент | Цепочка |
+|--------|---------|
+| Открытие | Фильтры opened + mySubscribe; срочные вакансии; Excel — только Manager |
+| После load | Batch-кэши LOB exists, агрегаты рекрутеров/CV/рейтинга |
+| Закрыть вакансию | → диалог кандидатов на рассмотрении → batch end-case → commit → уведомления |
+| Смена приоритета Low | → диалог недели + closingDate |
+
+#### OpenPositionEdit
+
+| Момент | Цепочка |
+|--------|---------|
+| Вкладки | Lazy LOB/collections при первом выборе |
+| Сохранение | sync skills + laborAgreement; дубликат имени/vacansyID; shortDescription ≤ 250 |
+| После save | OpenPositionNews; Telegram (ошибка не блокирует) |
+
 ### Java-оптимизации
 
 - **OpenPositionBrowse:** `removeCandidatesWithConsideration` — batch `CommitContext` для `IteractionList` при закрытии вакансии (один `dataManager.commit` вместо N×`commit(jc)`)
@@ -85,6 +106,8 @@ Browse: фильтры подписки рекрутёра, приоритета
 | OpenPositionBrowse | SQL tooltip/hover | batch LOB | 1×id при hover | −(N−k) | lazy text cache per field |
 | OpenPositionBrowse | SQL close vacancy (consideration) | N×commit(JobCandidate) | 1×CommitContext | −(N−1) commit | только новые IteractionList, FK candidate/vacancy |
 | OpenPositionBrowse | SQL на строку (rowStyle, lastCVSend, rating) | 3×N | 3 batch/страница | −(3N−3) | aggregate-кэши в PostLoad |
+| OpenPositionBrowse | SQL на строку (subscribers, stats, folder children) | до 4×N | 3 batch/страница | −(4N−3) | `subscribersByPosition`, `interactionStats*Cache`, `positionsWithChildren` |
+| OpenPositionBrowse | Loader page size | default | `maxResults=40` | cap rows | `openPositionsDl` |
 | OpenPositionEdit | LOB при открытии | все сразу | main tab + lazy | −4 LOB | вкладки exercise/template/… |
 
 ---
@@ -93,6 +116,8 @@ Browse: фильтры подписки рекрутёра, приоритета
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | OpenPositionBrowse: `maxResults=40`; batch subscribers (`QUERY_SUBSCRIBERS_BY_POSITIONS` + `SUBSCRIBERS_TASKS_VIEW`), interaction stats (`QUERY_COUNT_ITERACTIONS_BY_POSITIONS`), parent-folder (`QUERY_CHILD_POSITIONS_BY_PARENTS`); `fetch="BATCH"` в browse XML |
+| 2026-06-26 | Deep modernization: поведение browse/edit простым языком; Behavior Summary переписан |
 | 2026-06-26 | Добавлен Business & Context Intro (Living Documentation standard) |
 | 2026-06-23 | OpenPositionBrowse: `removeCandidatesWithConsideration` — batch `CommitContext` для `IteractionList` при закрытии вакансии (один commit вместо N×`commit(jc)`) |
 | 2026-06-23 | OpenPositionEdit: `closedVacancyTimer` — интервал 60 с, `autostart=false`; `initClosedVacancyTimerFacet` на AfterShow и смене `closingDate`; таймер стартует только при заданной дате закрытия |

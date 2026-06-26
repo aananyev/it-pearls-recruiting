@@ -17,7 +17,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Диалог выбора дополнительных должностей кандидата (TwinColumn). Открывается из JobCandidate.edit; при закрытии родитель читает выбранный список и добавляет уникальные позиции.
+
 
 ---
 
@@ -75,23 +76,21 @@ flowchart LR
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-| Событие | Логика |
-|---------|--------|
-| `BeforeShow` | load Position JPQL с фильтром `not like '%(не использовать)%'`, `positionTwinColumn.setOptionsList(positions)` |
-| `closeBtn` click | `closeWithDefaultAction()` |
+### 4.1 Жизненный цикл
 
-Нет валидации и commit на уровне диалога — персистенция в `JobCandidateEdit`.
+Перед показом загружаются все должности кроме «(не использовать)» → заполняется левый список TwinColumn. Родитель может предзаполнить правый список через `setPositionsList`.
+
+### 4.2–4.3
+
+Нет скрытых вычислений; сохранение выполняет родитель после закрытия диалога.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Элемент | id | Эффект |
-|---------|-----|--------|
-| Twin column | `positionTwinColumn` | перенос должностей left↔right, `addAllBtnEnabled` |
-| Закрыть | `closeBtn` | закрытие диалога (`msg://msgClose`) |
+| closeBtn | Закрытие диалога → родитель вызывает getPositionsList() |
+| TwinColumn | Перенос должностей между списками; итог — getValue() |
 
-Стандартные кнопки OK/Cancel отсутствуют — только Close; данные читаются родителем в `AfterCloseListener`.
 
 ---
 
@@ -110,5 +109,6 @@ layout (expand=positionTwinColumn, spacing=true)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первичная UI Spec из `select-person-positions.xml` и `SelectPersonPositions.java` |

@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Упрощённый список взаимодействий кандидата по одной вакансии. Открывается из карточки кандидата; показывает ФИО и должность; копирование последнего взаимодействия.
+
 
 ---
 
@@ -85,38 +86,21 @@ select e from itpearls_IteractionList e order by e.numberIteraction desc
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onBeforeShow` | см. Java |
-| `screen` | `onInit` | см. Java |
+Перед показом: настройка кнопок; если передан jobCandidate — подписи ФИО и должности (RU/EN). Loader фильтруется по кандидату и вакансии из setOpenPosition.
 
+### 4.2 Скрытые вычисления
 
-### @Install (generators / providers)
-
-| Target | Subject | Назначение |
-|--------|---------|------------|
-| `iteractionListsTable.rating` | `columnGenerator` | см. Java |
-| `iteractionListsTable.iteractionType` | `descriptionProvider` | см. Java |
-| `iteractionListsTable.vacancy` | `descriptionProvider` | см. Java |
-| `iteractionListsTable.commentColumn` | `columnGenerator` | см. Java |
-| `iteractionListsTable.commentColumn` | `styleProvider` | см. Java |
-| `iteractionListsTable.commentColumn` | `descriptionProvider` | см. Java |
-| `iteractionListsTable.currentOpenCloseColumn` | `columnGenerator` | см. Java |
-| `iteractionListsTable.currentOpenCloseColumn` | `styleProvider` | см. Java |
-| `iteractionListsTable.currentOpenCloseColumn` | `descriptionProvider` | см. Java |
-
+Звёздный рейтинг в колонках; HTML-описания комментариев (Jsoup).
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| create/edit/remove | standard | — | CRUD |
+| copyLastIteractionButton | Копия последнего взаимодействия |
+| create/edit | Стандартный CRUD IteractionList |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -141,5 +125,6 @@ select e from itpearls_IteractionList e order by e.numberIteraction desc
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

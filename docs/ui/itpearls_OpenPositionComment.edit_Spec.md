@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Комментарии и рейтинги вакансий. Звёздный рейтинг в списке и форме; после сохранения — глобальное уведомление с названием вакансии.
+
 
 ---
 
@@ -82,25 +83,24 @@ select e from itpearls_OpenPosition e
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onInit` | см. Java |
-| `screen` | `onBeforeShow` | см. Java |
-| `screen` | `onAfterCommitChanges` | см. Java |
+Browse: генератор звёздного рейтинга. Edit: шкала рейтинга при init; для новой записи — текущая дата; после commit — UiNotificationEvent.
 
+### 4.2 Скрытые вычисления
+
+Звёзды через StarsAndOtherService; динамический цвет label рейтинга.
+
+### 4.3 Валидация и сохранение
+
+После сохранения: глобальное уведомление с названием вакансии.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `lookup` | standard CUBA action | — | CRUD / lookup |
-| `clear` | standard CUBA action | — | CRUD / lookup |
+| setOpenPositionField / setUserField | Программная установка FK при открытии из других экранов |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -125,5 +125,6 @@ select e from itpearls_OpenPosition e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

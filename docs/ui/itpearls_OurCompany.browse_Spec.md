@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Список компаний HRM HuntTech (наши юрлица). Наследует CompanyBrowse, но при открытии принудительно фильтрует only ourLegalEntity=true и скрывает лишние чекбоксы.
+
 
 ---
 
@@ -78,22 +79,20 @@
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onBeforeShow1` | см. Java |
+Перед показом: чекбокс «только юрлицо» скрыт; «только наш клиент» = false; loader с параметром setOurLegalEntity=true → загрузка только наших юрлиц.
 
+### 4.2–4.3
+
+Наследует генераторы и фильтры CompanyBrowse; стандартный commit в edit.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| create/edit/remove | standard | — | CRUD |
+| CRUD | Как CompanyBrowse, но список предфильтрован |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -118,5 +117,6 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

@@ -80,6 +80,38 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             "select e from itpearls_OpenPosition e where e.openClose = false and e.priority >= :priority";
     private static final String QUERY_PARENT_OPENPOSITION =
             "select e from itpearls_OpenPosition e where e.parentOpenPosition = :parentOpenPosition";
+    private static final String QUERY_SUBSCRIBERS_BY_POSITIONS =
+            "select e from itpearls_RecrutiesTasks e where e.openPosition.id in :ids "
+                    + "and e.endDate > current_date and e.closed = false";
+    private static final String QUERY_CHILD_POSITIONS_BY_PARENTS =
+            "select distinct e.parentOpenPosition.id from itpearls_OpenPosition e "
+                    + "where e.parentOpenPosition.id in :ids";
+    private static final String QUERY_COUNT_ITERACTIONS_BY_DIRECT_VACANCIES =
+            "select e.vacancy.id as positionId, e.iteractionType as iteractionType, count(e) as cnt "
+                    + "from itpearls_IteractionList e "
+                    + "where e.dateIteraction between :startDate and :endDate "
+                    + "and e.iteractionType.statistics = true "
+                    + "and e.vacancy.id in :ids "
+                    + "and (e.vacancy.parentOpenPosition is null or e.vacancy.parentOpenPosition.id not in :ids) "
+                    + "group by e.vacancy.id, e.iteractionType";
+    private static final String QUERY_COUNT_ITERACTIONS_BY_CHILD_VACANCIES =
+            "select e.vacancy.parentOpenPosition.id as positionId, e.iteractionType as iteractionType, count(e) as cnt "
+                    + "from itpearls_IteractionList e "
+                    + "where e.dateIteraction between :startDate and :endDate "
+                    + "and e.iteractionType.statistics = true "
+                    + "and e.vacancy.parentOpenPosition.id in :ids "
+                    + "group by e.vacancy.parentOpenPosition.id, e.iteractionType";
+    private static final View SUBSCRIBERS_TASKS_VIEW = ViewBuilder.of(RecrutiesTasks.class)
+            .add("endDate")
+            .add("openPosition", op -> op.add("id"))
+            .add("reacrutier", recruiter -> recruiter
+                    .add("name")
+                    .add("fileImageFace", file -> file
+                            .add("name")
+                            .add("extension")
+                            .add("size")
+                            .add("createDate")))
+            .build();
     private static final String QUERY_ACTIVE_RECRUITERS_COUNT_BY_POSITIONS =
             "select e.openPosition.id as openPositionId, count(e.reacrutier) as cnt from itpearls_RecrutiesTasks e "
                     + "where e.openPosition.id in :ids and e.closed = false and e.endDate >= :currentDate "
@@ -250,6 +282,10 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Map<UUID, Integer> activeRecruitersCountByPosition = Collections.emptyMap();
     private Map<UUID, Integer> sentCvCountByPosition = Collections.emptyMap();
     private Map<UUID, BigDecimal> avgRatingByPosition = Collections.emptyMap();
+    private Map<UUID, List<RecrutiesTasks>> subscribersByPosition = Collections.emptyMap();
+    private Set<UUID> positionsWithChildren = Collections.emptySet();
+    private Map<UUID, String> interactionStatsColumnCache = Collections.emptyMap();
+    private Map<UUID, String> interactionStatsDescriptionCache = Collections.emptyMap();
 
     private final Map<UUID, String> lazyCommentTextCache = new HashMap<>();
     private final Map<UUID, String> lazyExerciseTextCache = new HashMap<>();
@@ -264,6 +300,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         clearLazyLobTextCaches();
         refreshBrowseLobExistsCaches(positions);
         refreshBrowseAggregateCaches(positions);
+        refreshBrowseSubscribersCache(positions);
+        refreshPositionsWithChildrenCache(positions);
+        refreshBrowseInteractionStatsCaches(positions);
     }
 
     private void clearLazyLobTextCaches() {
@@ -460,6 +499,125 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             }
         }
         avgRatingByPosition = avgRatings;
+    }
+
+    private List<UUID> collectPositionIds(List<OpenPosition> positions) {
+        List<UUID> ids = new ArrayList<>();
+        for (OpenPosition position : positions) {
+            if (position.getId() != null) {
+                ids.add(position.getId());
+            }
+        }
+        return ids;
+    }
+
+    private void refreshBrowseSubscribersCache(List<OpenPosition> positions) {
+        List<UUID> ids = collectPositionIds(positions);
+        if (ids.isEmpty()) {
+            subscribersByPosition = Collections.emptyMap();
+            return;
+        }
+
+        Map<UUID, List<RecrutiesTasks>> subscribers = new HashMap<>();
+        List<RecrutiesTasks> tasks = dataManager.load(RecrutiesTasks.class)
+                .query(QUERY_SUBSCRIBERS_BY_POSITIONS)
+                .parameter("ids", ids)
+                .view(SUBSCRIBERS_TASKS_VIEW)
+                .list();
+        for (RecrutiesTasks task : tasks) {
+            if (task.getOpenPosition() != null && task.getOpenPosition().getId() != null) {
+                subscribers.computeIfAbsent(task.getOpenPosition().getId(), key -> new ArrayList<>()).add(task);
+            }
+        }
+        subscribersByPosition = subscribers;
+    }
+
+    private void refreshPositionsWithChildrenCache(List<OpenPosition> positions) {
+        List<UUID> ids = collectPositionIds(positions);
+        if (ids.isEmpty()) {
+            positionsWithChildren = Collections.emptySet();
+            return;
+        }
+        positionsWithChildren = new HashSet<>(loadIdsByQuery(QUERY_CHILD_POSITIONS_BY_PARENTS, ids));
+    }
+
+    private void refreshBrowseInteractionStatsCaches(List<OpenPosition> positions) {
+        List<UUID> ids = collectPositionIds(positions);
+        if (ids.isEmpty()) {
+            interactionStatsColumnCache = Collections.emptyMap();
+            interactionStatsDescriptionCache = Collections.emptyMap();
+            return;
+        }
+
+        GregorianCalendar gregorianCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
+        Date endDate = gregorianCalendar.getTime();
+        gregorianCalendar.add(Calendar.MONTH, -montOfStat);
+        Date startDate = gregorianCalendar.getTime();
+
+        Map<UUID, List<KeyValueEntity>> rowsByPosition = new HashMap<>();
+        loadInteractionStatsRows(rowsByPosition, ids, startDate, endDate,
+                QUERY_COUNT_ITERACTIONS_BY_DIRECT_VACANCIES);
+        loadInteractionStatsRows(rowsByPosition, ids, startDate, endDate,
+                QUERY_COUNT_ITERACTIONS_BY_CHILD_VACANCIES);
+
+        Map<UUID, String> columnCache = new HashMap<>();
+        Map<UUID, String> descriptionCache = new HashMap<>();
+        for (UUID id : ids) {
+            List<KeyValueEntity> rows = rowsByPosition.get(id);
+            if (rows == null || rows.isEmpty()) {
+                continue;
+            }
+
+            StringBuilder columnText = new StringBuilder();
+            StringBuilder descriptionText = new StringBuilder("Статистика за ")
+                    .append(montOfStat)
+                    .append(" месяца\n");
+            for (KeyValueEntity row : rows) {
+                Object countValue = row.getValue("cnt");
+                if (countValue != null) {
+                    columnText.append(countValue.toString()).append(" / ");
+                }
+                Iteraction iteractionType = row.getValue("iteractionType");
+                if (iteractionType != null && countValue != null) {
+                    descriptionText.append(iteractionType.getIterationName())
+                            .append(" : ")
+                            .append(countValue.toString())
+                            .append("\n");
+                }
+            }
+            if (columnText.length() > 0) {
+                columnText.deleteCharAt(columnText.length() - 1);
+                columnCache.put(id, columnText.toString());
+            }
+            if (descriptionText.length() > 0) {
+                descriptionText.deleteCharAt(descriptionText.length() - 1);
+                descriptionCache.put(id, descriptionText.toString());
+            }
+        }
+        interactionStatsColumnCache = columnCache;
+        interactionStatsDescriptionCache = descriptionCache;
+    }
+
+    private void loadInteractionStatsRows(Map<UUID, List<KeyValueEntity>> rowsByPosition,
+                                          List<UUID> ids, Date startDate, Date endDate, String query) {
+        for (KeyValueEntity row : dataManager.loadValues(query)
+                .properties("positionId", "iteractionType", "cnt")
+                .parameter("ids", ids)
+                .parameter("startDate", startDate)
+                .parameter("endDate", endDate)
+                .list()) {
+            UUID positionId = row.getValue("positionId");
+            if (positionId != null) {
+                rowsByPosition.computeIfAbsent(positionId, key -> new ArrayList<>()).add(row);
+            }
+        }
+    }
+
+    private List<RecrutiesTasks> getSubscribersForPosition(OpenPosition openPosition) {
+        if (openPosition == null || openPosition.getId() == null) {
+            return Collections.emptyList();
+        }
+        return subscribersByPosition.getOrDefault(openPosition.getId(), Collections.emptyList());
     }
 
     private Position ensurePositionTypeLoaded(Position position) {
@@ -1302,11 +1460,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         String returnData = "";
         StringBuilder sb = new StringBuilder();
 
-        List<RecrutiesTasks> recrutiesTasks = dataManager.load(RecrutiesTasks.class)
-                .view("recrutiesTasks-view")
-                .query(QUERY_RECRUTIER_TASK)
-                .parameter("openPosition", openPosition)
-                .list();
+        List<RecrutiesTasks> recrutiesTasks = getSubscribersForPosition(openPosition);
 
         if (openPosition.getShortDescription() != null) {
             sb.append("\n<b>Кратко: </b><i>");
@@ -2869,75 +3023,22 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
 
     private String getIDStatistics(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
-//        String retStr = "";
-        StringBuilder sb = new StringBuilder();
-
-        GregorianCalendar gregorianCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
-        Date endDate = gregorianCalendar.getTime();
-        gregorianCalendar.add(Calendar.MONTH, -montOfStat);
-        Date startDate = gregorianCalendar.getTime();
-
-        List<KeyValueEntity> iteractionIntegerKeyValue =
-                dataManager.loadValues(QUERY_COUNT_ITERACTIONS)
-                        .properties("iteractionType", "sum")
-                        .parameter("startDate", startDate)
-                        .parameter("vacancy", event.getItem())
-                        .parameter("endDate", endDate)
-                        .list();
-
-        if (iteractionIntegerKeyValue.size() != 0) {
-            for (KeyValueEntity entity : iteractionIntegerKeyValue) {
-//                retStr += entity.getValue("sum") + " / ";
-                sb.append(entity.getValue("sum").toString()).append(" / ");
-
-            }
-
-//            retStr = retStr.substring(0, retStr.length() - 3);
-            sb.deleteCharAt(sb.length() - 1);
+        if (event.getItem().getId() == null) {
+            return "";
         }
-
-        return sb.toString();
+        return interactionStatsColumnCache.getOrDefault(event.getItem().getId(), "");
     }
 
     @Install(to = "openPositionsTable.idStatistics", subject = "descriptionProvider")
     private String openPositionsTableIdStatisticsDescriptionProvider(OpenPosition openPosition) {
-//        String retStr = "Статистика за " + montOfStat + " месяца\n";
-        StringBuilder sb = new StringBuilder();
-        sb.append("Статистика за ")
-                .append(montOfStat)
-                .append(" месяца\n");
-
-        GregorianCalendar gregorianCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
-        Date endDate = gregorianCalendar.getTime();
-        gregorianCalendar.add(Calendar.MONTH, -montOfStat);
-        Date startDate = gregorianCalendar.getTime();
-
-        List<KeyValueEntity> iteractionIntegerKeyValue =
-                dataManager.loadValues(QUERY_COUNT_ITERACTIONS)
-                        .properties("iteractionType", "sum")
-                        .parameter("startDate", startDate)
-                        .parameter("vacancy", openPosition)
-                        .parameter("endDate", endDate)
-                        .list();
-
-        if (iteractionIntegerKeyValue.size() != 0) {
-            for (KeyValueEntity entity : iteractionIntegerKeyValue) {
-                String iteractionName = ((Iteraction) entity.getValue("iteractionType"))
-                        .getIterationName();
-//                retStr += iteractionName + " : " + entity.getValue("sum") + "\n";
-
-                sb.append(iteractionName)
-                        .append(" : ")
-                        .append(entity.getValue("sum").toString())
-                        .append("\n");
-            }
-
-            sb.deleteCharAt(sb.length() - 1);
-
-//            retStr = retStr.substring(0, retStr.length() - 1);
+        if (openPosition.getId() == null) {
+            return "";
         }
-
-        return sb.toString();
+        String cached = interactionStatsDescriptionCache.get(openPosition.getId());
+        if (cached != null) {
+            return cached;
+        }
+        return "Статистика за " + montOfStat + " месяца\n";
     }
 
     String more_10_msg = "<font color=red>10</font>";
@@ -3113,11 +3214,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         Label retLabel = uiComponents.create(Label.NAME);
 
 
-        if (dataManager.load(OpenPosition.class)
-                .query(QUERY_PARENT_OPENPOSITION)
-                .parameter("parentOpenPosition", columnGeneratorEvent.getItem())
-                .view("openPosition-view")
-                .list().size() > 0) {
+        if (columnGeneratorEvent.getItem().getId() != null
+                && positionsWithChildren.contains(columnGeneratorEvent.getItem().getId())) {
             retStr = "FOLDER";
             styleRetLabel = "open-position-pic-center-x-large-gray";
 
@@ -3782,18 +3880,9 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
 
     private HBoxLayout setSubscribersRecruters(OpenPosition openPosition) {
-        final String QUERY_SUBSCRIBERS = "select e from itpearls_RecrutiesTasks e where e.endDate >= :currentDate and e.openPosition = :openPosition";
-
         HBoxLayout recrutersHBox = uiComponents.create(HBoxLayout.class);
 
-        List<RecrutiesTasks> tasks = dataManager.load(RecrutiesTasks.class)
-                .query(QUERY_SUBSCRIBERS)
-                .parameter("openPosition", openPosition)
-                .parameter("currentDate", new Date())
-                .view("recrutiesTasks-view")
-                .list();
-
-        for (RecrutiesTasks user : tasks) {
+        for (RecrutiesTasks user : getSubscribersForPosition(openPosition)) {
             Image image = uiComponents.create(Image.class);
 
             image.setScaleMode(Image.ScaleMode.SCALE_DOWN);

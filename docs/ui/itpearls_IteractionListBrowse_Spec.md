@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Расширенный browse взаимодействий: фильтр по дате (от), «только мои», стили строк, иконки типов. Используется как отдельный экран списка.
+
 
 ---
 
@@ -63,16 +64,22 @@
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-Стандартный `ScreenFragment` без `@Subscribe` и `@Install`. Интерактивность определяется родительским экраном и привязанным `dataContainer`.
+### 4.1 Жизненный цикл
+
+Перед показом — инициализация колонок и фильтров; dateFrom и checkBoxShowOnlyMy меняют параметры loader; PostLoad — стили и иконки.
+
+### 4.2 Скрытые вычисления
+
+rowStyleProvider по типу и дате; rating stars; open/close иконки вакансии.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Элемент | id | Эффект |
-|---------|-----|--------|
-| `buttonsPanel` | `buttonsPanel` | пустая панель (`alwaysVisible="true"`) |
-| actions таблицы | — | не заданы |
+| dateFromField | Перезагрузка с даты |
+| checkBoxShowOnlyMy | Фильтр по текущему рекрутеру |
+| CRUD | Стандартный + copy actions из контроллера |
+
 
 ---
 
@@ -88,5 +95,6 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec |

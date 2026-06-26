@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Справочник типов взаимодействий. В форме — флаги уведомлений, lazy-load цепочки и email-шаблона; перед сохранением null-булевы флаги приводятся к false.
+
 
 ---
 
@@ -85,36 +86,25 @@ select e from itpearls_Iteraction e order by e.number
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| — | — | Стандартное поведение CUBA (`StandardLookup` / `StandardEditor`) |
+Browse стандартный. Edit: radio/maps уведомлений; вкладки lazy-load элементов цепочки, email-шаблона, workStatus.
 
+### 4.2 Скрытые вычисления
 
-### @Install (generators / providers)
+Превью иконки; заполнение ключей email из EmailGenerationService; lazy load textEmailToSend.
 
-| Target | Subject | Назначение |
-|--------|---------|------------|
-| `iteractionTreeTable.needSendEmail` | `columnGenerator` | см. Java |
-| `iteractionTreeTable.needSendMemo` | `columnGenerator` | см. Java |
-| `iteractionTreeTable.notification` | `columnGenerator` | см. Java |
-| `iteractionTreeTable.notification` | `styleProvider` | см. Java |
-| `iteractionTreeTable.needSendEmail` | `styleProvider` | см. Java |
-| `iteractionTreeTable.needSendMemo` | `styleProvider` | см. Java |
+### 4.3 Валидация и сохранение
 
+Перед сохранением: sign-флаги (endCase, ourInterview, clientInterview, sentToClient, statistics, priorityNews, viewOnlyManagers) null → false.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `add` | standard CUBA action | — | CRUD / lookup |
-| `edit` | standard CUBA action | — | CRUD / lookup |
-| `remove` | standard CUBA action | — | CRUD / lookup |
+| Чекбоксы calendar/callDialog/flag/mandatory | Вкл./выкл. связанных полей |
+| notificationNeedSend | Блок настроек уведомлений |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -139,5 +129,6 @@ select e from itpearls_Iteraction e order by e.number
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

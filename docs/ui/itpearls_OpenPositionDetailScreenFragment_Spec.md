@@ -21,7 +21,8 @@ Read-only блок деталей вакансии в `detailsGenerator` browse:
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Раскрытая строка вакансии: режим удалёнки, флаги тестового задания и письма, emoji зарплатного комментария, аватары подписанных рекрутёров.
+
 
 ---
 
@@ -70,7 +71,7 @@ View наследуется от родительского `openPosition-browse
 
 ### Java load
 
-`QUERY_SUBSCRIBERS` → `RecrutiesTasks` (`recrutiesTasks-view`) для `setSubscribersRecruters()`.
+`QUERY_SUBSCRIBERS` → `RecrutiesTasks` с inline `ViewBuilder` (`SUBSCRIBERS_TASKS_VIEW`: `reacrutier.name`, `reacrutier.fileImageFace` _minimal) для `setSubscribersRecruters()` — один JPQL без N+1; аватары через `FileDescriptorResource`.
 
 ---
 
@@ -89,27 +90,29 @@ flowchart TD
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-| Метод / событие | Логика |
-|-----------------|--------|
-| `onAttach` | `setDefaultCompanyLogo()` — fallback `icons/no-company.png` |
-| `setLabels` | `needExeciseLabel`, `needLetterLabel` visibility; salary comment emoji + description; `setRemoteLabel()` (0=Нет, 1=Удаленная, 2=Частично 50/50) |
-| `setSubscribersRecruters` | Image 30px circle per active `RecrutiesTasks.reacrutier`, avatar or `no-programmer.jpeg`; hide `recrutersGroupBox` if empty |
+### 4.1 Жизненный цикл
 
-`remoteWork` map захардкожена в Java (не messages).
+При attach — placeholder логотипа компании если нет source. Родитель вызывает setOpenPosition → setLabels → setSubscribersRecruters.
+
+### 4.2 Скрытые вычисления
+
+| Элемент | Правило |
+|---------|---------|
+| remoteWorkTextField | 0 «Нет», 1 «Удалённая», 2 «Частично 50/50» |
+| needExercise / needLetter | Видимость label-ов |
+| salaryComment | Emoji 📃 в labels |
+| recrutersGroupBox | JPQL активных RecrutiesTasks (`endDate >= today`); bulk fetch `reacrutier` (name + fileImageFace); `FileDescriptorResource` или no-programmer.jpeg; `recrutersHBox.removeAll()` перед перерисовкой |
+
+### 4.3 Валидация и сохранение
+
+Нет.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-Фрагмент не содержит action-кнопок. Индикаторы:
+Кнопки действий (edit, open/close, комментарии) — в родительском OpenPositionBrowse.detailsGenerator, не во фрагменте.
 
-| Label | Условие visible |
-|-------|-----------------|
-| `needExeciseLabel` | `needExercise == true` |
-| `needLetterLabel` | `needLetter == true` |
-| `salaryComment1/2` | при `salaryComment != null` (emoji + tooltip) |
-
-Кнопки edit/close/subscribe создаются в `OpenPositionBrowse.detailsGenerator`, не во фрагменте.
 
 ---
 
@@ -135,5 +138,7 @@ layout (expand=mainHBox)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | perf: `setSubscribersRecruters` — `ViewBuilder` SUBSCRIBERS_TASKS_VIEW, FileDescriptorResource, clear hbox |
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первичная UI Spec из `open-position-detail-screen-fragment.xml` и `OpenPositionDetailScreenFragment.java` |

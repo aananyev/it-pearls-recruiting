@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Дерево навыков. В списке — ссылки на Wikipedia и цвет приоритета; в форме — парсинг статьи Wiki в описание и превью картинки навыка.
+
 
 ---
 
@@ -88,34 +89,27 @@ select e from itpearls_SkillTree e
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onInit` | см. Java |
-| `fileImageSkillUpload` | `onFileImageSkillUploadFileUploadSucceed` | см. Java |
-| `wikiPateField` | `onWikiPateFieldValueChange` | см. Java |
-| `screen` | `onAfterShow` | см. Java |
-| `screen` | `onBeforeShow` | см. Java |
+Edit: при инициализации — список приоритетов и слушатель имени; перед показом — дефолт notParsing; после показа — лого из Wiki-HTML.
 
+### 4.2 Скрытые вычисления
 
-### @Install (generators / providers)
+Browse: колонка wikiPage (ссылка), prioritySkill (стиль по StandartPrioritySkills). Edit: стиль приоритета; upload превью skillPic.
 
-| Target | Subject | Назначение |
-|--------|---------|------------|
-| `skillPriorityField` | `optionCaptionProvider` | см. Java |
-| `skillPriorityField` | `optionStyleProvider` | см. Java |
+### 4.3 Валидация и сохранение
 
+Стандартный commit.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `lookup` | standard CUBA action | — | CRUD / lookup |
+| Элемент | Цепочка |
+|---------|---------|
+| parseWikiToDescription | Нажатие → парсинг Wikipedia → заполнение RichTextArea + превью |
+| Смена skillName | Диалог обновления Wiki URL |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -140,5 +134,6 @@ select e from itpearls_SkillTree e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

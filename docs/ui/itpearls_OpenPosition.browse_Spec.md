@@ -17,7 +17,7 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-`openPosition-browse-view` без LOB; batch PostLoad-кэши (exists LOB, recruiters count, sent CV, avg rating); custom-фильтры проекта/должности/владельца/новых вакансий; `rowStyleProvider` по приоритету и подписке; закрытие вакансии с batch `IteractionList`; lazy load полного текста LOB в tooltip/description.
+При открытии списка включаются фильтры «только открытые» и «только моя подписка»; для не-менеджеров приоритет по умолчанию Normal. После загрузки строк пакетно подготавливаются данные для колонок (наличие описаний, число рекрутёров, отправленных CV). Клик по строке раскрывает карточку вакансии с кнопками редактирования, открытия/закрытия и подбора кандидатов. Закрытие вакансии может потребовать массового завершения взаимодействий с кандидатами «на рассмотрении».
 
 ---
 
@@ -44,7 +44,7 @@
 
 | Контейнер | Entity | View | Loader |
 |-----------|--------|------|--------|
-| `openPositionsDc` | `OpenPosition` | `extends="openPosition-browse-view"` | `openPositionsDl`, `readOnly=true` |
+| `openPositionsDc` | `OpenPosition` | `extends="openPosition-browse-view"` + `fetch="BATCH"` на `projectName`, `positionType`, `owner`, `openPositionComments`, `someFiles`, `cities` | `openPositionsDl`, `readOnly=true`, `maxResults=40` |
 
 ### JPQL
 
@@ -58,7 +58,7 @@ select e from itpearls_OpenPosition e order by e.vacansyName
 
 Используются в column generators без LOB: `vacansyName`, `vacansyID`, `priority`, `openClose`, `signDraft`, `remoteWork`, `salaryMin`/`salaryMax`, `numberPosition`, `workExperience`, `positionType` (`positionRuName`/`positionEnName`), `projectName` (logo, projectName, `projectDepartment.companyName`, descriptions — lazy exists cache), `owner`, `parentOpenPosition`.
 
-Batch-кэши в Java (PostLoad): exists LOB, active recruiters count, sent CV count, avg rating.
+Batch-кэши в Java (PostLoad): exists LOB, active recruiters count, sent CV count, avg rating, **subscribers** (`subscribersByPosition`), **child-folder** (`positionsWithChildren`), **interaction stats** (`interactionStatsColumnCache` / `interactionStatsDescriptionCache` — два JPQL-запроса: прямые вакансии и дочерние, свёрнутые к `parentOpenPosition.id`; без `CASE` в `GROUP BY`, совместимо с парсером CUBA 7).
 
 ### Фильтр
 
@@ -93,34 +93,51 @@ flowchart TD
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-| Область | Поведение |
-|---------|-----------|
-| `openPositionsDl` PostLoad | `refreshBrowseLobExistsCaches`, `refreshBrowseAggregateCaches` |
-| `detailsGenerator` | GroupBox: title, кнопки (edit, close, priority, comment, open/close, description, GigaChat, sent candidates), fragment, Skillsbar |
-| `rowStyleProvider` | цвет строки по приоритету, подписке, паузе |
-| `subscribeRadioButtonGroup` | фильтр подписчик/не подписчик/свободные |
-| Чекбоксы | `checkBoxOnlyOpenedPosition`, `signDraftCheckBox`, `checkBoxOnlyNotPaused`, `checkBoxOnlyMySubscribe` |
-| Lookup fields | `notLowerRatingLookupField`, `remoteWorkLookupField` → параметры loader |
-| `urgentlyPositons` | динамические кнопки срочных вакансий (`priority >= …`) |
-| Column generators | 20+ кастомных колонок: folder tree, traffic-light priority, logos, salary range, stats, last CV send |
+### 4.1 Жизненный цикл формы (Lifecycle)
 
-Закрытие вакансии: `openCloseButton` / details — `removeCandidatesWithConsideration` (batch `CommitContext` для `IteractionList`).
+| Этап | Что происходит | Роли |
+|------|----------------|------|
+| Инициализация | Настройка колонок, фильтров подписки/приоритета/удалёнки, кнопки групповой подписки; загрузка пользователей для колонки владельца | Групповая подписка — Management/Hunting |
+| Перед показом | Фильтр «только открытые»; Excel только для Manager; дефолт приоритета Normal для не-Manager; блок «срочных» вакансий (3 шт.) | Manager → доступен Excel |
+| После показа | «Только моя подписка» = true; режим подписки по группе (Management/Accounting → «все», иначе «в подписке»); включение/выключение popup-действий | — |
+| После загрузки списка | Очистка lazy-кэшей LOB; batch-проверки comment/exercise/memo/template; агрегаты рекрутеров, CV, рейтинга | — |
+
+### 4.2 Скрытые вычисления
+
+| Что видит пользователь | Правило |
+|------------------------|---------|
+| Цвет строки | Черновик / internal project / command / наличие активных рекрутеров |
+| Зарплата в колонке | Деление на 1000, режим «по запросу кандидата», outstaffing, emoji комментария |
+| Текст описания в tooltip | Lazy-load LOB только при наведении или открытии «Описание» |
+| Срочные вакансии (верхний блок) | Shuffle + группировка по должности; клик → фильтр по rating и positionType |
+| Обратный отсчёт в колонке folder | До `closingDate` |
+| Статистика idStatistics | Два batch-JPQL за 3 месяца: прямые вакансии + дочерние (rollup к родителю); кэш колонки и tooltip |
+
+### 4.3 Валидация и сохранение
+
+Browse не является editor. Сохранение через отдельные `dataManager.commit`: открытие/закрытие вакансии, смена приоритета, установка `closingDate` при Low, массовое закрытие кандидатов при закрытии вакансии.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Элемент | Эффект |
-|---------|--------|
-| CRUD | `createBtn`, `editBtn`, `removeBtn` |
-| `openCloseButton` | popup open/close (частично закомментирован в XML) |
-| `buttonSubscribe` | `subscribePosition` (enable при выборе) |
-| `groupSubscribe` | `groupSubscribe` (скрыт) |
-| `suggestCandidateButton` | `suggestCandidateButton` (скрыт) |
-| `setRatingButton` | `setRatingComment`, `openPositionCommentViewInvoke` |
-| `reportsPopupButton` | `getMemoForCandidate` (list print form, скрыт) |
-| `clearUrgentPos` | `clearUrgentFilter` |
-| Excel | скрыт/disabled |
+| Элемент | Цепочка |
+|---------|---------|
+| Подписаться | Нажатие → диалог подписки (`RecrutiesTasks.edit`) → после закрытия перезагрузка списка |
+| Групповая подписка | → `RecrutiesTasksGroupSubscribeBrowse` |
+| Подобрать кандидата | → `Suggestjobcandidate` с выбранной вакансией |
+| Открыть/закрыть | Если закрытие → сначала `removeCandidatesWithConsideration` (диалог + batch IteractionList end-case) → переключение openClose → commit → reload |
+| Закрыть с комментарием | Диалог рейтинга/комментария → затем open/close |
+| Смена приоритета | Low → диалог недели закрытия + `closingDate` + commit; иначе сразу commit + уведомления (UI, Telegram, OpenPositionNews) |
+| Комментарий/рейтинг | → `OpenPositionCommentEdit` → reload + scroll к строке |
+| Memo для кандидатов | Печать отчёта `memoForCandidates` |
+| Фильтр подписки (7 режимов) | Радиогруппа → перезагрузка: в подписке / не в / все / свободные / 3-7-30 дней / на паузе |
+| Чекбоксы opened/draft/paused/mySubscribe | → параметры loader |
+| Details: Изменить | → `OpenPosition.edit` |
+| Details: Описание | Lazy LOB → `QuickViewOpenPositionDescription` |
+| Details: Отправленные кандидаты | → `JobCandidateSimpleBrowse` по вакансии |
+| Details: Подобрать резюме | Только если пользователь подписан и есть CV по positionType |
+
 
 ---
 
@@ -146,5 +163,8 @@ layout (expand=openPositionsTable)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | fix: interaction stats — два JPQL вместо `CASE` в `GROUP BY` (JpqlSyntaxException CUBA 7) |
+| 2026-06-26 | perf: `maxResults=40`, `fetch="BATCH"` на FK/коллекции; PostLoad batch subscribers, interaction stats, parent-has-children; устранён N+1 в `setSubscribersRecruters`, `idStatistics`, `folder`, `vacansyName` description |
+| 2026-06-26 | §4–5: поведение из Java простым языком (deep modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первичная UI Spec из `open-position-browse.xml` и `OpenPositionBrowse.java` |

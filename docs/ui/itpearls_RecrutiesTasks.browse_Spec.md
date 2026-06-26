@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Подписки рекрутёров на вакансии. В списке — фильтры, стили просроченных задач, факт интервью за период; в форме — проверка пересечения подписок и уведомление после подписки.
+
 
 ---
 
@@ -84,36 +85,27 @@ select e
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onInit` | см. Java |
-| `screen` | `onBeforeShow` | см. Java |
-| `allReacrutersCheckBox` | `onAllReacrutersCheckBoxValueChange` | см. Java |
-| `checkBoxRemoveOld` | `onCheckBoxRemoveOldValueChange` | см. Java |
+Browse: стили просроченных, кнопка отписки; дефолтные фильтры перед показом. Edit: роли, даты, рекрутёр; после commit — уведомление о подписке.
 
+### 4.2 Скрытые вычисления
 
-### @Install (generators / providers)
+factForPeriod (интервью за период vs план, цвет); иконка статуса вакансии; логотип проекта.
 
-| Target | Subject | Назначение |
-|--------|---------|------------|
-| `recrutiesTasksesTable.factForPeriod` | `columnGenerator` | см. Java |
-| `recrutiesTasksesTable` | `iconProvider` | см. Java |
-| `recrutiesTasksesTable.group` | `columnGenerator` | см. Java |
+### 4.3 Валидация и сохранение
 
+Перед сохранением: проверка дублирующих подписок (диалог); блокировка Researcher на internalProject; диалог флага подписки на изменения.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `create` | standard CUBA action | — | CRUD / lookup |
-| `edit` | standard CUBA action | — | CRUD / lookup |
-| `remove` | standard CUBA action | — | CRUD / lookup |
+| Элемент | Цепочка |
+|---------|---------|
+| Отписаться | Нажатие → flip closed + новость по вакансии |
+| Фильтры allRecruters / removeOld | Перезагрузка списка |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -138,5 +130,6 @@ select e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

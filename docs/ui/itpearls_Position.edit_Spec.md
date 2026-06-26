@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Справочник должностей. В списке — иконки наличия стандартного описания и подсказки; в форме — сводная подпись «EN — RU» при изменении имён.
+
 
 ---
 
@@ -81,26 +82,26 @@
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `screen` | `onBeforeShow` | см. Java |
-| `positionEnNameField` | `onPositionEnNameFieldValueChange` | см. Java |
-| `positionRuNameField` | `onPositionRuNameFieldTextChange1` | см. Java |
-| `positionEnNameField` | `onPositionEnNameFieldTextChange` | см. Java |
-| `positionRuNameField` | `onPositionRuNameFieldTextChange` | см. Java |
+Browse: после загрузки кэшируются LOB-поля для колонок. Edit: перед показом для существующей записи подгружаются `standartDescription` и `whoIsThisGuy`, обновляется сводный label.
 
+### 4.2 Скрытые вычисления
+
+| Колонка | Правило |
+|---------|---------|
+| Иконка описания | FILE / FILE_TEXT, цвет и tooltip (plain text из HTML) |
+
+### 4.3 Валидация и сохранение
+
+Стандартный commit.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| create/edit/remove | standard | — | CRUD |
+| CRUD | Стандартный CUBA |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -125,5 +126,6 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

@@ -16,7 +16,8 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Подписки, actions и view контейнеры — §2–§5; Data View Integrity: атрибуты generators ⊆ view loader (см. [data-view-integrity.mdc](../../.cursor/rules/data-view-integrity.mdc)).
+Проекты заказчиков. В списке — фильтры открытых проектов и проектов с вакансиями, иерархическая таблица, бейдж «новый» для свежих записей. В форме закрытие проекта блокирует поля и предлагает закрыть все открытые вакансии.
+
 
 ---
 
@@ -100,31 +101,27 @@ select e from itpearls_OpenPosition e
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Подписки и обработчики
+### 4.1 Жизненный цикл
 
-| Событие / target | Метод | Логика |
-|------------------|-------|--------|
-| `projectLogoFileUpload` | `onProjectLogoFileUploadBeforeValueClear` | см. Java |
-| `screen` | `onBeforeShow1` | см. Java |
-| `projectLogoFileUpload` | `onProjectLogoFileUploadFileUploadSucceed` | см. Java |
-| `projectTab` | `onProjectTabSelectedTabChange` | см. Java |
-| `checkBoxProjectIsClosed` | `onCheckBoxProjectIsClosedValueChange1` | см. Java |
-| `screen` | `onBeforeShow` | см. Java |
-| `generalChatTextField` | `onGeneralChatTextFieldValueChange` | см. Java |
-| `chatForCVTextField` | `onChatForCVTextFieldValueChange` | см. Java |
-| `checkBoxProjectIsClosed` | `onCheckBoxProjectIsClosedValueChange` | см. Java |
-| `screen` | `onBeforeCommitChanges` | см. Java |
+Browse: при инициализации — иерархическая колонка; перед показом — фильтры onlyOpenProject / withOpenPosition. Edit: дата старта, загрузка открытых вакансий, ссылки чатов; вкладки lazy-load LOB и вакансий.
 
+### 4.2 Скрытые вычисления
+
+Кэш счётчиков открытых вакансий и описаний; генераторы логотипа, имени (бейдж <14 дней, фото владельца), иконки описания; preview логотипа при upload.
+
+### 4.3 Валидация и сохранение
+
+Перед сохранением: нормализация флага «проект закрыт»; при открытии/закрытии — глобальное уведомление в системе.
 
 ---
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-| Action / кнопка | id | Условие enable | Эффект |
-|-----------------|-----|----------------|--------|
-| `lookup` | standard CUBA action | — | CRUD / lookup |
+| Элемент | Цепочка |
+|---------|---------|
+| Фильтры onlyOpen / withOpenPosition | Вкл. → перезагрузка списка |
+| «Проект закрыт» | Вкл. → блокировка ключевых полей, установка endDate → диалог закрытия всех открытых вакансий |
 
-Стандартные кнопки: `windowCommitAndClose`, `windowClose` (edit); lookup: `lookupSelectAction`, `lookupCancelAction`.
 
 ---
 
@@ -149,5 +146,6 @@ select e from itpearls_OpenPosition e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |
