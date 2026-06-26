@@ -23,12 +23,17 @@
 
 .c-login-logo {
   margin-bottom: 15px;
-  border-radius: 10px;
-  box-shadow: 0 0 0 2px white, 0 0 10px #9a9a9a; /* Параметры теней */
+  max-width: 280px;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .v-ie .c-login-logo {
-  width: 64px;
+  max-width: 280px;
+  width: auto;
+  height: auto;
 }
 
 .c-login-welcome-label.v-label-c-login-welcome-label.v-label {
