@@ -13,6 +13,20 @@ alwaysApply: true
 
 ---
 
+## BUSINESS & CONTEXT INTRO (обязательный ввод)
+
+Перед **любыми** техническими таблицами, XML, привязками data containers в `docs/ui/{FormName}_Spec.md` — заполни обязательный ввод из трёх подразделов (связный текст на русском, факты из XML/Java):
+
+1. **Назначение и Бизнес-смысл (What & Why)** — какую задачу рекрутера/HR решает форма; **не** пиши «форма редактирования {Entity}» без бизнес-контекста.
+2. **Связи в интерфейсе и Навигация (UI Context & Navigation)** — родительский экран, menu id, дочерние диалоги/фрагменты/lookup, цепочка открытия.
+3. **Краткий обзор бизнес-логики поведения (Behavior Summary)** — что происходит при открытии и сохранении; главные кнопки и их итог; валидация. Формат «действие → условие → результат», простой русский без сырого жаргона.
+
+Шаблон: [ui-template.md](../../docs/templates/ui-template.md) § «Бизнес-контекст». Сущности — [living-documentation.mdc](living-documentation.mdc).
+
+**DoD:** UI Spec **недействителен**, если содержательная часть начинается с технических таблиц/XML без ввода.
+
+---
+
 ## GLOBAL UI TRIGGER (изменение UI-кода)
 
 Любое **создание / изменение / исправление / удаление** затрагивающее:
@@ -41,13 +55,15 @@ alwaysApply: true
 
 Без заглушек, без «TBD», без «будет дополнено». Источники — только реальный XML, Java, `messages*.properties`, `web-menu.xml`.
 
+**Сначала** — Business & Context Intro (3 подраздела). **Затем** технические разделы:
+
 | # | Раздел | Содержание | Источники |
 |---|--------|------------|-----------|
 | 1 | **Точка вызова и контекст** (Invocation & Context) | `@UiController`, `@Route`, menu id, opener (`openWindow`, `create`, lookup), права, `screen.xml` id | контроллер, menu XML, `web-app.properties` |
 | 2 | **Связь с моделью данных** (Data & Entity Binding) | entity/view, loaders (JPQL/Query), `dataContext`, fetch plan, `property` bindings, **nested paths из Java generators** | `*-browse.xml`, `*-edit.xml`, `views.xml`, контроллер — см. [data-view-integrity.mdc](data-view-integrity.mdc) |
 | 3 | **Иерархия и взаимосвязь форм** (Form Hierarchy) | родитель/дочерние экраны, фрагменты, embed, диалоги, lookup targets | XML `fragment`, `dialog`, `lookup`, Java `screenBuilders` |
-| 4 | **Модель поведения и интерактивность** (Behavior Model) | `@Subscribe`, валидаторы, `ItemChangeListener`, lazy tabs, `rowStyleProvider`, FTS | `*Edit.java`, `*Browse.java`, `*Fragment.java` |
-| 5 | **Логика управляющих элементов** (Actions & Buttons Logic) | `actions`, кнопки, `@Install`, bulk actions, enable/disable rules | XML `<actions>`, контроллер |
+| 4 | **Модель поведения и интерактивность** (Behavior Model) | **§4.1 Lifecycle** (Init/BeforeShow/AfterShow: загрузка, дефолты, роли, enable/disable); **§4.2 скрытые вычисления** (generators, private methods — функционально); **§4.3 валидация/сохранение** (PreCommit/PostCommit простым языком) | `*Edit.java`, `*Browse.java`, `*Fragment.java` |
+| 5 | **Логика управляющих элементов** (Actions & Buttons Logic) | Все клики и actions: цепочки «Пользователь нажал X → проверка Y → результат Z»; `@Install` execute; XML invoke | XML `<actions>`, контроллер |
 | 6 | **Визуальная компоновка элементов** (Visual Layout Schema) | layout (`grid`, `hbox`, `tabSheet`), колонки таблицы, CSS/stylename, messages keys | XML layout, SCSS темы, `messages*.properties` |
 
 Раздел **«История изменений»** — дата YYYY-MM-DD сверху ([documentation-with-dates.mdc](documentation-with-dates.mdc)).
@@ -56,7 +72,22 @@ Cross-link в шапке: на `docs/entities/{EntityName}.md` и/или `docs/a
 
 ---
 
-## DELETE rule (полное удаление UI)
+## Стандарт описания поведения формы (Behavior Documentation)
+
+При синхронизации UI Spec **обязательно** анализировать Java-контроллер (`*Browse.java`, `*Edit.java`, `*Fragment.java`) и описывать поведение **простым русским языком**, только факты из кода.
+
+**Чеклист анализа Java:**
+
+1. **Lifecycle** — `@Subscribe` Init / AfterInit / BeforeShow / AfterShow: что загружается, дефолты фильтров, enable/disable кнопок, роли (`GetRoleService`, `StandartRoles`).
+2. **Кнопки и Actions** — все `@Subscribe` на клики, `@Install` execute, XML `invoke`: цепочки «Пользователь нажал X → проверка Y → результат Z».
+3. **Скрытые вычисления** — private methods, `ColumnGenerator`, `rowStyleProvider`, `descriptionProvider`: что видит пользователь и по какому правилу (не «вызывает generator»).
+4. **Валидация и сохранение** — `BeforeCommitChanges` / `AfterCommitChanges`, дубликаты, диалоги подтверждения — в человеческом языке.
+
+**DoD поведения:** нет сырого жаргона без пояснения; каждое нетривиальное действие — причинно-следственная цепочка. Разделы §4 и §5 UI Spec следуют [ui-template.md](../../docs/templates/ui-template.md) §4–5.
+
+Для простых CRUD-экранов без кастомной логики в Java допустим краткий текст: lifecycle (стандартный CUBA browse/edit) + перечень полей/колонок из XML; **не** оставлять заглушки «TBD».
+
+---
 
 При **полном удалении** экрана, фрагмента или пункта меню из кода:
 
@@ -70,19 +101,20 @@ Cross-link в шапке: на `docs/entities/{EntityName}.md` и/или `docs/a
 ## Definition of Done (изменение UI-кода)
 
 1. UI-код изменён → `docs/ui/{FormName}_Spec.md` создан/обновлён в той же сессии.
-2. Затронутые разделы 1–6 переписаны или дополнены (не только «История изменений»).
-3. При привязке к сущности — синхронизирован `docs/entities/{EntityName}.md` (см. [living-documentation.mdc](living-documentation.mdc)).
-4. Новый Spec → строка в `docs/ui/README.md` и при необходимости в `docs/README.md`.
-5. «История изменений» — YYYY-MM-DD сверху.
-6. Финал ответа — **UI Diff-log**:
+2. Business & Context Intro заполнен и стоит **до** технических таблиц/XML.
+3. Затронутые разделы 1–6 переписаны или дополнены (не только «История изменений»).
+4. При привязке к сущности — синхронизирован `docs/entities/{EntityName}.md` (см. [living-documentation.mdc](living-documentation.mdc)).
+5. Новый Spec → строка в `docs/ui/README.md` и при необходимости в `docs/README.md`.
+6. «История изменений» — YYYY-MM-DD сверху.
+7. Финал ответа — **UI Diff-log**:
 
 ```
 Синхронизация UI-документации [Имя_Формы]: <что изменено в UI-коде> → <какие разделы Spec обновлены>
 ```
 
-7. При правке контроллера/XML view — [data-view-integrity.mdc](data-view-integrity.mdc); при optimize/refactor — DoD-фраза «Валидация View пройдена: …».
+8. При правке контроллера/XML view — [data-view-integrity.mdc](data-view-integrity.mdc); при optimize/refactor — DoD-фраза «Валидация View пройдена: …».
 
-8. **Не коммитить**, пока пользователь явно не попросит.
+9. **Не коммитить**, пока пользователь явно не попросит.
 
 ---
 
@@ -108,6 +140,7 @@ Cross-link в шапке: на `docs/entities/{EntityName}.md` и/или `docs/a
 **Living sync (правка UI):**
 - [ ] Определить `{FormName}` по `@UiController` / классу
 - [ ] Scan: XML дескриптор, Java контроллер/фрагмент, menu, messages, views
+- [ ] Business & Context Intro (3 подраздела) до технических разделов
 - [ ] View integrity: getters/generators ⊆ view контейнера — [data-view-integrity.mdc](data-view-integrity.mdc)
 - [ ] `docs/ui/{FormName}_Spec.md` — 6 разделов, без заглушек
 - [ ] Cross-link entity docs при наличии привязки

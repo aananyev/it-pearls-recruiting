@@ -101,7 +101,8 @@ public class MyJobCandidatesWidget extends ScreenFragment {
     private void setAccordionTabs() {
         List<Iteraction> iteractions = dataManager.load(Iteraction.class)
                 .query(QUERY_ITERACTIONS)
-                .view("iteraction-view")
+                .view("iteraction-list-type-view")
+                .cacheable(true)
                 .list();
         String CYRILLIC_TO_LATIN = "Russian-Latin/BGN";
         Transliterator toLatinTrans = Transliterator.getInstance(CYRILLIC_TO_LATIN);

@@ -5,6 +5,22 @@
 
 ---
 
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+Справочник `Iteraction` — типы/шаблоны этапов рекрутингового взаимодействия (звонок, интервью, оффер и т.д.) в HRM HuntTech. Задаёт структуру дерева требований и связь с `IteractionList`.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+`itpearls_Iteraction.browse`, `itpearls_Iteraction.edit`, дерево `itpearls_Iteraction._tree.browse`, `itpearls_IteractionRequirement.browse`. UI Spec: [browse](../ui/itpearls_Iteraction.browse_Spec.md), [edit](../ui/itpearls_Iteraction.edit_Spec.md).
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Иерархический справочник; FK `type` в `IteractionList`; views для picker в формах взаимодействий.
+
+---
+
 ## 1. Обзор
 
 | Параметр | Значение |
@@ -339,6 +355,7 @@ rg "view=\".*iteraction" modules/ --glob '*.xml'
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: `IteractionEdit` — обращения только к полям `iteraction-edit-view`; LOB lazy reload — OK |
 | 2026-06-22 | Исправление `iteraction-browse-view`: поля `iteractionTree` (number, iterationName) для группировки GroupTable |
 | 2026-06-22 | Оптимизация: specialized views (browse/tree-browse/edit/picker), lazy LOB `textEmailToSend` и вкладки checkTrace/outstaffingTab, cacheable loaders, документация |

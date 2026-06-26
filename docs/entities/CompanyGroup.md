@@ -5,6 +5,22 @@
 
 ---
 
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+Справочник `CompanyGroup` группирует компании-клиентов HRM HuntTech (холдинги, группы юрлиц) для навигации в дереве компаний.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+`itpearls_CompanyGroup.browse`, `itpearls_CompanyGroup.edit`; FK `companyGroup` на `Company`. UI Spec: [browse](../ui/itpearls_CompanyGroup.browse_Spec.md), [edit](../ui/itpearls_CompanyGroup.edit_Spec.md).
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Простой справочник; `companyGroup-browse-view` для дерева Company browse.
+
+---
+
 ## 1. Обзор
 
 | Параметр | Значение |
@@ -80,5 +96,6 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: `CompanyGroupEdit` — scalar-поля, вложенных FK в обработчиках нет — OK |
 | 2026-06-23 | Оптимизация: companyGroup-browse/edit/picker views, cacheable loader, убрана загрузка списка `company`, `CompanyGroupServiceTest`, документация |

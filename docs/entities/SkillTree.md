@@ -4,6 +4,22 @@
 
 ---
 
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+`SkillTree` — иерархический справочник навыков/технологий HRM HuntTech. Элементы привязываются к вакансии (`OpenPosition.skillsList`) и к кандидату (`JobCandidate.skillTree`); используется в фильтре `SkillsFilterJobCandidate` и фрагменте `Skillsbar`.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+`itpearls_SkillTree.browse` (дерево), `itpearls_SkillTree.edit`; вкладка Skills в OpenPositionEdit; фрагменты browse кандидатов/вакансий. UI Spec: [browse](../ui/itpearls_SkillTree.browse_Spec.md), [edit](../ui/itpearls_SkillTree.edit_Spec.md).
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Древовидный browse; standalone loader навыков вакансии; rescан из LOB описания должности при edit OpenPosition.
+
+---
+
 ## 1. Обзор
 
 | Параметр | Значение |
@@ -235,6 +251,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-23 | `skillTree-openPosition-tab-view`: вкладка «Требуемые навыки» OpenPositionEdit — `fileImageLogo` + reload после parse; `openPosition-view.skillsList` сужен |
 | 2026-06-23 | Оптимизация: специализированные views (browse/edit/picker/parser/check/filter/cv-tab), cacheable loaders, cross-form consumers, FTS cleanup, `SkillTreeServiceTest`, исправление image/upload dataContainer на Edit |
 | 2026-06-23 | Создание документа |

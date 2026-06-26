@@ -3,13 +3,11 @@
 */
 package com.company.itpearls.web.widgets.reports;
 
-import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.WindowParam;
 import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.model.CollectionContainer;
-import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
@@ -22,6 +20,12 @@ import java.util.*;
 @UiDescriptor("monthly-interview-count-widget.xml")
 @DashboardWidget(name = "Количество взаимодействий за месяц")
 public class MonthlyInterviewCountWidget extends ScreenFragment {
+
+    private static final String QUERY_INTERACTION_COUNT =
+            "select count(e) from itpearls_IteractionList e " +
+                    "where e.iteractionType.iterationName like :iteractionName " +
+                    "and e.dateIteraction between :startDate and :endDate";
+
     @Inject
     private Label<String> labelAssignExternalInterview;
     @Inject
@@ -32,10 +36,6 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     private Label<String> labelPrepareInternalInterview;
     @Inject
     private Label<String> labelWidgetTitle;
-    @Inject
-    private CollectionLoader<IteractionList> iteractioListDl;
-    @Inject
-    private CollectionContainer<IteractionList> iteractionListDc;
     @Inject
     private Label<String> labelAssignExternalInterviewValue;
     @Inject
@@ -48,6 +48,8 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     private Label<String> labelCountNewContactsValue;
     @Inject
     private Label<String> labelDirectorsInterview;
+    @Inject
+    private DataManager dataManager;
 
     @WidgetParam
     @WindowParam
@@ -72,7 +74,6 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     private String itemAssignExternalInterview = "Назначено техническое собеседование";
     private String itemPrepareExternalInterview = "Прошел техническое собеседование";
     private String itemPrepareDirectorsInterview = "Прошел собеседование с Директором";
-    private String WEEK = "неделя";
     @Inject
     private Label<String> labelCountProposeJob;
     @Inject
@@ -84,13 +85,9 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
 
     @Subscribe
     public void onAfterInit(AfterInitEvent event) {
-
-        iteractioListDl.removeParameter("endDate");
-        iteractioListDl.removeParameter("startDate");
-        iteractioListDl.removeParameter("iteractionName");
-
         labelWidgetTitle.setValue(widgetTitle);
 
+        setDateInterval();
         setLabelNewContacts();
         setLabelProposeJob();
         setLabelAssignInternalInterview();
@@ -101,65 +98,39 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     }
 
     private void setLabelProposeJob() {
-        iteractioListDl.setParameter("iteractionName", itemProposeJob + "%");
-        iteractioListDl.load();
-
-        int count = iteractionListDc.getItems().size();
+        int count = countInteractions(itemProposeJob + "%");
         labelCountProposeJob.setValue(itemProposeJob);
         labelCountProposeJobValue.setValue(String.valueOf(count));
     }
 
     private void setLabelPrepareDirectorsInterview() {
-        iteractioListDl.setParameter("iteractionName", itemPrepareDirectorsInterview + "%");
-        iteractioListDl.load();
-
-        int count = iteractionListDc.getItems().size();
+        int count = countInteractions(itemPrepareDirectorsInterview + "%");
         labelDirectorsInterview.setValue(itemPrepareDirectorsInterview);
         labelDirectorsInterviewValue.setValue(String.valueOf(count));
     }
 
     private void setLabelPrepareExternalInterview() {
-        iteractioListDl.setParameter("iteractionName", itemPrepareExternalInterview + "%");
-        iteractioListDl.load();
-
-        int count = iteractionListDc.getItems().size();
+        int count = countInteractions(itemPrepareExternalInterview + "%");
         labelPrepareExternalInterview.setValue(itemPrepareExternalInterview);
         labelPrepareExternalInterviewValue.setValue(String.valueOf(count));
     }
 
     private void setLabelAssignExternalInterview() {
-        iteractioListDl.setParameter("iteractionName", itemAssignExternalInterview + "%");
-        iteractioListDl.load();
-
-        int count = iteractionListDc.getItems().size();
+        int count = countInteractions(itemAssignExternalInterview + "%");
         labelAssignExternalInterview.setValue(itemAssignExternalInterview);
         labelAssignExternalInterviewValue.setValue(String.valueOf(count));
     }
 
     private void setLabelPrepareInternalInterview() {
-        iteractioListDl.setParameter("iteractionName", itemPrepareInternalInterview + "%");
-        iteractioListDl.load();
-
-        int count = iteractionListDc.getItems().size();
+        int count = countInteractions(itemPrepareInternalInterview + "%");
         labelPrepareInternalInterview.setValue(itemPrepareInternalInterview);
         labelPrepareInternalInterviewValus.setValue(String.valueOf(count));
     }
 
-
     private void setLabelNewContacts() {
-        setDateInterval();
-        setElementStyle();
-
-        iteractioListDl.setParameter("iteractionName", itemNewContact + "%");
-        iteractioListDl.load();
-
-        int countItems = iteractionListDc.getItems().size();
-
+        int countItems = countInteractions(itemNewContact + "%");
         labelCountNewContacts.setValue(itemNewContact);
         labelCountNewContactsValue.setValue(String.valueOf(countItems));
-    }
-
-    private void setElementStyle() {
     }
 
     public static int getCurrentYear() {
@@ -168,7 +139,6 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
         return calendar.get(Calendar.YEAR);
     }
 
-
     public static int getCurrentMonth() {
         Calendar calendar = Calendar.getInstance(TimeZone.getDefault(), Locale.getDefault());
         calendar.setTime(new Date());
@@ -176,14 +146,11 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
     }
 
     private void setDateInterval() {
-
-        Integer startDateOfPeriod = 1;
         Integer endDateOfPeriod = Calendar.DAY_OF_MONTH;
         Calendar firstDay = new GregorianCalendar();
 
         if (startDate == null) {
             firstDay = new GregorianCalendar(getCurrentYear(), getCurrentMonth(), 1);
-
             startDate = firstDay.getTime();
         }
 
@@ -191,42 +158,22 @@ public class MonthlyInterviewCountWidget extends ScreenFragment {
             Calendar endDayCal = new GregorianCalendar(getCurrentYear(),
                     getCurrentMonth(),
                     firstDay.getActualMaximum(endDateOfPeriod));
-
             endDate = endDayCal.getTime();
         }
-
-        iteractioListDl.setParameter("startDate", startDate);
-        iteractioListDl.setParameter("endDate", endDate);
-
-        iteractioListDl.load();
-    }
-
-    private Integer getEndDateOfWeek() {
-
-        Date date = new Date();
-
-        Calendar calendar = Calendar.getInstance();
-
-        Integer ret = calendar.get(Calendar.DAY_OF_MONTH) - calendar.get(Calendar.DAY_OF_WEEK) + 8;
-
-        return ret;
-    }
-
-    private Integer getStartDateOfWeek() {
-        Calendar calendar = Calendar.getInstance();
-
-
-        Integer ret = calendar.get(Calendar.DAY_OF_MONTH) - calendar.get(Calendar.DAY_OF_WEEK) + 2;
-
-        return ret;
     }
 
     private void setLabelAssignInternalInterview() {
-        iteractioListDl.setParameter("iteractionName", itemAssignInternalInterview + "%");
-        iteractioListDl.load();
-
-        int count = iteractionListDc.getItems().size();
+        int count = countInteractions(itemAssignInternalInterview + "%");
         labelAssignInternalInterview.setValue(itemAssignInternalInterview);
         labelAssignInternalInterviewValue.setValue(String.valueOf(count));
+    }
+
+    private int countInteractions(String iteractionNamePattern) {
+        Long count = dataManager.loadValue(QUERY_INTERACTION_COUNT, Long.class)
+                .parameter("iteractionName", iteractionNamePattern)
+                .parameter("startDate", startDate)
+                .parameter("endDate", endDate)
+                .one();
+        return count != null ? count.intValue() : 0;
     }
 }

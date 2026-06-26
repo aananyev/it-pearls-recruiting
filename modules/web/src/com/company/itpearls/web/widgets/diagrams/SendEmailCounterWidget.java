@@ -1,6 +1,5 @@
 package com.company.itpearls.web.widgets.diagrams;
 
-import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.charts.gui.amcharts.model.GaugeArrow;
 import com.haulmont.charts.gui.components.charts.AngularGaugeChart;
@@ -22,6 +21,11 @@ import java.util.List;
 @DashboardWidget(name="Счётчик отправленных писем")
 public class SendEmailCounterWidget extends ScreenFragment {
 
+    private static final String QUERY_EMAIL_COUNT =
+            "select count(e) from itpearls_IteractionList e " +
+                    "where e.iteractionType.signEmailSend = true and e.recrutier = :recrutier " +
+                    "and e.dateIteraction between :startDate and :endDate";
+
     @Inject
     private DataManager dataManager;
     @Inject
@@ -35,23 +39,17 @@ public class SendEmailCounterWidget extends ScreenFragment {
     }
 
     private void setAssignedInterviewToday() {
-        final String query = "select e from itpearls_IteractionList e " +
-                "where e.iteractionType.signEmailSend = true and e.recrutier = :recrutier " +
-                "and e.dateIteraction between :startDate and :endDate";
-
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         gregorianCalendar.add(GregorianCalendar.DAY_OF_MONTH, -1);
 
-        List<GaugeArrow> arrows = new ArrayList();
-        Double arrowData = Double.valueOf(dataManager
-                .load(IteractionList.class)
-                .query(query)
+        Long count = dataManager.loadValue(QUERY_EMAIL_COUNT, Long.class)
                 .parameter("recrutier", userSession.getUser())
                 .parameter("endDate", new Date())
                 .parameter("startDate", gregorianCalendar.getTime())
-                .view("iteractionList-view")
-                .list()
-                .size());
+                .one();
+
+        List<GaugeArrow> arrows = new ArrayList<>();
+        Double arrowData = count != null ? count.doubleValue() : 0.0;
 
         if (arrowData > gaugeChart.getAxes().get(0).getEndValue()) {
             gaugeChart.getAxes().get(0).setEndValue((arrowData / 10 + 1) * 10);

@@ -5,6 +5,22 @@
 
 ---
 
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+Справочник `Country` — верхний уровень географической иерархии HRM HuntTech. Задаёт страну для регионов, городов и компаний.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+`itpearls_Country.browse`, `itpearls_Country.edit`; FK в `Region`, `Company`. UI Spec: [browse](../ui/itpearls_Country.browse_Spec.md), [edit](../ui/itpearls_Country.edit_Spec.md).
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+CRUD справочник с `country-browse-view` / `country-edit-view`; используется в каскадных фильтрах региона и города.
+
+---
+
 ## 1. Обзор
 
 | Параметр | Значение |
@@ -243,6 +259,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: `CountryEdit` без обработчиков вложенных FK; `country-edit-view` покрывает поля формы — OK |
 | 2026-06-23 | Исправление `country-edit.xml`: явный `view="region-country-child-view"` на collection `countryOfRegion` |
 | 2026-06-23 | Оптимизация: country-browse/edit/picker views, cacheable loaders, `CountryServiceTest`, документация |

@@ -5,6 +5,22 @@
 
 ---
 
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+`CompanyDepartament` — подразделение/департамент внутри компании-клиента HRM HuntTech. Связывает проекты с организационной структурой заказчика.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+`itpearls_CompanyDepartament.browse`, `itpearls_CompanyDepartament.edit`; FK в `Project.projectDepartment`. UI Spec: [browse](../ui/itpearls_CompanyDepartament.browse_Spec.md), [edit](../ui/itpearls_CompanyDepartament.edit_Spec.md).
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Browse с FK на Company; используется в фильтрах и колонках OpenPosition (логотип/название через project → department → company).
+
+---
+
 ## 1. Обзор
 
 | Параметр | Значение |
@@ -91,5 +107,6 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: `CompanyDepartamentEdit` без каскадных обработчиков; lazy LOB/projects через reload — OK |
 | 2026-06-23 | Оптимизация: устранена рекурсия `companyName` в `companyDepartament-view`, browse/edit/picker views, lazy LOB, `CompanyDepartamentServiceTest`, документация |

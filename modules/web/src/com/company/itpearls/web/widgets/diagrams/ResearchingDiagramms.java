@@ -1,7 +1,6 @@
 package com.company.itpearls.web.widgets.diagrams;
 
 import com.company.itpearls.entity.Iteraction;
-import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.charts.gui.amcharts.model.Color;
@@ -25,6 +24,14 @@ import java.util.*;
 @UiDescriptor("researching-diagramms.xml")
 @DashboardWidget(name = "Диаграмма количества собеседований")
 public class ResearchingDiagramms extends ScreenFragment {
+
+    private static final String QUERY_GET_ITERACTIONS =
+            "select f from itpearls_Iteraction f where f.iterationName like :iteractionName";
+
+    private static final String QUERY_DAY_COUNT =
+            "select count(e) from itpearls_IteractionList e " +
+                    "where e.dateIteraction >= :startDate and e.dateIteraction < :endDate " +
+                    "and e.iteractionType in :iteractionType";
 
     @WidgetParam
     @WindowParam
@@ -88,28 +95,14 @@ public class ResearchingDiagramms extends ScreenFragment {
     }
 
     private ListDataProvider valueGraphs() {
-
-        final String QUERY_GET_ITERACTIONS = "select f from itpearls_Iteraction f where f.iterationName like :iteractionName";
         ListDataProvider dataProvider = new ListDataProvider();
 
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         gregorianCalendar.setTime(startDate);
 
-        List<Iteraction> iteraction = dataManager.load(Iteraction.class)
-                .query(QUERY_GET_ITERACTIONS)
-                .parameter("iteractionName", iteractionName + "%")
-                .view("_minimal")
-                .list();
-        List<Iteraction> iteractionsExternalInterview = dataManager.load(Iteraction.class)
-                .query(QUERY_GET_ITERACTIONS)
-                .parameter("iteractionName", externalInterview)
-                .view("_minimal")
-                .list();
-        List<Iteraction> iteractionsInternalInterview = dataManager.load(Iteraction.class)
-                .query(QUERY_GET_ITERACTIONS)
-                .parameter("iteractionName", internalInterview)
-                .view("_minimal")
-                .list();
+        List<Iteraction> iteraction = loadIteractionTypes(iteractionName + "%");
+        List<Iteraction> iteractionsExternalInterview = loadIteractionTypes(externalInterview);
+        List<Iteraction> iteractionsInternalInterview = loadIteractionTypes(internalInterview);
 
         do {
             GregorianCalendar sDate = new GregorianCalendar();
@@ -117,15 +110,11 @@ public class ResearchingDiagramms extends ScreenFragment {
 
             gregorianCalendar.add(Calendar.DAY_OF_MONTH, 1);
 
-            int iteractionCount = getCountIteraction(iteraction,
-                    sDate.getTime(), gregorianCalendar.getTime(),
-                    GRAPH_Y);
-            int internalInterviewCount = getCountIteraction(iteractionsInternalInterview,
-                    sDate.getTime(), gregorianCalendar.getTime(),
-                    GRAPH_Y_INTERNAL_INTERVIEW);
-            int externalInterviewCount = getCountIteraction(iteractionsExternalInterview,
-                    sDate.getTime(), gregorianCalendar.getTime(),
-                    GRAPH_Y_EXTERNAL_INTERVIEW);
+            int iteractionCount = countIteractions(iteraction, sDate.getTime(), gregorianCalendar.getTime());
+            int internalInterviewCount = countIteractions(iteractionsInternalInterview,
+                    sDate.getTime(), gregorianCalendar.getTime());
+            int externalInterviewCount = countIteractions(iteractionsExternalInterview,
+                    sDate.getTime(), gregorianCalendar.getTime());
 
             String date = dateFormat.format(sDate.getTime());
             dataProvider.addItem(iteractionCount(date,
@@ -135,6 +124,15 @@ public class ResearchingDiagramms extends ScreenFragment {
         } while (gregorianCalendar.getTime().before(endDate));
 
         return dataProvider;
+    }
+
+    private List<Iteraction> loadIteractionTypes(String namePattern) {
+        return dataManager.load(Iteraction.class)
+                .query(QUERY_GET_ITERACTIONS)
+                .parameter("iteractionName", namePattern)
+                .view("_minimal")
+                .cacheable(true)
+                .list();
     }
 
     private DataItem iteractionCount(String date, int allCount, int internalCount, int externalCount) {
@@ -148,30 +146,18 @@ public class ResearchingDiagramms extends ScreenFragment {
         return item;
     }
 
-    private int getCountIteraction(List<Iteraction> iteraction, Date startDate, Date endDate, String property) {
-        String queryGraph = "select e " +
-                "from itpearls_IteractionList e " +
-                "where (e.dateIteraction between :startDate and :endDate) and " +
-                "e.iteractionType in :iteractionType";
+    private int countIteractions(List<Iteraction> iteraction, Date startDate, Date endDate) {
+        if (iteraction.isEmpty()) {
+            return 0;
+        }
 
-        List<IteractionList> iteractionLists = new ArrayList<>();
+        Long count = dataManager.loadValue(QUERY_DAY_COUNT, Long.class)
+                .parameter("iteractionType", iteraction)
+                .parameter("startDate", startDate)
+                .parameter("endDate", endDate)
+                .one();
 
-         int retInt = 0;
-         try {
-             iteractionLists = dataManager.load(IteractionList.class)
-                     .query(queryGraph)
-                     .view("iteractionList-view")
-                     .parameter("iteractionType", iteraction)
-                     .parameter("startDate", startDate)
-                     .parameter("endDate", endDate)
-                     .list();
-
-             retInt = iteractionLists.size();
-         } catch (Exception e) {
-             retInt = 0;
-         }
-
-         return retInt;
+        return count != null ? count.intValue() : 0;
     }
 
     private void setDeafaultTimeInterval() {

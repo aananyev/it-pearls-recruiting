@@ -5,6 +5,22 @@
 
 ---
 
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+Справочник `Region` — регион/субъект внутри страны в HRM HuntTech. Связывает города и компании с географией.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+`itpearls_Region.browse`, `itpearls_Region.edit`; FK `country`, дочерние `City`. UI Spec: [browse](../ui/itpearls_Region.browse_Spec.md), [edit](../ui/itpearls_Region.edit_Spec.md).
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Browse/edit с picker страны; `region-browse-view` для списков без лишних LOB.
+
+---
+
 ## 1. Обзор
 
 | Параметр | Значение |
@@ -245,6 +261,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: `region-edit-view` покрывает `regionCountry`; каскад в `CompanyEdit` reload через `region-browse-view` |
 | 2026-06-23 | Исправление `region-browse-view`: `regionCountry` → `country-browse-view` для колонки и фильтра |
 | 2026-06-23 | Оптимизация: region-browse/edit/picker views, cacheable loaders, `RegionServiceTest`, документация |

@@ -1,7 +1,6 @@
 package com.company.itpearls.web.widgets.others;
 
-import com.company.itpearls.entity.ExtUser;
-import com.company.itpearls.entity.IteractionList;
+import com.company.itpearls.entity.Iteraction;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -56,32 +55,28 @@ public class MyStatisticsWidget extends ScreenFragment {
     }
 
 
-    private void setCunductedInterviewToday() {
-        final String query = "select e from itpearls_IteractionList e " +
-                "where e.iteractionType.signOurInterview = true and e.recrutier = :recrutier and @between(e.dateIteraction, now, now+1, day)";
+    private static final String QUERY_CONDUCTED_TODAY_COUNT =
+            "select count(e) from itpearls_IteractionList e " +
+                    "where e.iteractionType.signOurInterview = true and e.recrutier = :recrutier " +
+                    "and @between(e.dateIteraction, now, now+1, day)";
 
-        interviewsConductedTodayLabel.setValue(
-                String.valueOf(dataManager
-                        .load(IteractionList.class)
-                        .query(query)
-                        .parameter("recrutier", userSession.getUser())
-                        .view("iteractionList-view")
-                        .list()
-                        .size()));
+    private static final String QUERY_ASSIGNED_TODAY_COUNT =
+            "select count(e) from itpearls_IteractionList e " +
+                    "where e.iteractionType.signOurInterviewAssigned = true and e.recrutier = :recrutier " +
+                    "and @between(e.dateIteraction, now, now+1, day)";
+
+    private void setCunductedInterviewToday() {
+        Long count = dataManager.loadValue(QUERY_CONDUCTED_TODAY_COUNT, Long.class)
+                .parameter("recrutier", userSession.getUser())
+                .one();
+        interviewsConductedTodayLabel.setValue(String.valueOf(count != null ? count : 0L));
     }
 
     private void setAssignedInterviewToday() {
-        final String query = "select e from itpearls_IteractionList e " +
-                "where e.iteractionType.signOurInterviewAssigned = true and e.recrutier = :recrutier and @between(e.dateIteraction, now, now+1, day)";
-
-        interviewSheduledTodayLabel.setValue(
-                String.valueOf(dataManager
-                        .load(IteractionList.class)
-                        .query(query)
-                        .parameter("recrutier", userSession.getUser())
-                        .view("iteractionList-view")
-                        .list()
-                        .size()));
+        Long count = dataManager.loadValue(QUERY_ASSIGNED_TODAY_COUNT, Long.class)
+                .parameter("recrutier", userSession.getUser())
+                .one();
+        interviewSheduledTodayLabel.setValue(String.valueOf(count != null ? count : 0L));
     }
 
     private void setWorkTimeToday() {

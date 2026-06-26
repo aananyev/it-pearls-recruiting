@@ -3,6 +3,23 @@
 > Транзакционная сущность вакансий; центральный узел рекрутингового процесса.
 > Оптимизация: 2026-06-23.
 > Архитектурная спецификация: [OpenPosition_Spec.md](../architecture/OpenPosition_Spec.md)
+> UI Spec: [browse](../ui/itpearls_OpenPosition.browse_Spec.md), [edit](../ui/itpearls_OpenPosition.edit_Spec.md), [detail fragment](../ui/itpearls_OpenPositionDetailScreenFragment_Spec.md)
+
+---
+
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+`OpenPosition` — транзакционная сущность открытой вакансии в HRM HuntTech: название и внешний ID (`vacansyName`, `vacansyID`), статус открыта/закрыта (`openClose`), приоритет согласования, черновик (`signDraft`), пауза, рейтинг, иерархия через `parentOpenPosition`. Вакансия описывает требования к кандидату (грейд, опыт, удалёнка, вилка зарплаты, тип должности `positionType`, проект `projectName`, города), LOB-тексты (описание RU/EN, шаблон письма, тестовое, памятка к интервью), навыки (`skillsList`), подписки рекрутёров (`RecrutiesTasks`), комментарии и файлы. Центральный узел рекрутингового процесса: к вакансии привязываются `IteractionList` и подбор кандидатов.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+Главный browse — `itpearls_OpenPosition.browse` (меню, дерево `treeDataGrid`). Edit — `itpearls_OpenPosition.edit` с вкладками (основное, навыки, labor agreement, файлы, комментарии). Дополнительные browse: `OpenPositionRecruiting`, `OpenPositionOutstaff`, `ProdOpenPosition`, `OpenPositionMaster`. Фрагмент деталей строки — `itpearls_OpenPositionDetailScreenFragment`. Связанные сущности: `Project`, `Position`, `Grade`, `City`, `OpenPositionComment`, `OpenPositionNews`, `RecrutiesTasks`, `JobCandidate` (через взаимодействия и suggest). Архитектурная спецификация: [OpenPosition_Spec.md](../architecture/OpenPosition_Spec.md).
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Browse: фильтры подписки рекрутёра, приоритета, новых вакансий, удалёнки; batch-кэши exists LOB и агрегатов (число рекрутёров, отправленных CV, средний рейтинг); закрытие вакансии с batch-созданием `IteractionList` для кандидатов «на рассмотрении». Edit: lazy LOB и коллекции по вкладкам (`PreLoadEvent.preventLoad`); rescан навыков из описания должности; таймер `closedVacancyTimer` при `closingDate`; Telegram-уведомление при сохранении (не блокирует commit); проверка уникальности `vacansyID`. Views: `openPosition-browse-view` без LOB; `openPosition-edit-view` без коллекций на instance.
 
 ---
 
@@ -76,6 +93,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Добавлен Business & Context Intro (Living Documentation standard) |
 | 2026-06-23 | OpenPositionBrowse: `removeCandidatesWithConsideration` — batch `CommitContext` для `IteractionList` при закрытии вакансии (один commit вместо N×`commit(jc)`) |
 | 2026-06-23 | OpenPositionEdit: `closedVacancyTimer` — интервал 60 с, `autostart=false`; `initClosedVacancyTimerFacet` на AfterShow и смене `closingDate`; таймер стартует только при заданной дате закрытия |
 | 2026-06-23 | OpenPositionBrowse: 3-уровневая загрузка — batch exists-флаги LOB (comment/exercise/memo/templateLetter/project/company) вместо полного текста в PostLoad; lazy load текста в tooltip/descriptionProvider и `loadOpenPositionWithDescriptionLobs` при «Описание»; aggregate-кэши исправлены (`.properties("openPosition"/"vacancy")`, параметр `positions`) |

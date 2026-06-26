@@ -54,23 +54,25 @@ docs/
 | Описать UI-форму (экран, фрагмент) | [templates/ui-template.md](templates/ui-template.md) · [living-ui-documentation.mdc](../.cursor/rules/living-ui-documentation.mdc) |
 | Описать новую сущность | [templates/entity-template.md](templates/entity-template.md) |
 | Оптимизировать существующую сущность | [.cursor/rules/entity-performance-optimization.mdc](../.cursor/rules/entity-performance-optimization.mdc) |
+| Ограничение структуры БД при оптимизации | [`.cursorrules`](../.cursorrules) § «ОПТИМИЗАЦИЯ: ОГРАНИЧЕНИЕ СТРУКТУРЫ БД» · [entity-performance-optimization.mdc](../.cursor/rules/entity-performance-optimization.mdc) |
 | View ↔ Java integrity (UNFETCHED ATTRIBUTE ACCESS) | [.cursor/rules/data-view-integrity.mdc](../.cursor/rules/data-view-integrity.mdc) |
 | Living Documentation (код ↔ docs, DoD) | [living-documentation.mdc](../.cursor/rules/living-documentation.mdc) · [living-ui-documentation.mdc](../.cursor/rules/living-ui-documentation.mdc) · [`.cursorrules`](../.cursorrules) |
 | Полная спецификация сущности (триггер) | «Сделай документацию сущности {Имя}» → [architecture/{Имя}_Spec.md](architecture/README.md) |
 | Зафиксировать дату в «История изменений» | [.cursor/rules/documentation-with-dates.mdc](../.cursor/rules/documentation-with-dates.mdc) |
-| Понять устройство типов взаимодействий | [entities/Iteraction.md](entities/Iteraction.md) |
-| Понять записи взаимодействий с кандидатами | [entities/IteractionList.md](entities/IteractionList.md) |
+| Понять устройство типов взаимодействий | [entities/Iteraction.md](entities/Iteraction.md) · UI: [каталог](ui/README.md#iteraction) |
+| Понять записи взаимодействий с кандидатами | [entities/IteractionList.md](entities/IteractionList.md) · UI: [каталог](ui/README.md#iteractionlist) |
 | Понять справочник персон (сотрудники) | [entities/Person.md](entities/Person.md) |
 | Понять справочник стран | [entities/Country.md](entities/Country.md) |
 | Понять справочник городов | [entities/City.md](entities/City.md) |
 | Понять справочник регионов | [entities/Region.md](entities/Region.md) |
-| Понять справочник проектов | [entities/Project.md](entities/Project.md) |
-| Понять справочник компаний | [entities/Company.md](entities/Company.md) |
-| Понять департаменты компаний | [entities/CompanyDepartament.md](entities/CompanyDepartament.md) |
-| Понять группы компаний | [entities/CompanyGroup.md](entities/CompanyGroup.md) |
-| Понять дерево компетенций | [entities/SkillTree.md](entities/SkillTree.md) |
-| Понять подсистему кандидатов | [entities/JobCandidate.md](entities/JobCandidate.md) |
-| Понять подсистему вакансий | [entities/OpenPosition.md](entities/OpenPosition.md) · [architecture/OpenPosition_Spec.md](architecture/OpenPosition_Spec.md) |
+| Понять справочник проектов | [entities/Project.md](entities/Project.md) · UI: [browse](ui/itpearls_Project.browse_Spec.md), [edit](ui/itpearls_Project.edit_Spec.md) |
+| Понять справочник компаний | [entities/Company.md](entities/Company.md) · UI: [каталог](ui/README.md#company) |
+| Понять департаменты компаний | [entities/CompanyDepartament.md](entities/CompanyDepartament.md) · UI: [browse](ui/itpearls_CompanyDepartament.browse_Spec.md), [edit](ui/itpearls_CompanyDepartament.edit_Spec.md) |
+| Понять группы компаний | [entities/CompanyGroup.md](entities/CompanyGroup.md) · UI: [browse](ui/itpearls_CompanyGroup.browse_Spec.md), [edit](ui/itpearls_CompanyGroup.edit_Spec.md) |
+| Понять дерево компетенций | [entities/SkillTree.md](entities/SkillTree.md) · UI: [browse](ui/itpearls_SkillTree.browse_Spec.md), [edit](ui/itpearls_SkillTree.edit_Spec.md) |
+| Понять подсистему кандидатов | [entities/JobCandidate.md](entities/JobCandidate.md) · UI: [каталог](ui/README.md#jobcandidate) |
+| Понять подсистему вакансий | [entities/OpenPosition.md](entities/OpenPosition.md) · [architecture/OpenPosition_Spec.md](architecture/OpenPosition_Spec.md) · UI: [каталог](ui/README.md#openposition) |
+| Каталог всех UI Spec | [ui/README.md](ui/README.md) (47 форм) |
 
 ---
 
@@ -80,8 +82,8 @@ docs/
 
 | Сценарий | Путь | Разделы |
 |----------|------|---------|
-| Триггер (полная регенерация из кода) | `architecture/{EntityName}_Spec.md` | 6: Data Model, Views, Browse, Edit, Fragments, Deployment |
-| Living sync (правка кода в сессии) | `entities/{EntityName}.md` | 5 блоков living-doc |
+| Триггер (полная регенерация из кода) | `architecture/{EntityName}_Spec.md` | Intro + 6: Data Model, Views, Browse, Edit, Fragments, Deployment |
+| Living sync (правка кода в сессии) | `entities/{EntityName}.md` | Intro + 5 блоков living-doc |
 
 Оба каталога **не объединяются**: architecture — канон для one-pass спецификации по запросу; entities — инкрементальная синхронизация при изменении кода. При наличии обоих файлов — cross-links в шапке.
 
@@ -95,12 +97,16 @@ docs/
 
 | Сценарий | Путь | Разделы |
 |----------|------|---------|
-| Living sync UI | `ui/{FormName}_Spec.md` | 6: Invocation, Data Binding, Hierarchy, Behavior, Actions, Layout |
+| Living sync UI | `ui/{FormName}_Spec.md` | Intro + 6: Invocation, Data Binding, Hierarchy, Behavior, Actions, Layout |
 | Legacy | `ui/{kebab-name}.md` | напр. [login-screen.md](ui/login-screen.md) |
 | Архив удалённого UI | `ui/archive/{FormName}_Spec.md` | после delete из кода |
 | Шаблон | [templates/ui-template.md](templates/ui-template.md) | ручное создание |
 
 Каталог и соглашения: [ui/README.md](ui/README.md). Правила агента: [living-ui-documentation.mdc](../.cursor/rules/living-ui-documentation.mdc).
+
+### Описанные UI-формы
+
+Полный каталог **47 UI Spec** по 16 documented entities: [ui/README.md](ui/README.md).
 
 Завершение задачи с правкой UI — Diff-log: `Синхронизация UI-документации [Имя_Формы]: ...`
 
@@ -110,9 +116,10 @@ docs/
 
 Файл: **[templates/entity-template.md](templates/entity-template.md)**
 
-Используйте при добавлении описания любой сущности. Шаблон покрывает:
+Используйте при добавлении описания любой сущности. **Сначала** — блок «Бизнес-контекст» (3 подраздела), **затем** технические разделы. Шаблон покрывает:
 
-1. **Обзор** — назначение, объём данных, критичность
+0. **Бизнес-контекст** — назначение, навигация в UI, краткое поведение (обязательный ввод)
+1. **Обзор** — метаданные, объём данных, критичность
 2. **Архитектура** — FK, входящие/исходящие связи, сервисы
 3. **Поля** — бизнес-поля, enum, LOB
 4. **Views** — специализированные представления в `views.xml`
@@ -147,6 +154,11 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 | **SkillTree** | `ITPEARLS_SKILL_TREE` | справочник (дерево) | [entities/SkillTree.md](entities/SkillTree.md) | ✅ заполнен |
 | **JobCandidate** | `ITPEARLS_JOB_CANDIDATE` | транзакционная | [entities/JobCandidate.md](entities/JobCandidate.md) | ✅ заполнен |
 | **OpenPosition** | `ITPEARLS_OPEN_POSITION` | транзакционная | [entities/OpenPosition.md](entities/OpenPosition.md) · [Spec](architecture/OpenPosition_Spec.md) | ✅ заполнен |
+| **Grade** | `ITPEARLS_GRADE` | справочник | [entities/Grade.md](entities/Grade.md) | ✅ заполнен |
+| **Position** | `ITPEARLS_POSITION` | справочник | [entities/Position.md](entities/Position.md) | ✅ заполнен |
+| **OpenPositionNews** | `ITPEARLS_OPEN_POSITION_NEWS` | транзакционная | [entities/OpenPositionNews.md](entities/OpenPositionNews.md) | ✅ заполнен |
+| **OpenPositionComment** | `ITPEARLS_OPEN_POSITION_COMMENT` | транзакционная | [entities/OpenPositionComment.md](entities/OpenPositionComment.md) | ✅ заполнен |
+| **RecrutiesTasks** | `ITPEARLS_RECRUTIES_TASKS` | транзакционная | [entities/RecrutiesTasks.md](entities/RecrutiesTasks.md) | ✅ заполнен |
 
 ---
 
@@ -192,6 +204,8 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 6. Устранение N+1 в `rowStyleProvider` / `columnGenerator`
 7. Сборка: `./gradlew compileJava deploy -x test`
 
+**Структура БД:** индексы, новые колонки, поля entity и миграции — **только с явного согласия**; без согласия оптимизируй через views, JPQL и Java ([`.cursorrules`](../.cursorrules), [data-view-integrity.mdc](../.cursor/rules/data-view-integrity.mdc)).
+
 ---
 
 ## Развёртывание
@@ -209,10 +223,12 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 
 ## Соглашения
 
+- **Business & Context Intro:** любой `docs/entities/*.md`, `docs/architecture/*_Spec.md`, `docs/ui/*_Spec.md` **обязан** начинать содержательную часть с трёх подразделов ввода (назначение, навигация в UI, краткое поведение) **до** технических таблиц/XML/БД. Документ без ввода — недействителен. Шаблоны: [entity-template.md](templates/entity-template.md), [ui-template.md](templates/ui-template.md). Правило агента: [`.cursorrules`](../.cursorrules) § Business & Context Intro. Существующие UI Spec (~47) дополняются при следующем living sync или отдельным batch-проходом.
 - **Брендинг:** во всей документации (`docs/**/*.md`, шаблоны) — **HRM HuntTech**; не использовать «IT Pearls» / «IT-Pearls» в prose. Исключение — цитирование legacy-идентификаторов из кода (`itpearls`, `ITPEARLS_*`, имена файлов ресурсов, ключи `messages.properties`). Правило для агента: [living-documentation.mdc](../.cursor/rules/living-documentation.mdc), § «Брендинг в документации».
 - Документация сущностей — **на русском языке**
 - Имена файлов сущностей — как Java-класс: `Iteraction.md`, `IteractionList.md`
 - При изменении views/экранов сущности — обновлять `docs/entities/*.md` и `docs/ui/{FormName}_Spec.md`
+- **Оптимизация без изменения БД:** сужение view, batch/JPQL, loaders — без запроса; миграции, индексы, новые поля entity — только после явного согласия ([`.cursorrules`](../.cursorrules) § «ОПТИМИЗАЦИЯ: ОГРАНИЧЕНИЕ СТРУКТУРЫ БД»)
 - Не дублировать полные DDL в документах — ссылаться на `modules/core/db/`
 
 ### Политика Living Documentation
@@ -226,7 +242,7 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 
 **Изменение UI** (экран, фрагмент, меню, data bindings) — синхронизировать в той же сессии:
 
-- UI Spec → `docs/ui/{FormName}_Spec.md` (6 разделов)
+- UI Spec → `docs/ui/{FormName}_Spec.md` (Business & Context Intro + 6 разделов)
 - При привязке к сущности — также `docs/entities/{EntityName}.md` §2
 - Новый Spec → [ui/README.md](ui/README.md)
 - Diff-log: `Синхронизация UI-документации [Имя_Формы]: ...`
@@ -241,6 +257,7 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Глобальный аудит Living Documentation: Business & Context Intro во всех entity/UI/architecture spec (см. `docs/ui/README.md`) |
 | YYYY-MM-DD | Краткое описание изменения |
 
 - Дата — формат **YYYY-MM-DD** (дата внесения изменения)

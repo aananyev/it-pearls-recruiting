@@ -1,7 +1,7 @@
 # HRM HuntTech — Living Documentation
 
 > CUBA 7.3 · HuntTech · Документация — на русском.
-> Сущности: `.cursor/rules/living-documentation.mdc` · UI: `.cursor/rules/living-ui-documentation.mdc` · View integrity: `.cursor/rules/data-view-integrity.mdc` · даты: `.cursor/rules/documentation-with-dates.mdc`
+> Сущности: `.cursor/rules/living-documentation.mdc` · UI: `.cursor/rules/living-ui-documentation.mdc` · View integrity: `.cursor/rules/data-view-integrity.mdc` · оптимизация: `.cursor/rules/entity-performance-optimization.mdc` · даты: `.cursor/rules/documentation-with-dates.mdc` · коммиты: `.cursor/rules/git-commit-conventions.mdc` · ввод: **Business & Context Intro** (ниже)
 
 ---
 
@@ -34,6 +34,8 @@
 
 Без заглушек, без «TBD», без «будет дополнено». One-pass generation.
 
+**Сначала** — [Business & Context Intro](#business--context-intro-обязательный-ввод) (3 подраздела). **Затем** технические разделы:
+
 1. **Архитектура Сущности** (Data Model Layer) — класс, таблица, поля, FK, DDL/миграции
 2. **Слой Выборок Данных** (Fetch Plans / Views Layer) — views в `views.xml`, fetch plans, exclude/include
 3. **Списочные интерфейсы** (Browse Screens) — browse XML, контроллер, JPQL, фильтры, колонки
@@ -45,6 +47,7 @@
 
 ### Definition of Done (триггер)
 
+- Business & Context Intro заполнен (3 подраздела) **до** технических разделов.
 - Все 6 разделов заполнены фактами из кода.
 - Файл записан в `docs/architecture/{EntityName}_Spec.md`.
 - `docs/README.md` обновлён при первом создании файла.
@@ -74,6 +77,35 @@
 
 **Правило согласования:** не объединять файлы в один путь. Architecture Spec — канон для полной регенерации по триггеру; entities/ — living-doc сущности; ui/ — living-doc формы. При наличии обоих entity-файлов — cross-links в шапке; при триггере не удалять и не перезаписывать `docs/entities/{EntityName}.md`. Browse/Edit сущности → обновлять **и** entity doc, **и** `{FormName}_Spec.md`.
 
+Все перечисленные пути **обязаны** начинать содержательную часть с [Business & Context Intro](#business--context-intro-обязательный-ввод) (до технических таблиц/XML/БД).
+
+---
+
+## BUSINESS & CONTEXT INTRO (обязательный ввод)
+
+Применяется ко **всем** спецификациям сущностей, экранов и фрагментов:
+
+| Путь | Назначение |
+|------|------------|
+| `docs/entities/{EntityName}.md` | living-doc сущности |
+| `docs/architecture/{EntityName}_Spec.md` | architecture spec (триггер) |
+| `docs/ui/{FormName}_Spec.md` | UI Spec (экран, фрагмент, окно) |
+
+**Перед** любыми техническими таблицами, XML-фрагментами, DDL/БД-разделами и нумерованными техническими блоками (Data Model, Views, Data Binding и т.п.) — заполни обязательный ввод из **трёх подразделов** (связный текст на русском, только факты из кода; не заглушки):
+
+1. **Назначение и Бизнес-смысл (What & Why)** — функциональный смысл в предметной области рекрутинга; **не** допускай шаблон «форма редактирования X» / «справочник Y» без объяснения зачем объект нужен бизнесу.
+2. **Связи в интерфейсе и Навигация (UI Context & Navigation)** — откуда открывается, куда ведёт пользователь, родительские экраны, дочерние диалоги/фрагменты, пункты меню, lookup-цепочки.
+3. **Краткий обзор бизнес-логики поведения (Behavior Summary)** — что происходит при открытии и сохранении; главные кнопки и их итог. Формат «действие → условие → результат», простой русский (детальный чеклист: [living-ui-documentation.mdc](.cursor/rules/living-ui-documentation.mdc) § «Стандарт описания поведения формы»).
+
+Шапка (заголовок, cross-links) и блок **«История изменений»** могут идти до или после ввода по шаблону; первый **содержательный** блок после шапки — всегда Business & Context Intro.
+
+Шаблоны: `docs/templates/entity-template.md`, `docs/templates/ui-template.md`.
+
+### Definition of Done (Business & Context Intro)
+
+- Документ **недействителен**, если содержательная часть начинается с технических таблиц, XML, DDL/БД без трёх подразделов ввода.
+- При create/sync architecture spec, entity living-doc или UI Spec — ввод обязателен в той же сессии.
+
 ---
 
 ## GLOBAL UI TRIGGER (изменение UI-кода)
@@ -84,11 +116,13 @@
 
 ### Обязательные 6 разделов UI Spec (русский, только XML/Java)
 
+**Сначала** — [Business & Context Intro](#business--context-intro-обязательный-ввод). **Затем** технические разделы:
+
 1. **Точка вызова и контекст** (Invocation & Context)
 2. **Связь с моделью данных** (Data & Entity Binding)
 3. **Иерархия и взаимосвязь форм** (Form Hierarchy)
-4. **Модель поведения и интерактивность** (Behavior Model)
-5. **Логика управляющих элементов** (Actions & Buttons Logic)
+4. **Модель поведения и интерактивность** (Behavior Model) — §4.1 Lifecycle, §4.2 скрытые вычисления, §4.3 валидация/сохранение; простой русский, цепочки причинно-следственные ([ui-template.md](docs/templates/ui-template.md) §4)
+5. **Логика управляющих элементов** (Actions & Buttons Logic) — «нажал X → проверка Y → результат Z» ([ui-template.md](docs/templates/ui-template.md) §5)
 6. **Визуальная компоновка элементов** (Visual Layout Schema)
 
 ### DELETE UI
@@ -138,13 +172,42 @@
 
 ---
 
+## ОПТИМИЗАЦИЯ: ОГРАНИЧЕНИЕ СТРУКТУРЫ БД
+
+При **оптимизации** форм (Browse/Edit), сущностей, loaders, views, виджетов — соблюдай ограничение структуры БД. Детали: [entity-performance-optimization.mdc](.cursor/rules/entity-performance-optimization.mdc) § «Ограничение структуры БД»; сужение view — [data-view-integrity.mdc](.cursor/rules/data-view-integrity.mdc).
+
+### Запрещено без явного согласия пользователя
+
+- Изменения схемы БД: новые таблицы, колонки, индексы
+- Изменения полей entity (Java metadata, `@Column`, новые атрибуты)
+- Liquibase-миграции и `updateDb` для **структурных** изменений
+
+### Разрешено без запроса
+
+- Сужение view / fetch plan (с обязательным [data-view-integrity.mdc](.cursor/rules/data-view-integrity.mdc))
+- Оптимизация Java-контроллеров (batch N+1, lazy LOB, helpers)
+- JPQL / scalar-запросы, `fetch="BATCH"`, `maxResults`, `cacheable="true"` на loaders
+- `readOnly="true"` на browse, узкий `excludeProperties` в фильтрах
+
+### Если оптимизация требует изменения БД
+
+Если без нового индекса, колонки или атрибута entity целевой выигрыш недостижим — **сначала спроси пользователя**: что именно нужно, зачем, ожидаемый эффект, риски деплоя.
+
+### Если пользователь отказал
+
+Реализуй оптимизацию **только** на уровне кода, view и запросов. **Не** вноси изменений в БД, entity-поля и миграции.
+
+---
+
 ## Структура living-doc (`docs/entities/`)
 
 При создании или обновлении `docs/entities/{EntityName}.md` покрыть:
 
+**Сначала** — [Business & Context Intro](#business--context-intro-обязательный-ввод). **Затем** технические блоки:
+
 1. **Архитектура Сущности** (Data Model Layer) — класс, таблица, поля, FK, DDL/миграции
 2. **Интерфейсный Слой** (UI & Layout) — views.xml, экраны, фрагменты, layout
-3. **Бизнес-логика** (Controller Layer) — контроллеры экранов, ServiceBean, валидация
+3. **Бизнес-логика** (Controller Layer) — поведение экранов из Java: lifecycle, actions, скрытые вычисления, валидация/save ([living-ui-documentation.mdc](.cursor/rules/living-ui-documentation.mdc) § «Стандарт описания поведения формы»)
 4. **Взаимодействие компонентов** — cross-form FK, потребители, цепочки вызовов
 5. **Инструкция по развертыванию** (Deployment Guide) — app.properties, cache, FTS, сборка
 
@@ -156,11 +219,13 @@
 
 **Сущность:**
 - Задача **не завершена**, если entity/UI сущности изменён, а `docs/entities/{EntityName}.md` — нет.
+- Business & Context Intro актуален и стоит до технических таблиц/XML/БД.
 - Diff-log: `Синхронизация документации [Имя_Сущности]: ...`
 - Новая сущность: `cp docs/templates/entity-template.md docs/entities/{Entity}.md` + строка в `docs/README.md`.
 
 **UI (экран, фрагмент, меню):**
 - Задача **не завершена**, если UI изменён, а `docs/ui/{FormName}_Spec.md` — нет.
+- Business & Context Intro заполнен до технических разделов.
 - Diff-log: `Синхронизация UI-документации [Имя_Формы]: ...`
 - Новый UI Spec: `cp docs/templates/ui-template.md docs/ui/{FormName}_Spec.md` + строка в `docs/ui/README.md`.
 
@@ -168,14 +233,38 @@
 - Задача **не завершена**, если изменён контроллер/дескриптор, а чеклист [data-view-integrity.mdc](.cursor/rules/data-view-integrity.mdc) не пройден.
 - При optimize/refactor — DoD-фраза «Валидация View пройдена: …» в финале ответа.
 
+**Оптимизация (структура БД):**
+- Задача **не завершена**, если агент внёс структурные изменения БД/entity/миграций без явного согласия пользователя.
+- Индекс/колонка/атрибут entity — только после запроса и одобрения; при отказе — backlog в отчёте, реализация через view/query/Java.
+
 **Общее:** изменения кода и документации — **в одной сессии**. «История изменений»: YYYY-MM-DD сверху — см. `documentation-with-dates.mdc`.
+
+---
+
+## AUTO COMMIT MESSAGE GENERATION
+
+При **явном** запросе коммита («сделай коммит», «commit», «закоммить» и т.п.) — дополнение к user rule **Git Safety Protocol** (`committing-changes-with-git`). Детали: [git-commit-conventions.mdc](.cursor/rules/git-commit-conventions.mdc).
+
+1. **Анализ** — `git status`, staged + unstaged diff vs HEAD; при необходимости `git log` для стиля.
+2. **Сообщение на русском:**
+   - **Header:** `<type>([scope]): краткое описание` — types: `feat`, `fix`, `perf`, `docs`, `refactor`
+   - **Body:** маркированный список конкретных изменений из реального diff
+3. **Показать** полный текст сообщения пользователю **до** `git commit`.
+4. **Выполнить** stage + `git commit` через HEREDOC (Git Safety Protocol).
+
+### DoD (сообщение коммита)
+
+- Без generic: «update code», «fix bugs», «обновление кода».
+- Каждый bullet — из фактического diff.
+- Не коммитить секреты; не нарушать Git Safety Protocol (config, amend, push, hooks).
 
 ---
 
 ## Прочие правила проекта
 
 - Data View Integrity (UNFETCHED ATTRIBUTE ACCESS): `.cursor/rules/data-view-integrity.mdc`
-- Оптимизация сущности: `.cursor/rules/entity-performance-optimization.mdc`
+- Оптимизация сущности: `.cursor/rules/entity-performance-optimization.mdc` (включая ограничение структуры БД)
+- Автогенерация сообщений коммита: `.cursor/rules/git-commit-conventions.mdc`
 - **Не коммитить**, пока пользователь явно не попросит.
 
 ---

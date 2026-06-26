@@ -1,6 +1,5 @@
 package com.company.itpearls.web.widgets.diagrams;
 
-import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.charts.gui.amcharts.model.GaugeArrow;
 import com.haulmont.charts.gui.components.charts.AngularGaugeChart;
@@ -34,25 +33,23 @@ public class NewJobOfferWidget extends ScreenFragment {
         setAssignedInterviewToday();
     }
 
-    private void setAssignedInterviewToday() {
-        final String query = "select e from itpearls_IteractionList e " +
-                "where e.iteractionType.signStartCase = true and e.recrutier = :recrutier " +
-                "and e.dateIteraction between :startDate and :endDate";
+    private static final String QUERY_JOB_OFFER_COUNT =
+            "select count(e) from itpearls_IteractionList e " +
+                    "where e.iteractionType.signStartCase = true and e.recrutier = :recrutier " +
+                    "and e.dateIteraction between :startDate and :endDate";
 
+    private void setAssignedInterviewToday() {
         GregorianCalendar gregorianCalendar = new GregorianCalendar();
         gregorianCalendar.add(GregorianCalendar.DAY_OF_MONTH, -1);
 
         List<GaugeArrow> arrows = new ArrayList();
 
-        Double arrowData = Double.valueOf(dataManager
-                .load(IteractionList.class)
-                .query(query)
+        Long count = dataManager.loadValue(QUERY_JOB_OFFER_COUNT, Long.class)
                 .parameter("recrutier", userSession.getUser())
                 .parameter("endDate", new Date())
                 .parameter("startDate", gregorianCalendar.getTime())
-                .view("iteractionList-view")
-                .list()
-                .size());
+                .one();
+        Double arrowData = count != null ? count.doubleValue() : 0.0;
 
         if (arrowData > gaugeChart.getAxes().get(0).getEndValue()) {
             gaugeChart.getAxes().get(0).setEndValue((arrowData / 10 + 1) * 10);

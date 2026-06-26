@@ -13,6 +13,22 @@
 
 ---
 
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+Сущность `OpenPosition` моделирует жизненный цикл вакансии в HRM HuntTech: от черновика и согласования приоритета до набора кандидатов и закрытия. Хранит коммерческие и технические параметры позиции (проект, грейд, зарплатная вилка, формат работы, количество мест), текстовые материалы для рекрутёров (описания, письма, тестовые, памятки) и операционные связи — подписки рекрутёров, навыки, комментарии, файлы, трудовые договоры. Иерархия `parentOpenPosition` поддерживает группировку связанных вакансий в дереве browse.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+Экраны: `itpearls_OpenPosition.browse` (основной список-дерево), `itpearls_OpenPosition.edit` (много вкладок), специализированные browse (recruiting, outstaff, prod, master), фрагмент `itpearls_OpenPositionDetailScreenFragment`, комментарии `OpenPositionComment`, новости `OpenPositionNews`, подписки `RecrutiesTasks`. Входящие FK из `IteractionList.vacancy`, `CandidateCV`, `RecrutiesTasks`. Living-doc: [OpenPosition.md](../entities/OpenPosition.md); UI: [browse](../ui/itpearls_OpenPosition.browse_Spec.md), [edit](../ui/itpearls_OpenPosition.edit_Spec.md).
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Оптимизированный browse без LOB в SELECT: batch exists-флаги и lazy load текста в tooltip; aggregate-кэши для колонок статистики; batch commit при закрытии. Edit: standalone `CollectionLoader` для skills, comments, files, labor agreement; sync коллекций в entity только перед commit; guards от StackOverflow при смене `positionType` и unfetched при `@LoadDataBeforeShow`. Сервисы core: уведомления, расчёты комиссий (см. §1.5).
+
+---
+
 ## 1. Архитектура Сущности (Data Model Layer)
 
 ### 1.1 Класс и таблица
@@ -281,4 +297,5 @@ eclipselink.cache.size.itpearls_OpenPosition=500
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Создание архитектурной спецификации `OpenPosition_Spec.md` (one-pass из кода) |

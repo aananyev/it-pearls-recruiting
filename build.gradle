@@ -185,9 +185,28 @@ configure(webModule) {
         webcontent
     }
 
+    sourceSets {
+        main {
+            java {
+                exclude 'test/**'
+            }
+        }
+        test {
+            java {
+                srcDir 'src/test/java'
+            }
+        }
+    }
+
     dependencies {
         compileOnly(servletApi)
         compile(guiModule)
+    }
+
+    compileTestJava.dependsOn ':app-core:compileTestJava'
+
+    test {
+        workingDir = rootProject.projectDir
     }
 
     jar {
@@ -315,4 +334,11 @@ task buildWar(type: CubaWarBuilding) {
     includeContextXml = true
     singleWar = false
     coreContextXmlPath = 'modules/core/web/META-INF/war-context.xml'
+}
+
+gradle.projectsEvaluated {
+    def jmockitJar = webModule.configurations.testRuntime.find { it.name.startsWith('jmockit') }
+    if (jmockitJar != null) {
+        webModule.test.jvmArgs "-javaagent:${jmockitJar.absolutePath}"
+    }
 }

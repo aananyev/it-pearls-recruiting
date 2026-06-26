@@ -3,7 +3,10 @@ package com.company.itpearls.web.widgets.others;
 import com.company.itpearls.core.RecruterStatService;
 import com.company.itpearls.entity.ExtUser;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.ScrollBoxLayout;
@@ -21,11 +24,27 @@ import java.util.stream.Collectors;
 @UiDescriptor("recruters-leaders-widget.xml")
 @DashboardWidget(name = "Лидеры среди рекрутеров")
 public class RecrutersLeadersWidget extends ScreenFragment {
+
+    private static final String QUERY_GET_RECRUTERS_LIST =
+            "select e from itpearls_ExtUser e " +
+                    "where e.active = true and e.dashboards = true " +
+                    "and exists (select 1 from sec$UserRole ur where ur.user = e) " +
+                    "order by e.name";
+
+    private static final String QUERY_BULK_INTERVIEW_COUNTS =
+            "select e.recrutier.id as recrutierId, count(e) as cnt from itpearls_IteractionList e " +
+                    "where e.recrutier in :recrutiers and " +
+                    "@between(e.dateIteraction, now-30, now+1, day) and " +
+                    "(e.iteractionType.signOurInterviewAssigned = true or e.iteractionType.signOurInterview = true) " +
+                    "group by e.recrutier.id";
+
+    private static final View EXT_USER_DASHBOARD_VIEW = ViewBuilder.of(ExtUser.class)
+            .add("name")
+            .build();
+
     List<ExtUser> recruters = new ArrayList<>();
     Map<ExtUser, Integer> grade = new HashedMap();
     Map<ExtUser, Integer> interviews = new HashedMap();
-    static final String QUERY_GET_RECRUTERS_LIST = "select e from itpearls_ExtUser e " +
-            "where e.active = true and e.dashboards = true order by e.name";
 
     @Inject
     private DataManager dataManager;
@@ -66,7 +85,9 @@ public class RecrutersLeadersWidget extends ScreenFragment {
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,
-                        (a,b) -> {throw new AssertionError(); },
+                        (a, b) -> {
+                            throw new AssertionError();
+                        },
                         LinkedHashMap::new
                 ));
 
@@ -82,13 +103,6 @@ public class RecrutersLeadersWidget extends ScreenFragment {
                     .append(" / ")
                     .append(interviews.get(empl.getKey()));
             label.setValue(sb.toString());
-
-/*            label.setValue(empl.getKey().getName()
-                    + " "
-                    + recruterStatService.getGradeName(empl.getValue())
-                    + " / "
-                    + interviews.get(empl.getKey()))
-            ;*/
 
             leadersTableWidget.add(label);
 
@@ -113,17 +127,39 @@ public class RecrutersLeadersWidget extends ScreenFragment {
     private void getRecrutersList() {
         List<ExtUser> employees = dataManager.load(ExtUser.class)
                 .query(QUERY_GET_RECRUTERS_LIST)
-                .view("extUser-view")
+                .view(EXT_USER_DASHBOARD_VIEW)
+                .cacheable(true)
                 .list();
 
-        for (ExtUser emloyee : employees) {
-            if (emloyee.getUserRoles().size() > 0) {
-                recruters.add(emloyee);
+        Map<UUID, Long> interviewCounts = loadInterviewCounts(employees);
 
-                int interactions = recruterStatService.countInteraction(emloyee);
-                interviews.put(emloyee, interactions);
-                grade.put(emloyee, recruterStatService.getGrade(interactions));
+        for (ExtUser employee : employees) {
+            recruters.add(employee);
+
+            int interactionCount = interviewCounts.getOrDefault(employee.getId(), 0L).intValue();
+            interviews.put(employee, interactionCount);
+            grade.put(employee, recruterStatService.getGrade(interactionCount));
+        }
+    }
+
+    private Map<UUID, Long> loadInterviewCounts(List<ExtUser> employees) {
+        if (employees.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<KeyValueEntity> rows = dataManager.loadValues(QUERY_BULK_INTERVIEW_COUNTS)
+                .properties("recrutierId", "cnt")
+                .parameter("recrutiers", employees)
+                .list();
+
+        Map<UUID, Long> result = new HashMap<>();
+        for (KeyValueEntity row : rows) {
+            UUID recrutierId = row.getValue("recrutierId");
+            Number cnt = row.getValue("cnt");
+            if (recrutierId != null && cnt != null) {
+                result.put(recrutierId, cnt.longValue());
             }
         }
+        return result;
     }
 }

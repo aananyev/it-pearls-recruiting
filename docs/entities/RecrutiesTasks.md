@@ -16,4 +16,5 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-23 | browse/edit views, узкий FK openPosition, RecrutiesTasksServiceTest |

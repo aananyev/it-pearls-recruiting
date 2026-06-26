@@ -1,7 +1,6 @@
 package com.company.itpearls.web.widgets.diagrams;
 
 import com.company.itpearls.entity.ExtUser;
-import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
 import com.haulmont.charts.gui.amcharts.model.Color;
@@ -11,7 +10,10 @@ import com.haulmont.charts.gui.data.DataItem;
 import com.haulmont.charts.gui.data.DataProvider;
 import com.haulmont.charts.gui.data.ListDataProvider;
 import com.haulmont.charts.gui.data.MapDataItem;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.WindowParam;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
@@ -27,6 +29,33 @@ import java.util.*;
 @UiDescriptor("ReseracherEffectivity.xml")
 @DashboardWidget(name = "Эффективность ресерчера")
 public class Reserachereffectivity extends ScreenFragment {
+
+    private static final String QUERY_INTERACTION_COUNTS_BY_RECRUTIER =
+            "select e.recrutier.id as recrutierId, count(e) as cnt from itpearls_IteractionList e " +
+                    "where e.recrutier is not null " +
+                    "and e.dateIteraction between :startDate and :endDate ";
+
+    private static final String QUERY_INTERACTION_COUNTS_BY_RECRUTIER_WITH_TYPE =
+            "select e.recrutier.id as recrutierId, count(e) as cnt from itpearls_IteractionList e " +
+                    "where e.recrutier is not null " +
+                    "and e.dateIteraction between :startDate and :endDate " +
+                    "and e.iteractionType = (select i from itpearls_Iteraction i where i.iterationName like :iteractionName) ";
+
+    private static final String QUERY_RESEARCHERS =
+            "select f from itpearls_ExtUser f where f.active = true " +
+                    "and f.firstName is not null and f.lastName is not null " +
+                    "and f.group.name in :groupNames";
+
+    private static final String QUERY_RESEARCHERS_WITH_ROLE =
+            "select f from itpearls_ExtUser f where f.active = true " +
+                    "and f.firstName is not null and f.lastName is not null " +
+                    "and f.group.name in :groupNames " +
+                    "and exists (select 1 from sec$UserRole ur join ur.role r where ur.user = f and r.name like :userRole)";
+
+    private static final View RESEARCHER_DASHBOARD_VIEW = ViewBuilder.of(ExtUser.class)
+            .add("firstName")
+            .add("lastName")
+            .build();
 
     @WidgetParam
     @WindowParam
@@ -81,102 +110,92 @@ public class Reserachereffectivity extends ScreenFragment {
 
     private DataProvider valueGraphs() {
         ListDataProvider dataProvider = new ListDataProvider();
-        String queryCount;
 
-        if (iteractionName == null) {
-            queryCount = "select e from itpearls_IteractionList e " +
-                    "where e.recrutier = :user  and " +
-                    "(e.dateIteraction between :startDate and :endDate) " +
-                    "order by e.recrutier.name";
-        } else {
-            queryCount = "select e from itpearls_IteractionList e " +
-                    "where e.recrutier = :user  and " +
-                    "(e.dateIteraction between :startDate and :endDate) and " +
-                    "e.iteractionType = (select f from itpearls_Iteraction f where f.iterationName like :iteractionName)" +
-                    "order by e.recrutier.name";
-        }
+        Date[] weekInterval = getWeekInterval();
+        Map<UUID, Long> fullIntervalCounts = loadInteractionCountsByRecrutier(startDate, endDate);
+        Map<UUID, Long> weekIntervalCounts = loadInteractionCountsByRecrutier(weekInterval[0], weekInterval[1]);
 
-        String usersList = "select f from itpearls_ExtUser f where ";
-
-        List<ExtUser> users = dataManager.load(ExtUser.class).view("extUser-view").list();
+        List<ExtUser> users = loadResearchers();
 
         for (ExtUser a : users) {
-            if(a.getGroup() != null) {
-                if (a.getGroup().getName().equals(RESEARCHER)
-                        || a.getGroup().getName().equals(RESEARCHER_INTERN)
-                        || a.getGroup().getName().equals(RECRUTER)) {
-                    int     count;
-                    int     countWeek;
-
-                    GregorianCalendar firsDayOfWeek = new GregorianCalendar();
-                    firsDayOfWeek.setTime(new Date());
-
-                    GregorianCalendar today = new GregorianCalendar();
-                    today.setTime(new Date());
-                    today.add(Calendar.DAY_OF_YEAR, 1);
-
-                    if(firsDayOfWeek.get(Calendar.DAY_OF_MONTH) >= 7) {
-                        firsDayOfWeek.setFirstDayOfWeek(Calendar.MONDAY);
-                        firsDayOfWeek.add(Calendar.DAY_OF_YEAR, -1);
-                    } else {
-                        firsDayOfWeek.set(Calendar.DAY_OF_MONTH, 1);
-                    }
-
-                    if (a.getActive() & a.getFirstName() != null & a.getLastName() != null) {
-                        if (iteractionName == null) {
-                            count = dataManager.load(IteractionList.class)
-                                    .query(queryCount)
-                                    .view("iteractionList-view")
-                                    .parameter("user", a)
-                                    .parameter("startDate", startDate)
-                                    .parameter("endDate", endDate)
-                                    .list()
-                                    .size();
-
-                                countWeek = dataManager.load(IteractionList.class)
-                                        .query(queryCount)
-                                        .view("iteractionList-view")
-                                        .parameter("user", a)
-                                        .parameter("startDate", firsDayOfWeek.getTime())
-                                        .parameter("endDate", today.getTime())
-                                        .list()
-                                        .size();
-                        } else {
-                            count = dataManager.load(IteractionList.class)
-                                    .query(queryCount)
-                                    .view("iteractionList-view")
-                                    .parameter("user", a)
-                                    .parameter("iteractionName", iteractionName)
-                                    .parameter("startDate", startDate)
-                                    .parameter("endDate", endDate)
-                                    .list()
-                                    .size();
-
-                            countWeek = dataManager.load(IteractionList.class)
-                                    .query(queryCount)
-//                                    .view("iteractionList-view")
-                                    .view("_local")
-                                    .parameter("user", a)
-                                    .parameter("iteractionName", iteractionName)
-                                    .parameter("startDate", firsDayOfWeek.getTime())
-                                    .parameter("endDate", today.getTime())
-                                    .list()
-                                    .size();
-                        }
-
-                        if (userRole != null) {
-                            if (checkUserRoles(a, userRole)) {
-                                dataProvider.addItem(researcherCount(a.getFirstName() + "\n" + a.getLastName(), count - countWeek, countWeek));
-                            }
-                        } else {
-                            dataProvider.addItem(researcherCount(a.getFirstName() + "\n" + a.getLastName(), count - countWeek, countWeek));
-                        }
-                    }
-                }
-            }
+            int count = fullIntervalCounts.getOrDefault(a.getId(), 0L).intValue();
+            int countWeek = weekIntervalCounts.getOrDefault(a.getId(), 0L).intValue();
+            dataProvider.addItem(researcherCount(
+                    a.getFirstName() + "\n" + a.getLastName(),
+                    count - countWeek,
+                    countWeek));
         }
 
         return dataProvider;
+    }
+
+    private List<ExtUser> loadResearchers() {
+        List<String> groupNames = Arrays.asList(RESEARCHER, RESEARCHER_INTERN, RECRUTER);
+        if (userRole != null) {
+            return dataManager.load(ExtUser.class)
+                    .query(QUERY_RESEARCHERS_WITH_ROLE + " order by f.lastName, f.firstName")
+                    .view(RESEARCHER_DASHBOARD_VIEW)
+                    .cacheable(true)
+                    .parameter("groupNames", groupNames)
+                    .parameter("userRole", userRole)
+                    .list();
+        }
+        return dataManager.load(ExtUser.class)
+                .query(QUERY_RESEARCHERS + " order by f.lastName, f.firstName")
+                .view(RESEARCHER_DASHBOARD_VIEW)
+                .cacheable(true)
+                .parameter("groupNames", groupNames)
+                .list();
+    }
+
+    private Map<UUID, Long> loadInteractionCountsByRecrutier(Date from, Date to) {
+        String query = iteractionName == null
+                ? QUERY_INTERACTION_COUNTS_BY_RECRUTIER + "group by e.recrutier.id"
+                : QUERY_INTERACTION_COUNTS_BY_RECRUTIER_WITH_TYPE + "group by e.recrutier.id";
+
+        List<KeyValueEntity> rows;
+        if (iteractionName == null) {
+            rows = dataManager.loadValues(query)
+                    .properties("recrutierId", "cnt")
+                    .parameter("startDate", from)
+                    .parameter("endDate", to)
+                    .list();
+        } else {
+            rows = dataManager.loadValues(query)
+                    .properties("recrutierId", "cnt")
+                    .parameter("startDate", from)
+                    .parameter("endDate", to)
+                    .parameter("iteractionName", iteractionName)
+                    .list();
+        }
+
+        Map<UUID, Long> result = new HashMap<>();
+        for (KeyValueEntity row : rows) {
+            UUID recrutierId = row.getValue("recrutierId");
+            Number cnt = row.getValue("cnt");
+            if (recrutierId != null && cnt != null) {
+                result.put(recrutierId, cnt.longValue());
+            }
+        }
+        return result;
+    }
+
+    private Date[] getWeekInterval() {
+        GregorianCalendar firstDayOfWeek = new GregorianCalendar();
+        firstDayOfWeek.setTime(new Date());
+
+        GregorianCalendar today = new GregorianCalendar();
+        today.setTime(new Date());
+        today.add(Calendar.DAY_OF_YEAR, 1);
+
+        if (firstDayOfWeek.get(Calendar.DAY_OF_MONTH) >= 7) {
+            firstDayOfWeek.setFirstDayOfWeek(Calendar.MONDAY);
+            firstDayOfWeek.add(Calendar.DAY_OF_YEAR, -1);
+        } else {
+            firstDayOfWeek.set(Calendar.DAY_OF_MONTH, 1);
+        }
+
+        return new Date[]{firstDayOfWeek.getTime(), today.getTime()};
     }
 
     private DataItem researcherCount(String s, int i, int countWeek) {

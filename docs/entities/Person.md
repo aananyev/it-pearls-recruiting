@@ -5,6 +5,22 @@
 
 ---
 
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+Сущность `Person` — контактное лицо (ЛПР) на стороне клиента в HRM HuntTech: ФИО, должность, контакты. Используется как владелец проекта (`Project.projectOwner`) и в коммуникациях по вакансиям.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+`itpearls_Person.browse`, `itpearls_Person.edit`; lookup в Project, OpenPosition (через projectOwner). UI Spec: [browse](../ui/itpearls_Person.browse_Spec.md), [edit](../ui/itpearls_Person.edit_Spec.md).
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Карточка контакта с FK на `Position`; view `person-owner-view` для отображения в проектах и вакансиях.
+
+---
+
 ## 1. Обзор
 
 | Параметр | Значение |
@@ -230,6 +246,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: `PersonEdit` без каскадных обработчиков; `person-edit-view` покрывает поля формы — OK |
 | 2026-06-23 | Исправление `person-browse-view`: `position-picker-view`, `fileImageFace.name` для ImageRenderer |
 | 2026-06-23 | Оптимизация: person-browse/edit/picker/owner views, cacheable loaders, cross-form в Project/Company/OpenPosition, документация |

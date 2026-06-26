@@ -3,8 +3,10 @@ package com.company.itpearls.web.widgets.reports;
 import com.company.itpearls.entity.ExtUser;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.addon.dashboard.web.annotation.WidgetParam;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.LoadContext;
+import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.WindowParam;
 import com.haulmont.cuba.gui.components.*;
@@ -23,6 +25,23 @@ import java.util.*;
 @UiDescriptor("funnel-hunting-all-employee-widget.xml")
 @DashboardWidget(name = "Воронка хантинга (все сотрудники)")
 public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
+
+    private static final String QUERY_RESEARCHERS =
+            "select e from itpearls_ExtUser e " +
+                    "where e.active=true and e.group is not null and " +
+                    "e.name not like 'Anonymous' and e.name not like '%Test%' and e.name not like 'Administrator' " +
+                    "order by e.name";
+
+    private static final String QUERY_BULK_COUNTS =
+            "select e.recrutier.id as recrutierId, it.iterationName as iteractionName, count(e) as cnt " +
+                    "from itpearls_IteractionList e join e.iteractionType it " +
+                    "where e.dateIteraction between :startDate and :endDate and e.recrutier in :recrutiers " +
+                    "group by e.recrutier.id, it.iterationName";
+
+    private static final View EXT_USER_DASHBOARD_VIEW = ViewBuilder.of(ExtUser.class)
+            .add("name")
+            .build();
+
     @Inject
     private UiComponents uiComponents;
 
@@ -34,8 +53,9 @@ public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
     @WindowParam
     protected Date endDate;
 
-    private List<String> listIteractionForCheck = new ArrayList<String>();
+    private List<String> listIteractionForCheck = new ArrayList<>();
     private List<ExtUser> reaearchers = new ArrayList<>();
+    private Map<UUID, Map<String, Long>> bulkCounts = Collections.emptyMap();
 
     private static final String ITRKT_NEW_CONTACT = "Новый контакт";
     private static final String ITRKT_POPOSE_JOB = "Предложение работы";
@@ -83,23 +103,46 @@ public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
     }
 
     private void getResearchersList() {
-        LoadContext<ExtUser> loadContext = LoadContext.create(ExtUser.class)
-                .setQuery(LoadContext.createQuery("select e from itpearls_ExtUser e " +
-                        "where e.active=true and " +
-                        "e.name not like \'Anonymous\' and " +
-                        "e.name not like \'%Test%\' and " +
-                        "e.name not like \'Administrator\' " +
-                        "order by e.name"))
-                .setView("extUser-view");
+        reaearchers = dataManager.load(ExtUser.class)
+                .query(QUERY_RESEARCHERS)
+                .view(EXT_USER_DASHBOARD_VIEW)
+                .cacheable(true)
+                .list();
+        bulkCounts = loadBulkCounts();
+    }
 
-        reaearchers = dataManager.loadList(loadContext);
+    private Map<UUID, Map<String, Long>> loadBulkCounts() {
+        if (reaearchers.isEmpty()) {
+            return Collections.emptyMap();
+        }
 
-        Collections.sort(reaearchers, new Comparator<User>() {
-            @Override
-            public int compare(User user, User t1) {
-                return user.getName().compareTo(t1.getName());
+        List<KeyValueEntity> rows = dataManager.loadValues(QUERY_BULK_COUNTS)
+                .properties("recrutierId", "iteractionName", "cnt")
+                .parameter("startDate", startDate)
+                .parameter("endDate", endDate)
+                .parameter("recrutiers", reaearchers)
+                .list();
+
+        Map<UUID, Map<String, Long>> result = new HashMap<>();
+        for (KeyValueEntity row : rows) {
+            UUID recrutierId = row.getValue("recrutierId");
+            String iteractionName = row.getValue("iteractionName");
+            Number cnt = row.getValue("cnt");
+            if (recrutierId != null && iteractionName != null && cnt != null) {
+                result.computeIfAbsent(recrutierId, id -> new HashMap<>())
+                        .put(iteractionName, cnt.longValue());
             }
-        });
+        }
+        return result;
+    }
+
+    private int getIteractionCount(User user, String iteractionName) {
+        Map<String, Long> userCounts = bulkCounts.get(user.getId());
+        if (userCounts == null) {
+            return 0;
+        }
+        Long count = userCounts.get(iteractionName);
+        return count != null ? count.intValue() : 0;
     }
 
     private void setDeafaultTimeInterval() {
@@ -137,37 +180,21 @@ public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
             Integer styleCount = 2;
 
             for (User user : reaearchers) {
-
-
                 if (styleCount == 2)
                     styleCount = 1;
                 else
                     styleCount = 2;
 
-                final String queryCounter = "select count(e) from itpearls_IteractionList e " +
-                        "where e.dateIteraction between :startDate and :endDate and " +
-                        "e.recrutier = :recrutier and " +
-                        "e.iteractionType = (select f from itpearls_Iteraction f where f.iterationName like :iteractionName )";
+                int iteractionCount = getIteractionCount(user, a);
 
-                int iteractionCount = dataManager.loadValue(queryCounter, Integer.class)
-                        .parameter("startDate", startDate)
-                        .parameter("endDate", endDate)
-                        .parameter("recrutier", user)
-                        .parameter("iteractionName", a)
-                        .one();
+                Label<Integer> labelCount = uiComponents.create(Label.TYPE_INTEGER);
 
+                labelCount.setValue(iteractionCount);
+                labelCount.setWidthFull();
+                labelCount.setHeightFull();
+                labelCount.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
 
-                if (user.getGroup() != null) {
-
-                        Label<Integer> labelCount = uiComponents.create(Label.TYPE_INTEGER);
-
-                        labelCount.setValue(iteractionCount);
-                        labelCount.setWidthFull();
-                        labelCount.setHeightFull();
-                        labelCount.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
-
-                        vBox.add(labelCount);
-                }
+                vBox.add(labelCount);
             }
         }
     }
@@ -176,24 +203,21 @@ public class FunnelHuntingAllEmployeeWidget extends ScreenFragment {
         Integer styleCount = 2;
 
         for (User a : reaearchers) {
+            styleCount = styleCount == 2 ? 1 : 2;
 
-            if (a.getGroup() != null) {
-                    styleCount = styleCount == 2 ? 1 : 2;
+            CssLayout boxLayout = uiComponents.create(CssLayout.class);
+            boxLayout.setWidthFull();
+            boxLayout.setAlignment(Component.Alignment.BOTTOM_LEFT);
+            boxLayout.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
 
-                    CssLayout boxLayout = uiComponents.create(CssLayout.class);
-                    boxLayout.setWidthFull();
-                    boxLayout.setAlignment(Component.Alignment.BOTTOM_LEFT);
-                    boxLayout.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
+            Label<String> label = uiComponents.create(Label.TYPE_STRING);
+            label.setAlignment(Component.Alignment.MIDDLE_LEFT);
+            label.setWidthFull();
+            label.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
+            label.setValue(a.getName());
 
-                    Label<String> label = uiComponents.create(Label.TYPE_STRING);
-                    label.setAlignment(Component.Alignment.MIDDLE_LEFT);
-                    label.setWidthFull();
-                    label.setStyleName("widget-mountly-interview-table-" + styleCount.toString());
-                    label.setValue(a.getName());
-
-                    boxLayout.add(label);
-                    researcherNameBox.add(boxLayout);
-            }
+            boxLayout.add(label);
+            researcherNameBox.add(boxLayout);
         }
     }
 

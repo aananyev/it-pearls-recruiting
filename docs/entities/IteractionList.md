@@ -5,6 +5,22 @@
 
 ---
 
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+`IteractionList` — транзакционная запись взаимодействия рекрутёра с кандидатом по конкретной вакансии: дата, тип, рейтинг, комментарий, рекрутёр. Ядро воронки HRM HuntTech между `JobCandidate` и `OpenPosition`.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+Экраны: `itpearls_IteractionList.browse`, `itpearls_IteractionList.edit`, `itpearls_IteractionListSimple.browse`, `itpearls_IteractionListBrowse`; вкладки в JobCandidateEdit. UI Spec: [browse](../ui/itpearls_IteractionList.browse_Spec.md), [edit](../ui/itpearls_IteractionList.edit_Spec.md).
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Связка candidate + vacancy + recrutier; рейтинг агрегируется в JobCandidateBrowse; batch-создание при закрытии вакансии; nested `vacancy` обязателен в browse-view кандидата.
+
+---
+
 ## 1. Обзор
 
 | Параметр | Значение |
@@ -225,6 +241,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Исправление unfetched FK на Edit: `openPosition-iteraction-list-picker-view` — `cityPosition`/`cities` → `city-picker-view` для сравнения локаций в `IteractionListEdit` |
 | 2026-06-23 | Исправление unfetched `recrutier` в JobCandidate: `iteractionList-picker-view` + `iteractionList-job-candidate` → `extUser-picker-view`; FK в `job-candidate-edit.xml` |
 | 2026-06-23 | Исправление `iteractionList-browse-view`: поля @NamePattern для FK-колонок (`iteractionType.number`, `vacancy.vacansyID`, `recrutier.login/firstName/lastName`) |

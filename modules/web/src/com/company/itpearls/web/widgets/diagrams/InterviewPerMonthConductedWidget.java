@@ -1,27 +1,20 @@
 package com.company.itpearls.web.widgets.diagrams;
 
-import com.company.itpearls.entity.IteractionList;
 import com.haulmont.addon.dashboard.web.annotation.DashboardWidget;
 import com.haulmont.charts.gui.amcharts.model.GaugeArrow;
 import com.haulmont.charts.gui.components.charts.AngularGaugeChart;
 import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.gui.executors.BackgroundTask;
-import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
-import com.haulmont.cuba.gui.executors.BackgroundWorker;
-import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.screen.ScreenFragment;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
-import com.haulmont.cuba.web.AppUI;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @UiController("itpearls_InterviewPerMonthConductedWidget")
 @UiDescriptor("interview-per-month-conducted-widget.xml")
@@ -34,9 +27,10 @@ public class InterviewPerMonthConductedWidget extends ScreenFragment {
     @Inject
     private UserSession userSession;
 
-    static final String query = "select e from itpearls_IteractionList e " +
-            "where e.iteractionType.signOurInterview = true and e.recrutier = :recrutier " +
-            "and e.dateIteraction between :startDate and :endDate";
+    private static final String QUERY_CONDUCTED_COUNT =
+            "select count(e) from itpearls_IteractionList e " +
+                    "where e.iteractionType.signOurInterview = true and e.recrutier = :recrutier " +
+                    "and e.dateIteraction between :startDate and :endDate";
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -49,16 +43,12 @@ public class InterviewPerMonthConductedWidget extends ScreenFragment {
 
         List<GaugeArrow> arrows = new ArrayList();
 
-        Double arrowData = Double.valueOf(dataManager
-                .load(IteractionList.class)
-                .query(query)
+        Long count = dataManager.loadValue(QUERY_CONDUCTED_COUNT, Long.class)
                 .parameter("recrutier", userSession.getUser())
                 .parameter("endDate", new Date())
                 .parameter("startDate", gregorianCalendar.getTime())
-                .view("iteractionList-view")
-                .cacheable(true)
-                .list()
-                .size());
+                .one();
+        Double arrowData = count != null ? count.doubleValue() : 0.0;
 
         if (arrowData > gaugeChart.getAxes().get(0).getEndValue()) {
             double endValue = (arrowData / 10 + 1) / 10;

@@ -13,6 +13,20 @@ alwaysApply: true
 
 ---
 
+## BUSINESS & CONTEXT INTRO (обязательный ввод)
+
+Перед **любыми** техническими таблицами, XML, DDL/БД в `docs/entities/{EntityName}.md` и `docs/architecture/{EntityName}_Spec.md` — заполни обязательный ввод из трёх подразделов (связный текст на русском, факты из кода):
+
+1. **Назначение и Бизнес-смысл (What & Why)** — зачем сущность нужна в рекрутинге; не пиши «справочник X» / «таблица Y» без бизнес-смысла.
+2. **Связи в интерфейсе и Навигация (UI Context & Navigation)** — экраны browse/edit, фрагменты, меню, кто ссылается на сущность через FK.
+3. **Краткий обзор бизнес-логики поведения (Behavior Summary)** — типичные сценарии; что происходит при открытии browse/edit и при сохранении; главные кнопки. Формат «действие → условие → результат», простой русский.
+
+Шаблон: [entity-template.md](../../docs/templates/entity-template.md) § «Бизнес-контекст». UI-формы — [living-ui-documentation.mdc](living-ui-documentation.mdc).
+
+**DoD:** документ **недействителен**, если содержательная часть начинается с технических таблиц/XML/БД без ввода.
+
+---
+
 ## ENTITY DOC TRIGGER (СТРОГИЙ, ПРИОРИТЕТ)
 
 **Фраза:** «Сделай документацию сущности \<Название\>» (например: JobCandidate, OpenPosition).
@@ -23,7 +37,8 @@ alwaysApply: true
 
 1. Найти `{EntityName}` в коде (entity, views, services, screens, controllers, fragments, messages, db).
 2. Создать/перезаписать `docs/architecture/{EntityName}_Spec.md`.
-3. Заполнить **6 разделов** только фактами из кода (без заглушек):
+3. Заполнить **Business & Context Intro** (3 подраздела) — до технических разделов.
+4. Заполнить **6 разделов** только фактами из кода (без заглушек):
 
 | # | Раздел | Источники |
 |---|--------|-----------|
@@ -34,12 +49,13 @@ alwaysApply: true
 | 5 | Компоненты и Фрагменты (UI Fragments & Dialogs) | `*Fragment.java`, `*-fragment.xml`, lookup/view |
 | 6 | Инструкция по развертыванию с нуля (Deployment Guide) | `app.properties`, `fts.xml`, [LOCAL_DATABASE.md](../../docs/LOCAL_DATABASE.md) |
 
-4. Cross-link: если есть `docs/entities/{EntityName}.md` — взаимная ссылка в шапке.
-5. Индекс: `docs/README.md` при новом файле.
-6. История изменений: YYYY-MM-DD сверху.
+5. Cross-link: если есть `docs/entities/{EntityName}.md` — взаимная ссылка в шапке.
+6. Индекс: `docs/README.md` при новом файле.
+7. История изменений: YYYY-MM-DD сверху.
 
 ### DoD (триггер)
 
+- Business & Context Intro заполнен до технических разделов.
 - One-pass, все 6 разделов заполнены.
 - Финал ответа:
 
@@ -91,9 +107,11 @@ alwaysApply: true
 
 ## Структура living-doc (`docs/entities/`, 5 блоков)
 
+**Сначала** — Business & Context Intro (3 подраздела). **Затем** технические блоки:
+
 1. **Архитектура Сущности** (Data Model Layer)
 2. **Интерфейсный Слой** (UI & Layout)
-3. **Бизнес-логика** (Controller Layer)
+3. **Бизнес-логика** (Controller Layer) — поведение экранов из Java: lifecycle, actions, скрытые вычисления, валидация/save (см. [living-ui-documentation.mdc](living-ui-documentation.mdc) § «Стандарт описания поведения формы»)
 4. **Взаимодействие компонентов**
 5. **Инструкция по развертыванию** (Deployment Guide)
 
@@ -104,18 +122,19 @@ alwaysApply: true
 ## Definition of Done (изменение кода)
 
 1. Код изменён → `docs/entities/{EntityName}.md` обновлён в той же сессии.
-2. Затронутые блоки 1–5 переписаны или дополнены (не только «История изменений»).
-3. Новый `.md` → строка в `docs/README.md`.
-4. «История изменений» — YYYY-MM-DD сверху ([documentation-with-dates.mdc](documentation-with-dates.mdc)).
-5. Финал — **Diff-log**:
+2. Business & Context Intro актуален и стоит **до** технических таблиц/XML/БД.
+3. Затронутые блоки 1–5 переписаны или дополнены (не только «История изменений»).
+4. Новый `.md` → строка в `docs/README.md`.
+5. «История изменений» — YYYY-MM-DD сверху ([documentation-with-dates.mdc](documentation-with-dates.mdc)).
+6. Финал — **Diff-log**:
 
 ```
 Синхронизация документации [EntityName]: <что изменено в коде> → <какие разделы документа обновлены>
 ```
 
-6. При правке контроллера/экрана — чеклист [data-view-integrity.mdc](data-view-integrity.mdc); при optimize/refactor — DoD-фраза «Валидация View пройдена: …».
+7. При правке контроллера/экрана — чеклист [data-view-integrity.mdc](data-view-integrity.mdc); при optimize/refactor — DoD-фраза «Валидация View пройдена: …».
 
-7. **Не коммитить**, пока пользователь явно не попросит.
+8. **Не коммитить**, пока пользователь явно не попросит.
 
 ---
 
@@ -133,6 +152,7 @@ alwaysApply: true
 **Триггер «Сделай документацию сущности …»:**
 - [ ] STOP других задач
 - [ ] Scan: entity, views, services, screens, controllers, fragments, messages, db
+- [ ] Business & Context Intro (3 подраздела) до технических разделов
 - [ ] `docs/architecture/{Entity}_Spec.md` — 6 разделов, без заглушек
 - [ ] Cross-link с `docs/entities/{Entity}.md` если есть
 - [ ] `docs/README.md` при новом файле
@@ -140,6 +160,7 @@ alwaysApply: true
 
 **Living sync (правка entity-кода):**
 - [ ] `docs/entities/{Entity}.md`
+- [ ] Business & Context Intro актуален (до таблиц/XML/БД)
 - [ ] Блоки 1–5 по затронутым областям
 - [ ] `docs/README.md` при новом документе
 - [ ] История изменений YYYY-MM-DD

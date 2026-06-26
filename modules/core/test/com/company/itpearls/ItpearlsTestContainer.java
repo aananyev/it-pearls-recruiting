@@ -78,7 +78,21 @@ public class ItpearlsTestContainer extends TestContainer {
         @Override
         public void after() {
             cleanupContext();
-            // не останавливается — не вызывать super
+            // never stops - do not call super
         }
+    }
+
+    /**
+     * Exposes protected {@link #setupContext()} for web-tier performance tests.
+     */
+    public void activateContext() {
+        setupContext();
+    }
+
+    /**
+     * Exposes protected {@link #cleanupContext()} for web-tier performance tests.
+     */
+    public void deactivateContext() {
+        cleanupContext();
     }
 }

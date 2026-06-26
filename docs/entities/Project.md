@@ -5,6 +5,22 @@
 
 ---
 
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+Сущность `Project` — проект/контракт клиента в HRM HuntTech: название, логотип, департамент компании, владелец (Person). Каждая вакансия `OpenPosition` обязательно привязана к проекту (`projectName`).
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+`itpearls_Project.browse`, `itpearls_Project.edit`; FK в `OpenPosition`, фильтры browse вакансий. UI Spec: [browse](../ui/itpearls_Project.browse_Spec.md), [edit](../ui/itpearls_Project.edit_Spec.md).
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Browse без LOB descriptions в основном SELECT; nested `projectOwner` и `projectDepartment` в `openPosition-browse-view`; lazy exists для описаний проекта/компании в OpenPositionBrowse.
+
+---
+
 ## 1. Обзор
 
 | Параметр | Значение |
@@ -99,6 +115,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-23 | Fix ProjectEdit: `projectOpenPositionsDc` — standalone loader вместо `property="openPosition"`; lazy load по вкладке «Вакансии» |
 | 2026-06-22 | Аудит Edit unfetched FK: `ProjectEdit` без каскадных обработчиков location; lazy LOB/collections через reload — OK |
 | 2026-06-23 | Оптимизация: project-browse/edit/picker/tree-picker views, lazy LOB и `openPosition` по вкладкам, batch N+1 в `ProjectBrowse`, `ProjectServiceTest`, документация |

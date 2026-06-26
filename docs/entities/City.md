@@ -5,6 +5,22 @@
 
 ---
 
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+Справочник `City` — города в иерархии география HRM HuntTech (страна → регион → город). Используется для города проживания кандидата, города вакансии и адреса компании.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+`itpearls_City.browse`, `itpearls_City.edit`; picker `city-picker-view` / `city-location-view` в Company, JobCandidate, OpenPosition. UI Spec: [browse](../ui/itpearls_City.browse_Spec.md), [edit](../ui/itpearls_City.edit_Spec.md).
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Browse с FK на регион; оптимизированные views без лишних nested; каскадные lookup при выборе города в edit Company/JobCandidate.
+
+---
+
 ## 1. Обзор
 
 | Параметр | Значение |
@@ -257,6 +273,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: каскад город→регион использует `city-location-view` в `company-edit-view`; CityEdit без Java-обработчиков вложенных FK — OK |
 | 2026-06-23 | Исправление `city-browse-view`: `cityRegion` → `region-browse-view` с цепочкой `regionCountry` |
 | 2026-06-23 | Оптимизация: city-browse/edit/picker/location views, cacheable loaders, `CityServiceTest`, документация |

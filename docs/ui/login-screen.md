@@ -4,6 +4,22 @@
 
 ---
 
+## Business & Context Intro
+
+### Назначение и Бизнес-смысл (What & Why)
+
+Экран входа (`AppLoginScreen`, `@UiController("loginBranded")`) — корневая точка аутентификации веб-клиента HRM HuntTech. Пользователь подтверждает личность по логину и паролю перед доступом к основному окну приложения (`extMainScreen`). Экран обеспечивает брендированный первый контакт с системой: логотип, приветствие, выбор языка, «Запомнить меня», индикатор Caps Lock.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+Регистрация: `cuba.web.loginScreenId=loginBranded` в `web-app.properties`; маршрут `@Route(path = "login", root = true)`. После успешного `login()` — переход на `extMainScreen`. Не привязан к entity; наследует `com.haulmont.cuba.web.app.login.LoginScreen`. Дескриптор: `app-login-screen.xml`.
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+Lifecycle: `onAppLoginScreenInit`, `onBeforeShow`, `onSubmit` → `login()` базового класса; инициализация логотипа, локалей, remember-me, powered-by. Валидация пустых полей и ошибки аутентификации — стандарт CUBA LoginScreen. Тема `hover`, контекст `/app`.
+
+---
+
 ## 4.1 Назначение экрана
 
 Экран входа (`AppLoginScreen`, идентификатор контроллера `loginBranded`) — корневой экран веб-клиента HRM HuntTech. Предназначен для аутентификации пользователя по логину и паролю перед доступом к основному интерфейсу приложения (`extMainScreen`).
@@ -482,4 +498,5 @@ cuba.localeSelectVisible = true
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-25 | Создание документации экрана входа |

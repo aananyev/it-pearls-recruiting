@@ -20,5 +20,6 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-23 | PositionEdit: исправлен lazy LOB reload — отдельные `.add()` для `standartDescription` и `whoIsThisGuy` |
 | 2026-06-23 | browse/edit/picker views, batch LOB Browse, PositionServiceTest |

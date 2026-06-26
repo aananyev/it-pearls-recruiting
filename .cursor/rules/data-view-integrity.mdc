@@ -9,7 +9,7 @@ alwaysApply: true
 
 Проект: **CUBA 7.3**, HRM HuntTech.
 
-Связанные правила: [`.cursorrules`](../../.cursorrules) · [living-documentation.mdc](living-documentation.mdc) · [living-ui-documentation.mdc](living-ui-documentation.mdc) · [entity-performance-optimization.mdc](entity-performance-optimization.mdc).
+Связанные правила: [`.cursorrules`](../../.cursorrules) · [living-documentation.mdc](living-documentation.mdc) · [living-ui-documentation.mdc](living-ui-documentation.mdc) · [entity-performance-optimization.mdc](entity-performance-optimization.mdc) (§ «Ограничение структуры БД»).
 
 **Триггер:** любое **создание / изменение / оптимизация / рефакторинг** Java-контроллера (`*Browse.java`, `*Edit.java`, `*View.java`, `*Fragment.java`) **и/или** XML-дескриптора экрана (`*-browse.xml`, `*-edit.xml`, `*-fragment.xml`).
 
@@ -92,6 +92,8 @@ CUBA/EclipseLink бросает `IllegalStateException` / `IllegalArgumentExcept
 - Фаза 2.10 (колонки ⊆ view) — **неотъемлемая часть** этого чеклиста, не замена ему.
 - Создание `{entity}-browse-view` в `views.xml` → обязательный SCAN Java всех consumers экрана.
 - Batch N+1 в `rowStyleProvider` не освобождает от декларации полей в view **основного** loader'а, если provider читает их из `event.getItem()`.
+- **Сужение view разрешено без согласия пользователя** — это не изменение структуры БД. Запрещены без явного одобрения: новые колонки/индексы, поля entity, миграции (см. [entity-performance-optimization.mdc](entity-performance-optimization.mdc) § «Ограничение структуры БД», [`.cursorrules`](../../.cursorrules) § «ОПТИМИЗАЦИЯ: ОГРАНИЧЕНИЕ СТРУКТУРЫ БД»).
+- Если для оптимизации предлагается новый атрибут entity «чтобы не тянуть LOB в browse» — **сначала спроси пользователя**; альтернатива без БД: lazy load, scalar JPQL, batch-запрос.
 
 ### 5. Согласование с Living Documentation
 
@@ -141,3 +143,4 @@ CUBA/EclipseLink бросает `IllegalStateException` / `IllegalArgumentExcept
 **Оптимизация сущности (дополнительно):**
 - [ ] После `{entity}-browse-view` — `rg` по `*Browse.java` на getters удалённых полей
 - [ ] Фаза 7.3 entity-performance: нет `IllegalArgumentException` на колонках
+- [ ] Нет структурных изменений БД/entity/миграций без явного согласия пользователя
