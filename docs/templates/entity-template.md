@@ -4,6 +4,7 @@
 > Скопируйте файл в `docs/entities/{EntityName}.md` и заполните разделы.
 > Триггер оптимизации: «давай оптимизировать работу сущности {EntityName}» — см. [`.cursor/rules/entity-performance-optimization.mdc`](../../.cursor/rules/entity-performance-optimization.mdc).
 > **При любом изменении кода сущности** — синхронизируйте документ в той же сессии ([living-documentation.mdc](../../.cursor/rules/living-documentation.mdc), [`.cursorrules`](../../.cursorrules)) и добавляйте запись в §9 «История изменений» ([documentation-with-dates.mdc](../../.cursor/rules/documentation-with-dates.mdc)).
+> **При изменении экранов сущности** — также UI Spec: [living-ui-documentation.mdc](../../.cursor/rules/living-ui-documentation.mdc), [ui-template.md](ui-template.md).
 
 ---
 

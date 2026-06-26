@@ -1,0 +1,121 @@
+---
+description: >-
+  Living UI Documentation: GLOBAL UI TRIGGER при create/modify/fix/delete экранов,
+  фрагментов, меню; синхронизация docs/ui/{FormName}_Spec.md. DoD, Diff-log, DELETE.
+alwaysApply: true
+---
+
+# Living UI Documentation (Синхронизация UI и спецификации)
+
+Проект: **CUBA 7.3**, HRM HuntTech. Документация UI — **на русском**, только факты из XML/Java.
+
+Связанные правила: [`.cursorrules`](../../.cursorrules) · [living-documentation.mdc](living-documentation.mdc) (сущности) · [data-view-integrity.mdc](data-view-integrity.mdc) (view ↔ Java) · [documentation-with-dates.mdc](documentation-with-dates.mdc) · шаблон [ui-template.md](../../docs/templates/ui-template.md).
+
+---
+
+## GLOBAL UI TRIGGER (изменение UI-кода)
+
+Любое **создание / изменение / исправление / удаление** затрагивающее:
+
+| Область | Путь в репозитории |
+|---------|-------------------|
+| Экраны (Browse / Edit / View / Lookup / Window) | `modules/web/src/com/company/itpearls/web/screens/**` — `*-browse.xml`, `*-edit.xml`, `*-view.xml`, `*-lookup.xml`, `*-window.xml` |
+| Контроллеры экранов | `*Browse.java`, `*Edit.java`, `*View.java`, `*Lookup.java`, `*Window.java` |
+| Фрагменты UI | `*Fragment.java`, `*-fragment.xml` |
+| Кастомные UI-компоненты | `modules/web/src/com/company/itpearls/web/**` (виджеты, login, dashboard и т.д.) |
+| Пункты меню | `modules/web/src/com/company/itpearls/web-menu.xml`, `menu.xml`, `*-menu.xml` |
+| Привязки данных экрана | `dataContext`, `collection`/`instance` loaders, `property`, `optionsDatasource` в XML дескрипторах |
+| Маршруты Vaadin | `@Route`, `@UiController`, `web-app.properties` (`loginScreenId`, `mainScreenId`) |
+
+→ **обязательно** создать или актуализировать `docs/ui/{FormName}_Spec.md` **в той же сессии**.
+
+**Имя `{FormName}`:** значение `@UiController("…")` (приоритет); иначе имя Java-класса без суффикса `Screen`/`Fragment`/`Browse`/`Edit`/`View`/`Lookup`/`Window` — в PascalCase как в коде (`loginBranded` → `loginBranded`, `JobCandidateBrowse` → `JobCandidate` только если один канонический browse; при коллизии — полный controller id).
+
+**Пересечение с entity living-doc:** правка browse/edit/view сущности обновляет **и** `docs/entities/{EntityName}.md` (§2 Интерфейсный слой), **и** соответствующий `docs/ui/{FormName}_Spec.md`. UI Spec — детализация формы; entity doc — контекст сущности целиком.
+
+**Не откладывать.** UI-код без синхронизированной спецификации = незавершённая задача.
+
+---
+
+## Обязательные 6 разделов (`docs/ui/{FormName}_Spec.md`)
+
+Без заглушек, без «TBD», без «будет дополнено». Источники — только реальный XML, Java, `messages*.properties`, `web-menu.xml`.
+
+| # | Раздел | Содержание | Источники |
+|---|--------|------------|-----------|
+| 1 | **Точка вызова и контекст** (Invocation & Context) | `@UiController`, `@Route`, menu id, opener (`openWindow`, `create`, lookup), права, `screen.xml` id | контроллер, menu XML, `web-app.properties` |
+| 2 | **Связь с моделью данных** (Data & Entity Binding) | entity/view, loaders (JPQL/Query), `dataContext`, fetch plan, `property` bindings, **nested paths из Java generators** | `*-browse.xml`, `*-edit.xml`, `views.xml`, контроллер — см. [data-view-integrity.mdc](data-view-integrity.mdc) |
+| 3 | **Иерархия и взаимосвязь форм** (Form Hierarchy) | родитель/дочерние экраны, фрагменты, embed, диалоги, lookup targets | XML `fragment`, `dialog`, `lookup`, Java `screenBuilders` |
+| 4 | **Модель поведения и интерактивность** (Behavior Model) | `@Subscribe`, валидаторы, `ItemChangeListener`, lazy tabs, `rowStyleProvider`, FTS | `*Edit.java`, `*Browse.java`, `*Fragment.java` |
+| 5 | **Логика управляющих элементов** (Actions & Buttons Logic) | `actions`, кнопки, `@Install`, bulk actions, enable/disable rules | XML `<actions>`, контроллер |
+| 6 | **Визуальная компоновка элементов** (Visual Layout Schema) | layout (`grid`, `hbox`, `tabSheet`), колонки таблицы, CSS/stylename, messages keys | XML layout, SCSS темы, `messages*.properties` |
+
+Раздел **«История изменений»** — дата YYYY-MM-DD сверху ([documentation-with-dates.mdc](documentation-with-dates.mdc)).
+
+Cross-link в шапке: на `docs/entities/{EntityName}.md` и/или `docs/architecture/{EntityName}_Spec.md`, если форма привязана к сущности.
+
+---
+
+## DELETE rule (полное удаление UI)
+
+При **полном удалении** экрана, фрагмента или пункта меню из кода:
+
+1. **Документ:** удалить `docs/ui/{FormName}_Spec.md` **или** перенести в `docs/ui/archive/{FormName}_Spec.md` (предпочтительно archive для аудита).
+2. **Индекс:** убрать строку из [docs/ui/README.md](../../docs/ui/README.md) и [docs/README.md](../../docs/README.md) (раздел UI).
+3. **Родительские docs:** обновить ссылки в `docs/entities/*.md`, других UI Spec, architecture Spec — убрать или пометить «удалено».
+4. **Отчёт:** перечислить затронутые ссылки в `web-menu.xml` / `*-menu.xml` (id пункта, `screen=`, `openType`).
+
+---
+
+## Definition of Done (изменение UI-кода)
+
+1. UI-код изменён → `docs/ui/{FormName}_Spec.md` создан/обновлён в той же сессии.
+2. Затронутые разделы 1–6 переписаны или дополнены (не только «История изменений»).
+3. При привязке к сущности — синхронизирован `docs/entities/{EntityName}.md` (см. [living-documentation.mdc](living-documentation.mdc)).
+4. Новый Spec → строка в `docs/ui/README.md` и при необходимости в `docs/README.md`.
+5. «История изменений» — YYYY-MM-DD сверху.
+6. Финал ответа — **UI Diff-log**:
+
+```
+Синхронизация UI-документации [Имя_Формы]: <что изменено в UI-коде> → <какие разделы Spec обновлены>
+```
+
+7. При правке контроллера/XML view — [data-view-integrity.mdc](data-view-integrity.mdc); при optimize/refactor — DoD-фраза «Валидация View пройдена: …».
+
+8. **Не коммитить**, пока пользователь явно не попросит.
+
+---
+
+## Соглашения имён и legacy
+
+| Сценарий | Путь | Примечание |
+|----------|------|------------|
+| UI living sync (канон) | `docs/ui/{FormName}_Spec.md` | новые и обновляемые формы |
+| Legacy (до миграции) | `docs/ui/{kebab-name}.md` | напр. [login-screen.md](../../docs/ui/login-screen.md) — не переименовывать без запроса; при крупной правке login — cross-link или миграция в `loginBranded_Spec.md` |
+| Архив удалённых UI | `docs/ui/archive/` | `.gitkeep` + перенесённые Spec |
+| Шаблон | [docs/templates/ui-template.md](../../docs/templates/ui-template.md) | ручное создание UI Spec |
+
+---
+
+## Брендинг в UI-документации
+
+Во всех `docs/ui/**/*.md` — **HRM HuntTech** в prose. Legacy-идентификаторы из кода (`itpearls`, `ITPEARLS_*`, `@UiController` ids) — цитировать как в коде.
+
+---
+
+## Быстрый чеклист агента (UI)
+
+**Living sync (правка UI):**
+- [ ] Определить `{FormName}` по `@UiController` / классу
+- [ ] Scan: XML дескриптор, Java контроллер/фрагмент, menu, messages, views
+- [ ] View integrity: getters/generators ⊆ view контейнера — [data-view-integrity.mdc](data-view-integrity.mdc)
+- [ ] `docs/ui/{FormName}_Spec.md` — 6 разделов, без заглушек
+- [ ] Cross-link entity docs при наличии привязки
+- [ ] `docs/ui/README.md` при новом Spec
+- [ ] История изменений YYYY-MM-DD
+- [ ] UI Diff-log в финальном сообщении
+
+**DELETE UI:**
+- [ ] archive или удаление Spec
+- [ ] индексы и parent docs
+- [ ] отчёт по menu.xml refs

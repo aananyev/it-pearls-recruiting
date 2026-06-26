@@ -160,6 +160,9 @@
                 <property name="comment"/>
                 <property name="recrutierName"/>
                 <property name="recrutier" view="extUser-picker-view"/>
+                <property name="vacancy" view="_minimal">
+                    <property name="vacansyName"/>
+                </property>
             </view>
             <loader id="interactionCommentDl" cacheable="true">
                 <query>

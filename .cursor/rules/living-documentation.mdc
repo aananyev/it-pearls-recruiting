@@ -1,7 +1,7 @@
 ---
 description: >-
-  Living Documentation: триггер «Сделай документацию сущности …», синхронизация кода
-  (Entity, экраны, сервисы, фрагменты) со спецификацией в docs/. DoD, Diff-log.
+  Living Documentation: триггер «Сделай документацию сущности …», синхронизация entity
+  (Entity, экраны, сервисы, фрагменты) со спецификацией в docs/. UI — living-ui-documentation.mdc.
 alwaysApply: true
 ---
 
@@ -9,7 +9,7 @@ alwaysApply: true
 
 Проект: **CUBA 7.3**, HRM HuntTech. Документация — **на русском**.
 
-Корневой указатель: [`.cursorrules`](../../.cursorrules). Формат дат в истории: [documentation-with-dates.mdc](documentation-with-dates.mdc). Оптимизация: [entity-performance-optimization.mdc](entity-performance-optimization.mdc).
+Корневой указатель: [`.cursorrules`](../../.cursorrules). UI-слой: [living-ui-documentation.mdc](living-ui-documentation.mdc). View integrity: [data-view-integrity.mdc](data-view-integrity.mdc). Формат дат: [documentation-with-dates.mdc](documentation-with-dates.mdc). Оптимизация: [entity-performance-optimization.mdc](entity-performance-optimization.mdc).
 
 ---
 
@@ -53,12 +53,14 @@ alwaysApply: true
 
 | Сценарий | Путь | Когда |
 |----------|------|-------|
-| Триггерная фраза | `docs/architecture/{EntityName}_Spec.md` | Явный запрос полной спецификации |
-| Living sync (правка кода) | `docs/entities/{EntityName}.md` | create/fix/refactor/optimize entity, screens, services, fragments |
-| UI без entity | `docs/ui/{kebab-name}.md` | Экраны без одной сущности |
-| Шаблон | `docs/templates/entity-template.md` | Ручное создание living-doc |
+| Триггерная фраза | `docs/architecture/{EntityName}_Spec.md` | Явный запрос полной спецификации сущности |
+| Living sync сущности | `docs/entities/{EntityName}.md` | create/fix/refactor/optimize entity, views, services, миграции |
+| Living sync UI | `docs/ui/{FormName}_Spec.md` | create/fix/delete экран, фрагмент, меню — см. [living-ui-documentation.mdc](living-ui-documentation.mdc) |
+| Legacy UI | `docs/ui/{kebab-name}.md` | напр. `login-screen.md` |
+| Шаблон сущности | `docs/templates/entity-template.md` | Ручное создание entity living-doc |
+| Шаблон UI | `docs/templates/ui-template.md` | Ручное создание UI Spec |
 
-**Согласование:** Architecture Spec не заменяет `docs/entities/` и наоборот. Триггер пишет только в `architecture/`; living sync — только в `entities/`. Оба файла — cross-links при совместном существовании.
+**Согласование:** Architecture Spec не заменяет `entities/` и `ui/`. Триггер пишет только в `architecture/`; entity living sync — в `entities/`; UI living sync — в `ui/{FormName}_Spec.md`. Cross-links при совместном существовании. Правка browse/edit → entity doc **и** UI Spec.
 
 ---
 
@@ -77,6 +79,10 @@ alwaysApply: true
 
 → обновить `docs/entities/{EntityName}.md` в той же сессии.
 
+Если затронут конкретный экран/фрагмент — **дополнительно** GLOBAL UI TRIGGER → `docs/ui/{FormName}_Spec.md` ([living-ui-documentation.mdc](living-ui-documentation.mdc)).
+
+Если затронут Java-контроллер и/или XML view контейнера — **дополнительно** Data View Integrity Check → [data-view-integrity.mdc](data-view-integrity.mdc).
+
 Если `docs/entities/{Entity}.md` отсутствует — создать из шаблона.
 
 **Не откладывать документацию на «потом».** Код без синхронизированной спецификации = незавершённая задача.
@@ -91,7 +97,7 @@ alwaysApply: true
 4. **Взаимодействие компонентов**
 5. **Инструкция по развертыванию** (Deployment Guide)
 
-Дополнительно при оптимизации: §7 Производительность + [entity-performance-optimization.mdc](entity-performance-optimization.mdc).
+Дополнительно при оптимизации: §7 Производительность + [entity-performance-optimization.mdc](entity-performance-optimization.mdc) + [data-view-integrity.mdc](data-view-integrity.mdc) (валидация view после сужения).
 
 ---
 
@@ -107,7 +113,9 @@ alwaysApply: true
 Синхронизация документации [EntityName]: <что изменено в коде> → <какие разделы документа обновлены>
 ```
 
-6. **Не коммитить**, пока пользователь явно не попросит.
+6. При правке контроллера/экрана — чеклист [data-view-integrity.mdc](data-view-integrity.mdc); при optimize/refactor — DoD-фраза «Валидация View пройдена: …».
+
+7. **Не коммитить**, пока пользователь явно не попросит.
 
 ---
 
@@ -130,9 +138,16 @@ alwaysApply: true
 - [ ] `docs/README.md` при новом файле
 - [ ] Финал: «Документация для сущности … успешно создана/актуализирована в файле …»
 
-**Living sync (правка кода):**
-- [ ] `docs/entities/{Entity}.md` или `docs/ui/...`
+**Living sync (правка entity-кода):**
+- [ ] `docs/entities/{Entity}.md`
 - [ ] Блоки 1–5 по затронутым областям
 - [ ] `docs/README.md` при новом документе
 - [ ] История изменений YYYY-MM-DD
-- [ ] Diff-log в финальном сообщении
+- [ ] Diff-log: `Синхронизация документации [EntityName]: ...`
+- [ ] View integrity: [data-view-integrity.mdc](data-view-integrity.mdc) при правке контроллера/XML view
+
+**Living sync (правка UI) — см. [living-ui-documentation.mdc](living-ui-documentation.mdc):**
+- [ ] `docs/ui/{FormName}_Spec.md`
+- [ ] 6 разделов UI Spec
+- [ ] `docs/ui/README.md` при новом Spec
+- [ ] UI Diff-log: `Синхронизация UI-документации [Имя_Формы]: ...`

@@ -19,6 +19,10 @@
                     <property name="dateIteraction"/>
                     <property name="comment"/>
                     <property name="recrutier" view="_minimal"/>
+                    <property name="vacancy" view="_minimal">
+                        <property name="vacansyName"/>
+                        <property name="openClose"/>
+                    </property>
                 </property>
                 <property name="socialNetwork" fetch="BATCH">
                     <property name="networkURLS"/>

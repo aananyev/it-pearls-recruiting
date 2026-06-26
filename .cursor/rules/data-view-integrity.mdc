@@ -1,0 +1,143 @@
+---
+description: >-
+  Data View Integrity Check: предотвращение UNFETCHED ATTRIBUTE ACCESS ERROR при
+  правке Java-контроллеров и XML-дескрипторов экранов. Обязателен при optimize/refactor UI.
+alwaysApply: true
+---
+
+# Data View Integrity Check (CUBA 7.3)
+
+Проект: **CUBA 7.3**, HRM HuntTech.
+
+Связанные правила: [`.cursorrules`](../../.cursorrules) · [living-documentation.mdc](living-documentation.mdc) · [living-ui-documentation.mdc](living-ui-documentation.mdc) · [entity-performance-optimization.mdc](entity-performance-optimization.mdc).
+
+**Триггер:** любое **создание / изменение / оптимизация / рефакторинг** Java-контроллера (`*Browse.java`, `*Edit.java`, `*View.java`, `*Fragment.java`) **и/или** XML-дескриптора экрана (`*-browse.xml`, `*-edit.xml`, `*-fragment.xml`).
+
+Задача **не завершена**, пока не пройдена валидация view ниже.
+
+---
+
+## Проблема: UNFETCHED ATTRIBUTE ACCESS ERROR
+
+CUBA/EclipseLink бросает `IllegalStateException` / `IllegalArgumentException`, если Java-код обращается к атрибуту сущности, **не объявленному** в `view` контейнера (`instanceContainer`, `collectionContainer`, `dataContext` loader).
+
+Типичный сценарий: сужение browse-view при оптимизации → column generator / `rowStyleProvider` / цикл по коллекции всё ещё вызывает getter → runtime error при открытии экрана или переходе Browse → Edit.
+
+### Референсный инцидент (HRM HuntTech)
+
+| Экран | Симптом | Причина |
+|-------|---------|---------|
+| `JobCandidateBrowse` → `JobCandidateEdit` | UNFETCHED ATTRIBUTE ACCESS при открытии edit / рендере колонок | В browse-view `jobCandidatesDc` у `iteractionList` отсутствовал вложенный `vacancy`, тогда как `JobCandidateBrowse` / фрагменты обращались к `iteractionList.getVacancy()` и nested-полям (`vacansyName`, `openClose`) |
+
+**Исправление:** в `job-candidate-browse.xml` для `iteractionList` с `fetch="BATCH"` явно задекларировать `vacancy` с нужным nested view:
+
+```xml
+<property name="iteractionList" fetch="BATCH">
+    ...
+    <property name="vacancy" view="_minimal">
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+    </property>
+</property>
+```
+
+Либо переписать Java-логику без обращения к `vacancy` на browse-данных.
+
+---
+
+## Чеклист (обязателен перед завершением задачи)
+
+### 1. SCAN Java
+
+Прочитать **весь** затронутый контроллер и вложенные фрагменты. Выписать **каждый** getter и nested path:
+
+| Источник в Java | Что искать |
+|-----------------|------------|
+| `columnGenerator` / `setColumnGenerator` | `entity.getX()`, `entity.getFk().getY()` |
+| `rowStyleProvider` / `descriptionProvider` | стили по FK, sign-полям, датам |
+| `@Subscribe` на `ValueChangeEvent`, `ItemChangeEvent`, `SelectedTabChangeEvent` | чтение полей item |
+| Циклы `for (Child c : parent.getCollection())` | все getters внутри тела |
+| `interactionService.getLastIteraction(...)` + последующий доступ | поля возвращённой сущности |
+| `dataManager.load(...).view("...")` | view loader'а должен покрывать последующий доступ |
+| Screen builders / `@Install` / `@Supply` | инициализаторы, suppliers |
+
+Зафиксировать список: `атрибут` → `вложенный путь` (напр. `iteractionList` → `vacancy` → `vacansyName`).
+
+### 2. CROSS-VALIDATE с XML
+
+Открыть XML-дескриптор экрана. Для **каждого** контейнера (`<instance>`, `<collection>` в `<data>`, inline `<view>` на loader):
+
+1. Найти `view` / `extends` / вложенные `<property name="...">`.
+2. Сверить: **каждый** атрибут из шага 1 присутствует в view **того контейнера**, из которого читаются данные.
+3. Для коллекций с `fetch="BATCH"` — nested properties обязательны внутри `<property name="collectionName">`.
+4. Для FK — проверить `view` на `<property name="fkName" view="...">` и поля внутри picker/sign view в `views.xml`.
+5. Проверить **фрагменты** (`*-fragment.xml`): их `property=` bindings и loaders тоже должны иметь полный view.
+
+**Правило:** `<column id="..."/>` в таблице ⊆ view loader'а; getter в generator ⊆ view той же строки.
+
+### 3. PROHIBITIONS (запреты)
+
+- **НИКОГДА** не удалять из view свойства, к которым обращается контроллер, фрагмент или column generator — даже «для оптимизации».
+- При **сужении** browse-view:
+  - **либо** переписать generators / providers / циклы так, чтобы не трогать удалённые атрибуты;
+  - **либо** оставить атрибут в view с минимальным nested view;
+  - **либо** использовать `fetch="BATCH"` + явные nested `<property>` только для реально используемых полей.
+- Не полагаться на `_local` / `_base` «на всякий случай» в browse — явно декларировать нужные поля.
+- Не смешивать данные из `jobCandidatesDc` (узкий view) с логикой, требующей полей, доступных только в edit-loader — грузить отдельно с правильным view или batch.
+
+### 4. Согласование с оптимизацией
+
+При работе по [entity-performance-optimization.mdc](entity-performance-optimization.mdc):
+
+- Фаза 2.10 (колонки ⊆ view) — **неотъемлемая часть** этого чеклиста, не замена ему.
+- Создание `{entity}-browse-view` в `views.xml` → обязательный SCAN Java всех consumers экрана.
+- Batch N+1 в `rowStyleProvider` не освобождает от декларации полей в view **основного** loader'а, если provider читает их из `event.getItem()`.
+
+### 5. Согласование с Living Documentation
+
+Правка browse/edit → синхронизировать:
+
+- `docs/entities/{EntityName}.md` (§2 Интерфейсный слой — views, экраны) — [living-documentation.mdc](living-documentation.mdc)
+- `docs/ui/{FormName}_Spec.md` (§2 Data & Entity Binding, §4 Behavior Model) — [living-ui-documentation.mdc](living-ui-documentation.mdc)
+
+В UI Spec §2 явно перечислить view контейнера и критичные nested paths, используемые в Java.
+
+---
+
+## Definition of Done
+
+Задача по контроллеру/экрану **не завершена**, пока:
+
+1. Выполнены шаги 1–2 чеклиста; расхождений нет.
+2. Browse/Edit открываются без UNFETCHED ATTRIBUTE ACCESS (ручная проверка или лог Tomcat).
+3. При optimize/refactor — в финале ответа **обязательная фраза** (подставить имена):
+
+```
+Валидация View пройдена: все атрибуты, используемые в генераторах и логике [Имя контроллера], строго задекларированы в XML-контейнере [Имя контейнера].
+```
+
+Пример:
+
+```
+Валидация View пройдена: все атрибуты, используемые в генераторах и логике JobCandidateBrowse, строго задекларированы в XML-контейнере jobCandidatesDc.
+```
+
+4. Living sync docs выполнен, если менялся UI-код (см. GLOBAL UI TRIGGER).
+
+**Не коммитить**, пока пользователь явно не попросит.
+
+---
+
+## Быстрый чеклист агента
+
+**Правка Java + XML экрана:**
+- [ ] SCAN: getters, nested paths, generators, providers, loops
+- [ ] CROSS-VALIDATE: каждый path ∈ view контейнера / fragment loader
+- [ ] PROHIBITIONS: не удалять used attrs; при сужении — rewrite или BATCH+nested
+- [ ] Ручная проверка открытия Browse/Edit
+- [ ] DoD-фраза в финале (optimize/refactor)
+- [ ] Living sync: entity doc + UI Spec при изменении UI
+
+**Оптимизация сущности (дополнительно):**
+- [ ] После `{entity}-browse-view` — `rg` по `*Browse.java` на getters удалённых полей
+- [ ] Фаза 7.3 entity-performance: нет `IllegalArgumentException` на колонках

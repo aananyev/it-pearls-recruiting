@@ -1,7 +1,7 @@
 # HRM HuntTech — Living Documentation
 
 > CUBA 7.3 · HuntTech · Документация — на русском.
-> Детали: `.cursor/rules/living-documentation.mdc` · даты в истории: `.cursor/rules/documentation-with-dates.mdc`
+> Сущности: `.cursor/rules/living-documentation.mdc` · UI: `.cursor/rules/living-ui-documentation.mdc` · View integrity: `.cursor/rules/data-view-integrity.mdc` · даты: `.cursor/rules/documentation-with-dates.mdc`
 
 ---
 
@@ -60,20 +60,49 @@
 
 | Сценарий | Путь | Назначение |
 |----------|------|------------|
-| Триггер «Сделай документацию сущности …» | `docs/architecture/{EntityName}_Spec.md` | Полная архитектурная спецификация (6 разделов), one-pass из кода |
-| Living sync при изменении кода | `docs/entities/{EntityName}.md` | Инкрементальная синхронизация в той же сессии с правкой кода |
-| UI без одной entity | `docs/ui/{screen-name}.md` | Экраны и потоки без привязки к одной сущности |
-| Шаблон | `docs/templates/entity-template.md` | Ручное создание living-doc |
-| Индекс | `docs/README.md` | Ссылки на оба каталога |
+| Триггер «Сделай документацию сущности …» | `docs/architecture/{EntityName}_Spec.md` | Полная архитектурная спецификация сущности (6 разделов), one-pass из кода |
+| Living sync сущности (правка entity/экранов/сервисов) | `docs/entities/{EntityName}.md` | Инкрементальная синхронизация сущности в той же сессии |
+| Living sync UI (экран, фрагмент, меню) | `docs/ui/{FormName}_Spec.md` | UI Spec (6 разделов) из XML/Java; см. GLOBAL UI TRIGGER |
+| Legacy UI (до `_Spec`) | `docs/ui/{kebab-name}.md` | напр. `login-screen.md` — не удалять без миграции |
+| Архив удалённого UI | `docs/ui/archive/{FormName}_Spec.md` | при полном delete UI из кода |
+| Шаблон сущности | `docs/templates/entity-template.md` | Ручное создание entity living-doc |
+| Шаблон UI | `docs/templates/ui-template.md` | Ручное создание UI Spec |
+| Индекс | `docs/README.md`, `docs/ui/README.md` | Каталоги architecture, entities, ui |
 | Локальная среда | `docs/LOCAL_DATABASE.md` | БД и деплой |
 
 Имя `{EntityName}` = Java-класс: `JobCandidate`, `OpenPosition`.
 
-**Правило согласования:** не объединять файлы в один путь. Architecture Spec — канон для полной регенерации по триггеру; entities/ — living-doc при правках кода. При наличии обоих — cross-links в шапке; при триггере не удалять и не перезаписывать `docs/entities/{EntityName}.md`.
+**Правило согласования:** не объединять файлы в один путь. Architecture Spec — канон для полной регенерации по триггеру; entities/ — living-doc сущности; ui/ — living-doc формы. При наличии обоих entity-файлов — cross-links в шапке; при триггере не удалять и не перезаписывать `docs/entities/{EntityName}.md`. Browse/Edit сущности → обновлять **и** entity doc, **и** `{FormName}_Spec.md`.
 
 ---
 
-## GLOBAL SYNC TRIGGER (изменение кода)
+## GLOBAL UI TRIGGER (изменение UI-кода)
+
+Любое **создание / изменение / исправление / удаление** экрана, окна, фрагмента, кастомного UI-компонента, пункта меню или привязок данных (`dataContext`, loaders, `property`) → **обязательно** создать/актуализировать `docs/ui/{FormName}_Spec.md` **в той же сессии**.
+
+Детали, 6 разделов, DELETE rule, чеклист: `.cursor/rules/living-ui-documentation.mdc`.
+
+### Обязательные 6 разделов UI Spec (русский, только XML/Java)
+
+1. **Точка вызова и контекст** (Invocation & Context)
+2. **Связь с моделью данных** (Data & Entity Binding)
+3. **Иерархия и взаимосвязь форм** (Form Hierarchy)
+4. **Модель поведения и интерактивность** (Behavior Model)
+5. **Логика управляющих элементов** (Actions & Buttons Logic)
+6. **Визуальная компоновка элементов** (Visual Layout Schema)
+
+### DELETE UI
+
+Полное удаление UI → удалить или перенести Spec в `docs/ui/archive/`, обновить `docs/ui/README.md`, `docs/README.md`, parent entity docs; в отчёте — ссылки из `web-menu.xml` / `*-menu.xml`.
+
+### Definition of Done (UI)
+
+- UI-код без MD sync = незавершённая задача.
+- Финал — **UI Diff-log**: `Синхронизация UI-документации [Имя_Формы]: ...`
+
+---
+
+## GLOBAL SYNC TRIGGER (изменение кода сущности)
 
 Любое **создание / исправление / рефакторинг / оптимизация** затрагивающее:
 
@@ -83,6 +112,29 @@
 - Фрагменты UI (`*Fragment.java`, `*-fragment.xml`)
 
 → **обязательно** синхронизировать `docs/entities/{EntityName}.md` **в той же сессии** (если документ существует или создаётся по шаблону).
+
+Правка browse/edit/view/фрагмента → **дополнительно** GLOBAL UI TRIGGER (`docs/ui/{FormName}_Spec.md`).
+
+---
+
+## DATA VIEW INTEGRITY CHECK (UNFETCHED ATTRIBUTE ACCESS)
+
+Любое **создание / изменение / оптимизация / рефакторинг** Java-контроллера экрана (`*Browse.java`, `*Edit.java`, `*Fragment.java`) **и/или** XML-дескриптора (`*-browse.xml`, `*-edit.xml`, `*-fragment.xml`) → **обязательно** пройти чеклист [data-view-integrity.mdc](.cursor/rules/data-view-integrity.mdc) **в той же сессии**.
+
+Детали: SCAN Java (generators, providers, loops) → CROSS-VALIDATE с view контейнера → запрет удалять used attrs из view.
+
+### Definition of Done (View Integrity)
+
+- Задача **не завершена** без валидации view при правке контроллера/экрана.
+- При optimize/refactor — финал ответа **обязательная фраза**:
+
+```
+Валидация View пройдена: все атрибуты, используемые в генераторах и логике [Имя контроллера], строго задекларированы в XML-контейнере [Имя контейнера].
+```
+
+Референсный инцидент: `JobCandidateBrowse` → `JobCandidateEdit`, `iteractionList.vacancy` отсутствовал в browse view.
+
+Согласование: оптимизация сущности → [entity-performance-optimization.mdc](.cursor/rules/entity-performance-optimization.mdc); living sync → entity doc + UI Spec.
 
 ---
 
@@ -102,21 +154,27 @@
 
 ## Definition of Done (изменение кода)
 
-- Задача **не завершена**, если код изменён, а `docs/entities/{EntityName}.md` — нет.
-- Изменения кода и документации — **в одной сессии**.
-- Завершить ответ блоком **Diff-log**:
+**Сущность:**
+- Задача **не завершена**, если entity/UI сущности изменён, а `docs/entities/{EntityName}.md` — нет.
+- Diff-log: `Синхронизация документации [Имя_Сущности]: ...`
+- Новая сущность: `cp docs/templates/entity-template.md docs/entities/{Entity}.md` + строка в `docs/README.md`.
 
-```
-Синхронизация документации [Имя_Сущности]: <кратко что обновлено в коде и в каких разделах документа>
-```
+**UI (экран, фрагмент, меню):**
+- Задача **не завершена**, если UI изменён, а `docs/ui/{FormName}_Spec.md` — нет.
+- Diff-log: `Синхронизация UI-документации [Имя_Формы]: ...`
+- Новый UI Spec: `cp docs/templates/ui-template.md docs/ui/{FormName}_Spec.md` + строка в `docs/ui/README.md`.
 
-- Новая сущность (living): `cp docs/templates/entity-template.md docs/entities/{Entity}.md` + строка в `docs/README.md`.
-- «История изменений»: дата YYYY-MM-DD, новая строка сверху — см. `documentation-with-dates.mdc`.
+**View Integrity (контроллер + XML экрана):**
+- Задача **не завершена**, если изменён контроллер/дескриптор, а чеклист [data-view-integrity.mdc](.cursor/rules/data-view-integrity.mdc) не пройден.
+- При optimize/refactor — DoD-фраза «Валидация View пройдена: …» в финале ответа.
+
+**Общее:** изменения кода и документации — **в одной сессии**. «История изменений»: YYYY-MM-DD сверху — см. `documentation-with-dates.mdc`.
 
 ---
 
 ## Прочие правила проекта
 
+- Data View Integrity (UNFETCHED ATTRIBUTE ACCESS): `.cursor/rules/data-view-integrity.mdc`
 - Оптимизация сущности: `.cursor/rules/entity-performance-optimization.mdc`
 - **Не коммитить**, пока пользователь явно не попросит.
 
