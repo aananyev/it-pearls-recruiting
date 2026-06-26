@@ -23,7 +23,8 @@ import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
-import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
+import com.haulmont.cuba.gui.components.FileDescriptorResource;
+import com.haulmont.cuba.gui.components.ThemeResource;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
@@ -574,6 +575,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         jobCandidatesTable.setDescriptionAsHtml(true);
+        jobCandidatesDl.setMaxResults(50);
         if (userSession.getUser().getGroup().getName().equals("Стажер")) {
             jobCandidatesDl.setParameter("userName", new StringBuilder()
                     .append("%")
@@ -2059,8 +2061,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 }));
 
 
-        candidateImageColumnRenderer();
-
         DataGrid.ClickableTextRenderer<JobCandidate> jobCandidatesTableLastIteractionRenderer =
                 jobCandidatesTable.createRenderer(DataGrid.ClickableTextRenderer.class);
 
@@ -2164,34 +2164,36 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
 
-    private void candidateImageColumnRenderer() {
-        jobCandidatesTable.addGeneratedColumn("fileImageFace", entity -> {
-            HBoxLayout hBox = uiComponents.create(HBoxLayout.class);
-            Image image = uiComponents.create(Image.NAME);
+    @Install(to = "jobCandidatesTable.fileImageFace", subject = "columnGenerator")
+    private Component jobCandidatesTableFileImageFaceColumnGenerator(
+            DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        HBoxLayout hBox = uiComponents.create(HBoxLayout.class);
+        Image image = uiComponents.create(Image.NAME);
+        setCandidateFaceImage(image, event.getItem());
+        image.setWidth("20px");
+        image.setStyleName("circle-20px");
+        image.setScaleMode(Image.ScaleMode.CONTAIN);
+        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        hBox.setWidthFull();
+        hBox.setHeightFull();
+        hBox.add(image);
+        return hBox;
+    }
 
-            if (entity.getItem().getFileImageFace() != null) {
-                try {
-                    image.setValueSource(new ContainerValueSource<JobCandidate, FileDescriptor>(entity.getContainer(),
-                            "fileImageFace"));
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-            }
-
-            image.setWidth("20px");
-            image.setStyleName("circle-20px");
-
-            image.setScaleMode(Image.ScaleMode.CONTAIN);
-            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-            hBox.setWidthFull();
-            hBox.setHeightFull();
-            hBox.add(image);
-
-            return hBox;
+    private void setCandidateFaceImage(Image image, JobCandidate jobCandidate) {
+        if (jobCandidate.getFileImageFace() != null) {
+            image.setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(jobCandidate.getFileImageFace());
+        } else {
+            image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+        }
+        image.addClickListener(clickEvent -> {
+            JobCandidateImageFace screen = screens.create(JobCandidateImageFace.class, OpenMode.DIALOG);
+            InstanceContainer<JobCandidate> jobCandidateDc = UiControllerUtils
+                    .getScreenData(screen)
+                    .getContainer("jobCandidateDc");
+            jobCandidateDc.setItem(jobCandidate);
+            screens.show(screen);
         });
     }
 
@@ -2916,57 +2918,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Install(to = "jobCandidatesTable.fileImageFace", subject = "descriptionProvider")
     private String jobCandidatesTableFileImageFaceDescriptionProvider(JobCandidate jobCandidate) {
         FileDescriptor fd = jobCandidate.getFileImageFace();
-        return getImage(fd);
-    }
-
-    private String getImage(FileDescriptor fd) {
-        //UUID id = UuidProvider.fromString("f5fb2eef-bf8f-af1d-dfed-5b381001579f");
-        byte[] image;
-
-        if (fd != null) {
-            if (fd.getCreateDate() == null) {
-                fd.setCreateDate(new Date());
-            }
-
-            try {
-                image = fileStorageService.loadFile(fd);
-            } catch (FileStorageException e) {
-                return "";
-            }
-
-            Base64.Encoder encoder = Base64.getEncoder();
-            String encodedString = encoder.encodeToString(image);
-
-            return new StringBuilder()
-                    .append(getMailHTMLHeader())
-                    .append("\n<img src=\"data:image/")
-                    .append(fd.getExtension())
-                    .append(";base64, ")
-                    .append(encodedString)
-                    .append("\"")
-                    .append(" width=\"220\" height=\"292\">\n")
-                    .append(getMailHTMLFooter())
-                    .toString();
-        } else
-            return null;
-    }
-
-
-    private String getMailHTMLFooter() {
-        return "</body>\n</html>";
-    }
-
-    private String getMailHTMLHeader() {
-        return new StringBuilder()
-                .append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n")
-                .append("<html>\n")
-                .append("<head>\n")
-                .append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" >\n")
-                .append("<title></title>\n")
-                .append("<style type=\"text/css\">\n")
-                .append("</style>\n")
-                .append("</head>\n")
-                .append("<body>")
-                .toString();
+        return fd != null ? fd.getName() : null;
     }
 }
