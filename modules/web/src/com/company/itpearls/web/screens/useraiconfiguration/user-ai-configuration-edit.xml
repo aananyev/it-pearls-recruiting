@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://userAiConfigurationEdit.caption"
+        focusComponent="providerCodeField"
+        messagesPack="com.company.itpearls.web.screens.useraiconfiguration">
+    <data>
+        <instance id="userAiConfigurationDc"
+                  class="com.company.itpearls.entity.UserAiConfiguration"
+                  view="userAiConfiguration-edit-view">
+            <loader/>
+        </instance>
+    </data>
+    <dialogMode height="AUTO"
+                width="450"
+                modal="true"
+                forceDialog="true"/>
+    <layout expand="editActions" spacing="true" margin="true">
+        <form id="form" dataContainer="userAiConfigurationDc" width="100%">
+            <column width="400px">
+                <lookupField id="providerCodeField"
+                             property="providerCode"
+                             required="true"
+                             width="100%"/>
+                <passwordField id="apiKeyField"
+                               property="apiKey"
+                               secret="true"
+                               width="100%"/>
+                <textField id="defaultModelNameField"
+                           property="defaultModelName"
+                           width="100%"/>
+                <checkBox id="isActiveField"
+                          property="isActive"
+                          width="100%"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

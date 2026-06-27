@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://vacancyPromptTemplateEdit.caption"
+        focusComponent="codeField"
+        messagesPack="com.company.itpearls.web.screens.vacancyprompttemplate">
+    <data>
+        <instance id="vacancyPromptTemplateDc"
+                  class="com.company.itpearls.entity.VacancyPromptTemplate"
+                  view="vacancyPromptTemplate-edit-view">
+            <loader/>
+        </instance>
+    </data>
+    <dialogMode height="800"
+                width="960"/>
+    <layout expand="promptTextField"
+            spacing="true"
+            margin="true">
+        <form id="headerForm" dataContainer="vacancyPromptTemplateDc" width="100%">
+            <column width="300px">
+                <textField id="codeField"
+                           property="code"
+                           description="msg://VacancyPromptTemplate.code.description"
+                           width="100%"/>
+            </column>
+            <column width="400px">
+                <textField id="nameField"
+                           property="name"
+                           description="msg://VacancyPromptTemplate.name.description"
+                           width="100%"/>
+            </column>
+            <column width="150px">
+                <textField id="temperatureField"
+                           property="temperature"
+                           description="msg://VacancyPromptTemplate.temperature.description"
+                           width="100%"/>
+            </column>
+        </form>
+        <textArea id="systemContextField"
+                  caption="msg://systemContext.caption"
+                  description="msg://systemContext.description"
+                  dataContainer="vacancyPromptTemplateDc"
+                  property="systemContext"
+                  width="100%"
+                  rows="5"
+                  height="120px"/>
+        <textArea id="promptTextField"
+                  caption="msg://promptText.caption"
+                  description="msg://promptText.description"
+                  dataContainer="vacancyPromptTemplateDc"
+                  property="promptText"
+                  width="100%"
+                  rows="15"/>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

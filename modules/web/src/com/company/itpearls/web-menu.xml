@@ -104,4 +104,11 @@
               icon="ARROW_RIGHT"/>
     </menu>
     <item screen="itpearls_CheckCandidate.browse" icon="CHECK" insertAfter="application-reports" openType="DIALOG"/>
+    <menu id="aiAdministration" caption="mainMsg://menu_config.aiAdministration" icon="MAGIC"
+          insertAfter="administration">
+        <item screen="itpearls_VacancyPromptTemplate.browse"
+              caption="mainMsg://menu_config.itpearls_VacancyPromptTemplate.browse" icon="FILE_TEXT_O"/>
+        <item screen="itpearls_UserAiConfiguration.browse"
+              caption="mainMsg://menu_config.itpearls_UserAiConfiguration.browse" icon="KEY"/>
+    </menu>
 </menu-config>

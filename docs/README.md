@@ -38,6 +38,8 @@ docs/
     ├── OpenPositionComment.md  ← комментарии к вакансии
     ├── OpenPositionNews.md     ← новости вакансии
     ├── Grade.md                ← грейды
+    ├── VacancyPromptTemplate.md ← шаблоны AI-промптов вакансий
+    ├── UserAiConfiguration.md  ← персональные AI-ключи пользователей
     ├── Position.md             ← должности
     ├── JobCandidate.md         ← кандидаты (подсистема: entity + browse + edit)
     └── RecrutiesTasks.md       ← подписки рекрутёров
@@ -50,6 +52,7 @@ docs/
 | Задача | Документ |
 |--------|----------|
 | Поднять локальную БД и приложение | [LOCAL_DATABASE.md](LOCAL_DATABASE.md) |
+| Архитектура подсистемы AI (LLM) | [../AI_INTEGRATION.md](../AI_INTEGRATION.md) |
 | Экран входа (login) | [ui/login-screen.md](ui/login-screen.md) (legacy) · [ui/README.md](ui/README.md) |
 | Описать UI-форму (экран, фрагмент) | [templates/ui-template.md](templates/ui-template.md) · [living-ui-documentation.mdc](../.cursor/rules/living-ui-documentation.mdc) |
 | Описать новую сущность | [templates/entity-template.md](templates/entity-template.md) |

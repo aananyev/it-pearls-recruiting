@@ -326,9 +326,9 @@ protected void initBottomPanel() {
 | `.c-login-wrapper .c-login-field` | Поля ввода: `border-radius: 5px` (вертикальные отступы — `spacing` в XML) |
 | `.c-login-wrapper .c-login-button` | Кнопка: `margin-top: 8px`, `border-radius: 5px`, ширина 100% в XML |
 | `.c-login-background` | Фоновое изображение: `flex-basis: auto`, `width: 100%` |
-| `.c-login-logo-wrap` | Обёртка логотипа: flex, `align-items: center`, ширина 100%, `border: 1px solid #555`, `border-radius: 15px`, `overflow: hidden`, прозрачный фон |
-| `.v-slot-c-login-logo` | Слот Vaadin: flex center, `width: 100%`, `margin: 0 auto` |
-| `.c-login-logo` | Логотип: `width: 100%`, `scaleMode=CONTAIN`, `object-fit: contain`, центрирование через `margin: 0 auto`; `img` — `border-radius: 10px` |
+| `.c-login-logo-wrap` | Обёртка логотипа: flex column center, `padding: 8px`, ширина 100%, `border: 1px solid #555`, `border-radius: 15px`, `overflow: hidden`, прозрачный фон |
+| `.v-slot-c-login-logo` | Слот Vaadin: flex center, `width: 100%`, без нижнего отступа |
+| `.c-login-logo` | Контейнер `v-image`: flex center, `width: 100%`; `img` — `width: auto`, `max-width: 100%`, `object-fit: contain`, `object-position: center`, `margin: auto` |
 | `.c-login-welcome-label` | Заголовок: `font-size: 22px`, `width: 100%`, перенос строк, центрирование |
 | `.c-login-locales-select` | Селектор языка в нижней панели (relative, справа) |
 | `.c-login-bottom-panel` | Flex-панель: подпись слева, язык справа, `padding: 12px 0 16px` |
@@ -505,6 +505,7 @@ cuba.localeSelectVisible = true
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-27 | Логотип: строгое центрирование в рамке — flex-цепочка на wrap/slot/v-image, `img` с `width: auto` + `object-position: center`, `padding: 8px` внутри рамки |
 | 2026-06-27 | Логотип: `border-radius: 10px` на `img` внутри `.c-login-logo`; `overflow: hidden` на обёртке — устранение наложения на рамку |
 | 2026-06-27 | Логотип: `border-radius` обёртки `c-login-logo-wrap` увеличен с `5px` до `15px` |
 | 2026-06-27 | Логотип: тёмно-серая рамка на `c-login-logo-wrap` (`border: 1px solid #555`, `border-radius: 5px`), прозрачный фон обёртки и изображения |

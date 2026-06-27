@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://vacancyPromptTemplateBrowse.caption"
+        focusComponent="vacancyPromptTemplatesTable"
+        messagesPack="com.company.itpearls.web.screens.vacancyprompttemplate">
+    <data readOnly="true">
+        <collection id="vacancyPromptTemplatesDc"
+                    class="com.company.itpearls.entity.VacancyPromptTemplate">
+            <view extends="vacancyPromptTemplate-browse-view"/>
+            <loader id="vacancyPromptTemplatesDl">
+                <query>
+                    <![CDATA[select e from itpearls_VacancyPromptTemplate e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="900"/>
+    <layout expand="vacancyPromptTemplatesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="vacancyPromptTemplatesTable"
+                dataLoader="vacancyPromptTemplatesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="vacancyPromptTemplatesTable"
+                    width="100%"
+                    dataContainer="vacancyPromptTemplatesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="code"/>
+                <column id="name"/>
+                <column id="temperature"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="vacancyPromptTemplatesTable.create"/>
+                <button id="editBtn" action="vacancyPromptTemplatesTable.edit"/>
+                <button id="removeBtn" action="vacancyPromptTemplatesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

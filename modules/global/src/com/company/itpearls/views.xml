@@ -1306,5 +1306,20 @@
     <view entity="itpearls_UserAiConfiguration" name="userAiConfiguration-view" extends="_local">
         <property name="user" view="_minimal"/>
     </view>
+    <view entity="itpearls_UserAiConfiguration" name="userAiConfiguration-browse-view">
+        <property name="providerCode"/>
+        <property name="defaultModelName"/>
+        <property name="isActive"/>
+        <property name="user" view="_minimal"/>
+    </view>
+    <view entity="itpearls_UserAiConfiguration" name="userAiConfiguration-edit-view" extends="_local">
+        <property name="user" view="_minimal"/>
+    </view>
     <view entity="itpearls_VacancyPromptTemplate" name="vacancyPromptTemplate-view" extends="_local"/>
+    <view entity="itpearls_VacancyPromptTemplate" name="vacancyPromptTemplate-browse-view">
+        <property name="code"/>
+        <property name="name"/>
+        <property name="temperature"/>
+    </view>
+    <view entity="itpearls_VacancyPromptTemplate" name="vacancyPromptTemplate-edit-view" extends="_local"/>
 </views>
