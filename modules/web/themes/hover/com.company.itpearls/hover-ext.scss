@@ -29,6 +29,33 @@
   justify-content: center;
 }
 
+.candidate-face-thumb.v-image {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px;
+  min-height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+
+  img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+  }
+}
+
+.v-tooltip-text .candidate-face-preview-tooltip,
+.candidate-face-preview-tooltip {
+  width: 300px !important;
+  height: 300px !important;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  display: block;
+}
 
 .circle-30px {
   width: 30px;

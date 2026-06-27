@@ -1,0 +1,15 @@
+###############################################################################
+# Local overrides for CUBA app.home directory (outside WAR).
+# Copy to: ${app.home}/local.app.properties
+# Example app.home paths:
+#   Production Tomcat: /opt/app_home  (set APP_HOME in setenv.sh)
+#   Local Tomcat:      deploy/tomcat/app_home
+#   IDE / Gradle:      project deploy directory or custom path via -Dapp.home
+###############################################################################
+
+# Uncomment and adjust if fileStorage is not under ${app.home}/fileStorage:
+# cuba.fileStorageDir=/path/to/your/fileStorage
+# cuba.tempDir=/path/to/your/fileStorage/temp
+
+# After syncing from production (get_base.sh rsync):
+# cuba.fileStorageDir=/opt/app_home/fileStorage

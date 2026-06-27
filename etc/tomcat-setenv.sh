@@ -7,7 +7,10 @@ else
 fi
 export JRE_HOME="$JAVA_HOME"
 
-CATALINA_OPTS="-Xmx1024m -Dfile.encoding=UTF-8 -Dapp.home=\"$CATALINA_BASE/../app_home\""
+# APP_HOME: production uses /opt/app_home (see deploy_shared.conf).
+# Default for local Tomcat: $CATALINA_BASE/../app_home
+APP_HOME="${APP_HOME:-$CATALINA_BASE/../app_home}"
+CATALINA_OPTS="-Xmx1024m -Dfile.encoding=UTF-8 -Dapp.home=\"$APP_HOME\""
 
 CATALINA_OPTS="$CATALINA_OPTS -Dcom.sun.management.jmxremote"
 

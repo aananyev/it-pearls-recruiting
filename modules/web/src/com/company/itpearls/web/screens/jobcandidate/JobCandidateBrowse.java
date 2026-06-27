@@ -17,7 +17,7 @@ import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.Iter
 import com.company.itpearls.web.screens.jobcandidate.jobcandidatecomments.JobCandidateComment;
 import com.company.itpearls.web.screens.personelreserve.PersonelReserveEdit;
 import com.company.itpearls.web.screens.signicons.SignIconsBrowse;
-import com.haulmont.cuba.core.app.FileStorageService;
+import com.company.itpearls.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
@@ -115,8 +115,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private MessageBundle messageBundle;
     @Inject
     private StarsAndOtherService starsAndOtherService;
-    @Inject
-    private FileStorageService fileStorageService;
 
     private static final String QUERY_DEFAULT_OPEN_POSITION = "select e from itpearls_OpenPosition e where e.vacansyName like 'Default'";
     private static final String QUERY_RESUME = "select e from itpearls_CandidateCV e where e.candidate = :candidate";
@@ -1613,9 +1611,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 image.addClickListener(e -> webBrowserTools.showWebPage(snt.getNetworkURLS(), null));
 
                 if (snt.getSocialNetworkURL().getLogo() != null) {
-                    image
-                            .setSource(FileDescriptorResource.class)
-                            .setFileDescriptor(snt.getSocialNetworkURL().getLogo());
+                    FileDescriptorImageHelper.setCompanyLogo(image, fileLoader,
+                            snt.getSocialNetworkURL().getLogo());
                 } else {
                     image.setSource(ThemeResource.class).setPath("icons/no-company.png");
 
@@ -2171,8 +2168,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         HBoxLayout hBox = uiComponents.create(HBoxLayout.class);
         Image image = uiComponents.create(Image.NAME);
         setCandidateFaceImage(image, event.getItem());
-        image.setWidth("20px");
-        image.setStyleName("circle-20px");
+        image.setWidth("30px");
+        image.setHeight("30px");
+        image.addStyleName("candidate-face-thumb");
         image.setScaleMode(Image.ScaleMode.CONTAIN);
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
         hBox.setWidthFull();
@@ -2182,12 +2180,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     private void setCandidateFaceImage(Image image, JobCandidate jobCandidate) {
-        if (jobCandidate.getFileImageFace() != null) {
-            image.setSource(FileDescriptorResource.class)
-                    .setFileDescriptor(jobCandidate.getFileImageFace());
-        } else {
-            image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-        }
+        FileDescriptorImageHelper.setCandidateFace(image, fileLoader, jobCandidate.getFileImageFace());
         image.addClickListener(clickEvent -> {
             JobCandidateImageFace screen = screens.create(JobCandidateImageFace.class, OpenMode.DIALOG);
             InstanceContainer<JobCandidate> jobCandidateDc = UiControllerUtils
@@ -2918,7 +2911,6 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable.fileImageFace", subject = "descriptionProvider")
     private String jobCandidatesTableFileImageFaceDescriptionProvider(JobCandidate jobCandidate) {
-        FileDescriptor fd = jobCandidate.getFileImageFace();
-        return fd != null ? fd.getName() : null;
+        return FileDescriptorImageHelper.buildCandidateFacePreviewHtml(fileLoader, jobCandidate.getFileImageFace());
     }
 }

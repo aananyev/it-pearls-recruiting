@@ -132,21 +132,23 @@ flowchart TD
 |----|-----|-------------------|------------|
 | — | `action` | id=`submit`, shortcut=`ENTER`, caption=`msg://loginWindow.okButton` | Действие отправки формы |
 | `mainLayout` | `cssLayout` | stylename=`c-login-layout`, height/width=`100%` | Flex-контейнер: форма слева, фон справа |
-| `loginWrapper` | `vbox` | stylename=`c-login-wrapper`, expand=`loginPanel` | Левая колонка с формой входа |
-| `loginPanel` | `vbox` | — | Обёртка панели входа |
-| `loginMainBox` | `vbox` | align=`MIDDLE_CENTER`, margin=`true`, width=`AUTO` | Центрирование содержимого формы |
-| `logoImage` | `image` | stylename=`c-login-logo`, width=`350px`, scaleMode=`SCALE_DOWN` | Логотип (источник задаётся в `LoginScreen.initLogoImage()`) |
-| `welcomeLabel` | `label` | stylename=`c-login-welcome-label h1`, value=`mainMsg://loginWindow.welcomeLabel` | Приветственный заголовок |
+| `loginWrapper` | `vbox` | stylename=`c-login-wrapper`, expand=`loginPanel`, height=`100%` | Левая колонка с формой входа (боковые отступы в CSS) |
+| `loginPanel` | `vbox` | align=`MIDDLE_CENTER`, height/width=`100%` | Вертикальное и горизонтальное центрирование карточки входа |
+| `loginCard` | `vbox` | stylename=`c-login-card`, width=`310px`, spacing=`true`, margin=`true`, align=`MIDDLE_CENTER` | Карточка формы (~300–320px) |
+| `loginMainBox` | `vbox` | align=`MIDDLE_CENTER`, spacing=`true`, width=`100%` | Логотип, приветствие, форма |
+| `logoWrap` | `vbox` | stylename=`c-login-logo-wrap`, align=`MIDDLE_CENTER`, width=`100%` | Обёртка логотипа (прозрачный фон, blend для PNG) |
+| `logoImage` | `image` | stylename=`c-login-logo`, align=`MIDDLE_CENTER`, scaleMode=`CONTAIN`, width=`100%` | Логотип HuntTech (источник: `branding/app-icon-login.png` через `LoginScreen.initLogoImage()`) |
+| `welcomeLabel` | `label` | stylename=`c-login-welcome-label h1`, width=`100%`, align=`MIDDLE_CENTER`, value=`mainMsg://loginWindow.welcomeLabel` | Приветственный заголовок с переносом строк |
 | `capsLockIndicator` | `capsLockIndicator` | align=`MIDDLE_CENTER` | Индикатор включённого Caps Lock |
-| `loginForm` | `vbox` | spacing=`true` | Контейнер полей формы |
-| `loginField` | `textField` | id, htmlName=`loginField`, icon=`USER`, stylename=`c-login-field inline-icon`, 350×40px | Поле логина |
-| `passwordField` | `passwordField` | htmlName=`passwordField`, icon=`LOCK`, capsLockIndicator=`capsLockIndicator`, autocomplete=`true`, stylename=`c-login-field inline-icon`, 350×40px | Поле пароля |
-| `paramsBox` | `hbox` | width=`350px`, align=`MIDDLE_CENTER` | Строка «Запомнить меня» + выбор языка |
+| `loginForm` | `vbox` | spacing=`true`, width=`100%` | Контейнер полей формы |
+| `loginField` | `textField` | htmlName=`loginField`, icon=`USER`, stylename=`c-login-field inline-icon large`, width=`100%` | Поле логина |
+| `passwordField` | `passwordField` | htmlName=`passwordField`, icon=`LOCK`, capsLockIndicator=`capsLockIndicator`, autocomplete=`true`, stylename=`c-login-field inline-icon large`, width=`100%` | Поле пароля |
+| `paramsBox` | `hbox` | width=`100%`, align=`MIDDLE_LEFT` | Строка «Запомнить меня» |
 | `rememberMeCheckBox` | `checkBox` | stylename=`c-login-remember-me-checkbox`, caption=`mainMsg://loginWindow.rememberMe` | Чекбокс «Запомнить меня» |
-| `localesSelect` | `lookupField` | stylename=`c-login-locales-select borderless`, nullOptionVisible=`false`, textInputAllowed=`false` | Выбор локали |
-| `loginButton` | `button` | action=`submit`, stylename=`c-login-button primary`, 200×40px | Кнопка входа |
-| `bottomPanel` | `hbox` | stylename=`c-login-bottom-panel`, height=`40px`, width=`100%` | Нижняя панель |
-| `poweredByLink` | `label` | htmlEnabled=`true`, stylename=`c-login-powered-by-link`, value=`mainMsg://itpearls.poweredBy` | HTML-блок «Разработано ООО Ханттек» |
+| `loginButton` | `button` | action=`submit`, stylename=`c-login-button primary huge`, width=`100%` | Кнопка входа на всю ширину карточки |
+| `bottomPanel` | `hbox` | stylename=`c-login-bottom-panel`, width=`100%`, margin, align=`MIDDLE_CENTER` | Нижняя панель: подпись + язык |
+| `poweredByLink` | `label` | align=`MIDDLE_LEFT`, htmlEnabled=`true`, stylename=`c-login-powered-by-link`, value=`mainMsg://itpearls.poweredBy` | HTML-блок «Разработано ООО Ханттек» |
+| `localesSelect` | `lookupField` | align=`MIDDLE_RIGHT`, stylename=`c-login-locales-select borderless`, nullOptionVisible=`false`, textInputAllowed=`false` | Выбор локали в нижней панели |
 | `backgroundImage` | `image` | stylename=`c-login-background`, scaleMode=`FILL` | Фоновое изображение; default path=`VAADIN/brand-login-screen/background-2023.jpg` |
 
 ---
@@ -286,6 +288,8 @@ sequenceDiagram
 
 ```java
 protected void initBottomPanel() {
+    bottomPanel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+    poweredByLink.setAlignment(Component.Alignment.MIDDLE_LEFT);
     if (!globalConfig.getLocaleSelectVisible()) {
         poweredByLink.setAlignment(Component.Alignment.MIDDLE_CENTER);
         if (!webConfig.getLoginDialogPoweredByLinkVisible()) {
@@ -295,7 +299,7 @@ protected void initBottomPanel() {
 }
 ```
 
-**Важно:** при текущей конфигурации `cuba.localeSelectVisible = true` условие `!globalConfig.getLocaleSelectVisible()` ложно, и метод `initBottomPanel()` **не выполняет никаких действий**. Панель всегда видима; выравнивание остаётся `MIDDLE_LEFT` из XML.
+При `cuba.localeSelectVisible = true` (текущая конфигурация) подпись HuntTech выравнивается слева (`MIDDLE_LEFT`), селектор языка — справа в `bottomPanel` (XML + flex в `login.css`).
 
 Логика скрытия/центрирования панели сработает только если в конфигурации установить `cuba.localeSelectVisible = false`.
 
@@ -317,14 +321,17 @@ protected void initBottomPanel() {
 | CSS-класс | Назначение |
 |-----------|------------|
 | `.c-login-layout` | `display: flex` — горизонтальный макет |
-| `.c-login-wrapper` | Левая колонка, `flex: 0 0 500px` |
-| `.c-login-wrapper .c-login-field` | Поля ввода: `margin-top: 10px`, `border-radius: 5px` |
-| `.c-login-wrapper .c-login-button` | Кнопка: `margin-top: 30px`, `border-radius: 5px` |
+| `.c-login-wrapper` | Левая колонка, `flex: 0 0 500px`, `padding: 0 24px` |
+| `.c-login-card` | Карточка формы: `max-width: 310px`, `width: 100%` |
+| `.c-login-wrapper .c-login-field` | Поля ввода: `border-radius: 5px` (вертикальные отступы — `spacing` в XML) |
+| `.c-login-wrapper .c-login-button` | Кнопка: `margin-top: 8px`, `border-radius: 5px`, ширина 100% в XML |
 | `.c-login-background` | Фоновое изображение: `flex-basis: auto`, `width: 100%` |
-| `.c-login-logo` | Логотип: `margin-bottom: 15px`, `border-radius: 10px`, box-shadow |
-| `.c-login-welcome-label` | Заголовок: `font-size: 25px`, `font-weight: 600` |
-| `.c-login-locales-select` | Позиционирование селектора языка (absolute, right/bottom) |
-| `.c-login-bottom-panel` | Нижняя панель: `padding-left: 10px` |
+| `.c-login-logo-wrap` | Обёртка логотипа: flex, `align-items: center`, ширина 100% |
+| `.v-slot-c-login-logo` | Слот Vaadin: flex center, `width: 100%`, `margin: 0 auto` |
+| `.c-login-logo` | Логотип: `width: 100%`, `scaleMode=CONTAIN`, `object-fit: contain`, центрирование через `margin: 0 auto` |
+| `.c-login-welcome-label` | Заголовок: `font-size: 22px`, `width: 100%`, перенос строк, центрирование |
+| `.c-login-locales-select` | Селектор языка в нижней панели (relative, справа) |
+| `.c-login-bottom-panel` | Flex-панель: подпись слева, язык справа, `padding: 12px 0 16px` |
 | `.ht-powered-by` | Flex-контейнер подписи, цвет `#64748b`, `font-size: 12px` |
 | `.ht-powered-by-logo` | Логотип HuntTech: **22×22 px**, `object-fit: contain` |
 | `.ht-powered-by a` / `.c-login-powered-by-link a` | Ссылки: `#2563eb`, hover `#1d4ed8` |
@@ -351,7 +358,7 @@ protected void initBottomPanel() {
 
 ### Stylenames в XML (итого)
 
-`c-login-layout`, `c-login-wrapper`, `c-login-logo`, `c-login-welcome-label`, `h1`, `c-login-field`, `inline-icon`, `c-login-remember-me-checkbox`, `c-login-locales-select`, `borderless`, `c-login-button`, `primary`, `c-login-bottom-panel`, `c-login-powered-by-link`, `c-login-background`.
+`c-login-layout`, `c-login-wrapper`, `c-login-card`, `c-login-logo`, `c-login-welcome-label`, `h1`, `c-login-field`, `inline-icon`, `large`, `c-login-remember-me-checkbox`, `c-login-locales-select`, `borderless`, `c-login-button`, `primary`, `huge`, `c-login-bottom-panel`, `c-login-powered-by-link`, `c-login-background`.
 
 ---
 
@@ -498,5 +505,9 @@ cuba.localeSelectVisible = true
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-27 | Логотип HuntTech: прозрачный PNG (HUNT/TECH stacked), CSS flex-center на `logoWrap`/`v-slot-c-login-logo`, ширина 100% как у полей, убран `max-width: 280px` (причина левого смещения) |
+| 2026-06-27 | Логотип HuntTech: прозрачный PNG в `branding/app-icon-login.png`, `scaleMode=CONTAIN`, `width=100%`, центрирование, `max-width: 280px`; убран `mix-blend-mode` |
+| 2026-06-27 | Логотип: обёртка `logoWrap`, `mix-blend-mode: multiply`; welcome label: `width=100%`, перенос длинного текста |
+| 2026-06-27 | Редизайн левой панели: карточка `loginCard` 310px, центрирование, поля `large`, кнопка `huge` 100%, язык в `bottomPanel` |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-25 | Создание документации экрана входа |

@@ -139,7 +139,7 @@ flowchart TD
 | Иконка резюме (зелёная/красная) | Отдельный запрос: есть ли CV | Нет записей CV → красная иконка файла; есть → зелёная |
 | Колонка «статус» (набор иконок) | Поля кандидата + справочники | Чёрный список, статус в штате/уволен, персональный значок, «светофор» контактов (3+ контакта и ДР → зелёный), телефон, email, мессенджеры, CV, комментарии, соцсети |
 | Звёзды рейтинга | Среднее `rating` по всем взаимодействиям + 1 | CSS-класс по диапазону 1–5 |
-| Фото в колонке | `fileImageFace` или placeholder | Клик → диалог увеличенного фото |
+| Фото в колонке | `fileImageFace` или placeholder | Миниатюра 30×30 (круг, `object-fit: cover`) через `FileDescriptorImageHelper` + `candidate-face-thumb`; при наведении — Vaadin HTML-tooltip (`descriptionProvider`, `setDescriptionAsHtml`) с `<img class="candidate-face-preview-tooltip">` 300×300 (круг, тень), URL `/app/dispatch/download?f={uuid}` или theme placeholder; клик → `JobCandidateImageFace` |
 | Список должностей в подсказке колонки | `positionList` | Имена должностей через запятую |
 | Раскрытая строка (details) | Фрагмент `JobCanidateDetailScreenFragment` | Контакты, статистика по взаимодействиям, соцсети, зарплатные ожидания, цветные метки «в работе / свободен» |
 
@@ -205,6 +205,8 @@ layout (expand=jobCandidatesTable)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-27 | Hover-preview фото: `descriptionProvider` + `FileDescriptorImageHelper.buildCandidateFacePreviewHtml`, CSS `candidate-face-thumb` / `candidate-face-preview-tooltip` (30px thumb, 300px circular tooltip) |
+| 2026-06-27 | Откат hover-preview фото: простая колонка 20px `circle-20px`, клик → `JobCandidateImageFace`; удалены `candidate-photo-wrapper` и CSS-hover |
 | 2026-06-26 | §4–5 переписаны: поведение из Java простым языком (lifecycle, actions, generators) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первичная UI Spec из `job-candidate-browse.xml` и `JobCandidateBrowse.java` |

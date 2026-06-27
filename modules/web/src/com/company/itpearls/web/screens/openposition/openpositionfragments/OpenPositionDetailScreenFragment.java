@@ -1,7 +1,9 @@
 package com.company.itpearls.web.screens.openposition.openpositionfragments;
 
 import com.company.itpearls.entity.*;
+import com.company.itpearls.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.View;
 import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.UiComponents;
@@ -58,6 +60,8 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
     private Label<String> salaryComment2;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private FileLoader fileLoader;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -153,8 +157,7 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
         image.setDescription(recruiter.getName());
 
         if (recruiter.getFileImageFace() != null) {
-            image.setSource(FileDescriptorResource.class)
-                    .setFileDescriptor(recruiter.getFileImageFace());
+            FileDescriptorImageHelper.setCandidateFace(image, fileLoader, recruiter.getFileImageFace());
         } else {
             image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         }

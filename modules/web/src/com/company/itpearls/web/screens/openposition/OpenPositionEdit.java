@@ -6,6 +6,7 @@ import com.company.itpearls.entity.*;
 import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRegistrationForWork;
 import com.company.itpearls.web.screens.position.PositionEdit;
+import com.company.itpearls.web.util.FileDescriptorImageHelper;
 import com.haulmont.bpm.entity.ProcAttachment;
 import com.haulmont.bpm.gui.procactionsfragment.ProcActionsFragment;
 import com.haulmont.cuba.core.entity.Entity;
@@ -210,6 +211,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private CheckBox internalProjectCheckBox;
     @Inject
     private DataContext dataContext;
+    @Inject
+    private FileLoader fileLoader;
     @Inject
     private CollectionLoader<Position> positionTypesLc;
     @Inject
@@ -590,8 +593,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         retImage.setWidth("30px");
 
         if (company.getFileCompanyLogo() != null) {
-            return retImage.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(company.getFileCompanyLogo());
+            return FileDescriptorImageHelper.createCompanyLogoResource(retImage, fileLoader,
+                    company.getFileCompanyLogo());
         } else {
             return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
         }
@@ -603,8 +606,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         retImage.setWidth("30px");
 
         if (companyDepartament.getCompanyName().getFileCompanyLogo() != null) {
-            return retImage.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(companyDepartament.getCompanyName().getFileCompanyLogo());
+            return FileDescriptorImageHelper.createCompanyLogoResource(retImage, fileLoader,
+                    companyDepartament.getCompanyName().getFileCompanyLogo());
         } else {
             return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
         }
@@ -616,9 +619,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         retImage.setWidth("30px");
 
         if (project.getProjectLogo() != null) {
-            return retImage.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(project
-                            .getProjectLogo());
+            return FileDescriptorImageHelper.createCompanyLogoResource(retImage, fileLoader,
+                    project.getProjectLogo());
         } else {
             return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
         }
@@ -797,13 +799,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             Image image = uiComponents.create(Image.class);
 
             if (iteractionList.getRecrutier() != null) {
-                if (((ExtUser) iteractionList.getRecrutier()).getFileImageFace() != null) {
-                    image.setSource(FileDescriptorResource.class)
-                            .setFileDescriptor(((ExtUser) iteractionList.getRecrutier()).getFileImageFace());
-                } else {
-                    image.setSource(ThemeResource.class)
-                            .setPath("icons/no-programmer.jpeg");
-                }
+                FileDescriptorImageHelper.setCandidateFace(image, fileLoader,
+                        ((ExtUser) iteractionList.getRecrutier()).getFileImageFace());
             } else {
                 image.setSource(ThemeResource.class)
                         .setPath("icons/no-programmer.jpeg");
@@ -945,13 +942,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             Image image = uiComponents.create(Image.class);
 
             if (openPositionComment.getUser() != null) {
-                if (((ExtUser) openPositionComment.getUser()).getFileImageFace() != null) {
-                    image.setSource(FileDescriptorResource.class)
-                            .setFileDescriptor(((ExtUser) openPositionComment.getUser()).getFileImageFace());
-                } else {
-                    image.setSource(ThemeResource.class)
-                            .setPath("icons/no-programmer.jpeg");
-                }
+                FileDescriptorImageHelper.setCandidateFace(image, fileLoader,
+                        ((ExtUser) openPositionComment.getUser()).getFileImageFace());
             } else {
                 image.setSource(ThemeResource.class)
                         .setPath("icons/no-programmer.jpeg");
@@ -2509,8 +2501,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             return;
         }
         if (project.getProjectLogo() != null) {
-            projectLogoImage.setValueSource(
-                    new ContainerValueSource<>(openPositionDc, "projectName.projectLogo"));
+            projectLogoImage.setValueSource(null);
+            FileDescriptorImageHelper.setCompanyLogo(projectLogoImage, fileLoader, project.getProjectLogo());
         } else {
             projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
         }
@@ -2542,8 +2534,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         projectOwnerImage.setDescription(sb.toString());
         if (projectOwner.getFileImageFace() != null) {
             projectOwnerImage.setVisible(true);
-            projectOwnerImage.setValueSource(
-                    new ContainerValueSource<>(openPositionDc, "projectName.projectOwner.fileImageFace"));
+            projectOwnerImage.setValueSource(null);
+            FileDescriptorImageHelper.setCandidateFace(projectOwnerImage, fileLoader,
+                    projectOwner.getFileImageFace());
         } else {
             projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         }
@@ -2863,8 +2856,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             if (event.getValue().getProjectName() != null) {
                 if (event.getValue().getProjectOwner().getFileImageFace() != null) {
                     projectOwnerImage.setVisible(true);
-                    projectOwnerImage.setValueSource(
-                            new ContainerValueSource<>(openPositionDc, "projectName.projectOwner.fileImageFace"));
+                    projectOwnerImage.setValueSource(null);
+                    FileDescriptorImageHelper.setCandidateFace(projectOwnerImage, fileLoader,
+                            event.getValue().getProjectOwner().getFileImageFace());
                 } else {
                     projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
                 }
@@ -2880,8 +2874,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (event.getValue() != null) {
             if (event.getValue().getProjectName() != null) {
                 if (event.getValue().getProjectLogo() != null) {
-                    projectLogoImage.setValueSource(
-                            new ContainerValueSource<>(openPositionDc, "projectName.projectLogo"));
+                    projectLogoImage.setValueSource(null);
+                    FileDescriptorImageHelper.setCompanyLogo(projectLogoImage, fileLoader,
+                            event.getValue().getProjectLogo());
                 } else {
                     projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
                 }

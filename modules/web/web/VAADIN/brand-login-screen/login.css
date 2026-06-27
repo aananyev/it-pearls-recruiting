@@ -4,15 +4,22 @@
 
 .c-login-wrapper {
   flex: 0 0 500px;
+  box-sizing: border-box;
+  padding: 0 24px;
+}
+
+.c-login-card {
+  max-width: 310px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .c-login-wrapper .c-login-field {
-  margin-top: 10px;
   border-radius: 5px;
 }
 
 .c-login-wrapper .c-login-button {
-  margin-top: 30px;
+  margin-top: 8px;
   border-radius: 5px;
 }
 
@@ -21,24 +28,79 @@
   width: 100%;
 }
 
-.c-login-logo {
-  margin-bottom: 15px;
-  max-width: 280px;
-  width: auto;
-  height: auto;
+.c-login-logo-wrap,
+.v-slot-c-login-logo-wrap {
+  background: transparent;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.v-slot-c-login-logo {
+  background: transparent !important;
+  width: 100% !important;
+  max-width: 100%;
+  margin: 0 auto 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 0;
   box-shadow: none;
 }
 
-.v-ie .c-login-logo {
-  max-width: 280px;
-  width: auto;
+.c-login-logo,
+.c-login-logo.v-image {
+  background: transparent !important;
+  width: 100% !important;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.c-login-logo img,
+.c-login-logo .v-image,
+.v-slot-c-login-logo img,
+.v-slot-c-login-logo .v-image {
+  background: transparent;
+  display: block;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.v-ie .c-login-logo,
+.v-ie .v-slot-c-login-logo {
+  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
+.v-slot-c-login-welcome-label {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .c-login-welcome-label.v-label-c-login-welcome-label.v-label {
-  font-size: 25px;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  font-size: 22px;
   font-weight: 600;
+  margin-bottom: 4px;
+  text-align: center;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.3;
 }
 
 .v-slot-inline-icon .v-caption-c-login-field.v-caption-inline-icon span.v-icon {
@@ -52,21 +114,13 @@
   bottom: 13px;
 }
 
-.v-expand>.v-slot.v-slot-c-login-locales-select {
-  max-width: 500px;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 40px;
-}
-
 .c-login-locales-select.v-filterselect-c-login-locales-select.v-filterselect {
-  position: absolute;
-  right: 10px;
-  bottom: 0;
-  height: 40px;
+  position: relative;
+  right: auto;
+  bottom: auto;
+  height: auto;
   width: 100px;
-  z-index: 1;
+  flex-shrink: 0;
 }
 
 .helium.large .c-login-locales-select.v-filterselect-c-login-locales-select.v-filterselect {
@@ -82,14 +136,24 @@
 }
 
 .c-login-bottom-panel {
-  padding-left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  padding: 12px 0 16px;
+  gap: 12px;
+}
+
+.c-login-powered-by-link {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .ht-powered-by,
 .c-login-powered-by-link .ht-powered-by {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 6px;
   color: #64748b;
   font-size: 12px;
@@ -121,27 +185,22 @@
 @media (max-width: 992px) {
   .c-login-wrapper {
     min-width: 100%;
+    padding: 0 16px;
+  }
+
+  .c-login-card {
+    max-width: 320px;
   }
 
   .c-login-bottom-panel {
     max-width: 500px;
     left: auto;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .v-slot-c-login-powered-by-link {
     text-align: center;
-  }
-
-  .v-expand>.v-slot.v-slot-c-login-locales-select {
-    position: relative;
-    bottom: auto;
-    left: auto;
-  }
-
-  .c-login-locales-select.v-filterselect {
-    position: relative;
-    right: auto;
-    bottom: auto;
   }
 
   .c-login-remember-me-checkbox {

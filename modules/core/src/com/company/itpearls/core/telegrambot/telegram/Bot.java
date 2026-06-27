@@ -25,7 +25,6 @@ public final class Bot extends TelegramLongPollingCommandBot {
     private Logger logger = LoggerFactory.getLogger(Bot.class);
 
     private final String BOT_NAME;
-    private final String BOT_TOKEN;
 
     private static final Settings defaultSettings = new Settings(3, true);
     private final NonCommand nonCommand;
@@ -41,10 +40,9 @@ public final class Bot extends TelegramLongPollingCommandBot {
     private static Map<Long, Settings> userSettings;
 
     public Bot(String botName, String botToken) {
-        super();
+        super(botToken);
         logger.debug("Конструктор суперкласса отработал");
         this.BOT_NAME = botName;
-        this.BOT_TOKEN = botToken;
         logger.debug("Имя и токен присвоены");
 
         this.nonCommand = new NonCommand();
@@ -80,11 +78,6 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
     public static Map<Long, Settings> getUserSettings() {
         return userSettings;
-    }
-
-    @Override
-    public String getBotToken() {
-        return BOT_TOKEN;
     }
 
     @Override

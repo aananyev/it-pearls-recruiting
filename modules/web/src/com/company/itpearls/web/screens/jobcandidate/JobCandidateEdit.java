@@ -10,7 +10,9 @@ import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.Iter
 import com.company.itpearls.web.screens.openposition.OpenPositionMasterBrowse;
 import com.company.itpearls.web.screens.openposition.openpositionviews.QuickViewOpenPositionDescription;
 import com.company.itpearls.web.screens.skilltree.SkillTreeBrowseCheck;
+import com.company.itpearls.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.Entity;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
@@ -196,6 +198,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private InstanceContainer<JobCandidate> jobCandidateDc;
     @Inject
     private InteractionService interactionService;
+    @Inject
+    private FileLoader fileLoader;
     @Inject
     private UserSessionSource userSessionSource;
     @Inject
@@ -736,11 +740,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (object.getProjectName().getProjectLogo() == null) {
             return imageResource.createResource(ThemeResource.class)
                     .setPath("icons/no-company.png");
-        } else {
-            return imageResource.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(object.getProjectName()
-                            .getProjectLogo());
         }
+        return FileDescriptorImageHelper.createCompanyLogoResource(imageResource, fileLoader,
+                object.getProjectName().getProjectLogo());
     }
 
     private void setIteractionListVacancyFilter() {
@@ -804,12 +806,15 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setCandidatePicImage() {
-        if (getEditedEntity().getFileImageFace() == null) {
-            candidateDefaultPic.setVisible(true);
-            candidatePic.setVisible(false);
-        } else {
+        FileDescriptor faceImage = getEditedEntity().getFileImageFace();
+        candidatePic.setValueSource(null);
+        if (FileDescriptorImageHelper.fileExists(fileLoader, faceImage)) {
             candidateDefaultPic.setVisible(false);
             candidatePic.setVisible(true);
+            FileDescriptorImageHelper.setCandidateFace(candidatePic, fileLoader, faceImage);
+        } else {
+            candidateDefaultPic.setVisible(true);
+            candidatePic.setVisible(false);
         }
     }
 
@@ -3255,13 +3260,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             Image image = uiComponents.create(Image.class);
 
             if (event.getItem().getRecrutier() != null) {
-                if (((ExtUser) event.getItem().getRecrutier()).getFileImageFace() != null) {
-                    image.setSource(FileDescriptorResource.class)
-                            .setFileDescriptor(((ExtUser) event.getItem().getRecrutier()).getFileImageFace());
-                } else {
-                    image.setSource(ThemeResource.class)
-                            .setPath("icons/no-programmer.jpeg");
-                }
+                FileDescriptorImageHelper.setCandidateFace(image, fileLoader,
+                        ((ExtUser) event.getItem().getRecrutier()).getFileImageFace());
             } else {
                 image.setSource(ThemeResource.class)
                         .setPath("icons/no-programmer.jpeg");
@@ -3647,12 +3647,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .getToVacancy()
                         .getProjectName()
                         .getProjectLogo() != null) {
-                    image.setSource(FileDescriptorResource.class)
-                            .setFileDescriptor(event
-                                    .getItem()
-                                    .getToVacancy()
-                                    .getProjectName()
-                                    .getProjectLogo());
+                    FileDescriptorImageHelper.setCompanyLogo(image, fileLoader, event
+                            .getItem()
+                            .getToVacancy()
+                            .getProjectName()
+                            .getProjectLogo());
                 }
             }
         }
@@ -3702,12 +3701,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .getVacancy()
                         .getProjectName()
                         .getProjectLogo() != null) {
-                    image.setSource(FileDescriptorResource.class)
-                            .setFileDescriptor(event
-                                    .getItem()
-                                    .getVacancy()
-                                    .getProjectName()
-                                    .getProjectLogo());
+                    FileDescriptorImageHelper.setCompanyLogo(image, fileLoader, event
+                            .getItem()
+                            .getVacancy()
+                            .getProjectName()
+                            .getProjectLogo());
                 }
             }
         }
@@ -3758,7 +3756,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
         if (socialNetworkType.getLogo() != null) {
-            image.setSource(FileDescriptorResource.class).setFileDescriptor(socialNetworkType.getLogo());
+            FileDescriptorImageHelper.setCompanyLogo(image, fileLoader, socialNetworkType.getLogo());
         } else {
             image.setSource(ThemeResource.class).setPath("icons/no-company.png");
         }

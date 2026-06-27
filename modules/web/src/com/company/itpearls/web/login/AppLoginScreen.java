@@ -63,7 +63,14 @@ public class AppLoginScreen extends LoginScreen {
                 "vaadin://brand-login-screen/login.css", Dependency.Type.STYLESHEET);
     }
 
+    /**
+     * Нижняя панель левой колонки: подпись HuntTech слева, выбор языка справа.
+     * При скрытом селекторе локали — центрирование подписи.
+     */
     protected void initBottomPanel() {
+        bottomPanel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        poweredByLink.setAlignment(Component.Alignment.MIDDLE_LEFT);
+
         if (!globalConfig.getLocaleSelectVisible()) {
             poweredByLink.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
