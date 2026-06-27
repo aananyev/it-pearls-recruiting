@@ -200,6 +200,22 @@ public class OpenPosition extends StandardEntity {
     @Column(name = "MEMO_FOR_INTERVIEW")
     private String memoForInterview;
 
+    @Lob
+    @Column(name = "RAW_DESCRIPTION")
+    private String rawDescription;
+
+    @Lob
+    @Column(name = "INTERVIEW_CHECKLIST")
+    private String interviewChecklist;
+
+    @Lob
+    @Column(name = "SEARCH_MAP")
+    private String searchMap;
+
+    @Lob
+    @Column(name = "INTERVIEW_PLAN")
+    private String interviewPlan;
+
     @JoinTable(name = "ITPEARLS_OPEN_POSITION_LABOR_AGREEMENT_LINK",
             joinColumns = @JoinColumn(name = "OPEN_POSITION_ID"),
             inverseJoinColumns = @JoinColumn(name = "LABOR_AGREEMENT_ID"))
@@ -386,6 +402,38 @@ public class OpenPosition extends StandardEntity {
 
     public void setMemoForInterview(String memoForInterview) {
         this.memoForInterview = memoForInterview;
+    }
+
+    public String getRawDescription() {
+        return rawDescription;
+    }
+
+    public void setRawDescription(String rawDescription) {
+        this.rawDescription = rawDescription;
+    }
+
+    public String getInterviewChecklist() {
+        return interviewChecklist;
+    }
+
+    public void setInterviewChecklist(String interviewChecklist) {
+        this.interviewChecklist = interviewChecklist;
+    }
+
+    public String getSearchMap() {
+        return searchMap;
+    }
+
+    public void setSearchMap(String searchMap) {
+        this.searchMap = searchMap;
+    }
+
+    public String getInterviewPlan() {
+        return interviewPlan;
+    }
+
+    public void setInterviewPlan(String interviewPlan) {
+        this.interviewPlan = interviewPlan;
     }
 
     public Boolean getInternalProject() {

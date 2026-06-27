@@ -250,6 +250,10 @@
         <property name="commandExperience"/>
         <property name="internalProject"/>
         <property name="shortDescription"/>
+        <property name="rawDescription"/>
+        <property name="interviewChecklist"/>
+        <property name="searchMap"/>
+        <property name="interviewPlan"/>
         <property name="paymentsType"/>
         <property name="typeCompanyComission"/>
         <property name="typeSalaryOfResearcher"/>
@@ -1299,4 +1303,8 @@
         <property name="applicationLogo" view="_local"/>
         <property name="applicationIcon" view="_local"/>
     </view>
+    <view entity="itpearls_UserAiConfiguration" name="userAiConfiguration-view" extends="_local">
+        <property name="user" view="_minimal"/>
+    </view>
+    <view entity="itpearls_VacancyPromptTemplate" name="vacancyPromptTemplate-view" extends="_local"/>
 </views>

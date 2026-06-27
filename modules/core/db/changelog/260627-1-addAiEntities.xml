@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260627-1-addOpenPositionAiColumns" author="itpearls">
+        <addColumn tableName="ITPEARLS_OPEN_POSITION">
+            <column name="RAW_DESCRIPTION" type="clob"/>
+            <column name="INTERVIEW_CHECKLIST" type="clob"/>
+            <column name="SEARCH_MAP" type="clob"/>
+            <column name="INTERVIEW_PLAN" type="clob"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260627-2-createUserAiConfiguration" author="itpearls">
+        <createTable tableName="ITPEARLS_USER_AI_CONFIGURATION">
+            <column name="ID" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="VERSION" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="USER_ID" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PROVIDER_CODE" type="varchar(64)"/>
+            <column name="API_KEY" type="varchar(512)"/>
+            <column name="DEFAULT_MODEL_NAME" type="varchar(128)"/>
+            <column name="IS_ACTIVE" type="boolean"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="ITPEARLS_USER_AI_CONFIGURATION"
+                                 baseColumnNames="USER_ID"
+                                 constraintName="FK_ITPEARLS_USER_AI_CONFIGURATION_ON_USER"
+                                 referencedTableName="SEC_USER"
+                                 referencedColumnNames="ID"/>
+        <createIndex tableName="ITPEARLS_USER_AI_CONFIGURATION" indexName="IDX_ITPEARLS_USER_AI_CONFIGURATION_USER">
+            <column name="USER_ID"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="260627-3-createVacancyPromptTemplate" author="itpearls">
+        <createTable tableName="ITPEARLS_VACANCY_PROMPT_TEMPLATE">
+            <column name="ID" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="VERSION" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="CODE" type="varchar(64)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="NAME" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="PROMPT_TEXT" type="clob"/>
+            <column name="SYSTEM_CONTEXT" type="varchar(1000)"/>
+            <column name="TEMPERATURE" type="double" defaultValueNumeric="0.7"/>
+        </createTable>
+        <createIndex tableName="ITPEARLS_VACANCY_PROMPT_TEMPLATE"
+                     indexName="IDX_ITPEARLS_VACANCY_PROMPT_TEMPLATE_CODE"
+                     unique="true">
+            <column name="CODE"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

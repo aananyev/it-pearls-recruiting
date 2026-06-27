@@ -32,6 +32,9 @@
 .v-slot-c-login-logo-wrap {
   background: transparent;
   width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #555;
+  border-radius: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
