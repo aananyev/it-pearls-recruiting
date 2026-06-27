@@ -136,8 +136,8 @@ flowchart TD
 | `loginPanel` | `vbox` | align=`MIDDLE_CENTER`, height/width=`100%` | Вертикальное и горизонтальное центрирование карточки входа |
 | `loginCard` | `vbox` | stylename=`c-login-card`, width=`310px`, spacing=`true`, margin=`true`, align=`MIDDLE_CENTER` | Карточка формы (~300–320px) |
 | `loginMainBox` | `vbox` | align=`MIDDLE_CENTER`, spacing=`true`, width=`100%` | Логотип, приветствие, форма |
-| `logoWrap` | `vbox` | stylename=`c-login-logo-wrap`, align=`MIDDLE_CENTER`, width=`100%` | Обёртка логотипа: прозрачный фон, рамка `1px solid #555`, `border-radius: 15px` |
-| `logoImage` | `image` | stylename=`c-login-logo`, align=`MIDDLE_CENTER`, scaleMode=`CONTAIN`, width=`100%` | Логотип HuntTech (источник: `branding/app-icon-login.png` через `LoginScreen.initLogoImage()`) |
+| `logoWrap` | `vbox` | stylename=`c-login-logo-wrap`, align=`MIDDLE_CENTER`, width=`100%` | Обёртка логотипа: прозрачный фон, рамка `1px solid #555`, `border-radius: 15px`, `overflow: hidden` |
+| `logoImage` | `image` | stylename=`c-login-logo`, align=`MIDDLE_CENTER`, scaleMode=`CONTAIN`, width=`100%` | Логотип HuntTech (источник: `branding/app-icon-login.png` через `LoginScreen.initLogoImage()`); `img` с `border-radius: 10px` |
 | `welcomeLabel` | `label` | stylename=`c-login-welcome-label h1`, width=`100%`, align=`MIDDLE_CENTER`, value=`mainMsg://loginWindow.welcomeLabel` | Приветственный заголовок с переносом строк |
 | `capsLockIndicator` | `capsLockIndicator` | align=`MIDDLE_CENTER` | Индикатор включённого Caps Lock |
 | `loginForm` | `vbox` | spacing=`true`, width=`100%` | Контейнер полей формы |
@@ -326,9 +326,9 @@ protected void initBottomPanel() {
 | `.c-login-wrapper .c-login-field` | Поля ввода: `border-radius: 5px` (вертикальные отступы — `spacing` в XML) |
 | `.c-login-wrapper .c-login-button` | Кнопка: `margin-top: 8px`, `border-radius: 5px`, ширина 100% в XML |
 | `.c-login-background` | Фоновое изображение: `flex-basis: auto`, `width: 100%` |
-| `.c-login-logo-wrap` | Обёртка логотипа: flex, `align-items: center`, ширина 100%, `border: 1px solid #555`, `border-radius: 15px`, прозрачный фон |
+| `.c-login-logo-wrap` | Обёртка логотипа: flex, `align-items: center`, ширина 100%, `border: 1px solid #555`, `border-radius: 15px`, `overflow: hidden`, прозрачный фон |
 | `.v-slot-c-login-logo` | Слот Vaadin: flex center, `width: 100%`, `margin: 0 auto` |
-| `.c-login-logo` | Логотип: `width: 100%`, `scaleMode=CONTAIN`, `object-fit: contain`, центрирование через `margin: 0 auto` |
+| `.c-login-logo` | Логотип: `width: 100%`, `scaleMode=CONTAIN`, `object-fit: contain`, центрирование через `margin: 0 auto`; `img` — `border-radius: 10px` |
 | `.c-login-welcome-label` | Заголовок: `font-size: 22px`, `width: 100%`, перенос строк, центрирование |
 | `.c-login-locales-select` | Селектор языка в нижней панели (relative, справа) |
 | `.c-login-bottom-panel` | Flex-панель: подпись слева, язык справа, `padding: 12px 0 16px` |
@@ -505,6 +505,7 @@ cuba.localeSelectVisible = true
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-27 | Логотип: `border-radius: 10px` на `img` внутри `.c-login-logo`; `overflow: hidden` на обёртке — устранение наложения на рамку |
 | 2026-06-27 | Логотип: `border-radius` обёртки `c-login-logo-wrap` увеличен с `5px` до `15px` |
 | 2026-06-27 | Логотип: тёмно-серая рамка на `c-login-logo-wrap` (`border: 1px solid #555`, `border-radius: 5px`), прозрачный фон обёртки и изображения |
 | 2026-06-27 | Логотип HuntTech: прозрачный PNG (HUNT/TECH stacked), CSS flex-center на `logoWrap`/`v-slot-c-login-logo`, ширина 100% как у полей, убран `max-width: 280px` (причина левого смещения) |
