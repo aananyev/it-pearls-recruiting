@@ -34,7 +34,7 @@
   width: 100%;
   box-sizing: border-box;
   border: 1px solid #555;
-  border-radius: 5px;
+  border-radius: 15px;
   display: flex;
   flex-direction: column;
   align-items: center;
