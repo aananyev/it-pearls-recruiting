@@ -17,6 +17,7 @@ import com.company.itpearls.web.screens.iteractionlist.iteractionlistbrowse.Iter
 import com.company.itpearls.web.screens.jobcandidate.jobcandidatecomments.JobCandidateComment;
 import com.company.itpearls.web.screens.personelreserve.PersonelReserveEdit;
 import com.company.itpearls.web.screens.signicons.SignIconsBrowse;
+import com.company.itpearls.gui.components.OvalImage;
 import com.company.itpearls.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
@@ -2166,10 +2167,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private Component jobCandidatesTableFileImageFaceColumnGenerator(
             DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
         HBoxLayout hBox = uiComponents.create(HBoxLayout.class);
-        Image image = uiComponents.create(Image.NAME);
+        OvalImage image = uiComponents.create(OvalImage.NAME);
         setCandidateFaceImage(image, event.getItem());
-        image.setWidth("30px");
-        image.setHeight("30px");
+        image.setOvalWidth("32px");
         image.addStyleName("candidate-face-thumb");
         image.setScaleMode(Image.ScaleMode.CONTAIN);
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
