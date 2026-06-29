@@ -116,6 +116,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-29 | OpenPositionEdit: `projectNamesDc` — nested `projectDepartment.companyName.cityOfCompany` в view loader; исправлен unfetched `cityOfCompany` при смене Project |
 | 2026-06-26 | OpenPositionBrowse: `maxResults=40`; batch subscribers (`QUERY_SUBSCRIBERS_BY_POSITIONS` + `SUBSCRIBERS_TASKS_VIEW`), interaction stats (`QUERY_COUNT_ITERACTIONS_BY_POSITIONS`), parent-folder (`QUERY_CHILD_POSITIONS_BY_PARENTS`); `fetch="BATCH"` в browse XML |
 | 2026-06-26 | Deep modernization: поведение browse/edit простым языком; Behavior Summary переписан |
 | 2026-06-26 | Добавлен Business & Context Intro (Living Documentation standard) |

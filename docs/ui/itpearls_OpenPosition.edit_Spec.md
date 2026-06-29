@@ -61,7 +61,9 @@
 
 ### Справочные options loaders
 
-`openPositionParentDc` (`openPosition-picker-view`), `positionTypesDc`, `projectNamesDc` (фильтр department/closed/withOpenPosition), `companyNamesDc`, `companyDepartamentsDc`, `citiesDc`, `gradeDc`.
+`openPositionParentDc` (`openPosition-picker-view`), `positionTypesDc`, `projectNamesDc` (фильтр department/closed/withOpenPosition; view: `project-picker-view` + `projectLogo`, `projectDepartment.companyName.cityOfCompany`, `projectOwner`), `companyNamesDc`, `companyDepartamentsDc` (`companyName.cityOfCompany`), `citiesDc`, `gradeDc`.
+
+**Критичные nested paths в Java (`setCityNameOfCompany`, каскад Project → Department → Company → City):** `projectNamesDc` → `projectDepartment` → `companyName` → `cityOfCompany`.
 
 ### Facet
 
@@ -179,6 +181,7 @@ Header labels: `signDraftLabel`, `labelTopComissionRecrutier`, `labelTopComissio
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-29 | `projectNamesDc`: `projectDepartment.companyName.cityOfCompany` + `projectLogo` — исправлен unfetched `cityOfCompany` при смене Project (`setCityNameOfCompany`) |
 | 2026-06-26 | §4–5: поведение из Java простым языком (deep modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первичная UI Spec из `open-position-edit.xml` и `OpenPositionEdit.java` |

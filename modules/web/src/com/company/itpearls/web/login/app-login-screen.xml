@@ -30,16 +30,11 @@
                               align="MIDDLE_CENTER"
                               spacing="true"
                               width="100%">
-                            <vbox id="logoWrap"
-                                  align="MIDDLE_CENTER"
-                                  stylename="c-login-logo-wrap"
-                                  width="100%">
                                 <image id="logoImage"
                                        align="MIDDLE_CENTER"
                                        scaleMode="CONTAIN"
                                        stylename="c-login-logo"
                                        width="100%"/>
-                            </vbox>
                             <label id="welcomeLabel"
                                    align="MIDDLE_CENTER"
                                    stylename="c-login-welcome-label h1"

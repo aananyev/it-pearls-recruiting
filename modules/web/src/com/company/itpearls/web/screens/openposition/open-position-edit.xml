@@ -125,6 +125,12 @@
         <collection id="projectNamesDc"
                     class="com.company.itpearls.entity.Project">
             <view extends="project-picker-view">
+                <property name="projectLogo" view="_minimal"/>
+                <property name="projectDepartment" view="companyDepartament-picker-view">
+                    <property name="companyName" view="company-picker-view">
+                        <property name="cityOfCompany" view="_local"/>
+                    </property>
+                </property>
                 <property name="projectOwner" view="person-owner-view">
                     <property name="personPosition" view="_local"/>
                     <property name="companyDepartment" view="_local"/>
