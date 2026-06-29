@@ -112,6 +112,7 @@ configure(globalModule) {
         compile 'org.projectlombok:lombok:1.18.16'
         compile 'org.telegram:telegrambots:6.8.0'
         compile 'org.telegram:telegrambotsextensions:6.8.0'
+        compile 'net.coobird:thumbnailator:0.4.20'
     }
 
     entitiesEnhancing {
@@ -176,6 +177,8 @@ configure(guiModule) {
     task deployConf(type: Copy) {
         from file('src')
         include "com/company/itpearls/**"
+        include "com/company/hunttech/**"
+        include "com/hunttech/**"
         into "$cuba.appHome/${modulePrefix}/conf"
     }
 }
@@ -201,6 +204,7 @@ configure(webModule) {
     dependencies {
         compileOnly(servletApi)
         compile(guiModule)
+        testCompile 'org.mockito:mockito-core:3.12.4'
     }
 
     compileTestJava.dependsOn ':app-core:compileTestJava'
@@ -229,6 +233,8 @@ configure(webModule) {
     task deployConf(type: Copy) {
         from file('src')
         include "com/company/itpearls/**"
+        include "com/company/hunttech/**"
+        include "com/hunttech/**"
         into "$cuba.appHome/${modulePrefix}/conf"
     }
 

@@ -22,6 +22,10 @@ docs/
 ├── templates/
 │   ├── entity-template.md    ← шаблон описания сущности CUBA
 │   └── ui-template.md        ← шаблон UI Spec (6 разделов)
+├── services/
+│   └── ImageProcessingService.md  ← сжатие/масштабирование фото профиля
+├── components/
+│   └── FallbackImage.md           ← UI-компонент placeholder для image
 └── entities/
     ├── IteractionList.md      ← взаимодействие с кандидатом
     ├── Iteraction.md         ← тип взаимодействия с кандидатом (образец)
@@ -40,6 +44,7 @@ docs/
     ├── Grade.md                ← грейды
     ├── VacancyPromptTemplate.md ← шаблоны AI-промптов вакансий
     ├── UserAiConfiguration.md  ← персональные AI-ключи пользователей
+    ├── ExtUser.md              ← расширенный пользователь (фото, почта, AI)
     ├── Position.md             ← должности
     ├── JobCandidate.md         ← кандидаты (подсистема: entity + browse + edit)
     └── RecrutiesTasks.md       ← подписки рекрутёров
@@ -75,6 +80,8 @@ docs/
 | Понять дерево компетенций | [entities/SkillTree.md](entities/SkillTree.md) · UI: [browse](ui/itpearls_SkillTree.browse_Spec.md), [edit](ui/itpearls_SkillTree.edit_Spec.md) |
 | Понять подсистему кандидатов | [entities/JobCandidate.md](entities/JobCandidate.md) · UI: [каталог](ui/README.md#jobcandidate) |
 | Понять подсистему вакансий | [entities/OpenPosition.md](entities/OpenPosition.md) · [architecture/OpenPosition_Spec.md](architecture/OpenPosition_Spec.md) · UI: [каталог](ui/README.md#openposition) |
+| Обработка фото профиля (сжатие, лимиты) | [services/ImageProcessingService.md](services/ImageProcessingService.md) · [entities/ExtUser.md](entities/ExtUser.md) |
+| UI-компонент FallbackImage (placeholder для image) | [components/FallbackImage.md](components/FallbackImage.md) · [ui/FallbackImage_Component.md](ui/FallbackImage_Component.md) |
 | Каталог всех UI Spec | [ui/README.md](ui/README.md) (47 форм) |
 
 ---
