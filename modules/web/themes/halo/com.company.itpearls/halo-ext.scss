@@ -1782,4 +1782,19 @@ rating_battery_yellow_3:before {
       white-space: nowrap;
       color: black;
     }
+
+    /* Custom Oval Image Widget Styles */
+    .v-image.ht-oval-image,
+    .ht-oval-image {
+      border-radius: 50% !important;
+      overflow: hidden !important;
+      display: inline-block;
+
+      img, .v-image-element {
+        border-radius: 50% !important;
+        object-fit: cover !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+    }
 }
