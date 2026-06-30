@@ -2,6 +2,8 @@ package com.company.itpearls.web.screens.extuser;
 
 import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.IteractionList;
+import com.company.itpearls.web.util.FileDescriptorImageHelper;
+import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Component;
@@ -22,6 +24,8 @@ public class ExtUserBrowse extends Screen {
     private UiComponents uiComponents;
     @Inject
     private GroupTable<User> usersTable;
+    @Inject
+    private FileLoader fileLoader;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -45,7 +49,7 @@ public class ExtUserBrowse extends Screen {
         retImage.setWidth("20px");
         retImage.setStyleName("circle-20px");
 
-        retImage.setSource(FileDescriptorResource.class).setFileDescriptor( ((ExtUser)user).getFileImageFace());
+        FileDescriptorImageHelper.setUserProfilePhoto(retImage, fileLoader, (ExtUser) user);
 
         retBox.add(retImage);
 

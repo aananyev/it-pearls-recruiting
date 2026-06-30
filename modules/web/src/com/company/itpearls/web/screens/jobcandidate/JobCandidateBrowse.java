@@ -2169,8 +2169,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         HBoxLayout hBox = uiComponents.create(HBoxLayout.class);
         OvalImage image = uiComponents.create(OvalImage.NAME);
         setCandidateFaceImage(image, event.getItem());
-        image.setOvalWidth("32px");
-        image.addStyleName("candidate-face-thumb");
+        image.setOvalWidth("28px");
         image.setScaleMode(Image.ScaleMode.CONTAIN);
         image.setAlignment(Component.Alignment.MIDDLE_CENTER);
         hBox.setWidthFull();

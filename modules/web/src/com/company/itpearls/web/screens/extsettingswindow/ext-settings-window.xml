@@ -16,6 +16,10 @@
                     class="com.company.itpearls.entity.UserSettings"
                     allowCommit="true">
         </datasource>
+        <datasource id="extUserDs"
+                    class="com.company.itpearls.entity.ExtUser"
+                    view="extUser-view"
+                    allowCommit="true"/>
     </dsContext>
     <layout expand="settingsTabSheet">
         <tabSheet id="settingsTabSheet"
@@ -33,8 +37,6 @@
                       stylename="dropzone-container">
                     <vbox id="picVBox" align="TOP_RIGHT" spacing="true">
                         <image id="userPic"
-                               datasource="userSettingsDs"
-                               property="fileImageFace"
                                width="100%"
                                height="100%"
                                visible="true"
@@ -50,14 +52,14 @@
                             <theme path="icons/no-programmer.jpeg"/>
                         </image>
                     </vbox>
-                    <upload id="fileImageFaceUpload"
+                    <upload id="userAvatarUpload"
                             fileStoragePutMode="IMMEDIATE"
-                            datasource="userSettingsDs"
+                            datasource="extUserDs"
                             align="BOTTOM_CENTER"
                             showFileName="false"
                             dropZone="dropZone"
                             showClearButton="true"
-                            property="fileImageFace"/>
+                            property="userAvatar"/>
                 </vbox>
             </tab>
             <tab id="msgInterface"

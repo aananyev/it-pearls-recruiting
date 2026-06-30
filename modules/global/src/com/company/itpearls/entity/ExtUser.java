@@ -13,9 +13,21 @@ import javax.persistence.*;
 public class ExtUser extends User {
     private static final long serialVersionUID = 6173000981123148225L;
 
+    /**
+     * @deprecated use {@link #officialPhoto} and {@link #userAvatar}; kept for data migration from IMAGE_ID.
+     */
+    @Deprecated
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "IMAGE_ID")
     private FileDescriptor fileImageFace;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "OFFICIAL_PHOTO_ID")
+    private FileDescriptor officialPhoto;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_AVATAR_ID")
+    private FileDescriptor userAvatar;
 
     @Column(name = "SMTP_SERVER", length = 128)
     private String smtpServer;
@@ -108,12 +120,49 @@ public class ExtUser extends User {
         this.smtpUser = smtpUser;
     }
 
+    /**
+     * @deprecated use {@link #getOfficialPhoto()} / {@link #getUserAvatar()}.
+     */
+    @Deprecated
     public FileDescriptor getFileImageFace() {
         return fileImageFace;
     }
 
+    /**
+     * @deprecated use {@link #setOfficialPhoto(FileDescriptor)} / {@link #setUserAvatar(FileDescriptor)}.
+     */
+    @Deprecated
     public void setFileImageFace(FileDescriptor fileImageFace) {
         this.fileImageFace = fileImageFace;
+    }
+
+    public FileDescriptor getOfficialPhoto() {
+        return officialPhoto;
+    }
+
+    public void setOfficialPhoto(FileDescriptor officialPhoto) {
+        this.officialPhoto = officialPhoto;
+    }
+
+    public FileDescriptor getUserAvatar() {
+        return userAvatar;
+    }
+
+    public void setUserAvatar(FileDescriptor userAvatar) {
+        this.userAvatar = userAvatar;
+    }
+
+    /**
+     * Display priority: personal avatar → official admin photo → legacy {@link #fileImageFace}.
+     */
+    public FileDescriptor resolveProfilePhoto() {
+        if (userAvatar != null) {
+            return userAvatar;
+        }
+        if (officialPhoto != null) {
+            return officialPhoto;
+        }
+        return fileImageFace;
     }
 
     public Boolean getImapPasswordRequired() {

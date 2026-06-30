@@ -1,41 +1,45 @@
 package com.company.itpearls.web.screens.extuser;
 
+import com.company.hunttech.app.ImageProcessingService;
+import com.company.hunttech.config.HunttechImageConfig;
 import com.company.itpearls.entity.ExtUser;
-import com.company.itpearls.entity.StdPictures;
 import com.company.itpearls.entity.UserAiConfiguration;
-import com.company.itpearls.entity.UserSettings;
 import com.company.itpearls.web.screens.useraiconfiguration.UserAiConfigurationEdit;
+import com.company.itpearls.web.util.AvatarImageUploadHelper;
 import com.company.itpearls.web.util.FileDescriptorImageHelper;
+import com.haulmont.cuba.core.app.FileStorageService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FileLoader;
+import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.DialogAction;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.security.entity.User;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.Objects;
 import java.util.UUID;
 
 @UiController("itpearls_ExtUserEdit")
 @UiDescriptor("ext-user-edit.xml")
 public class ExtUserEdit extends Screen {
 
-    private static final String USER_SETTINGS_QUERY =
-            "select e from itpearls_UserSettings e where e.user.id = :userId";
+    private static final Logger log = LoggerFactory.getLogger(ExtUserEdit.class);
 
     @Inject
     private Field smtpPassword;
     @Inject
-    private Image defaultPic;
-    @Inject
-    private FileUploadField fileImageFaceUpload;
-    @Inject
-    private Image userPic;
+    private FileUploadField officialPhotoUpload;
     @Inject
     private Label<String> fioLabel;
     @Inject
@@ -58,13 +62,20 @@ public class ExtUserEdit extends Screen {
     private MessageBundle messageBundle;
     @Inject
     private FileLoader fileLoader;
+    @Inject
+    private FileStorageService fileStorageService;
+    @Inject
+    private Dialogs dialogs;
+    @Inject
+    private ImageProcessingService imageProcessingService;
+    @Inject
+    private HunttechImageConfig hunttechImageConfig;
 
     @Subscribe
     public void onInit(InitEvent event) {
         userDs.addItemChangeListener(e -> {
             refreshProfileLabels();
             refreshAiConfigs();
-            refreshAvatar();
         });
     }
 
@@ -72,7 +83,6 @@ public class ExtUserEdit extends Screen {
     public void onAfterShow(AfterShowEvent event) {
         refreshProfileLabels();
         refreshAiConfigs();
-        refreshAvatar();
         User user = userDs.getItem();
         if (user != null && PersistenceHelper.isNew(user)) {
             passwordBox.setVisible(true);
@@ -84,14 +94,29 @@ public class ExtUserEdit extends Screen {
         smtpPassword.setRequired(Boolean.TRUE.equals(value));
     }
 
-    @Subscribe("fileImageFaceUpload")
-    public void onFileImageFaceUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        refreshAvatar();
+    @Subscribe("officialPhotoUpload")
+    public void onOfficialPhotoUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
+        ExtUser user = getExtUser();
+        if (user == null) {
+            return;
+        }
+        FileDescriptor newPhoto = officialPhotoUpload.getFileDescriptor();
+        newPhoto = processUploadedPhoto(newPhoto);
+        FileDescriptor personalAvatar = user.getUserAvatar();
+        if (FileDescriptorImageHelper.fileExists(fileLoader, personalAvatar)) {
+            showAdminPhotoChoiceDialog(user, newPhoto, personalAvatar);
+        } else {
+            applyOfficialPhoto(user, newPhoto, true);
+        }
     }
 
-    @Subscribe("fileImageFaceUpload")
-    public void onFileImageFaceUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
-        refreshAvatar();
+    @Subscribe("officialPhotoUpload")
+    public void onOfficialPhotoUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
+        ExtUser user = getExtUser();
+        if (user != null) {
+            removeStoredFileIfUnreferenced(user.getOfficialPhoto(), user.getUserAvatar(), null);
+            user.setOfficialPhoto(null);
+        }
     }
 
     @Subscribe("changePasswordBtn")
@@ -141,6 +166,73 @@ public class ExtUserEdit extends Screen {
         refreshAiConfigs();
     }
 
+    private void showAdminPhotoChoiceDialog(ExtUser user, FileDescriptor newPhoto, FileDescriptor personalAvatar) {
+        String avatarHtml = FileDescriptorImageHelper.buildCandidateFacePreviewHtml(fileLoader, personalAvatar);
+        String message = messageBundle.getMessage("msgPersonalAvatarExists")
+                + "<br/><br/>" + avatarHtml;
+
+        dialogs.createOptionDialog()
+                .withCaption(messageBundle.getMessage("msgPhotoChoiceCaption"))
+                .withMessage(message)
+                .withContentMode(ContentMode.HTML)
+                .withWidth("420px")
+                .withActions(
+                        new BaseAction("replaceOfficialOnly")
+                                .withCaption(messageBundle.getMessage("msgReplaceOfficialOnly"))
+                                .withPrimary(true)
+                                .withHandler(e -> applyOfficialPhoto(user, newPhoto, false)),
+                        new BaseAction("overwriteBoth")
+                                .withCaption(messageBundle.getMessage("msgOverwriteBothPhotos"))
+                                .withHandler(e -> applyOfficialPhoto(user, newPhoto, true)),
+                        new DialogAction(DialogAction.Type.CANCEL)
+                                .withHandler(e -> officialPhotoUpload.setValue(null))
+                )
+                .show();
+    }
+
+    private FileDescriptor processUploadedPhoto(FileDescriptor descriptor) {
+        log.debug("Processing avatar upload with limits targetImageSize={}, targetImageFormat={}",
+                hunttechImageConfig.getTargetImageSize(), hunttechImageConfig.getTargetImageFormat());
+        return AvatarImageUploadHelper.processUploadedImage(
+                descriptor, fileLoader, fileStorageService, dataManager, imageProcessingService, log);
+    }
+
+    private void applyOfficialPhoto(ExtUser user, FileDescriptor newPhoto, boolean copyToAvatar) {
+        FileDescriptor oldOfficial = user.getOfficialPhoto();
+        FileDescriptor oldAvatar = user.getUserAvatar();
+
+        removeStoredFileIfUnreferenced(oldOfficial, copyToAvatar ? null : oldAvatar, newPhoto);
+        user.setOfficialPhoto(newPhoto);
+
+        if (copyToAvatar) {
+            removeStoredFileIfUnreferenced(oldAvatar, oldOfficial, newPhoto);
+            user.setUserAvatar(newPhoto);
+        }
+
+        userDs.setItem(user);
+    }
+
+    private void removeStoredFileIfUnreferenced(FileDescriptor oldFile,
+                                                FileDescriptor stillReferenced,
+                                                FileDescriptor replacement) {
+        if (oldFile == null || Objects.equals(oldFile, replacement)) {
+            return;
+        }
+        if (stillReferenced != null && Objects.equals(oldFile.getId(), stillReferenced.getId())) {
+            return;
+        }
+        try {
+            fileStorageService.removeFile(oldFile);
+        } catch (FileStorageException e) {
+            log.warn("Cannot remove old user photo id={}: {}", oldFile.getId(), e.getMessage());
+        }
+    }
+
+    private ExtUser getExtUser() {
+        User user = userDs.getItem();
+        return user instanceof ExtUser ? (ExtUser) user : null;
+    }
+
     private void refreshAiConfigs() {
         if (userDs.getItem() != null) {
             userAiConfigsDs.refresh();
@@ -184,50 +276,5 @@ public class ExtUserEdit extends Screen {
             sb.append(user.getMiddleName());
         }
         return sb.length() > 0 ? sb.toString() : user.getLogin();
-    }
-
-    private void refreshAvatar() {
-        FileDescriptor avatar = resolveAvatarFileDescriptor(userDs.getItem());
-        userPic.setValueSource(null);
-        if (FileDescriptorImageHelper.fileExists(fileLoader, avatar)) {
-            defaultPic.setVisible(false);
-            userPic.setVisible(true);
-            FileDescriptorImageHelper.setImageSource(userPic, fileLoader, avatar,
-                    StdPictures.NO_CANDIDATE.getId());
-        } else {
-            userPic.setVisible(false);
-            defaultPic.setVisible(true);
-        }
-    }
-
-    /**
-     * Priority: personal photo from «About me» ({@link UserSettings#fileImageFace}),
-     * then admin/system photo on {@link ExtUser#fileImageFace}, then placeholder.
-     */
-    private FileDescriptor resolveAvatarFileDescriptor(User user) {
-        if (user == null) {
-            return null;
-        }
-        FileDescriptor personalImage = loadPersonalImage(user);
-        if (FileDescriptorImageHelper.fileExists(fileLoader, personalImage)) {
-            return personalImage;
-        }
-        if (user instanceof ExtUser) {
-            FileDescriptor adminImage = ((ExtUser) user).getFileImageFace();
-            if (FileDescriptorImageHelper.fileExists(fileLoader, adminImage)) {
-                return adminImage;
-            }
-        }
-        return null;
-    }
-
-    private FileDescriptor loadPersonalImage(User user) {
-        return dataManager.load(UserSettings.class)
-                .query(USER_SETTINGS_QUERY)
-                .parameter("userId", user.getId())
-                .view("userSettings-view")
-                .optional()
-                .map(UserSettings::getFileImageFace)
-                .orElse(null);
     }
 }

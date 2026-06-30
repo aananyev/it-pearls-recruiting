@@ -275,6 +275,7 @@
             </grid>
         </groupBox>
         <tabSheet id="tabSheetSocialNetworks"
+                  lazy="true"
                   stylename="framed">
             <tab id="jobCandidateCard"
                  caption="msg://msgJobCard"

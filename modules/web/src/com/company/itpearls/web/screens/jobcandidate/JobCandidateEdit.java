@@ -22,10 +22,6 @@ import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.components.data.ValueSource;
-import com.haulmont.cuba.gui.executors.BackgroundTask;
-import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
-import com.haulmont.cuba.gui.executors.BackgroundWorker;
-import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.icons.Icons;
 import com.haulmont.cuba.gui.model.*;
@@ -86,6 +82,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> jobTitleTitle;
     @Inject
     private Image candidatePic;
+    private boolean updatingCandidatePic;
     @Inject
     private FileUploadField fileImageFaceUpload;
     @Inject
@@ -118,8 +115,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private UiComponents uiComponents;
     @Inject
     private Logger log;
-    @Inject
-    protected BackgroundWorker backgroundWorker;
     @Inject
     private SuggestionField<String> firstNameField;
     @Inject
@@ -218,6 +213,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Button copyIteractionButton;
     private boolean candidateInitialized = false;
     private boolean tabContactInfoInitialized = false;
+    private boolean initialInteractionAdded = false;
     @Inject
     private Table lastProjectTable;
     @Inject
@@ -529,90 +525,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setBlockUnblockButton(b);
     }
 
-    private void addSuggestField() {
-        BackgroundTask<Integer, Void> task1 = new BackgroundTask<Integer, Void>(10, this) {
-            @Override
-            public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
-                addFirstNameSuggestField();
-
-                return null;
-            }
-
-            @Override
-            public void canceled() {
-                // Действие в UI-потоке при отмене задачи
-            }
-
-            @Override
-            public void done(Void result) {
-                // Действие в UI-потоке по завершении задачи
-            }
-
-            @Override
-            public void progress(List<Integer> changes) {
-                // Отображение текущего прогресса в UI-потоке
-            }
-        };
-
-        BackgroundTask<Integer, Void> task2 = new BackgroundTask<Integer, Void>(10, this) {
-            @Override
-            public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
-                addSecondNameSuggestField();
-
-                return null;
-            }
-
-            @Override
-            public void canceled() {
-                // Действие в UI-потоке при отмене задачи
-            }
-
-            @Override
-            public void done(Void result) {
-                // Действие в UI-потоке по завершении задачи
-            }
-
-            @Override
-            public void progress(List<Integer> changes) {
-                // Отображение текущего прогресса в UI-потоке
-            }
-        };
-
-        BackgroundTask<Integer, Void> task3 = new BackgroundTask<Integer, Void>(10, this) {
-            @Override
-            public Void run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
-                addMiddleNameSuggestField();
-
-                return null;
-            }
-
-            @Override
-            public void canceled() {
-                // Действие в UI-потоке при отмене задачи
-            }
-
-            @Override
-            public void done(Void result) {
-                // Действие в UI-потоке по завершении задачи
-            }
-
-            @Override
-            public void progress(List<Integer> changes) {
-                // Отображение текущего прогресса в UI-потоке
-            }
-        };
-
-        // Получить обработчик задачи и запустить её
-        BackgroundTaskHandler taskHandler1 = backgroundWorker.handle(task1);
-        taskHandler1.execute();
-        // Получить обработчик задачи и запустить её
-        BackgroundTaskHandler taskHandler2 = backgroundWorker.handle(task2);
-        taskHandler2.execute();
-        // Получить обработчик задачи и запустить её
-        BackgroundTaskHandler taskHandler3 = backgroundWorker.handle(task3);
-        taskHandler3.execute();
-    }
-
     @Subscribe
     public void onAfterClose(AfterCloseEvent event) {
         // чтоб после закрытия не возникало
@@ -806,15 +718,23 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setCandidatePicImage() {
-        FileDescriptor faceImage = getEditedEntity().getFileImageFace();
-        candidatePic.setValueSource(null);
-        if (FileDescriptorImageHelper.fileExists(fileLoader, faceImage)) {
-            candidateDefaultPic.setVisible(false);
-            candidatePic.setVisible(true);
-            FileDescriptorImageHelper.setCandidateFace(candidatePic, fileLoader, faceImage);
-        } else {
-            candidateDefaultPic.setVisible(true);
-            candidatePic.setVisible(false);
+        if (updatingCandidatePic) {
+            return;
+        }
+        updatingCandidatePic = true;
+        try {
+            FileDescriptor faceImage = getEditedEntity().getFileImageFace();
+            candidatePic.setValueSource(null);
+            if (faceImage != null && FileDescriptorImageHelper.fileExists(fileLoader, faceImage)) {
+                candidateDefaultPic.setVisible(false);
+                candidatePic.setVisible(true);
+                FileDescriptorImageHelper.setCandidateFace(candidatePic, fileLoader, faceImage);
+            } else {
+                candidateDefaultPic.setVisible(true);
+                candidatePic.setVisible(false);
+            }
+        } finally {
+            updatingCandidatePic = false;
         }
     }
 
@@ -826,6 +746,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe("candidatePic")
     public void onCandidatePicSourceChange(ResourceView.SourceChangeEvent event) {
+        if (updatingCandidatePic) {
+            return;
+        }
         setCandidatePicImage();
     }
 
@@ -990,7 +913,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 
     private void addIteractionOfNewCandidate() {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
+        if (PersistenceHelper.isNew(getEditedEntity()) && !initialInteractionAdded) {
             // добавить сюда Iteraction "Новый кандиат"
             IteractionList iteractionList = metadata.create(IteractionList.class);
 
@@ -1047,6 +970,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 iteractionList.setVacancy(openPosition);
 
                 jobCandidateIteractionDc.getMutableItems().add(dataContext.merge(iteractionList));
+                initialInteractionAdded = true;
             }
         }
     }
@@ -1370,11 +1294,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void initTabCandidate() {
+        TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
+        if (selectedTab == null || !"tabCandidate".equals(selectedTab.getName())) {
+            return;
+        }
         if (!candidateInitialized) {
-            TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
-            if (selectedTab == null || !"tabCandidate".equals(selectedTab.getName())) {
-                return;
-            }
             ensureReferenceLoadersLoaded();
 
             if (currentCompanyField == null) {
@@ -1442,7 +1366,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 setPositionsLabel();
             }
 
-            addSuggestField();
+            setupNameSearchExecutors();
             checkNotUsePosition();
 
             if (firstNameField != null && secondNameField != null) {
@@ -1729,40 +1653,34 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     }
 
-    private void addMiddleNameSuggestField() {
-        String queryString = "select distinct e.middleName from itpearls_JobCandidate e order by e.middleName";
-
-        List<String> middleName = dataManager.loadValue(queryString, String.class)
-                .list();
-
-        middleNameField.setSearchExecutor((searchString, searchParams) ->
-                middleName.stream()
-                        .filter(str -> StringUtils.containsIgnoreCase(str, searchString))
-                        .collect(Collectors.toList()));
-    }
-
-    private void addSecondNameSuggestField() {
-        String queryString = "select distinct e.secondName from itpearls_JobCandidate e order by e.secondName";
-
-        List<String> secondName = dataManager.loadValue(queryString, String.class)
-                .list();
-
-        secondNameField.setSearchExecutor((searchString, searchParams) ->
-                secondName.stream()
-                        .filter(str -> StringUtils.containsIgnoreCase(str, searchString))
-                        .collect(Collectors.toList()));
-    }
-
-    private void addFirstNameSuggestField() {
-        String queryString = "select distinct e.firstName from itpearls_JobCandidate e order by e.firstName";
-
-        List<String> firstName = dataManager.loadValue(queryString, String.class)
-                .list();
-
-        firstNameField.setSearchExecutor((searchString, searchParams) ->
-                firstName.stream()
-                        .filter(str -> StringUtils.containsIgnoreCase(str, searchString))
-                        .collect(Collectors.toList()));
+    private void setupNameSearchExecutors() {
+        if (firstNameField != null) {
+            firstNameField.setSearchExecutor((searchString, searchParams) ->
+                    dataManager.loadValue(
+                            "select distinct e.firstName from itpearls_JobCandidate e " +
+                                    "where lower(e.firstName) like lower(:searchString) order by e.firstName",
+                            String.class)
+                            .parameter("searchString", "%" + searchString.toLowerCase() + "%")
+                            .list());
+        }
+        if (secondNameField != null) {
+            secondNameField.setSearchExecutor((searchString, searchParams) ->
+                    dataManager.loadValue(
+                            "select distinct e.secondName from itpearls_JobCandidate e " +
+                                    "where lower(e.secondName) like lower(:searchString) order by e.secondName",
+                            String.class)
+                            .parameter("searchString", "%" + searchString.toLowerCase() + "%")
+                            .list());
+        }
+        if (middleNameField != null) {
+            middleNameField.setSearchExecutor((searchString, searchParams) ->
+                    dataManager.loadValue(
+                            "select distinct e.middleName from itpearls_JobCandidate e " +
+                                    "where lower(e.middleName) like lower(:searchString) order by e.middleName",
+                            String.class)
+                            .parameter("searchString", "%" + searchString.toLowerCase() + "%")
+                            .list());
+        }
     }
 
     public void addIteractionJobCandidate() {
@@ -2025,7 +1943,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                 if (!flag) {
                     jobCandidateDc.getItem().getPositionList().add(position);
-                    dataContext.commit();
+                    dataContext.merge(position);
                 }
             }
 
@@ -3260,8 +3178,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             Image image = uiComponents.create(Image.class);
 
             if (event.getItem().getRecrutier() != null) {
-                FileDescriptorImageHelper.setCandidateFace(image, fileLoader,
-                        ((ExtUser) event.getItem().getRecrutier()).getFileImageFace());
+                FileDescriptorImageHelper.setUserProfilePhoto(image, fileLoader,
+                        (ExtUser) event.getItem().getRecrutier());
             } else {
                 image.setSource(ThemeResource.class)
                         .setPath("icons/no-programmer.jpeg");
@@ -3446,19 +3364,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void reloadCV() {
-        dataContext.commit();
-
-        jobCandidateDl.load();
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            dataContext.commit();
+            jobCandidateDl.load();
+        }
         jobCandidateCandidateCvTable.repaint();
     }
 
     private void reloadInteractions() {
-        dataContext.commit();
-
-        interactionCommentDl.load();
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            dataContext.commit();
+            interactionCommentDl.load();
+            jobCandidateDl.load();
+        }
         jobCandidateCommentsDataGrid.repaint();
-
-        jobCandidateDl.load();
         jobCandidateIteractionListTable.repaint();
     }
 

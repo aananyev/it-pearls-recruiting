@@ -25,7 +25,8 @@
             <column width="400px">
                 <textField id="nameField"
                            property="name"
-                           description="msg://VacancyPromptTemplate.name.description"
+                           caption="msg://templateName.caption"
+                           description="msg://templateNameDescription"
                            width="100%"/>
             </column>
             <column width="150px">
@@ -36,16 +37,16 @@
             </column>
         </form>
         <textArea id="systemContextField"
-                  caption="msg://systemContext.caption"
-                  description="msg://systemContext.description"
+                  caption="msg://aiRole.caption"
+                  description="msg://aiRoleDescription"
                   dataContainer="vacancyPromptTemplateDc"
                   property="systemContext"
                   width="100%"
                   rows="5"
                   height="120px"/>
         <textArea id="promptTextField"
-                  caption="msg://promptText.caption"
-                  description="msg://promptText.description"
+                  caption="msg://mainTask.caption"
+                  description="msg://mainTaskDescription"
                   dataContainer="vacancyPromptTemplateDc"
                   property="promptText"
                   width="100%"

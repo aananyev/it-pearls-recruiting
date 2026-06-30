@@ -1,7 +1,37 @@
 # HRM HuntTech — Living Documentation
 
 > CUBA 7.3 · HuntTech · Документация — на русском.
-> Сущности: `.cursor/rules/living-documentation.mdc` · UI: `.cursor/rules/living-ui-documentation.mdc` · View integrity: `.cursor/rules/data-view-integrity.mdc` · оптимизация: `.cursor/rules/entity-performance-optimization.mdc` · даты: `.cursor/rules/documentation-with-dates.mdc` · коммиты: `.cursor/rules/git-commit-conventions.mdc` · ввод: **Business & Context Intro** (ниже)
+> Workflow: [DEVELOPMENT WORKFLOW](#development-workflow) · Сущности: `.cursor/rules/living-documentation.mdc` · UI: `.cursor/rules/living-ui-documentation.mdc` · Java-сервисы: `.cursor/rules/java-service-dod.mdc` · View integrity: `.cursor/rules/data-view-integrity.mdc` · оптимизация: `.cursor/rules/entity-performance-optimization.mdc` · даты: `.cursor/rules/documentation-with-dates.mdc` · коммиты: `.cursor/rules/git-commit-conventions.mdc` · ввод: **Business & Context Intro** (ниже)
+
+---
+
+## DEVELOPMENT WORKFLOW
+
+Every code change — business logic, a UI element, or a screen form — **must** include design or update of the corresponding documentation under `docs/` **and** automated tests. **Do not consider a task finished** until documentation and auto-tests are created or updated in the **same session** as the code change.
+
+This workflow complements (does not replace) the triggers below: GLOBAL SYNC TRIGGER, GLOBAL UI TRIGGER, [RULE: AUTO-UPDATE-UI-DOCUMENTATION], and [java-service-dod.mdc](.cursor/rules/java-service-dod.mdc) for `*Service` / `*ServiceBean`.
+
+### Documentation layout (`docs/`)
+
+Strictly follow this **numbered** structure when creating or updating documentation:
+
+| Folder | Назначение |
+|--------|------------|
+| `docs/01_architecture/` | Архитектура, data model, deployment, entity architecture specs |
+| `docs/02_business_logic/` | Сервисы, бизнес-правила, controller layer |
+| `docs/03_ui_components/` | Кастомные UI-компоненты (OvalImage, FallbackImage и др.) |
+| `docs/04_screens/` | Экраны и формы — подпапки `browse/` и `edit/` по имени экрана |
+
+Пример путей экрана: `docs/04_screens/browse/JobCandidate.md`, `docs/04_screens/edit/JobCandidate.md`.
+
+**Legacy paths (до миграции):** существующие файлы в `docs/architecture/`, `docs/entities/`, `docs/ui/`, `docs/ui-components/`, `docs/services/` остаются валидными; при правках синхронизировать их по правилам living-doc. Новая и обновляемая документация — в нумерованной структуре выше. **Не переносить legacy-файлы** без явного запроса пользователя.
+
+**Детали living-doc:** [living-documentation.mdc](.cursor/rules/living-documentation.mdc) · UI: [living-ui-documentation.mdc](.cursor/rules/living-ui-documentation.mdc) · шаблоны: `docs/templates/`.
+
+### Automated tests
+
+- **Java-сервисы** (`*Service.java`, `*ServiceBean.java`): обязательны autotests в `modules/core/test/` и прогон перед завершением задачи — см. [java-service-dod.mdc](.cursor/rules/java-service-dod.mdc).
+- **Прочий код** (контроллеры, helpers, UI-компоненты): добавлять или обновлять тесты там, где в проекте уже принят паттерн (`modules/core/test/`, `modules/web/src/test/`); не считать задачу завершённой без покрытия затронутого поведения.
 
 ---
 
@@ -262,10 +292,19 @@
 
 ## Прочие правила проекта
 
+- Development workflow (docs + autotests, нумерованная структура `docs/`): [DEVELOPMENT WORKFLOW](#development-workflow)
+- Living Documentation: `.cursor/rules/living-documentation.mdc`
+- Java-сервисы (autotests + docs): `.cursor/rules/java-service-dod.mdc`
 - Data View Integrity (UNFETCHED ATTRIBUTE ACCESS): `.cursor/rules/data-view-integrity.mdc`
 - Оптимизация сущности: `.cursor/rules/entity-performance-optimization.mdc` (включая ограничение структуры БД)
 - Автогенерация сообщений коммита: `.cursor/rules/git-commit-conventions.mdc`
 - **Не коммитить**, пока пользователь явно не попросит.
+
+---
+
+## [RULE: AUTO-UPDATE-UI-DOCUMENTATION]
+
+При каждом изменении кода, логики, атрибутов или стилей кастомного UI-компонента `OvalImage` (или при создании/модификации любых других кастомных компонентов в будущем), ты ОБЯЗАН в этом же запросе автоматически обновить соответствующий файл документации в папке `docs/ui-components/`. Не жди отдельной команды от пользователя — актуализация документации является неотъемлемой частью выполнения любой задачи по изменению UI-компонентов.
 
 ---
 

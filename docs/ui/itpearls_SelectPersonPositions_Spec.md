@@ -70,7 +70,7 @@ flowchart LR
 | `setPositionsList(List<Position>)` | предзаполнение twin column |
 | `getPositionsList()` | результат после закрытия |
 
-Родитель после `AfterClose` создаёт `JobCandidatePositionLists` без дубликатов по `positionRuName` и вызывает `dataContext.commit()`.
+Родитель после `AfterClose` создаёт `JobCandidatePositionLists` без дубликатов по `positionRuName` и вызывает `dataContext.merge` (commit только при сохранении карточки кандидата).
 
 ---
 

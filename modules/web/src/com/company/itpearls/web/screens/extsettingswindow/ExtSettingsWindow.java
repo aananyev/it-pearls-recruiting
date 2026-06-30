@@ -1,20 +1,35 @@
 package com.company.itpearls.web.screens.extsettingswindow;
 
+import com.company.hunttech.app.ImageProcessingService;
+import com.company.hunttech.config.HunttechImageConfig;
 import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.UserSettings;
+import com.company.itpearls.web.util.AvatarImageUploadHelper;
+import com.company.itpearls.web.util.FileDescriptorImageHelper;
+import com.haulmont.cuba.core.app.FileStorageService;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.FileLoader;
+import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.config.MenuItem;
-import com.haulmont.cuba.gui.model.DataContext;
+import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.web.app.ui.core.settings.SettingsWindow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class ExtSettingsWindow extends SettingsWindow {
+
+    private static final Logger log = LoggerFactory.getLogger(ExtSettingsWindow.class);
+
     @Inject
     private UserSessionSource userSessionSource;
     @Inject
@@ -41,13 +56,23 @@ public class ExtSettingsWindow extends SettingsWindow {
     private Metadata metadata;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private FileLoader fileLoader;
+    @Inject
+    private FileStorageService fileStorageService;
+    @Inject
+    private FileUploadField userAvatarUpload;
+    @Inject
+    private Datasource<ExtUser> extUserDs;
+    @Inject
+    private ImageProcessingService imageProcessingService;
+    @Inject
+    private HunttechImageConfig hunttechImageConfig;
 
     private ExtUser currentUser;
     private UserSettings userSettings;
     private final String QUERY_GET_USER_SETTINGS
             = "select e from itpearls_UserSettings e where e.user = :currentUser";
-    @Inject
-    private DataContext dataContext;
     @Inject
     private Image defaultPic;
     @Inject
@@ -60,19 +85,83 @@ public class ExtSettingsWindow extends SettingsWindow {
     @Override
     public void init(Map<String, Object> params) {
         currentUser = (ExtUser) userSessionSource.getUserSession().getUser();
+        loadExtUser();
         getUserSettingsEntity(currentUser);
-
         setEmailSettings();
-
-        if (userPic.getSource() == null) {
-            userPic.setVisible(false);
-            defaultPic.setVisible(true);
-        } else {
-            userPic.setVisible(true);
-            defaultPic.setVisible(false);
-        }
+        refreshProfilePhoto();
 
         super.init(params);
+
+        userAvatarUpload.addFileUploadSucceedListener(event -> onUserAvatarUploaded());
+        userAvatarUpload.addBeforeValueClearListener(event -> onUserAvatarCleared());
+    }
+
+    private void loadExtUser() {
+        extUserDs.setItem(dataManager.load(ExtUser.class)
+                .id(currentUser.getId())
+                .view("extUser-view")
+                .one());
+        currentUser = extUserDs.getItem();
+    }
+
+    private void onUserAvatarUploaded() {
+        ExtUser user = extUserDs.getItem();
+        if (user == null) {
+            return;
+        }
+        FileDescriptor newAvatar = userAvatarUpload.getFileDescriptor();
+        newAvatar = processUploadedAvatar(newAvatar);
+        FileDescriptor oldAvatar = user.getUserAvatar();
+        removeStoredFileIfUnreferenced(oldAvatar, user.getOfficialPhoto(), newAvatar);
+        user.setUserAvatar(newAvatar);
+        refreshProfilePhoto();
+    }
+
+    private void onUserAvatarCleared() {
+        ExtUser user = extUserDs.getItem();
+        if (user == null) {
+            return;
+        }
+        removeStoredFileIfUnreferenced(user.getUserAvatar(), user.getOfficialPhoto(), null);
+        user.setUserAvatar(null);
+        refreshProfilePhoto();
+    }
+
+    private FileDescriptor processUploadedAvatar(FileDescriptor descriptor) {
+        log.debug("Processing user avatar upload with limits targetImageSize={}, targetImageFormat={}",
+                hunttechImageConfig.getTargetImageSize(), hunttechImageConfig.getTargetImageFormat());
+        return AvatarImageUploadHelper.processUploadedImage(
+                descriptor, fileLoader, fileStorageService, dataManager, imageProcessingService, log);
+    }
+
+    private void removeStoredFileIfUnreferenced(FileDescriptor oldFile,
+                                                FileDescriptor stillReferenced,
+                                                FileDescriptor replacement) {
+        if (oldFile == null || Objects.equals(oldFile, replacement)) {
+            return;
+        }
+        if (stillReferenced != null && Objects.equals(oldFile.getId(), stillReferenced.getId())) {
+            return;
+        }
+        try {
+            fileStorageService.removeFile(oldFile);
+        } catch (FileStorageException e) {
+            log.warn("Cannot remove old user avatar id={}: {}", oldFile.getId(), e.getMessage());
+        }
+    }
+
+    private void refreshProfilePhoto() {
+        ExtUser user = extUserDs.getItem();
+        userPic.setValueSource(null);
+        FileDescriptor photo = user != null ? user.resolveProfilePhoto() : null;
+        if (FileDescriptorImageHelper.fileExists(fileLoader, photo)) {
+            userPic.setVisible(true);
+            defaultPic.setVisible(false);
+            FileDescriptorImageHelper.setUserProfilePhoto(userPic, fileLoader, user);
+        } else {
+            userPic.setVisible(false);
+            defaultPic.setVisible(true);
+        }
     }
 
     private void getUserSettingsEntity(ExtUser currentUser) {
@@ -85,7 +174,6 @@ public class ExtSettingsWindow extends SettingsWindow {
         } catch (IllegalStateException e) {
             userSettings = createNewUserSetting();
             setEmailSettings();
-
         }
     }
 
@@ -186,13 +274,6 @@ public class ExtSettingsWindow extends SettingsWindow {
 
         if (pop3Password.getValue() == null)
             pop3Password.setValue(currentUser.getPop3Password());
-
-        if (userPic.getValueSource() == null) {
-            if (currentUser.getFileImageFace() != null) {
-                userPic.setSource(FileDescriptorResource.class)
-                        .setFileDescriptor(currentUser.getFileImageFace());
-            }
-        }
     }
 
     @Override
@@ -237,7 +318,6 @@ public class ExtSettingsWindow extends SettingsWindow {
 
     @Override
     protected void commit() {
-
         userSettings.setSmtpServer(smtpServer.getValue());
         userSettings.setSmtpPassword(smtpPassword.getValue());
         userSettings.setSmtpPasswordRequired(smtpPasswordRequired.getValue());
@@ -260,6 +340,9 @@ public class ExtSettingsWindow extends SettingsWindow {
                 pop3Port.getValue() : 0);
 
         dataManager.commit(userSettings);
+        if (extUserDs.getItem() != null) {
+            dataManager.commit(extUserDs.getItem());
+        }
         super.commit();
     }
 

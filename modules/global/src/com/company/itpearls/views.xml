@@ -148,6 +148,8 @@
     <view entity="itpearls_ExtUser" name="extUser-picker-view" extends="_minimal">
         <property name="name"/>
         <property name="login"/>
+        <property name="userAvatar" view="_minimal"/>
+        <property name="officialPhoto" view="_minimal"/>
         <property name="fileImageFace" view="_minimal"/>
     </view>
     <view entity="itpearls_ExtUser" name="extUser-recrutier-task-view" extends="extUser-picker-view">
@@ -1122,6 +1124,8 @@
     </view>
     <view entity="itpearls_LaborAgeementType" name="laborAgeementType-view" extends="_local"/>
     <view entity="itpearls_ExtUser" name="extUser-view" extends="_local">
+        <property name="officialPhoto" view="_local"/>
+        <property name="userAvatar" view="_local"/>
         <property name="fileImageFace" view="_local"/>
         <property name="substitutions" view="_local">
             <property name="substitutedUser" view="_local"/>
@@ -1166,6 +1170,8 @@
     <view entity="itpearls_ApplicationRecruitmentList" name="applicationRecruitmentList-view" extends="_local">
         <property name="applicationRecruitment" view="_local"/>
         <property name="recruiter" view="_local">
+            <property name="userAvatar" view="_minimal"/>
+            <property name="officialPhoto" view="_minimal"/>
             <property name="fileImageFace" view="_minimal"/>
         </property>
     </view>
@@ -1202,6 +1208,8 @@
     </view>
     <view entity="itpearls_InternalEmailer" name="internalEmailer-view" extends="_local">
         <property name="fromEmail" view="_minimal">
+            <property name="userAvatar" view="_minimal"/>
+            <property name="officialPhoto" view="_minimal"/>
             <property name="fileImageFace" view="_minimal"/>
         </property>
         <property name="toEmail" view="_minimal">

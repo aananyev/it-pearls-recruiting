@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
         class="com.haulmont.cuba.gui.app.security.user.edit.UserEditor"
+        caption="msg://extUserEdit.caption"
         messagesPack="com.company.itpearls.web.screens.extuser"
         datasource="userDs"
         focusComponent="settingsTabSheet">
@@ -22,77 +23,74 @@
             </query>
         </collectionDatasource>
     </dsContext>
-    <dialogMode height="theme://cuba.gui.dialogSize.height.xlarge"
+    <dialogMode height="850"
                 width="theme://cuba.gui.dialogSize.width.xlarge"
                 resizable="true"/>
     <layout expand="mainSplit" spacing="true">
-        <split id="mainSplit" orientation="horizontal" pos="25" width="100%" height="100%">
+        <split id="mainSplit" orientation="horizontal" pos="25" width="100%" height="100%" expand="settingsTabSheet">
             <vbox id="profilePanel"
-                  width="320px"
+                  width="100%"
+                  height="100%"
                   spacing="true"
                   margin="true"
                   stylename="well"
                   align="TOP_CENTER">
-                <label value="msg://msgProfile" stylename="h2"/>
+                <label value="msg://msgProfile" stylename="h2" align="TOP_CENTER" width="100%"/>
                 <vbox id="dropZone"
                       spacing="true"
-                      width="200px"
-                      height="220px"
+                      width="100%"
                       align="TOP_CENTER"
-                      expand="picVBox"
                       stylename="dropzone-container">
-                    <vbox id="picVBox" align="TOP_CENTER">
-                        <image id="userPic"
-                               datasource="userDs"
-                               property="fileImageFace"
-                               width="180px"
-                               height="180px"
-                               visible="true"
-                               stylename="widget-border"
-                               scaleMode="SCALE_DOWN"/>
-                        <image id="defaultPic"
-                               width="180px"
-                               height="180px"
-                               visible="false"
-                               stylename="widget-border"
-                               scaleMode="SCALE_DOWN">
-                            <theme path="icons/no-programmer.jpeg"/>
-                        </image>
-                    </vbox>
-                    <upload id="fileImageFaceUpload"
+                    <fallbackImage id="userPic"
+                                  width="180px"
+                                  height="180px"
+                                  align="MIDDLE_CENTER"
+                                  scaleMode="SCALE_DOWN"
+                                  datasource="userDs"
+                                  property="officialPhoto"/>
+                    <upload id="officialPhotoUpload"
                             fileStoragePutMode="IMMEDIATE"
                             datasource="userDs"
                             align="BOTTOM_CENTER"
                             showFileName="false"
                             dropZone="dropZone"
                             showClearButton="true"
-                            property="fileImageFace"/>
+                            property="officialPhoto"/>
                 </vbox>
-                <label id="fioLabel" stylename="h1" align="MIDDLE_CENTER" width="100%"/>
-                <label id="loginLabel" stylename="large" align="MIDDLE_CENTER" width="100%"/>
-                <label id="statusLabel" align="MIDDLE_CENTER" width="100%"/>
-                <button id="changePasswordBtn" caption="msg://msgChangePassword" stylename="friendly"/>
-                <vbox id="passwordBox" spacing="true" visible="false" width="100%">
-                    <fieldGroup id="fieldGroupLeft" datasource="userDs" width="100%">
-                        <column width="100%">
-                            <field id="passw" custom="true" caption="msg://password"/>
-                            <field id="confirmPassw" custom="true" caption="msg://confirmPassword"/>
-                        </column>
-                    </fieldGroup>
+                <vbox id="profileLabelsVBox"
+                      spacing="true"
+                      align="TOP_CENTER"
+                      width="100%">
+                    <label id="fioLabel" stylename="h1" align="MIDDLE_CENTER" width="100%"/>
+                    <label id="loginLabel" stylename="large" align="MIDDLE_CENTER" width="100%"/>
+                    <label id="statusLabel" align="MIDDLE_CENTER" width="100%"/>
                 </vbox>
             </vbox>
-            <tabSheet id="settingsTabSheet" width="100%" stylename="framed">
+            <tabSheet id="settingsTabSheet" width="100%" height="100%" stylename="framed">
                 <tab id="generalSettingsTab"
                      caption="msg://msgGeneralSettings"
                      margin="true"
                      spacing="true"
-                     expand="generalScrollBox">
-                    <scrollBox id="generalScrollBox" width="100%" height="100%" spacing="true">
+                     expand="rolesSubstSplit">
+                    <scrollBox id="generalScrollBox" width="100%" spacing="true">
+                        <vbox id="passwordBox"
+                              spacing="true"
+                              visible="false"
+                              width="100%"
+                              margin="true,true,true,true"
+                              stylename="card">
+                            <fieldGroup id="fieldGroupLeft" datasource="userDs" width="100%">
+                                <column width="100%">
+                                    <field id="passw" custom="true" caption="msg://password"/>
+                                    <field id="confirmPassw" custom="true" caption="msg://confirmPassword"/>
+                                </column>
+                            </fieldGroup>
+                        </vbox>
                         <hbox spacing="true" width="100%">
-                            <vbox spacing="true" width="300px" stylename="card">
+                            <groupBox flat="true" spacing="true" width="100%" flex="1">
                                 <label value="msg://msgContacts" stylename="h3"/>
                                 <fieldGroup id="contactsFieldGroup" datasource="userDs" width="100%">
-                                    <column width="300px">
+                                    <column width="100%">
                                         <field id="login" required="true" requiredMessage="msg://loginMsg"/>
                                         <field id="firstName"/>
                                         <field id="middleName"/>
@@ -104,11 +102,11 @@
                                         </field>
                                     </column>
                                 </fieldGroup>
-                            </vbox>
-                            <vbox spacing="true" width="300px" stylename="card">
+                            </groupBox>
+                            <groupBox flat="true" spacing="true" width="100%" flex="1">
                                 <label value="msg://msgRegional" stylename="h3"/>
                                 <fieldGroup id="fieldGroupRight" datasource="userDs" width="100%">
-                                    <column width="300px">
+                                    <column width="100%">
                                         <field id="language" custom="true"/>
                                         <field id="timeZone" custom="true"/>
                                         <field id="group" custom="true"/>
@@ -119,65 +117,72 @@
                                         <field id="dashboards"/>
                                     </column>
                                 </fieldGroup>
-                            </vbox>
+                            </groupBox>
                         </hbox>
-                        <split id="rolesSubstSplit" orientation="horizontal" pos="50" width="100%" height="250px">
-                            <vbox id="rolesPanel" expand="rolesTable" spacing="true" margin="false,true,false,false"
-                                  height="100%" width="100%">
-                                <label value="msg://roles" stylename="h3"/>
-                                <buttonsPanel>
-                                    <button id="rolesTableAddBtn"/>
-                                    <button id="rolesTableEditBtn" action="rolesTable.edit"/>
-                                    <button id="rolesTableRemoveBtn" action="rolesTable.remove"/>
-                                </buttonsPanel>
-                                <groupTable id="rolesTable" editable="false" multiselect="true" width="100%"
-                                            fixedGrouping="true">
-                                    <actions>
-                                        <action id="edit"/>
-                                        <action id="remove"/>
-                                    </actions>
-                                    <columns>
-                                        <column id="role.name" caption="msg://roleName"/>
-                                        <column id="role.locName" caption="msg://localizedRoleName"/>
-                                        <column id="role.locSecurityScope"/>
-                                    </columns>
-                                    <rows datasource="rolesDs"/>
-                                </groupTable>
-                            </vbox>
-                            <vbox id="substPanel" expand="substTable" spacing="true" margin="false,false,false,true"
-                                  height="100%" width="100%">
-                                <label value="msg://substUsers" stylename="h3"/>
-                                <buttonsPanel>
-                                    <button id="substTableAddBtn" action="substTable.add"/>
-                                    <button id="substTableEditBtn" action="substTable.edit"/>
-                                    <button id="substTableRemoveBtn" action="substTable.remove"/>
-                                </buttonsPanel>
-                                <table id="substTable" editable="false" multiselect="true" width="100%">
-                                    <actions>
-                                        <action id="add"/>
-                                        <action id="edit"/>
-                                        <action id="remove"/>
-                                    </actions>
-                                    <columns>
-                                        <column id="substitutedUser.login" caption="msg://login"/>
-                                        <column id="substitutedUser.name" caption="msg://name"/>
-                                        <column id="startDate" caption="msg://startDate">
-                                            <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter"
-                                                       type="DATE"/>
-                                        </column>
-                                        <column id="endDate" caption="msg://endDate">
-                                            <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter"
-                                                       type="DATE"/>
-                                        </column>
-                                    </columns>
-                                    <rows datasource="substitutionsDs"/>
-                                </table>
-                            </vbox>
-                        </split>
                     </scrollBox>
+                    <split id="rolesSubstSplit"
+                           orientation="horizontal"
+                           pos="50"
+                           width="100%"
+                           height="100%"
+                           expand="substPanel"
+                           margin="true,false,false,false">
+                        <vbox id="rolesPanel" expand="rolesTable" spacing="true" margin="false,true,false,false"
+                              height="100%" width="100%">
+                            <label value="msg://roles" stylename="h3"/>
+                            <buttonsPanel>
+                                <button id="rolesTableAddBtn"/>
+                                <button id="rolesTableEditBtn" action="rolesTable.edit"/>
+                                <button id="rolesTableRemoveBtn" action="rolesTable.remove"/>
+                            </buttonsPanel>
+                            <groupTable id="rolesTable" editable="false" multiselect="true" width="100%"
+                                        height="100%" fixedGrouping="true">
+                                <actions>
+                                    <action id="edit"/>
+                                    <action id="remove"/>
+                                </actions>
+                                <columns>
+                                    <column id="role.name" caption="msg://roleName"/>
+                                    <column id="role.locName" caption="msg://localizedRoleName"/>
+                                    <column id="role.locSecurityScope"/>
+                                </columns>
+                                <rows datasource="rolesDs"/>
+                            </groupTable>
+                        </vbox>
+                        <vbox id="substPanel" expand="substTable" spacing="true" margin="false,false,false,true"
+                              height="100%" width="100%">
+                            <label value="msg://substUsers" stylename="h3"/>
+                            <buttonsPanel>
+                                <button id="substTableAddBtn" action="substTable.add"/>
+                                <button id="substTableEditBtn" action="substTable.edit"/>
+                                <button id="substTableRemoveBtn" action="substTable.remove"/>
+                            </buttonsPanel>
+                            <table id="substTable" editable="false" multiselect="true" width="100%"
+                                   height="100%">
+                                <actions>
+                                    <action id="add"/>
+                                    <action id="edit"/>
+                                    <action id="remove"/>
+                                </actions>
+                                <columns>
+                                    <column id="substitutedUser.login" caption="msg://login"/>
+                                    <column id="substitutedUser.name" caption="msg://name"/>
+                                    <column id="startDate" caption="msg://startDate">
+                                        <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter"
+                                                   type="DATE"/>
+                                    </column>
+                                    <column id="endDate" caption="msg://endDate">
+                                        <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter"
+                                                   type="DATE"/>
+                                    </column>
+                                </columns>
+                                <rows datasource="substitutionsDs"/>
+                            </table>
+                        </vbox>
+                    </split>
                 </tab>
-                <tab id="emailSettingsTab" caption="msg://msgEmailSettings" margin="true" spacing="true">
-                    <scrollBox width="100%" height="100%" spacing="true">
+                <tab id="emailSettingsTab" caption="msg://msgEmailSettings" margin="true" spacing="true" expand="emailScrollBox">
+                    <scrollBox id="emailScrollBox" width="100%" height="100%" spacing="true">
                         <groupBox id="propertiesEmailBox" width="100%">
                             <grid id="propertiesEmailGrid" width="100%" spacing="true">
                                 <columns>
@@ -243,7 +248,7 @@
                         <button id="aiConfigsEditBtn" caption="msg://actions.Edit" icon="EDIT"/>
                         <button id="aiConfigsRemoveBtn" caption="msg://actions.Remove" icon="REMOVE"/>
                     </buttonsPanel>
-                    <table id="aiConfigsTable" width="100%" editable="false">
+                    <table id="aiConfigsTable" width="100%" height="100%" editable="false">
                         <columns>
                             <column id="providerCode"/>
                             <column id="defaultModelName"/>
@@ -254,6 +259,10 @@
                 </tab>
             </tabSheet>
         </split>
-        <fragment id="windowActions" align="MIDDLE_RIGHT" screen="editWindowActions"/>
+        <hbox id="bottomActionsBox" width="100%" spacing="true" align="BOTTOM_RIGHT">
+            <button id="changePasswordBtn" caption="msg://msgChangePassword" icon="KEY" stylename="friendly"/>
+            <label value="" expand="true"/>
+            <fragment id="windowActions" screen="editWindowActions"/>
+        </hbox>
     </layout>
 </window>

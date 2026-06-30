@@ -1,6 +1,7 @@
 # FallbackImage — кастомный UI-компонент HRM HuntTech
 
-> Краткая UI-заметка: [FallbackImage_Component.md](../ui/FallbackImage_Component.md)
+> Краткая UI-заметка: [FallbackImage_Component.md](../ui/FallbackImage_Component.md)  
+> См. также: [OvalImage](../ui-components/OvalImage.md) — круглый аватар (`extends Image`)
 
 ---
 

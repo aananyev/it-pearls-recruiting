@@ -46,10 +46,12 @@
 | Компонент | property | caption key | description key |
 |-----------|----------|-------------|-------------------|
 | codeField | code | (entity) | `VacancyPromptTemplate.code.description` |
-| nameField | name | (entity) | `VacancyPromptTemplate.name.description` |
+| nameField | name | `templateName.caption` | `templateNameDescription` |
 | temperatureField | temperature | (entity) | `VacancyPromptTemplate.temperature.description` |
-| systemContextField | systemContext | `systemContext.caption` | `systemContext.description` |
-| promptTextField | promptText | `promptText.caption` | `promptText.description` |
+| systemContextField | systemContext | `aiRole.caption` | `aiRoleDescription` |
+| promptTextField | promptText | `mainTask.caption` | `mainTaskDescription` |
+
+Ключи `constraintsDescription`, `outputFormatDescription`, `exampleDescription` зарезервированы в `messages*.properties` пакета экрана для будущих полей формы; в текущей модели `VacancyPromptTemplate` соответствующих атрибутов нет.
 
 ---
 
@@ -78,12 +80,12 @@
 
 ## 6. Визуальная компоновка элементов (Visual Layout Schema)
 
-- Верхняя `form` (3 колонки): code, name, temperature — у каждого поля атрибут `description="msg://VacancyPromptTemplate.*.description"`; подсказка температуры — многострочная с тремя диапазонами (точность / баланс / креативность)
-- `systemContextField`: textArea, caption `systemContext.caption`, description `systemContext.description`, width 100%, height 120px, rows 5
-- `promptTextField`: textArea, caption `promptText.caption`, description `promptText.description`, width 100%, rows 15, expand layout
+- Верхняя `form` (3 колонки): code, name, temperature — у `codeField` и `temperatureField` атрибуты `description="msg://VacancyPromptTemplate.*.description"`; у `nameField` — caption `templateName.caption`, description `templateNameDescription`
+- `systemContextField`: textArea, caption `aiRole.caption`, description `aiRoleDescription`, width 100%, height 120px, rows 5
+- `promptTextField`: textArea, caption `mainTask.caption`, description `mainTaskDescription`, width 100%, rows 15, expand layout
 - `editActions`: commit / close
 
-Локализация подсказок: `messages.properties` / `messages_ru.properties` пакета экрана (`com.company.itpearls.web.screens.vacancyprompttemplate`).
+Подсказки полей формулированы на понятном для пользователей языке (без технического жаргона). Локализация: `messages.properties` / `messages_ru.properties` пакета экрана (`com.company.itpearls.web.screens.vacancyprompttemplate`).
 
 ---
 
@@ -91,6 +93,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-29 | Добавлены стандартные всплывающие подсказки (description) для полей формы на понятном для пользователей языке. |
 | 2026-06-28 | `systemContextField` / `promptTextField`: отдельные caption и description (`systemContext.*`, `promptText.*`) вместо entity-ключей |
 | 2026-06-28 | Многострочная подсказка `temperatureField`: диапазоны 0.0–0.3 / 0.4–0.7 / 0.8–1.0 с примерами использования (RU/EN) |
 | 2026-06-28 | Контекстные description для всех полей edit-формы (RU/EN) |

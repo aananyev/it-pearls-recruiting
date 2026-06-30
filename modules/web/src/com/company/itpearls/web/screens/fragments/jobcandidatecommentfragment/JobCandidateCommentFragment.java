@@ -7,7 +7,9 @@ import com.company.itpearls.entity.Iteraction;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.web.JobCandidateCommentEvent;
+import com.company.itpearls.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
@@ -71,6 +73,8 @@ public class JobCandidateCommentFragment extends ScreenFragment {
     private Label<String> starLabel;
     @Inject
     private StarsAndOtherService starsAndOtherService;
+    @Inject
+    private FileLoader fileLoader;
 
     public IteractionList getIteractionList() {
         return iteractionList;
@@ -105,13 +109,9 @@ public class JobCandidateCommentFragment extends ScreenFragment {
                 dateLabel.setValue(iteractionList.getDateIteraction().toString());
             }
 
-            if (iteractionList.getRecrutier().getFileImageFace() != null) {
-                imageLeft.setSource(FileDescriptorResource.class).setFileDescriptor(iteractionList.getRecrutier().getFileImageFace());
-                imageRight.setSource(FileDescriptorResource.class).setFileDescriptor(iteractionList.getRecrutier().getFileImageFace());
-            } else {
-                imageLeft.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-                imageRight.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-            }
+            ExtUser recruiter = (ExtUser) iteractionList.getRecrutier();
+            FileDescriptorImageHelper.setUserProfilePhoto(imageLeft, fileLoader, recruiter);
+            FileDescriptorImageHelper.setUserProfilePhoto(imageRight, fileLoader, recruiter);
 
             if (userSession.getUser().equals(iteractionList.getRecrutier())) {
                 imageLeft.setVisible(true);

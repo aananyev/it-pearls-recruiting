@@ -1,5 +1,6 @@
 package com.company.itpearls.web.util;
 
+import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.StdPictures;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.FileLoader;
@@ -12,6 +13,8 @@ import com.haulmont.cuba.gui.components.Resource;
 import com.haulmont.cuba.gui.components.ThemeResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 
 /**
  * Safe loading of {@link FileDescriptor} images in UI: checks physical file presence
@@ -41,16 +44,43 @@ public final class FileDescriptorImageHelper {
     public static void setImageSource(Image image, FileLoader fileLoader,
                                       FileDescriptor fileDescriptor, String fallbackThemePath) {
         image.setValueSource(null);
-        if (fileExists(fileLoader, fileDescriptor)) {
+        if (fileDescriptor != null && fileExists(fileLoader, fileDescriptor)) {
+            if (isSameFileDescriptorSource(image, fileDescriptor)) {
+                return;
+            }
             image.setSource(FileDescriptorResource.class).setFileDescriptor(fileDescriptor);
         } else {
+            if (isSameThemeSource(image, fallbackThemePath)) {
+                return;
+            }
             logMissingFile(fileDescriptor);
             image.setSource(ThemeResource.class).setPath(fallbackThemePath);
         }
     }
 
+    private static boolean isSameFileDescriptorSource(Image image, FileDescriptor fileDescriptor) {
+        Resource source = image.getSource();
+        if (!(source instanceof FileDescriptorResource)) {
+            return false;
+        }
+        FileDescriptor current = ((FileDescriptorResource) source).getFileDescriptor();
+        return current != null && fileDescriptor != null
+                && Objects.equals(current.getId(), fileDescriptor.getId());
+    }
+
+    private static boolean isSameThemeSource(Image image, String themePath) {
+        Resource source = image.getSource();
+        return source instanceof ThemeResource
+                && Objects.equals(themePath, ((ThemeResource) source).getPath());
+    }
+
     public static void setCandidateFace(Image image, FileLoader fileLoader, FileDescriptor fileDescriptor) {
         setImageSource(image, fileLoader, fileDescriptor, StdPictures.NO_CANDIDATE.getId());
+    }
+
+    public static void setUserProfilePhoto(Image image, FileLoader fileLoader, ExtUser user) {
+        FileDescriptor photo = user != null ? user.resolveProfilePhoto() : null;
+        setImageSource(image, fileLoader, photo, StdPictures.NO_CANDIDATE.getId());
     }
 
     public static void setCompanyLogo(Image image, FileLoader fileLoader, FileDescriptor fileDescriptor) {

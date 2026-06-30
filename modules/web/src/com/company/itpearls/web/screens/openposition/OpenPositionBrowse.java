@@ -14,6 +14,7 @@ import com.company.itpearls.web.screens.recrutiestasks.RecrutiesTasksGroupSubscr
 import com.company.itpearls.web.screens.hrmasters.suggestjobcandidates.Suggestjobcandidate;
 import com.company.itpearls.web.screens.simplebrowsers.JobCandidateSimpleBrowse;
 import com.company.itpearls.web.screens.simplebrowsers.JobCandidateSimpleMailBrowse;
+import com.company.itpearls.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
@@ -106,6 +107,16 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             .add("openPosition", op -> op.add("id"))
             .add("reacrutier", recruiter -> recruiter
                     .add("name")
+                    .add("userAvatar", file -> file
+                            .add("name")
+                            .add("extension")
+                            .add("size")
+                            .add("createDate"))
+                    .add("officialPhoto", file -> file
+                            .add("name")
+                            .add("extension")
+                            .add("size")
+                            .add("createDate"))
                     .add("fileImageFace", file -> file
                             .add("name")
                             .add("extension")
@@ -134,6 +145,8 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private TelegramService telegramService;
     @Inject
     private ApplicationSetupService applicationSetupService;
+    @Inject
+    private FileLoader fileLoader;
 
     @Install(to = "openPositionsTable.projectLogoColumn", subject = "columnGenerator")
     private Object openPositionsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
@@ -3892,8 +3905,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
             try {
                 ExtUser extUser = (ExtUser) user.getReacrutier();
-                image.setSource(FileDescriptorResource.class)
-                        .setFileDescriptor(extUser.getFileImageFace());
+                FileDescriptorImageHelper.setUserProfilePhoto(image, fileLoader, extUser);
             } catch (Exception e) {
                 e.printStackTrace();
             }

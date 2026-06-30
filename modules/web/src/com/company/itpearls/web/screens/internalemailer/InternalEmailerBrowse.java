@@ -347,8 +347,8 @@ public class InternalEmailerBrowse extends StandardLookup<InternalEmailer> {
 
     @Install(to = "emailersTable.fromEmail", subject = "columnGenerator")
     private Component emailersTableFromEmailColumnGenerator(DataGrid.ColumnGeneratorEvent<InternalEmailer> event) {
-        if (event.getItem().getFromEmail().getFileImageFace() != null) {
-            return generateImageWithLabel(event.getItem().getFromEmail().getFileImageFace(),
+        if (event.getItem().getFromEmail().resolveProfilePhoto() != null) {
+            return generateImageWithLabel(event.getItem().getFromEmail().resolveProfilePhoto(),
                     event.getItem().getFromEmail().getName());
         } else {
             return generateImageWithLabel(null, event.getItem().getFromEmail().getName());

@@ -3,5 +3,5 @@
        xmlns:context="http://www.springframework.org/schema/context">
 
     <!-- Annotation-based beans -->
-    <context:component-scan base-package="com.company.itpearls"/>
+    <context:component-scan base-package="com.company.itpearls,com.company.hunttech"/>
 </beans>

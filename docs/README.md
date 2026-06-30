@@ -26,6 +26,8 @@ docs/
 │   └── ImageProcessingService.md  ← сжатие/масштабирование фото профиля
 ├── components/
 │   └── FallbackImage.md           ← UI-компонент placeholder для image
+├── ui-components/
+│   └── OvalImage.md               ← круглый аватар (extends Image)
 └── entities/
     ├── IteractionList.md      ← взаимодействие с кандидатом
     ├── Iteraction.md         ← тип взаимодействия с кандидатом (образец)
@@ -82,6 +84,7 @@ docs/
 | Понять подсистему вакансий | [entities/OpenPosition.md](entities/OpenPosition.md) · [architecture/OpenPosition_Spec.md](architecture/OpenPosition_Spec.md) · UI: [каталог](ui/README.md#openposition) |
 | Обработка фото профиля (сжатие, лимиты) | [services/ImageProcessingService.md](services/ImageProcessingService.md) · [entities/ExtUser.md](entities/ExtUser.md) |
 | UI-компонент FallbackImage (placeholder для image) | [components/FallbackImage.md](components/FallbackImage.md) · [ui/FallbackImage_Component.md](ui/FallbackImage_Component.md) |
+| UI-компонент OvalImage (круглый аватар) | [ui-components/OvalImage.md](ui-components/OvalImage.md) |
 | Каталог всех UI Spec | [ui/README.md](ui/README.md) (47 форм) |
 
 ---

@@ -1,0 +1,36 @@
+---
+description: Definition of Done для Java-сервисов HRM HuntTech — автотесты, документация, прогон перед deploy
+alwaysApply: true
+---
+
+# Java-сервисы: автотесты и документация (DoD)
+
+При **создании или изменении** любого Java-сервиса в проекте HRM HuntTech (`*Service.java`, `*ServiceBean.java` в `modules/global`, `modules/core` и др.):
+
+## 1. Автотесты (обязательно)
+
+- Добавить или обновить тесты в `modules/core/test/` (unit или integration — по паттерну существующих тестов).
+- Покрыть основные сценарии: happy path, граничные условия, ошибки/исключения.
+- **Перед deploy/start** прогнать тесты затронутого модуля, например:
+  ```bash
+  export JAVA_HOME=$(/usr/libexec/java_home -v 11)
+  ./gradlew :app-core:test --tests "com.company.itpearls.app.*" --no-daemon
+  ```
+- Не считать задачу завершённой, если тесты не прошли (исправить код или тесты).
+
+## 2. Документация (обязательно)
+
+Следовать [living-documentation.mdc](living-documentation.mdc) и [documentation-with-dates.mdc](documentation-with-dates.mdc):
+
+- Создать или обновить `docs/services/{ServiceName}.md` (или раздел в связанной entity/UI-спецификации).
+- Блок **«Бизнес-контекст»** в начале; затем API, конфигурация, точки интеграции.
+- Запись в **«История изменений»** — первая строка таблицы, дата `YYYY-MM-DD`.
+- Брендинг в prose: **HRM HuntTech** (legacy `itpearls` только в идентификаторах кода).
+- Ссылка в `docs/README.md` при новом файле.
+
+## 3. Порядок работ
+
+1. Реализация сервиса  
+2. Автотесты + прогон  
+3. Документация  
+4. `compileJava` / deploy — только после зелёных тестов

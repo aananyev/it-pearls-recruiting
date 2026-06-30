@@ -87,7 +87,7 @@ preventAutoLoadUntilReady(personPositionsLc, () -> referenceLoadersInitialized);
 | Категория | Bean / компонент |
 |-----------|------------------|
 | **Сервисы** | `DataManager`, `Metadata`, `UserSession`, `UserSessionSource`, `InteractionService`, `GetRoleService`, `ParseCVService`, `PdfParserService`, `StarsAndOtherService`, `ResumeRecognitionService`, `OpenPositionService` |
-| **UI framework** | `ScreenBuilders`, `Screens`, `Fragments`, `Dialogs`, `Notifications`, `UiComponents`, `WebBrowserTools`, `BackgroundWorker`, `MessageBundle` |
+| **UI framework** | `ScreenBuilders`, `Screens`, `Fragments`, `Dialogs`, `Notifications`, `UiComponents`, `WebBrowserTools`, `MessageBundle` |
 | **Data** | `DataContext`, `jobCandidateDc`/`jobCandidateDl`, collection containers (`jobCandidateCandidateCvsDc`, `jobCandidateIteractionDc`, `jobCandidateSocialNetworksDc`), loaders (`lastProjectDl`, `openPositionDl`, `suggestOpenPositionDl`, `interactionCommentDl`, `currentCompaniesLc`, `citiesDl`, `personPositionsLc`) |
 
 ### `dataManager.load` / `loadValue` (активные вызовы)
@@ -99,7 +99,7 @@ preventAutoLoadUntilReady(personPositionsLc, () -> referenceLoadersInitialized);
 | `initSocialNeiworkTable` | все `SocialNetworkType` | `socialNetworkType-view` |
 | `addMissingSocialNetworksListsInvoke` | все `SocialNetworkType` | default |
 | `getSocialNetworkType` | match host + fallback `Other` | `socialNetworkType-view` |
-| `addFirst/Second/MiddleNameSuggestField` | distinct ФИО | `String` |
+| `setupNameSearchExecutors` (вкладка `tabCandidate`) | distinct `firstName` / `secondName` / `middleName` по LIKE при вводе | `String` |
 | `numBerIteractionForNewEntity` | count по candidate[+vacancy] | `BigDecimal` |
 | `copyCVJobCandidate` | последний CV кандидата | `candidateCV-view` |
 | `createComment` | `Iteraction` с `signComment=true`; `max(numberIteraction)` | `Iteraction` |
@@ -176,11 +176,11 @@ flowchart TD
 
 | Этап | Что происходит | Кнопки / роли |
 |------|----------------|---------------|
-| Инициализация | Блокировка ранней загрузки справочников (города, компании, должности, вакансии для комментариев); подписка на смену вкладок → ленивая инициализация каждой вкладки | — |
+| Инициализация | `tabSheetSocialNetworks` с `lazy="true"`; блокировка ранней загрузки справочников; подписка на смену вкладок → ленивая инициализация каждой вкладки; `initTabCandidate()` сразу выходит, если выбрана не вкладка `tabCandidate` | — |
 | Перед показом | Загрузка ленты комментариев; для нового — status=0; рейтинг, навыки из последнего CV, подсказки вакансий, таблица lastProject; кнопка блокировки видна только Manager/Administrator | `blockCandidateButton` — Manager/Admin |
 | После показа | Процент заполнения карточки (14 полей); состояние кнопки блокировки | — |
 | Смена записи в dataContext | Пересчёт fullName и процента заполнения | — |
-| Первая вкладка «Кандидат» | Загрузка справочников; подсказки ФИО из БД; сброс должности «(не использовать)» | — |
+| Первая вкладка «Кандидат» | Загрузка справочников (`cacheable="true"`); `SearchExecutor` на полях ФИО (JPQL LIKE по вводу, без предзагрузки всего списка); сброс должности «(не использовать)» | — |
 | Первая вкладка «Контакты» | Слушатели контактов → снятие required если хоть один заполнен; radio приоритета связи; для нового — автостроки соцсетей | — |
 | Первая вкладка «Взаимодействия» | Генераторы колонок, кнопки копирования и популярных типов; грид disabled при blockCandidate (кроме Manager/Admin) | — |
 | Первая вкладка «Резюме» | Генераторы CV-таблицы, scan/skills | `copyCVButton` disabled до выбора строки |
@@ -208,7 +208,8 @@ flowchart TD
 | Перед сохранением | Любой | ё→е в ФИО; fullName; telegram без @ и без http://t.me/ |
 | Перед сохранением | Новый | Автовзаимодействие «Новый контакт», rating=4, vacancy Default; ошибка если нет типа или Default |
 | После редактирования соцсети в гриде | EditorPostCommit | Пересчёт required контактов |
-| Комментарий в чате | createComment | Немедленный commit через dataContext + reload взаимодействий |
+| Комментарий в чате | createComment | Для существующего кандидата — `dataContext.commit()` + reload; для NEW — только repaint (commit при OK) |
+| addPositionList / reloadCV / reloadInteractions | NEW кандидат | Только `dataContext.merge` и repaint; без промежуточного commit (избегает `itpearls_job_candidate_pkey`) |
 
 ---
 
@@ -245,7 +246,7 @@ layout (expand=tabSheetSocialNetworks)
 ├── groupBox msgOptions (collapsable, light)
 │   ├── grid: рейтинг | должность | город | CV | quality%
 │   └── grid: email, phone, mobile, skype, telegram (labels)
-├── tabSheet tabSheetSocialNetworks (framed)
+├── tabSheet tabSheetSocialNetworks (framed, lazy="true")
 │   ├── tab jobCandidateCard (ID_CARD): cardBox + dropZone(photo upload) + skillBox + lastProjects
 │   ├── tab tabCandidate (BOMB): ФИО, компания, должность, город, дата рождения
 │   ├── tab tabContactInfo (USER): контакты + priorityContact radio + socialNetworkTable
@@ -259,13 +260,20 @@ layout (expand=tabSheetSocialNetworks)
 
 **Required поля (XML):** `firstName`, `currentCompany`, `personPosition`, `cityOfResidence`, контакты на вкладке Contact Info, `priorityContact`.
 
+### Производительность (вкладка `tabCandidate`)
+
+- **`lazy="true"`** на `tabSheetSocialNetworks` — содержимое неактивных вкладок не строится до первого выбора.
+- **`initTabCandidate()`** — проверка `selectedTab.getName() == "tabCandidate"` в начале метода; при смене на другие вкладки справочники и поля ФИО не инициализируются.
+- **Подсказки ФИО** — `setupNameSearchExecutors()` вызывается только при первом открытии `tabCandidate`; `SuggestionField.setSearchExecutor` выполняет узкий JPQL `LIKE` по введённой строке вместо блокирующей предзагрузки всех distinct-имён через `BackgroundTask`.
+
 ---
 
 ## История изменений
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-06-26 | §4–5: поведение из Java простым языком (deep modernization) |
+| 2026-06-29 | Оптимизация скорости открытия вкладки tabCandidate, ленивая инициализация SuggestionFields, устранение блокирующих BackgroundTask |
+| 2026-06-29 | fix: убран промежуточный `dataContext.commit()` для NEW в `addPositionList`, `reloadCV`, `reloadInteractions`; флаг `initialInteractionAdded` |
 | 2026-06-26 | Полный разбор `JobCandidateEdit.java`: @Subscribe lifecycle, inject, validation, deferred loaders, соцсети, block/subscribe, generators, dialogs, Data View Integrity для `iteractionList.vacancy` BATCH |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первичная UI Spec из `job-candidate-edit.xml` и `JobCandidateEdit.java` |

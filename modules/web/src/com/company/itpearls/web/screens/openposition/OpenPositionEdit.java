@@ -799,8 +799,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             Image image = uiComponents.create(Image.class);
 
             if (iteractionList.getRecrutier() != null) {
-                FileDescriptorImageHelper.setCandidateFace(image, fileLoader,
-                        ((ExtUser) iteractionList.getRecrutier()).getFileImageFace());
+                FileDescriptorImageHelper.setUserProfilePhoto(image, fileLoader,
+                        (ExtUser) iteractionList.getRecrutier());
             } else {
                 image.setSource(ThemeResource.class)
                         .setPath("icons/no-programmer.jpeg");
@@ -942,8 +942,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             Image image = uiComponents.create(Image.class);
 
             if (openPositionComment.getUser() != null) {
-                FileDescriptorImageHelper.setCandidateFace(image, fileLoader,
-                        ((ExtUser) openPositionComment.getUser()).getFileImageFace());
+                FileDescriptorImageHelper.setUserProfilePhoto(image, fileLoader,
+                        (ExtUser) openPositionComment.getUser());
             } else {
                 image.setSource(ThemeResource.class)
                         .setPath("icons/no-programmer.jpeg");

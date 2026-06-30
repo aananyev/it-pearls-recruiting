@@ -18,18 +18,7 @@
             </loader>
         </instance>
     </data>
-    <layout width="100%"
-            height="100%">
-        <hbox width="100%"
-              height="100%"
-              spacing="true">
-            <image id="myPhotoImage"
-                   align="BOTTOM_LEFT"
-                   scaleMode="SCALE_DOWN"
-                   stylename="round-photo-150px"
-                   width="100%"
-                   height="AUTO"/>
-
-        </hbox>
+    <layout width="100%" height="100%">
+        <hbox id="photoHBox" width="100%" height="100%" spacing="true"/>
     </layout>
 </fragment>

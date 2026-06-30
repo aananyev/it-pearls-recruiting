@@ -4,7 +4,7 @@
        xmlns:gui="http://schemas.haulmont.com/cuba/spring/cuba-gui.xsd">
 
     <!-- Annotation-based beans -->
-    <context:component-scan base-package="com.company.itpearls"/>
+    <context:component-scan base-package="com.company.itpearls,com.company.hunttech,com.hunttech.hrm"/>
 
     <gui:screens base-packages="com.company.itpearls.web"/>
     <bean id="itpearls_proxyCreator" class="com.haulmont.cuba.web.sys.remoting.WebRemoteProxyBeanCreator">

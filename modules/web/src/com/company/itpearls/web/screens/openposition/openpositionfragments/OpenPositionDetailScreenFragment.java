@@ -26,6 +26,16 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
     private static final View SUBSCRIBERS_TASKS_VIEW = ViewBuilder.of(RecrutiesTasks.class)
             .add("reacrutier", recruiter -> recruiter
                     .add("name")
+                    .add("userAvatar", file -> file
+                            .add("name")
+                            .add("extension")
+                            .add("size")
+                            .add("createDate"))
+                    .add("officialPhoto", file -> file
+                            .add("name")
+                            .add("extension")
+                            .add("size")
+                            .add("createDate"))
                     .add("fileImageFace", file -> file
                             .add("name")
                             .add("extension")
@@ -156,8 +166,8 @@ public class OpenPositionDetailScreenFragment extends ScreenFragment {
         image.setStyleName("circle-30px");
         image.setDescription(recruiter.getName());
 
-        if (recruiter.getFileImageFace() != null) {
-            FileDescriptorImageHelper.setCandidateFace(image, fileLoader, recruiter.getFileImageFace());
+        if (recruiter.resolveProfilePhoto() != null) {
+            FileDescriptorImageHelper.setUserProfilePhoto(image, fileLoader, recruiter);
         } else {
             image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         }

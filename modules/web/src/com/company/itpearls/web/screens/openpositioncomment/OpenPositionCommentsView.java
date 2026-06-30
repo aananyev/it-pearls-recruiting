@@ -6,7 +6,9 @@ import com.company.itpearls.entity.ExtUser;
 import com.company.itpearls.entity.IteractionList;
 import com.company.itpearls.entity.OpenPosition;
 import com.company.itpearls.entity.OpenPositionComment;
+import com.company.itpearls.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.Events;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Dialogs;
@@ -44,6 +46,8 @@ public class OpenPositionCommentsView extends Screen {
     private Events events;
     @Inject
     private Metadata metadata;
+    @Inject
+    private FileLoader fileLoader;
     @Inject
     private Notifications notifications;
     @Inject
@@ -155,13 +159,8 @@ public class OpenPositionCommentsView extends Screen {
             Image image = uiComponents.create(Image.class);
 
             if (iteractionList.getRecrutier() != null) {
-                if (((ExtUser) iteractionList.getRecrutier()).getFileImageFace() != null) {
-                    image.setSource(FileDescriptorResource.class)
-                            .setFileDescriptor(((ExtUser) iteractionList.getRecrutier()).getFileImageFace());
-                } else {
-                    image.setSource(ThemeResource.class)
-                            .setPath("icons/no-programmer.jpeg");
-                }
+                FileDescriptorImageHelper.setUserProfilePhoto(image, fileLoader,
+                        (ExtUser) iteractionList.getRecrutier());
             } else {
                 image.setSource(ThemeResource.class)
                         .setPath("icons/no-programmer.jpeg");
@@ -304,13 +303,8 @@ public class OpenPositionCommentsView extends Screen {
             Image image = uiComponents.create(Image.class);
 
             if (openPositionComment.getUser() != null) {
-                if (((ExtUser) openPositionComment.getUser()).getFileImageFace() != null) {
-                    image.setSource(FileDescriptorResource.class)
-                            .setFileDescriptor(((ExtUser) openPositionComment.getUser()).getFileImageFace());
-                } else {
-                    image.setSource(ThemeResource.class)
-                            .setPath("icons/no-programmer.jpeg");
-                }
+                FileDescriptorImageHelper.setUserProfilePhoto(image, fileLoader,
+                        (ExtUser) openPositionComment.getUser());
             } else {
                 image.setSource(ThemeResource.class)
                         .setPath("icons/no-programmer.jpeg");
