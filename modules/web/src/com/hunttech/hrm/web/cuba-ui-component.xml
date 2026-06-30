@@ -10,4 +10,9 @@
         <class>com.company.hunttech.web.gui.components.WebOvalImage</class>
         <componentLoader>com.company.hunttech.web.gui.xml.layout.loaders.OvalImageLoader</componentLoader>
     </component>
+    <component>
+        <name>ovaFallbackImage</name>
+        <class>com.hunttech.hrm.web.components.WebOvaFallbackImage</class>
+        <componentLoader>com.hunttech.hrm.web.loaders.OvaFallbackImageLoader</componentLoader>
+    </component>
 </components>

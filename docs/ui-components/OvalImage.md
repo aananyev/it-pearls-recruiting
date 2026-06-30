@@ -1,6 +1,6 @@
 # OvalImage — кастомный UI-компонент HRM HuntTech
 
-> См. также: [FallbackImage](../components/FallbackImage.md) — placeholder для пустого `image`; компоненты часто используются вместе для аватаров и фото профиля.
+> См. также: [FallbackImage](../components/FallbackImage.md) — placeholder для пустого `image`; [OvaFallbackImage](OvaFallbackImage.md) — **объединённый** компонент (круг + fallback в одном теге).
 
 ---
 
@@ -10,6 +10,7 @@
 |------|-----------|
 | 2026-06-29 | Первоначальная документация компонента в `docs/ui-components/OvalImage.md` |
 | 2026-06-29 | Реализация `OvalImage` / `WebOvalImage` / `OvalImageLoader`; стили `.ht-oval-image` в темах hover и halo |
+| 2026-06-30 | Cross-link на объединённый компонент [OvaFallbackImage](OvaFallbackImage.md) |
 
 ---
 
@@ -163,5 +164,6 @@ webUiComponents.register(OvalImage.NAME, WebOvalImage.class);
 ## См. также
 
 - [FallbackImage](../components/FallbackImage.md) — placeholder при пустом `FileDescriptor`
+- [OvaFallbackImage](OvaFallbackImage.md) — круг + fallback в одном компоненте
 - [ImageProcessingService](../services/ImageProcessingService.md) — сжатие и лимиты фото профиля
 - [ExtUser](../entities/ExtUser.md) — поле `officialPhoto`, экраны с аватарами

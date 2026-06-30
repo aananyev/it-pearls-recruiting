@@ -27,7 +27,8 @@ docs/
 ├── components/
 │   └── FallbackImage.md           ← UI-компонент placeholder для image
 ├── ui-components/
-│   └── OvalImage.md               ← круглый аватар (extends Image)
+│   ├── OvalImage.md               ← круглый аватар (extends Image)
+│   └── OvaFallbackImage.md        ← круг + fallback (OvalImage + FallbackImage)
 └── entities/
     ├── IteractionList.md      ← взаимодействие с кандидатом
     ├── Iteraction.md         ← тип взаимодействия с кандидатом (образец)
@@ -85,6 +86,7 @@ docs/
 | Обработка фото профиля (сжатие, лимиты) | [services/ImageProcessingService.md](services/ImageProcessingService.md) · [entities/ExtUser.md](entities/ExtUser.md) |
 | UI-компонент FallbackImage (placeholder для image) | [components/FallbackImage.md](components/FallbackImage.md) · [ui/FallbackImage_Component.md](ui/FallbackImage_Component.md) |
 | UI-компонент OvalImage (круглый аватар) | [ui-components/OvalImage.md](ui-components/OvalImage.md) |
+| UI-компонент OvaFallbackImage (круг + placeholder) | [ui-components/OvaFallbackImage.md](ui-components/OvaFallbackImage.md) |
 | Каталог всех UI Spec | [ui/README.md](ui/README.md) (47 форм) |
 
 ---
