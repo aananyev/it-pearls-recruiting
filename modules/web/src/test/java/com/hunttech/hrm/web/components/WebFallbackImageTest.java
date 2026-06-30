@@ -5,6 +5,8 @@ import com.haulmont.cuba.core.config.Config;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.core.global.Configuration;
+import com.haulmont.cuba.core.global.FileLoader;
+import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.gui.components.FileDescriptorResource;
 import com.haulmont.cuba.gui.components.Resource;
 import com.haulmont.cuba.gui.components.ThemeResource;
@@ -53,6 +55,30 @@ public class WebFallbackImageTest {
     }
 
     @Test
+    public void applyFallback_withoutValueSource_updatesFallbackResource() throws Exception {
+        TrackingWebFallbackImage image = new TrackingWebFallbackImage();
+        image.setFallbackThemePath(LOCAL_FALLBACK_PATH);
+
+        image.applyFallback();
+
+        assertNotNull(image.lastUpdateValue);
+        assertTrue(image.lastUpdateValue instanceof ThemeResource);
+        assertEquals(LOCAL_FALLBACK_PATH, ((ThemeResource) image.lastUpdateValue).getPath());
+    }
+
+    @Test
+    public void updateComponent_withoutValueSourceAndNoPrimarySource_usesFallbackResource() throws Exception {
+        TrackingWebFallbackImage image = new TrackingWebFallbackImage();
+        image.setFallbackThemePath(LOCAL_FALLBACK_PATH);
+
+        invokeUpdateComponent(image);
+
+        assertNotNull(image.lastUpdateValue);
+        assertTrue(image.lastUpdateValue instanceof ThemeResource);
+        assertEquals(LOCAL_FALLBACK_PATH, ((ThemeResource) image.lastUpdateValue).getPath());
+    }
+
+    @Test
     public void updateComponent_withNullValue_usesFallbackResource() throws Exception {
         TrackingWebFallbackImage image = new TrackingWebFallbackImage();
         image.setFallbackThemePath(LOCAL_FALLBACK_PATH);
@@ -79,6 +105,7 @@ public class WebFallbackImageTest {
         ValueSource<FileDescriptor> valueSource = mock(ValueSource.class);
         when(valueSource.getValue()).thenReturn(fileDescriptor);
         setValueSource(image, valueSource);
+        setBeanLocator(image, beanLocatorWithFileLoader(true));
 
         invokeUpdateComponent(image);
 
@@ -100,6 +127,25 @@ public class WebFallbackImageTest {
         assertNull(image.lastUpdateValue);
     }
 
+    @Test
+    public void updateComponent_withMissingFileDescriptor_usesFallbackResource() throws Exception {
+        TrackingWebFallbackImage image = new TrackingWebFallbackImage();
+        image.setFallbackThemePath(LOCAL_FALLBACK_PATH);
+
+        FileDescriptor fileDescriptor = new FileDescriptor();
+        @SuppressWarnings("unchecked")
+        ValueSource<FileDescriptor> valueSource = mock(ValueSource.class);
+        when(valueSource.getValue()).thenReturn(fileDescriptor);
+        setValueSource(image, valueSource);
+        setBeanLocator(image, beanLocatorWithFileLoader(false));
+
+        invokeUpdateComponent(image);
+
+        assertNotNull(image.lastUpdateValue);
+        assertTrue(image.lastUpdateValue instanceof ThemeResource);
+        assertEquals(LOCAL_FALLBACK_PATH, ((ThemeResource) image.lastUpdateValue).getPath());
+    }
+
     private static BeanLocator beanLocatorWithFallbackPath(String fallbackPath) {
         HunttechImageConfig config = new StubHunttechImageConfig(fallbackPath);
         Configuration configuration = new Configuration() {
@@ -114,6 +160,14 @@ public class WebFallbackImageTest {
         };
         BeanLocator beanLocator = mock(BeanLocator.class);
         when(beanLocator.get(Configuration.class)).thenReturn(configuration);
+        return beanLocator;
+    }
+
+    private static BeanLocator beanLocatorWithFileLoader(boolean fileExists) throws FileStorageException {
+        FileLoader fileLoader = mock(FileLoader.class);
+        when(fileLoader.fileExists(org.mockito.ArgumentMatchers.any(FileDescriptor.class))).thenReturn(fileExists);
+        BeanLocator beanLocator = mock(BeanLocator.class);
+        when(beanLocator.get(FileLoader.class)).thenReturn(fileLoader);
         return beanLocator;
     }
 

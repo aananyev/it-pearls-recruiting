@@ -5,6 +5,7 @@ import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.gui.components.Resource;
 import com.haulmont.cuba.gui.components.data.ValueSource;
 import com.haulmont.cuba.web.gui.components.WebImage;
+import com.haulmont.cuba.web.widgets.CubaImage;
 import com.hunttech.hrm.gui.components.OvaFallbackImage;
 import com.hunttech.hrm.web.components.delegate.FallbackImageHost;
 import com.hunttech.hrm.web.components.delegate.FallbackImageResourceDelegate;
@@ -24,6 +25,11 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
         super();
         this.ovalDelegate = new OvalImageShapeDelegate(this);
         this.fallbackDelegate = new FallbackImageResourceDelegate(this);
+    }
+
+    @Override
+    protected void initComponent(CubaImage image) {
+        super.initComponent(image);
         ovalDelegate.applyOvalStyle();
     }
 
@@ -85,6 +91,14 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
     @Override
     public void setFallbackThemePath(String path) {
         fallbackDelegate.setFallbackThemePath(path);
+    }
+
+    @Override
+    public void applyFallback() {
+        Resource fallback = fallbackDelegate.getFallbackResource();
+        if (fallback != null) {
+            updateValue(fallback);
+        }
     }
 
     @Override

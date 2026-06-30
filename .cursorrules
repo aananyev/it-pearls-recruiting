@@ -1,7 +1,7 @@
 # HRM HuntTech — Living Documentation
 
 > CUBA 7.3 · HuntTech · Документация — на русском.
-> Workflow: [DEVELOPMENT WORKFLOW](#development-workflow) · Сущности: `.cursor/rules/living-documentation.mdc` · UI: `.cursor/rules/living-ui-documentation.mdc` · Java-сервисы: `.cursor/rules/java-service-dod.mdc` · View integrity: `.cursor/rules/data-view-integrity.mdc` · оптимизация: `.cursor/rules/entity-performance-optimization.mdc` · даты: `.cursor/rules/documentation-with-dates.mdc` · коммиты: `.cursor/rules/git-commit-conventions.mdc` · ввод: **Business & Context Intro** (ниже)
+> Workflow: [DEVELOPMENT WORKFLOW](#development-workflow) · Сущности: `.cursor/rules/living-documentation.mdc` · UI: `.cursor/rules/living-ui-documentation.mdc` · Java-сервисы: `.cursor/rules/java-service-dod.mdc` · View integrity: `.cursor/rules/data-view-integrity.mdc` · оптимизация: `.cursor/rules/entity-performance-optimization.mdc` · даты: `.cursor/rules/documentation-with-dates.mdc` · коммиты: `.cursor/rules/git-commit-conventions.mdc` · язык агента: `.cursor/rules/russian-agent-output.mdc` · ввод: **Business & Context Intro** (ниже)
 
 ---
 
@@ -298,6 +298,7 @@ Strictly follow this **numbered** structure when creating or updating documentat
 - Data View Integrity (UNFETCHED ATTRIBUTE ACCESS): `.cursor/rules/data-view-integrity.mdc`
 - Оптимизация сущности: `.cursor/rules/entity-performance-optimization.mdc` (включая ограничение структуры БД)
 - Автогенерация сообщений коммита: `.cursor/rules/git-commit-conventions.mdc`
+- Язык агента (рассуждения, отчёты, ответы — русский): `.cursor/rules/russian-agent-output.mdc`
 - **Не коммитить**, пока пользователь явно не попросит.
 
 ---

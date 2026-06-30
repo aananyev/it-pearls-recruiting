@@ -18,7 +18,7 @@ public class OvalImageShapeDelegate {
     }
 
     public void applyOvalStyle() {
-        host.setStyleName(OVAL_STYLE_NAME);
+        host.addStyleName(OVAL_STYLE_NAME);
     }
 
     public String getOvalWidth() {

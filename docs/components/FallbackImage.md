@@ -121,12 +121,28 @@ public void onBeforeShow(BeforeShowEvent event) {
 
 Вызов `setFallbackThemePath` в Java имеет приоритет над XML и глобальной конфигурацией.
 
+### Java (column generator, без datasource)
+
+```java
+FallbackImage image = uiComponents.create(FallbackImage.NAME);
+image.setFallbackThemePath("images/hunttech-placeholder.svg");
+image.setValueSource(null);
+if (fileDescriptor != null && FileDescriptorImageHelper.fileExists(fileLoader, fileDescriptor)) {
+    image.setSource(FileDescriptorResource.class).setFileDescriptor(fileDescriptor);
+} else {
+    image.applyFallback();
+}
+```
+
+Не вызывайте `setSource(ThemeResource.class)` на `FallbackImage` для placeholder — используйте `setFallbackThemePath` + `applyFallback()`.
+
 ---
 
 ## История изменений
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-30 | API `applyFallback()` для programmatic-контекста; `updateComponent` без valueSource при пустом primary source |
 | 2026-06-29 | Каноническая документация компонента в `docs/components/FallbackImage.md`; unit-тесты `WebFallbackImageTest` |
 | 2026-06-29 | Дефолтный путь заглушки: `images/hunttech-placeholder.svg` (фирменный SVG в темах hover/halo); `@DefaultString` в `HunttechImageConfig` |
 | 2026-06-29 | Первоначальная реализация `FallbackImage` в пакетах `com.hunttech.hrm.*`; свойство `hunttech.defaultFallbackImagePath` |

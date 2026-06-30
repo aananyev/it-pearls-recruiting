@@ -7,6 +7,7 @@ import com.company.itpearls.service.GetRoleService;
 import com.company.itpearls.web.StandartRegistrationForWork;
 import com.company.itpearls.web.screens.position.PositionEdit;
 import com.company.itpearls.web.util.FileDescriptorImageHelper;
+import com.hunttech.hrm.gui.components.OvaFallbackImage;
 import com.haulmont.bpm.entity.ProcAttachment;
 import com.haulmont.bpm.gui.procactionsfragment.ProcActionsFragment;
 import com.haulmont.cuba.core.entity.Entity;
@@ -328,9 +329,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private CheckBox withOpenPositionCheckBox;
     @Inject
-    private Image projectLogoImage;
+    private OvaFallbackImage projectLogoImage;
     @Inject
-    private Image projectOwnerImage;
+    private OvaFallbackImage projectOwnerImage;
     @Inject
     private TabSheet tabSheetOpenPosition;
 
@@ -2498,18 +2499,37 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private void initProjectImagesOnOpen() {
         Project project = getEditedEntity().getProjectName();
         if (project == null) {
+            updateProjectLogoImage(null);
+            updateProjectOwnerImage(null);
             return;
         }
-        if (project.getProjectLogo() != null) {
-            projectLogoImage.setValueSource(null);
-            FileDescriptorImageHelper.setCompanyLogo(projectLogoImage, fileLoader, project.getProjectLogo());
+        updateProjectLogoImage(project.getProjectLogo());
+        updateProjectOwnerImage(project.getProjectOwner());
+    }
+
+    private void updateProjectLogoImage(FileDescriptor projectLogo) {
+        projectLogoImage.setValueSource(null);
+        if (FileDescriptorImageHelper.fileExists(fileLoader, projectLogo)) {
+            projectLogoImage.setSource(FileDescriptorResource.class).setFileDescriptor(projectLogo);
         } else {
-            projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            projectLogoImage.applyFallback();
         }
-        Person projectOwner = project.getProjectOwner();
+    }
+
+    private void updateProjectOwnerImage(Person projectOwner) {
+        projectOwnerImage.setDescription(buildProjectOwnerDescription(projectOwner));
+        projectOwnerImage.setValueSource(null);
+        FileDescriptor face = projectOwner != null ? projectOwner.getFileImageFace() : null;
+        if (FileDescriptorImageHelper.fileExists(fileLoader, face)) {
+            projectOwnerImage.setSource(FileDescriptorResource.class).setFileDescriptor(face);
+        } else {
+            projectOwnerImage.applyFallback();
+        }
+    }
+
+    private String buildProjectOwnerDescription(Person projectOwner) {
         if (projectOwner == null) {
-            projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-            return;
+            return "";
         }
         StringBuilder sb = new StringBuilder();
         sb.append(projectOwner.getFirstName() != null ? projectOwner.getFirstName() : "")
@@ -2531,15 +2551,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             sb.append(" / ")
                     .append(projectOwner.getCityOfResidence().getCityRuName());
         }
-        projectOwnerImage.setDescription(sb.toString());
-        if (projectOwner.getFileImageFace() != null) {
-            projectOwnerImage.setVisible(true);
-            projectOwnerImage.setValueSource(null);
-            FileDescriptorImageHelper.setCandidateFace(projectOwnerImage, fileLoader,
-                    projectOwner.getFileImageFace());
-        } else {
-            projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-        }
+        return sb.toString();
     }
 
     @Subscribe(id = "someFilesesDc", target = Target.DATA_CONTAINER)
@@ -2819,73 +2831,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         vacansyNameField.setValue(generatePositionNameInProject());
 
         setCompanyDepartmentFromProject();
-        setProjectImage(event);
-        setProjectOwnerImage(event);
-    }
-
-    private void setProjectOwnerImage(HasValue.ValueChangeEvent<Project> event) {
-        if (event.getValue() == null || event.getValue().getProjectOwner() == null) {
-            projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-            return;
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(event.getValue().getProjectOwner().getFirstName())
-                .append(" ")
-                .append(event.getValue().getProjectOwner().getSecondName());
-        if (event.getValue().getProjectOwner().getPersonPosition() != null) {
-            sb.append(" / ")
-                    .append(event.getValue().getProjectOwner().getPersonPosition().getPositionRuName());
-        }
-        if (event.getValue().getProjectOwner().getCompanyDepartment() != null) {
-            sb.append(" / ")
-                    .append(event.getValue().getProjectOwner().getCompanyDepartment().getDepartamentRuName());
-            if (event.getValue().getProjectOwner().getCompanyDepartment().getCompanyName() != null) {
-                sb.append(" / ")
-                        .append(event.getValue().getProjectOwner().getCompanyDepartment().getCompanyName().getComanyName());
-            }
-        }
-
-        if (event.getValue().getProjectOwner().getCityOfResidence() != null) {
-            sb.append(" / ")
-                    .append(event.getValue().getProjectOwner().getCityOfResidence().getCityRuName());
-        }
-
-        projectOwnerImage.setDescription(sb.toString());
-
-        if (event.getValue() != null) {
-            if (event.getValue().getProjectName() != null) {
-                if (event.getValue().getProjectOwner().getFileImageFace() != null) {
-                    projectOwnerImage.setVisible(true);
-                    projectOwnerImage.setValueSource(null);
-                    FileDescriptorImageHelper.setCandidateFace(projectOwnerImage, fileLoader,
-                            event.getValue().getProjectOwner().getFileImageFace());
-                } else {
-                    projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-                }
-            } else {
-                projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-            }
-        } else {
-            projectOwnerImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-        }
-    }
-
-    private void setProjectImage(HasValue.ValueChangeEvent<Project> event) {
-        if (event.getValue() != null) {
-            if (event.getValue().getProjectName() != null) {
-                if (event.getValue().getProjectLogo() != null) {
-                    projectLogoImage.setValueSource(null);
-                    FileDescriptorImageHelper.setCompanyLogo(projectLogoImage, fileLoader,
-                            event.getValue().getProjectLogo());
-                } else {
-                    projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
-                }
-            } else {
-                projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
-            }
-        } else {
-            projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
-        }
+        Project project = event.getValue();
+        updateProjectLogoImage(project != null ? project.getProjectLogo() : null);
+        updateProjectOwnerImage(project != null ? project.getProjectOwner() : null);
     }
 
     private String generatePositionNameInProject() {

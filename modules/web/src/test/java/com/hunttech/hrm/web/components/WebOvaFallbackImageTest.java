@@ -148,8 +148,9 @@ public class WebOvaFallbackImageTest {
     }
 
     @Test
-    public void constructor_appliesOvalStyleName() {
+    public void afterPropertiesSet_appliesOvalStyleName() throws Exception {
         WebOvaFallbackImage image = new WebOvaFallbackImage();
+        image.afterPropertiesSet();
 
         assertTrue(image.getStyleName().contains("ht-oval-image"));
     }

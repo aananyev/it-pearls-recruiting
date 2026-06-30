@@ -1,7 +1,11 @@
 package com.hunttech.hrm.web.components;
 
 import com.company.hunttech.config.HunttechImageConfig;
+import com.company.itpearls.web.util.FileDescriptorImageHelper;
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.core.global.Configuration;
+import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.gui.components.Resource;
 import com.haulmont.cuba.gui.components.ThemeResource;
 import com.haulmont.cuba.web.gui.components.WebImage;
@@ -54,6 +58,13 @@ public class WebFallbackImage extends WebImage implements FallbackImage {
     }
 
     @Override
+    public void applyFallback() {
+        if (fallbackResource != null) {
+            updateValue(fallbackResource);
+        }
+    }
+
+    @Override
     protected void updateComponent() {
         if (valueSource != null) {
             Object value = valueSource.getValue();
@@ -61,6 +72,16 @@ public class WebFallbackImage extends WebImage implements FallbackImage {
                 updateValue(fallbackResource);
                 return;
             }
+            if (value instanceof FileDescriptor && fallbackResource != null) {
+                FileLoader fileLoader = beanLocator != null ? beanLocator.get(FileLoader.class) : null;
+                if (!FileDescriptorImageHelper.fileExists(fileLoader, (FileDescriptor) value)) {
+                    updateValue(fallbackResource);
+                    return;
+                }
+            }
+        } else if (getSource() == null && fallbackResource != null) {
+            updateValue(fallbackResource);
+            return;
         }
         super.updateComponent();
     }

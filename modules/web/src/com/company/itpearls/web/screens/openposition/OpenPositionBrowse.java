@@ -15,6 +15,8 @@ import com.company.itpearls.web.screens.hrmasters.suggestjobcandidates.Suggestjo
 import com.company.itpearls.web.screens.simplebrowsers.JobCandidateSimpleBrowse;
 import com.company.itpearls.web.screens.simplebrowsers.JobCandidateSimpleMailBrowse;
 import com.company.itpearls.web.util.FileDescriptorImageHelper;
+import com.hunttech.hrm.gui.components.FallbackImage;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
@@ -68,6 +70,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private final static String style_icon_no_border_50px = "icon-no-border-50px";
     private final static String style_table_wordwrap = "table-wordwrap";
     private final static String style_circle_30px = "circle-30px";
+    private final static String images_hunttech_placeholder_svg = "images/hunttech-placeholder.svg";
 
     private final static String icons_no_company_png = "icons/no-company.png";
     private final static String icons_traffic_lights_gray_png = "icons/traffic-lights_gray.png";
@@ -3593,10 +3596,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
         Person projectOwner = event.getItem().getProjectName() != null
                 ? event.getItem().getProjectName().getProjectOwner() : null;
-        Image image = setProjectOwnerImage(projectOwner);
+
+        FallbackImage fallbackImage = configureProjectOwnerFallbackImage(projectOwner);
+
         retHBox.add(newVacancyLabel);
         retHBox.add(retObject);
-        retHBox.add(image);
+        retHBox.add(fallbackImage);
         retHBox.expand(retObject);
 
         return retHBox;
@@ -3645,6 +3650,52 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
 
         return retImage;
+    }
+
+    private FallbackImage configureProjectOwnerFallbackImage(Person projectOwner) {
+        FallbackImage fallbackImage = uiComponents.create(FallbackImage.NAME);
+        fallbackImage.setFallbackThemePath(images_hunttech_placeholder_svg);
+        fallbackImage.setWidth(width_30px);
+        fallbackImage.setHeight(width_30px);
+        fallbackImage.addStyleName(style_circle_30px);
+        fallbackImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        fallbackImage.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        fallbackImage.setDescription(buildProjectOwnerDescription(projectOwner));
+
+        FileDescriptor face = projectOwner != null ? projectOwner.getFileImageFace() : null;
+        if (FileDescriptorImageHelper.fileExists(fileLoader, face)) {
+            fallbackImage.setSource(FileDescriptorResource.class).setFileDescriptor(face);
+        } else {
+            fallbackImage.applyFallback();
+        }
+        return fallbackImage;
+    }
+
+    private String buildProjectOwnerDescription(Person projectOwner) {
+        if (projectOwner == null) {
+            return "";
+        }
+        StringBuilder description = new StringBuilder();
+        description.append(projectOwner.getFirstName())
+                .append(" ")
+                .append(projectOwner.getSecondName());
+        if (projectOwner.getPersonPosition() != null) {
+            description.append(" / ")
+                    .append(projectOwner.getPersonPosition().getPositionRuName());
+        }
+        if (projectOwner.getCompanyDepartment() != null) {
+            description.append(" / ")
+                    .append(projectOwner.getCompanyDepartment().getDepartamentRuName());
+            if (projectOwner.getCompanyDepartment().getCompanyName() != null) {
+                description.append(" / ")
+                        .append(projectOwner.getCompanyDepartment().getCompanyName().getComanyName());
+            }
+        }
+        if (projectOwner.getCityOfResidence() != null) {
+            description.append(" / ")
+                    .append(projectOwner.getCityOfResidence().getCityRuName());
+        }
+        return description.toString();
     }
 
     public void openCloseButtonInvoke(Action.ActionPerformedEvent e) {

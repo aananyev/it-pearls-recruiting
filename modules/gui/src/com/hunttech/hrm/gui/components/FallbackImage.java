@@ -12,4 +12,11 @@ public interface FallbackImage extends Image {
     void setFallbackResource(Resource resource);
 
     void setFallbackThemePath(String path);
+
+    /**
+     * Shows the configured fallback resource without binding to a datasource.
+     * Use in column generators and other programmatic contexts instead of
+     * {@code setSource(ThemeResource.class)}.
+     */
+    void applyFallback();
 }

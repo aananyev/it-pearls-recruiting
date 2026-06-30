@@ -11,6 +11,8 @@ import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+
 /**
  * Ensures HuntTech custom UI components are registered in {@link WebUiComponents}
  * for programmatic creation via {@code uiComponents.create(NAME)}.
@@ -24,8 +26,17 @@ public class HunttechUiComponentsRegistrar {
         this.webUiComponents = webUiComponents;
     }
 
+    @PostConstruct
+    public void registerComponents() {
+        registerHunttechComponents();
+    }
+
     @EventListener
     public void onAppContextInitialized(AppContextInitializedEvent event) {
+        registerHunttechComponents();
+    }
+
+    private void registerHunttechComponents() {
         webUiComponents.register(OvalImage.NAME, WebOvalImage.class);
         webUiComponents.register(FallbackImage.NAME, WebFallbackImage.class);
         webUiComponents.register(OvaFallbackImage.NAME, WebOvaFallbackImage.class);

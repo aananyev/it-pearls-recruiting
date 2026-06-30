@@ -9,5 +9,5 @@ public interface OvalImageHost {
 
     void setHeight(String height);
 
-    void setStyleName(String styleName);
+    void addStyleName(String styleName);
 }

@@ -53,6 +53,7 @@
 1. После инициализации (`afterPropertiesSet`) загружается дефолтный путь из `HunttechImageConfig`.
 2. Атрибут `fallbackThemePath` в XML переопределяет дефолт при загрузке экрана.
 3. При обновлении value binding (`updateComponent`): если `valueSource.getValue() == null` и задан `fallbackResource` — на Vaadin-компонент ставится theme-ресурс; иначе — стандартная логика `WebImage`.
+4. Программное использование (column generator, без datasource): задать `setFallbackThemePath`, при отсутствии фото вызвать `applyFallback()` вместо `setSource(ThemeResource.class)`.
 
 ---
 
@@ -60,6 +61,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-30 | `applyFallback()` для programmatic-контекста; исправлен OpenPositionBrowse (без `setSource(ThemeResource)` на FallbackImage) |
 | 2026-06-29 | Добавлен cross-link на канон `docs/components/FallbackImage.md` |
 | 2026-06-29 | Дефолтный путь заглушки: `images/hunttech-placeholder.svg` (фирменный SVG в `themes/hover/images/` и `themes/halo/images/`); обновлён `@DefaultString` in `HunttechImageConfig` |
 | 2026-06-29 | Первоначальная реализация `FallbackImage` в пакетах `com.hunttech.hrm.*`; свойство `hunttech.defaultFallbackImagePath` в `HunttechImageConfig` |

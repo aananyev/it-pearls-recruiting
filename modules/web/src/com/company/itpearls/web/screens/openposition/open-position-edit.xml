@@ -247,24 +247,23 @@
                     <label id="labelTopComissionResearcher"
                            stylename="h4"
                            htmlEnabled="true"/>
-                    <image id="projectLogoImage"
+                    <ovaFallbackImage id="projectLogoImage"
                            width="70px"
                            height="70px"
                            visible="true"
                            align="TOP_RIGHT"
                            stylename="widget-border"
-                           scaleMode="SCALE_DOWN">
-                        <theme path="icons/no-company.png"/>
-                    </image>
-                    <image id="projectOwnerImage" 
+                           scaleMode="SCALE_DOWN"
+                           fallbackThemePath="icons/no-company.png"/>
+                    <ovaFallbackImage id="projectOwnerImage"
                            width="70px"
                            height="70px"
                            visible="true"
                            align="TOP_RIGHT"
                            stylename="widget-border"
-                           scaleMode="SCALE_DOWN">
-                        <theme path="icons/no-programmer.jpeg"/>
-                    </image>
+                           scaleMode="SCALE_DOWN"
+                           ovalWidth="70px"
+                           fallbackThemePath="icons/no-programmer.jpeg"/>
                 </hbox>
             <label id="closedVacancyInfoLabel"
                    width="AUTO"
