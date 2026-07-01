@@ -54,9 +54,15 @@ DB_SERVER="$DEFAULT_DB_SERVER"
 DB_USER="replica"
 SSH_USER="root"
 TOMCAT_WARS_DIR="/opt/tomcat/webapps"
+TOMCAT_SERVICE_NAME="tomcat"
 TOMCAT_WARS_LOCAL="${current_catalog}/../tomcat_wars"
 FILE_STORAGE_REMOTE="/opt/app_home/fileStorage"
 FILE_STORAGE_LOCAL="/opt/app_home"
+DB_NAME="itpearls"
+DB_DUMP_USER="postgres"
+REMOTE_DB_PORT="5432"
+DB_UPDATE_USER="cuba"
+DB_UPDATE_PASSWORD=""
 
 # Флаги CLI (см. usage / parse_args)
 SKIP_DB=0
@@ -215,7 +221,14 @@ DB_USER="replica"
 SSH_USER="root"
 # Пути на сервере
 TOMCAT_WARS_DIR="/opt/tomcat/webapps"
+TOMCAT_SERVICE_NAME="tomcat"
 FILE_STORAGE_REMOTE="/opt/app_home/fileStorage"
+# База данных (деплой / pg_dump)
+DB_NAME="itpearls"
+DB_DUMP_USER="postgres"
+REMOTE_DB_PORT="5432"
+DB_UPDATE_USER="cuba"
+DB_UPDATE_PASSWORD=""
 # Пути на локальной машине (Mac)
 FILE_STORAGE_LOCAL="/opt/app_home"
 # Каталог для сохранения финальных архивов (.tgz) локально
@@ -227,8 +240,14 @@ EOF
         check_and_fix_option "DB_SERVER" "hr.hunttech.ru" "Параметры подключения"
         check_and_fix_option "DB_USER" "replica" "Пользователь PostgreSQL для pg_basebackup"
         check_and_fix_option "SSH_USER" "root" "Пользователь SSH"
-        check_and_fix_option "TOMCAT_WARS_DIR" "/opt/tomcat/webapps" "Пути на сервере"
+        check_and_fix_option "TOMCAT_WARS_DIR" "/opt/tomcat/webapps" "Каталог WAR на сервере"
+        check_and_fix_option "TOMCAT_SERVICE_NAME" "tomcat" "Имя systemd-службы Tomcat"
         check_and_fix_option "FILE_STORAGE_REMOTE" "/opt/app_home/fileStorage" "Путь fileStorage на сервере"
+        check_and_fix_option "DB_NAME" "itpearls" "Имя базы данных CUBA"
+        check_and_fix_option "DB_DUMP_USER" "postgres" "Пользователь для pg_dump на сервере"
+        check_and_fix_option "REMOTE_DB_PORT" "5432" "Порт PostgreSQL на сервере"
+        check_and_fix_option "DB_UPDATE_USER" "cuba" "Пользователь для CUBA updateDb"
+        check_and_fix_option "DB_UPDATE_PASSWORD" "" "Пароль для CUBA updateDb (пусто = из ~/.pgpass)"
         check_and_fix_option "FILE_STORAGE_LOCAL" "/opt/app_home" "Пути на локальной машине (Mac)"
         check_and_fix_option "ARCHIVE_DIR" "../" "Каталог для сохранения финальных архивов (.tgz) локально"
     fi
@@ -563,6 +582,223 @@ show_log_tail() {
     fi
 }
 
+# GNU rsync поддерживает --info=progress2; macOS openrsync — только --progress.
+rsync_supports_gnu_progress() {
+    rsync --info=progress2 --version >/dev/null 2>&1
+}
+
+# Аргументы индикатора прогресса rsync (GNU vs BSD/openrsync).
+rsync_progress_args() {
+    if rsync_supports_gnu_progress; then
+        printf '%s' '--info=progress2'
+    else
+        printf '%s' '--progress'
+    fi
+}
+
+# Каталог libexec GNU rsync в Homebrew (Apple Silicon / Intel).
+homebrew_gnu_rsync_libexec() {
+    if [ -d "/opt/homebrew/opt/rsync/libexec/rsync.d" ]; then
+        echo "/opt/homebrew/opt/rsync/libexec/rsync.d"
+    elif [ -d "/usr/local/opt/rsync/libexec/rsync.d" ]; then
+        echo "/usr/local/opt/rsync/libexec/rsync.d"
+    else
+        echo ""
+    fi
+}
+
+# Предпочесть GNU rsync из Homebrew в PATH текущей сессии.
+prepend_homebrew_gnu_rsync_path() {
+    local libexec
+    libexec=$(homebrew_gnu_rsync_libexec)
+    if [ -n "$libexec" ]; then
+        export PATH="${libexec}:${PATH}"
+        log_action "INFO" "PATH обновлён: ${libexec} (GNU rsync из Homebrew)"
+    fi
+}
+
+# Текст ошибки похож на несовместимость BSD/openrsync с GNU-флагами.
+rsync_error_is_gnu_compat() {
+    local err_text="${1:-}"
+    echo "$err_text" | grep -qiE 'unrecognized option|--info=progress2|unknown option.*progress'
+}
+
+# Установка пакета Homebrew (без интерактивного запроса; pv-визуализация, кроме pv).
+brew_install_pkg() {
+    local brew_pkg="$1"
+
+    log_action "INFO" "Установка ${brew_pkg} через Homebrew"
+    info "Установка ${brew_pkg}: brew install ${brew_pkg} ..."
+
+    if [ "$brew_pkg" = "pv" ]; then
+        if ! brew install "$brew_pkg" >>"$LOG" 2>&1; then
+            fail "Не удалось установить ${brew_pkg} (см. $LOG)."
+            log_action "ERROR" "brew install ${brew_pkg} завершился с ошибкой"
+            return 1
+        fi
+    elif [ "$QUIET_MODE" -eq 1 ]; then
+        if ! brew install "$brew_pkg" >>"$LOG" 2>&1; then
+            fail "Не удалось установить ${brew_pkg} (см. $LOG)."
+            log_action "ERROR" "brew install ${brew_pkg} завершился с ошибкой"
+            return 1
+        fi
+    else
+        if command -v pv >/dev/null 2>&1; then
+            if ! brew install "$brew_pkg" 2>&1 | pv -l -p --timer --rate 2>>"$LOG" | tee -a "$LOG"; then
+                fail "Не удалось установить ${brew_pkg} (см. $LOG)."
+                log_action "ERROR" "brew install ${brew_pkg} завершился с ошибкой"
+                return 1
+            fi
+        elif ! brew install "$brew_pkg" >>"$LOG" 2>&1; then
+            fail "Не удалось установить ${brew_pkg} (см. $LOG)."
+            log_action "ERROR" "brew install ${brew_pkg} завершился с ошибкой"
+            return 1
+        fi
+    fi
+    return 0
+}
+
+# Интерактивная установка утилиты через Homebrew (pv-визуализация для brew install, кроме самого pv).
+ensure_brew_tool() {
+    local tool="$1"
+    local brew_pkg="${2:-$tool}"
+
+    if command -v "$tool" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    if ! command -v brew >/dev/null 2>&1; then
+        fail "Утилита ${tool} не найдена. Homebrew недоступен (https://brew.sh)."
+        log_action "ERROR" "Утилита ${tool} не найдена, Homebrew отсутствует"
+        return 1
+    fi
+
+    read -r -p "Утилита ${tool} не найдена. Установить её через Homebrew? [y/N]: " answer
+    if [[ ! "$answer" =~ ^[YyДд]$ ]]; then
+        fail "Утилита ${tool} обязательна для работы скрипта."
+        log_action "INFO" "Пользователь отказался от установки ${tool}"
+        return 1
+    fi
+
+    if ! brew_install_pkg "$brew_pkg"; then
+        return 1
+    fi
+
+    if [ "$tool" = "rsync" ]; then
+        prepend_homebrew_gnu_rsync_path
+    fi
+
+    if command -v "$tool" >/dev/null 2>&1; then
+        info "${GREEN}✓${NC} ${tool} установлен: $(command -v "$tool")"
+        log_action "SUCCESS" "${tool} установлен: $(command -v "$tool")"
+        return 0
+    fi
+
+    fail "После brew install ${brew_pkg} команда ${tool} по-прежнему недоступна."
+    log_action "ERROR" "После brew install ${brew_pkg} команда ${tool} недоступна"
+    return 1
+}
+
+# Установка GNU rsync через Homebrew (после согласия в ensure_gnu_rsync_or_fallback).
+install_gnu_rsync_via_brew() {
+    log_action "INFO" "Попытка установки GNU rsync через Homebrew (brew install rsync)"
+    if ! brew_install_pkg rsync; then
+        return 1
+    fi
+    prepend_homebrew_gnu_rsync_path
+    if rsync_supports_gnu_progress; then
+        info "${GREEN}✓${NC} GNU rsync: $(rsync --version 2>/dev/null | head -1)"
+        log_action "SUCCESS" "GNU rsync установлен: $(command -v rsync)"
+        return 0
+    fi
+    fail "GNU rsync установлен, но --info=progress2 по-прежнему недоступен."
+    log_action "WARN" "После brew install rsync флаг --info=progress2 не поддерживается"
+    return 1
+}
+
+# Проверка GNU rsync; при BSD/openrsync — предложить brew install.
+# Возврат 0 — GNU rsync доступен; 1 — fallback на --progress.
+ensure_gnu_rsync_or_fallback() {
+    if rsync_supports_gnu_progress; then
+        return 0
+    fi
+
+    if [ "$QUIET_MODE" -eq 1 ]; then
+        log_action "INFO" "Quiet-режим: BSD/openrsync — --progress без запроса установки GNU rsync"
+        return 1
+    fi
+
+    log_action "INFO" "Обнаружен BSD/openrsync — предложение установки GNU rsync"
+    if ! command -v brew >/dev/null 2>&1; then
+        info "Homebrew не найден. Установите GNU rsync вручную (https://brew.sh) или используйте -q/--quiet."
+        log_action "INFO" "Homebrew отсутствует — пропуск установки GNU rsync"
+        return 1
+    fi
+
+    read -r -p "Обнаружен macOS openrsync без поддержки GNU-флагов. Установить GNU rsync через Homebrew? [y/N]: " answer
+    if [[ ! "$answer" =~ ^[YyДд]$ ]]; then
+        info "Используется --progress (BSD/openrsync)."
+        log_action "INFO" "Пользователь отказался от установки GNU rsync — fallback на --progress"
+        return 1
+    fi
+
+    install_gnu_rsync_via_brew
+}
+
+# После сбоя rsync: предложить GNU rsync при ошибке несовместимости флагов.
+# Возврат 0 — установка успешна, можно повторить rsync; 1 — иначе.
+maybe_offer_gnu_rsync_on_failure() {
+    local err_capture="${1:-}"
+    if [ -z "$err_capture" ] && [ -f "$LOG" ]; then
+        err_capture=$(grep -iE 'rsync:|rsync error|unrecognized|unknown option' "$LOG" | tail -8 || true)
+    fi
+
+    if ! rsync_error_is_gnu_compat "$err_capture"; then
+        return 1
+    fi
+    if rsync_supports_gnu_progress; then
+        return 1
+    fi
+
+    log_action "WARN" "Сбой rsync из-за несовместимости GNU-флагов (--info=progress2)"
+
+    if [ "$QUIET_MODE" -eq 1 ]; then
+        return 1
+    fi
+    if ! command -v brew >/dev/null 2>&1; then
+        info "Homebrew не найден. Установите GNU rsync вручную (https://brew.sh) или запустите с -q (fallback --progress)."
+        return 1
+    fi
+
+    read -r -p "Обнаружен macOS openrsync без поддержки GNU-флагов. Установить GNU rsync через Homebrew? [y/N]: " answer
+    if [[ ! "$answer" =~ ^[YyДд]$ ]]; then
+        log_action "INFO" "После сбоя rsync пользователь отказался от установки GNU rsync"
+        return 1
+    fi
+
+    install_gnu_rsync_via_brew
+}
+
+# Подсказка при сбое rsync: последние строки из лога + контекст SSH/пути.
+show_rsync_failure() {
+    local context="${1:-Не удалось выполнить rsync}"
+    fail "$context"
+    if [ -f "$LOG" ] && [ -s "$LOG" ]; then
+        local rsync_err
+        rsync_err=$(grep -iE 'rsync:|rsync error|unknown option|failed|error' "$LOG" | tail -8 || true)
+        if [ -n "$rsync_err" ]; then
+            fail "Последняя ошибка rsync (из $LOG):"
+            echo "$rsync_err" | sed 's/^/  /'
+        else
+            show_log_tail 8
+        fi
+    fi
+    if ! rsync_supports_gnu_progress; then
+        info "Используется BSD/openrsync — прогресс через --progress (не --info=progress2)."
+    fi
+    fail "Проверьте SSH ${SSH_USER}@${DB_SERVER}, путь ${FILE_STORAGE_REMOTE:-?} и права — подробности в $LOG."
+}
+
 check_remote_port() {
     info_n "Проверка доступности порта 5432 на $DB_SERVER ... "
     if command -v nc >/dev/null 2>&1; then
@@ -623,8 +859,8 @@ preflight_checks() {
         needs_pv=1
     fi
 
-    if [ "$needs_pv" -eq 1 ] && ! command -v pv >/dev/null 2>&1; then
-        die "Установите pv через: brew install pv"
+    if [ "$needs_pv" -eq 1 ]; then
+        ensure_brew_tool pv || missing=1
     fi
 
     if [ "$SKIP_DB" -eq 0 ]; then
@@ -650,22 +886,26 @@ preflight_checks() {
 
     if [ "$SKIP_FILES" -eq 0 ]; then
         if ! command -v rsync >/dev/null 2>&1; then
-            fail "Не найден rsync — нужен для fileStorage."
-            missing=1
+            ensure_brew_tool rsync || missing=1
+        fi
+        ensure_gnu_rsync_or_fallback || true
+        if command -v rsync >/dev/null 2>&1; then
+            if rsync_supports_gnu_progress; then
+                info "rsync: GNU ($(rsync --version 2>/dev/null | head -1))"
+            else
+                info "rsync: BSD/openrsync — прогресс через --progress (не --info=progress2)"
+                log_action "INFO" "Обнаружен BSD/openrsync — используется --progress"
+            fi
         fi
     fi
 
     if [ "$needs_remote" -eq 1 ]; then
         if ! command -v ssh >/dev/null 2>&1; then
-            fail "Не найден ssh — нужен для диагностики, WAR и rsync."
-            missing=1
+            ensure_brew_tool ssh openssh || missing=1
         fi
     fi
 
-    if ! command -v gzip >/dev/null 2>&1; then
-        fail "Не найден gzip — нужен для архивации."
-        missing=1
-    fi
+    ensure_brew_tool gzip || missing=1
 
     if [ "$SKIP_DB" -eq 0 ]; then
         info "Проверка клиента: $("$PG_BASEBACKUP" --version)"
@@ -748,6 +988,52 @@ is_postgres_running_on_pgdata() {
     "$PG_CTL" status -D "$PGDATA" >>"$LOG" 2>&1
 }
 
+# Остановка локального PostgreSQL перед перезаписью PGDATA (fast → immediate → kill -9).
+stop_local_postgres_for_install() {
+    local pg_port stop_rc=0 was_running=0 pid=""
+
+    if is_postgres_running_on_pgdata; then
+        was_running=1
+    fi
+
+    if ! "$PG_CTL" stop -D . -m fast >>"$LOG" 2>&1; then
+        stop_rc=1
+    fi
+
+    if is_postgres_running_on_pgdata; then
+        log_action "WARN" "pg_ctl stop -m fast не остановил PostgreSQL, пробуем -m immediate"
+        if ! "$PG_CTL" stop -D . -m immediate >>"$LOG" 2>&1; then
+            stop_rc=1
+        fi
+    fi
+
+    if is_postgres_running_on_pgdata; then
+        pg_port=$(get_pgdata_port)
+        if command -v lsof >/dev/null 2>&1; then
+            pid=$(lsof -t -iTCP:"$pg_port" -sTCP:LISTEN 2>/dev/null | head -1 || true)
+        fi
+        if [ -z "$pid" ] && [ -f postmaster.pid ]; then
+            pid=$(head -1 postmaster.pid 2>/dev/null || true)
+        fi
+        echo "[WARN] Принудительное завершение процесса PostgreSQL..."
+        log_action "WARN" "Принудительное завершение PostgreSQL (PID=${pid:-unknown}, port=${pg_port})"
+        if [ -n "$pid" ]; then
+            kill -9 "$pid" >>"$LOG" 2>&1 || true
+        fi
+        sleep 2
+    fi
+
+    if is_postgres_running_on_pgdata; then
+        die "Не удалось остановить локальный PostgreSQL. Очистка отменена."
+    fi
+
+    if [ "$was_running" -eq 0 ] && [ "$stop_rc" -ne 0 ]; then
+        info "не запущена (продолжаем)"
+    else
+        ok
+    fi
+}
+
 is_port_listening() {
     local port="$1"
     if command -v lsof >/dev/null 2>&1; then
@@ -810,30 +1096,57 @@ prepare_temp_directory() {
     log_action "SUCCESS" "Этап завершен успешно: подготовка временного каталога backup"
 }
 
+# Размер tar-члена pg_basebackup в байтах (macOS stat -f%z / Linux stat -c%s).
+tar_member_bytes() {
+    local file="$1"
+    stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || du_bytes "$file"
+}
+
+# Распаковка одного вложенного tar с pv (честный -s по размеру файла на диске).
+unpack_tar_member_with_pv() {
+    local tar_path="$1"
+    local dest_dir="$2"
+    local label="$3"
+    local member_bytes
+
+    member_bytes=$(tar_member_bytes "$tar_path")
+    info "Распаковка ${label} (pv, ${member_bytes} байт) ..."
+    log_action "INFO" "Распаковка ${label}: ${member_bytes} байт"
+    if ! pv_file "$member_bytes" "$tar_path" \
+        | tar -xf - -C "$dest_dir" 2>>"$LOG"; then
+        die "Не удалось распаковать ${label} (см. $LOG)."
+    fi
+    rm -f "$tar_path"
+}
+
 # Распаковка вложенных base.tar / pg_wal.tar после pg_basebackup -Ft (формат tar stream).
 unpack_pg_basebackup_tar_members() {
     local dir="$1"
-    local member_bytes
+    local total_bytes=0 member_bytes
+
+    for member in base.tar pg_wal.tar; do
+        if [ -f "$dir/$member" ]; then
+            member_bytes=$(tar_member_bytes "$dir/$member")
+            total_bytes=$(( total_bytes + member_bytes ))
+        fi
+    done
+
+    if [ "$total_bytes" -gt 0 ]; then
+        info_stage "Распаковка вложенных tar-архивов (~${total_bytes} байт, pv + ETA) ..."
+        log_action "INFO" "Начало распаковки pg_basebackup tar members: ${total_bytes} байт"
+    fi
 
     if [ -f "$dir/base.tar" ]; then
-        member_bytes=$(stat -f%z "$dir/base.tar" 2>/dev/null || stat -c%s "$dir/base.tar" 2>/dev/null || du_bytes "$dir/base.tar")
-        info "Распаковка base.tar (pv, ${member_bytes} байт) ..."
-        if ! pv_file "$member_bytes" "$dir/base.tar" \
-            | tar -xf - -C "$dir" 2>>"$LOG"; then
-            die "Не удалось распаковать base.tar (см. $LOG)."
-        fi
-        rm -f "$dir/base.tar"
+        unpack_tar_member_with_pv "$dir/base.tar" "$dir" "base.tar"
     fi
 
     if [ -f "$dir/pg_wal.tar" ]; then
-        member_bytes=$(stat -f%z "$dir/pg_wal.tar" 2>/dev/null || stat -c%s "$dir/pg_wal.tar" 2>/dev/null || du_bytes "$dir/pg_wal.tar")
-        info "Распаковка pg_wal.tar (pv, ${member_bytes} байт) ..."
         mkdir -p "$dir/pg_wal"
-        if ! pv_file "$member_bytes" "$dir/pg_wal.tar" \
-            | tar -xf - -C "$dir/pg_wal" 2>>"$LOG"; then
-            die "Не удалось распаковать pg_wal.tar (см. $LOG)."
-        fi
-        rm -f "$dir/pg_wal.tar"
+        unpack_tar_member_with_pv "$dir/pg_wal.tar" "$dir/pg_wal" "pg_wal.tar"
+    fi
+
+    if [ "$total_bytes" -gt 0 ]; then
+        log_action "SUCCESS" "Распаковка pg_basebackup tar members завершена"
     fi
 }
 
@@ -854,10 +1167,11 @@ download_basebackup() {
     est_bytes=$(get_remote_cluster_size_bytes)
 
     info_stage "Загрузка base backup с $DB_SERVER (pg_basebackup -Ft, --wal-method=fetch) ..."
-    info "Ожидаемый объём потока: ~${est_bytes} байт"
+    info "Ожидаемый объём кластера: ~${est_bytes} байт"
+    info "Прогресс pv + ETA — при распаковке base.tar / pg_wal.tar (честный размер файлов)"
     info "Лог: $LOG"
 
-    # -Ft -D - : внешний tar-поток (base.tar + pg_wal.tar) → pv → tar -xf во временный каталог.
+    # -Ft -D - : внешний tar-поток (base.tar + pg_wal.tar) → tar -xf; pv — на распаковке вложенных tar.
     if ! "$PG_BASEBACKUP" \
         -h "$DB_SERVER" \
         -U "$DB_USER" \
@@ -867,7 +1181,6 @@ download_basebackup() {
         --checkpoint=fast \
         --no-slot \
         2>>"$LOG" \
-        | pv_stream "$est_bytes" \
         | tar -xf - -C "$postgre_temp_database" 2>>"$LOG"; then
         die "Не удалось загрузить base backup с $DB_SERVER (подробности в $LOG)."
     fi
@@ -915,18 +1228,7 @@ install_to_local_pgdata() {
     ok
 
     info_n "Остановка локальной PostgreSQL ... "
-    local stop_rc=0
-    if ! "$PG_CTL" stop -D . -m fast >>"$LOG" 2>&1; then
-        stop_rc=1
-    fi
-
-    if is_postgres_running_on_pgdata; then
-        die "Не удалось остановить локальный PostgreSQL. Очистка отменена."
-    elif [ "$stop_rc" -ne 0 ]; then
-        info "не запущена (продолжаем)"
-    else
-        ok
-    fi
+    stop_local_postgres_for_install
 
     local pg_port
     pg_port=$(get_pgdata_port)
@@ -965,17 +1267,46 @@ sync_file_storage() {
     log_action "INFO" "Начало этапа: синхронизация fileStorage"
     info_stage "=== Синхронизация fileStorage (rsync pull) ==="
     mkdir -p "$FILE_STORAGE_LOCAL"
+    ensure_gnu_rsync_or_fallback || true
+    local rsync_progress
+    rsync_progress=$(rsync_progress_args)
+    local rsync_rc=0
     if [ "$QUIET_MODE" -eq 1 ]; then
         if ! rsync -a --ignore-existing \
             "${SSH_USER}@${DB_SERVER}:${FILE_STORAGE_REMOTE}" "${FILE_STORAGE_LOCAL}/" \
             >>"$LOG" 2>&1; then
-            die "Не удалось скопировать fileStorage (нужен SSH-доступ ${SSH_USER}@${DB_SERVER})."
+            rsync_rc=1
         fi
     else
-        if ! rsync -a --info=progress2 --ignore-existing \
+        # shellcheck disable=SC2086
+        if ! rsync -a $rsync_progress --ignore-existing \
             "${SSH_USER}@${DB_SERVER}:${FILE_STORAGE_REMOTE}" "${FILE_STORAGE_LOCAL}/" \
             2>&1 | tee -a "$LOG"; then
-            die "Не удалось скопировать fileStorage (нужен SSH-доступ ${SSH_USER}@${DB_SERVER})."
+            rsync_rc=1
+        fi
+    fi
+    if [ "$rsync_rc" -ne 0 ]; then
+        if maybe_offer_gnu_rsync_on_failure ""; then
+            rsync_progress=$(rsync_progress_args)
+            rsync_rc=0
+            if [ "$QUIET_MODE" -eq 1 ]; then
+                if ! rsync -a --ignore-existing \
+                    "${SSH_USER}@${DB_SERVER}:${FILE_STORAGE_REMOTE}" "${FILE_STORAGE_LOCAL}/" \
+                    >>"$LOG" 2>&1; then
+                    rsync_rc=1
+                fi
+            else
+                # shellcheck disable=SC2086
+                if ! rsync -a $rsync_progress --ignore-existing \
+                    "${SSH_USER}@${DB_SERVER}:${FILE_STORAGE_REMOTE}" "${FILE_STORAGE_LOCAL}/" \
+                    2>&1 | tee -a "$LOG"; then
+                    rsync_rc=1
+                fi
+            fi
+        fi
+        if [ "$rsync_rc" -ne 0 ]; then
+            show_rsync_failure "Не удалось скопировать fileStorage."
+            die "Синхронизация fileStorage прервана (см. сообщения выше и $LOG)."
         fi
     fi
     ok
