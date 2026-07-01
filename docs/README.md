@@ -12,6 +12,9 @@
 docs/
 ├── README.md                 ← этот файл (индекс)
 ├── LOCAL_DATABASE.md         ← локальная PostgreSQL, миграции, запуск
+├── 02_business_logic/        ← TDD бизнес-логики (сквозные процессы)
+│   ├── db-schema-diff-report.md   ← отчёт: расхождения PostgreSQL ↔ модель приложения
+│   └── user-settings-photo-sync.md
 ├── architecture/             ← полные спецификации по триггеру (см. ниже)
 │   └── README.md
 ├── ui/
@@ -60,6 +63,7 @@ docs/
 | Задача | Документ |
 |--------|----------|
 | Поднять локальную БД и приложение | [LOCAL_DATABASE.md](LOCAL_DATABASE.md) |
+| Расхождения схемы БД и приложения | [02_business_logic/db-schema-diff-report.md](02_business_logic/db-schema-diff-report.md) |
 | Архитектура подсистемы AI (LLM) | [../AI_INTEGRATION.md](../AI_INTEGRATION.md) |
 | Экран входа (login) | [ui/login-screen.md](ui/login-screen.md) (legacy) · [ui/README.md](ui/README.md) |
 | Описать UI-форму (экран, фрагмент) | [templates/ui-template.md](templates/ui-template.md) · [living-ui-documentation.mdc](../.cursor/rules/living-ui-documentation.mdc) |
@@ -84,6 +88,7 @@ docs/
 | Понять подсистему кандидатов | [entities/JobCandidate.md](entities/JobCandidate.md) · UI: [каталог](ui/README.md#jobcandidate) |
 | Понять подсистему вакансий | [entities/OpenPosition.md](entities/OpenPosition.md) · [architecture/OpenPosition_Spec.md](architecture/OpenPosition_Spec.md) · UI: [каталог](ui/README.md#openposition) |
 | Обработка фото профиля (сжатие, лимиты) | [services/ImageProcessingService.md](services/ImageProcessingService.md) · [entities/ExtUser.md](entities/ExtUser.md) |
+| Модуль пользователя и синхронизация фото (TDD) | [02_business_logic/user-settings-photo-sync.md](02_business_logic/user-settings-photo-sync.md) |
 | UI-компонент FallbackImage (placeholder для image) | [components/FallbackImage.md](components/FallbackImage.md) · [ui/FallbackImage_Component.md](ui/FallbackImage_Component.md) |
 | UI-компонент OvalImage (круглый аватар) | [ui-components/OvalImage.md](ui-components/OvalImage.md) |
 | UI-компонент OvaFallbackImage (круг + placeholder) | [ui-components/OvaFallbackImage.md](ui-components/OvaFallbackImage.md) |

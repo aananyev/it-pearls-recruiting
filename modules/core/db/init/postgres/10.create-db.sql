@@ -499,6 +499,10 @@ create table ITPEARLS_OPEN_POSITION (
     PARENT_OPEN_POSITION_ID uuid,
     NEED_MEMO_FOR_INTERVIEW boolean,
     MEMO_FOR_INTERVIEW text,
+    RAW_DESCRIPTION text,
+    INTERVIEW_CHECKLIST text,
+    SEARCH_MAP text,
+    INTERVIEW_PLAN text,
     OWNER_ID uuid,
     CLOSING_DATE date,
     --
@@ -1292,3 +1296,43 @@ create table ITPEARLS_APPLICATION_SETUP (
     primary key (ID)
 )^
 -- end ITPEARLS_APPLICATION_SETUP
+-- begin ITPEARLS_USER_AI_CONFIGURATION
+create table ITPEARLS_USER_AI_CONFIGURATION (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    USER_ID uuid not null,
+    PROVIDER_CODE varchar(64),
+    API_KEY varchar(512),
+    DEFAULT_MODEL_NAME varchar(128),
+    IS_ACTIVE boolean,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_USER_AI_CONFIGURATION
+-- begin ITPEARLS_VACANCY_PROMPT_TEMPLATE
+create table ITPEARLS_VACANCY_PROMPT_TEMPLATE (
+    ID uuid,
+    VERSION integer not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    --
+    CODE varchar(64) not null,
+    NAME varchar(255) not null,
+    PROMPT_TEXT text,
+    SYSTEM_CONTEXT varchar(1000),
+    TEMPERATURE double precision,
+    --
+    primary key (ID)
+)^
+-- end ITPEARLS_VACANCY_PROMPT_TEMPLATE

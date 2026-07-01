@@ -17,10 +17,10 @@ public class ItpearlsWebTestContainer extends TestContainer {
                 "de.diedavids.cuba.dataimport",
                 "com.haulmont.addon.dashboard",
                 "com.haulmont.addon.helium",
-                "com.haulmont.charts",
                 "com.haulmont.fts",
-                "com.haulmont.bpm",
-                "com.haulmont.reports");
+                "com.haulmont.charts",
+                "com.haulmont.reports",
+                "com.haulmont.bpm");
         appPropertiesFiles = Arrays.asList(
                 "com/company/itpearls/web-app.properties",
                 "com/haulmont/cuba/web/testsupport/test-web-app.properties");

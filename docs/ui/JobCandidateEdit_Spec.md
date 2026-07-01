@@ -51,9 +51,9 @@ View `extends="_local"` с коллекциями `fetch="BATCH"`:
 | `iteractionList` | BATCH | `_local`; `vacancy` → `openPosition-iteraction-list-picker-view`; `iteractionType` → `iteraction-list-type-view`; `recrutier` → `extUser-picker-view` | Грид взаимодействий, фильтр, suggest-иконки, lastProject generators |
 | `socialNetwork` | BATCH | `_local` + `socialNetworkURL.logo`, `comment` | Таблица соцсетей, `enableDisableContacts` |
 | `positionList` | BATCH | `_local` → `positionList` `_local` | `addPositionList`, `suggestOpenPositionDl` |
-| `laborAgreement`, `cityOfResidence`, `currentCompany` (+ `companyGroup`), `fileImageFace`, `personPosition` | LAZY | `_local` | Карточка, вкладка кандидата |
+| `cityOfResidence`, `currentCompany` (+ `companyGroup`), `fileImageFace`, `personPosition` | LAZY | `_local` | Карточка, вкладка кандидата |
 
-Вложенные collection containers: `jobCandidateCandidateCvsDc`, `jobCandidateSocialNetworksDc`, `jobCandidateIteractionDc`, `jobCandidateLaborAgreementDc`.
+Вложенные collection containers: `jobCandidateCandidateCvsDc`, `jobCandidateSocialNetworksDc`, `jobCandidateIteractionDc`. (`laborAgreement` убран из view и контейнеров — вкладка Outstaffing закомментирована в UI.)
 
 ### Дополнительные loaders
 
@@ -272,6 +272,7 @@ layout (expand=tabSheetSocialNetworks)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-06-30 | fix: удалены `laborAgreement` из view и `jobCandidateLaborAgreementDc` — устранён QueryException (loader `laborAgreement` без параметра ID при `@LoadDataBeforeShow`) |
 | 2026-06-29 | Оптимизация скорости открытия вкладки tabCandidate, ленивая инициализация SuggestionFields, устранение блокирующих BackgroundTask |
 | 2026-06-29 | fix: убран промежуточный `dataContext.commit()` для NEW в `addPositionList`, `reloadCV`, `reloadInteractions`; флаг `initialInteractionAdded` |
 | 2026-06-26 | Полный разбор `JobCandidateEdit.java`: @Subscribe lifecycle, inject, validation, deferred loaders, соцсети, block/subscribe, generators, dialogs, Data View Integrity для `iteractionList.vacancy` BATCH |

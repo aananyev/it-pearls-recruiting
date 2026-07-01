@@ -1,0 +1,1 @@
+alter table itpearls_partners_subscribe_open_position rename to ITPEARLS_PARTNERS_SUBSCRIBE_OPEN_POSITION__U96422 ;

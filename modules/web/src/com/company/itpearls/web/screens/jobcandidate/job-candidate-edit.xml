@@ -45,7 +45,6 @@
                         <property name="logo" view="_local"/>
                     </property>
                 </property>
-                <property name="laborAgreement" view="_local"/>
                 <property name="cityOfResidence" view="_local"/>
                 <property name="currentCompany" view="_local">
                     <property name="companyGroup" view="_local"/>
@@ -65,8 +64,6 @@
                         property="socialNetwork"/>
             <collection id="jobCandidateIteractionDc"
                         property="iteractionList"/>
-            <collection id="jobCandidateLaborAgreementDc"
-                        property="laborAgreement"/>
         </instance>
         <keyValueCollection id="lastProjectDc">
             <loader id="lastProjectDl">

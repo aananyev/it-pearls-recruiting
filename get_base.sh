@@ -46,6 +46,23 @@ info_n() { printf "${WHITE}%s${NC}" "$*"; }
 ok()    { echo -e "${GREEN}OK${NC}"; }
 fail()  { echo -e "${RED}$*${NC}"; }
 
+# Гарантированный возврат в исходный каталог при любом выходе (ошибка или успех).
+_CLEANUP_DONE=0
+cleanup() {
+    local rc=$?
+    if [ "$_CLEANUP_DONE" -eq 1 ]; then
+        return
+    fi
+    _CLEANUP_DONE=1
+    echo -e "\n[Очистка] Возврат в исходный каталог: $CWD"
+    cd "$CWD" || true
+    trap - EXIT ERR INT TERM
+    if [ "$rc" -ne 0 ]; then
+        exit "$rc"
+    fi
+}
+trap cleanup EXIT ERR INT TERM
+
 die() {
     fail "$1"
     echo FAIL
@@ -61,6 +78,69 @@ banner() {
     echo "**                                                   **"
     echo "*******************************************************"
     echo "*******************************************************"
+}
+
+# Лог WAL/репликации на удалённом сервере (диагностика перед basebackup).
+log_remote_replication_settings() {
+    info "Запрос конфигурации репликации с сервера..."
+    {
+        echo "--- remote replication settings $(date) ---"
+        "$PSQL" -h "$db_server" -U "$db_user" -d postgres \
+            -c "SHOW max_wal_senders; SHOW wal_keep_segments; SHOW max_replication_slots;"
+        # PG14+: wal_keep_size (на PG11 сервере команда может вернуть ошибку — это нормально)
+        "$PSQL" -h "$db_server" -U "$db_user" -d postgres \
+            -c "SHOW wal_keep_size;" 2>&1 || true
+    } >>"$LOG" 2>&1 || true
+}
+
+show_log_tail() {
+    local n="${1:-15}"
+    if [ -f "$LOG" ] && [ -s "$LOG" ]; then
+        fail "Последние строки из $LOG:"
+        tail -n "$n" "$LOG" | sed 's/^/  /'
+    fi
+}
+
+check_remote_port() {
+    info_n "Проверка доступности порта 5432 на $db_server ... "
+    if command -v nc >/dev/null 2>&1; then
+        if nc -z -w 5 "$db_server" 5432 >>"$LOG" 2>&1; then
+            ok
+            return 0
+        fi
+        echo
+        fail "Порт 5432 на $db_server недоступен (nc -z)."
+        return 1
+    fi
+    if (echo >/dev/tcp/"$db_server"/5432) 2>/dev/null; then
+        ok
+        return 0
+    fi
+    echo
+    fail "Порт 5432 на $db_server недоступен (/dev/tcp)."
+    return 1
+}
+
+diagnose_psql_failure() {
+    local psql_output
+    psql_output=$(tail -n 30 "$LOG" 2>/dev/null || true)
+
+    show_log_tail 15
+    check_remote_port || true
+
+    if echo "$psql_output" | grep -qiE 'password authentication failed|authentication failed|FATAL:.*password'; then
+        fail "Диагноз: ошибка аутентификации — проверьте пароль в ~/.pgpass для $db_user@$db_server."
+    elif echo "$psql_output" | grep -qiE 'Connection refused|could not connect to server'; then
+        fail "Диагноз: connection refused — PostgreSQL не слушает порт или firewall блокирует доступ."
+    elif echo "$psql_output" | grep -qiE 'timeout|timed out|Operation timed out|No route to host'; then
+        fail "Диагноз: таймаут сети — хост недоступен или порт фильтруется."
+    elif echo "$psql_output" | grep -qiE 'SSL|ssl|certificate'; then
+        fail "Диагноз: проблема SSL (PGSSLMODE=$PGSSLMODE). Попробуйте: export PGSSLMODE=disable"
+    elif echo "$psql_output" | grep -qi 'Segmentation fault'; then
+        fail "Диагноз: segfault libpq на macOS — скрипт уже выставляет PGSSLMODE=disable; обновите клиент PostgreSQL."
+    else
+        fail "Диагноз: не удалось классифицировать ошибку — см. лог выше и ~/.pgpass (chmod 600)."
+    fi
 }
 
 # --- проверки перед стартом ---
@@ -90,17 +170,33 @@ preflight_checks() {
     info_n "Проверка соединения с $db_server ... "
     if ! "$PSQL" -h "$db_server" -U "$db_user" -d postgres -tAc "SELECT version();" >>"$LOG" 2>&1; then
         echo
-        fail "Не удалось подключиться к $db_server (см. $LOG)."
-        fail "Частая причина на macOS: segfault libpq при SSL — скрипт выставляет PGSSLMODE=disable."
-        fail "Проверьте ~/.pgpass и доступность хоста."
+        fail "Не удалось подключиться к $db_server."
+        diagnose_psql_failure
+        log_remote_replication_settings
         missing=1
     else
         ok
+        log_remote_replication_settings
     fi
 
     if [ "$missing" -ne 0 ]; then
         die "Предварительные проверки не пройдены."
     fi
+}
+
+# PGDATA задан и существует как каталог (перед rm/cp/pg_ctl)
+validate_pgdata_path() {
+    if [ -z "${PGDATA:-}" ]; then
+        die "PGDATA не задан — отмена деструктивных операций."
+    fi
+    if [ ! -d "$PGDATA" ]; then
+        die "Каталог PGDATA не существует: $PGDATA"
+    fi
+}
+
+# Минимум для pg_ctl start: PG_VERSION или postgresql.conf
+is_ready_for_pgctl_start() {
+    [ -f "$1/PG_VERSION" ] || [ -f "$1/postgresql.conf" ]
 }
 
 # Полный backup: PG_VERSION + каталог base/
@@ -120,6 +216,35 @@ is_incomplete_pgdata() {
         return 1
     fi
     return 0
+}
+
+# Порт из postgresql.conf (по умолчанию 5432).
+get_pgdata_port() {
+    local port=""
+    if [ -f "${PGDATA}/postgresql.conf" ]; then
+        port=$(grep -E '^[[:space:]]*port[[:space:]]*=' "${PGDATA}/postgresql.conf" \
+            | tail -1 | sed -E 's/^[[:space:]]*port[[:space:]]*=[[:space:]]*//;s/[[:space:]]*$//')
+    fi
+    echo "${port:-5432}"
+}
+
+# pg_ctl status: 0 — сервер запущен для данного PGDATA.
+is_postgres_running_on_pgdata() {
+    "$PG_CTL" status -D "$PGDATA" >>"$LOG" 2>&1
+}
+
+# Слушает ли кто-то указанный порт (LISTEN).
+is_port_listening() {
+    local port="$1"
+    if command -v lsof >/dev/null 2>&1; then
+        lsof -nP -iTCP:"$port" -sTCP:LISTEN >>"$LOG" 2>&1
+        return $?
+    fi
+    if command -v nc >/dev/null 2>&1; then
+        nc -z localhost "$port" >>"$LOG" 2>&1
+        return $?
+    fi
+    return 1
 }
 
 prepare_temp_directory() {
@@ -165,15 +290,18 @@ download_basebackup() {
         return
     fi
 
-    info "Загрузка base backup с $db_server (pg_basebackup, WAL stream) ..."
+    log_remote_replication_settings
+
+    info "Загрузка base backup с $db_server (pg_basebackup, --wal-method=fetch) ..."
     info "Лог: $LOG"
 
+    # fetch вместо stream (-X stream): стабильнее через сеть, без долгого WAL-streaming
     if ! "$PG_BASEBACKUP" \
         -P \
         -h "$db_server" \
         -D . \
         -U "$db_user" \
-        -X stream \
+        --wal-method=fetch \
         --checkpoint=fast \
         --no-slot \
         >>"$LOG" 2>&1; then
@@ -208,27 +336,62 @@ strip_standby_files() {
 }
 
 install_to_local_pgdata() {
+    validate_pgdata_path
+
+    if ! is_complete_pgdata "$postgre_temp_database"; then
+        die "Временный каталог не содержит полный backup — установка в PGDATA отменена."
+    fi
+
     info_n "Переход в каталог данных $PGDATA ... "
     cd "$PGDATA"
     ok
 
     info_n "Остановка локальной PostgreSQL ... "
-    if "$PG_CTL" stop -D . -m fast >>"$LOG" 2>&1; then
-        ok
-    else
+    local stop_rc=0
+    if ! "$PG_CTL" stop -D . -m fast >>"$LOG" 2>&1; then
+        stop_rc=1
+    fi
+
+    if is_postgres_running_on_pgdata; then
+        if [ "$stop_rc" -ne 0 ]; then
+            die "Не удалось остановить PostgreSQL в $PGDATA — очистка каталога отменена."
+        fi
+        sleep 2
+        if is_postgres_running_on_pgdata; then
+            die "PostgreSQL всё ещё работает в $PGDATA — очистка каталога отменена."
+        fi
+    elif [ "$stop_rc" -ne 0 ]; then
         info "не запущена (продолжаем)"
+    else
+        ok
+    fi
+
+    local pg_port
+    pg_port=$(get_pgdata_port)
+    if is_port_listening "$pg_port"; then
+        die "Порт $pg_port занят — очистка $PGDATA отменена (postgres, возможно, ещё держит файлы)."
     fi
 
     info_n "Очистка каталога данных ... "
-    find . -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+    rm -rf "${PGDATA:?}"/*
     ok
 
     info "Копирование backup из $postgre_temp_database в $PGDATA ..."
     if command -v pv >/dev/null 2>&1; then
-        file_count=$(find "$postgre_temp_database" -type f | wc -l | tr -d ' ')
-        cp -av "$postgre_temp_database"/* . 2>>"$LOG" | pv -l -s "$file_count" >/dev/null
+        file_count=$(find "$postgre_temp_database" -type f 2>/dev/null | wc -l | tr -d ' ')
+        if ! tar -cf - -C "$postgre_temp_database" . 2>>"$LOG" \
+            | pv -l -s "$file_count" 2>>"$LOG" \
+            | tar -xf - -C "$PGDATA" 2>>"$LOG"; then
+            die "Не удалось скопировать backup в $PGDATA (см. $LOG)."
+        fi
     else
-        cp -av "$postgre_temp_database"/* . >>"$LOG" 2>&1
+        if ! cp -a "$postgre_temp_database"/. "$PGDATA"/ >>"$LOG" 2>&1; then
+            die "Не удалось скопировать backup в $PGDATA (см. $LOG)."
+        fi
+    fi
+
+    if ! is_complete_pgdata "$PGDATA"; then
+        die "После копирования $PGDATA не содержит полный кластер — pg_ctl не запускается."
     fi
     ok
 
@@ -240,7 +403,15 @@ install_to_local_pgdata() {
 }
 
 archive_and_start() {
+    validate_pgdata_path
     cd "$PGDATA"
+
+    if ! is_ready_for_pgctl_start "$PGDATA"; then
+        die "В $PGDATA нет PG_VERSION и postgresql.conf — запуск PostgreSQL отменён."
+    fi
+    if ! is_complete_pgdata "$PGDATA"; then
+        die "В $PGDATA неполный кластер (нет PG_VERSION/base) — запуск PostgreSQL отменён."
+    fi
 
     info "Архивация прежней копии данных ..."
     rm -f "$old_archive" 2>>"$LOG" || true
@@ -248,10 +419,18 @@ archive_and_start() {
         mv "$new_archive" "$old_archive"
     fi
 
+    # BSD tar (macOS): tar -czf — корректные флаги -c/-z/-f; сжатие через gzip при потоке в pv
     if command -v pv >/dev/null 2>&1; then
-        tar czf - . 2>>"$LOG" | pv -p --timer --rate --bytes >"$new_archive"
+        if ! tar -cf - . 2>>"$LOG" | pv -p --timer --rate --bytes 2>>"$LOG" | gzip -c >"$new_archive"; then
+            die "Не удалось создать архив $new_archive (см. $LOG)."
+        fi
     else
-        tar czf "$new_archive" . >>"$LOG" 2>&1
+        if ! tar -czf "$new_archive" . >>"$LOG" 2>&1; then
+            die "Не удалось создать архив $new_archive (см. $LOG)."
+        fi
+    fi
+    if [ ! -s "$new_archive" ]; then
+        die "Архив $new_archive пуст или не создан."
     fi
     ok
 
@@ -296,6 +475,5 @@ install_to_local_pgdata
 archive_and_start
 sync_file_storage
 
-cd "$CWD"
 info "${GREEN}Готово. Локальная PostgreSQL: $PGDATA${NC}"
 info "Проверка: ./start-postgres11.sh status"

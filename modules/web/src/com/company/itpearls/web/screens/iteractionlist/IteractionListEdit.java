@@ -1498,18 +1498,19 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     private void setClosingDateLabel() {
-        if (vacancyFiels.getValue().getClosingDate() != null) {
+        OpenPosition vacancy = vacancyFiels.getValue();
+        if (vacancy != null && vacancy.getClosingDate() != null) {
             Date current = new Date();
             closingDateVacancyLabel.addStyleName("table-textwrap");
 
-            if (current.after(vacancyFiels.getValue().getClosingDate())) {
+            if (current.after(vacancy.getClosingDate())) {
                 closingDateVacancyLabel.addStyleName("h4-red");
 
                 SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy");
                 closingDateVacancyLabel.setValue(new StringBuilder()
                         .append(messageBundle.getMessage("msgClosingDate"))
                         .append(": ")
-                        .append(sdf.format(vacancyFiels.getValue().getClosingDate()))
+                        .append(sdf.format(vacancy.getClosingDate()))
                         .append(" ")
                         .append(messageBundle.getMessage("msgOverdue"))
                         .toString());
@@ -1520,7 +1521,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 closingDateVacancyLabel.setValue(new StringBuilder()
                         .append(messageBundle.getMessage("msgClosingDate"))
                         .append(": ")
-                        .append(sdf.format(vacancyFiels.getValue().getClosingDate()))
+                        .append(sdf.format(vacancy.getClosingDate()))
                         .toString());
             }
 

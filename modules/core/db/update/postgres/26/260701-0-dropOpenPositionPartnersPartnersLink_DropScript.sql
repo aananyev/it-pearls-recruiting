@@ -1,0 +1,1 @@
+drop table if exists ITPEARLS_OPEN_POSITION_PARTNERS_PARTNERS_LINK__U00523 cascade ;

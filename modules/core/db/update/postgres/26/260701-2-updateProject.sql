@@ -1,0 +1,2 @@
+alter table ITPEARLS_PROJECT rename column project_description_for_candidate to project_description_for_candidate__u85544 ;
+alter table ITPEARLS_PROJECT rename column project_name_for_candidate to project_name_for_candidate__u19826 ;
