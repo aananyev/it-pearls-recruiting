@@ -4,6 +4,7 @@ import com.company.itpearls.ItpearlsTestContainer;
 import com.company.itpearls.TestEntityTracker;
 import com.company.itpearls.entity.City;
 import com.company.itpearls.entity.Company;
+import com.company.itpearls.entity.CompanyDepartament;
 import com.company.itpearls.entity.Country;
 import com.company.itpearls.entity.Region;
 import com.haulmont.cuba.core.Persistence;
@@ -11,6 +12,7 @@ import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
+import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.View;
 import org.junit.After;
 import org.junit.Before;
@@ -96,9 +98,30 @@ public class CompanyServiceTest {
 
         assertEquals(1, companies.size());
         Company loaded = companies.get(0);
+        PersistenceHelper.checkLoadedWithView(loaded, "company-browse-view");
         assertEquals(company.getComanyName(), loaded.getComanyName());
         assertEquals(company.getCompanyShortName(), loaded.getCompanyShortName());
         assertNull(loaded.getCompanyDescription());
+    }
+
+    @Test
+    public void testEditViewLoadsDepartmentOfCompanyForNestedContainer() {
+        Company company = createTestCompany();
+        CompanyDepartament department = dataManager.create(CompanyDepartament.class);
+        department.setDepartamentRuName("TestDept-" + UUID.randomUUID());
+        department.setCompanyName(company);
+        department.setDepartamentNumberOfProgrammers(3);
+        tracker.track(dataManager.commit(department, "companyDepartament-edit-view"));
+
+        Company loaded = dataManager.load(Company.class)
+                .id(company.getId())
+                .view("company-edit-view")
+                .one();
+
+        PersistenceHelper.checkLoadedWithView(loaded, "company-edit-view");
+        assertTrue(PersistenceHelper.isLoaded(loaded, "departmentOfCompany"));
+        assertNotNull(loaded.getDepartmentOfCompany());
+        assertFalse(loaded.getDepartmentOfCompany().isEmpty());
     }
 
     @Test

@@ -109,11 +109,6 @@ public class CompanyBrowse extends StandardLookup<Company> {
         return companyDescriptionCache.get(company.getId());
     }
 
-    @Subscribe
-    public void onBeforeShow(BeforeShowEvent event) {
-        filterOurClients();
-    }
-
     @Subscribe("checkBoxOnlyOurClient")
     public void onCheckBoxOnlyOurClientValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         filterOurClients();
