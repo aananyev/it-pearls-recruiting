@@ -1,6 +1,6 @@
 package com.company.hunttech.web.gui.components;
 
-import com.company.itpearls.gui.components.OvalImage;
+import com.company.hunttech.gui.components.OvalImage;
 import com.haulmont.cuba.web.gui.components.WebImage;
 import com.haulmont.cuba.web.widgets.CubaImage;
 import org.apache.commons.lang3.StringUtils;

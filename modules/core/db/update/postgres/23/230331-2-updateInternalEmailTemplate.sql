@@ -1,1 +1,1 @@
-alter table ITPEARLS_INTERNAL_EMAIL_TEMPLATE add column TEMPLATE_SUBJ varchar(255) ;
+alter table HUNTTECH_INTERNAL_EMAIL_TEMPLATE add column TEMPLATE_SUBJ varchar(255) ;

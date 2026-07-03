@@ -1,1 +1,1 @@
-drop table if exists ITPEARLS_INTERVIEW__U84593 cascade ;
+drop table if exists HUNTTECH_INTERVIEW__U84593 cascade ;

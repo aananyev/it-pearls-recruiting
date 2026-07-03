@@ -1,1 +1,1 @@
-alter table ITPEARLS_SOCIAL_NETWORK_UR_LS add column JOB_CANDIDATE_ID varchar(36) ;
+alter table HUNTTECH_SOCIAL_NETWORK_UR_LS add column JOB_CANDIDATE_ID varchar(36) ;

@@ -1,4 +1,4 @@
-create table ITPEARLS_REQUIRED_PARAMETERS (
+create table HUNTTECH_REQUIRED_PARAMETERS (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,

@@ -1,4 +1,4 @@
-create table ITPEARLS_OUTSTAFFING_RATES (
+create table HUNTTECH_OUTSTAFFING_RATES (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

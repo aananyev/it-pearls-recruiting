@@ -1,4 +1,4 @@
-create table ITPEARLS_USER_AI_CONFIGURATION (
+create table HUNTTECH_USER_AI_CONFIGURATION (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

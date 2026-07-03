@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://editorCaption"
+        messagesPack="com.company.hunttech.web.screens.candidatecv" icon="FILE_WORD_O">
+    <data>
+        <collection id="openPositionsDc"
+                    class="com.company.hunttech.entity.OpenPosition">
+            <view extends="openPosition-view">
+                <property name="projectName" view="_local">
+                    <property name="projectDepartment" view="_local">
+                        <property name="companyName" view="_local">
+                            <property name="companyOwnership" view="_local"/>
+                        </property>
+                    </property>
+                </property>
+            </view>
+            <loader id="openPositionsDl"
+                    cacheable="true">
+                <query>
+                    <![CDATA[select e from hunttech_OpenPosition e order by e.openClose, e.vacansyName]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                e in (select k.openPosition from hunttech_RecrutiesTasks k
+                                where k.reacrutier = :subscriber
+                                and k.closed = false
+                                and current_date between k.startDate and k.endDate)
+                            </c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <instance id="candidateCVDc"
+                  class="com.company.hunttech.entity.CandidateCV">
+            <view extends="candidateCV-view">
+                <property name="toVacancy" view="_local">
+                    <property name="projectName" view="_local">
+                        <property name="projectDepartment" view="_local"/>
+                    </property>
+                    <property name="grade" view="_local"/>
+                </property>
+                <property name="candidate" view="_local">
+                    <property name="fileImageFace" view="_local"/>
+                    <property name="personPosition" view="_local"/>
+                </property>
+                <property name="someFiles" view="_local">
+                    <property name="fileType" view="_minimal"/>
+                    <property name="fileDescriptor" view="_minimal"/>
+                    <property name="fileOwner" view="_minimal"/>
+                </property>
+            </view>
+            <loader/>
+            <collection id="someFilesesDc"
+                        property="someFiles"/>
+            <collection id="skillTreesDc"
+                        property="skillTree">
+                <view extends="skillTree-cv-tab-view"/>
+            </collection>
+        </instance>
+        <collection id="resumePositionsDc"
+                    class="com.company.hunttech.entity.Position"
+                    view="_local">
+            <loader id="resumePositionsLc"
+                    cacheable="true">
+                <query>
+                    <![CDATA[select e from hunttech_Position e where e.positionRuName not like '%(не использовать)%' order by e.positionRuName]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="usersDc"
+                    class="com.haulmont.cuba.security.entity.User"
+                    view="_local">
+            <loader id="usersDl"
+                    cacheable="true">
+                <query>
+                    <![CDATA[select e from sec$User e order by e.name]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="800"
+                modal="true"
+                width="1200"/>
+    <layout expand="tabSheet"
+            spacing="true"
+            height="100%"
+            width="100%">
+        <groupBox spacing="true" expand="candidateLabel">
+            <hbox id="candidateLabel"
+                  spacing="true"
+                  width="100%">
+                <vbox box.expandRatio="4"
+                      align="TOP_LEFT">
+                    <label id="iteractionListLabelCandidate"
+                           stylename="h2"
+                           align="TOP_LEFT"
+                           dataContainer="candidateCVDc"
+                           property="candidate.fullName"/>
+                    <hbox spacing="true">
+                        <label id="iteractionListLabelPosition"
+                               stylename="h3"
+                               align="TOP_LEFT"
+                               dataContainer="candidateCVDc"
+                               property="candidate.personPosition"/>
+                        <label id="labelLastRecrutier"/>
+                        <label id="machRegexpFromCV"/>
+                    </hbox>
+                </vbox>
+                <hbox box.expandRatio="4"
+                      stylename="quote-border"
+                      visible="false"
+                      width="100%"
+                      expand="quoteTextArea">
+                    <textArea id="quoteTextArea"
+                              align="MIDDLE_LEFT"
+                              width="100%"
+                              visible="false"
+                              editable="false"
+                              rows="2"
+                              height="100%"
+                              stylename="quote-border"/>
+                </hbox>
+            </hbox>
+        </groupBox>
+        <tabSheet id="tabSheet"
+                  stylename="framed">
+            <tab id="tabCandidate"
+                 caption="msg://msgCandidate"
+                 expand="candidateScrolBox"
+                 margin="true,true,true,true"
+                 spacing="true">
+                <scrollBox id="candidateScrolBox"
+                           width="100%"
+                           height="100%">
+                    <hbox id="candidateVbox"
+                          spacing="true"
+                          width="100%"
+                          height="100%"
+                          align="TOP_LEFT"
+                          expand="groupBox">
+                        <vbox id="groupBox"
+                              spacing="true"
+                              stylename="light">
+                            <vbox spacing="true">
+                                <suggestionPickerField id="candidateField"
+                                                       inputPrompt="mainMsg://msgStartInput"
+                                                       minSearchStringLength="3"
+                                                       rowspan="1"
+                                                       colspan="1"
+                                                       caption="msg://msgCandidate"
+                                                       width="70%"
+                                                       required="true"
+                                                       dataContainer="candidateCVDc"
+                                                       property="candidate">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                        <action id="open" type="picker_open"/>
+                                    </actions>
+                                    <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                           escapeValueForLike="true"
+                                           searchStringFormat="%$searchString%">
+                                        select e
+                                        from hunttech_JobCandidate e
+                                        where lower(e.fullName) like lower(:searchString) escape '\'
+                                        and e.middleName not like '(не использовать)'
+                                        and not e.blockCandidate = true
+                                        order by e.fullName
+                                    </query>
+                                </suggestionPickerField>
+                                <lookupPickerField id="resumePositionField"
+                                                   optionsContainer="resumePositionsDc"
+                                                   dataContainer="candidateCVDc"
+                                                   property="resumePosition"
+                                                   caption="msg://msgPosition"
+                                                   height="50%"
+                                                   required="true"
+                                                   width="70%">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <vbox width="70%" spacing="true">
+                                    <lookupPickerField id="candidateCVFieldOpenPosition"
+                                                       dataContainer="candidateCVDc"
+                                                       optionsContainer="openPositionsDc"
+                                                       property="toVacancy"
+                                                       caption="mainMsg://msgVacancy"
+                                                       width="100%">
+                                        <actions>
+                                            <action id="lookup"
+                                                    type="picker_lookup"/>
+                                            <action id="open"
+                                                    type="picker_open"/>
+                                        </actions>
+                                    </lookupPickerField>
+                                    <checkBox id="onlyMySubscribeCheckBox"
+                                              align="TOP_RIGHT"
+                                              width="AUTO"
+                                              description="msg://msgOnlyMySebscribeDec"
+                                              caption="msg://msgOnlyMySubscribe"/>
+                                </vbox>
+                            </vbox>
+                            <lookupField id="СandidateCVField"
+                                         dataContainer="candidateCVDc"
+                                         optionsContainer="usersDc"
+                                         caption="mainMsg://msgOwner"
+                                         property="owner"
+                                         width="70%"/>
+
+                            <vbox expand="fileOriginalCVField"
+                                  width="70%"
+                                  spacing="true">
+                                <hbox width="100%"
+                                      expand="textFieldIOriginalCV"
+                                      spacing="true">
+                                    <textField id="textFieldIOriginalCV"
+                                               dataContainer="candidateCVDc"
+                                               property="linkOriginalCv"
+                                               caption="mainMsg://msgLinkOriginalCV"
+                                               align="MIDDLE_LEFT"/>
+                                    <button id="loadToCVTextArea"
+                                            icon="font-icon:DOWNLOAD"
+                                            align="BOTTOM_LEFT"
+                                            caption="msg://msgLoadToCVTextArea"
+                                            enable="false"
+                                            description="msg://msgLoarToTextAreaDecription"
+                                            invoke="loadToCVTextArea"/>
+                                    <link id="originalCVLink"
+                                          icon="font-icon:FILE_WORD_O"
+                                          align="BOTTOM_LEFT"
+                                          target="_blank"
+                                          width="AUTO"
+                                          caption="msg://msgGoTo"
+                                          description="msg://msgGoTo"/>
+                                </hbox>
+                                <upload id="fileOriginalCVField"
+                                        property="originalFileCV"
+                                        showFileName="true"
+                                        align="TOP_RIGHT"
+                                        width="AUTO"
+                                        description="msg://msgOriginalCV"
+                                        dataContainer="candidateCVDc"
+                                        fileStoragePutMode="IMMEDIATE"
+                                        showClearButton="true"/>
+                            </vbox>
+                            <vbox expand="fileCVField"
+                                  width="70%"
+                                  spacing="true">
+                                <hbox width="100%"
+                                      expand="textFieldHuntTechCV"
+                                      spacing="true">
+                                    <textField id="textFieldHuntTechCV"
+                                               dataContainer="candidateCVDc"
+                                               property="linkHuntTechCV"
+                                               caption="mainMsg://msgLinkToHuntTechCV"
+                                               align="MIDDLE_LEFT"/>
+                                    <link id="HuntTechCVLink"
+                                          icon="font-icon:FILE_WORD_O"
+                                          align="BOTTOM_LEFT"
+                                          target="_blank"
+                                          width="AUTO"
+                                          caption="msg://msgGoTo"
+                                          description="msg://msgGoTo"/>
+                                </hbox>
+                                <upload id="fileCVField"
+                                        fileStoragePutMode="IMMEDIATE"
+                                        property="fileCV"
+                                        showFileName="true"
+                                        align="TOP_RIGHT"
+                                        width="AUTO"
+                                        description="msg://msgCV"
+                                        dataContainer="candidateCVDc"
+                                        showClearButton="true"/>
+                            </vbox>
+                        </vbox>
+                        <vbox id="dropZone"
+                              spacing="true"
+                              width="220px"
+                              height="292px"
+                              align="TOP_RIGHT"
+                              expand="picVBox"
+                              stylename="dropzone-container">
+                            <vbox id="picVBox">
+                                <image id="candidatePic"
+                                       dataContainer="candidateCVDc"
+                                       property="fileImageFace"
+                                       width="100%"
+                                       align="TOP_RIGHT"
+                                       height="100%"
+                                       stylename="widget-border"
+                                       scaleMode="FILL"/>
+                                <image id="candidateFaceDefaultImage"
+                                       width="100%"
+                                       height="100%"
+                                       visible="false"
+                                       align="TOP_RIGHT"
+                                       stylename="widget-border"
+                                       scaleMode="FILL">
+                                    <theme path="icons/no-programmer.jpeg"/>
+                                </image>
+                            </vbox>
+                            <upload id="fileImageFaceUpload"
+                                    fileStoragePutMode="IMMEDIATE"
+                                    dataContainer="candidateCVDc"
+                                    align="BOTTOM_CENTER"
+                                    showFileName="false"
+                                    dropZone="dropZone"
+                                    showClearButton="true"
+                                    property="fileImageFace"/>
+                        </vbox>
+                    </hbox>
+                </scrollBox>
+            </tab>
+            <tab id="tabCV"
+                 caption="msg://msgCV"
+                 margin="true,true,true,true"
+                 expand="cvVbox"
+                 spacing="true">
+                <vbox id="cvVbox"
+                      spacing="true"
+                      width="100%"
+                      height="100%"
+                      expand="candidateCVHBox">
+                    <hbox spacing="true">
+                        <button id="rescanSkills"
+                                caption="msg://msgRescanResume"
+                                align="BOTTOM_LEFT"
+                                invoke="rescanCV"/>
+                        <button id="resumeRecognitionButton"
+                                caption="msg://msgResumeRecognition"
+                                align="BOTTOM_LEFT"
+                                invoke="resumeRecognition"/>
+                        <button id="convertToTextButton"
+                                caption="msg://msgConvertToText"
+                                align="BOTTOM_LEFT"
+                                enable="false"
+                                invoke="convertToText"/>
+                        <button id="showOriginalButon"
+                                caption="msg://msgShowOriginal"
+                                align="BOTTOM_LEFT"
+                                invoke="showOriginalText"/>
+                    </hbox>
+                    <hbox id="candidateCVHBox"
+                          expand="candidateCVRichTextArea"
+                          height="100%"
+                          spacing="true"
+                          width="100%">
+                        <richTextArea id="candidateCVRichTextArea"
+                                      width="100%"
+                                      height="100%"
+                                      box.expandRatio="4"
+                                      captionAsHtml="true"
+                                      descriptionAsHtml="true"
+                                      required="true"/>
+                        <richTextArea id="cvResomandation"
+                                      width="100%"
+                                      height="100%"
+                                      editable="false"
+                                      box.expandRatio="1"
+                                      stylename="borderless"/>
+                    </hbox>
+                </vbox>
+            </tab>
+            <tab id="tabLetter"
+                 caption="msg://msgLetter"
+                 margin="true,true,true,true"
+                 expand="letterHBox"
+                 spacing="true">
+                <hbox id="letterHBox"
+                      width="100%"
+                      expand="letterVbox"
+                      spacing="true"
+                      height="100%">
+                    <vbox id="letterVbox"
+                          spacing="true"
+                          width="100%"
+                          height="100%"
+                          box.expandRatio="4"
+                          expand="letterRichTextArea">
+                        <richTextArea id="questionLetterRichTextArea"
+                                      width="100%"
+                                      editable="false"
+                                      visible="false"
+                                      caption="msg://msgPatternLetter"
+                                      stylename="text-field-title-form"
+                                      height="100%"/>
+                        <richTextArea id="letterRichTextArea"
+                                      dataContainer="candidateCVDc"
+                                      property="letter"
+                                      height="100%"
+                                      caption="msg://msgLetter"
+                                      width="100%"/>
+                        <richTextArea id="commentLetterRichTextArea"
+                                      dataContainer="candidateCVDc"
+                                      property="commentLetter"
+                                      caption="msg://msgCommentLetter"
+                                      height="25%"/>
+                    </vbox>
+                    <richTextArea id="letterRecommendation"
+                                  width="100%"
+                                  height="100%"
+                                  stylename="borderless"
+                                  visible="false"
+                                  editable="false"
+                                  box.expandRatio="1"/>
+                </hbox>
+            </tab>
+            <tab id="tabSkillTree"
+                 caption="msg://msgCVSkillTree"
+                 margin="true,true,true,true"
+                 expand="skillBox"
+                 spacing="true">
+                <vbox id="skillBox"
+                      width="100%"
+                      expand="skillTreesTable"
+                      spacing="true">
+                    <buttonsPanel>
+                        <button id="rescanResume"
+                                caption="msg://msgRescanResume"
+                                align="BOTTOM_LEFT"
+                                invoke="rescanCV"/>
+                        <button id="checkSkillFromJD"
+                                caption="msg://msgCheckSkills"
+                                align="BOTTOM_LEFT"
+                                invoke="checkSkillFromJD"/>
+                    </buttonsPanel>
+                    <treeDataGrid id="skillTreesTable"
+                                  width="100%"
+                                  dataContainer="skillTreesDc"
+                                  hierarchyColumn="skillName"
+                                  hierarchyProperty="skillTree">
+                        <columns>
+                            <column id="skillName"
+                                    caption="mainMsg://msgSkill"
+                                    width="300px"
+                                    maximumWidth="350px"
+                                    sort="ASCENDING"
+                                    property="skillName"/>
+                            <column id="specialisation"
+                                    width="300px"
+                                    maximumWidth="350px"
+                                    property="specialisation"
+                                    caption="msg://msgSpecialisation"/>
+                            <column id="wikiPage"
+                                    maximumWidth="500px"
+                                    width="500px"
+                                    caption="msg://msgWikiPage">
+                                <componentRenderer/>
+                            </column>
+                            <column id="isComment"
+                                    caption="msg://msgIsComment"
+                                    width="100px"
+                                    maximumWidth="120px">
+                                <iconRenderer/>
+                            </column>
+                        </columns>
+                        <rowsCount/>
+                    </treeDataGrid>
+                </vbox>
+            </tab>
+            <tab id="tabFiles"
+                 caption="mainMsg://msgFiles"
+                 margin="true,true,true,true"
+                 spacing="true"
+                 expand="someFilesVbox">
+                <vbox id="someFilesVbox"
+                      spacing="true"
+                      expand="someFilesTable"
+                      width="100%">
+                    <table id="someFilesTable"
+                           height="300px"
+                           width="100%"
+                           dataContainer="someFilesesDc">
+                        <columns>
+                            <column id="fileDescription"/>
+                            <column id="fileType.nameFileType"/>
+                            <column id="fileComment"/>
+                            <column id="fileDescriptor.size"/>
+                            <column id="fileOwner.name" caption="mainMsg://msgOwner"/>
+                        </columns>
+                        <buttonsPanel>
+                            <button action="someFilesTable.create"/>
+                            <button action="someFilesTable.edit"/>
+                            <button action="someFilesTable.remove"/>
+                        </buttonsPanel>
+                        <actions>
+                            <action id="add" type="add"/>
+                            <action type="create" id="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                    </table>
+                </vbox>
+            </tab>
+        </tabSheet>
+        <hbox id="editActions"
+              spacing="true"
+              width="100%"
+              height="AUTO"
+              margin="true,true,true,true"
+              align="BOTTOM_RIGHT">
+            <dateField id="datePostField"
+                       align="TOP_LEFT"
+                       dataContainer="candidateCVDc"
+                       property="datePost"
+                       caption="msg://msgDatePost"
+                       width="AUTO"/>
+            <hbox align="BOTTOM_RIGHT"
+                  spacing="true">
+                <button action="windowCommitAndClose"
+                        align="BOTTOM_RIGHT"/>
+                <button action="windowClose"
+                        align="BOTTOM_RIGHT"/>
+            </hbox>
+        </hbox>
+    </layout>
+</window>

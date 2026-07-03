@@ -1,1 +1,1 @@
-alter table ITPEARLS_EMPLOYEE add column CURRENCY_ID uuid ;
+alter table HUNTTECH_EMPLOYEE add column CURRENCY_ID uuid ;

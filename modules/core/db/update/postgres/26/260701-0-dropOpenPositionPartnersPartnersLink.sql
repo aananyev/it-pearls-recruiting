@@ -1,1 +1,1 @@
-alter table itpearls_open_position_partners_partners_link rename to ITPEARLS_OPEN_POSITION_PARTNERS_PARTNERS_LINK__U00523 ;
+alter table hunttech_open_position_partners_partners_link rename to HUNTTECH_OPEN_POSITION_PARTNERS_PARTNERS_LINK__U00523 ;

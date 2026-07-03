@@ -1,4 +1,4 @@
-create table ITPEARLS_SKILLS_FILTER_LAST_SELECTION (
+create table HUNTTECH_SKILLS_FILTER_LAST_SELECTION (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

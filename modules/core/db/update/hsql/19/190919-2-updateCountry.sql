@@ -1,1 +1,1 @@
-alter table ITPEARLS_COUNTRY add column PHONE_CODE integer ;
+alter table HUNTTECH_COUNTRY add column PHONE_CODE integer ;

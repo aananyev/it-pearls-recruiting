@@ -1,4 +1,4 @@
-create table ITPEARLS_OPEN_POSITION_COMMENT (
+create table HUNTTECH_OPEN_POSITION_COMMENT (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

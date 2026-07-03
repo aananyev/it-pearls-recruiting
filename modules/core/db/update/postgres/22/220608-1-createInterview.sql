@@ -1,4 +1,4 @@
-create table ITPEARLS_INTERVIEW (
+create table HUNTTECH_INTERVIEW (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

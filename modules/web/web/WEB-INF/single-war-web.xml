@@ -10,7 +10,7 @@
         <description>List of app properties files for Web Client</description>
         <param-name>appPropertiesConfigWeb</param-name>
         <param-value>
-            classpath:com/company/itpearls/web-app.properties
+            classpath:com/company/hunttech/web-app.properties
             /WEB-INF/local.app.properties
             "file:${app.home}/local.app.properties"
         </param-value>
@@ -23,7 +23,7 @@
         <description>List of app properties files for Middleware</description>
         <param-name>appPropertiesConfigCore</param-name>
         <param-value>
-            classpath:com/company/itpearls/app.properties
+            classpath:com/company/hunttech/app.properties
             /WEB-INF/local.app.properties
             "file:${app.home}/local.app.properties"
         </param-value>

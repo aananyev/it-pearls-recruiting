@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<components xmlns="http://schemas.haulmont.com/cuba/components.xsd">
+    <component>
+        <name>fallbackImage</name>
+        <class>com.hunttech.hrm.web.components.WebFallbackImage</class>
+        <componentLoader>com.hunttech.hrm.web.loaders.FallbackImageLoader</componentLoader>
+    </component>
+    <component>
+        <name>ovalImage</name>
+        <class>com.company.hunttech.web.gui.components.WebOvalImage</class>
+        <componentLoader>com.company.hunttech.web.gui.xml.layout.loaders.OvalImageLoader</componentLoader>
+    </component>
+</components>

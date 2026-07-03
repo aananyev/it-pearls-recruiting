@@ -3,10 +3,10 @@ description: >-
   Формат «История изменений» (YYYY-MM-DD) при синхронизации docs с кодом.
   Дополняет living-documentation.mdc — не заменяет Definition of Done.
 globs:
-  - modules/global/src/com/company/itpearls/entity/**/*.java
-  - modules/global/src/com/company/itpearls/views.xml
-  - modules/web/src/com/company/itpearls/web/screens/**/*
-  - modules/core/src/com/company/itpearls/**/*.java
+  - modules/global/src/com/company/hunttech/entity/**/*.java
+  - modules/global/src/com/company/hunttech/views.xml
+  - modules/web/src/com/company/hunttech/web/screens/**/*
+  - modules/core/src/com/company/hunttech/**/*.java
   - modules/core/db/**/*
   - docs/entities/**/*.md
 alwaysApply: false
@@ -19,7 +19,7 @@ alwaysApply: false
 
 При изменении структуры сущности, экранов, форм, сервисов, бизнес-логики или схемы БД — обновить документ по Living Documentation и добавить запись в **«История изменений»**.
 
-**Брендинг:** в тексте документации — **HRM HuntTech**; не «IT Pearls», кроме цитирования legacy-идентификаторов из кода (см. [living-documentation.mdc](living-documentation.mdc), § «Брендинг в документации»).
+**Брендинг:** в тексте документации — **HRM HuntTech**; не «HuntTech», кроме цитирования legacy-идентификаторов из кода (см. [living-documentation.mdc](living-documentation.mdc), § «Брендинг в документации»).
 
 ## Когда обновлять
 

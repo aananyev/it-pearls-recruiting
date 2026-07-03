@@ -1,1 +1,1 @@
-alter table ITPEARLS_OPEN_POSITION drop column UUID__U93104 cascade ;
+alter table HUNTTECH_OPEN_POSITION drop column UUID__U93104 cascade ;

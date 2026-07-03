@@ -1,1 +1,1 @@
-alter table ITPEARLS_SKILL rename to ITPEARLS_SKILL__U65193 ;
+alter table HUNTTECH_SKILL rename to HUNTTECH_SKILL__U65193 ;

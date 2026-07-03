@@ -1,4 +1,4 @@
-# JobCandidate Edit (`JobCandidateEdit` / `itpearls_JobCandidate.edit`)
+# JobCandidate Edit (`JobCandidateEdit` / `hunttech_JobCandidate.edit`)
 
 > Форма редактирования карточки кандидата HRM HuntTech.
 > Сущность: [JobCandidate.md](../entities/JobCandidate.md)
@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Открывается из `itpearls_JobCandidate.browse` (edit/create), detail-фрагмента, lookup. Дочерние: `CandidateCVEdit`, `IteractionListEdit`, `SelectPersonPositions`, pickers Company/City/Position.
+Открывается из `hunttech_JobCandidate.browse` (edit/create), detail-фрагмента, lookup. Дочерние: `CandidateCVEdit`, `IteractionListEdit`, `SelectPersonPositions`, pickers Company/City/Position.
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -25,8 +25,8 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **@UiController** | `itpearls_JobCandidate.edit` |
-| **Java-класс** | `com.company.itpearls.web.screens.jobcandidate.JobCandidateEdit` |
+| **@UiController** | `hunttech_JobCandidate.edit` |
+| **Java-класс** | `com.company.hunttech.web.screens.jobcandidate.JobCandidateEdit` |
 | **XML-дескриптор** | `job-candidate-edit.xml` |
 | **Базовый класс** | `StandardEditor<JobCandidate>` |
 | **EditedEntityContainer** | `jobCandidateDc` |
@@ -131,7 +131,7 @@ Default-вакансия: `openPositionService.getOpenPositionDefault()` (не �
 
 - `jobCandidateIteractionListTable`: `vacancy` (logo, openClose), `iteractionType` (pic, iterationName), `rating`, `numberIteraction`, `recrutier`, `dateIteraction`, `comment`
 - `lastProjectTable`: `vacancy`, обход `jobCandidateIteractionDc` по типам взаимодействия
-- `jobCandidateCandidateCvTable`: `toVacancy.projectName`, `resumePosition`, `datePost`, `linkOriginalCv`, `linkItPearlsCV`, `letter`, `textCV`
+- `jobCandidateCandidateCvTable`: `toVacancy.projectName`, `resumePosition`, `datePost`, `linkOriginalCv`, `linkHuntTechCV`, `letter`, `textCV`
 - `socialNetworkTable`: `socialNetworkURL.logo`, `networkURLS`
 - `jobCandidateCommentsDataGrid`: `comment`, `dateIteraction`, `recrutier`, `vacancy.vacansyName`
 - `suggestVacancyTable`: `vacansyName`, статус по `iteractionList` + `iteractionType` signs
@@ -142,16 +142,16 @@ Default-вакансия: `openPositionService.getOpenPositionDefault()` (не �
 
 ```mermaid
 flowchart TD
-    Browse[itpearls_JobCandidate.browse] --> Edit[itpearls_JobCandidate.edit]
-    Edit --> SelectPos[itpearls_SelectPersonPositions]
-    Edit --> MasterBrowse[itpearls_OpenPositionMaster.browse]
+    Browse[hunttech_JobCandidate.browse] --> Edit[hunttech_JobCandidate.edit]
+    Edit --> SelectPos[hunttech_SelectPersonPositions]
+    Edit --> MasterBrowse[hunttech_OpenPositionMaster.browse]
     Edit --> CVEdit[CandidateCVEdit via DataGrid]
     Edit --> IteractionEdit[IteractionListEdit via DataGrid]
     Edit --> IteractionBrowse[IteractionListSimpleBrowse]
-    Edit --> QuickView[itpearls_QuickViewOpenPositionDescription]
+    Edit --> QuickView[hunttech_QuickViewOpenPositionDescription]
     Edit --> SkillCheck[SkillTreeBrowseCheck]
     Edit --> Subscribe[SubscribeCandidateAction]
-    Browse --> ImageFace[itpearls_JobCandidateImageFace]
+    Browse --> ImageFace[hunttech_JobCandidateImageFace]
 ```
 
 | Связь | Экран / класс | Открытие из Java | Параметры |
@@ -209,7 +209,7 @@ flowchart TD
 | Перед сохранением | Новый | Автовзаимодействие «Новый контакт», rating=4, vacancy Default; ошибка если нет типа или Default |
 | После редактирования соцсети в гриде | EditorPostCommit | Пересчёт required контактов |
 | Комментарий в чате | createComment | Для существующего кандидата — `dataContext.commit()` + reload; для NEW — только repaint (commit при OK) |
-| addPositionList / reloadCV / reloadInteractions | NEW кандидат | Только `dataContext.merge` и repaint; без промежуточного commit (избегает `itpearls_job_candidate_pkey`) |
+| addPositionList / reloadCV / reloadInteractions | NEW кандидат | Только `dataContext.merge` и repaint; без промежуточного commit (избегает `hunttech_job_candidate_pkey`) |
 
 ---
 

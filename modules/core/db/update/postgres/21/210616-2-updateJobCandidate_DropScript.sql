@@ -1,1 +1,1 @@
-alter table ITPEARLS_JOB_CANDIDATE drop column OPEN_POSITION_ID__U58501 cascade ;
+alter table HUNTTECH_JOB_CANDIDATE drop column OPEN_POSITION_ID__U58501 cascade ;

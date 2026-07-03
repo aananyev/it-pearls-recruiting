@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`itpearls_OpenPositionComment.browse`, `itpearls_OpenPositionComment.edit`; вкладка/попап в OpenPositionBrowse и Edit. UI Spec: [browse](../ui/itpearls_OpenPositionComment.browse_Spec.md), [edit](../ui/itpearls_OpenPositionComment.edit_Spec.md).
+`hunttech_OpenPositionComment.browse`, `hunttech_OpenPositionComment.edit`; вкладка/попап в OpenPositionBrowse и Edit. UI Spec: [browse](../ui/hunttech_OpenPositionComment.browse_Spec.md), [edit](../ui/hunttech_OpenPositionComment.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 

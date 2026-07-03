@@ -1,4 +1,4 @@
-create table ITPEARLS_STAFF_CURRENT (
+create table HUNTTECH_STAFF_CURRENT (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

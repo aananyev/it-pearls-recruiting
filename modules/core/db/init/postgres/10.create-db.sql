@@ -1,5 +1,5 @@
--- begin ITPEARLS_SOCIAL_NETWORK_UR_LS
-create table ITPEARLS_SOCIAL_NETWORK_UR_LS (
+-- begin HUNTTECH_SOCIAL_NETWORK_UR_LS
+create table HUNTTECH_SOCIAL_NETWORK_UR_LS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -16,9 +16,9 @@ create table ITPEARLS_SOCIAL_NETWORK_UR_LS (
     --
     primary key (ID)
 )^
--- end ITPEARLS_SOCIAL_NETWORK_UR_LS
--- begin ITPEARLS_JOB_CANDIDATE
-create table ITPEARLS_JOB_CANDIDATE (
+-- end HUNTTECH_SOCIAL_NETWORK_UR_LS
+-- begin HUNTTECH_JOB_CANDIDATE
+create table HUNTTECH_JOB_CANDIDATE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -54,9 +54,9 @@ create table ITPEARLS_JOB_CANDIDATE (
     --
     primary key (ID)
 )^
--- end ITPEARLS_JOB_CANDIDATE
--- begin ITPEARLS_COMPANY_DEPARTAMENT
-create table ITPEARLS_COMPANY_DEPARTAMENT (
+-- end HUNTTECH_JOB_CANDIDATE
+-- begin HUNTTECH_COMPANY_DEPARTAMENT
+create table HUNTTECH_COMPANY_DEPARTAMENT (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -76,9 +76,9 @@ create table ITPEARLS_COMPANY_DEPARTAMENT (
     --
     primary key (ID)
 )^
--- end ITPEARLS_COMPANY_DEPARTAMENT
--- begin ITPEARLS_ITERACTION_LIST
-create table ITPEARLS_ITERACTION_LIST (
+-- end HUNTTECH_COMPANY_DEPARTAMENT
+-- begin HUNTTECH_ITERACTION_LIST
+create table HUNTTECH_ITERACTION_LIST (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -108,9 +108,9 @@ create table ITPEARLS_ITERACTION_LIST (
     --
     primary key (ID)
 )^
--- end ITPEARLS_ITERACTION_LIST
--- begin ITPEARLS_CANDIDATE_CV
-create table ITPEARLS_CANDIDATE_CV (
+-- end HUNTTECH_ITERACTION_LIST
+-- begin HUNTTECH_CANDIDATE_CV
+create table HUNTTECH_CANDIDATE_CV (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -138,9 +138,9 @@ create table ITPEARLS_CANDIDATE_CV (
     --
     primary key (ID)
 )^
--- end ITPEARLS_CANDIDATE_CV
--- begin ITPEARLS_COMPANY
-create table ITPEARLS_COMPANY (
+-- end HUNTTECH_CANDIDATE_CV
+-- begin HUNTTECH_COMPANY
+create table HUNTTECH_COMPANY (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -167,9 +167,9 @@ create table ITPEARLS_COMPANY (
     --
     primary key (ID)
 )^
--- end ITPEARLS_COMPANY
--- begin ITPEARLS_REGION
-create table ITPEARLS_REGION (
+-- end HUNTTECH_COMPANY
+-- begin HUNTTECH_REGION
+create table HUNTTECH_REGION (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -185,9 +185,9 @@ create table ITPEARLS_REGION (
     --
     primary key (ID)
 )^
--- end ITPEARLS_REGION
--- begin ITPEARLS_ITERACTION
-create table ITPEARLS_ITERACTION (
+-- end HUNTTECH_REGION
+-- begin HUNTTECH_ITERACTION
+create table HUNTTECH_ITERACTION (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -249,9 +249,9 @@ create table ITPEARLS_ITERACTION (
     --
     primary key (ID)
 )^
--- end ITPEARLS_ITERACTION
--- begin ITPEARLS_COUNTRY
-create table ITPEARLS_COUNTRY (
+-- end HUNTTECH_ITERACTION
+-- begin HUNTTECH_COUNTRY
+create table HUNTTECH_COUNTRY (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -267,9 +267,9 @@ create table ITPEARLS_COUNTRY (
     --
     primary key (ID)
 )^
--- end ITPEARLS_COUNTRY
--- begin ITPEARLS_PROJECT
-create table ITPEARLS_PROJECT (
+-- end HUNTTECH_COUNTRY
+-- begin HUNTTECH_PROJECT
+create table HUNTTECH_PROJECT (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -295,9 +295,9 @@ create table ITPEARLS_PROJECT (
     --
     primary key (ID)
 )^
--- end ITPEARLS_PROJECT
--- begin ITPEARLS_POSITION
-create table ITPEARLS_POSITION (
+-- end HUNTTECH_PROJECT
+-- begin HUNTTECH_POSITION
+create table HUNTTECH_POSITION (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -315,9 +315,9 @@ create table ITPEARLS_POSITION (
     --
     primary key (ID)
 )^
--- end ITPEARLS_POSITION
--- begin ITPEARLS_PERSON
-create table ITPEARLS_PERSON (
+-- end HUNTTECH_POSITION
+-- begin HUNTTECH_PERSON
+create table HUNTTECH_PERSON (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -347,9 +347,9 @@ create table ITPEARLS_PERSON (
     --
     primary key (ID)
 )^
--- end ITPEARLS_PERSON
--- begin ITPEARLS_CITY
-create table ITPEARLS_CITY (
+-- end HUNTTECH_PERSON
+-- begin HUNTTECH_CITY
+create table HUNTTECH_CITY (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -366,9 +366,9 @@ create table ITPEARLS_CITY (
     --
     primary key (ID)
 )^
--- end ITPEARLS_CITY
--- begin ITPEARLS_SKILL_TREE
-create table ITPEARLS_SKILL_TREE (
+-- end HUNTTECH_CITY
+-- begin HUNTTECH_SKILL_TREE
+create table HUNTTECH_SKILL_TREE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -392,9 +392,9 @@ create table ITPEARLS_SKILL_TREE (
     --
     primary key (ID)
 )^
--- end ITPEARLS_SKILL_TREE
--- begin ITPEARLS_OWNERSHUP
-create table ITPEARLS_OWNERSHUP (
+-- end HUNTTECH_SKILL_TREE
+-- begin HUNTTECH_OWNERSHUP
+create table HUNTTECH_OWNERSHUP (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -409,9 +409,9 @@ create table ITPEARLS_OWNERSHUP (
     --
     primary key (ID)
 )^
--- end ITPEARLS_OWNERSHUP
--- begin ITPEARLS_SPECIALISATION
-create table ITPEARLS_SPECIALISATION (
+-- end HUNTTECH_OWNERSHUP
+-- begin HUNTTECH_SPECIALISATION
+create table HUNTTECH_SPECIALISATION (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -425,9 +425,9 @@ create table ITPEARLS_SPECIALISATION (
     --
     primary key (ID)
 )^
--- end ITPEARLS_SPECIALISATION
--- begin ITPEARLS_COMPANY_GROUP
-create table ITPEARLS_COMPANY_GROUP (
+-- end HUNTTECH_SPECIALISATION
+-- begin HUNTTECH_COMPANY_GROUP
+create table HUNTTECH_COMPANY_GROUP (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -441,9 +441,9 @@ create table ITPEARLS_COMPANY_GROUP (
     --
     primary key (ID)
 )^
--- end ITPEARLS_COMPANY_GROUP
--- begin ITPEARLS_OPEN_POSITION
-create table ITPEARLS_OPEN_POSITION (
+-- end HUNTTECH_COMPANY_GROUP
+-- begin HUNTTECH_OPEN_POSITION
+create table HUNTTECH_OPEN_POSITION (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -508,9 +508,9 @@ create table ITPEARLS_OPEN_POSITION (
     --
     primary key (ID)
 )^
--- end ITPEARLS_OPEN_POSITION
--- begin ITPEARLS_JOB_HISTORY
-create table ITPEARLS_JOB_HISTORY (
+-- end HUNTTECH_OPEN_POSITION
+-- begin HUNTTECH_JOB_HISTORY
+create table HUNTTECH_JOB_HISTORY (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -527,9 +527,9 @@ create table ITPEARLS_JOB_HISTORY (
     --
     primary key (ID)
 )^
--- end ITPEARLS_JOB_HISTORY
--- begin ITPEARLS_SETUP
-create table ITPEARLS_SETUP (
+-- end HUNTTECH_JOB_HISTORY
+-- begin HUNTTECH_SETUP
+create table HUNTTECH_SETUP (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -546,9 +546,9 @@ create table ITPEARLS_SETUP (
     --
     primary key (ID)
 )^
--- end ITPEARLS_SETUP
--- begin ITPEARLS_RECRUTIES_TASKS
-create table ITPEARLS_RECRUTIES_TASKS (
+-- end HUNTTECH_SETUP
+-- begin HUNTTECH_RECRUTIES_TASKS
+create table HUNTTECH_RECRUTIES_TASKS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -569,9 +569,9 @@ create table ITPEARLS_RECRUTIES_TASKS (
     --
     primary key (ID)
 )^
--- end ITPEARLS_RECRUTIES_TASKS
--- begin ITPEARLS_RECRUITING_RECRUTIERS
-create table ITPEARLS_RECRUITING_RECRUTIERS (
+-- end HUNTTECH_RECRUTIES_TASKS
+-- begin HUNTTECH_RECRUITING_RECRUTIERS
+create table HUNTTECH_RECRUITING_RECRUTIERS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -589,9 +589,9 @@ create table ITPEARLS_RECRUITING_RECRUTIERS (
     --
     primary key (ID)
 )^
--- end ITPEARLS_RECRUITING_RECRUTIERS
--- begin ITPEARLS_FILE_TYPE
-create table ITPEARLS_FILE_TYPE (
+-- end HUNTTECH_RECRUITING_RECRUTIERS
+-- begin HUNTTECH_FILE_TYPE
+create table HUNTTECH_FILE_TYPE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -606,9 +606,9 @@ create table ITPEARLS_FILE_TYPE (
     --
     primary key (ID)
 )^
--- end ITPEARLS_FILE_TYPE
--- begin ITPEARLS_SOME_FILES
-create table ITPEARLS_SOME_FILES (
+-- end HUNTTECH_FILE_TYPE
+-- begin HUNTTECH_SOME_FILES
+create table HUNTTECH_SOME_FILES (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -626,20 +626,20 @@ create table ITPEARLS_SOME_FILES (
     FILE_OWNER_ID uuid not null,
     FILE_TYPE_ID uuid not null,
     --
-    -- from itpearls_SomeFilesOpenPosition
+    -- from hunttech_SomeFilesOpenPosition
     OPEN_POSITION_ID uuid,
     --
-    -- from itpearls_SomeFilesCandidateCV
+    -- from hunttech_SomeFilesCandidateCV
     CANDIDATE_CV_ID uuid,
     --
-    -- from itpearls_SomeFilesAgreement
+    -- from hunttech_SomeFilesAgreement
     LABOR_AGREEMENT_ID uuid,
     --
     primary key (ID)
 )^
--- end ITPEARLS_SOME_FILES
--- begin ITPEARLS_SOCIAL_NETWORK_TYPE
-create table ITPEARLS_SOCIAL_NETWORK_TYPE (
+-- end HUNTTECH_SOME_FILES
+-- begin HUNTTECH_SOCIAL_NETWORK_TYPE
+create table HUNTTECH_SOCIAL_NETWORK_TYPE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -656,9 +656,9 @@ create table ITPEARLS_SOCIAL_NETWORK_TYPE (
     --
     primary key (ID)
 )^
--- end ITPEARLS_SOCIAL_NETWORK_TYPE
--- begin ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION
-create table ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION (
+-- end HUNTTECH_SOCIAL_NETWORK_TYPE
+-- begin HUNTTECH_SUBSCRIBE_CANDIDATE_ACTION
+create table HUNTTECH_SUBSCRIBE_CANDIDATE_ACTION (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -675,16 +675,16 @@ create table ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION (
     --
     primary key (ID)
 )^
--- end ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION
--- begin ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK
-create table ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK (
+-- end HUNTTECH_SUBSCRIBE_CANDIDATE_ACTION
+-- begin HUNTTECH_OPEN_POSITION_RECRUTIES_TASKS_LINK
+create table HUNTTECH_OPEN_POSITION_RECRUTIES_TASKS_LINK (
     OPEN_POSITION_ID uuid,
     RECRUTIES_TASKS_ID uuid,
     primary key (OPEN_POSITION_ID, RECRUTIES_TASKS_ID)
 )^
--- end ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK
--- begin ITPEARLS_ITEARCTION_REQUIREMENTS
-create table ITPEARLS_ITEARCTION_REQUIREMENTS (
+-- end HUNTTECH_OPEN_POSITION_RECRUTIES_TASKS_LINK
+-- begin HUNTTECH_ITEARCTION_REQUIREMENTS
+create table HUNTTECH_ITEARCTION_REQUIREMENTS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -701,9 +701,9 @@ create table ITPEARLS_ITEARCTION_REQUIREMENTS (
     --
     primary key (ID)
 )^
--- end ITPEARLS_ITEARCTION_REQUIREMENTS
--- begin ITPEARLS_JOB_CANDIDATE_POSITION_LISTS
-create table ITPEARLS_JOB_CANDIDATE_POSITION_LISTS (
+-- end HUNTTECH_ITEARCTION_REQUIREMENTS
+-- begin HUNTTECH_JOB_CANDIDATE_POSITION_LISTS
+create table HUNTTECH_JOB_CANDIDATE_POSITION_LISTS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -718,10 +718,10 @@ create table ITPEARLS_JOB_CANDIDATE_POSITION_LISTS (
     --
     primary key (ID)
 )^
--- end ITPEARLS_JOB_CANDIDATE_POSITION_LISTS
+-- end HUNTTECH_JOB_CANDIDATE_POSITION_LISTS
 
--- begin ITPEARLS_LABOR_AGEEMENT_TYPE
-create table ITPEARLS_LABOR_AGEEMENT_TYPE (
+-- begin HUNTTECH_LABOR_AGEEMENT_TYPE
+create table HUNTTECH_LABOR_AGEEMENT_TYPE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -737,9 +737,9 @@ create table ITPEARLS_LABOR_AGEEMENT_TYPE (
     --
     primary key (ID)
 )^
--- end ITPEARLS_LABOR_AGEEMENT_TYPE
--- begin ITPEARLS_LABOR_AGREEMENT
-create table ITPEARLS_LABOR_AGREEMENT (
+-- end HUNTTECH_LABOR_AGEEMENT_TYPE
+-- begin HUNTTECH_LABOR_AGREEMENT
+create table HUNTTECH_LABOR_AGREEMENT (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -772,16 +772,16 @@ create table ITPEARLS_LABOR_AGREEMENT (
     --
     primary key (ID)
 )^
--- end ITPEARLS_LABOR_AGREEMENT
--- begin ITPEARLS_OPEN_POSITION_LABOR_AGREEMENT_LINK
-create table ITPEARLS_OPEN_POSITION_LABOR_AGREEMENT_LINK (
+-- end HUNTTECH_LABOR_AGREEMENT
+-- begin HUNTTECH_OPEN_POSITION_LABOR_AGREEMENT_LINK
+create table HUNTTECH_OPEN_POSITION_LABOR_AGREEMENT_LINK (
     OPEN_POSITION_ID uuid,
     LABOR_AGREEMENT_ID uuid,
     primary key (OPEN_POSITION_ID, LABOR_AGREEMENT_ID)
 )^
--- end ITPEARLS_OPEN_POSITION_LABOR_AGREEMENT_LINK
--- begin ITPEARLS_POSSIBLE_NAMES
-create table ITPEARLS_POSSIBLE_NAMES (
+-- end HUNTTECH_OPEN_POSITION_LABOR_AGREEMENT_LINK
+-- begin HUNTTECH_POSSIBLE_NAMES
+create table HUNTTECH_POSSIBLE_NAMES (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -797,7 +797,7 @@ create table ITPEARLS_POSSIBLE_NAMES (
     --
     primary key (ID)
 )^
--- end ITPEARLS_POSSIBLE_NAMES
+-- end HUNTTECH_POSSIBLE_NAMES
 -- begin SEC_USER
 alter table SEC_USER add column IMAGE_ID uuid ^
 alter table SEC_USER add column SMTP_SERVER varchar(128) ^
@@ -818,10 +818,10 @@ alter table SEC_USER add column IMAP_PASSWORD varchar(128) ^
 alter table SEC_USER add column STATISTICS_ boolean ^
 alter table SEC_USER add column DASHBOARDS boolean ^
 alter table SEC_USER add column DTYPE varchar(31) ^
-update SEC_USER set DTYPE = 'itpearls_ExtUser' where DTYPE is null ^
+update SEC_USER set DTYPE = 'hunttech_ExtUser' where DTYPE is null ^
 -- end SEC_USER
--- begin ITPEARLS_OPEN_POSITION_NEWS
-create table ITPEARLS_OPEN_POSITION_NEWS (
+-- begin HUNTTECH_OPEN_POSITION_NEWS
+create table HUNTTECH_OPEN_POSITION_NEWS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -841,9 +841,9 @@ create table ITPEARLS_OPEN_POSITION_NEWS (
     --
     primary key (ID)
 )^
--- end ITPEARLS_OPEN_POSITION_NEWS
--- begin ITPEARLS_INTERVIEW
-create table ITPEARLS_INTERVIEW (
+-- end HUNTTECH_OPEN_POSITION_NEWS
+-- begin HUNTTECH_INTERVIEW
+create table HUNTTECH_INTERVIEW (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -866,17 +866,17 @@ create table ITPEARLS_INTERVIEW (
     --
     primary key (ID)
 )^
--- end ITPEARLS_INTERVIEW
--- begin ITPEARLS_INTERVIEW_OPEN_POSITION_LINK
-create table ITPEARLS_INTERVIEW_OPEN_POSITION_LINK (
+-- end HUNTTECH_INTERVIEW
+-- begin HUNTTECH_INTERVIEW_OPEN_POSITION_LINK
+create table HUNTTECH_INTERVIEW_OPEN_POSITION_LINK (
     INTERVIEW_ID uuid,
     OPEN_POSITION_ID uuid,
     primary key (INTERVIEW_ID, OPEN_POSITION_ID)
 )^
--- end ITPEARLS_INTERVIEW_OPEN_POSITION_LINK
+-- end HUNTTECH_INTERVIEW_OPEN_POSITION_LINK
 
--- begin ITPEARLS_STAFFING_TABLE
-create table ITPEARLS_STAFFING_TABLE (
+-- begin HUNTTECH_STAFFING_TABLE
+create table HUNTTECH_STAFFING_TABLE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -897,9 +897,9 @@ create table ITPEARLS_STAFFING_TABLE (
     --
     primary key (ID)
 )^
--- end ITPEARLS_STAFFING_TABLE
--- begin ITPEARLS_GRADE
-create table ITPEARLS_GRADE (
+-- end HUNTTECH_STAFFING_TABLE
+-- begin HUNTTECH_GRADE
+create table HUNTTECH_GRADE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -913,9 +913,9 @@ create table ITPEARLS_GRADE (
     --
     primary key (ID)
 )^
--- end ITPEARLS_GRADE
--- begin ITPEARLS_STAFF_CURRENT
-create table ITPEARLS_STAFF_CURRENT (
+-- end HUNTTECH_GRADE
+-- begin HUNTTECH_STAFF_CURRENT
+create table HUNTTECH_STAFF_CURRENT (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -932,9 +932,9 @@ create table ITPEARLS_STAFF_CURRENT (
     --
     primary key (ID)
 )^
--- end ITPEARLS_STAFF_CURRENT
--- begin ITPEARLS_APPLICATION_RECRUITMENT
-create table ITPEARLS_APPLICATION_RECRUITMENT (
+-- end HUNTTECH_STAFF_CURRENT
+-- begin HUNTTECH_APPLICATION_RECRUITMENT
+create table HUNTTECH_APPLICATION_RECRUITMENT (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -956,9 +956,9 @@ create table ITPEARLS_APPLICATION_RECRUITMENT (
     --
     primary key (ID)
 )^
--- end ITPEARLS_APPLICATION_RECRUITMENT
--- begin ITPEARLS_APPLICATION_RECRUITMENT_LIST
-create table ITPEARLS_APPLICATION_RECRUITMENT_LIST (
+-- end HUNTTECH_APPLICATION_RECRUITMENT
+-- begin HUNTTECH_APPLICATION_RECRUITMENT_LIST
+create table HUNTTECH_APPLICATION_RECRUITMENT_LIST (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -980,9 +980,9 @@ create table ITPEARLS_APPLICATION_RECRUITMENT_LIST (
     --
     primary key (ID)
 )^
--- end ITPEARLS_APPLICATION_RECRUITMENT_LIST
--- begin ITPEARLS_PERSONEL_RESERVE
-create table ITPEARLS_PERSONEL_RESERVE (
+-- end HUNTTECH_APPLICATION_RECRUITMENT_LIST
+-- begin HUNTTECH_PERSONEL_RESERVE
+create table HUNTTECH_PERSONEL_RESERVE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1006,9 +1006,9 @@ create table ITPEARLS_PERSONEL_RESERVE (
     --
     primary key (ID)
 )^
--- end ITPEARLS_PERSONEL_RESERVE
--- begin ITPEARLS_SKILLS_FILTER_LAST_SELECTION
-create table ITPEARLS_SKILLS_FILTER_LAST_SELECTION (
+-- end HUNTTECH_PERSONEL_RESERVE
+-- begin HUNTTECH_SKILLS_FILTER_LAST_SELECTION
+create table HUNTTECH_SKILLS_FILTER_LAST_SELECTION (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1027,9 +1027,9 @@ create table ITPEARLS_SKILLS_FILTER_LAST_SELECTION (
     --
     primary key (ID)
 )^
--- end ITPEARLS_SKILLS_FILTER_LAST_SELECTION
--- begin ITPEARLS_INTERNAL_EMAIL_TEMPLATE
-create table ITPEARLS_INTERNAL_EMAIL_TEMPLATE (
+-- end HUNTTECH_SKILLS_FILTER_LAST_SELECTION
+-- begin HUNTTECH_INTERNAL_EMAIL_TEMPLATE
+create table HUNTTECH_INTERNAL_EMAIL_TEMPLATE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1049,14 +1049,14 @@ create table ITPEARLS_INTERNAL_EMAIL_TEMPLATE (
     TEMPLATE_AUTHOR_ID uuid not null,
     SHARE_TEMPLATE boolean,
     --
-    -- from itpearls_InternalEmailTemplateInteraction
+    -- from hunttech_InternalEmailTemplateInteraction
     INTERACTION_ID uuid,
     --
     primary key (ID)
 )^
--- end ITPEARLS_INTERNAL_EMAIL_TEMPLATE
--- begin ITPEARLS_INTERNAL_EMAILER
-create table ITPEARLS_INTERNAL_EMAILER (
+-- end HUNTTECH_INTERNAL_EMAIL_TEMPLATE
+-- begin HUNTTECH_INTERNAL_EMAILER
+create table HUNTTECH_INTERNAL_EMAILER (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1079,14 +1079,14 @@ create table ITPEARLS_INTERNAL_EMAILER (
     SELECTED_FOR_ACTION boolean,
     SELECTION_SYMBOL_FOR_ACTIONS integer,
     --
-    -- from itpearls_InternalEmailerTemplate
+    -- from hunttech_InternalEmailerTemplate
     EMAIL_TEMPLATE_ID uuid,
     --
     primary key (ID)
 )^
--- end ITPEARLS_INTERNAL_EMAILER
--- begin ITPEARLS_USER_SETTINGS
-create table ITPEARLS_USER_SETTINGS (
+-- end HUNTTECH_INTERNAL_EMAILER
+-- begin HUNTTECH_USER_SETTINGS
+create table HUNTTECH_USER_SETTINGS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1113,9 +1113,9 @@ create table ITPEARLS_USER_SETTINGS (
     --
     primary key (ID)
 )^
--- end ITPEARLS_USER_SETTINGS
--- begin ITPEARLS_OUTSTAFFING_RATES
-create table ITPEARLS_OUTSTAFFING_RATES (
+-- end HUNTTECH_USER_SETTINGS
+-- begin HUNTTECH_OUTSTAFFING_RATES
+create table HUNTTECH_OUTSTAFFING_RATES (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1134,9 +1134,9 @@ create table ITPEARLS_OUTSTAFFING_RATES (
     --
     primary key (ID)
 )^
--- end ITPEARLS_OUTSTAFFING_RATES
--- begin ITPEARLS_CURRENCY
-create table ITPEARLS_CURRENCY (
+-- end HUNTTECH_OUTSTAFFING_RATES
+-- begin HUNTTECH_CURRENCY
+create table HUNTTECH_CURRENCY (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1151,9 +1151,9 @@ create table ITPEARLS_CURRENCY (
     --
     primary key (ID)
 )^
--- end ITPEARLS_CURRENCY
--- begin ITPEARLS_OPEN_POSITION_COMMENT
-create table ITPEARLS_OPEN_POSITION_COMMENT (
+-- end HUNTTECH_CURRENCY
+-- begin HUNTTECH_OPEN_POSITION_COMMENT
+create table HUNTTECH_OPEN_POSITION_COMMENT (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1171,9 +1171,9 @@ create table ITPEARLS_OPEN_POSITION_COMMENT (
     --
     primary key (ID)
 )^
--- end ITPEARLS_OPEN_POSITION_COMMENT
--- begin ITPEARLS_EMPLOYEE
-create table ITPEARLS_EMPLOYEE (
+-- end HUNTTECH_OPEN_POSITION_COMMENT
+-- begin HUNTTECH_EMPLOYEE
+create table HUNTTECH_EMPLOYEE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1197,9 +1197,9 @@ create table ITPEARLS_EMPLOYEE (
     --
     primary key (ID)
 )^
--- end ITPEARLS_EMPLOYEE
--- begin ITPEARLS_EMPLOYEE_WORK_STATUS
-create table ITPEARLS_EMPLOYEE_WORK_STATUS (
+-- end HUNTTECH_EMPLOYEE
+-- begin HUNTTECH_EMPLOYEE_WORK_STATUS
+create table HUNTTECH_EMPLOYEE_WORK_STATUS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1214,9 +1214,9 @@ create table ITPEARLS_EMPLOYEE_WORK_STATUS (
     --
     primary key (ID)
 )^
--- end ITPEARLS_EMPLOYEE_WORK_STATUS
--- begin ITPEARLS_MY_ACTIVE_CANDIDATE_EXCLUDE
-create table ITPEARLS_MY_ACTIVE_CANDIDATE_EXCLUDE (
+-- end HUNTTECH_EMPLOYEE_WORK_STATUS
+-- begin HUNTTECH_MY_ACTIVE_CANDIDATE_EXCLUDE
+create table HUNTTECH_MY_ACTIVE_CANDIDATE_EXCLUDE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1232,9 +1232,9 @@ create table ITPEARLS_MY_ACTIVE_CANDIDATE_EXCLUDE (
     --
     primary key (ID)
 )^
--- end ITPEARLS_MY_ACTIVE_CANDIDATE_EXCLUDE
--- begin ITPEARLS_SIGN_ICONS
-create table ITPEARLS_SIGN_ICONS (
+-- end HUNTTECH_MY_ACTIVE_CANDIDATE_EXCLUDE
+-- begin HUNTTECH_SIGN_ICONS
+create table HUNTTECH_SIGN_ICONS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1253,9 +1253,9 @@ create table ITPEARLS_SIGN_ICONS (
     --
     primary key (ID)
 )^
--- end ITPEARLS_SIGN_ICONS
--- begin ITPEARLS_JOB_CANDIDATE_SIGN_ICON
-create table ITPEARLS_JOB_CANDIDATE_SIGN_ICON (
+-- end HUNTTECH_SIGN_ICONS
+-- begin HUNTTECH_JOB_CANDIDATE_SIGN_ICON
+create table HUNTTECH_JOB_CANDIDATE_SIGN_ICON (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1271,9 +1271,9 @@ create table ITPEARLS_JOB_CANDIDATE_SIGN_ICON (
     --
     primary key (ID)
 )^
--- end ITPEARLS_JOB_CANDIDATE_SIGN_ICON
--- begin ITPEARLS_APPLICATION_SETUP
-create table ITPEARLS_APPLICATION_SETUP (
+-- end HUNTTECH_JOB_CANDIDATE_SIGN_ICON
+-- begin HUNTTECH_APPLICATION_SETUP
+create table HUNTTECH_APPLICATION_SETUP (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1295,9 +1295,9 @@ create table ITPEARLS_APPLICATION_SETUP (
     --
     primary key (ID)
 )^
--- end ITPEARLS_APPLICATION_SETUP
--- begin ITPEARLS_USER_AI_CONFIGURATION
-create table ITPEARLS_USER_AI_CONFIGURATION (
+-- end HUNTTECH_APPLICATION_SETUP
+-- begin HUNTTECH_USER_AI_CONFIGURATION
+create table HUNTTECH_USER_AI_CONFIGURATION (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1315,9 +1315,9 @@ create table ITPEARLS_USER_AI_CONFIGURATION (
     --
     primary key (ID)
 )^
--- end ITPEARLS_USER_AI_CONFIGURATION
--- begin ITPEARLS_VACANCY_PROMPT_TEMPLATE
-create table ITPEARLS_VACANCY_PROMPT_TEMPLATE (
+-- end HUNTTECH_USER_AI_CONFIGURATION
+-- begin HUNTTECH_VACANCY_PROMPT_TEMPLATE
+create table HUNTTECH_VACANCY_PROMPT_TEMPLATE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -1335,4 +1335,4 @@ create table ITPEARLS_VACANCY_PROMPT_TEMPLATE (
     --
     primary key (ID)
 )^
--- end ITPEARLS_VACANCY_PROMPT_TEMPLATE
+-- end HUNTTECH_VACANCY_PROMPT_TEMPLATE

@@ -1,1 +1,1 @@
-drop table ITPEARLS_REQUIRED_PARAMETERS__U63759 if exists cascade ;
+drop table HUNTTECH_REQUIRED_PARAMETERS__U63759 if exists cascade ;

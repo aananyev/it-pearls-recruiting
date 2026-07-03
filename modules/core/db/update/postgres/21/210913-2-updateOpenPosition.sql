@@ -1,1 +1,1 @@
-alter table ITPEARLS_OPEN_POSITION add column REGISTRATION_FOR_WORK integer ;
+alter table HUNTTECH_OPEN_POSITION add column REGISTRATION_FOR_WORK integer ;

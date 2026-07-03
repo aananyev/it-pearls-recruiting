@@ -2,7 +2,7 @@
 
 > Серверная обработка загружаемых изображений профиля в HRM HuntTech: сжатие и уменьшение размеров перед сохранением в файловое хранилище CUBA.
 
-**Связанные документы:** [ExtUser](../entities/ExtUser.md) (слоты фото) · UI: [ExtUserEdit](../ui/itpearls_ExtUserEdit_Spec.md) · [ExtSettingsWindow](../ui/ExtSettingsWindow_Spec.md) *(при наличии)*
+**Связанные документы:** [ExtUser](../entities/ExtUser.md) (слоты фото) · UI: [ExtUserEdit](../ui/hunttech_ExtUserEdit_Spec.md) · [ExtSettingsWindow](../ui/ExtSettingsWindow_Spec.md) *(при наличии)*
 
 ---
 
@@ -43,7 +43,7 @@
 
 Зависимости: **Thumbnailator** (`net.coobird:thumbnailator`), **Apache Commons Lang**, CUBA `Configuration`.
 
-Spring component-scan в `modules/core/src/com/company/itpearls/spring.xml` включает пакет `com.company.hunttech`.
+Spring component-scan в `modules/core/src/com/company/hunttech/spring.xml` включает пакет `com.company.hunttech`.
 
 ---
 
@@ -61,11 +61,11 @@ Spring component-scan в `modules/core/src/com/company/itpearls/spring.xml` вк
 
 ### Миграция ключей (legacy → hunttech)
 
-| Legacy (`itpearls.image.*`) | Новый ключ (`hunttech.image.*`) | Примечание |
+| Legacy (`HuntTech.image.*`) | Новый ключ (`hunttech.image.*`) | Примечание |
 |-----------------------------|----------------------------------|------------|
-| `itpearls.image.maxPixels` | `hunttech.image.resize.size` | Единый лимит по пикселям; дефолт 1024 (было 800) |
-| `itpearls.image.maxSizeKb` | — | Удалён; обработка только по размеру в пикселях |
-| `itpearls.image.targetFormat` | `hunttech.image.resize.format` | Дефолт `png` (было `jpeg`) |
+| `HuntTech.image.maxPixels` | `hunttech.image.resize.size` | Единый лимит по пикселям; дефолт 1024 (было 800) |
+| `HuntTech.image.maxSizeKb` | — | Удалён; обработка только по размеру в пикселях |
+| `HuntTech.image.targetFormat` | `hunttech.image.resize.format` | Дефолт `png` (было `jpeg`) |
 
 ---
 

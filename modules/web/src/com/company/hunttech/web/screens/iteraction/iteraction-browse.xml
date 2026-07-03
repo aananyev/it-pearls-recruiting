@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="iteractionsTable"
+        messagesPack="com.company.hunttech.web.screens.iteraction" icon="REFRESH_ACTION">
+    <data readOnly="true">
+        <collection id="iteractionsDc"
+                    class="com.company.hunttech.entity.Iteraction"
+                    view="iteraction-browse-view">
+            <loader id="iteractionsDl" cacheable="true">
+                <query><![CDATA[select e from hunttech_Iteraction e order by e.number, e.iterationName]]></query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="iteractionsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="iteractionsTable"
+                dataLoader="iteractionsDl">
+            <properties include=".*"
+                        excludeProperties="textEmailToSend,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,addField,calendarItemStyle,calendarItemDescription,widgetChackJobCandidates,checkTrace,notificationBeforeAfterDay,notificationPeriodType,notificationWhenSend"/>
+        </filter>
+        <groupTable id="iteractionsTable"
+                    width="100%"
+                    dataContainer="iteractionsDc"
+                    caption="mainMsg://msgNumber">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <group>
+                    <column id="iteractionTree"/>
+                </group>
+                <column id="number" caption="mainMsg://msgNumber"/>
+                <column id="mandatoryIteraction" caption="msg://msgMandatoryItercation"/>
+                <column id="iterationName" caption="mainMsg://msgItercationType"/>
+                <column id="callButtonText" caption="mainMsg://msgCallButtonText"/>
+                <column id="callClass" caption="mainMsg://msgCreateClass"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="iteractionsTable.create"/>
+                <button id="editBtn" action="iteractionsTable.edit"/>
+                <button id="removeBtn" action="iteractionsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

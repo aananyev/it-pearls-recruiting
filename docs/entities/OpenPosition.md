@@ -3,7 +3,7 @@
 > Транзакционная сущность вакансий; центральный узел рекрутингового процесса.
 > Оптимизация: 2026-06-23.
 > Архитектурная спецификация: [OpenPosition_Spec.md](../architecture/OpenPosition_Spec.md)
-> UI Spec: [browse](../ui/itpearls_OpenPosition.browse_Spec.md), [edit](../ui/itpearls_OpenPosition.edit_Spec.md), [detail fragment](../ui/itpearls_OpenPositionDetailScreenFragment_Spec.md)
+> UI Spec: [browse](../ui/hunttech_OpenPosition.browse_Spec.md), [edit](../ui/hunttech_OpenPosition.edit_Spec.md), [detail fragment](../ui/hunttech_OpenPositionDetailScreenFragment_Spec.md)
 
 ---
 
@@ -15,7 +15,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Главный browse — `itpearls_OpenPosition.browse` (меню, дерево `treeDataGrid`). Edit — `itpearls_OpenPosition.edit` с вкладками (основное, навыки, labor agreement, файлы, комментарии). Дополнительные browse: `OpenPositionRecruiting`, `OpenPositionOutstaff`, `ProdOpenPosition`, `OpenPositionMaster`. Фрагмент деталей строки — `itpearls_OpenPositionDetailScreenFragment`. Связанные сущности: `Project`, `Position`, `Grade`, `City`, `OpenPositionComment`, `OpenPositionNews`, `RecrutiesTasks`, `JobCandidate` (через взаимодействия и suggest). Архитектурная спецификация: [OpenPosition_Spec.md](../architecture/OpenPosition_Spec.md).
+Главный browse — `hunttech_OpenPosition.browse` (меню, дерево `treeDataGrid`). Edit — `hunttech_OpenPosition.edit` с вкладками (основное, навыки, labor agreement, файлы, комментарии). Дополнительные browse: `OpenPositionRecruiting`, `OpenPositionOutstaff`, `ProdOpenPosition`, `OpenPositionMaster`. Фрагмент деталей строки — `hunttech_OpenPositionDetailScreenFragment`. Связанные сущности: `Project`, `Position`, `Grade`, `City`, `OpenPositionComment`, `OpenPositionNews`, `RecrutiesTasks`, `JobCandidate` (через взаимодействия и suggest). Архитектурная спецификация: [OpenPosition_Spec.md](../architecture/OpenPosition_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -29,9 +29,9 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.OpenPosition` |
-| **Имя в CUBA** | `itpearls_OpenPosition` |
-| **Таблица БД** | `ITPEARLS_OPEN_POSITION` |
+| **Java-класс** | `com.company.hunttech.entity.OpenPosition` |
+| **Имя в CUBA** | `hunttech_OpenPosition` |
+| **Таблица БД** | `HUNTTECH_OPEN_POSITION` |
 | **Тип данных** | транзакционная |
 | **Критичность** | высокая |
 
@@ -132,7 +132,7 @@
 | 2026-06-23 | OpenPositionEdit: `rescanJobDescription` — убран `setSkillsList` на detached entity; rescан только через `skillTrees` + `openPositionSkillsListsDc`; guard `screenFullyLoaded` в `onOpenPositionRichTextAreaValueChange` (флаг `true` в конце `onAfterShow`, не срабатывает при `@LoadDataBeforeShow`); начальный rescан — только явный вызов из `onAfterShow`; `syncSkillsListToEntity` + `ensureSkillsListLoadedOnEntity` перед commit; задеплоено |
 | 2026-06-23 | OpenPositionEdit: исправлен `StackOverflowError` при открытии/смене `positionType` — guard `applyingPositionTypeFromHandler`, пропуск `setPositionType` при уже загруженных LOB (`standartDescription`/`whoIsThisGuy`), общий `loadPositionWithDescriptionLobs` |
 | 2026-06-23 | OpenPositionEdit: `laborAgreementDc`, `commentsOpenPositionDc`, `someFilesesDc` — standalone `CollectionLoader` (JPQL по `openPosition` / join M2M), убраны `property=` на `openPositionDc`; lazy load по вкладкам; `syncLaborAgreementToEntity` перед commit; исправлен unfetched `laborAgreement` при `@LoadDataBeforeShow` |
-| 2026-06-23 | OpenPositionEdit: `openPositionSkillsListsDc` — standalone `CollectionLoader` (`itpearls_SkillTree` по `openPosition`), убран `property="skillsList"`; lazy `loadSkillsList()` по вкладке Skills — исправлен unfetched `skillsList` при `@LoadDataBeforeShow` |
+| 2026-06-23 | OpenPositionEdit: `openPositionSkillsListsDc` — standalone `CollectionLoader` (`hunttech_SkillTree` по `openPosition`), убран `property="skillsList"`; lazy `loadSkillsList()` по вкладке Skills — исправлен unfetched `skillsList` при `@LoadDataBeforeShow` |
 | 2026-06-23 | OpenPositionBrowse: batch-кэш `positionEnName`/`positionRuName` в PostLoad + defensive `PersistenceHelper.isLoaded`/`dataManager.reload` в columnGenerator и descriptionProvider; `openPosition-browse-view.positionType` — явные свойства вместо nested view ref |
 | 2026-06-23 | OpenPositionEdit: аудит views — убраны `skillsList`/`laborAgreement` из `openPosition-edit-view`; views на collection loaders (`openPositionComments`, `someFiles`, `laborAgreement`); `openPosition-parent-picker-view`; `person-owner-view.personPosition` → `position-picker-view`; lazy-guard `setIconSomeFileTab`, `ensureOpenPositionCommentsLoaded`, reload Position LOB при смене типа |
 | 2026-06-23 | `openPosition-browse-view` / `openPosition-edit-view`: `positionType` → `position-picker-view` с `positionRuName`/`positionEnName` — исправлен unfetched attribute в OpenPositionBrowse (columnGenerator, descriptionProvider) и OpenPositionEdit |

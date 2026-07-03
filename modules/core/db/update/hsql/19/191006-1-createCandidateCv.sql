@@ -1,4 +1,4 @@
-create table ITPEARLS_CANDIDATE_CV (
+create table HUNTTECH_CANDIDATE_CV (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,

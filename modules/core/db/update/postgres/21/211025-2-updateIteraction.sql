@@ -1,1 +1,1 @@
-alter table ITPEARLS_ITERACTION add column NOTIFICATION_NEED_SEND boolean ;
+alter table HUNTTECH_ITERACTION add column NOTIFICATION_NEED_SEND boolean ;

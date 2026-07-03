@@ -1,1 +1,1 @@
-alter table ITPEARLS_OPEN_POSITION add column SALARY_COMMENT varchar(255) ;
+alter table HUNTTECH_OPEN_POSITION add column SALARY_COMMENT varchar(255) ;

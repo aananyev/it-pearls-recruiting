@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="companyDepartamentsTable"
+        messagesPack="com.company.hunttech.web.screens.companydepartament" icon="GROUP">
+    <data readOnly="true">
+        <collection id="companyDepartamentsDc"
+                    class="com.company.hunttech.entity.CompanyDepartament"
+                    view="companyDepartament-browse-view">
+            <loader id="companyDepartamentsDl">
+                <query>
+                    <![CDATA[select e from hunttech_CompanyDepartament e
+order by e.departamentRuName]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="companyDepartamentsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="companyDepartamentsTable"
+                dataLoader="companyDepartamentsDl">
+            <properties include=".*"
+                        excludeProperties="departamentDescription,templateLetter,projectOfDepartment,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+        </filter>
+        <groupTable id="companyDepartamentsTable"
+                    width="100%"
+                    dataContainer="companyDepartamentsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="departamentRuName" caption="mainMsg://msgDepartament"/>
+                <column id="companyName" caption="mainMsg://msgCompany"/>
+                <column id="departamentHrDirector" caption="mainMsg://msgHRDirector"/>
+                <column id="departamentDirector" caption="mainMsg://msgDirector"/>
+                <column id="departamentNumberOfProgrammers" caption="mainMsg://msgNumberOfVacansies"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="companyDepartamentsTable.create"/>
+                <button id="editBtn" action="companyDepartamentsTable.edit"/>
+                <button id="removeBtn" action="companyDepartamentsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

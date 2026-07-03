@@ -1,1 +1,1 @@
-alter table ITPEARLS_INTERNAL_EMAILER drop column REMOVED_FROM_RESERVE__U21609 cascade ;
+alter table HUNTTECH_INTERNAL_EMAILER drop column REMOVED_FROM_RESERVE__U21609 cascade ;

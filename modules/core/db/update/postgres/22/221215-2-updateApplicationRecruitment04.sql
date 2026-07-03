@@ -1,1 +1,1 @@
-alter table ITPEARLS_APPLICATION_RECRUITMENT alter column AMOUNT drop not null ;
+alter table HUNTTECH_APPLICATION_RECRUITMENT alter column AMOUNT drop not null ;

@@ -1,1 +1,1 @@
-alter table ITPEARLS_COMPANY_DEPARTAMENT add column TEMPLATE_LETTER text ;
+alter table HUNTTECH_COMPANY_DEPARTAMENT add column TEMPLATE_LETTER text ;

@@ -31,8 +31,8 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.{EntityName}` |
-| **Имя в CUBA** | `itpearls_{EntityName}` |
+| **Java-класс** | `com.company.hunttech.entity.{EntityName}` |
+| **Имя в CUBA** | `hunttech_{EntityName}` |
 | **Таблица БД** | `{TABLE_NAME}` |
 | **Тип данных** | справочник / транзакционная / связующая |
 | **Ожидаемый объём** | ~N записей |
@@ -114,7 +114,7 @@ erDiagram
 
 ## 4. Представления (views.xml)
 
-Файл: `modules/global/src/com/company/itpearls/views.xml`
+Файл: `modules/global/src/com/company/hunttech/views.xml`
 
 | View | Extends | Назначение | Где используется |
 |------|---------|------------|------------------|
@@ -142,13 +142,13 @@ erDiagram
 
 ## 5. Экраны (screens)
 
-Каталог: `modules/web/src/com/company/itpearls/web/screens/{entity}/`
+Каталог: `modules/web/src/com/company/hunttech/web/screens/{entity}/`
 
 | Экран | Controller ID | Дескриптор | View | Тип | Меню |
 |-------|---------------|------------|------|-----|------|
-| Browse | `itpearls_{Entity}.browse` | `{entity}-browse.xml` | `{entity}-browse-view` | StandardLookup | {пункт меню} |
-| Edit | `itpearls_{Entity}.edit` | `{entity}-edit.xml` | `{entity}-edit-view` | StandardEditor | — |
-| Tree Browse | `itpearls_{Entity}._tree.browse` | `{entity}-tree-browse.xml` | `{entity}-tree-browse-view` | StandardLookup | {пункт меню} |
+| Browse | `hunttech_{Entity}.browse` | `{entity}-browse.xml` | `{entity}-browse-view` | StandardLookup | {пункт меню} |
+| Edit | `hunttech_{Entity}.edit` | `{entity}-edit.xml` | `{entity}-edit-view` | StandardEditor | — |
+| Tree Browse | `hunttech_{Entity}._tree.browse` | `{entity}-tree-browse.xml` | `{entity}-tree-browse-view` | StandardLookup | {пункт меню} |
 
 ### 5.1 Browse — поведение формы
 
@@ -256,7 +256,7 @@ DDL: `modules/core/db/init/postgres/10.create-db.sql`
 ### 7.4 Потребители (rg-чеклист)
 
 ```bash
-rg "itpearls_{Entity}|{EntityName}\." modules/ --glob '*.{java,xml}'
+rg "hunttech_{Entity}|{EntityName}\." modules/ --glob '*.{java,xml}'
 rg "view=\".*{entity}" modules/ --glob '*.xml'
 ```
 
@@ -271,7 +271,7 @@ rg "view=\".*{entity}" modules/ --glob '*.xml'
 | Параметр | Файл | Значение |
 |----------|------|----------|
 | DBMS | `app.properties` | postgres |
-| Entity cache | `app.properties` | `eclipselink.cache.shared.itpearls_{Entity}=...` |
+| Entity cache | `app.properties` | `eclipselink.cache.shared.hunttech_{Entity}=...` |
 | FTS | `fts.xml` | включён / выключен |
 
 Локальная БД: см. [LOCAL_DATABASE.md](../LOCAL_DATABASE.md).

@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Экраны: `itpearls_Company.browse` (дерево), `itpearls_Company.edit`, специализированные `itpearls_OurCompany.browse` и `itpearls_ClientsCompany.browse`. Lookup через `company-picker-view` в карточках кандидата, вакансии, проекта. UI Spec: [browse](../ui/itpearls_Company.browse_Spec.md), [edit](../ui/itpearls_Company.edit_Spec.md).
+Экраны: `hunttech_Company.browse` (дерево), `hunttech_Company.edit`, специализированные `hunttech_OurCompany.browse` и `hunttech_ClientsCompany.browse`. Lookup через `company-picker-view` в карточках кандидата, вакансии, проекта. UI Spec: [browse](../ui/hunttech_Company.browse_Spec.md), [edit](../ui/hunttech_Company.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -25,9 +25,9 @@ Browse без LOB в view (`company-browse-view`); edit с lazy reload LOB на 
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.Company` |
-| **Имя в CUBA** | `itpearls_Company` |
-| **Таблица БД** | `ITPEARLS_COMPANY` |
+| **Java-класс** | `com.company.hunttech.entity.Company` |
+| **Имя в CUBA** | `hunttech_Company` |
+| **Таблица БД** | `HUNTTECH_COMPANY` |
 | **Тип данных** | справочник (тысячи записей; локально на 2026-07-02 ~5 590 активных записей) |
 | **Критичность** | высокая — FK в CompanyDepartament, OpenPosition, JobCandidate |
 
@@ -41,7 +41,7 @@ Browse без LOB в view (`company-browse-view`); edit с lazy reload LOB на 
 
 ### Индексы FK (дочерние)
 
-`IDX_ITPEARLS_COMPANY_ON_COMPANY_GROUP`, `ON_COUNTRY_OF_COMPANY`, `ON_REGION_OF_COMPANY`, `ON_CITY_OF_COMPANY` — ✅ в init schema.
+`IDX_HUNTTECH_COMPANY_ON_COMPANY_GROUP`, `ON_COUNTRY_OF_COMPANY`, `ON_REGION_OF_COMPANY`, `ON_CITY_OF_COMPANY` — ✅ в init schema.
 
 ### Индексы производительности (локальная БД, 2026-07-02)
 
@@ -49,23 +49,23 @@ Browse без LOB в view (`company-browse-view`); edit с lazy reload LOB на 
 
 | Индекс | Таблица / поля | Назначение |
 |--------|----------------|------------|
-| `IDX_ITPEARLS_COMPANY_ACTIVE_NAME` | `ITPEARLS_COMPANY (COMANY_NAME, ID) WHERE DELETE_TS IS NULL` | сортировка активного списка компаний; особенно полезно при `LIMIT`/пагинации |
-| `IDX_ITPEARLS_COMPANY_ACTIVE_CLIENT_NAME` | `ITPEARLS_COMPANY (COMANY_NAME, ID) WHERE DELETE_TS IS NULL AND OUR_CLIENT = TRUE` | checkbox-фильтр `OnlyOurClient` в Browse |
-| `IDX_ITPEARLS_COMPANY_ACTIVE_LEGAL_NAME` | `ITPEARLS_COMPANY (COMANY_NAME, ID) WHERE DELETE_TS IS NULL AND OUR_LEGAL_ENTITY = TRUE` | checkbox-фильтр `OnlyOurLegalEntity` в Browse |
+| `IDX_HUNTTECH_COMPANY_ACTIVE_NAME` | `HUNTTECH_COMPANY (COMANY_NAME, ID) WHERE DELETE_TS IS NULL` | сортировка активного списка компаний; особенно полезно при `LIMIT`/пагинации |
+| `IDX_HUNTTECH_COMPANY_ACTIVE_CLIENT_NAME` | `HUNTTECH_COMPANY (COMANY_NAME, ID) WHERE DELETE_TS IS NULL AND OUR_CLIENT = TRUE` | checkbox-фильтр `OnlyOurClient` в Browse |
+| `IDX_HUNTTECH_COMPANY_ACTIVE_LEGAL_NAME` | `HUNTTECH_COMPANY (COMANY_NAME, ID) WHERE DELETE_TS IS NULL AND OUR_LEGAL_ENTITY = TRUE` | checkbox-фильтр `OnlyOurLegalEntity` в Browse |
 
 DDL, применённый на локальной БД:
 
 ```sql
-CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_ITPEARLS_COMPANY_ACTIVE_NAME
-ON ITPEARLS_COMPANY (COMANY_NAME, ID)
+CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_HUNTTECH_COMPANY_ACTIVE_NAME
+ON HUNTTECH_COMPANY (COMANY_NAME, ID)
 WHERE DELETE_TS IS NULL;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_ITPEARLS_COMPANY_ACTIVE_CLIENT_NAME
-ON ITPEARLS_COMPANY (COMANY_NAME, ID)
+CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_HUNTTECH_COMPANY_ACTIVE_CLIENT_NAME
+ON HUNTTECH_COMPANY (COMANY_NAME, ID)
 WHERE DELETE_TS IS NULL AND OUR_CLIENT = TRUE;
 
-CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_ITPEARLS_COMPANY_ACTIVE_LEGAL_NAME
-ON ITPEARLS_COMPANY (COMANY_NAME, ID)
+CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_HUNTTECH_COMPANY_ACTIVE_LEGAL_NAME
+ON HUNTTECH_COMPANY (COMANY_NAME, ID)
 WHERE DELETE_TS IS NULL AND OUR_LEGAL_ENTITY = TRUE;
 ```
 
@@ -121,8 +121,8 @@ WHERE DELETE_TS IS NULL AND OUR_LEGAL_ENTITY = TRUE;
 
 ```bash
 ./gradlew app-web:test \
-  --tests com.company.itpearls.web.screens.company.CompanyBrowsePerfTest \
-  --tests com.company.itpearls.web.screens.company.CompanyEditPerfTest
+  --tests com.company.hunttech.web.screens.company.CompanyBrowsePerfTest \
+  --tests com.company.hunttech.web.screens.company.CompanyEditPerfTest
 ```
 
 | Метрика | Было | Стало | Комментарий |
@@ -137,14 +137,14 @@ WHERE DELETE_TS IS NULL AND OUR_LEGAL_ENTITY = TRUE;
 
 ### Замеры индексов локальной БД — 2026-07-02
 
-До добавления частичных индексов checkbox-запросы выполнялись через `Seq Scan` по `ITPEARLS_COMPANY`.
+До добавления частичных индексов checkbox-запросы выполнялись через `Seq Scan` по `HUNTTECH_COMPANY`.
 После добавления индексов:
 
 | Запрос | План после оптимизации | Время на локальной БД |
 |--------|------------------------|-----------------------|
-| `DELETE_TS IS NULL AND OUR_CLIENT = TRUE ORDER BY COMANY_NAME` | `Index Only Scan using IDX_ITPEARLS_COMPANY_ACTIVE_CLIENT_NAME` | ~0.23 ms |
-| `DELETE_TS IS NULL AND OUR_LEGAL_ENTITY = TRUE ORDER BY COMANY_NAME` | `Index Only Scan using IDX_ITPEARLS_COMPANY_ACTIVE_LEGAL_NAME` | ~0.05 ms |
-| `DELETE_TS IS NULL ORDER BY COMANY_NAME LIMIT 100` | `Index Only Scan using IDX_ITPEARLS_COMPANY_ACTIVE_NAME` | ~0.18 ms |
+| `DELETE_TS IS NULL AND OUR_CLIENT = TRUE ORDER BY COMANY_NAME` | `Index Only Scan using IDX_HUNTTECH_COMPANY_ACTIVE_CLIENT_NAME` | ~0.23 ms |
+| `DELETE_TS IS NULL AND OUR_LEGAL_ENTITY = TRUE ORDER BY COMANY_NAME` | `Index Only Scan using IDX_HUNTTECH_COMPANY_ACTIVE_LEGAL_NAME` | ~0.05 ms |
+| `DELETE_TS IS NULL ORDER BY COMANY_NAME LIMIT 100` | `Index Only Scan using IDX_HUNTTECH_COMPANY_ACTIVE_NAME` | ~0.18 ms |
 
 Полный `CompanyBrowse` без `LIMIT` всё ещё может идти через `Seq Scan + Sort`, потому что форма загружает почти все активные компании и широкий набор FK-полей. Для дальнейшего ускорения первого открытия формы нужен переход на пагинацию/ограниченную первую загрузку, а не только индексы.
 
@@ -164,7 +164,7 @@ WHERE DELETE_TS IS NULL AND OUR_LEGAL_ENTITY = TRUE;
 `CompanyServiceTest` + `TestEntityTracker`.
 
 ```bash
-./gradlew :app-core:test --tests "com.company.itpearls.core.CompanyServiceTest"
+./gradlew :app-core:test --tests "com.company.hunttech.core.CompanyServiceTest"
 ```
 
 ### Regression / view-contract tests
@@ -188,7 +188,7 @@ IllegalStateException: Cannot get unfetched attribute [departmentOfCompany] from
 
 - `CompanyBrowsePerfTest` — измеряет время открытия, число загруженных компаний и количество вызовов `DataService`.
 - `CompanyEditPerfTest` — измеряет открытие edit screen и количество вызовов `DataService`.
-- `CompanyPerfTestSupport` — общий счётчик `load`, `loadList`, `getCount`, `loadValues`, включая отдельные метрики по `itpearls_Company`.
+- `CompanyPerfTestSupport` — общий счётчик `load`, `loadList`, `getCount`, `loadValues`, включая отдельные метрики по `hunttech_Company`.
 
 Они нужны для сравнения производительности в формате «было — стало».
 
@@ -198,7 +198,7 @@ IllegalStateException: Cannot get unfetched attribute [departmentOfCompany] from
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-07-02 | Локальная БД: добавлены частичные индексы `IDX_ITPEARLS_COMPANY_ACTIVE_*` для активного списка и checkbox-фильтров CompanyBrowse |
+| 2026-07-02 | Локальная БД: добавлены частичные индексы `IDX_HUNTTECH_COMPANY_ACTIVE_*` для активного списка и checkbox-фильтров CompanyBrowse |
 | 2026-07-02 | Актуализация после оптимизации: удалена повторная загрузка `CompanyBrowse`; добавлены perf-тесты и view-contract regression-тесты; зафиксировано, что `departmentOfCompany` обязателен в `company-edit-view` из-за `departmentOfCompanyDc` |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Исправление unfetched FK на Edit: `company-edit-view` — `cityOfCompany` → `city-location-view`; `CompanyEdit` — reload `cityRegion`/`regionCountry` в обработчиках picker |

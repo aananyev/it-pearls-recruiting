@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<app-component xmlns="http://schemas.haulmont.com/cuba/app-component.xsd"
+               dependsOn="com.haulmont.addon.emailtemplates, com.haulmont.addon.globalevents, com.haulmont.charts, com.haulmont.reports, com.haulmont.cuba, com.haulmont.addon.dashboard, com.haulmont.fts, com.haulmont.addon.helium, de.diedavids.cuba.dataimport, com.haulmont.bpm">
+
+    <module name="global" blocks="*">
+        <artifact name="app-global" appJar="true"/>
+
+        <property name="cuba.persistenceConfig" value="+com/company/hunttech/persistence.xml"/>
+        <property name="cuba.metadataConfig" value="+com/company/hunttech/metadata.xml"/>
+        <property name="cuba.viewsConfig" value="+com/company/hunttech/views.xml"/>
+    </module>
+    <module name="core" dependsOn="global" blocks="core">
+        <artifact name="app-core" appJar="true"/>
+        <artifact name="app-core" classifier="db" ext="zip" configuration="dbscripts"/>
+
+        <property name="cuba.springContextConfig" value="+com/company/hunttech/spring.xml"/>
+        <property name="cuba.ftsConfig" value="+com/company/hunttech/fts.xml"/>
+        <property name="cuba.mainMessagePack" value="+com.company.hunttech.core"/>
+    </module>
+    <module name="gui" dependsOn="global" blocks="web,desktop">
+        <artifact name="app-gui" appJar="true"/>
+    </module>
+    <module name="web" dependsOn="gui" blocks="web">
+        <artifact name="app-web" appJar="true"/>
+        <artifact name="app-web" classifier="web" ext="zip" configuration="webcontent"/>
+        <artifact name="app-web-toolkit" appJar="true" classifier="client" ext="jar"
+                  skipIfExists="web-toolkit"/>
+        <artifact name="app-web" ext="jar" configuration="themes" classifier="themes"/>
+
+        <property name="cuba.springContextConfig" value="+com/company/hunttech/web-spring.xml"/>
+        <property name="cuba.dispatcherSpringContextConfig" value="+com/company/hunttech/web-dispatcher-spring.xml"/>
+        <property name="cuba.windowConfig" value="+com/company/hunttech/web-screens.xml"/>
+        <property name="cuba.menuConfig" value="+com/company/hunttech/web-menu.xml"/>
+        <property name="cuba.permissionConfig" value="+com/company/hunttech/web-permissions.xml"/>
+        <property name="cuba.mainMessagePack" value="+com.company.hunttech.web"/>
+        <property name="cuba.web.widgetSet" value="com.company.hunttech.web.toolkit.ui.AppWidgetSet"/>
+    </module>
+    <module name="web-toolkit" dependsOn="web">
+        <artifact name="app-web-toolkit"/>
+    </module>
+</app-component>

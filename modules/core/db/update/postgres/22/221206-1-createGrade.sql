@@ -1,4 +1,4 @@
-create table ITPEARLS_GRADE (
+create table HUNTTECH_GRADE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

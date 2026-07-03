@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="form"
+        messagesPack="com.company.hunttech.web.screens.specialisation" icon="icons/to-client.png">
+    <data>
+        <instance id="specialisationDc"
+                  class="com.company.hunttech.entity.Specialisation">
+            <view extends="specialisation-view">
+                <property name="candidate" view="_minimal"/>
+            </view>
+            <loader id="specialisationDl" entityId=""/>
+            <collection id="specialisationCandidatesDc" property="candidate"/>
+        </instance>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true" width="100%">
+        <form id="form" dataContainer="specialisationDc" width="100%">
+            <column width="100%">
+                <tabSheet>
+                    <tab id="tabSpecialisation" caption="mainMsg://msgSpecialisation" margin="true,false,false,false" spacing="true">
+                        <textField id="specRuNameField" caption="mainMsg://msgName"
+                                   dataContainer="specialisationDc" property="specRuName" width="50%"/>
+                    </tab>
+                    <tab id="tabCandidate" caption="msg://msgSpecialisation" margin="true,false,false,false" spacing="true">
+                        <table id="specialisationCandidateTable" height="400px" width="100%" dataContainer="specialisationCandidatesDc">
+                            <columns>
+                                <column id="firstName"/>
+                                <column id="middleName"/>
+                                <column id="secondName"/>
+                                <column id="birdhDate"/>
+                                <column id="email"/>
+                                <column id="phone"/>
+                                <column id="skypeName"/>
+                                <column id="telegramName"/>
+                            </columns>
+                        </table>
+                    </tab>
+                </tabSheet>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

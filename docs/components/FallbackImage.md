@@ -26,7 +26,7 @@
 | **web** (XML-loader) | `com.hunttech.hrm.web.loaders.FallbackImageLoader` | Создаёт `fallbackImage`, читает атрибут `fallbackThemePath` из screen XML |
 | **global** (конфиг) | `com.company.hunttech.config.HunttechImageConfig` | Глобальный путь theme-ресурса по умолчанию |
 | **регистрация** | `modules/web/src/com/hunttech/hrm/web/cuba-ui-component.xml` | Связка имени, класса и loader'а |
-| **подключение** | `modules/web/src/com/company/itpearls/web-app.properties` | `cuba.web.componentsConfig = +...,+com/hunttech/hrm/web/cuba-ui-component.xml` |
+| **подключение** | `modules/web/src/com/company/hunttech/web-app.properties` | `cuba.web.componentsConfig = +...,+com/hunttech/hrm/web/cuba-ui-component.xml` |
 
 ### Поток данных
 
@@ -70,7 +70,7 @@ flowchart TD
 
 Файл placeholder: `modules/web/themes/hover/images/hunttech-placeholder.svg`, `modules/web/themes/halo/images/hunttech-placeholder.svg`.
 
-Переопределение: **Administration → Application Properties**. Комментарий с ключом — в `modules/core/src/com/company/itpearls/app.properties`:
+Переопределение: **Administration → Application Properties**. Комментарий с ключом — в `modules/core/src/com/company/hunttech/app.properties`:
 
 ```properties
 # hunttech.defaultFallbackImagePath=images/hunttech-placeholder.svg
@@ -105,7 +105,7 @@ flowchart TD
 
 Остальные атрибуты наследуются от стандартного `image` (`ImageLoader`).
 
-**Пример в проекте:** `modules/web/src/com/company/itpearls/web/screens/extuser/ext-user-edit.xml` — `userPic` без `fallbackThemePath` (используется глобальный SVG).
+**Пример в проекте:** `modules/web/src/com/company/hunttech/web/screens/extuser/ext-user-edit.xml` — `userPic` без `fallbackThemePath` (используется глобальный SVG).
 
 ### Java (контроллер экрана)
 

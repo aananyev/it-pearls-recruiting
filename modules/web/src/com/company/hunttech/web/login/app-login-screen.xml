@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        messagesPack="com.company.hunttech.web.screens"
+        caption="mainMsg://loginWindow.caption">
+    <actions>
+        <action id="submit"
+                caption="msg://loginWindow.okButton"
+                shortcut="ENTER"/>
+    </actions>
+    <layout>
+        <cssLayout id="mainLayout"
+                   height="100%"
+                   stylename="c-login-layout"
+                   width="100%">
+            <vbox id="loginWrapper"
+                  expand="loginPanel"
+                  height="100%"
+                  stylename="c-login-wrapper">
+                <vbox id="loginPanel"
+                      align="MIDDLE_CENTER"
+                      height="100%"
+                      width="100%">
+                    <vbox id="loginCard"
+                          align="MIDDLE_CENTER"
+                          margin="true,true,true,true"
+                          spacing="true"
+                          stylename="c-login-card"
+                          width="310px">
+                        <vbox id="loginMainBox"
+                              align="MIDDLE_CENTER"
+                              spacing="true"
+                              width="100%">
+                                <image id="logoImage"
+                                       align="MIDDLE_CENTER"
+                                       scaleMode="CONTAIN"
+                                       stylename="c-login-logo"
+                                       width="100%"/>
+                            <label id="welcomeLabel"
+                                   align="MIDDLE_CENTER"
+                                   stylename="c-login-welcome-label h1"
+                                   value="mainMsg://loginWindow.welcomeLabel"
+                                   width="100%"/>
+                            <capsLockIndicator id="capsLockIndicator"
+                                               align="MIDDLE_CENTER"/>
+                            <vbox id="loginForm"
+                                  spacing="true"
+                                  width="100%">
+                                <textField id="loginField"
+                                           htmlName="loginField"
+                                           icon="USER"
+                                           inputPrompt="mainMsg://loginWindow.loginPlaceholder"
+                                           stylename="c-login-field inline-icon large"
+                                           width="100%"/>
+                                <passwordField id="passwordField"
+                                               autocomplete="true"
+                                               capsLockIndicator="capsLockIndicator"
+                                               htmlName="passwordField"
+                                               icon="LOCK"
+                                               inputPrompt="mainMsg://loginWindow.passwordPlaceholder"
+                                               stylename="c-login-field inline-icon large"
+                                               width="100%"/>
+                                <hbox id="paramsBox"
+                                      align="MIDDLE_LEFT"
+                                      width="100%">
+                                    <checkBox id="rememberMeCheckBox"
+                                              align="MIDDLE_LEFT"
+                                              stylename="c-login-remember-me-checkbox"
+                                              caption="mainMsg://loginWindow.rememberMe"/>
+                                </hbox>
+                                <button id="loginButton"
+                                        action="submit"
+                                        align="MIDDLE_CENTER"
+                                        stylename="c-login-button primary huge"
+                                        width="100%"/>
+                            </vbox>
+                        </vbox>
+                    </vbox>
+                </vbox>
+                <hbox id="bottomPanel"
+                      align="MIDDLE_CENTER"
+                      margin="true,false,true,false"
+                      stylename="c-login-bottom-panel"
+                      width="100%">
+                    <label id="poweredByLink"
+                           align="MIDDLE_LEFT"
+                           htmlEnabled="true"
+                           stylename="c-login-powered-by-link"
+                           value="mainMsg://hunttech.poweredBy"/>
+                    <lookupField id="localesSelect"
+                                 align="MIDDLE_RIGHT"
+                                 nullOptionVisible="false"
+                                 stylename="c-login-locales-select borderless"
+                                 textInputAllowed="false"/>
+                </hbox>
+            </vbox>
+            <image id="backgroundImage"
+                   scaleMode="FILL"
+                   stylename="c-login-background">
+                <relativePath path="VAADIN/brand-login-screen/background-2023.jpg"/>
+            </image>
+        </cssLayout>
+    </layout>
+</window>

@@ -1,1 +1,1 @@
-alter table ITPEARLS_ITERACTION add column WIDGET_CHACK_JOB_CANDIDATES boolean ;
+alter table HUNTTECH_ITERACTION add column WIDGET_CHACK_JOB_CANDIDATES boolean ;

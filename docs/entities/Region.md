@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`itpearls_Region.browse`, `itpearls_Region.edit`; FK `country`, дочерние `City`. UI Spec: [browse](../ui/itpearls_Region.browse_Spec.md), [edit](../ui/itpearls_Region.edit_Spec.md).
+`hunttech_Region.browse`, `hunttech_Region.edit`; FK `country`, дочерние `City`. UI Spec: [browse](../ui/hunttech_Region.browse_Spec.md), [edit](../ui/hunttech_Region.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -25,9 +25,9 @@ Browse/edit с picker страны; `region-browse-view` для списков �
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.Region` |
-| **Имя в CUBA** | `itpearls_Region` |
-| **Таблица БД** | `ITPEARLS_REGION` |
+| **Java-класс** | `com.company.hunttech.entity.Region` |
+| **Имя в CUBA** | `hunttech_Region` |
+| **Таблица БД** | `HUNTTECH_REGION` |
 | **Тип данных** | справочник |
 | **Ожидаемый объём** | ~100–500 записей, часто читается |
 | **Критичность** | средняя — FK в City, Company |
@@ -50,11 +50,11 @@ Browse/edit с picker страны; `region-browse-view` для списков �
 
 ```mermaid
 erDiagram
-    ITPEARLS_COUNTRY ||--o{ ITPEARLS_REGION : "countryOfRegion"
-    ITPEARLS_REGION ||--o{ ITPEARLS_CITY : "regionOfCity"
-    ITPEARLS_COMPANY }o--o| ITPEARLS_REGION : "regionOfCompany"
-    ITPEARLS_REGION }o--|| ITPEARLS_COUNTRY : "regionCountry"
-    ITPEARLS_CITY }o--o| ITPEARLS_REGION : "cityRegion"
+    HUNTTECH_COUNTRY ||--o{ HUNTTECH_REGION : "countryOfRegion"
+    HUNTTECH_REGION ||--o{ HUNTTECH_CITY : "regionOfCity"
+    HUNTTECH_COMPANY }o--o| HUNTTECH_REGION : "regionOfCompany"
+    HUNTTECH_REGION }o--|| HUNTTECH_COUNTRY : "regionCountry"
+    HUNTTECH_CITY }o--o| HUNTTECH_REGION : "cityRegion"
 ```
 
 ### 2.2 Исходящие связи
@@ -83,7 +83,7 @@ erDiagram
 |-----------|------------|-----|-------------|
 | `regionRuName` | `REGION_RU_NAME` | varchar(50) | NOT NULL, unique |
 | `regionCode` | `REGION_CODE` | integer | unique |
-| `regionCountry` | `REGION_COUNTRY_ID` | uuid FK | → `ITPEARLS_COUNTRY` |
+| `regionCountry` | `REGION_COUNTRY_ID` | uuid FK | → `HUNTTECH_COUNTRY` |
 
 ---
 
@@ -109,12 +109,12 @@ erDiagram
 
 ## 5. Экраны
 
-Каталог: `modules/web/src/com/company/itpearls/web/screens/region/`
+Каталог: `modules/web/src/com/company/hunttech/web/screens/region/`
 
 | Экран | Controller ID | Дескриптор | View |
 |-------|---------------|------------|------|
-| Browse | `itpearls_Region.browse` | `region-browse.xml` | `region-browse-view` |
-| Edit | `itpearls_Region.edit` | `region-edit.xml` | `region-edit-view` |
+| Browse | `hunttech_Region.browse` | `region-browse.xml` | `region-browse-view` |
+| Edit | `hunttech_Region.edit` | `region-edit.xml` | `region-edit-view` |
 
 ### 5.1 RegionBrowse
 
@@ -144,7 +144,7 @@ erDiagram
 
 ## 6. База данных
 
-### 6.1 Таблица `ITPEARLS_REGION`
+### 6.1 Таблица `HUNTTECH_REGION`
 
 Схема: `modules/core/db/init/postgres/10.create-db.sql`
 
@@ -152,16 +152,16 @@ erDiagram
 
 | Индекс | Колонки | Назначение |
 |--------|---------|------------|
-| `IDX_ITPEARLS_REGION_UK_REGION_RU_NAME` | `REGION_RU_NAME` (partial) | уникальность, ORDER BY browse |
-| `IDX_ITPEARLS_REGION_UK_REGION_CODE` | `REGION_CODE` (partial) | уникальность |
-| `IDX_ITPEARLS_REGION_ON_REGION_COUNTRY` | `REGION_COUNTRY_ID` | FK → Country |
+| `IDX_HUNTTECH_REGION_UK_REGION_RU_NAME` | `REGION_RU_NAME` (partial) | уникальность, ORDER BY browse |
+| `IDX_HUNTTECH_REGION_UK_REGION_CODE` | `REGION_CODE` (partial) | уникальность |
+| `IDX_HUNTTECH_REGION_ON_REGION_COUNTRY` | `REGION_COUNTRY_ID` | FK → Country |
 
 ### 6.3 Индексы FK в дочерних таблицах
 
 | Таблица | Колонка | Индекс |
 |---------|---------|--------|
-| `ITPEARLS_CITY` | `CITY_REGION_ID` | `IDX_ITPEARLS_CITY_ON_CITY_REGION` ✅ |
-| `ITPEARLS_COMPANY` | `REGION_OF_COMPANY_ID` | `IDX_ITPEARLS_COMPANY_ON_REGION_OF_COMPANY` ✅ |
+| `HUNTTECH_CITY` | `CITY_REGION_ID` | `IDX_HUNTTECH_CITY_ON_CITY_REGION` ✅ |
+| `HUNTTECH_COMPANY` | `REGION_OF_COMPANY_ID` | `IDX_HUNTTECH_COMPANY_ON_REGION_OF_COMPANY` ✅ |
 
 **Миграция не требуется** — все FK проиндексированы в `20.create-db.sql`.
 
@@ -249,10 +249,10 @@ erDiagram
 
 | Класс | Путь | Сценарии |
 |-------|------|----------|
-| `RegionServiceTest` | `modules/core/test/com/company/itpearls/core/` | create, edit/save, browse load, soft delete |
+| `RegionServiceTest` | `modules/core/test/com/company/hunttech/core/` | create, edit/save, browse load, soft delete |
 
 ```bash
-./gradlew :app-core:test --tests "com.company.itpearls.core.RegionServiceTest"
+./gradlew :app-core:test --tests "com.company.hunttech.core.RegionServiceTest"
 ```
 
 ---

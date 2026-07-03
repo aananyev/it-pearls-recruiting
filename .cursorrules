@@ -47,13 +47,13 @@ Strictly follow this **numbered** structure when creating or updating documentat
 
 1. **STOP** — немедленно прекратить другие задачи; выполнять только генерацию/актуализацию документации сущности.
 2. **SCAN** — пройти кодовую базу по сущности:
-   - Entity: `modules/global/src/com/company/itpearls/entity/**/{EntityName}.java`, enums, metadata
-   - Views: `modules/global/src/com/company/itpearls/views.xml` (fetch plans для сущности)
-   - Сервисы: `modules/core/src/com/company/itpearls/**/*ServiceBean.java`, репозитории
-   - Экраны: `modules/web/src/com/company/itpearls/web/screens/**` — `*-browse.xml`, `*-edit.xml`, `*-view.xml`, `*-lookup.xml`
+   - Entity: `modules/global/src/com/company/hunttech/entity/**/{EntityName}.java`, enums, metadata
+   - Views: `modules/global/src/com/company/hunttech/views.xml` (fetch plans для сущности)
+   - Сервисы: `modules/core/src/com/company/hunttech/**/*ServiceBean.java`, репозитории
+   - Экраны: `modules/web/src/com/company/hunttech/web/screens/**` — `*-browse.xml`, `*-edit.xml`, `*-view.xml`, `*-lookup.xml`
    - Контроллеры: `*Browse.java`, `*Edit.java`, `*View.java`
    - Фрагменты: `*Fragment.java`, `*-fragment.xml`
-   - Сообщения: `modules/global/src/com/company/itpearls/messages*.properties`
+   - Сообщения: `modules/global/src/com/company/hunttech/messages*.properties`
    - Миграции: `modules/core/db/**`
 3. **WRITE** — создать или полностью актуализировать файл:
    - **Путь:** `docs/architecture/{EntityName}_Spec.md`
@@ -311,7 +311,7 @@ Strictly follow this **numbered** structure when creating or updating documentat
 
 ## Брендинг в документации
 
-Во **всей** документации (`docs/**/*.md`, `docs/templates/**`, architecture spec) использовать **HRM HuntTech** вместо «IT Pearls» / «IT-Pearls» / «IT Pearls Recruiting».
+Во **всей** документации (`docs/**/*.md`, `docs/templates/**`, architecture spec) использовать **HRM HuntTech** вместо «HuntTech» / «HuntTech» / «HuntTech Recruiting».
 
-- При создании и обновлении docs **не использовать** брендинг IT Pearls, кроме цитирования legacy-идентификаторов из кода (имена пакетов `itpearls`, таблицы `ITPEARLS_*`, файлы `IT-Pearls-Logo.jpg`, CSS-классы, ключи `messages.properties` и т.п.).
+- При создании и обновлении docs **не использовать** брендинг HuntTech, кроме цитирования legacy-идентификаторов из кода (имена пакетов `HuntTech`, таблицы `HUNTTECH_*`, файлы `HuntTech-Logo.jpg`, CSS-классы, ключи `messages.properties` и т.п.).
 - Название продукта в prose: **HRM HuntTech** (рекрутинговая система HuntTech).

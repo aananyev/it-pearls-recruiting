@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://selectCitiesLocation.caption"
+        messagesPack="com.company.hunttech.web.screens.openposition">
+    <data>
+        <instance id="citiesDc" class="com.company.hunttech.entity.OpenPosition">
+            <view extends="_local">
+                <property name="cities" view="_local"/>
+            </view>
+            <loader id="citiesDl">
+                <query><![CDATA[select f from hunttech_OpenPosition f]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                f.cityRegion.regionCountry.countryRuName = :countries
+                            </c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+            <collection id="cityDc" property="cities"/>
+        </instance>
+        <collection id="cityOptionDc" class="com.company.hunttech.entity.City" view="city-location-view">
+            <loader id="cityOptionDl" cacheable="true">
+                <query>
+                    <![CDATA[select g from hunttech_City g]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>
+                                g.cityRegion.regionCountry.countryRuName = :country
+                            </c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="400"
+                width="600"
+                forceDialog="true"
+                closeOnClickOutside="false"
+                resizable="false"/>
+    <layout expand="citiesLocationTwinColumn" spacing="true">
+        <radioButtonGroup id="countries" orientation="horizontal"/>
+        <twinColumn id="citiesLocationTwinColumn"
+                    dataContainer="citiesDc"
+                    reorderable="true"
+                    property="cities"
+                    height="100%"
+                    addAllBtnEnabled="true"
+                    width="100%"/>
+        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
+            <button id="closeBtn" caption="msg://msgClose" align="BOTTOM_RIGHT"/>
+        </hbox>
+    </layout>
+</window>

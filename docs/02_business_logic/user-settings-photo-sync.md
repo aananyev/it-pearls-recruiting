@@ -2,7 +2,7 @@
 
 > **Платформа:** CUBA 7.3 · **Область:** `ExtUser`, `UserSettings`, экраны `sec$User.edit` и `settings`  
 > **Аудитория:** разработчики, бизнес-аналитики  
-> **Cross-links:** [ExtUser](../entities/ExtUser.md) · [itpearls_ExtUserEdit_Spec](../ui/itpearls_ExtUserEdit_Spec.md) · [ImageProcessingService](../services/ImageProcessingService.md)
+> **Cross-links:** [ExtUser](../entities/ExtUser.md) · [hunttech_ExtUserEdit_Spec](../ui/hunttech_ExtUserEdit_Spec.md) · [ImageProcessingService](../services/ImageProcessingService.md)
 
 ---
 
@@ -24,7 +24,7 @@
 
 ### 1.1. Расширение пользователя CUBA
 
-`ExtUser` (`itpearls_ExtUser`) наследует `com.haulmont.cuba.security.entity.User` через механизм `@Extends(User.class)` и маппится на ту же таблицу `SEC_USER` с дискриминатором `DTYPE = itpearls_ExtUser`.
+`ExtUser` (`hunttech_ExtUser`) наследует `com.haulmont.cuba.security.entity.User` через механизм `@Extends(User.class)` и маппится на ту же таблицу `SEC_USER` с дискриминатором `DTYPE = hunttech_ExtUser`.
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
@@ -34,14 +34,14 @@
                             │ @Extends
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                    itpearls_ExtUser (ExtUser)               │
+│                    hunttech_ExtUser (ExtUser)               │
 │  officialPhoto, userAvatar, fileImageFace* (deprecated)     │
 │  smtp*/imap*/pop3*, statistics, dashboards                  │
 └───────────────────────────┬─────────────────────────────────┘
                             │ 1 : 1  (USER_ID, unique)
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│              itpearls_UserSettings (UserSettings)           │
+│              hunttech_UserSettings (UserSettings)           │
 │  user (ExtUser), fileImageFace, smtp*/imap*/pop3*           │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -61,7 +61,7 @@
 Fetch plan `userSettings-view` (`views.xml`):
 
 ```xml
-<view entity="itpearls_UserSettings" name="userSettings-view" extends="_local">
+<view entity="hunttech_UserSettings" name="userSettings-view" extends="_local">
     <property name="user" view="_local"/>
     <property name="fileImageFace" view="_local"/>
 </view>
@@ -70,7 +70,7 @@ Fetch plan `userSettings-view` (`views.xml`):
 Fetch plan `extUser-view` для экранов:
 
 ```xml
-<view entity="itpearls_ExtUser" name="extUser-view" extends="_local">
+<view entity="hunttech_ExtUser" name="extUser-view" extends="_local">
     <property name="officialPhoto" view="_local"/>
     <property name="userAvatar" view="_local"/>
     <property name="fileImageFace" view="_local"/>
@@ -119,7 +119,7 @@ placeholder (ThemeResource / FallbackImage)
 
 | Screen id | Шаблон | Контроллер |
 |-----------|--------|------------|
-| `sec$User.edit` | `ext-user-edit.xml` | `UserEditor` + дополнение `itpearls_ExtUserEdit` |
+| `sec$User.edit` | `ext-user-edit.xml` | `UserEditor` + дополнение `hunttech_ExtUserEdit` |
 | `settings` | `ext-settings-window.xml` | `ExtSettingsWindow` extends `SettingsWindow` |
 
 ---
@@ -135,7 +135,7 @@ placeholder (ThemeResource / FallbackImage)
 | Параметр | Значение |
 |----------|----------|
 | Базовый класс окна | `com.haulmont.cuba.gui.app.security.user.edit.UserEditor` |
-| Дополнение | `@UiController("itpearls_ExtUserEdit")` extends `Screen` |
+| Дополнение | `@UiController("hunttech_ExtUserEdit")` extends `Screen` |
 | Companion | `UserEditorCompanion` (стандарт CUBA) |
 
 #### 2.1.2. Структура layout
@@ -506,16 +506,16 @@ Upload аватара (`IMMEDIATE`) сохраняет файл в хранил�
 
 | Компонент | Путь |
 |-----------|------|
-| ExtUser | `modules/global/src/com/company/itpearls/entity/ExtUser.java` |
-| UserSettings | `modules/global/src/com/company/itpearls/entity/UserSettings.java` |
-| ExtUserEdit | `modules/web/src/com/company/itpearls/web/screens/extuser/ExtUserEdit.java` |
-| ext-user-edit.xml | `modules/web/src/com/company/itpearls/web/screens/extuser/ext-user-edit.xml` |
-| ExtSettingsWindow | `modules/web/src/com/company/itpearls/web/screens/extsettingswindow/ExtSettingsWindow.java` |
-| ext-settings-window.xml | `modules/web/src/com/company/itpearls/web/screens/extsettingswindow/ext-settings-window.xml` |
-| views | `modules/global/src/com/company/itpearls/views.xml` (`extUser-view`, `userSettings-view`) |
-| ExtUserChangedListener | `modules/core/src/com/company/itpearls/listeners/ExtUserChangedListener.java` |
-| FileDescriptorImageHelper | `modules/web/src/com/company/itpearls/web/util/FileDescriptorImageHelper.java` |
-| AvatarImageUploadHelper | `modules/web/src/com/company/itpearls/web/util/AvatarImageUploadHelper.java` |
+| ExtUser | `modules/global/src/com/company/hunttech/entity/ExtUser.java` |
+| UserSettings | `modules/global/src/com/company/hunttech/entity/UserSettings.java` |
+| ExtUserEdit | `modules/web/src/com/company/hunttech/web/screens/extuser/ExtUserEdit.java` |
+| ext-user-edit.xml | `modules/web/src/com/company/hunttech/web/screens/extuser/ext-user-edit.xml` |
+| ExtSettingsWindow | `modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindow.java` |
+| ext-settings-window.xml | `modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml` |
+| views | `modules/global/src/com/company/hunttech/views.xml` (`extUser-view`, `userSettings-view`) |
+| ExtUserChangedListener | `modules/core/src/com/company/hunttech/listeners/ExtUserChangedListener.java` |
+| FileDescriptorImageHelper | `modules/web/src/com/company/hunttech/web/util/FileDescriptorImageHelper.java` |
+| AvatarImageUploadHelper | `modules/web/src/com/company/hunttech/web/util/AvatarImageUploadHelper.java` |
 
 ---
 
@@ -526,7 +526,7 @@ Upload аватара (`IMMEDIATE`) сохраняет файл в хранил�
 | 1 | Детекция конфликта фото использует `UserSettings.fileImageFace`, а не `ExtUser.userAvatar` | `resolvePersonalAvatar()` в `ExtUserEdit.java` |
 | 2 | `ExtSettingsWindow` не обновляет `UserSettings.fileImageFace` при загрузке аватара | `onUserAvatarUploaded()` |
 | 3 | `userSettingsDs` объявлен в `ext-settings-window.xml`, но не используется в Java | XML vs `ExtSettingsWindow.java` |
-| 4 | UI Spec `itpearls_ExtUserEdit_Spec.md` (2026-06-27) упоминает приоритет `UserSettings.fileImageFace` для аватара; актуальный код `ExtUserEdit` привязывает preview к `officialPhoto` | UI Spec vs `ext-user-edit.xml` |
+| 4 | UI Spec `hunttech_ExtUserEdit_Spec.md` (2026-06-27) упоминает приоритет `UserSettings.fileImageFace` для аватара; актуальный код `ExtUserEdit` привязывает preview к `officialPhoto` | UI Spec vs `ext-user-edit.xml` |
 | 5 | `docs/ui/ExtSettingsWindow_Spec.md` отсутствует (упоминается в `ImageProcessingService.md` как «при наличии») | docs gap |
 | 6 | При upload фото в `ExtUserEdit` `UserSettings` коммитится до OK; Cancel формы не откатывает | `applyOfficialPhotoUpdate` |
 | 7 | Если `UserSettings` не существует в момент upload (listener ещё не отработал), `syncToUserSettings=false` — фото не попадёт в `fileImageFace` | `loadUserSettings().optional()` |

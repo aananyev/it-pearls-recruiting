@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`itpearls_CompanyDepartament.browse`, `itpearls_CompanyDepartament.edit`; FK в `Project.projectDepartment`. UI Spec: [browse](../ui/itpearls_CompanyDepartament.browse_Spec.md), [edit](../ui/itpearls_CompanyDepartament.edit_Spec.md).
+`hunttech_CompanyDepartament.browse`, `hunttech_CompanyDepartament.edit`; FK в `Project.projectDepartment`. UI Spec: [browse](../ui/hunttech_CompanyDepartament.browse_Spec.md), [edit](../ui/hunttech_CompanyDepartament.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -25,9 +25,9 @@ Browse с FK на Company; используется в фильтрах и ко�
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.CompanyDepartament` |
-| **Имя в CUBA** | `itpearls_CompanyDepartament` |
-| **Таблица БД** | `ITPEARLS_COMPANY_DEPARTAMENT` |
+| **Java-класс** | `com.company.hunttech.entity.CompanyDepartament` |
+| **Имя в CUBA** | `hunttech_CompanyDepartament` |
+| **Таблица БД** | `HUNTTECH_COMPANY_DEPARTAMENT` |
 | **Тип данных** | справочник |
 | **Критичность** | высокая — FK в Project, Person, OpenPosition |
 
@@ -37,13 +37,13 @@ Browse с FK на Company; используется в фильтрах и ко�
 
 | Индекс | Таблица / поля | Назначение |
 |--------|----------------|------------|
-| `IDX_ITPEARLS_COMPANY_DEPT_ACTIVE_COMPANY_NAME` | `ITPEARLS_COMPANY_DEPARTAMENT (COMPANY_NAME_ID, DEPARTAMENT_RU_NAME) WHERE DELETE_TS IS NULL` | загрузка активных департаментов компании с сортировкой по названию |
+| `IDX_HUNTTECH_COMPANY_DEPT_ACTIVE_COMPANY_NAME` | `HUNTTECH_COMPANY_DEPARTAMENT (COMPANY_NAME_ID, DEPARTAMENT_RU_NAME) WHERE DELETE_TS IS NULL` | загрузка активных департаментов компании с сортировкой по названию |
 
 DDL, применённый на локальной БД:
 
 ```sql
-CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_ITPEARLS_COMPANY_DEPT_ACTIVE_COMPANY_NAME
-ON ITPEARLS_COMPANY_DEPARTAMENT (COMPANY_NAME_ID, DEPARTAMENT_RU_NAME)
+CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_HUNTTECH_COMPANY_DEPT_ACTIVE_COMPANY_NAME
+ON HUNTTECH_COMPANY_DEPARTAMENT (COMPANY_NAME_ID, DEPARTAMENT_RU_NAME)
 WHERE DELETE_TS IS NULL;
 ```
 
@@ -103,14 +103,14 @@ WHERE DELETE_TS IS NULL;
 
 ### Замеры индекса локальной БД — 2026-07-02
 
-Текущий объём `ITPEARLS_COMPANY_DEPARTAMENT` мал: около `116` строк всего и `112` активных.
+Текущий объём `HUNTTECH_COMPANY_DEPARTAMENT` мал: около `116` строк всего и `112` активных.
 Поэтому запрос вкладки департаментов конкретной компании выполняется менее чем за `1 ms`, а планер может предпочитать последовательное сканирование.
 
-Индекс `IDX_ITPEARLS_COMPANY_DEPT_ACTIVE_COMPANY_NAME` важен как защита при росте числа департаментов и компаний:
+Индекс `IDX_HUNTTECH_COMPANY_DEPT_ACTIVE_COMPANY_NAME` важен как защита при росте числа департаментов и компаний:
 
 ```sql
 SELECT id, departament_ru_name, departament_director_id, departament_hr_director_id
-FROM itpearls_company_departament
+FROM hunttech_company_departament
 WHERE delete_ts IS NULL
   AND company_name_id = :companyId
 ORDER BY departament_ru_name;
@@ -131,7 +131,7 @@ ORDER BY departament_ru_name;
 `CompanyDepartamentServiceTest` + `TestEntityTracker`.
 
 ```bash
-./gradlew :app-core:test --tests "com.company.itpearls.core.CompanyDepartamentServiceTest"
+./gradlew :app-core:test --tests "com.company.hunttech.core.CompanyDepartamentServiceTest"
 ```
 
 ---
@@ -140,7 +140,7 @@ ORDER BY departament_ru_name;
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-07-02 | Локальная БД: добавлен частичный индекс `IDX_ITPEARLS_COMPANY_DEPT_ACTIVE_COMPANY_NAME` для активных департаментов компании |
+| 2026-07-02 | Локальная БД: добавлен частичный индекс `IDX_HUNTTECH_COMPANY_DEPT_ACTIVE_COMPANY_NAME` для активных департаментов компании |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: `CompanyDepartamentEdit` без каскадных обработчиков; lazy LOB/projects через reload — OK |
 | 2026-06-23 | Оптимизация: устранена рекурсия `companyName` в `companyDepartament-view`, browse/edit/picker views, lazy LOB, `CompanyDepartamentServiceTest`, документация |

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://iteractionListSimpleBrowse.caption"
+        focusComponent="iteractionListsTable"
+        messagesPack="com.company.hunttech.web.screens.iteractionlist">
+    <data readOnly="true">
+        <collection id="jobCandidatesDc"
+                    class="com.company.hunttech.entity.JobCandidate">
+            <view extends="jobCandidate-view">
+                <property name="personPosition" view="_local"/>
+                <property name="iteractionList"
+                          view="_local">
+                    <property name="vacancy" view="_local"/>
+                    <property name="iteractionType"
+                              view="_local"/>
+                    <property name="recrutier" view="_local"/>
+                </property>
+            </view>
+            <loader id="jobCandidateDl" cacheable="true">
+                <query><![CDATA[select e from hunttech_JobCandidate e order by e.fullName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e in
+                                    (select k.candidate
+                                    from hunttech_IteractionList k
+                                    where k.vacancy = :vacancy)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in
+                                    (select n.candidate
+                                    from hunttech_IteractionList n
+                                    where n.vacancy = :vacancy and
+                                    n.iteractionType in
+                                    (select o from hunttech_Iteraction o
+                                    where o.signSendToClient = :signSendToClient))
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in
+                                    (select l.candidate
+                                    from hunttech_IteractionList l
+                                    where @dateBefore(l.dateIteraction, :dateBefore)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in
+                                    (select m.candidate
+                                    from hunttech_IteractionList m
+                                    where @dateAfter(m.dateIteraction, :dateAfter)
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="1100"
+                forceDialog="true"/>
+    <layout expand="datagridBox"
+            responsive="true"
+            spacing="true">
+        <hbox spacing="false"
+              responsive="true"
+              width="100%"
+              expand="vacancyLabel"
+              height="AUTO">
+            <label id="vacancyLabel"
+                   width="100%"
+                   stylename="h3"/>
+            <image id="projectLogoImage"
+                   width="100px"
+                   height="100px"
+                   visible="true"
+                   align="TOP_RIGHT"
+                   stylename="widget-border"
+                   scaleMode="SCALE_DOWN"/>
+        </hbox>
+        <vbox height="AUTO"
+              responsive="true"
+              spacing="true"
+              width="AUTO"
+              align="TOP_LEFT">
+            <label id="vacancyNameLabel"
+                   stylename="h4"
+                   width="AUTO"
+                   visible="false"/>
+            <label id="recrutierLabel"
+                   stylename="h4/"
+                   width="AUTO"
+                   visible="false"/>
+        </vbox>
+        <hbox spacing="true"
+              visible="false"
+              responsive="true"
+              height="AUTO">
+            <radioButtonGroup id="beforeAnAfterRadioButtonsGroup"
+                              orientation="horizontal"
+                              visible="false"
+                              align="MIDDLE_CENTER"
+                              width="AUTO"/>
+            <label width="AUTO"
+                   value="|"
+                   stylename="h2"
+                   align="MIDDLE_CENTER"/>
+            <radioButtonGroup id="interactionsCanidatesPeriodRadioButtonGroup"
+                              align="MIDDLE_CENTER"
+                              orientation="horizontal"
+                              width="AUTO"/>
+        </hbox>
+        <vbox id="datagridBox" height="100%" width="100%">
+        <dataGrid id="iteractionListsTable"
+                  bodyRowHeight="60px"
+                  selectionMode="NONE"
+                  responsive="true"
+                  width="100%"
+                  height="100%"
+                  dataContainer="jobCandidatesDc">
+            <columns>
+                <column id="fileImageFace"
+                        property="fileImageFace"
+                        maximumWidth="50px"
+                        width="50px">
+                    <componentRenderer/>
+                </column>
+                <column id="fullName"
+                        sort="ASCENDING"
+                        sortable="true"
+                        property="fullName">
+                    <componentRenderer/>
+                </column>
+                <column id="lastInterationName"
+                        caption="msg://msgLastInteractionType"
+                        maximumWidth="300px"
+                        width="300px">
+                    <componentRenderer/>
+                </column>
+                <column id="lastIteraction"
+                        caption="msg://msgDateLastIteraction"
+                        maximumWidth="90px"
+                        minimumWidth="90px">
+                    <componentRenderer/>
+                </column>
+                <column id="active"
+                        caption="msg://msgActive"
+                        width="40px">
+                    <componentRenderer/>
+                </column>
+                <column id="recruter"
+                        caption="msg://msgRecruter"
+                        maximumWidth="170px"
+                        width="170px">
+                    <componentRenderer/>
+                </column>
+                <column id="sourcer"
+                        caption="msg://msgSourcer"
+                        maximumWidth="170px"
+                        width="170px">
+                    <componentRenderer/>
+                </column>
+                <column id="jobCandidateCard"
+                        caption=""
+                        width="80px">
+                    <componentRenderer/>
+                </column>
+            </columns>
+        </dataGrid>
+        </vbox>
+        <vbox width="100%" height="AUTO">
+            <button action="lookupCancelAction"
+                    width="AUTO"
+                    height="AUTO"
+                    align="BOTTOM_RIGHT"/>
+        </vbox>
+    </layout>
+</window>

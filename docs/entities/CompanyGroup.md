@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`itpearls_CompanyGroup.browse`, `itpearls_CompanyGroup.edit`; FK `companyGroup` на `Company`. UI Spec: [browse](../ui/itpearls_CompanyGroup.browse_Spec.md), [edit](../ui/itpearls_CompanyGroup.edit_Spec.md).
+`hunttech_CompanyGroup.browse`, `hunttech_CompanyGroup.edit`; FK `companyGroup` на `Company`. UI Spec: [browse](../ui/hunttech_CompanyGroup.browse_Spec.md), [edit](../ui/hunttech_CompanyGroup.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -25,9 +25,9 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.CompanyGroup` |
-| **Имя в CUBA** | `itpearls_CompanyGroup` |
-| **Таблица БД** | `ITPEARLS_COMPANY_GROUP` |
+| **Java-класс** | `com.company.hunttech.entity.CompanyGroup` |
+| **Имя в CUBA** | `hunttech_CompanyGroup` |
+| **Таблица БД** | `HUNTTECH_COMPANY_GROUP` |
 | **Тип данных** | справочник (мало записей) |
 | **LOB** | нет |
 
@@ -87,7 +87,7 @@
 `CompanyGroupServiceTest` + `TestEntityTracker`.
 
 ```bash
-./gradlew :app-core:test --tests "com.company.itpearls.core.CompanyGroupServiceTest"
+./gradlew :app-core:test --tests "com.company.hunttech.core.CompanyGroupServiceTest"
 ```
 
 ---

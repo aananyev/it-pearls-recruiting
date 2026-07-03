@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Экраны: `itpearls_IteractionList.browse`, `itpearls_IteractionList.edit`, `itpearls_IteractionListSimple.browse`, `itpearls_IteractionListBrowse`; вкладки в JobCandidateEdit. UI Spec: [browse](../ui/itpearls_IteractionList.browse_Spec.md), [edit](../ui/itpearls_IteractionList.edit_Spec.md).
+Экраны: `hunttech_IteractionList.browse`, `hunttech_IteractionList.edit`, `hunttech_IteractionListSimple.browse`, `hunttech_IteractionListBrowse`; вкладки в JobCandidateEdit. UI Spec: [browse](../ui/hunttech_IteractionList.browse_Spec.md), [edit](../ui/hunttech_IteractionList.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -25,9 +25,9 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.IteractionList` |
-| **Имя в CUBA** | `itpearls_IteractionList` |
-| **Таблица БД** | `ITPEARLS_ITERACTION_LIST` |
+| **Java-класс** | `com.company.hunttech.entity.IteractionList` |
+| **Имя в CUBA** | `hunttech_IteractionList` |
+| **Таблица БД** | `HUNTTECH_ITERACTION_LIST` |
 | **Тип данных** | транзакционная |
 | **Ожидаемый объём** | десятки тысяч — сотни тысяч записей |
 | **Критичность** | высокая — центральная сущность рекрутингового процесса |
@@ -50,11 +50,11 @@
 
 ```mermaid
 erDiagram
-    ITPEARLS_ITERACTION_LIST }o--|| ITPEARLS_ITERACTION : "iteractionType"
-    ITPEARLS_ITERACTION_LIST }o--|| ITPEARLS_JOB_CANDIDATE : "candidate"
-    ITPEARLS_ITERACTION_LIST }o--|| ITPEARLS_OPEN_POSITION : "vacancy"
-    ITPEARLS_ITERACTION_LIST }o--|| SEC_USER : "recrutier"
-    ITPEARLS_ITERACTION_LIST }o--o| ITPEARLS_ITERACTION_LIST : "chainInteraction"
+    HUNTTECH_ITERACTION_LIST }o--|| HUNTTECH_ITERACTION : "iteractionType"
+    HUNTTECH_ITERACTION_LIST }o--|| HUNTTECH_JOB_CANDIDATE : "candidate"
+    HUNTTECH_ITERACTION_LIST }o--|| HUNTTECH_OPEN_POSITION : "vacancy"
+    HUNTTECH_ITERACTION_LIST }o--|| SEC_USER : "recrutier"
+    HUNTTECH_ITERACTION_LIST }o--o| HUNTTECH_ITERACTION_LIST : "chainInteraction"
 ```
 
 ### 2.2 Исходящие связи (FK)
@@ -131,13 +131,13 @@ erDiagram
 
 ## 5. Экраны
 
-Каталог: `modules/web/src/com/company/itpearls/web/screens/iteractionlist/`
+Каталог: `modules/web/src/com/company/hunttech/web/screens/iteractionlist/`
 
 | Экран | Controller ID | Дескриптор | View |
 |-------|---------------|------------|------|
-| Browse | `itpearls_IteractionList.browse` | `iteraction-list-browse.xml` | `iteractionList-browse-view` |
-| Edit | `itpearls_IteractionList.edit` | `iteraction-list-edit.xml` | `iteractionList-edit-view` |
-| Simple Browse | `itpearls_IteractionListSimple.browse` | `iteraction-list-simple-browse.xml` | `iteractionList-simple-browse-view` |
+| Browse | `hunttech_IteractionList.browse` | `iteraction-list-browse.xml` | `iteractionList-browse-view` |
+| Edit | `hunttech_IteractionList.edit` | `iteraction-list-edit.xml` | `iteractionList-edit-view` |
+| Simple Browse | `hunttech_IteractionListSimple.browse` | `iteraction-list-simple-browse.xml` | `iteractionList-simple-browse-view` |
 
 ### 5.1 IteractionListBrowse
 
@@ -166,11 +166,11 @@ erDiagram
 
 | Индекс | Колонки | Назначение |
 |--------|---------|------------|
-| `IDX_ITPEARLS_ITERACTION_LIST_ON_ITERACTION_TYPE` | `ITERACTION_TYPE_ID` | FK, фильтр outstaffing |
-| `IDX_ITPEARLS_ITERACTION_LIST_ON_CANDIDATE` | `CANDIDATE_ID` | фильтр по кандидату |
-| `IDX_ITPEARLS_ITERACTION_LIST_ON_VACANCY` | `VACANCY_ID` | фильтр по вакансии |
-| `IDX_ITPEARLS_ITERACTION_LIST_NUMBER_ITERACTION` | `NUMBER_ITERACTION` | ORDER BY desc |
-| `IDX_ITPEARLS_ITERACTION_LIST_DATE_ITERACTION` | `DATE_ITERACTION` | виджеты по дате |
+| `IDX_HUNTTECH_ITERACTION_LIST_ON_ITERACTION_TYPE` | `ITERACTION_TYPE_ID` | FK, фильтр outstaffing |
+| `IDX_HUNTTECH_ITERACTION_LIST_ON_CANDIDATE` | `CANDIDATE_ID` | фильтр по кандидату |
+| `IDX_HUNTTECH_ITERACTION_LIST_ON_VACANCY` | `VACANCY_ID` | фильтр по вакансии |
+| `IDX_HUNTTECH_ITERACTION_LIST_NUMBER_ITERACTION` | `NUMBER_ITERACTION` | ORDER BY desc |
+| `IDX_HUNTTECH_ITERACTION_LIST_DATE_ITERACTION` | `DATE_ITERACTION` | виджеты по дате |
 
 **Миграция не требуется** — индекс на `ITERACTION_TYPE_ID` уже есть в `20.create-db.sql`.
 

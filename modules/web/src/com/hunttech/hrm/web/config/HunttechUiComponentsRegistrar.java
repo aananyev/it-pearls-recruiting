@@ -1,7 +1,7 @@
 package com.hunttech.hrm.web.config;
 
 import com.company.hunttech.web.gui.components.WebOvalImage;
-import com.company.itpearls.gui.components.OvalImage;
+import com.company.hunttech.gui.components.OvalImage;
 import com.haulmont.cuba.core.sys.events.AppContextInitializedEvent;
 import com.haulmont.cuba.web.gui.WebUiComponents;
 import com.hunttech.hrm.gui.components.FallbackImage;

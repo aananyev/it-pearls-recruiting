@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://staffCurrentBrowse.caption"
+        focusComponent="staffCurrentsTable"
+        messagesPack="com.company.hunttech.web.screens.staffcurrent">
+    <data readOnly="true">
+        <collection id="staffCurrentsDc"
+                    class="com.company.hunttech.entity.StaffCurrent">
+            <view extends="_local">
+                <property name="employee" view="_local">
+                    <property name="personPosition" view="_local"/>
+                </property>
+                <property name="staffingTable" view="_local">
+                    <property name="openPosition" view="_local">
+                        <property name="projectName" view="_local">
+                            <property name="projectDepartment" view="_local">
+                                <property name="companyName" view="_local"/>
+                            </property>
+                        </property>
+                    </property>
+                </property>
+            </view>
+            <loader id="staffCurrentsDl">
+                <query>
+                    <![CDATA[select e from hunttech_StaffCurrent e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="staffCurrentsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="staffCurrentsTable"
+                dataLoader="staffCurrentsDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="staffCurrentsTable"
+                    width="100%"
+                    aggregatable="true"
+                    dataContainer="staffCurrentsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+                <action id="excel" type="excel"/>
+            </actions>
+            <columns>
+                <group>
+                    <column id="staffingTable.openPosition.projectName.projectDepartment"
+                            groupAllowed="true"/>
+                </group>
+                <column id="staffingTable.code"/>
+                <column id="employee" width="400px"/>
+                <column id="staffingTable" width="400px"/>
+                <column id="salary"/>
+                <column id="formEmployment"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="staffCurrentsTable.create"/>
+                <button id="editBtn" action="staffCurrentsTable.edit"/>
+                <button id="removeBtn" action="staffCurrentsTable.remove"/>
+                <button id="excelBtn" action="staffCurrentsTable.excel"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

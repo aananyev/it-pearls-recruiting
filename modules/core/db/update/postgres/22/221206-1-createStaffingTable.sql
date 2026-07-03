@@ -1,4 +1,4 @@
-create table ITPEARLS_STAFFING_TABLE (
+create table HUNTTECH_STAFFING_TABLE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

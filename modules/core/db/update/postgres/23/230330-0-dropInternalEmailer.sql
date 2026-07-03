@@ -1,1 +1,1 @@
-alter table itpearls_internal_emailer rename to ITPEARLS_INTERNAL_EMAILER__U93217 ;
+alter table hunttech_internal_emailer rename to HUNTTECH_INTERNAL_EMAILER__U93217 ;

@@ -1,4 +1,4 @@
-create table ITPEARLS_USER_SETTINGS (
+create table HUNTTECH_USER_SETTINGS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

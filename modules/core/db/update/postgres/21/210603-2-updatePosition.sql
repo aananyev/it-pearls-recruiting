@@ -1,1 +1,1 @@
-alter table ITPEARLS_POSITION add column STANDART_DECRIPTION text ;
+alter table HUNTTECH_POSITION add column STANDART_DECRIPTION text ;

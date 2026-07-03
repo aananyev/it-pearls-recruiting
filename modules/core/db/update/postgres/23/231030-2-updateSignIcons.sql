@@ -1,1 +1,1 @@
-alter table ITPEARLS_SIGN_ICONS add column TITLE_DESCRIPTION varchar(255) ;
+alter table HUNTTECH_SIGN_ICONS add column TITLE_DESCRIPTION varchar(255) ;

@@ -1,7 +1,7 @@
 @import "hover-defaults";
-@import "com.company.itpearls/hover-ext-defaults";
+@import "com.company.hunttech/hover-ext-defaults";
 @import "app-components";
-@import "com.company.itpearls/hover-ext";
+@import "com.company.hunttech/hover-ext";
 @import url('https://fonts.googleapis.com/css2?familyhalo=Antonio&family=Kanit&family=Teko:wght@500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap');
@@ -10,7 +10,7 @@
   // include auto-generated app components SCSS
   @include app_components;
 
-  @include com_company_itpearls-hover-ext;
+  @include com_company_hunttech-hover-ext;
 }
 
 .active-customer {

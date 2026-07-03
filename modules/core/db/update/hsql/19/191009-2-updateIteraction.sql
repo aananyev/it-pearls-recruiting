@@ -1,1 +1,1 @@
-alter table ITPEARLS_ITERACTION add column ITERACTION_TREE_ID varchar(36) ;
+alter table HUNTTECH_ITERACTION add column ITERACTION_TREE_ID varchar(36) ;

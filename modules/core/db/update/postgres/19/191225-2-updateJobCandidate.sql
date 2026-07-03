@@ -1,1 +1,1 @@
-alter table ITPEARLS_JOB_CANDIDATE add column STATUS integer ;
+alter table HUNTTECH_JOB_CANDIDATE add column STATUS integer ;

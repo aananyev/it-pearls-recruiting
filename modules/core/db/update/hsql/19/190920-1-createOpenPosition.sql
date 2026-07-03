@@ -1,4 +1,4 @@
-create table ITPEARLS_OPEN_POSITION (
+create table HUNTTECH_OPEN_POSITION (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,

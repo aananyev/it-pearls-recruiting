@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`itpearls_Project.browse`, `itpearls_Project.edit`; FK в `OpenPosition`, фильтры browse вакансий. UI Spec: [browse](../ui/itpearls_Project.browse_Spec.md), [edit](../ui/itpearls_Project.edit_Spec.md).
+`hunttech_Project.browse`, `hunttech_Project.edit`; FK в `OpenPosition`, фильтры browse вакансий. UI Spec: [browse](../ui/hunttech_Project.browse_Spec.md), [edit](../ui/hunttech_Project.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -25,9 +25,9 @@ Browse без LOB descriptions в основном SELECT; nested `projectOwner`
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.Project` |
-| **Имя в CUBA** | `itpearls_Project` |
-| **Таблица БД** | `ITPEARLS_PROJECT` |
+| **Java-класс** | `com.company.hunttech.entity.Project` |
+| **Имя в CUBA** | `hunttech_Project` |
+| **Таблица БД** | `HUNTTECH_PROJECT` |
 | **Тип данных** | мастер-данные (десятки–сотни записей, дерево) |
 | **Критичность** | высокая — FK в OpenPosition, ApplicationRecruitmentList |
 | **Ответственный модуль** | `global`, `web`, `core` |
@@ -63,8 +63,8 @@ Browse без LOB descriptions в основном SELECT; nested `projectOwner`
 
 | Экран | Controller | View |
 |-------|------------|------|
-| Browse (tree) | `itpearls_Project.browse` | `project-browse-view` |
-| Edit | `itpearls_Project.edit` | `project-edit-view` |
+| Browse (tree) | `hunttech_Project.browse` | `project-browse-view` |
+| Edit | `hunttech_Project.edit` | `project-edit-view` |
 
 ### Оптимизации экранов
 
@@ -106,7 +106,7 @@ Browse без LOB descriptions в основном SELECT; nested `projectOwner`
 `ProjectServiceTest` — create, edit, browse load (без LOB), soft delete. `TestEntityTracker` для очистки.
 
 ```bash
-./gradlew :app-core:test --tests "com.company.itpearls.core.ProjectServiceTest"
+./gradlew :app-core:test --tests "com.company.hunttech.core.ProjectServiceTest"
 ```
 
 ---

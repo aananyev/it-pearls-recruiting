@@ -1,1 +1,1 @@
-alter table ITPEARLS_ITERACTION_LIST drop column COMPANY_DEPARTMENT_ID__U23208 cascade ;
+alter table HUNTTECH_ITERACTION_LIST drop column COMPANY_DEPARTMENT_ID__U23208 cascade ;

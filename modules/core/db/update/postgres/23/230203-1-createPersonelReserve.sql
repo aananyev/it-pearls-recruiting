@@ -1,4 +1,4 @@
-create table ITPEARLS_PERSONEL_RESERVE (
+create table HUNTTECH_PERSONEL_RESERVE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

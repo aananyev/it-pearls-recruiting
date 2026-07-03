@@ -1,4 +1,4 @@
-create table ITPEARLS_OPEN_POSITION_NEWS (
+create table HUNTTECH_OPEN_POSITION_NEWS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

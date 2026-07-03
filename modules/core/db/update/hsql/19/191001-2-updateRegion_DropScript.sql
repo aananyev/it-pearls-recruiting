@@ -1,1 +1,1 @@
-alter table ITPEARLS_REGION drop column REGION_EN_NAME__U09583 cascade ;
+alter table HUNTTECH_REGION drop column REGION_EN_NAME__U09583 cascade ;

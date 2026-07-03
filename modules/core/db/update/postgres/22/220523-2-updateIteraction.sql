@@ -1,1 +1,1 @@
-alter table ITPEARLS_ITERACTION add column SIGN_PRIORITY_NEWS boolean ;
+alter table HUNTTECH_ITERACTION add column SIGN_PRIORITY_NEWS boolean ;

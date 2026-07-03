@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://openPositionNewsEdit.caption"
+        focusComponent="newsVBox"
+        messagesPack="com.company.hunttech.web.screens.openpositionnews">
+    <data>
+        <instance id="openPositionNewsDc"
+                  class="com.company.hunttech.entity.OpenPositionNews">
+            <view extends="openPositionNews-edit-view"/>
+            <loader/>
+        </instance>
+        <collection id="openPositionsDc" class="com.company.hunttech.entity.OpenPosition" view="openPosition-picker-view">
+            <loader id="openPositionsDl">
+                <query>
+                    <![CDATA[select e from hunttech_OpenPosition e order by e.openClose, e.vacansyName]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="authorDc" class="com.haulmont.cuba.security.entity.User" view="_minimal">
+            <loader id="authorDl">
+                <query>
+                    <![CDATA[select e from sec$User e order by e.name]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="newsVBox" spacing="true" >
+        <vbox id="newsVBox"
+              expand="commentField"
+              spacing="true"
+              width="100%"
+              height="100%">
+            <textField width="100%"
+                       dataContainer="openPositionNewsDc"
+                       caption="mainMsg://msgSubject"
+                       property="subject"/>
+            <hbox expand="openPositionField"
+                  spacing="true"
+                  width="100%">
+                <lookupPickerField id="openPositionField"
+                                   dataContainer="openPositionNewsDc"
+                                   optionsContainer="openPositionsDc"
+                                   caption="mainMsg://msgOpenPosition"
+                                   width="100%"
+                                   property="openPosition">
+                    <actions>
+                        <action id="lookup"
+                                type="picker_lookup"/>
+                        <action id="open"
+                                type="picker_open"/>
+                    </actions>
+                </lookupPickerField>
+                <dateField id="dateNewsField"
+                           dataContainer="openPositionNewsDc"
+                           property="dateNews"
+                           align="BOTTOM_RIGHT"
+                           width="AUTO"/>
+            </hbox>
+            <textArea id="commentField"
+                      dataContainer="openPositionNewsDc"
+                      caption="mainMsg://msgComment"
+                      width="100%"
+                      height="100%"
+                      property="comment"/>
+            <lookupPickerField id="authorLookupPickerField"
+                               dataContainer="openPositionNewsDc"
+                               optionsContainer="authorDc"
+                               width="AUTO"
+                               align="BOTTOM_RIGHT"
+                               caption="mainMsg://msgAuthor"
+                               property="author">
+                <actions>
+                    <action id="lookup"
+                            type="picker_lookup"/>
+                    <action id="open"
+                            type="picker_open"/>
+                </actions>
+            </lookupPickerField>
+        </vbox>
+        <hbox id="editActions"
+              spacing="true"
+              align="BOTTOM_RIGHT">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="commitBtn" action="windowCommit"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

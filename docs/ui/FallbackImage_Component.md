@@ -28,7 +28,7 @@
 |------|--------|------------|
 | `hunttech.defaultFallbackImagePath` | `images/hunttech-placeholder.svg` | Путь к theme-ресурсу по умолчанию для всех `fallbackImage` без атрибута `fallbackThemePath` |
 
-Переопределение: **Administration → Application Properties** (хранение DATABASE). Комментарий с ключом — в `modules/core/src/com/company/itpearls/app.properties`.
+Переопределение: **Administration → Application Properties** (хранение DATABASE). Комментарий с ключом — в `modules/core/src/com/company/hunttech/app.properties`.
 
 ---
 

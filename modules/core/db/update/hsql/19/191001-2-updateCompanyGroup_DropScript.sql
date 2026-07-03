@@ -1,1 +1,1 @@
-alter table ITPEARLS_COMPANY_GROUP drop column COMPANY_EN_GROUP_NAME__U97365 cascade ;
+alter table HUNTTECH_COMPANY_GROUP drop column COMPANY_EN_GROUP_NAME__U97365 cascade ;

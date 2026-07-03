@@ -8,7 +8,7 @@
     <context-param>
         <param-name>appPropertiesConfig</param-name>
         <param-value>
-            classpath:com/company/itpearls/web-app.properties
+            classpath:com/company/hunttech/web-app.properties
             /WEB-INF/local.app.properties
             "file:${app.home}/local.app.properties"
         </param-value>

@@ -1,1 +1,1 @@
-alter table ITPEARLS_ITEARCTION_REQUIREMENTS add column REQUIREMENT boolean ;
+alter table HUNTTECH_ITEARCTION_REQUIREMENTS add column REQUIREMENT boolean ;

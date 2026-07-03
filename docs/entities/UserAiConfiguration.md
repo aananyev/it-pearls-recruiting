@@ -1,6 +1,6 @@
 # UserAiConfiguration — AI-конфигурация пользователя
 
-> Cross-link: [itpearls_UserAiConfiguration.browse_Spec.md](../ui/itpearls_UserAiConfiguration.browse_Spec.md) · edit в [itpearls_ExtUserEdit_Spec.md](../ui/itpearls_ExtUserEdit_Spec.md)
+> Cross-link: [hunttech_UserAiConfiguration.browse_Spec.md](../ui/hunttech_UserAiConfiguration.browse_Spec.md) · edit в [hunttech_ExtUserEdit_Spec.md](../ui/hunttech_ExtUserEdit_Spec.md)
 
 ---
 
@@ -12,8 +12,8 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-- Редактирование: вкладка «Персональный ИИ» в `sec$User.edit` → модаль `itpearls_UserAiConfiguration.edit`
-- Мониторинг: меню **Управление AI** → `itpearls_UserAiConfiguration.browse`
+- Редактирование: вкладка «Персональный ИИ» в `sec$User.edit` → модаль `hunttech_UserAiConfiguration.edit`
+- Мониторинг: меню **Управление AI** → `hunttech_UserAiConfiguration.browse`
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -31,7 +31,7 @@
 | defaultModelName | String(128) | Модель по умолчанию |
 | isActive | Boolean | Активна |
 
-Таблица: `ITPEARLS_USER_AI_CONFIGURATION`. Миграция: `260627-2-createUserAiConfiguration`.
+Таблица: `HUNTTECH_USER_AI_CONFIGURATION`. Миграция: `260627-2-createUserAiConfiguration`.
 
 ---
 
@@ -45,8 +45,8 @@
 
 | Экран | Controller |
 |-------|------------|
-| Browse (мониторинг) | `itpearls_UserAiConfiguration.browse` |
-| Edit | `itpearls_UserAiConfiguration.edit` |
+| Browse (мониторинг) | `hunttech_UserAiConfiguration.browse` |
+| Edit | `hunttech_UserAiConfiguration.edit` |
 
 ---
 

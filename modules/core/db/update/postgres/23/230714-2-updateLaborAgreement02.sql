@@ -1,1 +1,1 @@
-alter table ITPEARLS_LABOR_AGREEMENT add column LEGAL_ENTITY_FROM_ID uuid ;
+alter table HUNTTECH_LABOR_AGREEMENT add column LEGAL_ENTITY_FROM_ID uuid ;

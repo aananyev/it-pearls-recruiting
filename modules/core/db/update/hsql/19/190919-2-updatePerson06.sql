@@ -1,1 +1,1 @@
-alter table ITPEARLS_PERSON alter column WATSUP_NAME set null ;
+alter table HUNTTECH_PERSON alter column WATSUP_NAME set null ;

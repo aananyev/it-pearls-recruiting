@@ -70,14 +70,14 @@ alwaysApply: false
 - Кандидаты на индексы/колонки — в backlog; не применять без согласия пользователя
 
 ### 1.3 CUBA
-- `modules/core/src/com/company/itpearls/app.properties` — entity cache (`cuba.entityCache.*`)
+- `modules/core/src/com/company/hunttech/app.properties` — entity cache (`cuba.entityCache.*`)
 - `cacheable="true"` на loaders справочников
 - `views.xml`: иерархия `_minimal` / `_base` / `_local` — что реально тянется
-- `modules/core/src/com/company/itpearls/fts.xml` — нужен ли FTS для сущности
+- `modules/core/src/com/company/hunttech/fts.xml` — нужен ли FTS для сущности
 
 ### 1.4 Карта потребителей
 ```bash
-rg "itpearls_{Entity}|{Entity}\." modules/ --glob '*.{java,xml}'
+rg "hunttech_{Entity}|{Entity}\." modules/ --glob '*.{java,xml}'
 rg "view=\".*{entity}" modules/ --glob '*.xml'
 rg "{entityCamelCase}\." modules/ --glob '*.java'
 ```
@@ -105,7 +105,7 @@ rg "{entityCamelCase}\." modules/ --glob '*.java'
 
 ## Фаза 2: Быстрые победы (реализация)
 
-### 2.1 Специализированные views в `modules/global/src/com/company/itpearls/views.xml`
+### 2.1 Специализированные views в `modules/global/src/com/company/hunttech/views.xml`
 
 Именование (заменить `{Entity}` / `{entity}`):
 
@@ -265,14 +265,14 @@ SELECT ... -- типичный SELECT browse-таблицы или тяжёлы�
 
 | Файл | Назначение |
 |------|------------|
-| `modules/core/test/com/company/itpearls/ItpearlsTestContainer.java` | TestContainer, подключение к локальной PostgreSQL из `context.xml` |
-| `modules/core/test/com/company/itpearls/core/SampleIntegrationTest.java` | образец: `@ClassRule`, `DataManager`, `Persistence`, транзакции |
+| `modules/core/test/com/company/hunttech/HunttechTestContainer.java` | TestContainer, подключение к локальной PostgreSQL из `context.xml` |
+| `modules/core/test/com/company/hunttech/core/SampleIntegrationTest.java` | образец: `@ClassRule`, `DataManager`, `Persistence`, транзакции |
 
 Перед написанием — `rg "ServiceTest|IntegrationTest" modules/core/test/` на существующие тесты сущности.
 
 ### 6.2 Что покрыть
 
-Класс: `{Entity}ServiceTest` в `modules/core/test/com/company/itpearls/core/` (или screen-тесты, если в проекте есть UI-тесты для экранов).
+Класс: `{Entity}ServiceTest` в `modules/core/test/com/company/hunttech/core/` (или screen-тесты, если в проекте есть UI-тесты для экранов).
 
 | Сценарий | Проверка |
 |----------|----------|
@@ -286,7 +286,7 @@ SELECT ... -- типичный SELECT browse-таблицы или тяжёлы�
 ### 6.3 Запуск
 
 ```bash
-./gradlew :app-core:test --tests "com.company.itpearls.core.{Entity}ServiceTest"
+./gradlew :app-core:test --tests "com.company.hunttech.core.{Entity}ServiceTest"
 ```
 
 Полный прогон core-тестов:
@@ -294,7 +294,7 @@ SELECT ... -- типичный SELECT browse-таблицы или тяжёлы�
 ./gradlew :app-core:test
 ```
 
-Требуется доступная локальная БД (как для `ItpearlsTestContainer`).
+Требуется доступная локальная БД (как для `HunttechTestContainer`).
 
 ### 6.4 Scope
 
@@ -318,7 +318,7 @@ SELECT ... -- типичный SELECT browse-таблицы или тяжёлы�
 ### 7.2 Автотесты CRUD
 
 ```bash
-./gradlew :app-core:test --tests "com.company.itpearls.core.{Entity}ServiceTest"
+./gradlew :app-core:test --tests "com.company.hunttech.core.{Entity}ServiceTest"
 ```
 
 При наличии тестов связанных сущностей — прогнать их тоже. Полный прогон при сомнениях:
@@ -444,12 +444,12 @@ SELECT ... -- типичный SELECT browse-таблицы или тяжёлы�
 
 | Область | Путь |
 |---------|------|
-| Views | `modules/global/src/com/company/itpearls/views.xml` |
-| FTS | `modules/core/src/com/company/itpearls/fts.xml` |
-| Cache config | `modules/core/src/com/company/itpearls/app.properties` |
-| Экраны | `modules/web/src/com/company/itpearls/web/screens/{entity}/` |
-| Сервисы | `modules/core/src/com/company/itpearls/core/` |
-| Стили row | `modules/web/themes/hover/com.company.itpearls/hover-ext.scss` |
+| Views | `modules/global/src/com/company/hunttech/views.xml` |
+| FTS | `modules/core/src/com/company/hunttech/fts.xml` |
+| Cache config | `modules/core/src/com/company/hunttech/app.properties` |
+| Экраны | `modules/web/src/com/company/hunttech/web/screens/{entity}/` |
+| Сервисы | `modules/core/src/com/company/hunttech/core/` |
+| Стили row | `modules/web/themes/hover/com.company.hunttech/hover-ext.scss` |
 | Документация сущности | `docs/entities/{Entity}.md` |
-| Тесты | `modules/core/test/com/company/itpearls/` |
-| TestContainer | `modules/core/test/com/company/itpearls/ItpearlsTestContainer.java` |
+| Тесты | `modules/core/test/com/company/hunttech/` |
+| TestContainer | `modules/core/test/com/company/hunttech/HunttechTestContainer.java` |

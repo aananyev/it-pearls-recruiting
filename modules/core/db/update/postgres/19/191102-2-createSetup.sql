@@ -1,1 +1,1 @@
-create unique index IDX_ITPEARLS_SETUP_UK_PERAM_NAME on ITPEARLS_SETUP (PERAM_NAME) where DELETE_TS is null ;
+create unique index IDX_HUNTTECH_SETUP_UK_PERAM_NAME on HUNTTECH_SETUP (PERAM_NAME) where DELETE_TS is null ;

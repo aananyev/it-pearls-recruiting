@@ -1,4 +1,4 @@
-create table ITPEARLS_EVENT_REGISTRATION (
+create table HUNTTECH_EVENT_REGISTRATION (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

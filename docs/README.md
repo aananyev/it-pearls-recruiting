@@ -80,11 +80,11 @@ docs/
 | Понять справочник стран | [entities/Country.md](entities/Country.md) |
 | Понять справочник городов | [entities/City.md](entities/City.md) |
 | Понять справочник регионов | [entities/Region.md](entities/Region.md) |
-| Понять справочник проектов | [entities/Project.md](entities/Project.md) · UI: [browse](ui/itpearls_Project.browse_Spec.md), [edit](ui/itpearls_Project.edit_Spec.md) |
+| Понять справочник проектов | [entities/Project.md](entities/Project.md) · UI: [browse](ui/hunttech_Project.browse_Spec.md), [edit](ui/hunttech_Project.edit_Spec.md) |
 | Понять справочник компаний | [entities/Company.md](entities/Company.md) · UI: [каталог](ui/README.md#company) |
-| Понять департаменты компаний | [entities/CompanyDepartament.md](entities/CompanyDepartament.md) · UI: [browse](ui/itpearls_CompanyDepartament.browse_Spec.md), [edit](ui/itpearls_CompanyDepartament.edit_Spec.md) |
-| Понять группы компаний | [entities/CompanyGroup.md](entities/CompanyGroup.md) · UI: [browse](ui/itpearls_CompanyGroup.browse_Spec.md), [edit](ui/itpearls_CompanyGroup.edit_Spec.md) |
-| Понять дерево компетенций | [entities/SkillTree.md](entities/SkillTree.md) · UI: [browse](ui/itpearls_SkillTree.browse_Spec.md), [edit](ui/itpearls_SkillTree.edit_Spec.md) |
+| Понять департаменты компаний | [entities/CompanyDepartament.md](entities/CompanyDepartament.md) · UI: [browse](ui/hunttech_CompanyDepartament.browse_Spec.md), [edit](ui/hunttech_CompanyDepartament.edit_Spec.md) |
+| Понять группы компаний | [entities/CompanyGroup.md](entities/CompanyGroup.md) · UI: [browse](ui/hunttech_CompanyGroup.browse_Spec.md), [edit](ui/hunttech_CompanyGroup.edit_Spec.md) |
+| Понять дерево компетенций | [entities/SkillTree.md](entities/SkillTree.md) · UI: [browse](ui/hunttech_SkillTree.browse_Spec.md), [edit](ui/hunttech_SkillTree.edit_Spec.md) |
 | Понять подсистему кандидатов | [entities/JobCandidate.md](entities/JobCandidate.md) · UI: [каталог](ui/README.md#jobcandidate) |
 | Понять подсистему вакансий | [entities/OpenPosition.md](entities/OpenPosition.md) · [architecture/OpenPosition_Spec.md](architecture/OpenPosition_Spec.md) · UI: [каталог](ui/README.md#openposition) |
 | Обработка фото профиля (сжатие, лимиты) | [services/ImageProcessingService.md](services/ImageProcessingService.md) · [entities/ExtUser.md](entities/ExtUser.md) |
@@ -161,24 +161,24 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 
 | Сущность | Таблица БД | Тип | Документ | Статус |
 |----------|------------|-----|----------|--------|
-| **Iteraction** | `ITPEARLS_ITERACTION` | справочник (дерево) | [entities/Iteraction.md](entities/Iteraction.md) | ✅ заполнен |
-| **IteractionList** | `ITPEARLS_ITERACTION_LIST` | транзакционная | [entities/IteractionList.md](entities/IteractionList.md) | ✅ заполнен |
-| **Person** | `ITPEARLS_PERSON` | справочник | [entities/Person.md](entities/Person.md) | ✅ заполнен |
-| **Country** | `ITPEARLS_COUNTRY` | справочник | [entities/Country.md](entities/Country.md) | ✅ заполнен |
-| **Region** | `ITPEARLS_REGION` | справочник | [entities/Region.md](entities/Region.md) | ✅ заполнен |
-| **City** | `ITPEARLS_CITY` | справочник | [entities/City.md](entities/City.md) | ✅ заполнен |
-| **Project** | `ITPEARLS_PROJECT` | мастер-данные | [entities/Project.md](entities/Project.md) | ✅ заполнен |
-| **Company** | `ITPEARLS_COMPANY` | справочник | [entities/Company.md](entities/Company.md) | ✅ заполнен |
-| **CompanyDepartament** | `ITPEARLS_COMPANY_DEPARTAMENT` | справочник | [entities/CompanyDepartament.md](entities/CompanyDepartament.md) | ✅ заполнен |
-| **CompanyGroup** | `ITPEARLS_COMPANY_GROUP` | справочник | [entities/CompanyGroup.md](entities/CompanyGroup.md) | ✅ заполнен |
-| **SkillTree** | `ITPEARLS_SKILL_TREE` | справочник (дерево) | [entities/SkillTree.md](entities/SkillTree.md) | ✅ заполнен |
-| **JobCandidate** | `ITPEARLS_JOB_CANDIDATE` | транзакционная | [entities/JobCandidate.md](entities/JobCandidate.md) | ✅ заполнен |
-| **OpenPosition** | `ITPEARLS_OPEN_POSITION` | транзакционная | [entities/OpenPosition.md](entities/OpenPosition.md) · [Spec](architecture/OpenPosition_Spec.md) | ✅ заполнен |
-| **Grade** | `ITPEARLS_GRADE` | справочник | [entities/Grade.md](entities/Grade.md) | ✅ заполнен |
-| **Position** | `ITPEARLS_POSITION` | справочник | [entities/Position.md](entities/Position.md) | ✅ заполнен |
-| **OpenPositionNews** | `ITPEARLS_OPEN_POSITION_NEWS` | транзакционная | [entities/OpenPositionNews.md](entities/OpenPositionNews.md) | ✅ заполнен |
-| **OpenPositionComment** | `ITPEARLS_OPEN_POSITION_COMMENT` | транзакционная | [entities/OpenPositionComment.md](entities/OpenPositionComment.md) | ✅ заполнен |
-| **RecrutiesTasks** | `ITPEARLS_RECRUTIES_TASKS` | транзакционная | [entities/RecrutiesTasks.md](entities/RecrutiesTasks.md) | ✅ заполнен |
+| **Iteraction** | `HUNTTECH_ITERACTION` | справочник (дерево) | [entities/Iteraction.md](entities/Iteraction.md) | ✅ заполнен |
+| **IteractionList** | `HUNTTECH_ITERACTION_LIST` | транзакционная | [entities/IteractionList.md](entities/IteractionList.md) | ✅ заполнен |
+| **Person** | `HUNTTECH_PERSON` | справочник | [entities/Person.md](entities/Person.md) | ✅ заполнен |
+| **Country** | `HUNTTECH_COUNTRY` | справочник | [entities/Country.md](entities/Country.md) | ✅ заполнен |
+| **Region** | `HUNTTECH_REGION` | справочник | [entities/Region.md](entities/Region.md) | ✅ заполнен |
+| **City** | `HUNTTECH_CITY` | справочник | [entities/City.md](entities/City.md) | ✅ заполнен |
+| **Project** | `HUNTTECH_PROJECT` | мастер-данные | [entities/Project.md](entities/Project.md) | ✅ заполнен |
+| **Company** | `HUNTTECH_COMPANY` | справочник | [entities/Company.md](entities/Company.md) | ✅ заполнен |
+| **CompanyDepartament** | `HUNTTECH_COMPANY_DEPARTAMENT` | справочник | [entities/CompanyDepartament.md](entities/CompanyDepartament.md) | ✅ заполнен |
+| **CompanyGroup** | `HUNTTECH_COMPANY_GROUP` | справочник | [entities/CompanyGroup.md](entities/CompanyGroup.md) | ✅ заполнен |
+| **SkillTree** | `HUNTTECH_SKILL_TREE` | справочник (дерево) | [entities/SkillTree.md](entities/SkillTree.md) | ✅ заполнен |
+| **JobCandidate** | `HUNTTECH_JOB_CANDIDATE` | транзакционная | [entities/JobCandidate.md](entities/JobCandidate.md) | ✅ заполнен |
+| **OpenPosition** | `HUNTTECH_OPEN_POSITION` | транзакционная | [entities/OpenPosition.md](entities/OpenPosition.md) · [Spec](architecture/OpenPosition_Spec.md) | ✅ заполнен |
+| **Grade** | `HUNTTECH_GRADE` | справочник | [entities/Grade.md](entities/Grade.md) | ✅ заполнен |
+| **Position** | `HUNTTECH_POSITION` | справочник | [entities/Position.md](entities/Position.md) | ✅ заполнен |
+| **OpenPositionNews** | `HUNTTECH_OPEN_POSITION_NEWS` | транзакционная | [entities/OpenPositionNews.md](entities/OpenPositionNews.md) | ✅ заполнен |
+| **OpenPositionComment** | `HUNTTECH_OPEN_POSITION_COMMENT` | транзакционная | [entities/OpenPositionComment.md](entities/OpenPositionComment.md) | ✅ заполнен |
+| **RecrutiesTasks** | `HUNTTECH_RECRUTIES_TASKS` | транзакционная | [entities/RecrutiesTasks.md](entities/RecrutiesTasks.md) | ✅ заполнен |
 
 ---
 
@@ -195,14 +195,14 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 
 | Область | Путь |
 |---------|------|
-| Views | `modules/global/src/com/company/itpearls/views.xml` |
-| Entity | `modules/global/src/com/company/itpearls/entity/` |
-| Экраны | `modules/web/src/com/company/itpearls/web/screens/` |
+| Views | `modules/global/src/com/company/hunttech/views.xml` |
+| Entity | `modules/global/src/com/company/hunttech/entity/` |
+| Экраны | `modules/web/src/com/company/hunttech/web/screens/` |
 | Миграции PostgreSQL | `modules/core/db/update/postgres/` |
 | Схема БД (init) | `modules/core/db/init/postgres/` |
-| Кэш сущностей | `modules/core/src/com/company/itpearls/app.properties` |
-| FTS | `modules/core/src/com/company/itpearls/fts.xml` |
-| Стили UI | `modules/web/themes/hover/com.company.itpearls/hover-ext.scss` |
+| Кэш сущностей | `modules/core/src/com/company/hunttech/app.properties` |
+| FTS | `modules/core/src/com/company/hunttech/fts.xml` |
+| Стили UI | `modules/web/themes/hover/com.company.hunttech/hover-ext.scss` |
 
 ---
 
@@ -244,7 +244,7 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 ## Соглашения
 
 - **Business & Context Intro:** любой `docs/entities/*.md`, `docs/architecture/*_Spec.md`, `docs/ui/*_Spec.md` **обязан** начинать содержательную часть с трёх подразделов ввода (назначение, навигация в UI, краткое поведение) **до** технических таблиц/XML/БД. Документ без ввода — недействителен. Шаблоны: [entity-template.md](templates/entity-template.md), [ui-template.md](templates/ui-template.md). Правило агента: [`.cursorrules`](../.cursorrules) § Business & Context Intro. Существующие UI Spec (~47) дополняются при следующем living sync или отдельным batch-проходом.
-- **Брендинг:** во всей документации (`docs/**/*.md`, шаблоны) — **HRM HuntTech**; не использовать «IT Pearls» / «IT-Pearls» в prose. Исключение — цитирование legacy-идентификаторов из кода (`itpearls`, `ITPEARLS_*`, имена файлов ресурсов, ключи `messages.properties`). Правило для агента: [living-documentation.mdc](../.cursor/rules/living-documentation.mdc), § «Брендинг в документации».
+- **Брендинг:** во всей документации (`docs/**/*.md`, шаблоны) — **HRM HuntTech**; не использовать «HuntTech» / «HuntTech» в prose. Исключение — цитирование legacy-идентификаторов из кода (`HuntTech`, `HUNTTECH_*`, имена файлов ресурсов, ключи `messages.properties`). Правило для агента: [living-documentation.mdc](../.cursor/rules/living-documentation.mdc), § «Брендинг в документации».
 - Документация сущностей — **на русском языке**
 - Имена файлов сущностей — как Java-класс: `Iteraction.md`, `IteractionList.md`
 - При изменении views/экранов сущности — обновлять `docs/entities/*.md` и `docs/ui/{FormName}_Spec.md`

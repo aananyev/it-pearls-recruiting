@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fts-config xmlns="http://schemas.haulmont.com/cuba/fts.xsd">
+    <entities>
+        <entity class="com.company.hunttech.entity.JobCandidate">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.CompanyDepartament">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Company">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Region">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Iteraction">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Country">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Project">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Position">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Person">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.City">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Ownershup">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Specialisation">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.CompanyGroup">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.OpenPosition">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.IteractionList">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.SocialNetworkURLs">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.JobHistory">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.CandidateCV">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.RecrutiesTasks">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.SomeFiles">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.FileType">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.SocialNetworkType">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.SubscribeCandidateAction">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.ItearctionRequirements">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.JobCandidatePositionLists">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.LaborAgeementType">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.LaborAgreement">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.PossibleNames">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.ExtUser">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.OpenPositionNews">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Interview">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.InternalEmailer">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.StaffingTable">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Grade">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.StaffCurrent">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.ApplicationRecruitment">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.ApplicationRecruitmentList">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.PersonelReserve">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.SkillsFilterLastSelection">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.InternalEmailTemplate">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.InternalEmailerTemplate">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.UserSettings">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.OutstaffingRates">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Currency">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.OpenPositionComment">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.SomeFilesAgreement">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.SomeFilesCandidateCV">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.SomeFilesOpenPosition">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.Employee">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.EmployeeWorkStatus">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.MyActiveCandidateExclude">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.SignIcons">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.JobCandidateSignIcon">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.InternalEmailTemplateInteraction">
+            <include re=".*"/>
+        </entity>
+        <entity class="com.company.hunttech.entity.ApplicationSetup">
+            <include re=".*"/>
+        </entity>
+    </entities>
+</fts-config>

@@ -1,1 +1,1 @@
-alter table ITPEARLS_MAIN_LIST add column CONTACT_NAME_ID varchar(36) ;
+alter table HUNTTECH_MAIN_LIST add column CONTACT_NAME_ID varchar(36) ;

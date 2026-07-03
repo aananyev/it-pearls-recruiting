@@ -1,1 +1,1 @@
-alter table itpearls_partners_subscribe_open_position rename to ITPEARLS_PARTNERS_SUBSCRIBE_OPEN_POSITION__U96422 ;
+alter table hunttech_partners_subscribe_open_position rename to HUNTTECH_PARTNERS_SUBSCRIBE_OPEN_POSITION__U96422 ;

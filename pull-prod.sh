@@ -11,7 +11,7 @@
 #   6. Запуск локальной PostgreSQL
 #
 # Использование:
-#   cd /path/to/it-pearls-recruiting
+#   cd /path/to/hunttech_recruiting
 #   ./pull-prod.sh [опции]
 #   ./pull-prod.sh --help
 #
@@ -58,7 +58,7 @@ TOMCAT_SERVICE_NAME="tomcat"
 TOMCAT_WARS_LOCAL="${current_catalog}/../tomcat_wars"
 FILE_STORAGE_REMOTE="/opt/app_home/fileStorage"
 FILE_STORAGE_LOCAL="/opt/app_home"
-DB_NAME="itpearls"
+DB_NAME="HuntTech"
 DB_DUMP_USER="postgres"
 REMOTE_DB_PORT="5432"
 DB_UPDATE_USER="cuba"
@@ -224,7 +224,7 @@ TOMCAT_WARS_DIR="/opt/tomcat/webapps"
 TOMCAT_SERVICE_NAME="tomcat"
 FILE_STORAGE_REMOTE="/opt/app_home/fileStorage"
 # База данных (деплой / pg_dump)
-DB_NAME="itpearls"
+DB_NAME="HuntTech"
 DB_DUMP_USER="postgres"
 REMOTE_DB_PORT="5432"
 DB_UPDATE_USER="cuba"
@@ -243,7 +243,7 @@ EOF
         check_and_fix_option "TOMCAT_WARS_DIR" "/opt/tomcat/webapps" "Каталог WAR на сервере"
         check_and_fix_option "TOMCAT_SERVICE_NAME" "tomcat" "Имя systemd-службы Tomcat"
         check_and_fix_option "FILE_STORAGE_REMOTE" "/opt/app_home/fileStorage" "Путь fileStorage на сервере"
-        check_and_fix_option "DB_NAME" "itpearls" "Имя базы данных CUBA"
+        check_and_fix_option "DB_NAME" "HuntTech" "Имя базы данных CUBA"
         check_and_fix_option "DB_DUMP_USER" "postgres" "Пользователь для pg_dump на сервере"
         check_and_fix_option "REMOTE_DB_PORT" "5432" "Порт PostgreSQL на сервере"
         check_and_fix_option "DB_UPDATE_USER" "cuba" "Пользователь для CUBA updateDb"

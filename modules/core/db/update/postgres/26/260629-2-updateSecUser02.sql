@@ -6,7 +6,7 @@ where IMAGE_ID is not null;
 -- Migrate personal photo from UserSettings to userAvatar
 update SEC_USER u
 set USER_AVATAR_ID = us.IMAGE_ID
-from ITPEARLS_USER_SETTINGS us
+from HUNTTECH_USER_SETTINGS us
 where us.USER_ID = u.ID
   and us.IMAGE_ID is not null;
 

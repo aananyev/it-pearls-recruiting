@@ -9,7 +9,7 @@
               name="jdbc/CubaDS"
               password="cuba"
               type="javax.sql.DataSource"
-              url="jdbc:postgresql://127.0.0.1:5432/itpearls"
+              url="jdbc:postgresql://127.0.0.1:5432/hunttech"
               username="cuba"/>
     <!-- Database connection-->
 

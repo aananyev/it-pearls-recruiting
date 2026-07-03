@@ -1,1 +1,1 @@
-alter table ITPEARLS_PROJECT add column PROJECT_GROUP uuid ;
+alter table HUNTTECH_PROJECT add column PROJECT_GROUP uuid ;

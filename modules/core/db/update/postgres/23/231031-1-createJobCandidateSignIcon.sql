@@ -1,4 +1,4 @@
-create table ITPEARLS_JOB_CANDIDATE_SIGN_ICON (
+create table HUNTTECH_JOB_CANDIDATE_SIGN_ICON (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

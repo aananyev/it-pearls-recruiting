@@ -5,9 +5,9 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.OpenPosition` |
-| **Имя в CUBA** | `itpearls_OpenPosition` |
-| **Таблица БД** | `ITPEARLS_OPEN_POSITION` |
+| **Java-класс** | `com.company.hunttech.entity.OpenPosition` |
+| **Имя в CUBA** | `hunttech_OpenPosition` |
+| **Таблица БД** | `HUNTTECH_OPEN_POSITION` |
 | **NamePattern** | `%s %s\|vacansyID,vacansyName` |
 | **Платформа** | CUBA 7.3 |
 
@@ -21,7 +21,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Экраны: `itpearls_OpenPosition.browse` (основной список-дерево), `itpearls_OpenPosition.edit` (много вкладок), специализированные browse (recruiting, outstaff, prod, master), фрагмент `itpearls_OpenPositionDetailScreenFragment`, комментарии `OpenPositionComment`, новости `OpenPositionNews`, подписки `RecrutiesTasks`. Входящие FK из `IteractionList.vacancy`, `CandidateCV`, `RecrutiesTasks`. Living-doc: [OpenPosition.md](../entities/OpenPosition.md); UI: [browse](../ui/itpearls_OpenPosition.browse_Spec.md), [edit](../ui/itpearls_OpenPosition.edit_Spec.md).
+Экраны: `hunttech_OpenPosition.browse` (основной список-дерево), `hunttech_OpenPosition.edit` (много вкладок), специализированные browse (recruiting, outstaff, prod, master), фрагмент `hunttech_OpenPositionDetailScreenFragment`, комментарии `OpenPositionComment`, новости `OpenPositionNews`, подписки `RecrutiesTasks`. Входящие FK из `IteractionList.vacancy`, `CandidateCV`, `RecrutiesTasks`. Living-doc: [OpenPosition.md](../entities/OpenPosition.md); UI: [browse](../ui/hunttech_OpenPosition.browse_Spec.md), [edit](../ui/hunttech_OpenPosition.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -33,17 +33,17 @@
 
 ### 1.1 Класс и таблица
 
-- **Файл entity:** `modules/global/src/com/company/itpearls/entity/OpenPosition.java`
+- **Файл entity:** `modules/global/src/com/company/hunttech/entity/OpenPosition.java`
 - **Базовый класс:** `StandardEntity` (soft delete, audit-поля)
-- **Таблица:** `ITPEARLS_OPEN_POSITION` (`@Table`)
+- **Таблица:** `HUNTTECH_OPEN_POSITION` (`@Table`)
 
 ### 1.2 Индексы (`@Table`)
 
 | Имя | Колонки |
 |-----|---------|
-| `IDX_ITPEARLS_OPEN_POSITION_OPEN_CLOSE` | `OPEN_CLOSE` |
-| `IDX_ITPEARLS_OPEN_POSITION_PRIORITY` | `PRIORITY` |
-| `IDX_ITPEARLS_OPEN_POSITION_VACANSY_NAME` | `VACANSY_NAME` |
+| `IDX_HUNTTECH_OPEN_POSITION_OPEN_CLOSE` | `OPEN_CLOSE` |
+| `IDX_HUNTTECH_OPEN_POSITION_PRIORITY` | `PRIORITY` |
+| `IDX_HUNTTECH_OPEN_POSITION_VACANSY_NAME` | `VACANSY_NAME` |
 
 ### 1.3 Поля и связи
 
@@ -107,9 +107,9 @@
 
 | Таблица | Назначение |
 |---------|------------|
-| `ITPEARLS_OPEN_POSITION_RECRUTIES_TASKS_LINK` | M2M `OpenPosition` ↔ `RecrutiesTasks` |
-| `ITPEARLS_OPEN_POSITION_LABOR_AGREEMENT_LINK` | M2M `OpenPosition` ↔ `LaborAgreement` |
-| `ITPEARLS_INTERVIEW_OPEN_POSITION_LINK` | M2M `Interview` ↔ `OpenPosition` |
+| `HUNTTECH_OPEN_POSITION_RECRUTIES_TASKS_LINK` | M2M `OpenPosition` ↔ `RecrutiesTasks` |
+| `HUNTTECH_OPEN_POSITION_LABOR_AGREEMENT_LINK` | M2M `OpenPosition` ↔ `LaborAgreement` |
+| `HUNTTECH_INTERVIEW_OPEN_POSITION_LINK` | M2M `Interview` ↔ `OpenPosition` |
 
 ### 1.5 Сервисы (core)
 
@@ -123,14 +123,14 @@
 
 ### 1.6 Миграции
 
-- **Init DDL (PostgreSQL):** `modules/core/db/init/postgres/10.create-db.sql` — таблица `ITPEARLS_OPEN_POSITION` и link-таблицы
+- **Init DDL (PostgreSQL):** `modules/core/db/init/postgres/10.create-db.sql` — таблица `HUNTTECH_OPEN_POSITION` и link-таблицы
 - **Инкрементальные миграции:** `modules/core/db/update/postgres/**/updateOpenPosition*.sql`, `createOpenPositionComment.sql`, `createInterviewOpenPositionLink.sql` и др. (каталоги `22/`–`24/`)
 
 ---
 
 ## 2. Слой Выборок Данных (Fetch Plans / Views Layer)
 
-**Файл:** `modules/global/src/com/company/itpearls/views.xml`
+**Файл:** `modules/global/src/com/company/hunttech/views.xml`
 
 | View | extends | Назначение | Ключевые свойства |
 |------|---------|------------|-------------------|
@@ -159,7 +159,7 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **Контроллер** | `itpearls_OpenPosition.browse` |
+| **Контроллер** | `hunttech_OpenPosition.browse` |
 | **Класс** | `OpenPositionBrowse` extends `StandardLookup<OpenPosition>` |
 | **Descriptor** | `open-position-browse.xml` |
 | **Lookup** | `openPositionsTable` (`treeDataGrid`) |
@@ -168,7 +168,7 @@
 **JPQL loader (`openPositionsDl`):**
 
 ```sql
-select e from itpearls_OpenPosition e order by e.vacansyName
+select e from hunttech_OpenPosition e order by e.vacansyName
 ```
 
 **Условия фильтра (`<condition>`):** `priority`, `lastOpenDate` (новые), подписки `RecrutiesTasks` (`freesubscriber`, `subscriber`, `notsubscriber`, `recrutier`), `openClose`, `signDraft`, `paused`, `internalProject`, `rating`, `remoteWork`, `positionType`.
@@ -194,10 +194,10 @@ select e from itpearls_OpenPosition e order by e.vacansyName
 
 | Экран | ID | Базовый класс | Descriptor |
 |-------|-----|---------------|------------|
-| `OpenPositionMasterBrowse` | `itpearls_OpenPositionMaster.browse` | `StandardLookup<OpenPosition>` | `open-position-master-browse.xml` |
-| `ProdOpenPositionBrowse` | `itpearls_ProdOpenPosition.browse` | extends `OpenPositionBrowse` | `prod-open-position-browse.xml` |
-| `OpenPositionOutstaffBrowse` | `itpearls_OpenPositionOutstaff.browse` | extends `OpenPositionBrowse` | `open-position-outstaff-browse.xml` |
-| `OpenPositionRecruitingBrowse` | `itpearls_OpenPositionRecruiting.browse` | extends `OpenPositionBrowse` | `open-position-browse-recrutiting.xml` |
+| `OpenPositionMasterBrowse` | `hunttech_OpenPositionMaster.browse` | `StandardLookup<OpenPosition>` | `open-position-master-browse.xml` |
+| `ProdOpenPositionBrowse` | `hunttech_ProdOpenPosition.browse` | extends `OpenPositionBrowse` | `prod-open-position-browse.xml` |
+| `OpenPositionOutstaffBrowse` | `hunttech_OpenPositionOutstaff.browse` | extends `OpenPositionBrowse` | `open-position-outstaff-browse.xml` |
+| `OpenPositionRecruitingBrowse` | `hunttech_OpenPositionRecruiting.browse` | extends `OpenPositionBrowse` | `open-position-browse-recrutiting.xml` |
 
 ---
 
@@ -207,7 +207,7 @@ select e from itpearls_OpenPosition e order by e.vacansyName
 
 | Параметр | Значение |
 |----------|----------|
-| **Контроллер** | `itpearls_OpenPosition.edit` |
+| **Контроллер** | `hunttech_OpenPosition.edit` |
 | **Класс** | `OpenPositionEdit` extends `StandardEditor<OpenPosition>` |
 | **Descriptor** | `open-position-edit.xml` |
 | **Entity container** | `openPositionDc`, view `openPosition-edit-view` |
@@ -245,11 +245,11 @@ select e from itpearls_OpenPosition e order by e.vacansyName
 
 | Компонент | ID | Тип | Descriptor | Назначение |
 |-----------|-----|-----|------------|------------|
-| `OpenPositionDetailScreenFragment` | `itpearls_OpenPositionDetailScreenFragment` | `ScreenFragment` | `open-position-detail-screen-fragment.xml` | Детали вакансии в browse (логотип, метки needExercise/needLetter) |
-| `OpenPositionOutstaffDetailScreenFragment` | `itpearls_OpenPositionOutstaffDetailScreenFragment` | extends detail | `open-position-outstaff-detail-screen-fragment.xml` | Вариант для аутстаффа |
-| `QuickViewOpenPositionDescription` | `itpearls_QuickViewOpenPositionDescription` | `Screen` | `quick-view-open-position-description.xml` | Быстрый просмотр описания (RU/EN, проект, компания, CV requirements) |
-| `TextViewScreen` | `itpearls_TextViewScreen` | `Screen` | `text-view-screen.xml` | Просмотр текста |
-| `SelectCitiesLocation` | `itpearls_SelectCitiesLocation` | `Screen` | `select-cities-location.xml` | Выбор городов |
+| `OpenPositionDetailScreenFragment` | `hunttech_OpenPositionDetailScreenFragment` | `ScreenFragment` | `open-position-detail-screen-fragment.xml` | Детали вакансии в browse (логотип, метки needExercise/needLetter) |
+| `OpenPositionOutstaffDetailScreenFragment` | `hunttech_OpenPositionOutstaffDetailScreenFragment` | extends detail | `open-position-outstaff-detail-screen-fragment.xml` | Вариант для аутстаффа |
+| `QuickViewOpenPositionDescription` | `hunttech_QuickViewOpenPositionDescription` | `Screen` | `quick-view-open-position-description.xml` | Быстрый просмотр описания (RU/EN, проект, компания, CV requirements) |
+| `TextViewScreen` | `hunttech_TextViewScreen` | `Screen` | `text-view-screen.xml` | Просмотр текста |
+| `SelectCitiesLocation` | `hunttech_SelectCitiesLocation` | `Screen` | `select-cities-location.xml` | Выбор городов |
 | `OpenPositionCommentsView` | — | View-экран | `OpenPositionCommentsView.xml` | Просмотр комментариев |
 | `OpenPositionCommentEdit` | — | Editor | — | Редактирование комментария |
 | `SomeFilesOpenPositionEdit` | — | Editor | — | Файлы вакансии |
@@ -264,27 +264,27 @@ select e from itpearls_OpenPosition e order by e.vacansyName
 
 ### 6.1 База данных
 
-1. PostgreSQL 11+ локально (см. [LOCAL_DATABASE.md](../LOCAL_DATABASE.md)): БД `itpearls`, пользователь `cuba`/`cuba`.
+1. PostgreSQL 11+ локально (см. [LOCAL_DATABASE.md](../LOCAL_DATABASE.md)): БД `HuntTech`, пользователь `cuba`/`cuba`.
 2. Создание схемы:
    ```bash
    ./gradlew createDb
    ./gradlew updateDb
    ```
-3. Таблица `ITPEARLS_OPEN_POSITION` создаётся из `modules/core/db/init/postgres/10.create-db.sql`; последующие изменения — Liquibase/SQL в `modules/core/db/update/postgres/`.
+3. Таблица `HUNTTECH_OPEN_POSITION` создаётся из `modules/core/db/init/postgres/10.create-db.sql`; последующие изменения — Liquibase/SQL в `modules/core/db/update/postgres/`.
 
 ### 6.2 app.properties (кэш)
 
-`modules/core/src/com/company/itpearls/app.properties`:
+`modules/core/src/com/company/hunttech/app.properties`:
 
 ```properties
 cuba.dbmsType=postgres
-eclipselink.cache.shared.itpearls_OpenPosition=true
-eclipselink.cache.size.itpearls_OpenPosition=500
+eclipselink.cache.shared.hunttech_OpenPosition=true
+eclipselink.cache.size.hunttech_OpenPosition=500
 ```
 
 ### 6.3 FTS (полнотекстовый поиск)
 
-`modules/core/src/com/company/itpearls/fts.xml` — сущность `com.company.itpearls.entity.OpenPosition` с `<include re=".*"/>` (индексируются все строковые поля). Также в FTS: `OpenPositionNews`, `OpenPositionComment`, `SomeFilesOpenPosition`.
+`modules/core/src/com/company/hunttech/fts.xml` — сущность `com.company.hunttech.entity.OpenPosition` с `<include re=".*"/>` (индексируются все строковые поля). Также в FTS: `OpenPositionNews`, `OpenPositionComment`, `SomeFilesOpenPosition`.
 
 ### 6.4 Сборка и запуск
 
@@ -303,11 +303,11 @@ eclipselink.cache.size.itpearls_OpenPosition=500
 
 ### 6.5 Меню и доступ
 
-Экраны регистрируются через аннотации `@UiController` (CUBA 7 Screens API); пункты меню — `modules/web/src/com/company/itpearls/web-menu.xml` (browse вакансий: `itpearls_OpenPosition.browse`).
+Экраны регистрируются через аннотации `@UiController` (CUBA 7 Screens API); пункты меню — `modules/web/src/com/company/hunttech/web-menu.xml` (browse вакансий: `hunttech_OpenPosition.browse`).
 
 ### 6.6 Тесты
 
-- `modules/core/test/com/company/itpearls/core/OpenPositionServiceTest.java`
+- `modules/core/test/com/company/hunttech/core/OpenPositionServiceTest.java`
 - `OpenPositionCommentServiceTest.java`, `OpenPositionNewsServiceTest.java`
 
 ---

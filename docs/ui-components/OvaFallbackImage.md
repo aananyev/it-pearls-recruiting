@@ -40,7 +40,7 @@
 | **регистрация XML** | [`modules/web/src/com/hunttech/hrm/web/cuba-ui-component.xml`](../../modules/web/src/com/hunttech/hrm/web/cuba-ui-component.xml) | Связка имени, класса и loader'а |
 | **регистрация Java** | [`modules/web/src/com/hunttech/hrm/web/config/HunttechUiComponentsRegistrar.java`](../../modules/web/src/com/hunttech/hrm/web/config/HunttechUiComponentsRegistrar.java) | `webUiComponents.register(OvaFallbackImage.NAME, ...)` |
 | **конфиг** | [`modules/global/src/com/company/hunttech/config/HunttechImageConfig.java`](../../modules/global/src/com/company/hunttech/config/HunttechImageConfig.java) | Глобальный `hunttech.defaultFallbackImagePath` |
-| **стили** | `modules/web/themes/*/com.company.itpearls/*-ext.scss` | Класс `.ht-oval-image` (`border-radius: 50%`) |
+| **стили** | `modules/web/themes/*/com.company.hunttech/*-ext.scss` | Класс `.ht-oval-image` (`border-radius: 50%`) |
 
 ### Composition / delegation (Decorator)
 

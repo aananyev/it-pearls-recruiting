@@ -1,1 +1,1 @@
-alter table ITPEARLS_RECRUTIES_TASKS add column RECRUTIER_NAME varchar(80) ;
+alter table HUNTTECH_RECRUTIES_TASKS add column RECRUTIER_NAME varchar(80) ;

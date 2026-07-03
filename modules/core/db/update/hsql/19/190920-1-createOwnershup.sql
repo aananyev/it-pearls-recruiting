@@ -1,4 +1,4 @@
-create table ITPEARLS_OWNERSHUP (
+create table HUNTTECH_OWNERSHUP (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,

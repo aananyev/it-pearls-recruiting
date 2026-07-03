@@ -1,1 +1,1 @@
-alter table ITPEARLS_ITERACTION drop column INTERACTION_STATUS__U23195 cascade ;
+alter table HUNTTECH_ITERACTION drop column INTERACTION_STATUS__U23195 cascade ;

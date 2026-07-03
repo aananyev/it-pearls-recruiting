@@ -1,1 +1,1 @@
-alter table ITPEARLS_OWNERSHIP add column OWNERSHIP_EN_LONG_NAME varchar(50) ;
+alter table HUNTTECH_OWNERSHIP add column OWNERSHIP_EN_LONG_NAME varchar(50) ;

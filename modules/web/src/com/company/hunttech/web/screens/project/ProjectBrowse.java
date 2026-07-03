@@ -1,0 +1,419 @@
+package com.company.hunttech.web.screens.project;
+
+import com.company.hunttech.entity.OpenPosition;
+import com.company.hunttech.entity.Person;
+import com.haulmont.chile.core.model.MetaPropertyPath;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.MessageTools;
+import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.icons.Icons;
+import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.screen.*;
+import com.company.hunttech.entity.Project;
+import com.haulmont.cuba.gui.screen.LookupComponent;
+import org.jsoup.Jsoup;
+
+import javax.inject.Inject;
+import java.util.*;
+import java.util.Calendar;
+import java.util.stream.Collectors;
+
+@UiController("hunttech_Project.browse")
+@UiDescriptor("project-browse.xml")
+@LookupComponent("projectsTable")
+@LoadDataBeforeShow
+public class ProjectBrowse extends StandardLookup<Project> {
+    private static final String QUERY_OPEN_POSITION_COUNT_BY_PROJECTS =
+            "select e.projectName, count(e) from hunttech_OpenPosition e "
+                    + "where not e.openClose = true and e.projectName in :projects group by e.projectName";
+    private static final String QUERY_PROJECT_DESCRIPTIONS_BY_IDS =
+            "select e.id, e.projectDescription from hunttech_Project e where e.id in :ids";
+    @Inject
+    private UiComponents uiComponents;
+    @Inject
+    private CheckBox onlyOpenProjectCheckBox;
+    @Inject
+    private CollectionLoader<Project> projectsDl;
+    @Inject
+    private TreeDataGrid<Project> projectsTable;
+    @Inject
+    private MessageTools messageTools;
+    @Inject
+    private LookupField columnSelector;
+    @Inject
+    private CheckBox withOpenPositionCheckBox;
+    @Inject
+    private MessageBundle messageBundle;
+
+    private final static String width_30px = "30px";
+    private final static String width_50px = "50px";
+    private final static String style_circle_30px = "circle-30px";
+    private final static String style_table_wordwrap = "table-wordwrap";
+    @Inject
+    private DataManager dataManager;
+
+    private Map<UUID, Integer> openPositionCountCache = Collections.emptyMap();
+    private Map<UUID, String> projectDescriptionCache = Collections.emptyMap();
+
+    @Subscribe(id = "projectsDl", target = Target.DATA_LOADER)
+    private void onProjectsDlPostLoad(CollectionLoader.PostLoadEvent<Project> event) {
+        refreshOpenPositionCountCache(event.getLoadedEntities());
+        refreshProjectDescriptionCache(event.getLoadedEntities());
+    }
+
+    private void refreshOpenPositionCountCache(List<Project> projects) {
+        if (projects.isEmpty()) {
+            openPositionCountCache = Collections.emptyMap();
+            return;
+        }
+        List<KeyValueEntity> counts = dataManager.loadValues(QUERY_OPEN_POSITION_COUNT_BY_PROJECTS)
+                .properties("project", "count")
+                .parameter("projects", projects)
+                .list();
+        Map<UUID, Integer> cache = new HashMap<>();
+        for (KeyValueEntity row : counts) {
+            Project project = row.getValue("project");
+            Long count = row.getValue("count");
+            if (project != null && project.getId() != null && count != null) {
+                cache.put(project.getId(), count.intValue());
+            }
+        }
+        openPositionCountCache = cache;
+    }
+
+    private void refreshProjectDescriptionCache(List<Project> projects) {
+        List<UUID> ids = projects.stream()
+                .map(Project::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (ids.isEmpty()) {
+            projectDescriptionCache = Collections.emptyMap();
+            return;
+        }
+        List<KeyValueEntity> rows = dataManager.loadValues(QUERY_PROJECT_DESCRIPTIONS_BY_IDS)
+                .properties("id", "projectDescription")
+                .parameter("ids", ids)
+                .list();
+        Map<UUID, String> cache = new HashMap<>();
+        for (KeyValueEntity row : rows) {
+            UUID id = row.getValue("id");
+            String description = row.getValue("projectDescription");
+            if (id != null) {
+                cache.put(id, description);
+            }
+        }
+        projectDescriptionCache = cache;
+    }
+
+    private String getPlainDescription(Project project) {
+        if (project == null || project.getId() == null) {
+            return "";
+        }
+        String description = projectDescriptionCache.get(project.getId());
+        return description != null ? Jsoup.parse(description).text() : "";
+    }
+
+    private boolean hasProjectDescription(Project project) {
+        if (project == null || project.getId() == null) {
+            return false;
+        }
+        String description = projectDescriptionCache.get(project.getId());
+        return description != null && !description.isEmpty();
+    }
+
+
+    @Install(to = "projectsTable.projectLogoColumn", subject = "columnGenerator")
+    private Object projectsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> event) {
+        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+        retBox.setWidthFull();
+        retBox.setHeightFull();
+        retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        Image image = uiComponents.create(Image.class);
+        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        image.setWidth("60px");
+        image.setHeight("60px");
+        image.setStyleName("icon-no-border-50px");
+        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        if (event.getItem().getProjectLogo() != null) {
+            image.setSource(FileDescriptorResource.class)
+                    .setFileDescriptor(event
+                            .getItem()
+                            .getProjectLogo());
+        } else {
+            image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+        }
+
+        retBox.add(image);
+        return retBox;
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        initColumnSelector();
+    }
+
+    private void initColumnSelector() {
+        List<DataGrid.Column<Project>> columns = projectsTable.getColumns();
+        Map<String, String> columnsMap = columns.stream()
+                .collect(Collectors.toMap(
+                        column -> {
+                            MetaPropertyPath propertyPath = column.getPropertyPath();
+                            return propertyPath != null
+                                    ? messageTools.getPropertyCaption(propertyPath.getMetaProperty())
+                                    : column.getId();
+                        },
+                        DataGrid.Column::getId,
+                        (oldValue, newValue) -> oldValue,
+                        LinkedHashMap::new));
+        columnSelector.setOptionsMap(columnsMap);
+
+        columnSelector.setValue(columns.get(0).getId());
+    }
+
+    @Subscribe("columnSelector")
+    protected void onColumnSelectorValueChange(HasValue.ValueChangeEvent<String> event) {
+        projectsTable.setHierarchyColumn(event.getValue());
+    }
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        onlyOpenProjectCheckBox.setValue(false);
+        setProjectClosedFilter();
+
+        withOpenPositionCheckBox.setValue(true);
+    }
+
+    @Install(to = "projectsTable", subject = "rowDescriptionProvider")
+    private String projectsTableRowDescriptionProvider(Project project) {
+        return getPlainDescription(project);
+    }
+
+    private void setProjectClosedFilter() {
+        if (onlyOpenProjectCheckBox.getValue()) {
+            projectsDl.removeParameter("projectClosed");
+            withOpenPositionCheckBox.setValue(false);
+        } else {
+            projectsDl.setParameter("projectClosed", false);
+        }
+
+        projectsDl.load();
+    }
+
+    @Subscribe("onlyOpenProjectCheckBox")
+    public void onOnlyOpenProjectCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        setProjectClosedFilter();
+    }
+
+    @Install(to = "projectsTable.iconProjectDesc", subject = "columnGenerator")
+    private Icons.Icon projectsTableIconProjectDescColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> event) {
+        if (hasProjectDescription(event.getItem())) {
+            return CubaIcon.PLUS_CIRCLE;
+        } else {
+            return CubaIcon.MINUS_CIRCLE;
+        }
+    }
+
+    @Install(to = "projectsTable.iconProjectDesc", subject = "styleProvider")
+    private String projectsTableIconProjectDescStyleProvider(Project project) {
+        if (hasProjectDescription(project)) {
+            return "pic-center-large-green";
+        } else {
+            return "pic-center-large-red";
+        }
+    }
+
+    @Install(to = "projectsTable.iconProjectDesc", subject = "descriptionProvider")
+    private String projectsTableIconProjectDescDescriptionProvider(Project project) {
+        if (hasProjectDescription(project)) {
+            String text = getPlainDescription(project);
+            return text.isEmpty() ? null : text;
+        } else {
+            return null;
+        }
+    }
+
+    @Subscribe("withOpenPositionCheckBox")
+    public void onWithOpenPositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (event.getValue()) {
+            projectsDl.setParameter("withOpenPosition", true);
+            onlyOpenProjectCheckBox.setValue(false);
+        } else {
+            projectsDl.removeParameter("withOpenPosition");
+        }
+
+        projectsDl.load();
+    }
+
+/*    @Install(to = "projectsTable.projectOwner", subject = "columnGenerator")
+    private Object projectsTableProjectOwnerColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+        retHBox.setHeightFull();
+        retHBox.setSpacing(true);
+
+        Label newProjectLabel = uiComponents.create(Label.class);
+        newProjectLabel.setValue(messageBundle.getMessage("msgNewReserve"));
+        newProjectLabel.setStyleName("button_table_red");
+        newProjectLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        newProjectLabel.setWidthAuto();
+        newProjectLabel.setHeightAuto();
+
+        GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.setTime(new Date());
+        gregorianCalendar.add(Calendar.DAY_OF_MONTH, -3);
+        if (event.getItem().getStartProjectDate() != null) {
+            if (event.getItem().getStartProjectDate().before(gregorianCalendar.getTime())) {
+                newProjectLabel.setVisible(false);
+            } else {
+                newProjectLabel.setVisible(true);
+            }
+        }
+
+        HBoxLayout retObject = setComponentsToOpenPositionsTable(event, event.getItem().getProjectName());
+        retObject.setWidthFull();
+
+        Image image = setProjectOwnerImage(event.getItem().getProjectOwner());
+        retHBox.add(newProjectLabel);
+        retHBox.add(retObject);
+        retHBox.add(image);
+        retHBox.expand(retObject);
+
+        return retHBox;
+    }*/
+
+    private Image setProjectOwnerImage(Person projectOwner) {
+        StringBuilder sb = new StringBuilder();
+
+        Image retImage = uiComponents.create(Image.class);
+        retImage.setWidth(width_30px);
+        retImage.setHeight(width_30px);
+        retImage.setStyleName(style_circle_30px);
+        retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+        retImage.setAlignment(Component.Alignment.MIDDLE_LEFT);
+
+        if (projectOwner != null) {
+            sb.append(projectOwner.getFirstName())
+                    .append(" ")
+                    .append(projectOwner.getSecondName());
+            if (projectOwner.getPersonPosition() != null) {
+                sb.append(" / ")
+                        .append(projectOwner.getPersonPosition().getPositionRuName());
+            }
+            if (projectOwner.getCompanyDepartment() != null) {
+                sb.append(" / ")
+                        .append(projectOwner.getCompanyDepartment().getDepartamentRuName());
+                if (projectOwner.getCompanyDepartment().getCompanyName() != null) {
+                    sb.append(" / ")
+                            .append(projectOwner.getCompanyDepartment().getCompanyName().getComanyName());
+                }
+            }
+
+            if (projectOwner.getCityOfResidence() != null) {
+                sb.append(" / ")
+                        .append(projectOwner.getCityOfResidence().getCityRuName());
+            }
+
+            retImage.setDescription(sb.toString());
+
+            if (projectOwner.getFileImageFace() != null) {
+                retImage
+                        .setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(projectOwner.getFileImageFace());
+            } else {
+                retImage.setVisible(false);
+            }
+        } else {
+            retImage.setVisible(false);
+        }
+
+        return retImage;
+    }
+
+    private HBoxLayout setComponentsToOpenPositionsTable(DataGrid.ColumnGeneratorEvent<Project> event,
+                                                         String dataStr) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        Label label = uiComponents.create(Label.class);
+
+        retHBox.setWidthFull();
+        retHBox.setHeightFull();
+        retHBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retHBox.setStyleName(style_table_wordwrap);
+
+        label.setHeightAuto();
+        label.setAlignment(Component.Alignment.MIDDLE_LEFT);
+        label.setStyleName(style_table_wordwrap);
+
+        label.setValue(dataStr);
+
+        retHBox.add(label);
+
+        return retHBox;
+    }
+
+    @Install(to = "projectsTable.projectName", subject = "columnGenerator")
+    private Object projectsTableProjectNameColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> event) {
+        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+        retHBox.setWidthFull();
+        retHBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
+        retHBox.setHeightFull();
+        retHBox.setSpacing(true);
+
+        Label newVacancyLabel = uiComponents.create(Label.class);
+        newVacancyLabel.setValue(messageBundle.getMessage("msgNewReserve"));
+        newVacancyLabel.setStyleName("button_table_red");
+        newVacancyLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        newVacancyLabel.setWidthAuto();
+        newVacancyLabel.setHeightAuto();
+
+        GregorianCalendar gregorianCalendar = new GregorianCalendar();
+        gregorianCalendar.setTime(new Date());
+        gregorianCalendar.add(Calendar.DAY_OF_MONTH, -14);
+        if (event.getItem().getStartProjectDate() != null) {
+            if (event.getItem().getStartProjectDate().before(gregorianCalendar.getTime())) {
+                newVacancyLabel.setVisible(false);
+            } else {
+                newVacancyLabel.setVisible(true);
+            }
+        }
+
+        HBoxLayout retObject = setComponentsToOpenPositionsTable(event, event.getItem().getProjectName());
+        retObject.setWidthFull();
+
+        Image image = setProjectOwnerImage(event.getItem().getProjectOwner());
+        retHBox.add(newVacancyLabel);
+        retHBox.add(retObject);
+        retHBox.add(image);
+        retHBox.expand(retObject);
+
+        return retHBox;
+    }
+
+    @Install(to = "projectsTable.openPositionsCountColumn", subject = "columnGenerator")
+    private Object projectsTableOpenPositionsCountColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> columnGeneratorEvent) {
+        Project project = columnGeneratorEvent.getItem();
+        Integer counter = 0;
+        if (project != null && project.getId() != null) {
+            counter = openPositionCountCache.getOrDefault(project.getId(), 0);
+        }
+
+        HBoxLayout retHbox = uiComponents.create(HBoxLayout.class);
+        retHbox.setWidthFull();
+        retHbox.setHeightFull();
+
+        Label counterOpenPositionLabel = uiComponents.create(Label.class);
+        counterOpenPositionLabel.setWidthAuto();
+        counterOpenPositionLabel.setHeightAuto();
+        counterOpenPositionLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        counterOpenPositionLabel.setValue(counter);
+
+        retHbox.add(counterOpenPositionLabel);
+        return retHbox;
+    }
+}

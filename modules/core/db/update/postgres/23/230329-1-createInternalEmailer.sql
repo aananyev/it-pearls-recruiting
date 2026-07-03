@@ -1,4 +1,4 @@
-create table ITPEARLS_INTERNAL_EMAILER (
+create table HUNTTECH_INTERNAL_EMAILER (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,
@@ -18,7 +18,7 @@ create table ITPEARLS_INTERNAL_EMAILER (
     DATE_CREATE_EMAIL timestamp not null,
     DATE_SEND_EMAIL timestamp,
     --
-    -- from itpearls_InternalEmailerTemplate
+    -- from hunttech_InternalEmailerTemplate
     EMAIL_TEMPLATE_ID uuid,
     --
     primary key (ID)

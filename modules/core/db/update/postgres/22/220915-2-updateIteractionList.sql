@@ -1,2 +1,2 @@
-alter table ITPEARLS_ITERACTION_LIST add column CURRENT_PRIORITY integer ;
-alter table ITPEARLS_ITERACTION_LIST add column CHAIN_INTERACTION_ID uuid ;
+alter table HUNTTECH_ITERACTION_LIST add column CURRENT_PRIORITY integer ;
+alter table HUNTTECH_ITERACTION_LIST add column CHAIN_INTERACTION_ID uuid ;

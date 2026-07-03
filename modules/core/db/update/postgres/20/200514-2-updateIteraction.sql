@@ -1,1 +1,1 @@
-alter table ITPEARLS_ITERACTION add column CALENDAR_ITEM boolean ;
+alter table HUNTTECH_ITERACTION add column CALENDAR_ITEM boolean ;

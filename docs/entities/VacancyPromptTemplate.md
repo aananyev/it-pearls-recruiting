@@ -1,6 +1,6 @@
 # VacancyPromptTemplate — шаблон промпта вакансии
 
-> Cross-link: [itpearls_VacancyPromptTemplate.browse_Spec.md](../ui/itpearls_VacancyPromptTemplate.browse_Spec.md) · [itpearls_VacancyPromptTemplate.edit_Spec.md](../ui/itpearls_VacancyPromptTemplate.edit_Spec.md)
+> Cross-link: [hunttech_VacancyPromptTemplate.browse_Spec.md](../ui/hunttech_VacancyPromptTemplate.browse_Spec.md) · [hunttech_VacancyPromptTemplate.edit_Spec.md](../ui/hunttech_VacancyPromptTemplate.edit_Spec.md)
 
 ---
 
@@ -12,7 +12,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Меню **Управление AI** → browse/edit `itpearls_VacancyPromptTemplate`. Используется сервисом по уникальному `code`.
+Меню **Управление AI** → browse/edit `hunttech_VacancyPromptTemplate`. Используется сервисом по уникальному `code`.
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -30,7 +30,7 @@
 | systemContext | String(1000) | Системный контекст |
 | temperature | Double | Температура (default 0.7) |
 
-Таблица: `ITPEARLS_VACANCY_PROMPT_TEMPLATE`. Миграция: `260627-3-createVacancyPromptTemplate`.
+Таблица: `HUNTTECH_VACANCY_PROMPT_TEMPLATE`. Миграция: `260627-3-createVacancyPromptTemplate`.
 
 ---
 
@@ -44,8 +44,8 @@
 
 | Экран | Controller |
 |-------|------------|
-| Browse | `itpearls_VacancyPromptTemplate.browse` |
-| Edit | `itpearls_VacancyPromptTemplate.edit` |
+| Browse | `hunttech_VacancyPromptTemplate.browse` |
+| Edit | `hunttech_VacancyPromptTemplate.edit` |
 
 ---
 

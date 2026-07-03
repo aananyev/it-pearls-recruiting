@@ -1,3 +1,3 @@
-alter table ITPEARLS_ITERACTION_LIST rename column legal_entity_id to legal_entity_id__u60884 ;
-alter table ITPEARLS_ITERACTION_LIST drop constraint FK_ITPEARLS_ITERACTION_LIST_ON_LEGAL_ENTITY ;
-drop index IDX_ITPEARLS_ITERACTION_LIST_ON_LEGAL_ENTITY ;
+alter table HUNTTECH_ITERACTION_LIST rename column legal_entity_id to legal_entity_id__u60884 ;
+alter table HUNTTECH_ITERACTION_LIST drop constraint FK_HUNTTECH_ITERACTION_LIST_ON_LEGAL_ENTITY ;
+drop index IDX_HUNTTECH_ITERACTION_LIST_ON_LEGAL_ENTITY ;

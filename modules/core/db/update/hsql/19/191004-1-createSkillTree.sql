@@ -1,4 +1,4 @@
-create table ITPEARLS_SKILL_TREE (
+create table HUNTTECH_SKILL_TREE (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,

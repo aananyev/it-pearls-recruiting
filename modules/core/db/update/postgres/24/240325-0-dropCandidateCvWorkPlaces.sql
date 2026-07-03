@@ -1,1 +1,1 @@
-alter table itpearls_candidate_cv_work_places rename to ITPEARLS_CANDIDATE_CV_WORK_PLACES__U87923 ;
+alter table hunttech_candidate_cv_work_places rename to HUNTTECH_CANDIDATE_CV_WORK_PLACES__U87923 ;

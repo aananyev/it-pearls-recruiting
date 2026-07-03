@@ -1,5 +1,5 @@
 #!/bin/bash
-# Создаёт пользователя и базу для локальной разработки IT-Pearls.
+# Создаёт пользователя и базу для локальной разработки HuntTech.
 # Запускать от суперпользователя PostgreSQL (обычно postgres или текущий пользователь macOS).
 set -euo pipefail
 
@@ -8,7 +8,7 @@ PGPORT="${POSTGRES_PORT:-5432}"
 PGUSER_ADMIN="${POSTGRES_ADMIN_USER:-postgres}"
 PGUSER_APP="${POSTGRES_USER:-cuba}"
 PGPASSWORD_APP="${POSTGRES_PASSWORD:-cuba}"
-PGDATABASE="${POSTGRES_DB:-itpearls}"
+PGDATABASE="${POSTGRES_DB:-HuntTech}"
 
 PSQL="${PSQL:-psql}"
 export PGHOST PGPORT

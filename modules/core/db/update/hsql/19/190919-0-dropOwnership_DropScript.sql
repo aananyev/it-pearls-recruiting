@@ -1,1 +1,1 @@
-drop table ITPEARLS_OWNERSHIP__U18653 if exists cascade ;
+drop table HUNTTECH_OWNERSHIP__U18653 if exists cascade ;

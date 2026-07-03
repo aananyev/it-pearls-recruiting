@@ -1,1 +1,1 @@
-drop table if exists ITPEARLS_EMAILER__U53402 cascade ;
+drop table if exists HUNTTECH_EMAILER__U53402 cascade ;

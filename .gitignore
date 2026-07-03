@@ -9,7 +9,10 @@ modules/*/build/*
 .idea/*
 out
 test-run
-sql/hr.it-pearls.ru.sql
+sql/hr.HuntTech.ru.sql
 sql/basebackup_new.tar.gz
-sql/sql/itpearls.sql
+sql/sql/HuntTech.sql
 .env.local
+.DS_Store
+*.log
+*.class

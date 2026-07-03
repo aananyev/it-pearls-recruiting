@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<components xmlns="http://schemas.haulmont.com/cuba/components.xsd">
+    <component>
+        <name>ovalImage</name>
+        <class>com.company.hunttech.web.gui.components.WebOvalImage</class>
+        <componentLoader>com.company.hunttech.web.gui.xml.layout.loaders.OvalImageLoader</componentLoader>
+    </component>
+</components>

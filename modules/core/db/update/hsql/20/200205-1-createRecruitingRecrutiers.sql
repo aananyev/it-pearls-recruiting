@@ -1,4 +1,4 @@
-create table ITPEARLS_RECRUITING_RECRUTIERS (
+create table HUNTTECH_RECRUITING_RECRUTIERS (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,

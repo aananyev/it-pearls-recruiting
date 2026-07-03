@@ -1,1 +1,1 @@
-alter table ITPEARLS_COMPANY add column WORKING_CONDITIONS text ;
+alter table HUNTTECH_COMPANY add column WORKING_CONDITIONS text ;

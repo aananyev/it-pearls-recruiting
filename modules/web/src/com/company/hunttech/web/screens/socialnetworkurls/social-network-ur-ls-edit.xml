@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://editorCaption"
+        focusComponent="form"
+        messagesPack="com.company.hunttech.web.screens.socialnetworkurls" icon="BULLSEYE">
+    <data>
+        <collection id="socialNetworkTypesDc" class="com.company.hunttech.entity.SocialNetworkType"
+                    view="socialNetworkType-view">
+            <loader id="socialNetworkTypesDl">
+                <query>
+                    <![CDATA[select e from hunttech_SocialNetworkType e ]]>
+                </query>
+            </loader>
+        </collection>
+        <instance id="socialNetworkURLsDc"
+                  class="com.company.hunttech.entity.SocialNetworkURLs"
+                  view="socialNetworkURLs-view">
+            <loader/>
+        </instance>
+        <collection id="jobCandidatesDc" class="com.company.hunttech.entity.JobCandidate" view="_minimal">
+            <loader id="jobCandidatesDl">
+                <query>
+                    <![CDATA[select e from hunttech_JobCandidate e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="editActions" spacing="true" width="100%">
+        <form id="form" dataContainer="socialNetworkURLsDc" width="100%">
+            <column width="100%">
+                <lookupPickerField id="socialNetworkURLsField" dataContainer="socialNetworkURLsDc" optionsContainer="socialNetworkTypesDc"
+                                   description="mainMsg://msgSocialNetworkType" property="socialNetworkURL" width="50%">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="open" type="picker_open"/>
+                    </actions>
+                </lookupPickerField>
+                <lookupPickerField id="jobCandidateField" property="jobCandidate" width="50%"
+                                   dataContainer="socialNetworkURLsDc" optionsContainer="jobCandidatesDc">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="open" type="picker_open"/>
+                    </actions>
+                </lookupPickerField>
+                <textField id="networkURLSField" property="networkURLS" width="50%"/>
+                <textField id="networkNameField" property="networkName" visible="false"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

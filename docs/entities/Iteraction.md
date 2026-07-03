@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`itpearls_Iteraction.browse`, `itpearls_Iteraction.edit`, дерево `itpearls_Iteraction._tree.browse`, `itpearls_IteractionRequirement.browse`. UI Spec: [browse](../ui/itpearls_Iteraction.browse_Spec.md), [edit](../ui/itpearls_Iteraction.edit_Spec.md).
+`hunttech_Iteraction.browse`, `hunttech_Iteraction.edit`, дерево `hunttech_Iteraction._tree.browse`, `hunttech_IteractionRequirement.browse`. UI Spec: [browse](../ui/hunttech_Iteraction.browse_Spec.md), [edit](../ui/hunttech_Iteraction.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -25,9 +25,9 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.Iteraction` |
-| **Имя в CUBA** | `itpearls_Iteraction` |
-| **Таблица БД** | `ITPEARLS_ITERACTION` |
+| **Java-класс** | `com.company.hunttech.entity.Iteraction` |
+| **Имя в CUBA** | `hunttech_Iteraction` |
+| **Таблица БД** | `HUNTTECH_ITERACTION` |
 | **Тип данных** | справочник (иерархический) |
 | **Ожидаемый объём** | десятки–сотни записей |
 | **Критичность** | высокая — используется во всех экранах взаимодействий с кандидатами |
@@ -58,11 +58,11 @@
 
 ```mermaid
 erDiagram
-    ITPEARLS_ITERACTION ||--o{ ITPEARLS_ITERACTION : "iteractionTree (self-ref)"
-    ITPEARLS_ITERACTION ||--o{ ITPEARLS_ITERACTION_LIST : "iteractionType"
-    ITPEARLS_ITERACTION ||--o{ ITPEARLS_ITEARCTION_REQUIREMENTS : "iteraction / iteractionRequirement"
-    ITPEARLS_ITERACTION }o--|| ITPEARLS_EMPLOYEE_WORK_STATUS : "workStatus"
-    ITPEARLS_ITERACTION ||--o{ ITPEARLS_INTERNAL_EMAIL_TEMPLATE : "interaction"
+    HUNTTECH_ITERACTION ||--o{ HUNTTECH_ITERACTION : "iteractionTree (self-ref)"
+    HUNTTECH_ITERACTION ||--o{ HUNTTECH_ITERACTION_LIST : "iteractionType"
+    HUNTTECH_ITERACTION ||--o{ HUNTTECH_ITEARCTION_REQUIREMENTS : "iteraction / iteractionRequirement"
+    HUNTTECH_ITERACTION }o--|| HUNTTECH_EMPLOYEE_WORK_STATUS : "workStatus"
+    HUNTTECH_ITERACTION ||--o{ HUNTTECH_INTERNAL_EMAIL_TEMPLATE : "interaction"
 ```
 
 ### 2.2 Исходящие связи
@@ -167,7 +167,7 @@ erDiagram
 
 ## 4. Представления (views.xml)
 
-Файл: `modules/global/src/com/company/itpearls/views.xml`
+Файл: `modules/global/src/com/company/hunttech/views.xml`
 
 | View | Extends | Назначение | Где используется |
 |------|---------|------------|------------------|
@@ -194,19 +194,19 @@ erDiagram
 
 ## 5. Экраны
 
-Каталог: `modules/web/src/com/company/itpearls/web/screens/iteraction/`
+Каталог: `modules/web/src/com/company/hunttech/web/screens/iteraction/`
 
 | Экран | Controller ID | Дескриптор | View | Меню (RU) |
 |-------|---------------|------------|------|-----------|
-| Browse | `itpearls_Iteraction.browse` | `iteraction-browse.xml` | `iteraction-browse-view` | — |
-| Tree Browse | `itpearls_Iteraction._tree.browse` | `iteraction-tree-browse.xml` | `iteraction-tree-browse-view` | Тип взаимодействия с кандидатом |
-| Edit | `itpearls_Iteraction.edit` | `iteraction-edit.xml` | `iteraction-edit-view` | — |
-| Tree Edit | `itpearls_Iteraction_tree.edit` | `iteraction-tree-edit.xml` | (default) | — |
-| Requirements | `itpearls_IteractionRequirement.browse` | `iteraction-requirement-browse.xml` | `iteraction-tree-browse-view` | Требования к взаимодействию |
+| Browse | `hunttech_Iteraction.browse` | `iteraction-browse.xml` | `iteraction-browse-view` | — |
+| Tree Browse | `hunttech_Iteraction._tree.browse` | `iteraction-tree-browse.xml` | `iteraction-tree-browse-view` | Тип взаимодействия с кандидатом |
+| Edit | `hunttech_Iteraction.edit` | `iteraction-edit.xml` | `iteraction-edit-view` | — |
+| Tree Edit | `hunttech_Iteraction_tree.edit` | `iteraction-tree-edit.xml` | (default) | — |
+| Requirements | `hunttech_IteractionRequirement.browse` | `iteraction-requirement-browse.xml` | `iteraction-tree-browse-view` | Требования к взаимодействию |
 
 ### 5.1 IteractionBrowse
 
-- **JPQL:** `select e from itpearls_Iteraction e order by e.number, e.iterationName`
+- **JPQL:** `select e from hunttech_Iteraction e order by e.number, e.iterationName`
 - **readOnly:** да
 - **cacheable loader:** да
 - **Таблица:** groupTable с группировкой по `iteractionTree`
@@ -215,7 +215,7 @@ erDiagram
 
 ### 5.2 IteractionTreeBrowse
 
-- **JPQL:** `select e from itpearls_Iteraction e order by e.number`
+- **JPQL:** `select e from hunttech_Iteraction e order by e.number`
 - **readOnly:** да, **cacheable:** да
 - **Компонент:** treeDataGrid, `hierarchyProperty="iteractionTree"`
 - **Колонки с иконками:** notification, needSendEmail, needSendMemo (columnGenerator + styleProvider в Java)
@@ -247,8 +247,8 @@ erDiagram
 | Экран / компонент | Поле FK | View / запрос |
 |-------------------|---------|---------------|
 | `IteractionListBrowse` | `iteractionType` | `iteractionList-browse-view` → iteractionType minimal |
-| `IteractionListEdit` | `iteractionType` | picker query по `itpearls_Iteraction` |
-| `job-candidate-simple-browse` | subselect по `itpearls_Iteraction` | фильтрация по sign-полям |
+| `IteractionListEdit` | `iteractionType` | picker query по `hunttech_Iteraction` |
+| `job-candidate-simple-browse` | subselect по `hunttech_Iteraction` | фильтрация по sign-полям |
 | `my-candidate-table-fragment` | `iteractionType` | виджет отчётов |
 | Виджеты / отчёты | sign-поля через path navigation | `e.iteractionType.signX` — кандидат на рефакторинг |
 
@@ -256,7 +256,7 @@ erDiagram
 
 ## 6. База данных
 
-### 6.1 Таблица `ITPEARLS_ITERACTION`
+### 6.1 Таблица `HUNTTECH_ITERACTION`
 
 Полная схема: `modules/core/db/init/postgres/10.create-db.sql` (строки 189–252).
 
@@ -266,16 +266,16 @@ erDiagram
 
 | Индекс | Колонки | Тип | Назначение |
 |--------|---------|-----|------------|
-| `IDX_ITPEARLS_ITERACTION_UK_ITERATION_NAME` | `ITERATION_NAME` | unique partial (`DELETE_TS is null`) | уникальность названия |
-| `IDX_ITPEARLS_ITERACTION_NUMBER` | `NUMBER_` | btree | сортировка browse/tree |
-| `IDX_ITPEARLS_ITERACTION_ON_ITERACTION_TREE` | `ITERACTION_TREE_ID` | btree | иерархия |
-| `IDX_ITPEARLS_ITERACTION_ON_WORK_STATUS` | `WORK_STATUS_ID` | btree | FK аутстаффинг |
-| `IDX_ITPEARLS_ITERACTION_UK_SIGN_PUT_RESONAL` | `SIGN_PUT_RESONAL` | unique partial | единственный тип «постановка в резерв» |
-| `IDX_ITPEARLS_ITERACTION_UK_SIGN_PERSONAL_RESERVE_REMOVE` | `SIGN_PERSONAL_RESERVE_REMOVE` | unique partial | единственный тип «снятие из резерва» |
+| `IDX_HUNTTECH_ITERACTION_UK_ITERATION_NAME` | `ITERATION_NAME` | unique partial (`DELETE_TS is null`) | уникальность названия |
+| `IDX_HUNTTECH_ITERACTION_NUMBER` | `NUMBER_` | btree | сортировка browse/tree |
+| `IDX_HUNTTECH_ITERACTION_ON_ITERACTION_TREE` | `ITERACTION_TREE_ID` | btree | иерархия |
+| `IDX_HUNTTECH_ITERACTION_ON_WORK_STATUS` | `WORK_STATUS_ID` | btree | FK аутстаффинг |
+| `IDX_HUNTTECH_ITERACTION_UK_SIGN_PUT_RESONAL` | `SIGN_PUT_RESONAL` | unique partial | единственный тип «постановка в резерв» |
+| `IDX_HUNTTECH_ITERACTION_UK_SIGN_PERSONAL_RESERVE_REMOVE` | `SIGN_PERSONAL_RESERVE_REMOVE` | unique partial | единственный тип «снятие из резерва» |
 
 ### 6.3 Индексы в дочерней таблице (важно для JOIN)
 
-`ITPEARLS_ITERACTION_LIST.ITERACTION_TYPE_ID` → `IDX_ITPEARLS_ITERACTION_LIST_ON_ITERACTION_TYPE`
+`HUNTTECH_ITERACTION_LIST.ITERACTION_TYPE_ID` → `IDX_HUNTTECH_ITERACTION_LIST_ON_ITERACTION_TYPE`
 
 ### 6.4 LOB / TOAST
 
@@ -296,7 +296,7 @@ erDiagram
 | cacheable loaders | ✅ | browse, tree, корни дерева, workStatus |
 | readOnly browse | ✅ | browse + tree-browse |
 | N+1 в providers | ✅ | tree-browse: данные из view, без доп. запросов |
-| Entity cache | ✅ | `eclipselink.cache.shared.itpearls_Iteraction=true`, size=100 |
+| Entity cache | ✅ | `eclipselink.cache.shared.hunttech_Iteraction=true`, size=100 |
 
 ### 7.2 Выполненные оптимизации
 
@@ -324,7 +324,7 @@ erDiagram
 ### 7.4 Ключевые потребители (для rg)
 
 ```bash
-rg "itpearls_Iteraction|Iteraction\." modules/ --glob '*.{java,xml}'
+rg "hunttech_Iteraction|Iteraction\." modules/ --glob '*.{java,xml}'
 rg "view=\".*iteraction" modules/ --glob '*.xml'
 ```
 
@@ -337,7 +337,7 @@ rg "view=\".*iteraction" modules/ --glob '*.xml'
 | Параметр | Файл | Значение |
 |----------|------|----------|
 | DBMS | `app.properties` | `cuba.dbmsType=postgres` |
-| Entity cache | `app.properties` | `eclipselink.cache.shared.itpearls_Iteraction=true`, size=100 |
+| Entity cache | `app.properties` | `eclipselink.cache.shared.hunttech_Iteraction=true`, size=100 |
 | IteractionList cache | `app.properties` | shared=true, size=1000 |
 
 Локальная БД: [LOCAL_DATABASE.md](../LOCAL_DATABASE.md).

@@ -38,15 +38,15 @@
 
 | Слой | Путь | Роль |
 |------|------|------|
-| **gui** (контракт) | [`modules/gui/src/com/company/itpearls/gui/components/OvalImage.java`](../../modules/gui/src/com/company/itpearls/gui/components/OvalImage.java) | Интерфейс, расширяет `Image`; `NAME = "ovalImage"`; API `ovalWidth` / `ovalHeight` |
-| **gui** (legacy alias) | [`modules/gui/src/com/company/hunttech/gui/components/OvalImage.java`](../../modules/gui/src/com/company/hunttech/gui/components/OvalImage.java) | `@deprecated` — делегирует в `com.company.itpearls.gui.components.OvalImage` |
+| **gui** (контракт) | [`modules/gui/src/com/company/hunttech/gui/components/OvalImage.java`](../../modules/gui/src/com/company/hunttech/gui/components/OvalImage.java) | Интерфейс, расширяет `Image`; `NAME = "ovalImage"`; API `ovalWidth` / `ovalHeight` |
+| **gui** (legacy alias) | [`modules/gui/src/com/company/hunttech/gui/components/OvalImage.java`](../../modules/gui/src/com/company/hunttech/gui/components/OvalImage.java) | `@deprecated` — делегирует в `com.company.hunttech.gui.components.OvalImage` |
 | **web** (реализация) | [`modules/web/src/com/company/hunttech/web/gui/components/WebOvalImage.java`](../../modules/web/src/com/company/hunttech/web/gui/components/WebOvalImage.java) | Vaadin/CUBA web-компонент; применяет `ht-oval-image`; синхронизация размеров |
 | **web** (XML-loader) | [`modules/web/src/com/company/hunttech/web/gui/xml/layout/loaders/OvalImageLoader.java`](../../modules/web/src/com/company/hunttech/web/gui/xml/layout/loaders/OvalImageLoader.java) | Создаёт `ovalImage`, читает `ovalWidth` / `ovalHeight` из screen XML |
 | **регистрация XML** | [`modules/web/src/com/hunttech/hrm/web/cuba-ui-component.xml`](../../modules/web/src/com/hunttech/hrm/web/cuba-ui-component.xml) | Связка имени `ovalImage`, класса `WebOvalImage` и `OvalImageLoader` |
-| **подключение** | [`modules/web/src/com/company/itpearls/web-app.properties`](../../modules/web/src/com/company/itpearls/web-app.properties) | `cuba.web.componentsConfig = +com/hunttech/hrm/web/cuba-ui-component.xml` |
+| **подключение** | [`modules/web/src/com/company/hunttech/web-app.properties`](../../modules/web/src/com/company/hunttech/web-app.properties) | `cuba.web.componentsConfig = +com/hunttech/hrm/web/cuba-ui-component.xml` |
 | **регистрация Java** | [`modules/web/src/com/hunttech/hrm/web/config/HunttechUiComponentsRegistrar.java`](../../modules/web/src/com/hunttech/hrm/web/config/HunttechUiComponentsRegistrar.java) | `@Component`; при старте регистрирует `WebOvalImage` в `WebUiComponents` для `uiComponents.create()` |
-| **стили hover** | [`modules/web/themes/hover/com.company.itpearls/hover-ext.scss`](../../modules/web/themes/hover/com.company.itpearls/hover-ext.scss) | Блок `.ht-oval-image` |
-| **стили halo** | [`modules/web/themes/halo/com.company.itpearls/halo-ext.scss`](../../modules/web/themes/halo/com.company.itpearls/halo-ext.scss) | Блок `.ht-oval-image` (идентичные правила) |
+| **стили hover** | [`modules/web/themes/hover/com.company.hunttech/hover-ext.scss`](../../modules/web/themes/hover/com.company.hunttech/hover-ext.scss) | Блок `.ht-oval-image` |
+| **стили halo** | [`modules/web/themes/halo/com.company.hunttech/halo-ext.scss`](../../modules/web/themes/halo/com.company.hunttech/halo-ext.scss) | Блок `.ht-oval-image` (идентичные правила) |
 
 ### Поток данных
 
@@ -118,7 +118,7 @@ flowchart TD
 ### Java — программное создание
 
 ```java
-import com.company.itpearls.gui.components.OvalImage;
+import com.company.hunttech.gui.components.OvalImage;
 import com.haulmont.cuba.gui.UiComponents;
 
 @Inject
@@ -132,13 +132,13 @@ parentLayout.add(image);
 
 **Примеры в проекте:**
 
-- [`JobCandidateBrowse.java`](../../modules/web/src/com/company/itpearls/web/screens/jobcandidate/JobCandidateBrowse.java) — `columnGenerator` для колонки `fileImageFace`;
-- [`MyPhotoWidget.java`](../../modules/web/src/com/company/itpearls/web/widgets/others/MyPhotoWidget.java) — виджет дашборда, создание в `@Subscribe onInit`.
+- [`JobCandidateBrowse.java`](../../modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateBrowse.java) — `columnGenerator` для колонки `fileImageFace`;
+- [`MyPhotoWidget.java`](../../modules/web/src/com/company/hunttech/web/widgets/others/MyPhotoWidget.java) — виджет дашборда, создание в `@Subscribe onInit`.
 
 ### Java — `@Inject` по id (если объявлен в screen XML)
 
 ```java
-import com.company.itpearls.gui.components.OvalImage;
+import com.company.hunttech.gui.components.OvalImage;
 
 @Inject
 private OvalImage userAvatar;

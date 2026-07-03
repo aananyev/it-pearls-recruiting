@@ -1,4 +1,4 @@
-create table ITPEARLS_ITEARCTION_REQUIREMENTS (
+create table HUNTTECH_ITEARCTION_REQUIREMENTS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

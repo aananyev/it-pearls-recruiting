@@ -33,11 +33,11 @@ alwaysApply: true
 
 | Область | Путь в репозитории |
 |---------|-------------------|
-| Экраны (Browse / Edit / View / Lookup / Window) | `modules/web/src/com/company/itpearls/web/screens/**` — `*-browse.xml`, `*-edit.xml`, `*-view.xml`, `*-lookup.xml`, `*-window.xml` |
+| Экраны (Browse / Edit / View / Lookup / Window) | `modules/web/src/com/company/hunttech/web/screens/**` — `*-browse.xml`, `*-edit.xml`, `*-view.xml`, `*-lookup.xml`, `*-window.xml` |
 | Контроллеры экранов | `*Browse.java`, `*Edit.java`, `*View.java`, `*Lookup.java`, `*Window.java` |
 | Фрагменты UI | `*Fragment.java`, `*-fragment.xml` |
-| Кастомные UI-компоненты | `modules/web/src/com/company/itpearls/web/**` (виджеты, login, dashboard и т.д.) |
-| Пункты меню | `modules/web/src/com/company/itpearls/web-menu.xml`, `menu.xml`, `*-menu.xml` |
+| Кастомные UI-компоненты | `modules/web/src/com/company/hunttech/web/**` (виджеты, login, dashboard и т.д.) |
+| Пункты меню | `modules/web/src/com/company/hunttech/web-menu.xml`, `menu.xml`, `*-menu.xml` |
 | Привязки данных экрана | `dataContext`, `collection`/`instance` loaders, `property`, `optionsDatasource` в XML дескрипторах |
 | Маршруты Vaadin | `@Route`, `@UiController`, `web-app.properties` (`loginScreenId`, `mainScreenId`) |
 
@@ -131,7 +131,7 @@ Cross-link в шапке: на `docs/entities/{EntityName}.md` и/или `docs/a
 
 ## Брендинг в UI-документации
 
-Во всех `docs/ui/**/*.md` — **HRM HuntTech** в prose. Legacy-идентификаторы из кода (`itpearls`, `ITPEARLS_*`, `@UiController` ids) — цитировать как в коде.
+Во всех `docs/ui/**/*.md` — **HRM HuntTech** в prose. Legacy-идентификаторы из кода (`HuntTech`, `HUNTTECH_*`, `@UiController` ids) — цитировать как в коде.
 
 ---
 

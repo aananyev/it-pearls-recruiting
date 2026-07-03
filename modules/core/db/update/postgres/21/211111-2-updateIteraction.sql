@@ -1,1 +1,1 @@
-alter table ITPEARLS_ITERACTION add column STATISTICS_ boolean ;
+alter table HUNTTECH_ITERACTION add column STATISTICS_ boolean ;

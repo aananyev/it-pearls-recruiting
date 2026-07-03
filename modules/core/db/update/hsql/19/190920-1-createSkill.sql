@@ -1,4 +1,4 @@
-create table ITPEARLS_SKILL (
+create table HUNTTECH_SKILL (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,

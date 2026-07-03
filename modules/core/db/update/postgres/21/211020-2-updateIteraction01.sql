@@ -1,1 +1,1 @@
-alter table ITPEARLS_ITERACTION add column NOTIFICATION_WHEN_SEND integer ;
+alter table HUNTTECH_ITERACTION add column NOTIFICATION_WHEN_SEND integer ;

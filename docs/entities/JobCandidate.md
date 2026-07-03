@@ -5,9 +5,9 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.JobCandidate` |
-| **Имя в CUBA** | `itpearls_JobCandidate` |
-| **Таблица БД** | `ITPEARLS_JOB_CANDIDATE` |
+| **Java-класс** | `com.company.hunttech.entity.JobCandidate` |
+| **Имя в CUBA** | `hunttech_JobCandidate` |
+| **Таблица БД** | `HUNTTECH_JOB_CANDIDATE` |
 | **Тип данных** | транзакционная |
 | **Критичность** | высокая — ядро рекрутингового процесса |
 | **Модули** | `global` (entity, views), `web` (экраны), `core` (миграции, сервисы) |
@@ -15,14 +15,14 @@
 ### Отображаемое имя
 
 - **NamePattern:** `%s %s %s %s|secondName,firstName,middleName,personPosition`
-- **Меню:** `menu-config.itpearls_JobCandidate.browse` → «Кандидаты» (`web-menu.xml`, экран `itpearls_JobCandidate.browse`)
+- **Меню:** `menu-config.hunttech_JobCandidate.browse` → «Кандидаты» (`web-menu.xml`, экран `hunttech_JobCandidate.browse`)
 
 ### Связанная документация
 
 - [IteractionList.md](IteractionList.md) — записи взаимодействий
 - [Position.md](Position.md), [Company.md](Company.md), [City.md](City.md) — справочники FK
 - [LOCAL_DATABASE.md](../LOCAL_DATABASE.md) — развёртывание БД
-- UI Spec: [browse](../ui/itpearls_JobCandidate.browse_Spec.md), [edit](../ui/itpearls_JobCandidate.edit_Spec.md), [detail fragment](../ui/itpearls_JobCanidateDetailScreenFragment_Spec.md), [image face](../ui/itpearls_JobCandidateImageFace_Spec.md), [select positions](../ui/itpearls_SelectPersonPositions_Spec.md)
+- UI Spec: [browse](../ui/hunttech_JobCandidate.browse_Spec.md), [edit](../ui/hunttech_JobCandidate.edit_Spec.md), [detail fragment](../ui/hunttech_JobCanidateDetailScreenFragment_Spec.md), [image face](../ui/hunttech_JobCandidateImageFace_Spec.md), [select positions](../ui/hunttech_SelectPersonPositions_Spec.md)
 
 ---
 
@@ -34,7 +34,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Главная точка входа — пункт меню «Кандидаты» → `itpearls_JobCandidate.browse`. Из списка открываются: форма редактирования `itpearls_JobCandidate.edit`, раскрытие строки с фрагментом `itpearls_JobCanidateDetailScreenFragment`, диалог фото `itpearls_JobCandidateImageFace`, экраны резюме и взаимодействий, lookup при выборе кандидата в других формах. Сущность ссылается на справочники `Position`, `Company`, `City`, `SkillTree`, `Specialisation`; на неё ссылаются `IteractionList.candidate`, `OpenPosition` (через взаимодействия), `PersonelReserve`, `JobCandidateSignIcon`, отчёты и фильтры навыков.
+Главная точка входа — пункт меню «Кандидаты» → `hunttech_JobCandidate.browse`. Из списка открываются: форма редактирования `hunttech_JobCandidate.edit`, раскрытие строки с фрагментом `hunttech_JobCanidateDetailScreenFragment`, диалог фото `hunttech_JobCandidateImageFace`, экраны резюме и взаимодействий, lookup при выборе кандидата в других формах. Сущность ссылается на справочники `Position`, `Company`, `City`, `SkillTree`, `Specialisation`; на неё ссылаются `IteractionList.candidate`, `OpenPosition` (через взаимодействия), `PersonelReserve`, `JobCandidateSignIcon`, отчёты и фильтры навыков.
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -46,7 +46,7 @@
 
 ## 1. Архитектура Сущности (Data Model Layer)
 
-### 1.1 Таблица `ITPEARLS_JOB_CANDIDATE`
+### 1.1 Таблица `HUNTTECH_JOB_CANDIDATE`
 
 Наследует поля `StandardEntity` CUBA: `ID`, `VERSION`, `CREATE_TS`, `CREATED_BY`, `UPDATE_TS`, `UPDATED_BY`, `DELETE_TS`, `DELETED_BY` (soft delete).
 
@@ -80,29 +80,29 @@
 
 | Имя индекса | Колонки |
 |-------------|---------|
-| `IDX_ITPEARLS_JOB_CANDIDATE_FULL_NAME` | `FULL_NAME` |
-| `IDX_ITPEARLS_JOB_CANDIDATE_FIRST_NAME` | `FIRST_NAME` |
-| `IDX_ITPEARLS_JOB_CANDIDATE_SECOND_NAME` | `SECOND_NAME` |
-| `IDX_ITPEARLS_JOB_CANDIDATE_CITY_OF_RESIDENCE` | `CITY_OF_RESIDENCE_ID` |
-| `IDX_ITPEARLS_JOB_CANDIDATE_PERSON_POSITION` | `PERSON_POSITION_ID` |
-| `IDX_ITPEARLS_JOB_CANDIDATE_CURRENT_COMPANY` | `CURRENT_COMPANY_ID` |
-| `IDX_ITPEARLS_JOB_CANDIDATE_FILE_IMAGE_FACE` | `FILE_IMAGE_FACE` |
+| `IDX_HUNTTECH_JOB_CANDIDATE_FULL_NAME` | `FULL_NAME` |
+| `IDX_HUNTTECH_JOB_CANDIDATE_FIRST_NAME` | `FIRST_NAME` |
+| `IDX_HUNTTECH_JOB_CANDIDATE_SECOND_NAME` | `SECOND_NAME` |
+| `IDX_HUNTTECH_JOB_CANDIDATE_CITY_OF_RESIDENCE` | `CITY_OF_RESIDENCE_ID` |
+| `IDX_HUNTTECH_JOB_CANDIDATE_PERSON_POSITION` | `PERSON_POSITION_ID` |
+| `IDX_HUNTTECH_JOB_CANDIDATE_CURRENT_COMPANY` | `CURRENT_COMPANY_ID` |
+| `IDX_HUNTTECH_JOB_CANDIDATE_FILE_IMAGE_FACE` | `FILE_IMAGE_FACE` |
 
 ### 1.3 Композиции и ассоциации
 
 ```mermaid
 erDiagram
-    ITPEARLS_JOB_CANDIDATE ||--o{ ITPEARLS_ITERACTION_LIST : "iteractionList"
-    ITPEARLS_JOB_CANDIDATE ||--o{ ITPEARLS_CANDIDATE_CV : "candidateCv"
-    ITPEARLS_JOB_CANDIDATE ||--o{ ITPEARLS_SOCIAL_NETWORK_UR_LS : "socialNetwork"
-    ITPEARLS_JOB_CANDIDATE ||--o{ ITPEARLS_JOB_CANDIDATE_POSITION_LISTS : "positionList"
-    ITPEARLS_JOB_CANDIDATE ||--o{ ITPEARLS_LABOR_AGREEMENT : "laborAgreement"
-    ITPEARLS_JOB_CANDIDATE ||--o{ ITPEARLS_JOB_HISTORY : "jobHistory"
-    ITPEARLS_JOB_CANDIDATE }o--o| ITPEARLS_POSITION : "personPosition"
-    ITPEARLS_JOB_CANDIDATE }o--o| ITPEARLS_COMPANY : "currentCompany"
-    ITPEARLS_JOB_CANDIDATE }o--o| ITPEARLS_CITY : "cityOfResidence"
-    ITPEARLS_JOB_CANDIDATE }o--o| SYS_FILE : "fileImageFace"
-    ITPEARLS_JOB_CANDIDATE_SIGN_ICON }o--|| ITPEARLS_JOB_CANDIDATE : "jobCandidate"
+    HUNTTECH_JOB_CANDIDATE ||--o{ HUNTTECH_ITERACTION_LIST : "iteractionList"
+    HUNTTECH_JOB_CANDIDATE ||--o{ HUNTTECH_CANDIDATE_CV : "candidateCv"
+    HUNTTECH_JOB_CANDIDATE ||--o{ HUNTTECH_SOCIAL_NETWORK_UR_LS : "socialNetwork"
+    HUNTTECH_JOB_CANDIDATE ||--o{ HUNTTECH_JOB_CANDIDATE_POSITION_LISTS : "positionList"
+    HUNTTECH_JOB_CANDIDATE ||--o{ HUNTTECH_LABOR_AGREEMENT : "laborAgreement"
+    HUNTTECH_JOB_CANDIDATE ||--o{ HUNTTECH_JOB_HISTORY : "jobHistory"
+    HUNTTECH_JOB_CANDIDATE }o--o| HUNTTECH_POSITION : "personPosition"
+    HUNTTECH_JOB_CANDIDATE }o--o| HUNTTECH_COMPANY : "currentCompany"
+    HUNTTECH_JOB_CANDIDATE }o--o| HUNTTECH_CITY : "cityOfResidence"
+    HUNTTECH_JOB_CANDIDATE }o--o| SYS_FILE : "fileImageFace"
+    HUNTTECH_JOB_CANDIDATE_SIGN_ICON }o--|| HUNTTECH_JOB_CANDIDATE : "jobCandidate"
 ```
 
 | Коллекция Java | Сущность-элемент | mappedBy | OnDelete (родитель) | OnDeleteInverse | Composition |
@@ -114,14 +114,14 @@ erDiagram
 | `laborAgreement` | `LaborAgreement` | `jobCandidate` | CASCADE | — | да |
 | `jobHistory` | `JobHistory` | `candidate` | CASCADE | — | да |
 
-**Промежуточная сущность `JobCandidatePositionLists`** (`ITPEARLS_JOB_CANDIDATE_POSITION_LISTS`):
+**Промежуточная сущность `JobCandidatePositionLists`** (`HUNTTECH_JOB_CANDIDATE_POSITION_LISTS`):
 
 | Поле | FK | Описание |
 |------|-----|----------|
 | `positionList` | `POSITION_LIST_ID` → `Position` | Дополнительная должность (OneToOne, CASCADE) |
 | `jobCandidate` | `JOB_CANDIDATE_ID` → `JobCandidate` | Владелец |
 
-**`SocialNetworkURLs`** (`ITPEARLS_SOCIAL_NETWORK_UR_LS`):
+**`SocialNetworkURLs`** (`HUNTTECH_SOCIAL_NETWORK_UR_LS`):
 
 | Поле | Тип | Описание |
 |------|-----|----------|
@@ -144,7 +144,7 @@ erDiagram
 
 ## 2. Слой Данных Интерфейса (Fetch Plans / Views Layer)
 
-### 2.1 Глобальные views в `modules/global/src/com/company/itpearls/views.xml`
+### 2.1 Глобальные views в `modules/global/src/com/company/hunttech/views.xml`
 
 | View | extends | Назначение |
 |------|---------|------------|
@@ -159,7 +159,7 @@ erDiagram
 Структура `jobCandidate-view` (фрагмент):
 
 ```xml
-<view entity="itpearls_JobCandidate" name="jobCandidate-view" extends="_local" systemProperties="true">
+<view entity="hunttech_JobCandidate" name="jobCandidate-view" extends="_local" systemProperties="true">
     <property name="laborAgreement" view="_local"/>
     <property name="socialNetwork" view="_local"/>
     <property name="candidateCv" view="_local">...</property>
@@ -175,7 +175,7 @@ erDiagram
 
 **Файл:** `job-candidate-browse.xml`  
 **Режим данных:** `readOnly="true"`  
-**Базовый JPQL:** `select e from itpearls_JobCandidate e order by e.secondName, e.firstName`  
+**Базовый JPQL:** `select e from hunttech_JobCandidate e order by e.secondName, e.firstName`  
 **Пагинация:** `jobCandidatesDl.setMaxResults(50)` в `onBeforeShow` (коммит `53e9720e`).
 
 | Свойство | fetch | View / вложенность | Назначение в UI |
@@ -252,11 +252,11 @@ erDiagram
 
 | Параметр | Значение |
 |----------|----------|
-| Контроллер | `itpearls_JobCandidate.browse` |
+| Контроллер | `hunttech_JobCandidate.browse` |
 | Класс | `JobCandidateBrowse` extends `StandardLookup<JobCandidate>` |
 | XML | `modules/web/.../jobcandidate/job-candidate-browse.xml` |
-| Messages | `com.company.itpearls.web.screens.jobcandidate` |
-| Меню | `web-menu.xml` → `itpearls_JobCandidate.browse` |
+| Messages | `com.company.hunttech.web.screens.jobcandidate` |
+| Меню | `web-menu.xml` → `hunttech_JobCandidate.browse` |
 
 ### 3.2 Структура UI
 
@@ -387,7 +387,7 @@ private Component jobCandidatesTableFileImageFaceColumnGenerator(...) {
 
 | Параметр | Значение |
 |----------|----------|
-| Контроллер | `itpearls_JobCandidate.edit` |
+| Контроллер | `hunttech_JobCandidate.edit` |
 | Класс | `JobCandidateEdit` extends `StandardEditor<JobCandidate>` |
 | XML | `job-candidate-edit.xml` |
 | Dialog | 1200×750 |
@@ -524,7 +524,7 @@ priorityMap.put("Other", 9);
 |--------------|---------------------|------------------------|
 | `lastProjectTable` | `lastIteractionCount`, `lastInteractionGeneratorColumn`, `whoIsResearcherGeneratorColumn`, `whoIsRecruterGeneratorColumn`, `addInteractionsViewButton` | `vacancy`, `iteractionType.signOurInterview*`, `recrutier` |
 | `jobCandidateIteractionListTable` | `addIconColumn`, rating html, comment icon, `@Install` projectLogo, currentOpenClose | `iteractionType.pic`, `vacancy.openClose`, `vacancy.projectName` |
-| `jobCandidateCandidateCvTable` | project logo, file icons, letter, Link columns | `toVacancy.projectName`, `linkOriginalCv`, `linkItPearlsCV`, `textCV` |
+| `jobCandidateCandidateCvTable` | project logo, file icons, letter, Link columns | `toVacancy.projectName`, `linkOriginalCv`, `linkHuntTechCV`, `textCV` |
 | `jobCandidateCommentsDataGrid` | `commentDialog` | `comment`, `recrutier.fileImageFace`, `vacancy.vacansyName` |
 | `socialNetworkTable` | logo, linkToWeb | `socialNetworkURL.logo` |
 | `suggestVacancyTable` | `notSendedIconColumn`, itemDescriptionProvider | `vacansyName`, `iteractionList`+`iteractionType.signSendToClient/signEndCase` |
@@ -539,7 +539,7 @@ priorityMap.put("Other", 9);
 | `iteractionType.signSendToClient`, `signEndCase`, `signOurInterview*` | не в `iteraction-list-type-view` | **риск** — suggest/lastProject generators |
 | `rating`, `comment`, `addDate/String/Integer`, `currentOpenClose` | `_local` на `IteractionList` | OK |
 
-Рекомендация: расширить nested views в `views.xml` или inline в edit XML — см. [itpearls_JobCandidate.edit_Spec.md](../ui/itpearls_JobCandidate.edit_Spec.md) §2 Data View Integrity.
+Рекомендация: расширить nested views в `views.xml` или inline в edit XML — см. [hunttech_JobCandidate.edit_Spec.md](../ui/hunttech_JobCandidate.edit_Spec.md) §2 Data View Integrity.
 
 ### 4.11 `addPositionList`
 
@@ -555,7 +555,7 @@ priorityMap.put("Other", 9);
 
 | Параметр | Значение |
 |----------|----------|
-| Контроллер | `itpearls_JobCanidateDetailScreenFragment` |
+| Контроллер | `hunttech_JobCanidateDetailScreenFragment` |
 | XML | `job-canidate-detail-screen-fragment.xml` |
 | Data | `jobCandidatesDc` — `provided="true"`, view: `_local` + `iteractionList.recrutier.group` |
 
@@ -576,7 +576,7 @@ priorityMap.put("Other", 9);
 
 | Параметр | Значение |
 |----------|----------|
-| Контроллер | `itpearls_JobCandidateImageFace` |
+| Контроллер | `hunttech_JobCandidateImageFace` |
 | XML | `job-candidate-image-face.xml` |
 | Data | `jobCandidateDc`, view `_minimal`, property `fileImageFace` |
 | Открытие | Из browse по клику на аватар; `jobCandidateDc.setItem(jobCandidate)` из вызывающего кода |
@@ -587,7 +587,7 @@ priorityMap.put("Other", 9);
 
 | Параметр | Значение |
 |----------|----------|
-| Контроллер | `itpearls_SelectPersonPositions` |
+| Контроллер | `hunttech_SelectPersonPositions` |
 | XML | `select-person-positions.xml` |
 | UI | `TwinColumn` на `positionsDc.positionList` |
 | Options | `positionsOptionDc` — все `Position` (в Java фильтр «не использовать») |
@@ -610,7 +610,7 @@ priorityMap.put("Other", 9);
 1. **Справочники:** `Country` → `Region` → `City`; `Position`; `Company`; `SocialNetworkType`; `Iteraction` (в т.ч. «Новый контакт»); `SignIcons`
 2. **Пользователи и роли:** группы CUBA + роли из `StandartRoles`
 3. **Сущность `JobCandidate`** + миграции `modules/core/db/update/postgres/`
-4. **Дочерние таблицы:** `ITPEARLS_JOB_CANDIDATE_POSITION_LISTS`, `ITPEARLS_SOCIAL_NETWORK_UR_LS`, `ITPEARLS_CANDIDATE_CV`, `ITPEARLS_ITERACTION_LIST`, `ITPEARLS_JOB_CANDIDATE_SIGN_ICON`
+4. **Дочерние таблицы:** `HUNTTECH_JOB_CANDIDATE_POSITION_LISTS`, `HUNTTECH_SOCIAL_NETWORK_UR_LS`, `HUNTTECH_CANDIDATE_CV`, `HUNTTECH_ITERACTION_LIST`, `HUNTTECH_JOB_CANDIDATE_SIGN_ICON`
 5. **Views** в `views.xml` + inline views в XML экранов
 6. **Экраны** web-модуля + пункт меню `web-menu.xml`
 7. **Messages** `messages.properties` / `messages_ru.properties`
@@ -627,7 +627,7 @@ priorityMap.put("Other", 9);
 | `210629-*` | `PRIORITY_CONTACT` NOT NULL |
 | `231031-*` | `JobCandidateSignIcon` |
 
-Полный список: `rg "ITPEARLS_JOB_CANDIDATE" modules/core/db/update/postgres/`
+Полный список: `rg "HUNTTECH_JOB_CANDIDATE" modules/core/db/update/postgres/`
 
 ### 6.3 Роли (`StandartRoles.java`)
 
@@ -662,19 +662,19 @@ priorityMap.put("Other", 9);
 | `jobCandidateImageFace.caption` | Фото кандидата | Диалог фото |
 | `selectPersonPositions.caption` | Select Person Positions | Диалог должностей (EN в properties) |
 | `mainMsg://msgFullName` | *(main messages)* | Колонка ФИО browse |
-| `menu-config.itpearls_JobCandidate.browse` | Кандидаты | Меню (`web/messages_ru.properties`) |
+| `menu-config.hunttech_JobCandidate.browse` | Кандидаты | Меню (`web/messages_ru.properties`) |
 
-Pack: `com.company.itpearls.web.screens.jobcandidate` — 200+ ключей, полные файлы:
+Pack: `com.company.hunttech.web.screens.jobcandidate` — 200+ ключей, полные файлы:
 
-- `modules/web/src/com/company/itpearls/web/screens/jobcandidate/messages.properties`
-- `modules/web/src/com/company/itpearls/web/screens/jobcandidate/messages_ru.properties`
+- `modules/web/src/com/company/hunttech/web/screens/jobcandidate/messages.properties`
+- `modules/web/src/com/company/hunttech/web/screens/jobcandidate/messages_ru.properties`
 
 ### 6.5 Сборка и проверка
 
 ```bash
 ./gradlew compileJava deploy -x test
 ./gradlew start
-# Меню → Кандидаты → itpearls_JobCandidate.browse
+# Меню → Кандидаты → hunttech_JobCandidate.browse
 ```
 
 ### 6.6 Чеклист воссоздания подсистемы

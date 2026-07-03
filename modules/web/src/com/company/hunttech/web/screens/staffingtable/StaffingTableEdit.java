@@ -1,0 +1,46 @@
+package com.company.hunttech.web.screens.staffingtable;
+
+import com.haulmont.bpm.entity.ProcAttachment;
+import com.haulmont.bpm.gui.procactionsfragment.ProcActionsFragment;
+import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.gui.components.CheckBox;
+import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.screen.*;
+import com.company.hunttech.entity.StaffingTable;
+
+import javax.inject.Inject;
+import java.util.UUID;
+
+@UiController("hunttech_StaffingTable.edit")
+@UiDescriptor("staffing-table-edit.xml")
+@EditedEntityContainer("staffingTableDc")
+@LoadDataBeforeShow
+public class StaffingTableEdit extends StandardEditor<StaffingTable> {
+    @Inject
+    private CollectionLoader<ProcAttachment> procAttachmentsDl;
+    @Inject
+    private ProcActionsFragment procActionsFragment;
+
+    private static final String PROCESS_CODE = "staffingTableApproval";
+    @Inject
+    private CheckBox activeCheckBox;
+
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            activeCheckBox.setValue(false);
+        }
+
+        setInitApprovalProcess();
+    }
+
+
+    private void setInitApprovalProcess() {
+        UUID entityId = getEditedEntity().getId();
+        procAttachmentsDl.setParameter("entityId",entityId);
+        procAttachmentsDl.load();
+        procActionsFragment.initializer()
+                .standard()
+                .init(PROCESS_CODE, getEditedEntity());
+    }
+}

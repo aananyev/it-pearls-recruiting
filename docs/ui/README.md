@@ -14,7 +14,7 @@ Living-документация экранов, окон, фрагментов �
 | **Legacy** | `docs/ui/{kebab-name}.md` | документы до введения `_Spec`; при крупных правках — cross-link или миграция |
 | **Архив** | `docs/ui/archive/{FormName}_Spec.md` | полное удаление UI из кода |
 
-**`{FormName}`** — `@UiController("…")` (приоритет); примеры: `itpearls_JobCandidate.browse`, `itpearls_OpenPosition.edit`.
+**`{FormName}`** — `@UiController("…")` (приоритет); примеры: `hunttech_JobCandidate.browse`, `hunttech_OpenPosition.edit`.
 
 Шаблон: [templates/ui-template.md](../templates/ui-template.md)
 
@@ -41,115 +41,115 @@ Living-документация экранов, окон, фрагментов �
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_JobCandidate.browse` | [itpearls_JobCandidate.browse_Spec.md](itpearls_JobCandidate.browse_Spec.md) |
-| Edit | `itpearls_JobCandidate.edit` | [itpearls_JobCandidate.edit_Spec.md](itpearls_JobCandidate.edit_Spec.md) · [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md) |
-| Detail fragment | `itpearls_JobCanidateDetailScreenFragment` | [itpearls_JobCanidateDetailScreenFragment_Spec.md](itpearls_JobCanidateDetailScreenFragment_Spec.md) |
-| Image face | `itpearls_JobCandidateImageFace` | [itpearls_JobCandidateImageFace_Spec.md](itpearls_JobCandidateImageFace_Spec.md) |
-| Select positions | `itpearls_SelectPersonPositions` | [itpearls_SelectPersonPositions_Spec.md](itpearls_SelectPersonPositions_Spec.md) |
+| Browse | `hunttech_JobCandidate.browse` | [hunttech_JobCandidate.browse_Spec.md](hunttech_JobCandidate.browse_Spec.md) |
+| Edit | `hunttech_JobCandidate.edit` | [hunttech_JobCandidate.edit_Spec.md](hunttech_JobCandidate.edit_Spec.md) · [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md) |
+| Detail fragment | `hunttech_JobCanidateDetailScreenFragment` | [hunttech_JobCanidateDetailScreenFragment_Spec.md](hunttech_JobCanidateDetailScreenFragment_Spec.md) |
+| Image face | `hunttech_JobCandidateImageFace` | [hunttech_JobCandidateImageFace_Spec.md](hunttech_JobCandidateImageFace_Spec.md) |
+| Select positions | `hunttech_SelectPersonPositions` | [hunttech_SelectPersonPositions_Spec.md](hunttech_SelectPersonPositions_Spec.md) |
 
 ### OpenPosition
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_OpenPosition.browse` | [itpearls_OpenPosition.browse_Spec.md](itpearls_OpenPosition.browse_Spec.md) |
-| Edit | `itpearls_OpenPosition.edit` | [itpearls_OpenPosition.edit_Spec.md](itpearls_OpenPosition.edit_Spec.md) |
-| Detail fragment | `itpearls_OpenPositionDetailScreenFragment` | [itpearls_OpenPositionDetailScreenFragment_Spec.md](itpearls_OpenPositionDetailScreenFragment_Spec.md) |
+| Browse | `hunttech_OpenPosition.browse` | [hunttech_OpenPosition.browse_Spec.md](hunttech_OpenPosition.browse_Spec.md) |
+| Edit | `hunttech_OpenPosition.edit` | [hunttech_OpenPosition.edit_Spec.md](hunttech_OpenPosition.edit_Spec.md) |
+| Detail fragment | `hunttech_OpenPositionDetailScreenFragment` | [hunttech_OpenPositionDetailScreenFragment_Spec.md](hunttech_OpenPositionDetailScreenFragment_Spec.md) |
 
 ### IteractionList
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_IteractionList.browse` | [itpearls_IteractionList.browse_Spec.md](itpearls_IteractionList.browse_Spec.md) |
-| Edit | `itpearls_IteractionList.edit` | [itpearls_IteractionList.edit_Spec.md](itpearls_IteractionList.edit_Spec.md) |
-| Simple browse | `itpearls_IteractionListSimple.browse` | [itpearls_IteractionListSimple.browse_Spec.md](itpearls_IteractionListSimple.browse_Spec.md) |
-| Fragment (jobcandidate) | `itpearls_IteractionListBrowse` | [itpearls_IteractionListBrowse_Spec.md](itpearls_IteractionListBrowse_Spec.md) |
+| Browse | `hunttech_IteractionList.browse` | [hunttech_IteractionList.browse_Spec.md](hunttech_IteractionList.browse_Spec.md) |
+| Edit | `hunttech_IteractionList.edit` | [hunttech_IteractionList.edit_Spec.md](hunttech_IteractionList.edit_Spec.md) |
+| Simple browse | `hunttech_IteractionListSimple.browse` | [hunttech_IteractionListSimple.browse_Spec.md](hunttech_IteractionListSimple.browse_Spec.md) |
+| Fragment (jobcandidate) | `hunttech_IteractionListBrowse` | [hunttech_IteractionListBrowse_Spec.md](hunttech_IteractionListBrowse_Spec.md) |
 
 ### Iteraction
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_Iteraction.browse` | [itpearls_Iteraction.browse_Spec.md](itpearls_Iteraction.browse_Spec.md) |
-| Edit | `itpearls_Iteraction.edit` | [itpearls_Iteraction.edit_Spec.md](itpearls_Iteraction.edit_Spec.md) |
-| Tree browse | `itpearls_Iteraction._tree.browse` | [itpearls_Iteraction._tree.browse_Spec.md](itpearls_Iteraction._tree.browse_Spec.md) |
-| Tree edit | `itpearls_Iteraction_tree.edit` | [itpearls_Iteraction_tree.edit_Spec.md](itpearls_Iteraction_tree.edit_Spec.md) |
-| Requirement browse | `itpearls_IteractionRequirement.browse` | [itpearls_IteractionRequirement.browse_Spec.md](itpearls_IteractionRequirement.browse_Spec.md) |
+| Browse | `hunttech_Iteraction.browse` | [hunttech_Iteraction.browse_Spec.md](hunttech_Iteraction.browse_Spec.md) |
+| Edit | `hunttech_Iteraction.edit` | [hunttech_Iteraction.edit_Spec.md](hunttech_Iteraction.edit_Spec.md) |
+| Tree browse | `hunttech_Iteraction._tree.browse` | [hunttech_Iteraction._tree.browse_Spec.md](hunttech_Iteraction._tree.browse_Spec.md) |
+| Tree edit | `hunttech_Iteraction_tree.edit` | [hunttech_Iteraction_tree.edit_Spec.md](hunttech_Iteraction_tree.edit_Spec.md) |
+| Requirement browse | `hunttech_IteractionRequirement.browse` | [hunttech_IteractionRequirement.browse_Spec.md](hunttech_IteractionRequirement.browse_Spec.md) |
 
 ### Project
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_Project.browse` | [itpearls_Project.browse_Spec.md](itpearls_Project.browse_Spec.md) |
-| Edit | `itpearls_Project.edit` | [itpearls_Project.edit_Spec.md](itpearls_Project.edit_Spec.md) |
+| Browse | `hunttech_Project.browse` | [hunttech_Project.browse_Spec.md](hunttech_Project.browse_Spec.md) |
+| Edit | `hunttech_Project.edit` | [hunttech_Project.edit_Spec.md](hunttech_Project.edit_Spec.md) |
 
 ### Person
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_Person.browse` | [itpearls_Person.browse_Spec.md](itpearls_Person.browse_Spec.md) |
-| Edit | `itpearls_Person.edit` | [itpearls_Person.edit_Spec.md](itpearls_Person.edit_Spec.md) |
+| Browse | `hunttech_Person.browse` | [hunttech_Person.browse_Spec.md](hunttech_Person.browse_Spec.md) |
+| Edit | `hunttech_Person.edit` | [hunttech_Person.edit_Spec.md](hunttech_Person.edit_Spec.md) |
 
 ### Company
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_Company.browse` | [itpearls_Company.browse_Spec.md](itpearls_Company.browse_Spec.md) |
-| Edit | `itpearls_Company.edit` | [itpearls_Company.edit_Spec.md](itpearls_Company.edit_Spec.md) |
-| Our company browse | `itpearls_OurCompany.browse` | [itpearls_OurCompany.browse_Spec.md](itpearls_OurCompany.browse_Spec.md) |
-| Clients browse | `itpearls_ClientsCompany.browse` | [itpearls_ClientsCompany.browse_Spec.md](itpearls_ClientsCompany.browse_Spec.md) |
+| Browse | `hunttech_Company.browse` | [hunttech_Company.browse_Spec.md](hunttech_Company.browse_Spec.md) |
+| Edit | `hunttech_Company.edit` | [hunttech_Company.edit_Spec.md](hunttech_Company.edit_Spec.md) |
+| Our company browse | `hunttech_OurCompany.browse` | [hunttech_OurCompany.browse_Spec.md](hunttech_OurCompany.browse_Spec.md) |
+| Clients browse | `hunttech_ClientsCompany.browse` | [hunttech_ClientsCompany.browse_Spec.md](hunttech_ClientsCompany.browse_Spec.md) |
 
 ### CompanyDepartament
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_CompanyDepartament.browse` | [itpearls_CompanyDepartament.browse_Spec.md](itpearls_CompanyDepartament.browse_Spec.md) |
-| Edit | `itpearls_CompanyDepartament.edit` | [itpearls_CompanyDepartament.edit_Spec.md](itpearls_CompanyDepartament.edit_Spec.md) |
+| Browse | `hunttech_CompanyDepartament.browse` | [hunttech_CompanyDepartament.browse_Spec.md](hunttech_CompanyDepartament.browse_Spec.md) |
+| Edit | `hunttech_CompanyDepartament.edit` | [hunttech_CompanyDepartament.edit_Spec.md](hunttech_CompanyDepartament.edit_Spec.md) |
 
 ### CompanyGroup
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_CompanyGroup.browse` | [itpearls_CompanyGroup.browse_Spec.md](itpearls_CompanyGroup.browse_Spec.md) |
-| Edit | `itpearls_CompanyGroup.edit` | [itpearls_CompanyGroup.edit_Spec.md](itpearls_CompanyGroup.edit_Spec.md) |
+| Browse | `hunttech_CompanyGroup.browse` | [hunttech_CompanyGroup.browse_Spec.md](hunttech_CompanyGroup.browse_Spec.md) |
+| Edit | `hunttech_CompanyGroup.edit` | [hunttech_CompanyGroup.edit_Spec.md](hunttech_CompanyGroup.edit_Spec.md) |
 
 ### Position
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_Position.browse` | [itpearls_Position.browse_Spec.md](itpearls_Position.browse_Spec.md) |
-| Edit | `itpearls_Position.edit` | [itpearls_Position.edit_Spec.md](itpearls_Position.edit_Spec.md) |
+| Browse | `hunttech_Position.browse` | [hunttech_Position.browse_Spec.md](hunttech_Position.browse_Spec.md) |
+| Edit | `hunttech_Position.edit` | [hunttech_Position.edit_Spec.md](hunttech_Position.edit_Spec.md) |
 
 ### SkillTree
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_SkillTree.browse` | [itpearls_SkillTree.browse_Spec.md](itpearls_SkillTree.browse_Spec.md) |
-| Edit | `itpearls_SkillTree.edit` | [itpearls_SkillTree.edit_Spec.md](itpearls_SkillTree.edit_Spec.md) |
+| Browse | `hunttech_SkillTree.browse` | [hunttech_SkillTree.browse_Spec.md](hunttech_SkillTree.browse_Spec.md) |
+| Edit | `hunttech_SkillTree.edit` | [hunttech_SkillTree.edit_Spec.md](hunttech_SkillTree.edit_Spec.md) |
 
 ### OpenPositionNews / OpenPositionComment
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| News browse | `itpearls_OpenPositionNews.browse` | [itpearls_OpenPositionNews.browse_Spec.md](itpearls_OpenPositionNews.browse_Spec.md) |
-| News edit | `itpearls_OpenPositionNews.edit` | [itpearls_OpenPositionNews.edit_Spec.md](itpearls_OpenPositionNews.edit_Spec.md) |
-| Comment browse | `itpearls_OpenPositionComment.browse` | [itpearls_OpenPositionComment.browse_Spec.md](itpearls_OpenPositionComment.browse_Spec.md) |
-| Comment edit | `itpearls_OpenPositionComment.edit` | [itpearls_OpenPositionComment.edit_Spec.md](itpearls_OpenPositionComment.edit_Spec.md) |
+| News browse | `hunttech_OpenPositionNews.browse` | [hunttech_OpenPositionNews.browse_Spec.md](hunttech_OpenPositionNews.browse_Spec.md) |
+| News edit | `hunttech_OpenPositionNews.edit` | [hunttech_OpenPositionNews.edit_Spec.md](hunttech_OpenPositionNews.edit_Spec.md) |
+| Comment browse | `hunttech_OpenPositionComment.browse` | [hunttech_OpenPositionComment.browse_Spec.md](hunttech_OpenPositionComment.browse_Spec.md) |
+| Comment edit | `hunttech_OpenPositionComment.edit` | [hunttech_OpenPositionComment.edit_Spec.md](hunttech_OpenPositionComment.edit_Spec.md) |
 
 ### RecrutiesTasks
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_RecrutiesTasks.browse` | [itpearls_RecrutiesTasks.browse_Spec.md](itpearls_RecrutiesTasks.browse_Spec.md) |
-| Edit | `itpearls_RecrutiesTasks.edit` | [itpearls_RecrutiesTasks.edit_Spec.md](itpearls_RecrutiesTasks.edit_Spec.md) |
-| Group subscribe | `itpearls_RecrutiesGroupSubscribeTasks.browse` | [itpearls_RecrutiesGroupSubscribeTasks.browse_Spec.md](itpearls_RecrutiesGroupSubscribeTasks.browse_Spec.md) |
+| Browse | `hunttech_RecrutiesTasks.browse` | [hunttech_RecrutiesTasks.browse_Spec.md](hunttech_RecrutiesTasks.browse_Spec.md) |
+| Edit | `hunttech_RecrutiesTasks.edit` | [hunttech_RecrutiesTasks.edit_Spec.md](hunttech_RecrutiesTasks.edit_Spec.md) |
+| Group subscribe | `hunttech_RecrutiesGroupSubscribeTasks.browse` | [hunttech_RecrutiesGroupSubscribeTasks.browse_Spec.md](hunttech_RecrutiesGroupSubscribeTasks.browse_Spec.md) |
 
 ### Справочники (Grade, City, Country, Region)
 
 | Сущность | Browse | Edit |
 |----------|--------|------|
-| Grade | [browse](itpearls_Grade.browse_Spec.md) | [edit](itpearls_Grade.edit_Spec.md) |
-| City | [browse](itpearls_City.browse_Spec.md) | [edit](itpearls_City.edit_Spec.md) |
-| Country | [browse](itpearls_Country.browse_Spec.md) | [edit](itpearls_Country.edit_Spec.md) |
-| Region | [browse](itpearls_Region.browse_Spec.md) | [edit](itpearls_Region.edit_Spec.md) |
+| Grade | [browse](hunttech_Grade.browse_Spec.md) | [edit](hunttech_Grade.edit_Spec.md) |
+| City | [browse](hunttech_City.browse_Spec.md) | [edit](hunttech_City.edit_Spec.md) |
+| Country | [browse](hunttech_Country.browse_Spec.md) | [edit](hunttech_Country.edit_Spec.md) |
+| Region | [browse](hunttech_Region.browse_Spec.md) | [edit](hunttech_Region.edit_Spec.md) |
 
 ### Прочее (legacy)
 
@@ -161,16 +161,16 @@ Living-документация экранов, окон, фрагментов �
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Шаблоны промптов (browse) | `itpearls_VacancyPromptTemplate.browse` | [itpearls_VacancyPromptTemplate.browse_Spec.md](itpearls_VacancyPromptTemplate.browse_Spec.md) |
-| Шаблон промпта (edit) | `itpearls_VacancyPromptTemplate.edit` | [itpearls_VacancyPromptTemplate.edit_Spec.md](itpearls_VacancyPromptTemplate.edit_Spec.md) |
-| Мониторинг ключей (browse) | `itpearls_UserAiConfiguration.browse` | [itpearls_UserAiConfiguration.browse_Spec.md](itpearls_UserAiConfiguration.browse_Spec.md) |
+| Шаблоны промптов (browse) | `hunttech_VacancyPromptTemplate.browse` | [hunttech_VacancyPromptTemplate.browse_Spec.md](hunttech_VacancyPromptTemplate.browse_Spec.md) |
+| Шаблон промпта (edit) | `hunttech_VacancyPromptTemplate.edit` | [hunttech_VacancyPromptTemplate.edit_Spec.md](hunttech_VacancyPromptTemplate.edit_Spec.md) |
+| Мониторинг ключей (browse) | `hunttech_UserAiConfiguration.browse` | [hunttech_UserAiConfiguration.browse_Spec.md](hunttech_UserAiConfiguration.browse_Spec.md) |
 
 ### ExtUser (Security)
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Edit | `sec$User.edit` / `itpearls_ExtUserEdit` | [itpearls_ExtUserEdit_Spec.md](itpearls_ExtUserEdit_Spec.md) |
-| AI config edit | `itpearls_UserAiConfiguration.edit` | (модаль внутри ExtUser edit) · entity [UserAiConfiguration.md](../entities/UserAiConfiguration.md) |
+| Edit | `sec$User.edit` / `hunttech_ExtUserEdit` | [hunttech_ExtUserEdit_Spec.md](hunttech_ExtUserEdit_Spec.md) |
+| AI config edit | `hunttech_UserAiConfiguration.edit` | (модаль внутри ExtUser edit) · entity [UserAiConfiguration.md](../entities/UserAiConfiguration.md) |
 
 ---
 

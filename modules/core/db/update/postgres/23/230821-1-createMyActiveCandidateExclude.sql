@@ -1,4 +1,4 @@
-create table ITPEARLS_MY_ACTIVE_CANDIDATE_EXCLUDE (
+create table HUNTTECH_MY_ACTIVE_CANDIDATE_EXCLUDE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

@@ -1,3 +1,3 @@
-alter table ITPEARLS_LABOR_AGREEMENT rename column some_filed_agreement_id to some_filed_agreement_id__u77857 ;
-alter table ITPEARLS_LABOR_AGREEMENT drop constraint FK_ITPEARLS_LABOR_AGREEMENT_ON_SOME_FILED_AGREEMENT ;
-drop index IDX_ITPEARLS_LABOR_AGREEMENT_ON_SOME_FILED_AGREEMENT ;
+alter table HUNTTECH_LABOR_AGREEMENT rename column some_filed_agreement_id to some_filed_agreement_id__u77857 ;
+alter table HUNTTECH_LABOR_AGREEMENT drop constraint FK_HUNTTECH_LABOR_AGREEMENT_ON_SOME_FILED_AGREEMENT ;
+drop index IDX_HUNTTECH_LABOR_AGREEMENT_ON_SOME_FILED_AGREEMENT ;

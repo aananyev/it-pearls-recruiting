@@ -1,1 +1,1 @@
-alter table ITPEARLS_FIRMA rename to ITPEARLS_FIRMA__U51667 ;
+alter table HUNTTECH_FIRMA rename to HUNTTECH_FIRMA__U51667 ;

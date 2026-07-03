@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="socialNetworkTypesTable"
+        messagesPack="com.company.hunttech.web.screens.socialnetworktype">
+    <data readOnly="true">
+        <collection id="socialNetworkTypesDc"
+                    class="com.company.hunttech.entity.SocialNetworkType"
+                    view="socialNetworkType-view">
+            <loader id="socialNetworkTypesDl">
+                <query>
+                    <![CDATA[select e from hunttech_SocialNetworkType e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="socialNetworkTypesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="socialNetworkTypesTable"
+                dataLoader="socialNetworkTypesDl">
+            <properties include=".*"
+                        excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+        </filter>
+        <groupTable id="socialNetworkTypesTable"
+                    width="100%"
+                    dataContainer="socialNetworkTypesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="snLogoColumn"
+                        collapsed="false"
+                        caption=""
+                        generator="snLogoGenerator"
+                        width="70px"/>
+                <column id="socialNetwork"/>
+                <column id="socialNetworkURL"/>
+                <column id="comment"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn" action="socialNetworkTypesTable.create"/>
+                <button id="editBtn" action="socialNetworkTypesTable.edit"/>
+                <button id="removeBtn" action="socialNetworkTypesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

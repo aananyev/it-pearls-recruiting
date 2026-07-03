@@ -1,4 +1,4 @@
-create table ITPEARLS_VACANCY_PROMPT_TEMPLATE (
+create table HUNTTECH_VACANCY_PROMPT_TEMPLATE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

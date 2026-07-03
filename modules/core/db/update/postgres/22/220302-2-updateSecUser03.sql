@@ -1,1 +1,1 @@
-update SEC_USER set DTYPE = 'itpearls_ExtUser' where DTYPE is null ;
+update SEC_USER set DTYPE = 'hunttech_ExtUser' where DTYPE is null ;

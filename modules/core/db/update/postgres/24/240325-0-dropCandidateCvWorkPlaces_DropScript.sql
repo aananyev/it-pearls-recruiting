@@ -1,1 +1,1 @@
-drop table if exists ITPEARLS_CANDIDATE_CV_WORK_PLACES__U87923 cascade ;
+drop table if exists HUNTTECH_CANDIDATE_CV_WORK_PLACES__U87923 cascade ;

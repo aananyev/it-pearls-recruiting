@@ -1,6 +1,6 @@
 package com.hunttech.hrm.gui.components;
 
-import com.company.itpearls.gui.components.OvalImage;
+import com.company.hunttech.gui.components.OvalImage;
 
 /**
  * Round avatar image with theme fallback when bound value is null, empty, or missing in storage.

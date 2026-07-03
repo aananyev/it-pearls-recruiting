@@ -1,1 +1,1 @@
-alter table ITPEARLS_CANDIDATE_CV add column LETTER longvarchar ;
+alter table HUNTTECH_CANDIDATE_CV add column LETTER longvarchar ;

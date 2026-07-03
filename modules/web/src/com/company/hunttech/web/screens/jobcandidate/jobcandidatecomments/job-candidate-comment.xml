@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://jobCandidateComment.caption"
+        messagesPack="com.company.hunttech.web.screens.jobcandidate.jobcandidatecomments">
+    <data>
+        <collection id="candidateCommentDc" class="com.company.hunttech.entity.IteractionList">
+            <view extends="_minimal">
+                <property name="comment"/>
+                <property name="dateIteraction"/>
+                <property name="rating"/>
+                <property name="recrutier" fetch="BATCH">
+                    <property name="name"/>
+                    <property name="fileImageFace" view="_minimal"/>
+                </property>
+                <property name="vacancy" fetch="BATCH">
+                    <property name="vacansyName"/>
+                </property>
+                <property name="candidate" fetch="BATCH">
+                    <property name="fullName"/>
+                    <property name="personPosition" view="_minimal"/>
+                    <property name="fileImageFace" view="_minimal"/>
+                </property>
+            </view>
+            <loader id="candidateCommentDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from hunttech_IteractionList e
+                    where not e.comment like '' and not e.comment is null
+                    order by e.dateIteraction desc]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.candidate = :jobCandidate</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout width="100%"
+            height="100%"
+            expand="commentScrollBox"
+            spacing="true">
+        <hbox width="AUTO"
+              height="AUTO"
+              spacing="true">
+            <image id="faceImage"
+                   width="100px"
+                   height="AUTO"
+                   scaleMode="SCALE_DOWN"
+                   dataContainer="candidateCommentDc"
+                   property="candidate.fileImageFace"/>
+            <vbox spacing="true"
+                  width="AUTO"
+                  height="AUTO">
+                <label id="jobCandidateLabel"
+                       dataContainer="candidateCommentDc"
+                       property="candidate.fullName"
+                       stylename="h3"/>
+                <label id="jobCandidatePositionLabel"
+                       dataContainer="candidateCommentDc"
+                       property="candidate.personPosition"
+                       stylename="h4"/>
+            </vbox>
+        </hbox>
+        <button id="addCommentButton"
+                caption="msg://msgAddComment"
+                description="msg://msgAddCommentButtonDesc"
+                invoke="addCommentButtonInvoke"
+                icon="COMMENTING"
+                width="AUTO"
+                align="TOP_RIGHT"/>
+        <scrollBox id="commentScrollBox"
+                   orientation="vertical"
+                   width="100%"
+                   spacing="true"
+                   height="AUTO"/>
+        <button caption="msg://msgClose"
+                invoke="closeScreenButton"
+                align="BOTTOM_RIGHT"/>
+
+    </layout>
+</window>

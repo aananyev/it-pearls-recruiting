@@ -3,7 +3,7 @@
 > **HRM HuntTech** · CUBA Platform 7.3  
 > Паспорт подсистемы интеграции с внешними LLM-провайдерами для стандартизации и генерации артефактов вакансий.
 
-**Связанная документация:** [docs/entities/UserAiConfiguration.md](docs/entities/UserAiConfiguration.md) · [docs/entities/VacancyPromptTemplate.md](docs/entities/VacancyPromptTemplate.md) · UI Spec: [ExtUserEdit](docs/ui/itpearls_ExtUserEdit_Spec.md), [UserAiConfiguration](docs/ui/itpearls_UserAiConfiguration.browse_Spec.md), [VacancyPromptTemplate](docs/ui/itpearls_VacancyPromptTemplate.browse_Spec.md)
+**Связанная документация:** [docs/entities/UserAiConfiguration.md](docs/entities/UserAiConfiguration.md) · [docs/entities/VacancyPromptTemplate.md](docs/entities/VacancyPromptTemplate.md) · UI Spec: [ExtUserEdit](docs/ui/hunttech_ExtUserEdit_Spec.md), [UserAiConfiguration](docs/ui/hunttech_UserAiConfiguration.browse_Spec.md), [VacancyPromptTemplate](docs/ui/hunttech_VacancyPromptTemplate.browse_Spec.md)
 
 **Статус интеграции (факт из кода, 2026-06-27):**
 
@@ -41,7 +41,7 @@
 | `VacancyPromptTemplate` | `modules/global/.../entity/VacancyPromptTemplate.java` | Промпт-шаблоны (FreeMarker) |
 | `OpenPosition` (AI-поля) | `modules/global/.../entity/OpenPosition.java` | Хранилище AI-артефактов вакансии |
 
-Spring component-scan: `modules/core/src/com/company/itpearls/spring.xml` (`base-package="com.company.itpearls"`).
+Spring component-scan: `modules/core/src/com/company/hunttech/spring.xml` (`base-package="com.company.hunttech"`).
 
 ### 1.3 Поток данных (целевой)
 
@@ -110,8 +110,8 @@ sequenceDiagram
 | `isActive` | `IS_ACTIVE` | `boolean` | Default `true`; неактивные игнорируются сервисом |
 
 ```java
-@Entity(name = "itpearls_UserAiConfiguration")
-@Table(name = "ITPEARLS_USER_AI_CONFIGURATION")
+@Entity(name = "hunttech_UserAiConfiguration")
+@Table(name = "HUNTTECH_USER_AI_CONFIGURATION")
 public class UserAiConfiguration extends StandardEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "USER_ID")
@@ -181,7 +181,7 @@ private String interviewChecklist;
 
 ### 2.4 Persistence
 
-Обе AI-сущности зарегистрированы в `modules/global/src/com/company/itpearls/persistence.xml`.
+Обе AI-сущности зарегистрированы в `modules/global/src/com/company/hunttech/persistence.xml`.
 
 ---
 
@@ -191,7 +191,7 @@ private String interviewChecklist;
 
 ```java
 public interface HrmAiService {
-    String NAME = "itpearls_HrmAiService";
+    String NAME = "hunttech_HrmAiService";
 
     String standardizeVacancyDescription(String rawText, String providerCode);
 
@@ -288,7 +288,7 @@ public class AIProviderRegistry {
 ### Шаг 1. Реализовать интерфейс
 
 ```java
-package com.company.itpearls.core.ai;
+package com.company.hunttech.core.ai;
 
 import org.springframework.stereotype.Component;
 import java.util.Map;
@@ -316,7 +316,7 @@ public class YandexGptProvider implements AIProvider {
 
 ### Шаг 2. Spring auto-registration
 
-Класс в пакете `com.company.itpearls` с `@Component` автоматически попадает в `AIProviderRegistry` при старте middleware. **Изменения в `HrmAiServiceBean` не нужны.**
+Класс в пакете `com.company.hunttech` с `@Component` автоматически попадает в `AIProviderRegistry` при старте middleware. **Изменения в `HrmAiServiceBean` не нужны.**
 
 ### Шаг 3. UI lookup (уже подготовлен)
 
@@ -383,17 +383,17 @@ User user = userSessionSource.getUserSession().getUser();
 
 | Точка входа | Controller | Поведение |
 |-------------|------------|-----------|
-| Профиль пользователя → вкладка «Персональный ИИ» | `itpearls_ExtUserEdit` | CRUD через `UserAiConfigurationEdit` (create/edit/remove) |
-| Меню **Управление AI** | `itpearls_VacancyPromptTemplate.browse` | CRUD шаблонов промптов |
-| Меню **Управление AI** | `itpearls_UserAiConfiguration.browse` | Read-only мониторинг всех ключей |
+| Профиль пользователя → вкладка «Персональный ИИ» | `hunttech_ExtUserEdit` | CRUD через `UserAiConfigurationEdit` (create/edit/remove) |
+| Меню **Управление AI** | `hunttech_VacancyPromptTemplate.browse` | CRUD шаблонов промптов |
+| Меню **Управление AI** | `hunttech_UserAiConfiguration.browse` | Read-only мониторинг всех ключей |
 
 Меню (`web-menu.xml`):
 
 ```xml
 <menu id="aiAdministration" caption="mainMsg://menu_config.aiAdministration" icon="MAGIC"
       insertAfter="administration">
-    <item screen="itpearls_VacancyPromptTemplate.browse" .../>
-    <item screen="itpearls_UserAiConfiguration.browse" .../>
+    <item screen="hunttech_VacancyPromptTemplate.browse" .../>
+    <item screen="hunttech_UserAiConfiguration.browse" .../>
 </menu>
 ```
 

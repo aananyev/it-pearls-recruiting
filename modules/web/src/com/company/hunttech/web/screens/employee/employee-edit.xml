@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://employeeEdit.caption"
+        focusComponent="candidateField"
+        messagesPack="com.company.hunttech.web.screens.employee">
+    <data>
+        <instance id="employeeDc"
+                  class="com.company.hunttech.entity.Employee">
+            <view extends="employee-view">
+                <property name="jobCandidate" view="_local">
+                    <property name="personPosition" view="_local"/>
+                    <property name="iteractionList" view="_local">
+                        <property name="iteractionType" view="_local">
+                            <property name="workStatus" view="employeeWorkStatus-view"/>
+                        </property>
+                    </property>
+                    <property name="laborAgreement" view="_local">
+                        <property name="jobCandidate" view="_local"/>
+                        <property name="legalEntityEmployee" view="_local"/>
+                        <property name="customerCompany" view="_local"/>
+                        <property name="additionalLaborAgreement" view="_local"/>
+                        <property name="legalEntityFrom" view="_local"/>
+                        <property name="company" view="_local"/>
+                        <property name="laborAgreementType" view="_local"/>
+                        <property name="openPositions" view="_local"/>
+                        <property name="fileAgreement" view="_local"/>
+                        <property name="someFilesAgreement" view="_local"/>
+                    </property>
+                </property>
+                <property name="openPosition" view="_local"/>
+                <property name="laborAgreement" view="_local">
+                    <property name="jobCandidate" view="_local"/>
+                    <property name="legalEntityEmployee" view="_local"/>
+                    <property name="customerCompany" view="_local"/>
+                    <property name="additionalLaborAgreement" view="_local"/>
+                    <property name="legalEntityFrom" view="_local"/>
+                    <property name="company" view="_local"/>
+                    <property name="laborAgreementType" view="_local"/>
+                </property>
+                <property name="workStatus" view="_base"/>
+            </view>
+            <loader/>
+        </instance>
+        <collection id="currencyDc" class="com.company.hunttech.entity.Currency">
+            <view extends="_local"/>
+            <loader id="currencyDl" cacheable="true">
+                <query><![CDATA[select e from hunttech_Currency e order by e.currencyShortName]]></query>
+            </loader>
+        </collection>
+        <collection id="workStatusDc"
+                    class="com.company.hunttech.entity.EmployeeWorkStatus"
+                    view="employeeWorkStatus-view">
+            <loader id="workStatusDl">
+                <query>
+                    <![CDATA[select e from hunttech_EmployeeWorkStatus e order by e.workStatusName]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="openPositionsDc"
+                    class="com.company.hunttech.entity.OpenPosition"
+                    view="_minimal">
+            <loader id="openPositionsDl">
+                <query>
+                    <![CDATA[select e from hunttech_OpenPosition e order by e.openClose, e.vacansyName]]>
+                </query>
+            </loader>
+        </collection>
+        <collection id="laborAgreementsDc" class="com.company.hunttech.entity.LaborAgreement" view="_minimal">
+            <loader id="laborAgreementsDl">
+                <query>
+                    <![CDATA[select e from hunttech_LaborAgreement e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout spacing="true"
+            expand="layoutVBox">
+        <vbox id="layoutVBox"
+              height="100%"
+              expand="mainVBox"
+              width="100%">
+            <groupBox align="TOP_LEFT"
+                      stylename="light"
+                      spacing="false"
+                      width="100%"
+                      height="AUTO">
+                <lookupPickerField id="workStatusField"
+                                   height="AUTO"
+                                   width="AUTO"
+                                   align="TOP_LEFT"
+                                   nullOptionVisible="false"
+                                   caption="msg://msgWorkStatus"
+                                   dataContainer="employeeDc"
+                                   optionsContainer="workStatusDc"
+                                   property="workStatus"/>
+            </groupBox>
+            <groupBox id="mainVBox"
+                      width="100%"
+                      stylename="light"
+                      height="100%"
+                      align="TOP_LEFT"
+                      spacing="true">
+                <vbox height="AUTO"
+                      width="100%"
+                      spacing="true">
+                    <hbox spacing="true"
+                          align="TOP_LEFT"
+                          width="100%">
+                        <suggestionPickerField id="candidateField"
+                                               inputPrompt="mainMsg://msgStartInput"
+                                               minSearchStringLength="3"
+                                               rowspan="1"
+                                               align="TOP_LEFT"
+                                               colspan="1"
+                                               caption="msg://msgCandidate"
+                                               width="100%"
+                                               required="true"
+                                               dataContainer="employeeDc"
+                                               property="jobCandidate">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="open" type="picker_open"/>
+                            </actions>
+                            <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                   escapeValueForLike="true"
+                                   searchStringFormat="%$searchString%">
+                                select e
+                                from hunttech_JobCandidate e
+                                where lower(e.fullName) like lower(:searchString) escape '\'
+                                and e.middleName not like '(не использовать)'
+                                and not e.blockCandidate = true
+                                order by e.secondName, e.firstName
+                            </query>
+                        </suggestionPickerField>
+                        <lookupPickerField id="openPositionField"
+                                           caption="msg://msgOpenPosition"
+                                           align="TOP_LEFT"
+                                           width="100%"
+                                           nullOptionVisible="false"
+                                           dataContainer="employeeDc"
+                                           optionsContainer="openPositionsDc"
+                                           property="openPosition">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="open" type="picker_open"/>
+                                <action id="clear" type="picker_clear"/>
+                            </actions>
+                        </lookupPickerField>
+                    </hbox>
+                    <hbox spacing="true" width="50%">
+                        <dateField id="employeeDateField"
+                                   align="TOP_LEFT"
+                                   width="100%"
+                                   caption="msg://msgEmployeeDate"
+                                   dataContainer="employeeDc"
+                                   property="employeeDate"/>
+                        <dateField id="dissmisalDateField"
+                                   align="TOP_LEFT"
+                                   width="100%"
+                                   caption="msg://msgDismissDate"
+                                   dataContainer="employeeDc"
+                                   property="dissmisalDate"/>
+                    </hbox>
+                    <hbox spacing="true" align="TOP_LEFT" width="50%">
+                        <textField id="outstaffingCostField"
+                                   align="TOP_LEFT"
+                                   width="100%"
+                                   caption="msg://msgOutstaffingCost"
+                                   dataContainer="employeeDc"
+                                   property="outstaffingCost">
+                            <validator class="com.haulmont.cuba.gui.components.validators.DoubleValidator"/>
+                        </textField>
+                        <textField id="salaryCost"
+                                   align="TOP_CENTER"
+                                   width="100%"
+                                   caption="msg://msgSalaryCost"
+                                   dataContainer="employeeDc"
+                                   property="salaryCost">
+                            <validator class="com.haulmont.cuba.gui.components.validators.DoubleValidator"/>
+                        </textField>
+                    </hbox>
+                    <hbox width="50%"
+                          spacing="true"
+                          expand="salaryTextField">
+                        <textField id="salaryTextField"
+                                   width="AUTO"
+                                   dataContainer="employeeDc"
+                                   property="salary"
+                                   caption="msg://msgSalary">
+                            <validator class="com.haulmont.cuba.gui.components.validators.DoubleValidator"/>
+                        </textField>
+                        <textField id="fullCostsField"
+                                   width="AUTO"
+                                   dataContainer="employeeDc"
+                                   property="fullCosts"
+                                   caption="msg://msgFullCosts">
+                            <validator class="com.haulmont.cuba.gui.components.validators.DoubleValidator"/>
+                        </textField>
+                        <lookupField id="currencyLookupField"
+                                     dataContainer="employeeDc"
+                                     optionsContainer="currencyDc"
+                                     property="currency"
+                                     visible="false"
+                                     caption="msg://msgCurrency"
+                                     width="AUTO"
+                                     nullOptionVisible="true"/>
+                    </hbox>
+                    <lookupPickerField id="laborAgreementField"
+                                       align="TOP_LEFT"
+                                       width="100%"
+                                       caption="msg://msgLaborAgreement"
+                                       dataContainer="employeeDc"
+                                       optionsContainer="laborAgreementsDc"
+                                       property="laborAgreement">
+                        <actions>
+                            <action id="lookup" type="picker_lookup"/>
+                            <action id="open" type="picker_open"/>
+                            <action id="clear" type="picker_clear"/>
+                        </actions>
+                    </lookupPickerField>
+                </vbox>
+            </groupBox>
+        </vbox>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

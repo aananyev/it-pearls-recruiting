@@ -1,1 +1,1 @@
-drop index IDX_ITPEARLS_ITERACTION_1 ;
+drop index IDX_HUNTTECH_ITERACTION_1 ;

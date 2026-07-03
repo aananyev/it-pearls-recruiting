@@ -1,4 +1,4 @@
-create table ITPEARLS_SIGN_ICONS (
+create table HUNTTECH_SIGN_ICONS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

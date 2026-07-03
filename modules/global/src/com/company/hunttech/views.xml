@@ -1,0 +1,1333 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
+
+    <view entity="hunttech_Region" name="region-country-child-view" extends="_minimal">
+        <property name="regionRuName"/>
+        <property name="regionCode"/>
+    </view>
+    <view entity="hunttech_Region" name="region-browse-view" extends="_minimal">
+        <property name="regionRuName"/>
+        <property name="regionCode"/>
+        <property name="regionCountry" view="country-picker-view"/>
+    </view>
+    <view entity="hunttech_Region" name="region-edit-view" extends="_minimal">
+        <property name="regionRuName"/>
+        <property name="regionCode"/>
+        <property name="regionCountry" view="country-picker-view"/>
+        <property name="regionOfCity" view="city-region-child-view"/>
+    </view>
+    <view entity="hunttech_Region" name="region-picker-view" extends="_minimal">
+        <property name="regionRuName"/>
+        <property name="regionCode"/>
+    </view>
+    <view entity="hunttech_Region" name="region-view" extends="_minimal">
+        <property name="regionRuName"/>
+        <property name="regionCode"/>
+        <property name="regionCountry" view="country-picker-view"/>
+    </view>
+    <view entity="hunttech_City" name="city-region-child-view" extends="_minimal">
+        <property name="cityRuName"/>
+        <property name="cityPhoneCode"/>
+    </view>
+    <view entity="hunttech_Country" name="country-browse-view" extends="_minimal">
+        <property name="countryRuName"/>
+        <property name="countryShortName"/>
+        <property name="phoneCode"/>
+    </view>
+    <view entity="hunttech_Country" name="country-edit-view" extends="_minimal">
+        <property name="countryRuName"/>
+        <property name="countryShortName"/>
+        <property name="phoneCode"/>
+        <property name="countryOfRegion" view="region-country-child-view"/>
+    </view>
+    <view entity="hunttech_Country" name="country-picker-view" extends="_minimal">
+        <property name="countryRuName"/>
+        <property name="countryShortName"/>
+    </view>
+    <view entity="hunttech_Country" name="country-view" extends="_local">
+        <property name="countryOfRegion" view="_local"/>
+    </view>
+    <view entity="hunttech_CompanyDepartament" name="companyDepartament-browse-view" extends="_minimal">
+        <property name="departamentRuName"/>
+        <property name="departamentNumberOfProgrammers"/>
+        <property name="companyName" view="company-picker-view"/>
+        <property name="departamentHrDirector" view="person-picker-view"/>
+        <property name="departamentDirector" view="person-picker-view"/>
+    </view>
+    <view entity="hunttech_CompanyDepartament" name="companyDepartament-edit-view" extends="_minimal">
+        <property name="departamentRuName"/>
+        <property name="departamentNumberOfProgrammers"/>
+        <property name="companyName" view="company-picker-view"/>
+        <property name="departamentHrDirector" view="person-picker-view"/>
+        <property name="departamentDirector" view="person-picker-view"/>
+        <property name="projectOfDepartment" view="project-department-child-view"/>
+    </view>
+    <view entity="hunttech_CompanyDepartament" name="companyDepartament-picker-view" extends="_minimal">
+        <property name="departamentRuName"/>
+        <property name="companyName" view="company-picker-view"/>
+    </view>
+    <view entity="hunttech_CompanyDepartament" name="companyDepartament-department-child-view" extends="_minimal">
+        <property name="departamentRuName"/>
+        <property name="departamentDirector" view="person-picker-view"/>
+        <property name="departamentHrDirector" view="person-picker-view"/>
+    </view>
+    <view entity="hunttech_CompanyDepartament" name="companyDepartament-view" extends="_local">
+        <property name="companyName" view="company-picker-view"/>
+        <property name="departamentHrDirector" view="person-picker-view"/>
+        <property name="departamentDirector" view="person-picker-view"/>
+        <property name="projectOfDepartment" view="project-picker-view"/>
+    </view>
+    <view entity="hunttech_Project" name="project-browse-view" extends="_minimal">
+        <property name="projectName"/>
+        <property name="projectIsClosed"/>
+        <property name="defaultProject"/>
+        <property name="startProjectDate"/>
+        <property name="endProjectDate"/>
+        <property name="generalChat"/>
+        <property name="chatForCV"/>
+        <property name="projectLogo" view="_minimal"/>
+        <property name="projectTree" view="project-tree-picker-view"/>
+        <property name="projectDepartment" view="companyDepartament-picker-view"/>
+        <property name="projectOwner" view="person-owner-view"/>
+    </view>
+    <view entity="hunttech_Project" name="project-edit-view" extends="_minimal">
+        <property name="projectName"/>
+        <property name="projectIsClosed"/>
+        <property name="defaultProject"/>
+        <property name="startProjectDate"/>
+        <property name="endProjectDate"/>
+        <property name="generalChat"/>
+        <property name="chatForCV"/>
+        <property name="projectLogo" view="_minimal"/>
+        <property name="projectTree" view="project-tree-picker-view"/>
+        <property name="projectDepartment" view="companyDepartament-picker-view"/>
+        <property name="projectOwner" view="person-owner-view"/>
+    </view>
+    <view entity="hunttech_Project" name="project-picker-view" extends="_minimal">
+        <property name="projectName"/>
+        <property name="projectIsClosed"/>
+    </view>
+    <view entity="hunttech_Project" name="project-tree-picker-view" extends="_minimal">
+        <property name="projectName"/>
+        <property name="projectTree" view="_minimal"/>
+    </view>
+    <view entity="hunttech_Project" name="project-department-child-view" extends="_minimal">
+        <property name="projectName"/>
+        <property name="startProjectDate"/>
+        <property name="endProjectDate"/>
+        <property name="projectIsClosed"/>
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-project-tab-view" extends="_minimal">
+        <property name="openClose"/>
+        <property name="vacansyName"/>
+        <property name="numberPosition"/>
+        <property name="positionType" view="position-picker-view"/>
+        <property name="createTs"/>
+    </view>
+    <view entity="hunttech_Grade" name="grade-browse-view" extends="_minimal">
+        <property name="gradeName"/>
+    </view>
+    <view entity="hunttech_Grade" name="grade-edit-view" extends="_minimal">
+        <property name="gradeName"/>
+    </view>
+    <view entity="hunttech_Grade" name="grade-picker-view" extends="_minimal">
+        <property name="gradeName"/>
+    </view>
+    <view entity="hunttech_Position" name="position-browse-view" extends="_minimal">
+        <property name="positionRuName"/>
+        <property name="positionEnName"/>
+    </view>
+    <view entity="hunttech_Position" name="position-edit-view" extends="_minimal">
+        <property name="positionRuName"/>
+        <property name="positionEnName"/>
+    </view>
+    <view entity="hunttech_Position" name="position-picker-view" extends="_minimal">
+        <property name="positionRuName"/>
+        <property name="positionEnName"/>
+    </view>
+    <view entity="hunttech_ExtUser" name="extUser-picker-view" extends="_minimal">
+        <property name="name"/>
+        <property name="login"/>
+        <property name="userAvatar" view="_minimal"/>
+        <property name="officialPhoto" view="_minimal"/>
+        <property name="fileImageFace" view="_minimal"/>
+    </view>
+    <view entity="hunttech_ExtUser" name="extUser-recrutier-task-view" extends="extUser-picker-view">
+        <property name="email"/>
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-picker-view" extends="_minimal">
+        <property name="vacansyID"/>
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-parent-picker-view" extends="openPosition-picker-view">
+        <property name="projectName" view="project-picker-view"/>
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-rtasks-browse-view" extends="_minimal">
+        <property name="vacansyName"/>
+        <property name="projectName" view="project-picker-view">
+            <property name="projectLogo" view="_minimal"/>
+        </property>
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-rtasks-picker-view" extends="_minimal">
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+        <property name="grade" view="grade-picker-view"/>
+        <property name="cityPosition" view="city-picker-view"/>
+        <property name="cities" view="city-picker-view"/>
+        <property name="positionType" view="position-picker-view"/>
+        <property name="projectName" view="project-picker-view"/>
+        <property name="owner" view="extUser-picker-view"/>
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-browse-view" extends="_minimal">
+        <property name="vacansyID"/>
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+        <property name="signDraft"/>
+        <property name="priority"/>
+        <property name="rating"/>
+        <property name="lastOpenDate"/>
+        <property name="closingDate"/>
+        <property name="remoteWork"/>
+        <property name="remoteComment"/>
+        <property name="needExercise"/>
+        <property name="needLetter"/>
+        <property name="needMemoForInterview"/>
+        <property name="salaryMin"/>
+        <property name="salaryMax"/>
+        <property name="salaryComment"/>
+        <property name="salaryFixLimit"/>
+        <property name="salaryCandidateRequest"/>
+        <property name="outstaffingCost"/>
+        <property name="numberPosition"/>
+        <property name="more10NumberPosition"/>
+        <property name="workExperience"/>
+        <property name="commandCandidate"/>
+        <property name="commandExperience"/>
+        <property name="internalProject"/>
+        <property name="shortDescription"/>
+        <property name="grade" view="grade-picker-view"/>
+        <property name="positionType" view="position-picker-view"/>
+        <property name="cityPosition" view="city-picker-view"/>
+        <property name="cities" view="city-picker-view"/>
+        <property name="owner" view="extUser-picker-view"/>
+        <property name="parentOpenPosition" view="openPosition-picker-view"/>
+        <property name="projectName" view="project-picker-view">
+            <property name="projectLogo" view="_minimal"/>
+            <property name="projectDepartment" view="companyDepartament-picker-view">
+                <property name="companyName" view="company-picker-view"/>
+            </property>
+            <property name="projectOwner" view="person-owner-view"/>
+        </property>
+        <property name="candidates" view="_minimal"/>
+        <property name="openPositionComments" view="_minimal"/>
+        <property name="someFiles" view="_minimal"/>
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-edit-view" extends="_minimal">
+        <property name="vacansyID"/>
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+        <property name="signDraft"/>
+        <property name="priority"/>
+        <property name="rating"/>
+        <property name="lastOpenDate"/>
+        <property name="closingDate"/>
+        <property name="remoteWork"/>
+        <property name="registrationForWork"/>
+        <property name="remoteComment"/>
+        <property name="needExercise"/>
+        <property name="needLetter"/>
+        <property name="needMemoForInterview"/>
+        <property name="salaryMin"/>
+        <property name="salaryMax"/>
+        <property name="salaryIE"/>
+        <property name="salaryFixLimit"/>
+        <property name="salaryCandidateRequest"/>
+        <property name="salaryComment"/>
+        <property name="outstaffingCost"/>
+        <property name="numberPosition"/>
+        <property name="more10NumberPosition"/>
+        <property name="workExperience"/>
+        <property name="commandCandidate"/>
+        <property name="commandExperience"/>
+        <property name="internalProject"/>
+        <property name="shortDescription"/>
+        <property name="rawDescription"/>
+        <property name="interviewChecklist"/>
+        <property name="searchMap"/>
+        <property name="interviewPlan"/>
+        <property name="paymentsType"/>
+        <property name="typeCompanyComission"/>
+        <property name="typeSalaryOfResearcher"/>
+        <property name="typeSalaryOfRecrutier"/>
+        <property name="useTaxNDFL"/>
+        <property name="percentComissionOfCompany"/>
+        <property name="percentSalaryOfResearcher"/>
+        <property name="percentSalaryOfRecrutier"/>
+        <property name="priorityComment"/>
+        <property name="grade" view="grade-picker-view"/>
+        <property name="cityPosition" view="city-picker-view"/>
+        <property name="cities" view="city-picker-view"/>
+        <property name="positionType" view="position-picker-view"/>
+        <property name="projectName" view="project-edit-view"/>
+        <property name="parentOpenPosition" view="openPosition-parent-picker-view"/>
+        <property name="owner" view="extUser-picker-view"/>
+    </view>
+    <view entity="hunttech_OpenPositionComment" name="openPositionComment-browse-view" extends="_minimal">
+        <property name="rating"/>
+        <property name="dateComment"/>
+        <property name="openPosition" view="openPosition-picker-view"/>
+        <property name="user" view="extUser-picker-view"/>
+    </view>
+    <view entity="hunttech_OpenPositionComment" name="openPositionComment-edit-view" extends="_minimal" systemProperties="true">
+        <property name="rating"/>
+        <property name="dateComment"/>
+        <property name="comment"/>
+        <property name="openPosition" view="openPosition-picker-view"/>
+        <property name="user" view="extUser-picker-view"/>
+    </view>
+    <view entity="hunttech_OpenPositionNews" name="openPositionNews-browse-view" extends="_minimal">
+        <property name="subject"/>
+        <property name="dateNews"/>
+        <property name="priorityNews"/>
+        <property name="openPosition" view="openPosition-picker-view"/>
+        <property name="author" view="extUser-picker-view"/>
+        <property name="candidates" view="_minimal"/>
+    </view>
+    <view entity="hunttech_OpenPositionNews" name="openPositionNews-edit-view" extends="_minimal">
+        <property name="subject"/>
+        <property name="dateNews"/>
+        <property name="priorityNews"/>
+        <property name="comment"/>
+        <property name="openPosition" view="openPosition-picker-view"/>
+        <property name="author" view="extUser-picker-view"/>
+        <property name="candidates" view="_minimal"/>
+    </view>
+    <view entity="hunttech_SomeFilesOpenPosition" name="someFilesOpenPosition-edit-view" extends="_minimal">
+        <property name="fileDescription"/>
+        <property name="fileLink"/>
+        <property name="fileComment"/>
+        <property name="fileDescriptor" view="_minimal"/>
+        <property name="fileOwner" view="extUser-picker-view"/>
+        <property name="fileType" view="_minimal"/>
+        <property name="openPosition" view="openPosition-picker-view"/>
+    </view>
+    <view entity="hunttech_RecrutiesTasks" name="recrutiesTasks-browse-view" extends="_minimal">
+        <property name="startDate"/>
+        <property name="endDate"/>
+        <property name="closed"/>
+        <property name="subscribe"/>
+        <property name="planForPeriod"/>
+        <property name="reacrutier" view="extUser-picker-view"/>
+        <property name="openPosition" view="openPosition-rtasks-browse-view"/>
+    </view>
+    <view entity="hunttech_RecrutiesTasks" name="recrutiesTasks-edit-view" extends="_minimal">
+        <property name="startDate"/>
+        <property name="endDate"/>
+        <property name="closed"/>
+        <property name="subscribe"/>
+        <property name="planForPeriod"/>
+        <property name="reacrutier" view="extUser-picker-view"/>
+        <property name="openPosition" view="openPosition-rtasks-picker-view"/>
+    </view>
+    <view entity="hunttech_Project" name="project-view" extends="_local">
+        <property name="projectDepartment" view="companyDepartament-picker-view"/>
+        <property name="projectOwner" view="person-owner-view"/>
+        <property name="projectTree" view="project-tree-picker-view"/>
+        <property name="projectLogo" view="_minimal"/>
+    </view>
+    <view entity="hunttech_Person" name="person-browse-view" extends="_minimal">
+        <property name="firstName"/>
+        <property name="middleName"/>
+        <property name="secondName"/>
+        <property name="personPosition" view="_minimal"/>
+        <property name="positionCountry" view="country-picker-view"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
+        <property name="fileImageFace" view="_minimal"/>
+    </view>
+    <view entity="hunttech_Person" name="person-edit-view" extends="_minimal">
+        <property name="firstName"/>
+        <property name="middleName"/>
+        <property name="secondName"/>
+        <property name="birdhDate"/>
+        <property name="email"/>
+        <property name="phone"/>
+        <property name="mobPhone"/>
+        <property name="skypeName"/>
+        <property name="telegramName"/>
+        <property name="wiberName"/>
+        <property name="watsupName"/>
+        <property name="sendResumeToEmail"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
+        <property name="positionCountry" view="country-picker-view"/>
+        <property name="personPosition" view="_minimal"/>
+        <property name="companyDepartment" view="_minimal"/>
+        <property name="fileImageFace" view="_minimal"/>
+    </view>
+    <view entity="hunttech_Person" name="person-picker-view" extends="_minimal">
+        <property name="firstName"/>
+        <property name="secondName"/>
+        <property name="middleName"/>
+        <property name="personPosition" view="_minimal"/>
+    </view>
+    <view entity="hunttech_Person" name="person-owner-view" extends="_minimal">
+        <property name="firstName"/>
+        <property name="secondName"/>
+        <property name="middleName"/>
+        <property name="personPosition" view="position-picker-view"/>
+        <property name="companyDepartment" view="_minimal">
+            <property name="departamentRuName"/>
+            <property name="companyName" view="_minimal"/>
+        </property>
+        <property name="cityOfResidence" view="city-picker-view"/>
+        <property name="fileImageFace" view="_minimal"/>
+    </view>
+    <view entity="hunttech_Person" name="person-view" extends="_local">
+        <property name="positionCountry" view="country-picker-view"/>
+        <property name="personPosition" view="_minimal"/>
+        <property name="companyDepartment" view="_minimal"/>
+        <property name="fileImageFace" view="_minimal"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
+    </view>
+    <view entity="hunttech_Position" name="position-view" extends="_local">
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-view" extends="_local" systemProperties="true"
+          overwrite="true">
+        <property name="grade" view="_local"/>
+        <property name="cityPosition" view="_local"/>
+        <property name="positionType" view="_local">
+        </property>
+        <property name="skillsList" view="skillTree-openPosition-tab-view"/>
+        <property name="parentOpenPosition" view="_local">
+        </property>
+        <property name="cities" view="_local"/>
+        <property name="owner" view="_local"/>
+        <property name="projectName" view="_local">
+            <property name="projectDepartment" view="_local">
+                <property name="companyName" view="_local"/>
+            </property>
+            <property name="projectLogo" view="_local"/>
+            <property name="projectOwner" view="person-owner-view"/>
+        </property>
+        <property name="openPositionComments" view="_local">
+            <property name="user" view="_local">
+                <property name="fileImageFace" view="_local"/>
+            </property>
+            <property name="openPosition" view="_local"/>
+        </property>
+    </view>
+    <view entity="hunttech_JobCandidate" name="JobCandidate-person-position" extends="_local">
+        <property name="currentCompany" view="_local"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
+        <property name="iteractionList" view="_minimal">
+            <property name="addType"/>
+            <property name="addDate"/>
+            <property name="addString"/>
+        </property>
+        <property name="positionList" view="_minimal"/>
+        <property name="personPosition" view="_local"/>
+    </view>
+    <view entity="hunttech_JobCandidate" name="jobCandidate-view" extends="_local" systemProperties="true"
+          overwrite="true">
+        <property name="laborAgreement" view="_local"/>
+        <property name="socialNetwork" view="_local"/>
+        <property name="candidateCv" view="_local">
+            <property name="candidate" view="_minimal"/>
+            <property name="resumePosition" view="_minimal"/>
+            <property name="toVacancy" view="_minimal"/>
+            <property name="owner" view="_minimal"/>
+            <property name="fileCV" view="_minimal"/>
+            <property name="someFiles" view="_local">
+                <property name="candidateCV" view="_local"/>
+                <property name="fileDescriptor" view="_local"/>
+                <property name="fileOwner" view="_local"/>
+                <property name="fileType" view="_local"/>
+            </property>
+            <property name="fileImageFace" view="_minimal"/>
+        </property>
+        <property name="skillTree" view="_local"/>
+        <property name="fileImageFace" view="_local"/>
+        <property name="personPosition" view="_local"/>
+        <property name="positionList" view="_local">
+            <property name="positionList" view="_local"/>
+        </property>
+        <property name="currentCompany" view="_local"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
+        <property name="iteractionList" view="_local">
+            <property name="vacancy" view="_local">
+                <property name="owner" view="_local"/>
+                <property name="grade" view="_minimal"/>
+                <property name="projectName" view="_local">
+                    <property name="projectLogo" view="_local"/>
+                </property>
+            </property>
+            <property name="candidate" view="_local">
+                <property name="personPosition" view="_local"/>
+            </property>
+            <property name="recrutier" view="_local">
+                <property name="group" view="_local"/>
+            </property>
+            <property name="iteractionType" view="_local"/>
+        </property>
+    </view>
+    <view entity="hunttech_SocialNetworkURLs" name="socialNetworkURLs-view" extends="_local">
+        <property name="socialNetworkURL" view="_minimal">
+            <property name="socialNetworkURL"/>
+            <property name="comment"/>
+        </property>
+        <property name="jobCandidate" view="_minimal"/>
+    </view>
+    <view entity="hunttech_SkillTree" name="skillTree-picker-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="prioritySkill"/>
+    </view>
+    <view entity="hunttech_SkillTree" name="skillTree-browse-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+        <property name="specialisation" view="specialisation-picker-view"/>
+        <property name="wikiPage"/>
+        <property name="prioritySkill"/>
+    </view>
+    <view entity="hunttech_SkillTree" name="skillTree-edit-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="wikiPage"/>
+        <property name="styleHighlighting"/>
+        <property name="notParsing"/>
+        <property name="prioritySkill"/>
+        <property name="comment"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+        <property name="specialisation" view="specialisation-picker-view"/>
+        <property name="fileImageLogo" view="_minimal"/>
+    </view>
+    <view entity="hunttech_SkillTree" name="skillTree-parser-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="notParsing"/>
+        <property name="skillTree" view="skillTree-picker-view">
+            <property name="skillName"/>
+            <property name="notParsing"/>
+        </property>
+    </view>
+    <view entity="hunttech_SkillTree" name="skillTree-browse-check-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="comment"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+    </view>
+    <view entity="hunttech_SkillTree" name="skillTree-filter-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="comment"/>
+        <property name="notParsing"/>
+        <property name="prioritySkill"/>
+        <property name="styleHighlighting"/>
+        <property name="wikiPage"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+        <property name="specialisation" view="specialisation-picker-view"/>
+        <property name="fileImageLogo" view="_minimal"/>
+        <property name="openPosition" view="_minimal"/>
+    </view>
+    <view entity="hunttech_SkillTree" name="skillTree-cv-tab-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="wikiPage"/>
+        <property name="comment"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+        <property name="specialisation" view="specialisation-picker-view"/>
+    </view>
+    <view entity="hunttech_SkillTree" name="skillTree-openPosition-tab-view" extends="_minimal">
+        <property name="skillName"/>
+        <property name="wikiPage"/>
+        <property name="comment"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+        <property name="specialisation" view="specialisation-picker-view"/>
+        <property name="fileImageLogo" view="_minimal"/>
+    </view>
+    <view entity="hunttech_SkillTree" name="skillTree-view" extends="_local">
+        <property name="skillTree" view="_minimal">
+            <property name="fileImageLogo" view="_local"/>
+            <property name="comment"/>
+            <property name="wikiPage"/>
+            <property name="specialisation" view="_local"/>
+            <property name="styleHighlighting"/>
+            <property name="notParsing"/>
+            <property name="prioritySkill"/>
+        </property>
+        <property name="openPosition" view="_local"/>
+        <property name="candidates" view="_local">
+            <property name="currentCompany" view="_local"/>
+            <property name="personPosition" view="_local"/>
+            <property name="cityOfResidence" view="city-picker-view"/>
+            <property name="iteractionList" view="_local"/>
+            <property name="specialisation" view="_local"/>
+            <property name="jobHistory" view="_local"/>
+            <property name="socialNetwork" view="_local"/>
+            <property name="candidateCv" view="_local"/>
+            <property name="skillTree" view="_local">
+                <property name="skillTree" view="_local"/>
+            </property>
+        </property>
+        <property name="specialisation" view="_local"/>
+        <property name="fileImageLogo" view="_local"/>
+    </view>
+    <view entity="hunttech_Specialisation" name="specialisation-picker-view" extends="_minimal">
+        <property name="specRuName"/>
+    </view>
+    <view entity="hunttech_Specialisation" name="specialisation-view" extends="_local">
+    </view>
+    <view entity="hunttech_JobHistory" name="jobHistory-view" extends="_local">
+        <property name="candidate" view="_local">
+            <property name="personPosition" view="_local"/>
+        </property>
+        <property name="currentPosition" view="_local"/>
+        <property name="currentCompany" view="_local"/>
+    </view>
+    <view entity="hunttech_City" name="city-browse-view" extends="_minimal">
+        <property name="cityRuName"/>
+        <property name="cityPhoneCode"/>
+        <property name="cityRegion" view="region-picker-view"/>
+    </view>
+    <view entity="hunttech_City" name="city-edit-view" extends="_minimal">
+        <property name="cityRuName"/>
+        <property name="cityPhoneCode"/>
+        <property name="cityRegion" view="region-picker-view"/>
+    </view>
+    <view entity="hunttech_City" name="city-picker-view" extends="_minimal">
+        <property name="cityRuName"/>
+        <property name="cityPhoneCode"/>
+    </view>
+    <view entity="hunttech_City" name="city-location-view" extends="_minimal">
+        <property name="cityRuName"/>
+        <property name="cityRegion" view="region-browse-view"/>
+    </view>
+    <view entity="hunttech_City" name="city-view" extends="_local">
+        <property name="cityRegion" view="region-picker-view"/>
+        <property name="openPosition" view="_minimal"/>
+    </view>
+    <view entity="hunttech_Company" name="company-browse-view" extends="_minimal">
+        <property name="comanyName"/>
+        <property name="companyShortName"/>
+        <property name="ourClient"/>
+        <property name="ourLegalEntity"/>
+        <property name="companyGroup" view="companyGroup-picker-view"/>
+        <property name="cityOfCompany" view="city-picker-view"/>
+        <property name="regionOfCompany" view="region-picker-view"/>
+        <property name="countryOfCompany" view="country-picker-view"/>
+        <property name="fileCompanyLogo" view="_minimal"/>
+        <property name="companyOwnership" view="_minimal"/>
+        <property name="companyDirector" view="person-picker-view"/>
+    </view>
+    <view entity="hunttech_Company" name="company-edit-view" extends="_minimal">
+        <property name="comanyName"/>
+        <property name="companyShortName"/>
+        <property name="ourClient"/>
+        <property name="ourLegalEntity"/>
+        <property name="companyGroup" view="companyGroup-picker-view"/>
+        <property name="companyOwnership" view="_minimal"/>
+        <property name="companyDirector" view="person-picker-view"/>
+        <property name="cityOfCompany" view="city-location-view"/>
+        <property name="regionOfCompany" view="region-browse-view"/>
+        <property name="countryOfCompany" view="country-picker-view"/>
+        <property name="fileCompanyLogo" view="_minimal"/>
+        <property name="departmentOfCompany" view="companyDepartament-department-child-view"/>
+    </view>
+    <view entity="hunttech_Company" name="company-picker-view" extends="_minimal">
+        <property name="comanyName"/>
+        <property name="companyShortName"/>
+        <property name="ourClient"/>
+        <property name="ourLegalEntity"/>
+        <property name="fileCompanyLogo" view="_minimal"/>
+    </view>
+    <view entity="hunttech_Company" name="company-view" extends="_local">
+        <property name="companyOwnership" view="_minimal"/>
+        <property name="departmentOfCompany" view="companyDepartament-department-child-view"/>
+        <property name="cityOfCompany" view="city-picker-view"/>
+        <property name="regionOfCompany" view="region-picker-view"/>
+        <property name="countryOfCompany" view="country-picker-view"/>
+        <property name="fileCompanyLogo" view="_minimal"/>
+        <property name="companyDirector" view="person-picker-view"/>
+        <property name="companyGroup" view="companyGroup-picker-view"/>
+    </view>
+    <view entity="hunttech_CandidateCV" name="candidateCV-view" extends="_local">
+        <property name="resumePosition" view="_minimal"/>
+        <property name="toVacancy" view="_minimal">
+            <property name="positionType" view="_local"/>
+            <property name="projectName" view="_local"/>
+        </property>
+        <property name="owner" view="_minimal">
+        </property>
+        <property name="fileCV" view="_minimal">
+        </property>
+        <property name="originalFileCV" view="_minimal">
+        </property>
+        <property name="someFiles" view="_local">
+            <property name="candidateCV" view="_local">
+                <property name="candidate" view="_local"/>
+            </property>
+        </property>
+        <property name="fileImageFace" view="_minimal"/>
+        <property name="skillTree" view="skillTree-picker-view"/>
+        <property name="candidate" view="_minimal">
+        </property>
+    </view>
+    <view entity="hunttech_Iteraction" name="iteraction-browse-view" extends="_minimal">
+        <property name="number"/>
+        <property name="iterationName"/>
+        <property name="iteractionTree" view="_minimal">
+            <property name="number"/>
+            <property name="iterationName"/>
+        </property>
+        <property name="mandatoryIteraction"/>
+        <property name="callButtonText"/>
+        <property name="callClass"/>
+    </view>
+    <view entity="hunttech_Iteraction" name="iteraction-tree-browse-view" extends="_minimal">
+        <property name="number"/>
+        <property name="iterationName"/>
+        <property name="mandatoryIteraction"/>
+        <property name="notificationType"/>
+        <property name="needSendLetter"/>
+        <property name="needSendMemo"/>
+        <property name="iteractionTree" view="_minimal">
+            <property name="number"/>
+            <property name="iterationName"/>
+        </property>
+    </view>
+    <view entity="hunttech_Iteraction" name="iteraction-picker-view" extends="_minimal">
+        <property name="number"/>
+        <property name="iterationName"/>
+    </view>
+    <view entity="hunttech_Iteraction" name="iteraction-list-type-view" extends="_minimal">
+        <property name="number"/>
+        <property name="iterationName"/>
+        <property name="pic"/>
+        <property name="outstaffingSign"/>
+        <property name="addFlag"/>
+        <property name="addType"/>
+        <property name="addCaption"/>
+        <property name="addField"/>
+        <property name="callForm"/>
+        <property name="callButtonText"/>
+        <property name="callClass"/>
+        <property name="findToDic"/>
+        <property name="setDateTime"/>
+        <property name="signComment"/>
+        <property name="needSendLetter"/>
+        <property name="signStartProject"/>
+        <property name="signEndProject"/>
+        <property name="signPriorityNews"/>
+        <property name="notificationNeedSend"/>
+        <property name="notificationType"/>
+        <property name="notificationWhenSend"/>
+        <property name="workStatus" view="employeeWorkStatus-view"/>
+    </view>
+    <view entity="hunttech_Iteraction" name="iteraction-edit-view" extends="_minimal">
+        <property name="number"/>
+        <property name="mandatoryIteraction"/>
+        <property name="iterationName"/>
+        <property name="staffInteractionStatus"/>
+        <property name="pic"/>
+        <property name="callButtonText"/>
+        <property name="callClass"/>
+        <property name="callForm"/>
+        <property name="addFlag"/>
+        <property name="setDateTime"/>
+        <property name="addType"/>
+        <property name="checkTrace"/>
+        <property name="addField"/>
+        <property name="addCaption"/>
+        <property name="calendarItem"/>
+        <property name="calendarItemStyle"/>
+        <property name="calendarItemDescription"/>
+        <property name="findToDic"/>
+        <property name="widgetChackJobCandidates"/>
+        <property name="needSendLetter"/>
+        <property name="needSendMemo"/>
+        <property name="signOurInterviewAssigned"/>
+        <property name="signOurInterview"/>
+        <property name="signClientInterview"/>
+        <property name="signSendToClient"/>
+        <property name="signPriorityNews"/>
+        <property name="signViewOnlyManager"/>
+        <property name="signComment"/>
+        <property name="signPersonalReserve"/>
+        <property name="signPersonalReserveDelete"/>
+        <property name="signPersonalReservePut"/>
+        <property name="signPersonalReserveRemove"/>
+        <property name="signStartCase"/>
+        <property name="signEndCase"/>
+        <property name="signFeedback"/>
+        <property name="signStartProject"/>
+        <property name="signEndProject"/>
+        <property name="signEndProcessVacancyClosed"/>
+        <property name="signEmailSend"/>
+        <property name="outstaffingSign"/>
+        <property name="notificationNeedSend"/>
+        <property name="notificationType"/>
+        <property name="notificationPeriodType"/>
+        <property name="notificationBeforeAfterDay"/>
+        <property name="notificationWhenSend"/>
+        <property name="statistics"/>
+        <property name="iteractionTree" view="iteraction-picker-view"/>
+        <property name="workStatus" view="employeeWorkStatus-view"/>
+    </view>
+    <view entity="hunttech_Iteraction" name="iteraction-view" extends="_base">
+        <property name="iteractionTree" view="_minimal">
+            <property name="mandatoryIteraction"/>
+            <property name="iteractionTree" view="_minimal">
+            </property>
+            <property name="pic"/>
+            <property name="callButtonText"/>
+            <property name="callClass"/>
+            <property name="callForm"/>
+            <property name="addFlag"/>
+            <property name="addType"/>
+            <property name="addField"/>
+            <property name="addCaption"/>
+        </property>
+        <property name="workStatus" view="employeeWorkStatus-view"/>
+    </view>
+    <view entity="hunttech_IteractionList" name="iteractionList-browse-view" extends="_minimal">
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="rating"/>
+        <property name="currentOpenClose"/>
+        <property name="addDate"/>
+        <property name="addString"/>
+        <property name="addInteger"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+        </property>
+        <property name="iteractionType" view="_minimal">
+            <property name="number"/>
+            <property name="iterationName"/>
+            <property name="pic"/>
+            <property name="outstaffingSign"/>
+        </property>
+        <property name="recrutier" view="extUser-picker-view"/>
+        <property name="vacancy" view="_minimal">
+            <property name="vacansyID"/>
+            <property name="vacansyName"/>
+            <property name="openClose"/>
+            <property name="signDraft"/>
+            <property name="internalProject"/>
+            <property name="commandCandidate"/>
+            <property name="projectName" view="_minimal">
+                <property name="projectName"/>
+            </property>
+        </property>
+    </view>
+    <view entity="hunttech_IteractionList" name="iteractionList-edit-view" extends="_minimal">
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="communicationMethod"/>
+        <property name="addType"/>
+        <property name="addDate"/>
+        <property name="addString"/>
+        <property name="addInteger"/>
+        <property name="rating"/>
+        <property name="recrutierName"/>
+        <property name="currentPriority"/>
+        <property name="currentOpenClose"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+            <property name="firstName"/>
+            <property name="middleName"/>
+            <property name="secondName"/>
+            <property name="email"/>
+            <property name="status"/>
+            <property name="fileImageFace" view="_minimal"/>
+            <property name="personPosition" view="_minimal"/>
+            <property name="cityOfResidence" view="city-picker-view"/>
+        </property>
+        <property name="iteractionType" view="iteraction-list-type-view"/>
+        <property name="vacancy" view="openPosition-iteraction-list-picker-view"/>
+        <property name="recrutier" view="_minimal"/>
+        <property name="chainInteraction" view="_minimal"/>
+    </view>
+    <view entity="hunttech_IteractionList" name="iteractionList-simple-browse-view" extends="_minimal">
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="rating"/>
+        <property name="currentOpenClose"/>
+        <property name="addDate"/>
+        <property name="addString"/>
+        <property name="addInteger"/>
+        <property name="comment"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+            <property name="personPosition" view="_minimal"/>
+        </property>
+        <property name="iteractionType" view="_minimal">
+            <property name="iterationName"/>
+            <property name="pic"/>
+        </property>
+        <property name="recrutier" view="_minimal"/>
+        <property name="vacancy" view="_minimal">
+            <property name="vacansyName"/>
+            <property name="openClose"/>
+            <property name="projectName" view="_minimal">
+                <property name="projectName"/>
+                <property name="projectOwner" view="_minimal"/>
+                <property name="projectDepartment" view="_minimal">
+                    <property name="departamentRuName"/>
+                    <property name="companyName" view="_minimal">
+                        <property name="comanyName"/>
+                    </property>
+                </property>
+            </property>
+        </property>
+    </view>
+    <view entity="hunttech_IteractionList" name="iteractionList-picker-view" extends="_minimal">
+        <property name="numberIteraction"/>
+        <property name="dateIteraction"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+        </property>
+        <property name="iteractionType" view="_minimal">
+            <property name="iterationName"/>
+            <property name="signEmailSend"/>
+        </property>
+        <property name="recrutier" view="extUser-picker-view"/>
+    </view>
+    <view entity="hunttech_IteractionList" name="iteractionList-view" extends="_local" systemProperties="true">
+        <property name="vacancy" view="_local">
+            <property name="positionType" view="_local"/>
+            <property name="projectName" view="_local">
+                <property name="projectLogo" view="_local"/>
+                <property name="projectOwner" view="person-owner-view"/>
+            </property>
+            <property name="grade" view="_local"/>
+            <property name="owner" view="_local"/>
+            <property name="cityPosition" view="_local"/>
+            <property name="cities" view="_local"/>
+        </property>
+        <property name="iteractionType" view="iteraction-list-type-view"/>
+        <property name="recrutier" view="_local">
+            <property name="group" view="_local"/>
+            <property name="fileImageFace" view="_local"/>
+        </property>
+        <property name="candidate" view="_local">
+            <property name="personPosition" view="_local"/>
+            <property name="fileImageFace" view="_local"/>
+        </property>
+        <property name="chainInteraction" view="_minimal"/>
+    </view>
+    <view entity="hunttech_IteractionList" name="iteractionList-current-position" extends="_local"
+          systemProperties="true">
+        <property name="candidate" view="_local">
+            <property name="personPosition" view="_local"/>
+        </property>
+        <property name="vacancy" view="_local">
+        </property>
+        <property name="iteractionType" view="_local"/>
+        <property name="recrutier" view="_local"/>
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-candidate" extends="_local">
+        <property name="grade" view="_local"/>
+        <property name="projectName" view="_local">
+            <property name="projectDepartment" view="_local">
+                <property name="companyName" view="_local"/>
+            </property>
+        </property>
+        <property name="candidates" view="_local">
+            <property name="reacrutier" view="_minimal"/>
+            <property name="openPosition" view="_minimal"/>
+        </property>
+        <property name="positionType" view="_local">
+        </property>
+    </view>
+    <view entity="hunttech_Setup" name="setup-view" extends="_local"/>
+    <view entity="hunttech_IteractionList" name="iteractionList-job-candidate" extends="_local">
+        <property name="candidate" view="_local">
+            <property name="personPosition" view="_local"/>
+        </property>
+        <property name="vacancy" view="_local">
+            <property name="positionType" view="_local"/>
+        </property>
+        <property name="iteractionType" view="iteraction-list-type-view"/>
+        <property name="recrutier" view="extUser-picker-view"/>
+    </view>
+    <view entity="hunttech_Iteraction" name="iteraction-view-button" extends="_base">
+        <property name="iteractionTree" view="_minimal">
+            <property name="addFlag"/>
+            <property name="addType"/>
+            <property name="addField"/>
+            <property name="addCaption"/>
+        </property>
+    </view>
+    <view entity="hunttech_CandidateCV" name="candidateCV-view-Letter" extends="_local">
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+        </property>
+        <property name="resumePosition" view="_minimal"/>
+        <property name="toVacancy" view="_minimal"/>
+        <property name="owner" view="_minimal"/>
+        <property name="lintToCloudFile"/>
+        <property name="fileCV" view="_minimal">
+            <property name="name"/>
+            <property name="size"/>
+        </property>
+        <property name="originalFileCV" view="_minimal"/>
+    </view>
+    <view entity="hunttech_JobCandidate" name="jobCandidate-view-search" extends="_minimal">
+        <property name="currentCompany" view="_minimal"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
+        <property name="iteractionList" view="_minimal">
+            <property name="dateIteraction"/>
+            <property name="vacancy" view="_minimal"/>
+            <property name="iteractionType" view="_minimal"/>
+            <property name="recrutier" view="_minimal"/>
+            <property name="recrutierName"/>
+        </property>
+        <property name="specialisation" view="_minimal"/>
+        <property name="candidateCv" view="_minimal">
+            <property name="fileImageFace" view="_local"/>
+        </property>
+        <property name="fullName"/>
+    </view>
+    <view entity="hunttech_Company" name="company-view-search" extends="_minimal">
+        <property name="comanyName"/>
+        <property name="companyShortName"/>
+        <property name="ourClient"/>
+        <property name="ourLegalEntity"/>
+        <property name="departmentOfCompany" view="companyDepartament-department-child-view"/>
+        <property name="cityOfCompany" view="city-picker-view"/>
+        <property name="regionOfCompany" view="region-picker-view"/>
+        <property name="countryOfCompany" view="country-picker-view"/>
+    </view>
+    <view entity="hunttech_RecrutiesTasks" name="recrutiesTasks-view" extends="_minimal">
+        <property name="openPosition" view="_local">
+            <property name="projectName" view="_minimal"/>
+        </property>
+        <property name="createdBy"/>
+        <property name="planForPeriod"/>
+        <property name="startDate"/>
+        <property name="endDate"/>
+        <property name="subscribe"/>
+        <property name="closed"/>
+        <property name="reacrutier" view="extUser-recrutier-task-view"/>
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-rtasks-view" extends="_local">
+        <property name="projectName" view="_minimal">
+            <property name="projectDepartment" view="_minimal"/>
+        </property>
+        <property name="candidates" view="_minimal">
+            <property name="startDate"/>
+            <property name="endDate"/>
+        </property>
+        <property name="grade" view="_local"/>
+        <property name="cityPosition" view="_local"/>
+        <property name="cities" view="_local"/>
+        <property name="positionType" view="_local"/>
+        <property name="owner" view="_local"/>
+        <property name="laborAgreement" view="_local"/>
+        <property name="skillsList" view="_local"/>
+    </view>
+    <view entity="hunttech_SomeFiles" name="someFiles-view" extends="_local">
+        <property name="fileDescriptor" view="_local">
+        </property>
+        <property name="fileOwner" view="_local">
+            <property name="fileImageFace" view="_local"/>
+        </property>
+        <property name="fileType" view="_local">
+        </property>
+    </view>
+    <view entity="hunttech_FileType" name="fileType-view" extends="_local"/>
+    <view entity="hunttech_SocialNetworkType" name="socialNetworkType-view" extends="_local">
+        <property name="logo" view="_local"/>
+    </view>
+    <view entity="hunttech_SubscribeCandidateAction" name="subscribeCandidateAction-view" extends="_local">
+        <property name="candidate" view="_local"/>
+        <property name="subscriber" view="_local"/>
+    </view>
+    <view entity="hunttech_JobCandidate" name="jobCandidate-view-iteraction-list" extends="_minimal">
+        <property name="candidateCv" view="_local"/>
+        <property name="fullName"/>
+        <property name="iteractionList" view="_minimal">
+            <property name="vacancy" view="_minimal">
+                <property name="projectName" view="_minimal"/>
+            </property>
+        </property>
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-view-iteraction-list" extends="_local">
+        <property name="projectName" view="_minimal">
+            <property name="projectDepartment" view="_minimal">
+                <property name="companyName" view="_minimal"/>
+            </property>
+        </property>
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-iteraction-list-picker-view" extends="_minimal">
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+        <property name="priority"/>
+        <property name="signDraft"/>
+        <property name="closingDate"/>
+        <property name="outstaffingCost"/>
+        <property name="remoteWork"/>
+        <property name="comment"/>
+        <property name="salaryMin"/>
+        <property name="salaryMax"/>
+        <property name="grade" view="grade-picker-view"/>
+        <property name="positionType" view="position-picker-view"/>
+        <property name="owner" view="_minimal"/>
+        <property name="cityPosition" view="city-picker-view"/>
+        <property name="cities" view="city-picker-view"/>
+        <property name="projectName" view="_minimal">
+            <property name="projectName"/>
+            <property name="projectLogo"/>
+            <property name="projectTree" view="_minimal"/>
+            <property name="projectOwner" view="_minimal"/>
+            <property name="projectDepartment" view="_minimal">
+                <property name="departamentRuName"/>
+                <property name="companyName" view="_minimal">
+                    <property name="companyShortName"/>
+                    <property name="comanyName"/>
+                    <property name="fileCompanyLogo"/>
+                </property>
+            </property>
+        </property>
+    </view>
+    <view entity="hunttech_ItearctionRequirements" name="itearctionRequirements-view" extends="_local">
+        <property name="iteraction" view="_local"/>
+        <property name="iteractionRequirement" view="_local"/>
+    </view>
+    <view entity="hunttech_LaborAgeementType" name="laborAgeementType-picker-view" extends="_minimal">
+        <property name="nameAgreement"/>
+    </view>
+    <view entity="hunttech_LaborAgreement" name="laborAgreement-openPosition-tab-view" extends="_minimal">
+        <property name="perhaps"/>
+        <property name="company" view="company-picker-view"/>
+        <property name="laborAgreementType" view="laborAgeementType-picker-view"/>
+    </view>
+    <view entity="hunttech_LaborAgreement" name="laborAgreement-view" extends="_local">
+        <property name="laborAgreementType" view="_local"/>
+        <property name="openPositions" view="_local">
+            <property name="grade" view="_local"/>
+            <property name="cityPosition" view="_local"/>
+            <property name="cities" view="_local"/>
+            <property name="positionType" view="_local"/>
+            <property name="projectName" view="_local">
+                <property name="projectLogo" view="_local"/>
+                <property name="projectTree" view="_local"/>
+            </property>
+        </property>
+        <property name="company" view="company-picker-view"/>
+        <property name="jobCandidate" view="_local">
+            <property name="personPosition" view="_local"/>
+            <property name="currentCompany" view="_local"/>
+            <property name="cityOfResidence" view="city-picker-view"/>
+            <property name="fileImageFace" view="_local"/>
+        </property>
+        <property name="additionalLaborAgreement" view="_local"/>
+        <property name="legalEntityEmployee" view="_local"/>
+        <property name="customerCompany" view="_local"/>
+        <property name="legalEntityFrom" view="_local"/>
+        <property name="fileAgreement" view="_local"/>
+        <property name="someFilesAgreement" view="_local"/>
+    </view>
+    <view entity="hunttech_LaborAgeementType" name="laborAgeementType-view" extends="_local"/>
+    <view entity="hunttech_ExtUser" name="extUser-view" extends="_local">
+        <property name="officialPhoto" view="_local"/>
+        <property name="userAvatar" view="_local"/>
+        <property name="fileImageFace" view="_local"/>
+        <property name="substitutions" view="_local">
+            <property name="substitutedUser" view="_local"/>
+        </property>
+        <property name="group" view="_local"/>
+        <property name="userRoles" view="_local">
+            <property name="role" view="_local"/>
+            <property name="user" view="_local"/>
+        </property>
+    </view>
+    <view entity="hunttech_Interview" name="interview-view" extends="_minimal">
+        <property name="candidate" view="_minimal">
+            <property name="personPosition">
+                <property name="positionRuName"/>
+                <property name="positionEnName"/>
+            </property>
+        </property>
+        <property name="candidateCV" view="_minimal"/>
+        <property name="openPositions" view="_minimal"/>
+        <property name="recrutier" view="_minimal"/>
+        <property name="researcher" view="_minimal"/>
+    </view>
+    <view entity="hunttech_OpenPositionNews" name="openPositionNews-view" extends="_local">
+        <property name="openPosition" view="_minimal">
+            <property name="projectName" view="_local">
+                <property name="projectDepartment" view="_local">
+                    <property name="companyName" view="_local"/>
+                </property>
+            </property>
+        </property>
+        <property name="candidates" view="_minimal"/>
+        <property name="author" view="_minimal"/>
+    </view>
+    <view entity="hunttech_StaffingTable" name="staffingTable-view" extends="_local">
+        <property name="openPosition" view="_local">
+            <property name="grade" view="_local"/>
+        </property>
+    </view>
+    <view entity="hunttech_StaffCurrent" name="staffCurrent-view" extends="_local">
+        <property name="staffingTable" view="_local"/>
+    </view>
+    <view entity="hunttech_ApplicationRecruitmentList" name="applicationRecruitmentList-view" extends="_local">
+        <property name="applicationRecruitment" view="_local"/>
+        <property name="recruiter" view="_local">
+            <property name="userAvatar" view="_minimal"/>
+            <property name="officialPhoto" view="_minimal"/>
+            <property name="fileImageFace" view="_minimal"/>
+        </property>
+    </view>
+    <view entity="hunttech_ApplicationRecruitment" name="applicationRecruitment-view" extends="_local">
+        <property name="staffingTable" view="_local"/>
+        <property name="applicationRecruitmentList" view="_local"/>
+    </view>
+    <view entity="hunttech_Grade" name="grade-view" extends="_local"/>
+    <view entity="hunttech_PersonelReserve" name="personelReserve-view" extends="_local">
+        <property name="jobCandidate" view="jobCandidate-view"/>
+        <property name="recruter" view="_local"/>
+        <property name="personPosition" view="_local"/>
+        <property name="openPosition" view="_local"/>
+    </view>
+    <view entity="hunttech_SkillsFilterLastSelection" name="skillsFilterLastSelection-view" extends="_local">
+        <property name="position" view="_local"/>
+        <property name="city" view="_local"/>
+        <property name="openPosition" view="_local"/>
+        <property name="jobCandidates" view="_local"/>
+        <property name="user" view="_local"/>
+    </view>
+    <view entity="hunttech_InternalEmailerTemplate" name="internalEmailerTemplate-view" extends="_local">
+        <property name="emailTemplate" view="_local">
+            <property name="templateOpenPosition" view="_local">
+                <property name="grade" view="_local"/>
+            </property>
+            <property name="templatePosition" view="_local"/>
+            <property name="templateAuthor" view="_local"/>
+        </property>
+        <property name="fromEmail" view="_local"/>
+        <property name="toEmail" view="_local">
+            <property name="fileImageFace" view="_local"/>
+        </property>
+    </view>
+    <view entity="hunttech_InternalEmailer" name="internalEmailer-view" extends="_local">
+        <property name="fromEmail" view="_minimal">
+            <property name="userAvatar" view="_minimal"/>
+            <property name="officialPhoto" view="_minimal"/>
+            <property name="fileImageFace" view="_minimal"/>
+        </property>
+        <property name="toEmail" view="_minimal">
+            <property name="fileImageFace" view="_local"/>
+        </property>
+    </view>
+    <view entity="hunttech_InternalEmailTemplate" name="internalEmailTemplate-view" extends="_local">
+        <property name="templateOpenPosition" view="_local">
+            <property name="grade" view="_local"/>
+        </property>
+        <property name="templatePosition" view="_local"/>
+        <property name="templateAuthor" view="_local"/>
+    </view>
+    <view entity="hunttech_UserSettings" name="userSettings-view" extends="_local">
+        <property name="user" view="_local"/>
+        <property name="fileImageFace" view="_local"/>
+    </view>
+    <view entity="hunttech_Currency" name="currency-view" extends="_local"/>
+    <view entity="hunttech_OutstaffingRates" name="outstaffingRates-view" extends="_local">
+        <property name="currency" view="_local"/>
+    </view>
+    <view entity="hunttech_OpenPositionComment" name="openPositionComment-view" extends="_local">
+        <property name="openPosition" view="_local"/>
+        <property name="user" view="_local"/>
+    </view>
+    <view entity="hunttech_CompanyGroup" name="companyGroup-browse-view" extends="_minimal">
+        <property name="companyRuGroupName"/>
+    </view>
+    <view entity="hunttech_CompanyGroup" name="companyGroup-edit-view" extends="_minimal">
+        <property name="companyRuGroupName"/>
+    </view>
+    <view entity="hunttech_CompanyGroup" name="companyGroup-picker-view" extends="_minimal">
+        <property name="companyRuGroupName"/>
+    </view>
+    <view entity="hunttech_CompanyGroup" name="companyGroup-view" extends="_local">
+        <property name="company" view="company-picker-view"/>
+    </view>
+    <view entity="hunttech_SomeFilesAgreement" name="someFilesAgreement-view" extends="_local">
+        <property name="laborAgreement" view="_local"/>
+        <property name="fileDescriptor" view="_local"/>
+        <property name="fileOwner" view="_local"/>
+        <property name="fileType" view="_local"/>
+    </view>
+    <view entity="hunttech_SomeFilesCandidateCV" name="someFilesCandidateCV-view" extends="_local">
+        <property name="candidateCV" view="_local">
+            <property name="candidate" view="_local"/>
+            <property name="resumePosition" view="_local"/>
+            <property name="toVacancy" view="_local"/>
+            <property name="owner" view="_local"/>
+            <property name="lintToCloudFile"/>
+            <property name="fileCV" view="_local"/>
+            <property name="originalFileCV" view="_local"/>
+            <property name="someFiles" view="_local"/>
+            <property name="skillTree" view="_local"/>
+            <property name="fileImageFace" view="_local"/>
+        </property>
+        <property name="fileDescriptor" view="_local"/>
+        <property name="fileOwner" view="_local"/>
+        <property name="fileType" view="_local"/>
+    </view>
+    <view entity="hunttech_SomeFilesOpenPosition" name="someFilesOpenPosition-view" extends="_local">
+        <property name="openPosition" view="_local"/>
+        <property name="fileDescriptor" view="_local"/>
+        <property name="fileOwner" view="_local">
+            <property name="fileImageFace" view="_local"/>
+        </property>
+        <property name="fileType" view="_local"/>
+    </view>
+    <view entity="hunttech_Employee" name="employee-view" extends="_base">
+        <property name="laborAgreement" view="_base"/>
+        <property name="workStatus" view="_local"/>
+        <property name="currency" view="_local"/>
+    </view>
+    <view entity="hunttech_EmployeeWorkStatus" name="employeeWorkStatus-view" extends="_local"/>
+    <view entity="hunttech_MyActiveCandidateExclude" name="myActiveCandidateExclude-view" extends="_local">
+        <property name="jobCandidate" view="_local">
+            <property name="fileImageFace" view="_local"/>
+            <property name="personPosition" view="_local"/>
+            <property name="iteractionList" view="_local">
+                <property name="iteractionType" view="_local"/>
+                <property name="vacancy" view="_local"/>
+            </property>
+        </property>
+        <property name="openPosition" view="_local"/>
+        <property name="user" view="_local"/>
+    </view>
+    <view entity="hunttech_SignIcons" name="signIcons-view" extends="_local"/>
+    <view entity="hunttech_JobCandidateSignIcon" name="jobCandidateSignIcon-view" extends="_minimal">
+        <property name="jobCandidate" view="_minimal"/>
+        <property name="signIcon" view="_local"/>
+        <property name="user" view="_minimal"/>
+    </view>
+    <view entity="hunttech_InternalEmailTemplateInteraction" name="internalEmailTemplateInteraction-view"
+          extends="_local">
+        <property name="interaction" view="_local"/>
+        <property name="templateAuthor" view="_local"/>
+    </view>
+    <view entity="hunttech_ApplicationSetup" name="applicationSetup-view" extends="_local">
+        <property name="applicationLogo" view="_local"/>
+        <property name="applicationIcon" view="_local"/>
+    </view>
+    <view entity="hunttech_UserAiConfiguration" name="userAiConfiguration-view" extends="_local">
+        <property name="user" view="_minimal"/>
+    </view>
+    <view entity="hunttech_UserAiConfiguration" name="userAiConfiguration-browse-view">
+        <property name="providerCode"/>
+        <property name="defaultModelName"/>
+        <property name="isActive"/>
+        <property name="user" view="_minimal"/>
+    </view>
+    <view entity="hunttech_UserAiConfiguration" name="userAiConfiguration-edit-view" extends="_local">
+        <property name="user" view="_minimal"/>
+    </view>
+    <view entity="hunttech_VacancyPromptTemplate" name="vacancyPromptTemplate-view" extends="_local"/>
+    <view entity="hunttech_VacancyPromptTemplate" name="vacancyPromptTemplate-browse-view">
+        <property name="code"/>
+        <property name="name"/>
+        <property name="temperature"/>
+    </view>
+    <view entity="hunttech_VacancyPromptTemplate" name="vacancyPromptTemplate-edit-view" extends="_local"/>
+</views>

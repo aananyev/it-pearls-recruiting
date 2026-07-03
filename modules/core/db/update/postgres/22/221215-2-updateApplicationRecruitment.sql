@@ -1,1 +1,1 @@
-alter table ITPEARLS_APPLICATION_RECRUITMENT add column CODE varchar(80) ;
+alter table HUNTTECH_APPLICATION_RECRUITMENT add column CODE varchar(80) ;

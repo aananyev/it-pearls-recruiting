@@ -1,1 +1,1 @@
-drop index IDX_ITPEARLS_COMPANY_NAME ;
+drop index IDX_HUNTTECH_COMPANY_NAME ;

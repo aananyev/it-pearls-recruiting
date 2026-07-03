@@ -1,4 +1,4 @@
-create table ITPEARLS_CURRENCY (
+create table HUNTTECH_CURRENCY (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

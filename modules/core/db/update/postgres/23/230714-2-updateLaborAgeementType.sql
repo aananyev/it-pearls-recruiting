@@ -1,1 +1,1 @@
-alter table ITPEARLS_LABOR_AGEEMENT_TYPE add column EMPLOYEE_ORCOMPANY boolean ;
+alter table HUNTTECH_LABOR_AGEEMENT_TYPE add column EMPLOYEE_ORCOMPANY boolean ;

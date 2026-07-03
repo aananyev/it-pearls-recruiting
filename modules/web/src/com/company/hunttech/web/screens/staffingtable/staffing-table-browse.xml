@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://staffingTableBrowse.caption"
+        focusComponent="staffingTablesTable"
+        messagesPack="com.company.hunttech.web.screens.staffingtable">
+    <data readOnly="true">
+        <collection id="staffingTablesDc"
+                    class="com.company.hunttech.entity.StaffingTable">
+            <view extends="_local">
+                <property name="openPosition" view="_local">
+                    <property name="projectName" view="_local">
+                        <property name="projectDepartment" view="_local">
+                            <property name="companyName" view="_local"/>
+                        </property>
+                    </property>
+                </property>
+                <property name="grade" view="_local"/>
+            </view>
+            <loader id="staffingTablesDl">
+                <query>
+                    <![CDATA[select e from hunttech_StaffingTable e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="staffingTablesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="staffingTablesTable"
+                dataLoader="staffingTablesDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="staffingTablesTable"
+                    width="100%"
+                    editable="true"
+                    dataContainer="staffingTablesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <group>
+                    <column id="openPosition.projectName.projectDepartment"/>
+                </group>
+                <column id="code"
+                        editable="true"
+                        width="150px"/>
+                <column id="active"
+                        editable="true"
+                        width="50px"/>
+                <column id="openPosition"
+                        width="600px"/>
+                <column id="grade"
+                        editable="true"
+                        width="150px"/>
+                <column id="numberOfStaff"
+                        editable="true"
+                        width="50px"/>
+                <column id="salaryMin"
+                        editable="true"
+                        width="150px"/>
+                <column id="salaryMax"
+                        editable="true"
+                        width="150px"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="staffingTablesTable.create"/>
+                <button id="editBtn"
+                        action="staffingTablesTable.edit"/>
+                <button id="removeBtn"
+                        action="staffingTablesTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

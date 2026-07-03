@@ -1,4 +1,4 @@
-create table ITPEARLS_INTERNAL_EMAIL_TEMPLATE (
+create table HUNTTECH_INTERNAL_EMAIL_TEMPLATE (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

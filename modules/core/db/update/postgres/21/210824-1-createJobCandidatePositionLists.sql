@@ -1,4 +1,4 @@
-create table ITPEARLS_JOB_CANDIDATE_POSITION_LISTS (
+create table HUNTTECH_JOB_CANDIDATE_POSITION_LISTS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

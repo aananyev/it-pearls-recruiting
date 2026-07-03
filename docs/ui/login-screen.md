@@ -47,7 +47,7 @@ Lifecycle: `onAppLoginScreenInit`, `onBeforeShow`, `onSubmit` → `login()` ба
 | Платформа | CUBA Platform **7.3-SNAPSHOT** (`build.gradle`) |
 | UI-стек | Vaadin 8 (Web Client) |
 | Базовый класс | `com.haulmont.cuba.web.app.login.LoginScreen` |
-| Контроллер проекта | `com.company.itpearls.web.login.AppLoginScreen` |
+| Контроллер проекта | `com.company.hunttech.web.login.AppLoginScreen` |
 | Дескриптор | `app-login-screen.xml` |
 | Идентификатор экрана | `loginBranded` (`@UiController("loginBranded")`) |
 | Активная тема | `hover` (`cuba.web.theme = hover` в `web-app.properties`) |
@@ -98,21 +98,21 @@ flowchart TD
 
 | Файл | Путь | Роль |
 |------|------|------|
-| XML-дескриптор | `modules/web/src/com/company/itpearls/web/login/app-login-screen.xml` | Разметка экрана входа |
-| Java-контроллер | `modules/web/src/com/company/itpearls/web/login/AppLoginScreen.java` | Логика инициализации, favicon, фон, вход |
+| XML-дескриптор | `modules/web/src/com/company/hunttech/web/login/app-login-screen.xml` | Разметка экрана входа |
+| Java-контроллер | `modules/web/src/com/company/hunttech/web/login/AppLoginScreen.java` | Логика инициализации, favicon, фон, вход |
 | Стили экрана | `modules/web/web/VAADIN/brand-login-screen/login.css` | CSS брендированного login-layout |
-| Основной message pack | `modules/web/src/com/company/itpearls/web/messages.properties` | `mainMsg://` — caption, welcome, logo, poweredBy |
-| RU message pack | `modules/web/src/com/company/itpearls/web/messages_ru.properties` | Локализация основного пакета |
-| Message pack экранов | `modules/web/src/com/company/itpearls/web/screens/messages.properties` | `msg://` — caption кнопки submit |
-| RU message pack экранов | `modules/web/src/com/company/itpearls/web/screens/messages_ru.properties` | RU-версия caption кнопки |
-| Web-конфигурация | `modules/web/src/com/company/itpearls/web-app.properties` | loginScreenId, theme, locales |
-| Core-конфигурация | `modules/core/src/com/company/itpearls/app.properties` | anonymousSessionId, таймауты сессии |
-| Favicon extension (Java) | `modules/web/src/com/company/itpearls/web/extension/ChangeFaviconExtension.java` | Смена favicon через JS |
-| Favicon extension (JS) | `modules/web/src/com/company/itpearls/web/extension/change-favicon.js` | Клиентская смена `<link rel="icon">` |
+| Основной message pack | `modules/web/src/com/company/hunttech/web/messages.properties` | `mainMsg://` — caption, welcome, logo, poweredBy |
+| RU message pack | `modules/web/src/com/company/hunttech/web/messages_ru.properties` | Локализация основного пакета |
+| Message pack экранов | `modules/web/src/com/company/hunttech/web/screens/messages.properties` | `msg://` — caption кнопки submit |
+| RU message pack экранов | `modules/web/src/com/company/hunttech/web/screens/messages_ru.properties` | RU-версия caption кнопки |
+| Web-конфигурация | `modules/web/src/com/company/hunttech/web-app.properties` | loginScreenId, theme, locales |
+| Core-конфигурация | `modules/core/src/com/company/hunttech/app.properties` | anonymousSessionId, таймауты сессии |
+| Favicon extension (Java) | `modules/web/src/com/company/hunttech/web/extension/ChangeFaviconExtension.java` | Смена favicon через JS |
+| Favicon extension (JS) | `modules/web/src/com/company/hunttech/web/extension/change-favicon.js` | Клиентская смена `<link rel="icon">` |
 | Ресурсы VAADIN | `modules/web/web/VAADIN/brand-login-screen/` | Изображения, CSS |
 | Логотип темы (login) | `modules/web/themes/hover/branding/app-icon-login.png` | Источник логотипа (`loginWindow.logoImage`) |
 | Favicon темы | `modules/web/themes/hover/favicon.ico` | Favicon по умолчанию на экране входа |
-| Расширение темы hover | `modules/web/themes/hover/com.company.itpearls/hover-ext.scss` | Доп. стили (в т.ч. `.c-login-layout-it-pearls`) |
+| Расширение темы hover | `modules/web/themes/hover/com.company.hunttech/hover-ext.scss` | Доп. стили (в т.ч. `.c-login-layout-HuntTech`) |
 | `main-message-pack.properties` | — | **не найдено в проекте** (используется `cuba.mainMessagePack`) |
 | `hunttech-modern.scss` | — | **не найдено в проекте** |
 | `hunttech-modern-defaults.scss` | — | **не найдено в проекте** |
@@ -122,9 +122,9 @@ flowchart TD
 
 ## 4.4 XML-структура
 
-Дескриптор: `modules/web/src/com/company/itpearls/web/login/app-login-screen.xml`
+Дескриптор: `modules/web/src/com/company/hunttech/web/login/app-login-screen.xml`
 
-Корневой элемент: `<window messagesPack="com.company.itpearls.web.screens" caption="mainMsg://loginWindow.caption">`
+Корневой элемент: `<window messagesPack="com.company.hunttech.web.screens" caption="mainMsg://loginWindow.caption">`
 
 ### Таблица компонентов
 
@@ -147,7 +147,7 @@ flowchart TD
 | `rememberMeCheckBox` | `checkBox` | stylename=`c-login-remember-me-checkbox`, caption=`mainMsg://loginWindow.rememberMe` | Чекбокс «Запомнить меня» |
 | `loginButton` | `button` | action=`submit`, stylename=`c-login-button primary huge`, width=`100%` | Кнопка входа на всю ширину карточки |
 | `bottomPanel` | `hbox` | stylename=`c-login-bottom-panel`, width=`100%`, margin, align=`MIDDLE_CENTER` | Нижняя панель: подпись + язык |
-| `poweredByLink` | `label` | align=`MIDDLE_LEFT`, htmlEnabled=`true`, stylename=`c-login-powered-by-link`, value=`mainMsg://itpearls.poweredBy` | HTML-блок «Разработано ООО Ханттек» |
+| `poweredByLink` | `label` | align=`MIDDLE_LEFT`, htmlEnabled=`true`, stylename=`c-login-powered-by-link`, value=`mainMsg://HuntTech.poweredBy` | HTML-блок «Разработано ООО Ханттек» |
 | `localesSelect` | `lookupField` | align=`MIDDLE_RIGHT`, stylename=`c-login-locales-select borderless`, nullOptionVisible=`false`, textInputAllowed=`false` | Выбор локали в нижней панели |
 | `backgroundImage` | `image` | stylename=`c-login-background`, scaleMode=`FILL` | Фоновое изображение; default path=`VAADIN/brand-login-screen/background-2023.jpg` |
 
@@ -155,7 +155,7 @@ flowchart TD
 
 ## 4.5 Java-контроллер AppLoginScreen
 
-Путь: `modules/web/src/com/company/itpearls/web/login/AppLoginScreen.java`
+Путь: `modules/web/src/com/company/hunttech/web/login/AppLoginScreen.java`
 
 ### Инъекции
 
@@ -252,7 +252,7 @@ sequenceDiagram
 
 ### Источник контента — message bundle
 
-Текст и разметка задаются ключом `itpearls.poweredBy` в основном message pack (`messages.properties` / `messages_ru.properties`), а не формируются в Java.
+Текст и разметка задаются ключом `HuntTech.poweredBy` в основном message pack (`messages.properties` / `messages_ru.properties`), а не формируются в Java.
 
 Компонент `poweredByLink` в XML:
 
@@ -260,10 +260,10 @@ sequenceDiagram
 <label id="poweredByLink"
        htmlEnabled="true"
        stylename="c-login-powered-by-link"
-       value="mainMsg://itpearls.poweredBy"/>
+       value="mainMsg://HuntTech.poweredBy"/>
 ```
 
-### Актуальное значение `itpearls.poweredBy`
+### Актуальное значение `HuntTech.poweredBy`
 
 ```html
 <span class="ht-powered-by">
@@ -346,15 +346,15 @@ protected void initBottomPanel() {
 
 ### Стили темы hover (SCSS)
 
-В `modules/web/themes/hover/com.company.itpearls/hover-ext.scss` определён селектор:
+В `modules/web/themes/hover/com.company.hunttech/hover-ext.scss` определён селектор:
 
 ```scss
-.c-login-layout-it-pearls .c-login-layout {
+.c-login-layout-HuntTech .c-login-layout {
     background: #ffab00;
 }
 ```
 
-Класс `c-login-layout-it-pearls` **не используется** в `app-login-screen.xml` (только `c-login-layout`), поэтому оранжевый фон из расширения темы на текущем экране **не применяется**.
+Класс `c-login-layout-HuntTech` **не используется** в `app-login-screen.xml` (только `c-login-layout`), поэтому оранжевый фон из расширения темы на текущем экране **не применяется**.
 
 ### Stylenames в XML (итого)
 
@@ -376,7 +376,7 @@ protected void initBottomPanel() {
 | `background.svg` | Присутствует, в коде экрана **не используется** |
 | `cuba-icon-login.svg` | Присутствует, в коде экрана **не используется** |
 | `cuba-icon-login.jpg` | Присутствует, в коде экрана **не используется** |
-| `IT-Pearls-Logo.jpg` | Присутствует, в коде экрана **не используется** |
+| `HuntTech-Logo.jpg` | Присутствует, в коде экрана **не используется** |
 | `backgroud.jpg` | Присутствует (опечатка в имени), в коде **не используется** |
 | `recruit1.jpg` … `recruit20.jpg` | Случайный фон в `initLoginImage()` |
 
@@ -397,8 +397,8 @@ protected void initBottomPanel() {
 
 | Префикс в XML | Пакет | Файл конфигурации |
 |---------------|-------|-------------------|
-| `mainMsg://` | `com.company.itpearls.web` | `cuba.mainMessagePack = +com.company.itpearls.web` |
-| `msg://` | `com.company.itpearls.web.screens` | `messagesPack` в XML-дескрипторе |
+| `mainMsg://` | `com.company.hunttech.web` | `cuba.mainMessagePack = +com.company.hunttech.web` |
+| `msg://` | `com.company.hunttech.web.screens` | `messagesPack` в XML-дескрипторе |
 
 Файл `main-message-pack.properties` — **не найден в проекте**. Роль основного пакета выполняет `cuba.mainMessagePack` в `web-app.properties`.
 
@@ -406,10 +406,10 @@ protected void initBottomPanel() {
 
 | Ключ | Пакет | EN/default (`messages.properties`) | RU (`messages_ru.properties`) |
 |------|-------|-----------------------------------|--------------------------------|
-| `loginWindow.caption` | main | `Вход IT Pearls` | *(не переопределён — наследуется)* |
+| `loginWindow.caption` | main | `Вход HuntTech` | *(не переопределён — наследуется)* |
 | `loginWindow.welcomeLabel` | main | `Добро пожаловать в HuntTECH!` | *(не переопределён)* |
 | `loginWindow.logoImage` | main | `branding/app-icon-login.png` | `branding/app-icon-login.png` |
-| `itpearls.poweredBy` | main | HTML с HuntTech / ООО Ханттек | идентично EN |
+| `HuntTech.poweredBy` | main | HTML с HuntTech / ООО Ханттек | идентично EN |
 | `loginWindow.okButton` | screens | `Регистрация` | `Регистрация` |
 
 ### Ключи из CUBA (не переопределены в проекте)
@@ -439,7 +439,7 @@ cuba.localeSelectVisible = true
 | Пароль | Поле `passwordField` типа `passwordField`; передаётся в middleware при `doLogin()` |
 | Remember Me | Чекбокс `rememberMeCheckBox`; логика cookies в базовом `LoginScreen.setRememberMeCookies()` |
 | HTML в нижней панели | `htmlEnabled="true"` на `poweredByLink`; контент из доверенного message bundle |
-| Внешние ссылки | `target="_blank" rel="noopener noreferrer"` в `itpearls.poweredBy` |
+| Внешние ссылки | `target="_blank" rel="noopener noreferrer"` в `HuntTech.poweredBy` |
 | Таймауты сессии | 900 сек (15 мин) для HTTP и user session в `app.properties` |
 | Brute force | `cuba.bruteForceProtection.enabled` не задан в проекте — действует default CUBA |
 | Favicon | Подмена через клиентский JS (`change-favicon.js`) без влияния на аутентификацию |
@@ -493,11 +493,11 @@ cuba.localeSelectVisible = true
 1. **Тема hunttech-modern** — при необходимости выделенного брендинга создать тему `hunttech-modern` или переименовать/расширить `hover`; сейчас стили login разбросаны между `login.css` и `hover-ext.scss`.
 2. **Caption кнопки** — значение `loginWindow.okButton=Регистрация` выглядит как ошибка для экрана входа; рассмотреть замену на «Войти» / «OK».
 3. **`initBottomPanel()`** — при `localeSelectVisible=true` метод неактивен; при необходимости центрирования панели с видимым селектором языка — вынести логику из условия.
-4. **Неиспользуемый SCSS** — класс `c-login-layout-it-pearls` не привязан к XML; либо добавить в `mainLayout`, либо удалить мёртвый код из тем.
+4. **Неиспользуемый SCSS** — класс `c-login-layout-HuntTech` не привязан к XML; либо добавить в `mainLayout`, либо удалить мёртвый код из тем.
 5. **Логотип из ApplicationSetup** — закомментированный код `initLogoImage()` с `applicationSetupService` позволяет динамический логотип компании; активировать при внедрении мультитенантного брендинга.
 6. **Дублирование `login.css`** — следить, чтобы единственный источник правды оставался в `VAADIN/brand-login-screen/login.css`.
 7. **Локализация `loginWindow.caption` и `welcomeLabel`** — добавить ключи в `messages_ru.properties` для полной RU/EN поддержки.
-8. **Очистка VAADIN** — удалить неиспользуемые ресурсы (`backgroud.jpg`, `IT-Pearls-Logo.jpg`, `cuba-icon-login.*`) или задокументировать их назначение.
+8. **Очистка VAADIN** — удалить неиспользуемые ресурсы (`backgroud.jpg`, `HuntTech-Logo.jpg`, `cuba-icon-login.*`) или задокументировать их назначение.
 
 ---
 

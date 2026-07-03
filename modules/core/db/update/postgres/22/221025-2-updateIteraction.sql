@@ -1,1 +1,1 @@
-alter table ITPEARLS_ITERACTION add column SIGN_OUR_INTERVIEW_ASSIGNED boolean ;
+alter table HUNTTECH_ITERACTION add column SIGN_OUR_INTERVIEW_ASSIGNED boolean ;

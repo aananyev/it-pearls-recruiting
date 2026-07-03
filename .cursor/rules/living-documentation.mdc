@@ -86,11 +86,11 @@ alwaysApply: true
 
 | Область кода | Путь в репозитории |
 |--------------|-------------------|
-| Entity, enums, metadata | `modules/global/src/com/company/itpearls/entity/` |
-| Views | `modules/global/src/com/company/itpearls/views.xml` |
-| Browse / Edit / View / Lookup | `modules/web/src/com/company/itpearls/web/screens/**` |
+| Entity, enums, metadata | `modules/global/src/com/company/hunttech/entity/` |
+| Views | `modules/global/src/com/company/hunttech/views.xml` |
+| Browse / Edit / View / Lookup | `modules/web/src/com/company/hunttech/web/screens/**` |
 | Фрагменты | `*Fragment.java`, `*-fragment.xml` в `modules/web/` |
-| Сервисы | `modules/core/src/com/company/itpearls/**/*ServiceBean.java` |
+| Сервисы | `modules/core/src/com/company/hunttech/**/*ServiceBean.java` |
 | Миграции / DDL | `modules/core/db/**` |
 
 → обновить `docs/entities/{EntityName}.md` в той же сессии.
@@ -140,10 +140,10 @@ alwaysApply: true
 
 ## Брендинг в документации
 
-Во всех файлах `docs/**/*.md` и `docs/templates/**` — **HRM HuntTech**, не «IT Pearls».
+Во всех файлах `docs/**/*.md` и `docs/templates/**` — **HRM HuntTech**, не «HuntTech».
 
-- Не использовать брендинг IT Pearls в prose, кроме цитирования legacy-идентификаторов из кода (`itpearls`, `ITPEARLS_*`, `IT-Pearls-Logo.jpg`, ключи messages и т.д.).
-- Варианты для замены: «IT Pearls», «IT-Pearls», «IT Pearls Recruiting», «компанией IT Pearls».
+- Не использовать брендинг HuntTech в prose, кроме цитирования legacy-идентификаторов из кода (`HuntTech`, `HUNTTECH_*`, `HuntTech-Logo.jpg`, ключи messages и т.д.).
+- Варианты для замены: «HuntTech», «HuntTech», «HuntTech Recruiting», «компанией HuntTech».
 
 ---
 

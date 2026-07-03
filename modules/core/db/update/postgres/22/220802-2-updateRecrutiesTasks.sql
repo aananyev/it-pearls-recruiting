@@ -1,1 +1,1 @@
-alter table ITPEARLS_RECRUTIES_TASKS add column CLOSED boolean ;
+alter table HUNTTECH_RECRUTIES_TASKS add column CLOSED boolean ;

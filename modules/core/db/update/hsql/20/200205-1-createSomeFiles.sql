@@ -1,4 +1,4 @@
-create table ITPEARLS_SOME_FILES (
+create table HUNTTECH_SOME_FILES (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,

@@ -1,4 +1,4 @@
-create table ITPEARLS_PERSON (
+create table HUNTTECH_PERSON (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,

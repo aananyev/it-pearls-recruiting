@@ -1,1 +1,1 @@
-alter table ITPEARLS_CANDIDATE_CV add column LETTEREN text ;
+alter table HUNTTECH_CANDIDATE_CV add column LETTEREN text ;

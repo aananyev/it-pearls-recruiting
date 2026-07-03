@@ -1,4 +1,4 @@
-create table ITPEARLS_ITERACTION_LIST (
+create table HUNTTECH_ITERACTION_LIST (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,

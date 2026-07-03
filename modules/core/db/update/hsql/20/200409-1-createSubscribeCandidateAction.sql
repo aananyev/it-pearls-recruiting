@@ -1,4 +1,4 @@
-create table ITPEARLS_SUBSCRIBE_CANDIDATE_ACTION (
+create table HUNTTECH_SUBSCRIBE_CANDIDATE_ACTION (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,

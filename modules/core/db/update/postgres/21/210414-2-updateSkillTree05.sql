@@ -1,1 +1,1 @@
-alter table ITPEARLS_SKILL_TREE add column FILE_IMAGE_LOGO uuid ;
+alter table HUNTTECH_SKILL_TREE add column FILE_IMAGE_LOGO uuid ;

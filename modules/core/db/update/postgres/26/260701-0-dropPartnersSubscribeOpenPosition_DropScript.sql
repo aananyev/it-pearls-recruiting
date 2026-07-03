@@ -1,1 +1,1 @@
-drop table if exists ITPEARLS_PARTNERS_SUBSCRIBE_OPEN_POSITION__U96422 cascade ;
+drop table if exists HUNTTECH_PARTNERS_SUBSCRIBE_OPEN_POSITION__U96422 cascade ;

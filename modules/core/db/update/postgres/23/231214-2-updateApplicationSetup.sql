@@ -1,1 +1,1 @@
-alter table ITPEARLS_APPLICATION_SETUP add column ACTIVE_SETUP boolean ;
+alter table HUNTTECH_APPLICATION_SETUP add column ACTIVE_SETUP boolean ;

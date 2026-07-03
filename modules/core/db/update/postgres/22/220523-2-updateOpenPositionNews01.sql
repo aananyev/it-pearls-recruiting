@@ -1,1 +1,1 @@
-alter table ITPEARLS_OPEN_POSITION_NEWS add column PRIORITY_NEWS boolean ;
+alter table HUNTTECH_OPEN_POSITION_NEWS add column PRIORITY_NEWS boolean ;

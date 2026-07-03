@@ -1,1 +1,1 @@
-drop table if exists ITPEARLS_RECRUTIES_TASKS_OPEN_POSITION_LINK__U72434 cascade ;
+drop table if exists HUNTTECH_RECRUTIES_TASKS_OPEN_POSITION_LINK__U72434 cascade ;

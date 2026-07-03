@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://browseCaption"
+        focusComponent="projectsTable"
+        messagesPack="com.company.hunttech.web.screens.project" icon="ARCHIVE">
+    <data readOnly="true">
+        <collection id="projectsDc"
+                    class="com.company.hunttech.entity.Project"
+                    view="project-browse-view">
+            <loader id="projectsDl">
+                <query>
+                    <![CDATA[select e from hunttech_Project e
+                            order by e.projectIsClosed desc, e.projectName]]>
+                    <condition>
+                        <and>
+                        <c:jpql>
+                            <c:where>
+                                e.projectIsClosed = :projectClosed
+                            </c:where>
+                        </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select f.projectName
+                                    from hunttech_OpenPosition f
+                                    where not (f.openClose = :withOpenPosition)
+                                        and f.projectName = e)</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="projectsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="projectsTable"
+                dataLoader="projectsDl">
+            <properties include=".*"
+                        excludeProperties="projectDescription,templateLetter,openPosition,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+        </filter>
+        <treeDataGrid id="projectsTable"
+                      width="100%"
+                      height="100%"
+                      bodyRowHeight="60px"
+                      hierarchyProperty="projectTree"
+                      dataContainer="projectsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="projectLogoColumn"
+                        resizable="true"
+                        collapsible="true"
+                        collapsed="false"
+                        caption=""
+                        width="100px"
+                        maximumWidth="100px">
+                    <componentRenderer/>
+                </column>
+                <column id="projectIsClosed"
+                        collapsible="true"
+                        collapsed="true"
+                        minimumWidth="400px"
+                        caption="msg://msgProjectIsClosed"
+                        property="projectIsClosed"/>
+                <column id="projectName"
+                        caption="msg://msgProjectName"
+                        property="projectName">
+                    <componentRenderer/>
+                </column>
+                <column id="startProjectDate"
+                        width="100px"
+                        caption="msg://msgProjectStartDate"
+                        property="startProjectDate"/>
+                <column id="endProjectDate"
+                        width="100px"
+                        caption="msg://msgProjectEndDate"
+                        property="endProjectDate"/>
+                <column id="projectDepartment" caption="msg://msgProjectDepartament" property="projectDepartment"/>
+                <column id="iconProjectDesc"
+                        caption="msg://msgIconCaption"
+                        collapsible="true"
+                        collapsed="true">
+                    <iconRenderer/>
+                </column>
+                <column id="openPositionsCountColumn"
+                        caption="msg://msgOpenPositionsCount"
+                        collapsible="true"
+                        collapsed="false">
+                    <componentRenderer/>
+                </column>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <label align="MIDDLE_LEFT" value="Hierarchy Column:"/>
+                <lookupField id="columnSelector"
+                             nullOptionVisible="false"
+                             textInputAllowed="false"/>
+                <button id="createBtn" action="projectsTable.create"/>
+                <button id="editBtn" action="projectsTable.edit"/>
+                <button id="removeBtn" action="projectsTable.remove"/>
+            </buttonsPanel>
+        </treeDataGrid>
+        <groupBox orientation="horizontal">
+            <checkBox id="onlyOpenProjectCheckBox"
+                      caption="msg://msgOnlyOpenedProject"/>
+            <checkBox id="withOpenPositionCheckBox"
+                      caption="msg://msgWithOpenPosition"/>
+        </groupBox>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

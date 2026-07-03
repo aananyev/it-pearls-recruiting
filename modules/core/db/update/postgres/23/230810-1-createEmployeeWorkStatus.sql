@@ -1,4 +1,4 @@
-create table ITPEARLS_EMPLOYEE_WORK_STATUS (
+create table HUNTTECH_EMPLOYEE_WORK_STATUS (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

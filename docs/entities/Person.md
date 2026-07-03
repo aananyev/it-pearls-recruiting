@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`itpearls_Person.browse`, `itpearls_Person.edit`; lookup в Project, OpenPosition (через projectOwner). UI Spec: [browse](../ui/itpearls_Person.browse_Spec.md), [edit](../ui/itpearls_Person.edit_Spec.md).
+`hunttech_Person.browse`, `hunttech_Person.edit`; lookup в Project, OpenPosition (через projectOwner). UI Spec: [browse](../ui/hunttech_Person.browse_Spec.md), [edit](../ui/hunttech_Person.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -25,9 +25,9 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.Person` |
-| **Имя в CUBA** | `itpearls_Person` |
-| **Таблица БД** | `ITPEARLS_PERSON` |
+| **Java-класс** | `com.company.hunttech.entity.Person` |
+| **Имя в CUBA** | `hunttech_Person` |
+| **Таблица БД** | `HUNTTECH_PERSON` |
 | **Тип данных** | справочник |
 | **Ожидаемый объём** | сотни — несколько тысяч записей |
 | **Критичность** | средняя — FK в Project, Company, CompanyDepartament; отдельный browse-экран |
@@ -50,14 +50,14 @@
 
 ```mermaid
 erDiagram
-    ITPEARLS_PERSON }o--o| ITPEARLS_POSITION : "personPosition"
-    ITPEARLS_PERSON }o--o| ITPEARLS_COUNTRY : "positionCountry"
-    ITPEARLS_PERSON }o--o| ITPEARLS_CITY : "cityOfResidence"
-    ITPEARLS_PERSON }o--o| ITPEARLS_COMPANY_DEPARTAMENT : "companyDepartment"
-    ITPEARLS_PERSON }o--o| SYS_FILE : "fileImageFace"
-    ITPEARLS_PROJECT }o--o| ITPEARLS_PERSON : "projectOwner"
-    ITPEARLS_COMPANY }o--o| ITPEARLS_PERSON : "companyDirector"
-    ITPEARLS_COMPANY_DEPARTAMENT }o--o| ITPEARLS_PERSON : "departamentDirector / departamentHrDirector"
+    HUNTTECH_PERSON }o--o| HUNTTECH_POSITION : "personPosition"
+    HUNTTECH_PERSON }o--o| HUNTTECH_COUNTRY : "positionCountry"
+    HUNTTECH_PERSON }o--o| HUNTTECH_CITY : "cityOfResidence"
+    HUNTTECH_PERSON }o--o| HUNTTECH_COMPANY_DEPARTAMENT : "companyDepartment"
+    HUNTTECH_PERSON }o--o| SYS_FILE : "fileImageFace"
+    HUNTTECH_PROJECT }o--o| HUNTTECH_PERSON : "projectOwner"
+    HUNTTECH_COMPANY }o--o| HUNTTECH_PERSON : "companyDirector"
+    HUNTTECH_COMPANY_DEPARTAMENT }o--o| HUNTTECH_PERSON : "departamentDirector / departamentHrDirector"
 ```
 
 ### 2.2 Исходящие связи (FK)
@@ -106,7 +106,7 @@ erDiagram
 
 ### 3.2 LOB
 
-**LOB-полей нет.** `fileImageFace` — FK на `SYS_FILE` (метаданные файла, не TOAST-колонка в `ITPEARLS_PERSON`).
+**LOB-полей нет.** `fileImageFace` — FK на `SYS_FILE` (метаданные файла, не TOAST-колонка в `HUNTTECH_PERSON`).
 
 ---
 
@@ -129,12 +129,12 @@ erDiagram
 
 ## 5. Экраны
 
-Каталог: `modules/web/src/com/company/itpearls/web/screens/person/`
+Каталог: `modules/web/src/com/company/hunttech/web/screens/person/`
 
 | Экран | Controller ID | Дескриптор | View |
 |-------|---------------|------------|------|
-| Browse | `itpearls_Person.browse` | `person-browse.xml` | `person-browse-view` |
-| Edit | `itpearls_Person.edit` | `person-edit.xml` | `person-edit-view` |
+| Browse | `hunttech_Person.browse` | `person-browse.xml` | `person-browse-view` |
+| Edit | `hunttech_Person.edit` | `person-edit.xml` | `person-edit-view` |
 
 ### 5.1 PersonBrowse
 
@@ -168,14 +168,14 @@ erDiagram
 
 | Индекс | Колонки | Назначение |
 |--------|---------|------------|
-| `IDX_ITPEARLS_PERSON_FIRST_NAME` | `FIRST_NAME` | фильтр/сортировка |
-| `IDX_ITPEARLS_PERSON_MIDDLE_NAME` | `MIDDLE_NAME` | фильтр |
-| `IDX_ITPEARLS_PERSON_SECOND_NAME` | `SECOND_NAME` | ORDER BY в browse |
-| `IDX_ITPEARLS_PERSON_ON_POSITION_COUNTRY` | `POSITION_COUNTRY_ID` | FK |
-| `IDX_ITPEARLS_PERSON_ON_CITY_OF_RESIDENCE` | `CITY_OF_RESIDENCE_ID` | FK |
-| `IDX_ITPEARLS_PERSON_ON_PERSON_POSITION` | `PERSON_POSITION_ID` | FK |
-| `IDX_ITPEARLS_PERSON_ON_COMPANY_DEPARTMENT` | `COMPANY_DEPARTMENT_ID` | FK |
-| `IDX_ITPEARLS_PERSON_ON_FILE_IMAGE_FACE` | `FILE_IMAGE_FACE` | FK |
+| `IDX_HUNTTECH_PERSON_FIRST_NAME` | `FIRST_NAME` | фильтр/сортировка |
+| `IDX_HUNTTECH_PERSON_MIDDLE_NAME` | `MIDDLE_NAME` | фильтр |
+| `IDX_HUNTTECH_PERSON_SECOND_NAME` | `SECOND_NAME` | ORDER BY в browse |
+| `IDX_HUNTTECH_PERSON_ON_POSITION_COUNTRY` | `POSITION_COUNTRY_ID` | FK |
+| `IDX_HUNTTECH_PERSON_ON_CITY_OF_RESIDENCE` | `CITY_OF_RESIDENCE_ID` | FK |
+| `IDX_HUNTTECH_PERSON_ON_PERSON_POSITION` | `PERSON_POSITION_ID` | FK |
+| `IDX_HUNTTECH_PERSON_ON_COMPANY_DEPARTMENT` | `COMPANY_DEPARTMENT_ID` | FK |
+| `IDX_HUNTTECH_PERSON_ON_FILE_IMAGE_FACE` | `FILE_IMAGE_FACE` | FK |
 | UK на `MOB_PHONE`, `SKYPE_NAME`, … | | unique contact |
 
 **Миграция не требуется** — все FK проиндексированы в `20.create-db.sql`.
@@ -184,9 +184,9 @@ erDiagram
 
 | Таблица | Колонка | Индекс |
 |---------|---------|--------|
-| `ITPEARLS_PROJECT` | `PROJECT_OWNER_ID` | есть в init |
-| `ITPEARLS_COMPANY` | `COMPANY_DIRECTOR_ID` | есть в init |
-| `ITPEARLS_COMPANY_DEPARTAMENT` | `DEPARTAMENT_DIRECTOR_ID`, `DEPARTAMENT_HR_DIRECTOR_ID` | есть в init |
+| `HUNTTECH_PROJECT` | `PROJECT_OWNER_ID` | есть в init |
+| `HUNTTECH_COMPANY` | `COMPANY_DIRECTOR_ID` | есть в init |
+| `HUNTTECH_COMPANY_DEPARTAMENT` | `DEPARTAMENT_DIRECTOR_ID`, `DEPARTAMENT_HR_DIRECTOR_ID` | есть в init |
 
 ---
 

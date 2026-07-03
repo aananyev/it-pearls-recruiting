@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://emailerBrowse.caption"
+        focusComponent="emailersTable"
+        messagesPack="com.company.hunttech.web.screens.internalemailer">
+    <data readOnly="true">
+        <collection id="emailersDc"
+                    class="com.company.hunttech.entity.InternalEmailer">
+            <view extends="internalEmailer-view">
+                <property name="fromEmail" view="_local">
+                    <property name="fileImageFace" view="_local"/>
+                </property>
+                <property name="toEmail" view="_local">
+                    <property name="fileImageFace" view="_local"/>
+                    <property name="personPosition" view="_local"/>
+                    <property name="candidateCv" view="_local"/>
+                    <property name="iteractionList" view="_local">
+                        <property name="iteractionType" view="_local"/>
+                        <property name="recrutier" view="_local"/>
+                    </property>
+                </property>
+            </view>
+            <loader id="emailersDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from hunttech_InternalEmailer e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.fromEmail = :fromEmail</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.toEmail in (select l.jobCandidate
+                                    from hunttech_JobCandidateSignIcon l
+                                    where l.signIcon = :signIcon)
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="signIconsDc" class="com.company.hunttech.entity.SignIcons">
+            <view extends="_local">
+                <property name="user" view="_local"/>
+            </view>
+            <loader id="signIconsDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from hunttech_SignIcons e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.user = :user</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="1000"/>
+    <layout expand="emailersTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="emailersTable"
+                dataLoader="emailersDl">
+            <properties include=".*"/>
+        </filter>
+        <dataGrid id="emailersTable"
+                  width="100%"
+                  responsive="true"
+                  bodyRowHeight="40px"
+                  descriptionAsHtml="true"
+                  captionAsHtml="true"
+                  dataContainer="emailersDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+            </actions>
+            <columns>
+                <column property="draftEmail"
+                        id="draftEmail"
+                        width="60px"/>
+                <column id="replyInternalEmailerColumn"
+                        width="80px"
+                        caption="msg://msgReply">
+                    <componentRenderer/>
+                </column>
+                <column id="toEmail"
+                        caption="msg://msgToEmail"
+                        width="250px"
+                        minimumWidth="170px"
+                        maximumWidth="250px">
+                    <componentRenderer/>
+                </column>
+                <column id="fromEmail"
+                        caption="msg://msgFromEmail"
+                        width="250px"
+                        minimumWidth="170px"
+                        maximumWidth="250px">
+                    <componentRenderer/>
+                </column>
+                <column property="subjectEmail"
+                        id="subjectEmail"
+                        width="400px"
+                        minimumWidth="250px">
+                    <componentRenderer/>
+                </column>
+                <column property="dateCreateEmail"
+                        sort="DESCENDING"
+                        id="dateCreateEmail"
+                        width="140px"
+                        maximumWidth="140px">
+                    <componentRenderer/>
+                </column>
+                <column property="dateSendEmail"
+                        id="dateSendEmail"
+                        width="140px"
+                        maximumWidth="140px">
+                    <componentRenderer/>
+                </column>
+                <column id="lastIteraction"
+                        caption="msg://msgDateLastIteraction"
+                        maximumWidth="90px"
+                        minimumWidth="90px">
+                    <componentRenderer/>
+                </column>
+                <column id="actionButtonColumn"
+                        width="100px"
+                        minimumWidth="80px"
+                        caption="msg://msgActions">
+                    <componentRenderer/>
+                </column>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="emailersTable.create"/>
+                <button id="editBtn"
+                        action="emailersTable.edit"/>
+                <popupButton id="signFilterButton"
+                             showActionIcons="true"
+                             caption="msg://msgSignFilter"
+                             enable="true"
+                             icon="FILTER"/>
+            </buttonsPanel>
+        </dataGrid>
+        <checkBox id="onlyMyLettersCheckBox"
+                  caption="msg://msgOnlyMyEmails"
+                  description="msg://msgOnlyMyEmailsDesc"
+                  width="AUTO"/>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

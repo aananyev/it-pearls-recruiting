@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://recrutiesTasksGroupSubscribeBrowse.caption"
+        focusComponent="recrutiesTasksesTable"
+        messagesPack="com.company.hunttech.web.screens.openposition">
+    <data readOnly="true">
+        <instance id="recrutiesTasksesDc"
+                  class="com.company.hunttech.entity.RecrutiesTasks"
+                  view="_local">
+            <loader id="recrutiesTasksesDl">
+                <query>
+                    <![CDATA[select e from hunttech_RecruitiesTasks e]]>
+                </query>
+            </loader>
+        </instance>
+
+    </data>
+    <dialogMode height="600"
+                modal="true"
+                closeOnClickOutside="false"
+                resizable="false"
+                width="800"/>
+    <layout expand="recrutiesTasksesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="recrutiesTasksesTable"
+                dataLoader="recrutiesTasksesDl">
+            <properties include=".*"/>
+        </filter>
+        <dataGrid id="recrutiesTasksesTable">
+            <columns>
+                <column></column>
+            </columns>
+        </dataGrid>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

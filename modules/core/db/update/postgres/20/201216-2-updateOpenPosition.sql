@@ -1,3 +1,3 @@
-alter table ITPEARLS_OPEN_POSITION rename column city_position_id to city_position_id__u89001 ;
-alter table ITPEARLS_OPEN_POSITION drop constraint FK_ITPEARLS_OPEN_POSITION_ON_CITY_POSITION ;
-drop index IDX_ITPEARLS_OPEN_POSITION_ON_CITY_POSITION ;
+alter table HUNTTECH_OPEN_POSITION rename column city_position_id to city_position_id__u89001 ;
+alter table HUNTTECH_OPEN_POSITION drop constraint FK_HUNTTECH_OPEN_POSITION_ON_CITY_POSITION ;
+drop index IDX_HUNTTECH_OPEN_POSITION_ON_CITY_POSITION ;

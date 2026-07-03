@@ -1,2 +1,2 @@
-alter table ITPEARLS_LABOR_AGREEMENT add column FILE_AGREEMENT_ID uuid ;
-alter table ITPEARLS_LABOR_AGREEMENT add column SOME_FILED_AGREEMENT_ID uuid ;
+alter table HUNTTECH_LABOR_AGREEMENT add column FILE_AGREEMENT_ID uuid ;
+alter table HUNTTECH_LABOR_AGREEMENT add column SOME_FILED_AGREEMENT_ID uuid ;

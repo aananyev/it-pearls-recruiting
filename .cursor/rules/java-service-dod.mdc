@@ -14,7 +14,7 @@ alwaysApply: true
 - **Перед deploy/start** прогнать тесты затронутого модуля, например:
   ```bash
   export JAVA_HOME=$(/usr/libexec/java_home -v 11)
-  ./gradlew :app-core:test --tests "com.company.itpearls.app.*" --no-daemon
+  ./gradlew :app-core:test --tests "com.company.hunttech.app.*" --no-daemon
   ```
 - Не считать задачу завершённой, если тесты не прошли (исправить код или тесты).
 
@@ -25,7 +25,7 @@ alwaysApply: true
 - Создать или обновить `docs/services/{ServiceName}.md` (или раздел в связанной entity/UI-спецификации).
 - Блок **«Бизнес-контекст»** в начале; затем API, конфигурация, точки интеграции.
 - Запись в **«История изменений»** — первая строка таблицы, дата `YYYY-MM-DD`.
-- Брендинг в prose: **HRM HuntTech** (legacy `itpearls` только в идентификаторах кода).
+- Брендинг в prose: **HRM HuntTech** (legacy `HuntTech` только в идентификаторах кода).
 - Ссылка в `docs/README.md` при новом файле.
 
 ## 3. Порядок работ

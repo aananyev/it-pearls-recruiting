@@ -1,1 +1,1 @@
-alter table ITPEARLS_OPEN_POSITION add column REMOTE_COMMENT varchar(40) ;
+alter table HUNTTECH_OPEN_POSITION add column REMOTE_COMMENT varchar(40) ;

@@ -1,1 +1,1 @@
-alter table ITPEARLS_ITERACTION add column PIC varchar(80) ;
+alter table HUNTTECH_ITERACTION add column PIC varchar(80) ;

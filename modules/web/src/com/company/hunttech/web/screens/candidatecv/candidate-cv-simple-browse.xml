@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://candidateCVSimpleBrowse.caption"
+        focusComponent="candidateCVsTable"
+        messagesPack="com.company.hunttech.web.screens.candidatecv">
+    <data readOnly="true">
+        <collection id="candidateCVsDc"
+                    class="com.company.hunttech.entity.CandidateCV">
+            <view extends="_local">
+                <property name="resumePosition" view="_local"/>
+                <property name="toVacancy" view="_local"/>
+                <property name="datePost"/>
+                <property name="createdBy"/>
+                <property name="candidate" view="_local">
+                    <property name="personPosition" view="_local"/>
+                </property>
+                <property name="owner" view="_local"/>
+            </view>
+            <loader id="candidateCVsDl">
+                <query>
+                    <![CDATA[select e from hunttech_CandidateCV e]]>
+                    <condition>
+                        <c:jpql>
+                            <c:where>e.candidate = :candidate</c:where>
+                        </c:jpql>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="1000"
+                forceDialog="true"/>
+    <layout expand="candidateCVsTable"
+            spacing="true">
+        <hbox spacing="false">
+            <label id="candidateLabel"
+                   stylename="h3"/>
+            <label value="("
+                   stylename="h3"/>
+            <label id="candidatePositionLabel"
+                   stylename="h3"/>
+            <label value=" / "
+                   stylename="h3"/>
+            <label id="candidatePositionEnLabel"
+                   stylename="h3"/>
+            <label value=")"
+                   stylename="h3"/>
+        </hbox>
+        <vbox height="AUTO"
+              spacing="true"
+              width="AUTO"
+              align="TOP_LEFT">
+            <label id="vacancyNameLabel"
+                   stylename="h3"
+                   width="AUTO"
+                   visible="false"/>
+            <label id="recrutierLabel"
+                   stylename="h4/"
+                   width="AUTO"
+                   visible="false"/>
+        </vbox>
+        <dataGrid id="candidateCVsTable"
+                  width="100%"
+                  dataContainer="candidateCVsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+            </actions>
+            <columns>
+                <column property="datePost" id="datePost"/>
+                <column property="resumePosition" id="resumePosition"/>
+                <column property="toVacancy" id="toVacancy"/>
+                <column id="candidateOriginalCVColumn"
+                        width="120px"
+                        caption="msg://msgOriginalCV">
+                    <componentRenderer/>
+                </column>
+                <column id="candidateHuntTechCVColumn"
+                        width="120px"
+                        caption="msg://msgHuntTechCV">
+                    <componentRenderer/>
+                </column>
+                <column id="createdBy" property="createdBy"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="candidateCVsTable.create"/>
+                <button id="editBtn"
+                        action="candidateCVsTable.edit"/>
+                <button id="copyCVButton"
+                        invoke="copyCandidateCVButton"
+                        caption="msg://msgCopyCV"
+                        description="msg://msgCopyCV"
+                        icon="COPY"/>
+                <button id="viewOriginalCVButton"
+                        enable="false"
+                        invoke="viewOriginalCVButton"
+                        caption="msg://msgViewOriginalCV"
+                        description="msg://msgViewOriginalCVButtonViewer"
+                        icon="VIEW_ACTION"/>
+            </buttonsPanel>
+        </dataGrid>
+        <button action="lookupCancelAction"
+                align="BOTTOM_RIGHT"/>
+    </layout>
+</window>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:gui="http://schemas.haulmont.com/cuba/spring/cuba-gui.xsd">
+
+    <!-- Annotation-based beans -->
+    <context:component-scan base-package="com.company.hunttech,com.company.hunttech,com.hunttech.hrm"/>
+
+    <gui:screens base-packages="com.company.hunttech.web"/>
+    <bean id="hunttech_proxyCreator" class="com.haulmont.cuba.web.sys.remoting.WebRemoteProxyBeanCreator">
+        <property name="serverSelector" ref="cuba_ServerSelector"/>
+        <property name="remoteServices">
+            <map>
+                <entry key="hunttech_GetUserRoleService" value="com.company.hunttech.service.GetUserRoleService"/>
+                <entry key="hunttech_GetRoleService" value="com.company.hunttech.service.GetRoleService"/>
+                <entry key="hunttech_SubscribeDateService" value="com.company.hunttech.service.SubscribeDateService"/>
+                <entry key="hunttech_PdfParserService" value="com.company.hunttech.core.PdfParserService"/>
+                <entry key="hunttech_StarsAndOtherService" value="com.company.hunttech.core.StarsAndOtherService"/>
+                <entry key="hunttech_ResumeRecognitionService"
+                       value="com.company.hunttech.core.ResumeRecognitionService"/>
+                <entry key="hunttech_EmailGenerationService" value="com.company.hunttech.core.EmailGenerationService"/>
+                <entry key="hunttech_ParseCVService" value="com.company.hunttech.core.ParseCVService"/>
+                <!-- <entry key="hunttech_IteractionService" value="com.company.hunttech.core.IteractionService"/> -->
+                <entry key="hunttech_WebLoadService" value="com.company.hunttech.core.WebLoadService"/>
+                <entry key="hunttech_InteractionService" value="com.company.hunttech.core.InteractionService"/>
+                <entry key="hunttech_StrSimpleService" value="com.company.hunttech.core.StrSimpleService"/>
+                <entry key="hunttech_SendNotificationsService"
+                       value="com.company.hunttech.core.SendNotificationsService"/>
+                <entry key="hunttech_SendEmailService" value="com.company.hunttech.service.SendEmailService"/>
+                <entry key="hunttech_RecruterStatService" value="com.company.hunttech.core.RecruterStatService"/>
+                <entry key="hunttech_SignIconService" value="com.company.hunttech.core.SignIconService"/>
+                <entry key="hunttech_OpenPositionService" value="com.company.hunttech.core.OpenPositionService"/>
+                <entry key="hunttech_TelegramService" value="com.company.hunttech.core.TelegramService"/>
+                <entry key="hunttech_ProjectService" value="com.company.hunttech.core.ProjectService"/>
+                <entry key="hunttech_ApplicationSetupService"
+                       value="com.company.hunttech.core.ApplicationSetupService"/>
+                <entry key="hunttech_OpenPositionCommentService"
+                       value="com.company.hunttech.core.OpenPositionCommentService"/>
+                <entry key="hunttech_TextManipulationService"
+                       value="com.company.hunttech.core.TextManipulationService"/>
+                <entry key="hunttech_TelegramBotService" value="com.company.hunttech.core.TelegramBotService"/>
+            </map>
+        </property>
+    </bean>
+
+</beans>

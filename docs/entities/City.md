@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`itpearls_City.browse`, `itpearls_City.edit`; picker `city-picker-view` / `city-location-view` в Company, JobCandidate, OpenPosition. UI Spec: [browse](../ui/itpearls_City.browse_Spec.md), [edit](../ui/itpearls_City.edit_Spec.md).
+`hunttech_City.browse`, `hunttech_City.edit`; picker `city-picker-view` / `city-location-view` в Company, JobCandidate, OpenPosition. UI Spec: [browse](../ui/hunttech_City.browse_Spec.md), [edit](../ui/hunttech_City.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -25,9 +25,9 @@ Browse с FK на регион; оптимизированные views без л
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.City` |
-| **Имя в CUBA** | `itpearls_City` |
-| **Таблица БД** | `ITPEARLS_CITY` |
+| **Java-класс** | `com.company.hunttech.entity.City` |
+| **Имя в CUBA** | `hunttech_City` |
+| **Таблица БД** | `HUNTTECH_CITY` |
 | **Тип данных** | справочник |
 | **Ожидаемый объём** | сотни записей, часто читается |
 | **Критичность** | высокая — FK в Person, JobCandidate, Company, OpenPosition |
@@ -50,13 +50,13 @@ Browse с FK на регион; оптимизированные views без л
 
 ```mermaid
 erDiagram
-    ITPEARLS_REGION ||--o{ ITPEARLS_CITY : "regionOfCity"
-    ITPEARLS_CITY }o--o| ITPEARLS_REGION : "cityRegion"
-    ITPEARLS_PERSON }o--o| ITPEARLS_CITY : "cityOfResidence"
-    ITPEARLS_JOB_CANDIDATE }o--o| ITPEARLS_CITY : "cityOfResidence"
-    ITPEARLS_COMPANY }o--o| ITPEARLS_CITY : "cityOfCompany"
-    ITPEARLS_OPEN_POSITION }o--o| ITPEARLS_CITY : "cityPosition"
-    ITPEARLS_CITY }o--o| ITPEARLS_OPEN_POSITION : "openPosition"
+    HUNTTECH_REGION ||--o{ HUNTTECH_CITY : "regionOfCity"
+    HUNTTECH_CITY }o--o| HUNTTECH_REGION : "cityRegion"
+    HUNTTECH_PERSON }o--o| HUNTTECH_CITY : "cityOfResidence"
+    HUNTTECH_JOB_CANDIDATE }o--o| HUNTTECH_CITY : "cityOfResidence"
+    HUNTTECH_COMPANY }o--o| HUNTTECH_CITY : "cityOfCompany"
+    HUNTTECH_OPEN_POSITION }o--o| HUNTTECH_CITY : "cityPosition"
+    HUNTTECH_CITY }o--o| HUNTTECH_OPEN_POSITION : "openPosition"
 ```
 
 ### 2.2 Исходящие связи
@@ -88,7 +88,7 @@ erDiagram
 |-----------|------------|-----|-------------|
 | `cityRuName` | `CITY_RU_NAME` | varchar(50) | NOT NULL, unique, индекс |
 | `cityPhoneCode` | `CITY_PHONE_CODE` | varchar(5) | unique |
-| `cityRegion` | `CITY_REGION_ID` | uuid FK | → `ITPEARLS_REGION` |
+| `cityRegion` | `CITY_REGION_ID` | uuid FK | → `HUNTTECH_REGION` |
 | `openPosition` | `OPEN_POSITION_ID` | uuid FK | legacy-связь |
 
 ---
@@ -114,12 +114,12 @@ erDiagram
 
 ## 5. Экраны
 
-Каталог: `modules/web/src/com/company/itpearls/web/screens/city/`
+Каталог: `modules/web/src/com/company/hunttech/web/screens/city/`
 
 | Экран | Controller ID | Дескриптор | View |
 |-------|---------------|------------|------|
-| Browse | `itpearls_City.browse` | `city-browse.xml` | `city-browse-view` |
-| Edit | `itpearls_City.edit` | `city-edit.xml` | `city-edit-view` |
+| Browse | `hunttech_City.browse` | `city-browse.xml` | `city-browse-view` |
+| Edit | `hunttech_City.edit` | `city-edit.xml` | `city-edit-view` |
 
 ### 5.1 CityBrowse
 
@@ -153,28 +153,28 @@ erDiagram
 
 ## 6. База данных
 
-### 6.1 Таблица `ITPEARLS_CITY`
+### 6.1 Таблица `HUNTTECH_CITY`
 
 Схема: `modules/core/db/init/postgres/10.create-db.sql`
 
-### 6.2 Индексы на `ITPEARLS_CITY`
+### 6.2 Индексы на `HUNTTECH_CITY`
 
 | Индекс | Колонки | Назначение |
 |--------|---------|------------|
-| `IDX_ITPEARLS_CITY_RU_NAME` | `CITY_RU_NAME` | ORDER BY в browse, фильтр |
-| `IDX_ITPEARLS_CITY_ON_CITY_REGION` | `CITY_REGION_ID` | JOIN по региону |
-| `IDX_ITPEARLS_CITY_ON_OPEN_POSITION` | `OPEN_POSITION_ID` | legacy FK |
+| `IDX_HUNTTECH_CITY_RU_NAME` | `CITY_RU_NAME` | ORDER BY в browse, фильтр |
+| `IDX_HUNTTECH_CITY_ON_CITY_REGION` | `CITY_REGION_ID` | JOIN по региону |
+| `IDX_HUNTTECH_CITY_ON_OPEN_POSITION` | `OPEN_POSITION_ID` | legacy FK |
 | UK на `CITY_RU_NAME`, `CITY_PHONE_CODE` | | уникальность |
 
 ### 6.3 Индексы FK в дочерних таблицах
 
 | Таблица | Колонка | Индекс |
 |---------|---------|--------|
-| `ITPEARLS_PERSON` | `CITY_OF_RESIDENCE_ID` | `IDX_ITPEARLS_PERSON_ON_CITY_OF_RESIDENCE` ✅ |
-| `ITPEARLS_JOB_CANDIDATE` | `CITY_OF_RESIDENCE_ID` | `IDX_ITPEARLS_JOB_CANDIDATE_ON_CITY_OF_RESIDENCE` ✅ |
-| `ITPEARLS_COMPANY` | `CITY_OF_COMPANY_ID` | `IDX_ITPEARLS_COMPANY_ON_CITY_OF_COMPANY` ✅ |
-| `ITPEARLS_OPEN_POSITION` | `CITY_POSITION_ID` | `IDX_ITPEARLS_OPEN_POSITION_ON_CITY_POSITION` ✅ |
-| `ITPEARLS_SKILLS_FILTER_LAST_SELECTION` | `CITY_ID` | `IDX_ITPEARLS_SKILLS_FILTER_LAST_SELECTION_ON_CITY` ✅ |
+| `HUNTTECH_PERSON` | `CITY_OF_RESIDENCE_ID` | `IDX_HUNTTECH_PERSON_ON_CITY_OF_RESIDENCE` ✅ |
+| `HUNTTECH_JOB_CANDIDATE` | `CITY_OF_RESIDENCE_ID` | `IDX_HUNTTECH_JOB_CANDIDATE_ON_CITY_OF_RESIDENCE` ✅ |
+| `HUNTTECH_COMPANY` | `CITY_OF_COMPANY_ID` | `IDX_HUNTTECH_COMPANY_ON_CITY_OF_COMPANY` ✅ |
+| `HUNTTECH_OPEN_POSITION` | `CITY_POSITION_ID` | `IDX_HUNTTECH_OPEN_POSITION_ON_CITY_POSITION` ✅ |
+| `HUNTTECH_SKILLS_FILTER_LAST_SELECTION` | `CITY_ID` | `IDX_HUNTTECH_SKILLS_FILTER_LAST_SELECTION_ON_CITY` ✅ |
 
 **Миграция не требуется** — все FK проиндексированы.
 
@@ -261,10 +261,10 @@ erDiagram
 
 | Класс | Путь | Сценарии |
 |-------|------|----------|
-| `CityServiceTest` | `modules/core/test/com/company/itpearls/core/` | create, edit/save, browse load, soft delete |
+| `CityServiceTest` | `modules/core/test/com/company/hunttech/core/` | create, edit/save, browse load, soft delete |
 
 ```bash
-./gradlew :app-core:test --tests "com.company.itpearls.core.CityServiceTest"
+./gradlew :app-core:test --tests "com.company.hunttech.core.CityServiceTest"
 ```
 
 ---

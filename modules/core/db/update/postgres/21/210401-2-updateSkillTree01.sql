@@ -1,1 +1,1 @@
-alter table ITPEARLS_SKILL_TREE add column CANDIDATE_CV_ID uuid ;
+alter table HUNTTECH_SKILL_TREE add column CANDIDATE_CV_ID uuid ;

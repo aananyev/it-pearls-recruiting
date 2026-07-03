@@ -1,1 +1,1 @@
-create unique index IDX_ITPEARLS_GRADE_UK_GRADE_NAME on ITPEARLS_GRADE (GRADE_NAME) where DELETE_TS is null ;
+create unique index IDX_HUNTTECH_GRADE_UK_GRADE_NAME on HUNTTECH_GRADE (GRADE_NAME) where DELETE_TS is null ;

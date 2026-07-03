@@ -1,1 +1,1 @@
-drop table if exists ITPEARLS_EVENT_REGISTRATION__U55087 cascade ;
+drop table if exists HUNTTECH_EVENT_REGISTRATION__U55087 cascade ;

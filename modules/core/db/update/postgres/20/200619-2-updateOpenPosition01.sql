@@ -1,1 +1,1 @@
-alter table ITPEARLS_OPEN_POSITION add column COMMAND_EXPERIENCE integer ;
+alter table HUNTTECH_OPEN_POSITION add column COMMAND_EXPERIENCE integer ;

@@ -1,10 +1,10 @@
 #!/bin/bash
-# Start/stop/status PostgreSQL 11 for IT-Pearls (data: /usr/local/var/postgresql@11)
+# Start/stop/status PostgreSQL 11 for HuntTech (data: /usr/local/var/postgresql@11)
 set -euo pipefail
 
 PG11_BIN="/usr/local/opt/postgresql@11/bin"
 PGDATA="/usr/local/var/postgresql@11"
-LABEL="com.itpearls.postgresql11"
+LABEL="com.HuntTech.postgresql11"
 PLIST="$HOME/Library/LaunchAgents/${LABEL}.plist"
 
 export LC_ALL=en_US.UTF-8
@@ -27,7 +27,7 @@ case "$cmd" in
   status)
     if "$PG11_BIN/pg_isready" >/dev/null 2>&1; then
       echo "PostgreSQL 11: running"
-      "$PG11_BIN/psql" -U cuba -d itpearls -c "SELECT version();" 2>/dev/null || true
+      "$PG11_BIN/psql" -U cuba -d HuntTech -c "SELECT version();" 2>/dev/null || true
     else
       echo "PostgreSQL 11: not running"
       exit 1

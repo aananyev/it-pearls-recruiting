@@ -1,5 +1,5 @@
 #!/bin/bash
-# Надёжный запуск CUBA/Tomcat для it-pearls-recruiting (без голого gradlew restart).
+# Надёжный запуск CUBA/Tomcat для hunttech_recruiting (без голого gradlew restart).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -8,7 +8,7 @@ cd "$ROOT"
 APP_URL="${APP_URL:-http://localhost:8080/app/}"
 WAIT_TIMEOUT="${WAIT_TIMEOUT:-300}"
 POLL_INTERVAL="${POLL_INTERVAL:-5}"
-PROJECT_MARKER="it-pearls-recruiting/deploy/tomcat"
+PROJECT_MARKER="hunttech_recruiting/deploy/tomcat"
 
 log() { printf '%s\n' "$*"; }
 

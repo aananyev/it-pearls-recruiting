@@ -8,10 +8,10 @@
 |----------|----------|
 | Хост | `localhost` |
 | Порт | `5432` |
-| База данных | `itpearls` |
+| База данных | `HuntTech` |
 | Пользователь | `cuba` |
 | Пароль | `cuba` |
-| JDBC URL | `jdbc:postgresql://localhost:5432/itpearls` |
+| JDBC URL | `jdbc:postgresql://localhost:5432/HuntTech` |
 
 Файлы с настройками подключения:
 
@@ -19,7 +19,7 @@
 - `modules/core/web/META-INF/war-context.xml` — сборка WAR
 - `modules/core/web/META-INF/jetty-env.xml` — запуск из IDE (Jetty)
 - `build.gradle` — задачи `createDb` / `updateDb`
-- `modules/core/src/com/company/itpearls/app.properties` — `cuba.dbmsType=postgres`
+- `modules/core/src/com/company/hunttech/app.properties` — `cuba.dbmsType=postgres`
 
 Переменные окружения для Docker: `.env.example` → скопируйте в `.env.local`.
 
@@ -60,7 +60,7 @@ chmod +x scripts/setup-local-postgres.sh
 
 ```sql
 CREATE USER cuba WITH PASSWORD 'cuba' CREATEDB;
-CREATE DATABASE itpearls OWNER cuba ENCODING 'UTF8';
+CREATE DATABASE HuntTech OWNER cuba ENCODING 'UTF8';
 ```
 
 ### 2. Создать схему и начальные данные CUBA
@@ -81,7 +81,7 @@ CREATE DATABASE itpearls OWNER cuba ENCODING 'UTF8';
 ## Проверка подключения
 
 ```bash
-psql -h localhost -p 5432 -U cuba -d itpearls -c "SELECT version();"
+psql -h localhost -p 5432 -U cuba -d HuntTech -c "SELECT version();"
 ```
 
 Или через скрипт проекта:
@@ -123,4 +123,4 @@ psql -h localhost -p 5432 -U cuba -d itpearls -c "SELECT version();"
 - **Подход:** свежий кластер **Homebrew PostgreSQL 11** (`initdb`), порт `5432` — Docker на машине недоступен.
 - **Причина:** прежний каталог данных был **standby-репликой** (`recovery.conf`, `pg_is_in_recovery() = true`, read-only).
 - **Резервная копия старого каталога:** `/usr/local/var/postgresql@11-standby-replica-backup-20260622` (можно удалить, если реплика больше не нужна).
-- **Проверка:** `psql -h localhost -p 5432 -U cuba -d itpearls -c "SELECT pg_is_in_recovery();"` → `f`.
+- **Проверка:** `psql -h localhost -p 5432 -U cuba -d HuntTech -c "SELECT pg_is_in_recovery();"` → `f`.

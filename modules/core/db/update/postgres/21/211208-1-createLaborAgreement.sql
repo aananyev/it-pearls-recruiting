@@ -1,4 +1,4 @@
-create table ITPEARLS_LABOR_AGREEMENT (
+create table HUNTTECH_LABOR_AGREEMENT (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

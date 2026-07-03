@@ -1,0 +1,40 @@
+package com.company.hunttech.entity;
+
+import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.StandardEntity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+
+@NamePattern("%s|shortType")
+@Table(name = "HUNTTECH_OWNERSHUP")
+@Entity(name = "hunttech_Ownershup")
+public class Ownershup extends StandardEntity {
+    private static final long serialVersionUID = -6057344078066436306L;
+
+    @NotNull
+    @Column(name = "SHORT_TYPE", nullable = false, unique = true, length = 7)
+    protected String shortType;
+
+    @NotNull
+    @Column(name = "LONG_TYPE", nullable = false, unique = true, length = 50)
+    protected String longType;
+
+    public String getShortType() {
+        return shortType;
+    }
+
+    public void setShortType(String shortType) {
+        this.shortType = shortType;
+    }
+
+    public String getLongType() {
+        return longType;
+    }
+
+    public void setLongType(String longType) {
+        this.longType = longType;
+    }
+}

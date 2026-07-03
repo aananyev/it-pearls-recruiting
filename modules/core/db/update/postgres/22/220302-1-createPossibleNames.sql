@@ -1,4 +1,4 @@
-create table ITPEARLS_POSSIBLE_NAMES (
+create table HUNTTECH_POSSIBLE_NAMES (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

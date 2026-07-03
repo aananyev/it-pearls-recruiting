@@ -1,4 +1,4 @@
-create table ITPEARLS_SOCIAL_NETWORK_TYPE (
+create table HUNTTECH_SOCIAL_NETWORK_TYPE (
     ID varchar(36) not null,
     VERSION integer not null,
     CREATE_TS timestamp,

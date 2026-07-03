@@ -1,1 +1,1 @@
-alter table ITPEARLS_OPEN_POSITION alter column VACANSY_NAME set data type varchar(120) ;
+alter table HUNTTECH_OPEN_POSITION alter column VACANSY_NAME set data type varchar(120) ;

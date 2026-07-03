@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://personelReserveBrowse.caption"
+        focusComponent="personelReservesTable"
+        messagesPack="com.company.hunttech.web.screens.personelreserve">
+    <data readOnly="true">
+        <collection id="personelReservesDc"
+                    class="com.company.hunttech.entity.PersonelReserve">
+            <view extends="personelReserve-view">
+                <property name="jobCandidate" view="jobCandidate-view">
+                    <property name="currentCompany" view="_local"/>
+                    <property name="cityOfResidence" view="_local"/>
+                    <property name="personPosition" view="_local"/>
+                    <property name="fileImageFace" view="_local"/>
+                    <property name="iteractionList" view="iteractionList-view">
+                        <property name="vacancy" view="_local"/>
+                        <property name="iteractionType" view="_local"/>
+                    </property>
+                </property>
+                <property name="recruter" view="_local"/>
+                <property name="personPosition" view="_local"/>
+                <property name="openPosition" view="openPosition-view"/>
+            </view>
+            <loader id="personelReservesDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from hunttech_PersonelReserve e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.recruter = :recruter
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.inProcess = :actives
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.removedFromReserve = :removedFromReserve
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.jobCandidate.iteractionList in :iteractionList
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    (:currentDate between e.date and e.endDate or e.date is null and @dateAfter(e.endDate, :currentDate))
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.jobCandidate in (select l.jobCandidate
+                                    from hunttech_JobCandidateSignIcon l
+                                    where l.signIcon = :signIcon)
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+            <instance id="jobCandidatesDc" property="jobCandidate"/>
+        </collection>
+        <collection id="signIconsDc" class="com.company.hunttech.entity.SignIcons">
+            <view extends="_local">
+                <property name="user" view="_local"/>
+            </view>
+            <loader id="signIconsDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from hunttech_SignIcons e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.user = :user</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="personelReservesTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="personelReservesTable"
+                dataLoader="personelReservesDl">
+            <properties include=".*"/>
+        </filter>
+        <dataGrid id="personelReservesTable"
+                  editorEnabled="false"
+                  sortable="true"
+                  height="100%"
+                  width="100%"
+                  bodyRowHeight="60px"
+                  dataContainer="personelReservesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="statusColumn"
+                        collapsed="false"
+                        caption="msg://msgStatusColumn"
+                        width="50px">
+                    <componentRenderer/>
+                </column>
+                <column id="inWorkColumn"
+                        collapsed="false"
+                        caption="msg://msgInWorkColumn"
+                        width="50px">
+                    <componentRenderer/>
+                </column>
+                <column id="fileImageFace"
+                        width="50px">
+                    <componentRenderer/>
+                </column>
+                <column id="jobCandidate"
+                        width="300px">
+                    <componentRenderer/>
+                </column>
+                <column id="recruter"
+                        collapsible="true"
+                        collapsed="true"
+                        property="recruter"
+                        width="150px"/>
+                <column id="personPosition"
+                        property="personPosition"
+                        collapsed="true"
+                        collapsible="true"
+                        width="150px"/>
+                <column id="openPosition"
+                        property="openPosition"
+                        width="300px"/>
+                <column id="date"
+                        property="date"
+                        width="100px"/>
+                <column id="termOfPlacement"
+                        collapsible="true"
+                        collapsed="true"
+                        property="termOfPlacement"
+                        width="150px"/>
+                <column id="endDate"
+                        property="endDate"
+                        width="100px"/>
+                <column id="candidateActions"
+                        width="80px"
+                        caption="msg://msgAction">
+                    <componentRenderer/>
+                </column>
+            </columns>
+            <rowsCount autoLoad="true"/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="personelReservesTable.create"/>
+                <button id="editBtn"
+                        action="personelReservesTable.edit"/>
+                <button id="removeBtn"
+                        visible="false"
+                        action="personelReservesTable.remove"/>
+                <button id="viewJobCandidateCardButton"
+                        width="AUTO"
+                        icon="CHILD"
+                        visible="false"
+                        caption="msg://msgJobCandidate"
+                        description="msg://msgJobCandidateDesc"
+                        enable="false"
+                        invoke="viewJobCandidateCardButtonInvoke"/>
+                <button id="sendEmailButton"
+                        width="AUTO"
+                        icon="ENVELOPE_O"
+                        visible="false"
+                        caption="msg://msgEmail"
+                        description="msg://msgEmailDesc"
+                        enable="false"
+                        invoke="sendEmailButtonInvoke"/>
+                <button id="closePersonalReserveButton"
+                        visible="true"
+                        width="AUTO"
+                        enable="false"
+                        icon="CLOSE"
+                        caption="msg://msgClosePersonalReserve"
+                        invoke="closePersonalReserveButtonInvoke"/>
+                <popupButton id="actionsButton"
+                             showActionIcons="true"
+                             icon="BARS"
+                             enable="false"
+                             caption="msg://msgActions"
+                             description="msg://msgActionsDesc"/>
+                <popupButton id="signFilterButton"
+                             showActionIcons="true"
+                             caption="msg://msgSignFilter"
+                             enable="true"
+                             icon="FILTER"/>
+            </buttonsPanel>
+        </dataGrid>
+        <groupBox id="filtersHBox"
+                  collapsed="false"
+                  collapsable="true"
+                  caption="msg://msgFilter"
+                  spacing="true"
+                  width="100%">
+            <hbox spacing="true" width="AUTO">
+                <checkBox id="allCandidatesCheckBox"
+                          caption="msg://msgAllCandidates"/>
+                <checkBox id="activesCheckBox"
+                          caption="msg://msgNoActives"/>
+                <checkBox id="inNotWorkCheckBox"
+                          visible="false"
+                          caption="msg://msgInWork"/>
+                <checkBox id="removedFromReserveCheckBox"
+                          caption="msg://msgRemovedFromReserve"/>
+                <checkBox id="showBetweenAndOther"
+                          caption="msg://msgShowBetweenAndOther"/>
+            </hbox>
+        </groupBox>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

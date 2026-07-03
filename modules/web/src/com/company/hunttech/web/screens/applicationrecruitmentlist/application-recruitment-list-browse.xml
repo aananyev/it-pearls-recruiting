@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://applicationRecruitmentListBrowse.caption"
+        focusComponent="applicationRecruitmentListsTable"
+        messagesPack="com.company.hunttech.web.screens.applicationrecruitmentlist">
+    <data readOnly="true">
+        <collection id="applicationRecruitmentListsDc"
+                    class="com.company.hunttech.entity.ApplicationRecruitmentList">
+            <view extends="_local">
+                <property name="applicationRecruitment" view="_local"/>
+                <property name="recruiter" view="_local"/>
+                <property name="project" view="_local"/>
+                <property name="projectDepartment" view="_local">
+                    <property name="companyName" view="_local"/>
+                </property>
+                <property name="company" view="_local"/>
+            </view>
+            <loader id="applicationRecruitmentListsDl">
+                <query>
+                    <![CDATA[select e from hunttech_ApplicationRecruitmentList e where e.code is not null and e.code not like '']]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="800"/>
+    <layout expand="applicationRecruitmentListsTable"
+            spacing="true">
+        <filter id="filter"
+                applyTo="applicationRecruitmentListsTable"
+                dataLoader="applicationRecruitmentListsDl">
+            <properties include=".*"/>
+        </filter>
+        <groupTable id="applicationRecruitmentListsTable"
+                    width="100%"
+                    stylename="table-wordwrap"
+                    dataContainer="applicationRecruitmentListsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="active"
+                        width="50px"/>
+                <column id="code"/>
+                <column id="project"
+                        width="200px"/>
+                <column id="projectDepartment"
+                        width="200px"/>
+                <column id="company"
+                        width="200px"/>
+                <column id="openDate"
+                        width="100px"/>
+                <column id="closeDate"
+                        width="100px"/>
+                <column id="recruiter"/>
+            </columns>
+            <rowsCount/>
+            <buttonsPanel id="buttonsPanel"
+                          alwaysVisible="true">
+                <button id="createBtn"
+                        action="applicationRecruitmentListsTable.create"/>
+                <button id="editBtn"
+                        action="applicationRecruitmentListsTable.edit"/>
+                <button id="removeBtn"
+                        action="applicationRecruitmentListsTable.remove"/>
+            </buttonsPanel>
+        </groupTable>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

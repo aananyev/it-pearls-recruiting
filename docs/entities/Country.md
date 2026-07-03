@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`itpearls_Country.browse`, `itpearls_Country.edit`; FK в `Region`, `Company`. UI Spec: [browse](../ui/itpearls_Country.browse_Spec.md), [edit](../ui/itpearls_Country.edit_Spec.md).
+`hunttech_Country.browse`, `hunttech_Country.edit`; FK в `Region`, `Company`. UI Spec: [browse](../ui/hunttech_Country.browse_Spec.md), [edit](../ui/hunttech_Country.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -25,9 +25,9 @@ CRUD справочник с `country-browse-view` / `country-edit-view`; исп
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.Country` |
-| **Имя в CUBA** | `itpearls_Country` |
-| **Таблица БД** | `ITPEARLS_COUNTRY` |
+| **Java-класс** | `com.company.hunttech.entity.Country` |
+| **Имя в CUBA** | `hunttech_Country` |
+| **Таблица БД** | `HUNTTECH_COUNTRY` |
 | **Тип данных** | справочник |
 | **Ожидаемый объём** | ~200 записей, часто читается |
 | **Критичность** | средняя — FK в Region, Person, Company |
@@ -50,10 +50,10 @@ CRUD справочник с `country-browse-view` / `country-edit-view`; исп
 
 ```mermaid
 erDiagram
-    ITPEARLS_COUNTRY ||--o{ ITPEARLS_REGION : "countryOfRegion"
-    ITPEARLS_PERSON }o--o| ITPEARLS_COUNTRY : "positionCountry"
-    ITPEARLS_COMPANY }o--o| ITPEARLS_COUNTRY : "countryOfCompany"
-    ITPEARLS_REGION }o--|| ITPEARLS_COUNTRY : "regionCountry"
+    HUNTTECH_COUNTRY ||--o{ HUNTTECH_REGION : "countryOfRegion"
+    HUNTTECH_PERSON }o--o| HUNTTECH_COUNTRY : "positionCountry"
+    HUNTTECH_COMPANY }o--o| HUNTTECH_COUNTRY : "countryOfCompany"
+    HUNTTECH_REGION }o--|| HUNTTECH_COUNTRY : "regionCountry"
 ```
 
 ### 2.2 Исходящие связи
@@ -111,12 +111,12 @@ erDiagram
 
 ## 5. Экраны
 
-Каталог: `modules/web/src/com/company/itpearls/web/screens/country/`
+Каталог: `modules/web/src/com/company/hunttech/web/screens/country/`
 
 | Экран | Controller ID | Дескриптор | View |
 |-------|---------------|------------|------|
-| Browse | `itpearls_Country.browse` | `country-browse.xml` | `country-browse-view` |
-| Edit | `itpearls_Country.edit` | `country-edit.xml` | `country-edit-view` |
+| Browse | `hunttech_Country.browse` | `country-browse.xml` | `country-browse-view` |
+| Edit | `hunttech_Country.edit` | `country-edit.xml` | `country-edit-view` |
 
 ### 5.1 CountryBrowse
 
@@ -147,7 +147,7 @@ erDiagram
 
 ## 6. База данных
 
-### 6.1 Таблица `ITPEARLS_COUNTRY`
+### 6.1 Таблица `HUNTTECH_COUNTRY`
 
 Схема: `modules/core/db/init/postgres/10.create-db.sql`
 
@@ -162,9 +162,9 @@ erDiagram
 
 | Таблица | Колонка | Индекс |
 |---------|---------|--------|
-| `ITPEARLS_REGION` | `REGION_COUNTRY_ID` | `IDX_ITPEARLS_REGION_ON_REGION_COUNTRY` ✅ |
-| `ITPEARLS_PERSON` | `POSITION_COUNTRY_ID` | `IDX_ITPEARLS_PERSON_ON_POSITION_COUNTRY` ✅ |
-| `ITPEARLS_COMPANY` | `COUNTRY_OF_COMPANY_ID` | `IDX_ITPEARLS_COMPANY_ON_COUNTRY_OF_COMPANY` ✅ |
+| `HUNTTECH_REGION` | `REGION_COUNTRY_ID` | `IDX_HUNTTECH_REGION_ON_REGION_COUNTRY` ✅ |
+| `HUNTTECH_PERSON` | `POSITION_COUNTRY_ID` | `IDX_HUNTTECH_PERSON_ON_POSITION_COUNTRY` ✅ |
+| `HUNTTECH_COMPANY` | `COUNTRY_OF_COMPANY_ID` | `IDX_HUNTTECH_COMPANY_ON_COUNTRY_OF_COMPANY` ✅ |
 
 **Миграция не требуется** — все FK проиндексированы в `20.create-db.sql`.
 
@@ -189,7 +189,7 @@ erDiagram
 |-------|---------|-----|-------|---|-------------|
 | CountryBrowse | view | `country-view` | `country-browse-view` | — | убрана коллекция регионов |
 | CountryBrowse | полей в view | ~10 + N регионов | 4 | −6+ | только scalar + id |
-| CountryBrowse | SQL при открытии (оценка) | 1 + N (регионы) | 1 | −N | один SELECT по `ITPEARLS_COUNTRY` |
+| CountryBrowse | SQL при открытии (оценка) | 1 + N (регионы) | 1 | −N | один SELECT по `HUNTTECH_COUNTRY` |
 | CountryBrowse | cacheable loader | нет | да | + | справочник |
 | CountryEdit | view | `country-view` | `country-edit-view` | — | регионы через `region-country-child-view` |
 | CountryEdit | глубина Region | `_local` (+ cities) | 2 поля | − | без `regionOfCity` |
@@ -247,10 +247,10 @@ erDiagram
 
 | Класс | Путь | Сценарии |
 |-------|------|----------|
-| `CountryServiceTest` | `modules/core/test/com/company/itpearls/core/` | create, edit/save, browse load, soft delete |
+| `CountryServiceTest` | `modules/core/test/com/company/hunttech/core/` | create, edit/save, browse load, soft delete |
 
 ```bash
-./gradlew :app-core:test --tests "com.company.itpearls.core.CountryServiceTest"
+./gradlew :app-core:test --tests "com.company.hunttech.core.CountryServiceTest"
 ```
 
 ---

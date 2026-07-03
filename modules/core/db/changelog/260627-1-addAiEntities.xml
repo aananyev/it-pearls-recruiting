@@ -5,8 +5,8 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="260627-1-addOpenPositionAiColumns" author="itpearls">
-        <addColumn tableName="ITPEARLS_OPEN_POSITION">
+    <changeSet id="260627-1-addOpenPositionAiColumns" author="HuntTech">
+        <addColumn tableName="HUNTTECH_OPEN_POSITION">
             <column name="RAW_DESCRIPTION" type="clob"/>
             <column name="INTERVIEW_CHECKLIST" type="clob"/>
             <column name="SEARCH_MAP" type="clob"/>
@@ -14,8 +14,8 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="260627-2-createUserAiConfiguration" author="itpearls">
-        <createTable tableName="ITPEARLS_USER_AI_CONFIGURATION">
+    <changeSet id="260627-2-createUserAiConfiguration" author="HuntTech">
+        <createTable tableName="HUNTTECH_USER_AI_CONFIGURATION">
             <column name="ID" type="uuid">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -36,18 +36,18 @@
             <column name="DEFAULT_MODEL_NAME" type="varchar(128)"/>
             <column name="IS_ACTIVE" type="boolean"/>
         </createTable>
-        <addForeignKeyConstraint baseTableName="ITPEARLS_USER_AI_CONFIGURATION"
+        <addForeignKeyConstraint baseTableName="HUNTTECH_USER_AI_CONFIGURATION"
                                  baseColumnNames="USER_ID"
-                                 constraintName="FK_ITPEARLS_USER_AI_CONFIGURATION_ON_USER"
+                                 constraintName="FK_HUNTTECH_USER_AI_CONFIGURATION_ON_USER"
                                  referencedTableName="SEC_USER"
                                  referencedColumnNames="ID"/>
-        <createIndex tableName="ITPEARLS_USER_AI_CONFIGURATION" indexName="IDX_ITPEARLS_USER_AI_CONFIGURATION_USER">
+        <createIndex tableName="HUNTTECH_USER_AI_CONFIGURATION" indexName="IDX_HUNTTECH_USER_AI_CONFIGURATION_USER">
             <column name="USER_ID"/>
         </createIndex>
     </changeSet>
 
-    <changeSet id="260627-3-createVacancyPromptTemplate" author="itpearls">
-        <createTable tableName="ITPEARLS_VACANCY_PROMPT_TEMPLATE">
+    <changeSet id="260627-3-createVacancyPromptTemplate" author="HuntTech">
+        <createTable tableName="HUNTTECH_VACANCY_PROMPT_TEMPLATE">
             <column name="ID" type="uuid">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -70,8 +70,8 @@
             <column name="SYSTEM_CONTEXT" type="varchar(1000)"/>
             <column name="TEMPERATURE" type="double" defaultValueNumeric="0.7"/>
         </createTable>
-        <createIndex tableName="ITPEARLS_VACANCY_PROMPT_TEMPLATE"
-                     indexName="IDX_ITPEARLS_VACANCY_PROMPT_TEMPLATE_CODE"
+        <createIndex tableName="HUNTTECH_VACANCY_PROMPT_TEMPLATE"
+                     indexName="IDX_HUNTTECH_VACANCY_PROMPT_TEMPLATE_CODE"
                      unique="true">
             <column name="CODE"/>
         </createIndex>

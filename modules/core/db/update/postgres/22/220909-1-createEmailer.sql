@@ -1,4 +1,4 @@
-create table ITPEARLS_EMAILER (
+create table HUNTTECH_EMAILER (
     ID uuid,
     VERSION integer not null,
     CREATE_TS timestamp,

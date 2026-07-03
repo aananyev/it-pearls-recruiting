@@ -1,7 +1,7 @@
 package com.hunttech.hrm.web.components.delegate;
 
 import com.company.hunttech.config.HunttechImageConfig;
-import com.company.itpearls.web.util.FileDescriptorImageHelper;
+import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.core.global.Configuration;

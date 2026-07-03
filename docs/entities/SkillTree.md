@@ -12,7 +12,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`itpearls_SkillTree.browse` (дерево), `itpearls_SkillTree.edit`; вкладка Skills в OpenPositionEdit; фрагменты browse кандидатов/вакансий. UI Spec: [browse](../ui/itpearls_SkillTree.browse_Spec.md), [edit](../ui/itpearls_SkillTree.edit_Spec.md).
+`hunttech_SkillTree.browse` (дерево), `hunttech_SkillTree.edit`; вкладка Skills в OpenPositionEdit; фрагменты browse кандидатов/вакансий. UI Spec: [browse](../ui/hunttech_SkillTree.browse_Spec.md), [edit](../ui/hunttech_SkillTree.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -24,9 +24,9 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.SkillTree` |
-| **Имя в CUBA** | `itpearls_SkillTree` |
-| **Таблица БД** | `ITPEARLS_SKILL_TREE` |
+| **Java-класс** | `com.company.hunttech.entity.SkillTree` |
+| **Имя в CUBA** | `hunttech_SkillTree` |
+| **Таблица БД** | `HUNTTECH_SKILL_TREE` |
 | **Тип данных** | справочник (дерево) |
 | **Ожидаемый объём** | сотни–тысячи записей |
 | **Критичность** | высокая (парсинг CV/JD, HR-фильтры) |
@@ -49,13 +49,13 @@
 
 ```mermaid
 erDiagram
-    ITPEARLS_SKILL_TREE ||--o{ ITPEARLS_SKILL_TREE : "skillTree (parent)"
-    ITPEARLS_SKILL_TREE }o--o| ITPEARLS_SPECIALISATION : "specialisation"
-    ITPEARLS_SKILL_TREE }o--o| ITPEARLS_OPEN_POSITION : "openPosition"
-    ITPEARLS_SKILL_TREE }o--o| ITPEARLS_CANDIDATE_CV : "candidateCV"
-    ITPEARLS_CANDIDATE_CV ||--o{ ITPEARLS_SKILL_TREE : "skillTree (collection)"
-    ITPEARLS_OPEN_POSITION ||--o{ ITPEARLS_SKILL_TREE : "skillsList"
-    ITPEARLS_JOB_CANDIDATE }o--o| ITPEARLS_SKILL_TREE : "skillTree"
+    HUNTTECH_SKILL_TREE ||--o{ HUNTTECH_SKILL_TREE : "skillTree (parent)"
+    HUNTTECH_SKILL_TREE }o--o| HUNTTECH_SPECIALISATION : "specialisation"
+    HUNTTECH_SKILL_TREE }o--o| HUNTTECH_OPEN_POSITION : "openPosition"
+    HUNTTECH_SKILL_TREE }o--o| HUNTTECH_CANDIDATE_CV : "candidateCV"
+    HUNTTECH_CANDIDATE_CV ||--o{ HUNTTECH_SKILL_TREE : "skillTree (collection)"
+    HUNTTECH_OPEN_POSITION ||--o{ HUNTTECH_SKILL_TREE : "skillsList"
+    HUNTTECH_JOB_CANDIDATE }o--o| HUNTTECH_SKILL_TREE : "skillTree"
 ```
 
 ### 2.2 Исходящие связи (FK)
@@ -146,12 +146,12 @@ erDiagram
 
 | Индекс | Колонка | Статус |
 |--------|---------|--------|
-| `IDX_ITPEARLS_SKILL_TREE_UK_SKILL_NAME` | `SKILL_NAME` | ✅ unique (soft delete) |
-| `IDX_ITPEARLS_SKILL_TREE_ON_SKILL_TREE` | `SKILL_TREE_ID` | ✅ self-FK |
-| `IDX_ITPEARLS_SKILL_TREE_ON_SPECIALISATION` | `SPECIALISATION_ID` | ✅ |
-| `IDX_ITPEARLS_SKILL_TREE_ON_OPEN_POSITION` | `OPEN_POSITION_ID` | ✅ |
-| `IDX_ITPEARLS_SKILL_TREE_ON_CANDIDATE_CV` | `CANDIDATE_CV_ID` | ✅ |
-| `IDX_ITPEARLS_SKILL_TREE_ON_FILE_IMAGE_LOGO` | `FILE_IMAGE_LOGO` | ✅ |
+| `IDX_HUNTTECH_SKILL_TREE_UK_SKILL_NAME` | `SKILL_NAME` | ✅ unique (soft delete) |
+| `IDX_HUNTTECH_SKILL_TREE_ON_SKILL_TREE` | `SKILL_TREE_ID` | ✅ self-FK |
+| `IDX_HUNTTECH_SKILL_TREE_ON_SPECIALISATION` | `SPECIALISATION_ID` | ✅ |
+| `IDX_HUNTTECH_SKILL_TREE_ON_OPEN_POSITION` | `OPEN_POSITION_ID` | ✅ |
+| `IDX_HUNTTECH_SKILL_TREE_ON_CANDIDATE_CV` | `CANDIDATE_CV_ID` | ✅ |
+| `IDX_HUNTTECH_SKILL_TREE_ON_FILE_IMAGE_LOGO` | `FILE_IMAGE_LOGO` | ✅ |
 
 **Миграция не требуется.**
 
@@ -242,7 +242,7 @@ erDiagram
 
 | Параметр | Значение |
 |----------|----------|
-| Entity cache | `eclipselink.cache.shared.itpearls_SkillTree=true`, size=1000 |
+| Entity cache | `eclipselink.cache.shared.hunttech_SkillTree=true`, size=1000 |
 | FTS | убран из `fts.xml` (2026-06-23) |
 
 ---

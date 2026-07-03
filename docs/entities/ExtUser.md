@@ -1,4 +1,4 @@
-# ExtUser (`itpearls_ExtUser`)
+# ExtUser (`hunttech_ExtUser`)
 
 > Расширение стандартного пользователя CUBA (`sec$User`) для HRM HuntTech: почтовые настройки, дашборды, AI-конфигурации и **два независимых слота фото**.
 
@@ -24,7 +24,7 @@
 | Список пользователей | `sec$User.browse` → `ext-user-browse.xml` | Админский browse |
 | Редактирование | `sec$User.edit` → `ext-user-edit.xml` / `ExtUserEdit` | Админ: профиль, роли, почта, AI, загрузка `officialPhoto` |
 | Настройки | `ExtSettingsWindow` | Пользователь: интерфейс, почта, загрузка `userAvatar` |
-| Виджет дашборда | `itpearls_MyPhotoWidget` | Миниатюра текущего пользователя |
+| Виджет дашборда | `hunttech_MyPhotoWidget` | Миниатюра текущего пользователя |
 
 Дочерние сущности: `UserSettings` (персональные почтовые overrides), `UserAiConfiguration` (AI-ключи). На `ExtUser` ссылаются рекрутёры в `IteractionList`, комментарии вакансий, внутренняя почта и др. (через `extUser-picker-view`).
 
@@ -41,10 +41,10 @@
 
 | Параметр | Значение |
 |----------|----------|
-| **Java-класс** | `com.company.itpearls.entity.ExtUser` |
-| **CUBA name** | `itpearls_ExtUser` |
+| **Java-класс** | `com.company.hunttech.entity.ExtUser` |
+| **CUBA name** | `hunttech_ExtUser` |
 | **Таблица** | `SEC_USER` (`@Extends(User.class)`) |
-| **DTYPE** | `itpearls_ExtUser` |
+| **DTYPE** | `hunttech_ExtUser` |
 
 ### Фото-профиль (FK → `SYS_FILE`)
 
@@ -98,7 +98,7 @@
 
 ## 5. Инструкция по развертыванию (Deployment Guide)
 
-После деплоя кода выполнить миграции БД (`updateDb` / Liquibase). Скрипты `260629-2-updateSecUser.sql` добавляют колонки и переносят данные из `IMAGE_ID` и `ITPEARLS_USER_SETTINGS.IMAGE_ID`.
+После деплоя кода выполнить миграции БД (`updateDb` / Liquibase). Скрипты `260629-2-updateSecUser.sql` добавляют колонки и переносят данные из `IMAGE_ID` и `HUNTTECH_USER_SETTINGS.IMAGE_ID`.
 
 Права: новые поля на `SEC_USER` покрываются существующими Read/Update на `sec$User`; Create на `sys$FileDescriptor` — без изменений.
 

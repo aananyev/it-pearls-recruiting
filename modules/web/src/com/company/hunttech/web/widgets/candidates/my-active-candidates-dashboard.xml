@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fragment xmlns="http://schemas.haulmont.com/cuba/screen/fragment.xsd"
+          xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd">
+    <data>
+        <collection id="internalEmailTemplateDc" class="com.company.hunttech.entity.InternalEmailTemplate">
+            <view extends="_local">
+                <property name="templateAuthor" view="_local"/>
+                <property name="templateOpenPosition" view="_local">
+                    <property name="positionType" view="_local"/>
+                    <property name="projectName" view="_local">
+                        <property name="projectLogo" view="_local"/>
+                    </property>
+                </property>
+                <property name="templatePosition" view="_local"/>
+            </view>
+            <loader id="internalEmailTemplateDl" cacheable="true">
+                <query>
+                    <![CDATA[select e from hunttech_InternalEmailTemplate e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.templateOpenPosition in (select k.openPosition from hunttech_RecrutiesTasks k
+                                    where k.reacrutier = :subscriber
+                                    and k.closed = false
+                                    and current_date between k.startDate and k.endDate)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.templateAuthor = :author
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e.templatePosition = :positionType
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.templateOpenPosition = :openPosition</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+        <collection id="iteractionListsDc"
+                    class="com.company.hunttech.entity.IteractionList">
+            <view extends="_local">
+                <property name="candidate"
+                          view="jobCandidate-view">
+                    <property name="socialNetwork"
+                              view="_local"/>
+                    <property name="cityOfResidence"
+                              view="_local"/>
+                    <property name="candidateCv"
+                              view="_local">
+                        <property name="toVacancy"
+                                  view="_local">
+                            <property name="projectName" view="_local"/>
+                        </property>
+                        <property name="resumePosition"
+                                  view="_local"/>
+                    </property>
+                    <property name="personPosition"
+                              view="_local"/>
+                    <property name="positionList"
+                              view="_local">
+                        <property name="positionList"
+                                  view="_local"/>
+                    </property>
+                    <property name="fileImageFace"
+                              view="_base"/>
+                    <property name="iteractionList"
+                              view="_local">
+                        <property name="recrutier"
+                                  view="_local"/>
+                        <property name="vacancy"
+                                  view="_local">
+                            <property name="projectName"
+                                      view="_local"/>
+                        </property>
+                        <property name="iteractionType"
+                                  view="_local">
+                            <property name="iteractionTree"
+                                      view="_local"/>
+                        </property>
+                    </property>
+                </property>
+                <property name="iteractionType"
+                          view="_local">
+                    <property name="iteractionTree"
+                              view="_local"/>
+                </property>
+                <property name="recrutier"
+                          view="_local"/>
+                <property name="vacancy"
+                          view="_local">
+                    <property name="projectName"
+                              view="_local">
+                        <property name="projectOwner" view="person-owner-view"/>
+                    </property>
+                </property>
+            </view>
+            <loader id="iteractionListsDl"
+                    cacheable="true">
+                <query><![CDATA[select e
+                    from hunttech_IteractionList e]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>
+                                    e.createdBy like :recrutier
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e in (select g from hunttech_IteractionList g
+                                    where e.candidate.id = g.candidate.id
+                                    and e.vacancy.id = g.vacancy.id
+                                    and g.iteractionType.signEndCase = :endCase)
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>@between(e.dateIteraction, now - :daysBetween, now, day)</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in
+                                    (select h
+                                    from hunttech_IteractionList h
+                                    where h.candidate.fullName like '%:candidate%')
+                                </c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e.candidate.personPosition = :personPosition)
+                                </c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout spacing="false"
+            expand="candidatesScrollBox">
+        <hbox spacing="true"
+              width="AUTO"
+              height="AUTO">
+            <radioButtonGroup id="candidateRadioButtonGroup"
+                              caption="msg://msgCandidateFilter"
+                              width="AUTO"
+                              align="BOTTOM_LEFT"
+                              orientation="horizontal"/>
+            <checkBox id="excludeCheckBox"
+                      caption="msg://msgExclude"
+                      width="AUTO"
+                      height="AUTO"
+                      align="BOTTOM_LEFT"
+                      description="msg://msgExcludeDesc"/>
+            <checkBox id="cardDetailCheckBox"
+                      caption="msg://msgCardDetail"
+                      description="msg://msgCardDetailDesc"
+                      align="BOTTOM_LEFT"
+                      width="AUTO"
+                      height="AUTO"/>
+        </hbox>
+        <scrollBox id="candidatesScrollBox"
+                   spacing="true"
+                   width="100%"
+                   align="TOP_LEFT"
+                   height="AUTO"
+                   orientation="vertical">
+        </scrollBox>
+        <label id="notCandidatesLabel"
+               align="MIDDLE_CENTER"
+               stylename="h1"
+               value="msg://msgNoCandidates"
+               visible="false"/>
+        <groupBox id="excludeCandidatesLineGroupBox"
+                  collapsable="true"
+                  collapsed="true"
+                  spacing="true"
+                  width="100%"
+                  align="TOP_LEFT"
+                  height="AUTO"
+                  stylename="light"
+                  caption="msg://msgExcludedCandidates"
+                  orientation="vertical"/>
+    </layout>
+</fragment>

@@ -31,7 +31,7 @@
 | Параметр | Значение |
 |----------|----------|
 | **@UiController** | `{controllerId}` |
-| **Java-класс** | `com.company.itpearls.web.{package}.{ClassName}` |
+| **Java-класс** | `com.company.hunttech.web.{package}.{ClassName}` |
 | **XML-дескриптор** | `{descriptor}.xml` |
 | **Маршрут** | `@Route(path = "…")` / menu id |
 | **Открытие** | menu / opener screen / lookup / dialog |
