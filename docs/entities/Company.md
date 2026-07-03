@@ -43,6 +43,32 @@ Browse без LOB в view (`company-browse-view`); edit с lazy reload LOB на 
 
 `IDX_ITPEARLS_COMPANY_ON_COMPANY_GROUP`, `ON_COUNTRY_OF_COMPANY`, `ON_REGION_OF_COMPANY`, `ON_CITY_OF_COMPANY` — ✅ в init schema.
 
+### Индексы производительности (локальная БД, 2026-07-02)
+
+Для ускорения `CompanyBrowse` на локальной PostgreSQL БД добавлены частичные индексы по активным (`DELETE_TS IS NULL`) компаниям:
+
+| Индекс | Таблица / поля | Назначение |
+|--------|----------------|------------|
+| `IDX_ITPEARLS_COMPANY_ACTIVE_NAME` | `ITPEARLS_COMPANY (COMANY_NAME, ID) WHERE DELETE_TS IS NULL` | сортировка активного списка компаний; особенно полезно при `LIMIT`/пагинации |
+| `IDX_ITPEARLS_COMPANY_ACTIVE_CLIENT_NAME` | `ITPEARLS_COMPANY (COMANY_NAME, ID) WHERE DELETE_TS IS NULL AND OUR_CLIENT = TRUE` | checkbox-фильтр `OnlyOurClient` в Browse |
+| `IDX_ITPEARLS_COMPANY_ACTIVE_LEGAL_NAME` | `ITPEARLS_COMPANY (COMANY_NAME, ID) WHERE DELETE_TS IS NULL AND OUR_LEGAL_ENTITY = TRUE` | checkbox-фильтр `OnlyOurLegalEntity` в Browse |
+
+DDL, применённый на локальной БД:
+
+```sql
+CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_ITPEARLS_COMPANY_ACTIVE_NAME
+ON ITPEARLS_COMPANY (COMANY_NAME, ID)
+WHERE DELETE_TS IS NULL;
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_ITPEARLS_COMPANY_ACTIVE_CLIENT_NAME
+ON ITPEARLS_COMPANY (COMANY_NAME, ID)
+WHERE DELETE_TS IS NULL AND OUR_CLIENT = TRUE;
+
+CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_ITPEARLS_COMPANY_ACTIVE_LEGAL_NAME
+ON ITPEARLS_COMPANY (COMANY_NAME, ID)
+WHERE DELETE_TS IS NULL AND OUR_LEGAL_ENTITY = TRUE;
+```
+
 ---
 
 ## 4. Представления
@@ -109,6 +135,19 @@ Browse без LOB в view (`company-browse-view`); edit с lazy reload LOB на 
 > Важно: попытка убрать `departmentOfCompany` из `company-edit-view` дала регрессию `Cannot get unfetched attribute [departmentOfCompany]`.
 > Поэтому текущая безопасная production-оптимизация — только устранение лишней загрузки Browse.
 
+### Замеры индексов локальной БД — 2026-07-02
+
+До добавления частичных индексов checkbox-запросы выполнялись через `Seq Scan` по `ITPEARLS_COMPANY`.
+После добавления индексов:
+
+| Запрос | План после оптимизации | Время на локальной БД |
+|--------|------------------------|-----------------------|
+| `DELETE_TS IS NULL AND OUR_CLIENT = TRUE ORDER BY COMANY_NAME` | `Index Only Scan using IDX_ITPEARLS_COMPANY_ACTIVE_CLIENT_NAME` | ~0.23 ms |
+| `DELETE_TS IS NULL AND OUR_LEGAL_ENTITY = TRUE ORDER BY COMANY_NAME` | `Index Only Scan using IDX_ITPEARLS_COMPANY_ACTIVE_LEGAL_NAME` | ~0.05 ms |
+| `DELETE_TS IS NULL ORDER BY COMANY_NAME LIMIT 100` | `Index Only Scan using IDX_ITPEARLS_COMPANY_ACTIVE_NAME` | ~0.18 ms |
+
+Полный `CompanyBrowse` без `LIMIT` всё ещё может идти через `Seq Scan + Sort`, потому что форма загружает почти все активные компании и широкий набор FK-полей. Для дальнейшего ускорения первого открытия формы нужен переход на пагинацию/ограниченную первую загрузку, а не только индексы.
+
 ### Backlog
 
 | Проблема | Приоритет |
@@ -116,6 +155,7 @@ Browse без LOB в view (`company-browse-view`); edit с lazy reload LOB на 
 | FTS Company в `fts.xml` | низкий |
 | Legacy `company-view` в views.xml (JobHistory и др.) | средний |
 | cacheable на companiesDl (динамические фильтры) | низкий |
+| Пагинация/ограниченная первая загрузка CompanyBrowse | высокий |
 
 ---
 
@@ -158,6 +198,7 @@ IllegalStateException: Cannot get unfetched attribute [departmentOfCompany] from
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-02 | Локальная БД: добавлены частичные индексы `IDX_ITPEARLS_COMPANY_ACTIVE_*` для активного списка и checkbox-фильтров CompanyBrowse |
 | 2026-07-02 | Актуализация после оптимизации: удалена повторная загрузка `CompanyBrowse`; добавлены perf-тесты и view-contract regression-тесты; зафиксировано, что `departmentOfCompany` обязателен в `company-edit-view` из-за `departmentOfCompanyDc` |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Исправление unfetched FK на Edit: `company-edit-view` — `cityOfCompany` → `city-location-view`; `CompanyEdit` — reload `cityRegion`/`regionCountry` в обработчиках picker |

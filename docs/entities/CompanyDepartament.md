@@ -31,6 +31,24 @@ Browse с FK на Company; используется в фильтрах и ко�
 | **Тип данных** | справочник |
 | **Критичность** | высокая — FK в Project, Person, OpenPosition |
 
+### Индексы производительности (локальная БД, 2026-07-02)
+
+Для ускорения загрузки департаментов конкретной компании на вкладке `CompanyEdit` добавлен частичный индекс:
+
+| Индекс | Таблица / поля | Назначение |
+|--------|----------------|------------|
+| `IDX_ITPEARLS_COMPANY_DEPT_ACTIVE_COMPANY_NAME` | `ITPEARLS_COMPANY_DEPARTAMENT (COMPANY_NAME_ID, DEPARTAMENT_RU_NAME) WHERE DELETE_TS IS NULL` | загрузка активных департаментов компании с сортировкой по названию |
+
+DDL, применённый на локальной БД:
+
+```sql
+CREATE INDEX CONCURRENTLY IF NOT EXISTS IDX_ITPEARLS_COMPANY_DEPT_ACTIVE_COMPANY_NAME
+ON ITPEARLS_COMPANY_DEPARTAMENT (COMPANY_NAME_ID, DEPARTAMENT_RU_NAME)
+WHERE DELETE_TS IS NULL;
+```
+
+На текущем локальном объёме (`~112` активных департаментов) PostgreSQL может продолжать выбирать `Seq Scan`, потому что таблица очень маленькая. Индекс добавлен как задел на рост данных и на быстрый доступ к департаментам из `CompanyEdit`.
+
 ### LOB-поля
 
 | Поле | Колонка |
@@ -83,12 +101,27 @@ Browse с FK на Company; используется в фильтрах и ко�
 | projectOfDepartment в browse | да (_local) | нет | −N проектов | |
 | Полей в view (оценка) | ~20+ | 6 | −14 | |
 
+### Замеры индекса локальной БД — 2026-07-02
+
+Текущий объём `ITPEARLS_COMPANY_DEPARTAMENT` мал: около `116` строк всего и `112` активных.
+Поэтому запрос вкладки департаментов конкретной компании выполняется менее чем за `1 ms`, а планер может предпочитать последовательное сканирование.
+
+Индекс `IDX_ITPEARLS_COMPANY_DEPT_ACTIVE_COMPANY_NAME` важен как защита при росте числа департаментов и компаний:
+
+```sql
+SELECT id, departament_ru_name, departament_director_id, departament_hr_director_id
+FROM itpearls_company_departament
+WHERE delete_ts IS NULL
+  AND company_name_id = :companyId
+ORDER BY departament_ru_name;
+```
+
 ### Backlog
 
 | Проблема | Приоритет |
 |----------|-----------|
 | FTS CompanyDepartament | низкий |
-| Индекс на `DEPARTAMENT_RU_NAME` (есть в HSQL migrations) | низкий |
+| Индекс на `DEPARTAMENT_RU_NAME` для общего Browse/search | низкий; для вкладки CompanyEdit уже есть составной локальный индекс по `(COMPANY_NAME_ID, DEPARTAMENT_RU_NAME)` |
 | Вернуть колонку «есть описание» через batch-иконку | низкий |
 
 ---
@@ -107,6 +140,7 @@ Browse с FK на Company; используется в фильтрах и ко�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-02 | Локальная БД: добавлен частичный индекс `IDX_ITPEARLS_COMPANY_DEPT_ACTIVE_COMPANY_NAME` для активных департаментов компании |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: `CompanyDepartamentEdit` без каскадных обработчиков; lazy LOB/projects через reload — OK |
 | 2026-06-23 | Оптимизация: устранена рекурсия `companyName` в `companyDepartament-view`, browse/edit/picker views, lazy LOB, `CompanyDepartamentServiceTest`, документация |
