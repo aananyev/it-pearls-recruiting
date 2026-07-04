@@ -83,16 +83,18 @@ public class VacancyListCommand extends OperationCommand {
         List<InlineKeyboardButton> viewFromHuntTech = new ArrayList<>();
         List<InlineKeyboardButton> viewCVComment = new ArrayList<>();
 
-        // Просмотр вакансии в базе
-        InlineKeyboardButton viewOpenPositionKeyboardButton = new InlineKeyboardButton();
-        viewOpenPositionKeyboardButton.setText("Просмотр в HuntTech");
         String urlButton = Utils.getOpenPositionEditorURL(openPosition);
-        viewOpenPositionKeyboardButton.setUrl(urlButton);
+        // ОБНОВЛЕНИЕ: кнопки inline-клавиатуры создаются через builder вместо new InlineKeyboardButton()+setters.
+        InlineKeyboardButton viewOpenPositionKeyboardButton = InlineKeyboardButton.builder()
+                .text("Просмотр в HuntTech")
+                .url(urlButton)
+                .build();
 
-        // Просмотр описания вакансии
-        InlineKeyboardButton postCVCommentKeyboardButton = new InlineKeyboardButton();
-        postCVCommentKeyboardButton.setText("Просмотр описания вакансии");
-        postCVCommentKeyboardButton.setCallbackData("ViewJobDescription");
+        // ОБНОВЛЕНИЕ: callback-кнопка также переведена на builder telegrambots 6.8.
+        InlineKeyboardButton postCVCommentKeyboardButton = InlineKeyboardButton.builder()
+                .text("Просмотр описания вакансии")
+                .callbackData("ViewJobDescription")
+                .build();
 
         viewFromHuntTech.add(viewOpenPositionKeyboardButton);
         viewFromHuntTech.add(postCVCommentKeyboardButton);
@@ -108,10 +110,11 @@ public class VacancyListCommand extends OperationCommand {
         InlineKeyboardMarkup markupKeyboard = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-
-        inlineKeyboardButton.setText("Просмотр");
-        inlineKeyboardButton.setUrl(Utils.getOpenPositionEditorURL(openPosition));
+        // ОБНОВЛЕНИЕ: одиночная inline-кнопка создаётся через builder вместо ручных setters.
+        InlineKeyboardButton inlineKeyboardButton = InlineKeyboardButton.builder()
+                .text("Просмотр")
+                .url(Utils.getOpenPositionEditorURL(openPosition))
+                .build();
 
         rowInline.add(inlineKeyboardButton);
         buttons.add(rowInline);

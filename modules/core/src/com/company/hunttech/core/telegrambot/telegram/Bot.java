@@ -25,7 +25,6 @@ public final class Bot extends TelegramLongPollingCommandBot {
     private Logger logger = LoggerFactory.getLogger(Bot.class);
 
     private final String BOT_NAME;
-
     private static final Settings defaultSettings = new Settings(3, true);
     private final NonCommand nonCommand;
     private Update update;
@@ -41,6 +40,7 @@ public final class Bot extends TelegramLongPollingCommandBot {
 
     public Bot(String botName, String botToken) {
         super(botToken);
+        // ОБНОВЛЕНИЕ: токен передаётся в современный constructor TelegramLongPollingCommandBot; override getBotToken() в 6.8 помечен deprecated.
         logger.debug("Конструктор суперкласса отработал");
         this.BOT_NAME = botName;
         logger.debug("Имя и токен присвоены");
@@ -118,10 +118,12 @@ public final class Bot extends TelegramLongPollingCommandBot {
      * @param text текст ответа
      */
     private void setAnswer(Long chatId, String userName, String text) {
-        SendMessage answer = new SendMessage();
-        answer.setText(text);
-        answer.setChatId(chatId.toString());
-        answer.setParseMode(ParseMode.HTML);
+        // ОБНОВЛЕНИЕ: устаревшее ручное создание SendMessage через new/setters заменено на builder telegrambots 6.8.
+        SendMessage answer = SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(text)
+                .parseMode(ParseMode.HTML)
+                .build();
 
         Utils.setButtons(answer);
 
@@ -133,29 +135,4 @@ public final class Bot extends TelegramLongPollingCommandBot {
             e.printStackTrace();
         }
     }
-
-/*    @Override
-    public void onUpdateReceived(Update update) {
-        this.update = update;
-        onUpdateReceived(update);
-
-        if(update.hasMessage()){
-            if(update.getMessage().hasText()){
-                if(update.getMessage().getText().equals("Hello")){
-//                    try {
-//                        execute(sendInlineKeyBoardMessage(update.getMessage().getChatId()));
-//                    } catch (TelegramApiException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-            }
-        }else if(update.hasCallbackQuery()){
-//            try {
-//                execute(new SendMessage().setText(
-//                                update.getCallbackQuery().getData())
-//                        .setChatId(update.getCallbackQuery().getMessage().getChatId()));
-//            } catch (TelegramApiException e) {
-//                e.printStackTrace();
-           }
-        } */
 }

@@ -3,6 +3,8 @@ package com.company.hunttech.core;
 import com.company.hunttech.core.telegrambot.TelegramBotStatus;
 import com.company.hunttech.core.telegrambot.telegram.Bot;
 import com.company.hunttech.core.telegrambot.telegram.commands.service.SettingsCommand;
+import com.company.hunttech.config.HunttechTelegramConfig;
+import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.security.app.Authentication;
 import org.slf4j.Logger;
@@ -29,26 +31,24 @@ public class TelegramBotComponent {
     private TelegramBotService telegramBotService;
     @Inject
     private ApplicationSetupService applicationSetupService;
+    @Inject
+    private Configuration configuration;
 
     @PostConstruct
     protected void init() throws IOException {
         authentication.begin();
 
-        String NAME = applicationSetupService.getTelegramBotName();
-        String TOKEN = applicationSetupService.getTelegramToken();
+        // ОБНОВЛЕНИЕ: имя и токен берутся из app.properties через CUBA Config, ApplicationSetup остаётся fallback для существующих инсталляций.
+        String NAME = resolveTelegramBotName();
+        String TOKEN = resolveTelegramBotToken();
         //инициализируйте конфигурацию здесь
         try {
+            // ОБНОВЛЕНИЕ: TelegramBotsApi создаётся с DefaultBotSession.class, как требует telegrambots 6.8+.
             TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
             telegramBotService.saveTelegramBotApi(botsApi);
 
             if (applicationSetupService.getTelegramBotStart() != null
                     ? applicationSetupService.getTelegramBotStart() : false) {
-                if (applicationSetupService.getTelegramBotName() != null
-                        && applicationSetupService.getTelegramToken() != null) {
-                    NAME = applicationSetupService.getTelegramBotName();
-                    TOKEN = applicationSetupService.getTelegramToken();
-                }
-
                 Bot bot = new Bot(NAME, TOKEN);
 
                 botsApi.registerBot(bot);
@@ -67,6 +67,24 @@ public class TelegramBotComponent {
         } finally {
             authentication.end();
         }
+    }
+
+    private String resolveTelegramBotName() {
+        HunttechTelegramConfig telegramConfig = configuration.getConfig(HunttechTelegramConfig.class);
+        return isConfigured(telegramConfig.getBotName())
+                ? telegramConfig.getBotName()
+                : applicationSetupService.getTelegramBotName();
+    }
+
+    private String resolveTelegramBotToken() {
+        HunttechTelegramConfig telegramConfig = configuration.getConfig(HunttechTelegramConfig.class);
+        return isConfigured(telegramConfig.getBotToken())
+                ? telegramConfig.getBotToken()
+                : applicationSetupService.getTelegramToken();
+    }
+
+    private boolean isConfigured(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 
     @PreDestroy

@@ -2,6 +2,8 @@ package com.company.hunttech.core;
 
 import com.company.hunttech.core.telegrambot.TelegramBotStatus;
 import com.company.hunttech.core.telegrambot.telegram.Bot;
+import com.company.hunttech.config.HunttechTelegramConfig;
+import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.Messages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +20,8 @@ public class TelegramBotServiceBean implements TelegramBotService, Serializable 
     private ApplicationSetupService applicationSetupService;
     @Inject
     private Messages messages;
+    @Inject
+    private Configuration configuration;
 
     @Override
     public void saveTelegramBotApi(TelegramBotsApi botsApi) {
@@ -47,18 +51,14 @@ public class TelegramBotServiceBean implements TelegramBotService, Serializable 
 
     @Override
     public void telegramBotRestart() {
-        String NAME = TelegramBotStatus.getDefaultBotName();
-        String TOKEN = TelegramBotStatus.getDefaultBotToken();
+        // ОБНОВЛЕНИЕ: рестарт бота использует CUBA Config из app.properties, а не значения по умолчанию из статуса.
+        String NAME = resolveTelegramBotName();
+        String TOKEN = resolveTelegramBotToken();
         TelegramBotsApi botsApi = restoreTelegramBotApi();
 
         if (!isBotStarted()) {
             if (applicationSetupService.getTelegramBotStart() != null
                     ? applicationSetupService.getTelegramBotStart() : false) {
-                if (applicationSetupService.getTelegramBotName() != null
-                        && applicationSetupService.getTelegramToken() != null) {
-                    NAME = applicationSetupService.getTelegramBotName();
-                    TOKEN = applicationSetupService.getTelegramToken();
-                }
                 try {
                     Bot bot = new Bot(NAME, TOKEN);
                     botsApi.registerBot(bot);
@@ -73,5 +73,23 @@ public class TelegramBotServiceBean implements TelegramBotService, Serializable 
                 }
             }
         }
+    }
+
+    private String resolveTelegramBotName() {
+        HunttechTelegramConfig telegramConfig = configuration.getConfig(HunttechTelegramConfig.class);
+        return isConfigured(telegramConfig.getBotName())
+                ? telegramConfig.getBotName()
+                : applicationSetupService.getTelegramBotName();
+    }
+
+    private String resolveTelegramBotToken() {
+        HunttechTelegramConfig telegramConfig = configuration.getConfig(HunttechTelegramConfig.class);
+        return isConfigured(telegramConfig.getBotToken())
+                ? telegramConfig.getBotToken()
+                : applicationSetupService.getTelegramToken();
+    }
+
+    private boolean isConfigured(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 }

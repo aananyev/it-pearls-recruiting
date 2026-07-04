@@ -25,11 +25,12 @@ abstract class OperationCommand extends BotCommand {
      * Отправка ответа пользователю
      */
     void sendAnswer(AbsSender absSender, Long chatId, String commandName, String userName, String text) {
-        SendMessage message = new SendMessage();
-        message.enableMarkdown(true);
-        message.setParseMode(ParseMode.HTML);
-        message.setChatId(chatId.toString());
-        message.setText(text);
+        // ОБНОВЛЕНИЕ: старый new SendMessage()+setters заменён на builder с явным HTML parse mode.
+        SendMessage message = SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(text)
+                .parseMode(ParseMode.HTML)
+                .build();
 
         Utils.setButtons(message);
         try {
@@ -42,12 +43,13 @@ abstract class OperationCommand extends BotCommand {
 
     void sendAnswer(AbsSender absSender, Long chatId, String commandName, String userName, String text,
                     InlineKeyboardMarkup keyboardMarkup) {
-        SendMessage message = new SendMessage();
-        message.enableMarkdown(true);
-        message.setParseMode(ParseMode.HTML);
-        message.setChatId(chatId.toString());
-        message.setText(text);
-        message.setReplyMarkup(keyboardMarkup);
+        // ОБНОВЛЕНИЕ: старый new SendMessage()+setReplyMarkup заменён на builder с keyboardMarkup.
+        SendMessage message = SendMessage.builder()
+                .chatId(chatId.toString())
+                .text(text)
+                .parseMode(ParseMode.HTML)
+                .replyMarkup(keyboardMarkup)
+                .build();
 
 //        Utils.setButtons(message);
         try {
