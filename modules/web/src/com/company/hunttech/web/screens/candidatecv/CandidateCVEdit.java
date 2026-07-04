@@ -135,9 +135,30 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Image candidateFaceDefaultImage;
     @Inject
     private ResumeRecognitionService resumeRecognitionService;
+    @Inject
+    private TabSheet tabSheet;
+
+    private boolean openPositionsReady;
+    private boolean cvTextInitialized;
+    private boolean skillTabInitialized;
 
     public FileDescriptor getFileDescriptor() {
         return fileDescriptor;
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        // @LoadDataBeforeShow should not load all vacancies before setOnlyMySubscribeCheckBox() sets the subscriber filter.
+        openPositionsDl.addPreLoadListener(e -> {
+            if (!openPositionsReady) {
+                e.preventLoad();
+            }
+        });
+
+        tabSheet.addSelectedTabChangeListener(selectedTabChangeEvent -> {
+            initCvTextTab();
+            initSkillTreeTab();
+        });
     }
 
     @Subscribe
@@ -342,6 +363,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 textResume = extractor.getText().replaceAll("\n", breakLine[0]);
 
                 if (textResume != null) {
+                    // Uploaded DOCX text is a real edit, so commit must include the lazily managed TEXT_CV field.
+                    cvTextInitialized = true;
                     candidateCVRichTextArea.setValue(textResume.replaceAll("\n", breakLine[0]));
                 }
             }
@@ -354,6 +377,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         if (textResume != null) {
+            // Uploaded file parsing writes TEXT_CV before the CV tab may be opened.
+            cvTextInitialized = true;
             candidateCVRichTextArea.setValue(textResume.replaceAll("\n", breakLine[0]));
         }
     }
@@ -383,6 +408,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private void setOnlyMySubscribeCheckBox() {
         onlyMySubscribeCheckBox.setValue(true);
         openPositionsDl.setParameter("subscriber", userSession.getUser());
+        openPositionsReady = true;
         openPositionsDl.load();
 
         if (openPositionsDc.getItems().size() == 0) {
@@ -398,6 +424,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         onlyMySubscribeCheckBox.addValueChangeListener(e -> {
             if (e.getValue()) {
                 openPositionsDl.setParameter("subscriber", userSession.getUser());
+                openPositionsReady = true;
                 openPositionsDl.load();
 
                 if (openPositionsDc.getItems().size() == 0) {
@@ -411,6 +438,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 }
             } else {
                 openPositionsDl.removeParameter("subscriber");
+                openPositionsReady = true;
                 openPositionsDl.load();
             }
 
@@ -420,7 +448,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         setOnlyMySubscribeCheckBox();
-        convertTextCV();
+        // Keep the heavy resume body out of the initial form opening; it is prepared when the CV tab is selected.
+        textResumeStringBuffer = new StringBuffer(getEditedEntity().getTextCV() != null ? getEditedEntity().getTextCV() : "");
 
 /*        if (candidateCVRichTextArea.getValue() != null) {
             textResumeStringBuffer = new StringBuffer(candidateCVRichTextArea.getValue());
@@ -441,16 +470,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         quoteTextArea.setValue(messageBundle.getMessage("msgSalesCV"));
-        candidateCVRichTextArea.setValue(getEditedEntity().getTextCV() != null ?
-                getEditedEntity().getTextCV().replaceAll("\n", breakLine[0]) : null);
-
-        candidateCVRichTextArea.addValidator(value -> {
-            if (value == null || value.equals("")) {
-                convertToTextButton.setEnabled(false);
-            } else {
-                convertToTextButton.setEnabled(true);
-            }
-        });
+        convertToTextButton.setEnabled(getEditedEntity().getTextCV() != null && !getEditedEntity().getTextCV().equals(""));
 
         if (!PersistenceHelper.isNew(getEditedEntity()) &&
                 (userSessionSource.getUserSession().getUser().getGroup().getName().equals(StdUserGroup.ACCOUNTING) ||
@@ -458,18 +478,67 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             candidateCVRichTextArea.setEditable(false);
         }
 
-        setCVRecommendation();
         setLetterRecommendation();
 //        setVisibleLogo();
         setCandidatePicImage();
     }
 
     private void convertTextCV() {
+        // Resume text conversion is intentionally lazy because large TEXT_CV values make editor opening slow.
+        initCvTextTab();
         convertToText();
+    }
+
+    private void initCvTextTab() {
+        TabSheet.Tab selectedTab = tabSheet.getSelectedTab();
+        if (selectedTab == null || !"tabCV".equals(selectedTab.getName())) {
+            return;
+        }
+
+        ensureCvTextInitialized();
+    }
+
+    private void ensureCvTextInitialized() {
+        if (cvTextInitialized) {
+            return;
+        }
+
+        // Load and decorate TEXT_CV only when a visible CV/skills workflow actually needs it.
+        candidateCVRichTextArea.setValue(getEditedEntity().getTextCV() != null ?
+                getEditedEntity().getTextCV().replaceAll("\n", breakLine[0]) : null);
+        candidateCVRichTextArea.addValidator(value -> convertToTextButton.setEnabled(value != null && !value.equals("")));
+        setCVRecommendation();
+        setColorHighlightingCompetencies();
+        // After lazy formatting/highlighting, keep the baseline equal to the visible text to avoid false dirty checks.
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            textResumeStringBuffer = new StringBuffer(candidateCVRichTextArea.getValue() != null
+                    ? candidateCVRichTextArea.getValue()
+                    : "");
+        }
+        cvTextInitialized = true;
+    }
+
+    private void initSkillTreeTab() {
+        TabSheet.Tab selectedTab = tabSheet.getSelectedTab();
+        if (selectedTab == null || !"tabSkillTree".equals(selectedTab.getName()) || skillTabInitialized) {
+            return;
+        }
+
+        // Parse skills only when the skill tree tab is opened; parsing a full resume is CPU-heavy.
+        ensureCvTextInitialized();
+        if (candidateCVRichTextArea.getValue() != null) {
+            rescanResume();
+        }
+        skillTabInitialized = true;
     }
 
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        // If the CV tab was never opened, keep existing LOB text unchanged and avoid false contact-check invalidation.
+        if (!cvTextInitialized) {
+            return;
+        }
+
         if (PersistenceHelper.isNew(getEditedEntity())) {
             if (candidateCVRichTextArea.getValue() != null) {
                 getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
@@ -627,9 +696,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe
     public void onAfterShow1(AfterShowEvent event) {
-        if (candidateCVRichTextArea.getValue() != null)
-            rescanResume();
-        setColorHighlightingCompetencies();
+        // Skill parsing moved to initSkillTreeTab(); opening the editor should not parse a full resume eagerly.
     }
 
 
@@ -705,9 +772,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
             getEditedEntity().setOwner((ExtUser) userSession.getUser());
         } else {
-            if (candidateCVRichTextArea.getValue() != null) {
-                textResumeStringBuffer = new StringBuffer(candidateCVRichTextArea.getValue());
-            }
+            // Baseline text is captured from the entity so unchanged LOB fields are not rewritten on save.
+            textResumeStringBuffer = new StringBuffer(getEditedEntity().getTextCV() != null ? getEditedEntity().getTextCV() : "");
         }
     }
 
@@ -761,6 +827,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     public List<SkillTree> rescanResume() {
+        // Skill parsing needs the lazy TEXT_CV value even when launched from the skills tab.
+        ensureCvTextInitialized();
 
         if (candidateCVRichTextArea.getValue() != null) {
             String inputText = Jsoup.parse(candidateCVRichTextArea.getValue()).text();
@@ -843,6 +911,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     public void resumeRecognition() {
+        // Recognition runs against the lazily loaded rich text area.
+        ensureCvTextInitialized();
         machRegexpFromCV.setValue(parseCVService.parseEmail(candidateCVRichTextArea.getValue())
                 + " "
                 + parseCVService.parsePhone(candidateCVRichTextArea.getValue()));
@@ -867,6 +937,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     public void loadToCVTextArea() {
+        // Web import replaces the lazy TEXT_CV value only for this explicit user action.
+        ensureCvTextInitialized();
         Document doc = null;
         try {
 /*            doc = Jsoup.connect(textFieldIOriginalCV.getValue())
@@ -901,6 +973,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     Boolean flagHTML = true;
 
     public void convertToText() {
+        // Conversion is user-triggered, so initialize the lazy resume text on demand.
+        ensureCvTextInitialized();
         if (candidateCVRichTextArea.getValue() != null) {
             if (flagHTML) {
                 String break_line = "break_line";
@@ -940,6 +1014,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     Boolean flagOriginal = false;
 
     public void showOriginalText() {
+        // Original/highlight toggle needs the lazy TEXT_CV body only after the user requests it.
+        ensureCvTextInitialized();
         if (flagOriginal) {
             showOriginalButon.setCaption("Оригинальное");
             flagOriginal = false;

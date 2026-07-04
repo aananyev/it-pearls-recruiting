@@ -1,0 +1,282 @@
+/**
+ * Hunttech-Modern-Dark (тёмная тема) — кастомные стили расширения.
+ *
+ * Содержит бизнес-стили HRM HuntTech, адаптированные для тёмной палитры:
+ * рейтинги кандидатов, виджеты, уведомления, календарь и прочие UI-компоненты.
+ */
+
+/* ─── Кастомные стили ─── */
+.open-position-job-recruitier {
+    color: #38BDF8;
+    font-weight: bold;
+}
+
+.open-position-empty-recruitier {
+    color: #64748B;
+    font-weight: normal;
+}
+
+.recrutier-tasks-gray {
+    color: #64748B;
+    text-decoration: line-through;
+}
+
+.recrutier-tasks-normal {
+    color: #CBD5E1;
+}
+
+/* ─── Виджеты ─── */
+.widget-border-line {
+    border: 1px solid #334155;
+    border-radius: 12px;
+}
+
+.v-caption-shift-field {
+    white-space: pre;
+}
+
+/* ─── Календарь ─── */
+.v-calendar-event.event-green {
+    background-color: #14532D;
+    color: #4ADE80;
+}
+
+.v-calendar-event.event-yellow {
+    background-color: #422006;
+    color: #FBBF24;
+}
+
+/* ─── Login ─── */
+.c-login-layout-HuntTech .c-login-layout {
+    background: #0F172A;
+}
+
+/* HuntTech Modern Dark: локальные миксины рейтингов нужны новым темам отдельно от базовой halo-директории. */
+@mixin rating_round($color_p) {
+    font-family: 'Kanit', sans-serif;
+    font-size: large;
+    font-weight: bold;
+    text-align: center;
+    width: 20px;
+    height: 20px;
+    border: 1px solid;
+    border-radius: 10px;
+    line-height: 17px;
+    color: $color_p;
+    box-shadow: 0 0 0 2px $color_p, 0 0 13px #333;
+}
+
+/* HuntTech Modern Dark: компактный индикатор батарейного рейтинга для виджетов главного экрана. */
+@mixin rating_battery_round($color_p) {
+    font-size: large;
+    font-weight: bold;
+    font-family: bold;
+    margin: -5px -5px -5px -5px;
+    padding: -5px -5px -5px -5px;
+    top: 50%;
+    height: 20px;
+    border: 1px solid;
+    border-radius: 2px;
+    color: $color_p;
+}
+
+/* HuntTech Modern Dark: крупный круглый рейтинг для карточки кандидата. */
+@mixin rating_candidate_round($color_p) {
+    font-family: 'Antonio', sans-serif;
+    font-size: large;
+    font-weight: bold;
+    text-align: center;
+    width: 50px;
+    height: 50px;
+    border: 1px solid;
+    border-radius: 25px;
+    line-height: 17px;
+    color: $color_p;
+    box-shadow: 0 0 0 2px $color_p, 0 0 13px #333;
+}
+
+/* HuntTech Modern Dark: метка статистики кандидатов в dashboard-виджетах. */
+@mixin rating_statistic_label($color_p) {
+    font-family: 'Antonio', sans-serif;
+    font-size: medium;
+    font-weight: bold;
+    text-align: center;
+    border: 1px solid;
+    border-radius: 5px;
+    line-height: 17px;
+    color: $color_p;
+    padding: 5px;
+    box-shadow: 0 0 0 2px $color_p, 0 0 13px #333;
+}
+
+/* ─── Mixin всех кастомных стилей для тёмной темы ─── */
+@mixin com_company_hunttech-hunttech-modern-dark-ext {
+
+    /* ─── Rating badges (яркость повышена для контраста на тёмном фоне) ─── */
+    .rating_red_1 {
+        @include rating_round(#F87171);
+    }
+    .rating_orange_2 {
+        @include rating_round(#FB923C);
+    }
+    .rating_yellow_3 {
+        @include rating_round(#FACC15);
+    }
+    .rating_green_4 {
+        @include rating_round(#4ADE80);
+    }
+    .rating_blue_5 {
+        @include rating_round(#60A5FA);
+    }
+    .rating_gray_6 {
+        @include rating_round(#94A3B8);
+    }
+
+    .rating_candidate_red_1 {
+        @include rating_candidate_round(#F87171);
+    }
+    .rating_candidate_orange_2 {
+        @include rating_candidate_round(#FB923C);
+    }
+    .rating_candidate_yellow_3 {
+        @include rating_candidate_round(#FACC15);
+    }
+    .rating_candidate_green_4 {
+        @include rating_candidate_round(#4ADE80);
+    }
+    .rating_candidate_blue_5 {
+        @include rating_candidate_round(#60A5FA);
+    }
+
+    /* ─── Battery-рейтинги ─── */
+    .rating_battery_grey_0 {
+        @include rating_battery_round(#94A3B8);
+    }
+    .rating_battery_red_1 {
+        @include rating_battery_round(#F87171);
+    }
+    .rating_battery_orange_2 {
+        @include rating_battery_round(#FB923C);
+    }
+    .rating_battery_teal_3 {
+        @include rating_battery_round(#2DD4BF);
+    }
+    .rating_battery_yellow_3 {
+        @include rating_battery_round(#FACC15);
+    }
+    .rating_battery_green_4 {
+        @include rating_battery_round(#4ADE80);
+    }
+    .rating_battery_blue_5 {
+        @include rating_battery_round(#60A5FA);
+    }
+
+    .statistic_label_candidate_blue {
+        @include rating_statistic_label(#60A5FA);
+    }
+
+    /* ─── Widget styling (тёмный) ─── */
+    .widget-title {
+        font-weight: 600;
+        padding: 4px 8px;
+        background: #38BDF8;            /* Неоновый голубой */
+        color: #0F172A;
+        text-align: center;
+        text-transform: uppercase;
+        border-radius: 6px 6px 0 0;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+    }
+
+    .widget-border {
+        padding: 8px;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ─── Notifications (тёмный фон, яркие акценты) ─── */
+    .open-position-notification-open {
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 600;
+        background-color: #16A34A;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 10px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .open-position-notification-close {
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 600;
+        background-color: #DC2626;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 10px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .notification-for-me {
+        color: #38BDF8;
+        background-color: #1E293B;
+        border-radius: 6px;
+        padding: 4px 8px;
+        font-weight: 500;
+        border: 1px solid #334155;
+    }
+
+    /* ─── Oval Image Widget ─── */
+    .v-image.ht-oval-image,
+    .ht-oval-image {
+        border-radius: 50% !important;
+        overflow: hidden !important;
+        display: inline-block;
+
+        img, .v-image-element {
+            border-radius: 50% !important;
+            object-fit: cover !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+    }
+
+    /* ─── Переопределение фона таблиц и инпутов для тёмной темы ─── */
+    .v-table {
+        background-color: #222938;
+        color: #E2E8F0;
+        border-color: #334155;
+    }
+
+    .v-table-header-wrap,
+    .v-table-header {
+        background-color: #1A1F2C;
+        color: #94A3B8;
+    }
+
+    .v-textfield,
+    .v-textarea {
+        background-color: #1A1F2C;
+        border: 1px solid #475569;
+        color: #E2E8F0;
+        border-radius: 4px;
+    }
+
+    .v-textfield:focus,
+    .v-textarea:focus {
+        border-color: #38BDF8;
+        box-shadow: 0 0 0 1px #38BDF8;
+    }
+
+    .v-panel {
+        background-color: #222938;
+        border-color: #334155;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+
+    .v-window {
+        background-color: #222938;
+        border: 1px solid #334155;
+    }
+}

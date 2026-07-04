@@ -7,7 +7,8 @@
     <data readOnly="true">
         <collection id="candidateCVsDc"
                     class="com.company.hunttech.entity.CandidateCV">
-            <view extends="candidateCV-view">
+            <!-- Main CandidateCV list uses a narrow view; LOB readiness is checked by a batch cache in the controller. -->
+            <view extends="candidateCV-browse-view">
                 <property name="candidate" view="_minimal">
                     <property name="fullName"/>
                 </property>

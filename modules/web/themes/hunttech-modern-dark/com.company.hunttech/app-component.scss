@@ -1,0 +1,8 @@
+/**
+ * Hunttech-Modern-Dark (тёмная тема) — агрегатор расширений.
+ */
+@import "hunttech-modern-dark-ext";
+
+@mixin com_company_hunttech {
+    @include com_company_hunttech-hunttech-modern-dark-ext;
+}

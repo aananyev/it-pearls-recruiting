@@ -1,0 +1,253 @@
+/**
+ * Hunttech-Modern (светлая тема) — кастомные стили расширения.
+ *
+ * Содержит бизнес-стили HRM HuntTech: рейтинги кандидатов, пиктограммы статусов,
+ * виджеты, чат, календарь и прочие компоненты UI рекрутинговой системы.
+ * Перенесено из hover-ext.scss с адаптацией палитры под новую тему.
+ */
+
+/* ─── Кастомные стили (используются в Java-контроллерах и XML-дескрипторах) ─── */
+
+.open-position-job-recruitier {
+    color: #1E3A5F;                     /* Тёмно-синий вместо blue */
+    font-weight: bold;
+}
+
+.open-position-empty-recruitier {
+    color: #94A3B8;                     /* Серый вместо grey */
+    font-weight: normal;
+}
+
+.recrutier-tasks-gray {
+    color: #94A3B8;
+    text-decoration: line-through;
+}
+
+.recrutier-tasks-normal {
+    color: #334155;
+}
+
+/* ─── Виджеты ─── */
+.widget-border-line {
+    border: 1px solid #CBD5E1;
+    border-radius: 12px;
+}
+
+.v-caption-shift-field {
+    white-space: pre;
+}
+
+/* ─── Календарь событий (recruiting pipeline) ─── */
+.v-calendar-event.event-green {
+    background-color: #DCFCE7;
+    color: #16A34A;
+}
+
+.v-calendar-event.event-yellow {
+    background-color: #FEF9C3;
+    color: #CA8A04;
+}
+
+/* ─── Login-экран HuntTech ─── */
+.c-login-layout-HuntTech .c-login-layout {
+    background: #1E3A5F;                /* Корпоративный тёмно-синий */
+}
+
+/* HuntTech Modern: локальные миксины рейтингов нужны новым темам отдельно от базовой halo-директории. */
+@mixin rating_round($color_p) {
+    font-family: 'Kanit', sans-serif;
+    font-size: large;
+    font-weight: bold;
+    text-align: center;
+    width: 20px;
+    height: 20px;
+    border: 1px solid;
+    border-radius: 10px;
+    line-height: 17px;
+    color: $color_p;
+    box-shadow: 0 0 0 2px $color_p, 0 0 13px #333;
+}
+
+/* HuntTech Modern: компактный индикатор батарейного рейтинга для виджетов главного экрана. */
+@mixin rating_battery_round($color_p) {
+    font-size: large;
+    font-weight: bold;
+    font-family: bold;
+    margin: -5px -5px -5px -5px;
+    padding: -5px -5px -5px -5px;
+    top: 50%;
+    height: 20px;
+    border: 1px solid;
+    border-radius: 2px;
+    color: $color_p;
+}
+
+/* HuntTech Modern: крупный круглый рейтинг для карточки кандидата. */
+@mixin rating_candidate_round($color_p) {
+    font-family: 'Antonio', sans-serif;
+    font-size: large;
+    font-weight: bold;
+    text-align: center;
+    width: 50px;
+    height: 50px;
+    border: 1px solid;
+    border-radius: 25px;
+    line-height: 17px;
+    color: $color_p;
+    box-shadow: 0 0 0 2px $color_p, 0 0 13px #333;
+}
+
+/* HuntTech Modern: метка статистики кандидатов в dashboard-виджетах. */
+@mixin rating_statistic_label($color_p) {
+    font-family: 'Antonio', sans-serif;
+    font-size: medium;
+    font-weight: bold;
+    text-align: center;
+    border: 1px solid;
+    border-radius: 5px;
+    line-height: 17px;
+    color: $color_p;
+    padding: 5px;
+    box-shadow: 0 0 0 2px $color_p, 0 0 13px #333;
+}
+
+/* ─── Mixin всех кастомных стилей ─── */
+@mixin com_company_hunttech-hunttech-modern-ext {
+
+    /* HuntTech recruiting cards: лёгкая тень и тонкая граница для современного светлого UI. */
+    .v-panel {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border: 1px solid #E2E8F0;
+    }
+
+    /* ─── Rating badges (рейтинги кандидатов: 1-5) ─── */
+    .rating_red_1 {
+        @include rating_round(#EF4444);
+    }
+    .rating_orange_2 {
+        @include rating_round(#F97316);
+    }
+    .rating_yellow_3 {
+        @include rating_round(#EAB308);
+    }
+    .rating_green_4 {
+        @include rating_round(#22C55E);
+    }
+    .rating_blue_5 {
+        @include rating_round(#3B82F6);
+    }
+    .rating_gray_6 {
+        @include rating_round(#94A3B8);
+    }
+
+    /* ─── Rating badges для detail-карточки кандидата ─── */
+    .rating_candidate_red_1 {
+        @include rating_candidate_round(#EF4444);
+    }
+    .rating_candidate_orange_2 {
+        @include rating_candidate_round(#F97316);
+    }
+    .rating_candidate_yellow_3 {
+        @include rating_candidate_round(#EAB308);
+    }
+    .rating_candidate_green_4 {
+        @include rating_candidate_round(#22C55E);
+    }
+    .rating_candidate_blue_5 {
+        @include rating_candidate_round(#3B82F6);
+    }
+
+    /* ─── Battery-рейтинги (виджет main screen) ─── */
+    .rating_battery_grey_0 {
+        @include rating_battery_round(#94A3B8);
+    }
+    .rating_battery_red_1 {
+        @include rating_battery_round(#EF4444);
+    }
+    .rating_battery_orange_2 {
+        @include rating_battery_round(#F97316);
+    }
+    .rating_battery_teal_3 {
+        @include rating_battery_round(#14B8A6);
+    }
+    .rating_battery_yellow_3 {
+        @include rating_battery_round(#EAB308);
+    }
+    .rating_battery_green_4 {
+        @include rating_battery_round(#22C55E);
+    }
+    .rating_battery_blue_5 {
+        @include rating_battery_round(#3B82F6);
+    }
+
+    /* ─── Статистика ─── */
+    .statistic_label_candidate_blue {
+        @include rating_statistic_label(#3B82F6);
+    }
+
+    /* ─── Widget styling ─── */
+    .widget-title {
+        font-weight: 600;
+        padding: 4px 8px;
+        background: #1E3A5F;            /* Корпоративный синий */
+        color: #FFFFFF;
+        text-align: center;
+        text-transform: uppercase;
+        border-radius: 6px 6px 0 0;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+    }
+
+    .widget-border {
+        padding: 8px;
+        border: 1px solid #CBD5E1;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    /* ─── Notifications ─── */
+    .open-position-notification-open {
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 600;
+        background-color: #22C55E;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 10px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .open-position-notification-close {
+        color: #FFFFFF;
+        font-size: 13px;
+        font-weight: 600;
+        background-color: #EF4444;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 10px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .notification-for-me {
+        color: #1E3A5F;
+        background-color: #DBEAFE;
+        border-radius: 6px;
+        padding: 4px 8px;
+        font-weight: 500;
+    }
+
+    /* ─── Кастомный Oval Image Widget ─── */
+    .v-image.ht-oval-image,
+    .ht-oval-image {
+        border-radius: 50% !important;
+        overflow: hidden !important;
+        display: inline-block;
+
+        img, .v-image-element {
+            border-radius: 50% !important;
+            object-fit: cover !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+    }
+}

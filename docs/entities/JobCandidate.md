@@ -88,6 +88,22 @@
 | `IDX_HUNTTECH_JOB_CANDIDATE_CURRENT_COMPANY` | `CURRENT_COMPANY_ID` |
 | `IDX_HUNTTECH_JOB_CANDIDATE_FILE_IMAGE_FACE` | `FILE_IMAGE_FACE` |
 
+### 1.2.1 Индексы производительности (миграция `260704-3`)
+
+Индексы ниже добавлены отдельной миграцией, чтобы ускорить реальные сценарии browse/edit без изменения бизнес-логики и структуры данных.
+
+| Имя индекса | Таблица / колонки | Сценарий |
+|-------------|-------------------|----------|
+| `IDX_HUNTTECH_JOB_CANDIDATE_ACTIVE_NAME` | `HUNTTECH_JOB_CANDIDATE (SECOND_NAME, FIRST_NAME, ID)` для активных строк | Сортировка и пагинация списка кандидатов |
+| `IDX_HUNTTECH_JOB_CANDIDATE_ACTIVE_CREATED_NAME` | `HUNTTECH_JOB_CANDIDATE (CREATED_BY, SECOND_NAME, FIRST_NAME, ID)` для активных строк | Фильтр «только мои», включая режим стажёра |
+| `IDX_HUNTTECH_CANDIDATE_CV_ACTIVE_CANDIDATE_DATE` | `HUNTTECH_CANDIDATE_CV (CANDIDATE_ID, DATE_POST, ID)` | Фильтр/иконка CV и поиск последнего резюме |
+| `IDX_HUNTTECH_ITERACTION_LIST_ACTIVE_CANDIDATE_NUMBER` | `HUNTTECH_ITERACTION_LIST (CANDIDATE_ID, NUMBER_ITERACTION, ID)` | Последнее взаимодействие на странице browse |
+| `IDX_HUNTTECH_ITERACTION_LIST_ACTIVE_CANDIDATE_RATING` | `HUNTTECH_ITERACTION_LIST (CANDIDATE_ID, RATING)` | Фильтр по рейтингу кандидата |
+| `IDX_HUNTTECH_ITERACTION_LIST_ACTIVE_RECRUTIER_CANDIDATE` | `HUNTTECH_ITERACTION_LIST (RECRUTIER_ID, CANDIDATE_ID)` | Фильтр «с моим участием» |
+| `IDX_HUNTTECH_ITERACTION_LIST_ACTIVE_COMMENTS` | `HUNTTECH_ITERACTION_LIST (CANDIDATE_ID, DATE_ITERACTION, ID)` для непустых комментариев | Лента комментариев во вкладке edit |
+| `IDX_HUNTTECH_JOB_CANDIDATE_SIGN_ICON_ACTIVE_SIGN_CANDIDATE` | `HUNTTECH_JOB_CANDIDATE_SIGN_ICON (SIGN_ICON_ID, JOB_CANDIDATE_ID)` | Фильтр по пользовательским значкам |
+| `IDX_HUNTTECH_EMPLOYEE_ACTIVE_JOB_CANDIDATE_STATUS` | `HUNTTECH_EMPLOYEE (JOB_CANDIDATE_ID, WORK_STATUS_ID)` | Иконка статуса сотрудника в списке |
+
 ### 1.3 Композиции и ассоциации
 
 ```mermaid
@@ -176,7 +192,7 @@ erDiagram
 **Файл:** `job-candidate-browse.xml`  
 **Режим данных:** `readOnly="true"`  
 **Базовый JPQL:** `select e from hunttech_JobCandidate e order by e.secondName, e.firstName`  
-**Пагинация:** `jobCandidatesDl.setMaxResults(50)` в `onBeforeShow` (коммит `53e9720e`).
+**Пагинация:** `jobCandidatesDl.setMaxResults(50)` подготавливается до первого `@LoadDataBeforeShow`, чтобы стартовый запрос сразу шёл с рабочим лимитом.
 
 | Свойство | fetch | View / вложенность | Назначение в UI |
 |----------|-------|-------------------|-----------------|
@@ -196,6 +212,13 @@ erDiagram
 - `fetch="BATCH"` для `iteractionList` и `socialNetwork` — устранение N+1 при отрисовке строк
 - Убрана глубокая загрузка vacancy/project в browse
 - Аватары: `FileDescriptorResource` вместо Base64 + `fileStorageService.loadFile` в `descriptionProvider`
+
+**Оптимизация (2026-07-04, JobCandidate performance pack):**
+
+- Производные данные строки (`lastIteraction`, наличие CV, employee status) грузятся пачками после загрузки страницы, а не отдельными запросами из column/style/description renderers.
+- Стартовые параметры фильтров выставляются до первого `@LoadDataBeforeShow`, чтобы открыть экран одним корректным запросом.
+- Фильтр по значкам выполняет один reload после смены параметра, без промежуточного сброса loader.
+- Обработчики чекбоксов подавляются на время стартовой инициализации, чтобы не запускать лишние загрузки.
 
 ### 2.3 Inline view: `jobCandidateDc` (Edit)
 
@@ -221,6 +244,8 @@ erDiagram
 - `openPositionDl` грузится при первом открытии вкладки `commentsTab`
 - `tabSheetSocialNetworks` с `lazy="true"` — неактивные вкладки не строятся до выбора
 - Подсказки ФИО на `tabCandidate`: `SearchExecutor` с JPQL `LIKE` при вводе (без предзагрузки всех имён через `BackgroundTask`)
+- Проверка дублей использует узкий `jobCandidate-view-search`, чтобы не тянуть полный граф кандидата.
+- Комментарии и picker вакансий вкладки `commentsTab` грузятся только при первом открытии вкладки.
 
 ### 2.4 Вспомогательные data containers (Edit)
 
@@ -239,6 +264,7 @@ erDiagram
 | Контекст | Стратегия | Обоснование |
 |----------|-----------|-------------|
 | Browse, коллекции на каждую строку | `BATCH` | Одна пачка SQL на страницу вместо N+1 |
+| Browse, производные колонки | Batch cache через `loadValues` / targeted loads | `lastIteraction`, CV и employee status не запускают запросы на каждую строку |
 | Справочники в Edit | LAZY + отложенный `load()` | Не грузить Company/City/Position при открытии карточки |
 | LOB (`CandidateCV.textCV`) | Не включать в browse/edit DC view | Только на вкладке резюме при необходимости |
 | SignIcons в status column | Отдельный `DataManager.load` с `cacheable(true)` | **Потенциальный N+1** — известный backlog |
@@ -314,14 +340,14 @@ private Component jobCandidatesTableFileImageFaceColumnGenerator(...) {
 
 #### `lastIteraction` (htmlRenderer)
 
-- Данные: `interactionService.getLastIteraction(candidate)`
+- Данные: batch cache последнего взаимодействия по кандидатам текущей страницы
 - Дата `dd-MM-yyyy`, цветовая индикация (`button_table_red/yellow/green/white`)
 - Учитывает `blockCandidate` и «свободен ли» кандидат (календарная логика +1 месяц)
 - `descriptionProvider`: HTML с деталями последнего взаимодействия
 
 #### `resume` (iconRenderer)
 
-- Зелёный/красный стиль по наличию `CandidateCV` (отдельный JPQL `QUERY_RESUME`)
+- Зелёный/красный стиль по наличию `CandidateCV`; данные берутся из batch cache текущей страницы
 
 #### `personPosition` (descriptionProvider)
 
@@ -350,9 +376,9 @@ private Component jobCandidatesTableFileImageFaceColumnGenerator(...) {
 
 | Этап | Что происходит |
 |------|----------------|
-| Открытие | Лимит 50; стажёр → «только мои» заблокирован; фильтр значков пользователя |
+| Открытие | Лимит 50 готовится до первого запроса; стажёр → «только мои» заблокирован; фильтр значков пользователя |
 | Выбор строки | Включаются popup «резерв», email; раскрытие details с фрагментом и кнопками действий |
-| Колонки | Цвет последнего взаимодействия по давности и рекрутеру; звёзды рейтинга; иконки статуса/контактов/CV |
+| Колонки | Цвет последнего взаимодействия, CV и employee status берутся из batch cache; звёзды рейтинга; иконки статуса/контактов |
 | Сохранение | Нет на browse — commit в дочерних формах |
 
 #### Edit (`JobCandidateEdit`)
@@ -360,7 +386,7 @@ private Component jobCandidatesTableFileImageFaceColumnGenerator(...) {
 | Этап | Что происходит |
 |------|----------------|
 | Открытие | Рейтинг, % заполнения (14 полей), suggest-вакансии; кнопка блокировки — Manager/Admin |
-| Вкладки | Первый заход на `tabCandidate` → справочники + `SearchExecutor` на ФИО; остальные вкладки — generators, scan CV |
+| Вкладки | Первый заход на `tabCandidate` → справочники + `SearchExecutor` на ФИО; первый заход на `commentsTab` → комментарии + вакансии; остальные вкладки — generators, scan CV |
 | Сохранение | Дубликат ФИО+город+должность → диалог; новый → «Новый контакт» rating=4; нормализация telegram |
 | Блокировка | Toggle blockCandidate → disable грида взаимодействий (кроме Manager/Admin) |
 
@@ -368,7 +394,7 @@ private Component jobCandidatesTableFileImageFaceColumnGenerator(...) {
 
 | Элемент | Handler |
 |---------|---------|
-| `onBeforeShow` | maxResults=50, стажёр → только свои, `initSignIcons`, `initSignFilterPopupButton` |
+| `onInit` / `onBeforeShow` | стартовые loader-параметры и maxResults=50 до первой загрузки; `initSignIcons`, `initSignFilterPopupButton` |
 | `checkBoxShowOnlyMy` | параметр `userName` = `%login%` |
 | `checkBoxOnWork` | status filter param1/param3 |
 | `onButtonSubscribeClick` | редактор `SubscribeCandidateAction` |
@@ -677,6 +703,19 @@ Pack: `com.company.hunttech.web.screens.jobcandidate` — 200+ ключей, п�
 # Меню → Кандидаты → hunttech_JobCandidate.browse
 ```
 
+### 6.5.1 Performance Замеры JobCandidate (2026-07-04)
+
+Замеры выполнены focused-тестами browse/edit после установки индексов `260704-3`.
+
+```bash
+./gradlew :app-web:test --tests com.company.hunttech.web.screens.jobcandidate.JobCandidateBrowsePerfTest --tests com.company.hunttech.web.screens.jobcandidate.JobCandidateEditPerfTest
+```
+
+| Экран | Результат |
+|-------|-----------|
+| Browse | `openMicros=1409943`, `loadedCandidates=50`, `loadList=8`, `loadValues=1`, `jobCandidateLoadList=1`, `jobCandidateGetCount=0` |
+| Edit | `openMicros=1726777`, `loadList=11`, `loadValues=3`, `jobCandidateLoadList=1`, `jobCandidateGetCount=0` |
+
 ### 6.6 Чеклист воссоздания подсистемы
 
 - [ ] Entity `JobCandidate` + индексы
@@ -697,6 +736,7 @@ Pack: `com.company.hunttech.web.screens.jobcandidate` — 200+ ключей, п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-04 | JobCandidate performance pack: batch cache производных колонок browse, lazy comments tab в edit, узкий duplicate-check view, индексы `260704-3`, focused perf tests |
 | 2026-06-30 | JobCandidateEdit: удалены `laborAgreement` из view и `jobCandidateLaborAgreementDc` — fix QueryException при Edit из Browse |
 | 2026-06-29 | JobCandidateEdit tabCandidate: `lazy="true"` на TabSheet, ранний выход `initTabCandidate`, `SearchExecutor` вместо BackgroundTask для подсказок ФИО |
 | 2026-06-29 | JobCandidateEdit: убран промежуточный commit для NEW в addPositionList/reloadCV/reloadInteractions (fix pkey duplicate) |

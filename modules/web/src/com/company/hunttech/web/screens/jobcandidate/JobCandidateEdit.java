@@ -279,7 +279,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .cacheable(true)
                 .parameter("firstName", firstNameField.getValue())
                 .parameter("secondName", secondNameField.getValue())
-                .view("jobCandidate-view")
+                // Duplicate check needs only identity fields; avoid loading full candidate graph.
+                .view("jobCandidate-view-search")
                 .list();
 
         return candidates.size() == 0 ? false : true;
@@ -592,7 +593,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        initInteractionCommentDl();
+        // Heavy comments data is loaded lazily from initTabComments() when the user opens the tab.
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (getEditedEntity().getCandidateCv().isEmpty()) {
@@ -1189,7 +1190,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
         TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
         if (selectedTab != null && "commentsTab".equals(selectedTab.getName())) {
+            // Comments and vacancy picker are needed only when the comments tab is opened.
             ensureOpenPositionLoaded();
+            initInteractionCommentDl();
             commentsTabInitialized = true;
         }
     }

@@ -10,7 +10,6 @@ import javax.inject.Inject;
 @UiController("hunttech_CandidateCVChoise.browse")
 @UiDescriptor("candidate-cv-choise-browse.xml")
 @LookupComponent("candidateCVsTable")
-@LoadDataBeforeShow
 public class CandidateCVChoiseBrowse extends StandardLookup<CandidateCV> {
     private JobCandidate jobCandidate;
     @Inject
@@ -26,6 +25,7 @@ public class CandidateCVChoiseBrowse extends StandardLookup<CandidateCV> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        // Load after the parent candidate parameter is set; @LoadDataBeforeShow would query all CandidateCV rows first.
         if (jobCandidate != null ) {
             candidateCVsDl.setParameter( "candidate", jobCandidate );
         } else {

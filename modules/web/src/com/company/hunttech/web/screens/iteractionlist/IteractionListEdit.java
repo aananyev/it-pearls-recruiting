@@ -104,6 +104,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private List<Iteraction> mostPopular = new ArrayList<>();
     private Boolean afterCommitSign = true;
     private boolean commentLoaded = false;
+    private boolean openPositionsReady = false;
     private Map<String, Integer> priorityMap = new LinkedHashMap<>();
 
     @Inject
@@ -1054,6 +1055,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     private void setOnlyMySubscribeCheckBox() {
         onlyMySubscribeCheckBox.setValue(true);
         openPositionsDl.setParameter("subscriber", userSession.getUser());
+        openPositionsReady = true;
         openPositionsDl.load();
 
         if (openPositionDc.getItems().size() == 0) {
@@ -1069,6 +1071,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         onlyMySubscribeCheckBox.addValueChangeListener(e -> {
             if (e.getValue()) {
                 openPositionsDl.setParameter("subscriber", userSession.getUser());
+                openPositionsReady = true;
                 openPositionsDl.load();
 
                 if (openPositionDc.getItems().size() == 0) {
@@ -1082,6 +1085,7 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                 }
             } else {
                 openPositionsDl.removeParameter("subscriber");
+                openPositionsReady = true;
                 openPositionsDl.load();
             }
 
@@ -1366,6 +1370,12 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     public void onInit(InitEvent event) {
         projectLogoImage.setSource(ThemeResource.class).setPath("icons/no-company.png");
         candidateImage.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+        // @LoadDataBeforeShow must not load all vacancies before subscriber/department filters are applied.
+        openPositionsDl.addPreLoadListener(e -> {
+            if (!openPositionsReady) {
+                e.preventLoad();
+            }
+        });
         // изначально предполагаем, что это продолжение проекта
         newProject = false;
         // вся сортировка в поле IteractionType

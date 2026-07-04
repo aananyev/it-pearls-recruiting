@@ -7,10 +7,11 @@
     <data readOnly="true">
         <collection id="candidateCVsDc"
                     class="com.company.hunttech.entity.CandidateCV"
-                    view="_local">
+                    view="candidateCV-browse-view">
             <loader id="candidateCVsDl">
                 <query>
-                    <![CDATA[select e from hunttech_CandidateCV e]]>
+                    <!-- Choice browse needs only resume metadata; order by date keeps newest CVs first. -->
+                    <![CDATA[select e from hunttech_CandidateCV e order by e.datePost desc]]>
                     <condition>
                         <c:jpql>
                             <c:where>e.candidate = :candidate</c:where>

@@ -80,17 +80,22 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private Map<UUID, Integer> vacancyRecruiterTaskCountCache = Collections.emptyMap();
     private Set<UUID> outstaffingTypeIdsCache;
     private boolean suppressDateFromReload;
+    private boolean suppressUserFilterReload;
     private boolean listenersAttached;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         suppressDateFromReload = true;
+        suppressUserFilterReload = true;
         try {
+            // Main transactional browse is opened frequently; keep the first page bounded and filters prepared.
+            iteractionListsDl.setMaxResults(100);
             buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER));
             dateFromField.setValue(getDefaultDateFrom());
             applyBrowseFilters();
         } finally {
             suppressDateFromReload = false;
+            suppressUserFilterReload = false;
         }
     }
 
@@ -228,7 +233,11 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
 
     @Subscribe("checkBoxShowOnlyMy")
     public void onCheckBoxShowOnlyMyValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if (checkBoxShowOnlyMy.getValue()) {
+        if (suppressUserFilterReload) {
+            return;
+        }
+
+        if (Boolean.TRUE.equals(checkBoxShowOnlyMy.getValue())) {
             iteractionListsDl.setParameter("userName", new StringBuilder()
                     .append("%")
                     .append(userSession.getUser().getLogin())

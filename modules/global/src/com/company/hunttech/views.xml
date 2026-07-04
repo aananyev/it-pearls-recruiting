@@ -160,6 +160,12 @@
         <property name="vacansyName"/>
         <property name="openClose"/>
     </view>
+    <!-- CandidateCV edit picker needs letter flags only after the user chooses a vacancy, not the full OpenPosition graph. -->
+    <view entity="hunttech_OpenPosition" name="openPosition-candidate-cv-picker-view" extends="openPosition-picker-view">
+        <property name="needLetter"/>
+        <property name="templateLetter"/>
+        <property name="comment"/>
+    </view>
     <view entity="hunttech_OpenPosition" name="openPosition-parent-picker-view" extends="openPosition-picker-view">
         <property name="projectName" view="project-picker-view"/>
     </view>
@@ -666,6 +672,22 @@
         <property name="candidate" view="_minimal">
         </property>
     </view>
+    <!-- CandidateCV browse grids use this narrow view to avoid loading TEXT_CV/LETTER/COMMENT_LETTER LOB fields per row. -->
+    <view entity="hunttech_CandidateCV" name="candidateCV-browse-view" extends="_minimal">
+        <property name="datePost"/>
+        <property name="createdBy"/>
+        <property name="linkHuntTechCV"/>
+        <property name="linkOriginalCv"/>
+        <property name="candidate" view="_minimal">
+            <property name="fullName"/>
+            <property name="personPosition" view="position-picker-view"/>
+        </property>
+        <property name="resumePosition" view="position-picker-view"/>
+        <property name="toVacancy" view="openPosition-picker-view"/>
+        <property name="owner" view="_minimal"/>
+        <property name="originalFileCV" view="_minimal"/>
+        <property name="fileCV" view="_minimal"/>
+    </view>
     <view entity="hunttech_Iteraction" name="iteraction-browse-view" extends="_minimal">
         <property name="number"/>
         <property name="iterationName"/>
@@ -849,7 +871,7 @@
         <property name="addDate"/>
         <property name="addString"/>
         <property name="addInteger"/>
-        <property name="comment"/>
+        <!-- Simple browse uses a batch comment-exists cache; full COMMENT_ text is loaded only for tooltip hover. -->
         <property name="candidate" view="_minimal">
             <property name="fullName"/>
             <property name="personPosition" view="_minimal"/>

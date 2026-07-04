@@ -20,6 +20,7 @@ import com.company.hunttech.web.screens.signicons.SignIconsBrowse;
 import com.company.hunttech.gui.components.OvalImage;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
@@ -118,7 +119,14 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private StarsAndOtherService starsAndOtherService;
 
     private static final String QUERY_DEFAULT_OPEN_POSITION = "select e from hunttech_OpenPosition e where e.vacansyName like 'Default'";
-    private static final String QUERY_RESUME = "select e from hunttech_CandidateCV e where e.candidate = :candidate";
+    private static final String QUERY_CV_COUNT_BY_CANDIDATES =
+            "select e.candidate, count(e) from hunttech_CandidateCV e where e.candidate in :candidates group by e.candidate";
+    private static final String QUERY_LAST_INTERACTIONS_BY_CANDIDATES =
+            "select e from hunttech_IteractionList e "
+                    + "where e.candidate in :candidates "
+                    + "order by e.candidate.id, e.numberIteraction desc";
+    private static final String QUERY_EMPLOYEES_BY_CANDIDATES =
+            "select e from hunttech_Employee e where e.jobCandidate in :candidates";
     private static final String QUERY_GET_OTHER_SOCIAL_NETWORK = "select e from hunttech_SocialNetworkType e where e.socialNetwork = :other";
     private static final String QUERY_GET_LASTRECRUTIER = "select e from hunttech_IteractionList e where e.candidate = :candidate order by e.numberIteraction desc";
 
@@ -130,7 +138,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     private CandidateCVEdit candidateCVEdit;
     private OnlyTextPersonPosition screenOnlytext;
     private JobCandidate jobCandidatesTableDetailsGeneratorOpened = null;
-    private List<Employee> employees;
+    private Map<UUID, Employee> employeeByCandidateId = Collections.emptyMap();
+    private Map<UUID, IteractionList> lastInteractionByCandidateId = Collections.emptyMap();
+    private Set<UUID> candidatesWithCv = Collections.emptySet();
+    private boolean suppressCandidateFilterReload;
 
     private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";
@@ -139,6 +150,94 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private static final String separatorChar = "⎯";
     private static final String separator = separatorChar.repeat(22);
+
+    @Subscribe(id = "jobCandidatesDl", target = Target.DATA_LOADER)
+    private void onJobCandidatesDlPostLoad(CollectionLoader.PostLoadEvent<JobCandidate> event) {
+        // Batch-load derived row data once per page instead of running queries from column renderers.
+        refreshLastInteractionCache(event.getLoadedEntities());
+        refreshCandidateCvCache(event.getLoadedEntities());
+        refreshEmployeeCache(event.getLoadedEntities());
+    }
+
+    private void refreshLastInteractionCache(List<JobCandidate> candidates) {
+        if (candidates.isEmpty()) {
+            lastInteractionByCandidateId = Collections.emptyMap();
+            return;
+        }
+
+        List<IteractionList> rows = dataManager.load(IteractionList.class)
+                .query(QUERY_LAST_INTERACTIONS_BY_CANDIDATES)
+                .parameter("candidates", candidates)
+                .view("iteractionList-picker-view")
+                .list();
+
+        Map<UUID, IteractionList> cache = new HashMap<>();
+        for (IteractionList row : rows) {
+            if (row.getCandidate() != null && row.getCandidate().getId() != null) {
+                cache.putIfAbsent(row.getCandidate().getId(), row);
+            }
+        }
+        lastInteractionByCandidateId = cache;
+    }
+
+    private void refreshCandidateCvCache(List<JobCandidate> candidates) {
+        if (candidates.isEmpty()) {
+            candidatesWithCv = Collections.emptySet();
+            return;
+        }
+
+        List<KeyValueEntity> rows = dataManager.loadValues(QUERY_CV_COUNT_BY_CANDIDATES)
+                .properties("candidate", "count")
+                .parameter("candidates", candidates)
+                .list();
+
+        Set<UUID> cache = new HashSet<>();
+        for (KeyValueEntity row : rows) {
+            JobCandidate candidate = row.getValue("candidate");
+            Long count = row.getValue("count");
+            if (candidate != null && candidate.getId() != null && count != null && count > 0) {
+                cache.add(candidate.getId());
+            }
+        }
+        candidatesWithCv = cache;
+    }
+
+    private void refreshEmployeeCache(List<JobCandidate> candidates) {
+        if (candidates.isEmpty()) {
+            employeeByCandidateId = Collections.emptyMap();
+            return;
+        }
+
+        List<Employee> employees = dataManager.load(Employee.class)
+                .query(QUERY_EMPLOYEES_BY_CANDIDATES)
+                .parameter("candidates", candidates)
+                .view(ViewBuilder.of(Employee.class)
+                        .add("jobCandidate", "_minimal")
+                        .add("workStatus", "_minimal")
+                        .build())
+                .list();
+
+        Map<UUID, Employee> cache = new HashMap<>();
+        for (Employee employee : employees) {
+            if (employee.getJobCandidate() != null && employee.getJobCandidate().getId() != null) {
+                cache.put(employee.getJobCandidate().getId(), employee);
+            }
+        }
+        employeeByCandidateId = cache;
+    }
+
+    private IteractionList getCachedLastInteraction(JobCandidate jobCandidate) {
+        if (jobCandidate == null || jobCandidate.getId() == null) {
+            return null;
+        }
+        return lastInteractionByCandidateId.get(jobCandidate.getId());
+    }
+
+    private boolean hasCachedCv(JobCandidate jobCandidate) {
+        return jobCandidate != null
+                && jobCandidate.getId() != null
+                && candidatesWithCv.contains(jobCandidate.getId());
+    }
 
 
     @Inject
@@ -163,7 +262,32 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe
     public void onInit1(InitEvent event) {
+        initDefaultCandidateFilters();
         initActionsWithCandidateButton();
+    }
+
+    private void initDefaultCandidateFilters() {
+        // @LoadDataBeforeShow will execute the first load; prepare its parameters without firing checkbox handlers.
+        suppressCandidateFilterReload = true;
+        try {
+            jobCandidatesDl.setMaxResults(50);
+            checkBoxOnWork.setValue(false);
+            if (userSession.getUser().getGroup().getName().equals("Стажер")) {
+                jobCandidatesDl.setParameter("userName", new StringBuilder()
+                        .append("%")
+                        .append(userSession.getUser().getLogin())
+                        .append("%")
+                        .toString());
+                checkBoxShowOnlyMy.setValue(true);
+                checkBoxShowOnlyMy.setEditable(false);
+            } else {
+                jobCandidatesDl.removeParameter("userName");
+            }
+            jobCandidatesDl.removeParameter("param1");
+            jobCandidatesDl.removeParameter("param3");
+        } finally {
+            suppressCandidateFilterReload = false;
+        }
     }
 
     private void initActionsWithCandidateButton() {
@@ -574,29 +698,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         jobCandidatesTable.setDescriptionAsHtml(true);
-        jobCandidatesDl.setMaxResults(50);
-        if (userSession.getUser().getGroup().getName().equals("Стажер")) {
-            jobCandidatesDl.setParameter("userName", new StringBuilder()
-                    .append("%")
-                    .append(userSession.getUser().getLogin())
-                    .append("%")
-                    .toString());
-
-            checkBoxShowOnlyMy.setValue(true);
-            checkBoxShowOnlyMy.setEditable(false);
-        }
-
-        checkBoxOnWork.setValue(false);
-        jobCandidatesDl.removeParameter("param1");
-        jobCandidatesDl.removeParameter("param3");
-
-        jobCandidatesDl.load();
 
 //        buttonExcel.setVisible(getRoleService.isUserRoles(userSession.getUser(), "Manager"));
-
-        employees = dataManager.load(Employee.class)
-                .view("employee-view")
-                .list();
 
         initSignIconsDataContainer();
         initSignFilterPopupButton();
@@ -655,7 +758,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     }
 
     private void setSignFilter(SignIcons icons) {
-        removeSignFilterAction();
+        jobCandidatesDl.removeParameter("signIcon");
         jobCandidatesDl.setParameter("signIcon", icons);
         jobCandidatesDl.load();
     }
@@ -667,7 +770,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe("checkBoxOnWork")
     public void onCheckBoxOnWorkValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if (!checkBoxOnWork.getValue()) {
+        if (suppressCandidateFilterReload) {
+            return;
+        }
+        if (!Boolean.TRUE.equals(checkBoxOnWork.getValue())) {
             jobCandidatesDl.removeParameter("param1");
             jobCandidatesDl.removeParameter("param3");
         } else {
@@ -681,9 +787,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe("checkBoxShowOnlyMy")
     public void onCheckBoxShowOnlyMyValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (suppressCandidateFilterReload) {
+            return;
+        }
         StringBuilder sb = new StringBuilder();
 
-        if (checkBoxShowOnlyMy.getValue()) {
+        if (Boolean.TRUE.equals(checkBoxShowOnlyMy.getValue())) {
             sb.append("%")
                     .append(userSession.getUser().getLogin())
                     .append("%");
@@ -698,7 +807,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "columnGenerator")
     private String jobCandidatesTableLastIteractionColumnGenerator
             (DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
-        IteractionList iteractionList = interactionService.getLastIteraction(event.getItem());
+        IteractionList iteractionList = getCachedLastInteraction(event.getItem());
 
         Date dateValue = iteractionList != null && iteractionList.getDateIteraction() != null
                 ? iteractionList.getDateIteraction()
@@ -760,7 +869,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "styleProvider")
     private String jobCandidatesTableLastIteractionStyleProvider(JobCandidate jobCandidate) {
-        IteractionList iteractionList = interactionService.getLastIteraction(jobCandidate);
+        IteractionList iteractionList = getCachedLastInteraction(jobCandidate);
 
         if (iteractionList != null) {
             Date dateValue = iteractionList.getDateIteraction() != null
@@ -792,7 +901,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Install(to = "jobCandidatesTable.lastIteraction", subject = "descriptionProvider")
     private String jobCandidatesTableLastIteractionDescriptionProvider(JobCandidate jobCandidate) {
-        IteractionList iteractionList = interactionService.getLastIteraction(jobCandidate);
+        IteractionList iteractionList = getCachedLastInteraction(jobCandidate);
         String recrutierName = "";
 
         if (iteractionList != null) {
@@ -884,35 +993,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
     @Install(to = "jobCandidatesTable.resume", subject = "columnGenerator")
     private Icons.Icon jobCandidatesTableResumeColumnGenerator
             (DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
-        String retStr = "";
-
-        try {
-            if (event.getItem().getCandidateCv() != null) {
-                if (event.getItem().getCandidateCv().size() == 0) {
-                    retStr = "FILE";
-                } else {
-                    retStr = "FILE_TEXT";
-                }
-            } else {
-                retStr = "FILE";
-            }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
-
-        return CubaIcon.valueOf(retStr);
+        return hasCachedCv(event.getItem()) ? CubaIcon.FILE_TEXT : CubaIcon.FILE;
     }
 
     @Install(to = "jobCandidatesTable.resume", subject = "styleProvider")
     private String jobCandidatesTableResumeStyleProvider(JobCandidate jobCandidate) {
-        if (dataManager.loadValues(QUERY_RESUME)
-                .parameter("candidate", jobCandidate)
-                .list()
-                .size() == 0) {
-            return "pic-center-large-red";
-        } else {
-            return "pic-center-large-green";
-        }
+        return hasCachedCv(jobCandidate) ? "pic-center-large-green" : "pic-center-large-red";
     }
 
     private JobCandidate jobCandidateFragment = null;
@@ -1900,36 +1986,29 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retLabel.setDescription(messageBundle.getMessage("msgCandidate"));
         retLabel.setVisible(false);
 
-        for (Employee employee : employees) {
-            if (event.getItem().equals(employee.getJobCandidate())) {
-                retLabel.setIconFromSet(CubaIcon.CHILD);
-                retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
-                retLabel.setVisible(true);
+        Employee employee = event.getItem() != null && event.getItem().getId() != null
+                ? employeeByCandidateId.get(event.getItem().getId())
+                : null;
+        if (employee == null) {
+            retLabel.setStyleName("pic-center-large-grey");
+            return retLabel;
+        }
 
-                if (employee.getWorkStatus() != null) {
-                    if (employee.getWorkStatus().getInStaff() != null) {
-                        if (employee.getWorkStatus().getInStaff()) {
-                            retLabel.setStyleName("pic-center-large-green");
-                            retLabel.setDescription(messageBundle.getMessage("msgOurWorker"));
-                            break;
-                        } else {
-                            retLabel.setStyleName("pic-center-large-red");
-                            retLabel.setDescription(messageBundle.getMessage("msgDissmised"));
-                            break;
-                        }
-                    } else {
-                        retLabel.setStyleName("pic-center-large-yellow");
-                        retLabel.setDescription(messageBundle.getMessage("msgUndefined"));
-                        break;
-                    }
-                } else {
-                    retLabel.setStyleName("pic-center-large-yellow");
-                    retLabel.setDescription(messageBundle.getMessage("msgUndefined"));
-                    break;
-                }
+        retLabel.setIconFromSet(CubaIcon.CHILD);
+        retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+        retLabel.setVisible(true);
+
+        if (employee.getWorkStatus() != null && employee.getWorkStatus().getInStaff() != null) {
+            if (employee.getWorkStatus().getInStaff()) {
+                retLabel.setStyleName("pic-center-large-green");
+                retLabel.setDescription(messageBundle.getMessage("msgOurWorker"));
             } else {
-                retLabel.setStyleName("pic-center-large-grey");
+                retLabel.setStyleName("pic-center-large-red");
+                retLabel.setDescription(messageBundle.getMessage("msgDissmised"));
             }
+        } else {
+            retLabel.setStyleName("pic-center-large-yellow");
+            retLabel.setDescription(messageBundle.getMessage("msgUndefined"));
         }
 
         return retLabel;
@@ -2078,7 +2157,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         });
 
         jobCandidatesTable.getColumn("lastIteraction").setStyleProvider(e -> {
-            IteractionList iteractionList = interactionService.getLastIteraction(e);
+            IteractionList iteractionList = getCachedLastInteraction(e);
 
             if (iteractionList != null) {
                 Calendar calendar = Calendar.getInstance();
@@ -2142,6 +2221,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     private void setWithCVCheckBox() {
         withCVCheckBox.addValueChangeListener(e -> {
+            if (suppressCandidateFilterReload) {
+                return;
+            }
             if (withCVCheckBox.getValue() != null) {
                 if (!withCVCheckBox.getValue()) {
                     if (ratingFieldNotLower.getValue() == null) {
@@ -2311,6 +2393,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         ratingFieldNotLower.setOptionsMap(map);
 
         ratingFieldNotLower.addValueChangeListener(e -> {
+            if (suppressCandidateFilterReload) {
+                return;
+            }
             if (ratingFieldNotLower.getValue() != null) {
                 if (withCVCheckBox.getValue() != null) {
                     if (!withCVCheckBox.getValue()) {
@@ -2347,7 +2432,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe("showOnlyWithMyParticipationCheckBox")
     public void onShowOnlyWithMyParticipationCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if (event.getValue()) {
+        if (suppressCandidateFilterReload) {
+            return;
+        }
+        if (Boolean.TRUE.equals(event.getValue())) {
             jobCandidatesDl.setParameter("recrutier", userSession.getUser());
         } else {
             jobCandidatesDl.removeParameter("recrutier");

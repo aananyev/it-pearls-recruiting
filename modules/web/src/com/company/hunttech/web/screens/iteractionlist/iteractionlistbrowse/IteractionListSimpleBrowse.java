@@ -4,7 +4,9 @@ import com.company.hunttech.core.StarsAndOtherService;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.web.screens.iteractionlist.IteractionListEdit;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.DataGrid;
@@ -19,11 +21,17 @@ import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 @UiController("hunttech_IteractionListSimple.browse")
 @UiDescriptor("iteraction-list-simple-browse.xml")
 @LookupComponent("iteractionListsTable")
-@LoadDataBeforeShow
 public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     @Inject
     private Button copyLastIteractionButton;
@@ -50,6 +58,10 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
 
     private String openPositionStr;
     JobCandidate jobCandidate = null;
+    private static final String QUERY_INTERACTIONS_WITH_COMMENT =
+            "select e.id from hunttech_IteractionList e where e in :items and e.comment is not null and e.comment <> ''";
+    private Set<UUID> interactionsWithComment = Collections.emptySet();
+    private Map<UUID, String> commentTooltipCache = Collections.emptyMap();
 
     public void setJobCandidate(JobCandidate jobCandidate) {
         this.jobCandidate = jobCandidate;
@@ -63,6 +75,12 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     public void onBeforeShow(BeforeShowEvent event) {
         setButtonActions();
         setCandidateLabel(event);
+    }
+
+    @Subscribe(id = "iteractionListsDl", target = Target.DATA_LOADER)
+    private void onIteractionListsDlPostLoad(CollectionLoader.PostLoadEvent<IteractionList> event) {
+        // COMMENT_ is a LOB; cache only its presence for grid icons and load text lazily for tooltip hover.
+        refreshCommentPresenceCache(event.getLoadedEntities());
     }
 
     private void setCandidateLabel(BeforeShowEvent event) {
@@ -116,8 +134,50 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
     }
 
     public void setSelectedCandidate(JobCandidate entity) {
+        // Parent screens set candidate explicitly; avoiding @LoadDataBeforeShow prevents an accidental full-table load.
         iteractionListsDl.setParameter("candidate", entity);
         iteractionListsDl.load();
+    }
+
+    private void refreshCommentPresenceCache(List<IteractionList> items) {
+        if (items.isEmpty()) {
+            interactionsWithComment = Collections.emptySet();
+            commentTooltipCache = Collections.emptyMap();
+            return;
+        }
+
+        List<KeyValueEntity> rows = dataManager.loadValues(QUERY_INTERACTIONS_WITH_COMMENT)
+                .properties("id")
+                .parameter("items", items)
+                .list();
+
+        Set<UUID> ids = new HashSet<>();
+        for (KeyValueEntity row : rows) {
+            UUID id = row.getValue("id");
+            if (id != null) {
+                ids.add(id);
+            }
+        }
+        interactionsWithComment = ids;
+        commentTooltipCache = new HashMap<>();
+    }
+
+    private boolean hasComment(IteractionList iteractionList) {
+        return iteractionList != null
+                && iteractionList.getId() != null
+                && interactionsWithComment.contains(iteractionList.getId());
+    }
+
+    private String getCommentTooltip(IteractionList iteractionList) {
+        if (!hasComment(iteractionList)) {
+            return null;
+        }
+        return commentTooltipCache.computeIfAbsent(iteractionList.getId(), id -> {
+            // Tooltip text is loaded only for the hovered row, keeping the initial grid load LOB-free.
+            IteractionList reloaded = dataManager.reload(iteractionList,
+                    ViewBuilder.of(IteractionList.class).add("comment").build());
+            return reloaded.getComment();
+        });
     }
 
     private String getIcon(IteractionList item) {
@@ -152,7 +212,8 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
 
     @Install(to = "iteractionListsTable.iteractionType", subject = "descriptionProvider")
     private String iteractionListsTableIteractionTypeDescriptionProvider(IteractionList iteractionList) {
-        return Jsoup.parse(iteractionList.getComment() != null ? iteractionList.getComment() : "").text()
+        String comment = getCommentTooltip(iteractionList);
+        return Jsoup.parse(comment != null ? comment : "").text()
                 + (iteractionList.getAddString() != null ? "\nДополнительно: " + iteractionList.getAddString() : "")
                 + (iteractionList.getAddDate() != null ? "\nДата: " + iteractionList.getAddDate().toString() : "");
     }
@@ -231,35 +292,31 @@ public class IteractionListSimpleBrowse extends StandardLookup<IteractionList> {
 
     public void setOpenPosition(OpenPosition openPosition) {
         this.openPosition = openPosition;
+        // Parent screens set vacancy explicitly; load only the scoped interaction history.
         iteractionListsDl.setParameter("vacancy", this.openPosition);
         iteractionListsDl.load();
     }
 
     public void setOpenPosition(String openPosition) {
         this.openPositionStr = openPosition;
+        // String vacancy filter is scoped by caller and avoids opening the full interaction table.
         iteractionListsDl.setParameter("vacancyStr", openPosition);
         iteractionListsDl.load();
     }
 
     @Install(to = "iteractionListsTable.commentColumn", subject = "columnGenerator")
     private Icons.Icon iteractionListsTableCommentColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        return (event.getItem().getComment() == null || event.getItem().getComment().equals("")) ?
-                CubaIcon.FILE : CubaIcon.FILE_TEXT;
+        return hasComment(event.getItem()) ? CubaIcon.FILE_TEXT : CubaIcon.FILE;
     }
 
     @Install(to = "iteractionListsTable.commentColumn", subject = "styleProvider")
     private String iteractionListsTableCommentColumnStyleProvider(IteractionList iteractionList) {
-        return iteractionList.getComment() != null && !iteractionList.getComment().equals("") ? "pic-center-large-green" : "pic-center-large-red";
+        return hasComment(iteractionList) ? "pic-center-large-green" : "pic-center-large-red";
     }
 
     @Install(to = "iteractionListsTable.commentColumn", subject = "descriptionProvider")
     private String iteractionListsTableCommentColumnDescriptionProvider(IteractionList iteractionList) {
-        if (iteractionList.getComment() != null) {
-            return !iteractionList.getComment().equals("") ?
-                    iteractionList.getComment() : null;
-        } else {
-            return null;
-        }
+        return getCommentTooltip(iteractionList);
     }
 
     @Install(to = "iteractionListsTable.currentOpenCloseColumn", subject = "columnGenerator")

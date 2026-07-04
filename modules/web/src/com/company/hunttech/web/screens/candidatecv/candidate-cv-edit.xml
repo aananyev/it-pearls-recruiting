@@ -6,15 +6,8 @@
     <data>
         <collection id="openPositionsDc"
                     class="com.company.hunttech.entity.OpenPosition">
-            <view extends="openPosition-view">
-                <property name="projectName" view="_local">
-                    <property name="projectDepartment" view="_local">
-                        <property name="companyName" view="_local">
-                            <property name="companyOwnership" view="_local"/>
-                        </property>
-                    </property>
-                </property>
-            </view>
+            <!-- CandidateCVEdit vacancy picker needs only picker fields plus letter/comment data used by this screen. -->
+            <view extends="openPosition-candidate-cv-picker-view"/>
             <loader id="openPositionsDl"
                     cacheable="true">
                 <query>

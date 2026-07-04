@@ -9,8 +9,11 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @NamePattern("%s. %s|number,iterationName")
+// Iteraction is a small dictionary, but these indexes keep tree pickers and outstaffing filters predictable.
 @Table(name = "HUNTTECH_ITERACTION", indexes = {
-        @Index(name = "IDX_HUNTTECH_ITERACTION_NUMBER", columnList = "NUMBER_")
+        @Index(name = "IDX_HUNTTECH_ITERACTION_NUMBER", columnList = "NUMBER_"),
+        @Index(name = "IDX_HUNTTECH_ITERACTION_TREE_NUMBER", columnList = "ITERACTION_TREE_ID, NUMBER_"),
+        @Index(name = "IDX_HUNTTECH_ITERACTION_OUTSTAFFING", columnList = "OUTSTAFFING_SIGN")
 })
 @Entity(name = "hunttech_Iteraction")
 public class Iteraction extends StandardEntity {

@@ -27,9 +27,12 @@ public class JobCandidateBrowsePerfTest {
     @Mocked
     private DataService dataService;
 
+    private JobCandidatePerfTestSupport.Metrics metrics;
+
     @Before
     public void setUp() {
-        JobCandidatePerfTestSupport.registerDataServiceDelegate(dataService, environment);
+        // Capture DataService counters so browse optimizations can be compared before/after.
+        metrics = JobCandidatePerfTestSupport.registerDataServiceDelegate(dataService, environment);
     }
 
     @After
@@ -50,7 +53,17 @@ public class JobCandidateBrowsePerfTest {
                 UiControllerUtils.getScreenData(browse).getContainer("jobCandidatesDc");
         int loadedCount = jobCandidatesDc.getItems().size();
 
-        System.out.printf("Screen [JobCandidateBrowse] opened in %d µs%n", elapsedMicros);
-        System.out.printf("JobCandidate records in jobCandidatesDc: %d%n", loadedCount);
+        System.out.printf("PERF_RESULT JobCandidateBrowse openMicros=%d loadedCandidates=%d " +
+                        "load=%d loadList=%d getCount=%d loadValues=%d " +
+                        "jobCandidateLoad=%d jobCandidateLoadList=%d jobCandidateGetCount=%d%n",
+                elapsedMicros,
+                loadedCount,
+                metrics.getLoadCalls(),
+                metrics.getLoadListCalls(),
+                metrics.getGetCountCalls(),
+                metrics.getLoadValuesCalls(),
+                metrics.getJobCandidateLoadCalls(),
+                metrics.getJobCandidateLoadListCalls(),
+                metrics.getJobCandidateGetCountCalls());
     }
 }

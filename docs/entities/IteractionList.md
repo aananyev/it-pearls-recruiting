@@ -172,7 +172,17 @@ erDiagram
 | `IDX_HUNTTECH_ITERACTION_LIST_NUMBER_ITERACTION` | `NUMBER_ITERACTION` | ORDER BY desc |
 | `IDX_HUNTTECH_ITERACTION_LIST_DATE_ITERACTION` | `DATE_ITERACTION` | виджеты по дате |
 
-**Миграция не требуется** — индекс на `ITERACTION_TYPE_ID` уже есть в `20.create-db.sql`.
+### 6.1.1 Индексы производительности (миграция `260704-5`)
+
+Индексы ниже добавлены отдельной миграцией, чтобы ускорить реальные browse/edit сценарии без изменения бизнес-логики и данных.
+
+| Индекс | Колонки | Назначение |
+|--------|---------|------------|
+| `IDX_HUNTTECH_ITERACTION_LIST_CANDIDATE_NUMBER` | `CANDIDATE_ID, NUMBER_ITERACTION desc, ID` | Последнее взаимодействие кандидата, simple-browse, JobCandidate batch-cache |
+| `IDX_HUNTTECH_ITERACTION_LIST_CANDIDATE_VACANCY_DATE` | `CANDIDATE_ID, VACANCY_ID, DATE_ITERACTION desc, ID` | Цепочка candidate+vacancy, duplicate/project continuation checks |
+| `IDX_HUNTTECH_ITERACTION_LIST_RECRUTIER_DATE_TYPE` | `RECRUTIER_ID, DATE_ITERACTION desc, ITERACTION_TYPE_ID` | `getMostPolularIteraction` и статистика рекрутёра |
+| `IDX_HUNTTECH_ITERACTION_LIST_TYPE_DATE_NUMBER` | `ITERACTION_TYPE_ID, DATE_ITERACTION desc, NUMBER_ITERACTION desc` | Фильтры по типам взаимодействий, включая manager/outstaffing |
+| `IDX_HUNTTECH_ITERACTION_LIST_ACTIVE_NUMBER` | `NUMBER_ITERACTION desc, ID` | Главный browse по последним взаимодействиям |
 
 ### 6.2 TOAST / LOB
 
@@ -195,6 +205,9 @@ erDiagram
 | N+1 в providers | ✅ | batch RecrutiesTasks в Browse |
 | Entity cache (EclipseLink) | ⚠️ | не настроен |
 | Legacy `iteractionList-view` | ⚠️ | ~25 потребителей с `_local` FK |
+| Simple Browse comment LOB | ✅ | `COMMENT_` исключён из view; наличие комментария кэшируется пачкой, текст tooltip грузится по hover |
+| Edit vacancy loader | ✅ | `openPositionsDl` защищён от ранней загрузки до установки фильтра подписки |
+| Iteraction tab loaders | ✅ | дочерние типы и workStatus грузятся только при открытии нужных вкладок |
 
 ### 7.2 Выполненные оптимизации
 
@@ -210,6 +223,10 @@ erDiagram
 - [x] Узкий `excludeProperties` (+ `comment`)
 - [x] `InteractionServiceBean.getLastIteraction` — JPQL вместо итерации в Java
 - [x] `OpenPositionRowStyleHelper` + batch в `IteractionListBrowse`
+- [x] `IteractionListSimpleBrowse` — batch cache наличия комментария вместо загрузки LOB в каждой строке
+- [x] `IteractionListEdit` — `openPositionsDl` не грузит все вакансии до установки `subscriber`
+- [x] `IteractionEdit` — вкладочные справочники защищены от преждевременной загрузки `@LoadDataBeforeShow`
+- [x] Индексы `260704-5` для candidate/vacancy/recruiter/type/date сценариев
 
 ### 7.3 Backlog
 
@@ -241,6 +258,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-04 | Performance pack: LOB-free simple-browse comments, guarded vacancy loader in IteractionListEdit, guarded tab loaders in IteractionEdit, composite indexes `260704-5` |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Исправление unfetched FK на Edit: `openPosition-iteraction-list-picker-view` — `cityPosition`/`cities` → `city-picker-view` для сравнения локаций в `IteractionListEdit` |
 | 2026-06-23 | Исправление unfetched `recrutier` в JobCandidate: `iteractionList-picker-view` + `iteractionList-job-candidate` → `extUser-picker-view`; FK в `job-candidate-edit.xml` |

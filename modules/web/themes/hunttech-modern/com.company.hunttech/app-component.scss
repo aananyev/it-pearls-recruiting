@@ -1,0 +1,11 @@
+/**
+ * Hunttech-Modern (светлая тема) — агрегатор расширений.
+ *
+ * Собирает все кастомные SCSS проекта в единый mixin для подключения
+ * в точке входа styles.scss.
+ */
+@import "hunttech-modern-ext";
+
+@mixin com_company_hunttech {
+    @include com_company_hunttech-hunttech-modern-ext;
+}

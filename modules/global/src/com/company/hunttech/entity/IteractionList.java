@@ -10,9 +10,14 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Date;
 
+// IteractionList screens mostly filter by candidate/vacancy/recruiter and then sort by interaction number/date.
 @Table(name = "HUNTTECH_ITERACTION_LIST", indexes = {
         @Index(name = "IDX_HUNTTECH_ITERACTION_LIST_NUMBER", columnList = "NUMBER_ITERACTION"),
-        @Index(name = "IDX_HUNTTECH_ITERACTION_LIST_DATE", columnList = "DATE_ITERACTION")
+        @Index(name = "IDX_HUNTTECH_ITERACTION_LIST_DATE", columnList = "DATE_ITERACTION"),
+        @Index(name = "IDX_HUNTTECH_ITERACTION_LIST_CANDIDATE_NUMBER", columnList = "CANDIDATE_ID, NUMBER_ITERACTION"),
+        @Index(name = "IDX_HUNTTECH_ITERACTION_LIST_CANDIDATE_VACANCY_DATE", columnList = "CANDIDATE_ID, VACANCY_ID, DATE_ITERACTION"),
+        @Index(name = "IDX_HUNTTECH_ITERACTION_LIST_RECRUTIER_DATE_TYPE", columnList = "RECRUTIER_ID, DATE_ITERACTION, ITERACTION_TYPE_ID"),
+        @Index(name = "IDX_HUNTTECH_ITERACTION_LIST_TYPE_DATE_NUMBER", columnList = "ITERACTION_TYPE_ID, DATE_ITERACTION, NUMBER_ITERACTION")
 })
 @Entity(name = "hunttech_IteractionList")
 @NamePattern("%s|candidate")

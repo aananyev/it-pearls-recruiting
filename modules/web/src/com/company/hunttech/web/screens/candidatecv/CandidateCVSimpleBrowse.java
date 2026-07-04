@@ -2,6 +2,7 @@ package com.company.hunttech.web.screens.candidatecv;
 
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.JobCandidate;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
@@ -50,8 +51,11 @@ public class CandidateCVSimpleBrowse extends StandardLookup<CandidateCV> {
     private Screens screens;
     @Inject
     private Button viewOriginalCVButton;
+    @Inject
+    private DataManager dataManager;
 
     public void setSelectedCandidate(JobCandidate entity) {
+        // Parent screens pass the candidate before show; keep the loader query scoped and newest-first.
         candidateCVsDl.setParameter("candidate", entity);
         candidateCVsDl.load();
     }
@@ -109,16 +113,19 @@ public class CandidateCVSimpleBrowse extends StandardLookup<CandidateCV> {
     }
 
     public void copyCandidateCVButton() {
+        // The grid uses a lightweight view, so load LOB fields only for the selected copy action.
+        CandidateCV selectedCandidateCV = loadFullCandidateCV(candidateCVsTable.getSingleSelected());
+
         screenBuilders.editor(CandidateCV.class, this)
                 .newEntity()
                 .withScreenClass(CandidateCVEdit.class)
                 .withInitializer(e -> {
-                    e.setCandidate(candidateCVsTable.getSingleSelected().getCandidate());
+                    e.setCandidate(selectedCandidateCV.getCandidate());
                     e.setOwner((ExtUser) userSession.getUser());
-                    e.setResumePosition(candidateCVsTable.getSingleSelected().getResumePosition());
-                    e.setTextCV(candidateCVsTable.getSingleSelected().getTextCV());
-                    e.setLetter(candidateCVsTable.getSingleSelected().getLetter());
-                    e.setLinkOriginalCv(candidateCVsTable.getSingleSelected().getLinkOriginalCv());
+                    e.setResumePosition(selectedCandidateCV.getResumePosition());
+                    e.setTextCV(selectedCandidateCV.getTextCV());
+                    e.setLetter(selectedCandidateCV.getLetter());
+                    e.setLinkOriginalCv(selectedCandidateCV.getLinkOriginalCv());
                     e.setDatePost(new Date());
                 })
                 .withAfterCloseListener(ee -> {
@@ -182,8 +189,18 @@ public class CandidateCVSimpleBrowse extends StandardLookup<CandidateCV> {
 
 
     public void viewOriginalCVButton() {
+        // Viewer needs the actual resume text; fetch it lazily instead of carrying it in the browse grid.
+        CandidateCV selectedCandidateCV = loadFullCandidateCV(candidateCVsTable.getSingleSelected());
+
         ViewerTextScreen viewerTextScreen = screens.create(ViewerTextScreen.class);
-        viewerTextScreen.setTextToArea(candidateCVsTable.getSingleSelected().getTextCV());
+        viewerTextScreen.setTextToArea(selectedCandidateCV.getTextCV());
         viewerTextScreen.show();
+    }
+
+    private CandidateCV loadFullCandidateCV(CandidateCV candidateCV) {
+        return dataManager.load(CandidateCV.class)
+                .id(candidateCV.getId())
+                .view("candidateCV-view")
+                .one();
     }
 }

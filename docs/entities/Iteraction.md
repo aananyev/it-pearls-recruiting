@@ -258,6 +258,13 @@ erDiagram
 
 ### 6.1 Таблица `HUNTTECH_ITERACTION`
 
+Индексы производительности `260704-5` добавлены для сценариев, где справочник типов взаимодействий участвует в дереве, picker-ах и фильтрации outstaffing.
+
+| Индекс | Колонки | Назначение |
+|--------|---------|------------|
+| `IDX_HUNTTECH_ITERACTION_TREE_NUMBER` | `ITERACTION_TREE_ID, NUMBER_, ID` | Быстрая загрузка дочерних типов и tree/picker экранов |
+| `IDX_HUNTTECH_ITERACTION_OUTSTAFFING` | `OUTSTAFFING_SIGN, ID` | Быстрый кэш ID outstaffing-типов для `IteractionListBrowse` |
+
 Полная схема: `modules/core/db/init/postgres/10.create-db.sql` (строки 189–252).
 
 Системные колонки CUBA: `ID`, `VERSION`, `CREATE_TS`, `CREATED_BY`, `UPDATE_TS`, `UPDATED_BY`, `DELETE_TS`, `DELETED_BY`.

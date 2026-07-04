@@ -35,9 +35,12 @@ public class JobCandidateEditPerfTest {
     @Mocked
     private InteractionService interactionService;
 
+    private JobCandidatePerfTestSupport.Metrics metrics;
+
     @Before
     public void setUp() {
-        JobCandidatePerfTestSupport.registerDataServiceDelegate(
+        // Capture DataService counters around edit opening, including lazy-tab improvements.
+        metrics = JobCandidatePerfTestSupport.registerDataServiceDelegate(
                 dataService, environment, getRoleService, interactionService);
     }
 
@@ -64,7 +67,17 @@ public class JobCandidateEditPerfTest {
         edit.show();
         long elapsedMicros = (System.nanoTime() - startNanos) / 1000L;
 
-        System.out.printf("Screen [JobCandidateEdit] opened in %d µs%n", elapsedMicros);
-        System.out.printf("Edited JobCandidate id: %s%n", candidate.getId());
+        System.out.printf("PERF_RESULT JobCandidateEdit openMicros=%d editedCandidate=%s " +
+                        "load=%d loadList=%d getCount=%d loadValues=%d " +
+                        "jobCandidateLoad=%d jobCandidateLoadList=%d jobCandidateGetCount=%d%n",
+                elapsedMicros,
+                candidate.getId(),
+                metrics.getLoadCalls(),
+                metrics.getLoadListCalls(),
+                metrics.getGetCountCalls(),
+                metrics.getLoadValuesCalls(),
+                metrics.getJobCandidateLoadCalls(),
+                metrics.getJobCandidateLoadListCalls(),
+                metrics.getJobCandidateGetCountCalls());
     }
 }

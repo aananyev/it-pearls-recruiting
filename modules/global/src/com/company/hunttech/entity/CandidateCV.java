@@ -16,8 +16,13 @@ import java.util.Date;
 import java.util.List;
 
 @NamePattern("%s|candidate")
+// CandidateCV screens filter and order by FK/date pairs; keep entity metadata aligned with performance migrations.
 @Table(name = "HUNTTECH_CANDIDATE_CV", indexes = {
-        @Index(name = "IDX_HUNTTECH_CANDIDATE_C_V_DATE_POST", columnList = "DATE_POST")
+        @Index(name = "IDX_HUNTTECH_CANDIDATE_C_V_DATE_POST", columnList = "DATE_POST"),
+        @Index(name = "IDX_HUNTTECH_CANDIDATE_C_V_CANDIDATE_DATE", columnList = "CANDIDATE_ID, DATE_POST"),
+        @Index(name = "IDX_HUNTTECH_CANDIDATE_C_V_VACANCY_DATE", columnList = "TO_VACANCY_ID, DATE_POST"),
+        @Index(name = "IDX_HUNTTECH_CANDIDATE_C_V_POSITION_DATE", columnList = "RESUME_POSITION_ID, DATE_POST"),
+        @Index(name = "IDX_HUNTTECH_CANDIDATE_C_V_OWNER_DATE", columnList = "OWNER_ID, DATE_POST")
 })
 @Entity(name = "hunttech_CandidateCV")
 public class CandidateCV extends StandardEntity {

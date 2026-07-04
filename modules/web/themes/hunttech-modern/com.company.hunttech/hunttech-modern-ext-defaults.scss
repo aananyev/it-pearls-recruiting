@@ -1,0 +1,54 @@
+/**
+ * Hunttech-Modern (светлая тема) — переопределение переменных Vaadin/Halo.
+ *
+ * Базируется на стандартной теме halo, но с современной палитрой, повышенной
+ * плотностью элементов и адаптивными размерами под экраны 13"–27".
+ *
+ * Файл подключается ДО точки входа halo через styles.scss.
+ */
+
+/* ─── Акцентные цвета HRM HuntTech ─── */
+$v-focus-color: #0052CC;                               /* Акцентный синий (контуры, фокус) */
+$v-selection-color: #E6F0FF;                            /* Подсветка выделения */
+$v-selection-item-selection-color: #4D7AB2;              /* Выделение в списках */
+
+/* ─── Фоны ─── */
+$v-app-loading-screen-background-color: #F8F9FA;
+$v-background-color: #F4F6F9;                            /* Мягкий серо-голубой фон */
+$v-app-background-color: #FFFFFF;                        /* Белый фон контента */
+
+/* ─── Типографика ─── */
+$v-font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+$v-font-size: 13px;                                      /* Оптимально для 13"–27" */
+$v-font-weight: 400;
+
+/* ─── Формы: плоский дизайн, без градиентов ─── */
+$v-gradient: none;                                      /* Плоский современный дизайн */
+
+/* ─── Размеры и плотность ─── */
+$v-unit-size: 30px;                                     /* Высота инпутов и кнопок */
+$v-roundness: 6px;                                      /* Закругления для карточек и инпутов */
+$v-border-radius: 6px;
+$v-border: 1px solid #E2E8F0;
+
+/* ─── Menubar (верхнее меню HRM HuntTech) ─── */
+$cuba-menubar-background-color: #1E3A5F;                /* Тёмно-синий, корпоративный */
+$cuba-menubar-border-color: #1E3A5F;
+$cuba-menubar-menuitem-text-color: #FFFFFF;
+$cuba-menubar-text-color: #FFFFFF;
+$cuba-app-menubar-padding-top: 6px;
+$cuba-app-menubar-padding-bottom: 6px;
+$cuba-menubar-submenu-padding: 2px;
+
+/* ─── Таблицы: плотность для работы на 13" ноутбуках ─── */
+$v-table-row-height: 28px;
+$v-table-header-font-size: 12px;
+$v-grid-cell-padding-horizontal: 10px;
+$v-grid-cell-padding-vertical: 6px;
+
+/* ─── Textfield ─── */
+$v-textfield-border: 1px solid #CBD5E1;
+$v-textfield-border-radius: 4px;
+
+/* ─── Panel / Cards ─── */
+$v-panel-background-color: #FFFFFF;

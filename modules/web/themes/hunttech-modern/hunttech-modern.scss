@@ -1,0 +1,23 @@
+$v-app-loading-screen-background-color: #F8F9FA;
+$v-background-color: #F4F6F9; /* Мягкий светлый фон */
+$v-app-background-color: #FFFFFF;
+$v-font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+$v-font-size: 13px; /* Оптимально для 13"-27" */
+$v-focus-color: #0052CC; /* Акцентный синий */
+$v-selection-color: #E6F0FF;
+$v-gradient: none; /* Плоский современный дизайн */
+$v-roundness: 6px; /* Закругления для карточек и инпутов */
+
+/* Плотность таблиц и кнопок */
+$v-unit-size: 30px; /* Уменьшенная высота инпутов и кнопок для эргономики */
+$v-grid-cell-padding-horizontal: 10px;
+$v-grid-cell-padding-vertical: 6px;
+
+/* CUBA buildScss собирает тему через styles.scss; этот файл хранит базовый контракт Hunttech Modern. */
+.hunttech-modern {
+  /* Кастомные стили для карточек рекрутинга HuntTech */
+  .v-panel {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #E2E8F0;
+  }
+}

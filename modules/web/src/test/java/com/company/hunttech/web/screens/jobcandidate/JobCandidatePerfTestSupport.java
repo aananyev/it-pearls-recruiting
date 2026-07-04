@@ -5,8 +5,10 @@ import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.service.GetRoleService;
 import com.haulmont.cuba.core.app.DataService;
 import com.haulmont.cuba.core.entity.Entity;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.LoadContext;
+import com.haulmont.cuba.core.global.ValueLoadContext;
 import com.haulmont.cuba.security.entity.Group;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.web.testsupport.TestContainer;
@@ -22,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Web-tier {@link DataService} mock helpers for JobCandidate screen performance tests.
@@ -34,16 +37,17 @@ public final class JobCandidatePerfTestSupport {
     private JobCandidatePerfTestSupport() {
     }
 
-    public static void registerDataServiceDelegate(DataService dataService, TestUiEnvironment environment) {
-        registerDataServiceDelegate(dataService, environment, null, null);
+    public static Metrics registerDataServiceDelegate(DataService dataService, TestUiEnvironment environment) {
+        return registerDataServiceDelegate(dataService, environment, null, null);
     }
 
-    public static void registerDataServiceDelegate(DataService dataService, TestUiEnvironment environment,
+    public static Metrics registerDataServiceDelegate(DataService dataService, TestUiEnvironment environment,
                                                    GetRoleService getRoleService,
                                                    InteractionService interactionService) {
         initializeUserSession(environment);
         TestContainer testContainer = environment.getContainer();
         DataServiceProxy defaultProxy = new DataServiceProxy(testContainer);
+        Metrics metrics = new Metrics();
 
         TestEntityFactory<JobCandidate> factory =
                 testContainer.getEntityFactory(JobCandidate.class, TestEntityState.DETACHED);
@@ -54,7 +58,9 @@ public final class JobCandidatePerfTestSupport {
             result = new Delegate() {
                 @SuppressWarnings("unchecked")
                 Entity load(LoadContext<? extends Entity> loadContext) {
+                    metrics.loadCalls.incrementAndGet();
                     if (isJobCandidate(loadContext)) {
+                        metrics.jobCandidateLoadCalls.incrementAndGet();
                         Object id = loadContext.getId();
                         if (id instanceof UUID) {
                             UUID candidateId = (UUID) id;
@@ -73,7 +79,9 @@ public final class JobCandidatePerfTestSupport {
             result = new Delegate() {
                 @SuppressWarnings("unchecked")
                 List<Entity> loadList(LoadContext<? extends Entity> loadContext) {
+                    metrics.loadListCalls.incrementAndGet();
                     if (isJobCandidate(loadContext)) {
+                        metrics.jobCandidateLoadListCalls.incrementAndGet();
                         return new ArrayList<>(browseFixtures);
                     }
                     List list = defaultProxy.loadList(loadContext);
@@ -85,10 +93,22 @@ public final class JobCandidatePerfTestSupport {
             dataService.getCount((LoadContext<? extends Entity>) any);
             result = new Delegate() {
                 long getCount(LoadContext<? extends Entity> loadContext) {
+                    metrics.getCountCalls.incrementAndGet();
                     if (isJobCandidate(loadContext)) {
+                        metrics.jobCandidateGetCountCalls.incrementAndGet();
                         return browseFixtures.size();
                     }
                     return defaultProxy.getCount(loadContext);
+                }
+            };
+            minTimes = 0;
+
+            dataService.loadValues((ValueLoadContext) any);
+            result = new Delegate() {
+                List<KeyValueEntity> loadValues(ValueLoadContext loadContext) {
+                    // Batch caches in JobCandidateBrowse use loadValues; delegate keeps perf tests realistic.
+                    metrics.loadValuesCalls.incrementAndGet();
+                    return defaultProxy.loadValues(loadContext);
                 }
             };
             minTimes = 0;
@@ -122,6 +142,8 @@ public final class JobCandidatePerfTestSupport {
             }};
             TestServiceProxy.mock(InteractionService.class, interactionService);
         }
+
+        return metrics;
     }
 
     public static void clearServiceMocks() {
@@ -162,5 +184,43 @@ public final class JobCandidatePerfTestSupport {
 
     private static boolean isJobCandidate(LoadContext<? extends Entity> loadContext) {
         return JOB_CANDIDATE_ENTITY.equals(loadContext.getEntityMetaClass());
+    }
+
+    public static final class Metrics {
+        private final AtomicInteger loadCalls = new AtomicInteger();
+        private final AtomicInteger loadListCalls = new AtomicInteger();
+        private final AtomicInteger getCountCalls = new AtomicInteger();
+        private final AtomicInteger loadValuesCalls = new AtomicInteger();
+        private final AtomicInteger jobCandidateLoadCalls = new AtomicInteger();
+        private final AtomicInteger jobCandidateLoadListCalls = new AtomicInteger();
+        private final AtomicInteger jobCandidateGetCountCalls = new AtomicInteger();
+
+        public int getLoadCalls() {
+            return loadCalls.get();
+        }
+
+        public int getLoadListCalls() {
+            return loadListCalls.get();
+        }
+
+        public int getGetCountCalls() {
+            return getCountCalls.get();
+        }
+
+        public int getLoadValuesCalls() {
+            return loadValuesCalls.get();
+        }
+
+        public int getJobCandidateLoadCalls() {
+            return jobCandidateLoadCalls.get();
+        }
+
+        public int getJobCandidateLoadListCalls() {
+            return jobCandidateLoadListCalls.get();
+        }
+
+        public int getJobCandidateGetCountCalls() {
+            return jobCandidateGetCountCalls.get();
+        }
     }
 }

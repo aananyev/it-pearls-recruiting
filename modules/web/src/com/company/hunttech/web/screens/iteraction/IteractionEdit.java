@@ -158,6 +158,17 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         addNotificationPeriod();
         addNotificationWhenSend();
         addCheckTrace();
+        // @LoadDataBeforeShow should load only the first-tab data; heavy tab dictionaries are loaded on tab activation.
+        iteractionElementDl.addPreLoadListener(e -> {
+            if (!iteractionElementsLoaded) {
+                e.preventLoad();
+            }
+        });
+        workStatusDl.addPreLoadListener(e -> {
+            if (!workStatusLoaded) {
+                e.preventLoad();
+            }
+        });
     }
 
     private void addNotificationWhenSend() {
@@ -398,16 +409,18 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         }
         String tabName = event.getSelectedTab().getName();
         if ("checkTrace".equals(tabName) && !iteractionElementsLoaded) {
-            iteractionElementDl.load();
+            // Child interaction options are needed only by the trace tab twin column.
             iteractionElementsLoaded = true;
+            iteractionElementDl.load();
         }
         if ("tabSetup".equals(tabName) && !textEmailToSendLoaded) {
             loadTextEmailToSend();
             textEmailToSendLoaded = true;
         }
         if ("outstaffingTab".equals(tabName) && !workStatusLoaded) {
-            workStatusDl.load();
+            // Work status dictionary is needed only by the outstaffing tab.
             workStatusLoaded = true;
+            workStatusDl.load();
         }
     }
 
