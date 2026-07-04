@@ -43,6 +43,19 @@ Browse без LOB descriptions в основном SELECT; nested `projectOwner`
 | `projectDescription` | `PROJECT_DESCRIPTION` |
 | `templateLetter` | `TEMPLATE_LETTER` |
 
+### Индексы производительности
+
+Для PostgreSQL добавлены частичные индексы под фактические запросы Project-экранов и связанных сервисов:
+
+| Индекс | Выражение | Назначение |
+|--------|-----------|------------|
+| `IDX_HUNTTECH_PROJECT_ACTIVE_NAME` | `HUNTTECH_PROJECT (PROJECT_NAME, ID) WHERE DELETE_TS IS NULL AND PROJECT_IS_CLOSED = FALSE` | основной активный список `ProjectBrowse` с сортировкой по имени |
+| `IDX_HUNTTECH_PROJECT_TREE_PICKER_ACTIVE_NAME` | `HUNTTECH_PROJECT (PROJECT_NAME, ID) WHERE DELETE_TS IS NULL AND NOT (PROJECT_IS_CLOSED = TRUE)` | lookup родительского проекта в `ProjectEdit` |
+| `IDX_HUNTTECH_PROJECT_DEFAULT_ACTIVE` | `HUNTTECH_PROJECT (ID) WHERE DELETE_TS IS NULL AND DEFAULT_PROJECT = TRUE` | `ProjectServiceBean.createProjectDefault()` |
+| `IDX_HUNTTECH_OPEN_POSITION_OPEN_PROJECT` | `HUNTTECH_OPEN_POSITION (PROJECT_NAME_ID) WHERE DELETE_TS IS NULL AND NOT (OPEN_CLOSE = TRUE)` | `ProjectBrowse` / `ProjectEdit`: открытые вакансии проекта |
+
+HSQL получил обычные составные аналоги этих индексов для локальных и тестовых контуров.
+
 ---
 
 ## 4. Представления (views.xml)
@@ -70,7 +83,9 @@ Browse без LOB descriptions в основном SELECT; nested `projectOwner`
 
 - **Browse:** `readOnly`, узкий `excludeProperties` (LOB, openPosition)
 - **Browse Java:** batch-кэш счётчиков открытых вакансий и LOB-описаний (`ProjectBrowse`)
+- **Browse Java:** начальные фильтры задаются в `InitEvent` до `@LoadDataBeforeShow`; вложенные изменения checkbox не вызывают повторные `projectsDl.load()`
 - **Edit Java:** lazy load LOB и коллекции `openPosition` по вкладкам (`ProjectEdit`); вакансии — отдельный `CollectionLoader` с JPQL `where e.projectName = :project`, без привязки к `property="openPosition"` на instance (избегает unfetched при `@LoadDataBeforeShow`)
+- **Edit Java:** новый несохранённый проект не выполняет запрос открытых вакансий, потому что связанных строк ещё не может быть
 - **Loaders:** `companyDepartament-picker-view` + `cacheable`, `person-picker-view` + `cacheable`
 
 ---
@@ -87,8 +102,25 @@ Browse без LOB descriptions в основном SELECT; nested `projectOwner`
 | LOB в основном SELECT | да (`projectDescription`, `templateLetter`) | нет | −2 LOB | TOAST не тянется при пагинации |
 | SQL на строку (счётчик вакансий) | 1 запрос/строка | 1 batch после load | −(N−1) | `refreshOpenPositionCountCache` |
 | SQL на LOB для иконки описания | в основном view | 1 batch после load | − | `refreshProjectDescriptionCache` |
+| Повторная загрузка на старте Browse | checkbox handlers + ручной `load()` | параметры до автозагрузки | −1/−2 load при открытии | `initDefaultProjectFilters` |
+| Запрос открытых вакансий для нового ProjectEdit | выполнялся всегда | пропускается для new entity | −1 loadList | `getOpenedPosition()` |
 | Полей в view (оценка) | ~15+ _local | ~12 scalar/FK | − | person-owner-view, companyDepartament-picker-view |
 | Глубина FK projectDepartment | `_local` + company `_local` | `companyDepartament-picker-view` | −2 уровня | |
+
+### Замеры 2026-07-04 — ProjectBrowse / ProjectEdit
+
+```bash
+./gradlew :app-web:test \
+  --tests com.company.hunttech.web.screens.project.ProjectBrowsePerfTest \
+  --tests com.company.hunttech.web.screens.project.ProjectEditPerfTest
+```
+
+| Тест | Результат |
+|------|-----------|
+| `ProjectBrowsePerfTest` | `BUILD SUCCESSFUL`; `projectLoadList=2`, `loadValues=0` на пустом тестовом наборе |
+| `ProjectEditPerfTest` | `BUILD SUCCESSFUL`; `projectLoadList=1`, без запроса открытых вакансий для нового проекта |
+
+Локальная PostgreSQL БД получила индексы `IDX_HUNTTECH_PROJECT_ACTIVE_NAME`, `IDX_HUNTTECH_PROJECT_TREE_PICKER_ACTIVE_NAME`, `IDX_HUNTTECH_PROJECT_DEFAULT_ACTIVE`, `IDX_HUNTTECH_OPEN_POSITION_OPEN_PROJECT`. На текущем небольшом объёме `HUNTTECH_PROJECT` планировщик может выбирать `Seq Scan`; индексы рассчитаны на рост объёма, lookup-запросы и фильтр открытых вакансий.
 
 ### Backlog
 
@@ -105,6 +137,8 @@ Browse без LOB descriptions в основном SELECT; nested `projectOwner`
 
 `ProjectServiceTest` — create, edit, browse load (без LOB), soft delete. `TestEntityTracker` для очистки.
 
+`ProjectBrowsePerfTest`, `ProjectEditPerfTest`, `ProjectPerfTestSupport` — web-level счётчики `DataService` по аналогии с Company performance suite.
+
 ```bash
 ./gradlew :app-core:test --tests "com.company.hunttech.core.ProjectServiceTest"
 ```
@@ -119,3 +153,4 @@ Browse без LOB descriptions в основном SELECT; nested `projectOwner`
 | 2026-06-23 | Fix ProjectEdit: `projectOpenPositionsDc` — standalone loader вместо `property="openPosition"`; lazy load по вкладке «Вакансии» |
 | 2026-06-22 | Аудит Edit unfetched FK: `ProjectEdit` без каскадных обработчиков location; lazy LOB/collections через reload — OK |
 | 2026-06-23 | Оптимизация: project-browse/edit/picker/tree-picker views, lazy LOB и `openPosition` по вкладкам, batch N+1 в `ProjectBrowse`, `ProjectServiceTest`, документация |
+| 2026-07-04 | Оптимизация Project по сценарию Company: стартовые фильтры без повторных load, skip open-position query для нового ProjectEdit, PostgreSQL/HSQL индексы, Project perf-тесты |

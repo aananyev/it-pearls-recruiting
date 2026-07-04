@@ -1,0 +1,15 @@
+create index if not exists IDX_HUNTTECH_PROJECT_ACTIVE_NAME
+on HUNTTECH_PROJECT (PROJECT_NAME, ID)
+where DELETE_TS is null and PROJECT_IS_CLOSED = false;
+
+create index if not exists IDX_HUNTTECH_PROJECT_TREE_PICKER_ACTIVE_NAME
+on HUNTTECH_PROJECT (PROJECT_NAME, ID)
+where DELETE_TS is null and not (PROJECT_IS_CLOSED = true);
+
+create index if not exists IDX_HUNTTECH_PROJECT_DEFAULT_ACTIVE
+on HUNTTECH_PROJECT (ID)
+where DELETE_TS is null and DEFAULT_PROJECT = true;
+
+create index if not exists IDX_HUNTTECH_OPEN_POSITION_OPEN_PROJECT
+on HUNTTECH_OPEN_POSITION (PROJECT_NAME_ID)
+where DELETE_TS is null and not (OPEN_CLOSE = true);

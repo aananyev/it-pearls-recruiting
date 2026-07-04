@@ -273,6 +273,10 @@ public class ProjectEdit extends StandardEditor<Project> {
     }
 
     private void getOpenedPosition() {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            openPositions = new ArrayList<>();
+            return;
+        }
         String positionsQuery = "select e from hunttech_OpenPosition e " +
                 "where e.projectName = :projectName and " +
                 "e.openClose = false";

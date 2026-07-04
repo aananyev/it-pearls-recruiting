@@ -58,6 +58,7 @@ public class ProjectBrowse extends StandardLookup<Project> {
 
     private Map<UUID, Integer> openPositionCountCache = Collections.emptyMap();
     private Map<UUID, String> projectDescriptionCache = Collections.emptyMap();
+    private boolean suppressProjectFilterReload;
 
     @Subscribe(id = "projectsDl", target = Target.DATA_LOADER)
     private void onProjectsDlPostLoad(CollectionLoader.PostLoadEvent<Project> event) {
@@ -156,6 +157,19 @@ public class ProjectBrowse extends StandardLookup<Project> {
     @Subscribe
     public void onInit(InitEvent event) {
         initColumnSelector();
+        initDefaultProjectFilters();
+    }
+
+    private void initDefaultProjectFilters() {
+        suppressProjectFilterReload = true;
+        try {
+            onlyOpenProjectCheckBox.setValue(false);
+            withOpenPositionCheckBox.setValue(true);
+        } finally {
+            suppressProjectFilterReload = false;
+        }
+        projectsDl.setParameter("projectClosed", false);
+        projectsDl.setParameter("withOpenPosition", true);
     }
 
     private void initColumnSelector() {
@@ -181,23 +195,16 @@ public class ProjectBrowse extends StandardLookup<Project> {
         projectsTable.setHierarchyColumn(event.getValue());
     }
 
-    @Subscribe
-    public void onBeforeShow(BeforeShowEvent event) {
-        onlyOpenProjectCheckBox.setValue(false);
-        setProjectClosedFilter();
-
-        withOpenPositionCheckBox.setValue(true);
-    }
-
     @Install(to = "projectsTable", subject = "rowDescriptionProvider")
     private String projectsTableRowDescriptionProvider(Project project) {
         return getPlainDescription(project);
     }
 
     private void setProjectClosedFilter() {
-        if (onlyOpenProjectCheckBox.getValue()) {
+        if (Boolean.TRUE.equals(onlyOpenProjectCheckBox.getValue())) {
             projectsDl.removeParameter("projectClosed");
-            withOpenPositionCheckBox.setValue(false);
+            projectsDl.removeParameter("withOpenPosition");
+            setFilterCheckBoxValue(withOpenPositionCheckBox, false);
         } else {
             projectsDl.setParameter("projectClosed", false);
         }
@@ -207,6 +214,9 @@ public class ProjectBrowse extends StandardLookup<Project> {
 
     @Subscribe("onlyOpenProjectCheckBox")
     public void onOnlyOpenProjectCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (suppressProjectFilterReload) {
+            return;
+        }
         setProjectClosedFilter();
     }
 
@@ -240,14 +250,27 @@ public class ProjectBrowse extends StandardLookup<Project> {
 
     @Subscribe("withOpenPositionCheckBox")
     public void onWithOpenPositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
-        if (event.getValue()) {
+        if (Boolean.TRUE.equals(event.getValue())) {
             projectsDl.setParameter("withOpenPosition", true);
-            onlyOpenProjectCheckBox.setValue(false);
+            projectsDl.setParameter("projectClosed", false);
+            setFilterCheckBoxValue(onlyOpenProjectCheckBox, false);
         } else {
             projectsDl.removeParameter("withOpenPosition");
         }
 
+        if (suppressProjectFilterReload) {
+            return;
+        }
         projectsDl.load();
+    }
+
+    private void setFilterCheckBoxValue(CheckBox checkBox, boolean value) {
+        suppressProjectFilterReload = true;
+        try {
+            checkBox.setValue(value);
+        } finally {
+            suppressProjectFilterReload = false;
+        }
     }
 
 /*    @Install(to = "projectsTable.projectOwner", subject = "columnGenerator")
