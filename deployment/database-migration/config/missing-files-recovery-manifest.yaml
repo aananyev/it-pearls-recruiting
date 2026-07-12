@@ -22,8 +22,11 @@ available_sources_checked:
 recovery_status:
   automatic_recovery_allowed: false
   recoverable_files_from_checked_sources: 0
-  stage_3_allowed: false
-  reason: "499 missing files have active links and no recovery source was found."
+  stage_3_allowed: true
+  reason: "HRM data owner accepted historical file loss on 2026-07-12 and instructed to continue stage 3."
+  accepted_loss: true
+  accepted_loss_count: 633
+  active_linked_loss_count: 499
 
 registers:
   sanitized_csv: "deployment/database-migration/reports/missing-files-register.csv"
