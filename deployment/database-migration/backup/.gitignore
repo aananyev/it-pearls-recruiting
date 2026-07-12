@@ -1,0 +1,6 @@
+# Backup outputs must never be committed.
+*
+!.gitignore
+!*.sh
+!*.md
+!env.example

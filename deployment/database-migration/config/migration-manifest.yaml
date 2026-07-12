@@ -1,0 +1,116 @@
+# HRM HuntTech production migration manifest template.
+# Do not store passwords, tokens, .pgpass contents or raw production data here.
+
+migration:
+  id: null
+  approved_git_commit: null
+  execution_mode: null # LOCAL_TEST | TEST_RESTORE | PRODUCTION_DRY_RUN | PRODUCTION_BACKUP | PRODUCTION_MIGRATION | PRODUCTION_ROLLBACK
+  require_clean_worktree: true
+  require_human_approval_for_cutover: true
+  prohibit_git_push: true
+
+source:
+  host: hr.hunttech.ru
+  port: 5432
+  database: itpearls
+  schema: public
+  expected_postgresql_version: "11.22"
+  expected_owner: cuba
+  expected_application_user: cuba
+  preserve_source_database: true
+  prohibit_source_schema_changes: true
+  prohibit_migration_in_place: true
+
+target:
+  host: hr.hunttech.ru
+  port: 5432
+  database: hunttech
+  schema: public
+  tablespace: pg_default
+  owner: cuba
+  create_only_if_absent: true
+  require_empty_database_before_schema: true
+  prohibit_tablespace_hunttech_creation: true
+
+application:
+  service: null
+  app_home: /opt/app_home
+  datasource_config: null
+  expected_old_jdbc_url: jdbc:postgresql://localhost/itpearls
+  target_jdbc_url: jdbc:postgresql://localhost/hunttech
+  automatic_database_update: false
+  require_integrations_disabled_for_test: true
+  require_scheduled_jobs_disabled_for_test: true
+  require_outbound_email_disabled_for_test: true
+  require_telegram_disabled_for_test: true
+
+backup:
+  directory: null
+  minimum_free_space_gb: null
+  checksum_algorithm: SHA-256
+  prohibit_overwrite: true
+  require_custom_format_dump: true
+  require_globals_backup: true
+  prohibit_globals_restore_without_review: true
+  require_pg_restore_list: true
+  require_manifest: true
+
+file_storage:
+  source_path: null
+  target_path: null
+  require_backup: true
+  require_checksum_manifest: true
+  require_target_isolation: true
+  prohibit_test_instance_writes_to_production_storage: true
+
+validation:
+  require_all_table_counts: true
+  require_primary_key_validation: true
+  require_foreign_key_validation: true
+  require_security_validation: true
+  require_file_validation: true
+  require_checksums: true
+  require_sequence_validation: true
+  require_schema_diff_validation: true
+  require_application_smoke_test: true
+  final_source_counts_policy: RECALCULATE_AFTER_STOP_WRITES
+
+known_data_rules:
+  empty_legacy_link_tables:
+    require_zero_count_recheck_before_production: true
+    tables:
+      - itpearls_job_candidate_position_link__u59616
+      - itpearls_open_position_city_link__u70664
+  vacancy_prompt_template_temperature:
+    preserve_existing_values: true
+    preserve_nulls: true
+    target_database_default: 0.7
+    requires_schema_decision: true
+  current_company_orphans:
+    confirmed_count: 17
+    rule_used_in_local_test: create_placeholder_companies_and_quarantine
+    requires_human_approval_before_production: true
+  dashboard_widget_namespace:
+    replace_dashboard_model_namespace: itpearls_to_hunttech
+    replace_widget_template_namespace: itpearls_to_hunttech
+  sec_user_dtype:
+    replace: itpearls_ExtUser
+    with: hunttech_ExtUser
+
+cross_database_safety:
+  other_databases_are_protected: true
+  allowed_source_database: itpearls
+  allowed_target_database: hunttech
+  prohibit_wildcard_database_operations: true
+  prohibit_drop_database_without_exact_name_and_human_approval: true
+  prohibit_shared_role_changes_without_review: true
+  prohibit_tablespace_changes_without_review: true
+  prohibit_postgresql_restart_without_separate_runbook: true
+
+rollback:
+  preserve_source_database: true
+  preserve_target_database_for_analysis_on_failure: true
+  prohibit_automatic_rollback_after_user_writes: true
+  require_delta_analysis_after_user_writes: true
+  require_human_decision_after_user_writes: true
+  prohibit_simultaneous_writes_to_source_and_target: true

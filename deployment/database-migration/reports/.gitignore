@@ -1,0 +1,11 @@
+# Generated reports may be committed only after manual review and secret masking.
+# Raw database audit outputs, dumps and personal data stay outside Git.
+raw/
+*.dump
+*.backup
+*.tar
+*.tar.gz
+*.tgz
+*.sql.gz
+*.csv
+*.tsv
