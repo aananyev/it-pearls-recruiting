@@ -1,0 +1,95 @@
+# HRM HuntTech staged production deployment manifest.
+# Do not store passwords, tokens, .pgpass contents, dumps, raw logs or production data here.
+
+deployment:
+  environment: production
+  approved_git_commit: null
+  host: hr.hunttech.ru
+  stage: 1-preparation
+  require_human_approval_for_mutating_actions: true
+  prohibit_git_push: true
+  prohibit_automatic_database_update: true
+
+tomcat:
+  catalina_home: null
+  catalina_base: null
+  service_name: tomcat9
+  user: tomcat
+  port: 8080
+  webapps_dir: /var/lib/tomcat9/webapps
+  app_home: /opt/app_home
+  logs_dir: /var/log/tomcat9
+  require_readonly_audit_before_deploy: true
+
+old_application:
+  context_path: /app
+  core_context_path: /app-core
+  database: itpearls
+  preserve: true
+  allow_delete: false
+  allow_overwrite: false
+  allow_stop_in_stage_1: false
+
+new_application:
+  context_path: /hrm
+  core_context_path: /hrm-core
+  database: hunttech
+  database_schema: public
+  database_tablespace: pg_default
+  automatic_database_update: false
+  enable_user_access: false
+  enable_scheduled_tasks: false
+  enable_outbound_email: false
+  enable_telegram: false
+  enable_external_writes: false
+  artifact_format: cuba_two_war
+  expected_web_war: hrm.war
+  expected_core_war: hrm-core.war
+
+build:
+  gradle_task: buildWar
+  cuba_single_war: false
+  module_prefix: app
+  web_context_name: hrm
+  core_context_name: hrm-core
+  require_clean_artifact_directory: true
+  require_war_sha256: true
+
+database:
+  source: itpearls
+  target: hunttech
+  postgresql_version: "11.22"
+  prohibit_source_changes_in_stage_1: true
+  prohibit_target_creation_in_stage_1: true
+  require_final_stop_writes_before_stage_2: true
+
+file_storage:
+  source_path: /opt/app_home/fileStorage
+  target_path: null
+  require_path_confirmation: true
+  prohibit_production_write_before_cutover: true
+
+integrations:
+  scheduled_tasks: disabled_before_cutover
+  outbound_email: disabled_before_cutover
+  telegram: disabled_before_cutover
+  external_callbacks: disabled_before_cutover
+  ai_api: disabled_before_cutover
+
+rollback:
+  preserve_old_database: true
+  preserve_old_application: true
+  require_human_approval: true
+  prohibit_automatic_rollback_after_user_writes: true
+  keep_failed_hrm_for_analysis: true
+
+guards:
+  exact_host_required: true
+  exact_context_paths_required: true
+  exact_database_names_required: true
+  prohibit_wildcard_deletion: true
+  prohibit_delete_app_war: true
+  prohibit_delete_app_directory: true
+  prohibit_drop_itpearls: true
+  prohibit_drop_any_unlisted_database: true
+  prohibit_restart_tomcat_in_stage_1: true

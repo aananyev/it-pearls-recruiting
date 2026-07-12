@@ -1,0 +1,24 @@
+# Pre-cutover runtime overrides for deploying /hrm in restricted mode.
+# This configuration is intentionally non-sending and non-scheduling.
+# Never store passwords, tokens or production secrets in this file.
+
+cuba.webContextName=hrm
+cuba.connectionUrlList=http://localhost:8080/hrm-core
+cuba.dataSourceProvider=jndi
+cuba.automaticDatabaseUpdate=false
+cuba.schedulingActive=false
+
+# Keep user-facing access blocked until stage 5 approval.
+deployment.hrm.userAccessEnabled=false
+deployment.hrm.externalWritesEnabled=false
+
+# Disable outbound integrations before cutover.
+cuba.email.smtpHost=
+cuba.email.smtpUser=
+cuba.email.smtpPassword=
+hunttech.telegram.botName=
+hunttech.telegram.botToken=
+
+# File storage must not point to production write path until approved.
+cuba.fileStorageDir=/opt/app_home/fileStorage
+cuba.tempDir=/opt/app_home/fileStorage/temp

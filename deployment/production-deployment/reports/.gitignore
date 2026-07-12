@@ -1,0 +1,17 @@
+# Keep reports as sanitized markdown only.
+raw/
+*.log
+*.out
+*.err
+*.jsonl
+*.dump
+*.backup
+*.sql.gz
+*.war
+*.tar
+*.tar.gz
+*.tgz
+*.csv
+*.tsv
+SHA256SUMS*
+raw-*

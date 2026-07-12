@@ -1,0 +1,23 @@
+# Production runtime overrides for HRM after explicit cutover approval.
+# Copy manually to the approved app.home configuration location.
+# Never store passwords, tokens or production secrets in this file.
+
+cuba.webContextName=hrm
+cuba.connectionUrlList=http://localhost:8080/hrm-core
+cuba.dataSourceProvider=jndi
+cuba.automaticDatabaseUpdate=false
+cuba.schedulingActive=false
+
+# Database must be provided through Tomcat JNDI Resource jdbc/CubaDS.
+# Expected database: hunttech
+
+# File storage path must be confirmed before production use.
+cuba.fileStorageDir=/opt/app_home/fileStorage
+cuba.tempDir=/opt/app_home/fileStorage/temp
+
+# Enable only after cutover and separate human approval.
+cuba.email.smtpHost=
+cuba.email.smtpUser=
+cuba.email.smtpPassword=
+hunttech.telegram.botName=
+hunttech.telegram.botToken=
