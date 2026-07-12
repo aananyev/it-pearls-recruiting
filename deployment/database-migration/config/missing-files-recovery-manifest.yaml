@@ -1,0 +1,30 @@
+# Stage 2.1 recovery manifest. No secrets, no personal data.
+stage: "2.1"
+server: "hr.hunttech.ru"
+database: "hunttech"
+file_storage_root: "/opt/app_home/fileStorage"
+source_backup_dir: "/var/backups/hunttech-hrm/20260712-175910-stage2-final"
+generated_at_utc: "2026-07-12T19:08:26Z"
+
+summary:
+  missing_files: 633
+  active_linked_missing_files: 499
+  soft_deleted_or_archive_linked_files: 2
+  orphan_sys_file_metadata: 132
+  recoverable_source_found: 0
+
+available_sources_checked:
+  active_file_storage: true
+  active_file_storage_uuid_search: true
+  final_stage2_file_storage_archive: true
+  external_archives: false
+
+recovery_status:
+  automatic_recovery_allowed: false
+  recoverable_files_from_checked_sources: 0
+  stage_3_allowed: false
+  reason: "499 missing files have active links and no recovery source was found."
+
+registers:
+  sanitized_csv: "deployment/database-migration/reports/missing-files-register.csv"
+  decisions_yaml: "deployment/database-migration/config/missing-files-decision-register.yaml"
