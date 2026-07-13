@@ -904,6 +904,57 @@ rating_battery_yellow_3:before {
         text-transform: uppercase;
 }
 
+.job-candidate-editor {
+    background-color: #f5f7f9;
+}
+
+.job-candidate-split-root {
+    padding: 8px;
+}
+
+.job-candidate-sidebar {
+    background-color: #ffffff;
+    border: 1px solid #d7dde3;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+.job-candidate-sidebar .dropzone-container {
+    width: 100% !important;
+    max-width: 260px;
+    align-self: center;
+}
+
+.job-candidate-sidebar-summary {
+    border: 0;
+    box-shadow: none;
+}
+
+.job-candidate-sidebar-summary .v-gridlayout-slot {
+    min-width: 0;
+}
+
+.job-candidate-workspace {
+    min-width: 0;
+}
+
+.job-candidate-toolbar {
+    background-color: #ffffff;
+    border: 1px solid #d7dde3;
+    border-radius: 6px;
+    padding: 8px 10px;
+}
+
+.job-candidate-tabs {
+    background-color: #ffffff;
+    border: 1px solid #d7dde3;
+    border-radius: 6px;
+}
+
+.job-candidate-history {
+    padding: 12px;
+}
+
 .label-ellipsis {
     white-space: nowrap;
     overflow: hidden;
