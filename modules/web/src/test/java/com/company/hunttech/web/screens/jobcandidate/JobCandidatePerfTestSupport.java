@@ -33,6 +33,7 @@ public final class JobCandidatePerfTestSupport {
 
     public static final String ADMIN_LOGIN = "admin";
     public static final String JOB_CANDIDATE_ENTITY = "hunttech_JobCandidate";
+    public static final String CANDIDATE_CV_ENTITY = "hunttech_CandidateCV";
     public static final String COMPANY_ENTITY = "hunttech_Company";
 
     private JobCandidatePerfTestSupport() {
@@ -87,6 +88,10 @@ public final class JobCandidatePerfTestSupport {
                     }
                     if (isCompany(loadContext)) {
                         metrics.companyLoadListCalls.incrementAndGet();
+                    }
+                    if (isCandidateCV(loadContext)) {
+                        metrics.candidateCvLoadListCalls.incrementAndGet();
+                        return Collections.emptyList();
                     }
                     List list = defaultProxy.loadList(loadContext);
                     return list;
@@ -194,6 +199,10 @@ public final class JobCandidatePerfTestSupport {
         return COMPANY_ENTITY.equals(loadContext.getEntityMetaClass());
     }
 
+    private static boolean isCandidateCV(LoadContext<? extends Entity> loadContext) {
+        return CANDIDATE_CV_ENTITY.equals(loadContext.getEntityMetaClass());
+    }
+
     public static final class Metrics {
         private final AtomicInteger loadCalls = new AtomicInteger();
         private final AtomicInteger loadListCalls = new AtomicInteger();
@@ -203,6 +212,7 @@ public final class JobCandidatePerfTestSupport {
         private final AtomicInteger jobCandidateLoadListCalls = new AtomicInteger();
         private final AtomicInteger jobCandidateGetCountCalls = new AtomicInteger();
         private final AtomicInteger companyLoadListCalls = new AtomicInteger();
+        private final AtomicInteger candidateCvLoadListCalls = new AtomicInteger();
 
         public int getLoadCalls() {
             return loadCalls.get();
@@ -234,6 +244,10 @@ public final class JobCandidatePerfTestSupport {
 
         public int getCompanyLoadListCalls() {
             return companyLoadListCalls.get();
+        }
+
+        public int getCandidateCvLoadListCalls() {
+            return candidateCvLoadListCalls.get();
         }
     }
 }
