@@ -1,18 +1,13 @@
 /*
- * JobCandidateEdit — локальный theme-aware дизайн.
- *
- * Не изменяет сущности, контейнеры данных, loaders, actions,
- * captions, запросы или бизнес-логику.
+ * JobCandidateEdit — LinkedIn-стиль.
+ * Theme-aware: работает во всех CUBA-темах (halo, hover, hunttech-modern и др.).
+ * ID, captions, containers, loaders, actions, JPQL не изменены.
  */
-
 @mixin job-candidate-editor-theme {
 
+  /* ── Global ───────────────────────────── */
   .job-candidate-editor {
-    background: mix(
-      $v-app-background-color,
-      $v-panel-background-color,
-      72%
-    );
+    background: mix($v-app-background-color, $v-panel-background-color, 72%);
     color: $v-font-color;
   }
 
@@ -20,21 +15,14 @@
     background: transparent;
   }
 
-  /* ==========================================================
-     SIDEBAR
-     ========================================================== */
-
+  /* ── SIDEBAR (LinkedIn-карточка) ──────── */
   .job-candidate-sidebar {
     box-sizing: border-box;
-    padding: 18px 16px;
-
+    padding: 16px 14px;
     background: $v-panel-background-color;
-    border-right: 1px solid rgba($v-font-color, 0.14);
-
+    border-right: 1px solid rgba($v-font-color, 0.10);
     overflow-x: hidden;
     overflow-y: auto;
-
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.04);
   }
 
   .job-candidate-sidebar > .v-slot {
@@ -43,36 +31,14 @@
   }
 
   .job-candidate-sidebar > .v-spacing {
-    height: 12px !important;
+    height: 8px !important;
   }
 
-  /* ==========================================================
-     WORKSPACE
-     ========================================================== */
-
-  .job-candidate-workspace {
-    box-sizing: border-box;
-    min-width: 0;
-    padding: 14px 16px 16px;
-
-    background: mix(
-      $v-app-background-color,
-      $v-panel-background-color,
-      82%
-    );
-
-    overflow: hidden;
-  }
-
-  /* ==========================================================
-     PROFILE HEADER
-     ========================================================== */
-
+  /* ── PROFILE HEADER ───────────────────── */
   .job-candidate-profile-header {
     box-sizing: border-box;
     width: 100%;
-    padding: 2px 4px 10px;
-
+    padding: 0 0 6px;
     text-align: center;
   }
 
@@ -84,36 +50,22 @@
   .job-candidate-avatar {
     width: 112px !important;
     height: 112px !important;
-
     border: 3px solid $v-panel-background-color;
     border-radius: 50%;
-
     overflow: hidden;
     object-fit: cover;
-
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.16);
-  }
-
-  .job-candidate-profile-header .v-upload {
-    margin-top: 8px;
-  }
-
-  .job-candidate-profile-header .v-button {
-    min-height: $v-unit-size;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
   }
 
   .job-candidate-profile-name {
     display: block;
     box-sizing: border-box;
-
     width: 100%;
-    margin-top: 8px;
-
+    margin-top: 6px;
     color: $v-font-color;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
     line-height: 1.3;
-
     text-align: center;
     white-space: normal;
     overflow-wrap: anywhere;
@@ -122,74 +74,58 @@
   .job-candidate-profile-position {
     display: block;
     box-sizing: border-box;
-
     width: 100%;
-
-    color: rgba($v-font-color, 0.68);
+    color: rgba($v-font-color, 0.58);
     font-size: 12px;
-    line-height: 1.4;
-
+    line-height: 1.35;
     text-align: center;
     white-space: normal;
     overflow-wrap: anywhere;
   }
 
-  /* ==========================================================
-     STATUS / RATING
-     ========================================================== */
-
+  /* ── STATUS / RATING ──────────────────── */
   .job-candidate-status {
     box-sizing: border-box;
-
     width: 100%;
-    min-height: 32px;
-    padding: 6px 8px;
-
-    border: 1px solid rgba($v-font-color, 0.12);
+    min-height: 30px;
+    padding: 5px 8px;
+    border: 1px solid rgba($v-font-color, 0.10);
     border-radius: $v-border-radius;
-
-    background: mix(
-      $v-selection-color,
-      $v-panel-background-color,
-      8%
-    );
+    background: mix($v-selection-color, $v-panel-background-color, 6%);
   }
 
   .job-candidate-status .v-label {
     font-size: 12px;
-    line-height: 20px;
+    line-height: 18px;
   }
 
   .job-candidate-status .h3 {
     font-size: 13px !important;
-    line-height: 20px !important;
+    line-height: 18px !important;
   }
 
   .job-candidate-status img {
-    max-width: 22px;
-    max-height: 22px;
+    max-width: 20px;
+    max-height: 20px;
   }
 
-  /* ==========================================================
-     SIDEBAR SECTIONS
-     ========================================================== */
+  .job-candidate-profile-header .v-upload {
+    margin-top: 6px;
+  }
 
+  .job-candidate-profile-header .v-button {
+    min-height: $v-unit-size;
+  }
+
+  /* ── SIDEBAR SECTIONS ─────────────────── */
   .job-candidate-sidebar-section,
   .job-candidate-quick-actions {
     box-sizing: border-box;
-
     width: 100%;
-    margin-top: 2px;
-    padding: 12px;
-
-    border: 1px solid rgba($v-font-color, 0.12);
+    padding: 10px;
+    border: 1px solid rgba($v-font-color, 0.10);
     border-radius: $v-border-radius;
-
-    background: mix(
-      $v-panel-background-color,
-      $v-app-background-color,
-      94%
-    );
+    background: $v-panel-background-color;
   }
 
   .job-candidate-sidebar-section > .v-slot,
@@ -204,17 +140,16 @@
   .job-candidate-info-grid .v-label,
   .job-candidate-info-grid .v-button-link {
     font-size: 12px;
-    line-height: 18px;
+    line-height: 16px;
   }
 
   .job-candidate-info-grid .v-gridlayout-slot:nth-child(odd) .v-label {
-    color: rgba($v-font-color, 0.62);
+    color: rgba($v-font-color, 0.55);
   }
 
   .job-candidate-info-grid .v-button-link {
     height: auto;
     padding: 0;
-
     text-align: left;
     white-space: normal;
     overflow-wrap: anywhere;
@@ -222,31 +157,21 @@
 
   .job-candidate-quick-action {
     box-sizing: border-box;
-
     width: 100%;
     min-height: $v-unit-size;
-
-    border-color: rgba($v-font-color, 0.16);
+    border-color: rgba($v-font-color, 0.12);
   }
 
-  /* ==========================================================
-     TOOLBAR
-     ========================================================== */
-
+  /* ── TOOLBAR (LinkedIn-style, над вкладками) ── */
   .job-candidate-toolbar {
     box-sizing: border-box;
-
     width: 100%;
-    min-height: 46px;
-    margin: 0;
-    padding: 8px 10px;
-
-    border: 1px solid rgba($v-font-color, 0.14);
+    min-height: 40px;
+    margin: 0 0 4px;
+    padding: 6px 10px;
+    border: 1px solid rgba($v-font-color, 0.10);
     border-radius: $v-border-radius;
-
     background: $v-panel-background-color;
-
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   }
 
   .job-candidate-toolbar > .v-slot {
@@ -258,115 +183,65 @@
   }
 
   .job-candidate-toolbar .v-label {
-    color: rgba($v-font-color, 0.62);
+    color: rgba($v-font-color, 0.55);
     font-size: 11px;
   }
 
-  /* ==========================================================
-     TABS
-     ========================================================== */
-
+  /* ── TABS (LinkedIn underline style) ─────── */
   .job-candidate-tabs {
     box-sizing: border-box;
-
     min-width: 0;
     min-height: 0;
-
-    border: 1px solid rgba($v-font-color, 0.14);
+    border: 1px solid rgba($v-font-color, 0.10);
     border-radius: $v-border-radius;
-
     background: $v-panel-background-color;
-
     overflow: hidden;
   }
 
   .job-candidate-tabs > .v-tabsheet-tabcontainer {
-    background: mix(
-      $v-app-background-color,
-      $v-panel-background-color,
-      72%
-    );
-
-    border-bottom: 1px solid rgba($v-font-color, 0.14);
+    background: $v-panel-background-color;
+    border-bottom: 1px solid rgba($v-font-color, 0.08);
+    padding: 0 4px;
   }
 
   .job-candidate-tabs .v-tabsheet-tabitem {
-    margin-right: 2px;
+    margin-right: 1px;
   }
 
   .job-candidate-tabs .v-tabsheet-tabitem .v-caption {
-    padding: 8px 12px;
-
-    color: rgba($v-font-color, 0.72);
+    padding: 8px 14px;
+    color: rgba($v-font-color, 0.65);
     font-weight: 500;
-
-    transition:
-      color 120ms ease,
-      background-color 120ms ease,
-      box-shadow 120ms ease;
+    font-size: 12px;
+    border-bottom: 2px solid transparent !important;
+    transition: color 120ms ease, border-color 120ms ease;
   }
 
   .job-candidate-tabs .v-tabsheet-tabitem:hover .v-caption {
     color: $v-font-color;
-
-    background: mix(
-      $v-selection-color,
-      $v-panel-background-color,
-      7%
-    );
+    background: transparent;
   }
 
   .job-candidate-tabs .v-tabsheet-tabitem-selected .v-caption {
     color: $v-selection-color;
-    background: $v-panel-background-color;
-
-    box-shadow: inset 0 -2px 0 $v-selection-color;
+    background: transparent !important;
+    border-bottom: 2px solid $v-selection-color !important;
+    box-shadow: none !important;
   }
 
   .job-candidate-tabs .v-tabsheet-content {
-    background: mix(
-      $v-app-background-color,
-      $v-panel-background-color,
-      86%
-    );
+    background: mix($v-app-background-color, $v-panel-background-color, 90%);
   }
 
   .job-candidate-tabs .v-tabsheet-tabsheetpanel {
     box-sizing: border-box;
   }
 
-  /*
-   * Увеличение шрифта в элементах tabsheet на 50%.
-   * Влияет на поля ввода, labels, кнопки, select, datefield внутри вкладок.
-   * База: $v-font-size (Halo default = 14px) → ×1.5 = 21px.
-   */
-  .job-candidate-tabs .v-tabsheet-content {
-    font-size: 1.5em;
-  }
-  .job-candidate-tabs .v-tabsheet-content .v-label,
-  .job-candidate-tabs .v-tabsheet-content .v-textfield,
-  .job-candidate-tabs .v-tabsheet-content .v-filterselect,
-  .job-candidate-tabs .v-tabsheet-content .v-filterselect-input,
-  .job-candidate-tabs .v-tabsheet-content .v-datefield,
-  .job-candidate-tabs .v-tabsheet-content .v-datefield-textfield,
-  .job-candidate-tabs .v-tabsheet-content .v-button,
-  .job-candidate-tabs .v-tabsheet-content .v-checkbox,
-  .job-candidate-tabs .v-tabsheet-content .v-radiobutton,
-  .job-candidate-tabs .v-tabsheet-content .v-slot,
-  .job-candidate-tabs .v-tabsheet-content input,
-  .job-candidate-tabs .v-tabsheet-content select,
-  .job-candidate-tabs .v-tabsheet-content textarea {
-    font-size: 1.5em;
-  }
-
-  /* ==========================================================
-     CARDS
-     ========================================================== */
-
+  /* ── CARDS ────────────────────────────── */
   .job-candidate-card-row {
     display: flex;
     width: 100%;
-    gap: 8px;
+    gap: 10px;
   }
 
   .job-candidate-card-row > .v-slot {
@@ -389,25 +264,22 @@
 
   .job-candidate-card {
     box-sizing: border-box;
-
     background: $v-panel-background-color !important;
-
-    border: 1px solid rgba($v-font-color, 0.13) !important;
+    border: 1px solid rgba($v-font-color, 0.10) !important;
     border-radius: $v-border-radius !important;
-
-    padding: 14px !important;
-
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    padding: 12px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
   }
 
   .job-candidate-card > .v-caption {
     color: $v-font-color;
     font-size: 13px;
     font-weight: 600;
+    padding-bottom: 2px;
   }
 
   .job-candidate-card .v-gridlayout {
-    margin-top: 6px;
+    margin-top: 4px;
   }
 
   .job-candidate-card .v-gridlayout .v-gridlayout-slot {
@@ -430,7 +302,7 @@
   }
 
   .job-candidate-card .v-label.small {
-    color: rgba($v-font-color, 0.66);
+    color: rgba($v-font-color, 0.58);
   }
 
   .job-candidate-card .v-textfield,
@@ -439,69 +311,92 @@
     box-sizing: border-box;
   }
 
-  /* ==========================================================
-     TABLES / DATAGRIDS
-     ========================================================== */
-
+  /* ── TABLES / DATAGRIDS (LinkedIn clean style) ── */
   .job-candidate-table {
     box-sizing: border-box;
-
-    border: 1px solid rgba($v-font-color, 0.12);
+    border: 1px solid rgba($v-font-color, 0.10);
     border-radius: $v-border-radius;
-
     overflow: hidden;
   }
 
   .job-candidate-table .v-grid-header,
   .job-candidate-table .v-table-header-wrap {
-    background: mix(
-      $v-app-background-color,
-      $v-panel-background-color,
-      70%
-    );
+    background: mix($v-app-background-color, $v-panel-background-color, 65%);
   }
 
   .job-candidate-table .v-grid-header .v-grid-cell,
   .job-candidate-table .v-table-caption-container {
-    color: rgba($v-font-color, 0.75);
+    color: rgba($v-font-color, 0.65);
     font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
   }
 
   .job-candidate-table .v-grid-row:hover,
   .job-candidate-table .v-table-row:hover,
   .job-candidate-table .v-table-row-odd:hover {
-    background: mix(
-      $v-selection-color,
-      $v-panel-background-color,
-      8%
-    );
+    background: mix($v-selection-color, $v-panel-background-color, 6%);
   }
 
   .job-candidate-table .v-grid-row-selected,
   .job-candidate-table .v-table-row-animating {
-    background: mix(
-      $v-selection-color,
-      $v-panel-background-color,
-      16%
-    );
+    background: mix($v-selection-color, $v-panel-background-color, 14%);
   }
 
-  /* ==========================================================
-     INTERACTIVE STATES
-     ========================================================== */
+  /* ── BUTTON LINK ──────────────────────── */
+  .job-candidate-editor .v-button-link {
+    color: $v-selection-color !important;
+    font-weight: 500;
+    text-decoration: none;
+  }
 
+  .job-candidate-editor .v-button-link:hover {
+    text-decoration: underline;
+  }
+
+  /* ── FOCUS STATES ─────────────────────── */
   .job-candidate-editor .v-textfield:focus,
   .job-candidate-editor .v-filterselect-focus,
   .job-candidate-editor .v-datefield-focus,
   .job-candidate-editor .v-button:focus {
-    box-shadow: 0 0 0 2px rgba($v-selection-color, 0.24);
+    box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20);
   }
 
   .job-candidate-editor .v-button:hover {
-    border-color: rgba($v-selection-color, 0.55);
+    border-color: rgba($v-selection-color, 0.45);
   }
 
   .job-candidate-editor .v-disabled {
-    opacity: 0.58;
+    opacity: 0.55;
+  }
+
+  /* ── FONT SIZE в tabsheet (умеренное увеличение) ── */
+  .job-candidate-tabs .v-tabsheet-content {
+    font-size: 1.2em;
+  }
+
+  .job-candidate-tabs .v-tabsheet-content .v-label,
+  .job-candidate-tabs .v-tabsheet-content .v-textfield,
+  .job-candidate-tabs .v-tabsheet-content .v-filterselect,
+  .job-candidate-tabs .v-tabsheet-content .v-filterselect-input,
+  .job-candidate-tabs .v-tabsheet-content .v-datefield,
+  .job-candidate-tabs .v-tabsheet-content .v-datefield-textfield,
+  .job-candidate-tabs .v-tabsheet-content .v-button,
+  .job-candidate-tabs .v-tabsheet-content .v-checkbox,
+  .job-candidate-tabs .v-tabsheet-content .v-radiobutton,
+  .job-candidate-tabs .v-tabsheet-content input,
+  .job-candidate-tabs .v-tabsheet-content select,
+  .job-candidate-tabs .v-tabsheet-content textarea {
+    font-size: 1.2em;
+  }
+
+  /* ── DATAGRID BODY ROW HEIGHT (сброс фиксированной) ── */
+  .job-candidate-table .v-grid-body .v-grid-row {
+    min-height: 40px;
+  }
+
+  .job-candidate-table .v-grid-cell {
+    padding: 6px 8px !important;
   }
 }

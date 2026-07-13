@@ -409,14 +409,20 @@
                                                                  property="firstName"
                                                                  width="100%"
                                                                  minSearchStringLength="1"
+                                                                 suggestionsLimit="20"
+                                                                 asyncSearchDelayMs="300"
                                                                  editable="true"
                                                                  inputPrompt="msg://msgPressEnter">
                                                     <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                           escapeValueForLike="false"
+                                                           escapeValueForLike="true"
                                                            view="_local"
                                                            searchStringFormat="%$searchString%">
-                                                        select e.firstName from hunttech_JobCandidate e
-                                                        where lower(e.firstName) like lower(:searchString) escape '\'
+                                                        select distinct e.firstName
+                                                        from hunttech_JobCandidate e
+                                                        where e.firstName is not null
+                                                          and e.firstName &lt;&gt; ''
+                                                          and lower(e.firstName) like lower(:searchString) escape '\'
+                                                        order by e.firstName
                                                     </query>
                                                 </suggestionField>
                                             </row>
@@ -427,14 +433,19 @@
                                                                  property="middleName"
                                                                  width="100%"
                                                                  minSearchStringLength="1"
+                                                                 suggestionsLimit="20"
+                                                                 asyncSearchDelayMs="300"
                                                                  editable="true"
                                                                  inputPrompt="msg://msgPressEnter">
                                                     <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                           searchStringFormat="%$searchString%"
-                                                           view="_minimal"
-                                                           escapeValueForLike="true">
-                                                        select e from hunttech_JobCandidate e
-                                                        where lower(e.middleName) like lower(:searchString) escape '\'
+                                                           escapeValueForLike="true"
+                                                           searchStringFormat="%$searchString%">
+                                                        select distinct e.middleName
+                                                        from hunttech_JobCandidate e
+                                                        where e.middleName is not null
+                                                          and e.middleName &lt;&gt; ''
+                                                          and lower(e.middleName) like lower(:searchString) escape '\'
+                                                        order by e.middleName
                                                     </query>
                                                 </suggestionField>
                                             </row>
@@ -445,13 +456,19 @@
                                                                  property="secondName"
                                                                  width="100%"
                                                                  minSearchStringLength="1"
+                                                                 suggestionsLimit="20"
+                                                                 asyncSearchDelayMs="300"
                                                                  editable="true"
                                                                  inputPrompt="msg://msgPressEnter">
                                                     <query entityClass="com.company.hunttech.entity.JobCandidate"
                                                            escapeValueForLike="true"
                                                            searchStringFormat="%$searchString%">
-                                                        select e from hunttech_JobCandidate e
-                                                        where lower(e.secondName) like lower(:searchString) escape '\'
+                                                        select distinct e.secondName
+                                                        from hunttech_JobCandidate e
+                                                        where e.secondName is not null
+                                                          and e.secondName &lt;&gt; ''
+                                                          and lower(e.secondName) like lower(:searchString) escape '\'
+                                                        order by e.secondName
                                                     </query>
                                                 </suggestionField>
                                             </row>
