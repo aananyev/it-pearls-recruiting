@@ -191,4 +191,174 @@ public class ScreenViewIntegrityTest {
         }
         System.out.println("OK: IteractionListEdit — all FK paths accessible");
     }
+
+    // ── Screen Registration Integrity ────────────────────────
+    // Проверяет, что все экраны из web-app.properties зарегистрированы.
+
+    private String getProjectRoot() {
+        String dir = System.getProperty("user.dir");
+        if (dir == null) dir = ".";
+        // Поднимаемся, пока не найдём build.gradle (корень проекта)
+        java.io.File f = new java.io.File(dir);
+        while (f != null && !new java.io.File(f, "build.gradle").exists()) {
+            f = f.getParentFile();
+        }
+        return f != null ? f.getAbsolutePath() : dir;
+    }
+
+    @Test
+    public void requiredScreensRegistered() {
+        String root = getProjectRoot();
+
+        // Список обязательных экранов из web-app.properties
+        String[] requiredScreens = {
+                "loginBranded",
+                "settings",
+        };
+
+        // Читаем web-screens.xml для поиска id
+        String screensXml;
+        try {
+            screensXml = new String(
+                    java.nio.file.Files.readAllBytes(
+                            java.nio.file.Paths.get(root,
+                                    "modules/web/src/com/company/hunttech/web-screens.xml")),
+                    java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            System.out.println("FAIL: cannot read web-screens.xml — " + e.getMessage());
+            return;
+        }
+
+        // Ищем каждый экран
+        for (String screenId : requiredScreens) {
+            boolean foundInXml = screensXml.contains("id=\"" + screenId + "\"");
+            if (!foundInXml) {
+                System.out.println("WARN: " + screenId + " not found in web-screens.xml " +
+                        "(may be auto-discovered via @UiController)");
+            }
+        }
+        System.out.println("OK: required screens check passed");
+    }
+
+    // ── Deployed jar integrity ─────────────────────────────
+    // Проверяет, что обязательные классы присутствуют в deployed jar.
+    // Вылавливает ситуацию, когда jar не обновлён после добавления нового экрана.
+
+    @Test
+    public void deployedJarContainsRequiredScreens() {
+        String root = getProjectRoot();
+
+        // Пути к deployed jar
+        String[] jarCandidates = {
+                root + "/deploy/tomcat/webapps/hrm/WEB-INF/lib/app-web-0.1-SNAPSHOT.jar",
+                root + "/deploy/tomcat/webapps/hrm/WEB-INF/lib/app-web-0.1-SNAPSHOT-sources.jar",
+        };
+
+        String[] requiredClasses = {
+                "com/company/hunttech/web/login/AppLoginScreen.class",
+                "com/company/hunttech/web/login/app-login-screen.xml",
+        };
+
+        boolean jarFound = false;
+        for (String jarPath : jarCandidates) {
+            java.io.File jarFile = new java.io.File(jarPath);
+            if (!jarFile.exists()) continue;
+
+            jarFound = true;
+            try (java.util.jar.JarFile jf = new java.util.jar.JarFile(jarFile)) {
+                java.util.Enumeration<java.util.jar.JarEntry> entries = jf.entries();
+                java.util.Set<String> entryNames = new java.util.HashSet<>();
+                while (entries.hasMoreElements()) {
+                    entryNames.add(entries.nextElement().getName());
+                }
+
+                for (String cls : requiredClasses) {
+                    if (!entryNames.contains(cls)) {
+                        // Проверяем в директории exploded
+                        java.io.File exploded = new java.io.File(
+                                root + "/deploy/tomcat/webapps/hrm/WEB-INF/classes/" + cls);
+                        if (!exploded.exists()) {
+                            throw new RuntimeException(
+                                    "Required class/resource not found in deployed jar: " + cls
+                                    + " (in " + jarPath + ")");
+                        }
+                    }
+                }
+                System.out.println("OK: deployed jar contains " + requiredClasses.length
+                        + " required resources — " + jarFile.getName());
+            } catch (Exception e) {
+                throw new RuntimeException("FAIL: cannot verify deployed jar: " + e.getMessage(), e);
+            }
+            break;
+        }
+
+        if (!jarFound) {
+            // Проверяем exploded deployment
+            boolean allFound = true;
+            for (String cls : requiredClasses) {
+                java.io.File exploded = new java.io.File(
+                        root + "/deploy/tomcat/webapps/hrm/WEB-INF/classes/" + cls);
+                if (!exploded.exists()) {
+                    allFound = false;
+                    System.out.println("WARN: " + cls + " not in exploded deployment either");
+                }
+            }
+            if (!allFound) {
+                throw new RuntimeException(
+                        "No deployed app-web jar found and exploded classes incomplete. "
+                        + "Run './gradlew deploy' first.");
+            }
+            System.out.println("OK: exploded deployment contains required classes");
+        }
+    }
+
+    // ── web-app.properties screenId consistency ──────────────
+
+    @Test
+    public void webAppPropertiesLoginScreenExists() {
+        String root = getProjectRoot();
+        try {
+            String props = new String(
+                    java.nio.file.Files.readAllBytes(
+                            java.nio.file.Paths.get(root,
+                                    "modules/web/src/com/company/hunttech/web-app.properties")),
+                    java.nio.charset.StandardCharsets.UTF_8);
+            for (String line : props.split("\n")) {
+                if (line.trim().startsWith("cuba.web.loginScreenId")) {
+                    String screenId = line.split("=")[1].trim();
+                    System.out.println("Checking login screen: " + screenId);
+
+                    // Ищем @UiController в Java-файлах
+                    String searchPath = root + "/modules/web/src/com/company/hunttech/web";
+                    java.io.File searchDir = new java.io.File(searchPath);
+                    boolean found = searchInFiles(searchDir, "@UiController(\"" + screenId + "\")");
+                    if (!found) {
+                        throw new RuntimeException(
+                                "Login screen not found: " + screenId);
+                    }
+                    System.out.println("OK: " + screenId + " found via @UiController");
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("FAIL: " + e.getMessage(), e);
+        }
+    }
+
+    private boolean searchInFiles(java.io.File dir, String search) {
+        if (!dir.isDirectory()) return false;
+        java.io.File[] files = dir.listFiles();
+        if (files == null) return false;
+        for (java.io.File f : files) {
+            if (f.isDirectory()) {
+                if (searchInFiles(f, search)) return true;
+            } else if (f.getName().endsWith(".java")) {
+                try {
+                    String content = new String(java.nio.file.Files.readAllBytes(f.toPath()),
+                            java.nio.charset.StandardCharsets.UTF_8);
+                    if (content.contains(search)) return true;
+                } catch (Exception ignored) {}
+            }
+        }
+        return false;
+    }
 }

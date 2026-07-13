@@ -220,6 +220,25 @@ configure(webModule) {
             from sourceSets.main.allJava
             include "com/company/hunttech/web/toolkit/ui/client/**"
         }
+        doLast {
+            // Проверка, что обязательные классы есть в jar
+            def requiredClasses = [
+                'com/company/hunttech/web/login/AppLoginScreen.class'
+            ]
+            def entries = []
+            def jarFile = archivePath
+            if (jarFile.exists()) {
+                def fs = java.util.jar.JarFile.newInstance(jarFile)
+                entries = fs.stream().map({ e -> e.name }).collect()
+                fs.close()
+                def missing = requiredClasses.findAll { c -> !entries.contains(c) }
+                if (missing) {
+                    throw new GradleException(
+                        "JAR validation FAILED — missing: ${missing.join(', ')}")
+                }
+                println "  → JAR validated: ${requiredClasses.size()} required classes present"
+            }
+        }
     }
 
     task webArchive(type: Zip) {
@@ -256,6 +275,18 @@ configure(webModule) {
             from "images"
             into "$cuba.tomcat.dir/webapps/${webContextName}/VAADIN/images"
             include "*.png"
+        }
+        doLast {
+            // Убедиться, что app-web-*.jar скопирован в WEB-INF/lib
+            def destDir = "$cuba.tomcat.dir/webapps/${webContextName}/WEB-INF/lib"
+            def jarFile = tasks.jar.archivePath
+            if (jarFile.exists()) {
+                copy {
+                    from jarFile
+                    into destDir
+                }
+                println "  → app-web jar copied to ${destDir}"
+            }
         }
     }
 

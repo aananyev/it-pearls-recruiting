@@ -3966,4 +3966,48 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         retBox.add(image);
         return retBox;
     }
+
+    // ── Вертикальная навигация по вкладкам (шаг 4) ──────────
+    // Переключает tabSheetSocialNetworks на вкладку с указанным tabId.
+    private void selectCandidateTab(String tabId) {
+        TabSheet.Tab tab = tabSheetSocialNetworks.getTab(tabId);
+        if (tab != null) {
+            tabSheetSocialNetworks.setSelectedTab(tab);
+        }
+    }
+
+    // Обработчики кнопок боковой навигации.
+    // Каждая кнопка вызывает selectCandidateTab с ID своей вкладки.
+
+    public void candidateNavMain() {
+        selectCandidateTab("tabMain");
+    }
+
+    public void candidateNavPositions() {
+        selectCandidateTab("tabPositions");
+    }
+
+    public void candidateNavIteraction() {
+        selectCandidateTab("tabIteraction");
+    }
+
+    public void candidateNavResume() {
+        selectCandidateTab("tabResume");
+    }
+
+    public void candidateNavContactInfo() {
+        selectCandidateTab("tabContactInfo");
+    }
+
+    public void candidateNavSocialNetworks() {
+        selectCandidateTab("tabSocialNetworks");
+    }
+
+    public void candidateNavComments() {
+        selectCandidateTab("commentsTab");
+    }
+
+    public void candidateNavHistory() {
+        selectCandidateTab("tabHistory");
+    }
 }
