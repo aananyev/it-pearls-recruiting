@@ -142,16 +142,26 @@
             </loader>
         </collection>
     </data>
-    <dialogMode height="750"
-                width="1200"/>
-    <layout expand="tabSheetSocialNetworks"
+    <dialogMode height="90%"
+                width="90%"/>
+    <layout id="jobCandidateEditorLayout"
+            expand="jobCandidateSplitRoot"
             spacing="true"
             width="100%"
-            height="100%">
-        <groupBox caption="msg://msgOptions"
-                  collapsable="true"
+            height="100%"
+            stylename="job-candidate-editor">
+        <hbox id="jobCandidateSplitRoot"
+              width="100%"
+              height="100%"
+              spacing="true"
+              expand="jobCandidateWorkspace"
+              stylename="job-candidate-split-root">
+            <vbox id="jobCandidateSidebar"
+                  width="280px"
+                  height="100%"
                   spacing="true"
-                  stylename="light">
+                  expand="jobCandidateSidebarSummary"
+                  stylename="job-candidate-sidebar">
             <textField id="fullNameTextField"
                        visible="false"
                        dataContainer="jobCandidateDc"
@@ -160,7 +170,52 @@
                       dataContainer="jobCandidateDc"
                       property="blockCandidate"
                       visible="false"/>
-            <grid spacing="true" height="45px">
+                <vbox id="dropZone"
+                      spacing="true"
+                      width="220px"
+                      height="292px"
+                      align="BOTTOM_RIGHT"
+                      expand="picVBox"
+                      stylename="dropzone-container">
+                    <vbox id="picVBox">
+                        <image id="candidatePic"
+                               dataContainer="jobCandidateDc"
+                               property="fileImageFace"
+                               width="100%"
+                               visible="true"
+                               align="TOP_RIGHT"
+                               stylename="widget-border"
+                               scaleMode="FILL"/>
+                        <image id="candidateDefaultPic"
+                               width="100%"
+                               visible="false"
+                               align="TOP_RIGHT"
+                               stylename="widget-border"
+                               scaleMode="FILL">
+                            <theme path="icons/no-programmer.jpeg"/>
+                        </image>
+                    </vbox>
+                    <upload id="fileImageFaceUpload"
+                            fileStoragePutMode="IMMEDIATE"
+                            dataContainer="jobCandidateDc"
+                            align="BOTTOM_CENTER"
+                            showFileName="false"
+                            dropZone="dropZone"
+                            showClearButton="true"
+                            property="fileImageFace"/>
+                    <button id="openPositionMasterBrowseButton"
+                            caption="msg://msgOpenPositionMasterBrowse"
+                            description="msg://msgOpenPositiionMasterBrowseDescription"
+                            invoke="openPositionMasterBrowseStart"
+                            width="100%"
+                            height="AUTO"/>
+                </vbox>
+                <groupBox id="jobCandidateSidebarSummary"
+                          caption="msg://msgCandidateSnapshot"
+                          collapsable="false"
+                          spacing="true"
+                          stylename="light job-candidate-sidebar-summary">
+                    <grid spacing="true" height="45px">
                 <columns count="12"/>
                 <rows>
                     <row>
@@ -234,12 +289,53 @@
                     </row>
                 </rows>
             </grid>
-        </groupBox>
-        <tabSheet id="tabSheetSocialNetworks"
-                  lazy="true"
-                  stylename="framed">
+                </groupBox>
+            </vbox>
+            <vbox id="jobCandidateWorkspace"
+                  width="100%"
+                  height="100%"
+                  spacing="true"
+                  expand="tabSheetSocialNetworks"
+                  stylename="job-candidate-workspace">
+                <hbox id="editActions"
+              spacing="true"
+              width="100%"
+              align="TOP_RIGHT"
+              stylename="job-candidate-toolbar"
+              expand="createdByLabel">
+            <hbox id="createdByLabel"
+                  spacing="true"
+                  expand="createdUpdatedLabel">
+                <label id="createdUpdatedLabel"
+                       align="MIDDLE_LEFT"
+                       stylename="small"/>
+            </hbox>
+            <hbox id="buttonCancelOk" spacing="true">
+                <button id="blockCandidateButton"
+                        caption="msg://msgBlockCandidate"
+                        invoke="blockCandidateButton"
+                        icon="WINDOW_CLOSE_O"
+                        align="MIDDLE_RIGHT"/>
+                <button id="buttonSubscribe"
+                        caption="msg://msgSubscribe"
+                        invoke="onButtonSubscribeClick"
+                        icon="BELL"
+                        visible="false"
+                        align="MIDDLE_RIGHT"/>
+                <button id="windowCommitAndCloseButton"
+                        action="windowCommitAndClose"
+                        align="MIDDLE_RIGHT"/>
+                <button action="windowClose"
+                        align="MIDDLE_RIGHT"/>
+            </hbox>
+        </hbox>
+                <tabSheet id="tabSheetSocialNetworks"
+                          lazy="true"
+                          width="100%"
+                          height="100%"
+                          stylename="job-candidate-tabs">
             <tab id="jobCandidateCard"
-                 caption="msg://msgJobCard"
+                 caption="msg://msgTabVacancies"
                  margin="true,true,true,true"
                  spacing="true"
                  expand="jobCandidateCardScrollBox"
@@ -351,46 +447,6 @@
                                                 description="msg://msgSkype"/>
                                 </hbox>
                             </groupBox>
-                            <vbox id="dropZone"
-                                  spacing="true"
-                                  width="220px"
-                                  height="292px"
-                                  align="BOTTOM_RIGHT"
-                                  expand="picVBox"
-                                  stylename="dropzone-container">
-                                <vbox id="picVBox">
-                                    <image id="candidatePic"
-                                           dataContainer="jobCandidateDc"
-                                           property="fileImageFace"
-                                           width="100%"
-                                           visible="true"
-                                           align="TOP_RIGHT"
-                                           stylename="widget-border"
-                                           scaleMode="FILL"/>
-                                    <image id="candidateDefaultPic"
-                                           width="100%"
-                                           visible="false"
-                                           align="TOP_RIGHT"
-                                           stylename="widget-border"
-                                           scaleMode="FILL">
-                                        <theme path="icons/no-programmer.jpeg"/>
-                                    </image>
-                                </vbox>
-                                <upload id="fileImageFaceUpload"
-                                        fileStoragePutMode="IMMEDIATE"
-                                        dataContainer="jobCandidateDc"
-                                        align="BOTTOM_CENTER"
-                                        showFileName="false"
-                                        dropZone="dropZone"
-                                        showClearButton="true"
-                                        property="fileImageFace"/>
-                                <button id="openPositionMasterBrowseButton"
-                                        caption="msg://msgOpenPositionMasterBrowse"
-                                        description="msg://msgOpenPositiionMasterBrowseDescription"
-                                        invoke="openPositionMasterBrowseStart"
-                                        width="100%"
-                                        height="AUTO"/>
-                            </vbox>
                         </hbox>
                         <hbox id="skillBox"
                               width="100%"
@@ -475,9 +531,9 @@
                 </scrollBox>
             </tab>
             <tab id="tabCandidate"
-                 caption="msg://candidate"
+                 caption="msg://msgTabMain"
                  margin="true,true,true,true"
-                 icon="BOMB"
+                 icon="USER"
                  spacing="true">
                 <hbox id="cardCandidateBox"
                       spacing="true"
@@ -626,10 +682,10 @@
                 </hbox>
             </tab>
             <tab id="tabContactInfo"
-                 caption="msg://msgTabContactInfo"
+                 caption="msg://msgCandidateContacts"
                  margin="true,true,true,true"
-                 expand="socialNetworkTableHbox"
-                 icon="font-icon:USER"
+                 expand="contactInfoGroupBox"
+                 icon="font-icon:PHONE"
                  spacing="true">
                 <hbox id="contactInfoGroupBox"
                       width="100%"
@@ -719,9 +775,16 @@
                                           property="priorityContact"/>
                     </vbox>
                 </hbox>
+            </tab>
+            <tab id="tabSocialNetworks"
+                 caption="msg://msgTabSocialNetworks"
+                 margin="true,true,true,true"
+                 expand="socialNetworkTableHbox"
+                 icon="font-icon:SHARE_ALT"
+                 spacing="true">
                 <hbox id="socialNetworkTableHbox"
                       width="100%"
-                      height="AUTO"
+                      height="100%"
                       spacing="true"
                       stylename="borderless"
                       margin="false,false,false,false"
@@ -780,9 +843,10 @@
                                 invoke="removeEmptySocialNetworkListsButton"/>
                     </vbox>
                 </hbox>
+
             </tab>
             <tab id="tabIteraction"
-                 caption="msg://candidateIteration"
+                 caption="msg://msgCandidateIteraction"
                  margin="true,true,true,true"
                  expand="jobCandidateIteractionListTable"
                  icon="LIST"
@@ -803,7 +867,7 @@
                           contextMenuEnabled="false"
                           textSelectionEnabled="false"
                           reorderingAllowed="true"
-                          height="350px">
+                          height="100%">
                     <actions>
                         <action id="create" type="create"/>
                         <action type="edit" id="edit"/>
@@ -883,7 +947,7 @@
                 </dataGrid>
             </tab>
             <tab id="tabResume"
-                 caption="msg://msgResume"
+                 caption="msg://msgTabResumeFiles"
                  margin="true,true,true,true"
                  icon="font-icon:FILE_TEXT"
                  expand="tabResumeVbox"
@@ -901,7 +965,8 @@
                               descriptionAsHtml="true"
                               captionAsHtml="true"
                               bodyRowHeight="55px"
-                              dataContainer="jobCandidateCandidateCvsDc">
+                              dataContainer="jobCandidateCandidateCvsDc"
+                              height="100%">
                         <columns>
                             <column id="projectLogoColumn"
                                     resizable="true"
@@ -1051,37 +1116,41 @@
                     </groupBox>
                 </vbox>
             </tab>
+            <tab id="tabHistory"
+                 caption="msg://msgTabHistory"
+                 margin="true,true,true,true"
+                 icon="font-icon:HISTORY"
+                 spacing="true">
+                <vbox id="jobCandidateHistoryBox"
+                      width="100%"
+                      height="100%"
+                      spacing="true"
+                      stylename="job-candidate-history">
+                    <label value="msg://msgTabHistory"
+                           stylename="h2"/>
+                    <grid id="jobCandidateHistoryGrid"
+                          spacing="true"
+                          width="100%">
+                        <columns count="2"/>
+                        <rows>
+                            <row>
+                                <label value="msg://msgCandidateCreatedBy"
+                                       stylename="h4"/>
+                                <label dataContainer="jobCandidateDc"
+                                       property="createdBy"/>
+                            </row>
+                            <row>
+                                <label value="msg://msgCandidateUpdatedBy"
+                                       stylename="h4"/>
+                                <label dataContainer="jobCandidateDc"
+                                       property="updatedBy"/>
+                            </row>
+                        </rows>
+                    </grid>
+                </vbox>
+            </tab>
         </tabSheet>
-        <hbox id="editActions"
-              spacing="true"
-              width="100%"
-              align="BOTTOM_RIGHT"
-              expand="createdByLabel">
-            <hbox id="createdByLabel"
-                  spacing="true"
-                  expand="createdUpdatedLabel">
-                <label id="createdUpdatedLabel"
-                       align="BOTTOM_LEFT"
-                       stylename="small"/>
-            </hbox>
-            <hbox id="buttonCancelOk" spacing="true">
-                <button id="blockCandidateButton"
-                        caption="msg://msgBlockCandidate"
-                        invoke="blockCandidateButton"
-                        icon="WINDOW_CLOSE_O"
-                        align="BOTTOM_RIGHT"/>
-                <button id="buttonSubscribe"
-                        caption="msg://msgSubscribe"
-                        invoke="onButtonSubscribeClick"
-                        icon="BELL"
-                        visible="false"
-                        align="BOTTOM_RIGHT"/>
-                <button id="windowCommitAndCloseButton"
-                        action="windowCommitAndClose"
-                        align="BOTTOM_RIGHT"/>
-                <button action="windowClose"
-                        align="BOTTOM_RIGHT"/>
-            </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>

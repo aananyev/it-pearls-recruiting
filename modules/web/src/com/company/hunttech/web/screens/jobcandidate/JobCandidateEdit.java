@@ -217,6 +217,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Button copyIteractionButton;
     private boolean candidateInitialized = false;
     private boolean tabContactInfoInitialized = false;
+    private boolean tabSocialNetworksInitialized = false;
     private boolean initialInteractionAdded = false;
     private boolean companyEditorOpen = false;
     @Inject
@@ -1154,6 +1155,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             initTabInteractions();
             initTabCandidate();
             initTabContactInfo();
+            initTabSocialNetworks();
             initTabComments();
         });
     }
@@ -1316,7 +1318,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             return;
         }
         if (!tabContactInfoInitialized) {
-            ensureSocialNetworksLoaded();
             if (emailField == null) {
                 emailField = (TextField<String>) getWindow().getComponent("emailField");
             }
@@ -1363,6 +1364,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
             mobilePhoneField.addTextChangeListener(e -> enableDisableContacts());
 
+            trimTelegramName();
+            enableDisableContacts();
+        }
+
+        tabContactInfoInitialized = true;
+    }
+
+    private void initTabSocialNetworks() {
+        TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
+        if (selectedTab == null || !"tabSocialNetworks".equals(selectedTab.getName())) {
+            return;
+        }
+        if (!tabSocialNetworksInitialized) {
+            ensureSocialNetworksLoaded();
 
             if (socialNetworkTable == null) {
                 socialNetworkTable = (DataGrid<SocialNetworkURLs>) getWindow()
@@ -1373,13 +1388,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             socialNetworkTable.addEditorPostCommitListener(e -> enableDisableContacts());
             socialNetworkTable.addSelectionListener(e -> enableDisableContacts());
 
-            trimTelegramName();
             enableDisableContacts();
             initSocialNeiworkTable();
             setAddSocialNetworkButtonEnable();
         }
 
-        tabContactInfoInitialized = true;
+        tabSocialNetworksInitialized = true;
     }
 
     public void initSocialNeiworkTable() {
