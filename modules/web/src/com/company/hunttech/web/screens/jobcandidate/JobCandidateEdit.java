@@ -124,7 +124,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private Label<String> positionsLabel;
     @Inject
-    private LookupPickerField<Company> currentCompanyField;
+    private SuggestionPickerField<Company> currentCompanyField;
     @Inject
     private LookupPickerField<Position> personPositionField;
     @Inject
@@ -172,6 +172,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private static final String QUERY_GET_CANDIDATE_CV = "select e from hunttech_CandidateCV e where e.candidate = :candidate";
     private static final String TELEGRAM_NAME_URL = "http://t.me/";
     private static final String QUERY_GET_LAST_ITERACTION = "select e from hunttech_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from hunttech_IteractionList f where f.candidate = :candidate)";
+    private static final String CREATE_COMPANY_ACTION_ID = "createCompany";
 
     List<Position> setPos = new ArrayList<>();
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
@@ -210,10 +211,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private boolean commentsTabInitialized = false;
     private boolean referenceLoadersInitialized = false;
     private boolean openPositionLoaderInitialized = false;
+    private boolean candidateCvLoaded = false;
+    private boolean interactionsLoaded = false;
+    private boolean socialNetworksLoaded = false;
     private Button copyIteractionButton;
     private boolean candidateInitialized = false;
     private boolean tabContactInfoInitialized = false;
     private boolean initialInteractionAdded = false;
+    private boolean companyEditorOpen = false;
     @Inject
     private Table lastProjectTable;
     @Inject
@@ -225,6 +230,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionLoader<OpenPosition> openPositionDl;
     @Inject
     private CollectionLoader<Company> currentCompaniesLc;
+    @Inject
+    private CollectionContainer<Company> currentCompaniesDc;
     @Inject
     private CollectionLoader<City> citiesDl;
     @Inject
@@ -341,30 +348,27 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private void setupSkillBox() {
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
-            if (skillBoxFragment.generateSkillLabels(getLastCVText(getEditedEntity()))) {
+            if (skillBoxFragment.generateSkillLabels(getLastCVText())) {
                 skillBox.add(skillBoxFragment.getFragment());
             }
         }
     }
 
-    private String getLastCVText(JobCandidate singleSelected) {
-        if (singleSelected != null) {
-            if (singleSelected.getCandidateCv().size() != 0) {
-                CandidateCV lastCV = singleSelected.getCandidateCv().get(0);
-
-                for (CandidateCV candidateCV : singleSelected.getCandidateCv()) {
-                    if (lastCV.getDatePost().before((candidateCV.getDatePost()))) {
-                        lastCV = candidateCV;
-                    }
-                }
-
-                return lastCV.getTextCV();
-            } else {
-                return null;
-            }
-        } else {
+    private String getLastCVText() {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             return null;
         }
+
+        List<CandidateCV> candidateCvs = dataManager.load(CandidateCV.class)
+                .query("select e from hunttech_CandidateCV e " +
+                        "where e.candidate = :candidate " +
+                        "order by e.datePost desc")
+                .parameter("candidate", getEditedEntity())
+                .maxResults(1)
+                .view("_local")
+                .list();
+
+        return candidateCvs.isEmpty() ? null : candidateCvs.get(0).getTextCV();
     }
 
     private void setFrequentInteractionPopupButton() {
@@ -586,7 +590,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onAfterShow1(AfterShowEvent event) {
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            iteractionListFromCandidate = getIteractionListFromCandidate(getEditedEntity());
+            iteractionListFromCandidate = loadInteractionsForRating();
         }
     }
 
@@ -596,7 +600,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         // Heavy comments data is loaded lazily from initTabComments() when the user opens the tab.
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            if (getEditedEntity().getCandidateCv().isEmpty()) {
+            if (!hasCandidateCv()) {
                 labelCV.setValue("Резюме: НЕТ");
             } else {
                 labelCV.setValue("Резюме: ДА");
@@ -610,7 +614,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         setSaveRecordOfViewCandidate();
 
-        setSocialNetworkTable();
         enableDisableContacts();
         setLabelTitle();
         setCreatedUpdatedLabel();
@@ -625,9 +628,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setSuggestOpenPositionTable();
         setLastProjectOfCandidate();
         setCandidatePicImage();
-        setAddSocialNetworkButtonEnable();
         checkTelegramName();
-        setIteractionListVacancyFilter();
 
         lastIteraction = interactionService.getLastIteraction(getEditedEntity());
 
@@ -761,8 +762,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         suggestVacancyTable.addStyleName("no-vertical-lines");
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            if (getEditedEntity().getPositionList() != null) {
-                for (JobCandidatePositionLists positionLists : getEditedEntity().getPositionList()) {
+            List<JobCandidatePositionLists> positionListsForSuggest = ensurePositionListLoaded();
+            if (positionListsForSuggest != null) {
+                for (JobCandidatePositionLists positionLists : positionListsForSuggest) {
                     positions.add(positionLists.getPositionList());
                 }
 
@@ -1144,7 +1146,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onInit(InitEvent event) {
         preventAutoLoadUntilReady(openPositionDl, () -> openPositionLoaderInitialized);
-        preventAutoLoadUntilReady(currentCompaniesLc, () -> referenceLoadersInitialized);
         preventAutoLoadUntilReady(citiesDl, () -> referenceLoadersInitialized);
         preventAutoLoadUntilReady(personPositionsLc, () -> referenceLoadersInitialized);
 
@@ -1171,7 +1172,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             return;
         }
         referenceLoadersInitialized = true;
-        currentCompaniesLc.load();
         citiesDl.load();
         personPositionsLc.load();
     }
@@ -1182,6 +1182,119 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
         openPositionLoaderInitialized = true;
         openPositionDl.load();
+    }
+
+    private boolean hasCandidateCv() {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            return false;
+        }
+
+        Long count = dataManager.loadValue(
+                "select count(e) from hunttech_CandidateCV e where e.candidate = :candidate",
+                Long.class)
+                .parameter("candidate", getEditedEntity())
+                .one();
+        return count != null && count > 0;
+    }
+
+    private List<IteractionList> loadInteractionsForRating() {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            return Collections.emptyList();
+        }
+
+        return dataManager.load(IteractionList.class)
+                .query("select e from hunttech_IteractionList e where e.candidate = :candidate")
+                .parameter("candidate", getEditedEntity())
+                .view("_local")
+                .list();
+    }
+
+    private List<CandidateCV> ensureCandidateCvLoaded() {
+        if (candidateCvLoaded || PersistenceHelper.isNew(getEditedEntity())) {
+            return getEditedEntity().getCandidateCv() != null ?
+                    getEditedEntity().getCandidateCv() : Collections.emptyList();
+        }
+
+        List<CandidateCV> candidateCvs = dataManager.load(CandidateCV.class)
+                .query("select e from hunttech_CandidateCV e " +
+                        "where e.candidate = :candidate " +
+                        "order by e.datePost desc")
+                .parameter("candidate", getEditedEntity())
+                .view("candidateCV-browse-view")
+                .list();
+
+        List<CandidateCV> mergedCandidateCvs = candidateCvs.stream()
+                .map(dataContext::merge)
+                .collect(Collectors.toList());
+        getEditedEntity().setCandidateCv(mergedCandidateCvs);
+        candidateCvLoaded = true;
+        return mergedCandidateCvs;
+    }
+
+    private List<IteractionList> ensureInteractionsLoaded() {
+        if (interactionsLoaded || PersistenceHelper.isNew(getEditedEntity())) {
+            return getEditedEntity().getIteractionList() != null ?
+                    getEditedEntity().getIteractionList() : Collections.emptyList();
+        }
+
+        List<IteractionList> interactions = dataManager.load(IteractionList.class)
+                .query("select e from hunttech_IteractionList e " +
+                        "where e.candidate = :candidate " +
+                        "order by e.numberIteraction desc")
+                .parameter("candidate", getEditedEntity())
+                .view("iteractionList-job-candidate")
+                .list();
+
+        List<IteractionList> mergedInteractions = interactions.stream()
+                .map(dataContext::merge)
+                .collect(Collectors.toList());
+        getEditedEntity().setIteractionList(mergedInteractions);
+        jobCandidateIteractionDc.setDisconnectedItems(mergedInteractions);
+        interactionsLoaded = true;
+        return mergedInteractions;
+    }
+
+    private List<SocialNetworkURLs> ensureSocialNetworksLoaded() {
+        if (socialNetworksLoaded || PersistenceHelper.isNew(getEditedEntity())) {
+            return getEditedEntity().getSocialNetwork() != null ?
+                    getEditedEntity().getSocialNetwork() : Collections.emptyList();
+        }
+
+        List<SocialNetworkURLs> socialNetworks = dataManager.load(SocialNetworkURLs.class)
+                .query("select e from hunttech_SocialNetworkURLs e " +
+                        "where e.jobCandidate = :candidate " +
+                        "order by e.networkName")
+                .parameter("candidate", getEditedEntity())
+                .view("socialNetworkURLs-view")
+                .list();
+
+        List<SocialNetworkURLs> mergedSocialNetworks = socialNetworks.stream()
+                .map(dataContext::merge)
+                .collect(Collectors.toList());
+        getEditedEntity().setSocialNetwork(mergedSocialNetworks);
+        socialNetworksLoaded = true;
+        return mergedSocialNetworks;
+    }
+
+    private List<JobCandidatePositionLists> ensurePositionListLoaded() {
+        return getEditedEntity().getPositionList() != null ?
+                getEditedEntity().getPositionList() : Collections.emptyList();
+    }
+
+    private void setupCurrentCompanySearchExecutor() {
+        if (currentCompanyField == null) {
+            return;
+        }
+
+        currentCompanyField.setSearchExecutor((searchString, searchParams) ->
+                dataManager.load(Company.class)
+                        .query("select e from hunttech_Company e " +
+                                "where lower(e.comanyName) like lower(:searchString) " +
+                                "order by e.comanyName, e.companyShortName")
+                        .parameter("searchString", "%" + searchString + "%")
+                        .view("company-picker-view")
+                        .maxResults(50)
+                        .list());
     }
 
     private void initTabComments() {
@@ -1198,7 +1311,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void initTabContactInfo() {
+        TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
+        if (selectedTab == null || !"tabContactInfo".equals(selectedTab.getName())) {
+            return;
+        }
         if (!tabContactInfoInitialized) {
+            ensureSocialNetworksLoaded();
             if (emailField == null) {
                 emailField = (TextField<String>) getWindow().getComponent("emailField");
             }
@@ -1258,6 +1376,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             trimTelegramName();
             enableDisableContacts();
             initSocialNeiworkTable();
+            setAddSocialNetworkButtonEnable();
         }
 
         tabContactInfoInitialized = true;
@@ -1305,9 +1424,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             ensureReferenceLoadersLoaded();
 
             if (currentCompanyField == null) {
-                currentCompanyField = (LookupPickerField<Company>) getWindow()
+                currentCompanyField = (SuggestionPickerField<Company>) getWindow()
                         .getComponent("currentCompanyField");
             }
+            setupCurrentCompanySearchExecutor();
+            setupCurrentCompanyCreateAction();
 
             if (personPositionField == null) {
                 personPositionField = (LookupPickerField<Position>) getWindow()
@@ -1378,12 +1499,81 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
+    private void setupCurrentCompanyCreateAction() {
+        if (currentCompanyField == null || currentCompanyField.getAction(CREATE_COMPANY_ACTION_ID) != null) {
+            return;
+        }
+
+        currentCompanyField.addAction(new BaseAction(CREATE_COMPANY_ACTION_ID)
+                .withCaption(messageBundle.getMessage("msgCreateCompany"))
+                .withDescription(messageBundle.getMessage("msgCreateCompanyDescription"))
+                .withIcon(CubaIcon.CREATE_ACTION.source())
+                .withHandler(actionPerformedEvent -> openCreateCompanyEditor()));
+    }
+
+    private void openCreateCompanyEditor() {
+        if (companyEditorOpen) {
+            return;
+        }
+
+        companyEditorOpen = true;
+        Action createAction = currentCompanyField.getAction(CREATE_COMPANY_ACTION_ID);
+        if (createAction != null) {
+            createAction.setEnabled(false);
+        }
+
+        try {
+            Screen companyEdit = screenBuilders.editor(Company.class, this)
+                    .newEntity()
+                    .withScreenId("hunttech_Company.edit")
+                    .withOpenMode(OpenMode.DIALOG)
+                    .withTransformation(this::mergeCreatedCompany)
+                    .withField(currentCompanyField)
+                    .build();
+
+            companyEdit.addAfterCloseListener(afterCloseEvent -> resetCompanyCreateAction());
+            companyEdit.show();
+        } catch (RuntimeException e) {
+            resetCompanyCreateAction();
+            throw e;
+        }
+    }
+
+    private void resetCompanyCreateAction() {
+        if (companyEditorOpen) {
+            companyEditorOpen = false;
+            Action action = currentCompanyField.getAction(CREATE_COMPANY_ACTION_ID);
+            if (action != null) {
+                action.setEnabled(true);
+            }
+        }
+    }
+
+    private Company mergeCreatedCompany(Company company) {
+        if (company == null || company.getId() == null) {
+            return company;
+        }
+
+        Company mergedCompany = dataContext.merge(company);
+        if (currentCompaniesDc != null && !currentCompaniesDc.containsItem(mergedCompany)) {
+            currentCompaniesDc.getMutableItems().add(mergedCompany);
+        } else if (currentCompaniesDc != null) {
+            currentCompaniesDc.replaceItem(mergedCompany);
+        }
+        return mergedCompany;
+    }
+
     public void repaintSocialNetworksTable() {
         socialNetworkTable.repaint();
     }
 
     private void initTabInteractions() {
+        TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
+        if (selectedTab == null || !"tabIteraction".equals(selectedTab.getName())) {
+            return;
+        }
         if (!interationTabInitialized) {
+            ensureInteractionsLoaded();
             if (jobCandidateIteractionListTable == null) {
                 jobCandidateIteractionListTable = (DataGrid<IteractionList>) getWindow()
                         .getComponent("jobCandidateIteractionListTable");
@@ -1487,13 +1677,19 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .getComponent("frequentInteractionPopupButton");
             }
             setFrequentInteractionPopupButton();
+            setIteractionListVacancyFilter();
 
             interationTabInitialized = true;
         }
     }
 
     private void initTabResume() {
+        TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
+        if (selectedTab == null || !"tabResume".equals(selectedTab.getName())) {
+            return;
+        }
         if (!cvTabInitialized) {
+            ensureCandidateCvLoaded();
             if (scanContactsFromCVButton == null) {
                 scanContactsFromCVButton = (Button) getWindow()
                         .getComponent("scanContactsFromCVButton");
@@ -1646,7 +1842,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private List<IteractionList> getIteractionListFromCandidate(JobCandidate editedEntity) {
-        return getEditedEntity().getIteractionList();
+        return ensureInteractionsLoaded();
     }
 
     private void setCopyCVButton() {

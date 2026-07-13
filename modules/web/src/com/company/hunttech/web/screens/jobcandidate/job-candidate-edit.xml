@@ -9,42 +9,6 @@
         <instance id="jobCandidateDc"
                   class="com.company.hunttech.entity.JobCandidate">
             <view extends="_local">
-                <property name="candidateCv" fetch="BATCH" view="_local">
-                    <property name="candidate" view="_local">
-                        <property name="personPosition" view="_local"/>
-                    </property>
-                    <property name="resumePosition" view="_local">
-                    </property>
-                    <property name="toVacancy" view="_local">
-                        <property name="grade" view="_local"/>
-                        <property name="positionType" view="_local"/>
-                        <property name="projectName" view="_local">
-                            <property name="projectLogo" view="_local"/>
-                            <property name="projectDepartment" view="_local">
-                                <property name="companyName" view="_local"/>
-                            </property>
-                        </property>
-                        <property name="owner" view="_local"/>
-                    </property>
-                    <property name="someFiles" view="_local">
-                        <property name="fileOwner" view="_local"/>
-                        <property name="fileDescriptor" view="_local"/>
-                        <property name="fileType" view="_local"/>
-                        <property name="candidateCV" view="_local"/>
-                    </property>
-                    <property name="fileImageFace" view="_local"/>
-                </property>
-                <property name="iteractionList" fetch="BATCH" view="_local">
-                    <property name="candidate" view="_minimal"/>
-                    <property name="vacancy" view="openPosition-iteraction-list-picker-view"/>
-                    <property name="iteractionType" view="iteraction-list-type-view"/>
-                    <property name="recrutier" view="extUser-picker-view"/>
-                </property>
-                <property name="socialNetwork" fetch="BATCH" view="_local">
-                    <property name="socialNetworkURL" view="_local">
-                        <property name="logo" view="_local"/>
-                    </property>
-                </property>
                 <property name="cityOfResidence" view="_local"/>
                 <property name="currentCompany" view="_local">
                     <property name="companyGroup" view="_local"/>
@@ -544,19 +508,29 @@
                                         lower(:searchString) escape '\'
                                     </query>
                                 </suggestionField>
-                                <lookupPickerField id="currentCompanyField"
-                                                   optionsContainer="currentCompaniesDc"
-                                                   dataContainer="jobCandidateDc"
-                                                   nullOptionVisible="false"
-                                                   property="currentCompany"
-                                                   width="100%"
-                                                   caption="msg://msgCorrentCompany"
-                                                   required="true">
+                                <suggestionPickerField id="currentCompanyField"
+                                                       dataContainer="jobCandidateDc"
+                                                       property="currentCompany"
+                                                       width="100%"
+                                                       caption="msg://msgCorrentCompany"
+                                                       minSearchStringLength="2"
+                                                       suggestionsLimit="50"
+                                                       asyncSearchDelayMs="300"
+                                                       inputPrompt="msg://msgPressEnter"
+                                                       required="true">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                         <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                     </actions>
-                                </lookupPickerField>
+                                    <query entityClass="com.company.hunttech.entity.Company"
+                                           escapeValueForLike="true"
+                                           searchStringFormat="%$searchString%">
+                                        select e
+                                        from hunttech_Company e
+                                        where lower(e.comanyName) like lower(:searchString) escape '\'
+                                        order by e.comanyName, e.companyShortName
+                                    </query>
+                                </suggestionPickerField>
                             </row>
                             <row>
                                 <suggestionField id="middleNameField"
