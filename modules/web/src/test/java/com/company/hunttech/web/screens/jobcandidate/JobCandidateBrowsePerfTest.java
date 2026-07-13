@@ -2,6 +2,8 @@ package com.company.hunttech.web.screens.jobcandidate;
 
 import com.company.hunttech.HunttechWebTestContainer;
 import com.company.hunttech.entity.JobCandidate;
+import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.core.global.ViewProperty;
 import com.haulmont.cuba.core.app.DataService;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.model.CollectionContainer;
@@ -10,6 +12,7 @@ import com.haulmont.cuba.gui.screen.UiControllerUtils;
 import com.haulmont.cuba.web.testsupport.TestUiEnvironment;
 import mockit.Mocked;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -65,5 +68,16 @@ public class JobCandidateBrowsePerfTest {
                 metrics.getJobCandidateLoadCalls(),
                 metrics.getJobCandidateLoadListCalls(),
                 metrics.getJobCandidateGetCountCalls());
+    }
+
+    @Test
+    public void testEmployeeStatusCacheViewLoadsInStaff() {
+        View employeeView = JobCandidateBrowse.EMPLOYEE_STATUS_CACHE_VIEW;
+        ViewProperty workStatusProperty = employeeView.getProperty("workStatus");
+
+        Assert.assertNotNull("Employee cache view must load workStatus", workStatusProperty);
+        Assert.assertNotNull("Employee workStatus must use a nested view", workStatusProperty.getView());
+        Assert.assertTrue("Employee workStatus view must load inStaff for the status column",
+                workStatusProperty.getView().containsProperty("inStaff"));
     }
 }
