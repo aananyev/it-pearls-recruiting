@@ -241,30 +241,125 @@ flowchart TD
 
 ## 6. Визуальная компоновка элементов (Visual Layout Schema)
 
-```
-layout (expand=tabSheetSocialNetworks)
-├── groupBox msgOptions (collapsable, light)
-│   ├── grid: рейтинг | должность | город | CV | quality%
-│   └── grid: email, phone, mobile, skype, telegram (labels)
-├── tabSheet tabSheetSocialNetworks (framed, lazy="true")
-│   ├── tab jobCandidateCard (ID_CARD): cardBox + dropZone(photo upload) + skillBox + lastProjects
-│   ├── tab tabCandidate (BOMB): ФИО, компания, должность, город, дата рождения
-│   ├── tab tabContactInfo (USER): контакты + priorityContact radio + socialNetworkTable
-│   ├── tab tabIteraction (LIST): vacancy filter + iteraction dataGrid
-│   ├── tab tabResume (FILE_TEXT): CV dataGrid + check skills
-│   └── tab commentsTab (COMMENT): comment grid + chat input + vacancy picker
-└── editActions: createdBy label, block, subscribe(hidden), commit, close
+|```
+layout stylename="job-candidate-editor"
+├── hbox id="jobCandidateMainLayout" (job-candidate-main-layout)
+│   ├── vbox id="jobCandidateSidebar" width="260px" (job-candidate-sidebar)
+│   │   ├── vbox id="candidateProfileHeader" — фото 112×112, ФИО, должность
+│   │   ├── vbox id="candidateProfileSummary" — рейтинг, город, компания, резюме
+│   │   ├── vbox id="candidateProfileContacts" — email, телефон, Telegram (linkButtons + labels)
+│   │   ├── vbox id="candidateNavigation" — 8 кнопок вертикальной навигации по вкладкам
+│   │   ├── vbox id="candidateProfileFooter" — кнопка HR-Мастер
+│   │   └── hidden placeholders: skillBox, suggestVacancyTable, lastProjects, ...
+│   └── vbox id="jobCandidateWorkspace" (job-candidate-workspace)
+│       ├── hbox id="jobCandidateTopBar" (job-candidate-top-bar)
+│       │   ├── hbox id="jobCandidateTopBarPrimary" — createdByLabel
+│       │   └── hbox id="jobCandidateTopBarSecondary" — commit&close, Отмена, Еще (popup: блокировка, подписка)
+│       ├── tabSheet id="tabSheetSocialNetworks" (framed job-candidate-tabs, lazy)
+│       │   ├── tab tabMain (Основное) — аккордеон, 2 карточки: Персональные/Профессиональные данные
+│       │   ├── tab tabContactInfo (Контакты) — аккордеон, 2 колонки inline-полей
+│       │   ├── tab tabPositions (Позиции и вакансии) — visible="false", двухколоночный layout
+│       │   ├── tab tabIteraction (Взаимодействия) — аккордеон, dataGrid
+│       │   ├── tab tabResume (Резюме и файлы) — аккордеон, dataGrid
+│       │   ├── tab tabSocialNetworks (Социальные сети) — аккордеон, dataGrid
+│       │   ├── tab commentsTab (Комментарии) — аккордеон, dataGrid + чат
+│       │   └── tab tabHistory (История) — аккордеон, метаданные записи
+│       └── hidden: fullNameTextField, blockCandidateCheckBox, ...
+├── dialogMode height="750" width="1200"
 ```
 
 **Вкладка «Карточка»:** `groupBox` контактов (read-only labels + link buttons), `image`/`upload` фото (`dropzone-container`), таблицы `lastProjectTable` и `suggestVacancyTable`.
 
 **Required поля (XML):** `firstName`, `currentCompany`, `personPosition`, `cityOfResidence`, контакты на вкладке Contact Info, `priorityContact`.
 
-### Производительность (вкладка `tabCandidate`)
+### Производительность (вкладка `tabMain`)
 
 - **`lazy="true"`** на `tabSheetSocialNetworks` — содержимое неактивных вкладок не строится до первого выбора.
-- **`initTabCandidate()`** — проверка `selectedTab.getName() == "tabCandidate"` в начале метода; при смене на другие вкладки справочники и поля ФИО не инициализируются.
-- **Подсказки ФИО** — `setupNameSearchExecutors()` вызывается только при первом открытии `tabCandidate`; `SuggestionField.setSearchExecutor` выполняет узкий JPQL `LIKE` по введённой строке вместо блокирующей предзагрузки всех distinct-имён через `BackgroundTask`.
+- **`initTabCandidate()`** — проверка `selectedTab.getName() == "tabMain"` в начале метода; при смене на другие вкладки справочники и поля ФИО не инициализируются.
+- **Подсказки ФИО** — `setupNameSearchExecutors()` вызывается только при первом открытии `tabMain`; `SuggestionField.setSearchExecutor` выполняет узкий JPQL `LIKE` по введённой строке вместо блокирующей предзагрузки всех distinct-имён через `BackgroundTask`.
+
+---
+
+## 7. Редизайн варианта 3
+
+### Назначение
+
+LinkedIn-ориентированный редизайн формы: двухпанельный layout, вертикальная навигация sidebar, аккордеон-секции, единый стиль таблиц и карточек.
+
+### Структура формы
+
+```
+jobCandidateSidebar (260 px) | jobCandidateWorkspace (flex)
+  ├── candidateProfileHeader   ├── jobCandidateTopBar
+  ├── candidateProfileSummary  ├── tabSheetSocialNetworks
+  ├── candidateProfileContacts │   ├── tabMain (аккордеон)
+  ├── candidateNavigation      │   ├── tabContactInfo (аккордеон)
+  └── candidateProfileFooter   │   ├── tabPositions (hidden)
+                                │   ├── tabIteraction (аккордеон)
+                                │   ├── tabResume (аккордеон)
+                                │   ├── tabSocialNetworks (аккордеон)
+                                │   ├── commentsTab (аккордеон)
+                                │   └── tabHistory (аккордеон)
+```
+
+### Изменённые файлы
+
+| Файл | Изменения |
+|------|-----------|
+| `job-candidate-edit.xml` | Двухпанельный layout, sidebar, вертикальная навигация, top-bar, аккордеон-секции, inline-формы полей |
+| `JobCandidateEdit.java` | Добавлен метод `selectCandidateTab` + 8 обработчиков навигации (только переключение вкладок) |
+| `job-candidate-editor.scss` (×7 тем) | 29 локальных классов `job-candidate-*` |
+| `build.gradle` | JAR-валидация, deploy force-copy |
+| `ScreenViewIntegrityTest.java` | Тесты регистрации экранов |
+
+### Локальные CSS-классы (префикс `job-candidate-`)
+
+| Класс | Назначение |
+|-------|-----------|
+| `job-candidate-editor` | Корневой layout |
+| `job-candidate-main-layout` | Hbox sidebar + workspace |
+| `job-candidate-sidebar` | Левая панель 260px |
+| `job-candidate-workspace` | Правая рабочая область |
+| `job-candidate-profile-header`, `-name`, `-position`, `-avatar` | Профиль (фото, ФИО, должность) |
+| `job-candidate-status` | Рейтинг кандидата |
+| `job-candidate-profile-summary`, `-contacts`, `-footer` | Блоки sidebar |
+| `job-candidate-navigation`, `-nav-item` | Вертикальная навигация |
+| `job-candidate-top-bar`, `-top-bar-secondary` | Toolbar |
+| `job-candidate-accordion-section`, `-header`, `-title`, `-content` | Аккордеон-секции |
+| `job-candidate-card`, `-card-row` | Карточки контента |
+| `job-candidate-table`, `-table-card`, `-table-comments`, `-position-column` | Единый стиль таблиц |
+| `job-candidate-sidebar-section`, `-quick-actions`, `-quick-action`, `-info-grid` | Legacy-стили |
+
+### Поддерживаемые темы
+
+- Halo
+- Havana
+- Helium
+- Hover
+- hunttech-modern, hunttech-modern-light, hunttech-modern-dark
+
+### Порядок сборки
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 11)
+./gradlew :app-web:buildScssThemes  # сборка SCSS всех тем
+./gradlew deploy -x test             # деплой
+```
+
+### Порядок отката
+
+```bash
+git checkout 4a959037 -- modules/web/src/com/company/hunttech/web/screens/jobcandidate/
+git checkout e246a7bc -- modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
+git checkout e246a7bc -- modules/web/themes/*/com.company.hunttech/job-candidate-editor.scss
+# Восстановить ext-файлы: git checkout e246a7bc -- modules/web/themes/*/com.company.hunttech/*-ext.scss
+```
+
+### Известные ограничения
+
+- `tabPositions` остаётся `visible="false"` — требует раскомментирования Java-кода
+- Вертикальная навигация на текущий момент не подсвечивает активную вкладку (выполняется только переключение, без обратной связи CSS)
+- bodyRowHeight таблиц изменён на 36px (компактный режим)
 
 ---
 
@@ -272,6 +367,7 @@ layout (expand=tabSheetSocialNetworks)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-13 | **Редизайн вариант 3:** LinkedIn-style двухпанельный layout (sidebar 260px), вертикальная навигация, top-bar, аккордеон-секции, inline-формы, единый стиль таблиц, 29 локальных SCSS-классов `job-candidate-*` |
 | 2026-07-13 | **TODO[tabPositions]:** Вкладка «Позиции и вакансии» отключена (visible=false). Java-методы закомментированы. Для восстановления: убрать visible=false в XML, раскомментировать методы в JobCandidateEdit.java |
 | 2026-06-30 | fix: удалены `laborAgreement` из view и `jobCandidateLaborAgreementDc` |
 | 2026-06-29 | Оптимизация скорости открытия вкладки tabCandidate, ленивая инициализация SuggestionFields, устранение блокирующих BackgroundTask |
