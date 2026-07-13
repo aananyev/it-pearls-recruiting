@@ -3,9 +3,12 @@ package com.company.hunttech.web.screens.jobcandidate;
 import com.company.hunttech.core.*;
 import com.company.hunttech.entity.*;
 import com.company.hunttech.service.GetRoleService;
+import com.company.hunttech.web.StandartPrioritySkills;
 import com.company.hunttech.web.StandartRoles;
 import com.company.hunttech.web.screens.candidatecv.CandidateCVEdit;
+import com.company.hunttech.web.screens.fragments.SkillLabelData;
 import com.company.hunttech.web.screens.fragments.Skillsbar;
+import com.company.hunttech.web.screens.jobcandidate.HistoryRowData;
 import com.company.hunttech.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.hunttech.web.screens.openposition.OpenPositionMasterBrowse;
 import com.company.hunttech.web.screens.openposition.openpositionviews.QuickViewOpenPositionDescription;
@@ -13,12 +16,16 @@ import com.company.hunttech.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogActions;
 import com.haulmont.cuba.gui.app.core.inputdialog.DialogOutcome;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
 import com.haulmont.cuba.gui.app.core.inputdialog.InputParameter;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.components.data.ValueSource;
@@ -40,6 +47,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -114,6 +122,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private UiComponents uiComponents;
     @Inject
+    private BackgroundWorker backgroundWorker;
+    @Inject
     private Logger log;
     @Inject
     private SuggestionField<String> firstNameField;
@@ -175,8 +185,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private static final String CREATE_COMPANY_ACTION_ID = "createCompany";
 
     List<Position> setPos = new ArrayList<>();
+    // TODO[tabPositions]: поля positionsTabLoading/positionsTabLoaded/historyRowDataByVacancy отключены вместе с вкладкой
+    // private Map<UUID, HistoryRowData> historyRowDataByVacancy;
+    // private boolean positionsTabLoading;
+    // private boolean positionsTabLoaded;
+    // Заглушка для генераторов — вкладка отключена, генераторы не будут вызваны.
+    private Map<UUID, HistoryRowData> historyRowDataByVacancy = Collections.emptyMap();
+    private boolean skillsLoading;
+    private boolean skillsLoaded;
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
     IteractionList lastIteraction = null;
+    private boolean lastIteractionLoaded;
 
     @Inject
     private Button blockCandidateButton;
@@ -346,11 +365,132 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setupSkillBox() {
-        if (!PersistenceHelper.isNew(getEditedEntity())) {
-            Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
-            if (skillBoxFragment.generateSkillLabels(getLastCVText())) {
-                skillBox.add(skillBoxFragment.getFragment());
-            }
+        // Skills are now loaded asynchronously via startSkillsBackgroundLoading()
+    }
+
+    private String loadLastCvText(UUID candidateId) {
+        if (candidateId == null) {
+            return null;
+        }
+        return dataManager.loadValue(
+                "select e.textCV from hunttech_CandidateCV e " +
+                "where e.candidate.id = :candidateId " +
+                "order by e.datePost desc",
+                String.class)
+                .parameter("candidateId", candidateId)
+                .maxResults(1)
+                .optional()
+                .orElse(null);
+    }
+
+    private void startSkillsBackgroundLoading() {
+        if (skillsLoading || skillsLoaded) {
+            return;
+        }
+        if (PersistenceHelper.isNew(getEditedEntity())
+                || getEditedEntity().getId() == null) {
+            return;
+        }
+
+        UUID candidateId = getEditedEntity().getId();
+        skillsLoading = true;
+
+        BackgroundTask<Void, List<SkillLabelData>> task =
+                new BackgroundTask<Void, List<SkillLabelData>>(
+                        60, TimeUnit.SECONDS, this) {
+
+                    @Override
+                    public List<SkillLabelData> run(TaskLifeCycle<Void> taskLifeCycle) {
+                        String cvText = loadLastCvText(candidateId);
+                        if (cvText == null || cvText.isEmpty()) {
+                            return Collections.emptyList();
+                        }
+                        // DataManager is safe to call from background thread
+                        // via AppBeans (injected DataManager bound to middleware)
+                        DataManager bgDataManager = AppBeans.get(DataManager.class);
+                        PdfParserService bgPdf = AppBeans.get(PdfParserService.class);
+                        ParseCVService bgParse = AppBeans.get(ParseCVService.class);
+
+                        String plainText = Jsoup.parse(cvText).text();
+                        List<SkillTree> skillTrees = bgPdf.parseSkillTree(plainText);
+                        HashMap<SkillTree, Integer> skillCounter = new HashMap<>();
+                        for (SkillTree skillTree : skillTrees) {
+                            skillCounter.put(skillTree,
+                                    bgParse.countMachesSkill(plainText, skillTree));
+                        }
+
+                        // Deduplicate
+                        for (int i = 0; i < skillTrees.size(); i++) {
+                            if (skillTrees.get(i).getNotParsing()) continue;
+                            for (int j = i + 1; j < skillTrees.size(); j++) {
+                                if (skillTrees.get(i).getSkillName()
+                                        .equalsIgnoreCase(skillTrees.get(j).getSkillName())) {
+                                    skillTrees.remove(j);
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (skillTrees.isEmpty()) {
+                            return Collections.emptyList();
+                        }
+
+                        List<SkillLabelData> result = new ArrayList<>();
+                        for (int i = StandartPrioritySkills.PROGRAMMING_LANGUAGE_INT;
+                             i >= StandartPrioritySkills.DEFAULT_INT; i--) {
+                            for (SkillTree st : skillTrees) {
+                                if (!st.getNotParsing() && st.getPrioritySkill() != null
+                                        && st.getPrioritySkill() == i) {
+                                    Integer count = skillCounter.get(st);
+                                    if (count != null && count > 0) {
+                                        result.add(new SkillLabelData(
+                                                st.getSkillName(), count,
+                                                skillStyleForPriority(st.getPrioritySkill()),
+                                                st.getComment(), count >= 2));
+                                    }
+                                }
+                            }
+                        }
+                        return result;
+                    }
+
+                    @Override
+                    public void done(List<SkillLabelData> result) {
+                        skillsLoading = false;
+                        skillsLoaded = true;
+                        if (result == null || result.isEmpty()) {
+                            return;
+                        }
+                        // UI thread — create fragment and render
+                        Skillsbar skillBoxFragment = fragments.create(
+                                JobCandidateEdit.this, Skillsbar.class);
+                        if (skillBoxFragment.renderSkillLabels(result)) {
+                            skillBox.add(skillBoxFragment.getFragment());
+                        }
+                    }
+
+                    @Override
+                    public boolean handleException(Exception exception) {
+                        skillsLoading = false;
+                        log.error("Unable to load candidate skills in background, " +
+                                "candidateId={}", candidateId, exception);
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(task).execute();
+    }
+
+    private static String skillStyleForPriority(Integer priority) {
+        if (priority == null) return StandartPrioritySkills.DEFAULT_STYLE;
+        switch (priority) {
+            case -1: return StandartPrioritySkills.NOT_USED_SKILLS_STYLE;
+            case 0:  return StandartPrioritySkills.DEFAULT_STYLE;
+            case 1:  return StandartPrioritySkills.SUBJECT_AREA_STYLE;
+            case 2:  return StandartPrioritySkills.FRAMEWORKS_STYLE;
+            case 3:  return StandartPrioritySkills.METHODOLORY_STYLE;
+            case 4:  return StandartPrioritySkills.PROGRAMMING_LANGUAGE_STYLE;
+            default: return StandartPrioritySkills.NOT_USED_SKILLS_STYLE;
         }
     }
 
@@ -359,16 +499,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             return null;
         }
 
-        List<CandidateCV> candidateCvs = dataManager.load(CandidateCV.class)
-                .query("select e from hunttech_CandidateCV e " +
-                        "where e.candidate = :candidate " +
-                        "order by e.datePost desc")
+        return dataManager.loadValue(
+                "select e.textCV from hunttech_CandidateCV e where e.candidate = :candidate order by e.datePost desc",
+                String.class)
                 .parameter("candidate", getEditedEntity())
                 .maxResults(1)
-                .view("_local")
-                .list();
-
-        return candidateCvs.isEmpty() ? null : candidateCvs.get(0).getTextCV();
+                .optional()
+                .orElse(null);
     }
 
     private void setFrequentInteractionPopupButton() {
@@ -528,6 +665,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         Boolean b = getEditedEntity().getBlockCandidate() == null ?
                 false : blockCandidateCheckBox.getValue();
         setBlockUnblockButton(b);
+
+        // Запуск фоновой загрузки и анализа резюме для блока навыков (Skillsbar).
+        // Операция вынесена из onBeforeShow, чтобы SQL-запрос полного textCV
+        // и сопоставление навыков не блокировали открытие формы.
+        // UI-компоненты Skillsbar создаются только в done() BackgroundTask.
+        startSkillsBackgroundLoading();
     }
 
     @Subscribe
@@ -588,10 +731,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onAfterShow1(AfterShowEvent event) {
-
-        if (!PersistenceHelper.isNew(getEditedEntity())) {
-            iteractionListFromCandidate = loadInteractionsForRating();
-        }
     }
 
     // загрузить таблицу взаимодействий
@@ -618,19 +757,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setLabelTitle();
         setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
-        setupSkillBox();
 
         setLinkButtonEmail();
         setLinkButtonTelegrem();
         setLinkButtonTelegremGroup();
         setLinkButtonSkype();
 
-        setSuggestOpenPositionTable();
-        setLastProjectOfCandidate();
         setCandidatePicImage();
         checkTelegramName();
 
         lastIteraction = interactionService.getLastIteraction(getEditedEntity());
+        lastIteractionLoaded = true;
 
         if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
@@ -640,7 +777,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
 //        setLaborAgreement();
-        setLastProjectTable();
     }
 
 
@@ -1148,6 +1284,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         preventAutoLoadUntilReady(openPositionDl, () -> openPositionLoaderInitialized);
         preventAutoLoadUntilReady(citiesDl, () -> referenceLoadersInitialized);
         preventAutoLoadUntilReady(personPositionsLc, () -> referenceLoadersInitialized);
+        // TODO[tabPositions]: loaders for positions tab disabled. Tab is commented out.
+        // preventAutoLoadUntilReady(lastProjectDl, () -> positionsTabLoaded);
+        // preventAutoLoadUntilReady(suggestOpenPositionDl, () -> positionsTabLoaded);
 
         tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
             initTabResume();
@@ -1155,6 +1294,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             initTabCandidate();
             initTabContactInfo();
             initTabComments();
+            // TODO[tabPositions]: tab positions disabled
+            // initTabPositions();
         });
     }
 
@@ -1188,25 +1329,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             return false;
         }
-
-        Long count = dataManager.loadValue(
-                "select count(e) from hunttech_CandidateCV e where e.candidate = :candidate",
-                Long.class)
-                .parameter("candidate", getEditedEntity())
-                .one();
-        return count != null && count > 0;
+        List<CandidateCV> cvs = getEditedEntity().getCandidateCv();
+        return cvs != null && !cvs.isEmpty();
     }
 
-    private List<IteractionList> loadInteractionsForRating() {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            return Collections.emptyList();
+    private double loadAverageRating() {
+        if (PersistenceHelper.isNew(getEditedEntity())
+                || getEditedEntity().getId() == null) {
+            return 0.0;
         }
-
-        return dataManager.load(IteractionList.class)
-                .query("select e from hunttech_IteractionList e where e.candidate = :candidate")
-                .parameter("candidate", getEditedEntity())
-                .view("_local")
-                .list();
+        UUID candidateId = getEditedEntity().getId();
+        Double avg = dataManager.loadValue(
+                "select avg(e.rating + 1) from hunttech_IteractionList e where e.candidate.id = :candidateId and e.rating is not null",
+                Double.class)
+                .parameter("candidateId", candidateId)
+                .one();
+        return avg != null ? avg.doubleValue() : 0.0;
     }
 
     private List<CandidateCV> ensureCandidateCvLoaded() {
@@ -1254,6 +1392,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return mergedInteractions;
     }
 
+    // TODO[tabPositions]: Вкладка «Позиции и вакансии» отключена.
+    // Полный код сохранён в git-истории. Для восстановления:
+    //   git diff HEAD~2 -- modules/web/.../JobCandidateEdit.java
+    // Методы: initTabPositions(), startPositionsBackgroundLoading(),
+    // loadHistoryKeyValues(), buildHistoryRowData(), buildOneRow(),
+    // loadSuggestedVacancies(), applyPositionsTabResult(), PositionsTabData.
+    private void initTabPositions() {
+        // tab positions disabled — см. TODO выше
+    }
+
     private List<SocialNetworkURLs> ensureSocialNetworksLoaded() {
         if (socialNetworksLoaded || PersistenceHelper.isNew(getEditedEntity())) {
             return getEditedEntity().getSocialNetwork() != null ?
@@ -1280,6 +1428,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return getEditedEntity().getPositionList() != null ?
                 getEditedEntity().getPositionList() : Collections.emptyList();
     }
+
+    // ── Positions tab background loading ──────────────────────────────
+    // TODO[tabPositions]: Все методы вкладки «Позиции и вакансии» отключены.
+    // Полный код сохранён в git-истории (HEAD~1).
+
 
     private void setupCurrentCompanySearchExecutor() {
         if (currentCompanyField == null) {
@@ -1417,7 +1570,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     private void initTabCandidate() {
         TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
-        if (selectedTab == null || !"tabCandidate".equals(selectedTab.getName())) {
+        if (selectedTab == null || !"tabMain".equals(selectedTab.getName())) {
             return;
         }
         if (!candidateInitialized) {
@@ -2335,24 +2488,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setRatingLabel(JobCandidate editedEntity) {
+        double avgRating = loadAverageRating();
+        int intRating = (int) Math.round(avgRating);
 
-        Integer sumRating = 0,
-                countRating = 0;
-
-        for (IteractionList iteractionList : iteractionListFromCandidate) {
-            if (iteractionList.getRating() != null) {
-                sumRating = sumRating + iteractionList.getRating() + 1;
-                countRating++;
-            }
-        }
-
-        if (countRating != 0) {
-            float avgRating = (float) sumRating / (float) countRating;
-            BigDecimal avgRatiog = new BigDecimal(String.valueOf(avgRating));
-
-            candidateRatingLabel.setValue(String.valueOf(avgRatiog.intValue()));
-
-            switch ((int) Integer.valueOf(avgRatiog.intValue())) {
+        if (intRating > 0) {
+            candidateRatingLabel.setValue(String.valueOf(intRating));
+            switch (intRating) {
                 case 1:
                     candidateRatingLabel.setStyleName("rating_candidate_red_1");
                     break;
@@ -2977,116 +3118,44 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     public Component whoIsResearcherGeneratorColumn(Entity entity) {
         Label retLabel = uiComponents.create(Label.NAME);
-
-        for (IteractionList iteractionList : jobCandidateIteractionDc.getMutableItems()) {
+        if (historyRowDataByVacancy != null && entity != null) {
             OpenPosition op = entity.getValue("vacancy");
-
             if (op != null) {
-                if (iteractionList.getIteractionType() != null) {
-                    if (iteractionList.getIteractionType().getSignOurInterviewAssigned() != null) {
-                        if (iteractionList.getVacancy() != null) {
-                            if (iteractionList.getVacancy().equals(op) &&
-                                    iteractionList.getIteractionType().getSignOurInterviewAssigned()) {
-                                if (iteractionList.getRecrutier() != null) {
-                                    retLabel.setValue(iteractionList.getRecrutier().getName());
-                                } else {
-                                    if (iteractionList.getRecrutierName() != null) {
-                                        retLabel.setValue(iteractionList.getRecrutierName());
-                                    }
-                                }
-                            }
-                        }
-                    }
+                HistoryRowData row = historyRowDataByVacancy.get(op.getId());
+                if (row != null && row.researcherName != null) {
+                    retLabel.setValue(row.researcherName);
                 }
             }
         }
-
         return retLabel;
     }
 
     public Component whoIsRecruterGeneratorColumn(Entity entity) {
         Label retLabel = uiComponents.create(Label.NAME);
-
-        for (IteractionList iteractionList : jobCandidateIteractionDc.getMutableItems()) {
+        if (historyRowDataByVacancy != null && entity != null) {
             OpenPosition op = entity.getValue("vacancy");
-
             if (op != null) {
-                if (iteractionList.getIteractionType() != null) {
-                    if (iteractionList.getIteractionType().getSignOurInterview() != null) {
-                        if (iteractionList.getVacancy() != null) {
-                            if (iteractionList.getVacancy().equals(op) &&
-                                    iteractionList.getIteractionType().getSignOurInterview()) {
-                                if (iteractionList.getRecrutier() != null) {
-                                    if (iteractionList.getRecrutier().getName() != null) {
-                                        retLabel.setValue(iteractionList.getRecrutier().getName());
-                                    }
-                                }
-                            }
-                        }
-                    }
+                HistoryRowData row = historyRowDataByVacancy.get(op.getId());
+                if (row != null && row.recruiterName != null) {
+                    retLabel.setValue(row.recruiterName);
                 }
             }
         }
-
         return retLabel;
     }
 
     public Component lastInteractionGeneratorColumn(Entity entity) {
         Label retLabel = uiComponents.create(Label.NAME);
         retLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
-        OpenPosition openPosition = entity.getValue("vacancy");
-        IteractionList lastInteraction = null;
-        jobCandidateIteractionDc.setDisconnectedItems(getEditedEntity().getIteractionList());
-
-        if (jobCandidateIteractionDc.getMutableItems().size() != 0) {
-            for (int i = 0; i < jobCandidateIteractionDc.getMutableItems().size(); i++) {
-                if (lastInteraction != null) {
-                    if (openPosition.equals(jobCandidateIteractionDc
-                            .getMutableItems()
-                            .get(i)
-                            .getVacancy())) {
-                        if (jobCandidateIteractionDc
-                                .getMutableItems()
-                                .get(i)
-                                .getDateIteraction() != null) {
-                            if (lastInteraction.getDateIteraction().before(
-                                    jobCandidateIteractionDc
-                                            .getMutableItems()
-                                            .get(i)
-                                            .getDateIteraction())) {
-                                lastInteraction = jobCandidateIteractionDc
-                                        .getMutableItems()
-                                        .get(i);
-                            }
-                        }
-                    }
-                } else {
-                    if (jobCandidateIteractionDc
-                            .getMutableItems()
-                            .get(i)
-                            .getVacancy() != null) {
-                        if (openPosition.equals(jobCandidateIteractionDc
-                                .getMutableItems()
-                                .get(i)
-                                .getVacancy())) {
-                            lastInteraction = jobCandidateIteractionDc
-                                    .getMutableItems()
-                                    .get(i);
-                        }
-                    }
+        if (historyRowDataByVacancy != null && entity != null) {
+            OpenPosition openPosition = entity.getValue("vacancy");
+            if (openPosition != null) {
+                HistoryRowData row = historyRowDataByVacancy.get(openPosition.getId());
+                if (row != null && row.lastInteractionName != null) {
+                    retLabel.setValue(row.lastInteractionName);
                 }
             }
         }
-
-        StringBuffer retStr = new StringBuffer("");
-        if (lastInteraction.getIteractionType() != null) {
-            if (lastInteraction.getIteractionType().getIterationName() != null) {
-                retStr.append(lastInteraction.getIteractionType().getIterationName());
-            }
-        }
-
-        retLabel.setValue(retStr);
-
         return retLabel;
     }
 

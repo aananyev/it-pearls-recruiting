@@ -1,3 +1,5 @@
+@import "job-candidate-editor.scss";
+
 /* Define your theme modifications inside next mixin */
 
 @mixin date_iteraction_button($color) {
@@ -305,7 +307,8 @@
     box-shadow: 0 0 0 3px green, 0 0 13px #333; /* Параметры теней */
 }
 
-@mixin star{content: '&#x2605';}
+@mixin star{
+    @include job-candidate-editor-theme;content: '&#x2605';}
 @mixin star_fill{content: '&#x2606';}
 
 .rating_star_1 {
@@ -1622,4 +1625,337 @@ rating_battery_yellow_3:before {
       height: 100% !important;
     }
   }
+
+  /* ========================================================================
+   * Hunttech Modern Light — подтема в стиле Jmix Default
+   * Плоский дизайн, Inter, скругления 4px, палитра #f0f2f5 / #0c66e4
+   *
+   * Класс .hunttech-modern-light добавляется CUBA как CSS-класс
+   * на корневой элемент VAADIN при выборе режима темы в настройках.
+   * Все переопределения — обычные CSS-свойства (не SCSS-переменные),
+   * т.к. SCSS-переменные компилируются на этапе сборки и не работают
+   * в runtime при переключении режимов.
+   * ======================================================================== */
+
+  .hunttech-modern-light {
+    /* ── Глобальный фон приложения и базовый шрифт ── */
+    .v-app {
+      background-color: #f0f2f5 !important;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+      font-size: 14px !important;
+      color: #2c3e50 !important;
+    }
+
+    /* ── Панели ── */
+    .v-panel,
+    .v-window,
+    .v-window-contents,
+    .v-formlayout,
+    .v-verticallayout,
+    .v-horizontallayout {
+      background-color: #ffffff !important;
+      color: #2c3e50 !important;
+    }
+
+    /* ── Menubar: тёмно-синий графит ── */
+    .cuba-app-menubar,
+    .v-menubar {
+      background-color: #1e293b !important;
+      border-color: #1e293b !important;
+
+      .v-menubar-menuitem {
+        color: #c8d1de !important;
+
+        &:hover,
+        &.v-menubar-menuitem-selected {
+          background-color: rgba(255, 255, 255, 0.06) !important;
+          color: #ffffff !important;
+        }
+      }
+    }
+
+    /* ── SideMenu ── */
+    .c-sidemenu {
+      background: #1e293b !important;
+
+      .v-side-menu-item {
+        color: #c8d1de !important;
+        border-radius: 4px !important;
+        transition: background 0.12s ease !important;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.06) !important;
+        }
+
+        &.v-side-menu-item-selected {
+          background: rgba(12, 102, 228, 0.2) !important;
+          color: #ffffff !important;
+        }
+      }
+    }
+
+    /* ── Плоские кнопки: без градиентов и теней ── */
+    .v-button {
+      background: transparent !important;
+      background-image: none !important;
+      box-shadow: none !important;
+      border-radius: 4px !important;
+      border: 1px solid #c4cdd5 !important;
+      color: #2c3e50 !important;
+      transition: background 0.15s ease !important;
+
+      &:hover {
+        background: #f0f2f5 !important;
+      }
+
+      &.v-button-primary,
+      &.v-button-primary:focus {
+        background: #0c66e4 !important;
+        color: #ffffff !important;
+        border-color: #0c66e4 !important;
+        box-shadow: none !important;
+
+        &:hover {
+          background: #0954c9 !important;
+        }
+      }
+    }
+
+    /* ── Поля ввода: TextField, TextArea, Lookup, DateField, ComboBox ── */
+    .v-textfield,
+    .v-textarea,
+    .v-filterselect,
+    .v-datefield,
+    .v-lookupfield,
+    .v-combobox {
+      border-radius: 4px !important;
+      box-shadow: none !important;
+    }
+
+    .v-select,
+    .v-filterselect-input {
+      border-radius: 4px !important;
+    }
+
+    /* ── Таблицы ── */
+    .v-table,
+    .v-grid {
+      background-color: #ffffff !important;
+      color: #2c3e50 !important;
+      border-color: #e3e8ed !important;
+
+      .v-table-header-wrap,
+      .v-grid-header {
+        background: #fafbfc !important;
+        color: #2c3e50 !important;
+      }
+    }
+
+    /* ── TabSheet: активная вкладка с акцентным цветом ── */
+    .v-tabsheet-tabitemcell .v-caption {
+      border-radius: 4px 4px 0 0 !important;
+    }
+
+    .v-tabsheet-tabitem-selected {
+      background: #ffffff !important;
+      border-bottom-color: #ffffff !important;
+
+      .v-caption {
+        color: #0c66e4 !important;
+        font-weight: 600 !important;
+      }
+    }
+
+    /* ── Селекция / фокус ── */
+    ::-moz-selection {
+      background: #dce9f8;
+      color: #2c3e50;
+    }
+
+    ::selection {
+      background: #dce9f8;
+      color: #2c3e50;
+    }
+
+    /* ── LinkButton: акцентный цвет ссылок ── */
+    .v-link,
+    .v-button-link {
+      color: #0c66e4 !important;
+
+      &:hover {
+        color: #0954c9 !important;
+      }
+    }
+  }
+
+  /* ========================================================================
+   * Hunttech Modern Dark — подтема в стиле Jmix Dark
+   * Глубокий чёрный #121212, панели #242424, акцент #357ec7
+   * ======================================================================== */
+
+  .hunttech-modern-dark {
+    /* ── Глобальный фон приложения и базовый шрифт ── */
+    .v-app {
+      background-color: #121212 !important;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+      font-size: 14px !important;
+      color: #e3e3e3 !important;
+    }
+
+    /* ── Панели ── */
+    .v-panel,
+    .v-window,
+    .v-window-contents,
+    .v-formlayout,
+    .v-verticallayout,
+    .v-horizontallayout {
+      background-color: #242424 !important;
+      color: #e3e3e3 !important;
+    }
+
+    /* ── Menubar ── */
+    .cuba-app-menubar,
+    .v-menubar {
+      background-color: #0d0d0d !important;
+      border-color: #0d0d0d !important;
+
+      .v-menubar-menuitem {
+        color: #a8b0bc !important;
+
+        &:hover,
+        &.v-menubar-menuitem-selected {
+          background-color: rgba(255, 255, 255, 0.05) !important;
+          color: #ffffff !important;
+        }
+      }
+    }
+
+    /* ── SideMenu ── */
+    .c-sidemenu {
+      background: #0d0d0d !important;
+
+      .v-side-menu-item {
+        color: #a8b0bc !important;
+        border-radius: 4px !important;
+        transition: background 0.12s ease !important;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        &.v-side-menu-item-selected {
+          background: rgba(53, 126, 199, 0.2) !important;
+          color: #ffffff !important;
+        }
+      }
+    }
+
+    /* ── Плоские кнопки ── */
+    .v-button {
+      background: transparent !important;
+      background-image: none !important;
+      box-shadow: none !important;
+      border-radius: 4px !important;
+      border: 1px solid #434343 !important;
+      color: #e3e3e3 !important;
+      transition: background 0.15s ease !important;
+
+      &:hover {
+        background: #2a2a2a !important;
+      }
+
+      &.v-button-primary,
+      &.v-button-primary:focus {
+        background: #357ec7 !important;
+        color: #ffffff !important;
+        border-color: #357ec7 !important;
+        box-shadow: none !important;
+
+        &:hover {
+          background: #2d6fb0 !important;
+        }
+      }
+    }
+
+    /* ── Поля ввода ── */
+    .v-textfield,
+    .v-textarea,
+    .v-filterselect,
+    .v-datefield,
+    .v-lookupfield,
+    .v-combobox {
+      background-color: #1a1a1a !important;
+      border: 1px solid #434343 !important;
+      color: #e3e3e3 !important;
+      border-radius: 4px !important;
+      box-shadow: none !important;
+    }
+
+    .v-select,
+    .v-filterselect-input {
+      border-radius: 4px !important;
+      background-color: #1a1a1a !important;
+    }
+
+    /* ── Таблицы ── */
+    .v-table,
+    .v-grid {
+      background-color: #242424 !important;
+      color: #e3e3e3 !important;
+      border-color: #434343 !important;
+
+      .v-table-row,
+      .v-grid-row {
+        border-bottom-color: #333333 !important;
+      }
+
+      .v-table-header-wrap,
+      .v-grid-header {
+        background: #1a1a1a !important;
+        color: #a8b0bc !important;
+      }
+    }
+
+    /* ── TabSheet ── */
+    .v-tabsheet-tabitemcell .v-caption {
+      border-radius: 4px 4px 0 0 !important;
+    }
+
+    .v-tabsheet-tabitem-selected {
+      background: #242424 !important;
+      border-bottom-color: #242424 !important;
+
+      .v-caption {
+        color: #357ec7 !important;
+        font-weight: 600 !important;
+      }
+    }
+
+    /* ── Панели и окна (дополнительно) ── */
+    .v-window-outerheader {
+      background: #1a1a1a !important;
+    }
+
+    /* ── Селекция ── */
+    ::-moz-selection {
+      background: #1e3347;
+      color: #e3e3e3;
+    }
+
+    ::selection {
+      background: #1e3347;
+      color: #e3e3e3;
+    }
+
+    /* ── LinkButton ── */
+    .v-link,
+    .v-button-link {
+      color: #357ec7 !important;
+
+      &:hover {
+        color: #2d6fb0 !important;
+      }
+    }
+  }
 }
+

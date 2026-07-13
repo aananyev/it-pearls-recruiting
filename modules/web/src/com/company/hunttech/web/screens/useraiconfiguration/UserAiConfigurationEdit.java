@@ -31,6 +31,7 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
         providers.put("OpenAI", "openai");
         providers.put("YandexGPT", "yandex");
         providers.put("GigaChat", "gigachat");
+        providers.put("Xiaomi MiMo", "mimo");
         providerCodeField.setOptionsMap(providers);
     }
 

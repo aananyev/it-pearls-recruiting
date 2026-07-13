@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="2.0">  
+  <persistence-unit name="hunttech_recruiting" transaction-type="RESOURCE_LOCAL"> 
+    <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+    <mapping-file>orm.xml</mapping-file>
+    <class>com.haulmont.cuba.core.entity.BaseGenericIdEntity</class>
+    <class>com.haulmont.cuba.core.entity.BaseUuidEntity</class>
+    <class>com.haulmont.cuba.core.entity.BaseLongIdEntity</class>
+    <class>com.haulmont.cuba.core.entity.BaseIntegerIdEntity</class>
+    <class>com.haulmont.cuba.core.entity.BaseStringIdEntity</class>
+    <class>com.haulmont.cuba.core.entity.BaseDbGeneratedIdEntity</class>
+    <class>com.haulmont.cuba.core.entity.BaseIdentityIdEntity</class>
+    <class>com.haulmont.cuba.core.entity.BaseIntIdentityIdEntity</class>
+    <class>com.haulmont.cuba.core.entity.StandardEntity</class>
+    <class>com.haulmont.cuba.core.entity.EmbeddableEntity</class>
+    <class>com.haulmont.cuba.core.entity.Server</class>
+    <class>com.haulmont.cuba.core.entity.Config</class>
+    <class>com.haulmont.cuba.core.entity.FileDescriptor</class>
+    <class>com.haulmont.cuba.core.entity.LockDescriptor</class>
+    <class>com.haulmont.cuba.core.entity.Folder</class>
+    <class>com.haulmont.cuba.core.entity.AbstractSearchFolder</class>
+    <class>com.haulmont.cuba.core.entity.AppFolder</class>
+    <class>com.haulmont.cuba.core.entity.FtsQueue</class>
+    <class>com.haulmont.cuba.core.entity.EntityStatistics</class>
+    <class>com.haulmont.cuba.core.entity.SendingMessage</class>
+    <class>com.haulmont.cuba.core.entity.SendingAttachment</class>
+    <class>com.haulmont.cuba.core.entity.EntitySnapshot</class>
+    <class>com.haulmont.cuba.core.entity.ScheduledTask</class>
+    <class>com.haulmont.cuba.core.entity.ScheduledExecution</class>
+    <class>com.haulmont.cuba.core.entity.QueryResult</class>
+    <class>com.haulmont.cuba.security.entity.User</class>
+    <class>com.haulmont.cuba.security.entity.Role</class>
+    <class>com.haulmont.cuba.security.entity.UserRole</class>
+    <class>com.haulmont.cuba.security.entity.Group</class>
+    <class>com.haulmont.cuba.security.entity.GroupHierarchy</class>
+    <class>com.haulmont.cuba.security.entity.Permission</class>
+    <class>com.haulmont.cuba.security.entity.Constraint</class>
+    <class>com.haulmont.cuba.security.entity.LocalizedConstraintMessage</class>
+    <class>com.haulmont.cuba.security.entity.SessionAttribute</class>
+    <class>com.haulmont.cuba.security.entity.UserSetting</class>
+    <class>com.haulmont.cuba.security.entity.UserSubstitution</class>
+    <class>com.haulmont.cuba.security.entity.LoggedEntity</class>
+    <class>com.haulmont.cuba.security.entity.LoggedAttribute</class>
+    <class>com.haulmont.cuba.security.entity.EntityLogItem</class>
+    <class>com.haulmont.cuba.security.entity.FilterEntity</class>
+    <class>com.haulmont.cuba.security.entity.SearchFolder</class>
+    <class>com.haulmont.cuba.security.entity.Presentation</class>
+    <class>com.haulmont.cuba.security.entity.ScreenHistoryEntity</class>
+    <class>com.haulmont.cuba.security.entity.SessionLogEntry</class>
+    <class>com.haulmont.cuba.core.entity.CategorizedEntity</class>
+    <class>com.haulmont.cuba.core.entity.Category</class>
+    <class>com.haulmont.cuba.core.entity.CategoryAttribute</class>
+    <class>com.haulmont.cuba.core.entity.CategoryAttributeValue</class>
+    <class>com.haulmont.cuba.core.entity.JmxInstance</class>
+    <class>com.haulmont.cuba.security.entity.RememberMeToken</class>
+    <class>com.haulmont.cuba.core.entity.ReferenceToEntity</class>
+    <class>com.haulmont.reports.entity.ReportTemplate</class>
+    <class>com.haulmont.reports.entity.Report</class>
+    <class>com.haulmont.reports.entity.ReportGroup</class>
+    <class>com.haulmont.reports.entity.ReportExecution</class>
+    <class>com.haulmont.addon.emailtemplates.entity.EmailTemplate</class>
+    <class>com.haulmont.addon.emailtemplates.entity.TemplateGroup</class>
+    <class>com.haulmont.addon.emailtemplates.entity.TemplateReport</class>
+    <class>com.haulmont.addon.emailtemplates.entity.ParameterValue</class>
+    <class>com.haulmont.addon.emailtemplates.entity.ReportEmailTemplate</class>
+    <class>com.haulmont.addon.emailtemplates.entity.JsonEmailTemplate</class>
+    <class>com.haulmont.addon.emailtemplates.entity.TemplateBlockGroup</class>
+    <class>com.haulmont.addon.emailtemplates.entity.TemplateBlock</class>
+    <class>de.diedavids.cuba.dataimport.entity.ImportExecution</class>
+    <class>de.diedavids.cuba.dataimport.entity.ImportExecutionDetail</class>
+    <class>de.diedavids.cuba.dataimport.entity.ImportConfiguration</class>
+    <class>de.diedavids.cuba.dataimport.entity.attributemapper.ImportAttributeMapper</class>
+    <class>de.diedavids.cuba.dataimport.entity.UniqueConfigurationAttribute</class>
+    <class>de.diedavids.cuba.dataimport.entity.UniqueConfiguration</class>
+    <class>com.haulmont.addon.dashboard.entity.PersistentDashboard</class>
+    <class>com.haulmont.addon.dashboard.entity.WidgetTemplate</class>
+    <class>com.haulmont.addon.dashboard.entity.DashboardGroup</class>
+    <class>com.haulmont.addon.dashboard.entity.WidgetTemplateGroup</class>
+    <class>com.haulmont.bpm.entity.ProcDefinition</class>
+    <class>com.haulmont.bpm.entity.ProcRole</class>
+    <class>com.haulmont.bpm.entity.ProcInstance</class>
+    <class>com.haulmont.bpm.entity.ProcActor</class>
+    <class>com.haulmont.bpm.entity.ProcTask</class>
+    <class>com.haulmont.bpm.entity.ProcAttachmentType</class>
+    <class>com.haulmont.bpm.entity.ProcAttachment</class>
+    <class>com.haulmont.bpm.entity.ProcModel</class>
+    <class>com.haulmont.bpm.entity.StencilSet</class>
+    <class>com.company.hunttech.entity.Country</class>
+    <class>com.company.hunttech.entity.Position</class>
+    <class>com.company.hunttech.entity.Person</class>
+    <class>com.company.hunttech.entity.City</class>
+    <class>com.company.hunttech.entity.Region</class>
+    <class>com.company.hunttech.entity.Ownershup</class>
+    <class>com.company.hunttech.entity.Company</class>
+    <class>com.company.hunttech.entity.CompanyDepartament</class>
+    <class>com.company.hunttech.entity.Specialisation</class>
+    <class>com.company.hunttech.entity.OpenPosition</class>
+    <class>com.company.hunttech.entity.Project</class>
+    <class>com.company.hunttech.entity.CompanyGroup</class>
+    <class>com.company.hunttech.entity.Iteraction</class>
+    <class>com.company.hunttech.entity.JobCandidate</class>
+    <class>com.company.hunttech.entity.IteractionList</class>
+    <class>com.company.hunttech.entity.SocialNetworkURLs</class>
+    <class>com.company.hunttech.entity.SkillTree</class>
+    <class>com.company.hunttech.entity.JobHistory</class>
+    <class>com.company.hunttech.entity.CandidateCV</class>
+    <class>com.company.hunttech.entity.Setup</class>
+    <class>com.company.hunttech.entity.RecrutiesTasks</class>
+    <class>com.company.hunttech.entity.RecruitingRecrutiers</class>
+    <class>com.company.hunttech.entity.SomeFiles</class>
+    <class>com.company.hunttech.entity.FileType</class>
+    <class>com.company.hunttech.entity.SocialNetworkType</class>
+    <class>com.company.hunttech.entity.SubscribeCandidateAction</class>
+    <class>com.company.hunttech.entity.ItearctionRequirements</class>
+    <class>com.company.hunttech.entity.JobCandidatePositionLists</class>
+    <class>com.company.hunttech.entity.LaborAgeementType</class>
+    <class>com.company.hunttech.entity.LaborAgreement</class>
+    <class>com.company.hunttech.entity.PossibleNames</class>
+    <class>com.company.hunttech.entity.ExtUser</class>
+    <class>com.company.hunttech.entity.OpenPositionNews</class>
+    <class>com.company.hunttech.entity.Interview</class>
+    <class>com.company.hunttech.entity.StaffingTable</class>
+    <class>com.company.hunttech.entity.Grade</class>
+    <class>com.company.hunttech.entity.StaffCurrent</class>
+    <class>com.company.hunttech.entity.ApplicationRecruitment</class>
+    <class>com.company.hunttech.entity.ApplicationRecruitmentList</class>
+    <class>com.company.hunttech.entity.PersonelReserve</class>
+    <class>com.company.hunttech.entity.SkillsFilterLastSelection</class>
+    <class>com.company.hunttech.entity.InternalEmailTemplate</class>
+    <class>com.company.hunttech.entity.InternalEmailer</class>
+    <class>com.company.hunttech.entity.InternalEmailerTemplate</class>
+    <class>com.company.hunttech.entity.UserSettings</class>
+    <class>com.company.hunttech.entity.OutstaffingRates</class>
+    <class>com.company.hunttech.entity.Currency</class>
+    <class>com.company.hunttech.entity.OpenPositionComment</class>
+    <class>com.company.hunttech.entity.SomeFilesAgreement</class>
+    <class>com.company.hunttech.entity.SomeFilesCandidateCV</class>
+    <class>com.company.hunttech.entity.SomeFilesOpenPosition</class>
+    <class>com.company.hunttech.entity.Employee</class>
+    <class>com.company.hunttech.entity.EmployeeWorkStatus</class>
+    <class>com.company.hunttech.entity.MyActiveCandidateExclude</class>
+    <class>com.company.hunttech.entity.SignIcons</class>
+    <class>com.company.hunttech.entity.JobCandidateSignIcon</class>
+    <class>com.company.hunttech.entity.InternalEmailTemplateInteraction</class>
+    <class>com.company.hunttech.entity.ApplicationSetup</class>
+    <class>com.company.hunttech.entity.UserAiConfiguration</class>
+    <class>com.company.hunttech.entity.VacancyPromptTemplate</class>
+    <exclude-unlisted-classes/>
+    <properties>
+      <property name="eclipselink.cache.shared.hunttech_CompanyDepartament" value="true"/>
+      <property name="eclipselink.cache.size.hunttech_CompanyDepartament" value="500"/>
+      <property name="eclipselink.cache.size.hunttech_Iteraction" value="100"/>
+      <property name="eclipselink.cache.shared.hunttech_CompanyGroup" value="true"/>
+      <property name="eclipselink.cache.shared.hunttech_Company" value="true"/>
+      <property name="eclipselink.cache.shared.hunttech_CandidateCV" value="true"/>
+      <property name="eclipselink.cache.shared.hunttech_SocialNetworkURLs" value="true"/>
+      <property name="eclipselink.cache.size.hunttech_CandidateCV" value="1000"/>
+      <property name="eclipselink.cache.size.hunttech_SocialNetworkType" value="100"/>
+      <property name="eclipselink.cache.shared.hunttech_SkillTree" value="true"/>
+      <property name="eclipselink.cache.size.hunttech_SkillTree" value="1000"/>
+      <property name="javax.persistence.validation.mode" value="NONE"/>
+      <property name="eclipselink.cache.shared.hunttech_FileType" value="true"/>
+      <property name="eclipselink.cache.size.hunttech_Project" value="200"/>
+      <property name="eclipselink.cache.shared.hunttech_Person" value="true"/>
+      <property name="eclipselink.cache.shared.hunttech_OpenPosition" value="true"/>
+      <property name="eclipselink.cache.size.hunttech_Country" value="100"/>
+      <property name="eclipselink.cache.size.hunttech_IteractionList" value="1000"/>
+      <property name="eclipselink.cache.size.hunttech_Company" value="500"/>
+      <property name="eclipselink.cache.shared.hunttech_Project" value="true"/>
+      <property name="eclipselink.cache.shared.hunttech_SomeFiles" value="true"/>
+      <property name="eclipselink.cache.shared.hunttech_Country" value="true"/>
+      <property name="eclipselink.target-database" value="com.haulmont.cuba.core.sys.persistence.CubaPostgreSQLPlatform"/>
+      <property name="eclipselink.cache.shared.hunttech_SubscribeCandidateAction" value="true"/>
+      <property name="eclipselink.cache.shared.hunttech_JobCandidate" value="true"/>
+      <property name="eclipselink.cache.shared.sec_ExtUser" value="true"/>
+      <property name="eclipselink.logging.logger" value="com.haulmont.cuba.core.sys.logging.EclipseLinkLog"/>
+      <property name="eclipselink.cache.shared.hunttech_IteractionList" value="true"/>
+      <property name="eclipselink.cache.size.hunttech_JobCandidate" value="1000"/>
+      <property name="eclipselink.cache.shared.hunttech_Specialisation" value="true"/>
+      <property name="eclipselink.cache.size.sec_User" value="100"/>
+      <property name="eclipselink.cache.size.hunttech_OpenPosition" value="500"/>
+      <property name="eclipselink.cache.size.hunttech_SocialNetworkURLs" value="500"/>
+      <property name="eclipselink.cache.size.hunttech_SomeFiles" value="100"/>
+      <property name="eclipselink.cache.shared.hunttech_Region" value="true"/>
+      <property name="eclipselink.flush-clear.cache" value="Merge"/>
+      <property name="eclipselink.cache.coordination.propagate-asynchronously" value="false"/>
+      <property name="eclipselink.session-event-listener" value="com.haulmont.cuba.core.sys.persistence.EclipseLinkSessionEventListener"/>
+      <property name="eclipselink.cache.size.hunttech_Region" value="100"/>
+      <property name="eclipselink.cache.size.hunttech_CompanyGroup" value="100"/>
+      <property name="eclipselink.cache.size.hunttech_FileType" value="100"/>
+      <property name="eclipselink.cache.size.hunttech_Person" value="100"/>
+      <property name="eclipselink.cache.size.hunttech_City" value="200"/>
+      <property name="eclipselink.weaving" value="static"/>
+      <property name="eclipselink.cache.shared.hunttech_Iteraction" value="true"/>
+      <property name="eclipselink.cache.size.hunttech_Specialisation" value="100"/>
+      <property name="eclipselink.cache.size.hunttech_SubscribeCandidateAction" value="100"/>
+      <property name="eclipselink.cache.shared.default" value="false"/>
+      <property name="eclipselink.cache.shared.hunttech_City" value="true"/>
+      <property name="eclipselink.cache.shared.hunttech_SocialNetworkType" value="true"/>
+      <property name="eclipselink.cache.coordination.protocol" value="com.haulmont.cuba.core.sys.entitycache.EntityCacheTransportManager"/>
+    </properties>
+  </persistence-unit> 
+</persistence>

@@ -1,0 +1,253 @@
+/* hunttech-modern — Jmix-inspired corporate theme for HRM HuntTech */
+
+@mixin com_company_hunttech-hunttech-modern-light-ext {
+
+  /* ── Global resets ───────────────────────────── */
+  .v-app {
+    background: $v-app-background-color;
+    color: $v-font-color;
+    font-size: $v-font-size;
+    font-family: $v-font-family;
+  }
+
+  /* ── Tables — clean, borderless ──────────────── */
+  .v-table {
+    border: none !important;
+    background: transparent;
+  }
+  .v-table-header-wrap {
+    border-bottom: 1px solid $ht-border-subtle !important;
+    background: transparent !important;
+  }
+  .v-table-caption-container {
+    color: $ht-muted !important;
+    font-weight: 600 !important;
+    font-size: 11px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 8px 6px !important;
+  }
+  .v-table-cell-content {
+    padding: 8px 6px !important;
+  }
+  .v-table-row, .v-table-row-odd {
+    background: transparent !important;
+    border-bottom: 1px solid $ht-border-subtle !important;
+  }
+  .v-table-row:hover {
+    background: rgba($ht-red, 0.03) !important;
+  }
+  .v-table-row-selected {
+    background: rgba($ht-red, 0.06) !important;
+  }
+
+  /* ── DataGrid ────────────────────────────────── */
+  .v-grid {
+    border: 1px solid $ht-border-subtle !important;
+    border-radius: $v-border-radius;
+    background: $ht-white;
+  }
+  .v-grid-header .v-grid-cell {
+    background: $ht-gray !important;
+    color: $ht-muted !important;
+    font-weight: 600 !important;
+    font-size: 11px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid $ht-border-subtle !important;
+  }
+  .v-grid-row {
+    border-bottom: 1px solid $ht-border-subtle;
+  }
+  .v-grid-row:hover {
+    background: rgba($ht-red, 0.02) !important;
+  }
+  .v-grid-row-selected {
+    background: rgba($ht-red, 0.05) !important;
+  }
+
+  /* ── Text fields ─────────────────────────────── */
+  .v-textfield, .v-filterselect {
+    border: 1px solid $ht-border-subtle !important;
+    border-radius: $v-textfield-border-radius !important;
+    padding: 6px 10px !important;
+    font-size: 14px !important;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .v-textfield:focus, .v-filterselect-focus {
+    border-color: $ht-red !important;
+    box-shadow: 0 0 0 2px rgba($ht-red, 0.12) !important;
+  }
+
+  /* ── Buttons ─────────────────────────────────── */
+  .v-button {
+    border-radius: $v-border-radius !important;
+    font-weight: 500 !important;
+    padding: 6px 16px !important;
+    transition: all 120ms ease;
+  }
+  .v-button-primary {
+    background: $ht-red !important;
+    color: $ht-white !important;
+    border: 1px solid $ht-red !important;
+  }
+  .v-button-primary:hover {
+    background: darken($ht-red, 8%) !important;
+    box-shadow: 0 2px 8px rgba($ht-red, 0.25) !important;
+  }
+  .v-button-default {
+    background: $ht-white !important;
+    color: $ht-dark !important;
+    border: 1px solid $ht-border-subtle !important;
+  }
+  .v-button-default:hover {
+    background: $ht-gray !important;
+    border-color: rgba($ht-red, 0.3) !important;
+  }
+
+  /* ── GroupBox / Card ─────────────────────────── */
+  .v-groupbox {
+    background: $ht-white !important;
+    border: 1px solid $ht-border-subtle !important;
+    border-radius: $v-border-radius !important;
+    box-shadow: 0 1px 4px $ht-shadow !important;
+  }
+  .v-groupbox-caption {
+    color: $ht-dark !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    padding: 14px 14px 0 !important;
+    line-height: 1.4 !important;
+  }
+  .v-groupbox-content {
+    padding: 12px 14px 14px !important;
+  }
+
+  /* ── TabSheet ────────────────────────────────── */
+  .v-tabsheet-tabcontainer {
+    background: transparent !important;
+    border-bottom: 1px solid $ht-border-subtle !important;
+  }
+  .v-tabsheet-tabitem .v-caption {
+    padding: 10px 16px !important;
+    color: $ht-muted !important;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    border-bottom: 2px solid transparent !important;
+    transition: color 120ms ease, border-color 120ms ease;
+  }
+  .v-tabsheet-tabitem:hover .v-caption {
+    color: $ht-dark !important;
+  }
+  .v-tabsheet-tabitem-selected .v-caption {
+    color: $ht-red !important;
+    border-bottom: 2px solid $ht-red !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  .v-tabsheet-content {
+    border: none !important;
+    background: transparent !important;
+  }
+  .v-tabsheet-tabsheetpanel {
+    background: transparent !important;
+  }
+
+  /* ── Labels ──────────────────────────────────── */
+  .v-label {
+    color: $v-font-color;
+    font-size: 14px;
+  }
+  .v-label.h1, .v-label.h2, .v-label.h3 {
+    color: $ht-dark;
+    font-weight: 600;
+  }
+  .v-label.h2 {
+    font-size: 16px;
+  }
+  .v-label.small {
+    color: $ht-muted;
+    font-size: 12px;
+  }
+
+  /* ── Filters ─────────────────────────────────── */
+  .v-filterselect {
+    border-radius: $v-textfield-border-radius !important;
+  }
+  .v-filterselect-button {
+    border-radius: 0 $v-textfield-border-radius $v-textfield-border-radius 0 !important;
+  }
+
+  /* ── DateField ───────────────────────────────── */
+  .v-datefield {
+    border-radius: $v-border-radius !important;
+  }
+  .v-datefield-textfield {
+    border: 1px solid $ht-border-subtle !important;
+    border-radius: $v-border-radius !important;
+    padding: 6px 10px !important;
+  }
+  .v-datefield-button {
+    border-radius: 0 $v-border-radius $v-border-radius 0 !important;
+  }
+
+  /* ── Menu bar ────────────────────────────────── */
+  .cuba-menubar {
+    background: $ht-black !important;
+  }
+  .cuba-menubar .v-menubar-menuitem {
+    color: rgba($ht-white, 0.8) !important;
+    padding: 6px 14px !important;
+  }
+  .cuba-menubar .v-menubar-menuitem:hover {
+    color: $ht-white !important;
+    background: rgba($ht-white, 0.08) !important;
+  }
+
+  /* ── Popup / context menu ────────────────────── */
+  .v-popup-dialog, .v-window {
+    border-radius: $v-border-radius !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12) !important;
+  }
+  .v-window-closebox {
+    color: $ht-muted !important;
+    transition: color 120ms ease;
+  }
+  .v-window-closebox:hover {
+    color: $ht-red !important;
+  }
+
+  /* ── Links ───────────────────────────────────── */
+  .v-link a, .v-button-link {
+    color: $ht-red !important;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .v-link a:hover, .v-button-link:hover {
+    color: darken($ht-red, 10%) !important;
+    text-decoration: underline;
+  }
+
+  /* ── Notifications ───────────────────────────── */
+  .v-Notification {
+    border-radius: $v-border-radius !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+  }
+
+
+  /* Custom Oval Image Widget Styles */
+  .v-image.ht-oval-image,
+  .ht-oval-image {
+    border-radius: 50% !important;
+    overflow: hidden !important;
+    display: inline-block;
+
+    img, .v-image-element {
+      border-radius: 50% !important;
+      object-fit: cover !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+  }
+
+}

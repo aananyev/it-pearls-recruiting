@@ -2,6 +2,7 @@ package com.company.hunttech.core.telegrambot;
 
 import com.company.hunttech.core.telegrambot.telegram.Bot;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.generics.BotSession;
 
 import java.io.Serializable;
 
@@ -9,6 +10,7 @@ public class TelegramBotStatus implements Serializable {
     private static TelegramBotsApi botsApi = null;
     private static Boolean botStarted = false;
     private static Bot bot = null;
+    private static BotSession botSession = null;
     private final static String defaultBotToken = "6433663497:AAGvl9NRSddfNC78PQ0JUzXywWIuO5EsCd8";
     private final static String defaultBotName = "HuntTechTestBot";
 
@@ -42,5 +44,13 @@ public class TelegramBotStatus implements Serializable {
 
     public static void setBot(Bot bot) {
         TelegramBotStatus.bot = bot;
+    }
+
+    public static BotSession getBotSession() {
+        return TelegramBotStatus.botSession;
+    }
+
+    public static void setBotSession(BotSession botSession) {
+        TelegramBotStatus.botSession = botSession;
     }
 }

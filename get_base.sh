@@ -25,12 +25,14 @@ export PGSSLMODE="${PGSSLMODE:-disable}"
 CWD=$(pwd)
 current_catalog="$CWD"
 postgre_temp_database="${current_catalog}/postgre_tmp_database"
-old_archive="${current_catalog}/../hunttech-basebackup-old.tgz"
-new_archive="${current_catalog}/../hunttech-basebackup.tgz"
+ARCHIVE_DIR="${current_catalog}/.."
 BACKUPBASELOG=backupbase.log
 LOG="${CWD}/${BACKUPBASELOG}"
 db_server=hr.hunttech.ru
 db_user=replica
+REMOTE_FILE_STORAGE_DIR="${REMOTE_FILE_STORAGE_DIR:-/opt/app_home/fileStorage}"
+LOCAL_FILE_STORAGE_DIR="${LOCAL_FILE_STORAGE_DIR:-${current_catalog}/fileStorage}"
+LOCAL_APP_PROPERTIES="${LOCAL_APP_PROPERTIES:-${current_catalog}/local.app.properties}"
 
 PG_BASEBACKUP="$PG11_BIN/pg_basebackup"
 PG_CTL="$PG11_BIN/pg_ctl"
@@ -154,6 +156,11 @@ preflight_checks() {
         fi
     done
 
+    if ! command -v rsync >/dev/null 2>&1; then
+        fail "Не найден rsync — он нужен для копирования fileStorage."
+        missing=1
+    fi
+
     if [ ! -f "$HOME/.pgpass" ]; then
         fail "Не найден ~/.pgpass — добавьте строку для пользователя replica:"
         info "  hr.hunttech.ru:5432:*:replica:<пароль>"
@@ -166,6 +173,7 @@ preflight_checks() {
 
     info "Проверка клиента: $("$PG_BASEBACKUP" --version)"
     info "Режим SSL: PGSSLMODE=$PGSSLMODE"
+    info "Локальный fileStorage: $LOCAL_FILE_STORAGE_DIR"
 
     info_n "Проверка соединения с $db_server ... "
     if ! "$PSQL" -h "$db_server" -U "$db_user" -d postgres -tAc "SELECT version();" >>"$LOG" 2>&1; then
@@ -257,7 +265,7 @@ prepare_temp_directory() {
 
     if is_complete_pgdata "$postgre_temp_database"; then
         info "Временный каталог уже содержит полный base backup."
-        read -r -p "Использовать его без повторной загрузки? [y/N]: " reuse
+        read -r -p "Использовать его без повторной загрузки? [y/N]: " reuse || true
         if [[ "$reuse" =~ ^[YyДд]$ ]]; then
             SKIP_DOWNLOAD=1
             ok
@@ -280,6 +288,45 @@ prepare_temp_directory() {
     ok
 }
 
+# Форматирование прогресса pg_basebackup в [====> ] с таймером и ETA.
+format_pg_progress() {
+    local bar_width=40
+    local pct total current filled elapsed eta i
+    local bar=""
+    local last_pct=-1
+    local start_sec=$SECONDS
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^[[:space:]]*([0-9]+)/([0-9]+)[[:space:]]*kB[[:space:]]*\(([0-9]+)%\) ]]; then
+            current="${BASH_REMATCH[1]}"
+            total="${BASH_REMATCH[2]}"
+            pct="${BASH_REMATCH[3]}"
+            elapsed=$(( SECONDS - start_sec ))
+            eta=0
+            if [ "$pct" -gt 0 ] && [ "$pct" -lt 100 ]; then
+                eta=$(( elapsed * 100 / pct - elapsed ))
+            fi
+            filled=$(( pct * bar_width / 100 ))
+            bar="["
+            for ((i=0; i<bar_width; i++)); do
+                if   [ "$i" -lt "$filled" ]; then bar+="="
+                elif [ "$i" -eq "$filled" ] && [ "$pct" -lt 100 ]; then bar+=">"
+                else bar+=" "; fi
+            done
+            bar+="]"
+            printf "\r%s %3d%% | %s/%s kB | прошло: %02d:%02d | ETA: %02d:%02d" \
+                "$bar" "$pct" "$current" "$total" \
+                $((elapsed/60)) $((elapsed%60)) \
+                $((eta/60)) $((eta%60))
+            last_pct=$pct
+        else
+            [ "$last_pct" -ge 0 ] && printf "\n"
+            echo "$line"
+            last_pct=-1
+        fi
+    done
+    [ "$last_pct" -ge 0 ] && printf "\n"
+}
+
 download_basebackup() {
     info_n "Переход во временный каталог $postgre_temp_database ... "
     cd "$postgre_temp_database"
@@ -293,10 +340,11 @@ download_basebackup() {
     log_remote_replication_settings
 
     info "Загрузка base backup с $db_server (pg_basebackup, --wal-method=fetch) ..."
-    info "Лог: $LOG"
+    echo -e "${WHITE}Прогресс:${NC}"
 
     # fetch вместо stream (-X stream): стабильнее через сеть, без долгого WAL-streaming
-    if ! "$PG_BASEBACKUP" \
+    set +e
+    "$PG_BASEBACKUP" \
         -P \
         -h "$db_server" \
         -D . \
@@ -304,7 +352,10 @@ download_basebackup() {
         --wal-method=fetch \
         --checkpoint=fast \
         --no-slot \
-        >>"$LOG" 2>&1; then
+        2>&1 | tee -a "$LOG" | format_pg_progress
+    RC=${PIPESTATUS[0]}
+    set -e
+    if [ "$RC" -ne 0 ]; then
         die "Не удалось загрузить base backup с $db_server (подробности в $LOG)."
     fi
 
@@ -347,24 +398,54 @@ install_to_local_pgdata() {
     ok
 
     info_n "Остановка локальной PostgreSQL ... "
-    local stop_rc=0
-    if ! "$PG_CTL" stop -D . -m fast >>"$LOG" 2>&1; then
-        stop_rc=1
+
+    # Останавливаем launchd-сервис (если есть), иначе launchd перезапускает postgres
+    local launchd_service=""
+    if launchctl list 2>/dev/null | grep -qi "postgres"; then
+        launchd_service=$(launchctl list 2>/dev/null | grep -i "postgres" | head -1 | awk '{print $3}')
+        if [ -n "$launchd_service" ]; then
+            info "сервис $launchd_service → bootout..."
+            launchctl bootout "gui/$(id -u)/${launchd_service}" 2>>"$LOG" || true
+            sleep 1
+        fi
     fi
 
-    if is_postgres_running_on_pgdata; then
-        if [ "$stop_rc" -ne 0 ]; then
-            die "Не удалось остановить PostgreSQL в $PGDATA — очистка каталога отменена."
-        fi
-        sleep 2
-        if is_postgres_running_on_pgdata; then
-            die "PostgreSQL всё ещё работает в $PGDATA — очистка каталога отменена."
-        fi
-    elif [ "$stop_rc" -ne 0 ]; then
-        info "не запущена (продолжаем)"
-    else
-        ok
+    # Читаем PID процесса из postmaster.pid (если файл существует)
+    local old_pid=""
+    if [ -f "postmaster.pid" ]; then
+        old_pid=$(head -1 "postmaster.pid" 2>/dev/null || true)
     fi
+
+    # Штатная остановка через pg_ctl (может не быть запущенного сервера — не ошибка)
+    "$PG_CTL" stop -D . -m fast >>"$LOG" 2>&1 || true
+    sleep 1
+
+    # pg_ctl stop не всегда убивает процесс (баг libpq на macOS) —
+    # проверяем напрямую через PID из postmaster.pid
+    if [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null; then
+        info "жив (PID $old_pid) → immediate shutdown..."
+        "$PG_CTL" stop -D . -m immediate >>"$LOG" 2>&1 || true
+        sleep 1
+    fi
+
+    if [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null; then
+        info "не реагирует → SIGKILL (PID $old_pid)..."
+        kill -9 "$old_pid" 2>/dev/null || true
+        sleep 1
+    fi
+
+    # Добиваем любые оставшиеся postgres-процессы с этим PGDATA
+    local stray_pids
+    stray_pids=$(ps auxww 2>/dev/null | grep "[p]ostgres.*-D.*${PGDATA}" | awk '{print $2}' || true)
+    if [ -n "$stray_pids" ]; then
+        info "добиваем stray: $stray_pids"
+        for p in $stray_pids; do
+            kill -9 "$p" 2>/dev/null || true
+        done
+        sleep 1
+    fi
+
+    ok
 
     local pg_port
     pg_port=$(get_pgdata_port)
@@ -378,9 +459,9 @@ install_to_local_pgdata() {
 
     info "Копирование backup из $postgre_temp_database в $PGDATA ..."
     if command -v pv >/dev/null 2>&1; then
-        file_count=$(find "$postgre_temp_database" -type f 2>/dev/null | wc -l | tr -d ' ')
+        copy_size=$(($(du -sk "$postgre_temp_database" 2>/dev/null | cut -f1) * 1024))
         if ! tar -cf - -C "$postgre_temp_database" . 2>>"$LOG" \
-            | pv -l -s "$file_count" 2>>"$LOG" \
+            | pv -p --timer --rate --bytes -s "${copy_size:-0}" \
             | tar -xf - -C "$PGDATA" 2>>"$LOG"; then
             die "Не удалось скопировать backup в $PGDATA (см. $LOG)."
         fi
@@ -402,6 +483,71 @@ install_to_local_pgdata() {
     ok
 }
 
+# Архивация свежего backup после установки в PGDATA (перед запуском PostgreSQL).
+archive_fresh_backup() {
+    validate_pgdata_path
+    cd "$PGDATA"
+
+    local date_stamp
+    date_stamp=$(date +%Y-%m-%d)
+    local archive_name="${date_stamp} HUNTTECH DataBase.tgz"
+    local archive_path="${ARCHIVE_DIR}/${archive_name}"
+
+    if [ -f "$archive_path" ]; then
+        info "Архив ${archive_name} уже существует — пропуск."
+        return
+    fi
+
+    info "Архивация свежей базы: ${archive_name} ..."
+    if command -v pv >/dev/null 2>&1; then
+        local arch_size
+        arch_size=$(($(du -sk . 2>/dev/null | cut -f1) * 1024))
+        if ! tar -cf - . 2>>"$LOG" \
+            | pv -p --timer --rate --bytes -s "${arch_size:-0}" \
+            | gzip -c >"$archive_path"; then
+            die "Не удалось создать архив $archive_path (см. $LOG)."
+        fi
+    else
+        if ! tar -czf "$archive_path" . >>"$LOG" 2>&1; then
+            die "Не удалось создать архив $archive_path (см. $LOG)."
+        fi
+    fi
+    if [ ! -s "$archive_path" ]; then
+        die "Архив $archive_path пуст или не создан."
+    fi
+    ok
+
+    # Ротация: оставить 3 последних архива
+    local archives=()
+    while IFS= read -r a; do
+        archives+=("$a")
+    done < <(find "$ARCHIVE_DIR" -maxdepth 1 -name '????-??-?? HUNTTECH DataBase.tgz' 2>/dev/null | sort -r)
+
+    local count=${#archives[@]}
+    if [ "$count" -le 3 ]; then
+        return
+    fi
+
+    info "Найдено архивов: $count (храним 3 последних)"
+    local to_delete=("${archives[@]:3}")
+
+    echo -e "${RED}Следующие старые архивы (${#to_delete[@]} шт.) могут быть удалены:${NC}"
+    for a in "${to_delete[@]}"; do
+        echo "  - $(basename "$a")"
+    done
+
+    read -r -p "Удалить эти старые архивы? [y/N]: " cleanup_old || true
+    if [[ "$cleanup_old" =~ ^[YyДд]$ ]]; then
+        for a in "${to_delete[@]}"; do
+            rm -f "$a"
+            info "  Удалён: $(basename "$a")"
+        done
+        ok
+    else
+        info "Старые архивы сохранены."
+    fi
+}
+
 archive_and_start() {
     validate_pgdata_path
     cd "$PGDATA"
@@ -412,27 +558,6 @@ archive_and_start() {
     if ! is_complete_pgdata "$PGDATA"; then
         die "В $PGDATA неполный кластер (нет PG_VERSION/base) — запуск PostgreSQL отменён."
     fi
-
-    info "Архивация прежней копии данных ..."
-    rm -f "$old_archive" 2>>"$LOG" || true
-    if [ -f "$new_archive" ]; then
-        mv "$new_archive" "$old_archive"
-    fi
-
-    # BSD tar (macOS): tar -czf — корректные флаги -c/-z/-f; сжатие через gzip при потоке в pv
-    if command -v pv >/dev/null 2>&1; then
-        if ! tar -cf - . 2>>"$LOG" | pv -p --timer --rate --bytes 2>>"$LOG" | gzip -c >"$new_archive"; then
-            die "Не удалось создать архив $new_archive (см. $LOG)."
-        fi
-    else
-        if ! tar -czf "$new_archive" . >>"$LOG" 2>&1; then
-            die "Не удалось создать архив $new_archive (см. $LOG)."
-        fi
-    fi
-    if [ ! -s "$new_archive" ]; then
-        die "Архив $new_archive пуст или не создан."
-    fi
-    ok
 
     info_n "Запуск PostgreSQL ... "
     if ! "$PG_CTL" start -D . >>"$LOG" 2>&1; then
@@ -454,12 +579,64 @@ archive_and_start() {
 }
 
 sync_file_storage() {
+    prepare_local_file_storage
+
     info "Копирование fileStorage с сервера (rsync) ..."
+    info "  source: root@${db_server}:${REMOTE_FILE_STORAGE_DIR}/"
+    info "  target: ${LOCAL_FILE_STORAGE_DIR}/"
     if ! rsync -avrltD --stats --ignore-existing \
-        "root@${db_server}:/opt/app_home/fileStorage" /opt/app_home/ >>"$LOG" 2>&1; then
+        "root@${db_server}:${REMOTE_FILE_STORAGE_DIR}/" "${LOCAL_FILE_STORAGE_DIR}/" >>"$LOG" 2>&1; then
         die "Не удалось скопировать fileStorage (нужен SSH-доступ root@${db_server})."
     fi
+
+    configure_local_file_storage
+    validate_local_file_storage
     ok
+}
+
+prepare_local_file_storage() {
+    if [ -L "$LOCAL_FILE_STORAGE_DIR" ] && [ ! -e "$LOCAL_FILE_STORAGE_DIR" ]; then
+        info "Удаление битой ссылки fileStorage: $LOCAL_FILE_STORAGE_DIR"
+        rm -f "$LOCAL_FILE_STORAGE_DIR"
+    fi
+
+    if [ -e "$LOCAL_FILE_STORAGE_DIR" ] && [ ! -d "$LOCAL_FILE_STORAGE_DIR" ]; then
+        die "LOCAL_FILE_STORAGE_DIR существует, но это не каталог: $LOCAL_FILE_STORAGE_DIR"
+    fi
+
+    mkdir -p "$LOCAL_FILE_STORAGE_DIR"
+    mkdir -p "$LOCAL_FILE_STORAGE_DIR/temp"
+}
+
+set_local_property() {
+    local key="$1"
+    local value="$2"
+
+    touch "$LOCAL_APP_PROPERTIES"
+    if grep -qE "^${key}=" "$LOCAL_APP_PROPERTIES"; then
+        sed -i.bak -E "s|^${key}=.*|${key}=${value}|" "$LOCAL_APP_PROPERTIES"
+        rm -f "${LOCAL_APP_PROPERTIES}.bak"
+    else
+        printf '%s=%s\n' "$key" "$value" >>"$LOCAL_APP_PROPERTIES"
+    fi
+}
+
+configure_local_file_storage() {
+    info "Обновление локальной CUBA-конфигурации fileStorage: $LOCAL_APP_PROPERTIES"
+    if [ ! -s "$LOCAL_APP_PROPERTIES" ]; then
+        printf '%s\n' '# Local CUBA overrides for Gradle/Tomcat startup.' >"$LOCAL_APP_PROPERTIES"
+    fi
+    set_local_property "cuba.fileStorageDir" "$LOCAL_FILE_STORAGE_DIR"
+    set_local_property "cuba.tempDir" "$LOCAL_FILE_STORAGE_DIR/temp"
+}
+
+validate_local_file_storage() {
+    local file_count
+    file_count=$(find "$LOCAL_FILE_STORAGE_DIR" -type f | wc -l | tr -d ' ')
+    if [ "$file_count" -eq 0 ]; then
+        die "После rsync локальный fileStorage пуст: $LOCAL_FILE_STORAGE_DIR"
+    fi
+    info "Локальный fileStorage готов: $LOCAL_FILE_STORAGE_DIR ($file_count файлов)"
 }
 
 # --- main ---
@@ -472,8 +649,11 @@ preflight_checks
 prepare_temp_directory
 download_basebackup
 install_to_local_pgdata
+archive_fresh_backup
 archive_and_start
 sync_file_storage
 
 info "${GREEN}Готово. Локальная PostgreSQL: $PGDATA${NC}"
+info "Локальный fileStorage: $LOCAL_FILE_STORAGE_DIR"
+info "CUBA overrides: $LOCAL_APP_PROPERTIES"
 info "Проверка: ./start-postgres11.sh status"

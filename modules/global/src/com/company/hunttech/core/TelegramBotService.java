@@ -15,5 +15,9 @@ public interface TelegramBotService {
 
     Boolean isBotStarted();
 
-    void telegramBotRestart();
+    String telegramBotStart();
+
+    String telegramBotRestart();
+
+    String telegramBotStop();
 }

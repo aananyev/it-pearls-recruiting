@@ -1,0 +1,9 @@
+README.md
+pyproject.toml
+src/deepseek_r1/main.py
+src/deepseek_r1/r1.py
+src/deepseek_r1.egg-info/PKG-INFO
+src/deepseek_r1.egg-info/SOURCES.txt
+src/deepseek_r1.egg-info/dependency_links.txt
+src/deepseek_r1.egg-info/requires.txt
+src/deepseek_r1.egg-info/top_level.txt

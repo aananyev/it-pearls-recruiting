@@ -1,25 +1,13 @@
-/**
- * Hunttech-Modern-Dark (тёмная тема) — точка входа SCSS.
- *
- * CUBA Gradle Plugin находит этот файл по имени директории темы.
- * HuntTech Modern Dark наследует halo и поверх него применяет тёмные переменные.
- */
-@import "com.company.hunttech/hunttech-modern-dark-ext-defaults";
-@import "../halo/halo";
+@import "hunttech-modern-dark-defaults";
+@import "com.company.hunttech/hunttech-modern-dark-defaults";
 @import "app-components";
 @import "com.company.hunttech/hunttech-modern-dark-ext";
-
-/* Google Fonts: Inter для современного UI */
+@import "com.company.hunttech/chat-style.css";
+@import "com.company.hunttech/job-candidate-editor.scss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* ─── Корневой селектор темы (обязателен для CUBA) ─── */
 .hunttech-modern-dark {
-    // HuntTech Modern Dark наследует полный набор визуальных правил темы halo.
-    @include halo;
-
-    // include auto-generated app components SCSS
-    @include app_components;
-
-    // HuntTech Modern Dark добавляет тёмные стили таблиц и полей ввода.
-    @include com_company_hunttech-hunttech-modern-dark-ext;
+  @include app_components;
+  @include com_company_hunttech-hunttech-modern-dark-ext;
+  @include job-candidate-editor-theme;
 }

@@ -1,0 +1,30 @@
+/* hunttech-modern extends Halo — override defaults below */
+/* Platform will provide the base halo defaults automatically */
+$ht-red: #c1211f;
+$ht-black: #000000;
+$ht-dark: #333333;
+$ht-gray: #f5f5f5;
+$ht-white: #ffffff;
+$ht-muted: rgba(0,0,0,0.6);
+$ht-border-subtle: rgba(0,0,0,0.1);
+$ht-shadow: rgba(0,0,0,0.08);
+
+$cuba-menubar-background-color: $ht-black;
+$cuba-menubar-border-color: $ht-black;
+$cuba-menubar-menuitem-text-color: $ht-white;
+$cuba-menubar-text-color: $ht-white;
+$v-app-background-color: $ht-gray;
+$v-background-color: $ht-white;
+$v-panel-background-color: $ht-white;
+$v-font-color: $ht-dark;
+$v-font-size: 14px;
+$v-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$v-unit-size: 32px;
+$v-border-radius: 6px;
+$v-border: 1px solid $ht-border-subtle;
+$v-selection-color: $ht-red;
+$v-selection-item-selection-color: $ht-red;
+$v-table-row-height: 36px;
+$v-table-header-font-size: 12px;
+$v-textfield-border: 1px solid $ht-border-subtle;
+$v-textfield-border-radius: 6px;

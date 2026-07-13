@@ -1,0 +1,32 @@
+/* hunttech-modern-light defaults — светлая тема с акцентом hunttech.ru */
+
+$ht-red: #c1211f;
+$ht-black: #000000;
+$ht-dark: #333333;
+$ht-gray: #f5f5f5;
+$ht-white: #ffffff;
+$ht-muted: rgba(0,0,0,0.6);
+$ht-border-subtle: rgba(0,0,0,0.1);
+$ht-shadow: rgba(0,0,0,0.08);
+
+/* CUBA theme variable overrides */
+$cuba-menubar-background-color: $ht-black;
+$cuba-menubar-border-color: $ht-black;
+$cuba-menubar-menuitem-text-color: $ht-white;
+$cuba-menubar-text-color: $ht-white;
+
+$v-app-background-color: #f7f8fa;
+$v-background-color: $ht-white;
+$v-panel-background-color: $ht-white;
+$v-font-color: $ht-dark;
+$v-font-size: 13px;
+$v-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$v-unit-size: 30px;
+$v-border-radius: 6px;
+$v-border: 1px solid $ht-border-subtle;
+$v-selection-color: $ht-red;
+$v-selection-item-selection-color: $ht-red;
+$v-table-row-height: 34px;
+$v-table-header-font-size: 11px;
+$v-textfield-border: 1px solid $ht-border-subtle;
+$v-textfield-border-radius: 6px;

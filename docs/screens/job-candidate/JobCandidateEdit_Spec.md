@@ -43,13 +43,13 @@
 
 ### Главный instance `jobCandidateDc`
 
-View `extends="_local"` с коллекциями `fetch="BATCH"`:
+View `extends="_local"` с коллекциями `fetch="BATCH"` и `view="_minimal"`:
 
 | property | fetch | view / nested | Назначение в Java |
 |----------|-------|---------------|-------------------|
-| `candidateCv` | BATCH | `_local` + `candidate`, `resumePosition`, `toVacancy` (grade, positionType, `projectName`→logo/description), `someFiles`, `fileImageFace` | Вкладка резюме; `scanContactsFromCVs`, `checkSkillFromJD`, project logo generators |
-| `iteractionList` | BATCH | `_local`; `vacancy` → `openPosition-iteraction-list-picker-view`; `iteractionType` → `iteraction-list-type-view`; `recrutier` → `extUser-picker-view` | Грид взаимодействий, фильтр, suggest-иконки, lastProject generators |
-| `socialNetwork` | BATCH | `_local` + `socialNetworkURL.logo`, `comment` | Таблица соцсетей, `enableDisableContacts` |
+| `candidateCv` | BATCH | `_minimal` (полная загрузка — `ensureCandidateCvLoaded()` на вкладке резюме) | Вкладка резюме; `scanContactsFromCVs`, `checkSkillFromJD`, project logo generators |
+| `iteractionList` | BATCH | `_minimal` (полная загрузка — `ensureInteractionsLoaded()` при активации вкладки или генераторе `lastInteractionGeneratorColumn`) | Грид взаимодействий, фильтр, suggest-иконки, lastProject generators |
+| `socialNetwork` | BATCH | `_minimal` (полная загрузка — `ensureSocialNetworksLoaded()` на вкладке контактов) | Таблица соцсетей, `enableDisableContacts` |
 | `positionList` | BATCH | `_local` → `positionList` `_local` | `addPositionList`, `suggestOpenPositionDl` |
 | `cityOfResidence`, `currentCompany` (+ `companyGroup`), `fileImageFace`, `personPosition` | LAZY | `_local` | Карточка, вкладка кандидата |
 
@@ -59,9 +59,9 @@ View `extends="_local"` с коллекциями `fetch="BATCH"`:
 
 | Контейнер | View | JPQL / назначение | Когда грузится |
 |-----------|------|-------------------|----------------|
-| `lastProjectDc` | KeyValue: `vacancy`, `max(dateIteraction)` | group by vacancy, exclude `Default`, `:candidate` | `onBeforeShow` → `setLastProjectTable()` |
+| `lastProjectDc` | KeyValue: `vacancyId`, `maxDate` | group by vacancy.id, exclude `Default`, `:candidateId` | **Вкладка `tabPositions`** (`BackgroundTask.run()`) |
 | `openPositionDc` | `openPosition-picker-view` | открытые вакансии | первое открытие `commentsTab` (`ensureOpenPositionLoaded`) |
-| `suggestOpenPositionDc` | `_local` | открытые + `:positionType` / `:positionTypes` | `onBeforeShow` → `setSuggestOpenPositionTable()` |
+| `suggestOpenPositionDc` | `openPosition-picker-view` | открытые + `positionType.id` / `positionType.id IN` | **Вкладка `tabPositions`** (`BackgroundTask.run()`) |
 | `personPositionsDc` | `position-view` | без «(не использовать)» | первое открытие `tabCandidate` |
 | `currentCompaniesDc` | `company-picker-view` | все Company | первое открытие `tabCandidate` |
 | `citiesDc` | `city-picker-view` | все City | первое открытие `tabCandidate` |
@@ -272,7 +272,8 @@ layout (expand=tabSheetSocialNetworks)
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-06-30 | fix: удалены `laborAgreement` из view и `jobCandidateLaborAgreementDc` — устранён QueryException (loader `laborAgreement` без параметра ID при `@LoadDataBeforeShow`) |
+| 2026-07-13 | **TODO[tabPositions]:** Вкладка «Позиции и вакансии» отключена (visible=false). Java-методы закомментированы. Для восстановления: убрать visible=false в XML, раскомментировать методы в JobCandidateEdit.java |
+| 2026-06-30 | fix: удалены `laborAgreement` из view и `jobCandidateLaborAgreementDc` |
 | 2026-06-29 | Оптимизация скорости открытия вкладки tabCandidate, ленивая инициализация SuggestionFields, устранение блокирующих BackgroundTask |
 | 2026-06-29 | fix: убран промежуточный `dataContext.commit()` для NEW в `addPositionList`, `reloadCV`, `reloadInteractions`; флаг `initialInteractionAdded` |
 | 2026-06-26 | Полный разбор `JobCandidateEdit.java`: @Subscribe lifecycle, inject, validation, deferred loaders, соцсети, block/subscribe, generators, dialogs, Data View Integrity для `iteractionList.vacancy` BATCH |

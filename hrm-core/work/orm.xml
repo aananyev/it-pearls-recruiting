@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<entity-mappings xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm http://xmlns.jcp.org/xml/ns/persistence/orm_2_1.xsd" version="2.1">
+  <entity class="com.haulmont.cuba.core.entity.EntitySnapshot" name="sys$EntitySnapshot">
+    <attributes>
+      <many-to-one name="author" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="AUTHOR_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.cuba.security.entity.UserRole" name="sec$UserRole">
+    <attributes>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.cuba.security.entity.UserSetting" name="sec$UserSetting">
+    <attributes>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.cuba.security.entity.UserSubstitution" name="sec$UserSubstitution">
+    <attributes>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+      <many-to-one name="substitutedUser" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="SUBSTITUTED_USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.cuba.security.entity.EntityLogItem" name="sec$EntityLog">
+    <attributes>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.cuba.security.entity.FilterEntity" name="sec$Filter">
+    <attributes>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.cuba.security.entity.SearchFolder" name="sec$SearchFolder">
+    <attributes>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.cuba.security.entity.Presentation" name="sec$Presentation">
+    <attributes>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.cuba.security.entity.ScreenHistoryEntity" name="sec$ScreenHistory">
+    <attributes>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+      <many-to-one name="substitutedUser" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="SUBSTITUTED_USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.cuba.security.entity.SessionLogEntry" name="sec$SessionLogEntry">
+    <attributes>
+      <many-to-one name="substitutedUser" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="SUBSTITUTED_USER_ID"/>
+      </many-to-one>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.cuba.security.entity.RememberMeToken" name="sec$RememberMeToken">
+    <attributes>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.reports.entity.ReportExecution" name="report$ReportExecution">
+    <attributes>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.bpm.entity.ProcInstance" name="bpm$ProcInstance">
+    <attributes>
+      <many-to-one name="startedBy" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="STARTED_BY_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.bpm.entity.ProcActor" name="bpm$ProcActor">
+    <attributes>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.bpm.entity.ProcTask" name="bpm$ProcTask">
+    <attributes>
+      <many-to-many name="candidateUsers" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-table name="BPM_PROC_TASK_USER_LINK">
+          <join-column name="PROC_TASK_ID"/>
+          <inverse-join-column name="USER_ID"/>
+        </join-table>
+      </many-to-many>
+    </attributes>
+  </entity>
+  <entity class="com.haulmont.bpm.entity.ProcAttachment" name="bpm$ProcAttachment">
+    <attributes>
+      <many-to-one name="author" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="AUTHOR_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.company.hunttech.entity.RecruitingRecrutiers" name="hunttech_RecruitingRecrutiers">
+    <attributes>
+      <many-to-one name="recrutierName" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="RECRUTIER_NAME_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.company.hunttech.entity.Interview" name="hunttech_Interview">
+    <attributes>
+      <many-to-one name="recrutier" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="RECRUTIER_ID"/>
+      </many-to-one>
+      <many-to-one name="researcher" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="RESEARCHER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.company.hunttech.entity.InternalEmailTemplate" name="hunttech_InternalEmailTemplate">
+    <attributes>
+      <many-to-one name="templateAuthor" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="TEMPLATE_AUTHOR_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+  <entity class="com.company.hunttech.entity.UserAiConfiguration" name="hunttech_UserAiConfiguration">
+    <attributes>
+      <many-to-one name="user" target-entity="com.company.hunttech.entity.ExtUser" fetch="LAZY">
+        <join-column name="USER_ID"/>
+      </many-to-one>
+    </attributes>
+  </entity>
+</entity-mappings>

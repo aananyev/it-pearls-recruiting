@@ -5,6 +5,7 @@ import com.company.hunttech.core.PdfParserService;
 import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.SkillTree;
 import com.company.hunttech.web.StandartPrioritySkills;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.DataGrid;
 import com.haulmont.cuba.gui.components.FlowBoxLayout;
@@ -18,6 +19,7 @@ import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -43,6 +45,113 @@ public class Skillsbar extends ScreenFragment {
     @Inject
     private GroupBoxLayout skillFlowGroupBox;
 
+    @Inject
+    private DataManager dataManager;
+
+    /**
+     * Parse a CV text and return a list of skill data — safe to call
+     * from a background thread (no UI access).
+     */
+    public List<SkillLabelData> analyzeSkills(String cvText) {
+        if (cvText == null) {
+            return Collections.emptyList();
+        }
+        String plainText = Jsoup.parse(cvText).text();
+        List<SkillTree> skillTrees = pdfParserService.parseSkillTree(plainText);
+        HashMap<SkillTree, Integer> skillCounter = new HashMap<>();
+
+        for (SkillTree skillTree : skillTrees) {
+            skillCounter.put(skillTree, parseCVService.countMachesSkill(plainText, skillTree));
+        }
+
+        // Deduplicate
+        for (int i = 0; i < skillTrees.size(); i++) {
+            if (!skillTrees.get(i).getNotParsing()) {
+                for (int j = i + 1; j < skillTrees.size(); j++) {
+                    if (skillTrees.get(i).getSkillName().equalsIgnoreCase(
+                            skillTrees.get(j).getSkillName())) {
+                        skillTrees.remove(j);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (skillTrees.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<SkillLabelData> result = new ArrayList<>();
+
+        for (int i = StandartPrioritySkills.PROGRAMMING_LANGUAGE_INT;
+             i >= StandartPrioritySkills.DEFAULT_INT; i--) {
+            for (SkillTree st : skillTrees) {
+                if (!st.getNotParsing() && st.getPrioritySkill() != null
+                        && st.getPrioritySkill().equals(i)) {
+                    Integer count = skillCounter.get(st);
+                    if (count != null && count > 0) {
+                        boolean isKey = count >= 2;
+                        result.add(new SkillLabelData(
+                                st.getSkillName(),
+                                count,
+                                getStyleForSkillPriority(st),
+                                st.getComment(),
+                                isKey
+                        ));
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Render skill labels from previously computed data into the fragment's
+     * UI containers.  Must be called on the UI thread.
+     *
+     * @return true if any skills were rendered
+     */
+    public boolean renderSkillLabels(List<SkillLabelData> skills) {
+        if (skills == null || skills.isEmpty()) {
+            skillsGroupBox.setVisible(false);
+            skillFlowGroupBox.setVisible(false);
+            keySkillsFlowGroupBox.setVisible(false);
+            return false;
+        }
+
+        int counterOfPub = 0;
+        int counterKeyOfPub = 0;
+
+        for (SkillLabelData data : skills) {
+            Label labelSkill = uiComponents.create(Label.NAME);
+            labelSkill.setHtmlEnabled(true);
+            labelSkill.setDescriptionAsHtml(true);
+
+            if (data.isKeySkill) {
+                labelSkill.setValue("<b>" + data.skillName + " (" + data.counter + ")</b>");
+                labelSkill.setStyleName(data.styleName);
+                labelSkill.setDescription(data.description);
+                counterKeyOfPub++;
+                keySkillsFlowBox.add(labelSkill);
+            } else {
+                labelSkill.setValue(data.skillName + " (" + data.counter + ")");
+                labelSkill.setStyleName(data.styleName);
+                labelSkill.setDescription(data.description);
+                counterOfPub++;
+                skillsFlowBox.add(labelSkill);
+            }
+        }
+
+        skillsFlowBox.setVisible(counterOfPub > 0);
+        keySkillsFlowBox.setVisible(counterKeyOfPub > 0);
+        skillsGroupBox.setVisible(counterOfPub > 0 || counterKeyOfPub > 0);
+        skillFlowGroupBox.setVisible(counterOfPub > 0);
+        keySkillsFlowGroupBox.setVisible(counterKeyOfPub > 0);
+
+        return counterOfPub > 0 || counterKeyOfPub > 0;
+    }
+
     public void setSkillText(String skillText) {
         if (skillText != null) {
             this.skillText = Jsoup.parse(skillText).text();
@@ -62,119 +171,16 @@ public class Skillsbar extends ScreenFragment {
     }
 
     public Boolean generateSkillLabels(String skillText) {
-        if (skillText != null) {
-            this.skillText = Jsoup.parse(skillText).text();
-
-            return generateSkillLabels();
-        } else {
+        if (skillText == null) {
             return false;
         }
+        this.skillText = Jsoup.parse(skillText).text();
+        List<SkillLabelData> skills = analyzeSkills(skillText);
+        return renderSkillLabels(skills);
     }
 
     public void setCaption(String textCaption) {
         skillsGroupBox.setCaption(textCaption);
-    }
-
-    private Boolean generateSkillLabels() {
-        Integer counterOfPub = 0;
-        Integer counterKeyOfPub = 0;
-
-        if (skillText != null) {
-            List<SkillTree> skillTrees = pdfParserService.parseSkillTree(skillText);
-            HashMap<SkillTree, Integer> skillCounter = new HashMap<>();
-
-            for (SkillTree skillTree : skillTrees) {
-                skillCounter.put(skillTree, parseCVService.countMachesSkill(skillText, skillTree));
-            }
-
-            for (Integer i = 0; i < skillTrees.size(); i++) {
-                if (!skillTrees.get(i).getNotParsing()) {
-                    for (Integer j = i + 1; j < skillTrees.size(); j++) {
-                        if (skillTrees.get(i).getSkillName().toLowerCase().equals(
-                                skillTrees.get(j).getSkillName().toLowerCase())) {
-                            skillTrees.remove(skillTrees.get(j));
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (skillTrees.size() > 0) {
-                flagVisible = true;
-            } else {
-                flagVisible = false;
-            }
-
-            for (Integer i = StandartPrioritySkills.PROGRAMMING_LANGUAGE_INT;
-                 i >= StandartPrioritySkills.DEFAULT_INT; i--) {
-                for (SkillTree st : skillTrees) {
-                    if (!st.getNotParsing()) {
-                        if (st.getPrioritySkill() != null) {
-                            if (st.getPrioritySkill().equals(i)) {
-                                if (skillCounter.get(st) > 0) {
-                                    Label labelSkill = uiComponents.create(Label.NAME);
-                                    labelSkill.setHtmlEnabled(true);
-                                    labelSkill.setDescriptionAsHtml(true);
-                                    labelSkill.setDescriptionAsHtml(true);
-
-                                    if (skillCounter.get(st) < 2) {
-                                        String counter = new StringBuilder()
-                                                .append(st.getSkillName())
-                                                .append(" (")
-                                                .append(skillCounter.get(st))
-                                                .append(")")
-                                                .toString();
-
-                                        labelSkill.setValue(counter);
-                                        labelSkill.setStyleName(getStyleForSkillPriority(st));
-                                        labelSkill.setDescription(st.getComment());
-
-                                        counterOfPub++;
-                                        skillsFlowBox.add(labelSkill);
-                                    } else {
-                                        String counter = new StringBuilder()
-                                                .append("<b>")
-                                                .append(st.getSkillName())
-                                                .append(" (")
-                                                .append(skillCounter.get(st))
-                                                .append(")</b>").toString();
-
-                                        labelSkill.setValue(counter);
-                                        labelSkill.setStyleName(getStyleForSkillPriority(st));
-                                        labelSkill.setDescription(st.getComment());
-
-                                        counterKeyOfPub++;
-                                        keySkillsFlowBox.add(labelSkill);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (counterOfPub > 0) {
-                skillsFlowBox.setVisible(true);
-                skillsGroupBox.setVisible(true);
-                skillFlowGroupBox.setVisible(true);
-            }
-
-            if (counterKeyOfPub > 0) {
-                keySkillsFlowBox.setVisible(true);
-                keySkillsFlowGroupBox.setVisible(true);
-                skillsGroupBox.setVisible(true);
-            }
-
-            if (counterKeyOfPub == 0 && counterOfPub == 0) {
-                skillsGroupBox.setVisible(false);
-            } else {
-                skillsGroupBox.setVisible(true);
-            }
-
-            return true;
-        } else {
-            return false;
-        }
     }
 
     private String getStyleForSkillPriority(SkillTree st) {

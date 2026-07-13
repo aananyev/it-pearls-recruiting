@@ -42,6 +42,11 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
+                <!-- ОБНОВЛЕНИЕ: возвращена колонка меню действий, где доступен пункт запуска Telegram-бота. -->
+                <column id="applicationSetupActions"
+                        generator="applicationSetupActionsGenerator"
+                        caption=""
+                        width="50px"/>
                 <column id="activeSetup" caption="msg://msgActive" width="50px"/>
                 <column id="name"/>
                 <column id="applicationLogo" generator="applicationLogoGenerator"/>

@@ -23,6 +23,8 @@ sql/sql/HuntTech.sql
 .DS_Store
 *.log
 *.class
+/fileStorage
+/local.app.properties
 deployment/database-migration/backup/*
 !deployment/database-migration/backup/.gitignore
 !deployment/database-migration/backup/*.sh

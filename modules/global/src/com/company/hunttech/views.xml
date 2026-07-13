@@ -683,7 +683,9 @@
             <property name="personPosition" view="position-picker-view"/>
         </property>
         <property name="resumePosition" view="position-picker-view"/>
-        <property name="toVacancy" view="openPosition-picker-view"/>
+        <property name="toVacancy" view="openPosition-picker-view">
+            <property name="projectName" view="project-picker-view"/>
+        </property>
         <property name="owner" view="_minimal"/>
         <property name="originalFileCV" view="_minimal"/>
         <property name="fileCV" view="_minimal"/>
@@ -960,7 +962,12 @@
         <property name="candidate" view="_local">
             <property name="personPosition" view="_local"/>
         </property>
-        <property name="vacancy" view="_local">
+        <property name="vacancy" view="_minimal">
+            <property name="projectName" view="_local">
+                <property name="projectDescription"/>
+                <property name="projectLogo" view="_minimal"/>
+                <property name="projectDepartment" view="_minimal"/>
+            </property>
             <property name="positionType" view="_local"/>
         </property>
         <property name="iteractionType" view="iteraction-list-type-view"/>
@@ -1105,6 +1112,17 @@
                 </property>
             </property>
         </property>
+    </view>
+    <view entity="hunttech_OpenPosition" name="openPosition-edit-view" extends="_minimal">
+        <!-- Только поля, реально используемые в JobCandidateEdit.
+             Остальные поля (_local) не загружаются. -->
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+        <property name="priority"/>
+        <property name="lastOpenDate"/>
+        <property name="comment"/>
+        <property name="owner" view="_minimal"/>
+        <!-- projectName переопределяется inline в job-candidate-edit.xml -->
     </view>
     <view entity="hunttech_ItearctionRequirements" name="itearctionRequirements-view" extends="_local">
         <property name="iteraction" view="_local"/>

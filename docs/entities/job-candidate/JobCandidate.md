@@ -385,10 +385,59 @@ private Component jobCandidatesTableFileImageFaceColumnGenerator(...) {
 
 | Этап | Что происходит |
 |------|----------------|
-| Открытие | Рейтинг, % заполнения (14 полей), suggest-вакансии; кнопка блокировки — Manager/Admin |
-| Вкладки | Первый заход на `tabCandidate` → справочники + `SearchExecutor` на ФИО; первый заход на `commentsTab` → комментарии + вакансии; остальные вкладки — generators, scan CV |
+| Открытие | Рейтинг (через `loadAverageRating` — scalar AVG, без загрузки всех взаимодействий), % заполнения (14 полей); кнопка блокировки — Manager/Admin |
+| **После открытия** | `startSkillsBackgroundLoading()` — фоновая загрузка и анализ CV для навыков (см. §4.12) |
+| Вкладки | Первый заход на `tabCandidate` → справочники + `SearchExecutor` на ФИО; первый заход на `tabPositions` → `startPositionsBackgroundLoading()` — фоновая загрузка истории и рекомендаций (см. §4.13); остальные вкладки — generators, scan CV |
 | Сохранение | Дубликат ФИО+город+должность → диалог; новый → «Новый контакт» rating=4; нормализация telegram |
 | Блокировка | Toggle blockCandidate → disable грида взаимодействий (кроме Manager/Admin) |
+
+### 4.12 Фоновая загрузка навыков (Skillsbar)
+
+**Запуск:** `AfterShowEvent` → `startSkillsBackgroundLoading()`.
+
+Операция вынесена из синхронного `onBeforeShow()` в `BackgroundTask`, чтобы SQL-загрузка полного `textCV` и анализ навыков не блокировали открытие формы.
+
+**В `BackgroundTask.run()` (background thread):**
+1. `loadLastCvText(UUID candidateId)` — scalar SELECT `textCV` по ID кандидата
+2. `Jsoup.parse()` — очистка HTML
+3. `pdfParserService.parseSkillTree()` — загрузка всех навыков из БД
+4. `parseCVService.countMachesSkill()` — сопоставление текста с каждым навыком
+5. Дедупликация, сортировка по приоритету, построение `List<SkillLabelData>`
+
+**В `done()` (UI thread):**
+1. `fragments.create(Skillsbar)` — создание фрагмента
+2. `skillBoxFragment.renderSkillLabels(result)` — создание Label UI-компонентов
+3. `skillBox.add(fragment)` — добавление в layout
+
+**Флаги:** `skillsLoading`/`skillsLoaded` предотвращают повторный запуск.
+
+### 4.13 Фоновая загрузка вкладки «Позиции и вакансии»
+
+**Запуск:** `SelectedTabChangeEvent` → `initTabPositions()` → `startPositionsBackgroundLoading()`.
+
+Ранее `setSuggestOpenPositionTable()`, `setLastProjectTable()` выполнялись синхронно в `onBeforeShow()` и загружали историю рассмотрения (`lastProjectDl`) и рекомендованные вакансии (`suggestOpenPositionDl`) до открытия формы.
+
+**В `BackgroundTask.run()` (background thread):**
+1. `loadHistoryKeyValues(UUID)` — key-value запрос: `select vacancyId, max(dateIteraction) group by vacancy.id`
+2. Загрузка всех взаимодействий кандидата (`iteractionList-job-candidate` view)
+3. Загрузка OpenPosition для истории по списку ID
+4. `buildHistoryRowData()` — группировка взаимодействий по вакансии, вычисление lastInteraction/researcher/recruiter за O(N) проход
+5. `loadSuggestedVacancies(UUID)` — загрузка primary + additional position IDs; JPQL с фильтром `positionType.id IN :ids`
+6. `PositionsTabData` — DTO с историей, агрегированными данными и рекомендациями
+
+**В `done()` (UI thread):**
+1. `lastProjectDc.setItems(kvList)` — заполнение key-value контейнера
+2. `suggestOpenPositionDc.setItems(suggestions)` — заполнение рекомендаций
+3. Управление видимостью таблиц
+
+**Генераторы колонок** (`lastInteractionGeneratorColumn`, `whoIsResearcherGeneratorColumn`, `whoIsRecruterGeneratorColumn`) теперь читают из `Map<UUID, HistoryRowData> historyRowDataByVacancy` (precomputed, O(1) lookup), а не перебирают `jobCandidateIteractionDc` для каждой строки. Это устранило:
+- `ensureInteractionsLoaded()` из генератора (ранее догружал все взаимодействия при рендере)
+- O(N×M) сложность на каждый генератор (N строк таблицы × M взаимодействий)
+- N+1 запросы при отрисовке
+
+**Флаги:** `positionsTabLoading`/`positionsTabLoaded` предотвращают повторный запуск.
+
+**Debug-логирование:** `positions.history.load.ms`, `positions.interactions.load.ms`, `aggregate.ms`, `suggestions.load.ms`, `total.ms` (уровень DEBUG).
 
 ### 3.8 События и действия (техническая сводка)
 
@@ -420,14 +469,16 @@ private Component jobCandidatesTableFileImageFaceColumnGenerator(...) {
 
 ### 4.2 TabSheet `tabSheetSocialNetworks` (`lazy="true"`)
 
-| Tab ID | caption (msg) | icon | Содержимое |
-|--------|---------------|------|------------|
-| `jobCandidateCard` | `msgJobCard` | ID_CARD | Карточка: контакты, фото, upload, HR-Master, проекты, suggest vacancies |
-| `tabCandidate` | `candidate` | BOMB | ФИО (suggestion), компания, должность, город, дата рождения |
-| `tabContactInfo` | `msgTabContactInfo` | USER | Контакты, priorityContact, таблица соцсетей |
-| `tabIteraction` | `candidateIteration` | LIST | DataGrid `IteractionList`, фильтр вакансии |
-| `tabResume` | `msgResume` | FILE_TEXT | DataGrid `CandidateCV` |
-| `commentsTab` | `msgComments` | COMMENT | Лента комментариев + отправка |
+| Tab ID | caption | Содержимое |
+|--------|---------|------------|
+| `tabMain` | Основное | Персональные данные (ФИО, дата рождения, город) + Профессиональные данные (должность, компания, доп. позиции) |
+| `tabContactInfo` | Контакты | Основные контакты + Дополнительные контакты + Приоритетный способ связи + таблица соцсетей |
+| `tabPositions` | Позиции и вакансии | История рассмотрения (lastProjectTable) + Подходящие вакансии (suggestVacancyTable). Данные грузятся фоновой задачей при первом открытии вкладки |
+| `tabIteraction` | Взаимодействия | DataGrid `IteractionList`, фильтр вакансии |
+| `tabResume` | Резюме и файлы | DataGrid `CandidateCV` + генераторы project logo/иконок |
+| `tabSocialNetworks` | Социальные сети | DataGrid `SocialNetworkURLs` |
+| `commentsTab` | Комментарии | Лента комментариев + отправка |
+| `tabHistory` | История | createdBy/updatedBy — системная информация |
 
 **Ленивая инициализация вкладок** (`onInit` → `SelectedTabChangeListener`):
 
@@ -448,9 +499,9 @@ private Component jobCandidatesTableFileImageFaceColumnGenerator(...) {
 | `currentCompaniesLc` | `currentCompaniesDc` | все Company | Вкладка `tabCandidate` |
 | `citiesDl` | `citiesDc` | все City | Вкладка `tabCandidate` |
 | `openPositionDl` | `openPositionDc` | открытые вакансии | Вкладка `commentsTab` |
-| `suggestOpenPositionDl` | `suggestOpenPositionDc` | по `positionType` кандидата | `onAfterShow` |
+| `suggestOpenPositionDl` | `suggestOpenPositionDc` | по `positionType` кандидата | **Вкладка `tabPositions`** (фоновая задача) |
 | `interactionCommentDl` | `interactionCommentDc` | комментарии кандидата | `onAfterShow` |
-| `lastProjectDl` | `lastProjectDc` | max(date) group by vacancy | `onAfterShow` |
+| `lastProjectDl` | `lastProjectDc` | max(date) group by vacancy | **Вкладка `tabPositions`** (фоновая задача) |
 
 Паттерн отложенной загрузки:
 
@@ -502,9 +553,9 @@ priorityMap.put("Other", 9);
 
 | Событие | Назначение |
 |---------|------------|
-| `InitEvent` | `preventAutoLoadUntilReady`; tab change listener |
-| `BeforeShowEvent` | loaders, рейтинг, skillBox, filters, role-based block button |
-| `AfterShowEvent` / `onAfterShow1` | quality percent, block UI, cache iteractionList |
+| `InitEvent` | `preventAutoLoadUntilReady`; tab change listener (включая `initTabPositions`) |
+| `BeforeShowEvent` | loaders, рейтинг, link buttons, role-based block button; **`setupSkillBox` удалён** — перенесён в `startSkillsBackgroundLoading()` (`AfterShowEvent`) |
+| `AfterShowEvent` / `onAfterShow1` | quality percent, block UI; **`startSkillsBackgroundLoading()`** |
 | `BeforeCommitChangesEvent` ×2 | duplicate check; normalization + new interaction |
 | `BeforeCloseEvent` / `AfterCloseEvent` | CV collection listeners |
 | `DataContext.ChangeEvent` | quality percent |
@@ -736,6 +787,7 @@ Pack: `com.company.hunttech.web.screens.jobcandidate` — 200+ ключей, п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-13 | **TODO[tabPositions]:** Вкладка «Позиции и вакансии» отключена (visible=false, код закомментирован). |
 | 2026-07-04 | JobCandidate performance pack: batch cache производных колонок browse, lazy comments tab в edit, узкий duplicate-check view, индексы `260704-3`, focused perf tests |
 | 2026-06-30 | JobCandidateEdit: удалены `laborAgreement` из view и `jobCandidateLaborAgreementDc` — fix QueryException при Edit из Browse |
 | 2026-06-29 | JobCandidateEdit tabCandidate: `lazy="true"` на TabSheet, ранний выход `initTabCandidate`, `SearchExecutor` вместо BackgroundTask для подсказок ФИО |
@@ -761,3 +813,28 @@ Pack: `com.company.hunttech.web.screens.jobcandidate` — 200+ ключей, п�
 | 4 | N+1 в `getSignIconLabel` на browse | Отдельный load на строку |
 | 5 | Опечатка `birdhDate`, `wiberName`, `Canidate` в именах | Legacy — менять только осознанно |
 | 6 | XML-ошибка в fragment line 213 (`align="MIDDLE_LEFT"/>`) | Файл `job-canidate-detail-screen-fragment.xml` — проверить парсинг Studio |
+
+## TODO
+
+### TODO[tabPositions] — Вкладка «Позиции и вакансии»
+
+**Статус:** отключена (visible=false).
+
+**Причина:** временно не нужна, данные не загружаются.
+
+**Содержание вкладки:**
+- `lastProjectTable` — история рассмотрения (key-value: vacancy + max date + precomputed lastInteraction/researcher/recruiter)
+- `suggestVacancyTable` — подходящие вакансии (фильтр по positionType кандидата)
+
+**Зависимости в Java:**
+- BackgroundTask: `startPositionsBackgroundLoading()`, `loadHistoryKeyValues()`, `buildHistoryRowData()`, `loadSuggestedVacancies()`, `applyPositionsTabResult()`
+- DTO: `HistoryRowData`, `PositionsTabData`
+- Генераторы (заглушены, не будут вызваны): `lastInteractionGeneratorColumn`, `whoIsResearcherGeneratorColumn`, `whoIsRecruterGeneratorColumn`, `addInteractionsViewButton`, `lastIteractionCount`, `suggestVacancyTableNotSendedIconColumnColumnGenerator`
+- Запуск: `initTabPositions()` в `onInit` → `SelectedTabChangeListener`
+
+**Как восстановить:**
+1. XML: убрать `visible="false"` из `<tab id="tabPositions"...>`
+2. Java: раскомментировать `initTabPositions();` в `onInit()`
+3. Java: раскомментировать методы в секции `// -- Positions tab background loading --`
+4. Java: раскомментировать поля `historyRowDataByVacancy`, `positionsTabLoading`, `positionsTabLoaded`, убрать заглушку
+5. Полный код сохранён в git-истории: `git diff HEAD~5 -- modules/web/.../JobCandidateEdit.java`

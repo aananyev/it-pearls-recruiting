@@ -1,30 +1,13 @@
-/**
- * Hunttech-Modern (светлая тема) — точка входа SCSS.
- *
- * CUBA Gradle Plugin (buildScssThemes) находит этот файл по имени директории темы.
- * Порядок загрузки строго определён:
- *   1. Наши переопределения переменных (defaults)
- *   2. Базовая тема halo как родительская тема
- *   3. Автогенерация UI-компонентов (app-component)
- *   4. Наши кастомные стили (ext)
- *   5. Внешние шрифты (Google Fonts)
- */
-@import "com.company.hunttech/hunttech-modern-ext-defaults";
-@import "../halo/halo";
+@import "hunttech-modern-defaults";
+@import "com.company.hunttech/hunttech-modern-defaults";
 @import "app-components";
 @import "com.company.hunttech/hunttech-modern-ext";
-
-/* Google Fonts: Inter для современного UI */
+@import "com.company.hunttech/chat-style.css";
+@import "com.company.hunttech/job-candidate-editor.scss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* ─── Корневой селектор темы (обязателен для CUBA) ─── */
 .hunttech-modern {
-    // HuntTech Modern наследует полный набор визуальных правил темы halo.
-    @include halo;
-
-    // include auto-generated app components SCSS
-    @include app_components;
-
-    // HuntTech Modern добавляет плотность и карточные стили для HRM-экранов.
-    @include com_company_hunttech-hunttech-modern-ext;
+  @include app_components;
+  @include com_company_hunttech-hunttech-modern-ext;
+  @include job-candidate-editor-theme;
 }
