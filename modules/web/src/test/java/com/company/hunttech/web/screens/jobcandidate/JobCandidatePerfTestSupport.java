@@ -33,6 +33,7 @@ public final class JobCandidatePerfTestSupport {
 
     public static final String ADMIN_LOGIN = "admin";
     public static final String JOB_CANDIDATE_ENTITY = "hunttech_JobCandidate";
+    public static final String COMPANY_ENTITY = "hunttech_Company";
 
     private JobCandidatePerfTestSupport() {
     }
@@ -83,6 +84,9 @@ public final class JobCandidatePerfTestSupport {
                     if (isJobCandidate(loadContext)) {
                         metrics.jobCandidateLoadListCalls.incrementAndGet();
                         return new ArrayList<>(browseFixtures);
+                    }
+                    if (isCompany(loadContext)) {
+                        metrics.companyLoadListCalls.incrementAndGet();
                     }
                     List list = defaultProxy.loadList(loadContext);
                     return list;
@@ -186,6 +190,10 @@ public final class JobCandidatePerfTestSupport {
         return JOB_CANDIDATE_ENTITY.equals(loadContext.getEntityMetaClass());
     }
 
+    private static boolean isCompany(LoadContext<? extends Entity> loadContext) {
+        return COMPANY_ENTITY.equals(loadContext.getEntityMetaClass());
+    }
+
     public static final class Metrics {
         private final AtomicInteger loadCalls = new AtomicInteger();
         private final AtomicInteger loadListCalls = new AtomicInteger();
@@ -194,6 +202,7 @@ public final class JobCandidatePerfTestSupport {
         private final AtomicInteger jobCandidateLoadCalls = new AtomicInteger();
         private final AtomicInteger jobCandidateLoadListCalls = new AtomicInteger();
         private final AtomicInteger jobCandidateGetCountCalls = new AtomicInteger();
+        private final AtomicInteger companyLoadListCalls = new AtomicInteger();
 
         public int getLoadCalls() {
             return loadCalls.get();
@@ -221,6 +230,10 @@ public final class JobCandidatePerfTestSupport {
 
         public int getJobCandidateGetCountCalls() {
             return jobCandidateGetCountCalls.get();
+        }
+
+        public int getCompanyLoadListCalls() {
+            return companyLoadListCalls.get();
         }
     }
 }
