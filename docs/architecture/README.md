@@ -1,34 +1,9 @@
-# Архитектурные спецификации сущностей
+# architecture
 
-Полные one-pass спецификации, генерируемые по триггерной фразе:
+Архитектурный раздел для решений и верхнеуровневых карт приложения. Детальные спецификации сущностей перенесены в соответствующие папки `docs/entities/<entity>/`, а рабочие deployment-архитектурные материалы оставлены в `deployment/`.
 
-> **Сделай документацию сущности \<Название\>**
-
-## Соглашение
-
-| Элемент | Значение |
-|---------|----------|
-| Имя файла | `{EntityName}_Spec.md` (Java-класс) |
-| Пример | `JobCandidate_Spec.md`, `OpenPosition_Spec.md` |
-| Язык | Русский |
-| Источник | Только реальный код репозитория |
-
-## Связь с `docs/entities/`
-
-| Каталог | Назначение |
-|---------|------------|
-| `docs/architecture/` | Полная регенерация по триггеру (6 разделов) |
-| `docs/entities/` | Living Documentation при изменении кода (5 блоков) |
-
-При наличии обоих документов для одной сущности — взаимные ссылки в шапке файлов.
-
-## Обязательные разделы спецификации
-
-1. Архитектура Сущности (Data Model Layer)
-2. Слой Выборок Данных (Fetch Plans / Views Layer)
-3. Списочные интерфейсы (Browse Screens)
-4. Формы редактирования (Edit Screens)
-5. Компоненты и Фрагменты (UI Fragments & Dialogs)
-6. Инструкция по развертыванию с нуля (Deployment Guide)
-
-Правила агента: [living-documentation.mdc](../../.cursor/rules/living-documentation.mdc), [`.cursorrules`](../../.cursorrules).
+| Где искать | Ссылка |
+| ---------- | ------ |
+| Архитектура вакансии OpenPosition | [../entities/open-position/OpenPosition_Spec.md](../entities/open-position/OpenPosition_Spec.md) |
+| AI integration architecture | [../integrations/ai/AI_INTEGRATION.md](../integrations/ai/AI_INTEGRATION.md) |
+| Production migration architecture audits | [../../deployment/database-migration/audit/](../../deployment/database-migration/audit/) |

@@ -1,0 +1,9 @@
+# Дубликаты и пересечения
+
+| Группа | Основной документ | Пересекающийся документ | Рекомендация |
+| ------ | ----------------- | ----------------------- | ------------ |
+| JobCandidate и связь с Company | [../docs/entities/job-candidate/JobCandidate.md](../docs/entities/job-candidate/JobCandidate.md) | [../docs/entities/job-candidate/current-company.md](../docs/entities/job-candidate/current-company.md) | Основной документ `JobCandidate.md`; `current-company.md` оставить как кандидат на последующий content audit. |
+| JobCandidateEdit | [../docs/screens/job-candidate/hunttech_JobCandidate.edit_Spec.md](../docs/screens/job-candidate/hunttech_JobCandidate.edit_Spec.md) | [../docs/screens/job-candidate/JobCandidateEdit_Spec.md](../docs/screens/job-candidate/JobCandidateEdit_Spec.md), [../docs/screens/job-candidate/job-candidate-edit.md](../docs/screens/job-candidate/job-candidate-edit.md) | Основной документ `hunttech_JobCandidate.edit_Spec.md`; остальные проверить при content audit. |
+| CompanyEdit | [../docs/screens/company/hunttech_Company.edit_Spec.md](../docs/screens/company/hunttech_Company.edit_Spec.md) | [../docs/screens/company/company-edit.md](../docs/screens/company/company-edit.md) | Основной документ `hunttech_Company.edit_Spec.md`; краткий документ оставить как заметку реализации. |
+| OpenPosition | [../docs/entities/open-position/OpenPosition.md](../docs/entities/open-position/OpenPosition.md) | [../docs/entities/open-position/OpenPosition_Spec.md](../docs/entities/open-position/OpenPosition_Spec.md) | `OpenPosition.md` как living-doc, `OpenPosition_Spec.md` как расширенная архитектурная спецификация. |
+| Production/database migration reports | [../deployment/database-migration/reports/](../deployment/database-migration/reports/) | [../deployment/database-migration/audit/](../deployment/database-migration/audit/) | Не объединять: это рабочая история миграции и аудиты разных этапов. |

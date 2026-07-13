@@ -1,0 +1,299 @@
+# {Название сущности} (`{EntityName}`)
+
+> Шаблон документации сущности CUBA 7.3 для проекта **HRM HuntTech**.
+> Скопируйте файл в `docs/entities/{EntityName}.md` и заполните разделы.
+> Триггер оптимизации: «давай оптимизировать работу сущности {EntityName}» — см. [`.cursor/rules/entity-performance-optimization.mdc`](../../../.cursor/rules/entity-performance-optimization.mdc).
+> **При любом изменении кода сущности** — синхронизируйте документ в той же сессии ([living-documentation.mdc](../../../.cursor/rules/living-documentation.mdc), [`.cursorrules`](../../../.cursorrules)) и добавляйте запись в §9 «История изменений» ([documentation-with-dates.mdc](../../../.cursor/rules/documentation-with-dates.mdc)).
+> **При изменении экранов сущности** — также UI Spec: [living-ui-documentation.mdc](../../../.cursor/rules/living-ui-documentation.mdc), [ui-template.md](ui-template.md).
+> **Обязательный ввод:** перед техническими таблицами/XML/БД — блок [Бизнес-контекст](#бизнес-контекст-обязательный-ввод) (см. [`.cursorrules`](../../../.cursorrules) § Business & Context Intro).
+
+---
+
+## Бизнес-контекст (обязательный ввод)
+
+> Заполни **до** любых технических таблиц, XML, DDL. Документ недействителен без этого блока.
+
+### Назначение и Бизнес-смысл (What & Why)
+
+{Связный текст: зачем сущность нужна в процессах рекрутинга HRM HuntTech; какую бизнес-задачу решает; кто основные пользователи. Не пиши только «справочник {EntityName}».}
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+{Откуда открывают экраны сущности (меню, родительские формы); какие browse/edit/lookup; какие другие сущности ссылаются через FK; встроенные фрагменты.}
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+{Типичный сценарий работы рекрутёра с сущностью; что происходит при открытии browse/edit; главные кнопки и итог сохранения. Формат «действие → условие → результат»; без сырого жаргона.}
+
+---
+
+## 1. Обзор
+
+| Параметр | Значение |
+|----------|----------|
+| **Java-класс** | `com.company.hunttech.entity.{EntityName}` |
+| **Имя в CUBA** | `hunttech_{EntityName}` |
+| **Таблица БД** | `{TABLE_NAME}` |
+| **Тип данных** | справочник / транзакционная / связующая |
+| **Ожидаемый объём** | ~N записей |
+| **Критичность** | низкая / средняя / высокая |
+| **Ответственный модуль** | `global` / `core` / `web` |
+
+### Назначение
+
+Краткое описание бизнес-роли сущности (1–3 предложения).
+
+### Отображаемое имя
+
+- **NamePattern:** `{pattern}`
+- **Lookup:** `{поле для lookup}`
+
+---
+
+## 2. Архитектура и связи
+
+### 2.1 Диаграмма связей (опционально)
+
+```mermaid
+erDiagram
+    {EntityName} ||--o{ {ChildEntity} : "связь"
+    {EntityName} }o--|| {ParentEntity} : "FK"
+```
+
+### 2.2 Исходящие связи (FK из этой таблицы)
+
+| Поле Java | Колонка БД | Связанная сущность | Fetch | Обязательность |
+|-----------|------------|-------------------|-------|----------------|
+| `{field}` | `{COLUMN}` | `{Entity}` | LAZY/EAGER | да/нет |
+
+### 2.3 Входящие связи (кто ссылается на эту сущность)
+
+| Сущность | Поле | Колонка БД | Назначение |
+|----------|------|------------|------------|
+| `{Entity}` | `{field}` | `{COLUMN}` | {описание} |
+
+### 2.4 Сервисы и бизнес-логика
+
+| Сервис | Метод | Описание |
+|--------|-------|----------|
+| `{ServiceBean}` | `{method}` | {что делает} |
+
+---
+
+## 3. Поля сущности
+
+### 3.1 Системные (StandardEntity)
+
+| Поле | Колонка | Тип | Примечание |
+|------|---------|-----|------------|
+| id | ID | UUID | PK |
+| version | VERSION | integer | оптимистичная блокировка |
+| createTs / createdBy | CREATE_TS / CREATED_BY | | аудит |
+| updateTs / updatedBy | UPDATE_TS / UPDATED_BY | | аудит |
+| deleteTs / deletedBy | DELETE_TS / DELETED_BY | | soft delete |
+
+### 3.2 Бизнес-поля
+
+| Поле Java | Колонка БД | Тип | Ограничения | Описание |
+|-----------|------------|-----|-------------|----------|
+| `{field}` | `{COLUMN}` | {type} | unique / not null / length | {бизнес-смысл} |
+
+### 3.3 Перечисления и флаги
+
+| Поле | Тип | Значения | Назначение |
+|------|-----|----------|------------|
+| `{enumField}` | enum / Integer | {значения} | {описание} |
+
+### 3.4 LOB и тяжёлые поля
+
+| Поле | Колонка | Тип | Где используется | Стратегия загрузки |
+|------|---------|-----|------------------|-------------------|
+| `{lobField}` | `{COLUMN}` | text / bytea | Edit, вкладка X | lazy reload на вкладке |
+
+---
+
+## 4. Представления (views.xml)
+
+Файл: `modules/global/src/com/company/hunttech/views.xml`
+
+| View | Extends | Назначение | Где используется |
+|------|---------|------------|------------------|
+| `{entity}-browse-view` | `_minimal` | Browse-таблица, без LOB | `{entity}-browse.xml` |
+| `{entity}-tree-browse-view` | `_minimal` | Tree browse (если есть) | `{entity}-tree-browse.xml` |
+| `{entity}-edit-view` | `_minimal` | Edit-форма, без LOB | `{entity}-edit.xml` |
+| `{entity}-picker-view` | `_minimal` | Lookup / picker | FK-поля, lookup-экраны |
+| `{entity}-view` | `_base` / `_local` | Legacy / runtime | {перечислить потребителей} |
+
+### Содержимое view (детализация)
+
+#### `{entity}-browse-view`
+
+```
+{список property}
+```
+
+#### `{entity}-edit-view`
+
+```
+{список property, явно указать исключённые LOB}
+```
+
+---
+
+## 5. Экраны (screens)
+
+Каталог: `modules/web/src/com/company/hunttech/web/screens/{entity}/`
+
+| Экран | Controller ID | Дескриптор | View | Тип | Меню |
+|-------|---------------|------------|------|-----|------|
+| Browse | `hunttech_{Entity}.browse` | `{entity}-browse.xml` | `{entity}-browse-view` | StandardLookup | {пункт меню} |
+| Edit | `hunttech_{Entity}.edit` | `{entity}-edit.xml` | `{entity}-edit-view` | StandardEditor | — |
+| Tree Browse | `hunttech_{Entity}._tree.browse` | `{entity}-tree-browse.xml` | `{entity}-tree-browse-view` | StandardLookup | {пункт меню} |
+
+### 5.1 Browse — поведение формы
+
+> Источник: `*Browse.java`. Описание — простой русский, цепочки «действие → условие → результат».
+
+**Жизненный цикл:** {что загружается при открытии; дефолты фильтров; ограничения по ролям.}
+
+**Главные действия пользователя:**
+
+| Действие | Цепочка |
+|----------|---------|
+| … | Пользователь … → если … → … |
+
+**Скрытые вычисления:** {генераторы колонок, стили строк, агрегаты — что видит пользователь и по какому правилу.}
+
+**Технические параметры:** JPQL `{query}`; readOnly да/нет; cacheable да/нет; колонки: {список}; excludeProperties фильтра: {список}.
+
+### 5.2 Edit — поведение формы
+
+> Источник: `*Edit.java`.
+
+**Жизненный цикл:** {вкладки TabSheet; lazy loaders при первом выборе вкладки; дефолты для новой записи.}
+
+**Главные действия пользователя:**
+
+| Действие | Цепочка |
+|----------|---------|
+| … | … |
+
+**Валидация и сохранение:**
+
+| Момент | Условие | Результат |
+|--------|---------|-----------|
+| Перед сохранением | … | … |
+| После сохранения | … | … |
+
+### 5.3 Cross-form (FK в других экранах)
+
+| Экран | Поле FK | View для FK | Необходимые поля |
+|-------|---------|-------------|------------------|
+| `{OtherScreen}` | `{fkField}` | `{view}` | {поля} |
+
+---
+
+## 6. База данных
+
+### 6.1 Таблица `{TABLE_NAME}`
+
+DDL: `modules/core/db/init/postgres/10.create-db.sql`  
+Ограничения и индексы: `modules/core/db/init/postgres/20.create-db.sql`  
+Миграции: `modules/core/db/update/postgres/`
+
+### 6.2 Индексы
+
+| Индекс | Колонки | Тип | Назначение |
+|--------|---------|-----|------------|
+| `{INDEX_NAME}` | `{columns}` | btree / unique partial | {зачем} |
+
+### 6.3 Рекомендации по индексам
+
+- Индексировать: FK в дочерних транзакционных таблицах, поля ORDER BY, уникальные бизнес-ключи.
+- **Не** индексировать: boolean-флаги с низкой селективностью, редко используемые поля.
+
+### 6.4 TOAST / LOB
+
+| Колонка | Влияние на SELECT * | Рекомендация |
+|---------|---------------------|--------------|
+| `{COLUMN}` | уходит в TOAST | исключить из browse/tree views |
+
+---
+
+## 7. Производительность
+
+> Заполняется при оптимизации или сразу, если известны проблемы.
+> Методология: `.cursor/rules/entity-performance-optimization.mdc`
+
+### 7.1 Текущее состояние
+
+| Область | Статус | Комментарий |
+|---------|--------|-------------|
+| Специализированные views | ✅ / ⚠️ / ❌ | |
+| LOB lazy load | ✅ / ⚠️ / ❌ | |
+| cacheable loaders | ✅ / ⚠️ / ❌ | |
+| readOnly browse | ✅ / ⚠️ / ❌ | |
+| N+1 в providers | ✅ / ⚠️ / ❌ | |
+| Entity cache (EclipseLink) | ✅ / ⚠️ / ❌ | `app.properties` |
+
+### 7.2 Выполненные оптимизации
+
+- [ ] `{entity}-browse-view` — только колонки таблицы
+- [ ] `{entity}-edit-view` — без LOB
+- [ ] `{entity}-picker-view` — для FK
+- [ ] Lazy load LOB на вкладке `{tabName}`
+- [ ] Lazy load collection на вкладке `{tabName}`
+- [ ] `cacheable="true"` на справочных loaders
+- [ ] `readOnly="true"` на browse data
+- [ ] Узкий `excludeProperties` в фильтре
+
+### 7.3 Известные проблемы и backlog
+
+| Проблема | Приоритет | Предлагаемое решение |
+|----------|-----------|---------------------|
+| {описание} | высокий/средний/низкий | {решение} |
+
+### 7.4 Потребители (rg-чеклист)
+
+```bash
+rg "hunttech_{Entity}|{EntityName}\." modules/ --glob '*.{java,xml}'
+rg "view=\".*{entity}" modules/ --glob '*.xml'
+```
+
+Зафиксированные потребители:
+
+- {экран / сервис / виджет}
+
+---
+
+## 8. Развёртывание и конфигурация
+
+| Параметр | Файл | Значение |
+|----------|------|----------|
+| DBMS | `app.properties` | postgres |
+| Entity cache | `app.properties` | `eclipselink.cache.shared.hunttech_{Entity}=...` |
+| FTS | `fts.xml` | включён / выключен |
+
+Локальная БД: см. [LOCAL_DATABASE.md](../../operations/local-development/local-database.md).
+
+---
+
+## 9. История изменений
+
+> **Обязательный раздел.** При каждом изменении entity, views, экранов, сервисов, БД или бизнес-логики добавляйте новую строку **в начало таблицы** с датой **YYYY-MM-DD** и кратким описанием.
+> Правило для агента: [`.cursor/rules/documentation-with-dates.mdc`](../../../.cursor/rules/documentation-with-dates.mdc).
+
+| Дата | Изменение |
+|------|-----------|
+| YYYY-MM-DD | Создание документа |
+| 2026-06-22 | Оптимизация browse-view, добавлен {entity}-browse-view |
+
+---
+
+## 10. Связанные документы
+
+- [Индекс документации](../../README.md)
+- [Шаблон сущности](entity-template.md)
+- [LOCAL_DATABASE.md](../../operations/local-development/local-database.md)
+- [Оптимизация сущностей](../../../.cursor/rules/entity-performance-optimization.mdc)
+- [Документирование изменений с датой](../../../.cursor/rules/documentation-with-dates.mdc)
