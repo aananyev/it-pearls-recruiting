@@ -2,6 +2,13 @@
  * JobCandidateEdit — локальный визуальный слой HRM HuntTech.
  * Вариант 3: профиль кандидата слева, рабочая область справа.
  * Все правила ограничены корневым классом job-candidate-editor.
+ *
+ * Этап 1 клиентской оптимизации:
+ * - универсальный selector для всех потомков заменён локальными классами;
+ * - сокращены глубокие цепочки селекторов Vaadin;
+ * - удалены лишние комбинации width/min-width/max-width;
+ * - `!important` оставлен только для свойств, которые переопределяются темами
+ *   или inline-размерами Vaadin.
  */
 @mixin job-candidate-editor-theme {
   .job-candidate-editor {
@@ -14,7 +21,22 @@
     background: #eef2f6;
     overflow: hidden;
 
-    &, * {
+    /* Box model задаётся только контейнерам макета, а не каждому DOM-узлу. */
+    .job-candidate-main-layout,
+    .job-candidate-sidebar,
+    .job-candidate-profile-header,
+    .job-candidate-sidebar-card,
+    .job-candidate-workspace,
+    .job-candidate-top-bar,
+    .job-candidate-tabs,
+    .job-candidate-accordion-section,
+    .job-candidate-accordion-header,
+    .job-candidate-accordion-content,
+    .job-candidate-card,
+    .job-candidate-form-grid,
+    .job-candidate-form-row,
+    .job-candidate-table,
+    .job-candidate-bottom-bar {
       box-sizing: border-box;
     }
 
@@ -24,10 +46,8 @@
       min-width: 0;
     }
 
-    /* Левая профильная панель. Фон назначается также Vaadin slot-обёртке,
-       чтобы разные темы не переопределяли его светлым цветом. */
+    /* Левая профильная панель */
     .v-slot-job-candidate-sidebar,
-    .v-slot-job-candidate-sidebar > .v-verticallayout,
     .job-candidate-sidebar {
       background-color: #172638 !important;
       background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%) !important;
@@ -39,7 +59,7 @@
       max-width: 312px !important;
       height: 100% !important;
       padding: 24px 20px 18px;
-      color: #f8fafc !important;
+      color: #f8fafc;
       border-right: 1px solid rgba(15, 23, 42, .72);
       box-shadow: 5px 0 20px rgba(15, 23, 42, .16);
       overflow-x: hidden;
@@ -69,7 +89,6 @@
       text-align: center;
 
       > .v-slot,
-      .v-layout,
       #dropZone,
       #picVBox {
         width: 100% !important;
@@ -80,22 +99,22 @@
         width: 100% !important;
         margin-top: 12px;
         text-align: center;
+      }
 
-        .v-button {
-          min-height: 36px;
-          padding: 0 14px;
-          color: #f8fafc !important;
-          font-size: 15px;
-          background: rgba(255, 255, 255, .06) !important;
-          border: 1px solid rgba(255, 255, 255, .34) !important;
-          border-radius: 5px;
-          box-shadow: none !important;
+      .v-upload .v-button {
+        min-height: 36px;
+        padding: 0 14px;
+        color: #f8fafc !important;
+        font-size: 15px;
+        background: rgba(255, 255, 255, .06) !important;
+        border: 1px solid rgba(255, 255, 255, .34) !important;
+        border-radius: 5px;
+        box-shadow: none !important;
+      }
 
-          &:hover {
-            background: rgba(255, 255, 255, .14) !important;
-            border-color: rgba(255, 255, 255, .58) !important;
-          }
-        }
+      .v-upload .v-button:hover {
+        background: rgba(255, 255, 255, .14) !important;
+        border-color: rgba(255, 255, 255, .58) !important;
       }
     }
 
@@ -127,7 +146,7 @@
       margin-top: 14px;
       color: #fff !important;
       font-size: 24px !important;
-      font-weight: 700 !important;
+      font-weight: 700;
       line-height: 1.22 !important;
       text-align: left !important;
       white-space: normal !important;
@@ -135,67 +154,59 @@
       word-break: break-word;
     }
 
-    /* Контроллер использует label, но визуально значение повторяет ФИО. */
+    /* Компонент остаётся доступен контроллеру, но не дублирует ФИО. */
     .job-candidate-profile-position {
       display: none !important;
     }
 
-    .job-candidate-sidebar-card,
-    .job-candidate-profile-summary,
-    .job-candidate-profile-contacts {
+    .job-candidate-sidebar-card {
       width: 100% !important;
       padding: 14px;
-      color: #f8fafc !important;
+      color: #f8fafc;
       background: rgba(255, 255, 255, .055) !important;
       border: 1px solid rgba(255, 255, 255, .18) !important;
       border-radius: 8px;
     }
 
-    .job-candidate-sidebar-grid,
-    .job-candidate-profile-summary .v-gridlayout,
-    .job-candidate-profile-contacts .v-gridlayout,
-    .job-candidate-profile-summary .v-gridlayout > div,
-    .job-candidate-profile-contacts .v-gridlayout > div,
-    .job-candidate-profile-summary table,
-    .job-candidate-profile-contacts table {
+    /* Обе sidebar-карточки используют одинаковую структуру GridLayout. */
+    .job-candidate-sidebar-card .v-gridlayout,
+    .job-candidate-sidebar-card .v-gridlayout > div,
+    .job-candidate-sidebar-card table {
       width: 100% !important;
       min-width: 0 !important;
       table-layout: fixed;
     }
 
-    .job-candidate-profile-summary,
-    .job-candidate-profile-contacts {
-      .v-gridlayout-slot {
-        min-width: 0 !important;
-        padding-top: 5px;
-        padding-bottom: 5px;
-      }
+    .job-candidate-sidebar-card .v-gridlayout-slot {
+      min-width: 0 !important;
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
 
-      .v-label,
-      .v-button-link {
-        height: auto !important;
-        min-width: 0 !important;
-        padding: 0 !important;
-        font-size: 16px !important;
-        line-height: 22px !important;
-        white-space: normal !important;
-        overflow-wrap: anywhere;
-        word-break: break-word;
-      }
+    .job-candidate-sidebar-card .v-label,
+    .job-candidate-sidebar-card .v-button-link {
+      height: auto !important;
+      min-width: 0 !important;
+      padding: 0 !important;
+      font-size: 16px !important;
+      line-height: 22px !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
 
-      .v-label {
-        color: #f8fafc !important;
-      }
+    .job-candidate-sidebar-card .v-label {
+      color: #f8fafc !important;
+    }
 
-      .v-button-link {
-        color: #72baff !important;
-        text-align: left;
-      }
+    .job-candidate-sidebar-card .v-button-link {
+      color: #72baff !important;
+      text-align: left;
+    }
 
-      .v-gridlayout-slot:nth-child(odd) .v-label {
-        color: rgba(248, 250, 252, .72) !important;
-        font-weight: 600;
-      }
+    .job-candidate-sidebar-card .v-gridlayout-slot:nth-child(odd) .v-label {
+      color: rgba(248, 250, 252, .72) !important;
+      font-weight: 600;
     }
 
     .job-candidate-status {
@@ -203,56 +214,61 @@
       min-height: 44px;
       padding: 2px 0 10px;
       border-bottom: 1px solid rgba(255, 255, 255, .16);
+    }
 
-      .v-label,
-      .h3,
-      [class*='rating_candidate_'],
-      .rating_red_1 {
-        width: auto !important;
-        height: auto !important;
-        min-width: 0 !important;
-        min-height: 0 !important;
-        padding: 0 !important;
-        color: #ffb11b !important;
-        font-family: Arial, "Segoe UI Symbol", sans-serif !important;
-        font-size: 22px !important;
-        font-weight: 700 !important;
-        line-height: 30px !important;
-        text-align: left !important;
-        white-space: nowrap !important;
-        background: transparent !important;
-        border: 0 !important;
-        border-radius: 0 !important;
-        box-shadow: none !important;
-      }
+    /* Явный список rating-классов исключает дорогой substring selector. */
+    .job-candidate-status .v-label,
+    .job-candidate-status .h3,
+    .job-candidate-status .rating_red_1,
+    .job-candidate-status .rating_candidate_red_1,
+    .job-candidate-status .rating_candidate_orange_2,
+    .job-candidate-status .rating_candidate_yellow_3,
+    .job-candidate-status .rating_candidate_green_4,
+    .job-candidate-status .rating_candidate_blue_5 {
+      width: auto !important;
+      height: auto !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      color: #ffb11b !important;
+      font-family: Arial, "Segoe UI Symbol", sans-serif !important;
+      font-size: 22px !important;
+      font-weight: 700;
+      line-height: 30px !important;
+      text-align: left !important;
+      white-space: nowrap !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
 
-      .rating_candidate_red_1:before,
-      .rating_red_1:before {
-        content: "\2605\2606\2606\2606\2606  ";
-      }
+    .job-candidate-status .rating_candidate_red_1:before,
+    .job-candidate-status .rating_red_1:before {
+      content: "\2605\2606\2606\2606\2606  ";
+    }
 
-      .rating_candidate_orange_2:before {
-        content: "\2605\2605\2606\2606\2606  ";
-      }
+    .job-candidate-status .rating_candidate_orange_2:before {
+      content: "\2605\2605\2606\2606\2606  ";
+    }
 
-      .rating_candidate_yellow_3:before {
-        content: "\2605\2605\2605\2606\2606  ";
-      }
+    .job-candidate-status .rating_candidate_yellow_3:before {
+      content: "\2605\2605\2605\2606\2606  ";
+    }
 
-      .rating_candidate_green_4:before {
-        content: "\2605\2605\2605\2605\2606  ";
-      }
+    .job-candidate-status .rating_candidate_green_4:before {
+      content: "\2605\2605\2605\2605\2606  ";
+    }
 
-      .rating_candidate_blue_5:before {
-        content: "\2605\2605\2605\2605\2605  ";
-      }
+    .job-candidate-status .rating_candidate_blue_5:before {
+      content: "\2605\2605\2605\2605\2605  ";
     }
 
     .job-candidate-quality {
       width: 100% !important;
       color: rgba(248, 250, 252, .72) !important;
       font-size: 12px !important;
-      font-weight: 400 !important;
+      font-weight: 400;
       line-height: 18px !important;
       text-align: right !important;
       white-space: normal !important;
@@ -266,21 +282,21 @@
       width: 100% !important;
       padding-top: 12px;
       border-top: 1px solid rgba(255, 255, 255, .16);
+    }
 
-      .v-button {
-        width: 100% !important;
-        min-height: 38px;
-        color: #f8fafc !important;
-        font-size: 15px;
-        background: transparent !important;
-        border: 1px solid rgba(255, 255, 255, .50) !important;
-        border-radius: 5px;
-        box-shadow: none !important;
+    .job-candidate-profile-footer .v-button {
+      width: 100% !important;
+      min-height: 38px;
+      color: #f8fafc !important;
+      font-size: 15px;
+      background: transparent !important;
+      border: 1px solid rgba(255, 255, 255, .50) !important;
+      border-radius: 5px;
+      box-shadow: none !important;
+    }
 
-        &:hover {
-          background: rgba(255, 255, 255, .10) !important;
-        }
-      }
+    .job-candidate-profile-footer .v-button:hover {
+      background: rgba(255, 255, 255, .10) !important;
     }
 
     /* Правая рабочая область */
@@ -301,13 +317,13 @@
       border-bottom: 1px solid #dfe5ec;
     }
 
-    .job-candidate-audit-box {
+    .job-candidate-audit-box,
+    .job-candidate-audit-label {
       width: 100% !important;
       min-width: 0;
     }
 
     .job-candidate-audit-label {
-      width: 100% !important;
       color: #718096 !important;
       font-size: 13px !important;
       line-height: 20px !important;
@@ -332,54 +348,54 @@
       min-height: 0;
       background: #fff !important;
       border: 0 !important;
+    }
 
-      > .v-tabsheet-tabcontainer {
-        padding: 0 20px;
-        background: #fff !important;
-        border-bottom: 1px solid #dfe5ec;
-      }
+    .job-candidate-tabs > .v-tabsheet-tabcontainer {
+      padding: 0 20px;
+      background: #fff !important;
+      border-bottom: 1px solid #dfe5ec;
+    }
 
-      .v-tabsheet-tabs,
-      .v-tabsheet-tabitem,
-      .v-tabsheet-tabitem-selected {
-        height: 48px;
-        background: transparent !important;
-        border: 0 !important;
-        box-shadow: none !important;
-      }
+    .job-candidate-tabs .v-tabsheet-tabs,
+    .job-candidate-tabs .v-tabsheet-tabitem,
+    .job-candidate-tabs .v-tabsheet-tabitem-selected {
+      height: 48px;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
 
-      .v-caption {
-        height: 48px;
-        padding: 0 16px;
-        color: #26384c !important;
-        font-size: 16px !important;
-        font-weight: 600;
-        line-height: 48px;
-        background: transparent !important;
-        border: 0 !important;
-      }
+    .job-candidate-tabs .v-caption {
+      height: 48px;
+      padding: 0 16px;
+      color: #26384c !important;
+      font-size: 16px !important;
+      font-weight: 600;
+      line-height: 48px;
+      background: transparent !important;
+      border: 0 !important;
+    }
 
-      .v-tabsheet-tabitem:hover .v-caption {
-        color: #1264b5 !important;
-      }
+    .job-candidate-tabs .v-tabsheet-tabitem:hover .v-caption {
+      color: #1264b5 !important;
+    }
 
-      .v-tabsheet-tabitem-selected .v-caption {
-        color: #0b63b6 !important;
-        border-bottom: 3px solid #0b63b6 !important;
-      }
+    .job-candidate-tabs .v-tabsheet-tabitem-selected .v-caption {
+      color: #0b63b6 !important;
+      border-bottom: 3px solid #0b63b6 !important;
+    }
 
-      .v-tabsheet-content {
-        height: calc(100% - 49px) !important;
-        padding: 16px 18px 20px;
-        background: #f5f7fa !important;
-        overflow: auto;
-      }
+    .job-candidate-tabs .v-tabsheet-content {
+      height: calc(100% - 49px) !important;
+      padding: 16px 18px 20px;
+      background: #f5f7fa !important;
+      overflow: auto;
+    }
 
-      .v-tabsheet-tabsheetpanel {
-        width: 100% !important;
-        height: 100% !important;
-        min-width: 0;
-      }
+    .job-candidate-tabs .v-tabsheet-tabsheetpanel {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0;
     }
 
     /* Видимый accordion-слой */
@@ -405,22 +421,23 @@
       border: 1px solid #d7e0ea;
       border-radius: 8px 8px 0 0;
       box-shadow: 0 2px 7px rgba(15, 23, 42, .04);
-
-      &:before {
-        content: "\25BC";
-        display: inline-block;
-        margin-right: 10px;
-        color: #0b63b6;
-        font-family: Arial, "Segoe UI Symbol", sans-serif;
-        font-size: 13px;
-        line-height: 20px;
-      }
     }
 
-    .job-candidate-accordion-title {
+    .job-candidate-accordion-header:before {
+      content: "\25BC";
+      display: inline-block;
+      margin-right: 10px;
+      color: #0b63b6;
+      font-family: Arial, "Segoe UI Symbol", sans-serif;
+      font-size: 13px;
+      line-height: 20px;
+    }
+
+    .job-candidate-accordion-title,
+    .job-candidate-card-title {
       color: #1f3146 !important;
       font-size: 18px !important;
-      font-weight: 700 !important;
+      font-weight: 700;
       line-height: 24px !important;
     }
 
@@ -437,17 +454,17 @@
       display: flex !important;
       gap: 16px;
       align-items: flex-start;
-
-      > .v-slot {
-        width: calc(50% - 8px) !important;
-        min-width: 0 !important;
-        max-width: calc(50% - 8px) !important;
-        flex: 1 1 0 !important;
-      }
     }
 
-    .job-candidate-card,
-    .job-candidate-half-card {
+    .job-candidate-accordion-open .job-candidate-accordion-content > .v-slot,
+    .job-candidate-card-row > .v-slot {
+      width: calc(50% - 8px) !important;
+      min-width: 0 !important;
+      max-width: calc(50% - 8px) !important;
+      flex: 1 1 0 !important;
+    }
+
+    .job-candidate-card {
       width: 100% !important;
       min-width: 0 !important;
       height: auto !important;
@@ -456,13 +473,13 @@
       border: 1px solid #dce3eb !important;
       border-radius: 8px !important;
       box-shadow: 0 2px 8px rgba(15, 23, 42, .04);
+    }
 
-      .v-label,
-      .v-button-link {
-        white-space: normal !important;
-        overflow-wrap: anywhere;
-        word-break: break-word;
-      }
+    .job-candidate-card .v-label,
+    .job-candidate-card .v-button-link {
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .job-candidate-card-heading {
@@ -473,16 +490,7 @@
       border-bottom: 1px solid #edf0f4;
     }
 
-    .job-candidate-card-title {
-      color: #1f3146 !important;
-      font-size: 18px !important;
-      font-weight: 700 !important;
-      line-height: 24px !important;
-    }
-
-    /* Вкладка «Основное»: колонка labels уменьшена, а поле занимает всю
-       оставшуюся ширину. Это приближает поле к подписи и увеличивает его
-       более чем в два раза относительно прежней ширины по содержимому. */
+    /* Вкладка «Основное» */
     .job-candidate-form-grid,
     .job-candidate-form-grid > div,
     .job-candidate-form-grid table {
@@ -494,41 +502,34 @@
     .job-candidate-form-grid td:first-child {
       width: 118px !important;
       min-width: 118px !important;
-      max-width: 118px !important;
       padding-right: 8px !important;
     }
 
-    .job-candidate-form-grid td:nth-child(2) {
-      width: auto !important;
+    /* Все slot-компоненты GridLayout растягиваются одинаково; отдельный
+       selector второй колонки и глубокие цепочки больше не нужны. */
+    .job-candidate-form-grid .v-gridlayout-slot,
+    .job-candidate-form-grid .v-gridlayout-slot > .v-widget {
+      width: 100% !important;
       min-width: 0 !important;
-      padding-left: 0 !important;
+      max-width: none !important;
     }
 
     .job-candidate-form-grid .v-gridlayout-slot {
-      min-width: 0 !important;
       padding-top: 5px;
       padding-bottom: 5px;
     }
 
-    .job-candidate-form-grid td:nth-child(2) .v-gridlayout-slot,
-    .job-candidate-form-grid td:nth-child(2) .v-gridlayout-slot > .v-widget {
+    .job-candidate-form-grid .c-suggestionfield,
+    .job-candidate-form-grid .c-suggestion-field,
+    .job-candidate-form-grid .c-suggestionpickerfield,
+    .job-candidate-form-grid .c-suggestion-picker-field,
+    .job-candidate-form-grid .c-pickerfield,
+    .job-candidate-form-grid .c-picker-field,
+    .job-candidate-form-grid .v-customcomponent,
+    .job-candidate-form-grid .v-csslayout,
+    .job-candidate-form-grid .v-horizontallayout {
       width: 100% !important;
       min-width: 0 !important;
-      max-width: none !important;
-    }
-
-    .job-candidate-form-grid td:nth-child(2) .c-suggestionfield,
-    .job-candidate-form-grid td:nth-child(2) .c-suggestion-field,
-    .job-candidate-form-grid td:nth-child(2) .c-suggestionpickerfield,
-    .job-candidate-form-grid td:nth-child(2) .c-suggestion-picker-field,
-    .job-candidate-form-grid td:nth-child(2) .c-pickerfield,
-    .job-candidate-form-grid td:nth-child(2) .c-picker-field,
-    .job-candidate-form-grid td:nth-child(2) .v-customcomponent,
-    .job-candidate-form-grid td:nth-child(2) .v-csslayout,
-    .job-candidate-form-grid td:nth-child(2) .v-horizontallayout {
-      width: 100% !important;
-      min-width: 0 !important;
-      max-width: none !important;
     }
 
     .job-candidate-form-grid .v-label,
@@ -540,56 +541,45 @@
       overflow-wrap: anywhere;
     }
 
-    /* SuggestionField ФИО получает тот же размер текста, что Город,
-       DateField и остальные поля формы. */
     .job-candidate-form-grid .v-textfield,
     .job-candidate-form-grid .v-filterselect,
     .job-candidate-form-grid .v-filterselect-input,
     .job-candidate-form-grid .v-datefield,
     .job-candidate-form-grid .v-datefield-textfield,
-    .job-candidate-form-grid input,
     .job-candidate-form-row .v-textfield,
     .job-candidate-form-row .v-filterselect,
     .job-candidate-form-row .v-filterselect-input,
     .job-candidate-form-row .v-datefield,
     .job-candidate-form-row .v-datefield-textfield {
+      width: 100% !important;
       min-width: 0 !important;
-      max-width: none !important;
       height: 38px !important;
       font-size: 16px !important;
       line-height: 38px !important;
-    }
-
-    .job-candidate-form-grid td:nth-child(2) .v-textfield,
-    .job-candidate-form-grid td:nth-child(2) .c-suggestionfield .v-textfield,
-    .job-candidate-form-grid td:nth-child(2) .c-suggestion-field .v-textfield {
-      width: 100% !important;
     }
 
     .job-candidate-form-row {
       width: 100% !important;
       min-width: 0 !important;
       min-height: 42px;
+    }
 
-      > .v-slot:first-child {
-        width: 150px !important;
-        min-width: 150px !important;
-        max-width: 150px !important;
-        padding-right: 12px;
-      }
+    .job-candidate-form-row > .v-slot:first-child {
+      width: 150px !important;
+      min-width: 150px !important;
+      padding-right: 12px;
+    }
 
-      > .v-slot:last-child {
-        width: calc(100% - 150px) !important;
-        min-width: 0 !important;
-        max-width: none !important;
-        flex: 1 1 auto !important;
-      }
+    .job-candidate-form-row > .v-slot:last-child {
+      width: calc(100% - 150px) !important;
+      min-width: 0 !important;
+      flex: 1 1 auto !important;
+    }
 
-      .v-select-optiongroup {
-        width: 100% !important;
-        font-size: 15px;
-        line-height: 24px;
-      }
+    .job-candidate-form-row .v-select-optiongroup {
+      width: 100% !important;
+      font-size: 15px;
+      line-height: 24px;
     }
 
     /* Таблицы */
@@ -601,25 +591,25 @@
       border: 1px solid #dce3eb;
       border-radius: 7px;
       overflow: hidden;
+    }
 
-      .v-grid-header,
-      .v-table-header-wrap {
-        color: #334155;
-        font-weight: 700;
-        background: #f1f4f8;
-        border-bottom: 1px solid #dce3eb;
-      }
+    .job-candidate-table .v-grid-header,
+    .job-candidate-table .v-table-header-wrap {
+      color: #334155;
+      font-weight: 700;
+      background: #f1f4f8;
+      border-bottom: 1px solid #dce3eb;
+    }
 
-      .v-grid-row:hover,
-      .v-table-row:hover,
-      .v-table-row-odd:hover {
-        background: #f3f8fe;
-      }
+    .job-candidate-table .v-grid-row:hover,
+    .job-candidate-table .v-table-row:hover,
+    .job-candidate-table .v-table-row-odd:hover {
+      background: #f3f8fe;
+    }
 
-      .v-grid-row-selected,
-      .v-table-row-selected {
-        background: #dcecff !important;
-      }
+    .job-candidate-table .v-grid-row-selected,
+    .job-candidate-table .v-table-row-selected {
+      background: #dcecff !important;
     }
 
     /* Нижняя панель действий */
@@ -630,27 +620,27 @@
       background: rgba(255, 255, 255, .98) !important;
       border-top: 1px solid #dfe5ec;
       box-shadow: 0 -3px 14px rgba(15, 23, 42, .05);
+    }
 
-      .v-button {
-        height: 40px;
-        min-width: 108px;
-        padding: 0 18px;
-        font-size: 15px;
-        border-radius: 5px;
-      }
+    .job-candidate-bottom-bar .v-button {
+      height: 40px;
+      min-width: 108px;
+      padding: 0 18px;
+      font-size: 15px;
+      border-radius: 5px;
+    }
 
-      .job-candidate-primary-action {
-        min-width: 190px;
-        font-weight: 700;
-        box-shadow: 0 3px 10px rgba(35, 101, 183, .18);
-      }
+    .job-candidate-bottom-bar .job-candidate-primary-action {
+      min-width: 190px;
+      font-weight: 700;
+      box-shadow: 0 3px 10px rgba(35, 101, 183, .18);
+    }
 
-      .job-candidate-secondary-action {
-        color: #334155 !important;
-        background: #fff !important;
-        border: 1px solid #cbd5e1 !important;
-        box-shadow: none !important;
-      }
+    .job-candidate-bottom-bar .job-candidate-secondary-action {
+      color: #334155 !important;
+      background: #fff !important;
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: none !important;
     }
   }
 
@@ -686,13 +676,11 @@
       .job-candidate-form-grid td:first-child {
         width: 112px !important;
         min-width: 112px !important;
-        max-width: 112px !important;
       }
 
       .job-candidate-form-row > .v-slot:first-child {
         width: 128px !important;
         min-width: 128px !important;
-        max-width: 128px !important;
       }
     }
   }
