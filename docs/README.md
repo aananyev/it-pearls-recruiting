@@ -24,6 +24,7 @@
 | Роль | Начать здесь |
 | ---- | ------------ |
 | Разработчик | [entities/](entities/), [screens/](screens/), [services/](services/) |
+| Диагностика разбора резюме и OOM | [services/PdfParserService.md](services/PdfParserService.md) |
 | DBA | [database/](database/) и [deployment/database-migration/](../deployment/database-migration/) |
 | Тестировщик | [operations/](operations/), [reports/](reports/), [deployment/database-migration/validation/](../deployment/database-migration/validation/) |
 | Администратор | [operations/](operations/) и [deployment/production-deployment/runbooks/](../deployment/production-deployment/runbooks/) |
