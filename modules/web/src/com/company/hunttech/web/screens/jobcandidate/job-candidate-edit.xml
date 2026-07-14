@@ -367,6 +367,30 @@
                 <hbox id="skillBox" visible="false"/>
             </vbox>
 
+                <!-- Legacy-контейнеры сохраняют XML-контракт @Inject контроллера.
+                     Не удалять даже если они скрыты — без них
+                     CUBA не сможет внедрить компоненты в Java-контроллер. -->
+                <groupBox id="lastProjects"
+                          visible="false"
+                          caption="msg://msgLastProject"/>
+                <grid id="dictionatysTavlesHBox"
+                      visible="false"
+                      spacing="true">
+                    <columns count="2"/>
+                    <rows>
+                        <row>
+                            <table id="lastProjectTable"
+                                   visible="false"
+                                   width="100%"/>
+                        </row>
+                        <row>
+                            <table id="suggestVacancyTable"
+                                   visible="false"
+                                   width="100%"/>
+                        </row>
+                    </rows>
+                </grid>
+
             <!-- ===== WORKSPACE ===== -->
             <vbox id="jobCandidateWorkspace"
                   width="100%"
