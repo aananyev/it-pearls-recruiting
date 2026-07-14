@@ -1,0 +1,200 @@
+name: Apply JobCandidateEdit main fields layout
+
+on:
+  push:
+    branches:
+      - agent/job-candidate-edit-layout-fix
+    paths:
+      - '.github/workflows/apply-job-candidate-main-fields-layout.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-layout:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/job-candidate-edit-layout-fix
+          fetch-depth: 0
+
+      - name: Apply XML, SCSS and documentation changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          xml_path = Path('modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml')
+          xml = xml_path.read_text(encoding='utf-8')
+
+          fields = {
+              ('suggestionField', 'firstNameField'): 'job-candidate-main-wide-field job-candidate-suggestion-field',
+              ('suggestionField', 'middleNameField'): 'job-candidate-main-wide-field job-candidate-suggestion-field',
+              ('suggestionField', 'secondNameField'): 'job-candidate-main-wide-field job-candidate-suggestion-field',
+              ('lookupPickerField', 'personPositionField'): 'job-candidate-main-wide-field',
+              ('suggestionPickerField', 'currentCompanyField'): 'job-candidate-main-wide-field',
+          }
+
+          for (tag, component_id), style in fields.items():
+              opening = re.compile(
+                  rf'(<{tag}\s+id="{component_id}"(?:(?!>).)*?\n)(\s*)width="100%"',
+                  re.S,
+              )
+              if f'id="{component_id}"' not in xml:
+                  raise SystemExit(f'Не найден компонент {component_id}')
+              segment_start = xml.index(f'id="{component_id}"')
+              segment = xml[segment_start:segment_start + 700]
+              if 'job-candidate-main-wide-field' in segment:
+                  continue
+              xml, count = opening.subn(
+                  lambda m: m.group(1) + m.group(2) + f'stylename="{style}"\n' + m.group(2) + 'width="100%"',
+                  xml,
+                  count=1,
+              )
+              if count != 1:
+                  raise SystemExit(f'Не удалось назначить локальный стиль {component_id}')
+
+          xml_path.write_text(xml, encoding='utf-8')
+
+          scss_paths = [
+              Path(f'modules/web/themes/{theme}/com.company.hunttech/job-candidate-editor.scss')
+              for theme in ('halo', 'hover', 'havana', 'helium')
+          ]
+
+          old_label_column = '''    .job-candidate-form-grid td:first-child {
+              width: 154px !important;
+              min-width: 154px !important;
+              max-width: 154px !important;
+              padding-right: 14px !important;
+            }'''
+          new_label_column = '''    .job-candidate-form-grid td:first-child {
+              width: 118px !important;
+              min-width: 118px !important;
+              max-width: 118px !important;
+              padding-right: 8px !important;
+            }'''
+
+          old_media_column = '''      .job-candidate-form-grid td:first-child,
+                .job-candidate-form-row > .v-slot:first-child {
+              width: 128px !important;
+              min-width: 128px !important;
+              max-width: 128px !important;
+            }'''
+          new_media_column = '''      .job-candidate-form-grid td:first-child,
+                .job-candidate-form-row > .v-slot:first-child {
+              width: 112px !important;
+              min-width: 112px !important;
+              max-width: 112px !important;
+            }'''
+
+          field_block = r'''
+
+            /* Основная вкладка: поля располагаются ближе к подписям и занимают
+               всю вторую колонку. Правила ограничены локальными style names. */
+            .job-candidate-main-wide-field,
+            .v-slot-job-candidate-main-wide-field,
+            .v-slot-job-candidate-main-wide-field > .v-widget,
+            .job-candidate-form-grid td:nth-child(2) .v-gridlayout-slot,
+            .job-candidate-form-grid td:nth-child(2) .v-gridlayout-slot > .v-widget {
+              width: 100% !important;
+              min-width: 0 !important;
+              max-width: none !important;
+            }
+
+            .job-candidate-main-wide-field .v-csslayout,
+            .job-candidate-main-wide-field .v-horizontallayout,
+            .job-candidate-main-wide-field .c-pickerfield,
+            .job-candidate-main-wide-field .c-picker-field,
+            .job-candidate-main-wide-field .c-suggestionfield,
+            .job-candidate-main-wide-field .c-suggestion-field,
+            .job-candidate-main-wide-field .c-suggestionpickerfield,
+            .job-candidate-main-wide-field .c-suggestion-picker-field,
+            .job-candidate-main-wide-field .v-filterselect,
+            .job-candidate-main-wide-field .v-textfield {
+              width: 100% !important;
+              min-width: 0 !important;
+              max-width: none !important;
+            }
+
+            .job-candidate-suggestion-field,
+            .job-candidate-suggestion-field .v-textfield,
+            .job-candidate-suggestion-field input,
+            .job-candidate-form-grid td:nth-child(2) .c-suggestionfield .v-textfield,
+            .job-candidate-form-grid td:nth-child(2) .c-suggestion-field .v-textfield {
+              height: 38px !important;
+              font-size: 16px !important;
+              line-height: 38px !important;
+            }
+
+            .job-candidate-form-grid td:nth-child(2) {
+              padding-left: 0 !important;
+            }
+'''
+
+          for path in scss_paths:
+              text = path.read_text(encoding='utf-8')
+              if old_label_column not in text:
+                  raise SystemExit(f'Не найден исходный блок ширины labels: {path}')
+              text = text.replace(old_label_column, new_label_column, 1)
+
+              if old_media_column not in text:
+                  raise SystemExit(f'Не найден responsive-блок ширины labels: {path}')
+              text = text.replace(old_media_column, new_media_column, 1)
+
+              if 'Основная вкладка: поля располагаются ближе к подписям' not in text:
+                  marker = '    /* Таблицы */'
+                  if marker not in text:
+                      raise SystemExit(f'Не найден маркер вставки SCSS: {path}')
+                  text = text.replace(marker, field_block + '\n' + marker, 1)
+
+              if text.count('{') != text.count('}'):
+                  raise SystemExit(f'Несбалансированные фигурные скобки: {path}')
+              path.write_text(text, encoding='utf-8')
+
+          docs_path = Path('docs/ui/JobCandidateEdit_Spec.md')
+          docs = docs_path.read_text(encoding='utf-8')
+          old_main = '''- внутренний `GridLayout` принудительно растягивается на 100%;
+          - первая колонка подписей фиксирована, вторая колонка полей занимает оставшуюся ширину;
+          - поля и их Vaadin wrappers имеют ширину 100% и высоту 38 px.'''
+          new_main = '''- внутренний `GridLayout` принудительно растягивается на 100%;
+          - колонка подписей уменьшена до 118 px, поэтому поля расположены ближе к labels;
+          - `firstNameField`, `middleNameField`, `secondNameField`, `personPositionField` и `currentCompanyField` получили локальный style name `job-candidate-main-wide-field`;
+          - поля занимают всю вторую колонку и визуально увеличены более чем вдвое относительно прежней ширины по содержимому;
+          - шрифт SuggestionField ФИО установлен 16 px, как у `jobCityCandidateField`;
+          - все Vaadin wrappers сохраняют ширину 100% и высоту 38 px.'''
+          if old_main not in docs:
+              raise SystemExit('Не найден раздел документации вкладки Основное')
+          docs = docs.replace(old_main, new_main, 1)
+
+          history_header = '''| Дата | Изменение |
+          |---|---|'''
+          history_row = '| 2026-07-14 | Увеличены и приближены к подписям поля ФИО, должности и компании; шрифт SuggestionField синхронизирован с остальными полями вкладки «Основное» во всех темах. |'
+          if history_row not in docs:
+              docs = docs.replace(history_header, history_header + '\n' + history_row, 1)
+          docs_path.write_text(docs, encoding='utf-8')
+          PY
+
+          git diff --check
+
+      - name: Commit completed layout fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/apply-job-candidate-main-fields-layout.yml
+
+          git config user.name "OpenAI Developer"
+          git config user.email "openai-developer@users.noreply.github.com"
+          git add -A
+          git commit \
+            -m "fix(job-candidate): увеличить основные поля формы" \
+            -m "- синхронизировать шрифт SuggestionField ФИО с остальными полями
+          - сократить расстояние между подписями и полями
+          - растянуть поля ФИО, должности и компании на вторую колонку
+          - применить изменения к Halo, Hover, Havana и Helium
+          - обновить документацию JobCandidateEdit"
+          git push origin HEAD:agent/job-candidate-edit-layout-fix
