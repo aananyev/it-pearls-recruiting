@@ -7,6 +7,11 @@
 #   IDE / Gradle:      project deploy directory or custom path via -Dapp.home
 ###############################################################################
 
+# На локальной машине планировщик временно отключён для диагностики OOM.
+# Это исключает параллельный запуск cuba_FtsManager.processQueue и других
+# scheduled tasks во время проверки JobCandidateEdit. Production не менять.
+cuba.schedulingActive=false
+
 # Uncomment and adjust if fileStorage is not under ${app.home}/fileStorage:
 # cuba.fileStorageDir=/path/to/your/fileStorage
 # cuba.tempDir=/path/to/your/fileStorage/temp
