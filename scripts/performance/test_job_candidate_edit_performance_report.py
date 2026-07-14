@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import importlib.util
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -9,6 +10,7 @@ SCRIPT = Path(__file__).with_name("job_candidate_edit_performance_report.py")
 SPEC = importlib.util.spec_from_file_location("job_candidate_edit_performance_report", SCRIPT)
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
+sys.modules[SPEC.name] = MODULE
 SPEC.loader.exec_module(MODULE)
 
 

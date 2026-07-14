@@ -11,7 +11,7 @@ import sys
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 PREFIX = "JOB_CANDIDATE_EDIT_PERF|"
 TOTAL_PHASE = "screen.visible.total"
@@ -28,7 +28,7 @@ class Record:
     thread: str
 
 
-def parse_record(line: str, line_no: int) -> Record | None:
+def parse_record(line: str, line_no: int) -> Optional[Record]:
     marker = line.find(PREFIX)
     if marker < 0:
         return None
@@ -70,7 +70,7 @@ def remove_warmup(records: Sequence[Record], warmup_opens: int) -> List[Record]:
         return list(records)
 
     opens_by_candidate: Dict[str, List[str]] = defaultdict(list)
-    seen: Dict[str, set[str]] = defaultdict(set)
+    seen: Dict[str, Set[str]] = defaultdict(set)
     for record in records:
         if record.open_id not in seen[record.candidate_id]:
             seen[record.candidate_id].add(record.open_id)
@@ -176,7 +176,7 @@ def write_csv(path: Path, rows: Sequence[dict]) -> None:
             writer.writerow(output)
 
 
-def format_optional_ms(value: float | None) -> str:
+def format_optional_ms(value: Optional[float]) -> str:
     return "нет данных" if value is None else f"{value:.3f}"
 
 
@@ -276,7 +276,7 @@ def write_markdown(path: Path,
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def main(argv: Sequence[str] | None = None) -> int:
+def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--log", required=True, type=Path, help="Лог Tomcat/CUBA")
     parser.add_argument("--markdown", required=True, type=Path, help="Итоговый Markdown")
