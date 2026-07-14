@@ -12,12 +12,28 @@ PROJECT_MARKER="hunttech_recruiting/deploy/tomcat"
 LOCAL_APP_HOME="${LOCAL_APP_HOME:-$ROOT/deploy/tomcat/app_home}"
 LOCAL_APP_PROPERTIES="$LOCAL_APP_HOME/local.app.properties"
 LOCAL_SCHEDULING_ACTIVE="${LOCAL_SCHEDULING_ACTIVE:-false}"
+LOCAL_JAVA_XMS="${LOCAL_JAVA_XMS:-1024m}"
+LOCAL_JAVA_XMX="${LOCAL_JAVA_XMX:-4096m}"
+HEAP_DUMP_DIR="${HEAP_DUMP_DIR:-$ROOT/deploy/tomcat/logs/heapdumps}"
+GC_LOG_FILE="${GC_LOG_FILE:-$ROOT/deploy/tomcat/logs/gc.log}"
+JVM_DIAGNOSTICS_DIR="${JVM_DIAGNOSTICS_DIR:-$ROOT/deploy/tomcat/logs/diagnostics}"
 
 log() { printf '%s\n' "$*"; }
 
 is_project_java() {
   local pid="$1"
   ps -p "$pid" -o command= 2>/dev/null | grep -q "$PROJECT_MARKER"
+}
+
+find_project_pid() {
+  local pid
+  for pid in $(pgrep -f "$PROJECT_MARKER" 2>/dev/null || true); do
+    if is_project_java "$pid"; then
+      printf '%s\n' "$pid"
+      return 0
+    fi
+  done
+  return 1
 }
 
 kill_stale_project_tomcat() {
@@ -71,6 +87,23 @@ ensure_postgres() {
   exit 1
 }
 
+clean_deployment() {
+  log "Удаляю старые exploded-приложения и кэш Tomcat..."
+  rm -rf \
+    "$ROOT/deploy/tomcat/webapps/app" \
+    "$ROOT/deploy/tomcat/webapps/app-core" \
+    "$ROOT/deploy/tomcat/webapps/hrm" \
+    "$ROOT/deploy/tomcat/webapps/hrm-core" \
+    "$ROOT/deploy/tomcat/work/Catalina/localhost/app" \
+    "$ROOT/deploy/tomcat/work/Catalina/localhost/app-core" \
+    "$ROOT/deploy/tomcat/work/Catalina/localhost/hrm" \
+    "$ROOT/deploy/tomcat/work/Catalina/localhost/hrm-core"
+
+  if [ -d "$ROOT/deploy/tomcat/temp" ]; then
+    find "$ROOT/deploy/tomcat/temp" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+  fi
+}
+
 ensure_local_app_properties() {
   local temp_file
   mkdir -p "$LOCAL_APP_HOME"
@@ -101,6 +134,24 @@ ensure_local_app_properties() {
   log "Файл: $LOCAL_APP_PROPERTIES"
 }
 
+configure_jvm_diagnostics() {
+  mkdir -p "$HEAP_DUMP_DIR" "$(dirname "$GC_LOG_FILE")" "$JVM_DIAGNOSTICS_DIR"
+
+  # Параметры добавляются последними: диагностические значения имеют приоритет
+  # над случайно оставшимися локальными -Xms/-Xmx.
+  CATALINA_OPTS="${CATALINA_OPTS:-} \
+-Xms${LOCAL_JAVA_XMS} \
+-Xmx${LOCAL_JAVA_XMX} \
+-XX:+HeapDumpOnOutOfMemoryError \
+-XX:HeapDumpPath=${HEAP_DUMP_DIR} \
+-Xlog:gc*:file=${GC_LOG_FILE}:time,uptime,level,tags:filecount=5,filesize=20M"
+  export CATALINA_OPTS
+
+  log "JVM heap: -Xms${LOCAL_JAVA_XMS} -Xmx${LOCAL_JAVA_XMX}"
+  log "Heap dumps: $HEAP_DUMP_DIR"
+  log "GC log: $GC_LOG_FILE"
+}
+
 wait_for_http() {
   local elapsed=0 code
   log "Ожидание ответа $APP_URL (таймаут ${WAIT_TIMEOUT} с, warmup CUBA 1–5 мин)..."
@@ -120,15 +171,43 @@ wait_for_http() {
   exit 1
 }
 
+write_jvm_diagnostics() {
+  local pid
+  if ! command -v jcmd >/dev/null 2>&1; then
+    log "jcmd не найден — JVM diagnostics пропущены."
+    return 0
+  fi
+  pid="$(find_project_pid || true)"
+  if [ -z "$pid" ]; then
+    log "PID Tomcat не найден — JVM diagnostics пропущены."
+    return 0
+  fi
+
+  jcmd "$pid" VM.command_line > "$JVM_DIAGNOSTICS_DIR/jvm-command-line.txt" 2>&1 || true
+  jcmd "$pid" VM.flags > "$JVM_DIAGNOSTICS_DIR/jvm-flags.txt" 2>&1 || true
+  jcmd "$pid" GC.heap_info > "$JVM_DIAGNOSTICS_DIR/heap-info.txt" 2>&1 || true
+  jcmd "$pid" GC.class_histogram > "$JVM_DIAGNOSTICS_DIR/class-histogram-startup.txt" 2>&1 || true
+  log "JVM diagnostics: $JVM_DIAGNOSTICS_DIR"
+}
+
 ensure_postgres
 kill_stale_project_tomcat
-ensure_local_app_properties
 
 log "Gradle stop (ошибки игнорируются)..."
 ./gradlew stop >/dev/null 2>&1 || true
 
-log "Gradle deploy start -x test ..."
-./gradlew deploy start -x test
+clean_deployment
+
+log "Чистая сборка и deploy без запуска тестов..."
+./gradlew clean deploy -x test
+
+# app_home и JVM-параметры задаются после deploy, чтобы их не затронула очистка.
+ensure_local_app_properties
+configure_jvm_diagnostics
+
+log "Запуск Tomcat..."
+./gradlew start
 
 log "URL: $APP_URL"
 wait_for_http
+write_jvm_diagnostics
