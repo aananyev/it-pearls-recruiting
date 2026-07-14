@@ -187,3 +187,5 @@ jobs:
                      -m "- направить expand вкладок на непосредственные дочерние контейнеры" \
                      -m "- обновить документацию редизайна JobCandidateEdit"
           git push origin HEAD:agent/job-candidate-edit-layout-fix
+
+# Повторный push для запуска workflow после его появления в ветке.
