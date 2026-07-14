@@ -35,6 +35,14 @@ jobs:
                           positions.add(positionLists.getPositionList());
                       }
                   }'''
+          # Нормализуем только ожидаемый уровень отступа тела цикла.
+          old = old.replace('                      positions', '                    positions')
+          old = old.replace('                  }', '                }')
+          new = new.replace('                      //', '                    //')
+          new = new.replace('                      if', '                    if')
+          new = new.replace('                          positions', '                        positions')
+          new = new.replace('                      }', '                    }')
+          new = new.replace('                  }', '                }')
           if text.count(old) != 1:
               raise SystemExit(f'Ожидалось одно совпадение, найдено {text.count(old)}')
           path.write_text(text.replace(old, new, 1), encoding='utf-8')
