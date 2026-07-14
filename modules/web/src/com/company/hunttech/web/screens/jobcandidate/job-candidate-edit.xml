@@ -180,9 +180,10 @@
 
             <!-- ===== SIDEBAR ===== -->
             <vbox id="jobCandidateSidebar"
-                  width="260px"
+                  width="312px"
                   height="100%"
                   spacing="true"
+                  expand="candidateSidebarSpacer"
                   stylename="job-candidate-sidebar">
 
                 <!-- Profile Header: photo + name + position -->
@@ -196,15 +197,15 @@
                             <image id="candidatePic"
                                    dataContainer="jobCandidateDc"
                                    property="fileImageFace"
-                                   width="112px" height="112px"
+                                   width="176px" height="176px"
                                    align="TOP_CENTER"
                                    stylename="job-candidate-avatar"
-                                   scaleMode="FILL"/>
+                                   scaleMode="SCALE_DOWN"/>
                             <image id="candidateDefaultPic"
-                                   width="112px" height="112px"
+                                   width="176px" height="176px"
                                    align="TOP_CENTER"
                                    stylename="job-candidate-avatar"
-                                   scaleMode="FILL">
+                                   scaleMode="SCALE_DOWN">
                                 <theme path="icons/no-programmer.jpeg"/>
                             </image>
                         </vbox>
@@ -229,7 +230,7 @@
                 <vbox id="candidateProfileSummary"
                       width="100%"
                       spacing="true"
-                      stylename="job-candidate-profile-summary">
+                      stylename="job-candidate-profile-summary job-candidate-sidebar-card">
                     <hbox id="statusRatingRow"
                           width="100%"
                           spacing="false"
@@ -238,10 +239,10 @@
                                stylename="h3"
                                align="MIDDLE_LEFT"/>
                         <label id="labelQualityPercent"
-                               align="MIDDLE_CENTER"
-                               stylename="h3"/>
+                               align="MIDDLE_RIGHT"
+                               stylename="job-candidate-quality"/>
                     </hbox>
-                    <grid id="profileInfoGrid" spacing="true" width="100%" stylename="job-candidate-info-grid">
+                    <grid id="profileInfoGrid" spacing="true" width="100%" stylename="job-candidate-info-grid job-candidate-sidebar-grid">
                         <columns count="2"/>
                         <rows>
                             <row>
@@ -270,7 +271,7 @@
                 <vbox id="candidateProfileContacts"
                       width="100%"
                       spacing="true"
-                      stylename="job-candidate-profile-contacts">
+                      stylename="job-candidate-profile-contacts job-candidate-sidebar-card">
                     <grid spacing="true" width="100%">
                         <columns count="2"/>
                         <rows>
@@ -336,6 +337,12 @@
                             stylename="job-candidate-nav-item"/>
                 </vbox>
 
+                <!-- Свободное пространство прижимает HR-Мастер к нижней границе sidebar. -->
+                <vbox id="candidateSidebarSpacer"
+                      width="100%"
+                      height="100%"
+                      stylename="job-candidate-sidebar-spacer"/>
+
                 <!-- Quick Actions -->
                 <vbox id="candidateProfileFooter"
                       width="100%"
@@ -363,8 +370,6 @@
                 <label id="telegramLabel" visible="false"/>
                 <linkButton id="skypeLinkButton" visible="false"/>
                 <linkButton id="telegrammGroupLinkButton" visible="false"/>
-                <label id="labelQualityPercent" visible="false"/>
-                <label id="labelCV" visible="false"/>
                 <label id="personPositionTitle" visible="false"/>
                 <label id="emailTitle" visible="false"/>
                 <label id="phoneTitle" visible="false"/>
@@ -401,66 +406,47 @@
             <vbox id="jobCandidateWorkspace"
                   width="100%"
                   height="100%"
-                  spacing="true"
+                  spacing="false"
                   expand="tabSheetSocialNetworks"
                   stylename="job-candidate-workspace">
 
-                <!-- Top Bar: современная панель действий -->
+                <!-- Верхняя панель: служебная информация слева, меню «Еще» справа. -->
                 <hbox id="jobCandidateTopBar"
                       width="100%"
                       spacing="true"
+                      expand="jobCandidateAuditBox"
                       align="MIDDLE_LEFT"
                       stylename="job-candidate-top-bar">
-
-                    <hbox id="jobCandidateTopBarPrimary"
-                          spacing="true"
-                          align="MIDDLE_LEFT"
-                          expand="createdByLabel">
-                        <hbox id="createdByLabel"
-                              spacing="true"
-                              expand="createdUpdatedLabel"
-                              align="MIDDLE_LEFT"
-                              width="100%">
-                            <label id="createdUpdatedLabel"
-                                   align="BOTTOM_LEFT"
-                                   stylename="small"/>
-                        </hbox>
-                    </hbox>
-
-                    <hbox id="jobCandidateTopBarSecondary"
+                    <hbox id="jobCandidateAuditBox"
                           width="100%"
                           spacing="true"
-                          align="MIDDLE_RIGHT"
-                          stylename="job-candidate-top-bar-secondary">
-                        <button id="windowCommitAndCloseButton"
-                                action="windowCommitAndClose"
-                                caption="Сохранить и закрыть"
-                                stylename="primary"
-                                align="MIDDLE_RIGHT"/>
-                        <button action="windowClose"
-                                caption="Отмена"
-                                stylename="default"
-                                align="MIDDLE_RIGHT"/>
-                        <popupButton id="moreActionsPopUpButton"
-                                     caption="Еще"
-                                     align="MIDDLE_RIGHT">
-                            <popup>
-                                <vbox spacing="true">
-                                    <button id="blockCandidateButton"
-                                            caption="msg://msgBlockCandidate"
-                                            invoke="blockCandidateButton"
-                                            icon="WINDOW_CLOSE_O"
-                                            stylename="small"/>
-                                    <button id="buttonSubscribe"
-                                            caption="msg://msgSubscribe"
-                                            invoke="onButtonSubscribeClick"
-                                            icon="BELL"
-                                            stylename="small"/>
-                                </vbox>
-                            </popup>
-                        </popupButton>
+                          expand="createdUpdatedLabel"
+                          align="MIDDLE_LEFT"
+                          stylename="job-candidate-audit-box">
+                        <label id="createdUpdatedLabel"
+                               width="100%"
+                               align="MIDDLE_LEFT"
+                               stylename="job-candidate-audit-label"/>
                     </hbox>
-
+                    <popupButton id="moreActionsPopUpButton"
+                                 caption="Еще"
+                                 align="MIDDLE_RIGHT"
+                                 stylename="job-candidate-more-actions">
+                        <popup>
+                            <vbox spacing="true">
+                                <button id="blockCandidateButton"
+                                        caption="msg://msgBlockCandidate"
+                                        invoke="blockCandidateButton"
+                                        icon="WINDOW_CLOSE_O"
+                                        stylename="small"/>
+                                <button id="buttonSubscribe"
+                                        caption="msg://msgSubscribe"
+                                        invoke="onButtonSubscribeClick"
+                                        icon="BELL"
+                                        stylename="small"/>
+                            </vbox>
+                        </popup>
+                    </popupButton>
                 </hbox>
 
                 <!-- TabSheet -->
@@ -497,8 +483,14 @@
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
-                                      stylename="job-candidate-card">
-                                    <grid id="personalDataGrid" spacing="true" width="100%">
+                                      stylename="job-candidate-card job-candidate-half-card">
+                                    <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
+                                        <label value="Персональные данные" stylename="job-candidate-card-title"/>
+                                    </hbox>
+                                    <grid id="personalDataGrid"
+                                          spacing="true"
+                                          width="100%"
+                                          stylename="job-candidate-form-grid">
                                         <columns count="2"/>
                                         <rows>
                                             <row>
@@ -582,8 +574,14 @@
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
-                                      stylename="job-candidate-card">
-                                    <grid id="professionalDataGrid" spacing="true" width="100%">
+                                      stylename="job-candidate-card job-candidate-half-card">
+                                    <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
+                                        <label value="Профессиональные данные" stylename="job-candidate-card-title"/>
+                                    </hbox>
+                                    <grid id="professionalDataGrid"
+                                          spacing="true"
+                                          width="100%"
+                                          stylename="job-candidate-form-grid">
                                         <columns count="2"/>
                                         <rows>
                                             <row>
@@ -658,32 +656,35 @@
                                 <hbox width="100%" spacing="true" stylename="job-candidate-card-row">
                                     <!-- Основные контакты -->
                                     <vbox id="jobCandidateMainContacts"
-                                          width="50%" height="AUTO"
+                                          width="100%" height="AUTO"
                                           spacing="true"
                                           box.expandRatio="1"
-                                          stylename="job-candidate-card">
-                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                                          stylename="job-candidate-card job-candidate-half-card job-candidate-contact-card">
+                                        <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
+                                            <label value="Основные контакты" stylename="job-candidate-card-title"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="emailField" stylename="job-candidate-form-row">
                                             <label value="Email" stylename="small" width="80px"/>
                                             <textField id="emailField"
                                                        dataContainer="jobCandidateDc"
                                                        property="email"
                                                        width="100%"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="phoneField" stylename="job-candidate-form-row">
                                             <label value="Телефон" stylename="small" width="80px"/>
                                             <textField id="phoneField"
                                                        dataContainer="jobCandidateDc"
                                                        property="phone"
                                                        width="100%"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="mobilePhoneField" stylename="job-candidate-form-row">
                                             <label value="Моб. телефон" stylename="small" width="80px"/>
                                             <textField id="mobilePhoneField"
                                                        dataContainer="jobCandidateDc"
                                                        property="mobilePhone"
                                                        width="100%"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="telegramNameField" stylename="job-candidate-form-row">
                                             <label value="Telegram" stylename="small" width="80px"/>
                                             <textField id="telegramNameField"
                                                        dataContainer="jobCandidateDc"
@@ -693,39 +694,42 @@
                                     </vbox>
                                     <!-- Дополнительные контакты + Приоритет -->
                                     <vbox id="jobCandidateAdditionalContacts"
-                                          width="50%" height="AUTO"
+                                          width="100%" height="AUTO"
                                           spacing="true"
                                           box.expandRatio="1"
-                                          stylename="job-candidate-card">
-                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                                          stylename="job-candidate-card job-candidate-half-card job-candidate-contact-card">
+                                        <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
+                                            <label value="Дополнительные контакты" stylename="job-candidate-card-title"/>
+                                        </hbox>
+                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="telegramGroupField" stylename="job-candidate-form-row">
                                             <label value="Telegram-группа" stylename="small" width="100px"/>
                                             <textField id="telegramGroupField"
                                                        dataContainer="jobCandidateDc"
                                                        property="telegramGroup"
                                                        width="100%"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="whatsupNameField" stylename="job-candidate-form-row">
                                             <label value="WhatsApp" stylename="small" width="100px"/>
                                             <textField id="whatsupNameField"
                                                        dataContainer="jobCandidateDc"
                                                        property="whatsupName"
                                                        width="100%"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="wiberNameField" stylename="job-candidate-form-row">
                                             <label value="Viber" stylename="small" width="100px"/>
                                             <textField id="wiberNameField"
                                                        dataContainer="jobCandidateDc"
                                                        property="wiberName"
                                                        width="100%"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="skypeNameField" stylename="job-candidate-form-row">
                                             <label value="Skype" stylename="small" width="100px"/>
                                             <textField id="skypeNameField"
                                                        dataContainer="jobCandidateDc"
                                                        property="skypeName"
                                                        width="100%"/>
                                         </hbox>
-                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="priorityCommunicationMethodRadioButton" stylename="job-candidate-form-row">
                                             <label value="Приоритетный способ" stylename="small" width="100px"/>
                                             <radioButtonGroup id="priorityCommunicationMethodRadioButton"
                                                               width="100%"
@@ -1131,11 +1135,17 @@
                                 <rows>
                                     <row>
                                         <label value="Создал" stylename="small"/>
-                                        <label id="createdByLabel" stylename="small"/>
+                                        <label id="historyCreatedByLabel"
+                                               dataContainer="jobCandidateDc"
+                                               property="createdBy"
+                                               stylename="small"/>
                                     </row>
                                     <row>
                                         <label value="Дата создания" stylename="small"/>
-                                        <label id="createdUpdatedLabel" stylename="small"/>
+                                        <label id="historyCreateTsLabel"
+                                               dataContainer="jobCandidateDc"
+                                               property="createTs"
+                                               stylename="small"/>
                                     </row>
                                 </rows>
                             </grid>
@@ -1145,6 +1155,23 @@
                         </vbox></tab>
 
                 </tabSheet>
+
+                <!-- Нижняя панель основных действий. -->
+                <hbox id="jobCandidateBottomBar"
+                      width="100%"
+                      spacing="true"
+                      align="MIDDLE_RIGHT"
+                      stylename="job-candidate-bottom-bar">
+                    <button id="windowCommitAndCloseButton"
+                            action="windowCommitAndClose"
+                            caption="Сохранить и закрыть"
+                            stylename="primary job-candidate-primary-action"
+                            align="MIDDLE_RIGHT"/>
+                    <button action="windowClose"
+                            caption="Отмена"
+                            stylename="default job-candidate-secondary-action"
+                            align="MIDDLE_RIGHT"/>
+                </hbox>
             </vbox>
         </hbox>
     </layout>
