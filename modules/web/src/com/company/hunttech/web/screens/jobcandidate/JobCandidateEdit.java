@@ -125,6 +125,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private BackgroundWorker backgroundWorker;
     @Inject
     private Logger log;
+    // Диагностический профайлер включается только системным свойством и
+    // не изменяет штатное поведение экрана при обычном запуске.
+    private JobCandidateEditPerformanceProbe startupPerformanceProbe;
     @Inject
     private SuggestionField<String> firstNameField;
     @Inject
@@ -658,17 +661,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
-        setPercentLabel();
+        long onAfterShowStarted = startupPerformanceProbe.begin();
+        startupPerformanceProbe.measure("onAfterShow.percentLabel", this::setPercentLabel);
 
-        Boolean b = getEditedEntity().getBlockCandidate() == null ?
-                false : blockCandidateCheckBox.getValue();
-        setBlockUnblockButton(b);
+        startupPerformanceProbe.measure("onAfterShow.blockButton", () -> {
+            Boolean blocked = getEditedEntity().getBlockCandidate() == null
+                    ? false : blockCandidateCheckBox.getValue();
+            setBlockUnblockButton(blocked);
+        });
 
-        // Запуск фоновой загрузки и анализа резюме для блока навыков (Skillsbar).
-        // Операция вынесена из onBeforeShow, чтобы SQL-запрос полного textCV
-        // и сопоставление навыков не блокировали открытие формы.
-        // UI-компоненты Skillsbar создаются только в done() BackgroundTask.
-        startSkillsBackgroundLoading();
+        // Измеряется только постановка фоновой задачи. Её дальнейшая нагрузка
+        // фиксируется JFR и не включается во время до первого отображения формы.
+        startupPerformanceProbe.measure(
+                "onAfterShow.startSkillsBackgroundLoading",
+                this::startSkillsBackgroundLoading);
+        startupPerformanceProbe.record("onAfterShow.total", onAfterShowStarted);
+        startupPerformanceProbe.finish();
     }
 
     @Subscribe
@@ -731,50 +739,53 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onAfterShow1(AfterShowEvent event) {
     }
 
-    // загрузить таблицу взаимодействий
+    // Загрузка и подготовка обязательных данных перед отображением формы.
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        // Heavy comments data is loaded lazily from initTabComments() when the user opens the tab.
-        // если есть резюме, то поставить галку
-        if (!PersistenceHelper.isNew(getEditedEntity())) {
-            if (!hasCandidateCv()) {
-                labelCV.setValue("Резюме: НЕТ");
-            } else {
-                labelCV.setValue("Резюме: ДА");
+        startupPerformanceProbe.setCandidateId(
+                getEditedEntity().getId() == null ? "new" : getEditedEntity().getId().toString());
+        // Интервал включает @LoadDataBeforeShow, загрузку jobCandidateDl и entity view.
+        startupPerformanceProbe.checkpoint("framework.autoLoadGap");
+        long onBeforeShowStarted = startupPerformanceProbe.begin();
+
+        startupPerformanceProbe.measure("onBeforeShow.hasCandidateCv", () -> {
+            if (!PersistenceHelper.isNew(getEditedEntity())) {
+                labelCV.setValue(hasCandidateCv() ? "Резюме: ДА" : "Резюме: НЕТ");
             }
-        }
+        });
 
-        // обнулить статус для вновь создаваемного кандидата
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            getEditedEntity().setStatus(0);
-        }
+        startupPerformanceProbe.measure("onBeforeShow.initializeNewStatus", () -> {
+            if (PersistenceHelper.isNew(getEditedEntity())) {
+                getEditedEntity().setStatus(0);
+            }
+        });
 
-        setSaveRecordOfViewCandidate();
+        startupPerformanceProbe.measure("onBeforeShow.saveViewAudit", this::setSaveRecordOfViewCandidate);
+        startupPerformanceProbe.measure("onBeforeShow.enableDisableContacts", this::enableDisableContacts);
+        startupPerformanceProbe.measure("onBeforeShow.labelTitles", this::setLabelTitle);
+        startupPerformanceProbe.measure("onBeforeShow.createdUpdatedLabel", this::setCreatedUpdatedLabel);
+        startupPerformanceProbe.measure("onBeforeShow.rating", () -> setRatingLabel(getEditedEntity()));
 
-        enableDisableContacts();
-        setLabelTitle();
-        setCreatedUpdatedLabel();
-        setRatingLabel(getEditedEntity());
+        startupPerformanceProbe.measure("onBeforeShow.emailLink", this::setLinkButtonEmail);
+        startupPerformanceProbe.measure("onBeforeShow.telegramLink", this::setLinkButtonTelegrem);
+        startupPerformanceProbe.measure("onBeforeShow.telegramGroupLink", this::setLinkButtonTelegremGroup);
+        startupPerformanceProbe.measure("onBeforeShow.skypeLink", this::setLinkButtonSkype);
 
-        setLinkButtonEmail();
-        setLinkButtonTelegrem();
-        setLinkButtonTelegremGroup();
-        setLinkButtonSkype();
+        startupPerformanceProbe.measure("onBeforeShow.candidateImage", this::setCandidatePicImage);
+        startupPerformanceProbe.measure("onBeforeShow.telegramNormalization", this::checkTelegramName);
 
-        setCandidatePicImage();
-        checkTelegramName();
-
-        lastIteraction = interactionService.getLastIteraction(getEditedEntity());
+        lastIteraction = startupPerformanceProbe.measure(
+                "onBeforeShow.lastInteraction",
+                () -> interactionService.getLastIteraction(getEditedEntity()));
         lastIteractionLoaded = true;
 
-        if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
-                getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
-            blockCandidateButton.setVisible(true);
-        } else {
-            blockCandidateButton.setVisible(false);
-        }
+        Boolean canBlockCandidate = startupPerformanceProbe.measure(
+                "onBeforeShow.roleCheck",
+                () -> getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER)
+                        || getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR));
+        blockCandidateButton.setVisible(canBlockCandidate);
 
-//        setLaborAgreement();
+        startupPerformanceProbe.record("onBeforeShow.total", onBeforeShowStarted);
     }
 
 
@@ -1286,22 +1297,33 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onInit(InitEvent event) {
-        preventAutoLoadUntilReady(openPositionDl, () -> openPositionLoaderInitialized);
-        preventAutoLoadUntilReady(citiesDl, () -> referenceLoadersInitialized);
-        preventAutoLoadUntilReady(personPositionsLc, () -> referenceLoadersInitialized);
-        // Запросы вкладки содержат параметры кандидата и позиции, поэтому
-        // блокируем автоматическую загрузку до первого открытия вкладки.
-        preventAutoLoadUntilReady(lastProjectDl, () -> positionsTabLoaded);
-        preventAutoLoadUntilReady(suggestOpenPositionDl, () -> positionsTabLoaded);
+        startupPerformanceProbe = new JobCandidateEditPerformanceProbe(log);
+        startupPerformanceProbe.start("not-loaded");
+        long onInitStarted = startupPerformanceProbe.begin();
 
-        tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
-            initTabResume();
-            initTabInteractions();
-            initTabCandidate();
-            initTabContactInfo();
-            initTabComments();
-            initTabPositions();
+        startupPerformanceProbe.measure("onInit.loaderGuards", () -> {
+            preventAutoLoadUntilReady(openPositionDl, () -> openPositionLoaderInitialized);
+            preventAutoLoadUntilReady(citiesDl, () -> referenceLoadersInitialized);
+            preventAutoLoadUntilReady(personPositionsLc, () -> referenceLoadersInitialized);
+            // Запросы вкладки содержат параметры кандидата и позиции, поэтому
+            // блокируем автоматическую загрузку до первого открытия вкладки.
+            preventAutoLoadUntilReady(lastProjectDl, () -> positionsTabLoaded);
+            preventAutoLoadUntilReady(suggestOpenPositionDl, () -> positionsTabLoaded);
         });
+
+        startupPerformanceProbe.measure("onInit.tabListenerRegistration", () ->
+                tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
+                    // Каждая инициализация измеряется отдельно, чтобы отличить
+                    // стоимость стартовой вкладки от тяжёлых ленивых вкладок.
+                    startupPerformanceProbe.measure("tab.initTabResume", this::initTabResume);
+                    startupPerformanceProbe.measure("tab.initTabInteractions", this::initTabInteractions);
+                    startupPerformanceProbe.measure("tab.initTabCandidate", this::initTabCandidate);
+                    startupPerformanceProbe.measure("tab.initTabContactInfo", this::initTabContactInfo);
+                    startupPerformanceProbe.measure("tab.initTabComments", this::initTabComments);
+                    startupPerformanceProbe.measure("tab.initTabPositions", this::initTabPositions);
+                }));
+
+        startupPerformanceProbe.record("onInit.total", onInitStarted);
     }
 
     private <E extends Entity> void preventAutoLoadUntilReady(CollectionLoader<E> loader,
