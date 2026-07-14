@@ -368,6 +368,7 @@ git checkout e246a7bc -- modules/web/themes/*/com.company.hunttech/job-candidate
 | Дата | Изменение |
 |------|-----------|
 | 2026-07-13 | **Редизайн вариант 3:** LinkedIn-style двухпанельный layout (sidebar 260px), вертикальная навигация, top-bar, аккордеон-секции, inline-формы, единый стиль таблиц, 29 локальных SCSS-классов `job-candidate-*` |
+| 2026-07-14 | Добавлена типобезопасная перегрузка `preventAutoLoadUntilReady(KeyValueCollectionLoader, BooleanSupplier)` для блокировки `lastProjectDl` до установки обязательных параметров. |
 | 2026-07-13 | **TODO[tabPositions]:** Вкладка «Позиции и вакансии» отключена (visible=false). Java-методы закомментированы. Для восстановления: убрать visible=false в XML, раскомментировать методы в JobCandidateEdit.java |
 | 2026-06-30 | fix: удалены `laborAgreement` из view и `jobCandidateLaborAgreementDc` |
 | 2026-06-29 | Оптимизация скорости открытия вкладки tabCandidate, ленивая инициализация SuggestionFields, устранение блокирующих BackgroundTask |

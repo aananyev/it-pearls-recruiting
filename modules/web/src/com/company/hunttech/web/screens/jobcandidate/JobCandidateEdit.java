@@ -1313,6 +1313,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         });
     }
 
+    // Блокирует автоматическую загрузку KeyValue loader до установки обязательных параметров.
+    private void preventAutoLoadUntilReady(KeyValueCollectionLoader loader,
+                                            java.util.function.BooleanSupplier readySupplier) {
+        loader.addPreLoadListener(loadEvent -> {
+            if (!readySupplier.getAsBoolean()) {
+                loadEvent.preventLoad();
+            }
+        });
+    }
+
     private void ensureReferenceLoadersLoaded() {
         if (referenceLoadersInitialized) {
             return;
