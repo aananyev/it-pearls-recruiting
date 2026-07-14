@@ -113,6 +113,17 @@ public class ProjectEdit extends StandardEditor<Project> {
     private boolean projectDescriptionLoaded;
     private boolean templateLetterLoaded;
     private boolean openPositionLoaded;
+    private boolean openPositionLoaderReady;
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        // Блокирует автозагрузку вакансий до установки обязательного параметра проекта.
+        projectOpenPositionsDl.addPreLoadListener(loadEvent -> {
+            if (!openPositionLoaderReady) {
+                loadEvent.preventLoad();
+            }
+        });
+    }
 
     @Subscribe("projectTab")
     public void onProjectTabSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
@@ -149,7 +160,9 @@ public class ProjectEdit extends StandardEditor<Project> {
     }
 
     private void loadOpenPositions() {
+        // Сначала задаёт параметр JPQL, затем разрешает единственную отложенную загрузку вкладки.
         projectOpenPositionsDl.setParameter("project", getEditedEntity());
+        openPositionLoaderReady = true;
         projectOpenPositionsDl.load();
     }
 
