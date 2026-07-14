@@ -28,6 +28,7 @@ import static org.junit.Assert.assertNotNull;
 public class JobCandidateEditPerfTest {
 
     private static final String MAIN_TAB_ID = "tabMain";
+    private static final String HISTORY_TAB_ID = "tabHistory";
 
     @Rule
     public final TestUiEnvironment environment = new TestUiEnvironment(HunttechWebTestContainer.Common.INSTANCE)
@@ -106,12 +107,13 @@ public class JobCandidateEditPerfTest {
         edit.show();
 
         TabSheet tabSheet = (TabSheet) edit.getWindow().getComponent("tabSheetSocialNetworks");
-        tabSheet.setSelectedTab(MAIN_TAB_ID);
+        selectMainTabThroughChangeEvent(tabSheet);
 
         SuggestionPickerField<Company> currentCompanyField =
                 (SuggestionPickerField<Company>) edit.getWindow().getComponent("currentCompanyField");
 
-        assertNotNull(currentCompanyField.getAction("createCompany"));
+        assertNotNull("createCompany action must be registered after main tab initialization",
+                currentCompanyField.getAction("createCompany"));
     }
 
     @Test
@@ -131,10 +133,21 @@ public class JobCandidateEditPerfTest {
         edit.show();
 
         TabSheet tabSheet = (TabSheet) edit.getWindow().getComponent("tabSheetSocialNetworks");
+        tabSheet.setSelectedTab(HISTORY_TAB_ID);
         int companyLoadListCallsBeforeTab = metrics.getCompanyLoadListCalls();
         tabSheet.setSelectedTab(MAIN_TAB_ID);
 
         assertEquals("tabMain must not preload the full Company options container",
                 companyLoadListCallsBeforeTab, metrics.getCompanyLoadListCalls());
+    }
+
+    private void selectMainTabThroughChangeEvent(TabSheet tabSheet) {
+        // The editor opens with tabMain already selected. Selecting the same tab again
+        // does not fire SelectedTabChangeEvent in the CUBA test environment.
+        TabSheet.Tab selectedTab = tabSheet.getSelectedTab();
+        if (selectedTab != null && MAIN_TAB_ID.equals(selectedTab.getName())) {
+            tabSheet.setSelectedTab(HISTORY_TAB_ID);
+        }
+        tabSheet.setSelectedTab(MAIN_TAB_ID);
     }
 }
