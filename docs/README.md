@@ -9,7 +9,8 @@
 | [project/](project/) | Общая информация, шаблоны и правила ведения документации. |
 | [architecture/](architecture/) | Архитектурные заметки и решения верхнего уровня. |
 | [entities/](entities/) | Living-документация сущностей CUBA и связанных таблиц. |
-| [screens/](screens/) | UI-спецификации экранов, форм, фрагментов и компонентов. |
+| [screens/](screens/) | Материалы редизайна, исследования и спецификации экранов по функциональным областям. |
+| [ui/](ui/) | Канонические технические спецификации экранов и фрагментов CUBA. |
 | [services/](services/) | Документация сервисов и сервисных подсистем. |
 | [business-rules/](business-rules/) | Сквозные бизнес-правила и сценарии. |
 | [database/](database/) | Схема, проверки, расхождения и навигация по БД. |
@@ -23,7 +24,8 @@
 
 | Роль | Начать здесь |
 | ---- | ------------ |
-| Разработчик | [entities/](entities/), [screens/](screens/), [services/](services/) |
+| Разработчик | [entities/](entities/), [ui/](ui/), [screens/](screens/), [services/](services/) |
+| Экран JobCandidateEdit | [ui/JobCandidateEdit_Spec.md](ui/JobCandidateEdit_Spec.md) · [screens/job-candidate/JobCandidateEdit_Design_Fix_2026-07-14.md](screens/job-candidate/JobCandidateEdit_Design_Fix_2026-07-14.md) |
 | Диагностика разбора резюме и OOM | [services/PdfParserService.md](services/PdfParserService.md) · [operations/JobCandidateEdit_OOM_Runbook.md](operations/JobCandidateEdit_OOM_Runbook.md) |
 | DBA | [database/](database/) и [deployment/database-migration/](../deployment/database-migration/) |
 | Тестировщик | [operations/](operations/), [reports/](reports/), [deployment/database-migration/validation/](../deployment/database-migration/validation/) |
@@ -35,7 +37,8 @@
 | Тип документа | Каталог |
 | ------------- | ------- |
 | Новая сущность или описание таблицы сущности | `docs/entities/<entity>/` |
-| Новый экран, форма, фрагмент или UI-компонент | `docs/screens/<area>/` |
+| Каноническая спецификация экрана или фрагмента | `docs/ui/<FormName>_Spec.md` |
+| Материалы редизайна и исследования UI | `docs/screens/<area>/` |
 | Сервис или фоновые задачи | `docs/services/<service-area>/` |
 | Сквозное бизнес-правило | `docs/business-rules/` |
 | Схема, индексы, проверки БД | `docs/database/` |
