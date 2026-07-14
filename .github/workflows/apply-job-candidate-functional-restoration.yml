@@ -1,0 +1,40 @@
+name: Apply JobCandidateEdit functional restoration
+
+on:
+  push:
+    branches:
+      - agent/job-candidate-edit-layout-fix
+    paths:
+      - .github/workflows/apply-job-candidate-functional-restoration.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-restoration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/job-candidate-edit-layout-fix
+          fetch-depth: 0
+
+      - name: Apply verified Java and XML patch
+        run: |
+          python3 scripts/apply-job-candidate-functional-restoration.py
+          python3 -m py_compile scripts/apply-job-candidate-functional-restoration.py
+
+      - name: Commit restored functionality and remove temporary files
+        run: |
+          rm -f scripts/apply-job-candidate-functional-restoration.py
+          rm -f .github/workflows/apply-job-candidate-functional-restoration.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "fix(job-candidate): восстановить позиции с ленивой загрузкой" \
+            -m "- вернуть доступ к истории рассмотрения и подходящим вакансиям" \
+            -m "- загружать агрегаты взаимодействий только при открытии вкладки" \
+            -m "- не передавать Entity-графы в фоновую задачу"
+          git push origin HEAD:agent/job-candidate-edit-layout-fix
