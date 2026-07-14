@@ -185,12 +185,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private static final String CREATE_COMPANY_ACTION_ID = "createCompany";
 
     List<Position> setPos = new ArrayList<>();
-    // TODO[tabPositions]: поля positionsTabLoading/positionsTabLoaded/historyRowDataByVacancy отключены вместе с вкладкой
-    // private Map<UUID, HistoryRowData> historyRowDataByVacancy;
-    // private boolean positionsTabLoading;
-    // private boolean positionsTabLoaded;
-    // Заглушка для генераторов — вкладка отключена, генераторы не будут вызваны.
+    // Данные вкладки «Позиции и вакансии» загружаются один раз при первом открытии.
     private Map<UUID, HistoryRowData> historyRowDataByVacancy = Collections.emptyMap();
+    private boolean positionsTabLoading;
+    private boolean positionsTabLoaded;
     private boolean skillsLoading;
     private boolean skillsLoaded;
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
@@ -1284,9 +1282,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         preventAutoLoadUntilReady(openPositionDl, () -> openPositionLoaderInitialized);
         preventAutoLoadUntilReady(citiesDl, () -> referenceLoadersInitialized);
         preventAutoLoadUntilReady(personPositionsLc, () -> referenceLoadersInitialized);
-        // TODO[tabPositions]: loaders for positions tab disabled. Tab is commented out.
-        // preventAutoLoadUntilReady(lastProjectDl, () -> positionsTabLoaded);
-        // preventAutoLoadUntilReady(suggestOpenPositionDl, () -> positionsTabLoaded);
+        // Запросы вкладки содержат параметры кандидата и позиции, поэтому
+        // блокируем автоматическую загрузку до первого открытия вкладки.
+        preventAutoLoadUntilReady(lastProjectDl, () -> positionsTabLoaded);
+        preventAutoLoadUntilReady(suggestOpenPositionDl, () -> positionsTabLoaded);
 
         tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
             initTabResume();
@@ -1294,8 +1293,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             initTabCandidate();
             initTabContactInfo();
             initTabComments();
-            // TODO[tabPositions]: tab positions disabled
-            // initTabPositions();
+            initTabPositions();
         });
     }
 
@@ -1392,14 +1390,174 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return mergedInteractions;
     }
 
-    // TODO[tabPositions]: Вкладка «Позиции и вакансии» отключена.
-    // Полный код сохранён в git-истории. Для восстановления:
-    //   git diff HEAD~2 -- modules/web/.../JobCandidateEdit.java
-    // Методы: initTabPositions(), startPositionsBackgroundLoading(),
-    // loadHistoryKeyValues(), buildHistoryRowData(), buildOneRow(),
-    // loadSuggestedVacancies(), applyPositionsTabResult(), PositionsTabData.
+    /**
+     * Инициализирует историю рассмотрения и подходящие вакансии только при первом
+     * открытии вкладки. Открытие JobCandidateEdit не выполняет эти запросы.
+     */
     private void initTabPositions() {
-        // tab positions disabled — см. TODO выше
+        if (positionsTabLoaded || positionsTabLoading) {
+            return;
+        }
+
+        TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
+        if (selectedTab == null || !"tabPositions".equals(selectedTab.getName())) {
+            return;
+        }
+
+        if (PersistenceHelper.isNew(getEditedEntity()) || getEditedEntity().getId() == null) {
+            positionsTabLoaded = true;
+            lastProjectTable.setVisible(false);
+            suggestVacancyTable.setVisible(false);
+            return;
+        }
+
+        startPositionsBackgroundLoading();
+    }
+
+    /**
+     * В фоне агрегирует только скалярные значения взаимодействий. Entity-графы
+     * кандидата, резюме и вакансий между потоками не передаются.
+     */
+    private void startPositionsBackgroundLoading() {
+        if (positionsTabLoading || positionsTabLoaded) {
+            return;
+        }
+
+        UUID candidateId = getEditedEntity().getId();
+        positionsTabLoading = true;
+
+        BackgroundTask<Void, Map<UUID, HistoryRowData>> task =
+                new BackgroundTask<Void, Map<UUID, HistoryRowData>>(
+                        60, TimeUnit.SECONDS, this) {
+                    @Override
+                    public Map<UUID, HistoryRowData> run(TaskLifeCycle<Void> taskLifeCycle) {
+                        DataManager bgDataManager = AppBeans.get(DataManager.class);
+                        List<KeyValueEntity> rows = bgDataManager.loadValues(
+                                "select vacancy.id, vacancy.vacansyName, e.dateIteraction, " +
+                                        "interactionType.iterationName, " +
+                                        "interactionType.signOurInterviewAssigned, " +
+                                        "interactionType.signOurInterview, " +
+                                        "recruiter.name, e.recrutierName " +
+                                        "from hunttech_IteractionList e " +
+                                        "left join e.vacancy vacancy " +
+                                        "left join e.iteractionType interactionType " +
+                                        "left join e.recrutier recruiter " +
+                                        "where e.candidate.id = :candidateId " +
+                                        "and vacancy is not null " +
+                                        "and vacancy.vacansyName not like 'Default' " +
+                                        "order by e.dateIteraction desc")
+                                .properties(
+                                        "vacancyId",
+                                        "vacancyName",
+                                        "dateIteraction",
+                                        "interactionName",
+                                        "signResearcher",
+                                        "signRecruiter",
+                                        "recruiterName",
+                                        "legacyRecruiterName")
+                                .parameter("candidateId", candidateId)
+                                .list();
+                        return buildHistoryRowData(rows);
+                    }
+
+                    @Override
+                    public void done(Map<UUID, HistoryRowData> result) {
+                        historyRowDataByVacancy = result != null
+                                ? result : Collections.emptyMap();
+                        positionsTabLoading = false;
+                        positionsTabLoaded = true;
+
+                        // UI-loader'ы запускаются только на UI-потоке и только
+                        // после установки обязательных параметров.
+                        lastProjectDl.setParameter("candidate", getEditedEntity());
+                        lastProjectDl.load();
+                        setLastProjectOfCandidate();
+                        setSuggestOpenPositionTable();
+                        lastProjectTable.repaint();
+                        suggestVacancyTable.repaint();
+                    }
+
+                    @Override
+                    public boolean handleException(Exception exception) {
+                        positionsTabLoading = false;
+                        log.error("Не удалось загрузить вкладку позиций кандидата, candidateId={}",
+                                candidateId, exception);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption(messageBundle.getMessage("msgError"))
+                                .withDescription("Не удалось загрузить историю позиций кандидата")
+                                .show();
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(task).execute();
+    }
+
+    /** Один раз агрегирует значения для генераторов колонок истории. */
+    private Map<UUID, HistoryRowData> buildHistoryRowData(List<KeyValueEntity> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<UUID, HistoryAccumulator> accumulators = new LinkedHashMap<>();
+        for (KeyValueEntity row : rows) {
+            UUID vacancyId = row.getValue("vacancyId");
+            if (vacancyId == null) {
+                continue;
+            }
+
+            HistoryAccumulator accumulator = accumulators.computeIfAbsent(
+                    vacancyId,
+                    id -> new HistoryAccumulator(id, row.getValue("vacancyName")));
+
+            Date interactionDate = row.getValue("dateIteraction");
+            if (accumulator.maxDate == null
+                    || interactionDate != null && interactionDate.after(accumulator.maxDate)) {
+                accumulator.maxDate = interactionDate;
+                accumulator.lastInteractionName = row.getValue("interactionName");
+            }
+
+            String employeeName = row.getValue("recruiterName");
+            if (employeeName == null || employeeName.trim().isEmpty()) {
+                employeeName = row.getValue("legacyRecruiterName");
+            }
+
+            if (accumulator.researcherName == null
+                    && Boolean.TRUE.equals(row.getValue("signResearcher"))) {
+                accumulator.researcherName = employeeName;
+            }
+            if (accumulator.recruiterName == null
+                    && Boolean.TRUE.equals(row.getValue("signRecruiter"))) {
+                accumulator.recruiterName = employeeName;
+            }
+        }
+
+        Map<UUID, HistoryRowData> result = new LinkedHashMap<>();
+        for (HistoryAccumulator accumulator : accumulators.values()) {
+            result.put(accumulator.vacancyId, new HistoryRowData(
+                    accumulator.vacancyId,
+                    accumulator.vacancyName,
+                    accumulator.maxDate,
+                    accumulator.lastInteractionName,
+                    accumulator.researcherName,
+                    accumulator.recruiterName));
+        }
+        return result;
+    }
+
+    /** Внутренняя изменяемая модель для единственного прохода по строкам JPQL. */
+    private static final class HistoryAccumulator {
+        final UUID vacancyId;
+        final String vacancyName;
+        Date maxDate;
+        String lastInteractionName;
+        String researcherName;
+        String recruiterName;
+
+        HistoryAccumulator(UUID vacancyId, String vacancyName) {
+            this.vacancyId = vacancyId;
+            this.vacancyName = vacancyName;
+        }
     }
 
     private List<SocialNetworkURLs> ensureSocialNetworksLoaded() {
@@ -1428,11 +1586,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return getEditedEntity().getPositionList() != null ?
                 getEditedEntity().getPositionList() : Collections.emptyList();
     }
-
-    // ── Positions tab background loading ──────────────────────────────
-    // TODO[tabPositions]: Все методы вкладки «Позиции и вакансии» отключены.
-    // Полный код сохранён в git-истории (HEAD~1).
-
 
     private void setupCurrentCompanySearchExecutor() {
         if (currentCompanyField == null) {

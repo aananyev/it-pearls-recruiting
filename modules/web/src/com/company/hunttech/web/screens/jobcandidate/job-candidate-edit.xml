@@ -731,19 +731,27 @@
                         </vbox>
                     </tab>
 
-                    <!-- TODO[tabPositions]: Вкладка отключена visible="false".
-                         Для включения убрать visible="false" и раскомментировать
-                         Java-методы в JobCandidateEdit.java -->
+                    <!-- TAB: Позиции и вакансии. Данные загружаются лениво контроллером. -->
                     <tab id="tabPositions"
                          caption="Позиции и вакансии"
-                         visible="false"
                          spacing="true"
-                         margin="false">
-                        <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section">
+                         margin="false"
+                         expand="tabPositionsSection">
+                        <vbox id="tabPositionsSection"
+                              width="100%"
+                              height="100%"
+                              spacing="true"
+                              expand="tabPositionsContent"
+                              stylename="job-candidate-accordion-section">
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Позиции и вакансии" stylename="job-candidate-accordion-title"/>
                             </hbox>
-                            <vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
+                            <vbox id="tabPositionsContent"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  expand="jobCandidatePositionsLayout"
+                                  stylename="job-candidate-accordion-content">
                                 <hbox id="jobCandidatePositionsLayout"
                                       width="100%"
                                       height="100%"
