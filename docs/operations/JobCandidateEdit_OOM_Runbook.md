@@ -2,7 +2,9 @@
 
 ## Назначение
 
-Runbook используется для воспроизводимой проверки карточки кандидата HRM HuntTech после ошибок `java.lang.OutOfMemoryError: Java heap space`. Процедура исключает старые классы Tomcat, параллельный FTS и недостаточный диагностический heap.
+Runbook используется для воспроизводимой проверки карточки кандидата HRM HuntTech после ошибок `java.lang.OutOfMemoryError: Java heap space`. Процедура исключает старые классы Tomcat, фиксирует фактический heap и позволяет отдельно сравнить работу формы с включённым и выключенным scheduler.
+
+Обычный локальный запуск должен сохранять бизнес-функциональность scheduled tasks. Отключение scheduler допустимо только как временный диагностический эксперимент.
 
 ## Условия запуска
 
@@ -19,10 +21,11 @@ Runbook используется для воспроизводимой пров�
 3. Удаляет старые exploded-приложения `app`, `app-core`, `hrm`, `hrm-core`.
 4. Очищает соответствующие каталоги `work` и содержимое `temp`.
 5. Выполняет `./gradlew clean deploy -x test`.
-6. Создаёт локальный `${app.home}/local.app.properties` с `cuba.schedulingActive=false`.
-7. Запускает Tomcat с диагностическими параметрами heap.
-8. Ожидает HTTP 200.
-9. Сохраняет `VM.command_line`, `VM.flags`, `GC.heap_info` и стартовую гистограмму классов.
+6. Создаёт или обновляет локальный `${app.home}/local.app.properties`.
+7. По умолчанию записывает `cuba.schedulingActive=true`.
+8. Запускает Tomcat с диагностическими параметрами heap.
+9. Ожидает HTTP 200.
+10. Сохраняет `VM.command_line`, `VM.flags`, `GC.heap_info` и стартовую гистограмму классов.
 
 ## Параметры JVM по умолчанию
 
@@ -42,47 +45,108 @@ LOCAL_JAVA_XMX=6144m \
 ./scripts/start-app.sh
 ```
 
-## Локальное отключение scheduler и FTS
+## Режимы scheduler и FTS
 
-По умолчанию скрипт записывает:
+### Штатный локальный запуск
+
+```bash
+./scripts/start-app.sh
+```
+
+Скрипт использует:
+
+```properties
+cuba.schedulingActive=true
+```
+
+В этом режиме работают FTS и остальные scheduled tasks HRM HuntTech. Именно этот режим используется для итоговой функциональной проверки.
+
+### Изолированная диагностика OOM
+
+Чтобы проверить влияние параллельного FTS на heap:
+
+```bash
+LOCAL_SCHEDULING_ACTIVE=false ./scripts/start-app.sh
+```
+
+Скрипт временно запишет:
 
 ```properties
 cuba.schedulingActive=false
 ```
 
-Это временно отключает все scheduled tasks в локальном окружении, включая `cuba_FtsManager.processQueue`. Production-конфигурация не изменяется.
-
-Для отдельной проверки планировщика:
-
-```bash
-LOCAL_SCHEDULING_ACTIVE=true ./scripts/start-app.sh
-```
-
-Включать планировщик следует только после успешной проверки `JobCandidateEdit` без OOM.
+Это отключает все scheduled tasks, а не только FTS. Такой запуск не является штатным и не используется для проверки фоновых бизнес-процессов. После эксперимента приложение необходимо снова запустить без переменной либо с `LOCAL_SCHEDULING_ACTIVE=true`.
 
 ## Порядок проверки
 
 ```bash
 export JAVA_HOME=$(/usr/libexec/java_home -v 11)
+export PATH="$JAVA_HOME/bin:$PATH"
 
 ./gradlew :app-core:test \
   --tests "com.company.hunttech.core.PdfParserServiceBeanTest" \
-  --no-daemon
+  --no-daemon \
+  --stacktrace
 
-./gradlew test --tests '*ScreenViewIntegrityTest*' --no-daemon
+./gradlew test \
+  --tests '*ScreenViewIntegrityTest*' \
+  --no-daemon \
+  --stacktrace
+
+./gradlew :app-web:buildScssThemes \
+  --no-daemon \
+  --stacktrace
 
 chmod +x scripts/start-app.sh
 ./scripts/start-app.sh
 ```
 
-После HTTP 200:
+## Функциональная проверка после HTTP 200
 
 1. Открыть существующего кандидата с объёмным резюме.
-2. Дождаться фонового формирования блока навыков.
-3. Закрыть и повторно открыть карточку не менее пяти раз.
-4. Создать нового кандидата и закрыть форму без сохранения.
-5. Проверить все вкладки формы.
-6. Убедиться, что в `catalina.out` отсутствуют новые OOM и массовые `NullPointerException` из `PdfParserServiceBean.parseSkillTree`.
+2. Зафиксировать время до полного отображения формы.
+3. Дождаться фонового формирования блока навыков.
+4. Открыть вкладку «Позиции и вакансии».
+5. Убедиться, что история рассмотрения содержит вакансии, дату, последнее взаимодействие, рекрутера и ресерчера.
+6. Проверить список подходящих вакансий и tooltip строки.
+7. Открыть взаимодействия выбранной вакансии кнопкой «Просмотр».
+8. Проверить вкладки «Взаимодействия», «Резюме и файлы», «Контакты», «Социальные сети», «Комментарии» и «История».
+9. Закрыть и повторно открыть карточку не менее пяти раз.
+10. Создать нового кандидата и закрыть форму без сохранения.
+11. Проверить сохранение существующего кандидата и отмену изменений.
+12. Проверить загрузку и очистку фотографии.
+
+## Проверка бизнес-контракта навыков
+
+В `CandidateCVEdit`:
+
+1. Открыть существующее резюме.
+2. Выполнить «Пересканировать резюме».
+3. Убедиться, что в таблице навыков отображаются `specialisation`, `wikiPage` и комментарий.
+4. Сохранить резюме.
+5. Повторно открыть его и убедиться, что `CandidateCV.skillTree` сохранился.
+
+Эта проверка подтверждает, что `PdfParserService` возвращает реальные сущности `SkillTree`, а не transient-объекты.
+
+## Анализ catalina.out
+
+После проверки нового запуска:
+
+```bash
+grep -nE \
+  'OutOfMemoryError|Java heap space|GuiDevelopmentException|DevelopmentException|NullPointerException|NoSuchMethodError|PdfParserServiceBean|cuba_FtsManager.processQueue' \
+  deploy/tomcat/logs/catalina.out
+```
+
+Критерии:
+
+- отсутствуют новые `OutOfMemoryError` и `Java heap space`;
+- отсутствует синхронная цепочка анализа навыков из `JobCandidateEdit.onBeforeShow`;
+- отсутствуют серии `NullPointerException` для строк `SkillTree`;
+- нет ошибок `unfetched attribute` при tooltip подходящих вакансий;
+- нет ошибок отсутствующего параметра `candidate`, `positionType` или `positionTypes`;
+- при штатном запуске scheduler активен;
+- при отдельном запуске с `LOCAL_SCHEDULING_ACTIVE=false` вызовы FTS отсутствуют.
 
 ## Диагностические файлы
 
@@ -102,29 +166,40 @@ deploy/tomcat/logs/diagnostics/class-histogram-startup.txt
 
 - `PdfParserServiceBeanTest` — зелёный;
 - восемь проверок `ScreenViewIntegrityTest` — зелёные;
-- `BUILD SUCCESSFUL`;
+- `buildScssThemes` — `BUILD SUCCESSFUL`;
+- полный `clean deploy` — `BUILD SUCCESSFUL`;
 - HTTP 200;
-- `JobCandidateEdit` открывается без OOM;
-- нет стека `Skillsbar.generateSkillLabels → PdfParserService.parseSkillTree` в синхронном `onBeforeShow`;
-- нет серии повторяющихся NPE по каждой записи `SkillTree`;
+- `JobCandidateEdit` открывается пять раз без OOM;
+- фоновые метки навыков появляются после открытия формы;
+- вкладка «Позиции и вакансии» загружается только при первом выборе;
+- история и подходящие вакансии отображаются без unfetched/null ошибок;
+- пересканированные навыки `CandidateCV` сохраняются и повторно открываются;
+- `cuba.schedulingActive=true` при штатном запуске;
 - фактический `-Xmx` подтверждён в `jvm-flags.txt`.
 
-## Откат локальных диагностических настроек
+## Возврат из диагностического режима
 
-Удалить или изменить строку в:
-
-```text
-deploy/tomcat/app_home/local.app.properties
-```
-
-Для возврата стандартного heap запустить:
+После запуска с отключённым scheduler выполнить:
 
 ```bash
-LOCAL_JAVA_XMS=512m LOCAL_JAVA_XMX=2048m ./scripts/start-app.sh
+LOCAL_SCHEDULING_ACTIVE=true ./scripts/start-app.sh
+```
+
+Проверить:
+
+```bash
+grep '^cuba.schedulingActive=' deploy/tomcat/app_home/local.app.properties
+```
+
+Ожидаемое значение:
+
+```text
+cuba.schedulingActive=true
 ```
 
 ## История изменений
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-07-14 | Добавлена процедура чистого redeploy, локального отключения scheduler/FTS, heap dump, GC-логирования и проверки JobCandidateEdit после OOM. |
+| 2026-07-14 | Восстановлен штатный scheduler по умолчанию, отключение FTS выделено в явный диагностический режим; добавлены проверки вкладки позиций и сохранения `CandidateCV.skillTree`. |
+| 2026-07-14 | Добавлена процедура чистого redeploy, heap dump, GC-логирования и первичной проверки JobCandidateEdit после OOM. |
