@@ -11,7 +11,9 @@ POLL_INTERVAL="${POLL_INTERVAL:-5}"
 PROJECT_MARKER="hunttech_recruiting/deploy/tomcat"
 LOCAL_APP_HOME="${LOCAL_APP_HOME:-$ROOT/deploy/tomcat/app_home}"
 LOCAL_APP_PROPERTIES="$LOCAL_APP_HOME/local.app.properties"
-LOCAL_SCHEDULING_ACTIVE="${LOCAL_SCHEDULING_ACTIVE:-false}"
+# Штатный запуск сохраняет все scheduled tasks. Для изолированной диагностики
+# JobCandidateEdit передайте LOCAL_SCHEDULING_ACTIVE=false явно.
+LOCAL_SCHEDULING_ACTIVE="${LOCAL_SCHEDULING_ACTIVE:-true}"
 LOCAL_JAVA_XMS="${LOCAL_JAVA_XMS:-1024m}"
 LOCAL_JAVA_XMX="${LOCAL_JAVA_XMX:-4096m}"
 HEAP_DUMP_DIR="${HEAP_DUMP_DIR:-$ROOT/deploy/tomcat/logs/heapdumps}"
@@ -110,8 +112,8 @@ ensure_local_app_properties() {
   touch "$LOCAL_APP_PROPERTIES"
   temp_file="$(mktemp)"
 
-  # Локально отключаем scheduler, чтобы FTS и другие scheduled tasks
-  # не конкурировали за heap во время диагностики JobCandidateEdit.
+  # Значение задаётся явно для воспроизводимого запуска. По умолчанию scheduler
+  # включён; false используется только для отдельной диагностики конкуренции с FTS.
   awk -v scheduling_active="$LOCAL_SCHEDULING_ACTIVE" '
     BEGIN { replaced = 0 }
     /^cuba\.schedulingActive=/ {
@@ -123,7 +125,7 @@ ensure_local_app_properties() {
     END {
       if (!replaced) {
         print ""
-        print "# Локальная диагностика JobCandidateEdit: scheduler/FTS отключён."
+        print "# Локальный scheduler HRM HuntTech; false — только диагностический режим."
         print "cuba.schedulingActive=" scheduling_active
       }
     }
