@@ -27,6 +27,8 @@ import static org.junit.Assert.assertNotNull;
  */
 public class JobCandidateEditPerfTest {
 
+    private static final String MAIN_TAB_ID = "tabMain";
+
     @Rule
     public final TestUiEnvironment environment = new TestUiEnvironment(HunttechWebTestContainer.Common.INSTANCE)
             .withUserLogin(JobCandidatePerfTestSupport.ADMIN_LOGIN)
@@ -104,7 +106,7 @@ public class JobCandidateEditPerfTest {
         edit.show();
 
         TabSheet tabSheet = (TabSheet) edit.getWindow().getComponent("tabSheetSocialNetworks");
-        tabSheet.setSelectedTab("tabCandidate");
+        tabSheet.setSelectedTab(MAIN_TAB_ID);
 
         SuggestionPickerField<Company> currentCompanyField =
                 (SuggestionPickerField<Company>) edit.getWindow().getComponent("currentCompanyField");
@@ -113,7 +115,7 @@ public class JobCandidateEditPerfTest {
     }
 
     @Test
-    public void testCandidateTabDoesNotLoadFullCompanyOptions() {
+    public void testMainTabDoesNotLoadFullCompanyOptions() {
         JobCandidate candidate = JobCandidatePerfTestSupport.createJobCandidateForEdit(environment);
 
         Screens screens = environment.getScreens();
@@ -130,9 +132,9 @@ public class JobCandidateEditPerfTest {
 
         TabSheet tabSheet = (TabSheet) edit.getWindow().getComponent("tabSheetSocialNetworks");
         int companyLoadListCallsBeforeTab = metrics.getCompanyLoadListCalls();
-        tabSheet.setSelectedTab("tabCandidate");
+        tabSheet.setSelectedTab(MAIN_TAB_ID);
 
-        assertEquals("tabCandidate must not preload the full Company options container",
+        assertEquals("tabMain must not preload the full Company options container",
                 companyLoadListCallsBeforeTab, metrics.getCompanyLoadListCalls());
     }
 }
