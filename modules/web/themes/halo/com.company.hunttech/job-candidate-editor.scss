@@ -24,8 +24,8 @@
       min-width: 0;
     }
 
-    /* Левая профильная панель. Фон принудительно задаётся и самому
-       layout, и Vaadin slot-обёртке, чтобы темы не делали sidebar светлым. */
+    /* Левая профильная панель. Фон назначается также Vaadin slot-обёртке,
+       чтобы разные темы не переопределяли его светлым цветом. */
     .v-slot-job-candidate-sidebar,
     .v-slot-job-candidate-sidebar > .v-verticallayout,
     .job-candidate-sidebar {
@@ -135,8 +135,7 @@
       word-break: break-word;
     }
 
-    /* В текущем XML второй label повторяет ФИО. Убираем только визуальный
-       дубль; component ID и Java-контракт остаются неизменными. */
+    /* Контроллер использует label, но визуально значение повторяет ФИО. */
     .job-candidate-profile-position {
       display: none !important;
     }
@@ -227,7 +226,6 @@
         box-shadow: none !important;
       }
 
-      /* CSS escapes исключают повреждение звёзд при сборке SCSS. */
       .rating_candidate_red_1:before,
       .rating_red_1:before {
         content: "\2605\2606\2606\2606\2606  ";
@@ -384,8 +382,7 @@
       }
     }
 
-    /* Видимый accordion-слой. В исходном коммите заголовок был ошибочно
-       скрыт display:none, поэтому пользователь видел только карточки. */
+    /* Видимый accordion-слой */
     .job-candidate-accordion-section,
     .job-candidate-accordion-content,
     .job-candidate-card-row {
@@ -483,8 +480,9 @@
       line-height: 24px !important;
     }
 
-    /* Растягиваем GridLayout: в прежнем CSS менялась ширина slot,
-       но таблица GridLayout оставалась шириной по содержимому. */
+    /* Вкладка «Основное»: колонка labels уменьшена, а поле занимает всю
+       оставшуюся ширину. Это приближает поле к подписи и увеличивает его
+       более чем в два раза относительно прежней ширины по содержимому. */
     .job-candidate-form-grid,
     .job-candidate-form-grid > div,
     .job-candidate-form-grid table {
@@ -494,22 +492,43 @@
     }
 
     .job-candidate-form-grid td:first-child {
-      width: 154px !important;
-      min-width: 154px !important;
-      max-width: 154px !important;
-      padding-right: 14px !important;
+      width: 118px !important;
+      min-width: 118px !important;
+      max-width: 118px !important;
+      padding-right: 8px !important;
     }
 
     .job-candidate-form-grid td:nth-child(2) {
       width: auto !important;
       min-width: 0 !important;
+      padding-left: 0 !important;
     }
 
     .job-candidate-form-grid .v-gridlayout-slot {
-      width: 100% !important;
       min-width: 0 !important;
       padding-top: 5px;
       padding-bottom: 5px;
+    }
+
+    .job-candidate-form-grid td:nth-child(2) .v-gridlayout-slot,
+    .job-candidate-form-grid td:nth-child(2) .v-gridlayout-slot > .v-widget {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: none !important;
+    }
+
+    .job-candidate-form-grid td:nth-child(2) .c-suggestionfield,
+    .job-candidate-form-grid td:nth-child(2) .c-suggestion-field,
+    .job-candidate-form-grid td:nth-child(2) .c-suggestionpickerfield,
+    .job-candidate-form-grid td:nth-child(2) .c-suggestion-picker-field,
+    .job-candidate-form-grid td:nth-child(2) .c-pickerfield,
+    .job-candidate-form-grid td:nth-child(2) .c-picker-field,
+    .job-candidate-form-grid td:nth-child(2) .v-customcomponent,
+    .job-candidate-form-grid td:nth-child(2) .v-csslayout,
+    .job-candidate-form-grid td:nth-child(2) .v-horizontallayout {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: none !important;
     }
 
     .job-candidate-form-grid .v-label,
@@ -521,28 +540,30 @@
       overflow-wrap: anywhere;
     }
 
-    .job-candidate-form-grid,
-    .job-candidate-form-row {
-      .v-textfield,
-      .v-filterselect,
-      .v-datefield,
-      .v-filterselect-input,
-      .v-datefield-textfield,
-      .v-customcomponent,
-      .v-slot {
-        max-width: none !important;
-        min-width: 0 !important;
-      }
+    /* SuggestionField ФИО получает тот же размер текста, что Город,
+       DateField и остальные поля формы. */
+    .job-candidate-form-grid .v-textfield,
+    .job-candidate-form-grid .v-filterselect,
+    .job-candidate-form-grid .v-filterselect-input,
+    .job-candidate-form-grid .v-datefield,
+    .job-candidate-form-grid .v-datefield-textfield,
+    .job-candidate-form-grid input,
+    .job-candidate-form-row .v-textfield,
+    .job-candidate-form-row .v-filterselect,
+    .job-candidate-form-row .v-filterselect-input,
+    .job-candidate-form-row .v-datefield,
+    .job-candidate-form-row .v-datefield-textfield {
+      min-width: 0 !important;
+      max-width: none !important;
+      height: 38px !important;
+      font-size: 16px !important;
+      line-height: 38px !important;
+    }
 
-      .v-textfield,
-      .v-filterselect,
-      .v-datefield,
-      .v-filterselect-input,
-      .v-datefield-textfield {
-        width: 100% !important;
-        height: 38px !important;
-        font-size: 16px !important;
-      }
+    .job-candidate-form-grid td:nth-child(2) .v-textfield,
+    .job-candidate-form-grid td:nth-child(2) .c-suggestionfield .v-textfield,
+    .job-candidate-form-grid td:nth-child(2) .c-suggestion-field .v-textfield {
+      width: 100% !important;
     }
 
     .job-candidate-form-row {
@@ -662,7 +683,12 @@
         font-size: 14px !important;
       }
 
-      .job-candidate-form-grid td:first-child,
+      .job-candidate-form-grid td:first-child {
+        width: 112px !important;
+        min-width: 112px !important;
+        max-width: 112px !important;
+      }
+
       .job-candidate-form-row > .v-slot:first-child {
         width: 128px !important;
         min-width: 128px !important;
