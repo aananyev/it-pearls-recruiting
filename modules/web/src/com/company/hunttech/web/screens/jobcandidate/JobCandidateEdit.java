@@ -902,9 +902,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     positions.add(positionLists.getPositionList());
                 }
 
-                suggestOpenPositionDl.setParameter("positionType", getEditedEntity().getPersonPosition());
+                Position mainPosition = getEditedEntity().getPersonPosition();
+                if (mainPosition != null) {
+                    suggestOpenPositionDl.setParameter("positionType", mainPosition);
+                } else {
+                    suggestOpenPositionDl.removeParameter("positionType");
+                }
                 if (positions.size() > 0) {
                     suggestOpenPositionDl.setParameter("positionTypes", positions);
+                } else {
+                    suggestOpenPositionDl.removeParameter("positionTypes");
                 }
 
             }
@@ -1443,7 +1450,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                                         "left join e.iteractionType interactionType " +
                                         "left join e.recrutier recruiter " +
                                         "where e.candidate.id = :candidateId " +
-                                        "and vacancy is not null " +
+                                        "and vacancy.id is not null " +
                                         "and vacancy.vacansyName not like 'Default' " +
                                         "order by e.dateIteraction desc")
                                 .properties(
@@ -1469,12 +1476,23 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                         // UI-loader'ы запускаются только на UI-потоке и только
                         // после установки обязательных параметров.
-                        lastProjectDl.setParameter("candidate", getEditedEntity());
-                        lastProjectDl.load();
-                        setLastProjectOfCandidate();
-                        setSuggestOpenPositionTable();
-                        lastProjectTable.repaint();
-                        suggestVacancyTable.repaint();
+                        try {
+                            lastProjectDl.setParameter("candidate", getEditedEntity());
+                            lastProjectDl.load();
+                            setLastProjectOfCandidate();
+                            setSuggestOpenPositionTable();
+                            lastProjectTable.repaint();
+                            suggestVacancyTable.repaint();
+                        } catch (RuntimeException loaderException) {
+                            // Разрешаем повторное открытие вкладки после временной ошибки БД.
+                            positionsTabLoaded = false;
+                            log.error("Не удалось применить данные вкладки позиций, candidateId={}",
+                                    candidateId, loaderException);
+                            notifications.create(Notifications.NotificationType.ERROR)
+                                    .withCaption(messageBundle.getMessage("msgError"))
+                                    .withDescription("Не удалось загрузить позиции и вакансии кандидата")
+                                    .show();
+                        }
                     }
 
                     @Override
@@ -3412,35 +3430,42 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Install(to = "suggestVacancyTable", subject = "itemDescriptionProvider")
     private String suggestVacancyTableItemDescriptionProvider(OpenPosition openPosition, String string) {
-//        String retStr = "<b>Вакансия:</b><br><br>";
         StringBuilder sb = new StringBuilder("<b>Вакансия:</b><br><br>");
-
         sb.append("<i>")
-                .append(openPosition.getVacansyName())
-                .append("</i><br>")
-                .append("<i>Проект: </i>")
-                .append(openPosition.getProjectName().getProjectName())
-                .append("<br><i>Ответственный за проект у заказчика:</i>")
-                .append(openPosition.getProjectName().getProjectOwner().getSecondName())
-                .append(" ")
-                .append(openPosition.getProjectName().getProjectOwner().getFirstName())
-                .append("<br><i>Ответственный за проект на нашей стороне: </i>")
-                .append(openPosition.getOwner().getName())
-                .append("<br><i>Дата открытия вакансии: ")
-                .append(openPosition.getLastOpenDate())
-                .append("<br><br><i>Описание вакансии: </i><br>")
-                .append(openPosition.getComment());
+                .append(openPosition.getVacansyName() != null ? openPosition.getVacansyName() : "")
+                .append("</i><br>");
 
-/*        retStr += "<i>" + openPosition.getVacansyName() + "</i><br>"
-                + "<i>Проект: </i>" + openPosition.getProjectName().getProjectName()
-                + "<br><i>Ответственный за проект у заказчика:</i>"
-                + openPosition.getProjectName().getProjectOwner().getSecondName()
-                + openPosition.getProjectName().getProjectOwner().getSecondName()
-                + "<br><i>Ответственный за проект на нашей стороне: </i>"
-                + openPosition.getOwner().getName()
-                + "<br><i>Дата открытия вакансии: "
-                + openPosition.getLastOpenDate()
-                + "<br><br><i>Описание вакансии: </i><br>" + openPosition.getComment();*/
+        Project project = openPosition.getProjectName();
+        if (project != null) {
+            sb.append("<i>Проект: </i>")
+                    .append(project.getProjectName() != null ? project.getProjectName() : "")
+                    .append("<br>");
+
+            Person projectOwner = project.getProjectOwner();
+            if (projectOwner != null) {
+                sb.append("<i>Ответственный за проект у заказчика: </i>")
+                        .append(projectOwner.getSecondName() != null ? projectOwner.getSecondName() : "")
+                        .append(" ")
+                        .append(projectOwner.getFirstName() != null ? projectOwner.getFirstName() : "")
+                        .append("<br>");
+            }
+        }
+
+        if (openPosition.getOwner() != null) {
+            sb.append("<i>Ответственный за проект на нашей стороне: </i>")
+                    .append(openPosition.getOwner().getName() != null
+                            ? openPosition.getOwner().getName() : "")
+                    .append("<br>");
+        }
+        if (openPosition.getLastOpenDate() != null) {
+            sb.append("<i>Дата открытия вакансии: </i>")
+                    .append(openPosition.getLastOpenDate())
+                    .append("<br>");
+        }
+        if (openPosition.getComment() != null) {
+            sb.append("<br><i>Описание вакансии: </i><br>")
+                    .append(openPosition.getComment());
+        }
 
         return sb.toString();
     }

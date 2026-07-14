@@ -85,7 +85,14 @@
         </collection>
         <collection id="suggestOpenPositionDc"
                     class="com.company.hunttech.entity.OpenPosition">
-            <view extends="_local"/>
+            <!-- Поля ограничены данными таблицы и её tooltip; тяжёлые связи не загружаются. -->
+            <view extends="_local">
+                <property name="positionType" view="_local"/>
+                <property name="projectName" view="_local">
+                    <property name="projectOwner" view="_local"/>
+                </property>
+                <property name="owner" view="_local"/>
+            </view>
             <loader id="suggestOpenPositionDl" cacheable="true">
                 <query>
                     <![CDATA[select e from hunttech_OpenPosition e
