@@ -5,12 +5,15 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-APP_CONTEXT="${APP_CONTEXT:-app}"
+APP_CONTEXT="${APP_CONTEXT:-hrm}"
 APP_URL="${APP_URL:-http://localhost:8080/${APP_CONTEXT}/}"
 WAIT_TIMEOUT="${WAIT_TIMEOUT:-300}"
 POLL_INTERVAL="${POLL_INTERVAL:-5}"
 WIDGETSET_NAME="com.company.hunttech.web.toolkit.ui.AppWidgetSet"
 WIDGETSET_RELATIVE_PATH="VAADIN/widgetsets/${WIDGETSET_NAME}/${WIDGETSET_NAME}.nocache.js"
+WIDGETSET_BUILD_DIR="$ROOT/modules/web-toolkit/build/web/VAADIN/widgetsets/${WIDGETSET_NAME}"
+BUILT_WIDGETSET="$WIDGETSET_BUILD_DIR/${WIDGETSET_NAME}.nocache.js"
+DEPLOYED_WIDGETSET_DIR="$ROOT/deploy/tomcat/webapps/${APP_CONTEXT}/VAADIN/widgetsets/${WIDGETSET_NAME}"
 DEPLOYED_WIDGETSET="$ROOT/deploy/tomcat/webapps/${APP_CONTEXT}/${WIDGETSET_RELATIVE_PATH}"
 PROJECT_MARKER="hunttech_recruiting/deploy/tomcat"
 
@@ -64,6 +67,34 @@ clean_tomcat_deployment() {
     fi
 }
 
+verify_built_widgetset() {
+    if [ ! -s "$BUILT_WIDGETSET" ]; then
+        log "ОШИБКА: buildWidgetSet не создал обязательный файл:"
+        log "$BUILT_WIDGETSET"
+        log "Найденные nocache.js:"
+        find "$ROOT/modules/web-toolkit/build" \
+            -path '*/VAADIN/widgetsets/*/*.nocache.js' \
+            -type f \
+            -print 2>/dev/null || true
+        exit 1
+    fi
+
+    log "Widgetset собран: $BUILT_WIDGETSET"
+    ls -lh "$BUILT_WIDGETSET"
+}
+
+deploy_widgetset_to_context() {
+    verify_built_widgetset
+
+    log "Копирую widgetset в контекст /${APP_CONTEXT}"
+    log "Источник: $WIDGETSET_BUILD_DIR"
+    log "Назначение: $DEPLOYED_WIDGETSET_DIR"
+
+    rm -rf "$DEPLOYED_WIDGETSET_DIR"
+    mkdir -p "$DEPLOYED_WIDGETSET_DIR"
+    cp -R "$WIDGETSET_BUILD_DIR/." "$DEPLOYED_WIDGETSET_DIR/"
+}
+
 build_application_with_widgetset() {
     log "Очищаю Gradle build"
     ./gradlew clean --no-daemon --stacktrace
@@ -76,6 +107,10 @@ build_application_with_widgetset() {
 
     log "Разворачиваю приложение после сборки widgetset"
     ./gradlew deploy -x test --no-daemon --stacktrace
+
+    # Gradle web-toolkit deploy помещает client JAR в WEB-INF/lib, но браузеру
+    # требуется физический VAADIN/widgetsets каталог в web-root контекста /hrm.
+    deploy_widgetset_to_context
 }
 
 verify_deployed_widgetset() {
@@ -131,6 +166,16 @@ verify_widgetset_http() {
         log "ОШИБКА: вместо JavaScript widgetset сервер вернул HTML/страницу ошибки"
         log "URL: $widgetset_url"
         head -n 30 "$response_file"
+        rm -f "$response_file"
+        exit 1
+    fi
+
+    if ! head -c 512 "$response_file" \
+        | grep -q '^function com_company_hunttech_web_toolkit_ui_AppWidgetSet'; then
+        log "ОШИБКА: HTTP 200 получен, но ответ не является AppWidgetSet JavaScript"
+        log "URL: $widgetset_url"
+        head -c 512 "$response_file"
+        echo
         rm -f "$response_file"
         exit 1
     fi
