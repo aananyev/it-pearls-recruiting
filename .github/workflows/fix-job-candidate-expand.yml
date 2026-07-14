@@ -1,0 +1,189 @@
+name: Одноразовое исправление expand JobCandidateEdit
+
+on:
+  push:
+    branches:
+      - agent/job-candidate-edit-layout-fix
+
+permissions:
+  contents: write
+
+jobs:
+  fix-layout:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Получить репозиторий
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Исправить иерархию expand в XML и документацию
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          xml_path = Path('modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml')
+          xml = xml_path.read_text(encoding='utf-8')
+
+          replacements = [
+              (
+                  '''<tab id="tabIteraction"
+                         caption="Взаимодействия"
+                         spacing="true"
+                         margin="true"
+                         expand="jobCandidateIteractionListTable">
+                        <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section">''',
+                  '''<tab id="tabIteraction"
+                         caption="Взаимодействия"
+                         spacing="true"
+                         margin="true"
+                         expand="tabIteractionSection">
+                        <vbox id="tabIteractionSection"
+                              width="100%"
+                              height="100%"
+                              spacing="true"
+                              expand="tabIteractionContent"
+                              stylename="job-candidate-accordion-section">'''
+              ),
+              (
+                  '''<vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
+
+                        <lookupPickerField id="vacancyFilterLookupPickerField"''',
+                  '''<vbox id="tabIteractionContent"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  expand="jobCandidateIteractionListTable"
+                                  stylename="job-candidate-accordion-content">
+
+                        <lookupPickerField id="vacancyFilterLookupPickerField"'''
+              ),
+              (
+                  '''<tab id="tabResume"
+                         caption="Резюме и файлы"
+                         spacing="true"
+                         margin="true"
+                         expand="tabResumeVbox">
+                        <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section">''',
+                  '''<tab id="tabResume"
+                         caption="Резюме и файлы"
+                         spacing="true"
+                         margin="true"
+                         expand="tabResumeSection">
+                        <vbox id="tabResumeSection"
+                              width="100%"
+                              height="100%"
+                              spacing="true"
+                              expand="tabResumeContent"
+                              stylename="job-candidate-accordion-section">'''
+              ),
+              (
+                  '''<vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
+
+                        <vbox id="tabResumeVbox"''',
+                  '''<vbox id="tabResumeContent"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  expand="tabResumeVbox"
+                                  stylename="job-candidate-accordion-content">
+
+                        <vbox id="tabResumeVbox"'''
+              ),
+              (
+                  '''<tab id="tabSocialNetworks"
+                         caption="Социальные сети"
+                         spacing="true"
+                         margin="true"
+                         expand="socialNetworkTableHbox">
+                        <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section">''',
+                  '''<tab id="tabSocialNetworks"
+                         caption="Социальные сети"
+                         spacing="true"
+                         margin="true"
+                         expand="tabSocialNetworksSection">
+                        <vbox id="tabSocialNetworksSection"
+                              width="100%"
+                              height="100%"
+                              spacing="true"
+                              expand="tabSocialNetworksContent"
+                              stylename="job-candidate-accordion-section">'''
+              ),
+              (
+                  '''<vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
+
+                        <hbox id="socialNetworkTableHbox"''',
+                  '''<vbox id="tabSocialNetworksContent"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  expand="socialNetworkTableHbox"
+                                  stylename="job-candidate-accordion-content">
+
+                        <hbox id="socialNetworkTableHbox"'''
+              ),
+              (
+                  '''<tab id="commentsTab"
+                         caption="Комментарии"
+                         spacing="true"
+                         margin="true"
+                         expand="tabCommentsVbox">
+                        <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section">''',
+                  '''<tab id="commentsTab"
+                         caption="Комментарии"
+                         spacing="true"
+                         margin="true"
+                         expand="tabCommentsSection">
+                        <vbox id="tabCommentsSection"
+                              width="100%"
+                              height="100%"
+                              spacing="true"
+                              expand="tabCommentsContent"
+                              stylename="job-candidate-accordion-section">'''
+              ),
+              (
+                  '''<vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
+
+                        <vbox id="tabCommentsVbox"''',
+                  '''<vbox id="tabCommentsContent"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  expand="tabCommentsVbox"
+                                  stylename="job-candidate-accordion-content">
+
+                        <vbox id="tabCommentsVbox"'''
+              ),
+          ]
+
+          for old, new in replacements:
+              count = xml.count(old)
+              if count != 1:
+                  raise SystemExit(f'Ожидалось одно совпадение, найдено {count}: {old[:80]!r}')
+              xml = xml.replace(old, new, 1)
+
+          xml_path.write_text(xml, encoding='utf-8')
+
+          docs_path = Path('docs/screens/job-candidate/JobCandidateEdit_Design_Fix_2026-07-14.md')
+          docs = docs_path.read_text(encoding='utf-8')
+          marker = '## Исправление иерархии `expand`'
+          if marker not in docs:
+              docs += '''\n\n## Исправление иерархии `expand`\n\n- Дата: 2026-07-14.\n- Причина: вкладки ссылались в `expand` на компоненты, вложенные на несколько уровней. CUBA Platform допускает расширение только непосредственного дочернего компонента контейнера.\n- Исправление: для вкладок `tabIteraction`, `tabResume`, `tabSocialNetworks` и `commentsTab` добавлены промежуточные контейнеры с уникальными ID; каждый `expand` теперь указывает на прямого потомка.\n- Бизнес-логика, Java-контроллер, data containers, loaders, JPQL, actions и существующие component ID не изменены.\n'''
+              docs_path.write_text(docs, encoding='utf-8')
+          PY
+
+      - name: Удалить одноразовый workflow и опубликовать исправление
+        shell: bash
+        run: |
+          rm -f .github/workflows/fix-job-candidate-expand.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml \
+                  docs/screens/job-candidate/JobCandidateEdit_Design_Fix_2026-07-14.md \
+                  .github/workflows/fix-job-candidate-expand.yml
+          git commit -m "fix(job-candidate): исправить expand контейнеров формы" \
+                     -m "- направить expand вкладок на непосредственные дочерние контейнеры" \
+                     -m "- обновить документацию редизайна JobCandidateEdit"
+          git push origin HEAD:agent/job-candidate-edit-layout-fix
