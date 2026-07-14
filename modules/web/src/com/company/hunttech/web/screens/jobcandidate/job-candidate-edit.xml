@@ -782,12 +782,22 @@
                          caption="Взаимодействия"
                          spacing="true"
                          margin="true"
-                         expand="jobCandidateIteractionListTable">
-                        <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section">
+                         expand="tabIteractionSection">
+                        <vbox id="tabIteractionSection"
+                              width="100%"
+                              height="100%"
+                              spacing="true"
+                              expand="tabIteractionContent"
+                              stylename="job-candidate-accordion-section">
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Взаимодействия" stylename="job-candidate-accordion-title"/>
                             </hbox>
-                            <vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
+                            <vbox id="tabIteractionContent"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  expand="jobCandidateIteractionListTable"
+                                  stylename="job-candidate-accordion-content">
 
                         <lookupPickerField id="vacancyFilterLookupPickerField"
                                            caption="msg://msgVacancyFiler"
@@ -859,12 +869,22 @@
                          caption="Резюме и файлы"
                          spacing="true"
                          margin="true"
-                         expand="tabResumeVbox">
-                        <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section">
+                         expand="tabResumeSection">
+                        <vbox id="tabResumeSection"
+                              width="100%"
+                              height="100%"
+                              spacing="true"
+                              expand="tabResumeContent"
+                              stylename="job-candidate-accordion-section">
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Резюме и файлы" stylename="job-candidate-accordion-title"/>
                             </hbox>
-                            <vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
+                            <vbox id="tabResumeContent"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  expand="tabResumeVbox"
+                                  stylename="job-candidate-accordion-content">
 
                         <vbox id="tabResumeVbox" spacing="true" height="100%" expand="jobCandidateCandidateCvTable">
                             <hbox spacing="true" width="100%" align="MIDDLE_RIGHT">
@@ -925,12 +945,22 @@
                          caption="Социальные сети"
                          spacing="true"
                          margin="true"
-                         expand="socialNetworkTableHbox">
-                        <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section">
+                         expand="tabSocialNetworksSection">
+                        <vbox id="tabSocialNetworksSection"
+                              width="100%"
+                              height="100%"
+                              spacing="true"
+                              expand="tabSocialNetworksContent"
+                              stylename="job-candidate-accordion-section">
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Социальные сети" stylename="job-candidate-accordion-title"/>
                             </hbox>
-                            <vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
+                            <vbox id="tabSocialNetworksContent"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  expand="socialNetworkTableHbox"
+                                  stylename="job-candidate-accordion-content">
 
                         <hbox id="socialNetworkTableHbox"
                               width="100%"
@@ -984,12 +1014,22 @@
                          caption="Комментарии"
                          spacing="true"
                          margin="true"
-                         expand="tabCommentsVbox">
-                        <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section">
+                         expand="tabCommentsSection">
+                        <vbox id="tabCommentsSection"
+                              width="100%"
+                              height="100%"
+                              spacing="true"
+                              expand="tabCommentsContent"
+                              stylename="job-candidate-accordion-section">
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Комментарии" stylename="job-candidate-accordion-title"/>
                             </hbox>
-                            <vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
+                            <vbox id="tabCommentsContent"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  expand="tabCommentsVbox"
+                                  stylename="job-candidate-accordion-content">
 
                         <vbox id="tabCommentsVbox" spacing="true" height="100%" expand="jobCandidateCommentsDataGrid">
                             <dataGrid id="jobCandidateCommentsDataGrid"
