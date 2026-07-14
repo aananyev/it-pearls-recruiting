@@ -1,0 +1,40 @@
+name: Harden JobCandidateEdit positions tab
+
+on:
+  push:
+    branches:
+      - agent/job-candidate-edit-layout-fix
+    paths:
+      - .github/workflows/harden-job-candidate-positions.yml
+
+permissions:
+  contents: write
+
+jobs:
+  harden-positions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/job-candidate-edit-layout-fix
+          fetch-depth: 0
+
+      - name: Apply verified hardening patch
+        run: |
+          python3 scripts/harden-job-candidate-positions.py
+          python3 -m py_compile scripts/harden-job-candidate-positions.py
+
+      - name: Commit protected functionality and remove temporary files
+        run: |
+          rm -f scripts/harden-job-candidate-positions.py
+          rm -f .github/workflows/harden-job-candidate-positions.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "fix(job-candidate): защитить вкладку позиций от runtime-ошибок" \
+            -m "- загрузить поля tooltip узким view" \
+            -m "- обработать пустые проект и ответственных" \
+            -m "- разрешить повторную загрузку после ошибки loader"
+          git push origin HEAD:agent/job-candidate-edit-layout-fix
