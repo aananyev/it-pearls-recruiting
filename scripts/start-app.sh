@@ -1,5 +1,5 @@
 #!/bin/bash
-# Надёжный запуск CUBA/Tomcat для hunttech_recruiting (без голого gradlew restart).
+# Надёжный локальный запуск CUBA/Tomcat для HRM HuntTech (без голого gradlew restart).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -9,6 +9,9 @@ APP_URL="${APP_URL:-http://localhost:8080/app/}"
 WAIT_TIMEOUT="${WAIT_TIMEOUT:-300}"
 POLL_INTERVAL="${POLL_INTERVAL:-5}"
 PROJECT_MARKER="hunttech_recruiting/deploy/tomcat"
+LOCAL_APP_HOME="${LOCAL_APP_HOME:-$ROOT/deploy/tomcat/app_home}"
+LOCAL_APP_PROPERTIES="$LOCAL_APP_HOME/local.app.properties"
+LOCAL_SCHEDULING_ACTIVE="${LOCAL_SCHEDULING_ACTIVE:-false}"
 
 log() { printf '%s\n' "$*"; }
 
@@ -68,6 +71,36 @@ ensure_postgres() {
   exit 1
 }
 
+ensure_local_app_properties() {
+  local temp_file
+  mkdir -p "$LOCAL_APP_HOME"
+  touch "$LOCAL_APP_PROPERTIES"
+  temp_file="$(mktemp)"
+
+  # Локально отключаем scheduler, чтобы FTS и другие scheduled tasks
+  # не конкурировали за heap во время диагностики JobCandidateEdit.
+  awk -v scheduling_active="$LOCAL_SCHEDULING_ACTIVE" '
+    BEGIN { replaced = 0 }
+    /^cuba\.schedulingActive=/ {
+      print "cuba.schedulingActive=" scheduling_active
+      replaced = 1
+      next
+    }
+    { print }
+    END {
+      if (!replaced) {
+        print ""
+        print "# Локальная диагностика JobCandidateEdit: scheduler/FTS отключён."
+        print "cuba.schedulingActive=" scheduling_active
+      }
+    }
+  ' "$LOCAL_APP_PROPERTIES" > "$temp_file"
+
+  mv "$temp_file" "$LOCAL_APP_PROPERTIES"
+  log "Local app properties: cuba.schedulingActive=$LOCAL_SCHEDULING_ACTIVE"
+  log "Файл: $LOCAL_APP_PROPERTIES"
+}
+
 wait_for_http() {
   local elapsed=0 code
   log "Ожидание ответа $APP_URL (таймаут ${WAIT_TIMEOUT} с, warmup CUBA 1–5 мин)..."
@@ -89,6 +122,7 @@ wait_for_http() {
 
 ensure_postgres
 kill_stale_project_tomcat
+ensure_local_app_properties
 
 log "Gradle stop (ошибки игнорируются)..."
 ./gradlew stop >/dev/null 2>&1 || true
