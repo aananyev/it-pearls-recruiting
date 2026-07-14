@@ -1,131 +1,126 @@
 package com.company.hunttech.core;
 
-import com.company.hunttech.entity.SkillTree;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class PdfParserServiceBeanTest {
 
     @Test
     public void nullAndBlankInput_returnEmptyList() {
-        assertTrue(PdfParserServiceBean.buildSkillSnapshots(null, Collections.emptyList()).isEmpty());
-        assertTrue(PdfParserServiceBean.buildSkillSnapshots("   ", Collections.emptyList()).isEmpty());
+        assertTrue(PdfParserServiceBean.selectSkillIds(null, Collections.emptyList()).isEmpty());
+        assertTrue(PdfParserServiceBean.selectSkillIds("   ", Collections.emptyList()).isEmpty());
     }
 
     @Test
-    public void invalidAndDisabledRows_areSkippedWithoutException() {
+    public void disabledUndefinedAndInvalidRows_areSkipped() {
+        UUID enabledId = UUID.randomUUID();
         PdfParserServiceBean.SkillProjection invalidName = projection(
-                UUID.randomUUID(), null, null, null, null,
-                null, null, null, null, null);
+                UUID.randomUUID(), null, false,
+                null, null, null);
         PdfParserServiceBean.SkillProjection disabled = projection(
-                UUID.randomUUID(), "Java", true, 4, "Отключён",
-                null, null, null, null, null);
+                UUID.randomUUID(), "Java", true,
+                null, null, null);
+        PdfParserServiceBean.SkillProjection undefined = projection(
+                UUID.randomUUID(), "Kotlin", null,
+                null, null, null);
         PdfParserServiceBean.SkillProjection enabled = projection(
-                UUID.randomUUID(), "PostgreSQL", null, 3, "База данных",
-                null, null, null, null, null);
+                enabledId, "PostgreSQL", false,
+                null, null, null);
 
-        List<SkillTree> result = PdfParserServiceBean.buildSkillSnapshots(
-                "Опыт работы с Java и PostgreSQL",
-                Arrays.asList(invalidName, disabled, enabled));
+        List<UUID> result = PdfParserServiceBean.selectSkillIds(
+                "Опыт работы с Java, Kotlin и PostgreSQL",
+                Arrays.asList(invalidName, disabled, undefined, enabled));
 
-        assertEquals(1, result.size());
-        assertEquals("PostgreSQL", result.get(0).getSkillName());
+        assertEquals(Collections.singletonList(enabledId), result);
     }
 
     @Test
-    public void matchedSkillAndParent_areCompactSnapshots() throws Exception {
+    public void matchedSkillAndParent_keepBusinessOrder() {
         UUID skillId = UUID.randomUUID();
         UUID parentId = UUID.randomUUID();
         PdfParserServiceBean.SkillProjection projection = projection(
-                skillId, "Spring Boot", false, 2, "Фреймворк",
-                parentId, "Java", false, 4, "Язык программирования");
+                skillId, "Spring Boot", false,
+                parentId, "Java", false);
 
-        List<SkillTree> result = PdfParserServiceBean.buildSkillSnapshots(
+        List<UUID> result = PdfParserServiceBean.selectSkillIds(
                 "Разработка сервисов на Spring Boot",
                 Collections.singletonList(projection));
 
-        assertEquals(2, result.size());
-        SkillTree skill = result.get(0);
-        SkillTree parent = result.get(1);
-
-        assertEquals(skillId, skill.getId());
-        assertEquals("Spring Boot", skill.getSkillName());
-        assertEquals(Integer.valueOf(2), skill.getPrioritySkill());
-        assertEquals("Фреймворк", skill.getComment());
-        assertSame(parent, skill.getSkillTree());
-        assertEquals(parentId, parent.getId());
-        assertEquals("Java", parent.getSkillName());
-
-        // Снимок не содержит тяжёлые обратные связи сущности SkillTree.
-        assertNull(skill.getCandidates());
-        assertNull(skill.getOpenPosition());
-        assertNull(skill.getCandidateCV());
-        assertNull(skill.getSpecialisation());
-        assertNull(skill.getFileImageLogo());
-
-        // Дополнительная страховка: компактный результат штатно сериализуется.
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(output)) {
-            objectOutputStream.writeObject(result);
-        }
-        assertFalse(output.toByteArray().length == 0);
-        assertTrue(output.toByteArray().length < 64 * 1024);
+        assertEquals(Arrays.asList(skillId, parentId), result);
     }
 
     @Test
     public void commonParent_isAddedOnlyOnce() {
+        UUID firstId = UUID.randomUUID();
+        UUID secondId = UUID.randomUUID();
         UUID parentId = UUID.randomUUID();
         PdfParserServiceBean.SkillProjection first = projection(
-                UUID.randomUUID(), "Spring", false, 2, null,
-                parentId, "Java", false, 4, null);
+                firstId, "Spring", false,
+                parentId, "Java", false);
         PdfParserServiceBean.SkillProjection second = projection(
-                UUID.randomUUID(), "Hibernate", false, 2, null,
-                parentId, "Java", false, 4, null);
+                secondId, "Hibernate", false,
+                parentId, "Java", false);
 
-        List<SkillTree> result = PdfParserServiceBean.buildSkillSnapshots(
+        List<UUID> result = PdfParserServiceBean.selectSkillIds(
                 "Spring Hibernate",
                 Arrays.asList(first, second));
 
-        assertEquals(3, result.size());
-        long parentCount = result.stream()
-                .filter(skill -> parentId.equals(skill.getId()))
-                .count();
-        assertEquals(1L, parentCount);
+        assertEquals(Arrays.asList(firstId, parentId, secondId), result);
+    }
+
+    @Test
+    public void parentWithUndefinedFlag_isNotAdded() {
+        UUID skillId = UUID.randomUUID();
+        PdfParserServiceBean.SkillProjection projection = projection(
+                skillId, "Spring", false,
+                UUID.randomUUID(), "Java", null);
+
+        List<UUID> result = PdfParserServiceBean.selectSkillIds(
+                "Spring",
+                Collections.singletonList(projection));
+
+        assertEquals(Collections.singletonList(skillId), result);
+    }
+
+    @Test
+    public void parentWithAlreadySelectedName_isNotDuplicated() {
+        UUID javaId = UUID.randomUUID();
+        UUID springId = UUID.randomUUID();
+        UUID duplicatedParentId = UUID.randomUUID();
+        PdfParserServiceBean.SkillProjection java = projection(
+                javaId, "Java", false,
+                null, null, null);
+        PdfParserServiceBean.SkillProjection spring = projection(
+                springId, "Spring", false,
+                duplicatedParentId, "JAVA", false);
+
+        List<UUID> result = PdfParserServiceBean.selectSkillIds(
+                "Java Spring",
+                Arrays.asList(java, spring));
+
+        assertEquals(Arrays.asList(javaId, springId), result);
     }
 
     private static PdfParserServiceBean.SkillProjection projection(
             UUID skillId,
             String skillName,
             Boolean notParsing,
-            Integer prioritySkill,
-            String comment,
             UUID parentId,
             String parentSkillName,
-            Boolean parentNotParsing,
-            Integer parentPrioritySkill,
-            String parentComment) {
+            Boolean parentNotParsing) {
         return new PdfParserServiceBean.SkillProjection(
                 skillId,
                 skillName,
                 notParsing,
-                prioritySkill,
-                comment,
                 parentId,
                 parentSkillName,
-                parentNotParsing,
-                parentPrioritySkill,
-                parentComment);
+                parentNotParsing);
     }
 }
