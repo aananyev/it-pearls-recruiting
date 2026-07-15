@@ -113,7 +113,7 @@
         </collection>
         <collection id="personPositionsDc"
                     class="com.company.hunttech.entity.Position">
-            <view extends="position-view"/>
+            <view extends="position-picker-view"/>
             <loader id="personPositionsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from hunttech_Position e
