@@ -2,19 +2,44 @@ repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
 task:
-  id: job-candidate-company-loader-stage-2
-  title: Stage 2 завершён
+  id: job-candidate-company-loader-stage-3-cleanup
+  title: Удаление остаточного контейнера компаний из JobCandidateEdit
   description: >
-    Полный список компаний исключён из initial open. Smoke-test пройден.
+    После принятого Stage 2 удалить currentCompaniesDc/currentCompaniesLc из XML
+    и контроллера, перевести возврат созданной Company на точечную загрузку через
+    DataManager, удалить временный lifecycle-optimizer и его Stage 2 unit-тест.
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: ad2e203de3bb5500872e67ec555c67f7315de5b7
-  head_sha: 8c792f82fb7450a9c8dbb4971bc4a8729cb9aa7e
-  status: completed
-  owner: none
-  updated_at: 2026-07-15T18:20:00+04:00
+  base_sha: 8c792f82e806589a4e0f8d502b77fddd1664f392
+  head_sha: 8c792f82e806589a4e0f8d502b77fddd1664f392
+  status: active
+  owner: chatgpt
+  updated_at: 2026-07-15T16:30:00+02:00
+scope:
+  type: performance
+  object: JobCandidateEdit
+  module: web
+  allowed_files:
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateCompanyLoaderOptimizer.java
+    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/JobCandidateCompanyLoaderOptimizerTest.java
+    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/JobCandidateCreatedCompanyResolverTest.java
+    - docs/ui/JobCandidateEdit_Spec.md
+    - docs/performance-archive/2026-07-15/job-candidate-company-loader-stage-3-cleanup/
+    - .ai/active-work.yml
+  forbidden_files:
+    - modules/global/src/com/company/hunttech/entity/
+    - modules/core/db/changelog/
+    - modules/global/src/com/company/hunttech/views.xml
 handoff:
   previous_agent: Hermes
   summary: >
-    Stage 2 завершён. Сборка, unit-тест, smoke-test — PASS.
-    Готов к Stage 3.
+    Stage 2 принят Алексеем. Фактический HEAD рабочей ветки —
+    8c792f82e806589a4e0f8d502b77fddd1664f392. Координационный SHA предыдущего
+    этапа был записан с ошибкой и исправлен при старте Stage 3.
+  required_actions:
+    - не изменять код при owner: chatgpt
+    - после передачи проверить точный итоговый HEAD
+    - подтвердить отсутствие currentCompaniesDc/currentCompaniesLc и полного Company SQL
+    - проверить suggestion, lookup, open, create и сохранение кандидата
