@@ -122,13 +122,6 @@
                 </query>
             </loader>
         </collection>
-        <collection id="currentCompaniesDc"
-                    class="com.company.hunttech.entity.Company">
-            <view extends="company-picker-view"/>
-            <loader id="currentCompaniesLc" cacheable="true">
-                <query><![CDATA[select e from hunttech_Company e order by e.comanyName]]></query>
-            </loader>
-        </collection>
         <collection id="citiesDc" class="com.company.hunttech.entity.City">
             <view extends="city-picker-view"/>
             <loader id="citiesDl" cacheable="true">

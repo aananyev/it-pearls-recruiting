@@ -48,6 +48,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -245,10 +246,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionLoader<OpenPosition> suggestOpenPositionDl;
     @Inject
     private CollectionLoader<OpenPosition> openPositionDl;
-    @Inject
-    private CollectionLoader<Company> currentCompaniesLc;
-    @Inject
-    private CollectionContainer<Company> currentCompaniesDc;
     @Inject
     private CollectionLoader<City> citiesDl;
     @Inject
@@ -1883,18 +1880,34 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
+    /**
+     * После сохранения CompanyEdit повторно загружает только созданную компанию
+     * узким picker-view и merge ит её в DataContext текущего редактора кандидата.
+     */
     private Company mergeCreatedCompany(Company company) {
+        return resolveCreatedCompany(
+                company,
+                companyId -> dataManager.load(Company.class)
+                        .query("select e from hunttech_Company e where e.id = :companyId")
+                        .parameter("companyId", companyId)
+                        .view("company-picker-view")
+                        .one(),
+                dataContext::merge);
+    }
+
+    /**
+     * Сохраняет create-company flow тестируемым без полного справочника компаний.
+     * Для несохранённой или отменённой сущности не выполняет SQL и merge.
+     */
+    static Company resolveCreatedCompany(Company company,
+                                         Function<UUID, Company> companyLoader,
+                                         Function<Company, Company> companyMerger) {
         if (company == null || company.getId() == null) {
             return company;
         }
 
-        Company mergedCompany = dataContext.merge(company);
-        if (currentCompaniesDc != null && !currentCompaniesDc.containsItem(mergedCompany)) {
-            currentCompaniesDc.getMutableItems().add(mergedCompany);
-        } else if (currentCompaniesDc != null) {
-            currentCompaniesDc.replaceItem(mergedCompany);
-        }
-        return mergedCompany;
+        Company persistedCompany = companyLoader.apply(company.getId());
+        return companyMerger.apply(persistedCompany);
     }
 
     public void repaintSocialNetworksTable() {
