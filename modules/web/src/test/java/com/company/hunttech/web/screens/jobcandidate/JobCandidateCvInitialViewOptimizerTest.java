@@ -5,6 +5,7 @@ import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.Project;
+import com.company.hunttech.entity.SocialNetworkType;
 import com.company.hunttech.entity.SocialNetworkURLs;
 import com.haulmont.cuba.core.global.FetchMode;
 import com.haulmont.cuba.core.global.View;
@@ -76,5 +77,27 @@ public class JobCandidateCvInitialViewOptimizerTest {
                 .collectProjectIds(Arrays.asList(firstCv, secondCv, withoutVacancy, null));
 
         assertEquals(Collections.singleton(projectId), projectIds);
+    }
+
+    @Test
+    public void collectSocialNetworkTypeIdsUsesLoadedRelationsAndRemovesDuplicates() {
+        UUID typeId = UUID.randomUUID();
+        SocialNetworkType socialNetworkType = new SocialNetworkType();
+        socialNetworkType.setId(typeId);
+
+        SocialNetworkURLs firstNetwork = new SocialNetworkURLs();
+        firstNetwork.setSocialNetworkURL(socialNetworkType);
+        SocialNetworkURLs secondNetwork = new SocialNetworkURLs();
+        secondNetwork.setSocialNetworkURL(socialNetworkType);
+        SocialNetworkURLs withoutType = new SocialNetworkURLs();
+
+        Set<UUID> typeIds = new JobCandidateCvInitialViewOptimizer()
+                .collectSocialNetworkTypeIds(Arrays.asList(
+                        firstNetwork,
+                        secondNetwork,
+                        withoutType,
+                        null));
+
+        assertEquals(Collections.singleton(typeId), typeIds);
     }
 }
