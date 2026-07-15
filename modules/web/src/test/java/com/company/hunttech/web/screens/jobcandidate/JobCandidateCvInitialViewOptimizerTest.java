@@ -3,10 +3,17 @@ package com.company.hunttech.web.screens.jobcandidate;
 import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.entity.OpenPosition;
+import com.company.hunttech.entity.Project;
 import com.company.hunttech.entity.SocialNetworkURLs;
 import com.haulmont.cuba.core.global.FetchMode;
 import com.haulmont.cuba.core.global.View;
 import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -46,5 +53,28 @@ public class JobCandidateCvInitialViewOptimizerTest {
         assertEquals(FetchMode.BATCH, optimizedView.getProperty("iteractionList").getFetchMode());
         assertNotSame(socialNetworkView, optimizedView.getProperty("socialNetwork").getView());
         assertNotSame(interactionsView, optimizedView.getProperty("iteractionList").getView());
+    }
+
+    @Test
+    public void collectProjectIdsUsesLoadedRelationsAndRemovesDuplicates() {
+        UUID projectId = UUID.randomUUID();
+        Project project = new Project();
+        project.setId(projectId);
+
+        OpenPosition firstVacancy = new OpenPosition();
+        firstVacancy.setProjectName(project);
+        OpenPosition secondVacancy = new OpenPosition();
+        secondVacancy.setProjectName(project);
+
+        CandidateCV firstCv = new CandidateCV();
+        firstCv.setToVacancy(firstVacancy);
+        CandidateCV secondCv = new CandidateCV();
+        secondCv.setToVacancy(secondVacancy);
+        CandidateCV withoutVacancy = new CandidateCV();
+
+        Set<UUID> projectIds = new JobCandidateCvInitialViewOptimizer()
+                .collectProjectIds(Arrays.asList(firstCv, secondCv, withoutVacancy, null));
+
+        assertEquals(Collections.singleton(projectId), projectIds);
     }
 }
