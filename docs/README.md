@@ -30,7 +30,7 @@
 | DBA | [database/](database/) и [deployment/database-migration/](../deployment/database-migration/) |
 | Тестировщик | [operations/](operations/), [reports/](reports/), [deployment/database-migration/validation/](../deployment/database-migration/validation/) |
 | Администратор | [operations/](operations/) и [deployment/production-deployment/runbooks/](../deployment/production-deployment/runbooks/) |
-| AI-агент | [ai/documentation-map.md](ai/documentation-map.md) |
+| AI-агент | [ai/documentation-map.md](ai/documentation-map.md) · [ai/ChatGPT_Project_Instructions.md](ai/ChatGPT_Project_Instructions.md) |
 
 ## Куда добавлять новый документ
 
