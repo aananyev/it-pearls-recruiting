@@ -1334,11 +1334,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private boolean hasCandidateCv() {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
+        if (PersistenceHelper.isNew(getEditedEntity())
+                || getEditedEntity().getId() == null) {
             return false;
         }
-        List<CandidateCV> cvs = getEditedEntity().getCandidateCv();
-        return cvs != null && !cvs.isEmpty();
+        Long count = dataManager.loadValue(
+                "select count(e) from hunttech_CandidateCV e where e.candidate.id = :candidateId and e.deleteTs is null",
+                Long.class)
+                .parameter("candidateId", getEditedEntity().getId())
+                .one();
+        return count != null && count > 0;
     }
 
     private double loadAverageRating() {
