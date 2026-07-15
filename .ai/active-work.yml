@@ -1,16 +1,64 @@
 repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
+  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
+
 task:
-  id: job-candidate-city-loader-stage-7-baseline
-  title: Stage 7 baseline
+  id: job-candidate-last-interaction-stage-8-baseline
+  title: Baseline последнего взаимодействия JobCandidateEdit
+  description: >
+    Stage 7 закрыт как STAGE_7_INCONCLUSIVE: Hermes подтвердил deployment и HTTP 200,
+    но не сохранил численный отчёт и не изменил рабочую ветку. citiesDl и поле города
+    остаются без изменений. Stage 8 измеряет синхронный вызов
+    InteractionService.getLastIteraction в JobCandidateEdit.onBeforeShow без изменения кода и БД.
+
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: ff58d3d1
-  head_sha: ff58d3d1
-  status: review
-  owner: none
-  updated_at: 2026-07-15T19:25:00+04:00
+  base_sha: 517c0c1fafb94111aa7abc2293cec99d86520e26
+  head_sha: 517c0c1fafb94111aa7abc2293cec99d86520e26
+  code_sha: 7f25633a3c96971dbf923d0f51f77424068ddc33
+  status: active
+  owner: hermes
+  updated_at: 2026-07-15T20:35:00+04:00
+
+scope:
+  type: performance-baseline
+  object: JobCandidateEdit.onBeforeShow.InteractionService.getLastIteraction
+  module: web-core
+  allowed_files:
+    - docs/performance-archive/2026-07-15/job-candidate-last-interaction-stage-8-baseline/stage-8-last-interaction-hermes-report.md
+    - .ai/active-work.yml
+  forbidden_files:
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
+    - modules/global/src/com/company/hunttech/core/InteractionService.java
+    - modules/core/src/com/company/hunttech/core/InteractionServiceBean.java
+    - modules/global/src/com/company/hunttech/views.xml
+    - modules/global/src/com/company/hunttech/entity/
+    - modules/core/db/changelog/
+    - modules/web/themes/
+
 handoff:
-  previous_agent: Hermes
-  summary: Stage 7 baseline deployed. HTTP 200.
+  previous_agent: ChatGPT
+  summary: >
+    Созданы stage-7-chatgpt-review.md и stage-8-last-interaction-baseline-plan.md.
+    Текущий синхронный сервис выполняет query по candidate, сортирует numberIteraction DESC,
+    применяет maxResults(1) и iteractionList-picker-view. Нужно определить фактическую стоимость
+    SQL, view materialization и middleware round-trip, а также проверить, нужен ли результат до first paint.
+  required_actions:
+    - синхронизировать ветку и подтвердить HEAD 517c0c1fafb94111aa7abc2293cec99d86520e26
+    - не изменять Java XML views entities Liquibase индексы SCSS и production
+    - найти все использования lastIteraction lastIteractionLoaded и QUERY_GET_LAST_ITERACTION
+    - составить call graph и определить необходимость результата до first paint
+    - выбрать профили нового кандидата кандидата без взаимодействий и кандидатов с 1 средним и максимальным числом взаимодействий
+    - посчитать распределение взаимодействий по кандидатам и проверить NULL и дубликаты numberIteraction
+    - выполнить 1 прогрев и 10 SQL замеров текущего query для каждого профиля
+    - сохранить MIN MAX AVG P50 P95 и EXPLAIN ANALYZE BUFFERS VERBOSE
+    - проверить существующие индексы candidate numberIteraction и partial delete_ts read-only
+    - инвентаризировать iteractionList-picker-view и составить Data View Integrity matrix
+    - выполнить 1 прогрев и 10 runtime открытий для каждого профиля
+    - измерить service duration middleware round-trip SQL count heap cold warm и долю в initial open P50 P95
+    - сравнить current MAX-subquery ID-only и reuse lazy interactions только read-only
+    - выдать один вердикт KEEP_SYNC_CURRENT NARROW_INTERACTION_VIEW COMPOSITE_INDEX_RECOMMENDED DEFER_LAST_INTERACTION REUSE_LAZY_INTERACTIONS_RESULT BACKGROUND_LOAD_RECOMMENDED или STAGE_8_BLOCKED
+    - сохранить stage-8-last-interaction-hermes-report.md с численными данными
+    - после push обновить coordination точным финальным HEAD и освободить блокировку
