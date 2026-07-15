@@ -19,7 +19,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -185,13 +184,5 @@ public class JobCandidateSocialNetworkInitialViewOptimizer implements Controller
         } finally {
             loading.set(false);
         }
-    }
-
-    List<SocialNetworkURLs> safeSocialNetworks(JobCandidate candidate) {
-        if (candidate == null || !PersistenceHelper.isLoaded(candidate, SOCIAL_NETWORK_PROPERTY)) {
-            return Collections.emptyList();
-        }
-        List<SocialNetworkURLs> socialNetworks = candidate.getSocialNetwork();
-        return socialNetworks != null ? socialNetworks : Collections.emptyList();
     }
 }
