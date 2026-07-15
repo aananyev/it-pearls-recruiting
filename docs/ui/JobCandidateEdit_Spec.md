@@ -265,6 +265,7 @@ Runtime-сценарии:
 
 | Дата | Изменение |
 |---|---|---|
+| 2026-07-15 | Stage 11: фоновый расчёт рейтинга через BackgroundTask; AVG не блокирует first paint, UI-форматирование звёзд сохранено. |
 | 2026-07-15 | Stage 10: `hasCandidateCv()` заменён на скалярный `count`-запрос; коллекция CV не материализуется ради индикатора «Резюме: ДА/НЕТ». |
 | 2026-07-15 | Stage 9: ленивая загрузка последнего взаимодействия; вызов `InteractionService.getLastIteraction()` удалён из `onBeforeShow`, перенесён в `ensureLastInteractionLoaded()` с кешированием и инвалидацией в `reloadInteractions()`. |
 | 2026-07-15 | Stage 6: `personPositionsDc` переведён с `position-view` (`_local`) на `position-picker-view` (`_minimal`); JPQL, optionsContainer, lookup/open и бизнес-поведение сохранены. |
