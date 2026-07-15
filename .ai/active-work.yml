@@ -6,19 +6,18 @@ coordination:
 
 task:
   id: job-candidate-main-tab-field-layout
-  title: Проверка объединённой компоновки вкладки Основное
+  title: Выравнивание подписей и фото вкладки Основное
   description: >
-    Продолжить работу с объединённого SHA после слияния изменений ChatGPT
-    и отчёта Hermes. Проверить сборку, ScreenViewIntegrityTest и runtime-сценарий
-    вкладки «Основное» без изменения бизнес-логики и JobCandidateEdit.java.
+    Продолжить после ручной правки Алексея в VS Code.
+    Проверить сборку, тесты и runtime.
 
 work:
-  branch: agent/job-candidate-main-tab-field-layout
-  base_sha: d0ece5d3f6cae20989595b87ba9ce9c8259833a3
-  head_sha: d0ece5d3f6cae20989595b87ba9ce9c8259833a3
-  status: ready
-  owner: none
-  updated_at: 2026-07-15T15:30:00+04:00
+  branch: agent/job-candidate-progressive-loading-stage-3-social-networks
+  base_sha: 85e90375be97dd51448dff3a98a2faea0b35875c
+  head_sha: 46233d23ccfe2e5b65e12b51a2bc7e5f5ca578f0
+  status: active
+  owner: hermes
+  updated_at: 2026-07-15T16:00:00+04:00
 
 scope:
   type: screen
@@ -27,26 +26,21 @@ scope:
   allowed_files:
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
     - docs/ui/JobCandidateEdit_Spec.md
-    - docs/performance-archive/2026-07-15/main-tab-field-layout/
+    - docs/performance-archive/
   forbidden_files:
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
     - modules/global/src/com/company/hunttech/entity/
     - modules/core/db/changelog/
 
 handoff:
-  previous_agent: ChatGPT
+  previous_agent: Алексей (ручная правка VS Code)
   summary: >
-    Перекомпоновка вкладки «Основное», документация и отчёт Hermes Stage 3
-    объединены в ветке agent/job-candidate-main-tab-field-layout.
-    Итоговый опубликованный SHA: d0ece5d3f6cae20989595b87ba9ce9c8259833a3.
+    Добавлен spacing на picVBox и width="80px" для подписей Имя/Отчество.
+    Hermes продолжит сборку и проверку.
   required_actions:
-    - синхронизировать локальную ветку с origin/agent/job-candidate-main-tab-field-layout
-    - проверить точное совпадение HEAD с work.head_sha
-    - выполнить git diff --check
-    - выполнить компиляцию web-модуля
-    - выполнить ScreenViewIntegrityTest и получить 8/8 PASS
-    - выполнить clean assemble
-    - развернуть /hrm и проверить HTTP 200
-    - проверить видимость и работу полей вкладки «Основное»
-    - сохранить отчёт в docs/performance-archive/2026-07-15/main-tab-field-layout/
-    - после push обновить этот файл и освободить блокировку
+    - выполнить компиляцию и тесты
+    - ScreenViewIntegrityTest 8/8
+    - clean assemble
+    - HTTP 200
+    - проверить форму в браузере
+    - сохранить отчёт
