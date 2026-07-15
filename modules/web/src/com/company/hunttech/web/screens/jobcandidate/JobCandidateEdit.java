@@ -661,6 +661,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setBlockUnblockButton(b);
 
         startCandidatePicBackgroundLoading();
+        startCandidateCvIndicatorBackgroundLoading();
         startRatingBackgroundLoading();
         startSkillsBackgroundLoading();
     }
@@ -729,13 +730,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         // Heavy comments data is loaded lazily from initTabComments() when the user opens the tab.
-        // если есть резюме, то поставить галку
+        // Индикатор резюме определяется фоновой задачей после first paint.
+        // До завершения background-запроса показывается нейтральная подпись.
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            if (!hasCandidateCv()) {
-                labelCV.setValue("Резюме: НЕТ");
-            } else {
-                labelCV.setValue("Резюме: ДА");
-            }
+            labelCV.setValue("Резюме: …");
         }
 
         // обнулить статус для вновь создаваемного кандидата
@@ -1428,6 +1426,67 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .parameter("candidateId", getEditedEntity().getId())
                 .one();
         return count != null && count > 0;
+    }
+
+    /** Применяет результат скалярной проверки CV к индикатору. */
+    private void applyCandidateCvIndicator(boolean hasCv) {
+        labelCV.setValue(hasCv ? "Резюме: ДА" : "Резюме: НЕТ");
+    }
+
+    /** Флаг предотвращения повторного запуска фоновой проверки CV. */
+    private boolean candidateCvIndicatorLoading;
+    /** Флаг завершения фоновой проверки CV (успех или ошибка). */
+    private boolean candidateCvIndicatorLoaded;
+
+    /**
+     * Запускает фоновую проверку наличия резюме после открытия формы.
+     * Scalar COUNT не блокирует first paint и не загружает коллекцию CandidateCV.
+     */
+    private void startCandidateCvIndicatorBackgroundLoading() {
+        if (candidateCvIndicatorLoading || candidateCvIndicatorLoaded) {
+            return;
+        }
+
+        if (PersistenceHelper.isNew(getEditedEntity()) || getEditedEntity().getId() == null) {
+            candidateCvIndicatorLoaded = true;
+            return;
+        }
+
+        UUID candidateId = getEditedEntity().getId();
+        candidateCvIndicatorLoading = true;
+
+        BackgroundTask<Void, Boolean> task =
+                new BackgroundTask<Void, Boolean>(30, TimeUnit.SECONDS, this) {
+                    @Override
+                    public Boolean run(TaskLifeCycle<Void> taskLifeCycle) {
+                        DataManager backgroundDataManager = AppBeans.get(DataManager.class);
+                        Long count = backgroundDataManager.loadValue(
+                                "select count(e) from hunttech_CandidateCV e " +
+                                        "where e.candidate.id = :candidateId and e.deleteTs is null",
+                                Long.class)
+                                .parameter("candidateId", candidateId)
+                                .one();
+                        return count != null && count > 0;
+                    }
+
+                    @Override
+                    public void done(Boolean hasCv) {
+                        candidateCvIndicatorLoading = false;
+                        candidateCvIndicatorLoaded = true;
+                        applyCandidateCvIndicator(hasCv != null && hasCv);
+                    }
+
+                    @Override
+                    public boolean handleException(Exception exception) {
+                        candidateCvIndicatorLoading = false;
+                        candidateCvIndicatorLoaded = true;
+                        log.error("Не удалось проверить наличие резюме, candidateId={}",
+                                candidateId, exception);
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(task).execute();
     }
 
     private double loadAverageRating() {
