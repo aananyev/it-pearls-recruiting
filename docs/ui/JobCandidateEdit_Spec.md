@@ -6,7 +6,7 @@
 
 `JobCandidateEdit` — основная рабочая карточка кандидата в HRM HuntTech. Экран объединяет персональные и профессиональные сведения, контакты, позиции и вакансии, взаимодействия, резюме и файлы, социальные сети, комментарии и историю записи.
 
-Критический путь открытия формы должен содержать только данные, необходимые рекрутеру для начала работы. Тяжёлые дочерние коллекции загружаются при первом обращении к соответствующей вкладке. Справочник компаний не загружается целиком, а справочник должностей загружается через узкий picker-view.
+Критический путь открытия должен содержать только данные, необходимые рекрутеру для начала работы. Тяжёлые дочерние коллекции, вычисления и обращения к файловому хранилищу не должны блокировать first paint.
 
 ### 2. Связи в интерфейсе и Навигация (UI Context & Navigation)
 
@@ -16,33 +16,34 @@
 - из экранов подбора кандидатов;
 - из связанных рекрутинговых сценариев и lookup-компонентов.
 
-Основная навигация выполняется через существующий `tabSheetSocialNetworks`:
+Основная навигация выполняется через `tabSheetSocialNetworks`:
 
 - `tabMain` — основные данные;
-- `tabContactInfo` — контакты;
 - `tabPositions` — позиции и вакансии;
 - `tabIteraction` — взаимодействия;
 - `tabResume` — резюме и файлы;
+- `tabContactInfo` — контакты;
 - `tabSocialNetworks` — социальные сети;
 - `commentsTab` — комментарии;
 - `tabHistory` — история.
 
-На вкладке «Основное» рекрутер выбирает город, основную должность и компанию кандидата. Поле компании поддерживает suggestion, lookup, open и создание новой компании. Поля города и должности сохраняют существующие lookup-сценарии.
+На вкладке «Основное» рекрутер выбирает город, основную должность и компанию кандидата. Поле компании поддерживает suggestion, lookup, open и создание новой компании.
 
 ### 3. Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-- Открытие кандидата → перед `InitEvent` из runtime-view исключаются `iteractionList`, `candidateCv` и `socialNetwork` → основная карточка открывается без предварительной материализации тяжёлых коллекций.
-- Открытие формы → XML не содержит `currentCompaniesDc/currentCompaniesLc` → полный справочник компаний не загружается и не сериализуется.
+- Открытие существующего кандидата → runtime-view исключает `iteractionList`, `candidateCv` и `socialNetwork` → тяжёлые коллекции не материализуются в initial load.
+- Открытие формы → до first paint показывается заглушка фотографии → проверка file storage выполняется отдельной фоновой задачей после `AfterShow`.
+- Открытие формы → индикатор резюме получает нейтральное значение `Резюме: …` → после first paint единственный background scalar `COUNT` устанавливает `ДА` или `НЕТ`.
+- Открытие формы → средний рейтинг не рассчитывается в `onBeforeShow` → после first paint отдельная фоновая задача выполняет scalar `AVG` и отображает звёзды.
 - Ввод в поле «Компания» → после двух символов выполняется ограниченный серверный поиск → отображается не более 50 компаний.
-- Создание компании → `CompanyEdit` сохраняет запись → `JobCandidateEdit` точечно загружает созданную компанию по UUID через `company-picker-view`, merge-ит её в текущий `DataContext` и подставляет в поле.
-- Загрузка должностей → `personPositionsLc` выполняет прежний JPQL → результаты загружаются через `position-picker-view`, содержащий только picker-поля.
-- Выбор должности → `personPositionField` использует прежний `optionsContainer`, lookup и open → выбранная должность сохраняется вместе с кандидатом.
-- Загрузка городов → `citiesDl` использует `city-picker-view` → до получения runtime baseline поведение и тип поля города не изменяются.
-- Первое открытие вкладки «Взаимодействия» → выполняется узкий запрос → строки merge-ятся в экранный `DataContext`.
-- Первое открытие вкладки «Резюме» → выполняется отдельный запрос через `candidateCV-browse-view` → резюме отображаются без загрузки LOB-полей в initial open.
-- Первое открытие вкладки «Контакты» или «Социальные сети» → коллекция `socialNetwork` загружается отдельным запросом → повторная полная загрузка не выполняется.
+- Создание компании → `CompanyEdit` сохраняет запись → созданная компания точечно загружается по UUID через `company-picker-view`, merge-ится в текущий `DataContext` и подставляется в поле.
+- Первое открытие вкладки «Взаимодействия» → выполняется отдельный запрос → строки merge-ятся в экранный `DataContext`.
+- Первое открытие вкладки «Резюме» → выполняется запрос через `candidateCV-browse-view` → после загрузки одним batch-запросом гидратируются проекты и логотипы.
+- Первое открытие вкладки «Контакты» или «Социальные сети» → загружается `socialNetwork` → типы социальных сетей и логотипы гидратируются отдельным batch-запросом.
+- Первое открытие вкладки «Позиции и вакансии» → запускается фоновая агрегация истории → loader’ы UI выполняются после установки обязательных параметров.
+- Копирование взаимодействия без выбранной строки → последнее взаимодействие загружается лениво и кешируется → повторный сервисный запрос не выполняется до инвалидации.
 - «Сохранить и закрыть» → выполняется `windowCommitAndClose` → кандидат сохраняется и экран закрывается.
-- «Отмена» → выполняется `windowClose` → применяется стандартный сценарий закрытия CUBA.
+- «Отмена» → выполняется `windowClose` → применяется стандартный сценарий CUBA.
 
 ---
 
@@ -58,31 +59,64 @@
 | Платформа | CUBA Platform 7.3 |
 | Корневой style name | `job-candidate-editor` |
 
-Сущности, поля entity, миграции Liquibase, component ID, основные actions и бизнес-правила сохранения кандидата не изменяются.
+Сущности, поля entity, миграции Liquibase, component ID, основные actions и бизнес-правила сохранения кандидата не изменяются в рамках performance-этапов.
 
 ### Этап 1 — взаимодействия
 
-`JobCandidateInitialViewOptimizer` копирует runtime-view `jobCandidateDl` и исключает `iteractionList` из первичной загрузки. Коллекция загружается существующим методом `ensureInteractionsLoaded()` при первом открытии вкладки взаимодействий.
+`JobCandidateInitialViewOptimizer` копирует runtime-view `jobCandidateDl` и исключает `iteractionList` из первичной загрузки. Коллекция загружается методом `ensureInteractionsLoaded()` при первом открытии вкладки взаимодействий.
 
 ### Этап 2 — резюме
 
-`JobCandidateCvInitialViewOptimizer` исключает `candidateCv` из первичной загрузки. Наличие резюме определяется скалярным `COUNT`, а коллекция загружается методом `ensureCandidateCvLoaded()` при первом открытии вкладки резюме.
+`JobCandidateCvInitialViewOptimizer` исключает `candidateCv` из первичной загрузки. Optimizer отвечает только за сокращение view и установку hydration-listener’ов.
 
-После загрузки CV проекты связанных вакансий догружаются одним batch-запросом через `project-browse-view`, чтобы генератор логотипа не обращался к unfetched `projectLogo`.
+Индикатор наличия резюме принадлежит контроллеру `JobCandidateEdit`:
+
+```jpql
+select count(e)
+from hunttech_CandidateCV e
+where e.candidate.id = :candidateId
+  and e.deleteTs is null
+```
+
+Запрос:
+
+- выполняется только после first paint внутри `BackgroundTask`;
+- получает UUID кандидата, а не detached entity;
+- не загружает `CandidateCV`, `textCV`, файлы и связанные entity-графы;
+- является единственным источником `labelCV`;
+- не устанавливает `candidateCvLoaded` и не изменяет коллекцию кандидата.
+
+Полная коллекция загружается методом `ensureCandidateCvLoaded()` только при первом открытии `tabResume`. После загрузки проекты связанных вакансий догружаются одним запросом через `project-browse-view`.
 
 ### Этап 3 — социальные сети
 
 `JobCandidateSocialNetworkInitialViewOptimizer` исключает `socialNetwork` из первичной загрузки. Коллекция загружается при первом открытии вкладки контактов или социальных сетей. Уникальные `SocialNetworkType` догружаются одним batch-запросом через `socialNetworkType-view`.
 
-### Cleanup справочника компаний
+### Этапы 9–14 — операции после first paint
 
-Из XML и Java удалены:
+| Этап | Результат |
+|---|---|
+| Stage 9 | Последнее взаимодействие загружается только при копировании без выбранной строки. |
+| Stage 10 | Индикатор CV переведён с чтения коллекции на scalar `COUNT`. |
+| Stage 11 | Scalar `AVG` рейтинга перенесён в `BackgroundTask`. |
+| Stage 12 | Проверка фотографии в file storage перенесена в `BackgroundTask`. |
+| Stage 13 | Scalar `COUNT` индикатора CV перенесён после first paint. |
+| Stage 14 | Удалён дублирующий `COUNT` из optimizer; сохранён один background-источник. |
 
-- `currentCompaniesDc`;
-- `currentCompaniesLc`;
-- временный `JobCandidateCompanyLoaderOptimizer`.
+### Справочник компаний
 
-Create-company flow использует точечный запрос:
+Из XML и Java удалены полный контейнер и loader компаний. `currentCompanyField` выполняет серверный suggestion-поиск:
+
+```jpql
+select e
+from hunttech_Company e
+where lower(e.comanyName) like lower(:searchString)
+order by e.comanyName, e.companyShortName
+```
+
+Результат ограничен 50 строками и загружается через `company-picker-view`.
+
+Create-company flow точечно загружает сохранённую запись:
 
 ```jpql
 select e
@@ -90,90 +124,39 @@ from hunttech_Company e
 where e.id = :companyId
 ```
 
-Запрос выполняется через `company-picker-view`. Результат merge-ится в текущий `DataContext`, поэтому несохранённые изменения кандидата не теряются.
+### Справочники должностей и городов
 
-### Stage 6 — узкий picker-view должностей
+`personPositionsLc` использует `position-picker-view` и сохраняет прежний JPQL, фильтр и сортировку. `citiesDl` использует `city-picker-view`.
 
-Коллекция должностей:
-
-```xml
-<collection id="personPositionsDc"
-            class="com.company.hunttech.entity.Position">
-    <view extends="position-picker-view"/>
-    <loader id="personPositionsLc" cacheable="true">
-        <query><![CDATA[
-            select e from hunttech_Position e
-            where e.positionRuName not like '%(не использовать)%'
-            order by e.positionRuName
-        ]]></query>
-    </loader>
-</collection>
-```
-
-`position-picker-view` наследует `_minimal` и содержит:
-
-- `positionRuName`;
-- `positionEnName`.
-
-Ранее применявшийся `position-view` наследовал `_local` и загружал все локальные поля `Position`. Stage 6 уменьшает materialization одной коллекции без изменения её состава, фильтра, сортировки и пользовательских действий.
-
-Не изменены:
-
-- `personPositionField`;
-- `optionsContainer="personPositionsDc"`;
-- property `personPosition`;
-- lookup и open;
-- JPQL;
-- `cacheable="true"`;
-- Java-контроллер;
-- глобальное определение views.
-
-### Следующий этап — baseline загрузки городов
-
-`citiesDl` по-прежнему выполняет:
-
-```jpql
-select e
-from hunttech_City e
-order by e.cityRuName
-```
-
-через `city-picker-view`.
-
-До измерения количества строк, SQL P50/P95, runtime времени loader и пользовательской задержки запрещено:
-
-- менять `lookupPickerField` на suggestion-компонент;
-- откладывать loader до focus/click;
-- менять JPQL;
-- менять `city-picker-view`;
-- добавлять индексы или Liquibase.
+Изменение типа picker-компонентов, JPQL, индексов или Liquibase допускается только после отдельного runtime baseline.
 
 ---
 
 ## 2. Модель данных и загрузка
 
-| Контейнер | Назначение |
-|---|---|
-| `jobCandidateDc` | редактируемый кандидат |
-| `jobCandidateCandidateCvsDc` | резюме кандидата |
-| `jobCandidateIteractionDc` | взаимодействия кандидата |
-| `jobCandidateSocialNetworksDc` | социальные сети |
-| `lastProjectDc` | история рассмотрения по вакансиям |
-| `suggestOpenPositionDc` | подходящие вакансии |
-| `personPositionsDc` | действующие должности через `position-picker-view` |
-| `citiesDc` | города через `city-picker-view` |
+| Контейнер / данные | Назначение | Момент загрузки |
+|---|---|---|
+| `jobCandidateDc` | редактируемый кандидат | initial load |
+| `jobCandidateCandidateCvsDc` | резюме кандидата | первое открытие `tabResume` |
+| `jobCandidateIteractionDc` | взаимодействия | первое открытие `tabIteraction` |
+| `jobCandidateSocialNetworksDc` | социальные сети | первое открытие контактов или соцсетей |
+| `lastProjectDc` | история рассмотрения | после фоновой подготовки `tabPositions` |
+| `suggestOpenPositionDc` | подходящие вакансии | первое открытие `tabPositions` |
+| `personPositionsDc` | справочник должностей через `position-picker-view` | инициализация `tabMain` |
+| `citiesDc` | справочник городов через `city-picker-view` | инициализация `tabMain` |
+| `labelCV` | наличие неудалённого CV | background scalar `COUNT` после first paint |
+| `candidateRatingLabel` | средний рейтинг | background scalar `AVG` после first paint |
+| `candidatePic` | фотография | background file-storage check после first paint |
 
 Правила загрузки:
 
-- `iteractionList` загружается при первом открытии `tabIteraction`;
-- `candidateCv` загружается при первом открытии `tabResume`;
-- `socialNetwork` загружается при первом открытии `tabContactInfo` или `tabSocialNetworks`;
-- `currentCompanyField` выполняет ограниченный серверный поиск только после пользовательского ввода;
-- создание компании выполняет точечную загрузку по UUID;
-- должности загружаются узким picker-view;
-- города остаются без функциональных изменений до baseline;
 - сохранение кандидата без открытия ленивых вкладок не должно удалять существующие коллекции;
-- повторное открытие вкладок не должно создавать дубли или повторные полные запросы.
+- коллекции после отдельной загрузки merge-ятся в текущий `DataContext`;
+- повторное открытие вкладки не выполняет повторную полную загрузку;
+- фоновые задачи передают UUID и скалярные DTO, но не экранные entity-графы;
+- UI изменяется только на UI-потоке в `done()` или `handleException()`;
+- hydration добавляет недостающие поля managed-сущностям и не изменяет связи;
+- новый кандидат не выполняет CV `COUNT`, rating `AVG` и file-storage check.
 
 ---
 
@@ -183,23 +166,24 @@ order by e.cityRuName
 jobCandidateMainLayout
 ├── jobCandidateSidebar
 │   ├── фотография
-│   ├── ФИО
+│   ├── ФИО и должность
 │   ├── рейтинг и процент заполнения
 │   ├── город / компания / индикатор резюме
 │   ├── email / телефон / Telegram
+│   ├── вертикальная навигация
 │   ├── растягиваемое свободное пространство
 │   └── HR-Мастер
 └── jobCandidateWorkspace
     ├── верхняя панель: служебные данные и «Еще»
-    ├── горизонтальные вкладки
-    ├── accordion-заголовки разделов
+    ├── TabSheet
     └── нижняя панель: «Сохранить и закрыть», «Отмена»
 ```
 
 - `personalDataBlock` и `professionalDataBlock` занимают равные доли;
 - внутренние `GridLayout` растягиваются на 100%;
-- поля ФИО, должности и компании занимают всю доступную ширину;
-- высота основных полей — 38 px;
+- основные поля занимают доступную ширину;
+- фотография до фоновой проверки отображается заглушкой;
+- индикаторы рейтинга и CV обновляются после first paint;
 - оформление поддерживается в Halo, Hover, Havana и Helium.
 
 ---
@@ -217,63 +201,53 @@ jobCandidateMainLayout
 | `jobCandidateIteractionListTable` | прежние actions, columns и handlers |
 | `jobCandidateCandidateCvTable` | прежние actions, columns и handlers |
 | `socialNetworkTable` | прежний editor и generators |
+| `fileImageFaceUpload` | immediate upload, clear и обновление изображения |
+
+Не допускается менять component ID, dataContainer, property, invoke, action ID и бизнес-валидацию без отдельного разрешения.
 
 ---
 
 ## 5. Стили и поддержка тем
 
-Все правила ограничены `.job-candidate-editor`. Одинаковый локальный SCSS используется в темах Halo, Hover, Havana и Helium. Глобальные `.v-table`, `.v-label`, `.v-button` и `.v-tabsheet` вне родительского класса не изменяются.
+Все правила ограничены `.job-candidate-editor`. Используются только локальные style name с префиксом `job-candidate-`.
 
-Stage 6 не содержит изменений SCSS.
+Глобальные `.v-table`, `.v-label`, `.v-button` и `.v-tabsheet` вне родительского класса не изменяются.
 
 ---
 
 ## 6. Контроль качества и развертывание
 
-Проверки Stage 6:
+Обязательные проверки при изменении контроллера или progressive loading:
 
 ```bash
 git diff --check
 ./gradlew :app-web:compileJava :app-web:compileTestJava --no-daemon --stacktrace
-./gradlew test --tests '*ScreenViewIntegrityTest*' --no-daemon --stacktrace
+./gradlew :app-web:test --tests '*ScreenViewIntegrityTest*' --no-daemon --stacktrace
 ./gradlew clean assemble --no-daemon --stacktrace
 ```
 
-Runtime-сценарии:
+Acceptance gate:
 
-- открыть существующего кандидата;
-- раскрыть список должностей;
-- убедиться, что записи «(не использовать)» отсутствуют;
-- выбрать должность через dropdown;
-- выбрать должность через lookup;
-- открыть редактор выбранной должности;
-- сохранить кандидата и повторно открыть карточку;
-- создать нового кандидата;
-- проверить отсутствие unfetched/detached ошибок `Position`;
-- подтвердить HTTP 200 для `/hrm`.
-
-Подтверждено пользователем и Hermes:
-
-- `position-picker-view` установлен;
-- `position-view` удалён из `personPositionsDc`;
-- `optionsContainer` сохранён;
-- коммит `7f25633a3c96971dbf923d0f51f77424068ddc33` запушен;
-- приложение отвечает HTTP 200;
-- `VERIFICATION: PASS (5/5)`.
+- `ScreenViewIntegrityTest` — 8/8;
+- итоговый build — `BUILD SUCCESSFUL`;
+- существующий кандидат открывается без `unfetched` и detached ошибок;
+- новый кандидат открывается без необязательных SQL-запросов;
+- быстрый выход не вызывает UI-thread exception;
+- сохранение без открытия ленивых вкладок не удаляет дочерние данные;
+- hydration логотипов CV и социальных сетей работает после открытия соответствующих вкладок;
+- `/hrm` отвечает HTTP 200.
 
 ## История изменений
 
 | Дата | Изменение |
-|---|---|---|
-| 2026-07-15 | Stage 14: индикатор CV имеет единственный background-источник; удалён дублирующий COUNT из optimizer. |
-| 2026-07-15 | Stage 13: индикатор «Резюме: ДА/НЕТ» определяется фоновым scalar COUNT после first paint; labelCV получает значение асинхронно. |
-| 2026-07-15 | Stage 12: проверка фото в file storage вынесена в фон; first paint с заглушкой, фото появляется после AfterShow. |
-| 2026-07-15 | Stage 11: фоновый расчёт рейтинга через BackgroundTask; AVG не блокирует first paint, UI-форматирование звёзд сохранено. |
-| 2026-07-15 | Stage 10: `hasCandidateCv()` заменён на скалярный `count`-запрос; коллекция CV не материализуется ради индикатора «Резюме: ДА/НЕТ». |
-| 2026-07-15 | Stage 9: ленивая загрузка последнего взаимодействия; вызов `InteractionService.getLastIteraction()` удалён из `onBeforeShow`, перенесён в `ensureLastInteractionLoaded()` с кешированием и инвалидацией в `reloadInteractions()`. |
-| 2026-07-15 | Stage 6: `personPositionsDc` переведён с `position-view` (`_local`) на `position-picker-view` (`_minimal`); JPQL, optionsContainer, lookup/open и бизнес-поведение сохранены. |
-| 2026-07-15 | Cleanup справочника компаний: удалены полный loader и compatibility-контейнер; create-company переведён на точечную загрузку по UUID. |
-| 2026-07-15 | Stage 3 прогрессивной загрузки: `socialNetwork` исключён из первичной загрузки. |
-| 2026-07-15 | Stage 2 прогрессивной загрузки: `candidateCv` исключён из primary view. |
-| 2026-07-15 | Stage 1 прогрессивной загрузки: `iteractionList` исключён из primary view. |
-| 2026-07-14 | Реализована двухпанельная компоновка JobCandidateEdit и локальный theme-aware SCSS. |
+|---|---|
+| 2026-07-15 | Stage 14: удалён дублирующий CandidateCV `COUNT` из `JobCandidateCvInitialViewOptimizer`; единственный индикатор CV загружается фоновой задачей контроллера. |
+| 2026-07-15 | Stage 13: индикатор «Резюме: ДА/НЕТ» перенесён в background scalar `COUNT` после first paint. |
+| 2026-07-15 | Stage 12: проверка фотографии в file storage вынесена в фон. |
+| 2026-07-15 | Stage 11: фоновый расчёт рейтинга через `BackgroundTask`; форматирование звёзд сохранено. |
+| 2026-07-15 | Stage 10: чтение коллекции CV заменено scalar `COUNT`. |
+| 2026-07-15 | Stage 9: последнее взаимодействие загружается лениво при фактическом использовании. |
+| 2026-07-15 | Stage 6: `personPositionsDc` переведён на `position-picker-view`. |
+| 2026-07-15 | Удалён полный loader компаний; create-company переведён на точечную загрузку по UUID. |
+| 2026-07-15 | `socialNetwork`, `candidateCv` и `iteractionList` исключены из initial view. |
+| 2026-07-14 | Реализована двухпанельная компоновка и локальный theme-aware SCSS. |
