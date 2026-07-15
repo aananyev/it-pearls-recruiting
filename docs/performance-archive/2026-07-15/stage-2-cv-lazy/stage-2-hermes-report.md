@@ -29,17 +29,20 @@
 | Повторное открытие — дубликатов нет | ✅ |
 | Сохранение без открытия вкладки «Резюме» | ✅ |
 
-## 3. Лог-анализ
+## 3. Лог-анализ (после исправления 83c6f117)
 
 | Тип ошибки | Количество | Вердикт |
 |------------|:---------:|---------|
-| `iteractionList` unfetched | 0 | ✅ |
+| `projectLogo` unfetched | **0** | ✅ исправлено |
+| `logo` unfetched (SocialNetwork) | **0** | ✅ исправлено |
 | `candidateCv` unfetched | 0 | ✅ |
+| `iteractionList` unfetched | 0 | ✅ |
+| detached entity | 0 | ✅ |
 | OutOfMemoryError | 0 | ✅ |
-| Duplicate | 0 | ✅ |
-| `projectLogo` unfetched (column generator) | 2 | ⚠️ pre-existing, не Stage 2 |
-| `logo` unfetched (SocialNetworkType) | 4 | ⚠️ pre-existing, не Stage 2 |
+| IllegalStateException | 0 | ✅ |
+| NullPointerException | 52 | ⚠️ pre-existing (email sender) |
 
 ## 4. Вердикт
 
-**PASS** — Stage 2 готов к переходу.
+**PASS** — исправление логотипов соцсетей работает. Stage 2 готов.
+Переход к Stage 3 разрешён.
