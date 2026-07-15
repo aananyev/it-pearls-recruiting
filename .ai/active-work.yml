@@ -1,0 +1,52 @@
+repository: aananyev/it-pearls-recruiting
+
+coordination:
+  protocol_version: 1
+  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
+
+task:
+  id: job-candidate-main-tab-field-layout
+  title: Проверка объединённой компоновки вкладки Основное
+  description: >
+    Продолжить работу с объединённого SHA после слияния изменений ChatGPT
+    и отчёта Hermes. Проверить сборку, ScreenViewIntegrityTest и runtime-сценарий
+    вкладки «Основное» без изменения бизнес-логики и JobCandidateEdit.java.
+
+work:
+  branch: agent/job-candidate-main-tab-field-layout
+  base_sha: d0ece5d3f6cae20989595b87ba9ce9c8259833a3
+  head_sha: d0ece5d3f6cae20989595b87ba9ce9c8259833a3
+  status: ready
+  owner: none
+  updated_at: 2026-07-15T15:30:00+04:00
+
+scope:
+  type: screen
+  object: JobCandidateEdit
+  module: web
+  allowed_files:
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
+    - docs/ui/JobCandidateEdit_Spec.md
+    - docs/performance-archive/2026-07-15/main-tab-field-layout/
+  forbidden_files:
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
+    - modules/global/src/com/company/hunttech/entity/
+    - modules/core/db/changelog/
+
+handoff:
+  previous_agent: ChatGPT
+  summary: >
+    Перекомпоновка вкладки «Основное», документация и отчёт Hermes Stage 3
+    объединены в ветке agent/job-candidate-main-tab-field-layout.
+    Итоговый опубликованный SHA: d0ece5d3f6cae20989595b87ba9ce9c8259833a3.
+  required_actions:
+    - синхронизировать локальную ветку с origin/agent/job-candidate-main-tab-field-layout
+    - проверить точное совпадение HEAD с work.head_sha
+    - выполнить git diff --check
+    - выполнить компиляцию web-модуля
+    - выполнить ScreenViewIntegrityTest и получить 8/8 PASS
+    - выполнить clean assemble
+    - развернуть /hrm и проверить HTTP 200
+    - проверить видимость и работу полей вкладки «Основное»
+    - сохранить отчёт в docs/performance-archive/2026-07-15/main-tab-field-layout/
+    - после push обновить этот файл и освободить блокировку
