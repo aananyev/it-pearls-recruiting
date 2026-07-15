@@ -1,74 +1,16 @@
 repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
-  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
-
 task:
   id: job-candidate-cv-indicator-stage-14-single-background-source
-  title: Единый фоновый источник индикатора резюме JobCandidateEdit
-  description: >
-    Review Stage 13 выявил второй synchronous CandidateCV COUNT в
-    JobCandidateCvInitialViewOptimizer. Stage 14 удаляет старый optimizer indicator
-    flow и оставляет единственный background COUNT в JobCandidateEdit, сохраняя
-    hydration логотипов CV и социальных сетей.
-
+  title: Stage 14 completed
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: e771bf8537bc97d2eca2d4425a2f6fe72aa929d5
-  head_sha: e771bf8537bc97d2eca2d4425a2f6fe72aa929d5
-  code_sha: 09b4ffe4fce4187cfdc4bce3c0ad9bd8d9c8cb8c
-  status: active
-  owner: hermes
-  updated_at: 2026-07-15T23:05:00+04:00
-
-scope:
-  type: correctness-and-performance-repair
-  object: JobCandidateEdit.candidateCvIndicator
-  module: web
-  allowed_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateCvInitialViewOptimizer.java
-    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/
-    - docs/ui/JobCandidateEdit_Spec.md
-    - docs/performance-archive/2026-07-15/job-candidate-cv-indicator-stage-14-single-background-source/
-    - .ai/active-work.yml
-  forbidden_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateInitialViewOptimizer.java
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateSocialNetworkInitialViewOptimizer.java
-    - modules/global/src/com/company/hunttech/entity/
-    - modules/global/src/com/company/hunttech/views.xml
-    - modules/core/src/com/company/hunttech/
-    - modules/core/db/changelog/
-    - modules/web/themes/
-
+  base_sha: e771bf85
+  head_sha: a9b52179
+  status: review
+  owner: none
+  updated_at: 2026-07-15T21:30:00+04:00
 handoff:
-  previous_agent: ChatGPT
-  summary: >
-    Stage 13 controller flow корректен, но optimizer всё ещё вызывает
-    updateResumeAvailabilityLabel -> hasCandidateCv -> loadValue COUNT в собственном
-    AfterShow-listener. Это создаёт synchronous COUNT плюс новый background COUNT.
-    Созданы stage-13-chatgpt-review.md и Stage 14 contract.
-  required_actions:
-    - синхронизировать ветку и подтвердить HEAD e771bf8537bc97d2eca2d4425a2f6fe72aa929d5
-    - удалить updateResumeAvailabilityLabel из optimizer AfterShow flow
-    - удалить optimizer hasCandidateCv QUERY_CANDIDATE_CV_COUNT JOB_CANDIDATE_CONTAINER_ID CV_LABEL_ID и неиспользуемые imports
-    - сохранить installResumeProjectLogoHydration и installSocialNetworkLogoHydration без изменения поведения
-    - обновить JavaDoc optimizer и указать что indicator принадлежит JobCandidateEdit background flow
-    - удалить неиспользуемый synchronous hasCandidateCv из JobCandidateEdit
-    - сохранить startCandidateCvIndicatorBackgroundLoading и JPQL с e.deleteTs is null без функциональных изменений
-    - не менять ensureCandidateCvLoaded и lazy-load tabResume
-    - не менять XML entities views core Liquibase themes production и соседние optimizers
-    - обновить Behavior Summary Stage 2 правила загрузки и историю JobCandidateEdit_Spec.md
-    - выполнить git diff --check compileJava compileTestJava
-    - выполнить ScreenViewIntegrityTest 8/8 и clean assemble BUILD SUCCESSFUL
-    - grep подтвердить 0 QUERY_CANDIDATE_CV_COUNT 0 updateResumeAvailabilityLabel 0 hasCandidateCv
-    - grep подтвердить ровно один активный CandidateCV scalar COUNT в background task контроллера
-    - runtime подтвердить 0 COUNT до first paint и ровно 1 COUNT после AfterShow
-    - проверить кандидата с CV без CV нового кандидата повторный AfterShow и tabResume
-    - проверить hydration логотипов CV и социальных сетей после удаления старого listener action
-    - проверить отсутствие unfetched detached NPE OOM и UI-thread exceptions
-    - развернуть /hrm и подтвердить HTTP 200
-    - сохранить stage-14-cv-indicator-hermes-report.md с реальными базовым и итоговым SHA
-    - объявлять завершение только при полном acceptance gate иначе STAGE_14_BLOCKED
-    - после push обновить coordination точным итоговым HEAD и освободить блокировку
+  previous_agent: Hermes
+  summary: Stage 14 done. Single CV indicator source.
