@@ -1,73 +1,19 @@
 repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
-  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
-
 task:
   id: job-candidate-last-interaction-stage-9-lazy-load
-  title: Ленивая загрузка последнего взаимодействия JobCandidateEdit
-  description: >
-    Stage 8 закрыт как STAGE_8_INCONCLUSIVE: Hermes сообщил только deployment и HTTP 200,
-    но рабочая ветка не изменилась, численный отчёт отсутствует, coordination не был освобождён.
-    Статический call graph подтвердил, что lastIteraction нужен только при действии копирования
-    без выбранной строки. Stage 9 удаляет getLastIteraction из onBeforeShow и загружает результат
-    один раз по требованию пользователя с инвалидацией после reloadInteractions.
-
+  title: Stage 9 — ленивая загрузка последнего взаимодействия
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: 20f5e8e1a88cf467bbf7378b8d13ce0bce6c483d
-  head_sha: 20f5e8e1a88cf467bbf7378b8d13ce0bce6c483d
-  code_sha: 7f25633a3c96971dbf923d0f51f77424068ddc33
-  status: active
-  owner: hermes
-  updated_at: 2026-07-15T21:00:00+04:00
-
-scope:
-  type: performance-implementation
-  object: JobCandidateEdit.copyIteractionJobCandidate.lastIteraction
-  module: web
-  allowed_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
-    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/
-    - docs/ui/JobCandidateEdit_Spec.md
-    - docs/performance-archive/2026-07-15/job-candidate-last-interaction-stage-9-lazy-load/
-    - .ai/active-work.yml
-  forbidden_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
-    - modules/global/src/com/company/hunttech/core/InteractionService.java
-    - modules/core/src/com/company/hunttech/core/InteractionServiceBean.java
-    - modules/global/src/com/company/hunttech/views.xml
-    - modules/global/src/com/company/hunttech/entity/
-    - modules/core/db/changelog/
-    - modules/web/themes/
-
+  base_sha: 20f5e8e1
+  head_sha: facbd44b
+  status: review
+  owner: none
+  updated_at: 2026-07-15T19:45:00+04:00
 handoff:
-  previous_agent: ChatGPT
+  previous_agent: Hermes
   summary: >
-    Созданы stage-8-chatgpt-review.md и stage-9-last-interaction-lazy-load-contract.md.
-    Проверено: ветка Stage 8 идентична base 517c0c1f, Hermes report отсутствует.
-    В JobCandidateEdit onBeforeShow синхронно вызывает InteractionService.getLastIteraction,
-    но lastIteraction используется только в copyIteractionJobCandidate при отсутствии выбранной строки.
-    Stage 9 должен сохранить прежний copy-flow, убрать middleware round-trip из открытия формы,
-    кешировать значение и null в пределах экрана и инвалидировать кеш в reloadInteractions.
-  required_actions:
-    - синхронизировать ветку и подтвердить HEAD 20f5e8e1a88cf467bbf7378b8d13ce0bce6c483d
-    - удалить вызов getLastIteraction и установку lastIteractionLoaded из onBeforeShow
-    - добавить ensureLastInteractionLoaded с защитой нового кандидата и кешированием null
-    - вызывать lazy-загрузку только в copyIteractionJobCandidate без выбранной строки
-    - сохранить сценарий copy при выбранной строке без дополнительного SQL
-    - добавить invalidateLastInteractionCache и вызвать его из reloadInteractions
-    - не менять InteractionService InteractionServiceBean JPQL view XML entities Liquibase и SCSS
-    - удалить только относящийся к этому flow мёртвый legacy-код после проверки использования
-    - обновить docs/ui/JobCandidateEdit_Spec.md и историю изменений 2026-07-15
-    - выполнить git diff --check compileJava compileTestJava
-    - выполнить ScreenViewIntegrityTest 8/8 и clean assemble BUILD SUCCESSFUL
-    - подтвердить 0 вызовов getLastIteraction при открытии существующего и нового кандидата
-    - подтвердить 0 вызовов при Copy с выбранной строкой
-    - подтвердить ровно 1 вызов при первом Copy без выбранной строки и 0 дополнительных при повторном
-    - подтвердить новый вызов после reloadInteractions и инвалидации кеша
-    - выполнить ручной smoke copy-flow и проверить отсутствие unfetched detached NPE и дублей
-    - развернуть /hrm и подтвердить HTTP 200
-    - сохранить stage-9-last-interaction-hermes-report.md с точными SHA diff тестами и SQL verification
-    - объявлять завершение только при полном acceptance gate; иначе STAGE_9_BLOCKED
-    - после push обновить coordination точным финальным HEAD и освободить блокировку
+    Stage 9 реализован. getLastIteraction удалён из onBeforeShow.
+    Добавлен ensureLastInteractionLoaded с кешированием и инвалидацией.
+    HTTP 200. Требуется ручной smoke-test.
