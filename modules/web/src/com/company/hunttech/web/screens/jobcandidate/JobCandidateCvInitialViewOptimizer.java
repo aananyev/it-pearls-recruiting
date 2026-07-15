@@ -3,6 +3,8 @@ package com.company.hunttech.web.screens.jobcandidate;
 import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.Project;
+import com.company.hunttech.entity.SocialNetworkType;
+import com.company.hunttech.entity.SocialNetworkURLs;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.View;
@@ -47,16 +49,22 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
     private static final String JOB_CANDIDATE_LOADER_ID = "jobCandidateDl";
     private static final String JOB_CANDIDATE_CONTAINER_ID = "jobCandidateDc";
     private static final String CANDIDATE_CV_CONTAINER_ID = "jobCandidateCandidateCvsDc";
+    private static final String SOCIAL_NETWORK_CONTAINER_ID = "jobCandidateSocialNetworksDc";
     private static final String CANDIDATE_CV_PROPERTY = "candidateCv";
     private static final String CV_LABEL_ID = "labelCV";
     private static final String TAB_SHEET_ID = "tabSheetSocialNetworks";
     private static final String RESUME_TAB_ID = "tabResume";
+    private static final String CONTACT_TAB_ID = "tabContactInfo";
+    private static final String SOCIAL_NETWORK_TAB_ID = "tabSocialNetworks";
     private static final String PROJECT_WITH_LOGO_VIEW = "project-browse-view";
+    private static final String SOCIAL_NETWORK_TYPE_WITH_LOGO_VIEW = "socialNetworkType-view";
     private static final String OPTIMIZED_VIEW_NAME = "jobCandidate-initial-without-cv";
     private static final String QUERY_CANDIDATE_CV_COUNT =
             "select count(e.id) from hunttech_CandidateCV e where e.candidate.id = :candidateId";
     private static final String QUERY_PROJECTS_WITH_LOGOS =
             "select e from hunttech_Project e where e.id in :projectIds";
+    private static final String QUERY_SOCIAL_NETWORK_TYPES_WITH_LOGOS =
+            "select e from hunttech_SocialNetworkType e where e.id in :typeIds";
 
     @Inject
     private DataManager dataManager;
@@ -79,10 +87,12 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
         }
 
         screen.addAfterShowListener(event -> {
+            DataContext dataContext = jobCandidateLoader.getDataContext();
             // Корректирует индикатор скалярным COUNT без чтения unfetched-коллекции.
             updateResumeAvailabilityLabel(screen, screenData);
-            // Подключает догрузку логотипов после штатного listener вкладки резюме.
-            installResumeProjectLogoHydration(screen, screenData, jobCandidateLoader.getDataContext());
+            // Подключает догрузку логотипов после штатных listener-ов вкладок.
+            installResumeProjectLogoHydration(screen, screenData, dataContext);
+            installSocialNetworkLogoHydration(screen, screenData, dataContext);
         });
     }
 
@@ -132,8 +142,8 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
      */
     @SuppressWarnings("unchecked")
     private void installResumeProjectLogoHydration(JobCandidateEdit screen,
-                                                   ScreenData screenData,
-                                                   DataContext dataContext) {
+                                                    ScreenData screenData,
+                                                    DataContext dataContext) {
         TabSheet tabSheet = (TabSheet) screen.getWindow().getComponent(TAB_SHEET_ID);
         CollectionPropertyContainer<CandidateCV> candidateCvContainer =
                 screenData.getContainer(CANDIDATE_CV_CONTAINER_ID);
@@ -162,9 +172,63 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
         });
     }
 
+    /**
+     * После штатной загрузки социальных сетей догружает только справочники типов и их логотипы.
+     * Initial view кандидата и XML-дескриптор при этом не расширяются.
+     */
+    @SuppressWarnings("unchecked")
+    private void installSocialNetworkLogoHydration(JobCandidateEdit screen,
+                                                   ScreenData screenData,
+                                                   DataContext dataContext) {
+        TabSheet tabSheet = (TabSheet) screen.getWindow().getComponent(TAB_SHEET_ID);
+        CollectionPropertyContainer<SocialNetworkURLs> socialNetworkContainer =
+                screenData.getContainer(SOCIAL_NETWORK_CONTAINER_ID);
+        if (tabSheet == null || socialNetworkContainer == null) {
+            return;
+        }
+
+        AtomicBoolean socialNetworkLogosLoaded = new AtomicBoolean(false);
+        AtomicBoolean initialHydrationCompleted = new AtomicBoolean(false);
+        Runnable hydrateLogos = () -> {
+            hydrateSocialNetworkTypeLogosOnce(
+                    socialNetworkContainer,
+                    dataContext,
+                    socialNetworkLogosLoaded);
+            initialHydrationCompleted.set(true);
+        };
+
+        // Во время первой инициализации вкладки контейнер может заполняться несколькими строками.
+        // До завершения штатного listener-а не запускаем отдельный запрос на каждое добавление.
+        socialNetworkContainer.addCollectionChangeListener(event -> {
+            if (!initialHydrationCompleted.get()) {
+                return;
+            }
+            socialNetworkLogosLoaded.set(false);
+            if (isSocialNetworkTabSelected(tabSheet)) {
+                hydrateLogos.run();
+            }
+        });
+
+        tabSheet.addSelectedTabChangeListener(event -> {
+            if (isSocialNetworkTabSelected(tabSheet)) {
+                hydrateLogos.run();
+            }
+        });
+    }
+
     private boolean isResumeTabSelected(TabSheet tabSheet) {
         TabSheet.Tab selectedTab = tabSheet.getSelectedTab();
         return selectedTab != null && RESUME_TAB_ID.equals(selectedTab.getName());
+    }
+
+    private boolean isSocialNetworkTabSelected(TabSheet tabSheet) {
+        TabSheet.Tab selectedTab = tabSheet.getSelectedTab();
+        if (selectedTab == null) {
+            return false;
+        }
+        String selectedTabName = selectedTab.getName();
+        return CONTACT_TAB_ID.equals(selectedTabName)
+                || SOCIAL_NETWORK_TAB_ID.equals(selectedTabName);
     }
 
     /**
@@ -172,8 +236,8 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
      * CandidateCV, OpenPosition или Project изменёнными для последующего commit.
      */
     private void hydrateResumeProjectLogosOnce(CollectionPropertyContainer<CandidateCV> candidateCvContainer,
-                                               DataContext dataContext,
-                                               AtomicBoolean projectLogosLoaded) {
+                                                DataContext dataContext,
+                                                AtomicBoolean projectLogosLoaded) {
         if (!projectLogosLoaded.compareAndSet(false, true)) {
             return;
         }
@@ -199,6 +263,37 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
     }
 
     /**
+     * Одним запросом обогащает managed-справочники SocialNetworkType полем logo.
+     */
+    private void hydrateSocialNetworkTypeLogosOnce(
+            CollectionPropertyContainer<SocialNetworkURLs> socialNetworkContainer,
+            DataContext dataContext,
+            AtomicBoolean socialNetworkLogosLoaded) {
+        if (!socialNetworkLogosLoaded.compareAndSet(false, true)) {
+            return;
+        }
+
+        try {
+            Set<UUID> typeIds = collectSocialNetworkTypeIds(socialNetworkContainer.getItems());
+            if (typeIds.isEmpty()) {
+                return;
+            }
+
+            List<SocialNetworkType> socialNetworkTypes = dataManager.load(SocialNetworkType.class)
+                    .query(QUERY_SOCIAL_NETWORK_TYPES_WITH_LOGOS)
+                    .parameter("typeIds", typeIds)
+                    .view(SOCIAL_NETWORK_TYPE_WITH_LOGO_VIEW)
+                    .list();
+
+            // Merge подменяет ссылки на те же managed-экземпляры и добавляет загруженный logo.
+            socialNetworkTypes.forEach(dataContext::merge);
+        } catch (RuntimeException exception) {
+            socialNetworkLogosLoaded.set(false);
+            throw exception;
+        }
+    }
+
+    /**
      * Собирает уникальные проекты только по уже загруженной цепочке
      * CandidateCV → OpenPosition → Project, не обращаясь к projectLogo.
      */
@@ -217,6 +312,26 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
             }
         }
         return projectIds;
+    }
+
+    /**
+     * Собирает уникальные типы только по уже загруженной связи
+     * SocialNetworkURLs → SocialNetworkType, не обращаясь к полю logo.
+     */
+    Set<UUID> collectSocialNetworkTypeIds(Collection<SocialNetworkURLs> socialNetworks) {
+        if (socialNetworks == null || socialNetworks.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        Set<UUID> typeIds = new LinkedHashSet<>();
+        for (SocialNetworkURLs socialNetwork : socialNetworks) {
+            if (socialNetwork != null
+                    && socialNetwork.getSocialNetworkURL() != null
+                    && socialNetwork.getSocialNetworkURL().getId() != null) {
+                typeIds.add(socialNetwork.getSocialNetworkURL().getId());
+            }
+        }
+        return typeIds;
     }
 
     /**
