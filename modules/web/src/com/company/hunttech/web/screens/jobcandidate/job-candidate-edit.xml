@@ -193,7 +193,7 @@
                       align="TOP_CENTER"
                       stylename="job-candidate-profile-header">
                     <vbox id="dropZone" spacing="false" align="TOP_CENTER">
-                        <vbox id="picVBox" align="TOP_CENTER">
+                        <vbox id="picVBox" align="TOP_CENTER" spacing="true">
                             <image id="candidatePic"
                                    dataContainer="jobCandidateDc"
                                    property="fileImageFace"
@@ -494,7 +494,7 @@
                                         <columns count="2"/>
                                         <rows>
                                             <row>
-                                                <label value="Имя" stylename="small"/>
+                                                <label value="Имя" stylename="small" width="80px"/>
                                                 <suggestionField id="firstNameField"
                                                                  dataContainer="jobCandidateDc"
                                                                  property="firstName"
@@ -512,7 +512,7 @@
                                                 </suggestionField>
                                             </row>
                                             <row>
-                                                <label value="Отчество" stylename="small"/>
+                                                <label value="Отчество" stylename="small" width="80px"/>
                                                 <suggestionField id="middleNameField"
                                                                  dataContainer="jobCandidateDc"
                                                                  property="middleName"
@@ -530,7 +530,7 @@
                                                 </suggestionField>
                                             </row>
                                             <row>
-                                                <label value="Фамилия" stylename="small"/>
+                                                <label value="Фамилия" stylename="small" width="80px"/>
                                                 <suggestionField id="secondNameField"
                                                                  dataContainer="jobCandidateDc"
                                                                  property="secondName"
@@ -547,7 +547,7 @@
                                                 </suggestionField>
                                             </row>
                                             <row>
-                                                <label value="Дата рождения" stylename="small"/>
+                                                <label value="Дата рождения" stylename="small" width="80px"/>
                                                 <dateField id="birdhDateField"
                                                            dataContainer="jobCandidateDc"
                                                            property="birdhDate"
