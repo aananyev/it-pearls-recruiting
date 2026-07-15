@@ -25,7 +25,7 @@ public class JobCandidateCompanyLoaderOptimizer implements ControllerDependencyI
 
     public static final String NAME = "hunttech_JobCandidateCompanyLoaderOptimizer";
 
-    private static final String CURRENT_COMPANIES_LOADER_ID = "currentCompaniesLc";
+    static final String CURRENT_COMPANIES_LOADER_ID = "currentCompaniesLc";
 
     @Override
     public void inject(InjectionContext injectionContext) {
@@ -38,8 +38,14 @@ public class JobCandidateCompanyLoaderOptimizer implements ControllerDependencyI
         CollectionLoader<Company> currentCompaniesLoader =
                 screenData.getLoader(CURRENT_COMPANIES_LOADER_ID);
 
-        // SuggestionPickerField выполняет собственный ограниченный запрос по вводу,
-        // поэтому полный список компаний не должен загружаться при открытии формы.
-        currentCompaniesLoader.addPreLoadListener(loadEvent -> loadEvent.preventLoad());
+        preventAutomaticLoad(currentCompaniesLoader);
+    }
+
+    /**
+     * Отменяет pre-load остаточного loader компаний. SuggestionPickerField
+     * продолжает выполнять собственный ограниченный запрос только после ввода.
+     */
+    static void preventAutomaticLoad(CollectionLoader<Company> loader) {
+        loader.addPreLoadListener(loadEvent -> loadEvent.preventLoad());
     }
 }
