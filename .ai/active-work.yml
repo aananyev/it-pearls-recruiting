@@ -6,19 +6,17 @@ coordination:
 
 task:
   id: job-candidate-company-suggestion-baseline
-  title: Baseline загрузки компаний в JobCandidateEdit
+  title: Read-only аудит загрузчика компаний
   description: >
-    Этап 1 завершён со стороны ChatGPT: зафиксировано текущее состояние
-    currentCompanyField и остаточного currentCompaniesLc. Требуется read-only
-    runtime-проверка Hermes без изменения Java, XML, сущностей и БД.
+    Подтвердить или опровергнуть выполнение currentCompaniesLc при initial open.
 
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: b68e27d85af056fab2a1ec72079df82d362c5b0d
+  base_sha: 84af3294d082f43ed9ce337d850dd06d8fb7b9e1
   head_sha: 84af3294d082f43ed9ce337d850dd06d8fb7b9e1
-  status: review
-  owner: none
-  updated_at: 2026-07-15T15:05:00+02:00
+  status: active
+  owner: hermes
+  updated_at: 2026-07-15T17:00:00+04:00
 
 scope:
   type: performance
@@ -26,27 +24,13 @@ scope:
   module: web
   allowed_files:
     - docs/performance-archive/2026-07-15/job-candidate-company-suggestion-baseline/
-    - .ai/active-work.yml
   forbidden_files:
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
-    - modules/global/src/com/company/hunttech/entity/
-    - modules/core/db/changelog/
+    - modules/global/
+    - modules/core/db/
 
 handoff:
   previous_agent: ChatGPT
   summary: >
-    Создан baseline-отчёт. Установлено, что currentCompanyField уже является
-    SuggestionPickerField с minSearchStringLength=2, suggestionsLimit=50 и
-    contains-поиском. При этом currentCompaniesDc/currentCompaniesLc остаются
-    в XML и Java, а currentCompaniesLc не защищён от @LoadDataBeforeShow.
-    Наличие полной загрузки при initial open является проверяемой гипотезой.
-  required_actions:
-    - синхронизировать ветку и подтвердить HEAD 84af3294d082f43ed9ce337d850dd06d8fb7b9e1
-    - не изменять Java, XML, сущности, JPQL, Liquibase, индексы и БД
-    - найти все обращения к currentCompaniesLc и currentCompaniesDc
-    - трассировать initial open отдельно от ввода в currentCompanyField
-    - выполнить один прогрев и пять измерений для трёх сценариев
-    - зафиксировать P50, P95, SQL count, SQL total и число Company rows
-    - выдать FULL_COMPANY_LOADER_CONFIRMED, FULL_COMPANY_LOADER_NOT_TRIGGERED или BASELINE_BLOCKED
-    - сохранить отчёт рядом с baseline-документом и после push обновить coordination
+    Read-only аудит. Hermes проверяет выполнение currentCompaniesLc.
