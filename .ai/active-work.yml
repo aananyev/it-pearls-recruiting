@@ -5,25 +5,28 @@ coordination:
   source_of_truth: origin/coordination/active-work:.ai/active-work.yml
 
 task:
-  id: job-candidate-index-revalidation
-  title: Повторный аудит индексов JobCandidateEdit
+  id: job-candidate-company-suggestion-baseline
+  title: Baseline загрузки компаний в JobCandidateEdit
   description: >
-    Инструментальный аудит завершён. Вердикт: INDEXES_NOT_REQUIRED.
+    Выполнить только этап 1 согласованного плана: зафиксировать текущее поведение
+    currentCompanyField и остаточного currentCompaniesLc, сформировать baseline и
+    подготовить проверяемое задание Hermes. Java, XML, сущности и БД не изменять.
 
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: 46233d23ccfe2e5b65e12b51a2bc7e5f5ca578f0
-  head_sha: b68e27d8ff12469878e9b01c79a72551963deb77
-  status: review
-  owner: none
-  updated_at: 2026-07-15T16:45:00+04:00
+  base_sha: b68e27d85af056fab2a1ec72079df82d362c5b0d
+  head_sha: b68e27d85af056fab2a1ec72079df82d362c5b0d
+  status: active
+  owner: chatgpt
+  updated_at: 2026-07-15T14:59:41+02:00
 
 scope:
   type: performance
   object: JobCandidateEdit
-  module: all
+  module: web
   allowed_files:
-    - docs/performance-archive/2026-07-15/job-candidate-index-revalidation/
+    - docs/performance-archive/2026-07-15/job-candidate-company-suggestion-baseline/
+    - .ai/active-work.yml
   forbidden_files:
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
@@ -33,9 +36,9 @@ scope:
 handoff:
   previous_agent: Hermes
   summary: >
-    Аудит завершён. EXPLAIN ANALYZE подтверждает: все SQL-запросы <9ms,
-    используют индексы. Stages 1-3 исключили тяжёлые коллекции из начальной
-    загрузки. Новые индексы не требуются. Основная задержка — client-side
-    Vaadin/SCSS.
+    Предыдущий аудит индексов завершён с вердиктом INDEXES_NOT_REQUIRED.
+    Начат отдельный read-only этап фиксации baseline загрузки справочника компаний.
   required_actions:
-    - продолжить оптимизацию client-side производительности
+    - не изменять код до передачи owner: hermes
+    - подтвердить фактический SQL initial open для currentCompaniesLc
+    - выполнить пять измерительных открытий после одного прогрева
