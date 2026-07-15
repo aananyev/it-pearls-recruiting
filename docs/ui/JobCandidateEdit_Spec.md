@@ -32,6 +32,7 @@
 ### 3. Краткий обзор бизнес-логики поведения (Behavior Summary)
 
 - Открытие кандидата → перед `InitEvent` из runtime-view последовательно исключаются `iteractionList`, `candidateCv` и `socialNetwork` → основная карточка открывается без предварительной материализации взаимодействий, резюме и социальных сетей.
+- Отображение вкладки «Основное» → экран создаёт две равные карточки со строками по шаблону вкладки «Контакты» → подписи и связанные поля ввода видимы и занимают доступную ширину.
 - Определение наличия резюме → после показа формы выполняется скалярный `COUNT` по идентификатору кандидата → боковой индикатор показывает «Резюме: ДА» или «Резюме: НЕТ» без загрузки сущностей `CandidateCV`.
 - Первое открытие вкладки «Взаимодействия» → существующий `ensureInteractionsLoaded()` выполняет узкий запрос → сущности merge-ятся в экранный `DataContext` и отображаются в штатной таблице.
 - Первое открытие вкладки «Резюме» → существующий `ensureCandidateCvLoaded()` выполняет отдельный запрос с `candidateCV-browse-view` → резюме merge-ятся в `DataContext` и отображаются в прежней таблице.
@@ -58,7 +59,7 @@
 | Платформа | CUBA Platform 7.3 |
 | Корневой style name | `job-candidate-editor` |
 
-Визуальная доработка не меняет сущности, component ID, data bindings, actions, invoke, loaders, XML views и JPQL существующего экрана.
+Визуальная доработка не меняет сущности, component ID, data bindings, actions, invoke, loaders, XML views и JPQL существующего экрана. Java-контроллер `JobCandidateEdit.java` не изменяется.
 
 ### Этап 1 — взаимодействия
 
@@ -205,14 +206,15 @@ XML содержит контейнеры `job-candidate-accordion-header` и `j
 
 ### Вкладка «Основное»
 
-- `personalDataBlock` и `professionalDataBlock` занимают по 50% доступной ширины;
-- родительский `jobCandidateMainSectionContent` использует flex-компоновку;
-- промежуток между блоками — 16 px;
-- внутренний `GridLayout` растягивается на 100%;
-- колонка подписей имеет ширину 118 px;
-- поля `firstNameField`, `middleNameField`, `secondNameField`, `personPositionField` и `currentCompanyField` занимают всю доступную ширину;
-- шрифт `SuggestionField` ФИО установлен 16 px;
-- высота полей — 38 px.
+- `jobCandidateMainSectionContent` использует тот же строковый паттерн `job-candidate-card-row`, что и вкладка «Контакты»;
+- `personalDataBlock` и `professionalDataBlock` занимают равные доли доступной ширины благодаря `box.expandRatio="1"`;
+- каждое поле помещено в отдельный `hbox` со стилем `job-candidate-form-row`;
+- подпись имеет фиксированную ширину 118 px;
+- атрибут `expand` строки указывает на поле, поэтому компонент ввода занимает всё оставшееся пространство;
+- поля `firstNameField`, `middleNameField`, `secondNameField`, `birdhDateField`, `jobCityCandidateField`, `personPositionField` и `currentCompanyField` видимы и растянуты по ширине;
+- контейнер `positionsControl` сохраняет существующие `positionsLabel` и `addPositions`, выводя выбранные дополнительные позиции и кнопку справа;
+- component ID, `dataContainer`, `property`, `required`, actions и JPQL-запросы suggestion-компонентов не изменены;
+- `JobCandidateEdit.java` не изменён.
 
 ### Вкладка «Контакты»
 
@@ -238,7 +240,7 @@ XML содержит контейнеры `job-candidate-accordion-header` и `j
 | `socialNetworkTable` | прежний editor и generators |
 | комментарии | прежние поле ввода, отправка и ответы |
 
-Stage 3 не меняет CRUD резюме, распознавание контактов, копирование CV, проверку навыков, загрузку файлов, связи CV с вакансией, CRUD социальных сетей и реализации генераторов `projectLogoColumn` и `socialNetworkLogoColumn`.
+Визуальная перекомпоновка вкладки «Основное» не меняет CRUD резюме, распознавание контактов, копирование CV, проверку навыков, загрузку файлов, связи CV с вакансией, CRUD социальных сетей и реализации генераторов `projectLogoColumn` и `socialNetworkLogoColumn`.
 
 ---
 
@@ -259,10 +261,10 @@ Stage 3 не меняет CRUD резюме, распознавание конт
 - локальные layout-классы вместо универсального selector всех потомков;
 - явный список rating-классов;
 - единый класс `job-candidate-sidebar-card`;
-- упрощённые правила `job-candidate-form-grid`;
+- строковый класс `job-candidate-form-row`, общий для вкладок «Основное» и «Контакты»;
 - минимально необходимый набор `!important` для конфликтов с inline-размерами Vaadin.
 
-Stage 3 не содержит изменений SCSS.
+Текущая перекомпоновка не содержит изменений SCSS.
 
 ---
 
@@ -280,6 +282,17 @@ git diff --check
 ./gradlew clean assemble --no-daemon --stacktrace
 ```
 
+Проверка вкладки «Основное»:
+
+- открыть существующего кандидата и нового кандидата;
+- проверить видимость подписей и компонентов ввода «Имя», «Отчество», «Фамилия», «Дата рождения», «Город», «Должность», «Компания», «Доп. позиции»;
+- проверить ввод и изменение ФИО и даты рождения;
+- проверить lookup города и должности;
+- проверить поиск, lookup и open для компании;
+- проверить отображение `positionsLabel` и действие `addPositions`;
+- проверить сохранение и отмену без изменения прежней бизнес-логики;
+- проверить отсутствие ошибок CUBA layout/expand и runtime-ошибок по изменённому сценарию.
+
 Ручная проверка Stage 3 и регрессии Stage 1–2:
 
 - HTTP 200 для `/hrm`;
@@ -295,14 +308,15 @@ git diff --check
 - проверить логотипы типов соцсетей без `Cannot get unfetched attribute [logo]`;
 - повторно открыть вкладки «Взаимодействия» и «Резюме» и подтвердить сохранение Stage 1–2;
 - проверить `projectLogo`, `candidateCv`, `iteractionList` и `socialNetwork` по логам;
-- в логах должны отсутствовать unfetched/detached-ошибки, `IllegalStateException`, `NullPointerException` Stage 3 и `OutOfMemoryError`;
+- в логах должны отсутствовать unfetched/detached-ошибки, `IllegalStateException`, `NullPointerException` по изменённому сценарию и `OutOfMemoryError`;
 - SQL-доказательство должно разделять initial open, первое открытие вкладки социальных сетей и повторное открытие;
-- отчёт сохранить в `docs/performance-archive/2026-07-15/stage-3-social-networks-lazy/`.
+- отчёт по текущей задаче сохранить в `docs/performance-archive/2026-07-15/main-tab-field-layout/`.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-15 | Вкладка «Основное» переведена с `GridLayout` на строковые `hbox`-контейнеры по шаблону вкладки «Контакты»: подписи и поля ввода видимы, а component ID, data bindings, actions, JPQL и `JobCandidateEdit.java` не изменены. |
 | 2026-07-15 | Stage 3 прогрессивной загрузки: `socialNetwork` исключён из runtime-view первичной загрузки; коллекция загружается при первом открытии вкладки «Контакты» или «Социальные сети» с защитой от повторного SQL. |
 | 2026-07-15 | Исправлена ошибка при открытии вкладки социальных сетей: уникальные `SocialNetworkType` догружаются batch-запросом через `socialNetworkType-view` и merge-ятся в `DataContext`, поэтому генератор не обращается к unfetched `logo`. |
 | 2026-07-15 | Исправлена ошибка Stage 2 при открытии вкладки «Резюме»: проекты связанных вакансий догружаются batch-запросом через `project-browse-view` и merge-ятся в `DataContext`, поэтому генератор логотипа не обращается к unfetched `projectLogo`. |
