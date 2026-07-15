@@ -3,25 +3,25 @@ coordination:
   protocol_version: 1
 task:
   id: job-candidate-company-loader-stage-2
-  title: Проверка исключения полной загрузки компаний
+  title: Проверка Stage 2 завершена
   description: >
-    Hermes проверяет Stage 2: сборка, тесты, runtime.
+    Сборка успешна, unit-тест PASS, HTTP 200. Требуется ручной smoke-test.
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
   base_sha: ad2e203de3bb5500872e67ec555c67f7315de5b7
-  head_sha: ad2e203de3bb5500872e67ec555c67f7315de5b7
-  status: active
-  owner: hermes
-  updated_at: 2026-07-15T18:00:00+04:00
+  head_sha: 8c792f82fb7450a9c8dbb4971bc4a8729cb9aa7e
+  status: review
+  owner: none
+  updated_at: 2026-07-15T18:10:00+04:00
 scope:
   type: performance
   object: JobCandidateEdit
   allowed_files:
     - docs/performance-archive/2026-07-15/job-candidate-company-loader-stage-2/
-  forbidden_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
 handoff:
-  previous_agent: ChatGPT
+  previous_agent: Hermes
   summary: >
-    Stage 2 готов. Hermes проверяет.
+    Stage 2 проверен: сборка OK, unit-тест PASS, HTTP 200.
+    ScreenViewIntegrityTest имеет pre-existing проблему ImageProcessingServiceBeanTest.
+  required_actions:
+    - ручной smoke-test: suggestion, lookup, open, create компании
