@@ -1,36 +1,34 @@
 repository: aananyev/it-pearls-recruiting
-
 coordination:
   protocol_version: 1
-  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
-
 task:
   id: job-candidate-company-suggestion-baseline
-  title: Read-only аудит загрузчика компаний
+  title: Подтверждение загрузчика компаний
   description: >
-    Подтвердить или опровергнуть выполнение currentCompaniesLc при initial open.
-
+    Вердикт: FULL_COMPANY_LOADER_CONFIRMED.
+    currentCompaniesLc не в preventAutoLoadUntilReady → ~5623 Company при initial open.
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
   base_sha: 84af3294d082f43ed9ce337d850dd06d8fb7b9e1
-  head_sha: 84af3294d082f43ed9ce337d850dd06d8fb7b9e1
-  status: active
-  owner: hermes
-  updated_at: 2026-07-15T17:00:00+04:00
-
+  head_sha: d3558cb2de15a50ef3a1f9a54bdbdb2a7a4d1fa7
+  status: review
+  owner: none
+  updated_at: 2026-07-15T17:15:00+04:00
 scope:
   type: performance
   object: JobCandidateEdit
-  module: web
   allowed_files:
     - docs/performance-archive/2026-07-15/job-candidate-company-suggestion-baseline/
   forbidden_files:
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
-    - modules/global/
-    - modules/core/db/
-
 handoff:
-  previous_agent: ChatGPT
+  previous_agent: Hermes
   summary: >
-    Read-only аудит. Hermes проверяет выполнение currentCompaniesLc.
+    FULL_COMPANY_LOADER_CONFIRMED. currentCompaniesLc выполняет полный запрос
+    (~5623 строк) при каждом initial open. Карта зависимостей составлена:
+    currentCompaniesDc нужен только для create-company return flow.
+  required_actions:
+    - Stage 2: добавить currentCompaniesLc в preventAutoLoadUntilReady
+    - заменить currentCompaniesDc на DataManager в create-company
+    - удалить неиспользуемый полный loader
