@@ -32,7 +32,8 @@
 | Stage 8 JobCandidateEdit | [review baseline последнего взаимодействия](performance-archive/2026-07-15/job-candidate-last-interaction-stage-8-baseline/stage-8-chatgpt-review.md) |
 | Stage 9 JobCandidateEdit | [review ленивой загрузки последнего взаимодействия](performance-archive/2026-07-15/job-candidate-last-interaction-stage-9-lazy-load/stage-9-chatgpt-review.md) |
 | Stage 10 JobCandidateEdit | [review скалярной проверки наличия резюме](performance-archive/2026-07-15/job-candidate-cv-indicator-stage-10-scalar-existence/stage-10-chatgpt-review.md) |
-| Stage 11 JobCandidateEdit | [контракт фоновой загрузки рейтинга](performance-archive/2026-07-15/job-candidate-rating-stage-11-background-load/stage-11-rating-background-load-contract.md) |
+| Stage 11 JobCandidateEdit | [review фоновой загрузки рейтинга](performance-archive/2026-07-15/job-candidate-rating-stage-11-background-load/stage-11-chatgpt-review.md) |
+| Stage 12 JobCandidateEdit | [контракт фоновой загрузки фотографии](performance-archive/2026-07-15/job-candidate-photo-stage-12-background-load/stage-12-candidate-photo-background-load-contract.md) |
 | Диагностика разбора резюме и OOM | [services/PdfParserService.md](services/PdfParserService.md) · [operations/JobCandidateEdit_OOM_Runbook.md](operations/JobCandidateEdit_OOM_Runbook.md) |
 | DBA | [database/](database/) и [deployment/database-migration/](../deployment/database-migration/) |
 | Тестировщик | [operations/](operations/), [reports/](reports/), [deployment/database-migration/validation/](../deployment/database-migration/validation/) |
