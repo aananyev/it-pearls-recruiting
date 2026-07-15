@@ -506,7 +506,7 @@
                                             <query entityClass="com.company.hunttech.entity.JobCandidate"
                                                    escapeValueForLike="true"
                                                    searchStringFormat="%$searchString%">
-                                                select e.firstName from hunttech_JobCandidate e
+                                                select e from hunttech_JobCandidate e
                                                 where lower(e.firstName) like lower(:searchString) escape '\'
                                             </query>
                                         </suggestionField>
