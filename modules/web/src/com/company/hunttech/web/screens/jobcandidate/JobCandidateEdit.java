@@ -660,10 +660,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 false : blockCandidateCheckBox.getValue();
         setBlockUnblockButton(b);
 
-        // Запуск фоновой загрузки и анализа резюме для блока навыков (Skillsbar).
-        // Операция вынесена из onBeforeShow, чтобы SQL-запрос полного textCV
-        // и сопоставление навыков не блокировали открытие формы.
-        // UI-компоненты Skillsbar создаются только в done() BackgroundTask.
+        startRatingBackgroundLoading();
         startSkillsBackgroundLoading();
     }
 
@@ -750,7 +747,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         enableDisableContacts();
         setLabelTitle();
         setCreatedUpdatedLabel();
-        setRatingLabel(getEditedEntity());
 
         setLinkButtonEmail();
         setLinkButtonTelegrem();
@@ -1358,6 +1354,67 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .parameter("candidateId", candidateId)
                 .one();
         return avg != null ? avg.doubleValue() : 0.0;
+    }
+
+    /** Флаг предотвращения повторного запуска фоновой загрузки рейтинга. */
+    private boolean ratingLoading;
+    /** Флаг завершения фоновой загрузки рейтинга (успех или ошибка). */
+    private boolean ratingLoaded;
+
+    /**
+     * Запускает фоновый расчёт среднего рейтинга кандидата после открытия формы.
+     * Вызов из onAfterShow, чтобы scalar AVG не блокировал first paint.
+     */
+    private void startRatingBackgroundLoading() {
+        if (ratingLoading || ratingLoaded) {
+            return;
+        }
+
+        if (PersistenceHelper.isNew(getEditedEntity()) || getEditedEntity().getId() == null) {
+            ratingLoaded = true;
+            applyRatingLabel(0.0);
+            return;
+        }
+
+        UUID candidateId = getEditedEntity().getId();
+        ratingLoading = true;
+
+        BackgroundTask<Void, Double> task =
+                new BackgroundTask<Void, Double>(30, TimeUnit.SECONDS, this) {
+                    @Override
+                    public Double run(TaskLifeCycle<Void> taskLifeCycle) {
+                        DataManager backgroundDataManager = AppBeans.get(DataManager.class);
+                        Double average = backgroundDataManager.loadValue(
+                                "select avg(e.rating + 1) " +
+                                        "from hunttech_IteractionList e " +
+                                        "where e.candidate.id = :candidateId " +
+                                        "and e.rating is not null",
+                                Double.class)
+                                .parameter("candidateId", candidateId)
+                                .optional()
+                                .orElse(0.0);
+                        return average != null ? average : 0.0;
+                    }
+
+                    @Override
+                    public void done(Double result) {
+                        ratingLoading = false;
+                        ratingLoaded = true;
+                        applyRatingLabel(result != null ? result : 0.0);
+                    }
+
+                    @Override
+                    public boolean handleException(Exception exception) {
+                        ratingLoading = false;
+                        ratingLoaded = true;
+                        log.error("Не удалось загрузить рейтинг кандидата, candidateId={}",
+                                candidateId, exception);
+                        applyRatingLabel(0.0);
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(task).execute();
     }
 
     private List<CandidateCV> ensureCandidateCvLoaded() {
@@ -1980,7 +2037,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             });
 
             jobCandidateIteractionListTable.addEditorCloseListener(event -> {
-                setRatingLabel(getEditedEntity());
+                applyRatingLabel(loadAverageRating());
             });
 
             jobCandidateIteractionListTable.getColumn("iteractionType")
@@ -2691,8 +2748,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return null;
     }
 
-    private void setRatingLabel(JobCandidate editedEntity) {
-        double avgRating = loadAverageRating();
+    /**
+     * Применяет заранее вычисленный средний рейтинг к UI-компоненту.
+     * Не выполняет SQL-запросы и не обращается к DataManager.
+     */
+    private void applyRatingLabel(double avgRating) {
         int intRating = (int) Math.round(avgRating);
 
         if (intRating > 0) {
