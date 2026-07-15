@@ -4,32 +4,35 @@ coordination:
   source_of_truth: origin/coordination/active-work:.ai/active-work.yml
 
 task:
-  id: job-candidate-last-interaction-stage-8-baseline
-  title: Baseline последнего взаимодействия JobCandidateEdit
+  id: job-candidate-last-interaction-stage-9-lazy-load
+  title: Ленивая загрузка последнего взаимодействия JobCandidateEdit
   description: >
-    Stage 7 закрыт как STAGE_7_INCONCLUSIVE: Hermes подтвердил deployment и HTTP 200,
-    но не сохранил численный отчёт и не изменил рабочую ветку. citiesDl и поле города
-    остаются без изменений. Stage 8 измеряет синхронный вызов
-    InteractionService.getLastIteraction в JobCandidateEdit.onBeforeShow без изменения кода и БД.
+    Stage 8 закрыт как STAGE_8_INCONCLUSIVE: Hermes сообщил только deployment и HTTP 200,
+    но рабочая ветка не изменилась, численный отчёт отсутствует, coordination не был освобождён.
+    Статический call graph подтвердил, что lastIteraction нужен только при действии копирования
+    без выбранной строки. Stage 9 удаляет getLastIteraction из onBeforeShow и загружает результат
+    один раз по требованию пользователя с инвалидацией после reloadInteractions.
 
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: 517c0c1fafb94111aa7abc2293cec99d86520e26
-  head_sha: 517c0c1fafb94111aa7abc2293cec99d86520e26
+  base_sha: 20f5e8e1a88cf467bbf7378b8d13ce0bce6c483d
+  head_sha: 20f5e8e1a88cf467bbf7378b8d13ce0bce6c483d
   code_sha: 7f25633a3c96971dbf923d0f51f77424068ddc33
   status: active
   owner: hermes
-  updated_at: 2026-07-15T20:35:00+04:00
+  updated_at: 2026-07-15T21:00:00+04:00
 
 scope:
-  type: performance-baseline
-  object: JobCandidateEdit.onBeforeShow.InteractionService.getLastIteraction
-  module: web-core
+  type: performance-implementation
+  object: JobCandidateEdit.copyIteractionJobCandidate.lastIteraction
+  module: web
   allowed_files:
-    - docs/performance-archive/2026-07-15/job-candidate-last-interaction-stage-8-baseline/stage-8-last-interaction-hermes-report.md
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
+    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/
+    - docs/ui/JobCandidateEdit_Spec.md
+    - docs/performance-archive/2026-07-15/job-candidate-last-interaction-stage-9-lazy-load/
     - .ai/active-work.yml
   forbidden_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
     - modules/global/src/com/company/hunttech/core/InteractionService.java
     - modules/core/src/com/company/hunttech/core/InteractionServiceBean.java
@@ -41,24 +44,30 @@ scope:
 handoff:
   previous_agent: ChatGPT
   summary: >
-    Созданы stage-7-chatgpt-review.md и stage-8-last-interaction-baseline-plan.md.
-    Текущий синхронный сервис выполняет query по candidate, сортирует numberIteraction DESC,
-    применяет maxResults(1) и iteractionList-picker-view. Нужно определить фактическую стоимость
-    SQL, view materialization и middleware round-trip, а также проверить, нужен ли результат до first paint.
+    Созданы stage-8-chatgpt-review.md и stage-9-last-interaction-lazy-load-contract.md.
+    Проверено: ветка Stage 8 идентична base 517c0c1f, Hermes report отсутствует.
+    В JobCandidateEdit onBeforeShow синхронно вызывает InteractionService.getLastIteraction,
+    но lastIteraction используется только в copyIteractionJobCandidate при отсутствии выбранной строки.
+    Stage 9 должен сохранить прежний copy-flow, убрать middleware round-trip из открытия формы,
+    кешировать значение и null в пределах экрана и инвалидировать кеш в reloadInteractions.
   required_actions:
-    - синхронизировать ветку и подтвердить HEAD 517c0c1fafb94111aa7abc2293cec99d86520e26
-    - не изменять Java XML views entities Liquibase индексы SCSS и production
-    - найти все использования lastIteraction lastIteractionLoaded и QUERY_GET_LAST_ITERACTION
-    - составить call graph и определить необходимость результата до first paint
-    - выбрать профили нового кандидата кандидата без взаимодействий и кандидатов с 1 средним и максимальным числом взаимодействий
-    - посчитать распределение взаимодействий по кандидатам и проверить NULL и дубликаты numberIteraction
-    - выполнить 1 прогрев и 10 SQL замеров текущего query для каждого профиля
-    - сохранить MIN MAX AVG P50 P95 и EXPLAIN ANALYZE BUFFERS VERBOSE
-    - проверить существующие индексы candidate numberIteraction и partial delete_ts read-only
-    - инвентаризировать iteractionList-picker-view и составить Data View Integrity matrix
-    - выполнить 1 прогрев и 10 runtime открытий для каждого профиля
-    - измерить service duration middleware round-trip SQL count heap cold warm и долю в initial open P50 P95
-    - сравнить current MAX-subquery ID-only и reuse lazy interactions только read-only
-    - выдать один вердикт KEEP_SYNC_CURRENT NARROW_INTERACTION_VIEW COMPOSITE_INDEX_RECOMMENDED DEFER_LAST_INTERACTION REUSE_LAZY_INTERACTIONS_RESULT BACKGROUND_LOAD_RECOMMENDED или STAGE_8_BLOCKED
-    - сохранить stage-8-last-interaction-hermes-report.md с численными данными
+    - синхронизировать ветку и подтвердить HEAD 20f5e8e1a88cf467bbf7378b8d13ce0bce6c483d
+    - удалить вызов getLastIteraction и установку lastIteractionLoaded из onBeforeShow
+    - добавить ensureLastInteractionLoaded с защитой нового кандидата и кешированием null
+    - вызывать lazy-загрузку только в copyIteractionJobCandidate без выбранной строки
+    - сохранить сценарий copy при выбранной строке без дополнительного SQL
+    - добавить invalidateLastInteractionCache и вызвать его из reloadInteractions
+    - не менять InteractionService InteractionServiceBean JPQL view XML entities Liquibase и SCSS
+    - удалить только относящийся к этому flow мёртвый legacy-код после проверки использования
+    - обновить docs/ui/JobCandidateEdit_Spec.md и историю изменений 2026-07-15
+    - выполнить git diff --check compileJava compileTestJava
+    - выполнить ScreenViewIntegrityTest 8/8 и clean assemble BUILD SUCCESSFUL
+    - подтвердить 0 вызовов getLastIteraction при открытии существующего и нового кандидата
+    - подтвердить 0 вызовов при Copy с выбранной строкой
+    - подтвердить ровно 1 вызов при первом Copy без выбранной строки и 0 дополнительных при повторном
+    - подтвердить новый вызов после reloadInteractions и инвалидации кеша
+    - выполнить ручной smoke copy-flow и проверить отсутствие unfetched detached NPE и дублей
+    - развернуть /hrm и подтвердить HTTP 200
+    - сохранить stage-9-last-interaction-hermes-report.md с точными SHA diff тестами и SQL verification
+    - объявлять завершение только при полном acceptance gate; иначе STAGE_9_BLOCKED
     - после push обновить coordination точным финальным HEAD и освободить блокировку
