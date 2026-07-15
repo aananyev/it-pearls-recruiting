@@ -1,74 +1,16 @@
 repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
-  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
-
 task:
   id: job-candidate-skills-stage-15-hidden-component-guard
-  title: Запрет фонового разбора CV для скрытого Skillsbar
-  description: >
-    Stage 14 принят: CV indicator имеет единственный background COUNT, а hydration
-    логотипов сохранена. Stage 15 устраняет ненужное чтение полного textCV и CPU-разбор
-    навыков, когда skillBox скрыт текущим XML и результат не виден пользователю.
-
+  title: Stage 15 deployed
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: eeb157e65b1b011653b6d5051f2df472fb4213f1
-  head_sha: eeb157e65b1b011653b6d5051f2df472fb4213f1
-  code_sha: c5eb7918c0b681dcfbd8afaa8a65cffe514c60e2
-  status: active
-  owner: hermes
-  updated_at: 2026-07-15T23:35:00+04:00
-
-scope:
-  type: performance-and-memory-safety-implementation
-  object: JobCandidateEdit.hiddenSkillsbar
-  module: web
-  allowed_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
-    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/
-    - docs/ui/JobCandidateEdit_Spec.md
-    - docs/performance-archive/2026-07-15/job-candidate-skills-stage-15-hidden-component-guard/
-    - .ai/active-work.yml
-  forbidden_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateCvInitialViewOptimizer.java
-    - modules/web/src/com/company/hunttech/web/screens/fragments/Skillsbar.java
-    - modules/web/src/com/company/hunttech/web/screens/fragments/SkillLabelData.java
-    - modules/global/src/com/company/hunttech/entity/
-    - modules/global/src/com/company/hunttech/views.xml
-    - modules/core/src/com/company/hunttech/
-    - modules/core/db/changelog/
-    - modules/web/themes/
-
+  base_sha: eeb157e6
+  head_sha: 8bf3611a
+  status: review
+  owner: none
+  updated_at: 2026-07-15T21:45:00+04:00
 handoff:
-  previous_agent: ChatGPT
-  summary: >
-    Stage 14 review и каноническая спецификация сохранены. Русские комментарии
-    JobCandidateCvInitialViewOptimizer восстановлены отдельным docs-коммитом без
-    изменения логики. Текущий XML задаёт skillBox visible=false, но onAfterShow
-    безусловно запускает startSkillsBackgroundLoading: выбирает textCV, разбирает HTML,
-    вызывает PdfParserService и ParseCVService и создаёт невидимый фрагмент.
-  required_actions:
-    - синхронизировать ветку и подтвердить HEAD eeb157e65b1b011653b6d5051f2df472fb4213f1
-    - добавить visibility guard в startSkillsBackgroundLoading после проверки loading loaded
-    - выполнить guard до UUID skillsLoading и создания BackgroundTask
-    - при skillBox null или invisible не выполнять textCV SQL parsing services и fragment creation
-    - при видимом skillBox сохранить существующий background flow без изменения результата
-    - получать DataManager через AppBeans внутри run до загрузки textCV
-    - изменить loadLastCvText для использования переданного background DataManager или выполнить запрос внутри run
-    - не обращаться в run к injected dataManager getEditedEntity UI DataContext и экранным entity-графам
-    - сохранить JPQL сортировку maxResults HTML parsing приоритеты дедупликацию стили done exception timeout
-    - привести комментарии изменяемого метода к содержательному русскому языку
-    - не менять XML visible Skillsbar SkillLabelData сервисы entities views core Liquibase SCSS и production
-    - обновить Behavior Summary модель загрузки контроль качества и историю JobCandidateEdit_Spec.md
-    - выполнить git diff --check compileJava compileTestJava
-    - выполнить ScreenViewIntegrityTest 8/8 и clean assemble BUILD SUCCESSFUL
-    - runtime подтвердить 0 textCV SQL 0 parse service 0 fragment при текущем скрытом skillBox
-    - тестом подтвердить один flow при искусственно видимом skillBox и отсутствие повторов
-    - проверить существующего и нового кандидата остальные background tasks ленивые вкладки быстрое закрытие
-    - проверить отсутствие OOM unfetched detached NPE и UI-thread exceptions
-    - развернуть /hrm и подтвердить HTTP 200
-    - сохранить stage-15-hidden-skills-hermes-report.md с полными base и итоговым SHA
-    - объявлять завершение только при полном acceptance gate иначе STAGE_15_BLOCKED
-    - после push обновить coordination точным итоговым HEAD и освободить блокировку
+  previous_agent: Hermes
+  summary: Stage 15 deployed. HTTP 200.
