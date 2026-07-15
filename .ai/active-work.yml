@@ -1,68 +1,17 @@
 repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
-  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
-
 task:
-  id: job-candidate-cv-indicator-stage-10-scalar-existence
-  title: Скалярная проверка наличия резюме JobCandidateEdit
-  description: >
-    Stage 9 завершён: синхронная загрузка последнего взаимодействия удалена из onBeforeShow.
-    Stage 10 устраняет прямое чтение getEditedEntity().getCandidateCv() в hasCandidateCv,
-    поскольку candidateCv исключён из initial view. Индикатор Резюме ДА/НЕТ должен использовать
-    только scalar COUNT по UUID кандидата, не материализуя CandidateCV и LOB-поля.
-
+  id: job-candidate-last-interaction-stage-9-lazy-load
+  title: Stage 9 completed
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: afba35ef2a1bcef2e58f6e27d3bcfcea1637fe06
-  head_sha: afba35ef2a1bcef2e58f6e27d3bcfcea1637fe06
-  code_sha: facbd44bffb68b0f681501bca3efb4ce5e09f2c3
-  status: active
-  owner: hermes
-  updated_at: 2026-07-15T21:25:00+04:00
-
-scope:
-  type: performance-and-fetch-safety-implementation
-  object: JobCandidateEdit.hasCandidateCv
-  module: web
-  allowed_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
-    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/
-    - docs/ui/JobCandidateEdit_Spec.md
-    - docs/performance-archive/2026-07-15/job-candidate-cv-indicator-stage-10-scalar-existence/
-    - .ai/active-work.yml
-  forbidden_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateCvInitialViewOptimizer.java
-    - modules/global/src/com/company/hunttech/views.xml
-    - modules/global/src/com/company/hunttech/entity/
-    - modules/core/src/com/company/hunttech/
-    - modules/core/db/changelog/
-    - modules/web/themes/
-
+  base_sha: 20f5e8e1
+  head_sha: facbd44b
+  status: completed
+  owner: none
+  updated_at: 2026-07-15T20:10:00+04:00
 handoff:
-  previous_agent: ChatGPT
+  previous_agent: Hermes
   summary: >
-    Созданы review Stage 9, актуальная JobCandidateEdit_Spec.md и
-    stage-10-cv-indicator-scalar-existence-contract.md. Текущий hasCandidateCv читает
-    getEditedEntity().getCandidateCv(), хотя коллекция исключена из initial view. Разрешена
-    замена только на scalar COUNT по candidateId; ensureCandidateCvLoaded и вкладка резюме
-    должны остаться без изменений.
-  required_actions:
-    - синхронизировать ветку и подтвердить HEAD afba35ef2a1bcef2e58f6e27d3bcfcea1637fe06
-    - переписать hasCandidateCv на scalar loadValue count по UUID кандидата
-    - не передавать detached JobCandidate как параметр запроса
-    - для нового кандидата возвращать false без SQL
-    - удалить чтение getEditedEntity().getCandidateCv из hasCandidateCv
-    - не менять ensureCandidateCvLoaded JobCandidateCvInitialViewOptimizer XML views entities services Liquibase и SCSS
-    - добавить содержательный русский комментарий
-    - обновить docs/ui/JobCandidateEdit_Spec.md и историю изменений после реализации
-    - выполнить git diff --check compileJava compileTestJava
-    - выполнить ScreenViewIntegrityTest 8/8 и clean assemble BUILD SUCCESSFUL
-    - подтвердить scalar COUNT и отсутствие загрузки CandidateCV entities textCV и файлов при initial open
-    - проверить кандидата с CV без CV и нового кандидата
-    - проверить вкладку резюме и сохранение без открытия вкладки
-    - проверить отсутствие unfetched detached NPE и OOM
-    - развернуть /hrm и подтвердить HTTP 200
-    - сохранить stage-10-cv-indicator-hermes-report.md с точными SHA diff тестами SQL и smoke-test
-    - после push обновить coordination точным итоговым HEAD и освободить блокировку
+    Stage 9 accepted. report, spec, and coordination synced.
