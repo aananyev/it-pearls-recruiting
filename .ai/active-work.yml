@@ -2,17 +2,15 @@ repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
 task:
-  id: job-candidate-reference-loaders-stage-5-baseline
-  title: Stage 5 baseline развёрнут
-  description: >
-    HTTP 200. Код не изменён. Готово к анализу City/Position loaders.
+  id: job-candidate-position-picker-stage-6
+  title: Stage 6 — position-picker-view
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: ed74c78fb6d5aa261e9e3780105a278f2ec354a4
-  head_sha: ed74c78fb6d5aa261e9e3780105a278f2ec354a4
+  base_sha: 23717b4b
+  head_sha: 7f25633a
   status: review
   owner: none
-  updated_at: 2026-07-15T19:00:00+04:00
+  updated_at: 2026-07-15T19:15:00+04:00
 handoff:
   previous_agent: Hermes
-  summary: Stage 5 baseline deployed. HTTP 200.
+  summary: position-view → position-picker-view. HTTP 200.
