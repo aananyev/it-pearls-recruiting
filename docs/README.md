@@ -28,6 +28,7 @@
 | Разработчик | [entities/](entities/), [ui/](ui/), [screens/](screens/), [services/](services/) |
 | Экран JobCandidateEdit | [ui/JobCandidateEdit_Spec.md](ui/JobCandidateEdit_Spec.md) · [architecture/JobCandidateEdit_Performance_Architecture.md](architecture/JobCandidateEdit_Performance_Architecture.md) · [screens/job-candidate/JobCandidateEdit_Design_Fix_2026-07-14.md](screens/job-candidate/JobCandidateEdit_Design_Fix_2026-07-14.md) |
 | Stage 5 JobCandidateEdit | [baseline загрузки городов и должностей](performance-archive/2026-07-15/job-candidate-reference-loaders-stage-5-baseline/stage-5-reference-loaders-baseline-plan.md) |
+| Stage 6 JobCandidateEdit | [узкий picker-view справочника должностей](performance-archive/2026-07-15/job-candidate-position-picker-stage-6/stage-6-position-picker-implementation-contract.md) |
 | Диагностика разбора резюме и OOM | [services/PdfParserService.md](services/PdfParserService.md) · [operations/JobCandidateEdit_OOM_Runbook.md](operations/JobCandidateEdit_OOM_Runbook.md) |
 | DBA | [database/](database/) и [deployment/database-migration/](../deployment/database-migration/) |
 | Тестировщик | [operations/](operations/), [reports/](reports/), [deployment/database-migration/validation/](../deployment/database-migration/validation/) |
