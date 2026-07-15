@@ -1,72 +1,18 @@
 repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
-  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
-
 task:
   id: job-candidate-rating-stage-11-background-load
-  title: Фоновая загрузка рейтинга JobCandidateEdit
-  description: >
-    Stage 10 принят: hasCandidateCv использует scalar COUNT по UUID и не читает
-    unfetched candidateCv. Stage 11 удаляет scalar AVG рейтинга из onBeforeShow
-    и запускает его после first paint через BackgroundTask с сохранением прежней
-    формулы, округления, звёзд и fallback-поведения.
-
+  title: Stage 11 completed
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: d8273da2f6a7b7bb3ce5c17fb1644d376244992e
-  head_sha: d8273da2f6a7b7bb3ce5c17fb1644d376244992e
-  code_sha: 8ec2b26f3ba7f84c25f05a3c46ba85a1304c5a42
-  status: active
-  owner: hermes
-  updated_at: 2026-07-15T21:50:00+04:00
-
-scope:
-  type: performance-implementation
-  object: JobCandidateEdit.rating
-  module: web
-  allowed_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
-    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/
-    - docs/ui/JobCandidateEdit_Spec.md
-    - docs/performance-archive/2026-07-15/job-candidate-rating-stage-11-background-load/
-    - .ai/active-work.yml
-  forbidden_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
-    - modules/global/src/com/company/hunttech/core/StarsAndOtherService.java
-    - modules/core/src/com/company/hunttech/core/StarsAndOtherServiceBean.java
-    - modules/global/src/com/company/hunttech/entity/
-    - modules/global/src/com/company/hunttech/views.xml
-    - modules/core/db/changelog/
-    - modules/web/themes/
-
+  base_sha: d8273da2
+  head_sha: 89263c79
+  status: review
+  owner: none
+  updated_at: 2026-07-15T20:40:00+04:00
 handoff:
-  previous_agent: ChatGPT
+  previous_agent: Hermes
   summary: >
-    Созданы stage-10-chatgpt-review.md и stage-11-rating-background-load-contract.md.
-    Проверено: onBeforeShow синхронно вызывает setRatingLabel, а loadAverageRating
-    выполняет scalar AVG по IteractionList. Рейтинг не нужен для editable-полей,
-    валидации или сохранения и может появиться после first paint.
-  required_actions:
-    - синхронизировать ветку и подтвердить HEAD d8273da2f6a7b7bb3ce5c17fb1644d376244992e
-    - изучить текущий setRatingLabel и сохранить точное форматирование звёзд округление и fallback
-    - удалить setRatingLabel из onBeforeShow
-    - разделить scalar-загрузку и UI-форматирование без изменения формулы
-    - добавить идемпотентный startRatingBackgroundLoading с флагами loading и loaded
-    - для нового кандидата применить прежний нулевой рейтинг без SQL
-    - передавать в background только UUID и scalar-result
-    - получать DataManager через AppBeans внутри BackgroundTask run
-    - обновлять UI только в done или handleException
-    - запускать rating background из существующего onAfterShow
-    - не менять XML StarsAndOtherService entities views Liquibase индексы SCSS и production
-    - обновить docs/ui/JobCandidateEdit_Spec.md и историю изменений 2026-07-15
-    - выполнить git diff --check compileJava compileTestJava
-    - выполнить ScreenViewIntegrityTest 8/8 и clean assemble BUILD SUCCESSFUL
-    - подтвердить 0 rating SQL до first paint и ровно 1 scalar AVG после AfterShow
-    - подтвердить 0 rating SQL для нового кандидата и отсутствие повторных AVG
-    - проверить кандидата с оценками без оценок быстрое закрытие формы и параллельный Skillsbar
-    - подтвердить отсутствие detached unfetched NPE и UI-thread exceptions
-    - развернуть /hrm и подтвердить HTTP 200
-    - сохранить stage-11-rating-hermes-report.md с реальными базовым и итоговым SHA
-    - объявлять завершение только при полном acceptance gate иначе STAGE_11_BLOCKED
-    - после push обновить coordination точным итоговым HEAD и освободить блокировку
+    Stage 11 implemented. Rating loaded in background after form display.
+    Report and spec synced. HTTP 200.
