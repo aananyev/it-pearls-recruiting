@@ -1,18 +1,78 @@
 repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
+  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
+
 task:
-  id: job-candidate-rating-stage-11-background-load
-  title: Stage 11 completed
+  id: job-candidate-photo-stage-12-background-load
+  title: Фоновая проверка и отображение фотографии JobCandidateEdit
+  description: >
+    Stage 11 принят: scalar AVG рейтинга удалён из onBeforeShow и выполняется
+    после first paint через отдельный BackgroundTask. Stage 12 удаляет синхронные
+    проверки file storage фотографии из onBeforeShow. До отображения формы показывается
+    заглушка; после AfterShow выполняется ровно одна фоновая проверка физического файла.
+
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: d8273da2
-  head_sha: 89263c79
-  status: review
-  owner: none
-  updated_at: 2026-07-15T20:40:00+04:00
+  base_sha: 2e2c4f1148936ff1ffe16dd0688a93755b9a1b84
+  head_sha: 2e2c4f1148936ff1ffe16dd0688a93755b9a1b84
+  code_sha: 89263c7950ee4a1489061824372e2b00c3722331
+  status: active
+  owner: hermes
+  updated_at: 2026-07-15T22:15:00+04:00
+
+scope:
+  type: performance-and-file-storage-safety-implementation
+  object: JobCandidateEdit.candidatePhoto
+  module: web
+  allowed_files:
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
+    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/
+    - docs/ui/JobCandidateEdit_Spec.md
+    - docs/performance-archive/2026-07-15/job-candidate-photo-stage-12-background-load/
+    - .ai/active-work.yml
+  forbidden_files:
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
+    - modules/web/src/com/company/hunttech/web/util/FileDescriptorImageHelper.java
+    - modules/global/src/com/company/hunttech/entity/
+    - modules/global/src/com/company/hunttech/views.xml
+    - modules/core/src/com/company/hunttech/
+    - modules/core/db/changelog/
+    - modules/web/themes/
+
 handoff:
-  previous_agent: Hermes
+  previous_agent: ChatGPT
   summary: >
-    Stage 11 implemented. Rating loaded in background after form display.
-    Report and spec synced. HTTP 200.
+    Созданы stage-11-chatgpt-review.md и stage-12-candidate-photo-background-load-contract.md.
+    Проверено: onBeforeShow вызывает setCandidatePicImage. Метод сначала вызывает
+    FileDescriptorImageHelper.fileExists, затем setCandidateFace, который повторно вызывает
+    fileExists внутри setImageSource. Для кандидата с фотографией возможны две синхронные
+    проверки storage до first paint.
+  required_actions:
+    - синхронизировать ветку и подтвердить HEAD 2e2c4f1148936ff1ffe16dd0688a93755b9a1b84
+    - удалить setCandidatePicImage из onBeforeShow и оставить до first paint только заглушку
+    - добавить отдельные candidatePicLoading и candidatePicLoaded
+    - добавить идемпотентный startCandidatePicBackgroundLoading и вызвать его из onAfterShow
+    - для нового кандидата и отсутствующего FileDescriptor не выполнять SQL и fileExists
+    - передавать в background только UUID FileDescriptor
+    - получать DataManager и FileLoader через AppBeans внутри run
+    - выполнить в run ровно один FileDescriptorImageHelper.fileExists
+    - не обращаться к UI и getEditedEntity внутри run
+    - в done напрямую установить FileDescriptorResource без вызова setCandidateFace
+    - защищать SourceChangeEvent флагом updatingCandidatePic
+    - сохранить без изменений upload clear actions и пользовательские events фотографии
+    - не объединять задачу фотографии с rating Skillsbar или positions background tasks
+    - не менять XML FileDescriptorImageHelper entities views services Liquibase SCSS и production
+    - обновить docs/ui/JobCandidateEdit_Spec.md включая Business Context Behavior и историю 2026-07-15
+    - выполнить git diff --check compileJava compileTestJava
+    - выполнить ScreenViewIntegrityTest 8/8 и clean assemble BUILD SUCCESSFUL
+    - подтвердить 0 fileExists до first paint
+    - подтвердить 0 fileExists для нового кандидата и кандидата без фотографии
+    - подтвердить ровно 1 fileExists после AfterShow для существующего и отсутствующего физического файла
+    - подтвердить отсутствие второго storage-check после успешного результата
+    - проверить существующее фото отсутствие файла новый кандидат upload clear быстрое закрытие формы
+    - проверить отсутствие detached unfetched NPE UI-thread и FileStorage ошибок в UI
+    - развернуть /hrm и подтвердить HTTP 200
+    - сохранить stage-12-candidate-photo-hermes-report.md с фактическими SHA и таблицей вызовов
+    - объявлять завершение только при полном acceptance gate иначе STAGE_12_BLOCKED
+    - после push обновить coordination точным итоговым HEAD и освободить блокировку
