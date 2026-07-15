@@ -8,16 +8,15 @@ task:
   id: job-candidate-main-tab-field-layout
   title: Выравнивание подписей и фото вкладки Основное
   description: >
-    Продолжить после ручной правки Алексея в VS Code.
-    Проверить сборку, тесты и runtime.
+    Проверка сборки, тестов и runtime после ручной правки XML.
 
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
   base_sha: 85e90375be97dd51448dff3a98a2faea0b35875c
   head_sha: 46233d23ccfe2e5b65e12b51a2bc7e5f5ca578f0
-  status: active
-  owner: hermes
-  updated_at: 2026-07-15T16:00:00+04:00
+  status: review
+  owner: none
+  updated_at: 2026-07-15T16:15:00+04:00
 
 scope:
   type: screen
@@ -33,14 +32,11 @@ scope:
     - modules/core/db/changelog/
 
 handoff:
-  previous_agent: Алексей (ручная правка VS Code)
+  previous_agent: Hermes
   summary: >
-    Добавлен spacing на picVBox и width="80px" для подписей Имя/Отчество.
-    Hermes продолжит сборку и проверку.
+    Проверка выполнена. Компиляция успешна, ScreenViewIntegrityTest 8/8 PASS,
+    clean assemble BUILD SUCCESSFUL, HTTP 200. JobCandidateEdit.java не изменён.
+    Изменения в XML: spacing на picVBox, width="80px" на подписи Имя/Отчество.
   required_actions:
-    - выполнить компиляцию и тесты
-    - ScreenViewIntegrityTest 8/8
-    - clean assemble
-    - HTTP 200
-    - проверить форму в браузере
-    - сохранить отчёт
+    - проверить видимость подписей и фото в браузере
+    - при необходимости продолжить правки вкладки Основное
