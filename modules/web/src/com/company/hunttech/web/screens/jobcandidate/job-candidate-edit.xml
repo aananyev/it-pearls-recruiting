@@ -495,7 +495,7 @@
                                          изменена только визуальная компоновка полей. -->
                                     <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                           expand="firstNameField" stylename="job-candidate-form-row">
-                                        <label value="Имя" stylename="small" width="118px"/>
+                                        <label value="Имя" stylename="small" width="80px"/>
                                         <suggestionField id="firstNameField"
                                                          dataContainer="jobCandidateDc"
                                                          property="firstName"
@@ -514,7 +514,7 @@
                                     </hbox>
                                     <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                           expand="middleNameField" stylename="job-candidate-form-row">
-                                        <label value="Отчество" stylename="small" width="118px"/>
+                                        <label value="Отчество" stylename="small" width="80px"/>
                                         <suggestionField id="middleNameField"
                                                          dataContainer="jobCandidateDc"
                                                          property="middleName"
@@ -533,7 +533,7 @@
                                     </hbox>
                                     <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                           expand="secondNameField" stylename="job-candidate-form-row">
-                                        <label value="Фамилия" stylename="small" width="118px"/>
+                                        <label value="Фамилия" stylename="small" width="80px"/>
                                         <suggestionField id="secondNameField"
                                                          dataContainer="jobCandidateDc"
                                                          property="secondName"
@@ -551,25 +551,11 @@
                                     </hbox>
                                     <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                           expand="birdhDateField" stylename="job-candidate-form-row">
-                                        <label value="Дата рождения" stylename="small" width="118px"/>
+                                        <label value="Дата рождения" stylename="small" width="80px"/>
                                         <dateField id="birdhDateField"
                                                    dataContainer="jobCandidateDc"
                                                    property="birdhDate"
                                                    width="100%"/>
-                                    </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
-                                          expand="jobCityCandidateField" stylename="job-candidate-form-row">
-                                        <label value="Город" stylename="small" width="118px"/>
-                                        <lookupPickerField id="jobCityCandidateField"
-                                                           dataContainer="jobCandidateDc"
-                                                           width="100%"
-                                                           optionsContainer="citiesDc"
-                                                           property="cityOfResidence"
-                                                           required="true">
-                                            <actions>
-                                                <action id="lookup" type="picker_lookup"/>
-                                            </actions>
-                                        </lookupPickerField>
                                     </hbox>
                                 </vbox>
 
@@ -583,10 +569,24 @@
                                         <label value="Профессиональные данные" stylename="job-candidate-card-title"/>
                                     </hbox>
 
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
+                                          expand="jobCityCandidateField" stylename="job-candidate-form-row">
+                                        <label value="Город" stylename="small" width="80px"/>
+                                        <lookupPickerField id="jobCityCandidateField"
+                                                           dataContainer="jobCandidateDc"
+                                                           width="100%"
+                                                           optionsContainer="citiesDc"
+                                                           property="cityOfResidence"
+                                                           required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                    </hbox>
                                     <!-- Picker- и suggestion-компоненты сохраняют штатные actions, query и свойства. -->
                                     <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                           expand="personPositionField" stylename="job-candidate-form-row">
-                                        <label value="Должность" stylename="small" width="118px"/>
+                                        <label value="Должность" stylename="small" width="80px"/>
                                         <lookupPickerField id="personPositionField"
                                                            optionsContainer="personPositionsDc"
                                                            dataContainer="jobCandidateDc"
@@ -601,7 +601,7 @@
                                     </hbox>
                                     <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                           expand="currentCompanyField" stylename="job-candidate-form-row">
-                                        <label value="Компания" stylename="small" width="118px"/>
+                                        <label value="Компания" stylename="small" width="80px"/>
                                         <suggestionPickerField id="currentCompanyField"
                                                                dataContainer="jobCandidateDc"
                                                                property="currentCompany"
@@ -626,7 +626,7 @@
                                     </hbox>
                                     <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                           expand="positionsControl" stylename="job-candidate-form-row">
-                                        <label value="Доп. позиции" stylename="small" width="118px"/>
+                                        <label value="Доп. позиции" stylename="small" width="80px"/>
                                         <hbox id="positionsControl" width="100%" spacing="true" expand="positionsLabel">
                                             <label id="positionsLabel"
                                                    width="100%"
