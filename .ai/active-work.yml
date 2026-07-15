@@ -5,38 +5,41 @@ coordination:
   source_of_truth: origin/coordination/active-work:.ai/active-work.yml
 
 task:
-  id: job-candidate-main-tab-field-layout
-  title: Выравнивание подписей и фото вкладки Основное
+  id: job-candidate-index-revalidation
+  title: Повторный аудит индексов JobCandidateEdit
   description: >
-    Проверка сборки, тестов и runtime после ручной правки XML.
+    Инструментальный аудит производительности открытия формы.
+    Сбор SQL trace, EXPLAIN ANALYZE, графа загрузки сущностей.
+    Определение необходимости новых индексов PostgreSQL.
 
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: 85e90375be97dd51448dff3a98a2faea0b35875c
+  base_sha: 46233d23ccfe2e5b65e12b51a2bc7e5f5ca578f0
   head_sha: 46233d23ccfe2e5b65e12b51a2bc7e5f5ca578f0
-  status: review
-  owner: none
-  updated_at: 2026-07-15T16:15:00+04:00
+  status: active
+  owner: hermes
+  updated_at: 2026-07-15T16:30:00+04:00
 
 scope:
-  type: screen
+  type: performance
   object: JobCandidateEdit
-  module: web
+  module: all
   allowed_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
-    - docs/ui/JobCandidateEdit_Spec.md
-    - docs/performance-archive/
+    - docs/performance-archive/2026-07-15/job-candidate-index-revalidation/
   forbidden_files:
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
     - modules/global/src/com/company/hunttech/entity/
+    - modules/global/src/com/company/hunttech/views.xml
     - modules/core/db/changelog/
 
 handoff:
-  previous_agent: Hermes
+  previous_agent: Алексей
   summary: >
-    Проверка выполнена. Компиляция успешна, ScreenViewIntegrityTest 8/8 PASS,
-    clean assemble BUILD SUCCESSFUL, HTTP 200. JobCandidateEdit.java не изменён.
-    Изменения в XML: spacing на picVBox, width="80px" на подписи Имя/Отчество.
+    Начат аудит индексов и производительности открытия формы.
+    Hermes выполняет read-only анализ.
   required_actions:
-    - проверить видимость подписей и фото в браузере
-    - при необходимости продолжить правки вкладки Основное
+    - SQL trace открытия формы
+    - EXPLAIN ANALYZE ключевых запросов
+    - проверка использования индексов
+    - вердикт INDEXES_NOT_REQUIRED или TARGETED_INDEX_EXPERIMENT_REQUIRED
