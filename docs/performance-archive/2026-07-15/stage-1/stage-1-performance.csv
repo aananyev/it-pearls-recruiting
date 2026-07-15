@@ -1,0 +1,11 @@
+version,commit,candidate,run,form_open_ms,first_interactions_tab_ms,sql_query_count,notes
+BASE,b5915df8,heavy-candidate-01,1,,,,"baseline — требуется ручной замер"
+BASE,b5915df8,heavy-candidate-01,2,,,,
+BASE,b5915df8,heavy-candidate-01,3,,,,
+BASE,b5915df8,heavy-candidate-01,4,,,,
+BASE,b5915df8,heavy-candidate-01,5,,,,
+STAGE1,ef3dadde,heavy-candidate-01,1,,,,"stage 1 — требуется ручной замер"
+STAGE1,ef3dadde,heavy-candidate-01,2,,,,
+STAGE1,ef3dadde,heavy-candidate-01,3,,,,
+STAGE1,ef3dadde,heavy-candidate-01,4,,,,
+STAGE1,ef3dadde,heavy-candidate-01,5,,,,
