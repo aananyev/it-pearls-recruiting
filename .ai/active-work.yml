@@ -5,16 +5,16 @@ task:
   id: job-candidate-company-loader-stage-3-cleanup
   title: Удаление остаточного контейнера компаний из JobCandidateEdit
   description: >
-    После принятого Stage 2 удалить currentCompaniesDc/currentCompaniesLc из XML
-    и контроллера, перевести возврат созданной Company на точечную загрузку через
-    DataManager, удалить временный lifecycle-optimizer и его Stage 2 unit-тест.
+    Применить точечный patch из stage-3-implementation-contract.md: удалить
+    currentCompaniesDc/currentCompaniesLc, перевести createCompany на точечный
+    DataManager, удалить временный optimizer и заменить его unit-тест.
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
   base_sha: 8c792f82e806589a4e0f8d502b77fddd1664f392
-  head_sha: 8c792f82e806589a4e0f8d502b77fddd1664f392
+  head_sha: a94d3fed271e4d591473f2d909a4f3c2edec0093
   status: active
-  owner: chatgpt
-  updated_at: 2026-07-15T16:30:00+02:00
+  owner: hermes
+  updated_at: 2026-07-15T16:45:00+02:00
 scope:
   type: performance
   object: JobCandidateEdit
@@ -32,14 +32,22 @@ scope:
     - modules/global/src/com/company/hunttech/entity/
     - modules/core/db/changelog/
     - modules/global/src/com/company/hunttech/views.xml
+    - modules/web/themes/
 handoff:
-  previous_agent: Hermes
+  previous_agent: ChatGPT
   summary: >
-    Stage 2 принят Алексеем. Фактический HEAD рабочей ветки —
-    8c792f82e806589a4e0f8d502b77fddd1664f392. Координационный SHA предыдущего
-    этапа был записан с ошибкой и исправлен при старте Stage 3.
+    Алексей разрешил переход к Stage 3. ChatGPT выполнил статический анализ и
+    зафиксировал точный patch-контракт в commit a94d3fed. Hermes разрешено
+    механически применить только этот patch в текущей ветке, добавить тест,
+    обновить документацию, собрать и выполнить runtime-проверки.
   required_actions:
-    - не изменять код при owner: chatgpt
-    - после передачи проверить точный итоговый HEAD
-    - подтвердить отсутствие currentCompaniesDc/currentCompaniesLc и полного Company SQL
+    - не создавать другую ветку
+    - синхронизировать HEAD a94d3fed271e4d591473f2d909a4f3c2edec0093
+    - применить только stage-3-implementation-contract.md
+    - не менять suggestion query, actions, entities, views, Liquibase и SCSS
+    - выполнить новый unit-тест и ScreenViewIntegrityTest 8/8
+    - выполнить clean assemble, deploy /hrm и HTTP 200
     - проверить suggestion, lookup, open, create и сохранение кандидата
+    - сохранить stage-3-hermes-report.md
+    - commit и push в эту же ветку
+    - после push обновить coordination: status review, owner none, точный head_sha
