@@ -182,7 +182,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private static final String QUERY_GET_OTHER_SOCIAL_NETWORK = "select e from hunttech_SocialNetworkType e where e.socialNetwork = :other";
     private static final String QUERY_GET_CANDIDATE_CV = "select e from hunttech_CandidateCV e where e.candidate = :candidate";
     private static final String TELEGRAM_NAME_URL = "http://t.me/";
-    private static final String QUERY_GET_LAST_ITERACTION = "select e from hunttech_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from hunttech_IteractionList f where f.candidate = :candidate)";
     private static final String CREATE_COMPANY_ACTION_ID = "createCompany";
 
     List<Position> setPos = new ArrayList<>();
@@ -760,9 +759,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         setCandidatePicImage();
         checkTelegramName();
-
-        lastIteraction = interactionService.getLastIteraction(getEditedEntity());
-        lastIteractionLoaded = true;
 
         if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
@@ -1612,6 +1608,31 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 getEditedEntity().getPositionList() : Collections.emptyList();
     }
 
+    /**
+     * Загружает последнее взаимодействие только при первом обращении.
+     * Вызов сервиса отложен до момента копирования без выбранной строки.
+     */
+    private IteractionList ensureLastInteractionLoaded() {
+        if (lastIteractionLoaded) {
+            return lastIteraction;
+        }
+
+        if (PersistenceHelper.isNew(getEditedEntity()) || getEditedEntity().getId() == null) {
+            lastIteractionLoaded = true;
+            lastIteraction = null;
+            return null;
+        }
+
+        lastIteraction = interactionService.getLastIteraction(getEditedEntity());
+        lastIteractionLoaded = true;
+        return lastIteraction;
+    }
+
+    private void invalidateLastInteractionCache() {
+        lastIteraction = null;
+        lastIteractionLoaded = false;
+    }
+
     private void setupCurrentCompanySearchExecutor() {
         if (currentCompanyField == null) {
             return;
@@ -2245,26 +2266,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .show();
     }
 
-    /* private IteractionList getLastIteraction() {
-        try {
-            lastIteraction = dataManager.load(IteractionList.class)
-                    .query(QUERY_GET_LAST_ITERACTION)
-                    .parameter("candidate", getEditedEntity())
-                    .cacheable(true)
-                    .view("iteractionList-view")
-                    .cacheable(true)
-                    .one();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-            lastIteraction = null;
-        }
-
-        return lastIteraction;
-    } */
-
 
     public void copyIteractionJobCandidate() {
         if (jobCandidateIteractionListTable.getSingleSelected() == null) {
+            ensureLastInteractionLoaded();
             if (lastIteraction != null) {
                 IteractionList finalLastIteraction = lastIteraction;
 
@@ -3841,6 +3846,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void reloadInteractions() {
+        invalidateLastInteractionCache();
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             dataContext.commit();
             interactionCommentDl.load();
