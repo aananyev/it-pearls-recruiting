@@ -8,17 +8,17 @@ task:
   id: job-candidate-company-suggestion-baseline
   title: Baseline загрузки компаний в JobCandidateEdit
   description: >
-    Выполнить только этап 1 согласованного плана: зафиксировать текущее поведение
-    currentCompanyField и остаточного currentCompaniesLc, сформировать baseline и
-    подготовить проверяемое задание Hermes. Java, XML, сущности и БД не изменять.
+    Этап 1 завершён со стороны ChatGPT: зафиксировано текущее состояние
+    currentCompanyField и остаточного currentCompaniesLc. Требуется read-only
+    runtime-проверка Hermes без изменения Java, XML, сущностей и БД.
 
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
   base_sha: b68e27d85af056fab2a1ec72079df82d362c5b0d
-  head_sha: b68e27d85af056fab2a1ec72079df82d362c5b0d
-  status: active
-  owner: chatgpt
-  updated_at: 2026-07-15T14:59:41+02:00
+  head_sha: 84af3294d082f43ed9ce337d850dd06d8fb7b9e1
+  status: review
+  owner: none
+  updated_at: 2026-07-15T15:05:00+02:00
 
 scope:
   type: performance
@@ -34,11 +34,19 @@ scope:
     - modules/core/db/changelog/
 
 handoff:
-  previous_agent: Hermes
+  previous_agent: ChatGPT
   summary: >
-    Предыдущий аудит индексов завершён с вердиктом INDEXES_NOT_REQUIRED.
-    Начат отдельный read-only этап фиксации baseline загрузки справочника компаний.
+    Создан baseline-отчёт. Установлено, что currentCompanyField уже является
+    SuggestionPickerField с minSearchStringLength=2, suggestionsLimit=50 и
+    contains-поиском. При этом currentCompaniesDc/currentCompaniesLc остаются
+    в XML и Java, а currentCompaniesLc не защищён от @LoadDataBeforeShow.
+    Наличие полной загрузки при initial open является проверяемой гипотезой.
   required_actions:
-    - не изменять код до передачи owner: hermes
-    - подтвердить фактический SQL initial open для currentCompaniesLc
-    - выполнить пять измерительных открытий после одного прогрева
+    - синхронизировать ветку и подтвердить HEAD 84af3294d082f43ed9ce337d850dd06d8fb7b9e1
+    - не изменять Java, XML, сущности, JPQL, Liquibase, индексы и БД
+    - найти все обращения к currentCompaniesLc и currentCompaniesDc
+    - трассировать initial open отдельно от ввода в currentCompanyField
+    - выполнить один прогрев и пять измерений для трёх сценариев
+    - зафиксировать P50, P95, SQL count, SQL total и число Company rows
+    - выдать FULL_COMPANY_LOADER_CONFIRMED, FULL_COMPANY_LOADER_NOT_TRIGGERED или BASELINE_BLOCKED
+    - сохранить отчёт рядом с baseline-документом и после push обновить coordination
