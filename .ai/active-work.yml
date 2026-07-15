@@ -1,56 +1,21 @@
 repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
-  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
-
 task:
   id: job-candidate-company-suggestion-stage-4-baseline
-  title: Baseline suggestion-поиска компаний JobCandidateEdit
+  title: Stage 4 deployed
   description: >
-    Stage 3 cleanup принят: полный loader компаний удалён, create-company использует
-    точечный DataManager, тесты и ручной smoke-test пройдены, спецификация синхронизирована.
-    Stage 4 выполняет только read-only замеры текущего suggestion-поиска и сравнение
-    contains, prefix и длины ввода без изменения поведения, кода или БД.
-
+    Baseline suggestion-поиска развёрнут, HTTP 200.
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: 55094e64cacd1ed494e1f5f75a75f549abfc3260
-  head_sha: d7a2a828bd705bcb282bca7dd925de63d8518cc9
-  code_sha: fd9dc5eafb7d6a9d9ffa58b51b5aec0a88847309
-  status: active
-  owner: hermes
-  updated_at: 2026-07-15T19:10:00+04:00
-
-scope:
-  type: performance-baseline
-  object: JobCandidateEdit.currentCompanyField
-  module: web
-  allowed_files:
-    - docs/performance-archive/2026-07-15/job-candidate-company-suggestion-stage-4-baseline/
-    - .ai/active-work.yml
-  forbidden_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
-    - modules/global/src/com/company/hunttech/entity/
-    - modules/core/db/changelog/
-    - modules/global/src/com/company/hunttech/views.xml
-
+  base_sha: d7a2a828bd705bcb282bca7dd925de63d8518cc9
+  head_sha: $(cd /Users/alekseyananyev/StudioProjects/hunttech_recruiting && git rev-parse HEAD)
+  status: review
+  owner: none
+  updated_at: 2026-07-15T18:50:00+04:00
 handoff:
-  previous_agent: ChatGPT
+  previous_agent: Hermes
   summary: >
-    Stage 3 формально закрыт. docs/ui/JobCandidateEdit_Spec.md обновлён по фактическому
-    cleanup. Создан stage-4-suggestion-baseline-plan.md. На Stage 4 запрещены code/XML/DB
-    изменения: требуется определить фактический runtime executor, измерить contains-поиск,
-    выполнить read-only сравнение prefix и ввода от трёх символов, проверить индексы и pg_trgm.
+    Stage 4 развёрнут. Код не изменён.
   required_actions:
-    - синхронизировать ветку и подтвердить HEAD d7a2a828bd705bcb282bca7dd925de63d8518cc9
-    - не изменять Java, XML, JPQL, Liquibase, индексы и production
-    - определить фактический executor currentCompanyField в runtime
-    - выполнить 1 прогрев и 10 замеров по каждому выражению
-    - записать SQL и UI MIN MAX AVG P50 P95
-    - выполнить EXPLAIN ANALYZE BUFFERS для contains и prefix
-    - проверить существующие индексы Company и доступность pg_trgm read-only
-    - оценить влияние двух символов и suggestionsLimit 50
-    - сохранить stage-4-suggestion-hermes-report.md
-    - выдать один вердикт KEEP_CURRENT_SUGGESTION, TUNE_MIN_LENGTH_LIMIT, PREFIX_SEARCH_RECOMMENDED, TRIGRAM_INDEX_RECOMMENDED или STAGE_4_BLOCKED
-    - после push обновить coordination и освободить блокировку
+    - тестирование suggestion-поиска (contains vs prefix)
