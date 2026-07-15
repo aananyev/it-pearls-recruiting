@@ -3,7 +3,7 @@
 **Проект:** HRM HuntTech  
 **Дата:** 2026-07-15  
 **Ветка:** `agent/job-candidate-progressive-loading-stage-3-social-networks`  
-**Базовый SHA:** `092633eef6b089b6afe70e90c88e7383daa336f0`  
+**Базовый SHA:** `a1f8e1937ac08cd269408bbd2f5495fff6a3dc9c`  
 **Тип этапа:** performance and memory-safety implementation
 
 ## 1. Основание
@@ -232,7 +232,7 @@ stage-15-hidden-skills-hermes-report.md
 
 Отчёт должен включать:
 
-- полный base SHA `092633eef6b089b6afe70e90c88e7383daa336f0`;
+- полный base SHA `a1f8e1937ac08cd269408bbd2f5495fff6a3dc9c`;
 - фактический итоговый SHA;
 - список изменённых файлов;
 - расположение visibility-guard;
