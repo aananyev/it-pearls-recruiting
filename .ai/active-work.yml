@@ -9,16 +9,17 @@ task:
   title: Исключение полной загрузки компаний из JobCandidateEdit
   description: >
     Добавлен lifecycle-компонент, который до @LoadDataBeforeShow блокирует
-    currentCompaniesLc. Требуется проверка Hermes: отсутствие полного Company SQL,
-    сборка, 8/8 ScreenViewIntegrityTest и регрессия suggestion/lookup/open/create.
+    currentCompaniesLc. Добавлен unit-тест регистрации PreLoadListener.
+    Требуется проверка Hermes: отсутствие полного Company SQL, сборка,
+    8/8 ScreenViewIntegrityTest и регрессия suggestion/lookup/open/create.
 
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
   base_sha: d3558cb2370cfcf34c8f7e286d29ad69c9ffd13a
-  head_sha: 1e4ce5954c1f84f6782d113b7531074f8a0a8e60
+  head_sha: ad2e203de3bb5500872e67ec555c67f7315de5b7
   status: review
   owner: none
-  updated_at: 2026-07-15T15:45:00+02:00
+  updated_at: 2026-07-15T15:58:00+02:00
 
 scope:
   type: performance
@@ -26,6 +27,7 @@ scope:
   module: web
   allowed_files:
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateCompanyLoaderOptimizer.java
+    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/JobCandidateCompanyLoaderOptimizerTest.java
     - docs/ui/JobCandidateEdit_Spec.md
     - docs/performance-archive/2026-07-15/job-candidate-company-loader-stage-2/
     - .ai/active-work.yml
@@ -39,12 +41,14 @@ handoff:
   previous_agent: ChatGPT
   summary: >
     Добавлен JobCandidateCompanyLoaderOptimizer. Он получает currentCompaniesLc
-    из ScreenData и предотвращает каждый load до выполнения SQL. Поле компании,
-    XML, JobCandidateEdit.java и create-company flow не изменены. Спецификация
-    и performance-отчёт синхронизированы.
+    из ScreenData и предотвращает каждый load до выполнения SQL. Тестируемая
+    регистрация listener вынесена в preventAutomaticLoad(), добавлен unit-тест.
+    Поле компании, XML, JobCandidateEdit.java и create-company flow не изменены.
+    Спецификация и performance-документы синхронизированы.
   required_actions:
-    - синхронизировать ветку и подтвердить HEAD 1e4ce5954c1f84f6782d113b7531074f8a0a8e60
+    - синхронизировать ветку и подтвердить HEAD ad2e203de3bb5500872e67ec555c67f7315de5b7
     - выполнить git diff --check и компиляцию app-web
+    - выполнить JobCandidateCompanyLoaderOptimizerTest и получить PASS
     - выполнить ScreenViewIntegrityTest и получить 8/8 PASS
     - выполнить clean assemble и получить BUILD SUCCESSFUL
     - развернуть локальный /hrm и проверить HTTP 200
