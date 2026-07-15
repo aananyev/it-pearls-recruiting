@@ -1,76 +1,16 @@
 repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
-  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
-
 task:
   id: job-candidate-cv-indicator-stage-13-background-load
-  title: Фоновая проверка индикатора резюме JobCandidateEdit
-  description: >
-    Stage 12 принят: проверка file storage фотографии удалена из onBeforeShow и
-    выполняется после first paint. Stage 13 удаляет scalar COUNT CandidateCV из
-    onBeforeShow и запускает независимую background-проверку после AfterShow,
-    не материализуя коллекцию резюме и не меняя lazy-load вкладки.
-
+  title: Stage 13 completed
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: 7260e062a01137b6472bbf38df9adf6090ebfa81
-  head_sha: 7260e062a01137b6472bbf38df9adf6090ebfa81
-  code_sha: b261c26edf1ba47a9f85e910a95c0e091f8f3777
-  status: active
-  owner: hermes
-  updated_at: 2026-07-15T22:40:00+04:00
-
-scope:
-  type: performance-and-fetch-safety-implementation
-  object: JobCandidateEdit.candidateCvIndicator
-  module: web
-  allowed_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
-    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/
-    - docs/ui/JobCandidateEdit_Spec.md
-    - docs/performance-archive/2026-07-15/job-candidate-cv-indicator-stage-13-background-load/
-    - .ai/active-work.yml
-  forbidden_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateCvInitialViewOptimizer.java
-    - modules/global/src/com/company/hunttech/entity/
-    - modules/global/src/com/company/hunttech/views.xml
-    - modules/core/src/com/company/hunttech/
-    - modules/core/db/changelog/
-    - modules/web/themes/
-
+  base_sha: 7260e062
+  head_sha: 09b4ffe4
+  status: review
+  owner: none
+  updated_at: 2026-07-15T21:15:00+04:00
 handoff:
-  previous_agent: ChatGPT
-  summary: >
-    Созданы stage-12-chatgpt-review.md и
-    stage-13-cv-indicator-background-load-contract.md. Текущий onBeforeShow
-    синхронно вызывает hasCandidateCv(), выполняющий scalar COUNT CandidateCV.
-    Результат нужен только для информационного label и может быть получен после
-    first paint. Полная коллекция должна по-прежнему загружаться только на tabResume.
-  required_actions:
-    - синхронизировать ветку и подтвердить HEAD 7260e062a01137b6472bbf38df9adf6090ebfa81
-    - удалить вызов hasCandidateCv и CandidateCV COUNT из onBeforeShow
-    - для существующего кандидата до результата показать нейтральный индикатор Резюме: …
-    - добавить отдельные candidateCvIndicatorLoading и candidateCvIndicatorLoaded
-    - добавить идемпотентный startCandidateCvIndicatorBackgroundLoading из onAfterShow
-    - для нового кандидата не выполнять CandidateCV SQL
-    - передавать в background только UUID кандидата
-    - получать DataManager через AppBeans внутри run
-    - сохранить scalar COUNT и явный фильтр e.deleteTs is null
-    - не загружать CandidateCV entities textCV файлы или associations
-    - обновлять label только в done; при ошибке не выставлять ложное НЕТ
-    - не менять ensureCandidateCvLoaded candidateCvLoaded cvTabInitialized XML optimizer entities views core Liquibase SCSS и production
-    - не объединять задачу с rating photo Skillsbar или positions background tasks
-    - обновить Business Context Behavior Summary Stage 2 правила загрузки и историю JobCandidateEdit_Spec.md
-    - выполнить git diff --check compileJava compileTestJava
-    - выполнить ScreenViewIntegrityTest 8/8 и clean assemble BUILD SUCCESSFUL
-    - подтвердить 0 CandidateCV SQL до first paint
-    - подтвердить ровно 1 scalar COUNT после AfterShow для существующего кандидата
-    - подтвердить 0 SQL для нового кандидата и отсутствие повторных COUNT
-    - проверить кандидата с CV без CV нового кандидата tabResume сохранение без вкладки и быстрое закрытие
-    - проверить отсутствие unfetched detached NPE OOM и UI-thread exceptions
-    - развернуть /hrm и подтвердить HTTP 200
-    - сохранить stage-13-cv-indicator-hermes-report.md с реальными базовым и итоговым SHA
-    - объявлять завершение только при полном acceptance gate иначе STAGE_13_BLOCKED
-    - после push обновить coordination точным итоговым HEAD и освободить блокировку
+  previous_agent: Hermes
+  summary: Stage 13 implemented. CV indicator moved to background.
