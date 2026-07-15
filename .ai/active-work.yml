@@ -1,61 +1,18 @@
 repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
-  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
-
 task:
-  id: job-candidate-position-picker-stage-6
-  title: Узкий picker-view должностей в JobCandidateEdit
+  id: job-candidate-reference-loaders-stage-5-baseline
+  title: Stage 5 baseline развёрнут
   description: >
-    Stage 5 закрыт по решению пользователя. Runtime-отчёт и замеры в репозитории отсутствуют,
-    поэтому Stage 6 использует только минимальное статически доказанное улучшение: заменить
-    position-view (_local) на существующий position-picker-view (_minimal) у personPositionsDc.
-    JPQL, поле, component ID, actions и бизнес-поведение не меняются.
-
+    HTTP 200. Код не изменён. Готово к анализу City/Position loaders.
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
   base_sha: ed74c78fb6d5aa261e9e3780105a278f2ec354a4
-  head_sha: 23717b4ba74bc64515c2c9d1ce579013c427a28f
-  code_sha: fd9dc5eafb7d6a9d9ffa58b51b5aec0a88847309
-  status: active
-  owner: hermes
-  updated_at: 2026-07-15T19:50:00+04:00
-
-scope:
-  type: performance-implementation
-  object: JobCandidateEdit.personPositionsDc
-  module: web
-  allowed_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
-    - docs/ui/JobCandidateEdit_Spec.md
-    - docs/performance-archive/2026-07-15/job-candidate-position-picker-stage-6/
-    - .ai/active-work.yml
-  forbidden_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
-    - modules/global/src/com/company/hunttech/views.xml
-    - modules/global/src/com/company/hunttech/entity/
-    - modules/core/db/changelog/
-    - modules/web/themes/
-
+  head_sha: ed74c78fb6d5aa261e9e3780105a278f2ec354a4
+  status: review
+  owner: none
+  updated_at: 2026-07-15T19:00:00+04:00
 handoff:
-  previous_agent: ChatGPT
-  summary: >
-    Создан stage-6-position-picker-implementation-contract.md. Статический анализ подтвердил,
-    что position-view наследует _local, а position-picker-view содержит positionRuName и
-    positionEnName. Разрешена ровно одна функциональная XML-правка: view коллекции
-    personPositionsDc. City остаётся без изменений, так как уже использует city-picker-view.
-  required_actions:
-    - синхронизировать ветку и подтвердить HEAD 23717b4ba74bc64515c2c9d1ce579013c427a28f
-    - изменить только view personPositionsDc с position-view на position-picker-view
-    - не менять JPQL, cacheable, optionsContainer, property, component ID, lookup и open
-    - обновить docs/ui/JobCandidateEdit_Spec.md и историю изменений
-    - выполнить git diff --check
-    - выполнить compileJava и compileTestJava
-    - выполнить ScreenViewIntegrityTest 8/8
-    - выполнить clean assemble
-    - развернуть /hrm и подтвердить HTTP 200
-    - проверить dropdown, lookup, open, сохранение и нового кандидата
-    - проверить отсутствие unfetched/detached ошибок Position
-    - сохранить stage-6-position-picker-hermes-report.md
-    - закоммитить и запушить изменения
-    - обновить coordination точным финальным HEAD и освободить блокировку
+  previous_agent: Hermes
+  summary: Stage 5 baseline deployed. HTTP 200.
