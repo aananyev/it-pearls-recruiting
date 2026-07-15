@@ -33,8 +33,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Исключает коллекцию резюме из первичной загрузки редактора кандидата.
  *
  * <p>Коллекция {@code candidateCv} загружается только при первом открытии
- * вкладки «Резюме». Индикатор ДА/НЕТ полностью принадлежит фоновому потоку
- * {@link JobCandidateEdit}. Оптимизатор больше не выполняет CandidateCV COUNT.</p>
+ * вкладки «Резюме». Индикатор ДА/НЕТ полностью принадлежит фоновой задаче
+ * {@link JobCandidateEdit}. Оптимизатор не выполняет CandidateCV COUNT.</p>
+ *
+ * <p>После ленивой загрузки резюме и социальных сетей оптимизатор точечно
+ * гидратирует только проекты и типы социальных сетей, необходимые для логотипов.</p>
  */
 @Component(JobCandidateCvInitialViewOptimizer.NAME)
 @Order(Ordered.LOWEST_PRECEDENCE)
@@ -61,6 +64,10 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
     @Inject
     private DataManager dataManager;
 
+    /**
+     * Подменяет только runtime-view первичного loader и подключает обработчики
+     * гидратации после создания экрана. XML, loader ID и DataContext не изменяются.
+     */
     @Override
     public void inject(InjectionContext injectionContext) {
         FrameOwner frameOwner = injectionContext.getFrameOwner();
@@ -74,16 +81,22 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
         View sourceView = jobCandidateLoader.getView();
 
         if (sourceView != null && sourceView.containsProperty(CANDIDATE_CV_PROPERTY)) {
+            // Убирает только candidateCv, сохраняя остальные свойства и fetch mode runtime-view.
             jobCandidateLoader.setView(copyWithoutCandidateCv(sourceView));
         }
 
         screen.addAfterShowListener(event -> {
             DataContext dataContext = jobCandidateLoader.getDataContext();
+            // Hydration подключается после штатных listener-ов ленивых вкладок.
             installResumeProjectLogoHydration(screen, screenData, dataContext);
             installSocialNetworkLogoHydration(screen, screenData, dataContext);
         });
     }
 
+    /**
+     * Копирует runtime-view со всеми вложенными представлениями и fetch mode,
+     * исключая только композицию candidateCv из initial load.
+     */
     View copyWithoutCandidateCv(View sourceView) {
         View optimizedView = new View(
                 sourceView.getEntityClass(),
@@ -103,6 +116,10 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
         return optimizedView;
     }
 
+    /**
+     * После ленивой загрузки таблицы резюме одним запросом догружает проекты
+     * и их логотипы. Повторная гидратация разрешается после CRUD коллекции CV.
+     */
     @SuppressWarnings("unchecked")
     private void installResumeProjectLogoHydration(JobCandidateEdit screen,
                                                     ScreenData screenData,
@@ -134,6 +151,10 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
         });
     }
 
+    /**
+     * После ленивой загрузки контактов или социальных сетей одним запросом
+     * догружает типы сетей и их логотипы, не расширяя initial view кандидата.
+     */
     @SuppressWarnings("unchecked")
     private void installSocialNetworkLogoHydration(JobCandidateEdit screen,
                                                    ScreenData screenData,
@@ -156,6 +177,7 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
         };
 
         socialNetworkContainer.addCollectionChangeListener(event -> {
+            // Во время первичного заполнения контейнера не запускает запрос на каждую строку.
             if (!initialHydrationCompleted.get()) {
                 return;
             }
@@ -172,11 +194,13 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
         });
     }
 
+    /** Проверяет, открыта ли вкладка резюме. */
     private boolean isResumeTabSelected(TabSheet tabSheet) {
         TabSheet.Tab selectedTab = tabSheet.getSelectedTab();
         return selectedTab != null && RESUME_TAB_ID.equals(selectedTab.getName());
     }
 
+    /** Проверяет, открыта ли вкладка контактов или социальных сетей. */
     private boolean isSocialNetworkTabSelected(TabSheet tabSheet) {
         TabSheet.Tab selectedTab = tabSheet.getSelectedTab();
         if (selectedTab == null) {
@@ -187,6 +211,10 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
                 || SOCIAL_NETWORK_TAB_ID.equals(selectedTabName);
     }
 
+    /**
+     * Однократно загружает проекты по уже известным UUID и merge-ит их в
+     * экранный DataContext, не изменяя связи CandidateCV.
+     */
     private void hydrateResumeProjectLogosOnce(CollectionPropertyContainer<CandidateCV> candidateCvContainer,
                                                 DataContext dataContext,
                                                 AtomicBoolean projectLogosLoaded) {
@@ -206,6 +234,7 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
                     .view(PROJECT_WITH_LOGO_VIEW)
                     .list();
 
+            // Merge гидратирует недостающие поля managed-проектов без изменения коллекции CV.
             projects.forEach(dataContext::merge);
         } catch (RuntimeException exception) {
             projectLogosLoaded.set(false);
@@ -213,6 +242,10 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
         }
     }
 
+    /**
+     * Однократно загружает типы социальных сетей по UUID и merge-ит логотипы
+     * в DataContext без изменения пользовательских ссылок SocialNetworkURLs.
+     */
     private void hydrateSocialNetworkTypeLogosOnce(
             CollectionPropertyContainer<SocialNetworkURLs> socialNetworkContainer,
             DataContext dataContext,
@@ -233,6 +266,7 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
                     .view(SOCIAL_NETWORK_TYPE_WITH_LOGO_VIEW)
                     .list();
 
+            // Merge добавляет logo к managed-справочникам и не создаёт новых связей.
             socialNetworkTypes.forEach(dataContext::merge);
         } catch (RuntimeException exception) {
             socialNetworkLogosLoaded.set(false);
@@ -240,6 +274,10 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
         }
     }
 
+    /**
+     * Собирает уникальные UUID проектов только из уже загруженной цепочки
+     * CandidateCV → OpenPosition → Project, не обращаясь к projectLogo.
+     */
     Set<UUID> collectProjectIds(Collection<CandidateCV> candidateCvs) {
         if (candidateCvs == null || candidateCvs.isEmpty()) {
             return Collections.emptySet();
@@ -257,6 +295,10 @@ public class JobCandidateCvInitialViewOptimizer implements ControllerDependencyI
         return projectIds;
     }
 
+    /**
+     * Собирает уникальные UUID типов только из уже загруженных SocialNetworkURLs,
+     * не обращаясь к полю logo и не инициируя дополнительный fetch.
+     */
     Set<UUID> collectSocialNetworkTypeIds(Collection<SocialNetworkURLs> socialNetworks) {
         if (socialNetworks == null || socialNetworks.isEmpty()) {
             return Collections.emptySet();
