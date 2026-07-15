@@ -504,8 +504,7 @@
                                                          editable="true"
                                                          inputPrompt="msg://msgPressEnter">
                                             <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                   escapeValueForLike="false"
-                                                   view="_local"
+                                                   escapeValueForLike="true"
                                                    searchStringFormat="%$searchString%">
                                                 select e.firstName from hunttech_JobCandidate e
                                                 where lower(e.firstName) like lower(:searchString) escape '\'
@@ -523,9 +522,8 @@
                                                          editable="true"
                                                          inputPrompt="msg://msgPressEnter">
                                             <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                   searchStringFormat="%$searchString%"
-                                                   view="_minimal"
-                                                   escapeValueForLike="true">
+                                                   escapeValueForLike="true"
+                                                   searchStringFormat="%$searchString%">
                                                 select e from hunttech_JobCandidate e
                                                 where lower(e.middleName) like lower(:searchString) escape '\'
                                             </query>
