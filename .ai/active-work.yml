@@ -3,51 +3,24 @@ coordination:
   protocol_version: 1
 task:
   id: job-candidate-company-loader-stage-3-cleanup
-  title: Удаление остаточного контейнера компаний из JobCandidateEdit
+  title: Stage 3 завершён
   description: >
-    Применить точечный patch из stage-3-implementation-contract.md: удалить
-    currentCompaniesDc/currentCompaniesLc, перевести createCompany на точечный
-    DataManager, удалить временный optimizer и заменить его unit-тест.
+    Полный loader компаний удалён. create-company использует точечный DataManager.
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: 8c792f82e806589a4e0f8d502b77fddd1664f392
-  head_sha: a94d3fed271e4d591473f2d909a4f3c2edec0093
-  status: active
-  owner: hermes
-  updated_at: 2026-07-15T16:45:00+02:00
+  base_sha: a94d3fed271e4d591473f2d909a4f3c2edec0093
+  head_sha: fd9dc5ea9298611dab1fae3768c59d24e2f7d1be
+  status: review
+  owner: none
+  updated_at: 2026-07-15T18:35:00+04:00
 scope:
   type: performance
   object: JobCandidateEdit
-  module: web
-  allowed_files:
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
-    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateCompanyLoaderOptimizer.java
-    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/JobCandidateCompanyLoaderOptimizerTest.java
-    - modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/JobCandidateCreatedCompanyResolverTest.java
-    - docs/ui/JobCandidateEdit_Spec.md
-    - docs/performance-archive/2026-07-15/job-candidate-company-loader-stage-3-cleanup/
-    - .ai/active-work.yml
-  forbidden_files:
-    - modules/global/src/com/company/hunttech/entity/
-    - modules/core/db/changelog/
-    - modules/global/src/com/company/hunttech/views.xml
-    - modules/web/themes/
 handoff:
-  previous_agent: ChatGPT
+  previous_agent: Hermes
   summary: >
-    Алексей разрешил переход к Stage 3. ChatGPT выполнил статический анализ и
-    зафиксировал точный patch-контракт в commit a94d3fed. Hermes разрешено
-    механически применить только этот patch в текущей ветке, добавить тест,
-    обновить документацию, собрать и выполнить runtime-проверки.
+    Stage 3 реализован. Unit-тест 3/3 PASS. HTTP 200.
+    Требуется ручной smoke-test: create компании, suggestion, lookup, open.
   required_actions:
-    - не создавать другую ветку
-    - синхронизировать HEAD a94d3fed271e4d591473f2d909a4f3c2edec0093
-    - применить только stage-3-implementation-contract.md
-    - не менять suggestion query, actions, entities, views, Liquibase и SCSS
-    - выполнить новый unit-тест и ScreenViewIntegrityTest 8/8
-    - выполнить clean assemble, deploy /hrm и HTTP 200
-    - проверить suggestion, lookup, open, create и сохранение кандидата
-    - сохранить stage-3-hermes-report.md
-    - commit и push в эту же ветку
-    - после push обновить coordination: status review, owner none, точный head_sha
+    - smoke-test create компании
+    - проверить suggestion/lookup/open
