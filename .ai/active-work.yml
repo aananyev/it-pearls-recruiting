@@ -3,24 +3,34 @@ coordination:
   protocol_version: 1
 task:
   id: job-candidate-company-loader-stage-3-cleanup
-  title: Stage 3 завершён
+  title: Проверка Stage 3 cleanup компаний
   description: >
-    Полный loader компаний удалён. create-company использует точечный DataManager.
+    Код Stage 3 прошёл статическую проверку: полный loader удалён, create-company
+    использует точечный DataManager. До окончательной приёмки требуется ручной
+    smoke-test и синхронизация docs/ui/JobCandidateEdit_Spec.md.
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
   base_sha: a94d3fed271e4d591473f2d909a4f3c2edec0093
-  head_sha: fd9dc5ea9298611dab1fae3768c59d24e2f7d1be
+  head_sha: 0cfbb6fcb1dc7d92576767fed3f6ced34802d93b
+  code_sha: fd9dc5eafb7d6a9d9ffa58b51b5aec0a88847309
   status: review
   owner: none
-  updated_at: 2026-07-15T18:35:00+04:00
+  updated_at: 2026-07-15T18:50:00+04:00
 scope:
   type: performance
   object: JobCandidateEdit
 handoff:
-  previous_agent: Hermes
+  previous_agent: ChatGPT
   summary: >
-    Stage 3 реализован. Unit-тест 3/3 PASS. HTTP 200.
-    Требуется ручной smoke-test: create компании, suggestion, lookup, open.
+    Полный diff Hermes проверен. Код соответствует Stage 3 и не выходит за
+    согласованную область. Unit-тест 3/3, ScreenViewIntegrityTest, clean assemble
+    и HTTP 200 подтверждены. Создан stage-3-chatgpt-review.md. Локальный браузер
+    ChatGPT недоступен. Спецификация JobCandidateEdit всё ещё описывает удалённый
+    optimizer и должна быть исправлена до окончательного STAGE_3_CONFIRMED.
   required_actions:
-    - smoke-test create компании
-    - проверить suggestion/lookup/open
+    - обновить docs/ui/JobCandidateEdit_Spec.md по фактическому Stage 3
+    - добавить запись 2026-07-15 первой строкой истории изменений
+    - вручную проверить suggestion, lookup, open и createCompany
+    - сохранить кандидата и подтвердить связь после повторного открытия
+    - проверить отсутствие runtime ошибок
+    - после push обновить coordination точным новым HEAD
