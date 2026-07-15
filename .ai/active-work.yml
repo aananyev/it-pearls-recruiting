@@ -2,16 +2,16 @@ repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
 task:
-  id: job-candidate-last-interaction-stage-9-lazy-load
-  title: Stage 9 completed
+  id: job-candidate-cv-indicator-stage-10-scalar-existence
+  title: Stage 10 completed
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: 20f5e8e1
-  head_sha: facbd44b
-  status: completed
+  head_sha: $(cd /Users/alekseyananyev/StudioProjects/hunttech_recruiting && git rev-parse HEAD)
+  status: review
   owner: none
-  updated_at: 2026-07-15T20:10:00+04:00
+  updated_at: 2026-07-15T20:20:00+04:00
 handoff:
   previous_agent: Hermes
   summary: >
-    Stage 9 accepted. report, spec, and coordination synced.
+    Stage 10 implemented. hasCandidateCv uses scalar count query.
+    Report and spec synced. HTTP 200.
