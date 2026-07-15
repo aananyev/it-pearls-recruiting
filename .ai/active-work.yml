@@ -8,18 +8,17 @@ task:
   id: job-candidate-company-loader-stage-2
   title: Исключение полной загрузки компаний из JobCandidateEdit
   description: >
-    Реализовать минимальный performance-fix: до выполнения @LoadDataBeforeShow
-    блокировать currentCompaniesLc, который загружает около 5623 Company при
-    каждом открытии JobCandidateEdit. Сценарии suggestion, lookup, open и create
-    на этом подэтапе не менять.
+    Добавлен lifecycle-компонент, который до @LoadDataBeforeShow блокирует
+    currentCompaniesLc. Требуется проверка Hermes: отсутствие полного Company SQL,
+    сборка, 8/8 ScreenViewIntegrityTest и регрессия suggestion/lookup/open/create.
 
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
   base_sha: d3558cb2370cfcf34c8f7e286d29ad69c9ffd13a
-  head_sha: d3558cb2370cfcf34c8f7e286d29ad69c9ffd13a
-  status: active
-  owner: chatgpt
-  updated_at: 2026-07-15T15:30:00+02:00
+  head_sha: 1e4ce5954c1f84f6782d113b7531074f8a0a8e60
+  status: review
+  owner: none
+  updated_at: 2026-07-15T15:45:00+02:00
 
 scope:
   type: performance
@@ -37,12 +36,20 @@ scope:
     - modules/core/db/changelog/
 
 handoff:
-  previous_agent: Hermes
+  previous_agent: ChatGPT
   summary: >
-    Hermes подтвердил FULL_COMPANY_LOADER_CONFIRMED: currentCompaniesLc выполняет
-    полный запрос примерно 5623 компаний при initial open. ChatGPT выполняет
-    изолированный lifecycle-fix без изменения бизнес-логики создания компании.
+    Добавлен JobCandidateCompanyLoaderOptimizer. Он получает currentCompaniesLc
+    из ScreenData и предотвращает каждый load до выполнения SQL. Поле компании,
+    XML, JobCandidateEdit.java и create-company flow не изменены. Спецификация
+    и performance-отчёт синхронизированы.
   required_actions:
-    - не изменять код при owner: chatgpt
-    - после передачи проверить отсутствие SQL полного списка Company при initial open
-    - проверить lookup, open и create Company без регрессий
+    - синхронизировать ветку и подтвердить HEAD 1e4ce5954c1f84f6782d113b7531074f8a0a8e60
+    - выполнить git diff --check и компиляцию app-web
+    - выполнить ScreenViewIntegrityTest и получить 8/8 PASS
+    - выполнить clean assemble и получить BUILD SUCCESSFUL
+    - развернуть локальный /hrm и проверить HTTP 200
+    - подтвердить отсутствие полного запроса hunttech_Company при initial open
+    - выполнить один прогрев и пять замеров с P50/P95
+    - проверить suggestion, lookup, open и createCompany
+    - сохранить Hermes-отчёт в job-candidate-company-loader-stage-2
+    - после push обновить coordination и освободить блокировку
