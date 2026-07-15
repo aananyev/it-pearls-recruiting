@@ -1,0 +1,230 @@
+name: Apply JobCandidateEdit loader guards
+
+on:
+  push:
+    branches:
+      - agent/job-candidate-edit-layout-fix
+    paths:
+      - '.github/workflows/apply-job-candidate-stage-a.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply-stage-a:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/job-candidate-edit-layout-fix
+          fetch-depth: 0
+
+      - name: Apply loader guards and documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(text: str, old: str, new: str, label: str) -> str:
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: ожидалось одно совпадение, найдено {count}')
+              return text.replace(old, new, 1)
+
+          java_path = Path('modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java')
+          java = java_path.read_text(encoding='utf-8')
+
+          java = replace_once(
+              java,
+              '''    private boolean commentsTabInitialized = false;
+              private boolean referenceLoadersInitialized = false;''',
+              '''    private boolean commentsTabInitialized = false;
+              // Loader комментариев разрешается только после установки параметра кандидата.
+              private boolean interactionCommentLoaderReady = false;
+              private boolean referenceLoadersInitialized = false;''',
+              'Флаг готовности loader комментариев'
+          )
+
+          java = replace_once(
+              java,
+              '''        preventAutoLoadUntilReady(openPositionDl, () -> openPositionLoaderInitialized);
+              preventAutoLoadUntilReady(citiesDl, () -> referenceLoadersInitialized);
+              preventAutoLoadUntilReady(personPositionsLc, () -> referenceLoadersInitialized);
+              // Запросы вкладки содержат параметры кандидата и позиции, поэтому
+              // блокируем автоматическую загрузку до первого открытия вкладки.
+              preventAutoLoadUntilReady(lastProjectDl, () -> positionsTabLoaded);
+              preventAutoLoadUntilReady(suggestOpenPositionDl, () -> positionsTabLoaded);''',
+              '''        preventAutoLoadUntilReady(openPositionDl, () -> openPositionLoaderInitialized);
+              preventAutoLoadUntilReady(citiesDl, () -> referenceLoadersInitialized);
+              preventAutoLoadUntilReady(personPositionsLc, () -> referenceLoadersInitialized);
+              // Полный справочник компаний не загружается при открытии формы:
+              // SuggestionPickerField выполняет ограниченный серверный поиск по строке.
+              preventAutoLoad(currentCompaniesLc);
+              // Комментарии загружаются только после установки обязательного параметра кандидата.
+              preventAutoLoadUntilReady(interactionCommentDl, () -> interactionCommentLoaderReady);
+              // Запросы вкладки содержат параметры кандидата и позиции, поэтому
+              // блокируем автоматическую загрузку до первого открытия вкладки.
+              preventAutoLoadUntilReady(lastProjectDl, () -> positionsTabLoaded);
+              preventAutoLoadUntilReady(suggestOpenPositionDl, () -> positionsTabLoaded);''',
+              'Регистрация guard в onInit'
+          )
+
+          java = replace_once(
+              java,
+              '''    private <E extends Entity> void preventAutoLoadUntilReady(CollectionLoader<E> loader,
+                                                                               java.util.function.BooleanSupplier ready) {
+                  loader.addPreLoadListener(e -> {
+                      if (!ready.getAsBoolean()) {
+                          e.preventLoad();
+                      }
+                  });
+              }
+
+              // Блокирует автоматическую загрузку KeyValue loader до установки обязательных параметров.''',
+              '''    private <E extends Entity> void preventAutoLoadUntilReady(CollectionLoader<E> loader,
+                                                                               java.util.function.BooleanSupplier ready) {
+                  loader.addPreLoadListener(e -> {
+                      if (!ready.getAsBoolean()) {
+                          e.preventLoad();
+                      }
+                  });
+              }
+
+              // Полностью блокирует загрузку справочника, который заменён серверным поиском.
+              private <E extends Entity> void preventAutoLoad(CollectionLoader<E> loader) {
+                  loader.addPreLoadListener(loadEvent -> loadEvent.preventLoad());
+              }
+
+              // Блокирует автоматическую загрузку KeyValue loader до установки обязательных параметров.''',
+              'Helper постоянной блокировки loader'
+          )
+
+          java = replace_once(
+              java,
+              '''    private void initInteractionCommentDl() {
+                  interactionCommentDl.setParameter("candidate", getEditedEntity());
+                  interactionCommentDl.setParameter("comment", null);
+                  interactionCommentDl.load();
+              }''',
+              '''    // Устанавливает обязательные параметры до разрешения загрузки комментариев.
+              private void initInteractionCommentDl() {
+                  interactionCommentLoaderReady = true;
+                  try {
+                      interactionCommentDl.setParameter("candidate", getEditedEntity());
+                      interactionCommentDl.setParameter("comment", null);
+                      interactionCommentDl.load();
+                  } catch (RuntimeException e) {
+                      // После ошибки вновь блокируем loader до следующей явной попытки открытия вкладки.
+                      interactionCommentLoaderReady = false;
+                      throw e;
+                  }
+              }''',
+              'Безопасная инициализация comments loader'
+          )
+
+          java_path.write_text(java, encoding='utf-8')
+
+          ui_doc_path = Path('docs/ui/JobCandidateEdit_Spec.md')
+          ui_doc = ui_doc_path.read_text(encoding='utf-8')
+          ui_doc = replace_once(
+              ui_doc,
+              '''- ленивое открытие тяжёлых вкладок сохраняется;
+              - обязательные параметры loaders не изменяются;
+              - визуальный слой не выполняет дополнительные запросы;
+              - таблицы продолжают использовать прежние dataContainer и actions.
+
+              ---''',
+              '''- ленивое открытие тяжёлых вкладок сохраняется;
+              - обязательные параметры loaders не изменяются;
+              - визуальный слой не выполняет дополнительные запросы;
+              - таблицы продолжают использовать прежние dataContainer и actions.
+
+              ### Этап A — guard необязательных loaders
+
+              - `currentCompaniesLc` не загружает полный справочник компаний при открытии формы; `currentCompanyField` продолжает использовать ограниченный серверный `SearchExecutor`;
+              - `interactionCommentDl` блокируется до первого открытия `commentsTab` и установки обязательного параметра `candidate`;
+              - после успешной инициализации комментариев штатный refresh loader остаётся доступным;
+              - при ошибке загрузки guard возвращается в закрытое состояние, поэтому следующая явная попытка открытия вкладки безопасно повторяет инициализацию;
+              - `jobCandidateDl`, component ID, JPQL, actions и бизнес-правила не изменены.
+
+              ---''',
+              'Документация этапа A в спецификации'
+          )
+          ui_doc = replace_once(
+              ui_doc,
+              '''| Дата | Изменение |
+              |---|---|''',
+              '''| Дата | Изменение |
+              |---|---|
+              | 2026-07-15 | Выполнен этап A: полная автозагрузка компаний заблокирована, комментарии загружаются только после установки параметра кандидата при открытии вкладки. |''',
+              'История изменений спецификации'
+          )
+          ui_doc_path.write_text(ui_doc, encoding='utf-8')
+
+          architecture_path = Path('docs/architecture/JobCandidateEdit_Performance_Architecture.md')
+          architecture = architecture_path.read_text(encoding='utf-8')
+          architecture = replace_once(
+              architecture,
+              '''**Риск:** низкий.
+
+              ### 4.2. P0 — использовать поиск вместо полного списка компаний''',
+              '''**Риск:** низкий.
+
+              **Статус:** выполнено 2026-07-15.
+
+              Реализовано:
+
+              - `currentCompaniesLc` постоянно защищён от полной загрузки, поскольку поле компании использует серверный поиск;
+              - `interactionCommentDl` защищён до установки параметра `candidate` при первом открытии вкладки комментариев;
+              - существующие guards городов, должностей, вакансий и вкладки позиций сохранены;
+              - основной entity view на этом этапе не изменялся.
+
+              ### 4.2. P0 — использовать поиск вместо полного списка компаний''',
+              'Статус этапа A в архитектуре'
+          )
+          architecture = replace_once(
+              architecture,
+              '''| A | Guard для всех необязательных loaders, особенно comments/company | исключение лишних SQL | низкий |''',
+              '''| A — выполнен | Guard для всех необязательных loaders, особенно comments/company | исключение лишних SQL | низкий |''',
+              'Статус этапа A в плане'
+          )
+          architecture = replace_once(
+              architecture,
+              '''| Дата | Изменение |
+              |---|---|''',
+              '''| Дата | Изменение |
+              |---|---|
+              | 2026-07-15 | Реализован этап A: добавлены guards полного справочника компаний и параметризованного loader комментариев без изменения стартового view. |''',
+              'История изменений архитектуры'
+          )
+          architecture_path.write_text(architecture, encoding='utf-8')
+          PY
+
+          grep -q 'preventAutoLoad(currentCompaniesLc)' \
+            modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
+          grep -q 'preventAutoLoadUntilReady(interactionCommentDl, () -> interactionCommentLoaderReady)' \
+            modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
+          grep -q 'interactionCommentLoaderReady = false' \
+            modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
+
+          git diff --check
+
+      - name: Commit Stage A
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/apply-job-candidate-stage-a.yml
+
+          git config user.name "OpenAI Developer"
+          git config user.email "openai-developer@users.noreply.github.com"
+          git add -A
+          git commit \
+            -m "perf(job-candidate): отложить необязательные loaders" \
+            -m "- заблокировать полную загрузку компаний при открытии формы
+          - разрешать loader комментариев только после установки параметра кандидата
+          - сохранить существующие component ID, JPQL и бизнес-контракты
+          - обновить спецификацию и архитектурный план"
+          git push origin HEAD:agent/job-candidate-edit-layout-fix
