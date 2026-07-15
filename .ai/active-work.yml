@@ -1,34 +1,48 @@
 repository: aananyev/it-pearls-recruiting
+
 coordination:
   protocol_version: 1
+  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
+
 task:
-  id: job-candidate-company-suggestion-baseline
-  title: Подтверждение загрузчика компаний
+  id: job-candidate-company-loader-stage-2
+  title: Исключение полной загрузки компаний из JobCandidateEdit
   description: >
-    Вердикт: FULL_COMPANY_LOADER_CONFIRMED.
-    currentCompaniesLc не в preventAutoLoadUntilReady → ~5623 Company при initial open.
+    Реализовать минимальный performance-fix: до выполнения @LoadDataBeforeShow
+    блокировать currentCompaniesLc, который загружает около 5623 Company при
+    каждом открытии JobCandidateEdit. Сценарии suggestion, lookup, open и create
+    на этом подэтапе не менять.
+
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: 84af3294d082f43ed9ce337d850dd06d8fb7b9e1
-  head_sha: d3558cb2de15a50ef3a1f9a54bdbdb2a7a4d1fa7
-  status: review
-  owner: none
-  updated_at: 2026-07-15T17:15:00+04:00
+  base_sha: d3558cb2370cfcf34c8f7e286d29ad69c9ffd13a
+  head_sha: d3558cb2370cfcf34c8f7e286d29ad69c9ffd13a
+  status: active
+  owner: chatgpt
+  updated_at: 2026-07-15T15:30:00+02:00
+
 scope:
   type: performance
   object: JobCandidateEdit
+  module: web
   allowed_files:
-    - docs/performance-archive/2026-07-15/job-candidate-company-suggestion-baseline/
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateCompanyLoaderOptimizer.java
+    - docs/ui/JobCandidateEdit_Spec.md
+    - docs/performance-archive/2026-07-15/job-candidate-company-loader-stage-2/
+    - .ai/active-work.yml
   forbidden_files:
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
     - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
+    - modules/global/src/com/company/hunttech/entity/
+    - modules/core/db/changelog/
+
 handoff:
   previous_agent: Hermes
   summary: >
-    FULL_COMPANY_LOADER_CONFIRMED. currentCompaniesLc выполняет полный запрос
-    (~5623 строк) при каждом initial open. Карта зависимостей составлена:
-    currentCompaniesDc нужен только для create-company return flow.
+    Hermes подтвердил FULL_COMPANY_LOADER_CONFIRMED: currentCompaniesLc выполняет
+    полный запрос примерно 5623 компаний при initial open. ChatGPT выполняет
+    изолированный lifecycle-fix без изменения бизнес-логики создания компании.
   required_actions:
-    - Stage 2: добавить currentCompaniesLc в preventAutoLoadUntilReady
-    - заменить currentCompaniesDc на DataManager в create-company
-    - удалить неиспользуемый полный loader
+    - не изменять код при owner: chatgpt
+    - после передачи проверить отсутствие SQL полного списка Company при initial open
+    - проверить lookup, open и create Company без регрессий
