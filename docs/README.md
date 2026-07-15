@@ -17,6 +17,7 @@
 | [integrations/](integrations/) | Внешние интеграции, AI, файлы, API и провайдеры. |
 | [operations/](operations/) | Локальный запуск, Tomcat, deployment, backup/restore и troubleshooting. |
 | [reports/](reports/) | Аудиты, отчёты внедрения, performance и исторические исследования. |
+| [performance-archive/](performance-archive/) | Поэтапные performance-baseline, контракты и отчёты проверок. |
 | [ai/](ai/) | Карта документации для AI-агентов. |
 | [review-needed/](review-needed/) | Документы, требующие ручной классификации. |
 
@@ -26,6 +27,7 @@
 | ---- | ------------ |
 | Разработчик | [entities/](entities/), [ui/](ui/), [screens/](screens/), [services/](services/) |
 | Экран JobCandidateEdit | [ui/JobCandidateEdit_Spec.md](ui/JobCandidateEdit_Spec.md) · [architecture/JobCandidateEdit_Performance_Architecture.md](architecture/JobCandidateEdit_Performance_Architecture.md) · [screens/job-candidate/JobCandidateEdit_Design_Fix_2026-07-14.md](screens/job-candidate/JobCandidateEdit_Design_Fix_2026-07-14.md) |
+| Stage 5 JobCandidateEdit | [baseline загрузки городов и должностей](performance-archive/2026-07-15/job-candidate-reference-loaders-stage-5-baseline/stage-5-reference-loaders-baseline-plan.md) |
 | Диагностика разбора резюме и OOM | [services/PdfParserService.md](services/PdfParserService.md) · [operations/JobCandidateEdit_OOM_Runbook.md](operations/JobCandidateEdit_OOM_Runbook.md) |
 | DBA | [database/](database/) и [deployment/database-migration/](../deployment/database-migration/) |
 | Тестировщик | [operations/](operations/), [reports/](reports/), [deployment/database-migration/validation/](../deployment/database-migration/validation/) |
@@ -43,5 +45,5 @@
 | Сквозное бизнес-правило | `docs/business-rules/` |
 | Схема, индексы, проверки БД | `docs/database/` |
 | Рабочий production runbook или скриптовая инструкция | `deployment/` с навигационной ссылкой из `docs/operations/` |
-| Аудит, investigation, implementation report | `docs/reports/` |
+| Аудит, investigation, implementation report | `docs/reports/` или `docs/performance-archive/<date>/` для поэтапных baseline |
 | Инструкция или карта для AI-агента | `docs/ai/` |
