@@ -1,16 +1,61 @@
 repository: aananyev/it-pearls-recruiting
 coordination:
   protocol_version: 1
+  source_of_truth: origin/coordination/active-work:.ai/active-work.yml
+
 task:
-  id: job-candidate-position-picker-stage-6
-  title: Stage 6 — position-picker-view
+  id: job-candidate-city-loader-stage-7-baseline
+  title: Baseline загрузки городов JobCandidateEdit
+  description: >
+    Stage 6 принят: personPositionsDc использует position-picker-view, единственный кодовый
+    diff соответствует контракту, пользователь и Hermes подтвердили VERIFICATION PASS и HTTP 200.
+    Репозиторный отчёт Stage 5 отсутствует, поэтому Stage 7 выполняет только численный baseline
+    citiesDl без изменения Java, XML, views, поля города или БД.
+
 work:
   branch: agent/job-candidate-progressive-loading-stage-3-social-networks
-  base_sha: 23717b4b
-  head_sha: 7f25633a
-  status: review
-  owner: none
-  updated_at: 2026-07-15T19:15:00+04:00
+  base_sha: ff58d3d155f093447cf974a6564da44a94956779
+  head_sha: ff58d3d155f093447cf974a6564da44a94956779
+  code_sha: 7f25633a3c96971dbf923d0f51f77424068ddc33
+  status: active
+  owner: hermes
+  updated_at: 2026-07-15T20:10:00+04:00
+
+scope:
+  type: performance-baseline
+  object: JobCandidateEdit.citiesDl
+  module: web
+  allowed_files:
+    - docs/performance-archive/2026-07-15/job-candidate-city-loader-stage-7-baseline/stage-7-city-loader-hermes-report.md
+    - .ai/active-work.yml
+  forbidden_files:
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/JobCandidateEdit.java
+    - modules/web/src/com/company/hunttech/web/screens/jobcandidate/job-candidate-edit.xml
+    - modules/global/src/com/company/hunttech/views.xml
+    - modules/global/src/com/company/hunttech/entity/
+    - modules/core/db/changelog/
+    - modules/web/themes/
+
 handoff:
-  previous_agent: Hermes
-  summary: position-view → position-picker-view. HTTP 200.
+  previous_agent: ChatGPT
+  summary: >
+    Stage 5 не оставил измерительного отчёта. Stage 6 проверен по полному diff: изменена только
+    ссылка personPositionsDc с position-view на position-picker-view. Созданы stage-6-chatgpt-review.md,
+    актуальная JobCandidateEdit_Spec.md и stage-7-city-loader-baseline-plan.md. Stage 7 должен
+    доказать численно, влияет ли полный citiesDl на P95 открытия формы.
+  required_actions:
+    - синхронизировать ветку и подтвердить HEAD ff58d3d155f093447cf974a6564da44a94956779
+    - не изменять Java XML views entities Liquibase индексы SCSS и production
+    - посчитать строки City и размер таблицы и индексов
+    - инвентаризировать полный graph city-picker-view
+    - составить Data View Integrity matrix для jobCityCandidateField
+    - выполнить 1 прогрев и 10 SQL замеров полного city loader
+    - сохранить MIN MAX AVG P50 P95 и EXPLAIN ANALYZE BUFFERS
+    - выполнить 1 прогрев и 10 runtime замеров существующего и нового кандидата
+    - измерить citiesDl load duration число SQL размер citiesDc heap и payload
+    - сравнить cold и warm cache и влияние cacheable=true
+    - выполнить read-only сравнение full limit50 prefix contains и by-id
+    - проверить существующие индексы и доступность pg_trgm без изменений БД
+    - выдать один вердикт KEEP_FULL_LOOKUP NARROW_PICKER_VIEW DEFER_LOADER_UNTIL_INTERACTION CONVERT_TO_SUGGESTION MIDDLEWARE_CACHE_RECOMMENDED INDEX_RECOMMENDED или STAGE_7_BLOCKED
+    - сохранить stage-7-city-loader-hermes-report.md с численными данными
+    - после push обновить coordination точным итоговым HEAD и освободить блокировку
