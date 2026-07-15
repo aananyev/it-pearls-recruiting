@@ -35,7 +35,8 @@
 | Stage 11 JobCandidateEdit | [review фоновой загрузки рейтинга](performance-archive/2026-07-15/job-candidate-rating-stage-11-background-load/stage-11-chatgpt-review.md) |
 | Stage 12 JobCandidateEdit | [review фоновой загрузки фотографии](performance-archive/2026-07-15/job-candidate-photo-stage-12-background-load/stage-12-chatgpt-review.md) |
 | Stage 13 JobCandidateEdit | [review дублирующего CV COUNT](performance-archive/2026-07-15/job-candidate-cv-indicator-stage-13-background-load/stage-13-chatgpt-review.md) |
-| Stage 14 JobCandidateEdit | [контракт единого background-источника CV indicator](performance-archive/2026-07-15/job-candidate-cv-indicator-stage-14-single-background-source/stage-14-cv-indicator-single-background-source-contract.md) |
+| Stage 14 JobCandidateEdit | [review единственного background-источника CV indicator](performance-archive/2026-07-15/job-candidate-cv-indicator-stage-14-single-background-source/stage-14-chatgpt-review.md) |
+| Stage 15 JobCandidateEdit | [контракт guard скрытого Skillsbar](performance-archive/2026-07-15/job-candidate-skills-stage-15-hidden-component-guard/stage-15-hidden-skills-background-guard-contract.md) |
 | Диагностика разбора резюме и OOM | [services/PdfParserService.md](services/PdfParserService.md) · [operations/JobCandidateEdit_OOM_Runbook.md](operations/JobCandidateEdit_OOM_Runbook.md) |
 | DBA | [database/](database/) и [deployment/database-migration/](../deployment/database-migration/) |
 | Тестировщик | [operations/](operations/), [reports/](reports/), [deployment/database-migration/validation/](../deployment/database-migration/validation/) |
