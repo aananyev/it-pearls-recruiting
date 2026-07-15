@@ -550,7 +550,9 @@
     .job-candidate-form-row .v-filterselect,
     .job-candidate-form-row .v-filterselect-input,
     .job-candidate-form-row .v-datefield,
-    .job-candidate-form-row .v-datefield-textfield {
+    .job-candidate-form-row .v-datefield-textfield,
+    .job-candidate-form-row .v-suggestionfield,
+    .job-candidate-form-row .v-suggestionpickerfield {
       width: 100% !important;
       min-width: 0 !important;
       height: 38px !important;
