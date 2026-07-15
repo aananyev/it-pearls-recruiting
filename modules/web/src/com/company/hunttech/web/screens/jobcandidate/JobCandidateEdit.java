@@ -660,6 +660,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 false : blockCandidateCheckBox.getValue();
         setBlockUnblockButton(b);
 
+        startCandidatePicBackgroundLoading();
         startRatingBackgroundLoading();
         startSkillsBackgroundLoading();
     }
@@ -753,7 +754,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setLinkButtonTelegremGroup();
         setLinkButtonSkype();
 
-        setCandidatePicImage();
+        // Фотография загружается асинхронно после первого отображения формы.
+        // До проверки file storage показывается безопасная заглушка.
+        showCandidatePicPlaceholder();
+
         checkTelegramName();
 
         if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
@@ -861,6 +865,90 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         } finally {
             updatingCandidatePic = false;
         }
+    }
+
+    /**
+     * Устанавливает безопасное начальное состояние фото до фоновой проверки.
+     * Заглушка видна, фото скрыто. Нет обращения к FileLoader.
+     */
+    private void showCandidatePicPlaceholder() {
+        candidateDefaultPic.setVisible(true);
+        candidatePic.setVisible(false);
+    }
+
+    /** Флаг предотвращения повторного запуска фоновой загрузки фото. */
+    private boolean candidatePicLoading;
+    /** Флаг завершения фоновой проверки фото (успех или ошибка). */
+    private boolean candidatePicLoaded;
+
+    /**
+     * Запускает фоновую проверку наличия фотографии кандидата после открытия формы.
+     * Вызывается из onAfterShow, чтобы проверка file storage не блокировала first paint.
+     */
+    private void startCandidatePicBackgroundLoading() {
+        if (candidatePicLoading || candidatePicLoaded) {
+            return;
+        }
+
+        FileDescriptor faceImage = getEditedEntity().getFileImageFace();
+
+        if (PersistenceHelper.isNew(getEditedEntity())
+                || getEditedEntity().getId() == null
+                || faceImage == null) {
+            candidatePicLoaded = true;
+            return;
+        }
+
+        UUID fileDescriptorId = faceImage.getId();
+        candidatePicLoading = true;
+
+        BackgroundTask<Void, Boolean> task =
+                new BackgroundTask<Void, Boolean>(30, TimeUnit.SECONDS, this) {
+                    @Override
+                    public Boolean run(TaskLifeCycle<Void> taskLifeCycle) {
+                        DataManager backgroundDataManager = AppBeans.get(DataManager.class);
+                        FileLoader backgroundFileLoader = AppBeans.get(FileLoader.class);
+                        FileDescriptor descriptor = backgroundDataManager.load(FileDescriptor.class)
+                                .id(fileDescriptorId)
+                                .view("_minimal")
+                                .optional()
+                                .orElse(null);
+                        if (descriptor == null) {
+                            return false;
+                        }
+                        return FileDescriptorImageHelper.fileExists(backgroundFileLoader, descriptor);
+                    }
+
+                    @Override
+                    public void done(Boolean fileExists) {
+                        candidatePicLoading = false;
+                        candidatePicLoaded = true;
+                        if (fileExists != null && fileExists && faceImage != null) {
+                            updatingCandidatePic = true;
+                            try {
+                                candidatePic.setValueSource(null);
+                                FileDescriptorResource resource = candidatePic.createResource(FileDescriptorResource.class)
+                                        .setFileDescriptor(faceImage);
+                                candidatePic.setSource(resource);
+                                candidateDefaultPic.setVisible(false);
+                                candidatePic.setVisible(true);
+                            } finally {
+                                updatingCandidatePic = false;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public boolean handleException(Exception exception) {
+                        candidatePicLoading = false;
+                        candidatePicLoaded = true;
+                        log.error("Не удалось проверить фотографию кандидата, candidateId={}",
+                                getEditedEntity().getId(), exception);
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(task).execute();
     }
 
     @Subscribe("fileImageFaceUpload")
