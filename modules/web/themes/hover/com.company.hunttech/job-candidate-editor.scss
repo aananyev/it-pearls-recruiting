@@ -453,7 +453,7 @@
     .job-candidate-card-row {
       display: flex !important;
       gap: 16px;
-      align-items: flex-start;
+      align-items: stretch;
     }
 
     .job-candidate-accordion-open .job-candidate-accordion-content > .v-slot,
@@ -601,10 +601,22 @@
       flex: 0 0 auto !important;
     }
 
+    /* Иконки контактов: ×2 размер */
+    .job-candidate-contact-icon {
+      font-size: 32px !important;
+      line-height: 38px !important;
+    }
+
     .job-candidate-form-row .v-select-optiongroup {
       width: 100% !important;
       font-size: 15px;
       line-height: 24px;
+    }
+
+    /* Горизонтальные radio-кнопки приоритета */
+    .job-candidate-form-row .v-select-optiongroup-horizontal .v-select-option {
+      display: inline-block !important;
+      margin-right: 20px !important;
     }
 
     /* Таблицы */
