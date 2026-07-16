@@ -491,7 +491,6 @@
                                                          inputPrompt="msg://msgPressEnter">
                                             <query entityClass="com.company.hunttech.entity.JobCandidate"
                                                    escapeValueForLike="false"
-                                                   view="_local"
                                                    searchStringFormat="%$searchString%">
                                                 select e.firstName from hunttech_JobCandidate e
                                                 where lower(e.firstName) like lower(:searchString) escape '\'
@@ -509,8 +508,7 @@
                                                          inputPrompt="msg://msgPressEnter">
                                             <query entityClass="com.company.hunttech.entity.JobCandidate"
                                                    escapeValueForLike="false"
-                                                   searchStringFormat="%$searchString%"
-                                                   view="_local">
+                                                   searchStringFormat="%$searchString%">
                                                 select e.middleName from hunttech_JobCandidate e
                                                 where lower(e.middleName) like lower(:searchString) escape '\'
                                             </query>
@@ -527,8 +525,7 @@
                                                          inputPrompt="msg://msgPressEnter">
                                             <query entityClass="com.company.hunttech.entity.JobCandidate"
                                                    escapeValueForLike="false"
-                                                   searchStringFormat="%$searchString%"
-                                                   view="_local">
+                                                   searchStringFormat="%$searchString%">
                                                 select e.secondName from hunttech_JobCandidate e
                                                 where lower(e.secondName) like lower(:searchString) escape '\'
                                             </query>

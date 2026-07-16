@@ -2990,6 +2990,19 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                                         StringUtils
                                                 .containsAnyIgnoreCase(str, searchString))
                                 .collect(Collectors.toList()));
+
+        ((SuggestionField<Object>) eventJobCandidateEdit
+                .getSource()
+                .getWindow()
+                .getComponentNN("middleNameField"))
+                .setSearchExecutor((searchString, searchParams) ->
+                        parseCVService.getMiddleNameList(
+                                ((Onlytext) screenOnlytext).getResultText())
+                                .stream()
+                                .filter(str ->
+                                        StringUtils
+                                                .containsAnyIgnoreCase(str, searchString))
+                                .collect(Collectors.toList()));
     }
 
     private void openScreenCVQuickLoadedCandidate(AfterShowEvent eventJobCandidateEdit,
