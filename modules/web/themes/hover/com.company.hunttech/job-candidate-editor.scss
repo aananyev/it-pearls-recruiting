@@ -550,12 +550,31 @@
     .job-candidate-form-row .v-filterselect,
     .job-candidate-form-row .v-filterselect-input,
     .job-candidate-form-row .v-datefield,
-    .job-candidate-form-row .v-datefield-textfield {
+    .job-candidate-form-row .v-datefield-textfield,
+    .job-candidate-form-row .c-suggestionfield,
+    .job-candidate-form-row .c-suggestion-field,
+    .job-candidate-form-row .c-suggestionpickerfield,
+    .job-candidate-form-row .c-suggestion-picker-field {
       width: 100% !important;
       min-width: 0 !important;
       height: 38px !important;
       font-size: 16px !important;
       line-height: 38px !important;
+    }
+
+    /* Внутренний textfield suggestionField — как v-filterselect-input у Должности */
+    .job-candidate-form-row .c-suggestionfield .v-textfield,
+    .job-candidate-form-row .c-suggestion-field .v-textfield,
+    .job-candidate-form-row .c-suggestionpickerfield .v-filterselect-input,
+    .job-candidate-form-row .c-suggestion-picker-field .v-filterselect-input {
+      height: 38px !important;
+      min-height: 38px !important;
+      padding: 0 10px !important;
+      font-size: 16px !important;
+      line-height: 38px !important;
+      border-radius: 4px !important;
+      background: #fff !important;
+      box-sizing: border-box !important;
     }
 
     .job-candidate-form-row {
@@ -574,6 +593,12 @@
       width: calc(100% - 150px) !important;
       min-width: 0 !important;
       flex: 1 1 auto !important;
+    }
+
+    /* Персональные данные: поля фиксированной ширины, без растягивания */
+    .job-candidate-form-row-fixed > .v-slot:last-child {
+      width: auto !important;
+      flex: 0 0 auto !important;
     }
 
     .job-candidate-form-row .v-select-optiongroup {

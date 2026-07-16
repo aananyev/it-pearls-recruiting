@@ -480,12 +480,13 @@
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="Персональные данные" stylename="job-candidate-card-title"/>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="firstNameField" stylename="job-candidate-form-row">
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="spacerFirstName" stylename="job-candidate-form-row job-candidate-form-row-fixed">
+                                        <label id="spacerFirstName" width="100%"/>
                                         <label value="Имя" stylename="small"/>
                                         <suggestionField id="firstNameField"
                                                          dataContainer="jobCandidateDc"
                                                          property="firstName"
-                                                         width="100%"
+                                                         width="220px"
                                                          minSearchStringLength="1"
                                                          editable="true"
                                                          inputPrompt="msg://msgPressEnter">
@@ -497,12 +498,13 @@
                                             </query>
                                         </suggestionField>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="middleNameField" stylename="job-candidate-form-row">
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="spacerMiddleName" stylename="job-candidate-form-row job-candidate-form-row-fixed">
+                                        <label id="spacerMiddleName" width="100%"/>
                                         <label value="Отчество" stylename="small"/>
                                         <suggestionField id="middleNameField"
                                                          dataContainer="jobCandidateDc"
                                                          property="middleName"
-                                                         width="100%"
+                                                         width="220px"
                                                          minSearchStringLength="1"
                                                          editable="true"
                                                          inputPrompt="msg://msgPressEnter">
@@ -514,12 +516,13 @@
                                             </query>
                                         </suggestionField>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="secondNameField" stylename="job-candidate-form-row">
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="spacerSecondName" stylename="job-candidate-form-row job-candidate-form-row-fixed">
+                                        <label id="spacerSecondName" width="100%"/>
                                         <label value="Фамилия" stylename="small"/>
                                         <suggestionField id="secondNameField"
                                                          dataContainer="jobCandidateDc"
                                                          property="secondName"
-                                                         width="100%"
+                                                         width="220px"
                                                          minSearchStringLength="1"
                                                          editable="true"
                                                          inputPrompt="msg://msgPressEnter">
@@ -531,18 +534,20 @@
                                             </query>
                                         </suggestionField>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="birdhDateField" stylename="job-candidate-form-row">
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="spacerBirdhDate" stylename="job-candidate-form-row job-candidate-form-row-fixed">
+                                        <label id="spacerBirdhDate" width="100%"/>
                                         <label value="Дата рождения" stylename="small"/>
                                         <dateField id="birdhDateField"
                                                    dataContainer="jobCandidateDc"
                                                    property="birdhDate"
-                                                   width="100%"/>
+                                                   width="220px"/>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="jobCityCandidateField" stylename="job-candidate-form-row">
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="spacerJobCity" stylename="job-candidate-form-row job-candidate-form-row-fixed">
+                                        <label id="spacerJobCity" width="100%"/>
                                         <label value="Город" stylename="small"/>
                                         <lookupPickerField id="jobCityCandidateField"
                                                            dataContainer="jobCandidateDc"
-                                                           width="100%"
+                                                           width="220px"
                                                            optionsContainer="citiesDc"
                                                            property="cityOfResidence"
                                                            required="true">
@@ -713,6 +718,53 @@
                                         </hbox>
                                     </vbox>
                                 </hbox>
+                                <vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-card">
+                                    <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
+                                        <label value="Социальные сети" stylename="job-candidate-card-title"/>
+                                    </hbox>
+                                    <hbox id="socialNetworkTableHbox"
+                                          width="100%"
+                                          spacing="true"
+                                          stylename="borderless"
+                                          expand="socialNetworkTable">
+                                        <dataGrid id="socialNetworkTable"
+                                                  height="100%"
+                                                  width="100%"
+                                                  stylename="job-candidate-table"
+                                                  editorEnabled="true"
+                                                  dataContainer="jobCandidateSocialNetworksDc">
+                                            <columns>
+                                                <column id="socialNetworkLogoColumn" width="50px" caption="">
+                                                    <componentRenderer/>
+                                                </column>
+                                                <column id="networkName" editable="false" property="socialNetworkURL.socialNetwork" maximumWidth="200px"/>
+                                                <column id="networkURLS" editable="true" property="networkURLS"/>
+                                                <column id="linkToWeb" caption="msg://msgLinkURL" maximumWidth="150px">
+                                                    <componentRenderer/>
+                                                </column>
+                                            </columns>
+                                            <actions>
+                                                <action id="create" type="create"/>
+                                                <action id="edit" type="edit"/>
+                                                <action id="remove" type="remove"/>
+                                            </actions>
+                                        </dataGrid>
+                                        <vbox spacing="true" width="AUTO" height="AUTO">
+                                            <button id="addSocialNetworkListsButton" visible="false" enable="false"
+                                                    width="100%" caption="msg://msgAddSocialNetworks"
+                                                    description="msg://msgAddSocialNetworksDesc"
+                                                    invoke="addSocialNetworksListsInvoke"/>
+                                            <button id="addMissingSocialNetworkListsButton" width="100%" enable="true"
+                                                    caption="msg://msgAddMissingSocialNetrorkButton"
+                                                    description="msg://msgAddMissingSocialNetrorkButtonDesc"
+                                                    invoke="addMissingSocialNetworksListsInvoke"/>
+                                            <button id="removeEmptySocialNetworkListsButton" width="100%" enable="true"
+                                                    caption="msg://removeEmptySocialNetworkListsButton"
+                                                    description="msg://removeEmptySocialNetworkListsButtonDesc"
+                                                    invoke="removeEmptySocialNetworkListsButton"/>
+                                        </vbox>
+                                    </hbox>
+                                </vbox>
                             </vbox>
                         </vbox>
                     </tab>
@@ -957,74 +1009,12 @@
                             </vbox>
                         </vbox></tab>
 
-                    <!-- TAB: Социальные сети -->
+                    <!-- TAB: Социальные сети (скрыта — таблица перенесена во вкладку Контакты) -->
                     <tab id="tabSocialNetworks"
                          caption="Социальные сети"
+                         visible="false"
                          spacing="true"
-                         margin="true"
-                         expand="tabSocialNetworksSection">
-                        <vbox id="tabSocialNetworksSection"
-                              width="100%"
-                              height="100%"
-                              spacing="true"
-                              expand="tabSocialNetworksContent"
-                              stylename="job-candidate-accordion-section">
-                            <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
-                                <label value="Социальные сети" stylename="job-candidate-accordion-title"/>
-                            </hbox>
-                            <vbox id="tabSocialNetworksContent"
-                                  width="100%"
-                                  height="100%"
-                                  spacing="true"
-                                  expand="socialNetworkTableHbox"
-                                  stylename="job-candidate-accordion-content">
-
-                        <hbox id="socialNetworkTableHbox"
-                              width="100%"
-                              height="100%"
-                              spacing="true"
-                              stylename="borderless"
-                              expand="socialNetworkTable">
-                            <dataGrid id="socialNetworkTable"
-                                      height="100%"
-                                      width="100%"
-                                      stylename="job-candidate-table"
-                                      editorEnabled="true"
-                                      dataContainer="jobCandidateSocialNetworksDc">
-                                <columns>
-                                    <column id="socialNetworkLogoColumn" width="50px" caption="">
-                                        <componentRenderer/>
-                                    </column>
-                                    <column id="networkName" editable="false" property="socialNetworkURL.socialNetwork" maximumWidth="200px"/>
-                                    <column id="networkURLS" editable="true" property="networkURLS"/>
-                                    <column id="linkToWeb" caption="msg://msgLinkURL" maximumWidth="150px">
-                                        <componentRenderer/>
-                                    </column>
-                                </columns>
-                                <actions>
-                                    <action id="create" type="create"/>
-                                    <action id="edit" type="edit"/>
-                                    <action id="remove" type="remove"/>
-                                </actions>
-                            </dataGrid>
-                            <vbox spacing="true" width="AUTO" height="AUTO">
-                                <button id="addSocialNetworkListsButton" visible="false" enable="false"
-                                        width="100%" caption="msg://msgAddSocialNetworks"
-                                        description="msg://msgAddSocialNetworksDesc"
-                                        invoke="addSocialNetworksListsInvoke"/>
-                                <button id="addMissingSocialNetworkListsButton" width="100%" enable="true"
-                                        caption="msg://msgAddMissingSocialNetrorkButton"
-                                        description="msg://msgAddMissingSocialNetrorkButtonDesc"
-                                        invoke="addMissingSocialNetworksListsInvoke"/>
-                                <button id="removeEmptySocialNetworkListsButton" width="100%" enable="true"
-                                        caption="msg://removeEmptySocialNetworkListsButton"
-                                        description="msg://removeEmptySocialNetworkListsButtonDesc"
-                                        invoke="removeEmptySocialNetworkListsButton"/>
-                            </vbox>
-                        </hbox>
-
-                            </vbox>
-                        </vbox></tab>
+                         margin="true"/>
 
                     <!-- TAB: Комментарии -->
                     <tab id="commentsTab"
