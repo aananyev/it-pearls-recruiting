@@ -437,6 +437,11 @@
                                         invoke="onButtonSubscribeClick"
                                         icon="BELL"
                                         stylename="small"/>
+                                <button id="addPositionsMenuButton"
+                                        caption="msg://msgSetPositions"
+                                        invoke="addPositionList"
+                                        icon="BARS"
+                                        stylename="small"/>
                             </vbox>
                         </popup>
                     </popupButton>
@@ -476,17 +481,17 @@
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
+                                      box.expandRatio="1"
                                       stylename="job-candidate-card job-candidate-half-card">
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="Персональные данные" stylename="job-candidate-card-title"/>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="spacerFirstName" stylename="job-candidate-form-row job-candidate-form-row-fixed">
-                                        <label id="spacerFirstName" width="100%"/>
-                                        <label value="Имя" stylename="small"/>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="firstNameField" stylename="job-candidate-form-row">
+                                        <label value="Имя" stylename="small" width="120px"/>
                                         <suggestionField id="firstNameField"
                                                          dataContainer="jobCandidateDc"
                                                          property="firstName"
-                                                         width="220px"
+                                                         width="100%"
                                                          minSearchStringLength="1"
                                                          editable="true"
                                                          inputPrompt="msg://msgPressEnter">
@@ -498,13 +503,12 @@
                                             </query>
                                         </suggestionField>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="spacerMiddleName" stylename="job-candidate-form-row job-candidate-form-row-fixed">
-                                        <label id="spacerMiddleName" width="100%"/>
-                                        <label value="Отчество" stylename="small"/>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="middleNameField" stylename="job-candidate-form-row">
+                                        <label value="Отчество" stylename="small" width="120px"/>
                                         <suggestionField id="middleNameField"
                                                          dataContainer="jobCandidateDc"
                                                          property="middleName"
-                                                         width="220px"
+                                                         width="100%"
                                                          minSearchStringLength="1"
                                                          editable="true"
                                                          inputPrompt="msg://msgPressEnter">
@@ -516,13 +520,12 @@
                                             </query>
                                         </suggestionField>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="spacerSecondName" stylename="job-candidate-form-row job-candidate-form-row-fixed">
-                                        <label id="spacerSecondName" width="100%"/>
-                                        <label value="Фамилия" stylename="small"/>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="secondNameField" stylename="job-candidate-form-row">
+                                        <label value="Фамилия" stylename="small" width="120px"/>
                                         <suggestionField id="secondNameField"
                                                          dataContainer="jobCandidateDc"
                                                          property="secondName"
-                                                         width="220px"
+                                                         width="100%"
                                                          minSearchStringLength="1"
                                                          editable="true"
                                                          inputPrompt="msg://msgPressEnter">
@@ -534,27 +537,12 @@
                                             </query>
                                         </suggestionField>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="spacerBirdhDate" stylename="job-candidate-form-row job-candidate-form-row-fixed">
-                                        <label id="spacerBirdhDate" width="100%"/>
-                                        <label value="Дата рождения" stylename="small"/>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="birdhDateField" stylename="job-candidate-form-row">
+                                        <label value="Дата рождения" stylename="small" width="120px"/>
                                         <dateField id="birdhDateField"
                                                    dataContainer="jobCandidateDc"
                                                    property="birdhDate"
-                                                   width="220px"/>
-                                    </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="spacerJobCity" stylename="job-candidate-form-row job-candidate-form-row-fixed">
-                                        <label id="spacerJobCity" width="100%"/>
-                                        <label value="Город" stylename="small"/>
-                                        <lookupPickerField id="jobCityCandidateField"
-                                                           dataContainer="jobCandidateDc"
-                                                           width="220px"
-                                                           optionsContainer="citiesDc"
-                                                           property="cityOfResidence"
-                                                           required="true">
-                                            <actions>
-                                                <action id="lookup" type="picker_lookup"/>
-                                            </actions>
-                                        </lookupPickerField>
+                                                   width="100%"/>
                                     </hbox>
                                 </vbox>
 
@@ -562,6 +550,7 @@
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
+                                      box.expandRatio="1"
                                       stylename="job-candidate-card job-candidate-half-card">
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="Профессиональные данные" stylename="job-candidate-card-title"/>
@@ -604,12 +593,26 @@
                                             </query>
                                         </suggestionPickerField>
                                     </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="jobCityCandidateField" stylename="job-candidate-form-row">
+                                        <label value="Город" stylename="small"/>
+                                        <lookupPickerField id="jobCityCandidateField"
+                                                           dataContainer="jobCandidateDc"
+                                                           width="100%"
+                                                           optionsContainer="citiesDc"
+                                                           property="cityOfResidence"
+                                                           required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                    </hbox>
                                     <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="positionsRow" stylename="job-candidate-form-row">
                                         <label value="Доп. позиции" stylename="small"/>
                                         <hbox id="positionsRow" spacing="true" width="100%" expand="positionsLabel">
                                             <button id="addPositions"
                                                     caption="..."
                                                     enable="true"
+                                                    visible="false"
                                                     description="msg://msgSetPositions"
                                                     invoke="addPositionList"/>
                                             <label id="positionsLabel"
@@ -710,16 +713,22 @@
                                                        property="skypeName"
                                                        width="100%"/>
                                         </hbox>
+                                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="messengerMaxField" stylename="job-candidate-form-row">
+                                            <label icon="COMMENTS" description="Месенджер Макс" stylename="small job-candidate-contact-icon"/>
+                                            <textField id="messengerMaxField"
+                                                       width="100%"
+                                                       enabled="false"
+                                                       inputPrompt="В разработке"/>
+                                        </hbox>
                                     </vbox>
                                 </hbox>
-                                <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="priorityCommunicationMethodRadioButton" stylename="job-candidate-form-row">
-                                    <label icon="STAR_O" description="Приоритетный способ связи" stylename="small job-candidate-contact-icon"/>
+                                <vbox width="100%" spacing="true">
+                                    <label value="Приоритетный способ связи" stylename="small"/>
                                     <radioButtonGroup id="priorityCommunicationMethodRadioButton"
                                                       width="100%"
-                                                      orientation="horizontal"
                                                       dataContainer="jobCandidateDc"
                                                       property="priorityContact"/>
-                                </hbox>
+                                </vbox>
                                 <vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-card">
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="Социальные сети" stylename="job-candidate-card-title"/>
@@ -1011,13 +1020,6 @@
                             </vbox>
                         </vbox></tab>
 
-                    <!-- TAB: Социальные сети (скрыта — таблица перенесена во вкладку Контакты) -->
-                    <tab id="tabSocialNetworks"
-                         caption="Социальные сети"
-                         visible="false"
-                         spacing="true"
-                         margin="true"/>
-
                     <!-- TAB: Комментарии -->
                     <tab id="commentsTab"
                          caption="Комментарии"
@@ -1125,19 +1127,19 @@
 
                 <!-- Нижняя панель основных действий. -->
                 <hbox id="jobCandidateBottomBar"
-                      width="100%"
                       spacing="true"
-                      align="MIDDLE_RIGHT"
+                      width="100%"
+                      expand="bottomSpacer"
+                      align="MIDDLE_LEFT"
                       stylename="job-candidate-bottom-bar">
+                    <label id="bottomSpacer" width="100%"/>
                     <button id="windowCommitAndCloseButton"
                             action="windowCommitAndClose"
                             caption="Сохранить и закрыть"
-                            stylename="primary job-candidate-primary-action"
-                            align="MIDDLE_RIGHT"/>
+                            stylename="primary job-candidate-primary-action"/>
                     <button action="windowClose"
                             caption="Отмена"
-                            stylename="default job-candidate-secondary-action"
-                            align="MIDDLE_RIGHT"/>
+                            stylename="default job-candidate-secondary-action"/>
                 </hbox>
             </vbox>
         </hbox>

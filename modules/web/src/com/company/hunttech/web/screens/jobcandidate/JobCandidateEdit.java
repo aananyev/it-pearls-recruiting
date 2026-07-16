@@ -4406,7 +4406,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     public void candidateNavSocialNetworks() {
-        selectCandidateTab("tabSocialNetworks");
+        selectCandidateTab("tabContactInfo");
     }
 
     public void candidateNavComments() {
