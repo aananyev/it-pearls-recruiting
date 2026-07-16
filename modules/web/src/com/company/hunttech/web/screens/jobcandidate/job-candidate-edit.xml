@@ -442,6 +442,11 @@
                                         invoke="addPositionList"
                                         icon="BARS"
                                         stylename="small"/>
+                                <button id="priorityDialogButton"
+                                        caption="Приоритетный способ связи"
+                                        invoke="openPriorityDialog"
+                                        icon="STAR_O"
+                                        stylename="small"/>
                             </vbox>
                         </popup>
                     </popupButton>
@@ -722,7 +727,7 @@
                                         </hbox>
                                     </vbox>
                                 </hbox>
-                                <vbox width="100%" spacing="true">
+                                <vbox width="100%" spacing="true" visible="false">
                                     <label value="Приоритетный способ связи" stylename="small"/>
                                     <radioButtonGroup id="priorityCommunicationMethodRadioButton"
                                                       width="100%"

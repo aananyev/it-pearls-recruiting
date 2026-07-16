@@ -1051,6 +1051,45 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         priorityCommunicationMethodRadioButton.setOptionsMap(priorityMap);
     }
 
+    /**
+     * Открывает модальное окно выбора приоритетного способа связи
+     * и записывает выбранное значение в поле priorityContact.
+     */
+    public void openPriorityDialog() {
+        Map<String, Integer> priorityMap = new LinkedHashMap<>();
+        priorityMap.put("Email", 1);
+        priorityMap.put("Phone", 2);
+        priorityMap.put("Telegramm", 3);
+        priorityMap.put("Skype", 4);
+        priorityMap.put("Viber", 5);
+        priorityMap.put("WhatsApp", 6);
+        priorityMap.put("Social Network", 7);
+        priorityMap.put("Other", 9);
+
+        dialogs.createInputDialog(this)
+                .withCaption("Приоритетный способ связи")
+                .withParameters(
+                        InputParameter.stringParameter("priority")
+                                .withCaption("Способ связи")
+                                .withField(() -> {
+                                    LookupField<String> field = uiComponents.create(LookupField.TYPE_STRING);
+                                    field.setWidthFull();
+                                    field.setOptionsList(new ArrayList<>(priorityMap.keySet()));
+                                    return field;
+                                })
+                )
+                .withCloseListener(closeEvent -> {
+                    if (closeEvent.getCloseAction().equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
+                        String selected = closeEvent.getValue("priority");
+                        Integer value = priorityMap.get(selected);
+                        if (value != null && jobCandidateDc.getItem() != null) {
+                            jobCandidateDc.getItem().setPriorityContact(value);
+                        }
+                    }
+                })
+                .show();
+    }
+
     private void checkNotUsePosition() {
         if (personPositionField != null) {
             if (personPositionField.getValue() != null) {
