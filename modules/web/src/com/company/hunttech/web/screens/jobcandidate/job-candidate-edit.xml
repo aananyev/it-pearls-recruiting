@@ -236,7 +236,10 @@
                                stylename="job-candidate-quality"/>
                     </hbox>
                     <grid id="profileInfoGrid" spacing="true" width="100%" stylename="job-candidate-info-grid job-candidate-sidebar-grid">
-                        <columns count="2"/>
+                        <columns>
+                            <column expandRatio="0"/>
+                            <column expandRatio="1"/>
+                        </columns>
                         <rows>
                             <row>
                                 <label value="Город" stylename="small"/>
@@ -611,7 +614,8 @@
                                             </actions>
                                         </lookupPickerField>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="positionsRow" stylename="job-candidate-form-row">
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="positionsRow" stylename="job-candidate-form-row"
+                                          visible="false">
                                         <label value="Доп. позиции" stylename="small"/>
                                         <hbox id="positionsRow" spacing="true" width="100%" expand="positionsLabel">
                                             <button id="addPositions"

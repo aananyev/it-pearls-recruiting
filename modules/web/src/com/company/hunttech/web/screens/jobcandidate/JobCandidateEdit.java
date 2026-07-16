@@ -4196,6 +4196,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                 getEditedEntity().getSocialNetwork().add(socialNetworkURLs);
                 dataContext.merge(socialNetworkURLs);
+                jobCandidateSocialNetworksDc.getMutableItems().add(socialNetworkURLs);
             }
         }
 

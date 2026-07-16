@@ -213,7 +213,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .parameter("candidates", candidates)
                 .view(ViewBuilder.of(Employee.class)
                         .add("jobCandidate", "_minimal")
-                        .add("workStatus", "_minimal")
+                        .add("workStatus", "_local")
                         .build())
                 .list();
 
