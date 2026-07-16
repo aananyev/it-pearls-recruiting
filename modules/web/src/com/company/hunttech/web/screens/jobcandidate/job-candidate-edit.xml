@@ -480,87 +480,80 @@
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="Персональные данные" stylename="job-candidate-card-title"/>
                                     </hbox>
-                                    <grid id="personalDataGrid"
-                                          spacing="true"
-                                          width="100%"
-                                          stylename="job-candidate-form-grid">
-                                        <columns count="2"/>
-                                        <rows>
-                                            <row>
-                                                <label value="Имя" stylename="small" width="80px"/>
-                                                <suggestionField id="firstNameField"
-                                                                 dataContainer="jobCandidateDc"
-                                                                 property="firstName"
-                                                                 width="100%"
-                                                                 minSearchStringLength="1"
-                                                                 editable="true"
-                                                                 inputPrompt="msg://msgPressEnter">
-                                                    <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                           escapeValueForLike="false"
-                                                           view="_local"
-                                                           searchStringFormat="%$searchString%">
-                                                        select e.firstName from hunttech_JobCandidate e
-                                                        where lower(e.firstName) like lower(:searchString) escape '\'
-                                                    </query>
-                                                </suggestionField>
-                                            </row>
-                                            <row>
-                                                <label value="Отчество" stylename="small" width="80px"/>
-                                                <suggestionField id="middleNameField"
-                                                                 dataContainer="jobCandidateDc"
-                                                                 property="middleName"
-                                                                 width="100%"
-                                                                 minSearchStringLength="1"
-                                                                 editable="true"
-                                                                 inputPrompt="msg://msgPressEnter">
-                                                    <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                           searchStringFormat="%$searchString%"
-                                                           view="_minimal"
-                                                           escapeValueForLike="true">
-                                                        select e from hunttech_JobCandidate e
-                                                        where lower(e.middleName) like lower(:searchString) escape '\'
-                                                    </query>
-                                                </suggestionField>
-                                            </row>
-                                            <row>
-                                                <label value="Фамилия" stylename="small" width="80px"/>
-                                                <suggestionField id="secondNameField"
-                                                                 dataContainer="jobCandidateDc"
-                                                                 property="secondName"
-                                                                 width="100%"
-                                                                 minSearchStringLength="1"
-                                                                 editable="true"
-                                                                 inputPrompt="msg://msgPressEnter">
-                                                    <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                           escapeValueForLike="true"
-                                                           searchStringFormat="%$searchString%">
-                                                        select e from hunttech_JobCandidate e
-                                                        where lower(e.secondName) like lower(:searchString) escape '\'
-                                                    </query>
-                                                </suggestionField>
-                                            </row>
-                                            <row>
-                                                <label value="Дата рождения" stylename="small" width="80px"/>
-                                                <dateField id="birdhDateField"
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="firstNameField" stylename="job-candidate-form-row">
+                                        <label value="Имя" stylename="small"/>
+                                        <suggestionField id="firstNameField"
+                                                         dataContainer="jobCandidateDc"
+                                                         property="firstName"
+                                                         width="100%"
+                                                         minSearchStringLength="1"
+                                                         editable="true"
+                                                         inputPrompt="msg://msgPressEnter">
+                                            <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                                   escapeValueForLike="false"
+                                                   view="_local"
+                                                   searchStringFormat="%$searchString%">
+                                                select e.firstName from hunttech_JobCandidate e
+                                                where lower(e.firstName) like lower(:searchString) escape '\'
+                                            </query>
+                                        </suggestionField>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="middleNameField" stylename="job-candidate-form-row">
+                                        <label value="Отчество" stylename="small"/>
+                                        <suggestionField id="middleNameField"
+                                                         dataContainer="jobCandidateDc"
+                                                         property="middleName"
+                                                         width="100%"
+                                                         minSearchStringLength="1"
+                                                         editable="true"
+                                                         inputPrompt="msg://msgPressEnter">
+                                            <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                                   escapeValueForLike="false"
+                                                   searchStringFormat="%$searchString%"
+                                                   view="_local">
+                                                select e.middleName from hunttech_JobCandidate e
+                                                where lower(e.middleName) like lower(:searchString) escape '\'
+                                            </query>
+                                        </suggestionField>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="secondNameField" stylename="job-candidate-form-row">
+                                        <label value="Фамилия" stylename="small"/>
+                                        <suggestionField id="secondNameField"
+                                                         dataContainer="jobCandidateDc"
+                                                         property="secondName"
+                                                         width="100%"
+                                                         minSearchStringLength="1"
+                                                         editable="true"
+                                                         inputPrompt="msg://msgPressEnter">
+                                            <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                                   escapeValueForLike="false"
+                                                   searchStringFormat="%$searchString%"
+                                                   view="_local">
+                                                select e.secondName from hunttech_JobCandidate e
+                                                where lower(e.secondName) like lower(:searchString) escape '\'
+                                            </query>
+                                        </suggestionField>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="birdhDateField" stylename="job-candidate-form-row">
+                                        <label value="Дата рождения" stylename="small"/>
+                                        <dateField id="birdhDateField"
+                                                   dataContainer="jobCandidateDc"
+                                                   property="birdhDate"
+                                                   width="100%"/>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="jobCityCandidateField" stylename="job-candidate-form-row">
+                                        <label value="Город" stylename="small"/>
+                                        <lookupPickerField id="jobCityCandidateField"
                                                            dataContainer="jobCandidateDc"
-                                                           property="birdhDate"
-                                                           width="100%"/>
-                                            </row>
-                                            <row>
-                                                <label value="Город" stylename="small"/>
-                                                <lookupPickerField id="jobCityCandidateField"
-                                                                   dataContainer="jobCandidateDc"
-                                                                   width="100%"
-                                                                   optionsContainer="citiesDc"
-                                                                   property="cityOfResidence"
-                                                                   required="true">
-                                                    <actions>
-                                                        <action id="lookup" type="picker_lookup"/>
-                                                    </actions>
-                                                </lookupPickerField>
-                                            </row>
-                                        </rows>
-                                    </grid>
+                                                           width="100%"
+                                                           optionsContainer="citiesDc"
+                                                           property="cityOfResidence"
+                                                           required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                    </hbox>
                                 </vbox>
 
                                 <vbox id="professionalDataBlock"
@@ -571,65 +564,57 @@
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="Профессиональные данные" stylename="job-candidate-card-title"/>
                                     </hbox>
-                                    <grid id="professionalDataGrid"
-                                          spacing="true"
-                                          width="100%"
-                                          stylename="job-candidate-form-grid">
-                                        <columns count="2"/>
-                                        <rows>
-                                            <row>
-                                                <label value="Должность" stylename="small"/>
-                                                <lookupPickerField id="personPositionField"
-                                                                   optionsContainer="personPositionsDc"
-                                                                   dataContainer="jobCandidateDc"
-                                                                   property="personPosition"
-                                                                   width="100%"
-                                                                   required="true">
-                                                    <actions>
-                                                        <action id="lookup" type="picker_lookup"/>
-                                                        <action id="open" type="picker_open" icon="EDIT_ACTION"/>
-                                                    </actions>
-                                                </lookupPickerField>
-                                            </row>
-                                            <row>
-                                                <label value="Компания" stylename="small"/>
-                                                <suggestionPickerField id="currentCompanyField"
-                                                                       dataContainer="jobCandidateDc"
-                                                                       property="currentCompany"
-                                                                       width="100%"
-                                                                       minSearchStringLength="2"
-                                                                       suggestionsLimit="50"
-                                                                       asyncSearchDelayMs="300"
-                                                                       inputPrompt="msg://msgPressEnter"
-                                                                       required="true">
-                                                    <actions>
-                                                        <action id="lookup" type="picker_lookup"/>
-                                                        <action id="open" type="picker_open" icon="EDIT_ACTION"/>
-                                                    </actions>
-                                                    <query entityClass="com.company.hunttech.entity.Company"
-                                                           escapeValueForLike="true"
-                                                           searchStringFormat="%$searchString%">
-                                                        select e from hunttech_Company e
-                                                        where lower(e.comanyName) like lower(:searchString) escape '\'
-                                                        order by e.comanyName, e.companyShortName
-                                                    </query>
-                                                </suggestionPickerField>
-                                            </row>
-                                            <row>
-                                                <label value="Доп. позиции" stylename="small"/>
-                                                <hbox spacing="true" width="100%" expand="positionsLabel">
-                                                    <button id="addPositions"
-                                                            caption="..."
-                                                            enable="true"
-                                                            description="msg://msgSetPositions"
-                                                            invoke="addPositionList"/>
-                                                    <label id="positionsLabel"
-                                                           stylename="small"
-                                                           align="MIDDLE_LEFT"/>
-                                                </hbox>
-                                            </row>
-                                        </rows>
-                                    </grid>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="personPositionField" stylename="job-candidate-form-row">
+                                        <label value="Должность" stylename="small"/>
+                                        <lookupPickerField id="personPositionField"
+                                                           optionsContainer="personPositionsDc"
+                                                           dataContainer="jobCandidateDc"
+                                                           property="personPosition"
+                                                           width="100%"
+                                                           required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                                <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="currentCompanyField" stylename="job-candidate-form-row">
+                                        <label value="Компания" stylename="small"/>
+                                        <suggestionPickerField id="currentCompanyField"
+                                                               dataContainer="jobCandidateDc"
+                                                               property="currentCompany"
+                                                               width="100%"
+                                                               minSearchStringLength="2"
+                                                               suggestionsLimit="50"
+                                                               asyncSearchDelayMs="300"
+                                                               inputPrompt="msg://msgPressEnter"
+                                                               required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                                <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                                            </actions>
+                                            <query entityClass="com.company.hunttech.entity.Company"
+                                                   escapeValueForLike="true"
+                                                   searchStringFormat="%$searchString%">
+                                                select e from hunttech_Company e
+                                                where lower(e.comanyName) like lower(:searchString) escape '\'
+                                                order by e.comanyName, e.companyShortName
+                                            </query>
+                                        </suggestionPickerField>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="positionsRow" stylename="job-candidate-form-row">
+                                        <label value="Доп. позиции" stylename="small"/>
+                                        <hbox id="positionsRow" spacing="true" width="100%" expand="positionsLabel">
+                                            <button id="addPositions"
+                                                    caption="..."
+                                                    enable="true"
+                                                    description="msg://msgSetPositions"
+                                                    invoke="addPositionList"/>
+                                            <label id="positionsLabel"
+                                                   stylename="small"
+                                                   align="MIDDLE_LEFT"/>
+                                        </hbox>
+                                    </hbox>
                                 </vbox>
 
                             </hbox>
