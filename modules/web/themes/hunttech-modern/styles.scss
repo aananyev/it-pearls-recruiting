@@ -1,13 +1,11 @@
 @import "hunttech-modern-defaults";
 @import "com.company.hunttech/hunttech-modern-defaults";
 @import "app-components";
-@import "com.company.hunttech/hunttech-modern-ext";
+@import "hunttech-modern";
 @import "com.company.hunttech/chat-style.css";
-@import "com.company.hunttech/job-candidate-editor.scss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 .hunttech-modern {
   @include app_components;
-  @include com_company_hunttech-hunttech-modern-ext;
-  @include job-candidate-editor-theme;
+  @include hunttech-modern;
 }

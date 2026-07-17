@@ -18,25 +18,9 @@
                     <property name="positionList" view="_local"/>
                 </property>
                 <property name="personPosition" view="_local"/>
-                <property name="iteractionList" fetch="BATCH" view="_minimal">
-                    <property name="vacancy" view="openPosition-edit-view">
-                        <property name="projectName" view="_local"/>
-                    </property>
-                    <property name="iteractionType" view="iteraction-list-type-view">
-                        <property name="signSendToClient"/>
-                        <property name="signEndCase"/>
-                    </property>
-                </property>
-                <property name="socialNetwork" fetch="BATCH" view="_minimal"/>
-                <property name="candidateCv" fetch="BATCH" view="_minimal">
-                    <property name="toVacancy" view="openPosition-edit-view">
-                        <property name="projectName" view="_local">
-                            <property name="projectDescription"/>
-                            <property name="projectLogo" view="_minimal"/>
-                            <property name="projectDepartment" view="_minimal"/>
-                        </property>
-                    </property>
-                </property>
+                <property name="iteractionList" view="_minimal"/>
+                <property name="socialNetwork" view="_minimal"/>
+                <property name="candidateCv" view="_minimal"/>
             </view>
             <loader id="jobCandidateDl"
                     softDeletion="true"
@@ -494,12 +478,12 @@
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="Персональные данные" stylename="job-candidate-card-title"/>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="firstNameField" stylename="job-candidate-form-row">
-                                        <label value="Имя" stylename="small" width="120px"/>
+                                    <hbox id="firstNameRow" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="job-candidate-form-row">
+                                        <label value="Имя" stylename="small" expandRatio="1"/>
                                         <suggestionField id="firstNameField"
                                                          dataContainer="jobCandidateDc"
                                                          property="firstName"
-                                                         width="100%"
+                                                         expandRatio="3"
                                                          minSearchStringLength="1"
                                                          editable="true"
                                                          inputPrompt="msg://msgPressEnter">
@@ -546,7 +530,7 @@
                                         </suggestionField>
                                     </hbox>
                                     <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="birdhDateField" stylename="job-candidate-form-row">
-                                        <label value="Дата рождения" stylename="small" width="120px"/>
+                                        <label value="Дата рождения" stylename="small nowrap"/>
                                         <dateField id="birdhDateField"
                                                    dataContainer="jobCandidateDc"
                                                    property="birdhDate"
