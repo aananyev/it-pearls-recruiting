@@ -478,7 +478,7 @@
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="Персональные данные" stylename="job-candidate-card-title"/>
                                     </hbox>
-                                    <hbox id="firstNameRow" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="job-candidate-form-row">
+                                    <hbox id="firstNameRow" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="job-candidate-form-row expand-row">
                                         <label value="Имя" stylename="small" expandRatio="1"/>
                                         <suggestionField id="firstNameField"
                                                          dataContainer="jobCandidateDc"
@@ -495,12 +495,12 @@
                                             </query>
                                         </suggestionField>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="middleNameField" stylename="job-candidate-form-row">
-                                        <label value="Отчество" stylename="small" width="120px"/>
+                                    <hbox id="middleNameRow" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="job-candidate-form-row expand-row">
+                                        <label value="Отчество" stylename="small" expandRatio="1"/>
                                         <suggestionField id="middleNameField"
                                                          dataContainer="jobCandidateDc"
                                                          property="middleName"
-                                                         width="100%"
+                                                         expandRatio="3"
                                                          minSearchStringLength="1"
                                                          editable="true"
                                                          inputPrompt="msg://msgPressEnter">
@@ -512,12 +512,12 @@
                                             </query>
                                         </suggestionField>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="secondNameField" stylename="job-candidate-form-row">
-                                        <label value="Фамилия" stylename="small" width="120px"/>
+                                    <hbox id="secondNameRow" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="job-candidate-form-row expand-row">
+                                        <label value="Фамилия" stylename="small" expandRatio="1"/>
                                         <suggestionField id="secondNameField"
                                                          dataContainer="jobCandidateDc"
                                                          property="secondName"
-                                                         width="100%"
+                                                         expandRatio="3"
                                                          minSearchStringLength="1"
                                                          editable="true"
                                                          inputPrompt="msg://msgPressEnter">
@@ -547,13 +547,13 @@
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="Профессиональные данные" stylename="job-candidate-card-title"/>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="personPositionField" stylename="job-candidate-form-row">
-                                        <label value="Должность" stylename="small"/>
+                                    <hbox id="personPositionRow" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="job-candidate-form-row expand-row">
+                                        <label value="Должность" stylename="small" expandRatio="1"/>
                                         <lookupPickerField id="personPositionField"
                                                            optionsContainer="personPositionsDc"
                                                            dataContainer="jobCandidateDc"
                                                            property="personPosition"
-                                                           width="100%"
+                                                           expandRatio="3"
                                                            required="true">
                                             <actions>
                                                 <action id="lookup" type="picker_lookup"/>
@@ -561,12 +561,12 @@
                                             </actions>
                                         </lookupPickerField>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="currentCompanyField" stylename="job-candidate-form-row">
-                                        <label value="Компания" stylename="small"/>
+                                    <hbox id="currentCompanyRow" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="job-candidate-form-row expand-row">
+                                        <label value="Компания" stylename="small" expandRatio="1"/>
                                         <suggestionPickerField id="currentCompanyField"
                                                                dataContainer="jobCandidateDc"
                                                                property="currentCompany"
-                                                               width="100%"
+                                                               expandRatio="3"
                                                                minSearchStringLength="2"
                                                                suggestionsLimit="50"
                                                                asyncSearchDelayMs="300"
@@ -585,11 +585,11 @@
                                             </query>
                                         </suggestionPickerField>
                                     </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="jobCityCandidateField" stylename="job-candidate-form-row">
-                                        <label value="Город" stylename="small"/>
+                                    <hbox id="jobCityCandidateRow" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="job-candidate-form-row expand-row">
+                                        <label value="Город" stylename="small" expandRatio="1"/>
                                         <lookupPickerField id="jobCityCandidateField"
                                                            dataContainer="jobCandidateDc"
-                                                           width="100%"
+                                                           expandRatio="3"
                                                            optionsContainer="citiesDc"
                                                            property="cityOfResidence"
                                                            required="true">

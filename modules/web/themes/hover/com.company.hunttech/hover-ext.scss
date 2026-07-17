@@ -549,6 +549,29 @@ rating_battery_yellow_3:before {
 
 @mixin com_company_hunttech-hover-ext {
 
+  /* ── Строки 25%/75% через flexbox (expand-row) ── */
+  .job-candidate-form-row.expand-row {
+    display: flex !important;
+    align-items: center !important;
+  }
+  .job-candidate-form-row.expand-row > .v-slot:first-child {
+    flex: 0 0 25% !important;
+    min-width: 0 !important;
+    width: auto !important;
+    padding-right: 12px;
+  }
+  .job-candidate-form-row.expand-row > .v-slot:last-child {
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+  .job-candidate-form-row.expand-row .v-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+
   .job-candidate-editor {
     position: relative;
     width: 100%;
