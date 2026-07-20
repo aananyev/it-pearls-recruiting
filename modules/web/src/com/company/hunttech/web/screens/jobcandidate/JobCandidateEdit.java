@@ -179,8 +179,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Inject
     private Button blockCandidateButton;
-    @Inject
-    private Label<String> iteractionListLabelCandidate;
+//    @Inject
+//    private Label<String> iteractionListLabelCandidate;
     @Inject
     private GetRoleService getRoleService;
     @Inject
@@ -253,6 +253,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private GroupBoxLayout lastProjects;
     @Inject
     private Label<String> fullNameField;
+    @Inject
+    private Label<String> personPositionLabel;
     @Inject
     private Label<String> emailLabel;
     @Inject
@@ -1828,6 +1830,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             setupNameSearchExecutors();
             checkNotUsePosition();
+            updateFullNameField();
+            updatePersonPositionLabel(personPositionField != null ? personPositionField.getValue() : null);
 
             if (firstNameField != null && secondNameField != null) {
                 candidateInitialized = true;
@@ -2406,7 +2410,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         blockCandidateCheckBox.setValue(b);
         blockCandidateButton.setCaption(b ? BLOCK_CANDIDATE_OFF : BLOCK_CANDIDATE_ON);
         blockCandidateButton.setIcon(b ? CubaIcon.ENABLE_EDITING.source() : CubaIcon.CLOSE.source());
-        iteractionListLabelCandidate.setStyleName(b ? "h2-red" : "h2");
+        fullNameField.setStyleName(b ? "h2-red" : "h2");
     }
 
     private void setLinkButtonSkype() {
@@ -3318,7 +3322,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (jobCandidateIteractionListTable != null) {
             jobCandidateIteractionListTable.setEnabled(!checkBlockCanidate);
         }
-        iteractionListLabelCandidate.setStyleName(checkBlockCanidate ? "h2-red" : "h2");
+        fullNameField.setStyleName(checkBlockCanidate ? "h2-red" : "h2");
 
     }
 
@@ -3870,14 +3874,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             setFullNameCandidate();
         }
 
-        StringBuffer fullName = new StringBuffer();
-
-        fullName.append(event.getValue())
-                .append(" ")
-                .append(secondNameField.getValue());
-
-        iteractionListLabelCandidate.setValue(fullName.toString());
-        fullNameField.setValue(fullName.toString());
+        updateFullNameField();
     }
 
     @Subscribe("secondNameField")
@@ -3886,14 +3883,30 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             setFullNameCandidate();
         }
 
-        StringBuffer fullName = new StringBuffer();
+        updateFullNameField();
+    }
 
-        fullName.append(firstNameField.getValue())
-                .append(" ")
-                .append(event.getValue());
+    @Subscribe("personPositionField")
+    public void onPersonPositionFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
+        updatePersonPositionLabel(event.getValue());
+    }
 
-        iteractionListLabelCandidate.setValue(fullName.toString());
-        fullNameField.setValue(fullName.toString());
+    private void updateFullNameField() {
+        String secondName = secondNameField != null && secondNameField.getValue() != null
+                ? secondNameField.getValue().trim() : "";
+        String firstName = firstNameField != null && firstNameField.getValue() != null
+                ? firstNameField.getValue().trim() : "";
+        String fullName = (secondName + " " + firstName).trim();
+
+        fullNameField.setValue(fullName);
+//        if (iteractionListLabelCandidate != null) {
+//            iteractionListLabelCandidate.setValue(fullName);
+//        }
+    }
+
+    private void updatePersonPositionLabel(Position position) {
+        personPositionLabel.setValue(position != null && position.getPositionRuName() != null
+                ? position.getPositionRuName() : "");
     }
 
     public void onEmailFieldValueChange(HasValue.ValueChangeEvent<String> event) {
@@ -3939,25 +3952,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void addMissingSocialNetworksListsInvoke() {
         List<SocialNetworkType> socialNetworkTypes = dataManager
                 .load(SocialNetworkType.class)
+                .view("socialNetworkType-view")
                 .list();
 
         for (SocialNetworkType socialNetworkType : socialNetworkTypes) {
-            Boolean flag = true;
+            boolean exists = jobCandidateSocialNetworksDc.getItems().stream()
+                    .map(SocialNetworkURLs::getSocialNetworkURL)
+                    .anyMatch(socialNetworkType::equals);
 
-            for (SocialNetworkURLs socialNetworkURLs : getEditedEntity().getSocialNetwork()) {
-                if (socialNetworkURLs.getSocialNetworkURL().equals(socialNetworkType)) {
-                    flag = false;
-                }
-            }
-
-            if (flag) {
+            if (!exists) {
                 SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
                 socialNetworkURLs.setJobCandidate(getEditedEntity());
                 socialNetworkURLs.setSocialNetworkURL(socialNetworkType);
                 socialNetworkURLs.setNetworkName(socialNetworkType.getSocialNetwork());
 
-                getEditedEntity().getSocialNetwork().add(socialNetworkURLs);
-                dataContext.merge(socialNetworkURLs);
+                jobCandidateSocialNetworksDc.getMutableItems().add(dataContext.merge(socialNetworkURLs));
             }
         }
 
