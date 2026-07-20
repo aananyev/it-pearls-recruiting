@@ -323,10 +323,6 @@
                             caption="Контакты"
                             width="100%"
                             stylename="job-candidate-nav-item"/>
-                    <button id="candidateNavSocialNetworks" invoke="candidateNavSocialNetworks"
-                            caption="Социальные сети"
-                            width="100%"
-                            stylename="job-candidate-nav-item"/>
                     <button id="candidateNavComments" invoke="candidateNavComments"
                             caption="Комментарии"
                             width="100%"
@@ -647,7 +643,14 @@
                     <tab id="tabContactInfo"
                          caption="Контакты"
                          spacing="true"
-                         margin="false">
+                         margin="false"
+                         expand="tabContactInfoScrollBox">
+                        <scrollBox id="tabContactInfoScrollBox"
+                                   orientation="vertical"
+                                   scrollBars="vertical"
+                                   width="100%"
+                                   height="100%"
+                                   spacing="true">
                         <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section">
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Контакты" stylename="job-candidate-accordion-title"/>
@@ -740,6 +743,70 @@
                                 </hbox>
                             </vbox>
                         </vbox>
+
+                        <vbox id="contactSocialNetworksSection"
+                              width="100%"
+                              height="100%"
+                              spacing="true"
+                              expand="contactSocialNetworksContent"
+                              stylename="job-candidate-accordion-section">
+                            <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
+                                <label value="Социальные сети" stylename="job-candidate-accordion-title"/>
+                            </hbox>
+                            <vbox id="contactSocialNetworksContent"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  expand="socialNetworkTableHbox"
+                                  stylename="job-candidate-accordion-content">
+
+                                <hbox id="socialNetworkTableHbox"
+                                      width="100%"
+                                      height="100%"
+                                      spacing="true"
+                                      stylename="borderless"
+                                      expand="socialNetworkTable">
+                                    <dataGrid id="socialNetworkTable"
+                                              height="100%"
+                                              width="100%"
+                                              stylename="job-candidate-table"
+                                              editorEnabled="true"
+                                              dataContainer="jobCandidateSocialNetworksDc">
+                                        <columns>
+                                            <column id="socialNetworkLogoColumn" width="50px" caption="">
+                                                <componentRenderer/>
+                                            </column>
+                                            <column id="networkName" editable="false" property="socialNetworkURL.socialNetwork" maximumWidth="200px"/>
+                                            <column id="networkURLS" editable="true" property="networkURLS"/>
+                                            <column id="linkToWeb" caption="msg://msgLinkURL" maximumWidth="150px">
+                                                <componentRenderer/>
+                                            </column>
+                                        </columns>
+                                        <actions>
+                                            <action id="create" type="create"/>
+                                            <action id="edit" type="edit"/>
+                                            <action id="remove" type="remove"/>
+                                        </actions>
+                                    </dataGrid>
+                                    <vbox spacing="true" width="AUTO" height="AUTO">
+                                        <button id="addSocialNetworkListsButton" visible="false" enable="false"
+                                                width="100%" caption="msg://msgAddSocialNetworks"
+                                                description="msg://msgAddSocialNetworksDesc"
+                                                invoke="addSocialNetworksListsInvoke"/>
+                                        <button id="addMissingSocialNetworkListsButton" width="100%" enable="true"
+                                                caption="msg://msgAddMissingSocialNetrorkButton"
+                                                description="msg://msgAddMissingSocialNetrorkButtonDesc"
+                                                invoke="addMissingSocialNetworksListsInvoke"/>
+                                        <button id="removeEmptySocialNetworkListsButton" width="100%" enable="true"
+                                                caption="msg://removeEmptySocialNetworkListsButton"
+                                                description="msg://removeEmptySocialNetworkListsButtonDesc"
+                                                invoke="removeEmptySocialNetworkListsButton"/>
+                                    </vbox>
+                                </hbox>
+
+                            </vbox>
+                        </vbox>
+                        </scrollBox>
                     </tab>
 
                     <!-- TAB: Позиции и вакансии. Данные загружаются лениво контроллером. -->
@@ -978,75 +1045,6 @@
                                 </buttonsPanel>
                             </dataGrid>
                         </vbox>
-
-                            </vbox>
-                        </vbox></tab>
-
-                    <!-- TAB: Социальные сети -->
-                    <tab id="tabSocialNetworks"
-                         caption="Социальные сети"
-                         spacing="true"
-                         margin="true"
-                         expand="tabSocialNetworksSection">
-                        <vbox id="tabSocialNetworksSection"
-                              width="100%"
-                              height="100%"
-                              spacing="true"
-                              expand="tabSocialNetworksContent"
-                              stylename="job-candidate-accordion-section">
-                            <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
-                                <label value="Социальные сети" stylename="job-candidate-accordion-title"/>
-                            </hbox>
-                            <vbox id="tabSocialNetworksContent"
-                                  width="100%"
-                                  height="100%"
-                                  spacing="true"
-                                  expand="socialNetworkTableHbox"
-                                  stylename="job-candidate-accordion-content">
-
-                        <hbox id="socialNetworkTableHbox"
-                              width="100%"
-                              height="100%"
-                              spacing="true"
-                              stylename="borderless"
-                              expand="socialNetworkTable">
-                            <dataGrid id="socialNetworkTable"
-                                      height="100%"
-                                      width="100%"
-                                      stylename="job-candidate-table"
-                                      editorEnabled="true"
-                                      dataContainer="jobCandidateSocialNetworksDc">
-                                <columns>
-                                    <column id="socialNetworkLogoColumn" width="50px" caption="">
-                                        <componentRenderer/>
-                                    </column>
-                                    <column id="networkName" editable="false" property="socialNetworkURL.socialNetwork" maximumWidth="200px"/>
-                                    <column id="networkURLS" editable="true" property="networkURLS"/>
-                                    <column id="linkToWeb" caption="msg://msgLinkURL" maximumWidth="150px">
-                                        <componentRenderer/>
-                                    </column>
-                                </columns>
-                                <actions>
-                                    <action id="create" type="create"/>
-                                    <action id="edit" type="edit"/>
-                                    <action id="remove" type="remove"/>
-                                </actions>
-                            </dataGrid>
-                            <vbox spacing="true" width="AUTO" height="AUTO">
-                                <button id="addSocialNetworkListsButton" visible="false" enable="false"
-                                        width="100%" caption="msg://msgAddSocialNetworks"
-                                        description="msg://msgAddSocialNetworksDesc"
-                                        invoke="addSocialNetworksListsInvoke"/>
-                                <button id="addMissingSocialNetworkListsButton" width="100%" enable="true"
-                                        caption="msg://msgAddMissingSocialNetrorkButton"
-                                        description="msg://msgAddMissingSocialNetrorkButtonDesc"
-                                        invoke="addMissingSocialNetworksListsInvoke"/>
-                                <button id="removeEmptySocialNetworkListsButton" width="100%" enable="true"
-                                        caption="msg://removeEmptySocialNetworkListsButton"
-                                        description="msg://removeEmptySocialNetworkListsButtonDesc"
-                                        invoke="removeEmptySocialNetworkListsButton"/>
-                            </vbox>
-                        </hbox>
 
                             </vbox>
                         </vbox></tab>
