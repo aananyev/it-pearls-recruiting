@@ -84,6 +84,10 @@
       height: 100% !important;
     }
 
+    .job-candidate-sidebar .v-label {
+      font-size: 14px !important;
+    }
+
     .job-candidate-profile-header {
       width: 100% !important;
       text-align: center;
@@ -145,7 +149,7 @@
       width: 100% !important;
       margin-top: 14px;
       color: #fff !important;
-      font-size: 24px !important;
+      font-size: 22px !important;
       font-weight: 700;
       line-height: 1.22 !important;
       text-align: left !important;
@@ -197,6 +201,7 @@
 
     .job-candidate-sidebar-card .v-label {
       color: #f8fafc !important;
+      font-size: 14px !important;
     }
 
     .job-candidate-sidebar-card .v-button-link {
@@ -232,7 +237,7 @@
       padding: 0 !important;
       color: #ffb11b !important;
       font-family: Arial, "Segoe UI Symbol", sans-serif !important;
-      font-size: 22px !important;
+      font-size: 20px !important;
       font-weight: 700;
       line-height: 30px !important;
       text-align: left !important;
@@ -264,10 +269,10 @@
       content: "\2605\2605\2605\2605\2605  ";
     }
 
-    .job-candidate-quality {
+    .job-candidate-status .job-candidate-quality {
       width: 100% !important;
       color: rgba(248, 250, 252, .72) !important;
-      font-size: 12px !important;
+      font-size: 10px !important;
       font-weight: 400;
       line-height: 18px !important;
       text-align: right !important;
@@ -541,11 +546,13 @@
       overflow-wrap: anywhere;
     }
 
+    .job-candidate-form-grid .c-suggestionfield,
     .job-candidate-form-grid .v-textfield,
     .job-candidate-form-grid .v-filterselect,
     .job-candidate-form-grid .v-filterselect-input,
     .job-candidate-form-grid .v-datefield,
     .job-candidate-form-grid .v-datefield-textfield,
+    .job-candidate-form-row .c-suggestionfield,
     .job-candidate-form-row .v-textfield,
     .job-candidate-form-row .v-filterselect,
     .job-candidate-form-row .v-filterselect-input,
@@ -553,6 +560,14 @@
     .job-candidate-form-row .v-datefield-textfield {
       width: 100% !important;
       min-width: 0 !important;
+    }
+
+    .c-suggestionfield,
+    .v-textfield,
+    .v-filterselect,
+    .v-filterselect-input,
+    .v-datefield,
+    .v-datefield-textfield {
       height: 38px !important;
       font-size: 16px !important;
       line-height: 38px !important;

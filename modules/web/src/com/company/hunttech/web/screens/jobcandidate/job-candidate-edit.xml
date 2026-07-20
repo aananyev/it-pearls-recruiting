@@ -309,35 +309,35 @@
                         <rows>
                             <row>
                                 <hbox spacing="false" width="100%">
-                                <label value="Email"
-                                       stylename="small"
-                                       box.expandRatio="1"/>
-                                <linkButton id="emailLinkButton"
-                                            box.expandRatio="2"
-                                            align="MIDDLE_LEFT"
-                                            stylename="small"/>
+                                    <label value="Email"
+                                           stylename="small"
+                                           box.expandRatio="1"/>
+                                    <linkButton id="emailLinkButton"
+                                                box.expandRatio="2"
+                                                align="MIDDLE_LEFT"
+                                                stylename="small"/>
                                 </hbox>
                             </row>
                             <row>
                                 <hbox spacing="false"
                                       width="100%">
-                                <label value="Телефон"
-                                       stylename="small"
-                                       box.expandRatio="1"/>
-                                <label id="phoneLabel"
-                                       box.expandRatio="2"
-                                       stylename="small"
-                                       dataContainer="jobCandidateDc"
-                                       property="phone"/>
+                                    <label value="Телефон"
+                                           stylename="small"
+                                           box.expandRatio="1"/>
+                                    <label id="phoneLabel"
+                                           box.expandRatio="2"
+                                           stylename="small"
+                                           dataContainer="jobCandidateDc"
+                                           property="phone"/>
                                 </hbox>
                             </row>
                             <row>
                                 <hbox spacing="false" width="100%">
-                                <label value="Telegram" stylename="small" box.expandRatio="1"/>
-                                <linkButton id="telegrammLinkButton"
-                                            box.expandRatio="2"
-                                            align="MIDDLE_LEFT"
-                                            stylename="small"/>
+                                    <label value="Telegram" stylename="small" box.expandRatio="1"/>
+                                    <linkButton id="telegrammLinkButton"
+                                                box.expandRatio="2"
+                                                align="MIDDLE_LEFT"
+                                                stylename="small"/>
                                 </hbox>
                             </row>
                         </rows>
@@ -691,8 +691,9 @@
                                                 </hbox>
                                             </row>
                                             <row>
-                                                <label value="Доп. позиции" stylename="small" box.expandRatio="1"/>
                                                 <hbox spacing="true" width="100%" expand="positionsLabel">
+                                                    <label value="Доп. позиции"
+                                                           stylename="small"/>
                                                     <button id="addPositions"
                                                             caption="..."
                                                             enable="true"

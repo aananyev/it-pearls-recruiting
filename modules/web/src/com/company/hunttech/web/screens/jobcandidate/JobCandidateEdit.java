@@ -142,7 +142,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private DateField<Date> birdhDateField;
     private RadioButtonGroup<Integer> priorityCommunicationMethodRadioButton;
-    private TextField<String> telegramGroupField;
     private TextField<String> mobilePhoneField;
     private DataGrid<IteractionList> jobCandidateIteractionListTable;
     private Button openPositionProjectDescriptionButton;
@@ -594,7 +593,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     (wiberNameField.getRawValue().equals("")) &&
                     (whatsupNameField.getRawValue().equals("")) &&
                     (mobilePhoneField.getRawValue().equals("")) &&
-                    (telegramGroupField.getRawValue().equals("")) &&
+                    StringUtils.isBlank(getEditedEntity().getTelegramGroup()) &&
                     (phoneField.getRawValue().equals("")));
         }
 
@@ -664,11 +663,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             Integer qualityPercent = setQualityPercent() * 100 / 14;
 
             if (!PersistenceHelper.isNew(getEditedEntity())) {
-                labelQualityPercent.setValue(new StringBuilder()
-                        .append("Процент заполнения карточки: ")
-                        .append(qualityPercent.toString())
-                        .append("%")
-                        .toString());
+                labelQualityPercent.setValue(qualityPercent + "%");
             }
         }
     }
@@ -695,8 +690,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         emailField.setRequired(true);
         telegramNameField.setRequired(true);
         whatsupNameField.setRequired(true);
-        wiberNameField.setRequired(true);
-        telegramGroupField.setRequired(true); */
+        wiberNameField.setRequired(true); */
 
         if (!isRequiredAddresField() || !flag) {
             skypeNameField.setRequired(false);
@@ -706,7 +700,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             telegramNameField.setRequired(false);
             whatsupNameField.setRequired(false);
             wiberNameField.setRequired(false);
-            telegramGroupField.setRequired(false);
         }
     }
 
@@ -1291,7 +1284,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         preventAutoLoadUntilReady(suggestOpenPositionDl, () -> positionsTabLoaded);
         preventAutoLoadUntilReady(interactionCommentDl, () -> commentsTabInitialized);
 
+        configureAvailableComponentRenderers();
+
         tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
+            configureAvailableComponentRenderers();
             initTabResume();
             initTabInteractions();
             initTabCandidate();
@@ -1300,6 +1296,39 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             initTabPositions();
         });
 
+    }
+
+    void configureAvailableComponentRenderers() {
+        configureComponentRenderer("socialNetworkTable", "socialNetworkLogoColumn",
+                this::socialNetworkTableSocialNetworkLogoColumnColumnGenerator);
+        configureComponentRenderer("socialNetworkTable", "linkToWeb",
+                this::socialNetworkTableLinkToWebColumnGenerator);
+        configureComponentRenderer("jobCandidateIteractionListTable", "projectLogoColumn",
+                this::jobCandidateIteractionListTableProjectLogoColumnColumnGenerator);
+        configureComponentRenderer("jobCandidateCandidateCvTable", "projectLogoColumn",
+                this::jobCandidateCandidateCvTableProjectLogoColumnColumnGenerator);
+        configureComponentRenderer("jobCandidateCandidateCvTable", "candidateOriginalCVColumn",
+                this::jobCandidateCandidateCvTableCandidateOriginalCvColumnGenerator);
+        configureComponentRenderer("jobCandidateCandidateCvTable", "candidateHuntTechCVColumn",
+                this::jobCandidateCandidateCvTableCandidateHuntTechCvColumnGenerator);
+        configureComponentRenderer("jobCandidateCommentsDataGrid", "commentDialog",
+                this::jobCandidateCommentsDataGridCommentDialogColumnGenerator);
+    }
+
+    @SuppressWarnings("unchecked")
+    <E extends Entity> void configureComponentRenderer(String dataGridId,
+                                                        String columnId,
+                                                        DataGrid.GenericColumnGenerator<E, Object> generator) {
+        Component component = getWindow().getComponent(dataGridId);
+        if (!(component instanceof DataGrid)) {
+            return;
+        }
+
+        DataGrid<E> dataGrid = (DataGrid<E>) component;
+        DataGrid.Column<E> column = dataGrid.getColumn(columnId);
+        if (column != null && dataGrid.getColumnGenerator(columnId) == null) {
+            column.setColumnGenerator(generator);
+        }
     }
 
     private <E extends Entity> void preventAutoLoadUntilReady(CollectionLoader<E> loader,
@@ -1656,8 +1685,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             vacancyPopupPickerField.setOptionIconProvider(this::vacancyPopupPickerFieldOptionIconProvider);
             jobCandidateCommentsDataGrid.getColumn("comment")
                     .setStyleProvider(this::jobCandidateCommentsDataGridCommentStyleProvider);
-            jobCandidateCommentsDataGrid.getColumn("commentDialog")
-                    .setColumnGenerator(this::jobCandidateCommentsDataGridCommentDialogColumnGenerator);
 
             commentsTabInitialized = true;
             ensureOpenPositionLoaded();
@@ -1678,7 +1705,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         phoneField = (TextField<String>) getWindow().getComponentNN("phoneField");
         mobilePhoneField = (TextField<String>) getWindow().getComponentNN("mobilePhoneField");
         telegramNameField = (TextField<String>) getWindow().getComponentNN("telegramNameField");
-        telegramGroupField = (TextField<String>) getWindow().getComponentNN("telegramGroupField");
         whatsupNameField = (TextField<String>) getWindow().getComponentNN("whatsupNameField");
         wiberNameField = (TextField<String>) getWindow().getComponentNN("wiberNameField");
         skypeNameField = (TextField<String>) getWindow().getComponentNN("skypeNameField");
@@ -1691,7 +1717,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         phoneField.addTextChangeListener(e -> enableDisableContacts());
         mobilePhoneField.addTextChangeListener(e -> enableDisableContacts());
         telegramNameField.addTextChangeListener(e -> enableDisableContacts());
-        telegramGroupField.addTextChangeListener(e -> enableDisableContacts());
         whatsupNameField.addTextChangeListener(e -> enableDisableContacts());
         wiberNameField.addTextChangeListener(e -> enableDisableContacts());
         skypeNameField.addTextChangeListener(e -> enableDisableContacts());
@@ -1703,10 +1728,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         skypeNameField.addValueChangeListener(this::onSkypeNameFieldValueChange);
         telegramNameField.addValueChangeListener(this::onTelegramNameFieldValueChange);
 
-        socialNetworkTable.getColumn("socialNetworkLogoColumn")
-                .setColumnGenerator(this::socialNetworkTableSocialNetworkLogoColumnColumnGenerator);
-        socialNetworkTable.getColumn("linkToWeb")
-                .setColumnGenerator(this::socialNetworkTableLinkToWebColumnGenerator);
         socialNetworkTable.addEditorCloseListener(e -> enableDisableContacts());
         socialNetworkTable.addEditorPostCommitListener(e -> enableDisableContacts());
         socialNetworkTable.addSelectionListener(e -> enableDisableContacts());
@@ -1935,8 +1956,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .setStyleProvider(this::jobCandidateIteractionListTableVacancyStyleProvider);
             jobCandidateIteractionListTable.getColumn("iteractionType")
                     .setStyleProvider(this::jobCandidateIteractionListTableIteractionTypeStyleProvider);
-            jobCandidateIteractionListTable.getColumn("projectLogoColumn")
-                    .setColumnGenerator(this::jobCandidateIteractionListTableProjectLogoColumnColumnGenerator);
             vacancyFilterLookupPickerField
                     .setOptionImageProvider(this::vacancyFilterLookupPickerFieldOptionImageProvider);
 
@@ -2064,9 +2083,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     .setDescriptionProvider(this::jobCandidateCandidateCvTableResumePositionDescriptionProvider);
             jobCandidateCandidateCvTable.getColumn("toVacancy")
                     .setStyleProvider(this::jobCandidateCandidateCvTableToVacancyStyleProvider);
-            jobCandidateCandidateCvTable.getColumn("projectLogoColumn")
-                    .setColumnGenerator(this::jobCandidateCandidateCvTableProjectLogoColumnColumnGenerator);
-
             ensureCandidateCvLoaded();
             scanContactsFromCVButton.addClickListener(e -> scanContactsFromCVs());
 
@@ -2162,43 +2178,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         return candidateCV.getLetter() != null ? "pic-center-large-green" : "pic-center-large-red";
                     });
 
-            jobCandidateCandidateCvTable.getColumn("candidateHuntTechCVColumn")
-                    .setColumnGenerator(event -> {
-                        Link link = uiComponents.create(Link.NAME);
-
-                        if (event.getItem().getLinkHuntTechCV() != null) {
-                            String url = event.getItem().getLinkHuntTechCV();
-
-                            link.setUrl(url);
-                            link.setCaption("CV HuntTech");
-                            link.setTarget("_blank");
-                            link.setWidthAuto();
-                            link.setVisible(true);
-                        } else {
-                            link.setVisible(false);
-                        }
-
-                        return link;
-                    });
-
-            jobCandidateCandidateCvTable.getColumn("candidateOriginalCVColumn")
-                    .setColumnGenerator(event -> {
-                        Link link = uiComponents.create(Link.NAME);
-
-                        if (event.getItem().getLinkOriginalCv() != null) {
-                            String url = event.getItem().getLinkOriginalCv();
-
-                            link.setUrl(url);
-                            link.setCaption("Оригинальное CV");
-                            link.setTarget("_blank");
-                            link.setWidthAuto();
-                            link.setVisible(true);
-                        } else {
-                            link.setVisible(false);
-                        }
-
-                        return link;
-                    });
         }
 
         cvTabInitialized = true;
@@ -2702,7 +2681,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         int intRating = (int) Math.round(avgRating);
 
         if (intRating > 0) {
-            candidateRatingLabel.setValue(String.valueOf(intRating));
+            candidateRatingLabel.setValue("");
             switch (intRating) {
                 case 1:
                     candidateRatingLabel.setStyleName("rating_candidate_red_1");
@@ -2723,7 +2702,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     break;
             }
         } else {
-            candidateRatingLabel.setValue("0.0");
+            candidateRatingLabel.setValue("");
             candidateRatingLabel.setStyleName("rating_red_1");
         }
     }
@@ -4059,6 +4038,40 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         retBox.add(image);
         return retBox;
+    }
+
+    private Component jobCandidateCandidateCvTableCandidateHuntTechCvColumnGenerator(
+            DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        Link link = uiComponents.create(Link.NAME);
+
+        if (event.getItem().getLinkHuntTechCV() != null) {
+            link.setUrl(event.getItem().getLinkHuntTechCV());
+            link.setCaption("CV HuntTech");
+            link.setTarget("_blank");
+            link.setWidthAuto();
+            link.setVisible(true);
+        } else {
+            link.setVisible(false);
+        }
+
+        return link;
+    }
+
+    private Component jobCandidateCandidateCvTableCandidateOriginalCvColumnGenerator(
+            DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        Link link = uiComponents.create(Link.NAME);
+
+        if (event.getItem().getLinkOriginalCv() != null) {
+            link.setUrl(event.getItem().getLinkOriginalCv());
+            link.setCaption("Оригинальное CV");
+            link.setTarget("_blank");
+            link.setWidthAuto();
+            link.setVisible(true);
+        } else {
+            link.setVisible(false);
+        }
+
+        return link;
     }
 
     private Component jobCandidateIteractionListTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
