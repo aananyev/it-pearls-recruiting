@@ -35,6 +35,8 @@ configurations.all {
     resolutionStrategy {
         // telegrambots 6.8+ pulls slf4j-api 2.x; logback 1.2.x (used by CUBA) requires SLF4J 1.7
         force 'org.slf4j:slf4j-api:1.7.36'
+        // declarativecontrollers тянет groovy-jsr223:2.5.2 — конфликтует с Groovy 2.5.23
+        force 'org.codehaus.groovy:groovy-jsr223:2.5.23'
     }
 }
 
@@ -73,6 +75,8 @@ configure([globalModule, coreModule, webModule, guiModule, webToolkitModule]) {
         resolutionStrategy {
             // telegrambots 6.8+ pulls slf4j-api 2.x; logback 1.2.x (used by CUBA) requires SLF4J 1.7
             force 'org.slf4j:slf4j-api:1.7.36'
+            // declarativecontrollers тянет groovy-jsr223:2.5.2 — конфликтует с Groovy 2.5.23
+            force 'org.codehaus.groovy:groovy-jsr223:2.5.23'
         }
     }
 

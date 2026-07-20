@@ -1416,6 +1416,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             initTabComments();
             initTabPositions();
         });
+
+        // Принудительная инициализация для стартового таба tabMain
+        initTabCandidate();
     }
 
     private <E extends Entity> void preventAutoLoadUntilReady(CollectionLoader<E> loader,
@@ -2074,7 +2077,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 positionsLabel = (Label<String>) getWindow().getComponent("positionsLabel");
             }
             if (positionsLabel != null) {
-                setPositionsLabel();
+                // getEditedEntity может быть null при вызове из onInit до загрузки сущности
+                if (getEditedEntity() != null) {
+                    setPositionsLabel();
+                }
             }
 
             setupNameSearchExecutors();

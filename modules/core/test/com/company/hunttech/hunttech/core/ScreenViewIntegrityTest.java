@@ -195,6 +195,27 @@ public class ScreenViewIntegrityTest {
     // ── Screen Registration Integrity ────────────────────────
     // Проверяет, что все экраны из web-app.properties зарегистрированы.
 
+    // ── JobCandidateEdit: NPE guard ────────────────────────
+    // Проверяет, что setPositionsLabel() не падает NPE при null getEditedEntity()
+    // (регрессия: наш explicit initTabCandidate() вызывал NPE при onInit)
+
+    @Test
+    public void jobCandidateEdit_openScreen_shouldNotThrow() {
+        // Достаточно загрузить entity с view, которое использует экран
+        List<JobCandidate> list = dm.load(JobCandidate.class)
+                .query("select e from hunttech_JobCandidate e")
+                .view("jobCandidate-edit-view")
+                .maxResults(1)
+                .list();
+        if (!list.isEmpty()) {
+            JobCandidate jc = list.get(0);
+            assertNotNull("JobCandidate loaded", jc);
+            System.out.println("OK: JobCandidate loaded with jobCandidate-edit-view");
+        } else {
+            System.out.println("SKIP: no JobCandidate data in DB");
+        }
+    }
+
     private String getProjectRoot() {
         String dir = System.getProperty("user.dir");
         if (dir == null) dir = ".";

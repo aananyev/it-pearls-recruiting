@@ -5,6 +5,7 @@ import com.company.hunttech.TestEntityTracker;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.OpenPositionNews;
+import com.company.hunttech.core.OpenPositionService;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.global.AppBeans;
@@ -108,6 +109,37 @@ public class OpenPositionNewsServiceTest {
                         .setParameter("id", id))
                 .setView(View.LOCAL));
         assertTrue(active.isEmpty());
+    }
+
+    @Test
+    public void testSetOpenPositionNewsAutomatedMessage_NewOpenPosition_shouldNotThrow() {
+        // given: новый (несохранённый) OpenPosition — именно этот сценарий давал IllegalStateException
+        OpenPosition unsavedOpenPosition = dataManager.create(OpenPosition.class);
+        unsavedOpenPosition.setVacansyName("Test-New-Position-" + UUID.randomUUID());
+        unsavedOpenPosition.setOpenClose(true);
+        unsavedOpenPosition.setPriority(0);
+
+        ExtUser author = loadAdminExtUser();
+        Date now = new Date();
+
+        OpenPositionService service = AppBeans.get(OpenPositionService.class);
+
+        // when: вызов сервиса с unsaved OpenPosition
+        // then: не должно быть IllegalStateException
+        service.setOpenPositionNewsAutomatedMessage(
+                unsavedOpenPosition, "Test subject", "Test comment", now, author);
+
+        // Verify: OpenPositionNews created and persisted
+        List<OpenPositionNews> news = dataManager.loadList(LoadContext.create(OpenPositionNews.class)
+                .setQuery(LoadContext.createQuery(
+                        "select e from hunttech_OpenPositionNews e where e.subject = :subject")
+                        .setParameter("subject", "Test subject"))
+                .setView(View.LOCAL));
+        assertEquals(1, news.size());
+        tracker.track(unsavedOpenPosition);
+        for (OpenPositionNews n : news) {
+            tracker.track(n);
+        }
     }
 
     private OpenPositionNews createTestNewsEntity() {

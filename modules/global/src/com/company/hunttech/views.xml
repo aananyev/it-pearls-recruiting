@@ -639,6 +639,7 @@
         <property name="ourClient"/>
         <property name="ourLegalEntity"/>
         <property name="fileCompanyLogo" view="_minimal"/>
+        <property name="cityOfCompany" view="_minimal"/>
     </view>
     <view entity="hunttech_Company" name="company-view" extends="_local">
         <property name="companyOwnership" view="_minimal"/>

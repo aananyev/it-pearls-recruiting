@@ -1068,6 +1068,15 @@ rating_battery_yellow_3:before {
       min-width: 0 !important;
     }
 
+    .job-candidate-form-grid .job-candidate-person-name-field,
+    .job-candidate-form-grid .job-candidate-person-name-field > .v-widget,
+    .job-candidate-form-grid .job-candidate-person-name-field .v-textfield {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+
     .job-candidate-form-grid .v-label,
     .job-candidate-form-row .v-label {
       color: #516174 !important;
@@ -2376,4 +2385,3 @@ rating_battery_yellow_3:before {
   }
 
 }
-
