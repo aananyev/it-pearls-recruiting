@@ -52,6 +52,34 @@ import java.util.function.Function;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+/**
+ * Контроллер формы редактирования / создания кандидатов (JobCandidate).
+ *
+ * ═══ ОСНОВНЫЕ ФУНКЦИИ ═══
+ * • Просмотр/редактирование основной информации о кандидате (ФИО, контакты,
+ *   город, дата рождения, текущее место работы).
+ * • Управление позициями кандидата, привязка к вакансиям.
+ * • Взаимодействия (звонки, собеседования, письма) — вкладка «Взаимодействия».
+ * • Резюме и файлы — вкладка «Резюме».
+ * • Комментарии, история изменений.
+ *
+ * ═══ ЛЕНИВАЯ ЗАГРУЗКА (lazy loading) ═══
+ * Многие collection-loader'ы (citiesDl, personPositionsLc, openPositionDl и др.)
+ * заблокированы через preventAutoLoadUntilReady() и загружаются только при
+ * первом открытии соответствующей вкладки (tabSheetSocialNetworks).
+ * Исключение: tabMain (Основное) — инициализируется сразу в onInit():
+ *   initTabCandidate() вызывается как в addSelectedTabChangeListener,
+ *   так и явно после его регистрации, чтобы reference loaders
+ *   (citiesDl, personPositionsLc) загрузились при старте формы.
+ *
+ * ═══ ВАЖНЫЕ ЗАМЕЧАНИЯ ═══
+ * • positionsLabel находится внутри tabPositions (visible="false"),
+ *   поэтому получается через getComponent(), а не @Inject.
+ * • setPositionsLabel() проверяет getEditedEntity() на null —
+ *   guard от NPE при вызове из onInit до загрузки сущности.
+ * • cityOfCompany в Company загружается через company-picker-view;
+ *   для безопасности используется PersistenceHelper.isLoaded().
+ */
 @UiController("hunttech_JobCandidate.edit")
 @UiDescriptor("job-candidate-edit.xml")
 @EditedEntityContainer("jobCandidateDc")

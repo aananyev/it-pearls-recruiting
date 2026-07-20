@@ -440,24 +440,23 @@
                   expand="tabSheetSocialNetworks"
                   stylename="job-candidate-workspace">
 
-                <!-- Верхняя панель: служебная информация слева, меню «Еще» справа. -->
+                <!-- ═══════════════════════════════════════════════════════════
+                     ВЕРХНЯЯ ПАНЕЛЬ
+                     — "Еще" (popup-меню) строго справа.
+                     ───────────────────────────────────────────────────────
+                     Элементы:
+                       • label (spacer) — занимает всё доступное пространство,
+                         прижимая кнопку "Еще" к правому краю.
+                       • moreActionsPopUpButton — выпадающее меню доп. действий
+                         (блокировка кандидата, подписка на уведомления).
+                     ═══════════════════════════════════════════════════════ -->
                 <hbox id="jobCandidateTopBar"
                       width="100%"
                       spacing="true"
-                      expand="jobCandidateAuditBox"
                       align="MIDDLE_LEFT"
                       stylename="job-candidate-top-bar">
-                    <hbox id="jobCandidateAuditBox"
-                          width="100%"
-                          spacing="true"
-                          expand="createdUpdatedLabel"
-                          align="MIDDLE_LEFT"
-                          stylename="job-candidate-audit-box">
-                        <label id="createdUpdatedLabel"
-                               width="100%"
-                               align="MIDDLE_LEFT"
-                               stylename="job-candidate-audit-label"/>
-                    </hbox>
+                    <!-- Растяжимый разделитель: прижимает "Еще" к правому краю -->
+                    <label width="100%" stylename="job-candidate-spacer"/>
                     <popupButton id="moreActionsPopUpButton"
                                  caption="Еще"
                                  align="MIDDLE_RIGHT"
@@ -478,6 +477,7 @@
                         </popup>
                     </popupButton>
                 </hbox>
+
 
                 <!-- TabSheet -->
                 <tabSheet id="tabSheetSocialNetworks"
@@ -1419,12 +1419,32 @@
 
                 </tabSheet>
 
-                <!-- Нижняя панель основных действий. -->
+                <!-- ═══════════════════════════════════════════════════════════
+                     НИЖНЯЯ ПАНЕЛЬ
+                     — служебное сообщение (audit) справа.
+                     — кнопки "Сохранить и закрыть" / "Отмена" рядом, правее.
+                     ───────────────────────────────────────────────────────
+                     Элементы:
+                       • label (spacer) — растягивается на всё свободное место,
+                         прижимая audit + кнопки к правому краю.
+                       • createdUpdatedLabel — информация о создании/изменении
+                         записи (выставляется в Java).
+                       • windowCommitAndCloseButton — сохранить и закрыть.
+                       • windowClose — отмена, закрытие без сохранения.
+                     ═══════════════════════════════════════════════════════ -->
                 <hbox id="jobCandidateBottomBar"
                       width="100%"
                       spacing="true"
                       align="MIDDLE_RIGHT"
                       stylename="job-candidate-bottom-bar">
+                    <!-- Растяжимый разделитель: прижимает audit + кнопки вправо -->
+                    <label width="100%" stylename="job-candidate-spacer"/>
+                    <!-- Служебное сообщение: дата создания / обновления записи -->
+                    <label id="createdUpdatedLabel"
+                           width="AUTO"
+                           align="MIDDLE_RIGHT"
+                           stylename="job-candidate-audit-label"/>
+                    <!-- Кнопки: Сохранить и Отмена, рядом друг с другом -->
                     <button id="windowCommitAndCloseButton"
                             action="windowCommitAndClose"
                             caption="Сохранить и закрыть"
