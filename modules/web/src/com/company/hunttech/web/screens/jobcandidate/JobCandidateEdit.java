@@ -139,43 +139,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private LookupPickerField<Position> personPositionField;
     @Inject
     private LookupPickerField<City> jobCityCandidateField;
-    @Inject
-    private DateField<Date> birdhDateField;
-    @Inject
-    private RadioButtonGroup<Integer> priorityCommunicationMethodRadioButton;
-    @Inject
-    private TextField<String> telegramGroupField;
-    @Inject
-    private TextField<String> mobilePhoneField;
-    @Inject
-    private DataGrid<IteractionList> jobCandidateIteractionListTable;
-    @Inject
-    private Button openPositionProjectDescriptionButton;
-    @Inject
-    private PopupButton frequentInteractionPopupButton;
-    @Inject
-    private DataGrid<CandidateCV> jobCandidateCandidateCvTable;
-    @Inject
-    private Button copyCVButton;
-    @Inject
-    private Button scanContactsFromCVButton;
-    @Inject
-    private Button checkSkillFromJD;
-    @Inject
-    private TextField<String> emailField;
-    @Inject
-    private TextField<String> phoneField;
-    @Inject
-    private TextField<String> skypeNameField;
-    @Inject
-    private TextField<String> telegramNameField;
-    @Inject
-    private TextField<String> whatsupNameField;
-    @Inject
-    private TextField<String> wiberNameField;
-    @Inject
-    private DataGrid<SocialNetworkURLs> socialNetworkTable;
-
+    private DateField<Date> birdhDateField;    private RadioButtonGroup<Integer> priorityCommunicationMethodRadioButton;
+    private TextField<String> telegramGroupField;    private TextField<String> mobilePhoneField;    private DataGrid<IteractionList> jobCandidateIteractionListTable;
+    private Button openPositionProjectDescriptionButton;    private PopupButton frequentInteractionPopupButton;    private DataGrid<CandidateCV> jobCandidateCandidateCvTable;
+    private Button copyCVButton;    private Button scanContactsFromCVButton;
+    private Button checkSkillFromJD;    private TextField<String> emailField;    private TextField<String> phoneField;
+    private TextField<String> skypeNameField;    private TextField<String> telegramNameField;    private TextField<String> whatsupNameField;    private TextField<String> wiberNameField;    private DataGrid<SocialNetworkURLs> socialNetworkTable;
     private static final String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
     private static final String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
     private static final String QUERY_GET_OTHER_SOCIAL_NETWORK = "select e from hunttech_SocialNetworkType e where e.socialNetwork = :other";
@@ -235,9 +204,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private boolean candidateInitialized = false;
     private boolean tabContactInfoInitialized = false;
     private boolean initialInteractionAdded = false;
-    private boolean companyEditorOpen = false;
-    @Inject
-    private Table lastProjectTable;
+    private boolean companyEditorOpen = false;    private Table lastProjectTable;
     @Inject
     private KeyValueCollectionContainer lastProjectDc;
     private boolean initSocialNetworkURLs = false;
@@ -251,22 +218,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionContainer<Company> currentCompaniesDc;
     @Inject
     private CollectionLoader<City> citiesDl;
-    @Inject
-    private CollectionLoader<Position> personPositionsLc;
-    @Inject
-    private Table<OpenPosition> suggestVacancyTable;
+    private CollectionLoader<Position> personPositionsLc;    private Table<OpenPosition> suggestVacancyTable;
     @Inject
     private Image candidateDefaultPic;
     @Inject
     private MessageBundle messageBundle;
-    @Inject
-    private Button sendCommentButton;
-    @Inject
-    private TextField<String> chatMessageTextField;
-    @Inject
-    private LookupPickerField<OpenPosition> vacancyPopupPickerField;
-    @Inject
-    private DataGrid<IteractionList> jobCandidateCommentsDataGrid;
+    private Button sendCommentButton;    private TextField<String> chatMessageTextField;
+    private LookupPickerField<OpenPosition> vacancyPopupPickerField;    private DataGrid<IteractionList> jobCandidateCommentsDataGrid;
     @Inject
     private CollectionLoader<IteractionList> interactionCommentDl;
     private CollectionContainer<OpenPosition> suggestOpenPositionDc;
@@ -284,12 +242,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> mobilePhoneLabel;
     @Inject
     private Label<String> skypuLabel;
-    @Inject
-    private Label<String> telegramLabel;
-    @Inject
-    private Button addSocialNetworkListsButton;
-    @Inject
-    private LookupPickerField vacancyFilterLookupPickerField;
+    private Label<String> telegramLabel;    private Button addSocialNetworkListsButton;    private LookupPickerField vacancyFilterLookupPickerField;
     @Inject
     private ResumeRecognitionService resumeRecognitionService;
     @Inject
