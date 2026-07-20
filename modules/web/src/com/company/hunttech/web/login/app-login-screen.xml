@@ -96,7 +96,7 @@
             <image id="backgroundImage"
                    scaleMode="FILL"
                    stylename="c-login-background">
-                <relativePath path="VAADIN/brand-login-screen/background-2023.jpg"/>
+                <relativePath path="VAADIN/brand-login-screen/hunttech-ad1.png"/>
             </image>
         </cssLayout>
     </layout>
