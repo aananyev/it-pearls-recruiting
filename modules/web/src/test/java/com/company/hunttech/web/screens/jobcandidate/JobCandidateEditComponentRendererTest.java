@@ -8,6 +8,7 @@ import com.haulmont.cuba.gui.model.KeyValueCollectionLoader;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -16,7 +17,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -85,6 +89,35 @@ public class JobCandidateEditComponentRendererTest {
                 missingComponentIds.isEmpty());
     }
 
+    @Test
+    public void sidebarCreateActionsPrecedeHrMaster() throws Exception {
+        Document document = parseScreenDescriptor();
+        Element footer = findElementById(document, "candidateProfileFooter");
+        List<String> buttonIds = new ArrayList<>();
+
+        NodeList children = footer.getChildNodes();
+        for (int index = 0; index < children.getLength(); index++) {
+            Node node = children.item(index);
+            if (node instanceof Element && "button".equals(node.getNodeName())) {
+                Element button = (Element) node;
+                buttonIds.add(button.getAttribute("id"));
+                assertEquals("100%", button.getAttribute("width"));
+                assertEquals("small", button.getAttribute("stylename"));
+            }
+        }
+
+        assertEquals(Arrays.asList(
+                "createCandidateCvButton",
+                "createCandidateIteractionButton",
+                "openPositionMasterBrowseButton"), buttonIds);
+        assertSidebarAction(footer, "createCandidateCvButton",
+                "Создать резюме", "createCandidateCv");
+        assertSidebarAction(footer, "createCandidateIteractionButton",
+                "Создать взаимодействие", "createCandidateIteraction");
+        assertNotNull(JobCandidateEdit.class.getMethod("createCandidateCv"));
+        assertNotNull(JobCandidateEdit.class.getMethod("createCandidateIteraction"));
+    }
+
     private static Set<String> componentRendererColumnsFromDescriptor() throws Exception {
         Document document = parseScreenDescriptor();
         Set<String> columns = new LinkedHashSet<>();
@@ -108,6 +141,26 @@ public class JobCandidateEditComponentRendererTest {
         return DocumentBuilderFactory.newInstance()
                 .newDocumentBuilder()
                 .parse(SCREEN_DESCRIPTOR.toFile());
+    }
+
+    private static Element findElementById(Document document, String id) {
+        NodeList elements = document.getElementsByTagName("*");
+        for (int index = 0; index < elements.getLength(); index++) {
+            Element element = (Element) elements.item(index);
+            if (id.equals(element.getAttribute("id"))) {
+                return element;
+            }
+        }
+        throw new AssertionError("Component not found: " + id);
+    }
+
+    private static void assertSidebarAction(Element footer,
+                                            String id,
+                                            String caption,
+                                            String invoke) {
+        Element button = findElementById(footer.getOwnerDocument(), id);
+        assertEquals(caption, button.getAttribute("caption"));
+        assertEquals(invoke, button.getAttribute("invoke"));
     }
 
     private static void setField(Object target, String name, Object value) throws Exception {

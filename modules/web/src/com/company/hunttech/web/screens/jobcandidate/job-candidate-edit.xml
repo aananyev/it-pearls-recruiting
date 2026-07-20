@@ -390,6 +390,16 @@
                       width="100%"
                       spacing="true"
                       stylename="job-candidate-profile-footer">
+                    <button id="createCandidateCvButton"
+                            caption="Создать резюме"
+                            invoke="createCandidateCv"
+                            width="100%"
+                            stylename="small"/>
+                    <button id="createCandidateIteractionButton"
+                            caption="Создать взаимодействие"
+                            invoke="createCandidateIteraction"
+                            width="100%"
+                            stylename="small"/>
                     <button id="openPositionMasterBrowseButton"
                             caption="HR-Мастер"
                             invoke="openPositionMasterBrowseStart"

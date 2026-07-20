@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <theme-config xmlns="http://schemas.haulmont.com/cuba/theme-config.xsd">
-    <!-- HuntTech Modern: светлая плотная тема для рабочих экранов рекрутинга. -->
-    <theme id="hunttech-modern" name="Hunttech Modern (Light)"/>
+    <!-- HuntTech Modern Light: светлая плотная тема для рабочих экранов рекрутинга. -->
+    <theme id="hunttech-modern-light" name="Hunttech Modern (Light)"/>
     <!-- HuntTech Modern Dark: тёмная тема для работы в условиях низкой освещённости. -->
     <theme id="hunttech-modern-dark" name="Hunttech Modern (Dark)"/>
 </theme-config>

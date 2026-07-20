@@ -11,6 +11,17 @@
       72%
     );
     color: $v-font-color;
+
+    .c-suggestionfield,
+    .v-textfield,
+    .v-filterselect,
+    .v-filterselect-input,
+    .v-datefield,
+    .v-datefield-textfield {
+      height: 38px !important;
+      font-size: 16px !important;
+      line-height: 38px !important;
+    }
   }
 
   .job-candidate-main-layout {
@@ -41,6 +52,10 @@
 
   .job-candidate-sidebar > .v-spacing {
     height: 12px !important;
+  }
+
+  .job-candidate-sidebar .v-label {
+    font-size: 12px !important;
   }
 
   /* ==========================================================
@@ -107,7 +122,7 @@
     margin-top: 8px;
 
     color: $v-font-color;
-    font-size: 18px;
+    font-size: 16px !important;
     font-weight: 600;
     line-height: 1.3;
 
@@ -123,7 +138,7 @@
     width: 100%;
 
     color: rgba($v-font-color, 0.68);
-    font-size: 12px;
+    font-size: 10px !important;
     line-height: 1.4;
 
     text-align: center;
@@ -153,12 +168,12 @@
   }
 
   .job-candidate-status .v-label {
-    font-size: 12px;
+    font-size: 10px !important;
     line-height: 20px;
   }
 
   .job-candidate-status .h3 {
-    font-size: 13px !important;
+    font-size: 11px !important;
     line-height: 20px !important;
   }
 
@@ -200,7 +215,7 @@
 
   .job-candidate-info-grid .v-label,
   .job-candidate-info-grid .v-button-link {
-    font-size: 12px;
+    font-size: 10px;
     line-height: 18px;
   }
 

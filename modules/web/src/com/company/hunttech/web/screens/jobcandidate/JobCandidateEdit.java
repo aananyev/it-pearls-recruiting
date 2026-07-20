@@ -9,6 +9,7 @@ import com.company.hunttech.web.screens.candidatecv.CandidateCVEdit;
 import com.company.hunttech.web.screens.fragments.SkillLabelData;
 import com.company.hunttech.web.screens.fragments.Skillsbar;
 import com.company.hunttech.web.screens.jobcandidate.HistoryRowData;
+import com.company.hunttech.web.screens.iteractionlist.IteractionListEdit;
 import com.company.hunttech.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.hunttech.web.screens.openposition.OpenPositionMasterBrowse;
 import com.company.hunttech.web.screens.openposition.openpositionviews.QuickViewOpenPositionDescription;
@@ -3309,6 +3310,40 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         OpenPositionMasterBrowse openPositionMasterBrowse = screens.create(OpenPositionMasterBrowse.class);
         openPositionMasterBrowse.setJobCandidate(getEditedEntity());
         openPositionMasterBrowse.show();
+    }
+
+    public void createCandidateCv() {
+        ensureCandidateCvLoaded();
+
+        screenBuilders.editor(CandidateCV.class, this)
+                .newEntity()
+                .withContainer(jobCandidateCandidateCvsDc)
+                .withInitializer(candidateCv -> candidateCv.setCandidate(getEditedEntity()))
+                .withScreenClass(CandidateCVEdit.class)
+                .withAfterCloseListener(event -> {
+                    if (jobCandidateCandidateCvTable != null) {
+                        jobCandidateCandidateCvTable.repaint();
+                    }
+                })
+                .build()
+                .show();
+    }
+
+    public void createCandidateIteraction() {
+        ensureInteractionsLoaded();
+
+        screenBuilders.editor(IteractionList.class, this)
+                .newEntity()
+                .withContainer(jobCandidateIteractionDc)
+                .withInitializer(iteraction -> iteraction.setCandidate(getEditedEntity()))
+                .withScreenClass(IteractionListEdit.class)
+                .withAfterCloseListener(event -> {
+                    if (jobCandidateIteractionListTable != null) {
+                        jobCandidateIteractionListTable.repaint();
+                    }
+                })
+                .build()
+                .show();
     }
 
     public Component whoIsResearcherGeneratorColumn(Entity entity) {
