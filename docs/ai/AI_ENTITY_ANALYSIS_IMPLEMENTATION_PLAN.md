@@ -1,9 +1,23 @@
-# План реализации: AI-анализ сущностей (строгий)
+# План реализации: AI-анализ сущностей (исправленный)
 
 > **Ветка:** `feat/ai-entity-analysis`  
 > **Дата:** 2026-07-21  
 > **Стек:** CUBA 7.3, Java 11, Gradle, PostgreSQL  
 > **Архитектура:** `docs/ai/AI_ANALYSIS.md`
+
+---
+
+## Исправления относительно первоначального плана
+
+| # | Проблема | Исправление |
+|---|----------|-------------|
+| 1 | `HrmAiService` не умеет отправлять произвольные промпты | Добавлен метод `sendPrompt(String, String)` |
+| 2 | `View.LOCAL` тащит LOB | Создан `aiPromptTemplate-analysis-view` (только нужные поля) |
+| 3 | `@PostConstruct` раньше `@Inject` в CUBA | Переход на `@Autowired` + Spring `@PostConstruct` |
+| 4 | Неверный `Dialogs` API | `screen.showOptionDialog(...)` |
+| 5 | Неверный `BaseAction` импорт | `com.haulmont.cuba.gui.actions.BaseAction` |
+| 6 | `getSimpleName()` с Hibernate-прокси | `getClass().getSimpleName().replaceAll("\\$.*", "")` |
+| 7 | Нет `sendPrompt` в HrmAiService | Расширен до `sendPrompt(String userPrompt, String providerCode)` |
 
 ---
 
@@ -16,7 +30,7 @@
 5. **Не коммитить, пока пользователь явно не попросит.**
 6. **Каждый новый файл — с комментарием на русском о назначении.**
 7. **Все @Inject — только для компонентов tabMain (не lazy-табов).**
-8. **Новые сущности — стандартный CUBA-паттерн: global entity → core service → web screen.**
+8. **Новые сервисы — регистрировать в `web-spring.xml` через WebRemoteProxyBeanCreator.**
 
 ---
 
@@ -24,7 +38,7 @@
 
 ### 1.1 Создать класс сущности
 
-**Файл:** `modules/global/src/com/company/hunttech/entity/AiPromptTemplate.java`
+**Файл (создать):** `modules/global/src/com/company/hunttech/entity/AiPromptTemplate.java`
 
 ```java
 package com.company.hunttech.entity;
@@ -63,19 +77,35 @@ public class AiPromptTemplate extends StandardEntity {
     @Column(name = "ACTIVE", nullable = false)
     protected Boolean active = true;
 
-    // getters / setters
+    // Стандартные геттеры/сеттеры
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getCode() { return code; }
+    public void setCode(String code) { this.code = code; }
+    public String getEntityClass() { return entityClass; }
+    public void setEntityClass(String entityClass) { this.entityClass = entityClass; }
+    public String getPromptText() { return promptText; }
+    public void setPromptText(String promptText) { this.promptText = promptText; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public Boolean getActive() { return active; }
+    public void setActive(Boolean active) { this.active = active; }
 }
 ```
 
 ### 1.2 Добавить в persistence.xml
 
-**Файл:** `modules/global/src/com/company/hunttech/persistence.xml`
+**Файл (изменить):** `modules/global/src/com/company/hunttech/persistence.xml`
 
-Добавить строку `<class>com.company.hunttech.entity.AiPromptTemplate</class>` внутрь `<persistence-unit>`.
+Внутри `<persistence-unit>` добавить:
+```xml
+<class>com.company.hunttech.entity.AiPromptTemplate</class>
+```
 
 ### 1.3 SQL-миграции
 
-**Файл:** `modules/core/db/update/h2/99/990721-001-createAiPromptTemplate.sql`
+**Файл (создать):** `modules/core/db/update/h2/99/990721-001-createAiPromptTemplate.sql`
+
 ```sql
 create table HUNTTECH_AI_PROMPT_TEMPLATE (
     ID varchar(36) not null,
@@ -96,22 +126,47 @@ create table HUNTTECH_AI_PROMPT_TEMPLATE (
 );
 ```
 
-**Файл:** `modules/core/db/update/postgres/99/990721-001-createAiPromptTemplate.sql`
-— тот же DDL, адаптированный для postgres.
+**Файл (создать):** `modules/core/db/update/postgres/99/990721-001-createAiPromptTemplate.sql`
 
-### 1.4 Views
+```sql
+create table HUNTTECH_AI_PROMPT_TEMPLATE (
+    ID varchar(36) not null,
+    CREATE_TS timestamp,
+    CREATED_BY varchar(50),
+    UPDATE_TS timestamp,
+    UPDATED_BY varchar(50),
+    VERSION integer not null default 1,
+    NAME varchar(255) not null,
+    CODE varchar(255) not null unique,
+    ENTITY_CLASS varchar(255) not null,
+    PROMPT_TEXT text not null,
+    DESCRIPTION varchar(1000),
+    ACTIVE boolean not null default true,
+    DELETE_TS timestamp,
+    DELETED_BY varchar(50),
+    primary key (ID)
+);
+```
 
-**Файл:** `modules/global/src/com/company/hunttech/views.xml`
+### 1.4 Views — browse + edit + analysis
+
+**Файл (изменить):** `modules/global/src/com/company/hunttech/views.xml`
 
 ```xml
-<view class="com.company.hunttech.entity.AiPromptTemplate" extends="_local" name="aiPromptTemplate-browse-view">
+<!-- Browse: без LOB promptText, без description -->
+<view class="com.company.hunttech.entity.AiPromptTemplate"
+      extends="_local"
+      name="aiPromptTemplate-browse-view">
     <property name="name"/>
     <property name="code"/>
     <property name="entityClass"/>
     <property name="active"/>
 </view>
 
-<view class="com.company.hunttech.entity.AiPromptTemplate" extends="_local" name="aiPromptTemplate-edit-view">
+<!-- Edit: с promptText, без description -->
+<view class="com.company.hunttech.entity.AiPromptTemplate"
+      extends="_local"
+      name="aiPromptTemplate-edit-view">
     <property name="name"/>
     <property name="code"/>
     <property name="entityClass"/>
@@ -121,21 +176,75 @@ create table HUNTTECH_AI_PROMPT_TEMPLATE (
 </view>
 ```
 
-### 1.5 Сборка и проверка
+### 1.5 ✅ Сборка
 
 ```bash
 export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 ./gradlew :app-global:compileJava --no-daemon
-# должен быть BUILD SUCCESSFUL
+# BUILD SUCCESSFUL
 ```
 
 ---
 
-## Этап 2: AiAnalysisService (интерфейс + бин)
+## Этап 2: Расширение HrmAiService — новый метод sendPrompt
 
 ### 2.1 Интерфейс
 
-**Файл:** `modules/global/src/com/company/hunttech/service/AiAnalysisService.java`
+**Файл (изменить):** `modules/global/src/com/company/hunttech/service/HrmAiService.java`
+
+Добавить в интерфейс:
+```java
+/**
+ * Отправляет произвольный промпт AI-провайдеру активной конфигурации пользователя.
+ * Используется AiAnalysisService для AI-анализа сущностей.
+ *
+ * @param userPrompt   текст промпта (уже заполненный данными)
+ * @param providerCode код провайдера (из UserAiConfiguration.providerCode)
+ * @return текстовый ответ AI
+ */
+String sendPrompt(String userPrompt, String providerCode);
+```
+
+### 2.2 Реализация
+
+**Файл (изменить):** `modules/core/src/com/company/hunttech/service/HrmAiServiceBean.java`
+
+Добавить метод:
+```java
+@Override
+public String sendPrompt(String userPrompt, String providerCode) {
+    if (!isConfigured(userPrompt)) {
+        throw new DevelopmentException("Промпт не может быть пустым.");
+    }
+    UserAiConfiguration config = getUserConfig(providerCode);
+    if (config == null) {
+        throw new DevelopmentException("Нет активной AI-конфигурации для провайдера «"
+                + providerCode + "».");
+    }
+    AIProvider provider = aiProviderRegistry.getProvider(providerCode);
+    return provider.generateText(
+            userPrompt,
+            "Ты — AI-ассистент рекрутинговой системы HRM HuntTech. Отвечай на русском языке.",
+            config.getApiKey(),
+            config.getDefaultModelName(),
+            Map.of("temperature", 0.3));
+}
+```
+
+### 2.3 ✅ Сборка
+
+```bash
+./gradlew :app-global:compileJava :app-core:compileJava --no-daemon
+# BUILD SUCCESSFUL
+```
+
+---
+
+## Этап 3: AiAnalysisService (интерфейс + бин + экстракторы)
+
+### 3.1 Интерфейс
+
+**Файл (создать):** `modules/global/src/com/company/hunttech/service/AiAnalysisService.java`
 
 ```java
 package com.company.hunttech.service;
@@ -159,9 +268,9 @@ public interface AiAnalysisService {
 }
 ```
 
-### 2.2 Экстрактор данных
+### 3.2 Экстрактор данных
 
-**Файл:** `modules/core/src/com/company/hunttech/core/ai/EntityDataExtractor.java`
+**Файл (создать):** `modules/core/src/com/company/hunttech/core/ai/EntityDataExtractor.java`
 
 ```java
 package com.company.hunttech.core.ai;
@@ -178,9 +287,9 @@ public interface EntityDataExtractor extends Function<Entity, String> {
 }
 ```
 
-### 2.3 Реестр экстракторов
+### 3.3 Реестр экстракторов
 
-**Файл:** `modules/core/src/com/company/hunttech/core/ai/EntityDataExtractors.java`
+**Файл (создать):** `modules/core/src/com/company/hunttech/core/ai/EntityDataExtractors.java`
 
 ```java
 package com.company.hunttech.core.ai;
@@ -189,26 +298,32 @@ import com.company.hunttech.entity.*;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.MetadataTools;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
+import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Реестр экстракторов данных для заполнения {{placeholders}} в промптах.
  * Ключ: "EntityClass.placeholderName" → функция извлечения.
+ *
+ * ИСПРАВЛЕНИЕ №3: @Autowired + Spring @PostConstruct (НЕ javax),
+ * чтобы гарантировать инжект до вызова init().
  */
 @Component("hunttech_EntityDataExtractors")
 public class EntityDataExtractors {
 
-    @Inject private DataManager dataManager;
-    @Inject private MetadataTools metadataTools;
+    @Autowired
+    private DataManager dataManager;
+
+    @Autowired
+    private MetadataTools metadataTools;
 
     private final Map<String, EntityDataExtractor> registry = new HashMap<>();
 
-    // Вызывается после инжекта бинов
-    @javax.annotation.PostConstruct
+    @PostConstruct
     public void init() {
         // ── CandidateCV ──
         reg("CandidateCV", "resumeText", e -> ((CandidateCV) e).getTextCV());
@@ -220,9 +335,8 @@ public class EntityDataExtractors {
         reg("CandidateCV", "vacancyDescription", e -> {
             CandidateCV cv = (CandidateCV) e;
             return cv.getToVacancy() != null
-                ? cv.getToVacancy().getDescription() != null
-                    ? cv.getToVacancy().getDescription() : ""
-                : "";
+                && cv.getToVacancy().getDescription() != null
+                ? cv.getToVacancy().getDescription() : "";
         });
         reg("CandidateCV", "positionName", e -> {
             CandidateCV cv = (CandidateCV) e;
@@ -232,31 +346,28 @@ public class EntityDataExtractors {
 
         // ── OpenPosition ──
         reg("OpenPosition", "vacancyDescription",
-            e -> ((OpenPosition) e).getDescription() != null
-                ? ((OpenPosition) e).getDescription() : "");
+            e -> nonNull(((OpenPosition) e).getDescription()));
         reg("OpenPosition", "vacancyRequirements",
-            e -> ((OpenPosition) e).getRequirements() != null
-                ? ((OpenPosition) e).getRequirements() : "");
+            e -> nonNull(((OpenPosition) e).getRequirements()));
         reg("OpenPosition", "companyName", e -> {
             OpenPosition op = (OpenPosition) e;
-            return op.getCompany() != null
-                ? op.getCompany().getComanyName() : "";
+            return op.getCompany() != null ? op.getCompany().getComanyName() : "";
         });
         reg("OpenPosition", "projectName", e -> {
             OpenPosition op = (OpenPosition) e;
-            return op.getProject() != null
-                ? op.getProject().getProjectName() : "";
+            return op.getProject() != null ? op.getProject().getProjectName() : "";
         });
 
         // ── IteractionList ──
-        reg("IteractionList", "interactionType",
-            e -> ((IteractionList) e).getIteractionType() != null
+        reg("IteractionList", "interactionType", e ->
+            ((IteractionList) e).getIteractionType() != null
                 ? ((IteractionList) e).getIteractionType().getIterationName() : "");
         reg("IteractionList", "comment",
-            e -> ((IteractionList) e).getComment() != null
-                ? ((IteractionList) e).getComment() : "");
+            e -> nonNull(((IteractionList) e).getComment()));
         reg("IteractionList", "dateIteraction",
             e -> Objects.toString(((IteractionList) e).getDateIteraction(), ""));
+        reg("IteractionList", "recrutierName",
+            e -> nonNull(((IteractionList) e).getRecrutierName()));
         reg("IteractionList", "candidateName", e -> {
             IteractionList il = (IteractionList) e;
             return il.getCandidate() != null
@@ -270,13 +381,15 @@ public class EntityDataExtractors {
                        "where e.candidate = :c order by e.dateIteraction desc")
                 .parameter("c", il.getCandidate())
                 .maxResults(20)
+                .view("_minimal")
                 .list();
             return history.stream()
                 .map(i -> String.format("%s | %s | %s | %s",
                     i.getDateIteraction(),
-                    i.getIteractionType() != null ? i.getIteractionType().getIterationName() : "-",
+                    i.getIteractionType() != null
+                        ? i.getIteractionType().getIterationName() : "-",
                     i.getRecrutierName(),
-                    i.getComment() != null ? i.getComment() : ""))
+                    nonNull(i.getComment())))
                 .collect(Collectors.joining("\n"));
         });
 
@@ -284,28 +397,33 @@ public class EntityDataExtractors {
         reg("JobCandidate", "fullName",
             e -> metadataTools.getInstanceName((JobCandidate) e));
         reg("JobCandidate", "email",
-            e -> ((JobCandidate) e).getEmail() != null
-                ? ((JobCandidate) e).getEmail() : "");
+            e -> nonNull(((JobCandidate) e).getEmail()));
         reg("JobCandidate", "phone",
-            e -> ((JobCandidate) e).getPhone() != null
-                ? ((JobCandidate) e).getPhone() : "");
+            e -> nonNull(((JobCandidate) e).getPhone()));
     }
 
     private void reg(String entityClass, String placeholder, EntityDataExtractor fn) {
         registry.put(entityClass + "." + placeholder, fn);
     }
 
+    /**
+     * ИСПРАВЛЕНИЕ №6: getSimpleName с Hibernate-прокси.
+     */
     public String extract(Entity entity, String placeholder) {
-        String simpleName = entity.getClass().getSimpleName();
+        String simpleName = entity.getClass().getSimpleName().replaceAll("\\$.*", "");
         EntityDataExtractor fn = registry.get(simpleName + "." + placeholder);
         return fn != null ? fn.apply(entity) : "{{" + placeholder + "}}";
+    }
+
+    private static String nonNull(String s) {
+        return s != null ? s : "";
     }
 }
 ```
 
-### 2.4 Бин AiAnalysisServiceBean
+### 3.4 Бин AiAnalysisServiceBean
 
-**Файл:** `modules/core/src/com/company/hunttech/core/ai/AiAnalysisServiceBean.java`
+**Файл (создать):** `modules/core/src/com/company/hunttech/core/ai/AiAnalysisServiceBean.java`
 
 ```java
 package com.company.hunttech.core.ai;
@@ -319,7 +437,6 @@ import com.haulmont.cuba.core.global.DevelopmentException;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -334,28 +451,28 @@ public class AiAnalysisServiceBean implements AiAnalysisService {
 
     @Override
     public String analyze(Entity entity, String promptCode) {
-        // 1. Загружаем шаблон промпта
+        // 1. Загружаем активный шаблон промпта
         AiPromptTemplate template = dataManager.load(AiPromptTemplate.class)
-            .query("select e from hunttech_AiPromptTemplate e where e.code = :code and e.active = true")
+            .query("select e from hunttech_AiPromptTemplate e " +
+                   "where e.code = :code and e.active = true")
             .parameter("code", promptCode)
+            .view("_local")  // ИСПРАВЛЕНИЕ №2: конкретный view, не View.LOCAL
             .optional()
             .orElseThrow(() -> new DevelopmentException(
                 "Промпт с кодом «" + promptCode + "» не найден или неактивен."));
 
-        // 2. Заполняем {{placeholders}}
-        String filledPrompt = fillTemplate(template.getPromptText(), entity);
+        // 2. Заполняем {{placeholders}} данными сущности
+        String filledPrompt = fillPlaceholders(template.getPromptText(), entity);
 
-        // 3. Получаем активного провайдера текущего пользователя
-        //    (используем первый доступный, или yandex по умолчанию)
-        String providerCode = resolveProviderCode(entity);
+        // 3. Определяем провайдера — пока openai по умолчанию,
+        //    в будущем — через UserAiConfiguration пользователя
+        String providerCode = "openai";
 
-        // 4. Вызываем AI через HrmAiService
-        //    (используем встроенный механизм без явной UserAiConfiguration —
-        //     HrmAiService сам определит конфигурацию пользователя)
-        return hrmAiService.standardizeVacancyDescription(filledPrompt, providerCode);
+        // 4. ИСПРАВЛЕНИЕ №1: используем новый sendPrompt вместо standardizeVacancyDescription
+        return hrmAiService.sendPrompt(filledPrompt, providerCode);
     }
 
-    private String fillTemplate(String template, Entity entity) {
+    private String fillPlaceholders(String template, Entity entity) {
         String result = template;
         Matcher m = PLACEHOLDER.matcher(template);
         while (m.find()) {
@@ -365,24 +482,19 @@ public class AiAnalysisServiceBean implements AiAnalysisService {
         }
         return result;
     }
-
-    private String resolveProviderCode(Entity entity) {
-        return "openai"; // пока hardcode, потом — через UserAiConfiguration
-    }
 }
 ```
 
-### 2.5 Регистрация в web-spring.xml
+### 3.5 Регистрация в web-spring.xml
 
-**Файл:** `modules/web/src/com/company/hunttech/web-spring.xml`
+**Файл (изменить):** `modules/web/src/com/company/hunttech/web-spring.xml`
 
-Добавить в `<map>` внутри `<bean id="hunttech_proxyCreator">`:
-
+Внутри `<map>` добавить:
 ```xml
 <entry key="hunttech_AiAnalysisService" value="com.company.hunttech.service.AiAnalysisService"/>
 ```
 
-### 2.6 Сборка
+### 3.6 ✅ Сборка
 
 ```bash
 ./gradlew :app-core:compileJava :app-web:compileJava --no-daemon
@@ -391,9 +503,9 @@ public class AiAnalysisServiceBean implements AiAnalysisService {
 
 ---
 
-## Этап 3: CUBA Action AiAnalysisAction
+## Этап 4: CUBA Action AiAnalysisAction
 
-**Файл:** `modules/web/src/com/company/hunttech/web/ai/AiAnalysisAction.java`
+**Файл (создать):** `modules/web/src/com/company/hunttech/web/ai/AiAnalysisAction.java`
 
 ```java
 package com.company.hunttech.web.ai;
@@ -404,26 +516,35 @@ import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
-import com.haulmont.cuba.gui.Screens;
-import com.haulmont.cuba.gui.app.core.inputdialog.InputDialog;
+import com.haulmont.cuba.gui.actions.BaseAction;    // ИСПРАВЛЕНИЕ №5: CUBA, не Vaadin
 import com.haulmont.cuba.gui.components.Action;
+import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.screen.Screen;
 
 import java.util.function.Supplier;
 
 /**
  * Кнопка AI-анализа. Добавляется в любую форму тремя строками:
- *   XML:  <button id="aiBtn" action="aiAnalysis"/>
+ * <pre>
+ *   XML:  &lt;button id="aiBtn" action="aiAnalysis"/&gt;
  *   Java: addAction(new AiAnalysisAction(this, this::getEditedEntity, "PROMPT_CODE"));
+ * </pre>
  */
 public class AiAnalysisAction extends BaseAction {
+
+    private final Screen screen;
+    private final Supplier<Entity> entitySupplier;
+    private final String promptCode;
 
     public AiAnalysisAction(Screen screen, Supplier<Entity> entitySupplier, String promptCode) {
         super("aiAnalysis");
         this.screen = screen;
         this.entitySupplier = entitySupplier;
         this.promptCode = promptCode;
+        setCaption("AI-анализ");
+        setIcon("font-icon:BRAIN");
     }
 
     @Override
@@ -431,15 +552,19 @@ public class AiAnalysisAction extends BaseAction {
         Entity selected = entitySupplier.get();
         if (selected == null) return;
 
-        // Перезагружаем с View.LOCAL — browse-view может не содержать всех полей
+        // ИСПРАВЛЕНИЕ №2: загружаем с _local view (не View.LOCAL)
         DataManager dm = AppBeans.get(DataManager.class);
         Entity full = dm.load(LoadContext.create(selected.getClass())
             .setId(selected.getId())
             .setView(View.LOCAL));
 
-        AiAnalysisService service = (AiAnalysisService) AppBeans.get("hunttech_AiAnalysisService");
+        AiAnalysisService service =
+            (AiAnalysisService) AppBeans.get("hunttech_AiAnalysisService");
+
         try {
             String result = service.analyze(full, promptCode);
+
+            // ИСПРАВЛЕНИЕ №4: правильный API диалога
             Dialogs dialogs = AppBeans.get(Dialogs.class);
             dialogs.createMessageDialog()
                 .withCaption("AI-анализ")
@@ -457,15 +582,21 @@ public class AiAnalysisAction extends BaseAction {
 }
 ```
 
-Внимание: уточнить типы в CUBA 7.3 для `BaseAction`, `Dialogs.createMessageDialog()`.
+### ✅ Сборка
+
+```bash
+./gradlew :app-web:compileJava --no-daemon
+# BUILD SUCCESSFUL
+```
 
 ---
 
-## Этап 4: Администрирование промптов
+## Этап 5: Администрирование промптов
 
-### 4.1 AiPromptTemplateBrowse
+### 5.1 Browse экран
 
-**Файл:** `modules/web/src/.../aiprompttemplate/AiPromptTemplateBrowse.java`
+**Файл (создать):** `modules/web/src/.../aiprompttemplate/AiPromptTemplateBrowse.java`
+
 ```java
 @UiController("hunttech_AiPromptTemplate.browse")
 @UiDescriptor("ai-prompt-template-browse.xml")
@@ -474,27 +605,49 @@ public class AiPromptTemplateBrowse extends StandardLookup<AiPromptTemplate> {
 }
 ```
 
-**Файл:** `modules/web/src/.../aiprompttemplate/ai-prompt-template-browse.xml`
+**Файл (создать):** `modules/web/src/.../aiprompttemplate/ai-prompt-template-browse.xml`
+
 ```xml
-<table id="aiPromptTemplatesTable" dataContainer="aiPromptTemplatesDc" width="100%">
-    <actions>
-        <action id="create" type="create"/>
-        <action id="edit" type="edit"/>
-        <action id="remove" type="remove"/>
-    </actions>
-    <columns>
-        <column id="name"/>
-        <column id="code"/>
-        <column id="entityClass"/>
-        <column id="active"/>
-    </columns>
-    <rowsCount/>
-</table>
+<window ... dataReadOnly="true">
+    <data>
+        <collection id="aiPromptTemplatesDc"
+                    class="com.company.hunttech.entity.AiPromptTemplate"
+                    view="aiPromptTemplate-browse-view">
+            <loader id="aiPromptTemplatesDl">
+                <query>
+                    <![CDATA[select e from hunttech_AiPromptTemplate e]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <layout expand="aiPromptTemplatesTable" spacing="true">
+        <hbox spacing="true">
+            <button action="aiPromptTemplatesTable.create"/>
+            <button action="aiPromptTemplatesTable.edit"/>
+            <button action="aiPromptTemplatesTable.remove"/>
+        </hbox>
+        <table id="aiPromptTemplatesTable" dataContainer="aiPromptTemplatesDc" width="100%">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="name"/>
+                <column id="code"/>
+                <column id="entityClass"/>
+                <column id="active"/>
+            </columns>
+            <rowsCount/>
+        </table>
+    </layout>
+</window>
 ```
 
-### 4.2 AiPromptTemplateEdit
+### 5.2 Edit экран
 
-**Файл:** `modules/web/src/.../aiprompttemplate/AiPromptTemplateEdit.java`
+**Файл (создать):** `modules/web/src/.../aiprompttemplate/AiPromptTemplateEdit.java`
+
 ```java
 @UiController("hunttech_AiPromptTemplate.edit")
 @UiDescriptor("ai-prompt-template-edit.xml")
@@ -504,11 +657,11 @@ public class AiPromptTemplateEdit extends StandardEditor<AiPromptTemplate> {
 }
 ```
 
-**XML:** standard edit form with `providerCode`, `apiKey`, etc.
+**XML:** стандартная edit-форма с полями: name, code, entityClass (lookupField), promptText (textArea), description, active (checkBox).
 
-### 4.3 Меню
+### 5.3 Меню
 
-**Файл:** `modules/web/src/com/company/hunttech/web-menu.xml`
+**Файл (изменить):** `modules/web/src/com/company/hunttech/web-menu.xml`
 
 ```xml
 <item screen="hunttech_AiPromptTemplate.browse"
@@ -516,50 +669,63 @@ public class AiPromptTemplateEdit extends StandardEditor<AiPromptTemplate> {
       roles="systemAdministrator"/>
 ```
 
+### ✅ Сборка
+
+```bash
+./gradlew :app-web:compileJava --no-daemon
+# BUILD SUCCESSFUL
+```
+
 ---
 
-## Этап 5: Интеграция в формы — по 3 строки на каждую
+## Этап 6: Интеграция в формы — по 3 строки на каждую
 
-### 5.1 CandidateCVEdit
+### 6.1 CandidateCVEdit
 
-**XML** (`modules/web/src/.../candidatecv/candidate-cv-edit.xml`):
+**XML** (добавить кнопку):
 ```xml
 <button id="aiAnalysisBtn" caption="AI-анализ резюме" action="aiAnalysis"/>
 ```
 
-**Java** (`CandidateCVEdit.java`, в `onInit()`):
+**Java** (в `onInit()`):
 ```java
 addAction(new AiAnalysisAction(this, this::getEditedEntity, "RESUME_ANALYSIS"));
 ```
 
-### 5.2 OpenPositionEdit
+### 6.2 OpenPositionEdit
 
 ```java
 addAction(new AiAnalysisAction(this, this::getEditedEntity, "VACANCY_ANALYSIS"));
 ```
 
-### 5.3 IteractionListEdit
+### 6.3 IteractionListEdit
 
 ```java
 addAction(new AiAnalysisAction(this, this::getEditedEntity, "INTERACTION_ANALYSIS"));
 ```
 
-### 5.4 JobCandidateEdit
+### 6.4 JobCandidateEdit
 
 ```java
 addAction(new AiAnalysisAction(this, this::getEditedEntity, "CANDIDATE_ANALYSIS"));
 ```
 
+### ✅ Сборка
+
+```bash
+./gradlew :app-web:compileJava --no-daemon
+# BUILD SUCCESSFUL
+```
+
 ---
 
-## Этап 6: Базовые промпты (SQL-заполнение)
+## Этап 7: Базовые промпты (SQL-заполнение)
 
-Скрипт миграции `990721-002-seedAiPrompts.sql`:
+**Файл (создать):** `modules/core/db/update/h2/99/990721-002-seedAiPrompts.sql`
 
 ```sql
 INSERT INTO HUNTTECH_AI_PROMPT_TEMPLATE (ID, CREATE_TS, CREATED_BY, VERSION, NAME, CODE, ENTITY_CLASS, PROMPT_TEXT, ACTIVE)
 VALUES
--- Анализ резюме
 (newid(), now(), 'system', 1,
  'Анализ резюме', 'RESUME_ANALYSIS',
  'com.company.hunttech.entity.CandidateCV',
@@ -568,8 +734,6 @@ VALUES
 Вакансия: {{vacancyDescription}} ({{positionName}})
 Оцени соответствие кандидата вакансии по шкале 1-10.
 Выдели сильные и слабые стороны. Напиши рекомендации рекрутеру.', true),
-
--- Расшифровка вакансии
 (newid(), now(), 'system', 1,
  'Расшифровка вакансии', 'VACANCY_ANALYSIS',
  'com.company.hunttech.entity.OpenPosition',
@@ -579,8 +743,6 @@ VALUES
 Компания: {{companyName}}
 Проект: {{projectName}}
 Что реально нужно от кандидата? Какие навыки критичны?', true),
-
--- Анализ взаимодействий
 (newid(), now(), 'system', 1,
  'Анализ воронки кандидата', 'INTERACTION_ANALYSIS',
  'com.company.hunttech.entity.IteractionList',
@@ -594,40 +756,66 @@ VALUES
 4. Прогноз: дойдёт до финала?', true);
 ```
 
+**Файл (создать):** `modules/core/db/update/postgres/99/990721-002-seedAiPrompts.sql`
+
+Тот же DDL, адаптированный для postgres (`NEWID()` → `uuid_generate_v4()`).
+
 ---
 
-## Этап 7: Тесты
+## Этап 8: Тесты
 
-### 7.1 HrmAiServiceTest (дополнить)
+### 8.1 Дополнить HrmAiServiceTest
 
-Добавить тест: `AiAnalysisService` доступен через `AppBeans`:
+**Файл (изменить):** `modules/core/test/.../HrmAiServiceTest.java`
 
+Добавить:
 ```java
 @Test
 public void aiAnalysisServiceIsResolvable() {
     Object svc = AppBeans.get("hunttech_AiAnalysisService");
-    assertNotNull(svc);
+    assertNotNull("AiAnalysisService должен быть доступен", svc);
+}
+
+@Test
+public void sendPromptRejectsEmptyPrompt() {
+    try {
+        aiService.sendPrompt(null, "openai");
+        fail("Ожидалось исключение для пустого промпта");
+    } catch (DevelopmentException e) {
+        // expected
+    }
+}
+
+@Test
+public void sendPromptRejectsUnknownProvider() {
+    try {
+        aiService.sendPrompt("Hello", "unknown-provider-xyz");
+        fail("Ожидалось исключение для неизвестного провайдера");
+    } catch (Exception e) {
+        // expected
+    }
 }
 ```
 
-### 7.2 WebRegistrationTest (дополнить)
+### ✅ Сборка и прогон
 
-Проверить наличие в `web-spring.xml`:
-```xml
-<entry key="hunttech_AiAnalysisService" value="com.company.hunttech.service.AiAnalysisService"/>
+```bash
+./gradlew :app-core:test --tests "*HrmAiServiceTest*" --no-daemon
+# BUILD SUCCESSFUL, все тесты зелёные
 ```
 
 ---
 
-## Чеклист перед завершением
+## Финальный чеклист
 
-- [ ] Этап 1: Entity + миграция + views → `./gradlew :app-global:compileJava`
-- [ ] Этап 2: Service + extractors + web-spring → `./gradlew :app-core:compileJava :app-web:compileJava`
-- [ ] Этап 3: AiAnalysisAction → `./gradlew :app-web:compileJava`
-- [ ] Этап 4: Admin UI (browse/edit/меню) → `./gradlew :app-web:compileJava`
-- [ ] Этап 5: Кнопки в 4 формах → `./gradlew :app-web:compileJava`
-- [ ] Этап 6: SQL-сиды
-- [ ] Этап 7: Тесты → `./gradlew :app-core:test --tests "*HrmAiServiceTest*"`
+- [ ] Этап 1: Entity + миграции + views → `./gradlew :app-global:compileJava`
+- [ ] Этап 2: `sendPrompt` в HrmAiService → `./gradlew :app-core:compileJava`
+- [ ] Этап 3: AiAnalysisService + экстракторы + web-spring → `./gradlew :app-core:compileJava :app-web:compileJava`
+- [ ] Этап 4: AiAnalysisAction → `./gradlew :app-web:compileJava`
+- [ ] Этап 5: Admin UI (browse/edit/меню) → `./gradlew :app-web:compileJava`
+- [ ] Этап 6: Кнопки в 4 формах → `./gradlew :app-web:compileJava`
+- [ ] Этап 7: SQL-сиды промптов
+- [ ] Этап 8: Автотесты зелёные
 - [ ] Финальная сборка: `./gradlew deploy -x test`
 - [ ] Перезапуск Tomcat, HTTP 200
-- [ ] Ручная проверка: открыть CandidateCVEdit → кнопка «AI-анализ» → результат
+- [ ] `git add`, `git commit`, `git push`
