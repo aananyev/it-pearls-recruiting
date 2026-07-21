@@ -62,4 +62,16 @@ public class HrmAiServiceTest {
         assertNotNull(c.getUser());
         assertNotNull(c.getApiKey());
     }
+
+    @Test
+    public void aiAnalysisServiceIsResolvable() {
+        Object svc = AppBeans.get("hunttech_AiAnalysisService");
+        assertNotNull("AiAnalysisService должен быть доступен", svc);
+    }
+
+    @Test
+    public void entityDataExtractorsIsResolvable() {
+        Object extractors = AppBeans.get("hunttech_EntityDataExtractors");
+        assertNotNull("EntityDataExtractors должен быть доступен", extractors);
+    }
 }
