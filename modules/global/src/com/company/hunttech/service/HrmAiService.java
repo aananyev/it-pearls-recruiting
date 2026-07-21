@@ -23,4 +23,14 @@ public interface HrmAiService {
      * провайдера, API-ключ и модель до запуска рабочих AI-сценариев рекрутинга.
      */
     void testConnection(UserAiConfiguration configuration);
+
+    /**
+     * Отправляет произвольный промпт AI-провайдеру через активную конфигурацию
+     * пользователя. Используется AiAnalysisService для AI-анализа сущностей.
+     *
+     * @param userPrompt   заполненный текст промпта (уже с подставленными данными)
+     * @param providerCode код провайдера из UserAiConfiguration.providerCode
+     * @return текстовый ответ AI
+     */
+    String sendPrompt(String userPrompt, String providerCode);
 }

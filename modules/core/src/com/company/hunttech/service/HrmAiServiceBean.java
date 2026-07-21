@@ -101,6 +101,27 @@ public class HrmAiServiceBean implements HrmAiService {
         }
     }
 
+    @Override
+    public String sendPrompt(String userPrompt, String providerCode) {
+        if (!isConfigured(userPrompt)) {
+            throw new DevelopmentException("Промпт не может быть пустым.");
+        }
+        if (!isConfigured(providerCode)) {
+            throw new DevelopmentException("Не указан код провайдера AI.");
+        }
+
+        UserAiConfiguration config = getUserConfig(providerCode);
+        AIProvider provider = aiProviderRegistry.getProvider(providerCode);
+
+        return provider.generateText(
+                userPrompt,
+                "Ты — AI-ассистент рекрутинговой системы HRM HuntTech. "
+                        + "Отвечай на русском языке развёрнуто и по делу.",
+                config.getApiKey(),
+                config.getDefaultModelName(),
+                Map.of("temperature", 0.3));
+    }
+
     private UserAiConfiguration getUserConfig(String providerCode) {
         User user = userSessionSource.getUserSession().getUser();
         UserAiConfiguration config = dataManager.load(UserAiConfiguration.class)
