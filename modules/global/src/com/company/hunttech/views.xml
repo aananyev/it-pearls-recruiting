@@ -1371,4 +1371,21 @@
         <property name="temperature"/>
     </view>
     <view entity="hunttech_VacancyPromptTemplate" name="vacancyPromptTemplate-edit-view" extends="_local"/>
+
+    <!-- AiPromptTemplate views -->
+    <view entity="hunttech_AiPromptTemplate" name="aiPromptTemplate-browse-view" extends="_local">
+        <property name="name"/>
+        <property name="code"/>
+        <property name="entityClass"/>
+        <property name="active"/>
+    </view>
+    <view entity="hunttech_AiPromptTemplate" name="aiPromptTemplate-edit-view" extends="_local">
+        <property name="name"/>
+        <property name="code"/>
+        <property name="entityClass"/>
+        <property name="promptText"/>
+        <property name="availablePlaceholders"/>
+        <property name="description"/>
+        <property name="active"/>
+    </view>
 </views>
