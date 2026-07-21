@@ -729,11 +729,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         // Heavy comments data is loaded lazily from initTabComments() when the user opens the tab.
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            if (!hasCandidateCv()) {
-                labelCV.setValue("Резюме: НЕТ");
-            } else {
-                labelCV.setValue("Резюме: ДА");
-            }
+            boolean hasCv = hasCandidateCv();
+            String locale = userSession.getLocale().getLanguage();
+            boolean isRussian = "ru".equals(locale);
+            String yes = isRussian ? "ДА" : "YES";
+            String no = isRussian ? "НЕТ" : "NO";
+            labelCV.setValue(hasCv ? yes : no);
         }
 
         // обнулить статус для вновь создаваемного кандидата

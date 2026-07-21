@@ -4,7 +4,7 @@
         caption="msg://userAiConfigurationBrowse.caption"
         focusComponent="userAiConfigurationsTable"
         messagesPack="com.company.hunttech.web.screens.useraiconfiguration">
-    <data readOnly="true">
+    <data>
         <collection id="userAiConfigurationsDc"
                     class="com.company.hunttech.entity.UserAiConfiguration">
             <view extends="userAiConfiguration-browse-view"/>
@@ -24,9 +24,20 @@
                 dataLoader="userAiConfigurationsDl">
             <properties include=".*"/>
         </filter>
-        <groupTable id="userAiConfigurationsTable"
+        <hbox spacing="true">
+            <button action="userAiConfigurationsTable.create"/>
+            <button action="userAiConfigurationsTable.edit"/>
+            <button action="userAiConfigurationsTable.remove"/>
+            <button id="testBtn" caption="Тест AI" invoke="onTestBtnClick" icon="CHECK"/>
+        </hbox>
+        <table id="userAiConfigurationsTable"
                     width="100%"
                     dataContainer="userAiConfigurationsDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
             <columns>
                 <column id="user.login"/>
                 <column id="providerCode"/>
@@ -34,7 +45,7 @@
                 <column id="defaultModelName"/>
             </columns>
             <rowsCount/>
-        </groupTable>
+        </table>
         <hbox id="lookupActions" spacing="true" visible="false">
             <button action="lookupSelectAction"/>
             <button action="lookupCancelAction"/>

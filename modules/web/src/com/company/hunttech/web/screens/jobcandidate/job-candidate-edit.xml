@@ -233,7 +233,7 @@
                                 showClearButton="true"
                                 property="fileImageFace"/>
                     </vbox>
-                    <vbox width="100%" spacing="true">
+                    <vbox width="100%" spacing="false">
                         <label id="fullNameField"
                                width="100%"
                                stylename="job-candidate-profile-name"
@@ -254,15 +254,21 @@
                           width="100%"
                           spacing="false"
                           stylename="job-candidate-status">
-                        <label value="Рейтинг"
-                               align="MIDDLE_CENTER"
-                               stylename="h3"/>
-                        <label id="candidateRatingLabel"
-                               stylename="h3"
-                               align="MIDDLE_CENTER"/>
-                        <label id="labelQualityPercent"
-                               align="MIDDLE_CENTER"
-                               stylename="job-candidate-quality"/>
+                        <hbox width="100%" spacing="false">
+                            <label value="Рейтинг"
+                                   box.expandRatio="1"
+                                   stylename="h3"/>
+                            <label id="candidateRatingLabel"
+                                   box.expandRatio="2"
+                                   stylename="h3"/>
+                        </hbox>
+                        <hbox width="100%" spacing="false">
+                            <label value="Карточка"
+                                   box.expandRatio="1"
+                                   stylename="h3"/>
+                            <label id="labelQualityPercent"
+                                   stylename="h3"/>
+                        </hbox>
                     </vbox>
                     <grid id="profileInfoGrid" spacing="true" width="100%"
                           stylename="job-candidate-info-grid job-candidate-sidebar-grid">
@@ -301,7 +307,7 @@
                                            stylename="small"
                                            box.expandRatio="1"/>
                                     <label id="labelCV"
-                                           align="MIDDLE_CENTER"
+                                           align="MIDDLE_LEFT"
                                            stylename="small"
                                            box.expandRatio="2"/>
                                 </hbox>
@@ -561,8 +567,11 @@
                                                 <hbox spacing="false" width="100%"
                                                       expand="firstNameField"
                                                       stylename="job-candidate-name-row">
-                                                    <label value="Имя" stylename="small" width="96px"/>
+                                                    <label value="Имя"
+                                                           stylename="small"
+                                                           box.expandRatio="1"/>
                                                     <suggestionField id="firstNameField"
+                                                                     box.expandRatio="4"
                                                                      dataContainer="jobCandidateDc"
                                                                      property="firstName"
                                                                      width="100%"
@@ -585,10 +594,11 @@
                                                       expand="middleNameField"
                                                       stylename="job-candidate-name-row">
                                                     <label value="Отчество"
-                                                           stylename="small"
-                                                           width="96px"/>
+                                                           box.expandRatio="1"
+                                                           stylename="small"/>
                                                     <suggestionField id="middleNameField"
                                                                      dataContainer="jobCandidateDc"
+                                                                     box.expandRatio="4"
                                                                      property="middleName"
                                                                      width="100%"
                                                                      minSearchStringLength="1"
@@ -609,9 +619,10 @@
                                                 <hbox spacing="false" width="100%"
                                                       expand="secondNameField"
                                                       stylename="job-candidate-name-row">
-                                                    <label value="Фамилия" stylename="small" width="96px"/>
+                                                    <label value="Фамилия" stylename="small" box.expandRatio="1"/>
                                                     <suggestionField id="secondNameField"
                                                                      dataContainer="jobCandidateDc"
+                                                                     box.expandRatio="4"
                                                                      property="secondName"
                                                                      width="100%"
                                                                      minSearchStringLength="1"
@@ -631,7 +642,7 @@
                                                 <hbox spacing="false" width="100%">
                                                     <label value="Дата рождения" stylename="small" box.expandRatio="1"/>
                                                     <dateField id="birdhDateField"
-                                                               box.expandRatio="3"
+                                                               box.expandRatio="4"
                                                                dataContainer="jobCandidateDc"
                                                                property="birdhDate"
                                                                width="AUTO"/>
@@ -641,7 +652,7 @@
                                                 <hbox spacing="false" width="100%">
                                                     <label value="Город" stylename="small" box.expandRatio="1"/>
                                                     <lookupPickerField id="jobCityCandidateField"
-                                                                       box.expandRatio="3"
+                                                                       box.expandRatio="4"
                                                                        dataContainer="jobCandidateDc"
                                                                        width="100%"
                                                                        optionsContainer="citiesDc"
@@ -719,10 +730,12 @@
                                             <row>
                                                 <hbox spacing="true" width="100%" expand="positionsLabel">
                                                     <label value="Доп. позиции"
+                                                           align="MIDDLE_LEFT"
                                                            stylename="small"/>
                                                     <button id="addPositions"
                                                             caption="..."
                                                             enable="true"
+                                                            align="MIDDLE_LEFT"
                                                             description="msg://msgSetPositions"
                                                             invoke="addPositionList"/>
                                                     <label id="positionsLabel"
@@ -1305,24 +1318,25 @@
                             </vbox>
                         </vbox>
                     </tab>
-
                 </tabSheet>
 
                 <!-- Нижняя панель основных действий. -->
-                <hbox id="jobCandidateBottomBar"
-                      width="AUTO"
-                      spacing="true"
-                      align="MIDDLE_RIGHT"
-                      stylename="job-candidate-bottom-bar">
-                    <button id="windowCommitAndCloseButton"
-                            action="windowCommitAndClose"
-                            caption="Сохранить и закрыть"
-                            stylename="primary job-candidate-primary-action"
-                            align="MIDDLE_RIGHT"/>
-                    <button action="windowClose"
-                            caption="Отмена"
-                            stylename="default job-candidate-secondary-action"
-                            align="MIDDLE_RIGHT"/>
+                <hbox width="100%" spacing="false">
+                    <hbox id="jobCandidateBottomBar"
+                          width="AUTO"
+                          spacing="true"
+                          align="MIDDLE_RIGHT"
+                          stylename="job-candidate-bottom-bar">
+                        <button id="windowCommitAndCloseButton"
+                                action="windowCommitAndClose"
+                                caption="Сохранить и закрыть"
+                                stylename="primary job-candidate-primary-action"
+                                align="MIDDLE_RIGHT"/>
+                        <button action="windowClose"
+                                caption="Отмена"
+                                stylename="default job-candidate-secondary-action"
+                                align="MIDDLE_RIGHT"/>
+                    </hbox>
                 </hbox>
             </vbox>
         </hbox>
