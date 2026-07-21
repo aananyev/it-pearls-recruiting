@@ -454,13 +454,22 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         setOnlyMySubscribeCheckBox();
-        // Keep the heavy resume body out of the initial form opening; it is prepared when the CV tab is selected.
-        textResumeStringBuffer = new StringBuffer(getEditedEntity().getTextCV() != null ? getEditedEntity().getTextCV() : "");
 
-/*        if (candidateCVRichTextArea.getValue() != null) {
-            textResumeStringBuffer = new StringBuffer(candidateCVRichTextArea.getValue());
-        } */
+        // textCV может быть не загружен в detached-экземпляре из browse-view.
+        // Откладываем инициализацию до ленивой загрузки вкладки CV (ensureCvTextInitialized).
+        CandidateCV edited = getEditedEntity();
+        boolean hasTextCV = edited != null
+                && PersistenceHelper.isLoaded(edited, "textCV")
+                && edited.getTextCV() != null
+                && !edited.getTextCV().isEmpty();
 
+        if (hasTextCV) {
+            textResumeStringBuffer = new StringBuffer(edited.getTextCV());
+            convertToTextButton.setEnabled(true);
+        } else {
+            textResumeStringBuffer = new StringBuffer();
+            convertToTextButton.setEnabled(false);
+        }
 
         if (textFieldIOriginalCV.getValue() != null) {
             originalCVLink.setUrl(textFieldIOriginalCV.getValue());
@@ -476,7 +485,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         quoteTextArea.setValue(messageBundle.getMessage("msgSalesCV"));
-        convertToTextButton.setEnabled(getEditedEntity().getTextCV() != null && !getEditedEntity().getTextCV().equals(""));
 
         if (!PersistenceHelper.isNew(getEditedEntity()) &&
                 (userSessionSource.getUserSession().getUser().getGroup().getName().equals(StdUserGroup.ACCOUNTING) ||
@@ -486,7 +494,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         setLetterRecommendation();
 //        setVisibleLogo();
-        setCandidatePicImage();
     }
 
     private void convertTextCV() {
@@ -1048,6 +1055,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     // --- AI-анализ резюме ---
     public void onAiAnalysisClick() {
-        AiAnalysisHelper.analyze(this, notifications, dialogs, getEditedEntity(), "RESUME_ANALYSIS");
+        AiAnalysisHelper.analyze(this, getEditedEntity(), "RESUME_ANALYSIS");
     }
 }
