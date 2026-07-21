@@ -213,7 +213,8 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .parameter("candidates", candidates)
                 .view(ViewBuilder.of(Employee.class)
                         .add("jobCandidate", "_minimal")
-                        .add("workStatus", "_minimal")
+                        // The status column reads inStaff after DataManager detaches the result.
+                        .add("workStatus", workStatusView -> workStatusView.add("inStaff"))
                         .build())
                 .list();
 
@@ -1998,8 +1999,9 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
         retLabel.setVisible(true);
 
-        if (employee.getWorkStatus() != null && employee.getWorkStatus().getInStaff() != null) {
-            if (employee.getWorkStatus().getInStaff()) {
+        Boolean inStaff = getEmployeeInStaff(employee);
+        if (inStaff != null) {
+            if (inStaff) {
                 retLabel.setStyleName("pic-center-large-green");
                 retLabel.setDescription(messageBundle.getMessage("msgOurWorker"));
             } else {
@@ -2012,6 +2014,23 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         }
 
         return retLabel;
+    }
+
+    /**
+     * Reads the value used by the generated status column without allowing an alternate
+     * or stale detached Employee instance to break rendering of the whole candidates grid.
+     * The normal cache load fetches this property explicitly in {@link #refreshEmployeeCache(List)}.
+     */
+    static Boolean getEmployeeInStaff(Employee employee) {
+        if (employee == null) {
+            return null;
+        }
+        try {
+            EmployeeWorkStatus workStatus = employee.getWorkStatus();
+            return workStatus != null ? workStatus.getInStaff() : null;
+        } catch (IllegalStateException e) {
+            return null;
+        }
     }
 
     private String contactsInfoStyle;
