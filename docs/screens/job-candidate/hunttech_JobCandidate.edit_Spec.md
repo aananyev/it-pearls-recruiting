@@ -2,6 +2,10 @@
 
 > Форма редактирования карточки кандидата HRM HuntTech.
 > Сущность: [JobCandidate.md](../../entities/job-candidate/JobCandidate.md)
+>
+> Этот файл сохраняет legacy-снимок структуры экрана. Актуальные профиль, layout и lifecycle
+> описаны в [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md), а пользовательские действия —
+> в [job-candidate-edit.md](job-candidate-edit.md).
 
 ---
 
@@ -233,7 +237,7 @@ flowchart TD
 | Подписка | Новый кандидат → диалог «Записать?» → SubscribeCandidateAction |
 | Соцсети: добавить недостающие | Все типы из справочника, которых нет в коллекции |
 | Соцсети: удалить пустые | dataManager.remove пустых URL |
-| Upload фото | Успех → скрыть placeholder, показать фото; clear → обратно |
+| Upload фото | Единый `OvaFallbackImage` показывает `fileImageFace`; clear, null или отсутствующий бинарный файл → `icons/no-programmer.jpeg` |
 | Commit and Close | Стандартный editor + цепочка BeforeCommit выше |
 
 
@@ -272,6 +276,7 @@ layout (expand=tabSheetSocialNetworks)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-21 | Legacy-описание связано с актуальной спецификацией; исправлен контракт фотографии после перехода на `OvaFallbackImage`. |
 | 2026-06-30 | fix: удалены `laborAgreement` из view и `jobCandidateLaborAgreementDc` — устранён QueryException (loader `laborAgreement` без параметра ID при `@LoadDataBeforeShow`) |
 | 2026-06-29 | Оптимизация скорости открытия вкладки tabCandidate, ленивая инициализация SuggestionFields, устранение блокирующих BackgroundTask |
 | 2026-06-29 | fix: убран промежуточный `dataContext.commit()` для NEW в `addPositionList`, `reloadCV`, `reloadInteractions`; флаг `initialInteractionAdded` |

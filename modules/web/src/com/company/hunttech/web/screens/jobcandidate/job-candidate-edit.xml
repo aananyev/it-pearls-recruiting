@@ -198,13 +198,23 @@
                         <vbox id="picVBox"
                               align="TOP_CENTER"
                               spacing="true">
-                            <image id="candidatePic"
-                                   dataContainer="jobCandidateDc"
-                                   property="fileImageFace"
-                                   width="176px" height="176px"
-                                   align="TOP_CENTER"
-                                   stylename="job-candidate-avatar"
-                                   scaleMode="SCALE_DOWN"/>
+                            <!--
+                              One data-bound component renders both the stored photo and the fallback.
+                              Keeping the fallback in the same component prevents layout shifts and
+                              removes the need to synchronize visibility of two parallel Image instances.
+                            -->
+                            <ovaFallbackImage id="candidatePic"
+                                              dataContainer="jobCandidateDc"
+                                              property="fileImageFace"
+                                              width="176px" height="176px"
+                                              ovalWidth="176px" ovalHeight="176px"
+                                              align="TOP_CENTER"
+                                              stylename="job-candidate-avatar"
+                                              scaleMode="SCALE_DOWN"
+                                              fallbackThemePath="icons/no-programmer.jpeg"/>
+                            <!--
+                            Legacy two-component fallback retained temporarily for comparison only.
+                            It must stay commented while candidatePic is an ovaFallbackImage.
                             <image id="candidateDefaultPic"
                                    width="176px" height="176px"
                                    align="TOP_CENTER"
@@ -212,6 +222,7 @@
                                    scaleMode="SCALE_DOWN">
                                 <theme path="icons/no-programmer.jpeg"/>
                             </image>
+                            -->
                         </vbox>
                         <upload id="fileImageFaceUpload"
                                 fileStoragePutMode="IMMEDIATE"
@@ -544,11 +555,14 @@
                                           stylename="job-candidate-form-grid">
                                         <columns count="2"/>
                                         <rows>
+                                            <!-- Fixed caption width + one expanded field keeps all three
+                                                 SuggestionFields equal without changing lazy initialization. -->
                                             <row>
-                                                <hbox spacing="false" width="100%">
-                                                    <label value="Имя" stylename="small" box.expandRatio="1"/>
+                                                <hbox spacing="false" width="100%"
+                                                      expand="firstNameField"
+                                                      stylename="job-candidate-name-row">
+                                                    <label value="Имя" stylename="small" width="96px"/>
                                                     <suggestionField id="firstNameField"
-                                                                     box.expandRatio="3"
                                                                      dataContainer="jobCandidateDc"
                                                                      property="firstName"
                                                                      width="100%"
@@ -567,12 +581,13 @@
                                                 </hbox>
                                             </row>
                                             <row>
-                                                <hbox spacing="false" width="100%">
+                                                <hbox spacing="false" width="100%"
+                                                      expand="middleNameField"
+                                                      stylename="job-candidate-name-row">
                                                     <label value="Отчество"
                                                            stylename="small"
-                                                           box.expandRatio="1"/>
+                                                           width="96px"/>
                                                     <suggestionField id="middleNameField"
-                                                                     box.expandRatio="3"
                                                                      dataContainer="jobCandidateDc"
                                                                      property="middleName"
                                                                      width="100%"
@@ -591,10 +606,11 @@
                                                 </hbox>
                                             </row>
                                             <row>
-                                                <hbox spacing="false" width="100%">
-                                                    <label value="Фамилия" stylename="small" box.expandRatio="1"/>
+                                                <hbox spacing="false" width="100%"
+                                                      expand="secondNameField"
+                                                      stylename="job-candidate-name-row">
+                                                    <label value="Фамилия" stylename="small" width="96px"/>
                                                     <suggestionField id="secondNameField"
-                                                                     box.expandRatio="3"
                                                                      dataContainer="jobCandidateDc"
                                                                      property="secondName"
                                                                      width="100%"

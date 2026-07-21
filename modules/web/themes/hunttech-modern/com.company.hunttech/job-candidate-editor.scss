@@ -3,6 +3,8 @@
  * Theme-aware: работает во всех CUBA-темах (halo, hover, hunttech-modern и др.).
  */
 @mixin job-candidate-editor-theme {
+  /* Shared by fullNameField and candidateRatingLabel; both were reduced by one point. */
+  $job-candidate-primary-label-font-size: 12px;
 
   .job-candidate-editor {
     background: mix(
@@ -41,6 +43,10 @@
 
   .job-candidate-sidebar > .v-spacing {
     height: 12px !important;
+  }
+
+  .job-candidate-sidebar .v-label {
+    font-size: 11px;
   }
 
   /* ==========================================================
@@ -99,7 +105,8 @@
     min-height: $v-unit-size;
   }
 
-  .job-candidate-profile-name {
+  /* The controller adds h2/h2-red at runtime but must retain this structural class. */
+  .job-candidate-sidebar .job-candidate-profile-name {
     display: block;
     box-sizing: border-box;
 
@@ -107,23 +114,29 @@
     margin-top: 8px;
 
     color: $v-font-color;
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 1.3;
+    font-family: 'Antonio', sans-serif;
+    font-size: $job-candidate-primary-label-font-size;
+    font-weight: 700;
+    line-height: 20px;
 
     text-align: center;
     white-space: normal;
     overflow-wrap: anywhere;
   }
 
-  .job-candidate-profile-position {
+  .job-candidate-sidebar .job-candidate-profile-name.h2-red {
+    color: red !important;
+  }
+
+  /* This label is populated by the controller and must remain visible outside lazy tabs. */
+  .job-candidate-sidebar .job-candidate-profile-position {
     display: block;
     box-sizing: border-box;
 
     width: 100%;
 
     color: rgba($v-font-color, 0.68);
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1.4;
 
     text-align: center;
@@ -153,12 +166,12 @@
   }
 
   .job-candidate-status .v-label {
-    font-size: 12px;
+    font-size: $job-candidate-primary-label-font-size;
     line-height: 20px;
   }
 
   .job-candidate-status .h3 {
-    font-size: 13px !important;
+    font-size: $job-candidate-primary-label-font-size !important;
     line-height: 20px !important;
   }
 
@@ -200,8 +213,15 @@
 
   .job-candidate-info-grid .v-label,
   .job-candidate-info-grid .v-button-link {
-    font-size: 12px;
     line-height: 18px;
+  }
+
+  .job-candidate-info-grid .v-label {
+    font-size: 11px;
+  }
+
+  .job-candidate-info-grid .v-button-link {
+    font-size: 12px;
   }
 
   .job-candidate-info-grid .v-gridlayout-slot:nth-child(odd) .v-label {

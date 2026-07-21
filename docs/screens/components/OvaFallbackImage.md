@@ -12,6 +12,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-21 | `JobCandidateEdit.candidatePic` переведён на `OvaFallbackImage` 176×176 с привязкой к `fileImageFace` и fallback `icons/no-programmer.jpeg` |
 | 2026-06-30 | Рефакторинг `RoundImageWithFallback` → `OvaFallbackImage` с composition/delegation через `OvalImageShapeDelegate` и `FallbackImageResourceDelegate` |
 | 2026-06-30 | Создание предшественника `RoundImageWithFallback` (объединение API `OvalImage` и `FallbackImage`) |
 
@@ -125,6 +126,40 @@ image.setScaleMode(Image.ScaleMode.CONTAIN);
 parentLayout.add(image);
 ```
 
+### Интеграция в JobCandidateEdit
+
+Профиль кандидата использует компонент напрямую в screen descriptor:
+
+```xml
+<ovaFallbackImage id="candidatePic"
+                  dataContainer="jobCandidateDc"
+                  property="fileImageFace"
+                  width="176px" height="176px"
+                  ovalWidth="176px" ovalHeight="176px"
+                  stylename="job-candidate-avatar"
+                  scaleMode="SCALE_DOWN"
+                  fallbackThemePath="icons/no-programmer.jpeg"/>
+```
+
+Контракт интеграции:
+
+- `dataContainer` и `property` оставляют источником истины `JobCandidate.fileImageFace`;
+- валидный `FileDescriptor` отображается стандартной логикой ValueSource;
+- `JobCandidateEdit.setCandidatePicImage()` дополнительно проверяет наличие бинарного файла,
+  потому что ненулевой detached `FileDescriptor` не гарантирует наличие содержимого в storage;
+- при очистке `fileImageFaceUpload` обработчик `BeforeValueClearEvent` вызывает
+  `candidatePic.applyFallback()`, чтобы placeholder появился до следующего server round-trip;
+- отдельный `FileUploadSucceedEvent` не устанавливает source вручную: после изменения
+  data-bound атрибута компонент получает новый ресурс из ValueSource;
+- второй компонент `candidateDefaultPic` не создаётся, поэтому реальное изображение и
+  placeholder всегда имеют одинаковые размеры и занимают один layout slot.
+
+Не следует возвращать ручное переключение `setVisible()` между двумя `Image`: оно создаёт
+два независимых источника состояния и может рассинхронизироваться с `DataContext`.
+
+Пользовательский сценарий описан в
+[JobCandidateEdit: инструкция пользователя](../job-candidate/job-candidate-edit.md).
+
 ---
 
 ## Тесты
@@ -135,6 +170,15 @@ parentLayout.add(image);
 - `updateComponent` с `null` → theme fallback, с `FileDescriptor` в хранилище → без подстановки, с отсутствующим файлом → fallback;
 - синхронизация `ovalWidth` / `ovalHeight`;
 - наличие стиля `ht-oval-image`.
+
+Интеграционный XML-контракт `JobCandidateEdit` дополнительно проверяется в
+[`JobCandidateEditComponentRendererTest`](../../../modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/JobCandidateEditComponentRendererTest.java):
+
+- тип `ovaFallbackImage`;
+- размеры `176px` и oval-размеры;
+- `fallbackThemePath`;
+- привязка к `jobCandidateDc.fileImageFace`;
+- отсутствие активного `candidateDefaultPic` в DOM дескриптора.
 
 ---
 

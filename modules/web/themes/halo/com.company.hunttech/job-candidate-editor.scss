@@ -11,6 +11,8 @@
  *   или inline-размерами Vaadin.
  */
 @mixin job-candidate-editor-theme {
+    /* Shared by fullNameField and candidateRatingLabel; both were reduced by one point. */
+    $job-candidate-primary-label-font-size: 19px;
   .job-candidate-editor {
     position: relative;
     width: 100%;
@@ -85,7 +87,7 @@
     }
 
     .job-candidate-sidebar .v-label {
-      font-size: 14px !important;
+      font-size: 13px !important;
     }
 
     .job-candidate-profile-header {
@@ -144,23 +146,38 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, .30);
     }
 
-    .job-candidate-profile-name {
+    /* The controller adds h2/h2-red at runtime but must retain this structural class. */
+    .job-candidate-sidebar .job-candidate-profile-name {
       display: block;
       width: 100% !important;
       margin-top: 14px;
-      color: #fff !important;
-      font-size: 22px !important;
+      color: #ffb11b !important;
+      font-family: Arial, "Segoe UI Symbol", sans-serif !important;
+      font-size: $job-candidate-primary-label-font-size !important;
       font-weight: 700;
-      line-height: 1.22 !important;
-      text-align: left !important;
+      line-height: 30px !important;
+      text-align: center !important;
       white-space: normal !important;
       overflow-wrap: anywhere;
       word-break: break-word;
     }
 
-    /* Компонент остаётся доступен контроллеру, но не дублирует ФИО. */
-    .job-candidate-profile-position {
-      display: none !important;
+    .job-candidate-sidebar .job-candidate-profile-name.h2-red {
+      color: red !important;
+    }
+
+    /* This label is populated by the controller and must remain visible outside lazy tabs. */
+    .job-candidate-sidebar .job-candidate-profile-position {
+      display: block !important;
+      width: 100% !important;
+      margin-top: 6px;
+      color: rgba(248, 250, 252, .84) !important;
+      font-size: 14px !important;
+      line-height: 1.35 !important;
+      text-align: center !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .job-candidate-sidebar-card {
@@ -201,7 +218,7 @@
 
     .job-candidate-sidebar-card .v-label {
       color: #f8fafc !important;
-      font-size: 14px !important;
+      font-size: 13px !important;
     }
 
     .job-candidate-sidebar-card .v-button-link {
@@ -237,7 +254,7 @@
       padding: 0 !important;
       color: #ffb11b !important;
       font-family: Arial, "Segoe UI Symbol", sans-serif !important;
-      font-size: 20px !important;
+      font-size: $job-candidate-primary-label-font-size !important;
       font-weight: 700;
       line-height: 30px !important;
       text-align: left !important;
@@ -272,7 +289,7 @@
     .job-candidate-status .job-candidate-quality {
       width: 100% !important;
       color: rgba(248, 250, 252, .72) !important;
-      font-size: 10px !important;
+      font-size: 9px !important;
       font-weight: 400;
       line-height: 18px !important;
       text-align: right !important;

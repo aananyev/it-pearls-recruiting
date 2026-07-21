@@ -15,6 +15,7 @@ import com.company.hunttech.web.screens.openposition.OpenPositionMasterBrowse;
 import com.company.hunttech.web.screens.openposition.openpositionviews.QuickViewOpenPositionDescription;
 import com.company.hunttech.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
+import com.hunttech.hrm.gui.components.OvaFallbackImage;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
@@ -89,9 +90,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> skypeTitle;
     @Inject
     private Label<String> jobTitleTitle;
+
+    /**
+     * Single avatar component for both the stored candidate photo and the theme fallback.
+     * The active value remains bound to {@code jobCandidateDc.fileImageFace}; the component
+     * itself decides whether the bound file or {@code icons/no-programmer.jpeg} is rendered.
+     */
     @Inject
-    private Image candidatePic;
-    private boolean updatingCandidatePic;
+    private OvaFallbackImage candidatePic;
     @Inject
     private FileUploadField fileImageFaceUpload;
     @Inject
@@ -166,6 +172,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private static final String QUERY_GET_LAST_ITERACTION = "select e from hunttech_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from hunttech_IteractionList f where f.candidate = :candidate)";
     private static final String CREATE_COMPANY_ACTION_ID = "createCompany";
 
+    /**
+     * Entity properties represented by visible data-entry controls in the candidate card.
+     * The list is intentionally independent from component creation so completion can be
+     * calculated before CUBA builds the lazy tabs.
+     */
+    static final List<String> CARD_COMPLETION_PROPERTIES = Collections.unmodifiableList(Arrays.asList(
+            "firstName", "middleName", "secondName", "birdhDate", "cityOfResidence",
+            "personPosition", "currentCompany", "email", "phone", "mobilePhone",
+            "telegramName", "whatsupName", "wiberName", "skypeName", "priorityContact"));
+
     List<Position> setPos = new ArrayList<>();
     // Данные вкладки «Позиции и вакансии» загружаются один раз при первом открытии.
     private Map<UUID, HistoryRowData> historyRowDataByVacancy = Collections.emptyMap();
@@ -236,8 +252,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private CollectionLoader<Position> personPositionsLc;
     private Table<OpenPosition> suggestVacancyTable;
-    @Inject
-    private Image candidateDefaultPic;
     @Inject
     private MessageBundle messageBundle;
     private Button sendCommentButton;
@@ -635,6 +649,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
+        // The sidebar is outside the lazy tabs, so populate it directly after screen data is ready.
+        updateCandidateProfileLabels(getEditedEntity());
         setPercentLabel();
 
         Boolean b = getEditedEntity().getBlockCandidate() == null ?
@@ -659,13 +675,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setPercentLabel() {
-        if (candidateInitialized) {
-            // вычислить процент заполнения карточки кандидата
-            Integer qualityPercent = setQualityPercent() * 100 / 14;
-
-            if (!PersistenceHelper.isNew(getEditedEntity())) {
-                labelQualityPercent.setValue(qualityPercent + "%");
-            }
+        JobCandidate candidate = getEditedEntity();
+        if (candidate != null) {
+            // The calculation reads only the already loaded edited entity and never initializes lazy tabs.
+            labelQualityPercent.setValue(calculateCardCompletionPercentage(candidate) + "%");
         }
     }
 
@@ -830,39 +843,25 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         interactionCommentDl.load();
     }
 
+    /**
+     * Ensures that a missing file in storage cannot leave a broken avatar in the sidebar.
+     * A valid FileDescriptor is rendered by the component's ValueSource; the controller only
+     * forces the fallback for null descriptors and descriptors whose binary file is unavailable.
+     */
     private void setCandidatePicImage() {
-        if (updatingCandidatePic) {
-            return;
-        }
-        updatingCandidatePic = true;
-        try {
-            FileDescriptor faceImage = getEditedEntity().getFileImageFace();
-            candidatePic.setValueSource(null);
-            if (faceImage != null && FileDescriptorImageHelper.fileExists(fileLoader, faceImage)) {
-                candidateDefaultPic.setVisible(false);
-                candidatePic.setVisible(true);
-                FileDescriptorImageHelper.setCandidateFace(candidatePic, fileLoader, faceImage);
-            } else {
-                candidateDefaultPic.setVisible(true);
-                candidatePic.setVisible(false);
-            }
-        } finally {
-            updatingCandidatePic = false;
+        FileDescriptor faceImage = getEditedEntity().getFileImageFace();
+        if (!FileDescriptorImageHelper.fileExists(fileLoader, faceImage)) {
+            candidatePic.applyFallback();
         }
     }
 
+    /**
+     * Shows the fallback immediately when the user clears the uploaded photo. The entity value
+     * is still changed by the upload field's standard data binding and is saved with the editor.
+     */
     @Subscribe("fileImageFaceUpload")
     public void onFileImageFaceUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
-        candidatePic.setVisible(false);
-        candidateDefaultPic.setVisible(true);
-    }
-
-    @Subscribe("candidatePic")
-    public void onCandidatePicSourceChange(ResourceView.SourceChangeEvent event) {
-        if (updatingCandidatePic) {
-            return;
-        }
-        setCandidatePicImage();
+        candidatePic.applyFallback();
     }
 
     private void setSuggestOpenPositionTable() {
@@ -1164,59 +1163,92 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 
     public Integer setQualityPercent() {
-        Integer qPercent = 0;
-
-        if (tabContactInfoInitialized) {
-
-            if (birdhDateField.getValue() != null)         // 1
-                qPercent = ++qPercent;
-
-            if (currentCompanyField.getValue() != null)    // 2
-                qPercent = ++qPercent;
-
-            if (emailField.getValue() != null)             // 3
-                qPercent = ++qPercent;
-
-            if (firstNameField.getValue() != null)         // 4
-                qPercent = ++qPercent;
-
-            if (middleNameField.getValue() != null)        // 5
-                qPercent = ++qPercent;
-
-            if (secondNameField.getValue() != null)        // 6
-                qPercent = ++qPercent;
-
-            if (jobCityCandidateField.getValue() != null)  // 7
-                qPercent = ++qPercent;
-
-            if (personPositionField.getValue() != null)    // 8
-                qPercent = ++qPercent;
-
-            if (phoneField.getValue() != null)             // 9
-                qPercent = ++qPercent;
-
-            if (mobilePhoneField.getValue() != null)       // 10
-                qPercent = ++qPercent;
-
-            if (skypeNameField.getValue() != null)         // 11
-                qPercent = ++qPercent;
-
-            if (telegramNameField.getValue() != null)      // 12
-                qPercent = ++qPercent;
-
-            if (whatsupNameField.getValue() != null)       // 13
-                qPercent = ++qPercent;
-
-            if (wiberNameField.getValue() != null)         // 14
-                qPercent = ++qPercent;
-        }
-
-        return qPercent;
+        return countFilledCardFields(getEditedEntity());
     }
 
+    /**
+     * Calculates a rounded 0..100 percentage using only the edited entity already held by
+     * the screen DataContext. Fifteen property reads are synchronous by design: scheduling
+     * a BackgroundTask would cost more and would introduce an unnecessary UI race.
+     */
+    static int calculateCardCompletionPercentage(JobCandidate candidate) {
+        if (candidate == null || CARD_COMPLETION_PROPERTIES.isEmpty()) {
+            return 0;
+        }
+        return (int) Math.round(countFilledCardFields(candidate) * 100.0
+                / CARD_COMPLETION_PROPERTIES.size());
+    }
+
+    static int countFilledCardFields(JobCandidate candidate) {
+        if (candidate == null) {
+            return 0;
+        }
+
+        int filledFields = 0;
+        for (String property : CARD_COMPLETION_PROPERTIES) {
+            if (isFilledCardValue(readCandidatePropertySafely(candidate, property))) {
+                filledFields++;
+            }
+        }
+        return filledFields;
+    }
+
+    /**
+     * Reads a property without forcing an unfetched detached association to load. The screen
+     * view normally contains every completion property; the catch protects alternate invocation
+     * contexts and stale detached instances from breaking form rendering.
+     */
+    private static Object readCandidatePropertySafely(JobCandidate candidate, String property) {
+        try {
+            return candidate.getValue(property);
+        } catch (IllegalStateException e) {
+            // Detached entities may contain an unfetched association; it counts as empty, not as a screen error.
+            return null;
+        }
+    }
+
+    /**
+     * Treats null and whitespace-only text as empty; dates, references and option values are
+     * filled when non-null.
+     */
+    private static boolean isFilledCardValue(Object value) {
+        if (value instanceof CharSequence) {
+            return StringUtils.isNotBlank((CharSequence) value);
+        }
+        return value != null;
+    }
+
+    /**
+     * Handles replacement of the edited item in the data container. Profile labels are refreshed
+     * here because they are not bound in XML and must not depend on whether {@code tabMain} was built.
+     */
     @Subscribe(id = "jobCandidateDc", target = Target.DATA_CONTAINER)
     private void onJobCandidateDcItemChange(InstanceContainer.ItemChangeEvent<JobCandidate> event) {
-        setFullNameCandidate();
+        if (event.getItem() != null) {
+            setFullNameCandidate();
+        }
+        updateCandidateProfileLabels(event.getItem());
+    }
+
+    /**
+     * Keeps the always-visible sidebar synchronized with edits made through lazy-created fields.
+     * Listening to the data container also covers programmatic changes that bypass field events.
+     */
+    @Subscribe(id = "jobCandidateDc", target = Target.DATA_CONTAINER)
+    private void onJobCandidateDcItemPropertyChange(
+            InstanceContainer.ItemPropertyChangeEvent<JobCandidate> event) {
+        if ("firstName".equals(event.getProperty())
+                || "secondName".equals(event.getProperty())) {
+            String fullName = formatCandidateProfileName(
+                    event.getItem().getSecondName(), event.getItem().getFirstName());
+            // fullName is a denormalized entity attribute and must match the visible sidebar value.
+            if (!Objects.equals(event.getItem().getFullName(), fullName)) {
+                event.getItem().setFullName(fullName);
+            }
+            updateCandidateProfileLabels(event.getItem());
+        } else if ("personPosition".equals(event.getProperty())) {
+            updateCandidateProfileLabels(event.getItem());
+        }
     }
 
     private void setFullNameCandidate() {
@@ -2364,23 +2396,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         iconColumn.setRenderer(jobCandidateIteractionListTable.createRenderer(DataGrid.ImageRenderer.class));
     }
 
-    @Subscribe("fileImageFaceUpload")
-    public void onFileImageFaceUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        try {
-
-            candidateDefaultPic.setVisible(false);
-            candidatePic.setVisible(true);
-
-            FileDescriptorResource fileDescriptorResource = candidatePic.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(fileImageFaceUpload.getFileDescriptor());
-
-            candidatePic.setSource(fileDescriptorResource);
-
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void setLastProjectTable() {
         lastProjectDl.setParameter("candidate", getEditedEntity());
         lastProjectDl.load();
@@ -2390,7 +2405,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         blockCandidateCheckBox.setValue(b);
         blockCandidateButton.setCaption(b ? BLOCK_CANDIDATE_OFF : BLOCK_CANDIDATE_ON);
         blockCandidateButton.setIcon(b ? CubaIcon.ENABLE_EDITING.source() : CubaIcon.CLOSE.source());
-        fullNameField.setStyleName(b ? "h2-red" : "h2");
+        updateFullNameStyle(b);
     }
 
     private void setLinkButtonSkype() {
@@ -3302,8 +3317,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (jobCandidateIteractionListTable != null) {
             jobCandidateIteractionListTable.setEnabled(!checkBlockCanidate);
         }
-        fullNameField.setStyleName(checkBlockCanidate ? "h2-red" : "h2");
+        updateFullNameStyle(checkBlockCanidate);
 
+    }
+
+    /**
+     * Applies the blocked/unblocked visual state without losing the profile layout class.
+     * CUBA's setStyleName() replaces every existing style name, therefore the stable profile
+     * class is restored first and the state-specific h2/h2-red class is added separately.
+     */
+    void updateFullNameStyle(boolean blocked) {
+        fullNameField.setStyleName("job-candidate-profile-name");
+        fullNameField.addStyleName(blocked ? "h2-red" : "h2");
     }
 
     public void openPositionMasterBrowseStart() {
@@ -3910,17 +3935,62 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 ? secondNameField.getValue().trim() : "";
         String firstName = firstNameField != null && firstNameField.getValue() != null
                 ? firstNameField.getValue().trim() : "";
-        String fullName = (secondName + " " + firstName).trim();
+        String fullName = formatCandidateProfileName(secondName, firstName);
 
+        // Update both the denormalized entity property and the read-only sidebar presentation.
+        getEditedEntity().setFullName(fullName);
         fullNameField.setValue(fullName);
 //        if (iteractionListLabelCandidate != null) {
 //            iteractionListLabelCandidate.setValue(fullName);
 //        }
     }
 
+    /**
+     * Populates the read-only profile immediately from the edited entity. Reading the entity
+     * instead of tab fields makes the sidebar independent from CUBA lazy-tab creation order.
+     *
+     * @param candidate current data-container item; null clears stale values during item replacement
+     */
+    void updateCandidateProfileLabels(JobCandidate candidate) {
+        if (candidate == null) {
+            fullNameField.setValue("");
+            updatePersonPositionLabel(null);
+            return;
+        }
+
+        fullNameField.setValue(formatCandidateProfileName(
+                Objects.toString(readCandidatePropertySafely(candidate, "secondName"), ""),
+                Objects.toString(readCandidatePropertySafely(candidate, "firstName"), "")));
+        Object position = readCandidatePropertySafely(candidate, "personPosition");
+        updatePersonPositionLabel(position instanceof Position ? (Position) position : null);
+    }
+
+    /**
+     * Formats the sidebar name as "Фамилия Имя" without leading, trailing or duplicate separator
+     * spaces when either source value is null or blank.
+     */
+    static String formatCandidateProfileName(String secondName, String firstName) {
+        return (StringUtils.trimToEmpty(secondName) + " "
+                + StringUtils.trimToEmpty(firstName)).trim();
+    }
+
+    /**
+     * Displays the Russian position name and clears the label for an unassigned position.
+     */
     private void updatePersonPositionLabel(Position position) {
-        personPositionLabel.setValue(position != null && position.getPositionRuName() != null
-                ? position.getPositionRuName() : "");
+        personPositionLabel.setValue(resolvePersonPositionLabel(position));
+    }
+
+    static String resolvePersonPositionLabel(Position position) {
+        if (position == null) {
+            return "";
+        }
+        try {
+            return StringUtils.trimToEmpty(position.getPositionRuName());
+        } catch (IllegalStateException e) {
+            // Do not trigger an extra load while opening the form for an unfetched detached reference.
+            return "";
+        }
     }
 
     public void onEmailFieldValueChange(HasValue.ValueChangeEvent<String> event) {
