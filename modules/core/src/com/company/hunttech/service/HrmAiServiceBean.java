@@ -50,6 +50,57 @@ public class HrmAiServiceBean implements HrmAiService {
         return callAiProvider(template, prompt, providerCode);
     }
 
+    @Override
+    public void testConnection(UserAiConfiguration configuration) {
+        /*
+         * Метод принимает конкретную UserAiConfiguration, а не только providerCode,
+         * потому что личное окно настроек тестирует именно выбранную строку таблицы:
+         * конкретный ключ, конкретную модель и конкретного провайдера. Рабочие
+         * методы генерации ниже по-прежнему выбирают только активную конфигурацию
+         * текущего пользователя через getUserConfig().
+         */
+        if (configuration == null) {
+            throw new DevelopmentException("Не выбрана AI-конфигурация для тестирования.");
+        }
+        if (!isConfigured(configuration.getProviderCode())) {
+            throw new DevelopmentException("Не указан провайдер AI.");
+        }
+        if (!isConfigured(configuration.getApiKey())) {
+            throw new DevelopmentException("Не указан API-ключ для провайдера «"
+                    + configuration.getProviderCode() + "».");
+        }
+
+        AIProvider provider;
+        try {
+            provider = aiProviderRegistry.getProvider(configuration.getProviderCode());
+        } catch (IllegalArgumentException e) {
+            /*
+             * В интерфейсе могут быть коды провайдеров, запланированных на будущее.
+             * Ошибку реестра переводим в понятное пользовательское сообщение:
+             * Java-компонент провайдера пока не подключён к приложению.
+             */
+            throw new DevelopmentException("Провайдер AI «"
+                    + configuration.getProviderCode() + "» не подключён в приложении.", e);
+        }
+
+        /*
+         * Короткий детерминированный запрос делает тест недорогим, но при этом
+         * проверяет авторизацию, доступность endpoint, имя выбранной модели и
+         * разбор ответа внутри реализации провайдера.
+         */
+        String response = provider.generateText(
+                "Ответь одним словом: ok",
+                "Тестирование подключения к API искусственного интеллекта.",
+                configuration.getApiKey(),
+                configuration.getDefaultModelName(),
+                Map.of("temperature", 0.0));
+
+        if (!isConfigured(response)) {
+            throw new DevelopmentException("API провайдера «"
+                    + configuration.getProviderCode() + "» вернул пустой ответ.");
+        }
+    }
+
     private UserAiConfiguration getUserConfig(String providerCode) {
         User user = userSessionSource.getUserSession().getUser();
         UserAiConfiguration config = dataManager.load(UserAiConfiguration.class)

@@ -27,6 +27,7 @@
 | Разработчик | [entities/](entities/), [ui/](ui/), [screens/](screens/), [services/](services/) |
 | Экран JobCandidateEdit | [ui/JobCandidateEdit_Spec.md](ui/JobCandidateEdit_Spec.md) · [architecture/JobCandidateEdit_Performance_Architecture.md](architecture/JobCandidateEdit_Performance_Architecture.md) · [screens/job-candidate/JobCandidateEdit_Design_Fix_2026-07-14.md](screens/job-candidate/JobCandidateEdit_Design_Fix_2026-07-14.md) |
 | Диагностика разбора резюме и OOM | [services/PdfParserService.md](services/PdfParserService.md) · [operations/JobCandidateEdit_OOM_Runbook.md](operations/JobCandidateEdit_OOM_Runbook.md) |
+| Подключение AI | [integrations/ai/USER_AI_CONNECTION_GUIDE.md](integrations/ai/USER_AI_CONNECTION_GUIDE.md) · [integrations/ai/AI_INTEGRATION.md](integrations/ai/AI_INTEGRATION.md) |
 | DBA | [database/](database/) и [deployment/database-migration/](../deployment/database-migration/) |
 | Тестировщик | [operations/](operations/), [reports/](reports/), [deployment/database-migration/validation/](../deployment/database-migration/validation/) |
 | Администратор | [operations/](operations/) и [deployment/production-deployment/runbooks/](../deployment/production-deployment/runbooks/) |
