@@ -502,6 +502,7 @@
                        width="AUTO"/>
             <hbox align="BOTTOM_RIGHT"
                   spacing="true">
+                <button id="aiAnalysisBtn" caption="AI-анализ" invoke="onAiAnalysisClick"/>
                 <button action="windowCommitAndClose"
                         align="BOTTOM_RIGHT"/>
                 <button action="windowClose"

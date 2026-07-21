@@ -1095,6 +1095,7 @@
                 <button invoke="subscribePosition"
                         caption="msg://msgSubscribe"
                         icon="BELL"/>
+                <button id="aiAnalysisBtn" caption="AI-анализ" invoke="onAiAnalysisClick"/>
                 <button id="windowCommitAndCloseButton"
                         action="windowCommitAndClose"/>
                 <button action="windowClose"/>

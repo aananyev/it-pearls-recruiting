@@ -383,6 +383,7 @@
                     invoke="onButtonSubscribeClick"
                     caption="mainMsg://msgSubscribe"
                     icon="BELL"/>
+            <button id="aiAnalysisBtn" caption="AI-анализ" invoke="onAiAnalysisClick"/>
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>
         </hbox>

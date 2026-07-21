@@ -5,6 +5,7 @@ import com.company.hunttech.core.PdfParserService;
 import com.company.hunttech.core.ResumeRecognitionService;
 import com.company.hunttech.core.WebLoadService;
 import com.company.hunttech.entity.*;
+import com.company.hunttech.web.ai.AiAnalysisHelper;
 import com.company.hunttech.web.screens.SelectedCloseAction;
 import com.company.hunttech.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -1031,5 +1032,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     public void setParentDataContext(DataContext parentDataContext) {
         dataContext.setParent(parentDataContext);
+    }
+
+    // --- AI-анализ резюме ---
+    public void onAiAnalysisClick() {
+        AiAnalysisHelper.analyze(this, getEditedEntity(), "RESUME_ANALYSIS");
     }
 }

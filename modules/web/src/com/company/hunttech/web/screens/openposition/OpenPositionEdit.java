@@ -3,6 +3,7 @@ package com.company.hunttech.web.screens.openposition;
 import com.company.hunttech.UiNotificationEvent;
 import com.company.hunttech.core.*;
 import com.company.hunttech.entity.*;
+import com.company.hunttech.web.ai.AiAnalysisHelper;
 import com.company.hunttech.service.GetRoleService;
 import com.company.hunttech.web.StandartRegistrationForWork;
 import com.company.hunttech.web.screens.position.PositionEdit;
@@ -3334,5 +3335,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                             + outstaffingCostTextField.getValue())
                     .show(); */
         }
+    }
+
+    // --- AI-анализ вакансии ---
+    public void onAiAnalysisClick() {
+        AiAnalysisHelper.analyze(this, getEditedEntity(), "VACANCY_ANALYSIS");
     }
 }
