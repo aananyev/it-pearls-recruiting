@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://aiPromptTemplateEdit.caption"
+        focusComponent="nameField"
+        messagesPack="com.company.hunttech.web.screens.aiprompttemplate">
+    <data>
+        <instance id="aiPromptTemplateDc"
+                  class="com.company.hunttech.entity.AiPromptTemplate"
+                  view="aiPromptTemplate-edit-view">
+            <loader/>
+        </instance>
+    </data>
+    <dialogMode height="AUTO"
+                width="650"
+                modal="true"
+                forceDialog="true"/>
+    <layout expand="editActions" spacing="true" margin="true">
+        <form id="form" dataContainer="aiPromptTemplateDc" width="100%">
+            <column width="600px">
+                <textField id="nameField" property="name" required="true" width="100%"/>
+                <textField id="codeField" property="code" required="true" width="100%"/>
+                <textField id="entityClassField" property="entityClass" required="true" width="100%"/>
+                <textArea id="descriptionField" property="description" width="100%" rows="2"/>
+                <textArea id="promptTextField" property="promptText" required="true"
+                          width="100%" rows="10"/>
+                <textArea id="availablePlaceholdersField" property="availablePlaceholders"
+                          width="100%" rows="4"/>
+                <checkBox id="activeField" property="active"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
+        </hbox>
+    </layout>
+</window>

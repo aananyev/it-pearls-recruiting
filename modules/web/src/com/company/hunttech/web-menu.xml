@@ -110,5 +110,7 @@
               caption="mainMsg://menu_config.hunttech_VacancyPromptTemplate.browse" icon="FILE_TEXT_O"/>
         <item screen="hunttech_UserAiConfiguration.browse"
               caption="mainMsg://menu_config.hunttech_UserAiConfiguration.browse" icon="KEY"/>
+        <item screen="hunttech_AiPromptTemplate.browse"
+              caption="mainMsg://menu_config.hunttech_AiPromptTemplate.browse" icon="FILE_TEXT_O"/>
     </menu>
 </menu-config>
