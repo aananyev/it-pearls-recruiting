@@ -32,7 +32,7 @@
                     <property name="toVacancy" view="openPosition-edit-view">
                         <property name="projectName" view="_local">
                             <property name="projectDescription"/>
-                            <property name="projectLogo" view="_minimal"/>
+                            <property name="projectLogo"/>
                             <property name="projectDepartment" view="_minimal"/>
                         </property>
                     </property>

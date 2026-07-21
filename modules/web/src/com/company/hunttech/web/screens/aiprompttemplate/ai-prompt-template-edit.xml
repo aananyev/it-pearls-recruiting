@@ -14,7 +14,7 @@
                 width="650"
                 modal="true"
                 forceDialog="true"/>
-    <layout expand="editActions" spacing="true" margin="true">
+    <layout spacing="true" margin="true">
         <form id="form" dataContainer="aiPromptTemplateDc" width="100%">
             <column width="600px">
                 <textField id="nameField" property="name" required="true" width="100%"/>

@@ -9,6 +9,8 @@ import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.security.entity.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -17,6 +19,8 @@ import java.util.Map;
 
 @Service(HrmAiService.NAME)
 public class HrmAiServiceBean implements HrmAiService {
+
+    private static final Logger log = LoggerFactory.getLogger(HrmAiServiceBean.class);
 
     private static final String STANDARDIZE_TEMPLATE_CODE = "STANDARDIZE_VACANCY";
 
@@ -103,23 +107,47 @@ public class HrmAiServiceBean implements HrmAiService {
 
     @Override
     public String sendPrompt(String userPrompt, String providerCode) {
+        log.info("sendPrompt вызван: provider={}, promptLength={}", providerCode,
+                userPrompt != null ? userPrompt.length() : 0);
+
         if (!isConfigured(userPrompt)) {
+            log.error("sendPrompt отклонён: пустой промпт");
             throw new DevelopmentException("Промпт не может быть пустым.");
         }
         if (!isConfigured(providerCode)) {
+            log.error("sendPrompt отклонён: пустой providerCode");
             throw new DevelopmentException("Не указан код провайдера AI.");
         }
 
+        log.debug("Загружаем UserAiConfiguration для provider={}", providerCode);
         UserAiConfiguration config = getUserConfig(providerCode);
+        log.debug("Конфигурация загружена: provider={}, model={}, active={}",
+                config.getProviderCode(), config.getDefaultModelName(), config.getIsActive());
+
+        log.debug("Получаем AIProvider для кода={}", providerCode);
         AIProvider provider = aiProviderRegistry.getProvider(providerCode);
 
-        return provider.generateText(
-                userPrompt,
-                "Ты — AI-ассистент рекрутинговой системы HRM HuntTech. "
-                        + "Отвечай на русском языке развёрнуто и по делу.",
-                config.getApiKey(),
-                config.getDefaultModelName(),
-                Map.of("temperature", 0.3));
+        log.info("Вызываем {}.generateText(): promptLength={}, model={}, temperature=0.3",
+                provider.getClass().getSimpleName(), userPrompt.length(),
+                config.getDefaultModelName());
+
+        try {
+            String response = provider.generateText(
+                    userPrompt,
+                    "Ты — AI-ассистент рекрутинговой системы HRM HuntTech. "
+                            + "Отвечай на русском языке развёрнуто и по делу.",
+                    config.getApiKey(),
+                    config.getDefaultModelName(),
+                    Map.of("temperature", 0.3));
+
+            log.info("Ответ получен от {}: responseLength={}", providerCode,
+                    response != null ? response.length() : 0);
+            return response;
+        } catch (Exception e) {
+            log.error("Ошибка при вызове {}.generateText(): {}", provider.getClass().getSimpleName(),
+                    e.toString(), e);
+            throw e;
+        }
     }
 
     private UserAiConfiguration getUserConfig(String providerCode) {
