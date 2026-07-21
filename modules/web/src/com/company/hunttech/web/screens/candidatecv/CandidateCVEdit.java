@@ -164,6 +164,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
+        // Инициализация фотографии после загрузки candidateCVDc полным editor view.
+        // В BeforeShow редактор содержит detached-экземпляр из вызывающего экрана
+        // с узким browse-view, не включающим fileImageFace.
+        setCandidatePicImage();
+
         candidateCVFieldOpenPosition.addValueChangeListener(e -> {
             if (e.getValue().getNeedLetter() != null) {
                 if (e.getValue().getTemplateLetter() != null) {
@@ -626,7 +631,14 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     } */
 
     private void setCandidatePicImage() {
-        if (getEditedEntity().getFileImageFace() == null) {
+        // В BeforeShow редактор ещё содержит detached-экземпляр из вызывающего экрана.
+        // Проверяем загруженность fileImageFace перед обращением — узкий browse-view
+        // не включает это поле, и вызов getFileImageFace() вызовет IllegalStateException.
+        CandidateCV cv = getEditedEntity();
+        if (cv == null || !PersistenceHelper.isLoaded(cv, "fileImageFace")) {
+            return;
+        }
+        if (cv.getFileImageFace() == null) {
             candidateFaceDefaultImage.setVisible(true);
             candidatePic.setVisible(false);
         } else {
@@ -1036,6 +1048,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     // --- AI-анализ резюме ---
     public void onAiAnalysisClick() {
-        AiAnalysisHelper.analyze(this, getEditedEntity(), "RESUME_ANALYSIS");
+        AiAnalysisHelper.analyze(this, notifications, dialogs, getEditedEntity(), "RESUME_ANALYSIS");
     }
 }
