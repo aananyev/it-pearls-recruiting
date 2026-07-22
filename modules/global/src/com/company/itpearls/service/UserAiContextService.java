@@ -1,10 +1,10 @@
-package com.company.itpearls.service;
+package com.company.hunttech.service;
 
-import com.company.itpearls.entity.UserAiProfile;
-import com.company.itpearls.service.dto.AiUserContext;
+import com.company.hunttech.entity.UserAiProfile;
+import com.company.hunttech.service.dto.AiUserContext;
 
 public interface UserAiContextService {
-    String NAME = "itpearls_UserAiContextService";
+    String NAME = "hunttech_UserAiContextService";
 
     AiUserContext buildCurrentUserContext();
 
