@@ -135,6 +135,9 @@ public class HrmAiServiceBean implements HrmAiService {
             if (selected == null) {
                 throw new DevelopmentException("Выбранная AI-конфигурация не найдена.");
             }
+            if (!isConfigured(selected.getProviderCode())) {
+                throw new DevelopmentException("В выбранной AI-конфигурации не указан провайдер.");
+            }
             if (!isConfigured(selected.getApiKey())) {
                 throw new DevelopmentException("Для провайдера «" + selected.getProviderCode()
                         + "» не указан API-ключ.");
@@ -227,6 +230,9 @@ public class HrmAiServiceBean implements HrmAiService {
         }
 
         UserAiConfiguration config = currentConfigurations.get(0);
+        if (!isConfigured(config.getProviderCode())) {
+            throw new DevelopmentException("В текущей AI-конфигурации не указан провайдер.");
+        }
         if (!isConfigured(config.getApiKey())) {
             throw new DevelopmentException("API-ключ текущего провайдера «"
                     + config.getProviderCode() + "» не настроен.");
