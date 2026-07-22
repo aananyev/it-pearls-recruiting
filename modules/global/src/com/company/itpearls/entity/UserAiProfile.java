@@ -1,5 +1,6 @@
-package com.company.itpearls.entity;
+package com.company.hunttech.entity;
 
+import com.company.itpearls.entity.ExtUser;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;
@@ -20,10 +21,10 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 
-@Table(name = "ITPEARLS_USER_AI_PROFILE", uniqueConstraints = {
-        @UniqueConstraint(name = "IDX_ITPEARLS_USER_AI_PROFILE_UNQ_USER", columnNames = "USER_ID")
+@Table(name = "HUNTTECH_USER_AI_PROFILE", uniqueConstraints = {
+        @UniqueConstraint(name = "IDX_HUNTTECH_USER_AI_PROFILE_UNQ_USER", columnNames = "USER_ID")
 })
-@Entity(name = "itpearls_UserAiProfile")
+@Entity(name = "hunttech_UserAiProfile")
 @NamePattern("%s|user")
 public class UserAiProfile extends StandardEntity {
     private static final long serialVersionUID = 5119245747892793319L;
@@ -426,5 +427,4 @@ public class UserAiProfile extends StandardEntity {
     public void setCommunicationConstraints(String communicationConstraints) {
         this.communicationConstraints = communicationConstraints;
     }
-
 }
