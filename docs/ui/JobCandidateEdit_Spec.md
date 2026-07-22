@@ -32,6 +32,7 @@
 ### 3. Краткий обзор бизнес-логики поведения (Behavior Summary)
 
 - Открытие кандидата → загружается основной view → слева показывается профиль, справа рабочие вкладки.
+- Открытие таблицы резюме → для связанной вакансии загружается проект и `projectLogo` → колонка показывает логотип либо стандартную заглушку без обращения к unfetched-атрибуту detached-сущности.
 - Первое открытие тяжёлой вкладки → устанавливаются обязательные параметры loaders → данные загружаются один раз.
 - Изменение поля → данные остаются в штатном `DataContext` → перед сохранением выполняется существующая валидация.
 - «Сохранить и закрыть» → выполняется `windowCommitAndClose` → кандидат сохраняется и экран закрывается.
@@ -52,7 +53,7 @@
 | Платформа | CUBA Platform 7.3 |
 | Корневой style name | `job-candidate-editor` |
 
-Визуальная доработка не меняет сущности, component ID, data bindings, actions, invoke, loaders, views и JPQL.
+Визуальная компоновка не меняет сущности, component ID, data bindings, actions, invoke, loaders и JPQL. Для устранения detached/unfetched ошибки уточнён только shared view `openPosition-edit-view`: ссылка `projectName.projectLogo` загружается с вложенным `FileDescriptor` view.
 
 Обязательные compatibility-компоненты контроллера:
 
@@ -75,12 +76,26 @@
 | `lastProjectDc` | история рассмотрения по вакансиям |
 | `suggestOpenPositionDc` | подходящие вакансии |
 
+Граф для логотипа проекта в таблице резюме:
+
+```text
+JobCandidate.candidateCv
+└── CandidateCV.toVacancy
+    └── OpenPosition.projectName
+        ├── Project.projectDescription
+        ├── Project.projectLogo → FileDescriptor (_local)
+        └── Project.projectDepartment
+```
+
+`Project.projectLogo` остаётся `FetchType.LAZY`. Загрузка обеспечивается дополнительным shared-view `job-candidate-project-logo-views.xml`, который с `overwrite="true"` уточняет существующий `openPosition-edit-view`. Это исключает глобальный `EAGER` и дополнительные запросы из генератора колонки.
+
 Правила:
 
 - ленивое открытие тяжёлых вкладок сохраняется;
 - обязательные параметры loaders не изменяются;
 - визуальный слой не выполняет дополнительные запросы;
-- таблицы продолжают использовать прежние dataContainer и actions.
+- таблицы продолжают использовать прежние dataContainer и actions;
+- ссылочные атрибуты, читаемые генераторами колонок, должны иметь явный вложенный view.
 
 ---
 
@@ -172,6 +187,14 @@ Accordion-слой не удаляет и не подменяет штатную
 - поля занимают оставшееся пространство;
 - `radioButtonGroup` сохраняет прежнюю бизнес-логику и привязку `priorityContact`.
 
+### Вкладка «Резюме и файлы»
+
+- `jobCandidateCandidateCvTable` сохраняет существующий dataContainer и генераторы колонок;
+- колонка логотипа проекта читает уже загруженный `Project.projectLogo`;
+- при отсутствии логотипа отображается `icons/no-company.png`;
+- открытие вкладки не должно приводить к `Cannot get unfetched attribute [projectLogo]`;
+- Java-генератор и `FileDescriptorImageHelper` не выполняют дополнительную перезагрузку проекта.
+
 ---
 
 ## 4. Actions и неизменяемые контракты
@@ -185,7 +208,7 @@ Accordion-слой не удаляет и не подменяет штатную
 | поля ФИО | прежние properties, search executors и listeners |
 | `currentCompanyField` | прежние lookup/open/create действия |
 | `jobCandidateIteractionListTable` | прежние actions, columns и handlers |
-| `jobCandidateCandidateCvTable` | прежние actions, columns и handlers |
+| `jobCandidateCandidateCvTable` | прежние actions, columns и handlers; логотип проекта обеспечивается view |
 | `socialNetworkTable` | прежний editor и generators |
 | комментарии | прежние поле ввода, отправка и ответы |
 
@@ -238,6 +261,8 @@ Accordion-слой не удаляет и не подменяет штатную
 
 ```bash
 git diff --check
+./gradlew :app-web:compileTestJava --no-daemon --stacktrace
+./gradlew :app-web:test --tests '*JobCandidateProjectLogoViewContractTest*' --no-daemon --stacktrace
 ./gradlew :app-web:buildScssThemes --no-daemon --stacktrace
 ./gradlew clean assemble --no-daemon --stacktrace
 ./gradlew test --tests '*ScreenViewIntegrityTest*' --no-daemon --stacktrace
@@ -247,6 +272,9 @@ git diff --check
 
 - HTTP 200 для `/hrm`;
 - открытие существующего и нового кандидата;
+- открытие вкладки «Резюме и файлы» у кандидата с резюме, вакансией и проектом;
+- отображение реального логотипа проекта и стандартной заглушки при его отсутствии;
+- отсутствие `Cannot get unfetched attribute [projectLogo]` и detached exceptions в журнале;
 - сохранение и отмена;
 - меню «Еще»;
 - фотография и HR-Мастер;
@@ -261,6 +289,7 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-22 | `openPosition-edit-view` дополнен графом `projectName.projectLogo` с вложенным `FileDescriptor` view; устранён unfetched/detached сбой колонки логотипа в таблице резюме без изменения Java-бизнес-логики. |
 | 2026-07-21 | Исправлены типографика и центрирование ФИО, вывод должности, размеры sidebar labels и одинаковая ширина трёх полей ФИО; процент заполнения считается по 15 полям без изменения lazy-алгоритма. |
 | 2026-07-21 | Профиль кандидата переведён на единый `OvaFallbackImage` 176×176 с локальным fallback; ФИО и должность синхронизируются через `jobCandidateDc` независимо от lazy-вкладок. |
 | 2026-07-21 | Во всех семи темах восстановлена видимость должности и сохранение структурного класса ФИО при блокировке; добавлены регрессионные тесты и пользовательская инструкция. |
