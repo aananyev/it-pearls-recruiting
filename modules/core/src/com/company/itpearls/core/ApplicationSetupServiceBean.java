@@ -31,7 +31,7 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
         try {
             String scripts =
                     runner.query(
-                            "select TELEGRAM_BOT_NAME from ITPEARLS_APPLICATION_SETUP where ACTIVE_SETUP = true",
+                            "select TELEGRAM_BOT_NAME from HUNTTECH_APPLICATION_SETUP where ACTIVE_SETUP = true",
                             rs -> rs.next() ? rs.getString(1) : null);
 
             return scripts;
@@ -47,7 +47,7 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
         try {
             Boolean scripts =
                     runner.query(
-                            "select TELEGRAM_BOT_START from ITPEARLS_APPLICATION_SETUP where ACTIVE_SETUP = true",
+                            "select TELEGRAM_BOT_START from HUNTTECH_APPLICATION_SETUP where ACTIVE_SETUP = true",
                             rs -> rs.next() ? rs.getBoolean(1) : null);
 
             return scripts;
@@ -63,7 +63,7 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
         try {
             String scripts =
                     runner.query(
-                            "select TELEGRAM_TOKEN from ITPEARLS_APPLICATION_SETUP where ACTIVE_SETUP = true",
+                            "select TELEGRAM_TOKEN from HUNTTECH_APPLICATION_SETUP where ACTIVE_SETUP = true",
                             rs -> rs.next() ? rs.getString(1) : null);
 
             return scripts;
@@ -79,7 +79,7 @@ public class ApplicationSetupServiceBean implements ApplicationSetupService {
         try {
             String scripts =
                     runner.query(
-                            "select TELEGRAM_CHAT_OPEN_POSITION from ITPEARLS_APPLICATION_SETUP where ACTIVE_SETUP = true",
+                            "select TELEGRAM_CHAT_OPEN_POSITION from HUNTTECH_APPLICATION_SETUP where ACTIVE_SETUP = true",
                             rs -> rs.next() ? rs.getString(1) : null);
 
 
