@@ -67,11 +67,13 @@ public class AiAnalysisServiceBean implements AiAnalysisService {
         String filledPrompt = fillPlaceholders(template.getPromptText(), fullEntity);
         log.debug("Промпт заполнен: length={}", filledPrompt.length());
 
-        log.info("Отправляем промпт провайдеру openai (entity={}, promptCode={})",
+        // Системные кнопки AI-анализа всегда используют одну текущую конфигурацию пользователя,
+        // выбранную администратором в списке настроек доступа к AI API.
+        log.info("Отправляем системный промпт через текущую AI-конфигурацию (entity={}, promptCode={})",
                 fullEntity.getClass().getSimpleName(), promptCode);
 
         try {
-            String result = hrmAiService.sendPrompt(filledPrompt, "openai");
+            String result = hrmAiService.sendPromptUsingCurrentConfiguration(filledPrompt);
             log.info("Ответ получен: length={}", result != null ? result.length() : 0);
             return result;
         } catch (Exception e) {
