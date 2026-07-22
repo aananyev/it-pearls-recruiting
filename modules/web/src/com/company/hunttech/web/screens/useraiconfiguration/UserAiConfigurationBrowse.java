@@ -53,13 +53,14 @@ public class UserAiConfigurationBrowse extends StandardLookup<UserAiConfiguratio
         try {
             hrmAiService.setCurrentConfiguration(selected.getId());
             userAiConfigurationsDl.load();
+            updateActionState();
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption(String.format(messageBundle.getMessage("currentProviderChanged"),
                             selected.getProviderCode()))
                     .show();
         } catch (Exception e) {
             notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption(messageBundle.getMessage("connectionError"))
+                    .withCaption(messageBundle.getMessage("currentProviderError"))
                     .withDescription(e.getMessage())
                     .show();
         }
