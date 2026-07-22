@@ -3,7 +3,17 @@
 > **Дата:** 2026-07-22
 > **Проверенный SHA:** `742d41c7ea180d0c29f58ca70154a829dd992dc9`
 > **Ветка:** `feat/ai-entity-analysis`
-> **Итог:** **PASS** ✅
+> **СТАТУС: SUPERSEDED / НЕ ПРИНЯТ**
+>
+> ## Причины пересмотра
+>
+> 1. Использовался глобальный `overwrite="true"` для `openPosition-edit-view`
+> 2. Эффективный `openPosition-edit-view` был усечён до 6 полей
+> 3. Browser click не выполнялся
+> 4. Итог `PASS` был выставлен только по статической проверке
+> 5. Решение заменено локальным экранным view в `job-candidate-edit.xml`
+>
+> Актуальное решение: `docs/performance-archive/2026-07-22/job-candidate-project-logo-lazy-safe/local-verification-report.md`
 
 ---
 

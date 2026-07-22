@@ -53,7 +53,7 @@
 | Платформа | CUBA Platform 7.3 |
 | Корневой style name | `job-candidate-editor` |
 
-Визуальная компоновка не меняет сущности, component ID, data bindings, actions, invoke, loaders и JPQL. Для устранения detached/unfetched ошибки уточнён только shared view `openPosition-edit-view`: ссылка `projectName.projectLogo` загружается с вложенным `FileDescriptor` view.
+Визуальная компоновка не меняет сущности, component ID, data bindings, actions, invoke, loaders и JPQL. Для устранения detached/unfetched ошибки `projectLogo` загружается через вложенный view в `job-candidate-edit.xml`: ссылка `projectName.projectLogo` указывается с `view="_local"` непосредственно в экранном view кандидата, без глобального override shared-entity view.
 
 Обязательные compatibility-компоненты контроллера:
 
@@ -87,7 +87,7 @@ JobCandidate.candidateCv
         └── Project.projectDepartment
 ```
 
-`Project.projectLogo` остаётся `FetchType.LAZY`. Загрузка обеспечивается дополнительным shared-view `job-candidate-project-logo-views.xml`, который с `overwrite="true"` уточняет существующий `openPosition-edit-view`. Это исключает глобальный `EAGER` и дополнительные запросы из генератора колонки.
+`Project.projectLogo` остаётся `FetchType.LAZY`. Загрузка осуществляется локально в экранном view `job-candidate-edit.xml` через вложенное свойство `<property name="projectLogo" view="_local"/>`. Глобальный shared-entity view `openPosition-edit-view` не изменяется.
 
 Правила:
 
@@ -289,7 +289,8 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
-| 2026-07-22 | `openPosition-edit-view` дополнен графом `projectName.projectLogo` с вложенным `FileDescriptor` view; устранён unfetched/detached сбой колонки логотипа в таблице резюме без изменения Java-бизнес-логики. |
+| 2026-07-22 | Глобальный overwrite `openPosition-edit-view` удалён. `projectLogo` загружается через локальный вложенный view `job-candidate-edit.xml`. Исходный shared view восстановлен. |
+| 2026-07-22 | (SUPERSEDED) `openPosition-edit-view` дополнен графом `projectName.projectLogo` через глобальный overwrite; заменён локальным экранным view. |
 | 2026-07-21 | Исправлены типографика и центрирование ФИО, вывод должности, размеры sidebar labels и одинаковая ширина трёх полей ФИО; процент заполнения считается по 15 полям без изменения lazy-алгоритма. |
 | 2026-07-21 | Профиль кандидата переведён на единый `OvaFallbackImage` 176×176 с локальным fallback; ФИО и должность синхронизируются через `jobCandidateDc` независимо от lazy-вкладок. |
 | 2026-07-21 | Во всех семи темах восстановлена видимость должности и сохранение структурного класса ФИО при блокировке; добавлены регрессионные тесты и пользовательская инструкция. |

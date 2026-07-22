@@ -8,7 +8,7 @@
         <property name="cuba.persistenceConfig" value="+com/company/hunttech/persistence.xml"/>
         <property name="cuba.metadataConfig" value="+com/company/hunttech/metadata.xml"/>
         <property name="cuba.viewsConfig"
-                  value="+com/company/hunttech/views.xml com/company/hunttech/job-candidate-project-logo-views.xml"/>
+                  value="+com/company/hunttech/views.xml"/>
     </module>
     <module name="core" dependsOn="global" blocks="core">
         <artifact name="app-core" appJar="true"/>
