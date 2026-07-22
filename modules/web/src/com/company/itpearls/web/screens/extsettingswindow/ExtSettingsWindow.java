@@ -1,9 +1,11 @@
-package com.company.itpearls.web.screens.extsettingswindow;
+package com.company.hunttech.web.screens.extsettingswindow;
 
 import com.company.hunttech.app.ImageProcessingService;
 import com.company.hunttech.config.HunttechImageConfig;
-import com.company.itpearls.entity.*;
-import com.company.itpearls.service.UserAiContextService;
+import com.company.hunttech.entity.*;
+import com.company.hunttech.service.UserAiContextService;
+import com.company.itpearls.entity.ExtUser;
+import com.company.itpearls.entity.UserSettings;
 import com.company.itpearls.web.util.AvatarImageUploadHelper;
 import com.company.itpearls.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.app.FileStorageService;
@@ -28,7 +30,7 @@ public class ExtSettingsWindow extends SettingsWindow {
     private static final String QUERY_GET_USER_SETTINGS =
             "select e from itpearls_UserSettings e where e.user = :currentUser";
     private static final String QUERY_GET_USER_AI_PROFILE =
-            "select e from itpearls_UserAiProfile e where e.user = :currentUser";
+            "select e from hunttech_UserAiProfile e where e.user = :currentUser";
     private static final String AI_PROFILE_CONSENT_VERSION = "2026-07-22-v1";
 
     @Inject private UserSessionSource userSessionSource;
