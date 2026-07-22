@@ -335,7 +335,9 @@ restart.dependsOn copyTomcatSetenv
 task buildWar(type: CubaWarBuilding) {
     includeJdbcDriver = true
     appProperties = ['cuba.automaticDatabaseUpdate': true,
-                     'cuba.dataSourceProvider'     : 'jndi']
+                     'cuba.dataSourceProvider'     : 'jndi',
+                     'cuba.useLocalServiceInvocation': false,
+                     'cuba.connectionUrlList'      : 'http://localhost:8080/hrm-core']
     logbackConfigurationFile = 'etc/war-logback.xml'
     includeContextXml = true
     singleWar = false
