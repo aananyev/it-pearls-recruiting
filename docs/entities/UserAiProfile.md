@@ -1,7 +1,7 @@
 # UserAiProfile — профессиональный профиль пользователя для ИИ
 
 > Сущность HRM HuntTech для управляемой персонализации ответов ИИ-сервисов.  
-> Таблица: `ITPEARLS_USER_AI_PROFILE`.  
+> Таблица: `HUNTTECH_USER_AI_PROFILE`.  
 > Связанные документы: [ExtSettingsWindow](../ui/ExtSettingsWindow_Spec.md), [UserAiContextService](../services/UserAiContextService.md), [техническое задание](../architecture/SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md).
 
 ## Business & Context Intro
@@ -12,7 +12,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Профиль редактируется в `ExtSettingsWindow` на вкладке «Обо мне». Аватар и имя берутся из `ExtUser`; провайдер, модель и конфигурация подключения остаются в `UserAiConfiguration`. Предпросмотр формируется через `UserAiContextService` без внешнего HTTP-вызова.
+Профиль редактируется в `ExtSettingsWindow` на вкладке «Обо мне». Аватар и имя берутся из существующей сущности `ExtUser`; провайдер, модель и конфигурация подключения остаются в `UserAiConfiguration`. Предпросмотр формируется через `UserAiContextService` без внешнего HTTP-вызова.
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -27,10 +27,10 @@
 
 | Параметр | Значение |
 |---|---|
-| Entity name | `itpearls_UserAiProfile` |
-| Java-класс | `com.company.itpearls.entity.UserAiProfile` |
+| Entity name | `hunttech_UserAiProfile` |
+| Java-класс | `com.company.hunttech.entity.UserAiProfile` |
 | Базовый класс | `StandardEntity` |
-| Таблица | `ITPEARLS_USER_AI_PROFILE` |
+| Таблица | `HUNTTECH_USER_AI_PROFILE` |
 | Владелец | `ExtUser` |
 | Кардинальность | один профиль на одного пользователя |
 | Критичность | средняя: персонализация не должна блокировать базовые функции HRM HuntTech |
@@ -76,14 +76,14 @@ flowchart LR
 - `AiTerminologyLevel`;
 - `AiAnswerStructure`.
 
-Enum реализованы через `EnumClass<Integer>` со стабильными числовыми идентификаторами.
+Enum размещены в `com.company.hunttech.entity` и реализованы через `EnumClass<Integer>` со стабильными числовыми идентификаторами.
 
 ## 4. Представления и загрузка
 
 Экран использует `userAiProfile-view`: он расширяет `_local` и добавляет только связь `user` через узкий `extUser-picker-view`. Сервис формирования контекста использует `_local`, потому что ему нужны только скалярные бизнес-поля профиля. Фильтрация по владельцу выполняется JPQL:
 
 ```jpql
-select e from itpearls_UserAiProfile e where e.user = :currentUser
+select e from hunttech_UserAiProfile e where e.user = :currentUser
 ```
 
 Запрещено расширять view профиля до `extUser-view`: это может загрузить роли, замещения и другие несвязанные данные пользователя.
@@ -94,7 +94,7 @@ select e from itpearls_UserAiProfile e where e.user = :currentUser
 - Liquibase mirror: `modules/core/db/changelog/260722-1-addUserAiProfile.xml`;
 - Liquibase master: `modules/core/db/changelog/db.changelog-master.xml`.
 
-Повторное выполнение PostgreSQL-скрипта предотвращает штатный журнал CUBA `updateDb`; вручную повторно запускать его нельзя. Скрипт создаёт таблицу, FK, уникальный индекс пользователя и ограничения диапазона опыта. Liquibase changeSet содержит `MARK_RAN`, если таблица уже создана CUBA-миграцией.
+Скрипты создают `HUNTTECH_USER_AI_PROFILE`, FK на `SEC_USER`, уникальный индекс `IDX_HUNTTECH_USER_AI_PROFILE_UNQ_USER` и ограничения диапазона опыта. Миграция предназначена только для локальной базы `hunttech`; production в рамках этапа не используется.
 
 ## 6. Безопасность
 
@@ -108,4 +108,5 @@ select e from itpearls_UserAiProfile e where e.user = :currentUser
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-22 | Сущность, entity name, Java namespace и таблица перенесены в контур `hunttech`; enum ID и бизнес-контракт сохранены |
 | 2026-07-22 | Созданы сущность, enum, PostgreSQL/CUBA update-скрипт, Liquibase changelog и безопасный контекстный сервис |
