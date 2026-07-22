@@ -8,15 +8,16 @@
 
 ## Структура каталога
 
-```
+```text
 docs/
 ├── README.md                 ← этот файл (индекс)
 ├── LOCAL_DATABASE.md         ← локальная PostgreSQL, миграции, запуск
 ├── 02_business_logic/        ← TDD бизнес-логики (сквозные процессы)
 │   ├── db-schema-diff-report.md   ← отчёт: расхождения PostgreSQL ↔ модель приложения
 │   └── user-settings-photo-sync.md
-├── architecture/             ← полные спецификации по триггеру (см. ниже)
-│   └── README.md
+├── architecture/             ← полные спецификации и утверждённые ТЗ
+│   ├── README.md
+│   └── SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md
 ├── ui/
 │   ├── README.md               ← каталог UI Spec
 │   ├── archive/                ← удалённые UI Spec
@@ -34,26 +35,26 @@ docs/
 │   └── OvaFallbackImage.md        ← круг + fallback (OvalImage + FallbackImage)
 └── entities/
     ├── IteractionList.md      ← взаимодействие с кандидатом
-    ├── Iteraction.md         ← тип взаимодействия с кандидатом (образец)
-    ├── Person.md             ← сотрудник / контактное лицо
-    ├── Country.md              ← справочник стран
-    ├── Region.md               ← справочник регионов
-    ├── City.md                 ← справочник городов
-    ├── Project.md              ← проекты
-    ├── Company.md              ← компании
-    ├── CompanyDepartament.md   ← департаменты компаний
-    ├── CompanyGroup.md         ← группы компаний
-    ├── SkillTree.md            ← дерево компетенций
-    ├── OpenPosition.md         ← вакансии
-    ├── OpenPositionComment.md  ← комментарии к вакансии
-    ├── OpenPositionNews.md     ← новости вакансии
-    ├── Grade.md                ← грейды
+    ├── Iteraction.md          ← тип взаимодействия с кандидатом (образец)
+    ├── Person.md              ← сотрудник / контактное лицо
+    ├── Country.md             ← справочник стран
+    ├── Region.md              ← справочник регионов
+    ├── City.md                ← справочник городов
+    ├── Project.md             ← проекты
+    ├── Company.md             ← компании
+    ├── CompanyDepartament.md  ← департаменты компаний
+    ├── CompanyGroup.md        ← группы компаний
+    ├── SkillTree.md           ← дерево компетенций
+    ├── OpenPosition.md        ← вакансии
+    ├── OpenPositionComment.md ← комментарии к вакансии
+    ├── OpenPositionNews.md    ← новости вакансии
+    ├── Grade.md               ← грейды
     ├── VacancyPromptTemplate.md ← шаблоны AI-промптов вакансий
-    ├── UserAiConfiguration.md  ← персональные AI-ключи пользователей
-    ├── ExtUser.md              ← расширенный пользователь (фото, почта, AI)
-    ├── Position.md             ← должности
-    ├── JobCandidate.md         ← кандидаты (подсистема: entity + browse + edit)
-    └── RecrutiesTasks.md       ← подписки рекрутёров
+    ├── UserAiConfiguration.md ← персональные AI-ключи пользователей
+    ├── ExtUser.md             ← расширенный пользователь (фото, почта, AI)
+    ├── Position.md            ← должности
+    ├── JobCandidate.md        ← кандидаты (подсистема: entity + browse + edit)
+    └── RecrutiesTasks.md      ← подписки рекрутёров
 ```
 
 ---
@@ -62,6 +63,7 @@ docs/
 
 | Задача | Документ |
 |--------|----------|
+| Реализовать вкладку «Обо мне» и профиль персонализации ИИ | [architecture/SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md](architecture/SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md) |
 | Поднять локальную БД и приложение | [LOCAL_DATABASE.md](LOCAL_DATABASE.md) |
 | Расхождения схемы БД и приложения | [02_business_logic/db-schema-diff-report.md](02_business_logic/db-schema-diff-report.md) |
 | Архитектура подсистемы AI (LLM) | [../AI_INTEGRATION.md](../AI_INTEGRATION.md) |
@@ -103,9 +105,10 @@ docs/
 | Сценарий | Путь | Разделы |
 |----------|------|---------|
 | Триггер (полная регенерация из кода) | `architecture/{EntityName}_Spec.md` | Intro + 6: Data Model, Views, Browse, Edit, Fragments, Deployment |
+| Утверждённое техническое задание | `architecture/*_Technical_Specification.md` | цели, scope, модель данных, UI, сервисы, тесты, DoD |
 | Living sync (правка кода в сессии) | `entities/{EntityName}.md` | Intro + 5 блоков living-doc |
 
-Оба каталога **не объединяются**: architecture — канон для one-pass спецификации по запросу; entities — инкрементальная синхронизация при изменении кода. При наличии обоих файлов — cross-links в шапке.
+Каталоги **не объединяются**: architecture — канон для one-pass спецификаций и утверждённых ТЗ; entities — инкрементальная синхронизация при изменении кода. При наличии нескольких связанных файлов используются cross-links в шапке.
 
 Подробности: [architecture/README.md](architecture/README.md)
 
@@ -245,15 +248,15 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 
 - **Business & Context Intro:** любой `docs/entities/*.md`, `docs/architecture/*_Spec.md`, `docs/ui/*_Spec.md` **обязан** начинать содержательную часть с трёх подразделов ввода (назначение, навигация в UI, краткое поведение) **до** технических таблиц/XML/БД. Документ без ввода — недействителен. Шаблоны: [entity-template.md](templates/entity-template.md), [ui-template.md](templates/ui-template.md). Правило агента: [`.cursorrules`](../.cursorrules) § Business & Context Intro. Существующие UI Spec (~47) дополняются при следующем living sync или отдельным batch-проходом.
 - **Брендинг:** во всей документации (`docs/**/*.md`, шаблоны) — **HRM HuntTech**; не использовать «IT Pearls» / «IT-Pearls» в prose. Исключение — цитирование legacy-идентификаторов из кода (`itpearls`, `ITPEARLS_*`, имена файлов ресурсов, ключи `messages.properties`). Правило для агента: [living-documentation.mdc](../.cursor/rules/living-documentation.mdc), § «Брендинг в документации».
-- Документация сущностей — **на русском языке**
-- Имена файлов сущностей — как Java-класс: `Iteraction.md`, `IteractionList.md`
-- При изменении views/экранов сущности — обновлять `docs/entities/*.md` и `docs/ui/{FormName}_Spec.md`
-- **Оптимизация без изменения БД:** сужение view, batch/JPQL, loaders — без запроса; миграции, индексы, новые поля entity — только после явного согласия ([`.cursorrules`](../.cursorrules) § «ОПТИМИЗАЦИЯ: ОГРАНИЧЕНИЕ СТРУКТУРЫ БД»)
-- Не дублировать полные DDL в документах — ссылаться на `modules/core/db/`
+- Документация сущностей — **на русском языке**.
+- Имена файлов сущностей — как Java-класс: `Iteraction.md`, `IteractionList.md`.
+- При изменении views/экранов сущности — обновлять `docs/entities/*.md` и `docs/ui/{FormName}_Spec.md`.
+- **Оптимизация без изменения БД:** сужение view, batch/JPQL, loaders — без запроса; миграции, индексы, новые поля entity — только после явного согласия ([`.cursorrules`](../.cursorrules) § «ОПТИМИЗАЦИЯ: ОГРАНИЧЕНИЕ СТРУКТУРЫ БД»).
+- Не дублировать полные DDL в документах — ссылаться на `modules/core/db/`.
 
 ### Политика Living Documentation
 
-**Триггер сущности (приоритет):** «Сделай документацию сущности {Имя}» → STOP остального → scan кода → `docs/architecture/{EntityName}_Spec.md` (6 разделов, one-pass) → финал: `Документация для сущности {Имя} успешно создана/актуализирована в файле {Путь}`
+**Триггер сущности (приоритет):** «Сделай документацию сущности {Имя}» → STOP остального → scan кода → `docs/architecture/{EntityName}_Spec.md` (6 разделов, one-pass) → финал: `Документация для сущности {Имя} успешно создана/актуализирована в файле {Путь}`.
 
 **Изменение кода сущности** (Entity, views, сервисы, миграции) — синхронизировать в той же сессии:
 
@@ -277,9 +280,10 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-22 | В индекс добавлено техническое задание на вкладку «Обо мне» и профиль персонализации ИИ |
 | 2026-06-26 | Глобальный аудит Living Documentation: Business & Context Intro во всех entity/UI/architecture spec (см. `docs/ui/README.md`) |
 | YYYY-MM-DD | Краткое описание изменения |
 
-- Дата — формат **YYYY-MM-DD** (дата внесения изменения)
-- Новые записи — **сверху** таблицы
+- Дата — формат **YYYY-MM-DD** (дата внесения изменения).
+- Новые записи — **сверху** таблицы.
 - Правило для Cursor-агента: [.cursor/rules/documentation-with-dates.mdc](../.cursor/rules/documentation-with-dates.mdc)
