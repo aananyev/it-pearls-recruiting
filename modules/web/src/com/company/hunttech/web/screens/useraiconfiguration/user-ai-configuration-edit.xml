@@ -10,29 +10,46 @@
             <loader/>
         </instance>
     </data>
-    <dialogMode height="AUTO"
-                width="450"
+    <dialogMode height="560"
+                width="650"
                 modal="true"
                 forceDialog="true"/>
-    <layout expand="editActions" spacing="true" margin="true">
-        <form id="form" dataContainer="userAiConfigurationDc" width="100%">
-            <column width="400px">
-                <lookupField id="providerCodeField"
-                             property="providerCode"
-                             required="true"
-                             width="100%"/>
-                <passwordField id="apiKeyField"
-                               property="apiKey"
-                               secret="true"
+    <layout expand="contentScrollBox"
+            spacing="true"
+            margin="true"
+            height="100%"
+            width="100%">
+        <scrollBox id="contentScrollBox"
+                   height="100%"
+                   width="100%">
+            <form id="form"
+                  dataContainer="userAiConfigurationDc"
+                  captionPosition="TOP"
+                  width="100%">
+                <column width="100%">
+                    <lookupField id="providerCodeField"
+                                 property="providerCode"
+                                 caption="msg://UserAiConfiguration.providerCode"
+                                 required="true"
+                                 width="100%"/>
+                    <passwordField id="apiKeyField"
+                                   property="apiKey"
+                                   caption="msg://UserAiConfiguration.apiKey"
+                                   secret="true"
+                                   required="true"
+                                   width="100%"/>
+                    <textField id="defaultModelNameField"
+                               property="defaultModelName"
+                               caption="msg://UserAiConfiguration.defaultModelName"
                                width="100%"/>
-                <textField id="defaultModelNameField"
-                           property="defaultModelName"
-                           width="100%"/>
-                <checkBox id="isActiveField"
-                          property="isActive"
-                          width="100%"/>
-            </column>
-        </form>
+                    <checkBox id="isActiveField"
+                              property="isActive"
+                              caption="msg://UserAiConfiguration.currentForAnalysis"
+                              description="msg://currentProviderHint"
+                              editable="false"/>
+                </column>
+            </form>
+        </scrollBox>
         <hbox id="editActions" spacing="true">
             <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
             <button id="closeBtn" action="windowClose"/>
