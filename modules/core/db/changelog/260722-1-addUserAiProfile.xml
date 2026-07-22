@@ -5,13 +5,13 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet id="260722-1-createUserAiProfile" author="itpearls">
+    <changeSet id="260722-1-createUserAiProfile" author="hunttech">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="ITPEARLS_USER_AI_PROFILE"/>
+                <tableExists tableName="HUNTTECH_USER_AI_PROFILE"/>
             </not>
         </preConditions>
-        <createTable tableName="ITPEARLS_USER_AI_PROFILE">
+        <createTable tableName="HUNTTECH_USER_AI_PROFILE">
             <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
             <column name="VERSION" type="int"><constraints nullable="false"/></column>
             <column name="CREATE_TS" type="timestamp"/>
@@ -55,7 +55,7 @@
             <column name="CUSTOM_AI_INSTRUCTIONS" type="clob"/>
             <column name="COMMUNICATION_CONSTRAINTS" type="clob"/>
         </createTable>
-        <addForeignKeyConstraint baseTableName="ITPEARLS_USER_AI_PROFILE" baseColumnNames="USER_ID" constraintName="FK_ITPEARLS_USER_AI_PROFILE_ON_USER" referencedTableName="SEC_USER" referencedColumnNames="ID"/>
-        <createIndex tableName="ITPEARLS_USER_AI_PROFILE" indexName="IDX_ITPEARLS_USER_AI_PROFILE_UNQ_USER" unique="true"><column name="USER_ID"/></createIndex>
+        <addForeignKeyConstraint baseTableName="HUNTTECH_USER_AI_PROFILE" baseColumnNames="USER_ID" constraintName="FK_HUNTTECH_USER_AI_PROFILE_ON_USER" referencedTableName="SEC_USER" referencedColumnNames="ID"/>
+        <createIndex tableName="HUNTTECH_USER_AI_PROFILE" indexName="IDX_HUNTTECH_USER_AI_PROFILE_UNQ_USER" unique="true"><column name="USER_ID"/></createIndex>
     </changeSet>
 </databaseChangeLog>
