@@ -1,4 +1,4 @@
-package com.company.itpearls.service.dto;
+package com.company.hunttech.service.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
