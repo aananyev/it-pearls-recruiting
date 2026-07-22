@@ -1,6 +1,8 @@
 # UserAiContextService
 
-> Middleware-сервис HRM HuntTech для формирования безопасного пользовательского контекста без обращения к внешнему LLM.
+> Middleware-сервис HRM HuntTech для формирования безопасного пользовательского контекста без обращения к внешнему LLM.  
+> Контракт: `com.company.hunttech.service.UserAiContextService`.  
+> Spring bean: `hunttech_UserAiContextService`.
 
 ## Business & Context Intro
 
@@ -31,9 +33,23 @@ String buildContextPreview(UserAiProfile profile);
 
 `buildContext(UserAiProfile)` выделен для детерминированного тестирования и повторного использования экраном без повторной загрузки.
 
+| Компонент | Значение |
+|---|---|
+| Интерфейс | `com.company.hunttech.service.UserAiContextService` |
+| Реализация | `com.company.hunttech.service.UserAiContextServiceBean` |
+| DTO | `com.company.hunttech.service.dto.AiUserContext` |
+| Bean name | `hunttech_UserAiContextService` |
+| Entity | `hunttech_UserAiProfile` |
+
 ## 2. Источники и границы
 
 Сервис читает только `UserAiProfile`. Он не загружает `UserAiConfiguration`, `UserSettings`, роли, замещения и почтовые реквизиты.
+
+Профиль текущего пользователя загружается запросом:
+
+```jpql
+select e from hunttech_UserAiProfile e where e.user = :user
+```
 
 ## 3. Sanitization
 
@@ -54,10 +70,11 @@ String buildContextPreview(UserAiProfile profile);
 
 ## 6. Тесты
 
-`UserAiContextServiceBeanTest` проверяет выключенный профиль, отсутствие согласия, разделение данных и инструкций, sanitization, Unicode-лимиты, отсутствие конфигурационных полей и пропуск пустых значений.
+`UserAiContextServiceBeanTest` в package `com.company.hunttech.service` проверяет выключенный профиль, отсутствие согласия, разделение данных и инструкций, sanitization, Unicode-лимиты, отсутствие конфигурационных полей и пропуск пустых значений.
 
 ## 7. История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-22 | Контракт, bean name, DTO, JPQL и тест перенесены из контура `itpearls` в `com.company.hunttech`/`hunttech_*` без изменения поведения |
 | 2026-07-22 | Созданы контракт, DTO, core-реализация, sanitization, предпросмотр и unit-тесты |
