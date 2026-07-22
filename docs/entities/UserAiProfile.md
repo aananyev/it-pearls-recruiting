@@ -2,7 +2,7 @@
 
 > Сущность HRM HuntTech для управляемой персонализации ответов ИИ-сервисов.  
 > Таблица: `HUNTTECH_USER_AI_PROFILE`.  
-> Связанные документы: [ExtSettingsWindow](../ui/ExtSettingsWindow_Spec.md), [UserAiContextService](../services/UserAiContextService.md), [техническое задание](../architecture/SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md).
+> Связанные документы: [ExtSettingsWindow](../ui/ExtSettingsWindow_Spec.md), [UserAiContextService](../services/UserAiContextService.md), [техническое задание](../architecture/SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md), [реализация hunttech](../architecture/SettingWindow_AboutMe_Hunttech_Implementation.md).
 
 ## Business & Context Intro
 
@@ -90,11 +90,14 @@ select e from hunttech_UserAiProfile e where e.user = :currentUser
 
 ## 5. База данных и миграции
 
-- CUBA update script: `modules/core/db/update/postgres/26/260722-1-createUserAiProfile.sql`;
-- Liquibase mirror: `modules/core/db/changelog/260722-1-addUserAiProfile.xml`;
+- первоначальное безопасное создание: `modules/core/db/update/postgres/26/260722-1-createUserAiProfile.sql`;
+- совместимость с ранее созданной legacy-таблицей: `modules/core/db/update/postgres/26/260722-2-migrateUserAiProfileToHunttech.sql`;
+- Liquibase mirrors: `260722-1-addUserAiProfile.xml`, `260722-2-migrateUserAiProfileToHunttech.xml`;
 - Liquibase master: `modules/core/db/changelog/db.changelog-master.xml`.
 
-Скрипты создают `HUNTTECH_USER_AI_PROFILE`, FK на `SEC_USER`, уникальный индекс `IDX_HUNTTECH_USER_AI_PROFILE_UNQ_USER` и ограничения диапазона опыта. Миграция предназначена только для локальной базы `hunttech`; production в рамках этапа не используется.
+Первый скрипт создаёт `HUNTTECH_USER_AI_PROFILE` только при отсутствии и новой, и legacy-таблицы. Второй скрипт без копирования строк переименовывает `ITPEARLS_USER_AI_PROFILE` и связанные ограничения в `HUNTTECH_*`. Если одновременно существуют обе таблицы, миграция останавливается с ошибкой для ручного разбора и не удаляет данные.
+
+Итоговая таблица содержит FK на `SEC_USER`, уникальный индекс `IDX_HUNTTECH_USER_AI_PROFILE_UNQ_USER` и ограничения диапазона опыта. Миграция предназначена только для локальной базы `hunttech`; production в рамках этапа не используется.
 
 ## 6. Безопасность
 
@@ -108,5 +111,6 @@ select e from hunttech_UserAiProfile e where e.user = :currentUser
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-22 | Добавлена безопасная compatibility-миграция legacy-таблицы через rename; при наличии обеих таблиц выполнение останавливается без удаления данных |
 | 2026-07-22 | Сущность, entity name, Java namespace и таблица перенесены в контур `hunttech`; enum ID и бизнес-контракт сохранены |
 | 2026-07-22 | Созданы сущность, enum, PostgreSQL/CUBA update-скрипт, Liquibase changelog и безопасный контекстный сервис |
