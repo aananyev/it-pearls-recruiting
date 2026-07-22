@@ -72,9 +72,8 @@ public class UserAiConfigurationEdit extends StandardEditor<UserAiConfiguration>
         if (parentUser != null) {
             event.getEntity().setUser(parentUser);
         }
-        if (event.getEntity().getIsActive() == null) {
-            event.getEntity().setIsActive(true);
-        }
+        // Новая настройка сохраняется как резервная; текущую нейросеть администратор выбирает в browse-экране.
+        event.getEntity().setIsActive(false);
     }
 
     @Subscribe
