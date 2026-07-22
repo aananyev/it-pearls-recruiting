@@ -17,7 +17,8 @@ docs/
 │   └── user-settings-photo-sync.md
 ├── architecture/             ← полные спецификации и утверждённые ТЗ
 │   ├── README.md
-│   └── SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md
+│   ├── SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md
+│   └── SettingWindow_AboutMe_Hunttech_Implementation.md
 ├── hermes/
 │   └── 2026-07-22-setting-window-about-me-ai-profile.md
 ├── ui/
@@ -69,7 +70,8 @@ docs/
 | Задача | Документ |
 |--------|----------|
 | Реализовать вкладку «Обо мне» и профиль персонализации ИИ | [architecture/SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md](architecture/SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md) |
-| Развернуть и проверить ИИ-профиль через Hermes | [hermes/2026-07-22-setting-window-about-me-ai-profile.md](hermes/2026-07-22-setting-window-about-me-ai-profile.md) |
+| Проверить фактическую реализацию в namespace и БД `hunttech` | [architecture/SettingWindow_AboutMe_Hunttech_Implementation.md](architecture/SettingWindow_AboutMe_Hunttech_Implementation.md) |
+| Локально собрать и проверить ИИ-профиль через Hermes | [hermes/2026-07-22-setting-window-about-me-ai-profile.md](hermes/2026-07-22-setting-window-about-me-ai-profile.md) |
 | Понять сущность персонального ИИ-профиля | [entities/UserAiProfile.md](entities/UserAiProfile.md) |
 | Понять безопасную сборку ИИ-контекста | [services/UserAiContextService.md](services/UserAiContextService.md) |
 | Поднять локальную БД и приложение | [LOCAL_DATABASE.md](LOCAL_DATABASE.md) |
@@ -114,6 +116,7 @@ docs/
 |----------|------|---------|
 | Триггер (полная регенерация из кода) | `architecture/{EntityName}_Spec.md` | Intro + 6: Data Model, Views, Browse, Edit, Fragments, Deployment |
 | Утверждённое техническое задание | `architecture/*_Technical_Specification.md` | цели, scope, модель данных, UI, сервисы, тесты, DoD |
+| Фактическая реализация после миграции namespace | `architecture/*_Implementation.md` | применённые packages, entity names, таблицы, ограничения среды |
 | Living sync (правка кода в сессии) | `entities/{EntityName}.md` | Intro + 5 блоков living-doc |
 
 Каталоги **не объединяются**: architecture — канон для one-pass спецификаций и утверждённых ТЗ; entities — инкрементальная синхронизация при изменении кода. При наличии нескольких связанных файлов используются cross-links в шапке.
@@ -156,8 +159,8 @@ docs/
 4. **Views** — специализированные представления в `views.xml`
 5. **Экраны** — Browse / Edit / Tree, JPQL, lazy loaders
 6. **База данных** — таблица, индексы, миграции
-7. **Производительность** — чеклист оптимизаций, backlog
-8. **Развёртывание** — cache, FTS, app.properties
+7. **Производительность** — запросы, узкие views, N+1, кэш
+8. **История изменений** — дата YYYY-MM-DD
 
 ### Как добавить документ сущности
 
@@ -190,7 +193,7 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 | **OpenPositionNews** | `ITPEARLS_OPEN_POSITION_NEWS` | транзакционная | [entities/OpenPositionNews.md](entities/OpenPositionNews.md) | ✅ заполнен |
 | **OpenPositionComment** | `ITPEARLS_OPEN_POSITION_COMMENT` | транзакционная | [entities/OpenPositionComment.md](entities/OpenPositionComment.md) | ✅ заполнен |
 | **RecrutiesTasks** | `ITPEARLS_RECRUTIES_TASKS` | транзакционная | [entities/RecrutiesTasks.md](entities/RecrutiesTasks.md) | ✅ заполнен |
-| **UserAiProfile** | `ITPEARLS_USER_AI_PROFILE` | персональные настройки | [entities/UserAiProfile.md](entities/UserAiProfile.md) | ✅ заполнен |
+| **UserAiProfile** | `HUNTTECH_USER_AI_PROFILE` | персональные настройки | [entities/UserAiProfile.md](entities/UserAiProfile.md) | ✅ заполнен |
 
 ---
 
@@ -207,9 +210,11 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 
 | Область | Путь |
 |---------|------|
-| Views | `modules/global/src/com/company/itpearls/views.xml` |
-| Entity | `modules/global/src/com/company/itpearls/entity/` |
-| Экраны | `modules/web/src/com/company/itpearls/web/screens/` |
+| Views legacy-модели | `modules/global/src/com/company/itpearls/views.xml` |
+| Новый ИИ-профиль | `modules/global/src/com/company/hunttech/entity/UserAiProfile.java` |
+| View ИИ-профиля | `modules/global/src/com/company/hunttech/user-ai-profile-views.xml` |
+| Экраны legacy-модели | `modules/web/src/com/company/itpearls/web/screens/` |
+| Контроллер нового SettingsWindow | `modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindow.java` |
 | Миграции PostgreSQL | `modules/core/db/update/postgres/` |
 | Схема БД (init) | `modules/core/db/init/postgres/` |
 | Кэш сущностей | `modules/core/src/com/company/itpearls/app.properties` |
@@ -248,6 +253,8 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 ./gradlew setupTomcat deploy start
 # http://localhost:8080/app
 ```
+
+Для текущего этапа `ExtSettingsWindow` разрешено только локальное развертывание. Production запрещён.
 
 Версия CUBA: `7.3-SNAPSHOT` (`build.gradle`).
 
@@ -289,7 +296,8 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-07-22 | Добавлены `UserAiProfile`, `UserAiContextService`, UI Spec `ExtSettingsWindow` и задание Hermes на миграцию и запуск |
+| 2026-07-22 | Реализация `ExtSettingsWindow` и `UserAiProfile` перенесена в namespace и локальную БД `hunttech`; добавлена спецификация фактической реализации |
+| 2026-07-22 | Добавлены `UserAiProfile`, `UserAiContextService`, UI Spec `ExtSettingsWindow` и локальное задание Hermes на миграцию и запуск |
 | 2026-07-22 | В индекс добавлено техническое задание на вкладку «Обо мне» и профиль персонализации ИИ |
 | 2026-06-26 | Глобальный аудит Living Documentation: Business & Context Intro во всех entity/UI/architecture spec (см. `docs/ui/README.md`) |
 | YYYY-MM-DD | Краткое описание изменения |
