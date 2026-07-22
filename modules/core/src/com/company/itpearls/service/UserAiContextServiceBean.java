@@ -1,7 +1,7 @@
-package com.company.itpearls.service;
+package com.company.hunttech.service;
 
-import com.company.itpearls.entity.UserAiProfile;
-import com.company.itpearls.service.dto.AiUserContext;
+import com.company.hunttech.entity.UserAiProfile;
+import com.company.hunttech.service.dto.AiUserContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ import java.util.Map;
 public class UserAiContextServiceBean implements UserAiContextService {
 
     private static final String QUERY_CURRENT_PROFILE =
-            "select e from itpearls_UserAiProfile e where e.user = :user";
+            "select e from hunttech_UserAiProfile e where e.user = :user";
 
     private static final int DEFAULT_FIELD_LIMIT = 4000;
     private static final int SHORT_FIELD_LIMIT = 255;
