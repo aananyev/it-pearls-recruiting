@@ -318,7 +318,7 @@ public class ExtSettingsWindow extends SettingsWindow {
     public void previewAiContext() {
         // Формирует очищенный предпросмотр данных, разрешённых к передаче ИИ-провайдеру.
         aiContextPreviewArea.setValue(userAiContextService.buildContextPreview(userAiProfileDs.getItem()));
-        previewGroup.setCollapsed(false);
+        previewGroup.setExpanded(true);
     }
 
     public void clearAiProfile() {
