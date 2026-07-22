@@ -8,9 +8,10 @@
 |---|---|---|
 | `JobCandidateEdit` | [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md) | Карточка кандидата, вкладки, история вакансий, анализ навыков и защита от OOM |
 | `CandidateCVEdit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) | Редактор резюме, ленивое чтение текста и безопасная загрузка фотографии |
+| `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | Стандартные пользовательские настройки и персональные AI API-ключи без отдельного пункта меню |
 | `AiPromptTemplateBrowse` | [AiPromptTemplateBrowse_Spec.md](AiPromptTemplateBrowse_Spec.md) | Локализованный список системных промптов AI |
 | `AiPromptTemplateEdit` | [AiPromptTemplateEdit_Spec.md](AiPromptTemplateEdit_Spec.md) | Читаемый редактор системного промпта с фиксированной панелью действий |
-| `UserAiConfigurationBrowse` | [UserAiConfigurationBrowse_Spec.md](UserAiConfigurationBrowse_Spec.md) | Настройка API и выбор текущей нейросети для AI-анализа |
+| `UserAiConfigurationBrowse` | [UserAiConfigurationBrowse_Spec.md](UserAiConfigurationBrowse_Spec.md) | Технический экран мониторинга и выбора текущей нейросети без отдельной пользовательской навигации |
 | `UserAiConfigurationEdit` | [UserAiConfigurationEdit_Spec.md](UserAiConfigurationEdit_Spec.md) | Читаемый редактор подключения к AI API с резервным состоянием по умолчанию |
 
 ## Правила актуализации
