@@ -1,6 +1,6 @@
 # ExtSettingsWindow — настройки пользователя
 
-> Экран HRM HuntTech: `com.company.itpearls.web.screens.extsettingswindow.ExtSettingsWindow`.  
+> Экран HRM HuntTech: `com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindow`.  
 > XML: `ext-settings-window.xml`.  
 > Связанные документы: [UserAiProfile](../entities/UserAiProfile.md), [UserAiContextService](../services/UserAiContextService.md).
 
@@ -12,7 +12,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Открывается из стандартного меню настроек CUBA. Содержит вкладки `msgMyInfo`, `msgInterface` и `mailAccessTab`. «Обо мне» работает с `ExtUser` и `UserAiProfile`; интерфейсные параметры сохраняет базовый `SettingsWindow`; почтовые параметры — `UserSettings`.
+Открывается из стандартного меню настроек CUBA. Содержит вкладки `msgMyInfo`, `msgInterface` и `mailAccessTab`. «Обо мне» работает с `ExtUser` и `hunttech_UserAiProfile`; интерфейсные параметры сохраняет базовый `SettingsWindow`; почтовые параметры — существующая legacy-сущность `UserSettings`.
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -28,10 +28,11 @@
 
 | Параметр | Значение |
 |---|---|
+| Контроллер | `com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindow` |
 | Базовый класс | `SettingsWindow` |
 | XML schema | legacy `window.xsd` |
 | Data API | legacy `dsContext` |
-| Messages pack | `com.company.itpearls.web.screens.extsettingswindow` |
+| Messages pack | `com.company.itpearls.web.screens.extsettingswindow` — сохранён как legacy-ресурс |
 
 Существующие component ID сохранены для совместимости: `settingsTabSheet`, `msgMyInfo`, `msgInterface`, `mailAccessTab`, `okBtn`, `cancelBtn`, `userAvatarUpload`, `userPic`, `defaultPic`.
 
@@ -40,10 +41,16 @@
 | Datasource | Entity | View | Назначение |
 |---|---|---|---|
 | `extUserDs` | `ExtUser` | `extUser-view` | аватар и данные пользователя |
-| `userSettingsDs` | `UserSettings` | `userSettings-view` | legacy-контракт экрана |
-| `userAiProfileDs` | `UserAiProfile` | `userAiProfile-view` | профессиональный профиль и узкая связь с владельцем |
+| `userSettingsDs` | `UserSettings` | `userSettings-view` | существующий legacy-контракт почтовых настроек |
+| `userAiProfileDs` | `hunttech_UserAiProfile` | `userAiProfile-view` | профессиональный профиль и узкая связь с владельцем |
 
-Профиль загружается запросом по текущему пользователю. Отсутствующий профиль создаётся только в памяти и сохраняется после нажатия `okBtn`.
+Профиль загружается запросом:
+
+```jpql
+select e from hunttech_UserAiProfile e where e.user = :currentUser
+```
+
+Отсутствующий профиль создаётся только в памяти и сохраняется после нажатия `okBtn`.
 
 ## 3. Form Hierarchy
 
@@ -54,13 +61,14 @@ settingsTabSheet
 │       ├── userAiProfileSidebar
 │       │   ├── dropZone / picVBox / userPic / defaultPic
 │       │   └── summary labels
-│       └── userAiProfileContent
-│           ├── professionalProfileGroup
-│           ├── recruitingProfileGroup
-│           ├── responsePreferencesGroup
-│           ├── goalsGroup
-│           ├── privacyGroup
-│           └── previewGroup
+│       └── userAiProfileContentScrollBox
+│           └── userAiProfileContent
+│               ├── professionalProfileGroup
+│               ├── recruitingProfileGroup
+│               ├── responsePreferencesGroup
+│               ├── goalsGroup
+│               ├── privacyGroup
+│               └── previewGroup
 ├── msgInterface
 └── mailAccessTab
 ```
@@ -83,7 +91,7 @@ settingsTabSheet
 
 ### Предпросмотр
 
-`previewAiContext()` вызывает `UserAiContextService.buildContextPreview()` и раскрывает `previewGroup`. HTTP к LLM не выполняется.
+`previewAiContext()` вызывает `UserAiContextService.buildContextPreview()` и раскрывает `previewGroup` через совместимый с CUBA 7.3 вызов `setExpanded(true)`. HTTP к LLM не выполняется.
 
 ## 5. Actions & Methods
 
@@ -106,11 +114,12 @@ settingsTabSheet
 
 ## 7. Проверки
 
-Обязательны `ScreenViewIntegrityTest` (8/8), компиляция web/core/global, сборка SCSS, `clean assemble`, smoke-проверка аватара, почты, профиля и HTTP 200.
+Обязательны `ScreenViewIntegrityTest` (8/8), компиляция web/core/global, сборка SCSS, `clean assemble`, локальный smoke аватара, почты, профиля и локальный HTTP. Production-проверки для этого этапа запрещены.
 
 ## 8. История изменений
 
 | Дата | Изменение |
 |---|---|
-| 2026-07-22 | Исправлено программное раскрытие секции предпросмотра ИИ-контекста: используется совместимый с CUBA 7.3 метод setExpanded(true). |
+| 2026-07-22 | Контроллер, datasource ИИ-профиля и JPQL перенесены в namespace `hunttech`; legacy-контракты `ExtUser`, `UserSettings` и messages pack сохранены |
+| 2026-07-22 | Исправлено программное раскрытие секции предпросмотра ИИ-контекста: используется совместимый с CUBA 7.3 метод `setExpanded(true)` |
 | 2026-07-22 | Вкладка «Обо мне» переработана в двухпанельный профессиональный ИИ-профиль; добавлены согласие, предпросмотр и атомарное сохранение |
