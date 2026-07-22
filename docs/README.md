@@ -18,16 +18,20 @@ docs/
 ├── architecture/             ← полные спецификации и утверждённые ТЗ
 │   ├── README.md
 │   └── SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md
+├── hermes/
+│   └── 2026-07-22-setting-window-about-me-ai-profile.md
 ├── ui/
 │   ├── README.md               ← каталог UI Spec
 │   ├── archive/                ← удалённые UI Spec
+│   ├── ExtSettingsWindow_Spec.md
 │   ├── login-screen.md         ← legacy (kebab); канон при миграции: loginBranded_Spec.md
 │   └── {FormName}_Spec.md      ← living UI (GLOBAL UI TRIGGER)
 ├── templates/
 │   ├── entity-template.md    ← шаблон описания сущности CUBA
 │   └── ui-template.md        ← шаблон UI Spec (6 разделов)
 ├── services/
-│   └── ImageProcessingService.md  ← сжатие/масштабирование фото профиля
+│   ├── ImageProcessingService.md  ← сжатие/масштабирование фото профиля
+│   └── UserAiContextService.md    ← безопасная сборка ИИ-контекста
 ├── components/
 │   └── FallbackImage.md           ← UI-компонент placeholder для image
 ├── ui-components/
@@ -51,6 +55,7 @@ docs/
     ├── Grade.md               ← грейды
     ├── VacancyPromptTemplate.md ← шаблоны AI-промптов вакансий
     ├── UserAiConfiguration.md ← персональные AI-ключи пользователей
+    ├── UserAiProfile.md       ← профессиональный профиль для ИИ
     ├── ExtUser.md             ← расширенный пользователь (фото, почта, AI)
     ├── Position.md            ← должности
     ├── JobCandidate.md        ← кандидаты (подсистема: entity + browse + edit)
@@ -64,6 +69,9 @@ docs/
 | Задача | Документ |
 |--------|----------|
 | Реализовать вкладку «Обо мне» и профиль персонализации ИИ | [architecture/SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md](architecture/SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md) |
+| Развернуть и проверить ИИ-профиль через Hermes | [hermes/2026-07-22-setting-window-about-me-ai-profile.md](hermes/2026-07-22-setting-window-about-me-ai-profile.md) |
+| Понять сущность персонального ИИ-профиля | [entities/UserAiProfile.md](entities/UserAiProfile.md) |
+| Понять безопасную сборку ИИ-контекста | [services/UserAiContextService.md](services/UserAiContextService.md) |
 | Поднять локальную БД и приложение | [LOCAL_DATABASE.md](LOCAL_DATABASE.md) |
 | Расхождения схемы БД и приложения | [02_business_logic/db-schema-diff-report.md](02_business_logic/db-schema-diff-report.md) |
 | Архитектура подсистемы AI (LLM) | [../AI_INTEGRATION.md](../AI_INTEGRATION.md) |
@@ -94,7 +102,7 @@ docs/
 | UI-компонент FallbackImage (placeholder для image) | [components/FallbackImage.md](components/FallbackImage.md) · [ui/FallbackImage_Component.md](ui/FallbackImage_Component.md) |
 | UI-компонент OvalImage (круглый аватар) | [ui-components/OvalImage.md](ui-components/OvalImage.md) |
 | UI-компонент OvaFallbackImage (круг + placeholder) | [ui-components/OvaFallbackImage.md](ui-components/OvaFallbackImage.md) |
-| Каталог всех UI Spec | [ui/README.md](ui/README.md) (47 форм) |
+| Каталог всех UI Spec | [ui/README.md](ui/README.md) (48 форм) |
 
 ---
 
@@ -129,7 +137,7 @@ docs/
 
 ### Описанные UI-формы
 
-Полный каталог **47 UI Spec** по 16 documented entities: [ui/README.md](ui/README.md).
+Полный каталог **48 UI Spec**: [ui/README.md](ui/README.md).
 
 Завершение задачи с правкой UI — Diff-log: `Синхронизация UI-документации [Имя_Формы]: ...`
 
@@ -182,6 +190,7 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 | **OpenPositionNews** | `ITPEARLS_OPEN_POSITION_NEWS` | транзакционная | [entities/OpenPositionNews.md](entities/OpenPositionNews.md) | ✅ заполнен |
 | **OpenPositionComment** | `ITPEARLS_OPEN_POSITION_COMMENT` | транзакционная | [entities/OpenPositionComment.md](entities/OpenPositionComment.md) | ✅ заполнен |
 | **RecrutiesTasks** | `ITPEARLS_RECRUTIES_TASKS` | транзакционная | [entities/RecrutiesTasks.md](entities/RecrutiesTasks.md) | ✅ заполнен |
+| **UserAiProfile** | `ITPEARLS_USER_AI_PROFILE` | персональные настройки | [entities/UserAiProfile.md](entities/UserAiProfile.md) | ✅ заполнен |
 
 ---
 
@@ -280,6 +289,7 @@ cp docs/templates/entity-template.md docs/entities/MyEntity.md
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-22 | Добавлены `UserAiProfile`, `UserAiContextService`, UI Spec `ExtSettingsWindow` и задание Hermes на миграцию и запуск |
 | 2026-07-22 | В индекс добавлено техническое задание на вкладку «Обо мне» и профиль персонализации ИИ |
 | 2026-06-26 | Глобальный аудит Living Documentation: Business & Context Intro во всех entity/UI/architecture spec (см. `docs/ui/README.md`) |
 | YYYY-MM-DD | Краткое описание изменения |

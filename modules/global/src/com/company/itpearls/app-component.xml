@@ -7,7 +7,7 @@
 
         <property name="cuba.persistenceConfig" value="+com/company/itpearls/persistence.xml"/>
         <property name="cuba.metadataConfig" value="+com/company/itpearls/metadata.xml"/>
-        <property name="cuba.viewsConfig" value="+com/company/itpearls/views.xml"/>
+        <property name="cuba.viewsConfig" value="+com/company/itpearls/views.xml com/company/itpearls/user-ai-profile-views.xml"/>
     </module>
     <module name="core" dependsOn="global" blocks="core">
         <artifact name="app-core" appJar="true"/>

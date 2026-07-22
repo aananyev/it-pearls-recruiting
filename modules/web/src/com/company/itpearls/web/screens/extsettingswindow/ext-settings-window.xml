@@ -4,63 +4,445 @@
         class="com.company.itpearls.web.screens.extsettingswindow.ExtSettingsWindow"
         caption="msg://msgSettings"
         messagesPack="com.company.itpearls.web.screens.extsettingswindow">
-    <!--     <dsContext>
-            <datasource id="userDs"
-                        class="com.haulmont.cuba.security.entity.User"
-                        view="extUser-view">
-            </datasource>
-        </dsContext> -->
     <dsContext>
         <datasource id="userSettingsDs"
                     view="userSettings-view"
                     class="com.company.itpearls.entity.UserSettings"
-                    allowCommit="true">
-        </datasource>
+                    allowCommit="true"/>
         <datasource id="extUserDs"
                     class="com.company.itpearls.entity.ExtUser"
                     view="extUser-view"
+                    allowCommit="true"/>
+        <datasource id="userAiProfileDs"
+                    class="com.company.itpearls.entity.UserAiProfile"
+                    view="userAiProfile-view"
                     allowCommit="true"/>
     </dsContext>
     <layout expand="settingsTabSheet">
         <tabSheet id="settingsTabSheet"
                   width="100%"
+                  height="100%"
                   stylename="framed">
             <tab id="msgMyInfo"
-                 caption="msg://msgMyInfo">
-                <vbox id="dropZone"
+                 caption="msg://msgMyInfo"
+                 margin="true"
+                 spacing="true">
+                <hbox id="userAiProfileMainBox"
+                      width="100%"
+                      height="100%"
                       spacing="true"
-                      width="200px"
-                      height="266px"
-                      align="TOP_RIGHT"
-                      margin="true"
-                      expand="picVBox"
-                      stylename="dropzone-container">
-                    <vbox id="picVBox" align="TOP_RIGHT" spacing="true">
-                        <image id="userPic"
+                      expand="userAiProfileContentScrollBox"
+                      stylename="user-ai-profile-editor">
+                    <vbox id="userAiProfileSidebar"
+                          width="270px"
+                          height="100%"
+                          spacing="true"
+                          stylename="user-ai-profile-sidebar">
+                        <vbox id="dropZone"
+                              spacing="true"
+                              width="200px"
+                              height="266px"
+                              align="TOP_CENTER"
+                              expand="picVBox"
+                              stylename="dropzone-container user-ai-profile-avatar">
+                            <vbox id="picVBox" align="TOP_CENTER" spacing="true">
+                                <image id="userPic"
+                                       width="100%"
+                                       height="100%"
+                                       visible="true"
+                                       align="TOP_CENTER"
+                                       stylename="widget-border"
+                                       scaleMode="FILL"/>
+                                <image id="defaultPic"
+                                       width="100%"
+                                       visible="false"
+                                       align="TOP_CENTER"
+                                       stylename="widget-border"
+                                       scaleMode="FILL">
+                                    <theme path="icons/no-programmer.jpeg"/>
+                                </image>
+                            </vbox>
+                            <upload id="userAvatarUpload"
+                                    fileStoragePutMode="IMMEDIATE"
+                                    datasource="extUserDs"
+                                    align="BOTTOM_CENTER"
+                                    width="100%"
+                                    showFileName="false"
+                                    dropZone="dropZone"
+                                    showClearButton="true"
+                                    property="userAvatar"/>
+                        </vbox>
+                        <label id="userProfileNameLabel"
+                               width="100%"
+                               stylename="h2"
+                               align="MIDDLE_CENTER"/>
+                        <label id="currentPositionSidebarLabel"
+                               width="100%"
+                               stylename="h4"
+                               align="MIDDLE_CENTER"/>
+                        <label id="profileStatusLabel"
+                               width="100%"
+                               stylename="user-ai-profile-status"/>
+                        <label id="profileCompletionLabel"
+                               width="100%"
+                               stylename="h4"/>
+                        <label id="profileConfirmedAtLabel"
+                               width="100%"
+                               stylename="h4"/>
+                        <label width="100%"
+                               value="msg://aiProfileSensitiveDataWarning"
+                               stylename="user-ai-profile-help"/>
+                    </vbox>
+
+                    <scrollBox id="userAiProfileContentScrollBox"
                                width="100%"
                                height="100%"
-                               visible="true"
-                               align="TOP_RIGHT"
-                               stylename="widget-border"
-                               scaleMode="FILL"/>
-                        <image id="defaultPic"
-                               width="100%"
-                               visible="false"
-                               align="TOP_RIGHT"
-                               stylename="widget-border"
-                               scaleMode="FILL">
-                            <theme path="icons/no-programmer.jpeg"/>
-                        </image>
-                    </vbox>
-                    <upload id="userAvatarUpload"
-                            fileStoragePutMode="IMMEDIATE"
-                            datasource="extUserDs"
-                            align="BOTTOM_CENTER"
-                            showFileName="false"
-                            dropZone="dropZone"
-                            showClearButton="true"
-                            property="userAvatar"/>
-                </vbox>
+                               orientation="vertical"
+                               stylename="user-ai-profile-content">
+                        <vbox id="userAiProfileContent"
+                              width="100%"
+                              spacing="true">
+                            <hbox width="100%"
+                                  spacing="true"
+                                  expand="userAiProfileTitleBox"
+                                  stylename="user-ai-profile-toolbar">
+                                <vbox id="userAiProfileTitleBox"
+                                      width="100%"
+                                      spacing="false">
+                                    <label value="msg://aiProfileTitle" stylename="h1"/>
+                                    <label value="msg://aiProfileDescription"
+                                           width="100%"
+                                           stylename="user-ai-profile-help"/>
+                                </vbox>
+                                <button id="previewAiContextBtn"
+                                        caption="msg://previewAiContext"
+                                        align="BOTTOM_RIGHT"
+                                        invoke="previewAiContext"/>
+                            </hbox>
+
+                            <groupBox id="professionalProfileGroup"
+                                      caption="msg://professionalProfile"
+                                      width="100%"
+                                      spacing="true"
+                                      margin="true"
+                                      collapsable="true"
+                                      stylename="user-ai-profile-section">
+                                <grid width="100%" spacing="true">
+                                    <columns>
+                                        <column flex="1"/>
+                                        <column flex="1"/>
+                                    </columns>
+                                    <rows>
+                                        <row>
+                                            <textField id="currentPositionField"
+                                                       datasource="userAiProfileDs"
+                                                       property="currentPosition"
+                                                       caption="msg://currentPosition"
+                                                       maxLength="255"
+                                                       width="100%"/>
+                                            <lookupField id="functionalRoleField"
+                                                         datasource="userAiProfileDs"
+                                                         property="functionalRole"
+                                                         caption="msg://functionalRole"
+                                                         width="100%"/>
+                                        </row>
+                                        <row>
+                                            <lookupField id="seniorityLevelField"
+                                                         datasource="userAiProfileDs"
+                                                         property="seniorityLevel"
+                                                         caption="msg://seniorityLevel"
+                                                         width="100%"/>
+                                            <hbox width="100%" spacing="true">
+                                                <textField id="professionalExperienceYearsField"
+                                                           datasource="userAiProfileDs"
+                                                           property="professionalExperienceYears"
+                                                           caption="msg://professionalExperienceYears"
+                                                           width="50%"/>
+                                                <textField id="recruitingExperienceYearsField"
+                                                           datasource="userAiProfileDs"
+                                                           property="recruitingExperienceYears"
+                                                           caption="msg://recruitingExperienceYears"
+                                                           width="50%"/>
+                                            </hbox>
+                                        </row>
+                                        <row>
+                                            <textArea id="aboutMeField"
+                                                      datasource="userAiProfileDs"
+                                                      property="aboutMe"
+                                                      caption="msg://aboutMe"
+                                                      maxLength="2000"
+                                                      height="90px"
+                                                      width="100%"
+                                                      colspan="2"/>
+                                        </row>
+                                        <row>
+                                            <textArea id="currentResponsibilitiesField"
+                                                      datasource="userAiProfileDs"
+                                                      property="currentResponsibilities"
+                                                      caption="msg://currentResponsibilities"
+                                                      maxLength="4000"
+                                                      height="90px"
+                                                      width="100%"/>
+                                            <textArea id="educationField"
+                                                      datasource="userAiProfileDs"
+                                                      property="education"
+                                                      caption="msg://education"
+                                                      maxLength="4000"
+                                                      height="90px"
+                                                      width="100%"/>
+                                        </row>
+                                        <row>
+                                            <textArea id="certificationsField"
+                                                      datasource="userAiProfileDs"
+                                                      property="certifications"
+                                                      caption="msg://certifications"
+                                                      maxLength="4000"
+                                                      height="80px"
+                                                      width="100%"/>
+                                            <textArea id="domainExpertiseField"
+                                                      datasource="userAiProfileDs"
+                                                      property="domainExpertise"
+                                                      caption="msg://domainExpertise"
+                                                      maxLength="4000"
+                                                      height="80px"
+                                                      width="100%"/>
+                                        </row>
+                                        <row>
+                                            <textArea id="industriesField"
+                                                      datasource="userAiProfileDs"
+                                                      property="industries"
+                                                      caption="msg://industries"
+                                                      maxLength="4000"
+                                                      height="70px"
+                                                      width="100%"
+                                                      colspan="2"/>
+                                        </row>
+                                    </rows>
+                                </grid>
+                            </groupBox>
+
+                            <groupBox id="recruitingProfileGroup"
+                                      caption="msg://recruitingProfile"
+                                      width="100%"
+                                      spacing="true"
+                                      margin="true"
+                                      collapsable="true"
+                                      stylename="user-ai-profile-section">
+                                <grid width="100%" spacing="true">
+                                    <columns>
+                                        <column flex="1"/>
+                                        <column flex="1"/>
+                                    </columns>
+                                    <rows>
+                                        <row>
+                                            <textArea id="recruitingSpecializationsField"
+                                                      datasource="userAiProfileDs"
+                                                      property="recruitingSpecializations"
+                                                      caption="msg://recruitingSpecializations"
+                                                      maxLength="4000"
+                                                      height="80px"
+                                                      width="100%"/>
+                                            <textArea id="targetRolesField"
+                                                      datasource="userAiProfileDs"
+                                                      property="targetRoles"
+                                                      caption="msg://targetRoles"
+                                                      maxLength="4000"
+                                                      height="80px"
+                                                      width="100%"/>
+                                        </row>
+                                        <row>
+                                            <textField id="candidateLevelsField"
+                                                       datasource="userAiProfileDs"
+                                                       property="candidateLevels"
+                                                       caption="msg://candidateLevels"
+                                                       maxLength="255"
+                                                       width="100%"/>
+                                            <textArea id="hiringGeographiesField"
+                                                      datasource="userAiProfileDs"
+                                                      property="hiringGeographies"
+                                                      caption="msg://hiringGeographies"
+                                                      maxLength="2000"
+                                                      height="65px"
+                                                      width="100%"/>
+                                        </row>
+                                        <row>
+                                            <textArea id="decisionPrioritiesField"
+                                                      datasource="userAiProfileDs"
+                                                      property="decisionPriorities"
+                                                      caption="msg://decisionPriorities"
+                                                      maxLength="4000"
+                                                      height="90px"
+                                                      width="100%"/>
+                                            <textArea id="clientAndProjectContextField"
+                                                      datasource="userAiProfileDs"
+                                                      property="clientAndProjectContext"
+                                                      caption="msg://clientAndProjectContext"
+                                                      maxLength="4000"
+                                                      height="90px"
+                                                      width="100%"/>
+                                        </row>
+                                    </rows>
+                                </grid>
+                            </groupBox>
+
+                            <groupBox id="responsePreferencesGroup"
+                                      caption="msg://responsePreferences"
+                                      width="100%"
+                                      spacing="true"
+                                      margin="true"
+                                      collapsable="true"
+                                      stylename="user-ai-profile-section">
+                                <grid width="100%" spacing="true">
+                                    <columns>
+                                        <column flex="1"/>
+                                        <column flex="1"/>
+                                    </columns>
+                                    <rows>
+                                        <row>
+                                            <lookupField id="preferredLanguageField"
+                                                         datasource="userAiProfileDs"
+                                                         property="preferredLanguage"
+                                                         caption="msg://preferredLanguage"
+                                                         width="100%"/>
+                                            <lookupField id="responseDetailLevelField"
+                                                         datasource="userAiProfileDs"
+                                                         property="responseDetailLevel"
+                                                         caption="msg://responseDetailLevel"
+                                                         width="100%"/>
+                                        </row>
+                                        <row>
+                                            <lookupField id="communicationStyleField"
+                                                         datasource="userAiProfileDs"
+                                                         property="communicationStyle"
+                                                         caption="msg://communicationStyle"
+                                                         width="100%"/>
+                                            <lookupField id="terminologyLevelField"
+                                                         datasource="userAiProfileDs"
+                                                         property="terminologyLevel"
+                                                         caption="msg://terminologyLevel"
+                                                         width="100%"/>
+                                        </row>
+                                        <row>
+                                            <lookupField id="preferredAnswerStructureField"
+                                                         datasource="userAiProfileDs"
+                                                         property="preferredAnswerStructure"
+                                                         caption="msg://preferredAnswerStructure"
+                                                         width="100%"
+                                                         colspan="2"/>
+                                        </row>
+                                        <row>
+                                            <textArea id="customAiInstructionsField"
+                                                      datasource="userAiProfileDs"
+                                                      property="customAiInstructions"
+                                                      caption="msg://customAiInstructions"
+                                                      description="msg://customAiInstructionsDescription"
+                                                      maxLength="4000"
+                                                      height="90px"
+                                                      width="100%"/>
+                                            <textArea id="communicationConstraintsField"
+                                                      datasource="userAiProfileDs"
+                                                      property="communicationConstraints"
+                                                      caption="msg://communicationConstraints"
+                                                      maxLength="2000"
+                                                      height="90px"
+                                                      width="100%"/>
+                                        </row>
+                                    </rows>
+                                </grid>
+                            </groupBox>
+
+                            <groupBox id="goalsGroup"
+                                      caption="msg://goalsAndInterests"
+                                      width="100%"
+                                      spacing="true"
+                                      margin="true"
+                                      collapsable="true"
+                                      stylename="user-ai-profile-section">
+                                <grid width="100%" spacing="true">
+                                    <columns>
+                                        <column flex="1"/>
+                                        <column flex="1"/>
+                                    </columns>
+                                    <rows>
+                                        <row>
+                                            <textArea id="professionalGoalsField"
+                                                      datasource="userAiProfileDs"
+                                                      property="professionalGoals"
+                                                      caption="msg://professionalGoals"
+                                                      maxLength="4000"
+                                                      height="80px"
+                                                      width="100%"/>
+                                            <textArea id="professionalInterestsField"
+                                                      datasource="userAiProfileDs"
+                                                      property="professionalInterests"
+                                                      caption="msg://professionalInterests"
+                                                      maxLength="4000"
+                                                      height="80px"
+                                                      width="100%"/>
+                                        </row>
+                                        <row>
+                                            <textArea id="developmentAreasField"
+                                                      datasource="userAiProfileDs"
+                                                      property="developmentAreas"
+                                                      caption="msg://developmentAreas"
+                                                      maxLength="4000"
+                                                      height="80px"
+                                                      width="100%"/>
+                                            <textArea id="currentPrioritiesField"
+                                                      datasource="userAiProfileDs"
+                                                      property="currentPriorities"
+                                                      caption="msg://currentPriorities"
+                                                      maxLength="4000"
+                                                      height="80px"
+                                                      width="100%"/>
+                                        </row>
+                                    </rows>
+                                </grid>
+                            </groupBox>
+
+                            <groupBox id="privacyGroup"
+                                      caption="msg://privacyAndBoundaries"
+                                      width="100%"
+                                      spacing="true"
+                                      margin="true"
+                                      collapsable="true"
+                                      stylename="user-ai-profile-section user-ai-profile-privacy">
+                                <checkBox id="profileEnabledField"
+                                          datasource="userAiProfileDs"
+                                          property="profileEnabled"
+                                          caption="msg://profileEnabled"/>
+                                <checkBox id="externalProcessingAllowedField"
+                                          datasource="userAiProfileDs"
+                                          property="externalProcessingAllowed"
+                                          caption="msg://externalProcessingAllowed"/>
+                                <label value="msg://externalProcessingConsentText"
+                                       width="100%"
+                                       stylename="user-ai-profile-help"/>
+                                <label id="consentAcceptedAtLabel"
+                                       width="100%"
+                                       stylename="h4"/>
+                                <button id="clearAiProfileBtn"
+                                        caption="msg://clearAiProfile"
+                                        stylename="danger"
+                                        invoke="clearAiProfile"/>
+                            </groupBox>
+
+                            <groupBox id="previewGroup"
+                                      caption="msg://aiContextPreview"
+                                      width="100%"
+                                      spacing="true"
+                                      margin="true"
+                                      collapsable="true"
+                                      stylename="user-ai-profile-section">
+                                <textArea id="aiContextPreviewArea"
+                                          width="100%"
+                                          height="260px"
+                                          editable="false"
+                                          stylename="user-ai-profile-preview"/>
+                            </groupBox>
+                        </vbox>
+                    </scrollBox>
+                </hbox>
             </tab>
             <tab id="msgInterface"
                  caption="msg://msgInterface">
@@ -94,7 +476,8 @@
                                              width="theme://cuba.web.settings-window.appLocaleField.width"/>
                             </row>
                             <row>
-                                <label id="timeZoneLabel" value="msg://com.haulmont.cuba.security.entity/User.timeZone"
+                                <label id="timeZoneLabel"
+                                       value="msg://com.haulmont.cuba.security.entity/User.timeZone"
                                        align="MIDDLE_LEFT"/>
                                 <hbox id="timeZoneBox"
                                       spacing="true"
@@ -132,51 +515,30 @@
                         <columns count="4"/>
                         <rows>
                             <row>
-                                <textField id="smtpServer"
-                                           caption="SMTP server"/>
-                                <textField id="pop3Server"
-                                           caption="POP3 server"/>
-                                <textField id="imapServer"
-                                           caption="IMAP server"/>
+                                <textField id="smtpServer" caption="SMTP server"/>
+                                <textField id="pop3Server" caption="POP3 server"/>
+                                <textField id="imapServer" caption="IMAP server"/>
                             </row>
                             <row>
-                                <textField id="smtpPort"
-                                           datatype="int"
-                                           caption="SMTP port">
-                                    <validator
-                                            class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                <textField id="smtpPort" datatype="int" caption="SMTP port">
+                                    <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                 </textField>
-                                <textField id="pop3Port"
-                                           datatype="int"
-                                           caption="POP3 port">
-                                    <validator
-                                            class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                <textField id="pop3Port" datatype="int" caption="POP3 port">
+                                    <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                 </textField>
-                                <textField id="imapPort"
-                                           datatype="int"
-                                           caption="IMAP port">
-                                    <validator
-                                            class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                <textField id="imapPort" datatype="int" caption="IMAP port">
+                                    <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
                                 </textField>
                             </row>
                             <row>
-                                <checkBox id="smtpPasswordRequired"
-                                          caption="msg://msgSMTPPasswordRequired"/>
-                                <checkBox id="pop3PasswordRequired"
-                                          caption="msg://msgPop3PasswordRequired"/>
-                                <checkBox id="imapPasswordRequired"
-                                          caption="msg://msgImapPasswordRequired"/>
+                                <checkBox id="smtpPasswordRequired" caption="msg://msgSMTPPasswordRequired"/>
+                                <checkBox id="pop3PasswordRequired" caption="msg://msgPop3PasswordRequired"/>
+                                <checkBox id="imapPasswordRequired" caption="msg://msgImapPasswordRequired"/>
                             </row>
                             <row>
-                                <textField id="smtpPassword"
-                                           caption="SMTP password">
-                                </textField>
-                                <textField id="pop3Password"
-                                           caption="POP3 password">
-                                </textField>
-                                <textField id="imapPassword"
-                                           caption="IMAP password">
-                                </textField>
+                                <textField id="smtpPassword" caption="SMTP password"/>
+                                <textField id="pop3Password" caption="POP3 password"/>
+                                <textField id="imapPassword" caption="IMAP password"/>
                             </row>
                         </rows>
                     </grid>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260722-1-createUserAiProfile" author="itpearls">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="ITPEARLS_USER_AI_PROFILE"/>
+            </not>
+        </preConditions>
+        <createTable tableName="ITPEARLS_USER_AI_PROFILE">
+            <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="VERSION" type="int"><constraints nullable="false"/></column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="USER_ID" type="uuid"><constraints nullable="false"/></column>
+            <column name="PROFILE_ENABLED" type="boolean" defaultValueBoolean="false"><constraints nullable="false"/></column>
+            <column name="EXTERNAL_PROCESSING_ALLOWED" type="boolean" defaultValueBoolean="false"><constraints nullable="false"/></column>
+            <column name="CONSENT_VERSION" type="varchar(32)"/>
+            <column name="CONSENT_ACCEPTED_AT" type="timestamp"/>
+            <column name="PROFILE_CONFIRMED_AT" type="timestamp"/>
+            <column name="ABOUT_ME" type="clob"/>
+            <column name="CURRENT_POSITION" type="varchar(255)"/>
+            <column name="FUNCTIONAL_ROLE" type="int"/>
+            <column name="SENIORITY_LEVEL" type="int"/>
+            <column name="PROFESSIONAL_EXPERIENCE_YEARS" type="int"/>
+            <column name="RECRUITING_EXPERIENCE_YEARS" type="int"/>
+            <column name="CURRENT_RESPONSIBILITIES" type="clob"/>
+            <column name="EDUCATION" type="clob"/>
+            <column name="CERTIFICATIONS" type="clob"/>
+            <column name="DOMAIN_EXPERTISE" type="clob"/>
+            <column name="INDUSTRIES" type="clob"/>
+            <column name="RECRUITING_SPECIALIZATIONS" type="clob"/>
+            <column name="TARGET_ROLES" type="clob"/>
+            <column name="CANDIDATE_LEVELS" type="varchar(255)"/>
+            <column name="HIRING_GEOGRAPHIES" type="clob"/>
+            <column name="DECISION_PRIORITIES" type="clob"/>
+            <column name="CLIENT_PROJECT_CONTEXT" type="clob"/>
+            <column name="PROFESSIONAL_GOALS" type="clob"/>
+            <column name="PROFESSIONAL_INTERESTS" type="clob"/>
+            <column name="DEVELOPMENT_AREAS" type="clob"/>
+            <column name="CURRENT_PRIORITIES" type="clob"/>
+            <column name="PREFERRED_LANGUAGE" type="int"/>
+            <column name="RESPONSE_DETAIL_LEVEL" type="int"/>
+            <column name="COMMUNICATION_STYLE" type="int"/>
+            <column name="TERMINOLOGY_LEVEL" type="int"/>
+            <column name="PREFERRED_ANSWER_STRUCTURE" type="int"/>
+            <column name="CUSTOM_AI_INSTRUCTIONS" type="clob"/>
+            <column name="COMMUNICATION_CONSTRAINTS" type="clob"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="ITPEARLS_USER_AI_PROFILE" baseColumnNames="USER_ID" constraintName="FK_ITPEARLS_USER_AI_PROFILE_ON_USER" referencedTableName="SEC_USER" referencedColumnNames="ID"/>
+        <createIndex tableName="ITPEARLS_USER_AI_PROFILE" indexName="IDX_ITPEARLS_USER_AI_PROFILE_UNQ_USER" unique="true"><column name="USER_ID"/></createIndex>
+    </changeSet>
+</databaseChangeLog>

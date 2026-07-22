@@ -6,5 +6,6 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <include file="260627-1-addAiEntities.xml" relativeToChangelogFile="true"/>
+    <include file="260722-1-addUserAiProfile.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
