@@ -4,6 +4,8 @@ import com.company.hunttech.entity.*;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.MetadataTools;
+import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -82,12 +84,20 @@ public class EntityDataExtractors {
         reg("IteractionList", "candidateHistory", e -> {
             IteractionList il = (IteractionList) e;
             if (il.getCandidate() == null) return "";
+            // Явный узкий view со всеми полями, читаемыми в форматтере:
+            // dateIteraction, iteractionType.iterationName, recrutierName, comment.
+            View historyView = ViewBuilder.of(IteractionList.class)
+                    .addAll("dateIteraction", "recrutierName", "comment", "iteractionType")
+                    .addView(ViewBuilder.of(com.company.hunttech.entity.Iteraction.class)
+                            .addAll("iterationName")
+                            .build())
+                    .build();
             List<IteractionList> history = dataManager.load(IteractionList.class)
                     .query("select e from hunttech_IteractionList e "
                             + "where e.candidate = :c order by e.dateIteraction desc")
                     .parameter("c", il.getCandidate())
                     .maxResults(20)
-                    .view("_minimal")
+                    .view(historyView)
                     .list();
             return history.stream()
                     .map(i -> String.format("%s | %s | %s | %s",

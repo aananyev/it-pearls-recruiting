@@ -1,17 +1,23 @@
 package com.company.hunttech.core.ai;
 
 import com.company.hunttech.entity.AiPromptTemplate;
+import com.company.hunttech.entity.CandidateCV;
+import com.company.hunttech.entity.IteractionList;
+import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.service.AiAnalysisService;
 import com.company.hunttech.service.HrmAiService;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.DevelopmentException;
 import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,12 +40,9 @@ public class AiAnalysisServiceBean implements AiAnalysisService {
     @Override
     public String analyze(Entity entity, String promptCode) {
         // Сущность приходит из web-тира через CUBA remoting — она detached,
-        // и её LAZY-связи потеряли EclipseLink Session. Перезагружаем в core-тире
-        // через DataManager для восстановления работоспособности индирекции.
-        Entity fullEntity = dataManager.load(entity.getClass())
-                .id(entity.getId())
-                .view(View.LOCAL)
-                .one();
+        // LAZY-связи потеряли EclipseLink Session. Перезагружаем в core-тире
+        // со специализированным view: View.LOCAL недостаточен для LAZY-связей.
+        Entity fullEntity = reloadWithAnalysisView(entity);
         log.info("Сущность перезагружена в core-тире: class={}, id={}",
                 fullEntity.getClass().getSimpleName(), fullEntity.getId());
 
@@ -75,6 +78,92 @@ public class AiAnalysisServiceBean implements AiAnalysisService {
             log.error("Ошибка вызова AI-провайдера: {}", e.toString(), e);
             throw e;
         }
+    }
+
+    /**
+     * Перезагружает сущность в core-тире со специализированным view,
+     * включающим LAZY-связи, необходимые экстракторам placeholder-ов.
+     * View.LOCAL загружает только прямые поля, но НЕ ManyToOne-связи,
+     * которые экстракторы читают (CandidateCV.candidate, OpenPosition.projectName и др.).
+     */
+    private Entity reloadWithAnalysisView(Entity entity) {
+        Class<? extends Entity> cls = entity.getClass();
+        // Убираем Hibernate-прокси-суффикс
+        String simpleName = cls.getSimpleName().replaceAll("\\$.*", "");
+
+        UUID entityId = (UUID) entity.getId();
+        switch (simpleName) {
+            case "CandidateCV":
+                return dataManager.load(CandidateCV.class)
+                        .id(entityId)
+                        .view(buildCandidateCVAnalysisView())
+                        .one();
+            case "OpenPosition":
+                return dataManager.load(OpenPosition.class)
+                        .id(entityId)
+                        .view(buildOpenPositionAnalysisView())
+                        .one();
+            case "IteractionList":
+                return dataManager.load(IteractionList.class)
+                        .id(entityId)
+                        .view(buildIteractionListAnalysisView())
+                        .one();
+            case "JobCandidate":
+                return dataManager.load(JobCandidate.class)
+                        .id(entityId)
+                        .view(buildJobCandidateAnalysisView())
+                        .one();
+            default:
+                throw new DevelopmentException("Нет analysis-view для класса «"
+                        + simpleName + "».");
+        }
+    }
+
+    private View buildCandidateCVAnalysisView() {
+        return ViewBuilder.of(CandidateCV.class)
+                .addAll("textCV", "candidate", "toVacancy")
+                .addView(ViewBuilder.of(OpenPosition.class)
+                        .addAll("vacansyName", "shortDescription")
+                        .build())
+                .addView(ViewBuilder.of(JobCandidate.class)
+                        .addView("_minimal")
+                        .build())
+                .build();
+    }
+
+    private View buildOpenPositionAnalysisView() {
+        return ViewBuilder.of(OpenPosition.class)
+                .addAll("shortDescription", "comment", "projectName")
+                .addView(ViewBuilder.of(com.company.hunttech.entity.Project.class)
+                        .addAll("projectName", "projectDepartment")
+                        .addView(ViewBuilder.of(com.company.hunttech.entity.CompanyDepartament.class)
+                                .addAll("companyName")
+                                .addView(ViewBuilder.of(com.company.hunttech.entity.Company.class)
+                                        .addAll("comanyName")
+                                        .build())
+                                .build())
+                        .build())
+                .build();
+    }
+
+    private View buildIteractionListAnalysisView() {
+        return ViewBuilder.of(IteractionList.class)
+                .addAll("comment", "dateIteraction", "recrutierName",
+                        "iteractionType", "candidate")
+                .addView(ViewBuilder.of(com.company.hunttech.entity.Iteraction.class)
+                        .addAll("iterationName")
+                        .build())
+                .addView(ViewBuilder.of(JobCandidate.class)
+                        .addView("_minimal")
+                        .build())
+                .build();
+    }
+
+    private View buildJobCandidateAnalysisView() {
+        return ViewBuilder.of(JobCandidate.class)
+                .addAll("email", "phone")
+                .addView("_minimal")
+                .build();
     }
 
     private String fillPlaceholders(String template, Entity entity) {
