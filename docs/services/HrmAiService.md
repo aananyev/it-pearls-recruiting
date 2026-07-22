@@ -8,7 +8,7 @@
 
 ### 2. Связи в интерфейсе и Навигация
 
-Сервис вызывается `AiAnalysisServiceBean`, редактором и browse-экраном `UserAiConfiguration`, а также сценариями генерации материалов вакансии с явным выбором провайдера.
+Сервис вызывается `AiAnalysisServiceBean`, редактором и browse-экраном `UserAiConfiguration`, а также сценариями генерации материалов вакансии с явным выбором провайдера. UI-вызов системного анализа проходит через [AiAnalysisHelper](AiAnalysisHelper.md).
 
 ### 3. Краткий обзор бизнес-логики поведения
 
@@ -27,6 +27,12 @@
 | `sendPrompt` | Отправляет промпт провайдеру, указанному вызывающим сценарием. |
 | `sendPromptUsingCurrentConfiguration` | Используется системными кнопками AI-анализа и выбирает текущую конфигурацию. |
 | `setCurrentConfiguration` | Атомарно переключает текущую нейросеть владельца конфигурации. |
+
+## UI-мост системного анализа
+
+`AiAnalysisHelper` получает `Dialogs` и `Notifications` из `ScreenContext` текущего экрана через `UiControllerUtils`. UI-фасады нельзя запрашивать через Spring `AppBeans`, поскольку они создаются внутренней UI-инфраструктурой CUBA. Middleware-сервис остаётся доступным через `AppBeans` по имени remote service.
+
+Helper передаёт исходную экранную сущность в `AiAnalysisServiceBean`. Специализированный analysis-view загружается на core-tier; повторная web-tier загрузка с `View.LOCAL` не выполняется.
 
 ## Выбор конфигурации
 
@@ -54,10 +60,11 @@ API-ключ используется только при вызове пров�
 
 Скрипт `270722-002-enforceCurrentAiConfiguration.sql` нормализует существующие активные строки и создаёт индекс `IDX_HUNTTECH_USER_AI_CFG_ONE_CURRENT` по `USER_ID` для `IS_ACTIVE = TRUE AND DELETE_TS IS NULL`.
 
-При локальном развёртывании обязательны updateDb, core/web compilation, service contract test, `ScreenViewIntegrityTest`, локальный deploy и проверка HTTP 200.
+При локальном развёртывании обязательны updateDb, core/web compilation, service contract test, `AiAnalysisHelperUiContextContractTest`, `ScreenViewIntegrityTest`, локальный deploy, HTTP 200 и реальное нажатие AI-кнопки.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-22 | Исправлен UI-мост системного анализа: Dialogs/Notifications получаются из ScreenContext, удалена повторная загрузка View.LOCAL. |
 | 2026-07-22 | Добавлен выбор единственной текущей AI-конфигурации для системных кнопок анализа. |
