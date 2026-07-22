@@ -9,7 +9,7 @@
                     view="aiPromptTemplate-browse-view">
             <loader id="aiPromptTemplatesDl">
                 <query>
-                    <![CDATA[select e from hunttech_AiPromptTemplate e]]>
+                    <![CDATA[select e from hunttech_AiPromptTemplate e order by e.code]]>
                 </query>
             </loader>
         </collection>
@@ -32,10 +32,10 @@
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="name"/>
-                <column id="code"/>
-                <column id="entityClass"/>
-                <column id="active"/>
+                <column id="name" caption="msg://AiPromptTemplate.name"/>
+                <column id="code" caption="msg://AiPromptTemplate.code"/>
+                <column id="entityClass" caption="msg://AiPromptTemplate.entityClass"/>
+                <column id="active" caption="msg://AiPromptTemplate.active"/>
             </columns>
             <rowsCount/>
         </table>
