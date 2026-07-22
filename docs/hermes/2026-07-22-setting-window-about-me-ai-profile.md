@@ -4,17 +4,17 @@
 > Ветка: `agent/settings-window-hunttech-refactor`  
 > Среда: **строго локальный компьютер**  
 > Локальная БД: `hunttech`  
-> Production: **запрещён**  
+> Production: **строго запрещён**  
 > Дата: `2026-07-22`
 
 ## 1. Цель
 
-Проверить точный HEAD ветки, собрать проект, безопасно обновить локальную БД `hunttech`, запустить локальные блоки `core` и `web`, выполнить smoke-тест нового дизайна `ExtSettingsWindow` и сохранить фактические отчёты.
+Проверить точный HEAD ветки, выполнить обязательные тесты, создать проверенный backup локальной БД `hunttech`, применить локальный `updateDb`, запустить локальные блоки `core` и `web`, провести functional smoke нового дизайна `ExtSettingsWindow` и сохранить фактические отчёты.
 
 Реализация должна включать:
 
-- контроллер `com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindow`;
-- сущность `com.company.hunttech.entity.UserAiProfile`;
+- `com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindow`;
+- `com.company.hunttech.entity.UserAiProfile`;
 - entity name `hunttech_UserAiProfile`;
 - сервис `hunttech_UserAiContextService`;
 - таблицу `HUNTTECH_USER_AI_PROFILE`;
@@ -65,19 +65,17 @@ echo "TARGET_SHA=$TARGET_SHA"
 
 После фиксации `TARGET_SHA` не переключаться на другой commit.
 
-## 4. Проверка namespace
+## 4. Проверка namespace и артефактов
 
 ```bash
 grep -RIn \
   --exclude-dir=.git \
   --exclude-dir=build \
-  -E 'itpearls_UserAiProfile|ITPEARLS_USER_AI_PROFILE|com\.company\.itpearls\.entity\.UserAiProfile|com\.company\.itpearls\.service\.UserAiContextService' \
+  -E 'itpearls_UserAiProfile|com\.company\.itpearls\.entity\.UserAiProfile|com\.company\.itpearls\.service\.UserAiContextService' \
   modules docs || true
 ```
 
-В активном коде не должно остаться старого namespace ИИ-профиля.
-
-Допустимы legacy-ссылки на существующие `ExtUser`, `UserSettings`, messages pack и другие объекты проекта, которые не входили в данный рефакторинг.
+В активном коде не должно остаться старого namespace ИИ-профиля. Упоминание `ITPEARLS_USER_AI_PROFILE` допустимо только в compatibility-миграции, которая безопасно переименовывает ранее созданную таблицу.
 
 Проверить наличие:
 
@@ -90,9 +88,10 @@ modules/core/test/com/company/hunttech/service/UserAiContextServiceBeanTest.java
 modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindow.java
 modules/global/src/com/company/hunttech/user-ai-profile-views.xml
 modules/core/db/update/postgres/26/260722-1-createUserAiProfile.sql
+modules/core/db/update/postgres/26/260722-2-migrateUserAiProfileToHunttech.sql
 ```
 
-## 5. Компиляция и тесты
+## 5. Компиляция и обязательные тесты
 
 ```bash
 ./gradlew \
@@ -110,14 +109,20 @@ modules/core/db/update/postgres/26/260722-1-createUserAiProfile.sql
   --no-daemon --stacktrace
 ```
 
-Найти integrity-тест:
+`ScreenViewIntegrityTest` является обязательным критерием ТЗ. Найти его:
 
 ```bash
 find . -type f -name '*ScreenViewIntegrityTest*' \
   -not -path './.git/*' -not -path '*/build/*'
 ```
 
-Если тест существует:
+Если тест отсутствует в текущей ветке, найти каноническую реализацию в истории Git и восстановить только тестовую инфраструктуру без переноса посторонней бизнес-логики:
+
+```bash
+git log --all --oneline -- '*ScreenViewIntegrityTest*'
+```
+
+После восстановления или подтверждения наличия выполнить:
 
 ```bash
 ./gradlew test \
@@ -125,11 +130,13 @@ find . -type f -name '*ScreenViewIntegrityTest*' \
   --no-daemon --stacktrace
 ```
 
-Если тест отсутствует, не писать `8/8 PASS`; зафиксировать `NOT AVAILABLE` и выполнить все доступные тесты:
+Обязательный результат:
 
-```bash
-./gradlew test --no-daemon --stacktrace
+```text
+ScreenViewIntegrityTest — 8/8 PASS
 ```
+
+Если тест невозможно найти, восстановить или успешно выполнить, этап остановить. Нельзя писать `NOT AVAILABLE`, `NOT APPLICABLE` или продолжать к миграции.
 
 SCSS:
 
@@ -143,11 +150,11 @@ SCSS:
 ./gradlew clean assemble --no-daemon --stacktrace
 ```
 
-При любой ошибке локальный запуск и миграцию не начинать.
+При любой ошибке миграцию и локальный запуск не начинать.
 
 ## 6. Проверка локальной БД
 
-Проверить параметры подключения и подтвердить:
+Подтвердить параметры подключения:
 
 ```sql
 SELECT current_database();
@@ -161,7 +168,7 @@ SELECT inet_server_port();
 current_database = hunttech
 ```
 
-Если подключена другая БД, остановиться.
+Если подключена другая БД или удалённый сервер, немедленно остановиться.
 
 ## 7. Backup локальной БД
 
@@ -193,11 +200,11 @@ shasum -a 256 \
   > "$BACKUP_DIR/hunttech-before-user-ai-profile.dump.sha256"
 ```
 
-До миграции сохранить counts ключевых таблиц без вывода персональных данных.
+До миграции сохранить точные `count(*)` ключевых таблиц без вывода персональных данных.
 
 ## 8. Локальный updateDb
 
-Проверить `build.gradle`:
+Проверить:
 
 ```bash
 grep -n -A12 'task updateDb' build.gradle
@@ -229,7 +236,9 @@ ORDER BY conname;
 SELECT count(*) FROM hunttech_user_ai_profile;
 ```
 
-Повторить counts ключевых существующих таблиц. Уменьшение количества строк недопустимо.
+Повторить `count(*)` ключевых существующих таблиц. Уменьшение количества строк недопустимо.
+
+Если одновременно существуют `ITPEARLS_USER_AI_PROFILE` и `HUNTTECH_USER_AI_PROFILE`, compatibility-миграция обязана остановиться. Не объединять и не удалять таблицы автоматически.
 
 ## 9. Локальный запуск
 
@@ -239,15 +248,13 @@ SELECT count(*) FROM hunttech_user_ai_profile;
 sed -n '1,360p' scripts/start-app.sh
 ```
 
-Убедиться, что он не использует SSH, production и удалённую БД.
-
-Запустить:
+Убедиться, что он не использует SSH, production и удалённую БД. Затем:
 
 ```bash
 ./scripts/start-app.sh
 ```
 
-Проверить фактические локальные context names:
+Определить фактические context names:
 
 ```bash
 grep -RIn --include='*.properties' \
@@ -255,7 +262,7 @@ grep -RIn --include='*.properties' \
   modules deploy 2>/dev/null
 ```
 
-Проверить локальные URL, обычно:
+Проверить только локальные URL, обычно:
 
 ```text
 http://localhost:8080/app-core/
@@ -285,7 +292,7 @@ http://localhost:8080/app/
 17. вкладки «Интерфейс» и «Почта» продолжают работать;
 18. существующие данные пользователей, кандидатов и проектов доступны.
 
-Для каждого пункта указать `PASS`, `FAIL` или `NOT TESTED`.
+Для каждого пункта указать `PASS`, `FAIL` или `NOT TESTED`. Итог `PASS` допустим только при отсутствии `FAIL` и `NOT TESTED` в обязательных сценариях.
 
 ## 11. Runtime-логи
 
@@ -326,7 +333,8 @@ runtime-errors.log
 - подтверждение, что production не затрагивался;
 - имя БД `hunttech`;
 - backup, размер и SHA-256;
-- результаты сборки и тестов;
+- результаты компиляции и всех тестов;
+- `ScreenViewIntegrityTest — 8/8 PASS`;
 - результат `updateDb`;
 - HTTP-коды;
 - smoke-сценарии;
@@ -342,6 +350,9 @@ runtime-errors.log
 Среда: строго локальный компьютер.
 База: hunttech.
 Production: не затрагивался.
+UserAiContextServiceBeanTest: PASS.
+ScreenViewIntegrityTest: 8/8 PASS.
+SCSS: PASS.
 BUILD SUCCESSFUL.
 Локальный updateDb: PASS.
 Functional smoke: PASS.
