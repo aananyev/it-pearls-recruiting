@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
+    <!--
+        Узкое переопределение существующего view для JobCandidateEdit.
+        Логотип проекта является LAZY-ссылкой на FileDescriptor, поэтому для
+        безопасного чтения в генераторе колонки требуется явный вложенный view.
+    -->
+    <view entity="hunttech_OpenPosition"
+          name="openPosition-edit-view"
+          extends="_minimal"
+          overwrite="true">
+        <property name="vacansyName"/>
+        <property name="openClose"/>
+        <property name="priority"/>
+        <property name="lastOpenDate"/>
+        <property name="comment"/>
+        <property name="owner" view="_minimal"/>
+        <property name="projectName" view="_local">
+            <property name="projectDescription"/>
+            <property name="projectLogo" view="_local"/>
+            <property name="projectDepartment" view="_minimal"/>
+        </property>
+    </view>
+</views>
