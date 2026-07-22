@@ -30,7 +30,8 @@
                 <property name="socialNetwork" fetch="BATCH" view="_minimal"/>
                 <property name="candidateCv" fetch="BATCH" view="_minimal">
                     <property name="toVacancy" view="openPosition-edit-view">
-                        <property name="projectName" view="_local">
+                        <property name="projectName" view="_minimal">
+                            <property name="projectName"/>
                             <property name="projectDescription"/>
                             <property name="projectLogo" view="_local"/>
                             <property name="projectDepartment" view="_minimal"/>

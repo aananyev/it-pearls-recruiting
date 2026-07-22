@@ -25,7 +25,7 @@ public class JobCandidateProjectLogoViewContractTest {
 
         assertTrue(screen.contains("candidateCv\" fetch=\"BATCH\""));
         assertTrue(screen.contains("view=\"openPosition-edit-view\""));
-        assertTrue(screen.contains("projectName\" view=\"_local\""));
+        assertTrue(screen.contains("projectName\" view=\"_minimal\""));
         assertTrue(screen.contains("projectLogo\" view=\"_local\""));
     }
 
