@@ -1,9 +1,9 @@
-package com.company.itpearls.service;
+package com.company.hunttech.service;
 
-import com.company.itpearls.entity.AiFunctionalRole;
-import com.company.itpearls.entity.AiPreferredLanguage;
-import com.company.itpearls.entity.UserAiProfile;
-import com.company.itpearls.service.dto.AiUserContext;
+import com.company.hunttech.entity.AiFunctionalRole;
+import com.company.hunttech.entity.AiPreferredLanguage;
+import com.company.hunttech.entity.UserAiProfile;
+import com.company.hunttech.service.dto.AiUserContext;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
