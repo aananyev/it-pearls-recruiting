@@ -2,11 +2,14 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.core.ai.AIProvider;
 import com.company.hunttech.core.ai.AIProviderRegistry;
-import com.haulmont.cuba.core.global.TemplateHelper;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.VacancyPromptTemplate;
+import com.haulmont.cuba.core.EntityManager;
+import com.haulmont.cuba.core.Persistence;
+import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.DevelopmentException;
+import com.haulmont.cuba.core.global.TemplateHelper;
 import com.haulmont.cuba.core.global.UserSessionSource;
 import com.haulmont.cuba.security.entity.User;
 import org.slf4j.Logger;
@@ -15,7 +18,9 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service(HrmAiService.NAME)
 public class HrmAiServiceBean implements HrmAiService {
@@ -26,7 +31,11 @@ public class HrmAiServiceBean implements HrmAiService {
 
     private static final String QUERY_USER_AI_CONFIG =
             "select e from hunttech_UserAiConfiguration e "
-                    + "where e.user = :user and e.providerCode = :providerCode and e.isActive = true";
+                    + "where e.user = :user and e.providerCode = :providerCode";
+
+    private static final String QUERY_CURRENT_AI_CONFIG =
+            "select e from hunttech_UserAiConfiguration e "
+                    + "where e.user = :user and e.isActive = true order by e.updateTs desc";
 
     private static final String QUERY_VACANCY_PROMPT_TEMPLATE =
             "select e from hunttech_VacancyPromptTemplate e where e.code = :code";
@@ -37,6 +46,8 @@ public class HrmAiServiceBean implements HrmAiService {
     private DataManager dataManager;
     @Inject
     private UserSessionSource userSessionSource;
+    @Inject
+    private Persistence persistence;
 
     @Override
     public String standardizeVacancyDescription(String rawText, String providerCode) {
@@ -58,10 +69,8 @@ public class HrmAiServiceBean implements HrmAiService {
     public void testConnection(UserAiConfiguration configuration) {
         /*
          * Метод принимает конкретную UserAiConfiguration, а не только providerCode,
-         * потому что личное окно настроек тестирует именно выбранную строку таблицы:
-         * конкретный ключ, конкретную модель и конкретного провайдера. Рабочие
-         * методы генерации ниже по-прежнему выбирают только активную конфигурацию
-         * текущего пользователя через getUserConfig().
+         * потому что окно настроек тестирует именно выбранную строку: конкретный
+         * ключ, модель и провайдера, независимо от того, назначена ли строка текущей.
          */
         if (configuration == null) {
             throw new DevelopmentException("Не выбрана AI-конфигурация для тестирования.");
@@ -78,20 +87,11 @@ public class HrmAiServiceBean implements HrmAiService {
         try {
             provider = aiProviderRegistry.getProvider(configuration.getProviderCode());
         } catch (IllegalArgumentException e) {
-            /*
-             * В интерфейсе могут быть коды провайдеров, запланированных на будущее.
-             * Ошибку реестра переводим в понятное пользовательское сообщение:
-             * Java-компонент провайдера пока не подключён к приложению.
-             */
+            // В настройках могут храниться провайдеры, Java-компонент которых ещё не подключён.
             throw new DevelopmentException("Провайдер AI «"
                     + configuration.getProviderCode() + "» не подключён в приложении.", e);
         }
 
-        /*
-         * Короткий детерминированный запрос делает тест недорогим, но при этом
-         * проверяет авторизацию, доступность endpoint, имя выбранной модели и
-         * разбор ответа внутри реализации провайдера.
-         */
         String response = provider.generateText(
                 "Ответь одним словом: ok",
                 "Тестирование подключения к API искусственного интеллекта.",
@@ -107,62 +107,129 @@ public class HrmAiServiceBean implements HrmAiService {
 
     @Override
     public String sendPrompt(String userPrompt, String providerCode) {
-        log.info("sendPrompt вызван: provider={}, promptLength={}", providerCode,
-                userPrompt != null ? userPrompt.length() : 0);
+        if (!isConfigured(providerCode)) {
+            throw new DevelopmentException("Не указан код провайдера AI.");
+        }
+        return sendPrompt(userPrompt, getUserConfig(providerCode));
+    }
 
+    @Override
+    public String sendPromptUsingCurrentConfiguration(String userPrompt) {
+        return sendPrompt(userPrompt, getCurrentUserConfig());
+    }
+
+    @Override
+    public void setCurrentConfiguration(UUID configurationId) {
+        if (configurationId == null) {
+            throw new DevelopmentException("Не выбрана AI-конфигурация.");
+        }
+
+        /*
+         * Снимаем текущий признак и назначаем новую конфигурацию в одной core-транзакции.
+         * Это сохраняет инвариант «один пользователь — одна текущая нейросеть» даже
+         * при наличии нескольких сохранённых API-ключей и моделей.
+         */
+        try (Transaction transaction = persistence.createTransaction()) {
+            EntityManager entityManager = persistence.getEntityManager();
+            UserAiConfiguration selected = entityManager.find(UserAiConfiguration.class, configurationId);
+            if (selected == null) {
+                throw new DevelopmentException("Выбранная AI-конфигурация не найдена.");
+            }
+            if (!isConfigured(selected.getApiKey())) {
+                throw new DevelopmentException("Для провайдера «" + selected.getProviderCode()
+                        + "» не указан API-ключ.");
+            }
+
+            entityManager.createQuery(
+                            "update hunttech_UserAiConfiguration e set e.isActive = false "
+                                    + "where e.user = :user and e.id <> :configurationId and e.deleteTs is null")
+                    .setParameter("user", selected.getUser())
+                    .setParameter("configurationId", configurationId)
+                    .executeUpdate();
+
+            selected.setIsActive(true);
+            transaction.commit();
+        }
+    }
+
+    private String sendPrompt(String userPrompt, UserAiConfiguration configuration) {
         if (!isConfigured(userPrompt)) {
             log.error("sendPrompt отклонён: пустой промпт");
             throw new DevelopmentException("Промпт не может быть пустым.");
         }
-        if (!isConfigured(providerCode)) {
-            log.error("sendPrompt отклонён: пустой providerCode");
-            throw new DevelopmentException("Не указан код провайдера AI.");
-        }
 
-        log.debug("Загружаем UserAiConfiguration для provider={}", providerCode);
-        UserAiConfiguration config = getUserConfig(providerCode);
-        log.debug("Конфигурация загружена: provider={}, model={}, active={}",
-                config.getProviderCode(), config.getDefaultModelName(), config.getIsActive());
+        String providerCode = configuration.getProviderCode();
+        log.info("Отправка AI-промпта: provider={}, promptLength={}, model={}",
+                providerCode, userPrompt.length(), configuration.getDefaultModelName());
 
-        log.debug("Получаем AIProvider для кода={}", providerCode);
         AIProvider provider = aiProviderRegistry.getProvider(providerCode);
-
-        log.info("Вызываем {}.generateText(): promptLength={}, model={}, temperature=0.3",
-                provider.getClass().getSimpleName(), userPrompt.length(),
-                config.getDefaultModelName());
-
         try {
             String response = provider.generateText(
                     userPrompt,
                     "Ты — AI-ассистент рекрутинговой системы HRM HuntTech. "
                             + "Отвечай на русском языке развёрнуто и по делу.",
-                    config.getApiKey(),
-                    config.getDefaultModelName(),
+                    configuration.getApiKey(),
+                    configuration.getDefaultModelName(),
                     Map.of("temperature", 0.3));
 
             log.info("Ответ получен от {}: responseLength={}", providerCode,
                     response != null ? response.length() : 0);
             return response;
         } catch (Exception e) {
-            log.error("Ошибка при вызове {}.generateText(): {}", provider.getClass().getSimpleName(),
-                    e.toString(), e);
+            log.error("Ошибка при вызове {}.generateText(): {}",
+                    provider.getClass().getSimpleName(), e.toString(), e);
             throw e;
         }
     }
 
+    /**
+     * Загружает сохранённую конфигурацию явно выбранного провайдера.
+     * Признак isActive здесь не используется: он зарезервирован для единственной
+     * текущей нейросети системного AI-анализа, а остальные настройки можно тестировать
+     * и использовать в сценариях с явным выбором провайдера.
+     */
     private UserAiConfiguration getUserConfig(String providerCode) {
         User user = userSessionSource.getUserSession().getUser();
         UserAiConfiguration config = dataManager.load(UserAiConfiguration.class)
                 .query(QUERY_USER_AI_CONFIG)
                 .parameter("user", user)
                 .parameter("providerCode", providerCode)
+                .view("userAiConfiguration-edit-view")
                 .optional()
                 .orElse(null);
 
         if (config == null || !isConfigured(config.getApiKey())) {
             throw new DevelopmentException(
                     "API-ключ для провайдера «" + providerCode + "» не настроен. "
-                            + "Добавьте активную конфигурацию в настройках AI.");
+                            + "Добавьте конфигурацию в настройках AI.");
+        }
+        return config;
+    }
+
+    private UserAiConfiguration getCurrentUserConfig() {
+        User user = userSessionSource.getUserSession().getUser();
+        List<UserAiConfiguration> currentConfigurations = dataManager.load(UserAiConfiguration.class)
+                .query(QUERY_CURRENT_AI_CONFIG)
+                .parameter("user", user)
+                .view("userAiConfiguration-edit-view")
+                .maxResults(2)
+                .list();
+
+        if (currentConfigurations.isEmpty()) {
+            throw new DevelopmentException(
+                    "Не выбрана текущая нейросеть для AI-анализа. "
+                            + "Администратор должен выбрать её в настройках доступа к AI API.");
+        }
+        if (currentConfigurations.size() > 1) {
+            throw new DevelopmentException(
+                    "Для пользователя выбрано несколько текущих AI-конфигураций. "
+                            + "Оставьте текущей только одну нейросеть.");
+        }
+
+        UserAiConfiguration config = currentConfigurations.get(0);
+        if (!isConfigured(config.getApiKey())) {
+            throw new DevelopmentException("API-ключ текущего провайдера «"
+                    + config.getProviderCode() + "» не настроен.");
         }
         return config;
     }
