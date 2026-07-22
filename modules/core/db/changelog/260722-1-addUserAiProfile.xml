@@ -7,9 +7,10 @@
 
     <changeSet id="260722-1-createUserAiProfile" author="hunttech">
         <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="HUNTTECH_USER_AI_PROFILE"/>
-            </not>
+            <and>
+                <not><tableExists tableName="HUNTTECH_USER_AI_PROFILE"/></not>
+                <not><tableExists tableName="ITPEARLS_USER_AI_PROFILE"/></not>
+            </and>
         </preConditions>
         <createTable tableName="HUNTTECH_USER_AI_PROFILE">
             <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
