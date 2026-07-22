@@ -1,0 +1,123 @@
+-- Без потери данных переводит ранее созданную таблицу ИИ-профиля в контур HUNTTECH.
+-- Если одновременно существуют старая и новая таблицы, миграция останавливается для ручного разбора.
+
+DO $$
+DECLARE
+    legacy_exists BOOLEAN := to_regclass('public.itpearls_user_ai_profile') IS NOT NULL;
+    hunttech_exists BOOLEAN := to_regclass('public.hunttech_user_ai_profile') IS NOT NULL;
+BEGIN
+    IF legacy_exists AND hunttech_exists THEN
+        RAISE EXCEPTION
+            'Одновременно существуют ITPEARLS_USER_AI_PROFILE и HUNTTECH_USER_AI_PROFILE. Автоматическая миграция остановлена во избежание потери данных.';
+    END IF;
+
+    IF legacy_exists AND NOT hunttech_exists THEN
+        ALTER TABLE ITPEARLS_USER_AI_PROFILE
+            RENAME TO HUNTTECH_USER_AI_PROFILE;
+
+        IF EXISTS (
+            SELECT 1 FROM pg_constraint
+            WHERE lower(conname) = 'pk_itpearls_user_ai_profile'
+              AND conrelid = 'hunttech_user_ai_profile'::regclass
+        ) THEN
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE
+                RENAME CONSTRAINT PK_ITPEARLS_USER_AI_PROFILE
+                TO PK_HUNTTECH_USER_AI_PROFILE;
+        END IF;
+
+        IF EXISTS (
+            SELECT 1 FROM pg_constraint
+            WHERE lower(conname) = 'fk_itpearls_user_ai_profile_on_user'
+              AND conrelid = 'hunttech_user_ai_profile'::regclass
+        ) THEN
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE
+                RENAME CONSTRAINT FK_ITPEARLS_USER_AI_PROFILE_ON_USER
+                TO FK_HUNTTECH_USER_AI_PROFILE_ON_USER;
+        END IF;
+
+        IF EXISTS (
+            SELECT 1 FROM pg_constraint
+            WHERE lower(conname) = 'chk_itpearls_user_ai_profile_prof_exp'
+              AND conrelid = 'hunttech_user_ai_profile'::regclass
+        ) THEN
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE
+                RENAME CONSTRAINT CHK_ITPEARLS_USER_AI_PROFILE_PROF_EXP
+                TO CHK_HUNTTECH_USER_AI_PROFILE_PROF_EXP;
+        END IF;
+
+        IF EXISTS (
+            SELECT 1 FROM pg_constraint
+            WHERE lower(conname) = 'chk_itpearls_user_ai_profile_recr_exp'
+              AND conrelid = 'hunttech_user_ai_profile'::regclass
+        ) THEN
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE
+                RENAME CONSTRAINT CHK_ITPEARLS_USER_AI_PROFILE_RECR_EXP
+                TO CHK_HUNTTECH_USER_AI_PROFILE_RECR_EXP;
+        END IF;
+
+        IF to_regclass('public.idx_itpearls_user_ai_profile_unq_user') IS NOT NULL THEN
+            ALTER INDEX IDX_ITPEARLS_USER_AI_PROFILE_UNQ_USER
+                RENAME TO IDX_HUNTTECH_USER_AI_PROFILE_UNQ_USER;
+        END IF;
+    END IF;
+
+    IF NOT legacy_exists AND NOT hunttech_exists THEN
+        CREATE TABLE HUNTTECH_USER_AI_PROFILE (
+            ID UUID NOT NULL,
+            VERSION INTEGER NOT NULL,
+            CREATE_TS TIMESTAMP,
+            CREATED_BY VARCHAR(50),
+            UPDATE_TS TIMESTAMP,
+            UPDATED_BY VARCHAR(50),
+            DELETE_TS TIMESTAMP,
+            DELETED_BY VARCHAR(50),
+            USER_ID UUID NOT NULL,
+            PROFILE_ENABLED BOOLEAN NOT NULL DEFAULT FALSE,
+            EXTERNAL_PROCESSING_ALLOWED BOOLEAN NOT NULL DEFAULT FALSE,
+            CONSENT_VERSION VARCHAR(32),
+            CONSENT_ACCEPTED_AT TIMESTAMP,
+            PROFILE_CONFIRMED_AT TIMESTAMP,
+            ABOUT_ME TEXT,
+            CURRENT_POSITION VARCHAR(255),
+            FUNCTIONAL_ROLE INTEGER,
+            SENIORITY_LEVEL INTEGER,
+            PROFESSIONAL_EXPERIENCE_YEARS INTEGER,
+            RECRUITING_EXPERIENCE_YEARS INTEGER,
+            CURRENT_RESPONSIBILITIES TEXT,
+            EDUCATION TEXT,
+            CERTIFICATIONS TEXT,
+            DOMAIN_EXPERTISE TEXT,
+            INDUSTRIES TEXT,
+            RECRUITING_SPECIALIZATIONS TEXT,
+            TARGET_ROLES TEXT,
+            CANDIDATE_LEVELS VARCHAR(255),
+            HIRING_GEOGRAPHIES TEXT,
+            DECISION_PRIORITIES TEXT,
+            CLIENT_PROJECT_CONTEXT TEXT,
+            PROFESSIONAL_GOALS TEXT,
+            PROFESSIONAL_INTERESTS TEXT,
+            DEVELOPMENT_AREAS TEXT,
+            CURRENT_PRIORITIES TEXT,
+            PREFERRED_LANGUAGE INTEGER,
+            RESPONSE_DETAIL_LEVEL INTEGER,
+            COMMUNICATION_STYLE INTEGER,
+            TERMINOLOGY_LEVEL INTEGER,
+            PREFERRED_ANSWER_STRUCTURE INTEGER,
+            CUSTOM_AI_INSTRUCTIONS TEXT,
+            COMMUNICATION_CONSTRAINTS TEXT,
+            CONSTRAINT PK_HUNTTECH_USER_AI_PROFILE PRIMARY KEY (ID),
+            CONSTRAINT FK_HUNTTECH_USER_AI_PROFILE_ON_USER
+                FOREIGN KEY (USER_ID) REFERENCES SEC_USER (ID),
+            CONSTRAINT CHK_HUNTTECH_USER_AI_PROFILE_PROF_EXP
+                CHECK (PROFESSIONAL_EXPERIENCE_YEARS IS NULL
+                    OR PROFESSIONAL_EXPERIENCE_YEARS BETWEEN 0 AND 70),
+            CONSTRAINT CHK_HUNTTECH_USER_AI_PROFILE_RECR_EXP
+                CHECK (RECRUITING_EXPERIENCE_YEARS IS NULL
+                    OR RECRUITING_EXPERIENCE_YEARS BETWEEN 0 AND 70)
+        );
+
+        CREATE UNIQUE INDEX IDX_HUNTTECH_USER_AI_PROFILE_UNQ_USER
+            ON HUNTTECH_USER_AI_PROFILE (USER_ID);
+    END IF;
+END
+$$;
