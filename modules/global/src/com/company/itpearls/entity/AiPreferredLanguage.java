@@ -1,4 +1,4 @@
-package com.company.itpearls.entity;
+package com.company.hunttech.entity;
 
 import com.haulmont.chile.core.datatypes.impl.EnumClass;
 
