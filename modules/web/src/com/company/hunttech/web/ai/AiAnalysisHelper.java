@@ -3,12 +3,10 @@ package com.company.hunttech.web.ai;
 import com.company.hunttech.service.AiAnalysisService;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.LoadContext;
-import com.haulmont.cuba.core.global.View;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.UiControllerUtils;
 
 /**
  * Статический helper для вызова AI-анализа из любой формы.
@@ -32,26 +30,31 @@ public final class AiAnalysisHelper {
      * @param promptCode код промпта из AiPromptTemplate
      */
     public static void analyze(Screen screen, Entity entity, String promptCode) {
+        /*
+         * Dialogs и Notifications создаются внутренней UI-инфраструктурой CUBA,
+         * а не Spring-контейнером. Получаем их из ScreenContext текущего экрана,
+         * иначе AppBeans.get(...) завершится NoSuchBeanDefinitionException.
+         */
+        Notifications notifications = UiControllerUtils.getScreenContext(screen).getNotifications();
+        Dialogs dialogs = UiControllerUtils.getScreenContext(screen).getDialogs();
+
         if (entity == null) {
-            AppBeans.get(Notifications.class)
-                    .create(Notifications.NotificationType.WARNING)
+            notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption("Нет данных для анализа")
                     .show();
             return;
         }
 
-        // Перезагружаем с View.LOCAL — browse-view может не содержать всех полей
-        DataManager dm = AppBeans.get(DataManager.class);
-        Entity full = dm.load(LoadContext.create(entity.getClass())
-                .setId(entity.getId())
-                .setView(View.LOCAL));
-
-        AiAnalysisService svc = (AiAnalysisService) AppBeans.get("hunttech_AiAnalysisService");
+        /*
+         * Не выполняем повторную web-tier загрузку с View.LOCAL: core-сервис
+         * самостоятельно перезагружает сущность специализированным analysis-view
+         * со всеми связями, нужными placeholder-экстракторам.
+         */
+        AiAnalysisService service = (AiAnalysisService) AppBeans.get(AiAnalysisService.NAME);
 
         try {
-            String result = svc.analyze(full, promptCode);
+            String result = service.analyze(entity, promptCode);
 
-            Dialogs dialogs = AppBeans.get(Dialogs.class);
             dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
                     .withCaption("AI-анализ")
                     .withMessage(result)
@@ -59,8 +62,7 @@ public final class AiAnalysisHelper {
                     .withHeight("500px")
                     .show();
         } catch (Exception e) {
-            AppBeans.get(Notifications.class)
-                    .create(Notifications.NotificationType.ERROR)
+            notifications.create(Notifications.NotificationType.ERROR)
                     .withCaption("Ошибка AI-анализа")
                     .withDescription(e.getMessage())
                     .show();
