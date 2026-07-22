@@ -134,17 +134,21 @@ public class AiAnalysisServiceBean implements AiAnalysisService {
     }
 
     private View buildOpenPositionAnalysisView() {
+        // Каждый вложенный view привязывается к конкретному property родительской сущности.
+        // Перегрузка addView(View) не определяет автоматически связь Project → Department → Company.
         return ViewBuilder.of(OpenPosition.class)
-                .addAll("shortDescription", "comment", "projectName")
-                .addView(ViewBuilder.of(com.company.hunttech.entity.Project.class)
-                        .addAll("projectName", "projectDepartment")
-                        .addView(ViewBuilder.of(com.company.hunttech.entity.CompanyDepartament.class)
-                                .addAll("companyName")
-                                .addView(ViewBuilder.of(com.company.hunttech.entity.Company.class)
-                                        .addAll("comanyName")
-                                        .build())
+                .addAll("shortDescription", "comment")
+                .addView("projectName",
+                        ViewBuilder.of(com.company.hunttech.entity.Project.class)
+                                .addAll("projectName")
+                                .addView("projectDepartment",
+                                        ViewBuilder.of(com.company.hunttech.entity.CompanyDepartament.class)
+                                                .addView("companyName",
+                                                        ViewBuilder.of(com.company.hunttech.entity.Company.class)
+                                                                .addAll("comanyName")
+                                                                .build())
+                                                .build())
                                 .build())
-                        .build())
                 .build();
     }
 
