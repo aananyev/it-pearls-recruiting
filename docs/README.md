@@ -29,7 +29,8 @@
 | Разработчик | [entities/](entities/), [ui/](ui/), [screens/](screens/), [services/](services/) |
 | Экран JobCandidateEdit | [ui/JobCandidateEdit_Spec.md](ui/JobCandidateEdit_Spec.md) · [architecture/JobCandidateEdit_Performance_Architecture.md](architecture/JobCandidateEdit_Performance_Architecture.md) · [screens/job-candidate/JobCandidateEdit_Design_Fix_2026-07-14.md](screens/job-candidate/JobCandidateEdit_Design_Fix_2026-07-14.md) |
 | Диагностика разбора резюме и OOM | [services/PdfParserService.md](services/PdfParserService.md) · [operations/JobCandidateEdit_OOM_Runbook.md](operations/JobCandidateEdit_OOM_Runbook.md) |
-| Подключение AI | [integrations/ai/USER_AI_CONNECTION_GUIDE.md](integrations/ai/USER_AI_CONNECTION_GUIDE.md) · [integrations/ai/AI_INTEGRATION.md](integrations/ai/AI_INTEGRATION.md) |
+| Подключение и выбор AI | [integrations/ai/USER_AI_CONNECTION_GUIDE.md](integrations/ai/USER_AI_CONNECTION_GUIDE.md) · [services/HrmAiService.md](services/HrmAiService.md) · [ui/UserAiConfigurationBrowse_Spec.md](ui/UserAiConfigurationBrowse_Spec.md) |
+| Системные промпты AI | [ui/AiPromptTemplateBrowse_Spec.md](ui/AiPromptTemplateBrowse_Spec.md) · [ui/AiPromptTemplateEdit_Spec.md](ui/AiPromptTemplateEdit_Spec.md) |
 | Production migration системных промптов AI | [ai-system-prompts-production-migration-runbook.md](../deployment/production-deployment/runbooks/ai-system-prompts-production-migration-runbook.md) |
 | DBA | [database/](database/) и [deployment/database-migration/](../deployment/database-migration/) |
 | Тестировщик | [operations/](operations/), [reports/](reports/), [deployment/database-migration/validation/](../deployment/database-migration/validation/) |
@@ -54,4 +55,5 @@
 
 | Дата | Изменение |
 | --- | --- |
+| 2026-07-22 | Добавлены спецификации системных промптов, выбор текущей нейросети и документация HrmAiService. |
 | 2026-07-22 | Добавлены проектные правила, канонический DevOps-промпт Hermes и production runbook миграции системных промптов AI. |
