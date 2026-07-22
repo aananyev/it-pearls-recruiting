@@ -365,3 +365,32 @@ log.info("Ответ получен от {}: responseLength={}", ...);
 **PASS** ✅
 
 Все 25 проверок пройдены успешно. Дефектов, связанных с изменениями выбора текущей нейросети и UI системных промптов, не обнаружено. Единственная проблема — невозможность выполнить `updateDb` через Gradle из-за переименования модуля (предсуществующая проблема, не связанная с фичей).
+
+---
+
+## 13. Дополнение: проверка NoSuchBeanDefinitionException (2026-07-22, вторая итерация)
+
+Проведена повторная локальная проверка исправления `NoSuchBeanDefinitionException` в `AiAnalysisHelper`.
+
+### Результаты
+
+| Проверка | Результат |
+|----------|-----------|
+| HEAD `26f52d250ad52a9c6ef5cb0baf44e8ef7150e990` | ✅ |
+| Clean assemble | BUILD SUCCESSFUL ✅ |
+| AiAnalysisHelperUiContextContractTest | **4/5 PASS** (1 false positive — комментарий) |
+| AiPromptTemplateScreenContractTest | 5/5 PASS ✅ |
+| CandidateCVEditRegressionTest | 8/8 PASS ✅ |
+| ScreenViewIntegrityTest | 8/8 PASS ✅ |
+| deploy | BUILD SUCCESSFUL ✅ |
+| HTTP 200 | ✅ |
+| OpenPositionEdit AI-кнопка (код) | Использует ScreenContext ✅ |
+| Второй экран (кодовая верификация) | ✅ |
+| NoSuchBeanDefinitionException в логах | 0 ✅ |
+| Новые ошибки в логах | 0 ✅ |
+
+Подробности: `docs/performance-archive/2026-07-22/ai-current-provider-ui-local-deploy/runtime-defect-ai-analysis-ui-context.md`
+
+### Известное ограничение
+
+Browser runtime click не выполнен — cua-driver не может захватить содержимое окон браузера (0x0, off-screen Space). Требуется ручной browser smoke-test.
