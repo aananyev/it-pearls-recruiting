@@ -10,24 +10,60 @@
             <loader/>
         </instance>
     </data>
-    <dialogMode height="AUTO"
-                width="650"
+    <dialogMode height="800"
+                width="900"
                 modal="true"
                 forceDialog="true"/>
-    <layout spacing="true" margin="true">
-        <form id="form" dataContainer="aiPromptTemplateDc" width="100%">
-            <column width="600px">
-                <textField id="nameField" property="name" required="true" width="100%"/>
-                <textField id="codeField" property="code" required="true" width="100%"/>
-                <textField id="entityClassField" property="entityClass" required="true" width="100%"/>
-                <textArea id="descriptionField" property="description" width="100%" rows="2"/>
-                <textArea id="promptTextField" property="promptText" required="true"
-                          width="100%" rows="10"/>
-                <textArea id="availablePlaceholdersField" property="availablePlaceholders"
-                          width="100%" rows="4"/>
-                <checkBox id="activeField" property="active"/>
-            </column>
-        </form>
+    <layout expand="contentScrollBox"
+            spacing="true"
+            margin="true"
+            height="100%"
+            width="100%">
+        <scrollBox id="contentScrollBox"
+                   height="100%"
+                   width="100%">
+            <form id="form"
+                  dataContainer="aiPromptTemplateDc"
+                  captionPosition="TOP"
+                  width="100%">
+                <column width="100%">
+                    <textField id="nameField"
+                               property="name"
+                               caption="msg://AiPromptTemplate.name"
+                               required="true"
+                               width="100%"/>
+                    <textField id="codeField"
+                               property="code"
+                               caption="msg://AiPromptTemplate.code"
+                               required="true"
+                               width="100%"/>
+                    <textField id="entityClassField"
+                               property="entityClass"
+                               caption="msg://AiPromptTemplate.entityClass"
+                               required="true"
+                               width="100%"/>
+                    <textArea id="descriptionField"
+                              property="description"
+                              caption="msg://AiPromptTemplate.description"
+                              width="100%"
+                              rows="3"/>
+                    <textArea id="promptTextField"
+                              property="promptText"
+                              caption="msg://AiPromptTemplate.promptText"
+                              required="true"
+                              width="100%"
+                              rows="14"/>
+                    <textArea id="availablePlaceholdersField"
+                              property="availablePlaceholders"
+                              caption="msg://AiPromptTemplate.availablePlaceholders"
+                              width="100%"
+                              rows="5"/>
+                    <checkBox id="activeField"
+                              property="active"
+                              caption="msg://AiPromptTemplate.active"/>
+                </column>
+            </form>
+        </scrollBox>
         <hbox id="editActions" spacing="true">
             <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
             <button id="closeBtn" action="windowClose"/>
