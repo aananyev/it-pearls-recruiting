@@ -2,12 +2,14 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.entity.UserAiConfiguration;
 
+import java.util.UUID;
+
 public interface HrmAiService {
     String NAME = "hunttech_HrmAiService";
 
     /**
-     * Строит стандартизированное описание вакансии через активную AI-конфигурацию
-     * текущего пользователя для выбранного провайдера.
+     * Строит стандартизированное описание вакансии через сохранённую
+     * AI-конфигурацию текущего пользователя для явно выбранного провайдера.
      */
     String standardizeVacancyDescription(String rawText, String providerCode);
 
@@ -25,12 +27,21 @@ public interface HrmAiService {
     void testConnection(UserAiConfiguration configuration);
 
     /**
-     * Отправляет произвольный промпт AI-провайдеру через активную конфигурацию
-     * пользователя. Используется AiAnalysisService для AI-анализа сущностей.
-     *
-     * @param userPrompt   заполненный текст промпта (уже с подставленными данными)
-     * @param providerCode код провайдера из UserAiConfiguration.providerCode
-     * @return текстовый ответ AI
+     * Отправляет произвольный промпт явно выбранному провайдеру.
+     * Используется сценариями, где провайдер выбирается пользователем непосредственно.
      */
     String sendPrompt(String userPrompt, String providerCode);
+
+    /**
+     * Отправляет системный промпт через единственную текущую AI-конфигурацию
+     * пользователя. Этим методом пользуются кнопки AI-анализа на экранах сущностей.
+     */
+    String sendPromptUsingCurrentConfiguration(String userPrompt);
+
+    /**
+     * Делает выбранную конфигурацию единственной текущей для её пользователя.
+     *
+     * @param configurationId идентификатор UserAiConfiguration
+     */
+    void setCurrentConfiguration(UUID configurationId);
 }
