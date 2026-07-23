@@ -244,29 +244,93 @@
                     </grid>
                 </vbox>
             </tab>
-            <tab id="aiAccessTab" caption="msg://msgAiSettings">
-                <vbox spacing="true" margin="true" width="100%" height="100%" expand="aiConfigsTable">
-                    <label value="msg://msgAiSettingsHint" stylename="light"/>
-                    <!-- Флаг только сохраняет предпочтение пользователя; алгоритм маршрутизации API будет добавлен отдельно. -->
-                    <vbox id="personalAiApiPreferenceBox" spacing="false" width="100%">
-                        <checkBox id="preferPersonalAiApiSettingsField"
-                                  datasource="userSettingsDs"
-                                  property="preferPersonalAiApiSettings"
-                                  caption="msg://preferPersonalAiApiSettings"/>
-                        <label value="msg://preferPersonalAiApiSettingsHint" width="100%" stylename="light"/>
+            <tab id="aiAccessTab" caption="msg://msgAiSettings" margin="true" spacing="true">
+                <!-- Вкладка AI использует тот же двухпанельный паттерн, что и остальные Edit-формы:
+                     контекст и навигация слева, toolbar и функциональные карточки справа. -->
+                <hbox id="aiSettingsMainBox"
+                      width="100%"
+                      height="100%"
+                      spacing="true"
+                      expand="aiSettingsContent"
+                      stylename="ai-settings-editor">
+                    <vbox id="aiSettingsSidebar"
+                          width="270px"
+                          height="100%"
+                          spacing="true"
+                          expand="aiSettingsSidebarSpacer"
+                          stylename="ai-settings-sidebar">
+                        <label value="AI" align="TOP_LEFT" stylename="ai-settings-mark"/>
+                        <vbox id="aiSettingsSidebarIdentity" width="100%" spacing="false">
+                            <label value="msg://aiSettingsSidebarTitle" width="100%" stylename="h2 ai-settings-sidebar-title"/>
+                            <label value="msg://aiSettingsSidebarDescription" width="100%" stylename="ai-settings-help"/>
+                        </vbox>
+                        <vbox id="aiSettingsNavigation" width="100%" spacing="false" stylename="ai-settings-navigation">
+                            <label value="msg://aiSettingsNavigationTitle" width="100%" stylename="ai-settings-navigation-title"/>
+                            <label value="msg://aiSettingsSourceSection" width="100%" stylename="ai-settings-nav-item ai-settings-nav-item-active"/>
+                            <label value="msg://aiSettingsConnectionsSection" width="100%" stylename="ai-settings-nav-item"/>
+                        </vbox>
+                        <label id="aiSettingsSidebarSpacer"/>
+                        <vbox id="aiSettingsSecurityBox" width="100%" spacing="false" stylename="ai-settings-security">
+                            <label value="msg://aiSettingsSecurityHint" width="100%" stylename="ai-settings-help"/>
+                        </vbox>
                     </vbox>
-                    <buttonsPanel id="aiConfigsButtonsPanel">
-                        <button id="aiConfigsCreateBtn" caption="msg://actions.Create" icon="CREATE_ACTION" invoke="onAiConfigsCreateBtnClick"/>
-                        <button id="aiConfigsEditBtn" caption="msg://actions.Edit" icon="EDIT" enable="false" invoke="onAiConfigsEditBtnClick"/>
-                        <button id="aiConfigsRemoveBtn" caption="msg://actions.Remove" icon="REMOVE" enable="false" invoke="onAiConfigsRemoveBtnClick"/>
-                        <!-- Включается из ExtSettingsWindow только при выбранной строке таблицы. -->
-                        <button id="aiConfigsTestBtn" caption="msg://msgAiTestConnection" icon="KEY" enable="false" invoke="onAiConfigsTestBtnClick"/>
-                    </buttonsPanel>
-                    <table id="aiConfigsTable" width="100%" height="100%" editable="false">
-                        <columns><column id="providerCode"/><column id="defaultModelName"/><column id="isActive"/></columns>
-                        <rows datasource="userAiConfigsDs"/>
-                    </table>
-                </vbox>
+                    <vbox id="aiSettingsContent"
+                          width="100%"
+                          height="100%"
+                          spacing="true"
+                          expand="aiConnectionsCard"
+                          stylename="ai-settings-content">
+                        <hbox id="aiSettingsToolbar"
+                              width="100%"
+                              spacing="true"
+                              expand="aiSettingsTitleBox"
+                              stylename="ai-settings-toolbar">
+                            <vbox id="aiSettingsTitleBox" width="100%" spacing="false">
+                                <label value="msg://aiSettingsPageTitle" stylename="h1"/>
+                                <label value="msg://aiSettingsPageDescription" width="100%" stylename="ai-settings-help"/>
+                            </vbox>
+                            <buttonsPanel id="aiConfigsButtonsPanel" align="BOTTOM_RIGHT" stylename="ai-settings-toolbar-actions">
+                                <button id="aiConfigsCreateBtn" caption="msg://actions.Create" icon="CREATE_ACTION" invoke="onAiConfigsCreateBtnClick"/>
+                                <button id="aiConfigsEditBtn" caption="msg://actions.Edit" icon="EDIT" enable="false" invoke="onAiConfigsEditBtnClick"/>
+                                <button id="aiConfigsRemoveBtn" caption="msg://actions.Remove" icon="REMOVE" enable="false" invoke="onAiConfigsRemoveBtnClick"/>
+                                <!-- Включается из ExtSettingsWindow только при выбранной строке таблицы. -->
+                                <button id="aiConfigsTestBtn" caption="msg://msgAiTestConnection" icon="KEY" enable="false" invoke="onAiConfigsTestBtnClick"/>
+                            </buttonsPanel>
+                        </hbox>
+                        <!-- Флаг только сохраняет предпочтение пользователя; алгоритм маршрутизации API будет добавлен отдельно. -->
+                        <vbox id="personalAiApiPreferenceBox"
+                              spacing="true"
+                              width="100%"
+                              stylename="ai-settings-card ai-settings-preference-card">
+                            <label value="msg://aiSettingsPreferenceTitle" stylename="h3 ai-settings-card-title"/>
+                            <checkBox id="preferPersonalAiApiSettingsField"
+                                      datasource="userSettingsDs"
+                                      property="preferPersonalAiApiSettings"
+                                      caption="msg://preferPersonalAiApiSettings"
+                                      stylename="ai-settings-preference-checkbox"/>
+                            <label value="msg://preferPersonalAiApiSettingsHint" width="100%" stylename="ai-settings-help"/>
+                        </vbox>
+                        <vbox id="aiConnectionsCard"
+                              width="100%"
+                              height="100%"
+                              spacing="true"
+                              expand="aiConfigsTable"
+                              stylename="ai-settings-card ai-settings-connections-card">
+                            <vbox id="aiConnectionsHeader" width="100%" spacing="false">
+                                <label value="msg://aiSettingsConnectionsTitle" stylename="h3 ai-settings-card-title"/>
+                                <label value="msg://aiSettingsConnectionsDescription" width="100%" stylename="ai-settings-help"/>
+                            </vbox>
+                            <table id="aiConfigsTable"
+                                   width="100%"
+                                   height="100%"
+                                   editable="false"
+                                   stylename="ai-settings-table">
+                                <columns><column id="providerCode"/><column id="defaultModelName"/><column id="isActive"/></columns>
+                                <rows datasource="userAiConfigsDs"/>
+                            </table>
+                        </vbox>
+                    </vbox>
+                </hbox>
             </tab>
         </tabSheet>
         <vbox id="buttons" margin="true;false;false;false">
