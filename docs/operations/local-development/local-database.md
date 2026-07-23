@@ -78,6 +78,20 @@ CREATE DATABASE HuntTech OWNER cuba ENCODING 'UTF8';
 Скрипты миграций: `modules/core/db/update/postgres/`  
 Начальные скрипты: `modules/core/db/init/postgres/`
 
+## Автоматическая синхронизация схемы при локальном запуске
+
+Штатный сценарий `./scripts/start-app.sh` выполняет `./gradlew updateDb --no-daemon --stacktrace` после остановки локального Tomcat и до `clean deploy`.
+
+Это обязательный порядок:
+
+```text
+PostgreSQL готов → Tomcat остановлен → updateDb → clean deploy → start
+```
+
+Такой порядок не позволяет развернуть новую entity-модель поверх устаревшей схемы. В частности, миграция `26/260723-1-addPreferPersonalAiApiSettings.sql` должна создать колонку `HUNTTECH_USER_SETTINGS.PREFER_PERSONAL_AI_API_SETTINGS` до загрузки `UserSettings` в `SettingsWindow`.
+
+Если `updateDb` завершается ошибкой, `start-app.sh` прекращает запуск. Ошибку миграции необходимо устранить до deploy; обходить её запуском приложения на старой схеме запрещено.
+
 ## Проверка подключения
 
 ```bash
@@ -92,7 +106,7 @@ psql -h localhost -p 5432 -U cuba -d HuntTech -c "SELECT version();"
 
 ## Запуск приложения
 
-Рекомендуемый способ (PostgreSQL + очистка зависшего Tomcat + deploy): `./scripts/start-app.sh`
+Рекомендуемый способ (PostgreSQL + миграции + очистка зависшего Tomcat + deploy): `./scripts/start-app.sh`
 
 ```bash
 ./gradlew setupTomcat
@@ -124,3 +138,9 @@ psql -h localhost -p 5432 -U cuba -d HuntTech -c "SELECT version();"
 - **Причина:** прежний каталог данных был **standby-репликой** (`recovery.conf`, `pg_is_in_recovery() = true`, read-only).
 - **Резервная копия старого каталога:** `/usr/local/var/postgresql@11-standby-replica-backup-20260622` (можно удалить, если реплика больше не нужна).
 - **Проверка:** `psql -h localhost -p 5432 -U cuba -d HuntTech -c "SELECT pg_is_in_recovery();"` → `f`.
+
+## История изменений
+
+| Дата | Изменение |
+|---|---|
+| 2026-07-23 | Штатный локальный запуск дополнен обязательным `updateDb` до deploy, чтобы исключить ошибки отсутствующих колонок при загрузке экранов |
