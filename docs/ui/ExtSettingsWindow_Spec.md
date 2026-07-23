@@ -2,17 +2,19 @@
 
 > Экран HRM HuntTech: `com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindow`.  
 > XML: `ext-settings-window.xml`.  
-> Связанные документы: [UserAiProfile](../entities/UserAiProfile.md), [UserAiContextService](../services/UserAiContextService.md).
+> Связанные документы: [UserSettings](../entities/user-settings/UserSettings.md), [UserAiProfile](../entities/UserAiProfile.md), [UserAiContextService](../services/UserAiContextService.md).
 
 ## Business & Context Intro
 
 ### Назначение и Бизнес-смысл (What & Why)
 
-Экран объединяет персональные настройки пользователя. Вкладка «Обо мне» формирует профессиональный ИИ-профиль, чтобы сервисы HRM HuntTech адаптировали ответы к роли и опыту пользователя без изменения объективных данных рекрутмента. Отдельная вкладка AI управляет персональными подключениями к провайдерам и не смешивает API-ключи с профессиональным профилем.
+Экран объединяет персональные настройки пользователя. Вкладка «Обо мне» формирует профессиональный ИИ-профиль, чтобы сервисы HRM HuntTech адаптировали ответы к роли и опыту пользователя без изменения объективных данных рекрутмента. Отдельная вкладка AI управляет персональными подключениями к провайдерам и хранит предпочтение пользователя по выбору личных либо административных настроек API.
+
+Новый checkbox только фиксирует предпочтение. Алгоритм маршрутизации вызовов, fallback на административные настройки и ограничения функций при отсутствии личного API будут спроектированы и реализованы отдельной задачей.
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Открывается из стандартного меню настроек CUBA. Содержит вкладки `msgMyInfo`, `msgInterface`, `mailAccessTab` и `aiAccessTab`. «Обо мне» работает с `ExtUser` и `hunttech_UserAiProfile`; интерфейсные параметры сохраняет базовый `SettingsWindow`; почтовые параметры — существующая сущность `UserSettings`; вкладка AI — коллекция `UserAiConfiguration`, ограниченная текущим пользователем.
+Открывается из стандартного меню настроек CUBA. Содержит вкладки `msgMyInfo`, `msgInterface`, `mailAccessTab` и `aiAccessTab`. «Обо мне» работает с `ExtUser` и `hunttech_UserAiProfile`; интерфейсные параметры сохраняет базовый `SettingsWindow`; почтовые параметры и предпочтение источника API — `UserSettings`; вкладка AI — коллекция `UserAiConfiguration`, ограниченная текущим пользователем.
 
 Внутри вкладки «Обо мне» левая профильная панель показывает аватар, имя, должность, статус и заполненность профиля, а также вертикальный индекс разделов. Справа разделы представлены карточками-аккордеонами в том же порядке, что и индекс слева.
 
@@ -20,12 +22,15 @@
 
 - открытие → до инициализации контроллера web-блок получает `userAiProfile-view` из своего `ViewRepository`;
 - открытие → загружаются `ExtUser`, `UserSettings`, `UserAiProfile` и персональные `UserAiConfiguration`;
+- `preferPersonalAiApiSettings` отсутствует или равен `null` → применяется безопасное `false`;
+- пользователь изменяет checkbox во вкладке AI → значение меняется в `userSettingsDs`;
+- сохранение → `ExtUser`, `UserSettings` и `UserAiProfile` фиксируются единым `CommitContext`;
+- значение checkbox сохраняется, но текущий алгоритм вызовов API не изменяется;
 - загрузка аватара → изображение нормализуется существующим `ImageProcessingService`;
 - профиль отсутствует → создаётся несохранённый экземпляр;
 - открытие вкладки → раскрыт только «Профессиональный профиль», остальные секции свёрнуты;
 - предпросмотр → локально формируется очищенный контекст и раскрывается секция предпросмотра;
 - включение без согласия → сохранение блокируется;
-- сохранение → `ExtUser`, `UserSettings` и `UserAiProfile` фиксируются единым `CommitContext`;
 - очистка → сбрасывается только `UserAiProfile`;
 - выбор AI-конфигурации → становятся доступны редактирование, удаление и тест подключения.
 
@@ -39,14 +44,14 @@
 | Data API | legacy `dsContext` |
 | Messages pack | `com.company.hunttech.web.screens.extsettingswindow` |
 
-Существующие component ID сохранены для совместимости: `settingsTabSheet`, `msgMyInfo`, `msgInterface`, `mailAccessTab`, `aiAccessTab`, `okBtn`, `cancelBtn`, `userAvatarUpload`, `userPic`, `defaultPic`.
+Существующие component ID сохранены для совместимости: `settingsTabSheet`, `msgMyInfo`, `msgInterface`, `mailAccessTab`, `aiAccessTab`, `okBtn`, `cancelBtn`, `userAvatarUpload`, `userPic`, `defaultPic`. Новый component ID: `preferPersonalAiApiSettingsField`.
 
 ## 2. Data & Entity Binding
 
 | Datasource | Entity | View | Назначение |
 |---|---|---|---|
 | `extUserDs` | `ExtUser` | `extUser-view` | аватар и данные пользователя |
-| `userSettingsDs` | `UserSettings` | `userSettings-view` | существующий контракт почтовых настроек |
+| `userSettingsDs` | `UserSettings` | `userSettings-view` | почтовые параметры и `preferPersonalAiApiSettings` |
 | `userAiProfileDs` | `hunttech_UserAiProfile` | `userAiProfile-view` | профессиональный профиль и узкая связь с владельцем |
 | `userAiConfigsDs` | `hunttech_UserAiConfiguration` | `userAiConfiguration-view` | персональные подключения пользователя к AI-провайдерам |
 
@@ -56,6 +61,12 @@
 - `modules/web/src/com/company/hunttech/web-app.properties`.
 
 Регистрация только в `app-component.xml` недостаточна для standalone-запуска HRM HuntTech: web `ViewRepository` не получает именованный view, и `DsBuilder` завершает открытие окна с `ViewNotFoundException` до вызова `ExtSettingsWindow.init()`.
+
+Пользовательские настройки загружаются запросом:
+
+```jpql
+select e from hunttech_UserSettings e where e.user = :currentUser
+```
 
 Профиль загружается запросом:
 
@@ -69,7 +80,7 @@ select e from hunttech_UserAiProfile e where e.user = :currentUser
 select e from hunttech_UserAiConfiguration e where e.user = :ds$extUserDs
 ```
 
-Отсутствующий профиль создаётся только в памяти и сохраняется после нажатия `okBtn`.
+Отсутствующие `UserSettings` и `UserAiProfile` создаются только в памяти и сохраняются после нажатия `okBtn`.
 
 ## 3. Form Hierarchy
 
@@ -96,6 +107,8 @@ settingsTabSheet
 ├── msgInterface
 ├── mailAccessTab
 └── aiAccessTab
+    ├── personalAiApiPreferenceBox
+    │   └── preferPersonalAiApiSettingsField
     ├── aiConfigsButtonsPanel
     └── aiConfigsTable
 ```
@@ -104,6 +117,7 @@ settingsTabSheet
 
 ### Безопасные значения по умолчанию
 
+- предпочтение личных настроек API — выключено;
 - профиль выключен;
 - внешняя обработка запрещена;
 - язык — автоматически;
@@ -111,6 +125,12 @@ settingsTabSheet
 - стиль — нейтральный;
 - терминология — профессиональная;
 - структура — автоматически.
+
+### Предпочтение источника API
+
+`preferPersonalAiApiSettingsField` связан с `UserSettings.preferPersonalAiApiSettings`. Значение `false` сохраняет действующее поведение и не требует наличия личного API-ключа. Значение `true` только сохраняет намерение пользователя предпочитать персональные настройки.
+
+Контроллер не выбирает провайдера, не проверяет наличие личных ключей и не меняет маршрутизацию. Сервисы `HrmAiService` и другие API-интеграции этой задачей не изменяются.
 
 ### Согласие
 
@@ -128,6 +148,7 @@ settingsTabSheet
 
 | Метод | Назначение |
 |---|---|
+| `loadOrCreateUserSettings()` | загружает `UserSettings`, применяет default `false` и устанавливает `userSettingsDs` |
 | `loadOrCreateUserAiProfile()` | загружает профиль или создаёт несохранённый |
 | `initAiProfileOptions()` | задаёт локализованные enum options |
 | `refreshProfileSummary()` | обновляет левую карточку |
@@ -145,11 +166,15 @@ settingsTabSheet
 
 Кнопки `previewAiContextBtn` и `clearAiProfileBtn` собраны в верхнем toolbar. Секции оформлены как локальные карточки `showAsPanel="true"`; при открытии формы раскрыта только `professionalProfileGroup`, остальные секции имеют `collapsed="true"`.
 
-Стили подключены через локальный mixin `user-ai-profile` и ограничены корнем `.user-ai-profile-editor`. Глобальные `.v-*` правила не добавляются. При ширине окна 1200 px горизонтальная прокрутка не требуется; содержимое справа прокручивается вертикально. Вкладки «Интерфейс», «Почта» и AI сохраняют действующие component ID и функциональные контракты.
+На вкладке AI новый checkbox расположен после пояснения вкладки и перед панелью действий персональных конфигураций. Новые глобальные стили не добавляются; используются стандартные компоненты CUBA и существующие отступы вкладки.
+
+Стили вкладки «Обо мне» подключены через локальный mixin `user-ai-profile` и ограничены корнем `.user-ai-profile-editor`. Глобальные `.v-*` правила не добавляются. При ширине окна 1200 px горизонтальная прокрутка не требуется; содержимое справа прокручивается вертикально. Вкладки «Интерфейс», «Почта» и AI сохраняют действующие component ID и функциональные контракты.
 
 ### Синхронизация тем
 
 Изменение визуального контракта экрана в одной теме требует одновременной адаптации всех поддерживаемых тем в той же задаче и в том же PR. Частичное обновление только одной темы считается незавершённым.
+
+Новый checkbox использует стандартный theme-aware компонент CUBA и не требует локального SCSS. Его положение и читаемость должны проверяться во всех поддерживаемых темах.
 
 | Тема | SCSS-контур | Адаптация SettingsWindow |
 |---|---|---|
@@ -165,16 +190,29 @@ settingsTabSheet
 
 ## 7. База данных
 
-Исправление регистрации view не создаёт новых entity, полей или changeSet. Используется существующая таблица `HUNTTECH_USER_AI_PROFILE` и существующая схема `UserAiConfiguration`. SQL, Liquibase и изменение данных не требуются. PROD в рамках исправления не используется.
+Добавлена колонка `HUNTTECH_USER_SETTINGS.PREFER_PERSONAL_AI_API_SETTINGS BOOLEAN NOT NULL DEFAULT FALSE`.
+
+Миграции:
+
+- `modules/core/db/update/postgres/26/260723-1-addPreferPersonalAiApiSettings.sql`;
+- `modules/core/db/changelog/260723-1-addPreferPersonalAiApiSettings.xml`;
+- Liquibase master обновлён.
+
+Entity, таблица `HUNTTECH_USER_AI_PROFILE`, `UserAiConfiguration`, API-ключи и административные настройки не изменяются. PROD в данный PR не входит.
 
 ## 8. Проверки
 
-Обязательны `git diff --check`, компиляция global/core/web, `ScreenViewIntegrityTest` (8/8), Data View Integrity и `clean assemble`. Тест `test5_userAiProfile_view_registered` обязан:
+Обязательны:
 
-1. получить `userAiProfile-view` через runtime `ViewRepository`;
-2. подтвердить регистрацию `user-ai-profile-views.xml` в core `app.properties`;
-3. подтвердить регистрацию `user-ai-profile-views.xml` в web `web-app.properties`;
-4. подтвердить ссылку `view="userAiProfile-view"` в XML SettingsWindow.
+- `git diff --check`;
+- компиляция global/core/web;
+- `UserSettingsAiApiPreferenceTest` — 4/4;
+- `ScreenViewIntegrityTest` — 8/8;
+- Data View Integrity для `ExtSettingsWindow`;
+- `clean assemble`;
+- визуальная проверка checkbox во всех поддерживаемых темах.
+
+`UserSettingsAiApiPreferenceTest` проверяет метаданные поля, default `false`, binding XML и обе миграции. Тест `test5_userAiProfile_view_registered` продолжает проверять runtime-регистрацию `userAiProfile-view`.
 
 Merge и deploy выполняются отдельно и не входят в данный PR.
 
@@ -182,6 +220,7 @@ Merge и deploy выполняются отдельно и не входят в 
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-23 | Добавлен checkbox «Предпочитать использовать в запросах мои настройки API», поле `UserSettings.preferPersonalAiApiSettings`, миграции и `UserSettingsAiApiPreferenceTest`; алгоритм маршрутизации API намеренно не изменён |
 | 2026-07-23 | Исправлена повторная `ViewNotFoundException`: `user-ai-profile-views.xml` зарегистрирован в рабочих конфигурациях core/web; тест 5 переведён на `HunttechTestContainer` и проверяет runtime `ViewRepository` и оба `cuba.viewsConfig` |
 | 2026-07-23 | Дополнительный `user-ai-profile-views.xml` был зарегистрирован только через `app-component.xml`; решение признано недостаточным для standalone-запуска приложения |
 | 2026-07-23 | Введено обязательное правило синхронизации тем; SettingsWindow адаптирован для `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light` и `hunttech-modern-dark` |

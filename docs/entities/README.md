@@ -26,4 +26,5 @@
 | [Region.md](region/Region.md) | Region — регион / область / штат |
 | [SkillTree.md](skill-tree/SkillTree.md) | Дерево компетенций (`SkillTree`) |
 | [UserAiConfiguration.md](user-ai-configuration/UserAiConfiguration.md) | UserAiConfiguration — AI-конфигурация пользователя |
+| [UserSettings.md](user-settings/UserSettings.md) | UserSettings — индивидуальные настройки пользователя и предпочтение источника API |
 | [VacancyPromptTemplate.md](vacancy-prompt-template/VacancyPromptTemplate.md) | VacancyPromptTemplate — шаблон промпта вакансии |
