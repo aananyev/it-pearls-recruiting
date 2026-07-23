@@ -4,10 +4,12 @@
 @import "com.company.hunttech/hunttech-modern-light-ext";
 @import "com.company.hunttech/chat-style.css";
 @import "com.company.hunttech/job-candidate-editor.scss";
+@import "com.company.hunttech/user-ai-profile";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 .hunttech-modern-light {
   @include app_components;
   @include com_company_hunttech-hunttech-modern-light-ext;
   @include job-candidate-editor-theme;
+  @include user-ai-profile;
 }

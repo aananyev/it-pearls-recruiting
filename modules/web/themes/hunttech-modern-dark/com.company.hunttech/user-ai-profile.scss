@@ -1,20 +1,20 @@
-// Локальные стили профессионального ИИ-профиля. Селекторы ограничены корнем экрана,
-// чтобы одинаковая компоновка SettingsWindow не влияла на остальные формы темы.
+// Тёмная адаптация профессионального ИИ-профиля. Структура совпадает с остальными
+// темами, а полупрозрачные поверхности сохраняют контраст Hunttech Modern Dark.
 @mixin user-ai-profile {
   .user-ai-profile-editor {
     .user-ai-profile-sidebar {
       box-sizing: border-box;
       padding: 16px;
       border-radius: 8px;
-      background: rgba(0, 0, 0, 0.045);
-      border: 1px solid rgba(127, 127, 127, 0.22);
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .user-ai-profile-avatar {
       border-radius: 8px;
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.55);
-      border: 1px solid rgba(127, 127, 127, 0.18);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .user-ai-profile-identity {
@@ -28,42 +28,42 @@
     }
 
     .user-ai-profile-position {
-      opacity: 0.72;
+      opacity: 0.74;
     }
 
     .user-ai-profile-summary {
       box-sizing: border-box;
       padding: 10px;
       border-radius: 7px;
-      background: rgba(255, 255, 255, 0.5);
-      border: 1px solid rgba(127, 127, 127, 0.18);
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.11);
     }
 
     .user-ai-profile-status {
       box-sizing: border-box;
       padding: 8px 10px;
       border-radius: 6px;
-      background: rgba(47, 128, 237, 0.10);
-      border: 1px solid rgba(47, 128, 237, 0.22);
+      background: rgba(100, 168, 255, 0.12);
+      border: 1px solid rgba(100, 168, 255, 0.28);
       white-space: normal;
     }
 
     .user-ai-profile-summary-value {
       white-space: normal;
-      opacity: 0.78;
+      opacity: 0.80;
     }
 
     .user-ai-profile-navigation {
       box-sizing: border-box;
       padding-top: 4px;
-      border-top: 1px solid rgba(127, 127, 127, 0.18);
+      border-top: 1px solid rgba(255, 255, 255, 0.11);
     }
 
     .user-ai-profile-navigation-title {
       padding: 6px 10px;
       font-size: 12px;
       font-weight: 600;
-      opacity: 0.66;
+      opacity: 0.68;
       text-transform: uppercase;
     }
 
@@ -72,13 +72,13 @@
       padding: 7px 10px;
       border-left: 3px solid transparent;
       white-space: normal;
-      opacity: 0.78;
+      opacity: 0.80;
     }
 
     .user-ai-profile-nav-item-active {
-      color: #2f80ed;
-      background: rgba(47, 128, 237, 0.08);
-      border-left-color: #2f80ed;
+      color: #64a8ff;
+      background: rgba(100, 168, 255, 0.10);
+      border-left-color: #64a8ff;
       opacity: 1;
     }
 
@@ -86,13 +86,13 @@
       box-sizing: border-box;
       padding: 10px;
       border-radius: 7px;
-      background: rgba(230, 126, 34, 0.06);
-      border: 1px solid rgba(230, 126, 34, 0.28);
+      background: rgba(255, 166, 77, 0.08);
+      border: 1px solid rgba(255, 166, 77, 0.30);
     }
 
     .user-ai-profile-help {
       font-size: 12px;
-      opacity: 0.72;
+      opacity: 0.74;
       white-space: normal;
     }
 
@@ -105,7 +105,7 @@
     .user-ai-profile-toolbar {
       box-sizing: border-box;
       padding: 2px 0 12px;
-      border-bottom: 1px solid rgba(127, 127, 127, 0.20);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
     }
 
     .user-ai-profile-toolbar-actions {
@@ -115,21 +115,21 @@
     .user-ai-profile-section {
       margin-bottom: 10px;
       border-radius: 7px;
-      border: 1px solid rgba(127, 127, 127, 0.20);
+      border: 1px solid rgba(255, 255, 255, 0.12);
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.45);
+      background: rgba(255, 255, 255, 0.025);
     }
 
     .user-ai-profile-section .v-panel-caption {
       padding-top: 9px;
       padding-bottom: 9px;
       font-weight: 600;
-      background: rgba(127, 127, 127, 0.045);
+      background: rgba(255, 255, 255, 0.045);
     }
 
     .user-ai-profile-privacy {
-      border-color: rgba(230, 126, 34, 0.35);
-      background: rgba(230, 126, 34, 0.05);
+      border-color: rgba(255, 166, 77, 0.34);
+      background: rgba(255, 166, 77, 0.06);
     }
 
     .user-ai-profile-preview {
