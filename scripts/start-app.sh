@@ -198,6 +198,11 @@ kill_stale_project_tomcat
 log "Gradle stop (ошибки игнорируются)..."
 ./gradlew stop >/dev/null 2>&1 || true
 
+# Схема должна обновляться до deploy: иначе новая entity-модель может обратиться
+# к ещё отсутствующей колонке и сорвать открытие экранов после входа.
+log "Применяю накопленные миграции CUBA к локальной PostgreSQL..."
+./gradlew updateDb --no-daemon --stacktrace
+
 clean_deployment
 
 log "Чистая сборка и deploy без запуска тестов..."
