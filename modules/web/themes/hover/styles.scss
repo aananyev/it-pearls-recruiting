@@ -1,9 +1,15 @@
 @import "hover-defaults";
 @import "com.company.hunttech/hover-ext-defaults";
 @import "app-components";
+<<<<<<< HEAD
 @import "com.company.hunttech/hover-ext";
 /* Шрифт Inter для подтем hunttech-modern-light / hunttech-modern-dark */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+=======
+@import "com.company.itpearls/hover-ext";
+@import "com.company.itpearls/user-ai-profile";
+@import url('https://fonts.googleapis.com/css2?familyhalo=Antonio&family=Kanit&family=Teko:wght@500&display=swap');
+>>>>>>> origin/master
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap');
 
@@ -11,7 +17,12 @@
   // include auto-generated app components SCSS
   @include app_components;
 
+<<<<<<< HEAD
   @include com_company_hunttech-hover-ext;
+=======
+  @include com_company_itpearls-hover-ext;
+  @include user-ai-profile;
+>>>>>>> origin/master
 }
 
 .active-customer {

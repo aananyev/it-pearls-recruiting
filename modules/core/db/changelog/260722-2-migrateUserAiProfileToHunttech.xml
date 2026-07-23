@@ -5,8 +5,10 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <include file="260627-1-addAiEntities.xml" relativeToChangelogFile="true"/>
-    <include file="260722-1-addUserAiProfile.xml" relativeToChangelogFile="true"/>
-    <include file="260722-2-migrateUserAiProfileToHunttech.xml" relativeToChangelogFile="true"/>
-
+    <changeSet id="260722-2-migrateUserAiProfileToHunttech" author="hunttech">
+        <sqlFile path="../update/postgres/26/260722-2-migrateUserAiProfileToHunttech.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"
+                 stripComments="false"/>
+    </changeSet>
 </databaseChangeLog>

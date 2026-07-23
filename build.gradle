@@ -383,3 +383,356 @@ gradle.projectsEvaluated {
         webModule.test.jvmArgs "-javaagent:${jmockitJar.absolutePath}"
     }
 }
+# === From master ===
+buildscript {
+    ext.cubaVersion = '7.3-SNAPSHOT'
+    repositories {
+        maven {
+            url 'https://repo.cuba-platform.com/content/groups/work'
+
+            credentials {
+                username(rootProject.hasProperty('repoUser') ? rootProject['repoUser'] : 'cuba')
+                password(rootProject.hasProperty('repoPass') ? rootProject['repoPass'] : 'cuba123')
+            }
+        }
+
+
+    }
+    dependencies {
+        classpath "com.haulmont.gradle:cuba-plugin:$cubaVersion"
+    }
+}
+
+def modulePrefix = 'app'
+
+def globalModule = project(":${modulePrefix}-global")
+def coreModule = project(":${modulePrefix}-core")
+def webModule = project(":${modulePrefix}-web")
+def guiModule = project(":${modulePrefix}-gui")
+def webToolkitModule = project(":${modulePrefix}-web-toolkit")
+
+def servletApi = 'javax.servlet:javax.servlet-api:3.1.0'
+
+apply(plugin: 'cuba')
+
+configurations.all {
+    resolutionStrategy {
+        // telegrambots 6.8+ pulls slf4j-api 2.x; logback 1.2.x (used by CUBA) requires SLF4J 1.7
+        force 'org.slf4j:slf4j-api:1.7.36'
+    }
+}
+
+cuba {
+    artifact {
+        group = 'com.company.itpearls'
+        version = '0.1'
+        isSnapshot = true
+    }
+    tomcat {
+        dir = "$project.rootDir/deploy/tomcat"
+    }
+}
+
+dependencies {
+    appComponent("com.haulmont.cuba:cuba-global:$cubaVersion")
+    appComponent('com.haulmont.addon.globalevents:cubaglevt-global:0.6.1')
+    appComponent('com.haulmont.addon.emailtemplates:yet-global:1.4.2')
+    appComponent('de.diedavids.cuba.dataimport:dataimport-global:0.14.1')
+    appComponent('com.haulmont.addon.dashboard:dashboard-global:3.2.3')
+    appComponent('com.haulmont.addon.helium:helium-global:0.4.0')
+    appComponent("com.haulmont.fts:fts-global:$cubaVersion")
+    appComponent("com.haulmont.charts:charts-global:$cubaVersion")
+    appComponent("com.haulmont.reports:reports-global:$cubaVersion")
+    appComponent("com.haulmont.bpm:bpm-global:$cubaVersion")
+}
+
+def postgres = 'org.postgresql:postgresql:42.2.9'
+
+configure([globalModule, coreModule, webModule, guiModule, webToolkitModule]) {
+    apply(plugin: 'java')
+    apply(plugin: 'maven')
+    apply(plugin: 'cuba')
+
+    configurations.all {
+        resolutionStrategy {
+            // telegrambots 6.8+ pulls slf4j-api 2.x; logback 1.2.x (used by CUBA) requires SLF4J 1.7
+            force 'org.slf4j:slf4j-api:1.7.36'
+        }
+    }
+
+    dependencies {
+        testCompile('junit:junit:4.12')
+    }
+
+    task sourceJar(type: Jar) {
+        from file('src')
+        classifier = 'sources'
+    }
+
+    artifacts {
+        archives sourceJar
+    }
+}
+
+configure(globalModule) {
+    dependencies {
+        if (!JavaVersion.current().isJava8()) {
+            runtime('javax.xml.bind:jaxb-api:2.3.1')
+            runtime('org.glassfish.jaxb:jaxb-runtime:2.3.1')
+        }
+        annotationProcessor 'org.projectlombok:lombok:1.18.16'
+        compile 'org.apache.pdfbox:pdfbox:3.0.0-alpha3'
+        compile 'org.webjars.npm:domelementtype:2.2.0'
+        compile 'com.ibm.icu:icu4j:69.1'
+        compile 'org.apache.poi:poi-ooxml-lite:5.2.3'
+        compile 'net.htmlparser.jericho:jericho-html:3.4'
+        compile 'com.rubiconproject.oss:jchronic:0.2.8'
+        compile 'ru.yaal.project.hhapi:HhJavaApi:0.2.6'
+        compile 'jakarta.mail:jakarta.mail-api:2.1.2'
+        compile 'io.jsonwebtoken:jjwt-api:0.11.5'
+        compile 'javax.ws.rs:javax.ws.rs-api:2.1.1'
+        runtime 'io.jsonwebtoken:jjwt-impl:0.11.5'
+        runtime 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+//        compile 'com.ibm.icu:icu4j:4.8.1.1'
+        compile 'commons-lang:commons-lang:2.6'
+        compile 'org.projectlombok:lombok:1.18.16'
+        compile 'org.telegram:telegrambots:6.8.0'
+        compile 'org.telegram:telegrambotsextensions:6.8.0'
+        compile 'net.coobird:thumbnailator:0.4.20'
+    }
+
+    entitiesEnhancing {
+        main {
+            enabled = true
+        }
+    }
+
+    jar {
+        manifest {
+            attributes('App-Component-Id': cuba.artifact.group)
+            attributes('App-Component-Version': cuba.artifact.version + (cuba.artifact.isSnapshot ? '-SNAPSHOT' : ''))
+        }
+    }
+}
+
+configure(coreModule) {
+
+    configurations {
+        jdbc
+        dbscripts
+    }
+
+    dependencies {
+        compile(globalModule)
+        compileOnly(servletApi)
+        jdbc(postgres)
+        testRuntime(postgres)
+    }
+
+    task cleanConf(description: 'Cleans up conf directory', type: Delete) {
+        delete "$cuba.appHome/${modulePrefix}-core/conf"
+    }
+
+    task deploy(dependsOn: [assemble, cleanConf], type: CubaDeployment) {
+        appName = "${modulePrefix}-core"
+        appJars(modulePrefix + '-global', modulePrefix + '-core')
+    }
+
+    task createDb(dependsOn: assembleDbScripts, description: 'Creates local database', type: CubaDbCreation) {
+        host = '127.0.0.1:5432'
+        dbName = 'hunttech'
+        dbms = 'postgres'
+        dbUser = 'cuba'
+        dbPassword = 'cuba'
+    }
+
+    task updateDb(dependsOn: assembleDbScripts, description: 'Updates local database', type: CubaDbUpdate) {
+        host = '127.0.0.1:5432'
+        dbName = 'hunttech'
+        dbms = 'postgres'
+        dbUser = 'cuba'
+        dbPassword = 'cuba'
+    }
+}
+
+configure(guiModule) {
+    dependencies {
+        compile(globalModule)
+    }
+
+    task deployConf(type: Copy) {
+        from file('src')
+        include "com/company/itpearls/**"
+        include "com/company/hunttech/**"
+        include "com/hunttech/**"
+        into "$cuba.appHome/${modulePrefix}/conf"
+    }
+}
+
+configure(webModule) {
+    configurations {
+        webcontent
+    }
+
+    sourceSets {
+        main {
+            java {
+                exclude 'test/**'
+            }
+        }
+        test {
+            java {
+                srcDir 'src/test/java'
+            }
+        }
+    }
+
+    dependencies {
+        compileOnly(servletApi)
+        compile(guiModule)
+        testCompile 'org.mockito:mockito-core:3.12.4'
+    }
+
+    compileTestJava.dependsOn ':app-core:compileTestJava'
+
+    test {
+        workingDir = rootProject.projectDir
+    }
+
+    jar {
+        with copySpec {
+            from sourceSets.main.allJava
+            include "com/company/itpearls/web/toolkit/ui/client/**"
+        }
+    }
+
+    task webArchive(type: Zip) {
+        from file("$buildDir/web")
+        from file('web')
+        classifier = 'web'
+    }
+
+    artifacts {
+        archives webArchive
+    }
+
+    task deployConf(type: Copy) {
+        from file('src')
+        include "com/company/itpearls/**"
+        include "com/company/hunttech/**"
+        include "com/hunttech/**"
+        into "$cuba.appHome/${modulePrefix}/conf"
+    }
+
+    task clearMessagesCache(type: CubaClearMessagesCache) {
+        appName = "${modulePrefix}"
+    }
+    deployConf.dependsOn clearMessagesCache
+
+    task cleanConf(description: 'Cleans up conf directory', type: Delete) {
+        delete "$cuba.appHome/${modulePrefix}/conf"
+    }
+
+    task deploy(dependsOn: [assemble, cleanConf], type: CubaDeployment) {
+        appName = "${modulePrefix}"
+        appJars(modulePrefix + '-global', modulePrefix + '-gui', modulePrefix + '-web')
+        copy {
+            from "images"
+            into "$cuba.tomcat.dir/webapps/${modulePrefix}/VAADIN/images"
+            include "*.png"
+        }
+    }
+
+    task buildScssThemes(type: CubaWebScssThemeCreation)
+
+    task deployThemes(type: CubaDeployThemeTask, dependsOn: buildScssThemes)
+
+    assemble.dependsOn buildScssThemes
+
+    task themesJar(type: Jar) {
+        from file('themes')
+        classifier = 'themes'
+    }
+
+    artifacts {
+        archives themesJar
+    }
+}
+
+configure(webToolkitModule) {
+    dependencies {
+        compile(webModule)
+    }
+
+    jar {
+        from sourceSets.main.allJava
+    }
+
+    task buildWidgetSet(type: CubaWidgetSetBuilding) {
+        widgetSetClass = 'com.company.itpearls.web.toolkit.ui.AppWidgetSet'
+    }
+
+    task debugWidgetSet(type: CubaWidgetSetDebug) {
+        widgetSetClass = 'com.company.itpearls.web.toolkit.ui.AppWidgetSet'
+    }
+
+    task webArchive(dependsOn: buildWidgetSet, type: Jar) {
+        from file("$buildDir/web")
+        classifier = 'client'
+    }
+
+    artifacts {
+        archives webArchive
+    }
+
+    task deploy(dependsOn: webArchive, type: Copy) {
+        from webArchive
+        into "$cuba.tomcat.dir/webapps/${modulePrefix}/WEB-INF/lib"
+    }
+}
+
+task copyTomcatSetenv(type: Copy) {
+    description = 'Configure Tomcat to use Java 11'
+    from 'etc/tomcat-setenv.sh'
+    into "$cuba.tomcat.dir/bin"
+    rename 'tomcat-setenv.sh', 'setenv.sh'
+}
+
+start.dependsOn copyTomcatSetenv
+
+task undeploy(type: Delete, dependsOn: ":${modulePrefix}-web:cleanConf") {
+    delete("$cuba.tomcat.dir/shared")
+    delete("$cuba.tomcat.dir/webapps/${modulePrefix}-core")
+    delete("$cuba.tomcat.dir/webapps/${modulePrefix}")
+}
+
+task restart(dependsOn: ['stop', ":${modulePrefix}-core:deploy", ":${modulePrefix}-web:deploy", ":${modulePrefix}-web-toolkit:deploy"], description: 'Redeploys applications and restarts local Tomcat') {
+    doLast {
+        ant.waitfor(maxwait: 6, maxwaitunit: 'second', checkevery: 2, checkeveryunit: 'second') {
+            not {
+                socket(server: 'localhost', port: '8787')
+            }
+        }
+    }
+}
+restart.finalizedBy start
+restart.dependsOn copyTomcatSetenv
+
+task buildWar(type: CubaWarBuilding) {
+    includeJdbcDriver = true
+    appProperties = ['cuba.automaticDatabaseUpdate': true,
+                     'cuba.dataSourceProvider'     : 'jndi',
+                     'cuba.useLocalServiceInvocation': false,
+                     'cuba.connectionUrlList'      : 'http://localhost:8080/hrm-core']
+    logbackConfigurationFile = 'etc/war-logback.xml'
+    includeContextXml = true
+    singleWar = false
+    coreContextXmlPath = 'modules/core/web/META-INF/war-context.xml'
+}
+
+gradle.projectsEvaluated {
+    def jmockitJar = webModule.configurations.testRuntime.find { it.name.startsWith('jmockit') }
+    if (jmockitJar != null) {
+        webModule.test.jvmArgs "-javaagent:${jmockitJar.absolutePath}"
+    }
+}

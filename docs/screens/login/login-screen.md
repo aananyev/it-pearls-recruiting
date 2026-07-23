@@ -378,7 +378,8 @@ protected void initBottomPanel() {
 | `cuba-icon-login.jpg` | Присутствует, в коде экрана **не используется** |
 | `HuntTech-Logo.jpg` | Присутствует, в коде экрана **не используется** |
 | `backgroud.jpg` | Присутствует (опечатка в имени), в коде **не используется** |
-| `recruit1.jpg` … `recruit20.jpg` | Случайный фон в `initLoginImage()` |
+| `recruit1.jpg` … `recruit10.jpg` | Случайный фон в `initLoginImage()` — реклама HUNT TECH |
+| `recruit11.jpg` … `recruit20.jpg` | Случайный фон в `initLoginImage()` — реклама HRM HuntTech |
 
 ### Связанные ресурсы темы hover
 
@@ -505,6 +506,7 @@ cuba.localeSelectVisible = true
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-23 | Заменены 20 рекламных изображений login-экрана на новый брендированный набор v2: recruit1–10 реклама HUNT TECH, recruit11–20 реклама HRM HuntTech |
 | 2026-06-27 | Логотип: строгое центрирование в рамке — flex-цепочка на wrap/slot/v-image, `img` с `width: auto` + `object-position: center`, `padding: 8px` внутри рамки |
 | 2026-06-27 | Логотип: `border-radius: 10px` на `img` внутри `.c-login-logo`; `overflow: hidden` на обёртке — устранение наложения на рамку |
 | 2026-06-27 | Логотип: `border-radius` обёртки `c-login-logo-wrap` увеличен с `5px` до `15px` |
