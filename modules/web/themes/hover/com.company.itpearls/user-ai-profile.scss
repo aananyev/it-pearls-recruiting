@@ -2,23 +2,90 @@
   .user-ai-profile-editor {
     .user-ai-profile-sidebar {
       box-sizing: border-box;
-      padding: 18px;
+      padding: 16px;
       border-radius: 8px;
-      background: rgba(0, 0, 0, 0.06);
+      background: rgba(0, 0, 0, 0.045);
       border: 1px solid rgba(127, 127, 127, 0.22);
     }
 
     .user-ai-profile-avatar {
       border-radius: 8px;
       overflow: hidden;
+      background: rgba(255, 255, 255, 0.55);
+      border: 1px solid rgba(127, 127, 127, 0.18);
+    }
+
+    .user-ai-profile-identity {
+      padding: 2px 0 4px;
+      text-align: center;
+    }
+
+    .user-ai-profile-name,
+    .user-ai-profile-position {
+      white-space: normal;
+    }
+
+    .user-ai-profile-position {
+      opacity: 0.72;
+    }
+
+    .user-ai-profile-summary {
+      box-sizing: border-box;
+      padding: 10px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(127, 127, 127, 0.18);
     }
 
     .user-ai-profile-status {
+      box-sizing: border-box;
       padding: 8px 10px;
       border-radius: 6px;
       background: rgba(47, 128, 237, 0.10);
       border: 1px solid rgba(47, 128, 237, 0.22);
       white-space: normal;
+    }
+
+    .user-ai-profile-summary-value {
+      white-space: normal;
+      opacity: 0.78;
+    }
+
+    .user-ai-profile-navigation {
+      box-sizing: border-box;
+      padding-top: 4px;
+      border-top: 1px solid rgba(127, 127, 127, 0.18);
+    }
+
+    .user-ai-profile-navigation-title {
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.66;
+      text-transform: uppercase;
+    }
+
+    .user-ai-profile-nav-item {
+      box-sizing: border-box;
+      padding: 7px 10px;
+      border-left: 3px solid transparent;
+      white-space: normal;
+      opacity: 0.78;
+    }
+
+    .user-ai-profile-nav-item-active {
+      color: #2f80ed;
+      background: rgba(47, 128, 237, 0.08);
+      border-left-color: #2f80ed;
+      opacity: 1;
+    }
+
+    .user-ai-profile-sensitive-warning {
+      box-sizing: border-box;
+      padding: 10px;
+      border-radius: 7px;
+      background: rgba(230, 126, 34, 0.06);
+      border: 1px solid rgba(230, 126, 34, 0.28);
     }
 
     .user-ai-profile-help {
@@ -28,18 +95,34 @@
     }
 
     .user-ai-profile-content {
-      padding-left: 14px;
+      box-sizing: border-box;
+      padding-left: 12px;
+      padding-right: 6px;
     }
 
     .user-ai-profile-toolbar {
-      padding: 0 0 8px 0;
+      box-sizing: border-box;
+      padding: 2px 0 12px;
       border-bottom: 1px solid rgba(127, 127, 127, 0.20);
+    }
+
+    .user-ai-profile-toolbar-actions {
+      white-space: nowrap;
     }
 
     .user-ai-profile-section {
       margin-bottom: 10px;
       border-radius: 7px;
       border: 1px solid rgba(127, 127, 127, 0.20);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.45);
+    }
+
+    .user-ai-profile-section .v-panel-caption {
+      padding-top: 9px;
+      padding-bottom: 9px;
+      font-weight: 600;
+      background: rgba(127, 127, 127, 0.045);
     }
 
     .user-ai-profile-privacy {
