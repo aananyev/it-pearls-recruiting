@@ -1,5 +1,6 @@
 package com.company.hunttech.core;
 
+import com.company.hunttech.entity.UserAiProfile;
 import com.company.itpearls.ItpearlsTestContainer;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.Metadata;
@@ -36,11 +37,13 @@ public class ScreenViewIntegrityTest {
     }
 
     @Test
-    public void test5_hunttech_views_config_loaded() {
-        // Verify the app-component.xml registers hunttech views file
-        ViewRepository vr = AppBeans.get(ViewRepository.class);
-        // View repository is accessible
-        assertNotNull(vr);
+    public void test5_userAiProfile_view_registered() {
+        /*
+         * SettingsWindow создаёт legacy datasource до вызова контроллера. Поэтому тест
+         * проверяет именно наличие именованного view, а не только доступность репозитория.
+         */
+        ViewRepository viewRepository = AppBeans.get(ViewRepository.class);
+        assertNotNull(viewRepository.getView(UserAiProfile.class, "userAiProfile-view"));
     }
 
     @Test
