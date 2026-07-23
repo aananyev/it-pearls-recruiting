@@ -62,5 +62,6 @@
         <class>com.company.hunttech.entity.ApplicationSetup</class>
         <class>com.company.hunttech.entity.UserAiConfiguration</class>
         <class>com.company.hunttech.entity.VacancyPromptTemplate</class>
+        <class>com.company.hunttech.entity.UserAiProfile</class>
     </persistence-unit>
 </persistence>
