@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="18" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+    <linearGradient id="sidebar" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e8f0ff"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <linearGradient id="preference" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#edf4ff"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1440" height="900" fill="#eef2f6"/>
+  <rect x="54" y="34" width="1332" height="832" rx="18" fill="#ffffff" filter="url(#shadow)"/>
+
+  <rect x="54" y="34" width="1332" height="64" rx="18" fill="#ffffff"/>
+  <text x="82" y="74" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#111827">Параметры</text>
+  <circle cx="1340" cy="66" r="14" fill="#f1f5f9"/>
+  <path d="M1334 60l12 12m0-12l-12 12" stroke="#64748b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="54" y1="98" x2="1386" y2="98" stroke="#e2e8f0"/>
+
+  <g font-family="Arial, sans-serif" font-size="14">
+    <text x="84" y="134" fill="#64748b">Обо мне</text>
+    <text x="172" y="134" fill="#64748b">Интерфейс</text>
+    <text x="272" y="134" fill="#64748b">Почта</text>
+    <text x="336" y="134" font-weight="700" fill="#2563eb">AI</text>
+    <rect x="326" y="148" width="36" height="3" rx="1.5" fill="#2563eb"/>
+  </g>
+
+  <rect x="78" y="170" width="270" height="614" rx="14" fill="url(#sidebar)" stroke="#c7d8f5" filter="url(#cardShadow)"/>
+  <rect x="100" y="194" width="54" height="54" rx="14" fill="#2563eb"/>
+  <text x="127" y="229" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#ffffff">AI</text>
+  <text x="100" y="282" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#111827">Персональный ИИ</text>
+  <text x="100" y="310" font-family="Arial, sans-serif" font-size="13" fill="#64748b">Личные подключения к нейросетям</text>
+  <text x="100" y="329" font-family="Arial, sans-serif" font-size="13" fill="#64748b">и предпочтение источника API.</text>
+  <line x1="100" y1="358" x2="326" y2="358" stroke="#cbd8ec"/>
+  <text x="110" y="387" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#64748b" letter-spacing="1">НАСТРОЙКИ AI</text>
+  <rect x="96" y="405" width="230" height="42" rx="8" fill="#dbeafe"/>
+  <rect x="96" y="405" width="4" height="42" rx="2" fill="#2563eb"/>
+  <text x="112" y="431" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#2563eb">Источник API</text>
+  <text x="112" y="478" font-family="Arial, sans-serif" font-size="14" fill="#475569">Подключения</text>
+  <rect x="96" y="666" width="230" height="94" rx="10" fill="#fff7ed" stroke="#fed7aa"/>
+  <circle cx="114" cy="689" r="9" fill="#f59e0b"/>
+  <text x="114" y="693" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="700" fill="#ffffff">!</text>
+  <text x="132" y="688" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#92400e">Безопасность</text>
+  <text x="112" y="713" font-family="Arial, sans-serif" font-size="11.5" fill="#92400e">API-ключи и пароли относятся</text>
+  <text x="112" y="730" font-family="Arial, sans-serif" font-size="11.5" fill="#92400e">к чувствительным данным.</text>
+  <text x="112" y="747" font-family="Arial, sans-serif" font-size="11.5" fill="#92400e">Храните только актуальные ключи.</text>
+
+  <text x="390" y="206" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#111827">AI-подключения</text>
+  <text x="390" y="232" font-family="Arial, sans-serif" font-size="13" fill="#64748b">Управляйте предпочтением источника API и персональными конфигурациями провайдеров.</text>
+
+  <g font-family="Arial, sans-serif" font-size="13" font-weight="600">
+    <rect x="870" y="190" width="92" height="38" rx="8" fill="#2563eb"/>
+    <text x="916" y="214" text-anchor="middle" fill="#ffffff">+ Создать</text>
+    <rect x="972" y="190" width="96" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="1020" y="214" text-anchor="middle" fill="#334155">Изменить</text>
+    <rect x="1078" y="190" width="88" height="38" rx="8" fill="#ffffff" stroke="#fecaca"/>
+    <text x="1122" y="214" text-anchor="middle" fill="#b91c1c">Удалить</text>
+    <rect x="1176" y="190" width="174" height="38" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+    <text x="1263" y="214" text-anchor="middle" fill="#334155">Тест подключения</text>
+  </g>
+  <line x1="390" y1="252" x2="1350" y2="252" stroke="#e2e8f0"/>
+
+  <rect x="390" y="278" width="960" height="154" rx="14" fill="url(#preference)" stroke="#bfd3f5" filter="url(#cardShadow)"/>
+  <text x="416" y="314" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#111827">Источник API</text>
+  <rect x="416" y="338" width="20" height="20" rx="4" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+  <text x="450" y="353" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="#1e293b">Предпочитать использовать в запросах мои настройки API</text>
+  <text x="416" y="385" font-family="Arial, sans-serif" font-size="12.5" fill="#64748b">Флаг сохраняет ваше предпочтение. Алгоритм выбора между личными и административными</text>
+  <text x="416" y="405" font-family="Arial, sans-serif" font-size="12.5" fill="#64748b">настройками API будет реализован отдельно.</text>
+
+  <rect x="390" y="454" width="960" height="330" rx="14" fill="#ffffff" stroke="#d9e0ea" filter="url(#cardShadow)"/>
+  <text x="416" y="491" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#111827">Мои подключения</text>
+  <text x="416" y="514" font-family="Arial, sans-serif" font-size="12.5" fill="#64748b">Провайдеры, модели и состояние персональных API-конфигураций.</text>
+  <rect x="416" y="540" width="908" height="44" rx="8" fill="#f2f6fc"/>
+  <text x="438" y="567" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#475569">ПРОВАЙДЕР</text>
+  <text x="695" y="567" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#475569">МОДЕЛЬ ПО УМОЛЧАНИЮ</text>
+  <text x="1160" y="567" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#475569">СТАТУС</text>
+
+  <g font-family="Arial, sans-serif" font-size="14" fill="#1e293b">
+    <line x1="416" y1="628" x2="1324" y2="628" stroke="#e2e8f0"/>
+    <line x1="416" y1="684" x2="1324" y2="684" stroke="#e2e8f0"/>
+    <line x1="416" y1="740" x2="1324" y2="740" stroke="#e2e8f0"/>
+    <text x="438" y="614" font-weight="600">OpenAI</text>
+    <text x="695" y="614">gpt-4.1</text>
+    <rect x="1160" y="593" width="88" height="28" rx="14" fill="#dcfce7"/>
+    <text x="1204" y="612" text-anchor="middle" font-size="12" font-weight="700" fill="#15803d">Активно</text>
+
+    <text x="438" y="670" font-weight="600">DeepSeek</text>
+    <text x="695" y="670">deepseek-v4-flash</text>
+    <rect x="1160" y="649" width="88" height="28" rx="14" fill="#dcfce7"/>
+    <text x="1204" y="668" text-anchor="middle" font-size="12" font-weight="700" fill="#15803d">Активно</text>
+
+    <text x="438" y="726" font-weight="600">YandexGPT</text>
+    <text x="695" y="726">yandexgpt-pro</text>
+    <rect x="1160" y="705" width="96" height="28" rx="14" fill="#f1f5f9"/>
+    <text x="1208" y="724" text-anchor="middle" font-size="12" font-weight="700" fill="#64748b">Выключено</text>
+  </g>
+
+  <line x1="54" y1="804" x2="1386" y2="804" stroke="#e2e8f0"/>
+  <rect x="1158" y="820" width="96" height="36" rx="8" fill="#2563eb"/>
+  <text x="1206" y="843" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#ffffff">Сохранить</text>
+  <rect x="1264" y="820" width="86" height="36" rx="8" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="1307" y="843" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="600" fill="#334155">Отмена</text>
+</svg>

@@ -1,5 +1,5 @@
-// Локальные стили профессионального ИИ-профиля. Селекторы ограничены корнем экрана,
-// чтобы одинаковая компоновка SettingsWindow не влияла на остальные формы темы.
+// Локальные стили профессионального ИИ-профиля и вкладки AI.
+// Селекторы ограничены корнями SettingsWindow и не влияют на остальные экраны.
 @mixin user-ai-profile {
   .user-ai-profile-editor {
     .user-ai-profile-sidebar {
@@ -135,6 +135,141 @@
     .user-ai-profile-preview {
       font-family: monospace;
       line-height: 1.35;
+    }
+  }
+
+  .ai-settings-editor {
+    .ai-settings-sidebar {
+      box-sizing: border-box;
+      padding: 20px 18px;
+      border-radius: 14px;
+      background: linear-gradient(160deg, rgba(37, 99, 235, 0.12), rgba(255, 255, 255, 0.72));
+      border: 1px solid rgba(37, 99, 235, 0.18);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+
+    .ai-settings-mark {
+      box-sizing: border-box;
+      display: inline-block;
+      width: 52px;
+      padding: 13px 0;
+      border-radius: 14px;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .ai-settings-sidebar-title,
+    .ai-settings-card-title {
+      white-space: normal;
+    }
+
+    .ai-settings-sidebar-title {
+      margin-top: 6px;
+    }
+
+    .ai-settings-help {
+      font-size: 12px;
+      line-height: 1.45;
+      opacity: 0.72;
+      white-space: normal;
+    }
+
+    .ai-settings-navigation {
+      box-sizing: border-box;
+      padding-top: 8px;
+      border-top: 1px solid rgba(37, 99, 235, 0.16);
+    }
+
+    .ai-settings-navigation-title {
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.62;
+      text-transform: uppercase;
+    }
+
+    .ai-settings-nav-item {
+      box-sizing: border-box;
+      padding: 9px 10px;
+      border-left: 3px solid transparent;
+      border-radius: 0 7px 7px 0;
+      white-space: normal;
+      opacity: 0.78;
+    }
+
+    .ai-settings-nav-item-active {
+      color: #2563eb;
+      background: rgba(37, 99, 235, 0.10);
+      border-left-color: #2563eb;
+      opacity: 1;
+    }
+
+    .ai-settings-security {
+      box-sizing: border-box;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.28);
+    }
+
+    .ai-settings-content {
+      box-sizing: border-box;
+      padding-left: 12px;
+      padding-right: 6px;
+    }
+
+    .ai-settings-toolbar {
+      box-sizing: border-box;
+      padding: 4px 0 14px;
+      border-bottom: 1px solid rgba(127, 127, 127, 0.20);
+    }
+
+    .ai-settings-toolbar-actions {
+      white-space: nowrap;
+    }
+
+    .ai-settings-card {
+      box-sizing: border-box;
+      padding: 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(127, 127, 127, 0.18);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .ai-settings-preference-card {
+      border-color: rgba(37, 99, 235, 0.24);
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.07), rgba(255, 255, 255, 0.88));
+    }
+
+    .ai-settings-preference-checkbox {
+      padding: 4px 0;
+    }
+
+    .ai-settings-connections-card {
+      min-height: 280px;
+    }
+
+    .ai-settings-table {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(127, 127, 127, 0.18);
+    }
+
+    .ai-settings-table .v-table-header-wrap {
+      background: rgba(37, 99, 235, 0.055);
+      border-bottom-color: rgba(127, 127, 127, 0.18);
+    }
+
+    .ai-settings-table .v-table-header-cell {
+      font-weight: 600;
+    }
+
+    .ai-settings-table .v-table-row-odd {
+      background: rgba(127, 127, 127, 0.025);
     }
   }
 }

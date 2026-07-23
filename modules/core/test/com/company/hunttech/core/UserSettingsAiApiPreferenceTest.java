@@ -13,6 +13,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -46,6 +48,50 @@ public class UserSettingsAiApiPreferenceTest {
         assertTrue(screenXml.contains("id=\"preferPersonalAiApiSettingsField\""));
         assertTrue(screenXml.contains("datasource=\"userSettingsDs\""));
         assertTrue(screenXml.contains("property=\"preferPersonalAiApiSettings\""));
+    }
+
+    @Test
+    public void settingsWindowAiTabUsesEditDesignWithoutChangingBehaviorContracts() throws IOException {
+        /*
+         * Дизайн вкладки может меняться только через контейнеры и локальные стили.
+         * Проверка закрепляет существующие действия и datasource, чтобы визуальный
+         * рефакторинг не изменил бизнес-поведение персональных AI-подключений.
+         */
+        String screenXml = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml");
+
+        assertTrue(screenXml.contains("id=\"aiSettingsMainBox\""));
+        assertTrue(screenXml.contains("stylename=\"ai-settings-editor\""));
+        assertTrue(screenXml.contains("id=\"aiSettingsSidebar\""));
+        assertTrue(screenXml.contains("width=\"270px\""));
+        assertTrue(screenXml.contains("id=\"aiConfigsButtonsPanel\""));
+        assertTrue(screenXml.contains("invoke=\"onAiConfigsCreateBtnClick\""));
+        assertTrue(screenXml.contains("invoke=\"onAiConfigsEditBtnClick\""));
+        assertTrue(screenXml.contains("invoke=\"onAiConfigsRemoveBtnClick\""));
+        assertTrue(screenXml.contains("invoke=\"onAiConfigsTestBtnClick\""));
+        assertTrue(screenXml.contains("id=\"aiConfigsTable\""));
+        assertTrue(screenXml.contains("<rows datasource=\"userAiConfigsDs\"/>"));
+    }
+
+    @Test
+    public void allSupportedThemesContainLocalizedAiSettingsStyles() throws IOException {
+        List<String> themes = Arrays.asList(
+                "halo",
+                "havana",
+                "helium",
+                "hover",
+                "hunttech-modern",
+                "hunttech-modern-light",
+                "hunttech-modern-dark");
+
+        for (String theme : themes) {
+            String scss = readProjectFile("modules/web/themes/" + theme
+                    + "/com.company.hunttech/user-ai-profile.scss");
+            assertTrue("В теме " + theme + " отсутствует локальный AI-дизайн",
+                    scss.contains(".ai-settings-editor"));
+            assertTrue("В теме " + theme + " отсутствует карточка подключений",
+                    scss.contains(".ai-settings-connections-card"));
+        }
     }
 
     @Test

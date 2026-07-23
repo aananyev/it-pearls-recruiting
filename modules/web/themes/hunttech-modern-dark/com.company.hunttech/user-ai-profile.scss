@@ -1,5 +1,5 @@
-// Тёмная адаптация профессионального ИИ-профиля. Структура совпадает с остальными
-// темами, а полупрозрачные поверхности сохраняют контраст Hunttech Modern Dark.
+// Тёмная адаптация профессионального ИИ-профиля и вкладки AI.
+// Структура совпадает с остальными темами, а полупрозрачные поверхности сохраняют контраст Hunttech Modern Dark.
 @mixin user-ai-profile {
   .user-ai-profile-editor {
     .user-ai-profile-sidebar {
@@ -135,6 +135,141 @@
     .user-ai-profile-preview {
       font-family: monospace;
       line-height: 1.35;
+    }
+  }
+
+  .ai-settings-editor {
+    .ai-settings-sidebar {
+      box-sizing: border-box;
+      padding: 20px 18px;
+      border-radius: 14px;
+      background: linear-gradient(160deg, rgba(100, 168, 255, 0.14), rgba(255, 255, 255, 0.035));
+      border: 1px solid rgba(100, 168, 255, 0.22);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+    }
+
+    .ai-settings-mark {
+      box-sizing: border-box;
+      display: inline-block;
+      width: 52px;
+      padding: 13px 0;
+      border-radius: 14px;
+      background: #3b82f6;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .ai-settings-sidebar-title,
+    .ai-settings-card-title {
+      white-space: normal;
+    }
+
+    .ai-settings-sidebar-title {
+      margin-top: 6px;
+    }
+
+    .ai-settings-help {
+      font-size: 12px;
+      line-height: 1.45;
+      opacity: 0.76;
+      white-space: normal;
+    }
+
+    .ai-settings-navigation {
+      box-sizing: border-box;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .ai-settings-navigation-title {
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.64;
+      text-transform: uppercase;
+    }
+
+    .ai-settings-nav-item {
+      box-sizing: border-box;
+      padding: 9px 10px;
+      border-left: 3px solid transparent;
+      border-radius: 0 7px 7px 0;
+      white-space: normal;
+      opacity: 0.82;
+    }
+
+    .ai-settings-nav-item-active {
+      color: #64a8ff;
+      background: rgba(100, 168, 255, 0.12);
+      border-left-color: #64a8ff;
+      opacity: 1;
+    }
+
+    .ai-settings-security {
+      box-sizing: border-box;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(255, 166, 77, 0.08);
+      border: 1px solid rgba(255, 166, 77, 0.30);
+    }
+
+    .ai-settings-content {
+      box-sizing: border-box;
+      padding-left: 12px;
+      padding-right: 6px;
+    }
+
+    .ai-settings-toolbar {
+      box-sizing: border-box;
+      padding: 4px 0 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .ai-settings-toolbar-actions {
+      white-space: nowrap;
+    }
+
+    .ai-settings-card {
+      box-sizing: border-box;
+      padding: 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.20);
+    }
+
+    .ai-settings-preference-card {
+      border-color: rgba(100, 168, 255, 0.26);
+      background: linear-gradient(135deg, rgba(100, 168, 255, 0.10), rgba(255, 255, 255, 0.028));
+    }
+
+    .ai-settings-preference-checkbox {
+      padding: 4px 0;
+    }
+
+    .ai-settings-connections-card {
+      min-height: 280px;
+    }
+
+    .ai-settings-table {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .ai-settings-table .v-table-header-wrap {
+      background: rgba(100, 168, 255, 0.075);
+      border-bottom-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .ai-settings-table .v-table-header-cell {
+      font-weight: 600;
+    }
+
+    .ai-settings-table .v-table-row-odd {
+      background: rgba(255, 255, 255, 0.022);
     }
   }
 }
