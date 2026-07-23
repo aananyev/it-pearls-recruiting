@@ -2,5 +2,6 @@
 <metadata xmlns="http://schemas.haulmont.com/cuba/metadata.xsd">
 
     <metadata-model root-package="com.company.itpearls" namespace="itpearls"/>
+    <metadata-model root-package="com.company.hunttech" namespace="hunttech"/>
 
 </metadata>
