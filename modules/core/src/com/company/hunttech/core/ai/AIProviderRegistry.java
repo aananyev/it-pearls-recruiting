@@ -15,6 +15,11 @@ public class AIProviderRegistry {
         providers = new HashMap<>();
         if (providerList != null) {
             for (AIProvider provider : providerList) {
+                /*
+                 * Spring передаёт все компоненты AIProvider. Регистрация по
+                 * стабильному коду позволяет добавлять новые сервисы без
+                 * изменения HrmAiServiceBean и его бизнес-логики.
+                 */
                 providers.put(provider.getProviderCode(), provider);
             }
         }

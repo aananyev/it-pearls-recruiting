@@ -20,6 +20,16 @@
                     class="com.company.hunttech.entity.ExtUser"
                     view="extUser-view"
                     allowCommit="true"/>
+        <!-- Персональные AI-настройки загружаются только через текущий extUserDs.
+             ExtSettingsWindow заполняет extUserDs из UserSessionSource, поэтому
+             запрос разделяет API-ключи разных пользователей. -->
+        <collectionDatasource id="userAiConfigsDs"
+                              class="com.company.hunttech.entity.UserAiConfiguration"
+                              view="userAiConfiguration-view">
+            <query>
+                <![CDATA[select e from hunttech_UserAiConfiguration e where e.user = :ds$extUserDs]]>
+            </query>
+        </collectionDatasource>
     </dsContext>
     <layout expand="settingsTabSheet">
         <tabSheet id="settingsTabSheet"
@@ -180,6 +190,45 @@
                             </row>
                         </rows>
                     </grid>
+                </vbox>
+            </tab>
+            <tab id="aiAccessTab" caption="msg://msgAiSettings">
+                <vbox spacing="true" margin="true" width="100%" height="100%" expand="aiConfigsTable">
+                    <label value="msg://msgAiSettingsHint"
+                           stylename="light"/>
+                    <buttonsPanel id="aiConfigsButtonsPanel">
+                        <button id="aiConfigsCreateBtn"
+                                caption="msg://actions.Create"
+                                icon="CREATE_ACTION"
+                                invoke="onAiConfigsCreateBtnClick"/>
+                        <button id="aiConfigsEditBtn"
+                                caption="msg://actions.Edit"
+                                icon="EDIT"
+                                enable="false"
+                                invoke="onAiConfigsEditBtnClick"/>
+                        <button id="aiConfigsRemoveBtn"
+                                caption="msg://actions.Remove"
+                                icon="REMOVE"
+                                enable="false"
+                                invoke="onAiConfigsRemoveBtnClick"/>
+                        <!-- Включается из ExtSettingsWindow только при выбранной строке таблицы. -->
+                        <button id="aiConfigsTestBtn"
+                                caption="msg://msgAiTestConnection"
+                                icon="KEY"
+                                enable="false"
+                                invoke="onAiConfigsTestBtnClick"/>
+                    </buttonsPanel>
+                    <table id="aiConfigsTable"
+                           width="100%"
+                           height="100%"
+                           editable="false">
+                        <columns>
+                            <column id="providerCode"/>
+                            <column id="defaultModelName"/>
+                            <column id="isActive"/>
+                        </columns>
+                        <rows datasource="userAiConfigsDs"/>
+                    </table>
                 </vbox>
             </tab>
         </tabSheet>

@@ -3,16 +3,16 @@
 > **HRM HuntTech** · CUBA Platform 7.3  
 > Паспорт подсистемы интеграции с внешними LLM-провайдерами для стандартизации и генерации артефактов вакансий.
 
-**Связанная документация:** [docs/entities/UserAiConfiguration.md](../../entities/user-ai-configuration/UserAiConfiguration.md) · [docs/entities/VacancyPromptTemplate.md](../../entities/vacancy-prompt-template/VacancyPromptTemplate.md) · UI Spec: [ExtUserEdit](../../screens/ext-user/hunttech_ExtUserEdit_Spec.md), [UserAiConfiguration](../../screens/user-ai-configuration/hunttech_UserAiConfiguration.browse_Spec.md), [VacancyPromptTemplate](../../screens/vacancy-prompt-template/hunttech_VacancyPromptTemplate.browse_Spec.md)
+**Связанная документация:** [User AI connection guide](USER_AI_CONNECTION_GUIDE.md) · [User AI settings implementation](USER_AI_SETTINGS_IMPLEMENTATION.md) · [docs/entities/UserAiConfiguration.md](../../entities/user-ai-configuration/UserAiConfiguration.md) · [docs/entities/VacancyPromptTemplate.md](../../entities/vacancy-prompt-template/VacancyPromptTemplate.md) · UI Spec: [ExtUserEdit](../../screens/ext-user/hunttech_ExtUserEdit_Spec.md), [UserAiConfiguration](../../screens/user-ai-configuration/hunttech_UserAiConfiguration.browse_Spec.md), [VacancyPromptTemplate](../../screens/vacancy-prompt-template/hunttech_VacancyPromptTemplate.browse_Spec.md)
 
-**Статус интеграции (факт из кода, 2026-06-27):**
+**Статус интеграции (факт из кода, 2026-07-21):**
 
 | Слой | Реализовано | Не реализовано |
 |------|-------------|----------------|
-| Core (`HrmAiService`, провайдеры) | Да | Провайдеры кроме `openai` |
-| Админ-экраны, вкладка AI в профиле пользователя | Да | — |
+| Core (`HrmAiService`, провайдеры) | Да, включая тест подключения и 10 провайдеров | — |
+| Админ-экраны, вкладка AI в профиле пользователя | Да; личные настройки открыты таблицей на вкладке `AI` | — |
 | Поля AI на `OpenPosition` (entity + view) | Да (БД + Java) | Привязка в `OpenPositionEdit` UI |
-| Вызов `HrmAiService` из web-слоя | **Нет** | `OpenPositionEdit`, `BackgroundWorker` |
+| Вызов `HrmAiService` из web-слоя | Тест подключения из `SettingWindow` | Генерация из `OpenPositionEdit`, `BackgroundWorker` |
 
 ---
 
@@ -32,11 +32,12 @@
 
 | Компонент | Путь | Роль |
 |-----------|------|------|
-| `HrmAiService` | `modules/global/.../service/HrmAiService.java` | Middleware-контракт (2 метода) |
-| `HrmAiServiceBean` | `modules/core/.../service/HrmAiServiceBean.java` | Оркестратор: шаблоны, сессия, провайдер |
+| `HrmAiService` | `modules/global/.../service/HrmAiService.java` | Middleware-контракт генерации и тестирования AI-подключения |
+| `HrmAiServiceBean` | `modules/core/.../service/HrmAiServiceBean.java` | Оркестратор: шаблоны, сессия, провайдер, тест API |
 | `AIProvider` | `modules/core/.../core/ai/AIProvider.java` | Strategy-интерфейс |
 | `AIProviderRegistry` | `modules/core/.../core/ai/AIProviderRegistry.java` | Реестр по `providerCode` |
-| `OpenAiProvider` | `modules/core/.../core/ai/OpenAiProvider.java` | Единственная реализация (`openai`) |
+| `AbstractOpenAiCompatibleProvider` | `modules/core/.../core/ai/AbstractOpenAiCompatibleProvider.java` | Общий HTTP-транспорт для совместимых Chat Completions API |
+| 10 классов `*Provider` | `modules/core/.../core/ai/` | YandexGPT, GigaChat, OpenAI, Claude, Gemini, Grok, DeepSeek, Qwen, Kimi и GLM |
 | `UserAiConfiguration` | `modules/global/.../entity/UserAiConfiguration.java` | Персональные ключи пользователя |
 | `VacancyPromptTemplate` | `modules/global/.../entity/VacancyPromptTemplate.java` | Промпт-шаблоны (FreeMarker) |
 | `OpenPosition` (AI-поля) | `modules/global/.../entity/OpenPosition.java` | Хранилище AI-артефактов вакансии |
@@ -67,7 +68,7 @@ sequenceDiagram
     Svc-->>UI: standardized text
 ```
 
-**Текущее состояние:** стрелка `UI → Svc` **отсутствует** — `HrmAiService` не инжектируется ни в один web-контроллер. Сервис готов к вызову из middleware или будущего UI.
+**Текущее состояние:** `SettingWindow` вызывает `HrmAiService.testConnection`. Генерация артефактов вакансии из `OpenPositionEdit` пока не подключена.
 
 ### 1.4 Диаграмма слоёв (текст)
 
@@ -89,7 +90,7 @@ sequenceDiagram
 └──────────────────────────┬──────────────────────────────────┘
                            │ HTTPS
 ┌──────────────────────────▼──────────────────────────────────┐
-│  External: OpenAI Chat Completions API                      │
+│  External: 10 поддерживаемых AI API                         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -241,7 +242,11 @@ ${rawDescription}
 
 Для `generateVacancyArtifact` доступна переменная `${description}`.
 
-### 3.4 `OpenAiProvider`
+### 3.4 Реализации провайдеров
+
+Шесть сервисов используют общий OpenAI-совместимый транспорт: OpenAI, Grok, DeepSeek, Qwen, Kimi и GLM. Для несовместимых протоколов реализованы отдельные преобразования запросов и ответов: Anthropic Messages, Gemini GenerateContent, Yandex Completion и GigaChat OAuth + Chat Completions.
+
+#### Пример: `OpenAiProvider`
 
 | Параметр | Значение |
 |----------|----------|
@@ -326,9 +331,16 @@ public class YandexGptProvider implements AIProvider {
 providers.put("OpenAI", "openai");
 providers.put("YandexGPT", "yandex");
 providers.put("GigaChat", "gigachat");
+providers.put("Anthropic Claude", "anthropic");
+providers.put("Google Gemini", "gemini");
+providers.put("xAI Grok", "grok");
+providers.put("DeepSeek", "deepseek");
+providers.put("Alibaba Qwen", "qwen");
+providers.put("Moonshot Kimi", "kimi");
+providers.put("Z.AI GLM", "glm");
 ```
 
-Коды `yandex` и `gigachat` **уже в UI**, но **без Java-реализаций** вызов сервиса завершится `IllegalArgumentException: Unknown AI provider code`.
+Каждый код из UI имеет одноимённую регистрацию в `AIProviderRegistry`. Полная таблица моделей и форматов ключей приведена в [пользовательской инструкции](USER_AI_CONNECTION_GUIDE.md).
 
 ### Шаг 4. Шаблоны и конфигурация
 

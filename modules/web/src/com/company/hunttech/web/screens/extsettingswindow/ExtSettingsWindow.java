@@ -3,7 +3,10 @@ package com.company.hunttech.web.screens.extsettingswindow;
 import com.company.hunttech.app.ImageProcessingService;
 import com.company.hunttech.config.HunttechImageConfig;
 import com.company.hunttech.entity.ExtUser;
+import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.entity.UserSettings;
+import com.company.hunttech.service.HrmAiService;
+import com.company.hunttech.web.screens.useraiconfiguration.UserAiConfigurationEdit;
 import com.company.hunttech.web.util.AvatarImageUploadHelper;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.app.FileStorageService;
@@ -13,8 +16,11 @@ import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.UserSessionSource;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.config.MenuItem;
+import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.web.app.ui.core.settings.SettingsWindow;
 import org.slf4j.Logger;
@@ -25,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 public class ExtSettingsWindow extends SettingsWindow {
 
@@ -81,6 +88,22 @@ public class ExtSettingsWindow extends SettingsWindow {
     private TextField<Integer> imapPort;
     @Inject
     private TextField<Integer> pop3Port;
+    @Inject
+    private CollectionDatasource<UserAiConfiguration, UUID> userAiConfigsDs;
+    @Inject
+    private Table<UserAiConfiguration> aiConfigsTable;
+    @Inject
+    private Button aiConfigsEditBtn;
+    @Inject
+    private Button aiConfigsRemoveBtn;
+    @Inject
+    private Button aiConfigsTestBtn;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private HrmAiService hrmAiService;
 
     @Override
     public void init(Map<String, Object> params) {
@@ -88,6 +111,8 @@ public class ExtSettingsWindow extends SettingsWindow {
         loadExtUser();
         getUserSettingsEntity(currentUser);
         setEmailSettings();
+        refreshAiConfigs();
+        initAiTableActions();
         refreshProfilePhoto();
 
         super.init(params);
@@ -96,12 +121,114 @@ public class ExtSettingsWindow extends SettingsWindow {
         userAvatarUpload.addBeforeValueClearListener(event -> onUserAvatarCleared());
     }
 
+    private void initAiTableActions() {
+        /*
+         * AI-настройки редактируются коллекцией, потому что у одного пользователя
+         * может быть несколько подключений к разным провайдерам. Действия, которым
+         * нужна конкретная конфигурация, остаются выключенными до выбора строки,
+         * чтобы не запускать редактирование, удаление или тест с пустым значением.
+         */
+        refreshAiActionState();
+        aiConfigsTable.addSelectionListener(event -> refreshAiActionState());
+    }
+
     private void loadExtUser() {
         extUserDs.setItem(dataManager.load(ExtUser.class)
                 .id(currentUser.getId())
                 .view("extUser-view")
                 .one());
         currentUser = extUserDs.getItem();
+    }
+
+    private void refreshAiConfigs() {
+        /*
+         * Запрос datasource привязан к extUserDs, который загружается из текущей
+         * пользовательской сессии в loadExtUser(). Так личные AI-ключи остаются
+         * изолированными: окно настроек не показывает строки других пользователей.
+         */
+        if (userAiConfigsDs != null) {
+            userAiConfigsDs.refresh();
+        }
+        refreshAiActionState();
+    }
+
+    private void refreshAiActionState() {
+        boolean selected = aiConfigsTable != null && aiConfigsTable.getSingleSelected() != null;
+        if (aiConfigsEditBtn != null) {
+            aiConfigsEditBtn.setEnabled(selected);
+        }
+        if (aiConfigsRemoveBtn != null) {
+            aiConfigsRemoveBtn.setEnabled(selected);
+        }
+        if (aiConfigsTestBtn != null) {
+            aiConfigsTestBtn.setEnabled(selected);
+        }
+    }
+
+    public void onAiConfigsCreateBtnClick() {
+        /*
+         * UserAiConfigurationEdit переиспользуется и в администраторской карточке
+         * пользователя. В личном SettingWindow принудительно задаём владельца
+         * currentUser, чтобы пользователь не мог создать настройку для другого.
+         */
+        screenBuilders.editor(UserAiConfiguration.class, this)
+                .withScreenClass(UserAiConfigurationEdit.class)
+                .newEntity()
+                .withInitializer(entity -> {
+                    entity.setUser(currentUser);
+                    entity.setIsActive(true);
+                })
+                .withAfterCloseListener(afterCloseEvent -> refreshAiConfigs())
+                .build()
+                .show();
+    }
+
+    public void onAiConfigsEditBtnClick() {
+        UserAiConfiguration selected = aiConfigsTable.getSingleSelected();
+        if (selected == null) {
+            return;
+        }
+        screenBuilders.editor(UserAiConfiguration.class, this)
+                .withScreenClass(UserAiConfigurationEdit.class)
+                .editEntity(selected)
+                .withAfterCloseListener(afterCloseEvent -> refreshAiConfigs())
+                .build()
+                .show();
+    }
+
+    public void onAiConfigsRemoveBtnClick() {
+        UserAiConfiguration selected = aiConfigsTable.getSingleSelected();
+        if (selected == null) {
+            return;
+        }
+        dataManager.remove(selected);
+        refreshAiConfigs();
+    }
+
+    public void onAiConfigsTestBtnClick() {
+        UserAiConfiguration selected = aiConfigsTable.getSingleSelected();
+        if (selected == null) {
+            return;
+        }
+
+        try {
+            /*
+             * Web-слой не знает endpoint провайдера и правила HTTP-вызова. Он
+             * передаёт выбранную персональную конфигурацию в HrmAiService, а
+             * сервис уже делает реальный запрос и возвращает понятный результат.
+             */
+            hrmAiService.testConnection(selected);
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(getMessage("msgAiConnectionSuccess"))
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .show();
+        } catch (Exception e) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(getMessage("msgAiConnectionError"))
+                    .withDescription(e.getMessage())
+                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                    .show();
+        }
     }
 
     private void onUserAvatarUploaded() {

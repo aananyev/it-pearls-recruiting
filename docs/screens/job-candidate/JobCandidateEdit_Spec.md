@@ -233,7 +233,7 @@ flowchart TD
 | Подписка | Новый кандидат → диалог «Записать?» → SubscribeCandidateAction |
 | Соцсети: добавить недостающие | Все типы из справочника, которых нет в коллекции |
 | Соцсети: удалить пустые | dataManager.remove пустых URL |
-| Upload фото | Успех → скрыть placeholder, показать фото; clear → обратно |
+| Upload фото | `OvaFallbackImage` отображает загруженный `fileImageFace`; clear, null или отсутствующий файл → немедленный fallback `icons/no-programmer.jpeg` |
 | Commit and Close | Стандартный editor + цепочка BeforeCommit выше |
 
 
@@ -245,7 +245,7 @@ flowchart TD
 layout stylename="job-candidate-editor"
 ├── hbox id="jobCandidateMainLayout" (job-candidate-main-layout)
 │   ├── vbox id="jobCandidateSidebar" width="260px" (job-candidate-sidebar)
-│   │   ├── vbox id="candidateProfileHeader" — фото 112×112, ФИО, должность
+│   │   ├── vbox id="candidateProfileHeader" — круглое фото 176×176, ФИО, должность
 │   │   ├── vbox id="candidateProfileSummary" — рейтинг, город, компания, резюме
 │   │   ├── vbox id="candidateProfileContacts" — email, телефон, Telegram (linkButtons + labels)
 │   │   ├── vbox id="candidateNavigation" — 8 кнопок вертикальной навигации по вкладкам
@@ -268,9 +268,124 @@ layout stylename="job-candidate-editor"
 ├── dialogMode height="750" width="1200"
 ```
 
-**Вкладка «Карточка»:** `groupBox` контактов (read-only labels + link buttons), `image`/`upload` фото (`dropzone-container`), таблицы `lastProjectTable` и `suggestVacancyTable`.
+**Профиль кандидата:** `OvaFallbackImage`/`upload` для фотографии и read-only labels
+`fullNameField`, `personPositionLabel` под ней. Профиль расположен вне содержимого lazy-вкладок.
 
 **Required поля (XML):** `firstName`, `currentCompany`, `personPosition`, `cityOfResidence`, контакты на вкладке Contact Info, `priorityContact`.
+
+### Профиль под фотографией: технический контракт
+
+| Элемент | ID / тип | Источник | Поведение |
+|---|---|---|---|
+| Фотография | `candidatePic` / `OvaFallbackImage` | `jobCandidateDc.fileImageFace` | Валидный файл отображается как круг `176 x 176 px`; null или отсутствующий файл заменяется theme fallback |
+| Загрузка | `fileImageFaceUpload` / `FileUploadField` | `jobCandidateDc.fileImageFace` | Стандартная data binding CUBA меняет атрибут сущности; `BeforeValueClearEvent` немедленно включает fallback |
+| ФИО | `fullNameField` / `Label<String>` | `secondName`, `firstName` | Формат `Фамилия Имя`; значение обновляется при показе, смене item и изменении любого исходного атрибута |
+| Должность | `personPositionLabel` / `Label<String>` | `personPosition.positionRuName` | Обновляется при показе и изменении `personPosition`; для null выводится пустая строка |
+
+Оба label намеренно не имеют XML data binding. Их presentation value формируется
+контроллером, потому что ФИО составляется из двух атрибутов, а должность выводит локализованное
+наименование связанной сущности.
+
+#### Последовательность инициализации
+
+1. `@LoadDataBeforeShow` загружает `jobCandidateDc`.
+2. `onJobCandidateDcItemChange()` обрабатывает установку или замену item и очищает старые
+   presentation values, если item отсутствует.
+3. `onAfterShow()` вызывает `updateCandidateProfileLabels(getEditedEntity())`, когда данные
+   экрана уже доступны, независимо от выбранной вкладки.
+4. `onJobCandidateDcItemPropertyChange()` слушает `firstName`, `secondName` и
+   `personPosition` на уровне `InstanceContainer`.
+5. Изменения полей, созданных внутри lazy-вкладки, попадают в `DataContext`, после чего
+   sidebar обновляется без закрытия формы.
+
+Подписка на `InstanceContainer.ItemPropertyChangeEvent`, а не только на события полей,
+является обязательной: она охватывает как пользовательский ввод, так и программное изменение
+сущности и не зависит от момента создания компонентов lazy-вкладки.
+
+#### Формирование ФИО
+
+`formatCandidateProfileName(secondName, firstName)` применяет `trimToEmpty()` к обоим
+значениям, соединяет их одним пробелом и обрезает итог. Тот же результат записывается в
+денормализованный атрибут `JobCandidate.fullName` и в `fullNameField`.
+
+Это гарантирует:
+
+- единый порядок `Фамилия Имя`;
+- отсутствие строки `null`;
+- отсутствие лишнего разделителя при пустом имени или фамилии;
+- совпадение сохраняемого `fullName` с подписью под фотографией.
+
+#### Стили и состояние блокировки
+
+`updateFullNameStyle(boolean blocked)` всегда восстанавливает структурный класс
+`job-candidate-profile-name`, затем добавляет `h2` или `h2-red`. Это необходимо, потому что
+`Component.setStyleName()` в CUBA заменяет весь набор классов. Потеря структурного класса
+лишала ФИО размеров, цвета, переноса и позиционирования профильного блока.
+
+Правило `.job-candidate-profile-position` должно содержать `display: block`. Запрещено
+возвращать `display: none`: должность является самостоятельным значением и больше не
+используется как дублирующая подпись ФИО.
+
+Правила ФИО и должности ограничены селектором `.job-candidate-sidebar`, чтобы общий размер
+label-компонентов боковой панели не переопределял профильную типографику. Одинаковый контракт
+реализован в семи поддерживаемых темах.
+
+ФИО центрируется по ширине профильного блока и использует ту же переменную размера,
+семейство шрифта и насыщенность, что `candidateRatingLabel`. Псевдоэлементы со звёздами
+остаются только у rating-классов и к ФИО не применяются. Остальные `Label` внутри sidebar
+уменьшены на один пункт; `LinkButton` контактов сохраняют прежний размер.
+
+### Процент заполнения карточки
+
+Причиной постоянного `0%` была зависимость старого расчёта от `candidateInitialized` и
+`tabContactInfoInitialized`. Пока lazy-вкладка контактов не создавалась, метод возвращал
+ноль независимо от данных сущности.
+
+Новый расчёт использует только уже загруженный item `jobCandidateDc` и список
+`CARD_COMPLETION_PROPERTIES` из 15 свойств:
+
+```text
+firstName, middleName, secondName, birdhDate, cityOfResidence,
+personPosition, currentCompany, email, phone, mobilePhone,
+telegramName, whatsupName, wiberName, skypeName, priorityContact
+```
+
+Алгоритм:
+
+1. Для каждого свойства читается текущее значение edited entity.
+2. `null` и blank-строки считаются пустыми.
+3. Unfetched-атрибут detached entity перехватывается как пустое значение без дополнительного load.
+4. Процент равен `round(filled * 100 / 15)`.
+5. `setPercentLabel()` обновляет label при `AfterShowEvent` и штатном `DataContext.ChangeEvent`.
+
+Алгоритм не обращается к компонентам вкладок, не меняет флаги lazy-инициализации, не
+запускает loaders и не выполняет SQL. Объём в 15 чтений слишком мал для `BackgroundTask`;
+фоновый процесс здесь увеличил бы стоимость и усложнил синхронизацию UI.
+
+### Одинаковая ширина полей ФИО
+
+Старые строки использовали `box.expandRatio` одновременно для подписи и SuggestionField.
+Итоговая ширина зависела от intrinsic width дочерних Vaadin-компонентов. Теперь три hbox
+имеют одинаковый `job-candidate-name-row`, фиксированную колонку подписи `96px` и
+`expand` соответствующего SuggestionField. Поля занимают одинаковое оставшееся пространство,
+не изменяя query, ValueSource или lazy-создание вкладки.
+
+#### Фотография и fallback
+
+`candidatePic` заменяет прежнюю пару `candidatePic` + `candidateDefaultPic`. Компонент
+одновременно реализует круглую маску, ValueSource и fallback:
+
+- `dataContainer="jobCandidateDc"`, `property="fileImageFace"` сохраняют стандартную привязку;
+- `ovalWidth` и `ovalHeight` равны `176px`;
+- `fallbackThemePath="icons/no-programmer.jpeg"` задаёт локальный placeholder;
+- `setCandidatePicImage()` проверяет наличие бинарного файла через
+  `FileDescriptorImageHelper.fileExists()` и вызывает `applyFallback()` только при его отсутствии;
+- отдельный success-handler загрузки не нужен: актуальный файл отображает ValueSource;
+- старый `candidateDefaultPic` оставлен закомментированным в XML как временная ссылка и не
+  создаётся CUBA loader'ом.
+
+Такая схема устраняет ручное переключение `visible` у двух изображений, рекурсивные
+`SourceChangeEvent` и расхождение размеров реального изображения и placeholder.
 
 ### Производительность (вкладка `tabMain`)
 
@@ -306,9 +421,10 @@ jobCandidateSidebar (260 px) | jobCandidateWorkspace (flex)
 
 | Файл | Изменения |
 |------|-----------|
-| `job-candidate-edit.xml` | Двухпанельный layout, sidebar, вертикальная навигация, top-bar, аккордеон-секции, inline-формы полей |
-| `JobCandidateEdit.java` | Добавлен метод `selectCandidateTab` + 8 обработчиков навигации (только переключение вкладок) |
-| `job-candidate-editor.scss` (×7 тем) | 29 локальных классов `job-candidate-*` |
+| `job-candidate-edit.xml` | Двухпанельный layout; `candidatePic` переведён на `OvaFallbackImage`; legacy `candidateDefaultPic` закомментирован |
+| `JobCandidateEdit.java` | Навигация; единый fallback фото; синхронизация ФИО и должности через lifecycle и события `jobCandidateDc`; сохранение структурного CSS-класса |
+| `job-candidate-editor.scss` (×7 тем) | Локальные классы `job-candidate-*`; видимые стили ФИО/должности и отдельный blocked-state ФИО |
+| `JobCandidateEditComponentRendererTest.java` | Контракт XML аватара, значения профильных labels, сохранение style name и видимость должности во всех темах |
 | `build.gradle` | JAR-валидация, deploy force-copy |
 | `ScreenViewIntegrityTest.java` | Тесты регистрации экранов |
 
@@ -367,7 +483,13 @@ git checkout e246a7bc -- modules/web/themes/*/com.company.hunttech/job-candidate
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-21 | Исправлен процент заполнения: 15 активных input properties, расчёт по `jobCandidateDc` без создания lazy-вкладок и запросов; добавлены null/detached тесты. |
+| 2026-07-21 | Поля Имя/Отчество/Фамилия выровнены единым hbox-контрактом; ФИО центрировано и синхронизировано с типографикой рейтинга; sidebar labels уменьшены на один пункт. |
+| 2026-07-21 | `candidatePic` заменён на data-bound `OvaFallbackImage` размером 176×176 с fallback `icons/no-programmer.jpeg`; ручное переключение двух `Image` удалено. |
+| 2026-07-21 | ФИО и должность sidebar синхронизированы с `jobCandidateDc` независимо от lazy-вкладок; восстановлена видимость должности и сохранение структурного класса ФИО во всех семи темах. |
+| 2026-07-21 | Добавлены регрессионные тесты профиля кандидата и подробная пользовательская инструкция. |
 | 2026-07-13 | **Редизайн вариант 3:** LinkedIn-style двухпанельный layout (sidebar 260px), вертикальная навигация, top-bar, аккордеон-секции, inline-формы, единый стиль таблиц, 29 локальных SCSS-классов `job-candidate-*` |
+| 2026-07-14 | Добавлена типобезопасная перегрузка `preventAutoLoadUntilReady(KeyValueCollectionLoader, BooleanSupplier)` для блокировки `lastProjectDl` до установки обязательных параметров. |
 | 2026-07-13 | **TODO[tabPositions]:** Вкладка «Позиции и вакансии» отключена (visible=false). Java-методы закомментированы. Для восстановления: убрать visible=false в XML, раскомментировать методы в JobCandidateEdit.java |
 | 2026-06-30 | fix: удалены `laborAgreement` из view и `jobCandidateLaborAgreementDc` |
 | 2026-06-29 | Оптимизация скорости открытия вкладки tabCandidate, ленивая инициализация SuggestionFields, устранение блокирующих BackgroundTask |

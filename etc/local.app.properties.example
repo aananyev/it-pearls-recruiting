@@ -7,6 +7,13 @@
 #   IDE / Gradle:      project deploy directory or custom path via -Dapp.home
 ###############################################################################
 
+# Штатный локальный запуск сохраняет scheduled tasks HRM HuntTech.
+cuba.schedulingActive=true
+
+# Для отдельной диагностики конкуренции JobCandidateEdit с FTS временно задайте:
+# cuba.schedulingActive=false
+# После проверки обязательно верните true.
+
 # Uncomment and adjust if fileStorage is not under ${app.home}/fileStorage:
 # cuba.fileStorageDir=/path/to/your/fileStorage
 # cuba.tempDir=/path/to/your/fileStorage/temp

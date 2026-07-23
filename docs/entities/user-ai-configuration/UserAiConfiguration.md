@@ -1,6 +1,6 @@
 # UserAiConfiguration — AI-конфигурация пользователя
 
-> Cross-link: [hunttech_UserAiConfiguration.browse_Spec.md](../../screens/user-ai-configuration/hunttech_UserAiConfiguration.browse_Spec.md) · edit в [hunttech_ExtUserEdit_Spec.md](../../screens/ext-user/hunttech_ExtUserEdit_Spec.md)
+> Cross-link: [пользовательская инструкция](../../integrations/ai/USER_AI_CONNECTION_GUIDE.md) · [документация изменений](../../integrations/ai/USER_AI_SETTINGS_IMPLEMENTATION.md) · [hunttech_UserAiConfiguration.browse_Spec.md](../../screens/user-ai-configuration/hunttech_UserAiConfiguration.browse_Spec.md) · edit в [hunttech_ExtUserEdit_Spec.md](../../screens/ext-user/hunttech_ExtUserEdit_Spec.md)
 
 ---
 
@@ -58,7 +58,7 @@
 
 ## 4. Взаимодействие компонентов
 
-`ExtUserEdit` → коллекция AI configs; `HrmAiServiceBean` → чтение активной конфигурации.
+`ExtUserEdit` и личное окно `settings` → коллекция AI configs; `HrmAiServiceBean` → чтение активной конфигурации и тестирование выбранного подключения.
 
 ---
 
@@ -74,3 +74,5 @@
 |------|-----------|
 | 2026-06-27 | Browse мониторинга без apiKey; view `userAiConfiguration-browse-view`; меню aiAdministration |
 | 2026-06-27 | Edit-модаль в ExtUser; сущность и миграции AI |
+| 2026-07-21 | Личная вкладка AI в пользовательских настройках переведена на таблицу конфигураций; добавлено тестирование подключения |
+| 2026-07-21 | В личные AI-настройки добавлен провайдер DeepSeek с моделью `deepseek-v4-flash` |

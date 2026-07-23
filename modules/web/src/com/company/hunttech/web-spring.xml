@@ -39,6 +39,7 @@
                 <entry key="hunttech_TextManipulationService"
                        value="com.company.hunttech.core.TextManipulationService"/>
                 <entry key="hunttech_TelegramBotService" value="com.company.hunttech.core.TelegramBotService"/>
+                <entry key="hunttech_HrmAiService" value="com.company.hunttech.service.HrmAiService"/>
             </map>
         </property>
     </bean>

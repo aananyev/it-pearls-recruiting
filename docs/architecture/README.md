@@ -4,6 +4,7 @@
 
 | Где искать | Ссылка |
 | ---------- | ------ |
+| Архитектура ускорения JobCandidateEdit | [JobCandidateEdit_Performance_Architecture.md](JobCandidateEdit_Performance_Architecture.md) |
 | Архитектура вакансии OpenPosition | [../entities/open-position/OpenPosition_Spec.md](../entities/open-position/OpenPosition_Spec.md) |
 | AI integration architecture | [../integrations/ai/AI_INTEGRATION.md](../integrations/ai/AI_INTEGRATION.md) |
 | Production migration architecture audits | [../../deployment/database-migration/audit/](../../deployment/database-migration/audit/) |

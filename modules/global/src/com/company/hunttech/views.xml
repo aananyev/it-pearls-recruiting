@@ -480,6 +480,7 @@
         <property name="socialNetworkURL" view="_minimal">
             <property name="socialNetworkURL"/>
             <property name="comment"/>
+            <property name="logo" view="_local"/>
         </property>
         <property name="jobCandidate" view="_minimal"/>
     </view>

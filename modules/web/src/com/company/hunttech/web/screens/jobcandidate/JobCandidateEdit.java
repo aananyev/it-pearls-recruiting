@@ -9,11 +9,13 @@ import com.company.hunttech.web.screens.candidatecv.CandidateCVEdit;
 import com.company.hunttech.web.screens.fragments.SkillLabelData;
 import com.company.hunttech.web.screens.fragments.Skillsbar;
 import com.company.hunttech.web.screens.jobcandidate.HistoryRowData;
+import com.company.hunttech.web.screens.iteractionlist.IteractionListEdit;
 import com.company.hunttech.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
 import com.company.hunttech.web.screens.openposition.OpenPositionMasterBrowse;
 import com.company.hunttech.web.screens.openposition.openpositionviews.QuickViewOpenPositionDescription;
 import com.company.hunttech.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
+import com.hunttech.hrm.gui.components.OvaFallbackImage;
 import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
@@ -88,9 +90,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> skypeTitle;
     @Inject
     private Label<String> jobTitleTitle;
+
+    /**
+     * Single avatar component for both the stored candidate photo and the theme fallback.
+     * The active value remains bound to {@code jobCandidateDc.fileImageFace}; the component
+     * itself decides whether the bound file or {@code icons/no-programmer.jpeg} is rendered.
+     */
     @Inject
-    private Image candidatePic;
-    private boolean updatingCandidatePic;
+    private OvaFallbackImage candidatePic;
     @Inject
     private FileUploadField fileImageFaceUpload;
     @Inject
@@ -141,41 +148,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private LookupPickerField<City> jobCityCandidateField;
     @Inject
     private DateField<Date> birdhDateField;
-    @Inject
     private RadioButtonGroup<Integer> priorityCommunicationMethodRadioButton;
-    @Inject
-    private TextField<String> telegramGroupField;
-    @Inject
     private TextField<String> mobilePhoneField;
-    @Inject
     private DataGrid<IteractionList> jobCandidateIteractionListTable;
-    @Inject
     private Button openPositionProjectDescriptionButton;
-    @Inject
     private PopupButton frequentInteractionPopupButton;
-    @Inject
     private DataGrid<CandidateCV> jobCandidateCandidateCvTable;
-    @Inject
     private Button copyCVButton;
-    @Inject
     private Button scanContactsFromCVButton;
-    @Inject
     private Button checkSkillFromJD;
-    @Inject
     private TextField<String> emailField;
-    @Inject
     private TextField<String> phoneField;
-    @Inject
     private TextField<String> skypeNameField;
-    @Inject
     private TextField<String> telegramNameField;
-    @Inject
     private TextField<String> whatsupNameField;
-    @Inject
     private TextField<String> wiberNameField;
-    @Inject
     private DataGrid<SocialNetworkURLs> socialNetworkTable;
-
     private static final String BLOCK_CANDIDATE_ON = "Запретить работу с кандидатом";
     private static final String BLOCK_CANDIDATE_OFF = "Разрешить работу с кандидатом";
     private static final String QUERY_GET_OTHER_SOCIAL_NETWORK = "select e from hunttech_SocialNetworkType e where e.socialNetwork = :other";
@@ -184,13 +172,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private static final String QUERY_GET_LAST_ITERACTION = "select e from hunttech_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from hunttech_IteractionList f where f.candidate = :candidate)";
     private static final String CREATE_COMPANY_ACTION_ID = "createCompany";
 
+    /**
+     * Entity properties represented by visible data-entry controls in the candidate card.
+     * The list is intentionally independent from component creation so completion can be
+     * calculated before CUBA builds the lazy tabs.
+     */
+    static final List<String> CARD_COMPLETION_PROPERTIES = Collections.unmodifiableList(Arrays.asList(
+            "firstName", "middleName", "secondName", "birdhDate", "cityOfResidence",
+            "personPosition", "currentCompany", "email", "phone", "mobilePhone",
+            "telegramName", "whatsupName", "wiberName", "skypeName", "priorityContact"));
+
     List<Position> setPos = new ArrayList<>();
-    // TODO[tabPositions]: поля positionsTabLoading/positionsTabLoaded/historyRowDataByVacancy отключены вместе с вкладкой
-    // private Map<UUID, HistoryRowData> historyRowDataByVacancy;
-    // private boolean positionsTabLoading;
-    // private boolean positionsTabLoaded;
-    // Заглушка для генераторов — вкладка отключена, генераторы не будут вызваны.
+    // Данные вкладки «Позиции и вакансии» загружаются один раз при первом открытии.
     private Map<UUID, HistoryRowData> historyRowDataByVacancy = Collections.emptyMap();
+    private boolean positionsTabLoading;
+    private boolean positionsTabLoaded;
     private boolean skillsLoading;
     private boolean skillsLoaded;
     List<IteractionList> iteractionListFromCandidate = new ArrayList();
@@ -199,8 +195,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Inject
     private Button blockCandidateButton;
-    @Inject
-    private Label<String> iteractionListLabelCandidate;
+//    @Inject
+//    private Label<String> iteractionListLabelCandidate;
     @Inject
     private GetRoleService getRoleService;
     @Inject
@@ -236,9 +232,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Button copyIteractionButton;
     private boolean candidateInitialized = false;
     private boolean tabContactInfoInitialized = false;
+    private boolean positionsTabInitialized = false;
     private boolean initialInteractionAdded = false;
     private boolean companyEditorOpen = false;
-    @Inject
     private Table lastProjectTable;
     @Inject
     private KeyValueCollectionContainer lastProjectDc;
@@ -255,19 +251,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionLoader<City> citiesDl;
     @Inject
     private CollectionLoader<Position> personPositionsLc;
-    @Inject
     private Table<OpenPosition> suggestVacancyTable;
     @Inject
-    private Image candidateDefaultPic;
-    @Inject
     private MessageBundle messageBundle;
-    @Inject
     private Button sendCommentButton;
-    @Inject
     private TextField<String> chatMessageTextField;
-    @Inject
     private LookupPickerField<OpenPosition> vacancyPopupPickerField;
-    @Inject
     private DataGrid<IteractionList> jobCandidateCommentsDataGrid;
     @Inject
     private CollectionLoader<IteractionList> interactionCommentDl;
@@ -279,6 +268,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private Label<String> fullNameField;
     @Inject
+    private Label<String> personPositionLabel;
+    @Inject
     private Label<String> emailLabel;
     @Inject
     private Label<String> phoneLabel;
@@ -288,10 +279,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Label<String> skypuLabel;
     @Inject
     private Label<String> telegramLabel;
-    @Inject
     private Button addSocialNetworkListsButton;
-    @Inject
-    private LookupPickerField vacancyFilterLookupPickerField;
+    private LookupPickerField<OpenPosition> vacancyFilterLookupPickerField;
     @Inject
     private ResumeRecognitionService resumeRecognitionService;
     @Inject
@@ -619,7 +608,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     (wiberNameField.getRawValue().equals("")) &&
                     (whatsupNameField.getRawValue().equals("")) &&
                     (mobilePhoneField.getRawValue().equals("")) &&
-                    (telegramGroupField.getRawValue().equals("")) &&
+                    StringUtils.isBlank(getEditedEntity().getTelegramGroup()) &&
                     (phoneField.getRawValue().equals("")));
         }
 
@@ -660,6 +649,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
+        // The sidebar is outside the lazy tabs, so populate it directly after screen data is ready.
+        updateCandidateProfileLabels(getEditedEntity());
         setPercentLabel();
 
         Boolean b = getEditedEntity().getBlockCandidate() == null ?
@@ -677,26 +668,25 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onAfterClose(AfterCloseEvent event) {
         // чтоб после закрытия не возникало
         jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
-            jobCandidateCandidateCvTable.repaint();
+            if (jobCandidateCandidateCvTable != null) {
+                jobCandidateCandidateCvTable.repaint();
+            }
         });
     }
 
     private void setPercentLabel() {
-        if (candidateInitialized) {
-            // вычислить процент заполнения карточки кандидата
-            Integer qualityPercent = setQualityPercent() * 100 / 14;
-
-            if (!PersistenceHelper.isNew(getEditedEntity())) {
-                labelQualityPercent.setValue(new StringBuilder()
-                        .append("Процент заполнения карточки: ")
-                        .append(qualityPercent.toString())
-                        .append("%")
-                        .toString());
-            }
+        JobCandidate candidate = getEditedEntity();
+        if (candidate != null) {
+            // The calculation reads only the already loaded edited entity and never initializes lazy tabs.
+            labelQualityPercent.setValue(calculateCardCompletionPercentage(candidate) + "%");
         }
     }
 
     protected void enableDisableContacts() {
+        if (!tabContactInfoInitialized) {
+            return;
+        }
+
         Boolean flag = true;
 
         for (SocialNetworkURLs s : jobCandidateSocialNetworksDc.getItems()) {
@@ -714,8 +704,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         emailField.setRequired(true);
         telegramNameField.setRequired(true);
         whatsupNameField.setRequired(true);
-        wiberNameField.setRequired(true);
-        telegramGroupField.setRequired(true); */
+        wiberNameField.setRequired(true); */
 
         if (!isRequiredAddresField() || !flag) {
             skypeNameField.setRequired(false);
@@ -725,7 +714,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             telegramNameField.setRequired(false);
             whatsupNameField.setRequired(false);
             wiberNameField.setRequired(false);
-            telegramGroupField.setRequired(false);
         }
     }
 
@@ -736,14 +724,17 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     // загрузить таблицу взаимодействий
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        initTabCandidate();
+
         // Heavy comments data is loaded lazily from initTabComments() when the user opens the tab.
         // если есть резюме, то поставить галку
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            if (!hasCandidateCv()) {
-                labelCV.setValue("Резюме: НЕТ");
-            } else {
-                labelCV.setValue("Резюме: ДА");
-            }
+            boolean hasCv = hasCandidateCv();
+            String locale = userSession.getLocale().getLanguage();
+            boolean isRussian = "ru".equals(locale);
+            String yes = isRussian ? "ДА" : "YES";
+            String no = isRussian ? "НЕТ" : "NO";
+            labelCV.setValue(hasCv ? yes : no);
         }
 
         // обнулить статус для вновь создаваемного кандидата
@@ -753,7 +744,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         setSaveRecordOfViewCandidate();
 
-        enableDisableContacts();
         setLabelTitle();
         setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
@@ -780,7 +770,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
 
-    @Install(to = "vacancyFilterLookupPickerField", subject = "optionImageProvider")
     private Resource vacancyFilterLookupPickerFieldOptionImageProvider(OpenPosition object) {
         Image imageResource = uiComponents.create(Image.class);
         imageResource.setWidth("20px");
@@ -855,39 +844,25 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         interactionCommentDl.load();
     }
 
+    /**
+     * Ensures that a missing file in storage cannot leave a broken avatar in the sidebar.
+     * A valid FileDescriptor is rendered by the component's ValueSource; the controller only
+     * forces the fallback for null descriptors and descriptors whose binary file is unavailable.
+     */
     private void setCandidatePicImage() {
-        if (updatingCandidatePic) {
-            return;
-        }
-        updatingCandidatePic = true;
-        try {
-            FileDescriptor faceImage = getEditedEntity().getFileImageFace();
-            candidatePic.setValueSource(null);
-            if (faceImage != null && FileDescriptorImageHelper.fileExists(fileLoader, faceImage)) {
-                candidateDefaultPic.setVisible(false);
-                candidatePic.setVisible(true);
-                FileDescriptorImageHelper.setCandidateFace(candidatePic, fileLoader, faceImage);
-            } else {
-                candidateDefaultPic.setVisible(true);
-                candidatePic.setVisible(false);
-            }
-        } finally {
-            updatingCandidatePic = false;
+        FileDescriptor faceImage = getEditedEntity().getFileImageFace();
+        if (!FileDescriptorImageHelper.fileExists(fileLoader, faceImage)) {
+            candidatePic.applyFallback();
         }
     }
 
+    /**
+     * Shows the fallback immediately when the user clears the uploaded photo. The entity value
+     * is still changed by the upload field's standard data binding and is saved with the editor.
+     */
     @Subscribe("fileImageFaceUpload")
     public void onFileImageFaceUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
-        candidatePic.setVisible(false);
-        candidateDefaultPic.setVisible(true);
-    }
-
-    @Subscribe("candidatePic")
-    public void onCandidatePicSourceChange(ResourceView.SourceChangeEvent event) {
-        if (updatingCandidatePic) {
-            return;
-        }
-        setCandidatePicImage();
+        candidatePic.applyFallback();
     }
 
     private void setSuggestOpenPositionTable() {
@@ -904,9 +879,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     positions.add(positionLists.getPositionList());
                 }
 
-                suggestOpenPositionDl.setParameter("positionType", getEditedEntity().getPersonPosition());
+                Position mainPosition = getEditedEntity().getPersonPosition();
+                if (mainPosition != null) {
+                    suggestOpenPositionDl.setParameter("positionType", mainPosition);
+                } else {
+                    suggestOpenPositionDl.removeParameter("positionType");
+                }
                 if (positions.size() > 0) {
                     suggestOpenPositionDl.setParameter("positionTypes", positions);
+                } else {
+                    suggestOpenPositionDl.removeParameter("positionTypes");
                 }
 
             }
@@ -937,7 +919,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void onBeforeClose1(BeforeCloseEvent event) {
         // удалить листенер изменения, чтобы  не пугало сообщение о ненадйенности новых контактов в резюмехе
         jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
-            jobCandidateCandidateCvTable.repaint();
+            if (jobCandidateCandidateCvTable != null) {
+                jobCandidateCandidateCvTable.repaint();
+            }
         });
     }
 
@@ -1027,10 +1011,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void checkTelegramName() {
-        if (telegramNameField.getValue() != null) {
-            if (telegramNameField.getValue().toLowerCase().startsWith(TELEGRAM_NAME_URL.toLowerCase())) {
-                telegramNameField.setValue(
-                        telegramNameField.getValue().substring(TELEGRAM_NAME_URL.length()));
+        String telegramName = telegramNameField != null
+                ? telegramNameField.getValue()
+                : getEditedEntity().getTelegramName();
+        if (telegramName != null
+                && telegramName.toLowerCase().startsWith(TELEGRAM_NAME_URL.toLowerCase())) {
+            String normalizedTelegramName = telegramName.substring(TELEGRAM_NAME_URL.length());
+            if (telegramNameField != null) {
+                telegramNameField.setValue(normalizedTelegramName);
+            } else {
+                getEditedEntity().setTelegramName(normalizedTelegramName);
             }
         }
     }
@@ -1147,13 +1137,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void trimTelegramName() {
-        if (telegramNameField != null) {
-            if (telegramNameField.getValue() != null) {
-                String tn = telegramNameField.getValue();
-
-                telegramNameField.setValue(telegramNameField.getValue().trim().charAt(0) == '@' ?
-                        telegramNameField.getValue().trim().substring(1) :
-                        telegramNameField.getValue().trim());
+        String telegramName = telegramNameField != null
+                ? telegramNameField.getValue()
+                : getEditedEntity().getTelegramName();
+        if (telegramName != null) {
+            String trimmedTelegramName = telegramName.trim();
+            String normalizedTelegramName = trimmedTelegramName.startsWith("@")
+                    ? trimmedTelegramName.substring(1)
+                    : trimmedTelegramName;
+            if (telegramNameField != null) {
+                telegramNameField.setValue(normalizedTelegramName);
+            } else {
+                getEditedEntity().setTelegramName(normalizedTelegramName);
             }
         }
     }
@@ -1169,59 +1164,92 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
 
     public Integer setQualityPercent() {
-        Integer qPercent = 0;
-
-        if (tabContactInfoInitialized) {
-
-            if (birdhDateField.getValue() != null)         // 1
-                qPercent = ++qPercent;
-
-            if (currentCompanyField.getValue() != null)    // 2
-                qPercent = ++qPercent;
-
-            if (emailField.getValue() != null)             // 3
-                qPercent = ++qPercent;
-
-            if (firstNameField.getValue() != null)         // 4
-                qPercent = ++qPercent;
-
-            if (middleNameField.getValue() != null)        // 5
-                qPercent = ++qPercent;
-
-            if (secondNameField.getValue() != null)        // 6
-                qPercent = ++qPercent;
-
-            if (jobCityCandidateField.getValue() != null)  // 7
-                qPercent = ++qPercent;
-
-            if (personPositionField.getValue() != null)    // 8
-                qPercent = ++qPercent;
-
-            if (phoneField.getValue() != null)             // 9
-                qPercent = ++qPercent;
-
-            if (mobilePhoneField.getValue() != null)       // 10
-                qPercent = ++qPercent;
-
-            if (skypeNameField.getValue() != null)         // 11
-                qPercent = ++qPercent;
-
-            if (telegramNameField.getValue() != null)      // 12
-                qPercent = ++qPercent;
-
-            if (whatsupNameField.getValue() != null)       // 13
-                qPercent = ++qPercent;
-
-            if (wiberNameField.getValue() != null)         // 14
-                qPercent = ++qPercent;
-        }
-
-        return qPercent;
+        return countFilledCardFields(getEditedEntity());
     }
 
+    /**
+     * Calculates a rounded 0..100 percentage using only the edited entity already held by
+     * the screen DataContext. Fifteen property reads are synchronous by design: scheduling
+     * a BackgroundTask would cost more and would introduce an unnecessary UI race.
+     */
+    static int calculateCardCompletionPercentage(JobCandidate candidate) {
+        if (candidate == null || CARD_COMPLETION_PROPERTIES.isEmpty()) {
+            return 0;
+        }
+        return (int) Math.round(countFilledCardFields(candidate) * 100.0
+                / CARD_COMPLETION_PROPERTIES.size());
+    }
+
+    static int countFilledCardFields(JobCandidate candidate) {
+        if (candidate == null) {
+            return 0;
+        }
+
+        int filledFields = 0;
+        for (String property : CARD_COMPLETION_PROPERTIES) {
+            if (isFilledCardValue(readCandidatePropertySafely(candidate, property))) {
+                filledFields++;
+            }
+        }
+        return filledFields;
+    }
+
+    /**
+     * Reads a property without forcing an unfetched detached association to load. The screen
+     * view normally contains every completion property; the catch protects alternate invocation
+     * contexts and stale detached instances from breaking form rendering.
+     */
+    private static Object readCandidatePropertySafely(JobCandidate candidate, String property) {
+        try {
+            return candidate.getValue(property);
+        } catch (IllegalStateException e) {
+            // Detached entities may contain an unfetched association; it counts as empty, not as a screen error.
+            return null;
+        }
+    }
+
+    /**
+     * Treats null and whitespace-only text as empty; dates, references and option values are
+     * filled when non-null.
+     */
+    private static boolean isFilledCardValue(Object value) {
+        if (value instanceof CharSequence) {
+            return StringUtils.isNotBlank((CharSequence) value);
+        }
+        return value != null;
+    }
+
+    /**
+     * Handles replacement of the edited item in the data container. Profile labels are refreshed
+     * here because they are not bound in XML and must not depend on whether {@code tabMain} was built.
+     */
     @Subscribe(id = "jobCandidateDc", target = Target.DATA_CONTAINER)
     private void onJobCandidateDcItemChange(InstanceContainer.ItemChangeEvent<JobCandidate> event) {
-        setFullNameCandidate();
+        if (event.getItem() != null) {
+            setFullNameCandidate();
+        }
+        updateCandidateProfileLabels(event.getItem());
+    }
+
+    /**
+     * Keeps the always-visible sidebar synchronized with edits made through lazy-created fields.
+     * Listening to the data container also covers programmatic changes that bypass field events.
+     */
+    @Subscribe(id = "jobCandidateDc", target = Target.DATA_CONTAINER)
+    private void onJobCandidateDcItemPropertyChange(
+            InstanceContainer.ItemPropertyChangeEvent<JobCandidate> event) {
+        if ("firstName".equals(event.getProperty())
+                || "secondName".equals(event.getProperty())) {
+            String fullName = formatCandidateProfileName(
+                    event.getItem().getSecondName(), event.getItem().getFirstName());
+            // fullName is a denormalized entity attribute and must match the visible sidebar value.
+            if (!Objects.equals(event.getItem().getFullName(), fullName)) {
+                event.getItem().setFullName(fullName);
+            }
+            updateCandidateProfileLabels(event.getItem());
+        } else if ("personPosition".equals(event.getProperty())) {
+            updateCandidateProfileLabels(event.getItem());
+        }
     }
 
     private void setFullNameCandidate() {
@@ -1284,19 +1312,57 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         preventAutoLoadUntilReady(openPositionDl, () -> openPositionLoaderInitialized);
         preventAutoLoadUntilReady(citiesDl, () -> referenceLoadersInitialized);
         preventAutoLoadUntilReady(personPositionsLc, () -> referenceLoadersInitialized);
-        // TODO[tabPositions]: loaders for positions tab disabled. Tab is commented out.
-        // preventAutoLoadUntilReady(lastProjectDl, () -> positionsTabLoaded);
-        // preventAutoLoadUntilReady(suggestOpenPositionDl, () -> positionsTabLoaded);
+        // Запросы вкладки содержат параметры кандидата и позиции, поэтому
+        // блокируем автоматическую загрузку до первого открытия вкладки.
+        preventAutoLoadUntilReady(lastProjectDl, () -> positionsTabLoaded);
+        preventAutoLoadUntilReady(suggestOpenPositionDl, () -> positionsTabLoaded);
+        preventAutoLoadUntilReady(interactionCommentDl, () -> commentsTabInitialized);
+
+        configureAvailableComponentRenderers();
 
         tabSheetSocialNetworks.addSelectedTabChangeListener(selectedTabChangeEvent -> {
+            configureAvailableComponentRenderers();
             initTabResume();
             initTabInteractions();
             initTabCandidate();
             initTabContactInfo();
             initTabComments();
-            // TODO[tabPositions]: tab positions disabled
-            // initTabPositions();
+            initTabPositions();
         });
+
+    }
+
+    void configureAvailableComponentRenderers() {
+        configureComponentRenderer("socialNetworkTable", "socialNetworkLogoColumn",
+                this::socialNetworkTableSocialNetworkLogoColumnColumnGenerator);
+        configureComponentRenderer("socialNetworkTable", "linkToWeb",
+                this::socialNetworkTableLinkToWebColumnGenerator);
+        configureComponentRenderer("jobCandidateIteractionListTable", "projectLogoColumn",
+                this::jobCandidateIteractionListTableProjectLogoColumnColumnGenerator);
+        configureComponentRenderer("jobCandidateCandidateCvTable", "projectLogoColumn",
+                this::jobCandidateCandidateCvTableProjectLogoColumnColumnGenerator);
+        configureComponentRenderer("jobCandidateCandidateCvTable", "candidateOriginalCVColumn",
+                this::jobCandidateCandidateCvTableCandidateOriginalCvColumnGenerator);
+        configureComponentRenderer("jobCandidateCandidateCvTable", "candidateHuntTechCVColumn",
+                this::jobCandidateCandidateCvTableCandidateHuntTechCvColumnGenerator);
+        configureComponentRenderer("jobCandidateCommentsDataGrid", "commentDialog",
+                this::jobCandidateCommentsDataGridCommentDialogColumnGenerator);
+    }
+
+    @SuppressWarnings("unchecked")
+    <E extends Entity> void configureComponentRenderer(String dataGridId,
+                                                        String columnId,
+                                                        DataGrid.GenericColumnGenerator<E, Object> generator) {
+        Component component = getWindow().getComponent(dataGridId);
+        if (!(component instanceof DataGrid)) {
+            return;
+        }
+
+        DataGrid<E> dataGrid = (DataGrid<E>) component;
+        DataGrid.Column<E> column = dataGrid.getColumn(columnId);
+        if (column != null && dataGrid.getColumnGenerator(columnId) == null) {
+            column.setColumnGenerator(generator);
+        }
     }
 
     private <E extends Entity> void preventAutoLoadUntilReady(CollectionLoader<E> loader,
@@ -1304,6 +1370,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         loader.addPreLoadListener(e -> {
             if (!ready.getAsBoolean()) {
                 e.preventLoad();
+            }
+        });
+    }
+
+    // Блокирует автоматическую загрузку KeyValue loader до установки обязательных параметров.
+    private void preventAutoLoadUntilReady(KeyValueCollectionLoader loader,
+                                            java.util.function.BooleanSupplier readySupplier) {
+        loader.addPreLoadListener(loadEvent -> {
+            if (!readySupplier.getAsBoolean()) {
+                loadEvent.preventLoad();
             }
         });
     }
@@ -1392,14 +1468,194 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return mergedInteractions;
     }
 
-    // TODO[tabPositions]: Вкладка «Позиции и вакансии» отключена.
-    // Полный код сохранён в git-истории. Для восстановления:
-    //   git diff HEAD~2 -- modules/web/.../JobCandidateEdit.java
-    // Методы: initTabPositions(), startPositionsBackgroundLoading(),
-    // loadHistoryKeyValues(), buildHistoryRowData(), buildOneRow(),
-    // loadSuggestedVacancies(), applyPositionsTabResult(), PositionsTabData.
+    /**
+     * Инициализирует историю рассмотрения и подходящие вакансии только при первом
+     * открытии вкладки. Открытие JobCandidateEdit не выполняет эти запросы.
+     */
     private void initTabPositions() {
-        // tab positions disabled — см. TODO выше
+        TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
+        if (selectedTab == null || !"tabPositions".equals(selectedTab.getName())) {
+            return;
+        }
+
+        if (!positionsTabInitialized) {
+            lastProjectTable = (Table) getWindow().getComponentNN("lastProjectTable");
+            suggestVacancyTable = (Table<OpenPosition>) getWindow().getComponentNN("suggestVacancyTable");
+            suggestVacancyTable.setItemDescriptionProvider(this::suggestVacancyTableItemDescriptionProvider);
+            suggestVacancyTable.getColumn("notSendedIconColumn")
+                    .setColumnGenerator(this::suggestVacancyTableNotSendedIconColumnColumnGenerator);
+            positionsTabInitialized = true;
+        }
+
+        if (positionsTabLoaded || positionsTabLoading) {
+            return;
+        }
+
+        if (PersistenceHelper.isNew(getEditedEntity()) || getEditedEntity().getId() == null) {
+            positionsTabLoaded = true;
+            lastProjectTable.setVisible(false);
+            suggestVacancyTable.setVisible(false);
+            return;
+        }
+
+        startPositionsBackgroundLoading();
+    }
+
+    /**
+     * В фоне агрегирует только скалярные значения взаимодействий. Entity-графы
+     * кандидата, резюме и вакансий между потоками не передаются.
+     */
+    private void startPositionsBackgroundLoading() {
+        if (positionsTabLoading || positionsTabLoaded) {
+            return;
+        }
+
+        UUID candidateId = getEditedEntity().getId();
+        positionsTabLoading = true;
+
+        BackgroundTask<Void, Map<UUID, HistoryRowData>> task =
+                new BackgroundTask<Void, Map<UUID, HistoryRowData>>(
+                        60, TimeUnit.SECONDS, this) {
+                    @Override
+                    public Map<UUID, HistoryRowData> run(TaskLifeCycle<Void> taskLifeCycle) {
+                        DataManager bgDataManager = AppBeans.get(DataManager.class);
+                        List<KeyValueEntity> rows = bgDataManager.loadValues(
+                                "select vacancy.id, vacancy.vacansyName, e.dateIteraction, " +
+                                        "interactionType.iterationName, " +
+                                        "interactionType.signOurInterviewAssigned, " +
+                                        "interactionType.signOurInterview, " +
+                                        "recruiter.name, e.recrutierName " +
+                                        "from hunttech_IteractionList e " +
+                                        "left join e.vacancy vacancy " +
+                                        "left join e.iteractionType interactionType " +
+                                        "left join e.recrutier recruiter " +
+                                        "where e.candidate.id = :candidateId " +
+                                        "and vacancy.id is not null " +
+                                        "and vacancy.vacansyName not like 'Default' " +
+                                        "order by e.dateIteraction desc")
+                                .properties(
+                                        "vacancyId",
+                                        "vacancyName",
+                                        "dateIteraction",
+                                        "interactionName",
+                                        "signResearcher",
+                                        "signRecruiter",
+                                        "recruiterName",
+                                        "legacyRecruiterName")
+                                .parameter("candidateId", candidateId)
+                                .list();
+                        return buildHistoryRowData(rows);
+                    }
+
+                    @Override
+                    public void done(Map<UUID, HistoryRowData> result) {
+                        historyRowDataByVacancy = result != null
+                                ? result : Collections.emptyMap();
+                        positionsTabLoading = false;
+                        positionsTabLoaded = true;
+
+                        // UI-loader'ы запускаются только на UI-потоке и только
+                        // после установки обязательных параметров.
+                        try {
+                            lastProjectDl.setParameter("candidate", getEditedEntity());
+                            lastProjectDl.load();
+                            setLastProjectOfCandidate();
+                            setSuggestOpenPositionTable();
+                            lastProjectTable.repaint();
+                            suggestVacancyTable.repaint();
+                        } catch (RuntimeException loaderException) {
+                            // Разрешаем повторное открытие вкладки после временной ошибки БД.
+                            positionsTabLoaded = false;
+                            log.error("Не удалось применить данные вкладки позиций, candidateId={}",
+                                    candidateId, loaderException);
+                            notifications.create(Notifications.NotificationType.ERROR)
+                                    .withCaption(messageBundle.getMessage("msgError"))
+                                    .withDescription("Не удалось загрузить позиции и вакансии кандидата")
+                                    .show();
+                        }
+                    }
+
+                    @Override
+                    public boolean handleException(Exception exception) {
+                        positionsTabLoading = false;
+                        log.error("Не удалось загрузить вкладку позиций кандидата, candidateId={}",
+                                candidateId, exception);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption(messageBundle.getMessage("msgError"))
+                                .withDescription("Не удалось загрузить историю позиций кандидата")
+                                .show();
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(task).execute();
+    }
+
+    /** Один раз агрегирует значения для генераторов колонок истории. */
+    private Map<UUID, HistoryRowData> buildHistoryRowData(List<KeyValueEntity> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<UUID, HistoryAccumulator> accumulators = new LinkedHashMap<>();
+        for (KeyValueEntity row : rows) {
+            UUID vacancyId = row.getValue("vacancyId");
+            if (vacancyId == null) {
+                continue;
+            }
+
+            HistoryAccumulator accumulator = accumulators.computeIfAbsent(
+                    vacancyId,
+                    id -> new HistoryAccumulator(id, row.getValue("vacancyName")));
+
+            Date interactionDate = row.getValue("dateIteraction");
+            if (accumulator.maxDate == null
+                    || interactionDate != null && interactionDate.after(accumulator.maxDate)) {
+                accumulator.maxDate = interactionDate;
+                accumulator.lastInteractionName = row.getValue("interactionName");
+            }
+
+            String employeeName = row.getValue("recruiterName");
+            if (employeeName == null || employeeName.trim().isEmpty()) {
+                employeeName = row.getValue("legacyRecruiterName");
+            }
+
+            if (accumulator.researcherName == null
+                    && Boolean.TRUE.equals(row.getValue("signResearcher"))) {
+                accumulator.researcherName = employeeName;
+            }
+            if (accumulator.recruiterName == null
+                    && Boolean.TRUE.equals(row.getValue("signRecruiter"))) {
+                accumulator.recruiterName = employeeName;
+            }
+        }
+
+        Map<UUID, HistoryRowData> result = new LinkedHashMap<>();
+        for (HistoryAccumulator accumulator : accumulators.values()) {
+            result.put(accumulator.vacancyId, new HistoryRowData(
+                    accumulator.vacancyId,
+                    accumulator.vacancyName,
+                    accumulator.maxDate,
+                    accumulator.lastInteractionName,
+                    accumulator.researcherName,
+                    accumulator.recruiterName));
+        }
+        return result;
+    }
+
+    /** Внутренняя изменяемая модель для единственного прохода по строкам JPQL. */
+    private static final class HistoryAccumulator {
+        final UUID vacancyId;
+        final String vacancyName;
+        Date maxDate;
+        String lastInteractionName;
+        String researcherName;
+        String recruiterName;
+
+        HistoryAccumulator(UUID vacancyId, String vacancyName) {
+            this.vacancyId = vacancyId;
+            this.vacancyName = vacancyName;
+        }
     }
 
     private List<SocialNetworkURLs> ensureSocialNetworksLoaded() {
@@ -1429,11 +1685,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 getEditedEntity().getPositionList() : Collections.emptyList();
     }
 
-    // ── Positions tab background loading ──────────────────────────────
-    // TODO[tabPositions]: Все методы вкладки «Позиции и вакансии» отключены.
-    // Полный код сохранён в git-истории (HEAD~1).
-
-
     private void setupCurrentCompanySearchExecutor() {
         if (currentCompanyField == null) {
             return;
@@ -1456,10 +1707,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
         TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
         if (selectedTab != null && "commentsTab".equals(selectedTab.getName())) {
-            // Comments and vacancy picker are needed only when the comments tab is opened.
+            chatMessageTextField = (TextField<String>) getWindow().getComponentNN("chatMessageTextField");
+            sendCommentButton = (Button) getWindow().getComponentNN("sendCommentButton");
+            vacancyPopupPickerField = (LookupPickerField<OpenPosition>) getWindow()
+                    .getComponentNN("vacancyPopupPickerField");
+            jobCandidateCommentsDataGrid = (DataGrid<IteractionList>) getWindow()
+                    .getComponentNN("jobCandidateCommentsDataGrid");
+
+            chatMessageTextField.addValueChangeListener(this::onChatMessageTextFieldValueChange);
+            chatMessageTextField.addEnterPressListener(this::onChatMessageTextFieldEnterPress);
+            vacancyPopupPickerField.setOptionIconProvider(this::vacancyPopupPickerFieldOptionIconProvider);
+            jobCandidateCommentsDataGrid.getColumn("comment")
+                    .setStyleProvider(this::jobCandidateCommentsDataGridCommentStyleProvider);
+
+            commentsTabInitialized = true;
             ensureOpenPositionLoaded();
             initInteractionCommentDl();
-            commentsTabInitialized = true;
         }
     }
 
@@ -1468,71 +1731,48 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (selectedTab == null || !"tabContactInfo".equals(selectedTab.getName())) {
             return;
         }
-        if (!tabContactInfoInitialized) {
-            ensureSocialNetworksLoaded();
-            if (emailField == null) {
-                emailField = (TextField<String>) getWindow().getComponent("emailField");
-            }
-            emailField.addTextChangeListener(e -> enableDisableContacts());
-
-            if (phoneField == null) {
-                phoneField = (TextField<String>) getWindow().getComponent("phoneField");
-            }
-            phoneField.addTextChangeListener(e -> enableDisableContacts());
-
-            if (skypeNameField == null) {
-                skypeNameField = (TextField<String>) getWindow().getComponent("skypeNameField");
-            }
-            skypeNameField.addTextChangeListener(e -> enableDisableContacts());
-
-            if (telegramNameField == null) {
-                telegramNameField = (TextField<String>) getWindow().getComponent("telegramNameField");
-            }
-            telegramNameField.addTextChangeListener(e -> enableDisableContacts());
-
-            if (whatsupNameField == null) {
-                whatsupNameField = (TextField<String>) getWindow().getComponent("whatsupNameField");
-            }
-            whatsupNameField.addTextChangeListener(e -> enableDisableContacts());
-
-            if (wiberNameField == null) {
-                wiberNameField = (TextField<String>) getWindow().getComponent("wiberNameField");
-            }
-            wiberNameField.addTextChangeListener(e -> enableDisableContacts());
-
-            if (priorityCommunicationMethodRadioButton == null) {
-                priorityCommunicationMethodRadioButton = (RadioButtonGroup) getWindow()
-                        .getComponent("priorityCommunicationMethodRadioButton");
-            }
-            priorityCommenicationMethodRadioButtonInit();
-
-            if (telegramGroupField == null) {
-                telegramGroupField = (TextField<String>) getWindow().getComponent("telegramGroupField");
-            }
-            telegramGroupField.addTextChangeListener(e -> enableDisableContacts());
-
-            if (mobilePhoneField == null) {
-                mobilePhoneField = (TextField<String>) getWindow().getComponent("mobilePhoneField");
-            }
-            mobilePhoneField.addTextChangeListener(e -> enableDisableContacts());
-
-
-            if (socialNetworkTable == null) {
-                socialNetworkTable = (DataGrid<SocialNetworkURLs>) getWindow()
-                        .getComponent("socialNetworkTable");
-            }
-
-            socialNetworkTable.addEditorCloseListener(e -> enableDisableContacts());
-            socialNetworkTable.addEditorPostCommitListener(e -> enableDisableContacts());
-            socialNetworkTable.addSelectionListener(e -> enableDisableContacts());
-
-            trimTelegramName();
-            enableDisableContacts();
-            initSocialNeiworkTable();
-            setAddSocialNetworkButtonEnable();
+        if (tabContactInfoInitialized) {
+            return;
         }
 
+        emailField = (TextField<String>) getWindow().getComponentNN("emailField");
+        phoneField = (TextField<String>) getWindow().getComponentNN("phoneField");
+        mobilePhoneField = (TextField<String>) getWindow().getComponentNN("mobilePhoneField");
+        telegramNameField = (TextField<String>) getWindow().getComponentNN("telegramNameField");
+        whatsupNameField = (TextField<String>) getWindow().getComponentNN("whatsupNameField");
+        wiberNameField = (TextField<String>) getWindow().getComponentNN("wiberNameField");
+        skypeNameField = (TextField<String>) getWindow().getComponentNN("skypeNameField");
+        priorityCommunicationMethodRadioButton = (RadioButtonGroup<Integer>) getWindow()
+                .getComponentNN("priorityCommunicationMethodRadioButton");
+        socialNetworkTable = (DataGrid<SocialNetworkURLs>) getWindow().getComponentNN("socialNetworkTable");
+        addSocialNetworkListsButton = (Button) getWindow().getComponentNN("addSocialNetworkListsButton");
+
+        emailField.addTextChangeListener(e -> enableDisableContacts());
+        phoneField.addTextChangeListener(e -> enableDisableContacts());
+        mobilePhoneField.addTextChangeListener(e -> enableDisableContacts());
+        telegramNameField.addTextChangeListener(e -> enableDisableContacts());
+        whatsupNameField.addTextChangeListener(e -> enableDisableContacts());
+        wiberNameField.addTextChangeListener(e -> enableDisableContacts());
+        skypeNameField.addTextChangeListener(e -> enableDisableContacts());
+
+        phoneField.addValueChangeListener(this::onPhoneFieldValueChange);
+        mobilePhoneField.addValueChangeListener(this::onMobilePhoneFieldValueChange1);
+        emailField.addValueChangeListener(this::onEmailFieldValueChange);
+        mobilePhoneField.addValueChangeListener(this::onMobilePhoneFieldValueChange);
+        skypeNameField.addValueChangeListener(this::onSkypeNameFieldValueChange);
+        telegramNameField.addValueChangeListener(this::onTelegramNameFieldValueChange);
+
+        socialNetworkTable.addEditorCloseListener(e -> enableDisableContacts());
+        socialNetworkTable.addEditorPostCommitListener(e -> enableDisableContacts());
+        socialNetworkTable.addSelectionListener(e -> enableDisableContacts());
+
+        priorityCommenicationMethodRadioButtonInit();
+        ensureSocialNetworksLoaded();
+        initSocialNeiworkTable();
+        setAddSocialNetworkButtonEnable();
+        trimTelegramName();
         tabContactInfoInitialized = true;
+        enableDisableContacts();
     }
 
     public void initSocialNeiworkTable() {
@@ -1645,6 +1885,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             setupNameSearchExecutors();
             checkNotUsePosition();
+            updateFullNameField();
+            updatePersonPositionLabel(personPositionField != null ? personPositionField.getValue() : null);
 
             if (firstNameField != null && secondNameField != null) {
                 candidateInitialized = true;
@@ -1717,7 +1959,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     public void repaintSocialNetworksTable() {
-        socialNetworkTable.repaint();
+        if (socialNetworkTable != null) {
+            socialNetworkTable.repaint();
+        }
     }
 
     private void initTabInteractions() {
@@ -1726,11 +1970,30 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             return;
         }
         if (!interationTabInitialized) {
+            jobCandidateIteractionListTable = (DataGrid<IteractionList>) getWindow()
+                    .getComponentNN("jobCandidateIteractionListTable");
+            frequentInteractionPopupButton = (PopupButton) getWindow()
+                    .getComponentNN("frequentInteractionPopupButton");
+            copyIteractionButton = (Button) getWindow().getComponentNN("copyIteractionButton");
+            vacancyFilterLookupPickerField = (LookupPickerField<OpenPosition>) getWindow()
+                    .getComponentNN("vacancyFilterLookupPickerField");
+            openPositionProjectDescriptionButton = (Button) getWindow()
+                    .getComponentNN("openPositionProjectDescriptionButton");
+
+            jobCandidateIteractionListTable.getColumn("currentOpenCloseColumn")
+                    .setColumnGenerator(this::jobCandidateIteractionListTableCurrentOpenCloseColumnColumnGenerator);
+            jobCandidateIteractionListTable.getColumn("currentOpenCloseColumn")
+                    .setStyleProvider(this::jobCandidateIteractionListTableCurrentOpenCloseColumnStyleProvider);
+            jobCandidateIteractionListTable.getColumn("currentOpenCloseColumn")
+                    .setDescriptionProvider(this::jobCandidateIteractionListTableCurrentOpenCloseColumnDescriptionProvider);
+            jobCandidateIteractionListTable.getColumn("vacancy")
+                    .setStyleProvider(this::jobCandidateIteractionListTableVacancyStyleProvider);
+            jobCandidateIteractionListTable.getColumn("iteractionType")
+                    .setStyleProvider(this::jobCandidateIteractionListTableIteractionTypeStyleProvider);
+            vacancyFilterLookupPickerField
+                    .setOptionImageProvider(this::vacancyFilterLookupPickerFieldOptionImageProvider);
+
             ensureInteractionsLoaded();
-            if (jobCandidateIteractionListTable == null) {
-                jobCandidateIteractionListTable = (DataGrid<IteractionList>) getWindow()
-                        .getComponent("jobCandidateIteractionListTable");
-            }
 
             addIconColumn();
 
@@ -1842,28 +2105,25 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             return;
         }
         if (!cvTabInitialized) {
+            jobCandidateCandidateCvTable = (DataGrid<CandidateCV>) getWindow()
+                    .getComponentNN("jobCandidateCandidateCvTable");
+            scanContactsFromCVButton = (Button) getWindow().getComponentNN("scanContactsFromCVButton");
+            copyCVButton = (Button) getWindow().getComponentNN("copyCVButton");
+            checkSkillFromJD = (Button) getWindow().getComponentNN("checkSkillFromJD");
+
+            jobCandidateCandidateCvTable.getColumn("toVacancy")
+                    .setDescriptionProvider(this::jobCandidateCandidateCvTableToVacancyDescriptionProvider);
+            jobCandidateCandidateCvTable.getColumn("resumePosition")
+                    .setDescriptionProvider(this::jobCandidateCandidateCvTableResumePositionDescriptionProvider);
+            jobCandidateCandidateCvTable.getColumn("toVacancy")
+                    .setStyleProvider(this::jobCandidateCandidateCvTableToVacancyStyleProvider);
             ensureCandidateCvLoaded();
-            if (scanContactsFromCVButton == null) {
-                scanContactsFromCVButton = (Button) getWindow()
-                        .getComponent("scanContactsFromCVButton");
-            }
             scanContactsFromCVButton.addClickListener(e -> scanContactsFromCVs());
 
-            if (copyCVButton == null) {
-                copyCVButton = (Button) getWindow().getComponent("copyCVButton");
-            }
             copyCVButton.addClickListener(e -> copyCVJobCandidate());
             setCopyCVButton();
 
-            if (checkSkillFromJD == null) {
-                checkSkillFromJD = (Button) getWindow().getComponent("checkSkillFromJD");
-            }
             checkSkillFromJD.addClickListener(e -> checkSkillFromJD());
-
-            if (jobCandidateCandidateCvTable == null) {
-                jobCandidateCandidateCvTable = (DataGrid<CandidateCV>) getWindow()
-                        .getComponent("jobCandidateCandidateCvTable");
-            }
 
             jobCandidateCandidateCvTable.addItemClickListener(e -> {
                 if (e.getItem() != null) {
@@ -1952,43 +2212,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         return candidateCV.getLetter() != null ? "pic-center-large-green" : "pic-center-large-red";
                     });
 
-            jobCandidateCandidateCvTable.getColumn("candidateHuntTechCVColumn")
-                    .setColumnGenerator(event -> {
-                        Link link = uiComponents.create(Link.NAME);
-
-                        if (event.getItem().getLinkHuntTechCV() != null) {
-                            String url = event.getItem().getLinkHuntTechCV();
-
-                            link.setUrl(url);
-                            link.setCaption("CV HuntTech");
-                            link.setTarget("_blank");
-                            link.setWidthAuto();
-                            link.setVisible(true);
-                        } else {
-                            link.setVisible(false);
-                        }
-
-                        return link;
-                    });
-
-            jobCandidateCandidateCvTable.getColumn("candidateOriginalCVColumn")
-                    .setColumnGenerator(event -> {
-                        Link link = uiComponents.create(Link.NAME);
-
-                        if (event.getItem().getLinkOriginalCv() != null) {
-                            String url = event.getItem().getLinkOriginalCv();
-
-                            link.setUrl(url);
-                            link.setCaption("Оригинальное CV");
-                            link.setTarget("_blank");
-                            link.setWidthAuto();
-                            link.setVisible(true);
-                        } else {
-                            link.setVisible(false);
-                        }
-
-                        return link;
-                    });
         }
 
         cvTabInitialized = true;
@@ -2174,23 +2397,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         iconColumn.setRenderer(jobCandidateIteractionListTable.createRenderer(DataGrid.ImageRenderer.class));
     }
 
-    @Subscribe("fileImageFaceUpload")
-    public void onFileImageFaceUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        try {
-
-            candidateDefaultPic.setVisible(false);
-            candidatePic.setVisible(true);
-
-            FileDescriptorResource fileDescriptorResource = candidatePic.createResource(FileDescriptorResource.class)
-                    .setFileDescriptor(fileImageFaceUpload.getFileDescriptor());
-
-            candidatePic.setSource(fileDescriptorResource);
-
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void setLastProjectTable() {
         lastProjectDl.setParameter("candidate", getEditedEntity());
         lastProjectDl.load();
@@ -2200,7 +2406,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         blockCandidateCheckBox.setValue(b);
         blockCandidateButton.setCaption(b ? BLOCK_CANDIDATE_OFF : BLOCK_CANDIDATE_ON);
         blockCandidateButton.setIcon(b ? CubaIcon.ENABLE_EDITING.source() : CubaIcon.CLOSE.source());
-        iteractionListLabelCandidate.setStyleName(b ? "h2-red" : "h2");
+        updateFullNameStyle(b);
     }
 
     private void setLinkButtonSkype() {
@@ -2492,7 +2698,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         int intRating = (int) Math.round(avgRating);
 
         if (intRating > 0) {
-            candidateRatingLabel.setValue(String.valueOf(intRating));
+            candidateRatingLabel.setValue("");
             switch (intRating) {
                 case 1:
                     candidateRatingLabel.setStyleName("rating_candidate_red_1");
@@ -2513,12 +2719,14 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     break;
             }
         } else {
-            candidateRatingLabel.setValue("0.0");
+            candidateRatingLabel.setValue("");
             candidateRatingLabel.setStyleName("rating_red_1");
         }
     }
 
     public void scanContactsFromCVs() {
+        ensureSocialNetworksLoaded();
+
         String newPhone = null,
                 newEmail = null;
         Company newCompany = null;
@@ -2566,6 +2774,30 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
+    private String getCandidateEmailValue() {
+        return emailField != null ? emailField.getValue() : getEditedEntity().getEmail();
+    }
+
+    private void setCandidateEmailValue(String email) {
+        if (emailField != null) {
+            emailField.setValue(email);
+        } else {
+            getEditedEntity().setEmail(email);
+        }
+    }
+
+    private String getCandidatePhoneValue() {
+        return phoneField != null ? phoneField.getValue() : getEditedEntity().getPhone();
+    }
+
+    private void setCandidatePhoneValue(String phone) {
+        if (phoneField != null) {
+            phoneField.setValue(phone);
+        } else {
+            getEditedEntity().setPhone(phone);
+        }
+    }
+
     private void makeDialogNewEmailPhone1(String newEmail,
                                           String newPhone,
                                           Company newCompany,
@@ -2579,19 +2811,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         HashMap<String, List<String>> messageSocial = new HashMap<>();
 
         String newPhoneNew = parseCVService.normalizePhoneStr(newPhone);
-        String oldEmail = null;
-        if (emailField == null) {
-            initTabContactInfo();
-        }
-
-        oldEmail = emailField.getValue();
-
-        String oldPhone = null;
-        if (phoneField == null) {
-            initTabContactInfo();
-        }
-
-        oldPhone = parseCVService.normalizePhoneStr(phoneField.getValue());
+        String oldEmail = getCandidateEmailValue();
+        String oldPhone = parseCVService.normalizePhoneStr(getCandidatePhoneValue());
 
         Boolean flag = false;
 
@@ -2681,7 +2902,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             if (newEmail != null) {
                 if (!StringUtils.equals(newEmail, oldEmail)) {
-                    if (!newEmail.equals(emailField != null ? emailField.getValue() : null)) {
+                    if (!newEmail.equals(oldEmail)) {
                         dialog.withParameter(InputParameter.booleanParameter("newEmail")
                                 .withCaption(messageEmail).withRequired(true));
                     }
@@ -2710,23 +2931,13 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
                     if (newEmailFlag != null) {
                         if (newEmailFlag) {
-                            if (emailField != null) {
-                                emailField.setValue(newEmail);
-                            } else {
-                                initTabContactInfo();
-                                emailField.setValue(newEmail);
-                            }
+                            setCandidateEmailValue(newEmail);
                         }
                     }
 
                     if (newPhoneFlag != null) {
                         if (newPhoneFlag) {
-                            if (phoneField != null) {
-                                phoneField.setValue(newPhoneNew);
-                            } else {
-                                initTabContactInfo();
-                                phoneField.setValue(newPhoneNew);
-                            }
+                            setCandidatePhoneValue(newPhoneNew);
                         }
                     }
 
@@ -2837,6 +3048,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     public void scanContactsFromCV() {
+        ensureSocialNetworksLoaded();
+
         String message = "<b>В резюме есть новые контактные данные кандидата: </b><br><br>";
         StringBuilder messageSB = new StringBuilder(message);
         String textCVAll = "";
@@ -2908,11 +3121,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         if (newEmail != null) {
-            if (!newEmail.equals(emailField.getValue())) {
+            if (!newEmail.equals(getCandidateEmailValue())) {
                 message = new StringBuilder(message)
                         .append("<i> - адрес электронной почты старый </i>")
                         .append("<b>")
-                        .append(emailField.getValue())
+                        .append(getCandidateEmailValue())
                         .append("</b>")
                         .append(" новый ")
                         .append("<b>")
@@ -2933,7 +3146,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         if (newPhone != null) {
             if (parseCVService.normalizePhoneStr(newPhone)
-                    .equals(parseCVService.normalizePhoneStr(phoneField.getValue()))) {
+                    .equals(parseCVService.normalizePhoneStr(getCandidatePhoneValue()))) {
 /*                message = message
                         + messageBundle.getMessage("msgOldPhone")
                         + "<b>" + phoneField.getValue() + "</b>"
@@ -2944,7 +3157,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 message = new StringBuilder(message)
                         .append(messageBundle.getMessage("msgOldPhone"))
                         .append("<b>")
-                        .append(phoneField.getValue())
+                        .append(getCandidatePhoneValue())
                         .append("</b>")
                         .append(" ")
                         .append(messageBundle.getMessage("msgNew"))
@@ -2972,8 +3185,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                             + "<b>Заменить в карточке кандидата?</b>")*/
                     .withContentMode(ContentMode.HTML)
                     .withActions(new DialogAction(DialogAction.Type.OK, Action.Status.PRIMARY).withHandler(e -> {
-                        phoneField.setValue(finalNewPhone);
-                        emailField.setValue(finalNewEmail);
+                        setCandidatePhoneValue(finalNewPhone);
+                        setCandidateEmailValue(finalNewEmail);
                     }), new DialogAction(DialogAction.Type.CANCEL).withHandler(f -> {
                     }))
                     .show();
@@ -2987,7 +3200,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Subscribe("phoneField")
     public void onPhoneFieldValueChange(HasValue.ValueChangeEvent<String> event) {
         if (event.getValue() != null) {
             if (!phoneField
@@ -3000,7 +3212,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
 
-    @Subscribe("mobilePhoneField")
     public void onMobilePhoneFieldValueChange1(HasValue.ValueChangeEvent<String> event) {
         if (event.getValue() != null) {
             if (!mobilePhoneField
@@ -3012,7 +3223,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Install(to = "socialNetworkTable.linkToWeb", subject = "columnGenerator")
     private Component socialNetworkTableLinkToWebColumnGenerator
             (DataGrid.ColumnGeneratorEvent<SocialNetworkURLs> event) {
         LinkButton linkButton = uiComponents.create(LinkButton.class);
@@ -3105,15 +3315,61 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         blockCandidateCheckBox.setValue(checkBlockCanidate == null ? false : checkBlockCanidate);
         blockCandidateButton.setCaption(!checkBlockCanidate ? BLOCK_CANDIDATE_ON : BLOCK_CANDIDATE_OFF);
         blockCandidateButton.setIcon(!checkBlockCanidate ? CubaIcon.ENABLE_EDITING.source() : CubaIcon.CLOSE.source());
-        jobCandidateIteractionListTable.setEnabled(!checkBlockCanidate);
-        iteractionListLabelCandidate.setStyleName(checkBlockCanidate ? "h2-red" : "h2");
+        if (jobCandidateIteractionListTable != null) {
+            jobCandidateIteractionListTable.setEnabled(!checkBlockCanidate);
+        }
+        updateFullNameStyle(checkBlockCanidate);
 
+    }
+
+    /**
+     * Applies the blocked/unblocked visual state without losing the profile layout class.
+     * CUBA's setStyleName() replaces every existing style name, therefore the stable profile
+     * class is restored first and the state-specific h2/h2-red class is added separately.
+     */
+    void updateFullNameStyle(boolean blocked) {
+        fullNameField.setStyleName("job-candidate-profile-name");
+        fullNameField.addStyleName(blocked ? "h2-red" : "h2");
     }
 
     public void openPositionMasterBrowseStart() {
         OpenPositionMasterBrowse openPositionMasterBrowse = screens.create(OpenPositionMasterBrowse.class);
         openPositionMasterBrowse.setJobCandidate(getEditedEntity());
         openPositionMasterBrowse.show();
+    }
+
+    public void createCandidateCv() {
+        ensureCandidateCvLoaded();
+
+        screenBuilders.editor(CandidateCV.class, this)
+                .newEntity()
+                .withContainer(jobCandidateCandidateCvsDc)
+                .withInitializer(candidateCv -> candidateCv.setCandidate(getEditedEntity()))
+                .withScreenClass(CandidateCVEdit.class)
+                .withAfterCloseListener(event -> {
+                    if (jobCandidateCandidateCvTable != null) {
+                        jobCandidateCandidateCvTable.repaint();
+                    }
+                })
+                .build()
+                .show();
+    }
+
+    public void createCandidateIteraction() {
+        ensureInteractionsLoaded();
+
+        screenBuilders.editor(IteractionList.class, this)
+                .newEntity()
+                .withContainer(jobCandidateIteractionDc)
+                .withInitializer(iteraction -> iteraction.setCandidate(getEditedEntity()))
+                .withScreenClass(IteractionListEdit.class)
+                .withAfterCloseListener(event -> {
+                    if (jobCandidateIteractionListTable != null) {
+                        jobCandidateIteractionListTable.repaint();
+                    }
+                })
+                .build()
+                .show();
     }
 
     public Component whoIsResearcherGeneratorColumn(Entity entity) {
@@ -3200,7 +3456,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
 
-    @Install(to = "jobCandidateIteractionListTable.currentOpenCloseColumn", subject = "columnGenerator")
     private Icons.Icon jobCandidateIteractionListTableCurrentOpenCloseColumnColumnGenerator(
             DataGrid.ColumnGeneratorEvent<IteractionList> columnGeneratorEvent) {
 
@@ -3219,7 +3474,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Install(to = "jobCandidateIteractionListTable.currentOpenCloseColumn", subject = "styleProvider")
     private String jobCandidateIteractionListTableCurrentOpenCloseColumnStyleProvider(
             IteractionList iteractionList) {
 
@@ -3238,7 +3492,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Install(to = "jobCandidateIteractionListTable.currentOpenCloseColumn", subject = "descriptionProvider")
     private String jobCandidateIteractionListTableCurrentOpenCloseColumnDescriptionProvider(IteractionList iteractionList) {
 
         if (iteractionList.getCurrentOpenClose() != null) {
@@ -3257,42 +3510,47 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Install(to = "suggestVacancyTable", subject = "itemDescriptionProvider")
     private String suggestVacancyTableItemDescriptionProvider(OpenPosition openPosition, String string) {
-//        String retStr = "<b>Вакансия:</b><br><br>";
         StringBuilder sb = new StringBuilder("<b>Вакансия:</b><br><br>");
-
         sb.append("<i>")
-                .append(openPosition.getVacansyName())
-                .append("</i><br>")
-                .append("<i>Проект: </i>")
-                .append(openPosition.getProjectName().getProjectName())
-                .append("<br><i>Ответственный за проект у заказчика:</i>")
-                .append(openPosition.getProjectName().getProjectOwner().getSecondName())
-                .append(" ")
-                .append(openPosition.getProjectName().getProjectOwner().getFirstName())
-                .append("<br><i>Ответственный за проект на нашей стороне: </i>")
-                .append(openPosition.getOwner().getName())
-                .append("<br><i>Дата открытия вакансии: ")
-                .append(openPosition.getLastOpenDate())
-                .append("<br><br><i>Описание вакансии: </i><br>")
-                .append(openPosition.getComment());
+                .append(openPosition.getVacansyName() != null ? openPosition.getVacansyName() : "")
+                .append("</i><br>");
 
-/*        retStr += "<i>" + openPosition.getVacansyName() + "</i><br>"
-                + "<i>Проект: </i>" + openPosition.getProjectName().getProjectName()
-                + "<br><i>Ответственный за проект у заказчика:</i>"
-                + openPosition.getProjectName().getProjectOwner().getSecondName()
-                + openPosition.getProjectName().getProjectOwner().getSecondName()
-                + "<br><i>Ответственный за проект на нашей стороне: </i>"
-                + openPosition.getOwner().getName()
-                + "<br><i>Дата открытия вакансии: "
-                + openPosition.getLastOpenDate()
-                + "<br><br><i>Описание вакансии: </i><br>" + openPosition.getComment();*/
+        Project project = openPosition.getProjectName();
+        if (project != null) {
+            sb.append("<i>Проект: </i>")
+                    .append(project.getProjectName() != null ? project.getProjectName() : "")
+                    .append("<br>");
+
+            Person projectOwner = project.getProjectOwner();
+            if (projectOwner != null) {
+                sb.append("<i>Ответственный за проект у заказчика: </i>")
+                        .append(projectOwner.getSecondName() != null ? projectOwner.getSecondName() : "")
+                        .append(" ")
+                        .append(projectOwner.getFirstName() != null ? projectOwner.getFirstName() : "")
+                        .append("<br>");
+            }
+        }
+
+        if (openPosition.getOwner() != null) {
+            sb.append("<i>Ответственный за проект на нашей стороне: </i>")
+                    .append(openPosition.getOwner().getName() != null
+                            ? openPosition.getOwner().getName() : "")
+                    .append("<br>");
+        }
+        if (openPosition.getLastOpenDate() != null) {
+            sb.append("<i>Дата открытия вакансии: </i>")
+                    .append(openPosition.getLastOpenDate())
+                    .append("<br>");
+        }
+        if (openPosition.getComment() != null) {
+            sb.append("<br><i>Описание вакансии: </i><br>")
+                    .append(openPosition.getComment());
+        }
 
         return sb.toString();
     }
 
-    @Install(to = "suggestVacancyTable.notSendedIconColumn", subject = "columnGenerator")
     private Component suggestVacancyTableNotSendedIconColumnColumnGenerator(OpenPosition openPosition) {
         String retStr = "font-icon:CHECK";
         String retStyle = "h2-green";
@@ -3338,7 +3596,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return retIcon;
     }
 
-    @Install(to = "jobCandidateCandidateCvTable.toVacancy", subject = "descriptionProvider")
     private String jobCandidateCandidateCvTableToVacancyDescriptionProvider(CandidateCV candidateCV) {
 //        String retStr = (candidateCV.getToVacancy() != null ? candidateCV.getToVacancy().getVacansyName() : "");
         StringBuilder sb = new StringBuilder((candidateCV.getToVacancy() != null ? candidateCV.getToVacancy().getVacansyName() : ""));
@@ -3354,12 +3611,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return sb.toString();
     }
 
-    @Install(to = "jobCandidateIteractionListTable.vacancy", subject = "styleProvider")
     private String jobCandidateIteractionListTableVacancyStyleProvider(IteractionList iteractionList) {
         return "table-wordwrap";
     }
 
-    @Install(to = "jobCandidateCandidateCvTable.resumePosition", subject = "descriptionProvider")
     private String jobCandidateCandidateCvTableResumePositionDescriptionProvider(CandidateCV candidateCV) {
 //        String retStr = "";
         StringBuilder sb = new StringBuilder();
@@ -3383,22 +3638,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return sb.length() != 0 ? sb.toString() : "";
     }
 
-    @Install(to = "jobCandidateCandidateCvTable.toVacancy", subject = "styleProvider")
     private String jobCandidateCandidateCvTableToVacancyStyleProvider(CandidateCV candidateCV) {
         return "table-wordwrap";
     }
 
-    @Install(to = "jobCandidateIteractionListTable.iteractionType", subject = "styleProvider")
     private String jobCandidateIteractionListTableIteractionTypeStyleProvider(IteractionList iteractionList) {
         return "table-wordwrap";
     }
 
-    @Install(to = "jobCandidateCommentsDataGrid.comment", subject = "styleProvider")
     private String jobCandidateCommentsDataGridCommentStyleProvider(IteractionList iteractionList) {
         return "table-wordwrap";
     }
 
-    @Install(to = "jobCandidateCommentsDataGrid.commentDialog", subject = "columnGenerator")
     private Component jobCandidateCommentsDataGridCommentDialogColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
         VBoxLayout retBox = uiComponents.create(VBoxLayout.class);
         retBox.setWidthFull();
@@ -3534,7 +3785,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         createComment(replyStr);
     }
 
-    @Subscribe("chatMessageTextField")
     public void onChatMessageTextFieldValueChange(HasValue.ValueChangeEvent<String> event) {
         if (event.getValue() == null || event.getValue().equals("")) {
             sendCommentButton.setEnabled(false);
@@ -3543,7 +3793,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Subscribe("chatMessageTextField")
     public void onChatMessageTextFieldEnterPress(TextInputField.EnterPressEvent event) {
         dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
                 .withCaption(messageBundle.getMessage("msgQuuestionSendMessage"))
@@ -3636,7 +3885,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             dataContext.commit();
             jobCandidateDl.load();
         }
-        jobCandidateCandidateCvTable.repaint();
+        if (jobCandidateCandidateCvTable != null) {
+            jobCandidateCandidateCvTable.repaint();
+        }
     }
 
     private void reloadInteractions() {
@@ -3645,8 +3896,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             interactionCommentDl.load();
             jobCandidateDl.load();
         }
-        jobCandidateCommentsDataGrid.repaint();
-        jobCandidateIteractionListTable.repaint();
+        if (jobCandidateCommentsDataGrid != null) {
+            jobCandidateCommentsDataGrid.repaint();
+        }
+        if (jobCandidateIteractionListTable != null) {
+            jobCandidateIteractionListTable.repaint();
+        }
     }
 
     public void setFirstNameField(List<String> suggestFirstNames) {
@@ -3659,14 +3914,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             setFullNameCandidate();
         }
 
-        StringBuffer fullName = new StringBuffer();
-
-        fullName.append(event.getValue())
-                .append(" ")
-                .append(secondNameField.getValue());
-
-        iteractionListLabelCandidate.setValue(fullName.toString());
-        fullNameField.setValue(fullName.toString());
+        updateFullNameField();
     }
 
     @Subscribe("secondNameField")
@@ -3675,17 +3923,77 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             setFullNameCandidate();
         }
 
-        StringBuffer fullName = new StringBuffer();
-
-        fullName.append(firstNameField.getValue())
-                .append(" ")
-                .append(event.getValue());
-
-        iteractionListLabelCandidate.setValue(fullName.toString());
-        fullNameField.setValue(fullName.toString());
+        updateFullNameField();
     }
 
-    @Subscribe("emailField")
+    @Subscribe("personPositionField")
+    public void onPersonPositionFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
+        updatePersonPositionLabel(event.getValue());
+    }
+
+    private void updateFullNameField() {
+        String secondName = secondNameField != null && secondNameField.getValue() != null
+                ? secondNameField.getValue().trim() : "";
+        String firstName = firstNameField != null && firstNameField.getValue() != null
+                ? firstNameField.getValue().trim() : "";
+        String fullName = formatCandidateProfileName(secondName, firstName);
+
+        // Update both the denormalized entity property and the read-only sidebar presentation.
+        getEditedEntity().setFullName(fullName);
+        fullNameField.setValue(fullName);
+//        if (iteractionListLabelCandidate != null) {
+//            iteractionListLabelCandidate.setValue(fullName);
+//        }
+    }
+
+    /**
+     * Populates the read-only profile immediately from the edited entity. Reading the entity
+     * instead of tab fields makes the sidebar independent from CUBA lazy-tab creation order.
+     *
+     * @param candidate current data-container item; null clears stale values during item replacement
+     */
+    void updateCandidateProfileLabels(JobCandidate candidate) {
+        if (candidate == null) {
+            fullNameField.setValue("");
+            updatePersonPositionLabel(null);
+            return;
+        }
+
+        fullNameField.setValue(formatCandidateProfileName(
+                Objects.toString(readCandidatePropertySafely(candidate, "secondName"), ""),
+                Objects.toString(readCandidatePropertySafely(candidate, "firstName"), "")));
+        Object position = readCandidatePropertySafely(candidate, "personPosition");
+        updatePersonPositionLabel(position instanceof Position ? (Position) position : null);
+    }
+
+    /**
+     * Formats the sidebar name as "Фамилия Имя" without leading, trailing or duplicate separator
+     * spaces when either source value is null or blank.
+     */
+    static String formatCandidateProfileName(String secondName, String firstName) {
+        return (StringUtils.trimToEmpty(secondName) + " "
+                + StringUtils.trimToEmpty(firstName)).trim();
+    }
+
+    /**
+     * Displays the Russian position name and clears the label for an unassigned position.
+     */
+    private void updatePersonPositionLabel(Position position) {
+        personPositionLabel.setValue(resolvePersonPositionLabel(position));
+    }
+
+    static String resolvePersonPositionLabel(Position position) {
+        if (position == null) {
+            return "";
+        }
+        try {
+            return StringUtils.trimToEmpty(position.getPositionRuName());
+        } catch (IllegalStateException e) {
+            // Do not trigger an extra load while opening the form for an unfetched detached reference.
+            return "";
+        }
+    }
+
     public void onEmailFieldValueChange(HasValue.ValueChangeEvent<String> event) {
         if (event.getValue() != null) {
             emailLabel.setValue(event.getValue());
@@ -3699,14 +4007,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Subscribe("mobilePhoneField")
     public void onMobilePhoneFieldValueChange(HasValue.ValueChangeEvent<String> event) {
         if (event.getValue() != null) {
             mobilePhoneLabel.setValue(event.getValue());
         }
     }
 
-    @Subscribe("skypeNameField")
     public void onSkypeNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
         if (event.getValue() != null) {
             skypuLabel.setValue(event.getValue());
@@ -3714,7 +4020,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     }
 
-    @Subscribe("telegramNameField")
     public void onTelegramNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
         if (event.getValue() != null) {
             telegramLabel.setValue(event.getValue());
@@ -3732,25 +4037,21 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     public void addMissingSocialNetworksListsInvoke() {
         List<SocialNetworkType> socialNetworkTypes = dataManager
                 .load(SocialNetworkType.class)
+                .view("socialNetworkType-view")
                 .list();
 
         for (SocialNetworkType socialNetworkType : socialNetworkTypes) {
-            Boolean flag = true;
+            boolean exists = jobCandidateSocialNetworksDc.getItems().stream()
+                    .map(SocialNetworkURLs::getSocialNetworkURL)
+                    .anyMatch(socialNetworkType::equals);
 
-            for (SocialNetworkURLs socialNetworkURLs : getEditedEntity().getSocialNetwork()) {
-                if (socialNetworkURLs.getSocialNetworkURL().equals(socialNetworkType)) {
-                    flag = false;
-                }
-            }
-
-            if (flag) {
+            if (!exists) {
                 SocialNetworkURLs socialNetworkURLs = metadata.create(SocialNetworkURLs.class);
                 socialNetworkURLs.setJobCandidate(getEditedEntity());
                 socialNetworkURLs.setSocialNetworkURL(socialNetworkType);
                 socialNetworkURLs.setNetworkName(socialNetworkType.getSocialNetwork());
 
-                getEditedEntity().getSocialNetwork().add(socialNetworkURLs);
-                dataContext.merge(socialNetworkURLs);
+                jobCandidateSocialNetworksDc.getMutableItems().add(dataContext.merge(socialNetworkURLs));
             }
         }
 
@@ -3784,7 +4085,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .show();
     }
 
-    @Install(to = "vacancyPopupPickerField", subject = "optionIconProvider")
     private String vacancyPopupPickerFieldOptionIconProvider(OpenPosition openPosition) {
         if (!openPosition.getOpenClose()) {
             return CubaIcon.PLUS_CIRCLE.source();
@@ -3793,7 +4093,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    @Install(to = "jobCandidateCandidateCvTable.projectLogoColumn", subject = "columnGenerator")
     private Component jobCandidateCandidateCvTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
         retBox.setWidthFull();
@@ -3847,7 +4146,40 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return retBox;
     }
 
-    @Install(to = "jobCandidateIteractionListTable.projectLogoColumn", subject = "columnGenerator")
+    private Component jobCandidateCandidateCvTableCandidateHuntTechCvColumnGenerator(
+            DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        Link link = uiComponents.create(Link.NAME);
+
+        if (event.getItem().getLinkHuntTechCV() != null) {
+            link.setUrl(event.getItem().getLinkHuntTechCV());
+            link.setCaption("CV HuntTech");
+            link.setTarget("_blank");
+            link.setWidthAuto();
+            link.setVisible(true);
+        } else {
+            link.setVisible(false);
+        }
+
+        return link;
+    }
+
+    private Component jobCandidateCandidateCvTableCandidateOriginalCvColumnGenerator(
+            DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
+        Link link = uiComponents.create(Link.NAME);
+
+        if (event.getItem().getLinkOriginalCv() != null) {
+            link.setUrl(event.getItem().getLinkOriginalCv());
+            link.setCaption("Оригинальное CV");
+            link.setTarget("_blank");
+            link.setWidthAuto();
+            link.setVisible(true);
+        } else {
+            link.setVisible(false);
+        }
+
+        return link;
+    }
+
     private Component jobCandidateIteractionListTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
         retBox.setWidthFull();
@@ -3919,7 +4251,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return str.replaceAll("\n", breakLine[0]);
     }
 
-    @Install(to = "socialNetworkTable.socialNetworkLogoColumn", subject = "columnGenerator")
     private Component socialNetworkTableSocialNetworkLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<SocialNetworkURLs> event) {
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
         retBox.setWidthFull();
@@ -3997,10 +4328,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     public void candidateNavContactInfo() {
         selectCandidateTab("tabContactInfo");
-    }
-
-    public void candidateNavSocialNetworks() {
-        selectCandidateTab("tabSocialNetworks");
     }
 
     public void candidateNavComments() {
