@@ -2,8 +2,9 @@
 
 > Проект: **HRM HuntTech**  
 > Базовое ТЗ: [SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md](SettingWindow_AboutMe_UserAiProfile_Technical_Specification.md)  
-> Ветка реализации: `agent/settings-window-hunttech-refactor`  
-> Базовый `master`: `4b787cd7921c97f9aee9521cb5c91aecb4be31c5`  
+> Ветка первоначальной реализации: `agent/settings-window-hunttech-refactor`  
+> Ветка актуализации layout: `agent/settings-window-layout-doc-sync`  
+> Базовый `master` актуализации: `45fd67aa6a953373ecb086f4d7fef8d40605124b`  
 > Среда проверки и развертывания: строго локальная
 
 ## Business & Context Intro
@@ -27,6 +28,7 @@
 
 - открытие → профиль найден → данные отображаются;
 - профиль отсутствует → создаётся несохранённый экземпляр;
+- открытие вкладки → основной профессиональный раздел раскрыт, вторичные секции свёрнуты;
 - включение без согласия → сохранение блокируется;
 - предпросмотр → контекст формируется локально без внешнего HTTP;
 - сохранение → `ExtUser`, `UserSettings` и `UserAiProfile` передаются в единый `CommitContext`;
@@ -55,11 +57,14 @@ Legacy-сущности проекта, которые не входили в р
 
 - фиксированную левую панель 270 px;
 - аватар, имя, должность, статус и заполненность профиля;
+- вертикальный индекс разделов и отдельное предупреждение о чувствительных данных;
 - правую вертикально прокручиваемую область;
+- единый toolbar с действиями предпросмотра и очистки профиля;
 - секции профессионального профиля, рекрутинга, предпочтений ответа, целей, конфиденциальности и предпросмотра;
+- раскрытую по умолчанию первую секцию и свёрнутые вторичные аккордеоны;
 - локальные SCSS-классы с корнем `.user-ai-profile-editor`.
 
-Существующие ID `settingsTabSheet`, `msgMyInfo`, `msgInterface`, `mailAccessTab`, `okBtn`, `cancelBtn`, `userAvatarUpload`, `userPic`, `defaultPic` сохранены.
+Существующие ID `settingsTabSheet`, `msgMyInfo`, `msgInterface`, `mailAccessTab`, `okBtn`, `cancelBtn`, `userAvatarUpload`, `userPic`, `defaultPic` сохранены. ID полей, datasource, actions и invoke-контракты не изменены.
 
 ## 3. Новые свойства профиля
 
@@ -100,18 +105,18 @@ CUBA update script и Liquibase mirror создают `HUNTTECH_USER_AI_PROFILE`
 
 - компиляцию global/core/web;
 - `UserAiContextServiceBeanTest`;
-- доступный integrity-тест экрана;
+- `ScreenViewIntegrityTest` — 8/8;
 - `buildScssThemes`;
 - `clean assemble`;
-- локальный `updateDb` базы `hunttech`;
 - запуск core/web и отсутствие `RemoteAccessException`;
-- functional smoke нового дизайна;
-- отсутствие потери данных.
+- functional smoke нового дизайна в теме Halo;
+- отсутствие потери данных и горизонтальной прокрутки при ширине окна 1200 px.
 
-До выполнения этих команд результат сборки, миграции и запуска не считается подтверждённым.
+До выполнения этих команд результат сборки и запуска не считается подтверждённым.
 
 ## 7. История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-23 | `ext-settings-window.xml` синхронизирован с утверждённым ТЗ: добавлены вертикальный индекс разделов, единый toolbar, карточки-аккордеоны и локальная Halo-стилизация |
 | 2026-07-22 | Зафиксирована реализация нового дизайна `ExtSettingsWindow` и перенос контура `UserAiProfile` в namespace и БД `hunttech` |
