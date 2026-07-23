@@ -1,6 +1,6 @@
 package com.company.hunttech.entity;
 
-import com.company.itpearls.entity.ExtUser;
+import com.company.hunttech.entity.ExtUser;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import com.haulmont.cuba.core.entity.annotation.Lookup;

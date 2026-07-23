@@ -46,7 +46,6 @@
 | Рабочий production runbook или скриптовая инструкция | `deployment/` с навигационной ссылкой из `docs/operations/` |
 | Аудит, investigation, implementation report | `docs/reports/` |
 | Инструкция или карта для AI-агента | `docs/ai/` |
-# === From master ===
 # Документация HRM HuntTech
 
 Проект рекрутинговой системы **HRM HuntTech** на **CUBA Platform 7.3**.

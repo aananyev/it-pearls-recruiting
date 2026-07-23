@@ -17,7 +17,7 @@ import javax.inject.Inject;
 public class AppLoginScreen extends LoginScreen {
 
     private static final String DEFAULT_FAVICON = "./VAADIN/themes/hover/favicon.ico";
-    private static final int LOGIN_IMAGE_COUNT = 10;
+    private static final int LOGIN_IMAGE_COUNT = 20;
 
     @Inject
     protected VBoxLayout loginWrapper;
@@ -46,7 +46,7 @@ public class AppLoginScreen extends LoginScreen {
         int count = (int) (Math.random() * LOGIN_IMAGE_COUNT + 1);
         backgroundImage
                 .setSource(RelativePathResource.class)
-                .setPath("VAADIN/brand-login-screen/hunttech-ad" + count + ".png");
+                .setPath("VAADIN/brand-login-screen/recruit" + count + ".jpg");
 
 /*        FileDescriptor fileDescriptor = applicationSetupService.getActiveCompanyIcon();
 

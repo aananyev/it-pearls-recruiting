@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200">
+<title>Настройки HRM HuntTech — Обо мне</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Verdana, Tahoma, Arial, Geneva, Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    background: #E3EAF1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  /* Window frame */
+  .settings-window {
+    width: 1150px;
+    background: #ffffff;
+    border: 1px solid #9BB3D3;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    min-height: 700px;
+  }
+
+  /* Title bar */
+  .window-title {
+    background: #315379;
+    color: #ffffff;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .window-title::before {
+    content: "⚙";
+    font-size: 14px;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    background: #f0f3f6;
+    border-bottom: 1px solid #9BB3D3;
+    padding: 0 10px;
+  }
+  .tab {
+    padding: 9px 20px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    margin-right: 2px;
+    color: #555;
+    font-size: 12px;
+    transition: all 0.15s;
+    position: relative;
+    top: 1px;
+  }
+  .tab:hover { background: #e8ecf1; }
+  .tab.active {
+    background: #ffffff;
+    color: #315379;
+    font-weight: bold;
+    border-color: #9BB3D3;
+    border-bottom-color: #ffffff;
+  }
+
+  /* Content area */
+  .tab-content {
+    flex: 1;
+    overflow: hidden;
+    display: none;
+  }
+  .tab-content.active { display: flex; }
+
+  /* === TAB: Обо мне === */
+  .about-me-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  /* Left sidebar */
+  .sidebar {
+    width: 270px;
+    flex-shrink: 0;
+    padding: 18px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.06);
+    border: 1px solid rgba(127,127,127,0.22);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    height: fit-content;
+  }
+  .sidebar .avatar-zone {
+    width: 200px;
+    height: 240px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #9BB3D3;
+    position: relative;
+  }
+  .sidebar .avatar-zone img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.5;
+  }
+  .sidebar .avatar-zone .placeholder {
+    color: #999;
+    font-size: 11px;
+    text-align: center;
+    padding: 20px;
+  }
+  .sidebar .upload-btn {
+    font-size: 11px;
+    color: #4D7AB2;
+    cursor: pointer;
+    text-align: center;
+    margin-top: -4px;
+  }
+  .sidebar .name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #315379;
+    text-align: center;
+  }
+  .sidebar .position {
+    font-size: 13px;
+    color: #666;
+    text-align: center;
+  }
+  .sidebar .status {
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: rgba(47,128,237,0.10);
+    border: 1px solid rgba(47,128,237,0.22);
+    font-size: 12px;
+    color: #2F80ED;
+    text-align: center;
+    width: 100%;
+  }
+  .sidebar .completion {
+    font-size: 13px;
+    color: #666;
+    text-align: center;
+  }
+  .sidebar .confirmed {
+    font-size: 13px;
+    color: #666;
+    text-align: center;
+  }
+  .sidebar .warning {
+    font-size: 11px;
+    opacity: 0.72;
+    color: #888;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  /* Right content */
+  .content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding-left: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .content-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 0 8px 0;
+    border-bottom: 1px solid rgba(127,127,127,0.20);
+  }
+  .content-toolbar h1 {
+    font-size: 18px;
+    color: #315379;
+  }
+  .content-toolbar .desc {
+    font-size: 11px;
+    opacity: 0.72;
+    color: #666;
+    margin-top: 3px;
+  }
+  .content-toolbar .preview-btn {
+    background: #4D7AB2;
+    color: white;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .content-toolbar .preview-btn:hover {
+    background: #315379;
+  }
+
+  /* Section (groupbox) */
+  .section {
+    border: 1px solid rgba(127,127,127,0.20);
+    border-radius: 7px;
+    margin-bottom: 4px;
+  }
+  .section-header {
+    padding: 9px 14px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #315379;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+  }
+  .section-header::before {
+    content: "▾";
+    font-size: 10px;
+    transition: transform 0.2s;
+  }
+  .section.collapsed .section-header::before {
+    transform: rotate(-90deg);
+  }
+  .section.collapsed .section-body {
+    display: none;
+  }
+  .section-body {
+    padding: 10px 14px 14px;
+  }
+
+  .section.privacy {
+    border-color: rgba(230,126,34,0.35);
+    background: rgba(230,126,34,0.05);
+  }
+
+  /* Grid */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 14px;
+  }
+  .form-grid .full-width {
+    grid-column: 1 / -1;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .field label {
+    font-size: 11px;
+    color: #555;
+    font-weight: bold;
+  }
+  .field input, .field textarea, .field select {
+    font-family: Verdana, sans-serif;
+    font-size: 12px;
+    padding: 5px 8px;
+    border: 1px solid #A5C4E0;
+    border-radius: 4px;
+    background: #fff;
+    color: #222;
+  }
+  .field textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none;
+    border-color: #4D7AB2;
+    box-shadow: 0 0 0 2px rgba(77,122,178,0.15);
+  }
+  .field select {
+    height: 28px;
+  }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .checkbox-row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+  }
+
+  .danger-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+  .danger-btn:hover { background: #c0392b; }
+
+  /* Preview area */
+  .preview-area {
+    width: 100%;
+    min-height: 200px;
+    background: #f8f9fa;
+    border: 1px solid #A5C4E0;
+    border-radius: 4px;
+    padding: 12px;
+    font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+    font-size: 12px;
+    line-height: 1.35;
+    color: #333;
+    white-space: pre-wrap;
+    display: none;
+  }
+  .preview-area.visible { display: block; }
+
+  /* === TAB: Интерфейс === */
+  .interface-layout {
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .interface-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .interface-row .label {
+    width: 180px;
+    font-size: 12px;
+    color: #555;
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .interface-row input, .interface-row select {
+    font-family: Verdana, sans-serif;
+    font-size: 12px;
+    padding: 5px 10px;
+    border: 1px solid #A5C4E0;
+    border-radius: 4px;
+    background: #fff;
+  }
+  .interface-row select { width: 200px; }
+  .mode-options {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+  }
+  .mode-options label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+  .interface-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .interface-buttons button {
+    padding: 6px 16px;
+    border: 1px solid #9BB3D3;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .interface-buttons button:hover { background: #f0f3f6; }
+  .interface-buttons .danger-text { color: #e74c3c; border-color: #e74c3c; }
+
+  /* === TAB: Почта === */
+  .mail-layout {
+    padding: 20px;
+  }
+  .mail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px 14px;
+  }
+  .mail-grid .field label {
+    font-size: 11px;
+    color: #555;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  /* Footer buttons */
+  .window-footer {
+    padding: 10px 14px;
+    border-top: 1px solid #9BB3D3;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .ok-btn {
+    background: #4D7AB2;
+    color: white;
+    border: none;
+    padding: 7px 24px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .ok-btn:hover { background: #315379; }
+  .cancel-btn {
+    background: #ffffff;
+    color: #555;
+    border: 1px solid #9BB3D3;
+    padding: 7px 24px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .cancel-btn:hover { background: #f0f3f6; }
+
+  /* Scrollbar */
+  .content-area::-webkit-scrollbar { width: 8px; }
+  .content-area::-webkit-scrollbar-track { background: #f0f3f6; border-radius: 4px; }
+  .content-area::-webkit-scrollbar-thumb { background: #9BB3D3; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="settings-window">
+  <div class="window-title">Настройки</div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active">Обо мне</div>
+    <div class="tab">Интерфейс</div>
+    <div class="tab">Почта</div>
+  </div>
+
+  <!-- ============== TAB: ОБО МНЕ ============== -->
+  <div class="tab-content active">
+    <div class="about-me-layout">
+
+      <!-- Левая панель -->
+      <div class="sidebar">
+        <div class="avatar-zone">
+          <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 240'%3E%3Crect fill='%23d4dce6' width='200' height='240'/%3E%3Ccircle cx='100' cy='90' r='48' fill='%239BB3D3'/%3E%3Cellipse cx='100' cy='210' rx='55' ry='38' fill='%239BB3D3'/%3E%3C/svg%3E" alt="Аватар">
+        </div>
+        <div class="upload-btn">Загрузить аватар</div>
+
+        <div class="name">Алексей Ананьев</div>
+        <div class="position">Senior CUBA Architect</div>
+
+        <div class="status">⚪ Профиль неактивен</div>
+
+        <div class="completion">Заполнение: 30%</div>
+        <div class="confirmed">Подтверждён: не указано</div>
+
+        <div class="warning">⚠ Не указывайте пароли, API-ключи, защищённые персональные данные, сведения о кандидатах и вакансиях.</div>
+      </div>
+
+      <!-- Правая область -->
+      <div class="content-area">
+        <div class="content-toolbar">
+          <div>
+            <h1>Профессиональный профиль</h1>
+            <div class="desc">Заполните профиль, чтобы ИИ-сервисы HRM HuntTech адаптировали ответы под вашу роль, опыт и предпочтения</div>
+          </div>
+          <button class="preview-btn" onclick="togglePreview()">Предпросмотр контекста</button>
+        </div>
+
+        <!-- Профессиональный профиль -->
+        <div class="section">
+          <div class="section-header" onclick="toggleSection(this)">Профессиональный профиль</div>
+          <div class="section-body">
+            <div class="form-grid">
+              <div class="field">
+                <label>Текущая должность</label>
+                <input type="text" value="Senior CUBA Architect" maxlength="255">
+              </div>
+              <div class="field">
+                <label>Функциональная роль</label>
+                <select>
+                  <option>Рекрутер</option>
+                  <option>Ресерчер</option>
+                  <option>Руководитель рекрутмента</option>
+                  <option>Аккаунт-менеджер</option>
+                  <option>HR-менеджер</option>
+                  <option selected>Технический эксперт</option>
+                  <option>Руководитель проекта</option>
+                  <option>Руководитель</option>
+                  <option>Другая роль</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Уровень (Seniority)</label>
+                <select>
+                  <option>Junior</option>
+                  <option>Middle</option>
+                  <option selected>Senior</option>
+                  <option>Lead</option>
+                  <option>Head</option>
+                  <option>Executive</option>
+                </select>
+              </div>
+              <div style="display:flex; gap:10px;">
+                <div class="field" style="flex:1;">
+                  <label>Опыт (лет), проф.</label>
+                  <input type="number" value="15" min="0" max="70" style="width:100%">
+                </div>
+                <div class="field" style="flex:1;">
+                  <label>Опыт в рекрутменте</label>
+                  <input type="number" value="5" min="0" max="70" style="width:100%">
+                </div>
+              </div>
+              <div class="field full-width">
+                <label>Обо мне (до 2000 зн.)</label>
+                <textarea maxlength="2000" style="height:70px">Архитектор HRM HuntTech, специализируюсь на CUBA Platform, Java, PostgreSQL. Проектирую и развиваю рекрутинговую систему полного цикла.</textarea>
+              </div>
+              <div class="field">
+                <label>Текущие обязанности</label>
+                <textarea maxlength="4000" style="height:70px">Архитектура и разработка модулей рекрутинговой системы, оптимизация производительности, code review, управление техническим долгом.</textarea>
+              </div>
+              <div class="field">
+                <label>Образование</label>
+                <textarea maxlength="4000" style="height:70px">Высшее техническое, информационные системы</textarea>
+              </div>
+              <div class="field">
+                <label>Сертификаты</label>
+                <textarea maxlength="4000" style="height:60px"></textarea>
+              </div>
+              <div class="field">
+                <label>Доменная экспертиза</label>
+                <textarea maxlength="4000" style="height:60px">Рекрутинговые системы, HR-tech, CUBA Platform, Java EE</textarea>
+              </div>
+              <div class="field full-width">
+                <label>Отрасли</label>
+                <textarea maxlength="4000" style="height:55px">Информационные технологии, HR-tech, разработка ПО</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Рекрутинговая специализация -->
+        <div class="section collapsed">
+          <div class="section-header" onclick="toggleSection(this)">Рекрутинговая специализация</div>
+          <div class="section-body">
+            <div class="form-grid">
+              <div class="field">
+                <label>Специализации рекрутинга</label>
+                <textarea maxlength="4000" style="height:65px">Технический рекрутинг, Executive Search, подбор Java-разработчиков</textarea>
+              </div>
+              <div class="field">
+                <label>Целевые роли</label>
+                <textarea maxlength="4000" style="height:65px">Senior Java Developer, Tech Lead, Solution Architect</textarea>
+              </div>
+              <div class="field">
+                <label>Уровни кандидатов</label>
+                <input type="text" value="Middle, Senior, Lead" maxlength="255">
+              </div>
+              <div class="field">
+                <label>География найма</label>
+                <textarea maxlength="2000" style="height:55px">Россия, СНГ, удалённо</textarea>
+              </div>
+              <div class="field">
+                <label>Приоритеты решений</label>
+                <textarea maxlength="4000" style="height:70px">Техническая компетентность, опыт в аналогичных проектах, культурное соответствие</textarea>
+              </div>
+              <div class="field">
+                <label>Клиентский и проектный контекст</label>
+                <textarea maxlength="4000" style="height:70px">Автоматизация рекрутинга, HRM-системы, enterprise Java-проекты</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Предпочтения ответа -->
+        <div class="section collapsed">
+          <div class="section-header" onclick="toggleSection(this)">Как мне отвечать</div>
+          <div class="section-body">
+            <div class="form-grid">
+              <div class="field">
+                <label>Предпочитаемый язык</label>
+                <select><option selected>Автоматически</option><option>Русский</option><option>Английский</option></select>
+              </div>
+              <div class="field">
+                <label>Детализация ответа</label>
+                <select><option>Кратко</option><option selected>Сбалансированно</option><option>Подробно</option></select>
+              </div>
+              <div class="field">
+                <label>Стиль общения</label>
+                <select><option>Прямой</option><option selected>Нейтральный</option><option>Обучающий</option></select>
+              </div>
+              <div class="field">
+                <label>Уровень терминологии</label>
+                <select><option>Простой</option><option selected>Профессиональный</option><option>Экспертный</option></select>
+              </div>
+              <div class="field full-width">
+                <label>Предпочитаемая структура ответа</label>
+                <select style="width:100%"><option selected>Автоматически</option><option>Управленческая сводка</option><option>План действий</option><option>Пошаговая инструкция</option><option>Чек-лист</option><option>Таблица</option></select>
+              </div>
+              <div class="field">
+                <label>Индивидуальные инструкции</label>
+                <textarea maxlength="4000" style="height:70px"></textarea>
+              </div>
+              <div class="field">
+                <label>Ограничения коммуникации</label>
+                <textarea maxlength="2000" style="height:70px"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Цели и интересы -->
+        <div class="section collapsed">
+          <div class="section-header" onclick="toggleSection(this)">Цели и профессиональные интересы</div>
+          <div class="section-body">
+            <div class="form-grid">
+              <div class="field">
+                <label>Профессиональные цели</label>
+                <textarea maxlength="4000" style="height:65px">Развитие архитектуры HRM-системы до уровня enterprise-продукта</textarea>
+              </div>
+              <div class="field">
+                <label>Профессиональные интересы</label>
+                <textarea maxlength="4000" style="height:65px">Архитектура enterprise-приложений, AI в рекрутменте, оптимизация БД</textarea>
+              </div>
+              <div class="field">
+                <label>Зоны развития</label>
+                <textarea maxlength="4000" style="height:65px">ML/AI-интеграции, Kubernetes, event-driven architecture</textarea>
+              </div>
+              <div class="field">
+                <label>Текущие приоритеты</label>
+                <textarea maxlength="4000" style="height:65px">Оптимизация производительности, документирование архитектуры</textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Конфиденциальность и границы -->
+        <div class="section privacy">
+          <div class="section-header" onclick="toggleSection(this)">Конфиденциальность и границы</div>
+          <div class="section-body">
+            <div class="checkbox-row">
+              <input type="checkbox" id="profileEnabled">
+              <label for="profileEnabled">Включить персонализацию ИИ-ответов</label>
+            </div>
+            <div class="checkbox-row">
+              <input type="checkbox" id="externalProcessing">
+              <label for="externalProcessing">Я даю согласие на внешнюю обработку данных профиля ИИ-провайдером</label>
+            </div>
+            <div class="warning" style="font-size:11px;opacity:0.72;margin:6px 0;">Сервис формирует контекст из вашего профиля для персонализации ответов. Данные кандидатов, вакансий, пароли и API-ключи никогда не передаются.</div>
+            <div style="font-size:12px;color:#666;margin-top:8px;">Согласие принято: не указано</div>
+            <button class="danger-btn">Очистить профиль</button>
+          </div>
+        </div>
+
+        <!-- Предпросмотр контекста -->
+        <div class="section collapsed" id="previewSection">
+          <div class="section-header" onclick="toggleSection(this)">Предпросмотр ИИ-контекста</div>
+          <div class="section-body">
+            <div class="preview-area" id="previewArea">
+              --- ПРЕДПРОСМОТР ИИ-КОНТЕКСТА ---
+              Источник: профиль пользователя (hunttech_UserAiProfile)
+
+              Текущая должность: Senior CUBA Architect
+              Функциональная роль: Технический эксперт
+              Уровень: Senior
+              Профессиональный опыт: 15 лет
+              Опыт в рекрутменте: 5 лет
+
+              Обо мне: Архитектор HRM HuntTech, специализируюсь на
+              CUBA Platform, Java, PostgreSQL...
+
+              --- ПРЕДПОЧТЕНИЯ ОТВЕТА ---
+              Язык: Автоматически
+              Детализация: Сбалансированно
+              Стиль: Нейтральный
+              Терминология: Профессиональная
+              Структура: Автоматически
+
+              --- ПРИМЕЧАНИЕ ---
+              API-ключи, пароли и данные кандидатов/вакансий не
+              включены. Контекст формируется локально без внешних
+              HTTP-запросов.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== TAB: ИНТЕРФЕЙС ============== -->
+  <div class="tab-content">
+    <div class="interface-layout">
+      <div class="interface-row">
+        <span class="label">Режим главного окна</span>
+        <div class="mode-options">
+          <label><input type="radio" name="mode" checked> Обычный</label>
+          <label><input type="radio" name="mode"> С вкладками</label>
+        </div>
+      </div>
+      <div class="interface-row">
+        <span class="label">Тема оформления</span>
+        <select><option>Halo</option><option selected>Hover</option><option>Havana</option><option>Helium</option></select>
+      </div>
+      <div class="interface-row">
+        <span class="label">Язык</span>
+        <select><option selected>Русский</option><option>English</option></select>
+      </div>
+      <div class="interface-row">
+        <span class="label">Часовой пояс</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <select><option>Europe/Moscow (GMT+3)</option></select>
+          <label style="font-size:12px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+            <input type="checkbox"> Авто
+          </label>
+        </div>
+      </div>
+      <div class="interface-row">
+        <span class="label">Экран по умолчанию</span>
+        <select style="width:280px;"><option>Нет экрана по умолчанию</option></select>
+      </div>
+      <div class="interface-buttons">
+        <button>🔑 Изменить пароль</button>
+        <button class="danger-text">🗑 Сбросить настройки экранов</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== TAB: ПОЧТА ============== -->
+  <div class="tab-content">
+    <div class="mail-layout">
+      <div class="mail-grid">
+        <div class="field"><label>SMTP server</label><input type="text" value="smtp.hunttech.ru"></div>
+        <div class="field"><label>POP3 server</label><input type="text" value="pop3.hunttech.ru"></div>
+        <div class="field"><label>IMAP server</label><input type="text" value="imap.hunttech.ru"></div>
+        <div class="field"><label>SMTP port</label><input type="number" value="587"></div>
+        <div class="field"><label>POP3 port</label><input type="number" value="995"></div>
+        <div class="field"><label>IMAP port</label><input type="number" value="993"></div>
+        <div class="field"><label><input type="checkbox"> Требуется пароль SMTP</label></div>
+        <div class="field"><label><input type="checkbox"> Требуется пароль POP3</label></div>
+        <div class="field"><label><input type="checkbox"> Требуется пароль IMAP</label></div>
+        <div class="field"><label>SMTP password</label><input type="password" value=""></div>
+        <div class="field"><label>POP3 password</label><input type="password" value=""></div>
+        <div class="field"><label>IMAP password</label><input type="password" value=""></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="window-footer">
+    <button class="cancel-btn">Отмена</button>
+    <button class="ok-btn">OK</button>
+  </div>
+</div>
+
+<script>
+  // Tab switching
+  document.querySelectorAll('.tab').forEach((tab, i) => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.tab-content')[i].classList.add('active');
+    });
+  });
+
+  // Section collapse
+  function toggleSection(header) {
+    header.parentElement.classList.toggle('collapsed');
+  }
+
+  // Preview toggle
+  function togglePreview() {
+    const previewSection = document.getElementById('previewSection');
+    const previewArea = document.getElementById('previewArea');
+    previewSection.classList.remove('collapsed');
+    previewArea.classList.add('visible');
+    previewSection.scrollIntoView({ behavior: 'smooth' });
+  }
+</script>
+
+</body>
+</html>
