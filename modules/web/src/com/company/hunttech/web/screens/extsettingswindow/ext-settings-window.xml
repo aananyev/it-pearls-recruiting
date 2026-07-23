@@ -247,6 +247,14 @@
             <tab id="aiAccessTab" caption="msg://msgAiSettings">
                 <vbox spacing="true" margin="true" width="100%" height="100%" expand="aiConfigsTable">
                     <label value="msg://msgAiSettingsHint" stylename="light"/>
+                    <!-- Флаг только сохраняет предпочтение пользователя; алгоритм маршрутизации API будет добавлен отдельно. -->
+                    <vbox id="personalAiApiPreferenceBox" spacing="false" width="100%">
+                        <checkBox id="preferPersonalAiApiSettingsField"
+                                  datasource="userSettingsDs"
+                                  property="preferPersonalAiApiSettings"
+                                  caption="msg://preferPersonalAiApiSettings"/>
+                        <label value="msg://preferPersonalAiApiSettingsHint" width="100%" stylename="light"/>
+                    </vbox>
                     <buttonsPanel id="aiConfigsButtonsPanel">
                         <button id="aiConfigsCreateBtn" caption="msg://actions.Create" icon="CREATE_ACTION" invoke="onAiConfigsCreateBtnClick"/>
                         <button id="aiConfigsEditBtn" caption="msg://actions.Edit" icon="EDIT" enable="false" invoke="onAiConfigsEditBtnClick"/>

@@ -65,6 +65,7 @@ public class ExtSettingsWindow extends SettingsWindow {
     @Inject private Image defaultPic;
     @Inject private FileUploadField userAvatarUpload;
     @Inject private Datasource<ExtUser> extUserDs;
+    @Inject private Datasource<UserSettings> userSettingsDs;
     @Inject private Datasource<UserAiProfile> userAiProfileDs;
 
     @Inject private Label<String> userProfileNameLabel;
@@ -135,6 +136,14 @@ public class ExtSettingsWindow extends SettingsWindow {
                 .view("userSettings-view")
                 .optional()
                 .orElseGet(this::createNewUserSetting);
+        /*
+         * Пока алгоритм выбора API не реализован, поле только хранит намерение пользователя.
+         * Значение false сохраняет действующий административный маршрут вызовов по умолчанию.
+         */
+        if (userSettings.getPreferPersonalAiApiSettings() == null) {
+            userSettings.setPreferPersonalAiApiSettings(false);
+        }
+        userSettingsDs.setItem(userSettings);
     }
 
     // Загружает персональный ИИ-профиль текущего пользователя без автоматического сохранения.
@@ -327,8 +336,8 @@ public class ExtSettingsWindow extends SettingsWindow {
     }
 
     private void removeStoredFileIfUnreferenced(FileDescriptor oldFile,
-                                                FileDescriptor stillReferenced,
-                                                FileDescriptor replacement) {
+                                                 FileDescriptor stillReferenced,
+                                                 FileDescriptor replacement) {
         if (oldFile == null || Objects.equals(oldFile, replacement)) return;
         if (stillReferenced != null && Objects.equals(oldFile.getId(), stillReferenced.getId())) return;
         try {
@@ -411,6 +420,7 @@ public class ExtSettingsWindow extends SettingsWindow {
     private UserSettings createNewUserSetting() {
         UserSettings settings = metadata.create(UserSettings.class);
         settings.setUser((ExtUser) userSession.getUser());
+        settings.setPreferPersonalAiApiSettings(false);
         return settings;
     }
 

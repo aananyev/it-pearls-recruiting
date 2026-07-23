@@ -28,6 +28,10 @@ public class UserSettings extends StandardEntity {
     @JoinColumn(name = "IMAGE_ID")
     private FileDescriptor fileImageFace;
 
+    @NotNull
+    @Column(name = "PREFER_PERSONAL_AI_API_SETTINGS", nullable = false)
+    private Boolean preferPersonalAiApiSettings = false;
+
     @Column(name = "SMTP_SERVER", length = 128)
     private String smtpServer;
 
@@ -63,6 +67,14 @@ public class UserSettings extends StandardEntity {
 
     @Column(name = "IMAP_PASSWORD", length = 128)
     private String imapPassword;
+
+    public Boolean getPreferPersonalAiApiSettings() {
+        return preferPersonalAiApiSettings;
+    }
+
+    public void setPreferPersonalAiApiSettings(Boolean preferPersonalAiApiSettings) {
+        this.preferPersonalAiApiSettings = preferPersonalAiApiSettings;
+    }
 
     public void setUser(ExtUser user) {
         this.user = user;
@@ -175,5 +187,4 @@ public class UserSettings extends StandardEntity {
     public void setSmtpServer(String smtpServer) {
         this.smtpServer = smtpServer;
     }
-
 }
