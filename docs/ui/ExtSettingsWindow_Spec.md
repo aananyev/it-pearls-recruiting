@@ -18,7 +18,7 @@
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-- открытие → до инициализации контроллера CUBA получает `userAiProfile-view` из общего `ViewRepository`;
+- открытие → до инициализации контроллера web-блок получает `userAiProfile-view` из своего `ViewRepository`;
 - открытие → загружаются `ExtUser`, `UserSettings`, `UserAiProfile` и персональные `UserAiConfiguration`;
 - загрузка аватара → изображение нормализуется существующим `ImageProcessingService`;
 - профиль отсутствует → создаётся несохранённый экземпляр;
@@ -50,7 +50,12 @@
 | `userAiProfileDs` | `hunttech_UserAiProfile` | `userAiProfile-view` | профессиональный профиль и узкая связь с владельцем |
 | `userAiConfigsDs` | `hunttech_UserAiConfiguration` | `userAiConfiguration-view` | персональные подключения пользователя к AI-провайдерам |
 
-`userAiProfile-view` объявлен в `modules/global/src/com/company/hunttech/user-ai-profile-views.xml`. Файл зарегистрирован вместе с основным `views.xml` в свойстве `cuba.viewsConfig` файла `app-component.xml`, поэтому view загружается в общий репозиторий всех стандартных блоков CUBA. Отдельный XML-файл без регистрации не считается доступным приложению и приводит к `ViewNotFoundException` ещё до вызова `ExtSettingsWindow.init()`.
+`userAiProfile-view` объявлен в `modules/global/src/com/company/hunttech/user-ai-profile-views.xml`. Для реально запускаемого приложения файл обязан быть перечислен не только в `app-component.xml`, но и в рабочих свойствах обоих блоков:
+
+- `modules/core/src/com/company/hunttech/app.properties`;
+- `modules/web/src/com/company/hunttech/web-app.properties`.
+
+Регистрация только в `app-component.xml` недостаточна для standalone-запуска HRM HuntTech: web `ViewRepository` не получает именованный view, и `DsBuilder` завершает открытие окна с `ViewNotFoundException` до вызова `ExtSettingsWindow.init()`.
 
 Профиль загружается запросом:
 
@@ -160,17 +165,25 @@ settingsTabSheet
 
 ## 7. База данных
 
-Исправление регистрации view не создаёт новых entity, полей или changeSet. Используется существующая таблица `HUNTTECH_USER_AI_PROFILE` и существующая схема `UserAiConfiguration`. Hermes выполняет только read-only проверку наличия таблицы в локальной БД. Любое изменение локальной схемы требует отдельного согласования; PROD запрещён.
+Исправление регистрации view не создаёт новых entity, полей или changeSet. Используется существующая таблица `HUNTTECH_USER_AI_PROFILE` и существующая схема `UserAiConfiguration`. SQL, Liquibase и изменение данных не требуются. PROD в рамках исправления не используется.
 
 ## 8. Проверки
 
-Обязательны `git diff --check`, компиляция global/core/web, `ScreenViewIntegrityTest` (8/8), Data View Integrity, сборка всех SCSS-тем, `clean assemble`, локальный deploy и HTTP 200. Тест `test5_userAiProfile_view_registered` обязан получить `userAiProfile-view` через `ViewRepository`; простая проверка существования репозитория недостаточна. Функциональный smoke выполняется для вкладок «Обо мне», «Интерфейс», «Почта» и AI. В каждой поддерживаемой теме отдельно проверяются открытие SettingsWindow, двухпанельная компоновка, читаемость, отсутствие горизонтальной прокрутки при ширине 1200 px и отсутствие SCSS/runtime-ошибок. Production-проверки и любые действия на PROD запрещены.
+Обязательны `git diff --check`, компиляция global/core/web, `ScreenViewIntegrityTest` (8/8), Data View Integrity и `clean assemble`. Тест `test5_userAiProfile_view_registered` обязан:
+
+1. получить `userAiProfile-view` через runtime `ViewRepository`;
+2. подтвердить регистрацию `user-ai-profile-views.xml` в core `app.properties`;
+3. подтвердить регистрацию `user-ai-profile-views.xml` в web `web-app.properties`;
+4. подтвердить ссылку `view="userAiProfile-view"` в XML SettingsWindow.
+
+Merge и deploy выполняются отдельно и не входят в данный PR.
 
 ## 9. История изменений
 
 | Дата | Изменение |
 |---|---|
-| 2026-07-23 | Исправлена `ViewNotFoundException`: дополнительный `user-ai-profile-views.xml` зарегистрирован через `cuba.viewsConfig`; тест 5 теперь проверяет получение `userAiProfile-view` из `ViewRepository` |
+| 2026-07-23 | Исправлена повторная `ViewNotFoundException`: `user-ai-profile-views.xml` зарегистрирован в рабочих конфигурациях core/web; тест 5 переведён на `HunttechTestContainer` и проверяет runtime `ViewRepository` и оба `cuba.viewsConfig` |
+| 2026-07-23 | Дополнительный `user-ai-profile-views.xml` был зарегистрирован только через `app-component.xml`; решение признано недостаточным для standalone-запуска приложения |
 | 2026-07-23 | Введено обязательное правило синхронизации тем; SettingsWindow адаптирован для `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light` и `hunttech-modern-dark` |
 | 2026-07-23 | После merge-регрессии восстановлены двухпанельная вкладка «Обо мне» и контроллер `UserAiProfile`; функциональность объединена с действующей вкладкой персональных AI-подключений без изменения БД |
 | 2026-07-23 | XML приведён к утверждённой двухпанельной структуре: добавлены профильная навигация, единый toolbar, карточки-аккордеоны и начальное сворачивание вторичных секций; обновлён локальный Halo SCSS |
