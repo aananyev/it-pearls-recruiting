@@ -110,6 +110,18 @@ public class UserSettingsAiApiPreferenceTest {
         assertTrue(liquibaseMaster.contains("260723-1-addPreferPersonalAiApiSettings.xml"));
     }
 
+    @Test
+    public void localStartupAppliesDatabaseMigrationsBeforeDeploy() throws IOException {
+        String startScript = readProjectFile("scripts/start-app.sh");
+
+        // Регрессия защищает запуск экранов от новой entity-модели поверх устаревшей схемы PostgreSQL.
+        int updateDbPosition = startScript.indexOf("./gradlew updateDb");
+        int deployPosition = startScript.indexOf("./gradlew clean deploy");
+
+        assertTrue("Локальный запуск обязан выполнять updateDb", updateDbPosition >= 0);
+        assertTrue("updateDb должен выполняться до deploy", updateDbPosition < deployPosition);
+    }
+
     private String readProjectFile(String relativePath) throws IOException {
         Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
         while (root != null && !Files.exists(root.resolve("build.gradle"))) {
