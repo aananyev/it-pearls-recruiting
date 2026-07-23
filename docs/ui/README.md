@@ -14,7 +14,7 @@ Living-документация экранов, окон, фрагментов �
 | **Legacy** | `docs/ui/{kebab-name}.md` | документы до введения `_Spec`; при крупных правках — cross-link или миграция |
 | **Архив** | `docs/ui/archive/{FormName}_Spec.md` | полное удаление UI из кода |
 
-**`{FormName}`** — `@UiController("…")` (приоритет); примеры: `itpearls_JobCandidate.browse`, `itpearls_OpenPosition.edit`.
+**`{FormName}`** — `@UiController("…")` (приоритет); примеры: `itpearls_JobCandidate.browse`, `itpearls_OpenPosition.edit`. Для legacy-классов без `@UiController` используется имя Java-класса, например `ExtSettingsWindow_Spec.md`.
 
 Шаблон: [templates/ui-template.md](../templates/ui-template.md)
 
@@ -156,14 +156,16 @@ Living-документация экранов, окон, фрагментов �
 | Форма | Controller | Документ | Статус |
 |-------|------------|----------|--------|
 | Login (брендированный) | `loginBranded` | [login-screen.md](login-screen.md) | legacy (kebab) |
+| Настройки пользователя | `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | legacy `SettingsWindow`, активный |
 
-### AI-администрирование
+### AI-администрирование и персонализация
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
 | Шаблоны промптов (browse) | `itpearls_VacancyPromptTemplate.browse` | [itpearls_VacancyPromptTemplate.browse_Spec.md](itpearls_VacancyPromptTemplate.browse_Spec.md) |
 | Шаблон промпта (edit) | `itpearls_VacancyPromptTemplate.edit` | [itpearls_VacancyPromptTemplate.edit_Spec.md](itpearls_VacancyPromptTemplate.edit_Spec.md) |
 | Мониторинг ключей (browse) | `itpearls_UserAiConfiguration.browse` | [itpearls_UserAiConfiguration.browse_Spec.md](itpearls_UserAiConfiguration.browse_Spec.md) |
+| Профессиональный ИИ-профиль | `ExtSettingsWindow` / вкладка `msgMyInfo` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) |
 
 ### ExtUser (Security)
 
@@ -196,6 +198,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-22 | Добавлена спецификация `ExtSettingsWindow`: вкладка «Обо мне», `UserAiProfile`, согласие и предпросмотр контекста |
 | 2026-06-29 | Документация кастомного компонента FallbackImage |
 | 2026-06-27 | AI-администрирование: VacancyPromptTemplate browse/edit, UserAiConfiguration browse, меню aiAdministration |
 | 2026-06-26 | Каталог дополнен UI Spec для 16 documented entities (40 новых файлов + 7 ранее созданных JobCandidate/OpenPosition) |

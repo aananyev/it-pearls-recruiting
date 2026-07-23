@@ -154,7 +154,7 @@ configure(coreModule) {
 
     task createDb(dependsOn: assembleDbScripts, description: 'Creates local database', type: CubaDbCreation) {
         host = '127.0.0.1:5432'
-        dbName = 'itpearls'
+        dbName = 'hunttech'
         dbms = 'postgres'
         dbUser = 'cuba'
         dbPassword = 'cuba'
@@ -162,7 +162,7 @@ configure(coreModule) {
 
     task updateDb(dependsOn: assembleDbScripts, description: 'Updates local database', type: CubaDbUpdate) {
         host = '127.0.0.1:5432'
-        dbName = 'itpearls'
+        dbName = 'hunttech'
         dbms = 'postgres'
         dbUser = 'cuba'
         dbPassword = 'cuba'
@@ -335,7 +335,9 @@ restart.dependsOn copyTomcatSetenv
 task buildWar(type: CubaWarBuilding) {
     includeJdbcDriver = true
     appProperties = ['cuba.automaticDatabaseUpdate': true,
-                     'cuba.dataSourceProvider'     : 'jndi']
+                     'cuba.dataSourceProvider'     : 'jndi',
+                     'cuba.useLocalServiceInvocation': false,
+                     'cuba.connectionUrlList'      : 'http://localhost:8080/hrm-core']
     logbackConfigurationFile = 'etc/war-logback.xml'
     includeContextXml = true
     singleWar = false

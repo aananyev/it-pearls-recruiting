@@ -61,6 +61,7 @@
         <class>com.company.itpearls.entity.InternalEmailTemplateInteraction</class>
         <class>com.company.itpearls.entity.ApplicationSetup</class>
         <class>com.company.itpearls.entity.UserAiConfiguration</class>
+        <class>com.company.hunttech.entity.UserAiProfile</class>
         <class>com.company.itpearls.entity.VacancyPromptTemplate</class>
     </persistence-unit>
 </persistence>
