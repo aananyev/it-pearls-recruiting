@@ -2,47 +2,48 @@
 
 > Экран HRM HuntTech: `com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindow`.  
 > XML: `ext-settings-window.xml`.  
+> Базовый класс: `com.haulmont.cuba.web.app.ui.core.settings.SettingsWindow`.  
 > Связанные документы: [UserSettings](../entities/user-settings/UserSettings.md), [UserAiProfile](../entities/UserAiProfile.md), [UserAiContextService](../services/UserAiContextService.md).  
-> Визуальный эталон: [SettingsWindow AI — Halo](renders/SettingsWindow_AI_Halo.svg).
+> Визуальный эталон существующих вкладок: [SettingsWindow AI — Halo](renders/SettingsWindow_AI_Halo.svg).
 
 ## Business & Context Intro
 
-### Назначение и Бизнес-смысл (What & Why)
+### Назначение и бизнес-смысл (What & Why)
 
-Экран объединяет персональные настройки пользователя. Вкладка «Обо мне» формирует профессиональный ИИ-профиль, чтобы сервисы HRM HuntTech адаптировали язык, глубину и структуру ответа к рабочей роли пользователя. Вкладка AI управляет персональными подключениями к провайдерам и хранит предпочтение пользователя по выбору личных либо административных настроек API.
+`ExtSettingsWindow` объединяет персональные настройки рабочего места пользователя HRM HuntTech:
 
-Checkbox `preferPersonalAiApiSettingsField` только фиксирует предпочтение. Алгоритм маршрутизации вызовов, fallback на административные настройки и ограничения функций при отсутствии личного API будут реализованы отдельной задачей.
+- вкладка «Обо мне» формирует профессиональный ИИ-профиль;
+- вкладка «Интерфейс» определяет режим главного окна, тему, язык, часовой пояс и стартовый экран;
+- вкладка «Настройка email» хранит персональные параметры SMTP, POP3 и IMAP;
+- вкладка AI управляет персональными подключениями к провайдерам и предпочтением источника API.
 
-### Связи в интерфейсе и Навигация (UI Context & Navigation)
+Редизайн вкладок «Интерфейс» и «Настройка email» устраняет визуальный разрыв внутри одного окна и приводит их к общей концепции Edit-форм: контекстная боковая панель, понятная навигация, заголовок рабочей области и функциональные карточки. Изменение не затрагивает правила сохранения, сервисы, сущности, БД и поведение базового `SettingsWindow`.
 
-Экран открывается из стандартного меню настроек CUBA. Содержит вкладки `msgMyInfo`, `msgInterface`, `mailAccessTab` и `aiAccessTab`.
+### Связи в интерфейсе и навигация (UI Context & Navigation)
 
-- «Обо мне» работает с `ExtUser` и `hunttech_UserAiProfile`;
-- интерфейсные параметры сохраняет базовый `SettingsWindow`;
-- почтовые параметры и предпочтение источника API хранятся в `UserSettings`;
-- вкладка AI показывает `UserAiConfiguration`, ограниченные текущим пользователем.
+Экран открывается из стандартного меню настроек CUBA Platform и содержит четыре вкладки:
 
-Вкладки «Обо мне» и AI используют единый визуальный язык утверждённых Edit-форм: фиксированная левая панель 270 px, вертикальная навигация, единый верхний toolbar и карточки в правой рабочей области.
+| Вкладка | ID | Источник данных и ответственность |
+|---|---|---|
+| «Обо мне» | `msgMyInfo` | `ExtUser`, `UserAiProfile`, предпросмотр ИИ-контекста |
+| «Интерфейс» | `msgInterface` | компоненты и методы базового `SettingsWindow` |
+| «Настройка email» | `mailAccessTab` | поля `UserSettings`, заполняемые и собираемые контроллером вручную |
+| AI | `aiAccessTab` | `UserSettings.preferPersonalAiApiSettings`, `UserAiConfiguration` |
+
+Вкладки `msgMyInfo` и `aiAccessTab` в задаче 2026-07-24 не изменяются. Редизайн ограничен вкладками `msgInterface` и `mailAccessTab`.
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-- открытие → до инициализации контроллера web-блок получает `userAiProfile-view` из своего `ViewRepository`;
-- открытие → загружаются `ExtUser`, `UserSettings`, `UserAiProfile` и персональные `UserAiConfiguration`;
-- `preferPersonalAiApiSettings` отсутствует или равен `null` → применяется безопасное `false`;
-- пользователь изменяет checkbox во вкладке AI → значение меняется в `userSettingsDs`;
-- сохранение → `ExtUser`, `UserSettings` и `UserAiProfile` фиксируются единым `CommitContext`;
-- значение checkbox сохраняется, но текущий алгоритм вызовов API не изменяется;
-- выбор AI-конфигурации → становятся доступны редактирование, удаление и тест подключения;
-- создание, редактирование, удаление и тестирование → выполняются прежними методами контроллера;
-- визуальный рефакторинг → не меняет datasource, JPQL, component ID, `invoke`, enable-состояния и сервисы;
-- загрузка аватара → изображение нормализуется существующим `ImageProcessingService`;
-- профиль отсутствует → создаётся несохранённый экземпляр;
-- открытие «Обо мне» → раскрыт только «Профессиональный профиль», остальные секции свёрнуты;
-- предпросмотр → локально формируется очищенный контекст и раскрывается секция предпросмотра;
-- включение профиля без согласия → сохранение блокируется;
-- очистка → сбрасывается только `UserAiProfile`.
+- открытие окна → базовый `SettingsWindow` находит интерфейсные компоненты по legacy component ID → отображаются текущие настройки;
+- изменение режима, темы, языка, часового пояса или стартового экрана → меняется состояние стандартных компонентов → значения применяются штатной логикой CUBA;
+- нажатие `changePasswordBtn` → вызывается прежнее действие базового окна → открывается смена пароля;
+- нажатие `resetScreenSettingsBtn` → вызывается прежнее действие базового окна → сохранённые настройки экранов сбрасываются после подтверждения;
+- открытие вкладки email → `setEmailSettings()` заполняет существующие поля из `UserSettings` с fallback на `ExtUser`;
+- сохранение окна → `collectEmailSettings()` читает те же `TextField` и `CheckBox` по ID → значения записываются в `UserSettings`;
+- визуальный рефакторинг → меняются только контейнеры и локальные `stylename` → datasource, component ID, типы компонентов, валидаторы и Java-методы остаются прежними;
+- открытие «Обо мне» или AI → выполняется существующее поведение → структура и стили этих вкладок не изменены.
 
-## 1. Invocation & Context
+## 1. Точка вызова и контекст (Invocation & Context)
 
 | Параметр | Значение |
 |---|---|
@@ -50,20 +51,22 @@ Checkbox `preferPersonalAiApiSettingsField` только фиксирует пр
 | Базовый класс | `SettingsWindow` |
 | XML schema | legacy `window.xsd` |
 | Data API | legacy `dsContext` |
+| Корневой визуальный компонент | `settingsTabSheet` |
 | Messages pack | `com.company.hunttech.web.screens.extsettingswindow` |
+| Поддерживаемые темы | `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light`, `hunttech-modern-dark` |
 
-Существующие component ID сохранены для совместимости: `settingsTabSheet`, `msgMyInfo`, `msgInterface`, `mailAccessTab`, `aiAccessTab`, `okBtn`, `cancelBtn`, `userAvatarUpload`, `userPic`, `defaultPic`, `personalAiApiPreferenceBox`, `preferPersonalAiApiSettingsField`, `aiConfigsButtonsPanel`, `aiConfigsCreateBtn`, `aiConfigsEditBtn`, `aiConfigsRemoveBtn`, `aiConfigsTestBtn`, `aiConfigsTable`.
+Экран остаётся legacy-экраном CUBA Platform. Корневые секции `<window>`, `<dsContext>` и `<layout>` сохранены. Наследуемые компоненты базового `SettingsWindow` не переименовываются, поскольку контроллер платформы связывает их по ID.
 
-Новые ID относятся только к визуальным контейнерам вкладки AI: `aiSettingsMainBox`, `aiSettingsSidebar`, `aiSettingsSidebarIdentity`, `aiSettingsNavigation`, `aiSettingsSecurityBox`, `aiSettingsContent`, `aiSettingsToolbar`, `aiSettingsTitleBox`, `aiConnectionsCard`, `aiConnectionsHeader`.
-
-## 2. Data & Entity Binding
+## 2. Связь с моделью данных (Data & Entity Binding)
 
 | Datasource | Entity | View | Назначение |
 |---|---|---|---|
-| `extUserDs` | `ExtUser` | `extUser-view` | аватар и данные пользователя |
-| `userSettingsDs` | `UserSettings` | `userSettings-view` | почтовые параметры и `preferPersonalAiApiSettings` |
-| `userAiProfileDs` | `hunttech_UserAiProfile` | `userAiProfile-view` | профессиональный профиль и узкая связь с владельцем |
-| `userAiConfigsDs` | `hunttech_UserAiConfiguration` | `userAiConfiguration-view` | персональные подключения пользователя к AI-провайдерам |
+| `extUserDs` | `ExtUser` | `extUser-view` | пользователь, аватар и fallback почтовых значений |
+| `userSettingsDs` | `UserSettings` | `userSettings-view` | почтовые параметры и предпочтение личного API |
+| `userAiProfileDs` | `UserAiProfile` | `userAiProfile-view` | профессиональный ИИ-профиль |
+| `userAiConfigsDs` | `UserAiConfiguration` | `userAiConfiguration-view` | персональные AI-подключения |
+
+### Регистрация view и запросы существующих вкладок
 
 `userAiProfile-view` объявлен в `modules/global/src/com/company/hunttech/user-ai-profile-views.xml` и зарегистрирован в рабочих свойствах core и web:
 
@@ -78,66 +81,80 @@ Checkbox `preferPersonalAiApiSettingsField` только фиксирует пр
 select e from hunttech_UserSettings e where e.user = :currentUser
 ```
 
-Профиль загружается запросом:
+Профессиональный ИИ-профиль загружается запросом:
 
 ```jpql
 select e from hunttech_UserAiProfile e where e.user = :currentUser
 ```
 
-Конфигурации AI загружаются запросом:
+Персональные AI-конфигурации загружаются запросом:
 
 ```jpql
 select e from hunttech_UserAiConfiguration e where e.user = :ds$extUserDs
 ```
 
-Отсутствующие `UserSettings` и `UserAiProfile` создаются только в памяти и сохраняются после нажатия `okBtn`.
+Отсутствующие `UserSettings` и `UserAiProfile` создаются только в памяти и сохраняются после нажатия `okBtn`. Эти запросы, view и порядок загрузки задачей редизайна не изменены.
 
-## 3. Form Hierarchy
+### Интерфейсные параметры
+
+Компоненты `modeOptions`, `appThemeField`, `appLangField`, `timeZoneLookup`, `timeZoneAutoField` и `defaultScreenField` не получают новых binding. Инициализация и сохранение остаются ответственностью базового `SettingsWindow`.
+
+### Почтовые параметры
+
+Почтовые поля намеренно не связываются с datasource в XML. `ExtSettingsWindow` использует инъекцию по ID:
+
+- `smtpServer`, `smtpPort`, `smtpPasswordRequired`, `smtpPassword`;
+- `pop3Server`, `pop3Port`, `pop3PasswordRequired`, `pop3Password`;
+- `imapServer`, `imapPort`, `imapPasswordRequired`, `imapPassword`.
+
+Методы `setEmailSettings()` и `collectEmailSettings()` не изменены. Поля портов сохраняют `datatype="int"` и `IntegerValidator`.
+
+## 3. Иерархия и взаимосвязь форм (Form Hierarchy)
 
 ```text
 settingsTabSheet
 ├── msgMyInfo
-│   └── userAiProfileMainBox
-│       ├── userAiProfileSidebar
-│       │   ├── dropZone / picVBox / userPic / defaultPic
-│       │   ├── userAiProfileIdentity
-│       │   ├── userAiProfileSummary
-│       │   ├── userAiProfileSectionNavigation
-│       │   └── userAiProfileSensitiveWarningBox
-│       └── userAiProfileContentScrollBox
-│           └── userAiProfileContent
-│               ├── userAiProfileToolbar
-│               │   └── previewAiContextBtn / clearAiProfileBtn
-│               ├── professionalProfileGroup
-│               ├── recruitingProfileGroup
-│               ├── responsePreferencesGroup
-│               ├── goalsGroup
-│               ├── privacyGroup
-│               └── previewGroup
+│   └── userAiProfileMainBox                         [без изменений]
 ├── msgInterface
+│   └── interfaceSettingsMainBox
+│       ├── interfaceSettingsSidebar (270 px)
+│       │   ├── interfaceSettingsSidebarIdentity
+│       │   ├── interfaceSettingsNavigation
+│       │   └── interfaceSettingsHintBox
+│       └── interfaceSettingsContentScrollBox
+│           └── interfaceSettingsContent
+│               ├── interfaceSettingsToolbar
+│               │   ├── changePasswordBtn
+│               │   └── resetScreenSettingsBtn
+│               └── interfaceAppearanceCard
+│                   └── grid
+│                       ├── modeOptions
+│                       ├── appThemeField
+│                       ├── appLangField
+│                       ├── timeZoneLookup / timeZoneAutoField
+│                       └── defaultScreenField
 ├── mailAccessTab
+│   └── emailSettingsMainBox
+│       ├── emailSettingsSidebar (270 px)
+│       │   ├── emailSettingsSidebarIdentity
+│       │   ├── emailSettingsNavigation
+│       │   └── emailSettingsSecurityBox
+│       └── emailSettingsContentScrollBox
+│           └── emailSettingsContent
+│               ├── emailSettingsToolbar
+│               └── emailSettingsGrid
+│                   ├── smtpSettingsCard
+│                   ├── pop3SettingsCard
+│                   └── imapSettingsCard
 └── aiAccessTab
-    └── aiSettingsMainBox
-        ├── aiSettingsSidebar
-        │   ├── aiSettingsSidebarIdentity
-        │   ├── aiSettingsNavigation
-        │   └── aiSettingsSecurityBox
-        └── aiSettingsContent
-            ├── aiSettingsToolbar
-            │   └── aiConfigsButtonsPanel
-            │       ├── aiConfigsCreateBtn
-            │       ├── aiConfigsEditBtn
-            │       ├── aiConfigsRemoveBtn
-            │       └── aiConfigsTestBtn
-            ├── personalAiApiPreferenceBox
-            │   └── preferPersonalAiApiSettingsField
-            └── aiConnectionsCard
-                └── aiConfigsTable
+    └── aiSettingsMainBox                            [без изменений]
 ```
 
-## 4. Business Behavior
+## 4. Модель поведения и интерактивность (Behavior Model)
 
-### Безопасные значения по умолчанию
+### Существующее поведение вкладок «Обо мне» и AI
+
+Безопасные значения по умолчанию сохранены:
 
 - предпочтение личных настроек API — выключено;
 - профиль выключен;
@@ -148,30 +165,47 @@ settingsTabSheet
 - терминология — профессиональная;
 - структура — автоматически.
 
-### Предпочтение источника API
+`preferPersonalAiApiSettingsField` связан с `UserSettings.preferPersonalAiApiSettings`. Значение `false` сохраняет действующее поведение и не требует личного API-ключа. Значение `true` только фиксирует намерение пользователя; контроллер не выбирает провайдера, не проверяет наличие ключей и не меняет маршрутизацию.
 
-`preferPersonalAiApiSettingsField` связан с `UserSettings.preferPersonalAiApiSettings`. Значение `false` сохраняет действующее поведение и не требует наличия личного API-ключа. Значение `true` только сохраняет намерение пользователя предпочитать персональные настройки.
-
-Контроллер не выбирает провайдера, не проверяет наличие личных ключей и не меняет маршрутизацию. Сервисы `HrmAiService` и другие API-интеграции этой задачей не изменяются.
-
-### Согласие
-
-`profileEnabled=true` разрешено только при `externalProcessingAllowed=true`. При первом согласии сохраняются `consentVersion=2026-07-22-v1` и `consentAcceptedAt`. При отзыве согласия персонализация выключается.
-
-### Предпросмотр
+`profileEnabled=true` разрешено только при `externalProcessingAllowed=true`. При первом согласии сохраняются `consentVersion=2026-07-22-v1` и `consentAcceptedAt`; при отзыве согласия персонализация выключается.
 
 `previewAiContext()` вызывает `UserAiContextService.buildContextPreview()` и раскрывает `previewGroup` через совместимый с CUBA 7.3 вызов `setExpanded(true)`. HTTP к LLM не выполняется.
 
-### AI-подключения
+Создание и редактирование AI-подключений выполняются через `UserAiConfigurationEdit`. Владелец новой конфигурации задаётся из текущей сессии. Тест подключения делегируется `HrmAiService`; endpoint и HTTP-логика провайдера в контроллер не переносятся.
 
-Создание и редактирование выполняются через `UserAiConfigurationEdit`. Владелец новой конфигурации принудительно задаётся из текущей пользовательской сессии. Тест подключения делегируется `HrmAiService`; контроллер не содержит endpoint и HTTP-логику провайдера.
+### Вкладка «Интерфейс»
 
-## 5. Actions & Methods
+Вкладка разделена на фиксированную боковую панель шириной 270 px и прокручиваемую рабочую область. Боковая панель объясняет назначение разделов и предупреждает, что часть изменений применяется при следующем входе. Правая карточка сохраняет прежнюю последовательность полей.
 
-| Метод | Назначение |
+`changePasswordBtn` и `resetScreenSettingsBtn` визуально перенесены в toolbar, но их ID, иконки, стиль `danger` и обработчики базового класса не изменены.
+
+### Вкладка «Настройка email»
+
+SMTP, POP3 и IMAP представлены тремя равноправными карточками. Внутри каждой карточки сохранён порядок:
+
+```text
+сервер → порт → требование пароля → пароль
+```
+
+Это только визуальная группировка. Почтовые пароли не передаются в ИИ-контекст и продолжают сохраняться существующим кодом `ExtSettingsWindow`.
+
+### Неизменяемые вкладки
+
+`msgMyInfo` и `aiAccessTab` не перерабатывались, их XML-блоки, component ID, datasource, `invoke` и локальные классы оставлены без функциональных изменений.
+
+## 5. Логика управляющих элементов (Actions & Buttons Logic)
+
+| Компонент / метод | Контракт |
 |---|---|
+| `changePasswordBtn` | существующая смена пароля базового `SettingsWindow` |
+| `resetScreenSettingsBtn` | существующий сброс пользовательских настроек экранов |
+| `okBtn` | вызывает существующую последовательность валидации и сохранения |
+| `cancelBtn` | закрывает окно без согласованного сохранения |
+| `setEmailSettings()` | заполняет почтовые поля при инициализации |
+| `collectEmailSettings()` | переносит значения почтовых полей в `UserSettings` перед commit |
+| `commit()` | сохраняет `UserSettings`, `ExtUser`, `UserAiProfile` существующим `CommitContext` |
 | `loadOrCreateUserSettings()` | загружает `UserSettings`, применяет default `false` и устанавливает `userSettingsDs` |
-| `loadOrCreateUserAiProfile()` | загружает профиль или создаёт несохранённый |
+| `loadOrCreateUserAiProfile()` | загружает профиль или создаёт несохранённый экземпляр |
 | `initAiProfileOptions()` | задаёт локализованные enum options |
 | `refreshProfileSummary()` | обновляет левую карточку профиля |
 | `previewAiContext()` | показывает очищенный контекст |
@@ -183,99 +217,115 @@ settingsTabSheet
 | `onAiConfigsCreateBtnClick()` | создаёт персональное подключение |
 | `onAiConfigsEditBtnClick()` | редактирует выбранное подключение |
 | `onAiConfigsRemoveBtnClick()` | удаляет выбранное подключение |
-| `onAiConfigsTestBtnClick()` | тестирует выбранное подключение через `HrmAiService` |
-| `commit()` | сохраняет основные настройки единым `CommitContext` |
+| `onAiConfigsTestBtnClick()` | тестирует подключение через `HrmAiService` |
 
-## 6. Layout & Components
+Java-контроллер, entity, views, JPQL, сервисы, `@Subscribe`, `@Install`, actions и API-контракты этой задачей не изменяются.
 
-### Вкладка «Обо мне»
+## 6. Визуальная компоновка элементов (Visual Layout Schema)
 
-Вкладка следует направлению дизайна `JobCandidateEdit`: фиксированная левая панель 270 px и правая рабочая область с вертикальными секциями. Левая панель разделена на аватар, идентичность, статусную карточку, индекс разделов и предупреждение о чувствительных данных.
+### Общий паттерн
 
-Кнопки `previewAiContextBtn` и `clearAiProfileBtn` собраны в верхнем toolbar. Секции оформлены как локальные карточки `showAsPanel="true"`; при открытии формы раскрыта только `professionalProfileGroup`, остальные секции имеют `collapsed="true"`.
+Обе переработанные вкладки используют одинаковый визуальный контракт:
 
-### Вкладка AI
+- фиксированная левая панель `270px`;
+- короткий маркер назначения (`UI` или `@`);
+- заголовок и пояснение;
+- вертикальный индекс разделов;
+- нижняя информационная либо предупреждающая карточка;
+- справа — toolbar и функциональные карточки;
+- вертикальная прокрутка правой области;
+- отсутствие глобальных Vaadin-селекторов.
 
-Вкладка AI приведена к той же концепции Edit-форм:
+Локальные корни:
 
-- слева фиксированная панель шириной 270 px;
-- в панели — маркер AI, назначение вкладки, вертикальный индекс «Источник API / Подключения» и предупреждение о защите ключей;
-- справа — единый toolbar с заголовком и существующими действиями;
-- настройка источника API оформлена отдельной акцентной карточкой;
-- таблица персональных подключений находится в самостоятельной рабочей карточке;
-- `aiConfigsButtonsPanel` визуально перенесён в toolbar, но component ID, кнопки, `invoke` и состояния `enable=false` сохранены;
-- `preferPersonalAiApiSettingsField` сохраняет binding `userSettingsDs.preferPersonalAiApiSettings`;
-- `aiConfigsTable` сохраняет datasource `userAiConfigsDs` и прежние колонки;
-- Java-контроллер, JPQL, сервисы, entity, views и БД не изменены.
+```scss
+.interface-settings-editor
+.email-settings-editor
+```
 
-Стили ограничены корнями `.user-ai-profile-editor` и `.ai-settings-editor`. Глобальные `.v-table`, `.v-label`, `.v-button`, `.v-tabsheet` не изменяются. Вложенные Vaadin-селекторы допускаются только внутри `.ai-settings-editor .ai-settings-table`.
-
-При ширине окна 1200 px горизонтальная прокрутка не требуется. Левая панель сохраняет ширину, а правая область занимает остаток окна.
+Общие вложенные классы объявлены только внутри этих корней в mixin `settings-window-sections`.
 
 ### Синхронизация тем
 
-Изменение визуального контракта экрана в одной теме требует одновременной адаптации всех поддерживаемых тем в той же задаче и в том же PR. Частичное обновление только одной темы считается незавершённым.
-
-Локальный контур `.ai-settings-editor` добавлен в `com.company.hunttech/user-ai-profile.scss` каждой поддерживаемой темы.
-
-| Тема | SCSS-контур | Адаптация вкладки AI |
+| Тема | Файл | Особенности |
 |---|---|---|
-| `halo` | `modules/web/themes/halo/` | светлые карточки, синий акцент, мягкие тени |
-| `havana` | `modules/web/themes/havana/` | светлые карточки, синий акцент, мягкие тени |
-| `helium` | `modules/web/themes/helium/` | светлые карточки, синий акцент, мягкие тени |
-| `hover` | `modules/web/themes/hover/` | светлые карточки, синий акцент, мягкие тени |
-| `hunttech-modern` | `modules/web/themes/hunttech-modern/` | базовая современная светлая палитра |
-| `hunttech-modern-light` | `modules/web/themes/hunttech-modern-light/` | светлая современная палитра |
-| `hunttech-modern-dark` | `modules/web/themes/hunttech-modern-dark/` | отдельные тёмные поверхности, светлые границы, акцент `#64a8ff` |
+| `halo` | `com.company.hunttech/settings-window-sections.scss` | светлые поверхности и синий акцент |
+| `havana` | тот же локальный путь темы | светлые поверхности и синий акцент |
+| `helium` | тот же локальный путь темы | светлые поверхности и синий акцент |
+| `hover` | тот же локальный путь темы | светлые поверхности и синий акцент |
+| `hunttech-modern` | тот же локальный путь темы | современная светлая палитра |
+| `hunttech-modern-light` | тот же локальный путь темы | современная светлая палитра |
+| `hunttech-modern-dark` | тот же локальный путь темы | тёмные поверхности и акцент `#64a8ff` |
 
-Структура, размеры, отступы, component ID и состояния одинаковы во всех темах. Различаются только theme-aware цвета, прозрачность поверхностей, тени и контраст текста.
+Каждый `styles.scss` импортирует `com.company.hunttech/settings-window-sections` и включает `@include settings-window-sections;`. Структура XML одинакова во всех темах; различаются только цвета, прозрачность, тени и контраст.
 
-## 7. База данных
+Запрещены и не добавлены глобальные правила `.v-table`, `.v-label`, `.v-button`, `.v-tabsheet`.
 
-Колонка `HUNTTECH_USER_SETTINGS.PREFER_PERSONAL_AI_API_SETTINGS BOOLEAN NOT NULL DEFAULT FALSE` была добавлена предыдущей задачей.
+## 7. Соответствие CUBA Platform 7.3
 
-Текущий визуальный рефакторинг:
+Реализация сохраняет платформенные контракты legacy UI:
+
+1. экран остаётся описан XML-дескриптором `window.xsd`;
+2. вкладки остаются дочерними компонентами `TabSheet`;
+3. компоновка построена стандартными `HBox`, `VBox`, `ScrollBox`, `Grid`, `ButtonsPanel`;
+4. extension-контракты базового `SettingsWindow` сохраняются через прежние component ID;
+5. стили подключаются через theme extension и локальные `stylename`;
+6. валидаторы портов остаются вложенными в соответствующие `TextField`;
+7. data-binding и Java-инъекция не заменяются визуальным кодом.
+
+## 8. База данных и ограничения задачи
+
+Редизайн:
 
 - не меняет entity и поля;
-- не добавляет SQL или Liquibase;
-- не изменяет `HUNTTECH_USER_AI_PROFILE` и `HUNTTECH_USER_AI_CONFIGURATION`;
-- не изменяет API-ключи и административные настройки;
-- не требует изменения данных.
+- не добавляет Liquibase или SQL;
+- не меняет таблицы `HUNTTECH_USER_SETTINGS`, `HUNTTECH_USER_AI_PROFILE`, `HUNTTECH_USER_AI_CONFIGURATION`;
+- не меняет формат хранения паролей;
+- не меняет маршрутизацию AI API;
+- не затрагивает production.
 
-PROD в данный PR не входит.
+## 9. Обязательные проверки
 
-## 8. Проверки
-
-Обязательны:
+Hermes проверяет точный HEAD ветки и PR без изменения кода:
 
 - `git diff --check`;
-- компиляция global/core/web;
-- `UserSettingsAiApiPreferenceTest` — 6/6;
-- `ScreenViewIntegrityTest` — 8/8;
+- компиляция web и test-кода;
+- `UserSettingsAiApiPreferenceTest` — ожидается **9/9**;
+- `ScreenViewIntegrityTest` — ожидается **8/8**;
 - Data View Integrity для `ExtSettingsWindow`;
 - `./gradlew :app-web:buildScssThemes --no-daemon --stacktrace`;
 - `./gradlew clean assemble --no-daemon --stacktrace`;
-- визуальная проверка вкладки AI во всех семи темах при ширине окна 1200 px;
-- отсутствие горизонтальной прокрутки, обрезки toolbar и нечитаемых состояний таблицы.
+- локальный deploy с предварительным `updateDb`;
+- HTTP `http://localhost:8080/hrm/` = 200;
+- smoke вкладок «Интерфейс» и «Настройка email» во всех семи темах при ширине окна 1200 px;
+- проверка отсутствия горизонтальной прокрутки, обрезки полей и toolbar;
+- изменение и сохранение интерфейсных параметров;
+- изменение, сохранение и повторное открытие почтовых параметров;
+- смена пароля и сброс экранных настроек;
+- регрессионное открытие вкладок «Обо мне» и AI без визуальных и runtime-ошибок;
+- отсутствие критических ошибок в Tomcat logs.
 
-`UserSettingsAiApiPreferenceTest` проверяет:
+`UserSettingsAiApiPreferenceTest` содержит девять сценариев:
 
 1. metadata-поле и default `false`;
 2. binding checkbox;
-3. двухпанельный layout и sidebar 270 px;
-4. сохранность четырёх `invoke`-контрактов действий;
-5. сохранность datasource таблицы;
-6. наличие локального `.ai-settings-editor` во всех семи темах;
-7. миграции ранее добавленного поля.
+3. двухпанельный layout вкладки AI;
+4. сохранность четырёх `invoke`-контрактов AI-действий;
+5. двухпанельный layout вкладок «Интерфейс» и «Настройка email»;
+6. сохранность legacy component ID и трёх `IntegerValidator`;
+7. наличие локальных AI-стилей во всех семи темах;
+8. наличие и подключение локальных стилей двух новых вкладок во всех семи темах;
+9. миграции ранее добавленного поля и порядок локального запуска.
 
 Тест `test5_userAiProfile_view_registered` продолжает проверять runtime-регистрацию `userAiProfile-view`.
 
-Merge и deploy выполняются отдельно и не входят в данный PR.
+До отчёта Hermes по точному SHA статус задачи — `WAITING_FOR_HERMES`.
 
-## 9. История изменений
+## 10. История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-24 | Вкладки «Интерфейс» и «Настройка email» приведены к двухпанельной концепции Edit-форм; сохранены legacy component ID, типы полей, валидаторы и бизнес-логика; локальный SCSS синхронизирован для семи тем |
 | 2026-07-23 | Вкладка AI приведена к двухпанельной концепции Edit-форм: sidebar 270 px, единый toolbar, карточки источника API и подключений; SCSS синхронизирован во всех семи темах; бизнес-логика, datasource, component ID и `invoke` сохранены |
 | 2026-07-23 | Добавлен checkbox «Предпочитать использовать в запросах мои настройки API», поле `UserSettings.preferPersonalAiApiSettings`, миграции и `UserSettingsAiApiPreferenceTest`; алгоритм маршрутизации API намеренно не изменён |
 | 2026-07-23 | Исправлена повторная `ViewNotFoundException`: `user-ai-profile-views.xml` зарегистрирован в рабочих конфигурациях core/web; тест 5 переведён на `HunttechTestContainer` и проверяет runtime `ViewRepository` и оба `cuba.viewsConfig` |

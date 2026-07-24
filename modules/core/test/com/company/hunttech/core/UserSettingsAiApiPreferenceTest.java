@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -74,15 +75,46 @@ public class UserSettingsAiApiPreferenceTest {
     }
 
     @Test
+    public void settingsWindowInterfaceAndEmailTabsUseEditDesignWithoutChangingCubaContracts()
+            throws IOException {
+        /*
+         * Регрессия фиксирует CUBA-контракты двух legacy-вкладок: базовый SettingsWindow
+         * находит интерфейсные компоненты по ID, а ExtSettingsWindow вручную читает
+         * почтовые TextField и CheckBox. Разрешено менять только визуальные контейнеры.
+         */
+        String screenXml = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml");
+
+        assertTrue(screenXml.contains("id=\"interfaceSettingsMainBox\""));
+        assertTrue(screenXml.contains("stylename=\"interface-settings-editor\""));
+        assertTrue(screenXml.contains("id=\"interfaceSettingsSidebar\""));
+        assertTrue(screenXml.contains("id=\"emailSettingsMainBox\""));
+        assertTrue(screenXml.contains("stylename=\"email-settings-editor\""));
+        assertTrue(screenXml.contains("id=\"emailSettingsSidebar\""));
+
+        List<String> preservedComponentIds = Arrays.asList(
+                "grid", "mainWindowLabel", "modeOptions", "visualThemeLabel", "appThemeField",
+                "languageLabel", "appLangField", "timeZoneLabel", "timeZoneBox",
+                "timeZoneLookup", "timeZoneAutoField", "defaultScreenLabel", "defaultScreenField",
+                "changePasswordBtn", "resetScreenSettingsBtn",
+                "smtpServer", "smtpPort", "smtpPasswordRequired", "smtpPassword",
+                "pop3Server", "pop3Port", "pop3PasswordRequired", "pop3Password",
+                "imapServer", "imapPort", "imapPasswordRequired", "imapPassword");
+        for (String componentId : preservedComponentIds) {
+            assertTrue("Потерян CUBA component ID: " + componentId,
+                    screenXml.contains("id=\"" + componentId + "\""));
+        }
+
+        assertTrue(screenXml.contains("id=\"appThemeField\" required=\"true\""));
+        assertEquals(3, countOccurrences(screenXml,
+                "class=\"com.haulmont.cuba.gui.components.validators.IntegerValidator\""));
+        assertTrue(screenXml.contains("id=\"msgMyInfo\""));
+        assertTrue(screenXml.contains("id=\"aiAccessTab\""));
+    }
+
+    @Test
     public void allSupportedThemesContainLocalizedAiSettingsStyles() throws IOException {
-        List<String> themes = Arrays.asList(
-                "halo",
-                "havana",
-                "helium",
-                "hover",
-                "hunttech-modern",
-                "hunttech-modern-light",
-                "hunttech-modern-dark");
+        List<String> themes = supportedThemes();
 
         for (String theme : themes) {
             String scss = readProjectFile("modules/web/themes/" + theme
@@ -91,6 +123,36 @@ public class UserSettingsAiApiPreferenceTest {
                     scss.contains(".ai-settings-editor"));
             assertTrue("В теме " + theme + " отсутствует карточка подключений",
                     scss.contains(".ai-settings-connections-card"));
+        }
+    }
+
+    @Test
+    public void allSupportedThemesContainLocalizedInterfaceAndEmailStyles() throws IOException {
+        /*
+         * Визуальный контракт должен быть одинаковым во всех поддерживаемых темах.
+         * Стили подключаются отдельным mixin и остаются внутри локальных корней вкладок.
+         */
+        for (String theme : supportedThemes()) {
+            String scss = readProjectFile("modules/web/themes/" + theme
+                    + "/com.company.hunttech/settings-window-sections.scss");
+            String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");
+
+            assertTrue("В теме " + theme + " отсутствует дизайн вкладки «Интерфейс»",
+                    scss.contains(".interface-settings-editor"));
+            assertTrue("В теме " + theme + " отсутствует дизайн вкладки email",
+                    scss.contains(".email-settings-editor"));
+            assertTrue("В теме " + theme + " не импортирован локальный SCSS",
+                    styles.contains("@import \"com.company.hunttech/settings-window-sections\";"));
+            assertTrue("В теме " + theme + " не подключён mixin вкладок",
+                    styles.contains("@include settings-window-sections;"));
+            assertFalse("В теме " + theme + " найден глобальный .v-table",
+                    scss.contains("\n.v-table"));
+            assertFalse("В теме " + theme + " найден глобальный .v-label",
+                    scss.contains("\n.v-label"));
+            assertFalse("В теме " + theme + " найден глобальный .v-button",
+                    scss.contains("\n.v-button"));
+            assertFalse("В теме " + theme + " найден глобальный .v-tabsheet",
+                    scss.contains("\n.v-tabsheet"));
         }
     }
 
@@ -120,6 +182,27 @@ public class UserSettingsAiApiPreferenceTest {
 
         assertTrue("Локальный запуск обязан выполнять updateDb", updateDbPosition >= 0);
         assertTrue("updateDb должен выполняться до deploy", updateDbPosition < deployPosition);
+    }
+
+    private List<String> supportedThemes() {
+        return Arrays.asList(
+                "halo",
+                "havana",
+                "helium",
+                "hover",
+                "hunttech-modern",
+                "hunttech-modern-light",
+                "hunttech-modern-dark");
+    }
+
+    private int countOccurrences(String source, String fragment) {
+        int count = 0;
+        int start = 0;
+        while ((start = source.indexOf(fragment, start)) >= 0) {
+            count++;
+            start += fragment.length();
+        }
+        return count;
     }
 
     private String readProjectFile(String relativePath) throws IOException {
