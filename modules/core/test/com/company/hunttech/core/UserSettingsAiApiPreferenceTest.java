@@ -85,6 +85,8 @@ public class UserSettingsAiApiPreferenceTest {
         String screenXml = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml");
 
+        assertTrue(screenXml.contains("stylename=\"ext-settings-window\""));
+        assertTrue(screenXml.contains("stylename=\"framed ext-settings-tabs\""));
         assertTrue(screenXml.contains("id=\"interfaceSettingsMainBox\""));
         assertTrue(screenXml.contains("stylename=\"interface-settings-editor\""));
         assertTrue(screenXml.contains("id=\"interfaceSettingsSidebar\""));
@@ -137,6 +139,8 @@ public class UserSettingsAiApiPreferenceTest {
                     + "/com.company.hunttech/settings-window-sections.scss");
             String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");
 
+            assertTrue("В теме " + theme + " отсутствует корневой namespace SettingsWindow",
+                    scss.contains(".ext-settings-window"));
             assertTrue("В теме " + theme + " отсутствует дизайн вкладки «Интерфейс»",
                     scss.contains(".interface-settings-editor"));
             assertTrue("В теме " + theme + " отсутствует дизайн вкладки email",
@@ -153,7 +157,37 @@ public class UserSettingsAiApiPreferenceTest {
                     scss.contains("\n.v-button"));
             assertFalse("В теме " + theme + " найден глобальный .v-tabsheet",
                     scss.contains("\n.v-tabsheet"));
+            assertFalse("В теме " + theme + " обнаружена зависимость от JobCandidateEdit",
+                    scss.contains(".job-candidate-editor"));
         }
+    }
+
+
+    @Test
+    public void settingsWindowVisualLayerUsesJobCandidatePrinciplesThroughOwnNamespace()
+            throws IOException {
+        /*
+         * Визуальные токены JobCandidateEdit адаптируются, а не подключаются напрямую.
+         * Проверка закрепляет отдельный namespace и theme-aware переменные CUBA/Valo.
+         */
+        String haloScss = readProjectFile(
+                "modules/web/themes/halo/com.company.hunttech/settings-window-sections.scss");
+        String concept = readProjectFile(
+                "docs/architecture/HRM_HuntTech_UI_UX_Design_Concept.md");
+
+        assertTrue(haloScss.contains(".ext-settings-window"));
+        assertTrue(haloScss.contains("$v-app-background-color"));
+        assertTrue(haloScss.contains("$v-panel-background-color"));
+        assertTrue(haloScss.contains("$v-font-color"));
+        assertTrue(haloScss.contains("$v-selection-color"));
+        assertTrue(haloScss.contains(".ext-settings-tabs"));
+        assertTrue(haloScss.contains(".v-filterselect-focus"));
+        assertTrue(haloScss.contains(".v-disabled"));
+        assertFalse(haloScss.contains(".job-candidate-editor"));
+
+        assertTrue(concept.contains("JobCandidateEdit"));
+        assertTrue(concept.contains(".ext-settings-window"));
+        assertTrue(concept.contains("не обновляется автоматически"));
     }
 
     @Test

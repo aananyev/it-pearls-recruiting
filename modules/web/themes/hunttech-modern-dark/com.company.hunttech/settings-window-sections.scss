@@ -1,139 +1,316 @@
-// Локальные стили вкладок «Интерфейс» и «Настройка email» для тёмной темы.
-// Селекторы ограничены корнями вкладок и не меняют глобальные Vaadin-компоненты.
+// Локальный визуальный слой ExtSettingsWindow в дизайн-языке JobCandidateEdit.
+// Геометрия и состояния адаптированы под экран настроек; зависимость от job-candidate-editor отсутствует.
 @mixin settings-window-sections {
-  .interface-settings-editor,
-  .email-settings-editor {
-    .settings-section-sidebar {
-      box-sizing: border-box;
-      padding: 20px 18px;
-      border-radius: 14px;
-      background: linear-gradient(160deg, rgba(45, 103, 178, 0.34), rgba(28, 37, 51, 0.94));
-      border: 1px solid rgba(100, 168, 255, 0.28);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+  .ext-settings-window {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    color: $v-font-color;
+    background: mix($v-app-background-color, $v-panel-background-color, 72%);
+
+    /* Вкладки сохраняют штатный TabSheet CUBA, но получают локальную визуальную иерархию. */
+    .ext-settings-tabs .v-tabsheet-tabcontainer {
+      background: $v-panel-background-color !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.12) !important;
     }
 
-    .settings-section-mark {
+    .ext-settings-tabs .v-tabsheet-tabitem .v-caption {
+      padding: 9px 14px !important;
+      color: rgba($v-font-color, 0.66) !important;
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      border-bottom: 2px solid transparent !important;
+      transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+
+    .ext-settings-tabs .v-tabsheet-tabitem:hover .v-caption {
+      color: $v-font-color !important;
+      background: mix($v-selection-color, $v-panel-background-color, 5%) !important;
+    }
+
+    .ext-settings-tabs .v-tabsheet-tabitem-selected .v-caption {
+      color: $v-selection-color !important;
+      background: transparent !important;
+      border-bottom-color: $v-selection-color !important;
+      box-shadow: none !important;
+    }
+
+    .ext-settings-tabs > .v-tabsheet-content,
+    .ext-settings-tabs .v-tabsheet-tabsheetpanel {
+      background: transparent !important;
+      border: none !important;
+    }
+
+    .interface-settings-editor,
+    .email-settings-editor,
+    .user-ai-profile-editor,
+    .ai-settings-editor {
+      min-width: 0;
+    }
+
+    /* Боковые панели повторяют компактную панель JobCandidateEdit без копирования её профиля. */
+    .settings-section-sidebar,
+    .user-ai-profile-sidebar,
+    .ai-settings-sidebar {
       box-sizing: border-box;
-      display: inline-block;
-      width: 52px;
-      padding: 13px 0;
-      border-radius: 14px;
-      background: #3f8cff;
-      color: #ffffff;
-      font-size: 18px;
-      font-weight: 700;
-      text-align: center;
+      padding: 18px 16px;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.13) !important;
+      border-radius: $v-border-radius !important;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.04) !important;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    .settings-section-mark,
+    .ai-settings-mark {
+      border-radius: $v-border-radius !important;
+      background: $v-selection-color !important;
+      color: valo-font-color($v-selection-color, 1) !important;
+      box-shadow: none !important;
     }
 
     .settings-section-sidebar-title,
-    .settings-section-card-title {
-      color: #f4f7fb;
+    .user-ai-profile-name,
+    .ai-settings-sidebar-title {
+      color: $v-font-color !important;
+      font-weight: 600 !important;
       white-space: normal;
     }
 
-    .settings-section-sidebar-title {
-      margin-top: 6px;
-    }
-
-    .settings-section-help {
-      color: #d7e0eb;
-      font-size: 12px;
-      line-height: 1.45;
-      opacity: 0.82;
+    .settings-section-help,
+    .user-ai-profile-help,
+    .ai-settings-help {
+      color: rgba($v-font-color, 0.66) !important;
+      font-size: 12px !important;
+      line-height: 1.4 !important;
+      opacity: 1 !important;
       white-space: normal;
     }
 
-    .settings-section-navigation {
+    .settings-section-navigation,
+    .user-ai-profile-navigation,
+    .ai-settings-navigation {
       box-sizing: border-box;
-      padding-top: 8px;
-      border-top: 1px solid rgba(100, 168, 255, 0.24);
+      padding-top: 6px;
+      border-top: 1px solid rgba($v-font-color, 0.10) !important;
     }
 
-    .settings-section-navigation-title {
+    .settings-section-navigation-title,
+    .user-ai-profile-navigation-title,
+    .ai-settings-navigation-title {
       padding: 6px 10px;
-      color: #d7e0eb;
-      font-size: 12px;
-      font-weight: 600;
-      opacity: 0.70;
+      color: rgba($v-font-color, 0.58) !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.35px;
       text-transform: uppercase;
     }
 
-    .settings-section-nav-item {
+    .settings-section-nav-item,
+    .user-ai-profile-nav-item,
+    .ai-settings-nav-item {
       box-sizing: border-box;
-      padding: 9px 10px;
-      color: #d7e0eb;
-      border-left: 3px solid transparent;
-      border-radius: 0 7px 7px 0;
+      padding: 7px 10px;
+      color: rgba($v-font-color, 0.72) !important;
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      background: transparent !important;
+      border-left: 3px solid transparent !important;
+      border-radius: 0 !important;
+      transition: color 120ms ease, background 120ms ease;
       white-space: normal;
-      opacity: 0.82;
     }
 
-    .settings-section-nav-item-active {
-      color: #8cc0ff;
-      background: rgba(100, 168, 255, 0.14);
-      border-left-color: #64a8ff;
-      opacity: 1;
+    .settings-section-nav-item:hover,
+    .user-ai-profile-nav-item:hover,
+    .ai-settings-nav-item:hover {
+      color: $v-font-color !important;
+      background: mix($v-selection-color, $v-panel-background-color, 6%) !important;
+    }
+
+    .settings-section-nav-item-active,
+    .user-ai-profile-nav-item-active,
+    .ai-settings-nav-item-active {
+      color: $v-selection-color !important;
+      background: mix($v-selection-color, $v-panel-background-color, 9%) !important;
+      border-left-color: $v-selection-color !important;
     }
 
     .settings-section-hint,
-    .settings-section-warning {
+    .settings-section-warning,
+    .user-ai-profile-sensitive-warning,
+    .ai-settings-security {
       box-sizing: border-box;
-      padding: 12px;
-      border-radius: 10px;
+      padding: 10px;
+      background: mix($v-app-background-color, $v-panel-background-color, 58%) !important;
+      border: 1px solid rgba($v-font-color, 0.12) !important;
+      border-radius: $v-border-radius !important;
     }
 
-    .settings-section-hint {
-      background: rgba(100, 168, 255, 0.10);
-      border: 1px solid rgba(100, 168, 255, 0.26);
-    }
-
-    .settings-section-warning {
-      background: rgba(245, 158, 11, 0.10);
-      border: 1px solid rgba(245, 158, 11, 0.30);
-    }
-
-    .settings-section-content {
+    .settings-section-content,
+    .user-ai-profile-content,
+    .ai-settings-content {
       box-sizing: border-box;
+      min-width: 0;
       padding-left: 12px;
       padding-right: 6px;
     }
 
-    .settings-section-toolbar {
+    /* Toolbar использует компактную рамку и фон панели, как верхняя панель JobCandidateEdit. */
+    .settings-section-toolbar,
+    .user-ai-profile-toolbar,
+    .ai-settings-toolbar {
       box-sizing: border-box;
-      padding: 4px 0 14px;
-      border-bottom: 1px solid rgba(181, 198, 218, 0.20);
+      width: 100%;
+      min-height: 38px;
+      margin-bottom: 4px;
+      padding: 8px 10px;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.12) !important;
+      border-radius: $v-border-radius !important;
     }
 
-    .settings-section-toolbar-actions {
+    .settings-section-toolbar-actions,
+    .user-ai-profile-toolbar-actions,
+    .ai-settings-toolbar-actions {
       white-space: nowrap;
     }
 
-    .settings-section-card {
+    /* Карточки используют умеренную рамку, стандартное скругление темы и лёгкую тень. */
+    .settings-section-card,
+    .ai-settings-card,
+    .user-ai-profile-section {
       box-sizing: border-box;
-      padding: 16px;
-      border-radius: 14px;
-      background: rgba(31, 42, 58, 0.94);
-      border: 1px solid rgba(181, 198, 218, 0.18);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.13) !important;
+      border-radius: $v-border-radius !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
     }
-  }
 
-  .interface-settings-editor {
+    .settings-section-card,
+    .ai-settings-card {
+      padding: 14px;
+    }
+
+    .user-ai-profile-section {
+      overflow: hidden;
+    }
+
+    .user-ai-profile-section .v-panel-caption {
+      padding: 8px 12px;
+      color: $v-font-color !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 70%) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.10) !important;
+    }
+
+    .settings-section-card-title,
+    .ai-settings-card-title {
+      color: $v-font-color !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 1.35 !important;
+      white-space: normal;
+    }
+
     .interface-settings-card {
       max-width: 900px;
-      border-color: rgba(100, 168, 255, 0.28);
-      background: linear-gradient(135deg, rgba(45, 103, 178, 0.18), rgba(31, 42, 58, 0.96));
     }
-  }
 
-  .email-settings-editor {
-    .email-settings-grid {
-      margin-top: 2px;
+    .email-settings-grid,
+    .email-settings-grid > div,
+    .email-settings-grid table {
+      width: 100% !important;
+      min-width: 0 !important;
+      table-layout: fixed;
+    }
+
+    .email-settings-grid .v-gridlayout-slot,
+    .email-settings-card {
+      min-width: 0 !important;
     }
 
     .email-settings-card {
       min-height: 310px;
-      border-top: 3px solid rgba(100, 168, 255, 0.72);
+    }
+
+    /* Поля и lookup-компоненты сохраняют типы, binding и validators; меняется только presentation. */
+    .v-textfield,
+    .v-textarea,
+    .v-filterselect {
+      box-sizing: border-box;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.18) !important;
+      border-radius: $v-border-radius !important;
+      box-shadow: none !important;
+      transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+
+    .v-textfield,
+    .v-textarea {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .v-filterselect-input {
+      padding-left: 8px !important;
+    }
+
+    .v-caption .v-captiontext {
+      color: rgba($v-font-color, 0.72) !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+    }
+
+    .v-textfield:focus,
+    .v-textarea:focus,
+    .v-filterselect-focus,
+    .v-button:focus {
+      border-color: $v-selection-color !important;
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
+    }
+
+    .v-textfield-readonly,
+    .v-textarea-readonly,
+    .v-filterselect-readonly,
+    .v-readonly {
+      background: mix($v-app-background-color, $v-panel-background-color, 62%) !important;
+    }
+
+    .v-checkbox {
+      padding: 2px 0;
+    }
+
+    .v-checkbox label {
+      color: $v-font-color;
+      line-height: 1.35;
+    }
+
+    .v-button {
+      border-radius: $v-border-radius !important;
+      transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+    }
+
+    .v-button:hover {
+      border-color: rgba($v-font-color, 0.30) !important;
+    }
+
+    .v-button-primary {
+      font-weight: 600 !important;
+    }
+
+    .v-disabled {
+      opacity: 0.55;
+    }
+
+    .ext-settings-footer {
+      box-sizing: border-box;
+      padding-top: 8px;
+      background: transparent;
+      border-top: 1px solid rgba($v-font-color, 0.10);
     }
   }
 }

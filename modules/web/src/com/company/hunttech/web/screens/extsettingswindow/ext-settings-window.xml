@@ -26,8 +26,10 @@
             <query><![CDATA[select e from hunttech_UserAiConfiguration e where e.user = :ds$extUserDs]]></query>
         </collectionDatasource>
     </dsContext>
-    <layout expand="settingsTabSheet">
-        <tabSheet id="settingsTabSheet" width="100%" height="100%" stylename="framed">
+    <!-- Локальный корневой класс ограничивает визуальные правила экраном настроек
+         и предотвращает влияние на остальные формы HRM HuntTech. -->
+    <layout expand="settingsTabSheet" stylename="ext-settings-window">
+        <tabSheet id="settingsTabSheet" width="100%" height="100%" stylename="framed ext-settings-tabs">
             <tab id="msgMyInfo" caption="msg://msgMyInfo" margin="true" spacing="true">
                 <!-- Двухпанельная компоновка повторяет утверждённое направление JobCandidateEdit:
                      фиксированный профиль слева и прокручиваемые карточки справа. -->
@@ -465,7 +467,7 @@
                 </hbox>
             </tab>
         </tabSheet>
-        <vbox id="buttons" margin="true;false;false;false">
+        <vbox id="buttons" margin="true;false;false;false" stylename="ext-settings-footer">
             <buttonsPanel><button id="okBtn" icon="icons/ok.png"/><button id="cancelBtn" icon="icons/cancel.png"/></buttonsPanel>
         </vbox>
     </layout>

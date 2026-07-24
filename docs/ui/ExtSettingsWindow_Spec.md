@@ -1,9 +1,9 @@
 # ExtSettingsWindow — настройки пользователя
 
-> Экран HRM HuntTech: `com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindow`.  
-> XML: `ext-settings-window.xml`.  
-> Базовый класс: `com.haulmont.cuba.web.app.ui.core.settings.SettingsWindow`.  
-> Связанные документы: [UserSettings](../entities/user-settings/UserSettings.md), [UserAiProfile](../entities/UserAiProfile.md), [UserAiContextService](../services/UserAiContextService.md).  
+> Экран HRM HuntTech: `com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindow`.
+> XML: `ext-settings-window.xml`.
+> Базовый класс: `com.haulmont.cuba.web.app.ui.core.settings.SettingsWindow`.
+> Связанные документы: [UI/UX-концепция HRM HuntTech](../architecture/HRM_HuntTech_UI_UX_Design_Concept.md), [UserSettings](../entities/user-settings/UserSettings.md), [UserAiProfile](../entities/UserAiProfile.md), [UserAiContextService](../services/UserAiContextService.md).
 > Визуальный эталон существующих вкладок: [SettingsWindow AI — Halo](renders/SettingsWindow_AI_Halo.svg).
 
 ## Business & Context Intro
@@ -19,6 +19,8 @@
 
 Редизайн вкладок «Интерфейс» и «Настройка email» устраняет визуальный разрыв внутри одного окна и приводит их к общей концепции Edit-форм: контекстная боковая панель, понятная навигация, заголовок рабочей области и функциональные карточки. Изменение не затрагивает правила сохранения, сервисы, сущности, БД и поведение базового `SettingsWindow`.
 
+Визуальный слой экрана дополнительно унифицирован с `JobCandidateEdit`: применены theme-aware фон рабочей области, компактные карточки, умеренные рамки и тени, единая иерархия заголовков, локальная стилизация вкладок, полей и кнопок. Это не новый редизайн: существующая структура и компоновка `ExtSettingsWindow` сохранены.
+
 ### Связи в интерфейсе и навигация (UI Context & Navigation)
 
 Экран открывается из стандартного меню настроек CUBA Platform и содержит четыре вкладки:
@@ -30,7 +32,7 @@
 | «Настройка email» | `mailAccessTab` | поля `UserSettings`, заполняемые и собираемые контроллером вручную |
 | AI | `aiAccessTab` | `UserSettings.preferPersonalAiApiSettings`, `UserAiConfiguration` |
 
-Вкладки `msgMyInfo` и `aiAccessTab` в задаче 2026-07-24 не изменяются. Редизайн ограничен вкладками `msgInterface` и `mailAccessTab`.
+XML-компоновка и функциональные контракты вкладок `msgMyInfo` и `aiAccessTab` не изменяются. Общий корневой визуальный слой `.ext-settings-window` применяется ко всем четырём вкладкам только для унификации фона, вкладок, полей, карточек, кнопок и состояний.
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -40,8 +42,9 @@
 - нажатие `resetScreenSettingsBtn` → вызывается прежнее действие базового окна → сохранённые настройки экранов сбрасываются после подтверждения;
 - открытие вкладки email → `setEmailSettings()` заполняет существующие поля из `UserSettings` с fallback на `ExtUser`;
 - сохранение окна → `collectEmailSettings()` читает те же `TextField` и `CheckBox` по ID → значения записываются в `UserSettings`;
-- визуальный рефакторинг → меняются только контейнеры и локальные `stylename` → datasource, component ID, типы компонентов, валидаторы и Java-методы остаются прежними;
-- открытие «Обо мне» или AI → выполняется существующее поведение → структура и стили этих вкладок не изменены.
+- визуальная унификация → корневой класс `.ext-settings-window` ограничивает локальный SCSS → datasource, component ID, captions, типы компонентов, валидаторы и Java-методы остаются прежними;
+- hover, focus, disabled или read-only → применяется локальное presentation-состояние → доступность, required и правила валидации не меняются;
+- открытие «Обо мне» или AI → выполняется существующее поведение → XML-компоновка, bindings, actions и `invoke` остаются прежними.
 
 ## 1. Точка вызова и контекст (Invocation & Context)
 
@@ -51,11 +54,11 @@
 | Базовый класс | `SettingsWindow` |
 | XML schema | legacy `window.xsd` |
 | Data API | legacy `dsContext` |
-| Корневой визуальный компонент | `settingsTabSheet` |
+| Корневой визуальный namespace | `.ext-settings-window` на корневом `<layout>` |
 | Messages pack | `com.company.hunttech.web.screens.extsettingswindow` |
 | Поддерживаемые темы | `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light`, `hunttech-modern-dark` |
 
-Экран остаётся legacy-экраном CUBA Platform. Корневые секции `<window>`, `<dsContext>` и `<layout>` сохранены. Наследуемые компоненты базового `SettingsWindow` не переименовываются, поскольку контроллер платформы связывает их по ID.
+Экран остаётся legacy-экраном CUBA Platform. Корневые секции `<window>`, `<dsContext>` и `<layout>` сохранены. На существующий `<layout>` добавлен только `stylename="ext-settings-window"`, а `settingsTabSheet` получил дополнительный локальный класс `ext-settings-tabs` при сохранении `framed`. Наследуемые компоненты базового `SettingsWindow` не переименовываются, поскольку контроллер платформы связывает их по ID.
 
 ## 2. Связь с моделью данных (Data & Entity Binding)
 
@@ -112,42 +115,43 @@ select e from hunttech_UserAiConfiguration e where e.user = :ds$extUserDs
 ## 3. Иерархия и взаимосвязь форм (Form Hierarchy)
 
 ```text
-settingsTabSheet
-├── msgMyInfo
-│   └── userAiProfileMainBox                         [без изменений]
-├── msgInterface
-│   └── interfaceSettingsMainBox
-│       ├── interfaceSettingsSidebar (270 px)
-│       │   ├── interfaceSettingsSidebarIdentity
-│       │   ├── interfaceSettingsNavigation
-│       │   └── interfaceSettingsHintBox
-│       └── interfaceSettingsContentScrollBox
-│           └── interfaceSettingsContent
-│               ├── interfaceSettingsToolbar
-│               │   ├── changePasswordBtn
-│               │   └── resetScreenSettingsBtn
-│               └── interfaceAppearanceCard
-│                   └── grid
-│                       ├── modeOptions
-│                       ├── appThemeField
-│                       ├── appLangField
-│                       ├── timeZoneLookup / timeZoneAutoField
-│                       └── defaultScreenField
-├── mailAccessTab
-│   └── emailSettingsMainBox
-│       ├── emailSettingsSidebar (270 px)
-│       │   ├── emailSettingsSidebarIdentity
-│       │   ├── emailSettingsNavigation
-│       │   └── emailSettingsSecurityBox
-│       └── emailSettingsContentScrollBox
-│           └── emailSettingsContent
-│               ├── emailSettingsToolbar
-│               └── emailSettingsGrid
-│                   ├── smtpSettingsCard
-│                   ├── pop3SettingsCard
-│                   └── imapSettingsCard
-└── aiAccessTab
-    └── aiSettingsMainBox                            [без изменений]
+ext-settings-window
+└── settingsTabSheet
+    ├── msgMyInfo
+    │   └── userAiProfileMainBox                         [без изменений]
+    ├── msgInterface
+    │   └── interfaceSettingsMainBox
+    │       ├── interfaceSettingsSidebar (270 px)
+    │       │   ├── interfaceSettingsSidebarIdentity
+    │       │   ├── interfaceSettingsNavigation
+    │       │   └── interfaceSettingsHintBox
+    │       └── interfaceSettingsContentScrollBox
+    │           └── interfaceSettingsContent
+    │               ├── interfaceSettingsToolbar
+    │               │   ├── changePasswordBtn
+    │               │   └── resetScreenSettingsBtn
+    │               └── interfaceAppearanceCard
+    │                   └── grid
+    │                       ├── modeOptions
+    │                       ├── appThemeField
+    │                       ├── appLangField
+    │                       ├── timeZoneLookup / timeZoneAutoField
+    │                       └── defaultScreenField
+    ├── mailAccessTab
+    │   └── emailSettingsMainBox
+    │       ├── emailSettingsSidebar (270 px)
+    │       │   ├── emailSettingsSidebarIdentity
+    │       │   ├── emailSettingsNavigation
+    │       │   └── emailSettingsSecurityBox
+    │       └── emailSettingsContentScrollBox
+    │           └── emailSettingsContent
+    │               ├── emailSettingsToolbar
+    │               └── emailSettingsGrid
+    │                   ├── smtpSettingsCard
+    │                   ├── pop3SettingsCard
+    │                   └── imapSettingsCard
+    └── aiAccessTab
+        └── aiSettingsMainBox                            [без изменений]
 ```
 
 ## 4. Модель поведения и интерактивность (Behavior Model)
@@ -191,7 +195,7 @@ SMTP, POP3 и IMAP представлены тремя равноправным�
 
 ### Неизменяемые вкладки
 
-`msgMyInfo` и `aiAccessTab` не перерабатывались, их XML-блоки, component ID, datasource, `invoke` и локальные классы оставлены без функциональных изменений.
+`msgMyInfo` и `aiAccessTab` не перерабатывались: их XML-блоки, component ID, datasource, `invoke` и порядок компонентов оставлены без функциональных изменений. Корневой `.ext-settings-window` только согласует их общие presentation-состояния с остальными вкладками.
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
@@ -236,28 +240,48 @@ Java-контроллер, entity, views, JPQL, сервисы, `@Subscribe`, `@
 - вертикальная прокрутка правой области;
 - отсутствие глобальных Vaadin-селекторов.
 
-Локальные корни:
+Основной локальный корень:
 
 ```scss
-.interface-settings-editor
-.email-settings-editor
+.ext-settings-window
 ```
 
-Общие вложенные классы объявлены только внутри этих корней в mixin `settings-window-sections`.
+Внутри него используются существующие структурные классы `.interface-settings-editor`, `.email-settings-editor`, `.user-ai-profile-editor`, `.ai-settings-editor` и локальные Vaadin-селекторы. Селекторы `.v-button`, `.v-label`, `.v-tabsheet`, `.v-textfield` и аналогичные вне `.ext-settings-window` отсутствуют. Namespace `.job-candidate-editor` не подключается и не переиспользуется.
+
+### Таблица соответствия визуальных решений
+
+| Элемент `JobCandidateEdit` | Применимость к `ExtSettingsWindow` | Способ адаптации |
+|---|---|---|
+| Фон рабочей области | Полностью | `mix($v-app-background-color, $v-panel-background-color, 72%)` внутри `.ext-settings-window` |
+| Боковая панель | Частично | сохранена ширина 270 px и текущий контент; применены компактные отступы, фон панели, локальная рамка и умеренная тень |
+| Контейнеры-карточки | Полностью | фон `$v-panel-background-color`, рамка через `$v-font-color`, `$v-border-radius`, тень `0 2px 8px` |
+| Заголовки секций | Полностью | размер 13 px, насыщенность 600, единые интервалы и контраст темы |
+| Поясняющий текст | Полностью | размер 12 px, `line-height: 1.4`, вторичный цвет через `rgba($v-font-color, 0.66)` |
+| TextField / TextArea | Полностью | локальная рамка, фон, скругление, focus, read-only и disabled без изменения binding и validators |
+| LookupField / ComboBox | Полностью | стили `.v-filterselect` и `.v-filterselect-focus` только внутри корня |
+| CheckBox / OptionsGroup | Частично | согласованы интервалы, текст и disabled; типы компонентов и значения не меняются |
+| Кнопки | Полностью | скругление темы, hover/focus, сохранение стандартных `primary` и `danger` |
+| Панели действий | Полностью | toolbar оформлен как компактная панель с рамкой, фоном и высотой не менее 38 px |
+| TabSheet | Полностью | локальные active/hover-состояния и разделитель через `.ext-settings-tabs` |
+| Разделители и интервалы | Полностью | ритм 4/6/8/10/12/14/18 px без изменения порядка компонентов |
+| Тени и скругления | Полностью | исключены большие декоративные тени и радиусы 14 px; используются `$v-border-radius` и умеренные тени |
+| Disabled / read-only | Полностью | presentation-состояния задаются локально; условия доступности и редактирования не меняются |
+| Ограниченная ширина | Частично | добавлены `min-width: 0` и фиксированный layout таблицы email; структурный reflow не вводится |
+| Halo и другие темы | Полностью | единый theme-aware SCSS использует переменные CUBA/Valo без прямой зависимости от стилей кандидата |
 
 ### Синхронизация тем
 
-| Тема | Файл | Особенности |
+| Тема | Файл | Адаптация |
 |---|---|---|
-| `halo` | `com.company.hunttech/settings-window-sections.scss` | светлые поверхности и синий акцент |
-| `havana` | тот же локальный путь темы | светлые поверхности и синий акцент |
-| `helium` | тот же локальный путь темы | светлые поверхности и синий акцент |
-| `hover` | тот же локальный путь темы | светлые поверхности и синий акцент |
-| `hunttech-modern` | тот же локальный путь темы | современная светлая палитра |
-| `hunttech-modern-light` | тот же локальный путь темы | современная светлая палитра |
-| `hunttech-modern-dark` | тот же локальный путь темы | тёмные поверхности и акцент `#64a8ff` |
+| `halo` | `com.company.hunttech/settings-window-sections.scss` | эталонная проверка на стандартных переменных Halo |
+| `havana` | тот же локальный путь темы | тот же theme-aware контракт |
+| `helium` | тот же локальный путь темы | тот же theme-aware контракт |
+| `hover` | тот же локальный путь темы | тот же theme-aware контракт |
+| `hunttech-modern` | тот же локальный путь темы | тот же theme-aware контракт |
+| `hunttech-modern-light` | тот же локальный путь темы | тот же theme-aware контракт |
+| `hunttech-modern-dark` | тот же локальный путь темы | автоматическая адаптация через переменные тёмной темы |
 
-Каждый `styles.scss` импортирует `com.company.hunttech/settings-window-sections` и включает `@include settings-window-sections;`. Структура XML одинакова во всех темах; различаются только цвета, прозрачность, тени и контраст.
+Каждый `styles.scss` продолжает импортировать `com.company.hunttech/settings-window-sections` и включать `@include settings-window-sections;`. Один и тот же SCSS-контракт используется во всех семи темах; цвета, фон, focus и контраст вычисляются из `$v-app-background-color`, `$v-panel-background-color`, `$v-font-color` и `$v-selection-color`.
 
 Запрещены и не добавлены глобальные правила `.v-table`, `.v-label`, `.v-button`, `.v-tabsheet`.
 
@@ -269,9 +293,10 @@ Java-контроллер, entity, views, JPQL, сервисы, `@Subscribe`, `@
 2. вкладки остаются дочерними компонентами `TabSheet`;
 3. компоновка построена стандартными `HBox`, `VBox`, `ScrollBox`, `Grid`, `ButtonsPanel`;
 4. extension-контракты базового `SettingsWindow` сохраняются через прежние component ID;
-5. стили подключаются через theme extension и локальные `stylename`;
-6. валидаторы портов остаются вложенными в соответствующие `TextField`;
-7. data-binding и Java-инъекция не заменяются визуальным кодом.
+5. стили подключаются через theme extension и стандартный XML-атрибут `stylename`;
+6. `HBox`, `VBox`, `ScrollBox`, `Grid`, `ButtonsPanel` и `TabSheet` остаются штатными компонентами CUBA 7.3;
+7. валидаторы портов остаются вложенными в соответствующие `TextField`;
+8. data-binding и Java-инъекция не заменяются визуальным кодом.
 
 ## 8. База данных и ограничения задачи
 
@@ -290,7 +315,7 @@ Hermes проверяет точный HEAD ветки и PR без измене
 
 - `git diff --check`;
 - компиляция web и test-кода;
-- `UserSettingsAiApiPreferenceTest` — ожидается **9/9**;
+- `UserSettingsAiApiPreferenceTest` — ожидается **10/10**;
 - `ScreenViewIntegrityTest` — ожидается **8/8**;
 - Data View Integrity для `ExtSettingsWindow`;
 - `./gradlew :app-web:buildScssThemes --no-daemon --stacktrace`;
@@ -305,7 +330,7 @@ Hermes проверяет точный HEAD ветки и PR без измене
 - регрессионное открытие вкладок «Обо мне» и AI без визуальных и runtime-ошибок;
 - отсутствие критических ошибок в Tomcat logs.
 
-`UserSettingsAiApiPreferenceTest` содержит девять сценариев:
+`UserSettingsAiApiPreferenceTest` содержит десять сценариев:
 
 1. metadata-поле и default `false`;
 2. binding checkbox;
@@ -315,7 +340,8 @@ Hermes проверяет точный HEAD ветки и PR без измене
 6. сохранность legacy component ID и трёх `IntegerValidator`;
 7. наличие локальных AI-стилей во всех семи темах;
 8. наличие и подключение локальных стилей двух новых вкладок во всех семи темах;
-9. миграции ранее добавленного поля и порядок локального запуска.
+9. локальный `.ext-settings-window`, theme-aware токены и отсутствие зависимости от `.job-candidate-editor`;
+10. миграции ранее добавленного поля и порядок локального запуска.
 
 Тест `test5_userAiProfile_view_registered` продолжает проверять runtime-регистрацию `userAiProfile-view`.
 
@@ -325,6 +351,7 @@ Hermes проверяет точный HEAD ветки и PR без измене
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-24 | Визуальное оформление `ExtSettingsWindow` адаптировано к дизайн-языку `JobCandidateEdit` без изменения структуры и бизнес-логики; добавлен локальный namespace `.ext-settings-window`, theme-aware состояния и синхронизация семи тем |
 | 2026-07-24 | Вкладки «Интерфейс» и «Настройка email» приведены к двухпанельной концепции Edit-форм; сохранены legacy component ID, типы полей, валидаторы и бизнес-логика; локальный SCSS синхронизирован для семи тем |
 | 2026-07-23 | Вкладка AI приведена к двухпанельной концепции Edit-форм: sidebar 270 px, единый toolbar, карточки источника API и подключений; SCSS синхронизирован во всех семи темах; бизнес-логика, datasource, component ID и `invoke` сохранены |
 | 2026-07-23 | Добавлен checkbox «Предпочитать использовать в запросах мои настройки API», поле `UserSettings.preferPersonalAiApiSettings`, миграции и `UserSettingsAiApiPreferenceTest`; алгоритм маршрутизации API намеренно не изменён |
