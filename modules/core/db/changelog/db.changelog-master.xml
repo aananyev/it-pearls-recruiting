@@ -9,5 +9,6 @@
     <include file="260722-1-addUserAiProfile.xml" relativeToChangelogFile="true"/>
     <include file="260722-2-migrateUserAiProfileToHunttech.xml" relativeToChangelogFile="true"/>
     <include file="260723-1-addPreferPersonalAiApiSettings.xml" relativeToChangelogFile="true"/>
+    <include file="260724-1-enablePersonalAiPreferences.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

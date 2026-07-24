@@ -30,7 +30,11 @@ public class UserSettings extends StandardEntity {
 
     @NotNull
     @Column(name = "PREFER_PERSONAL_AI_API_SETTINGS", nullable = false)
-    private Boolean preferPersonalAiApiSettings = false;
+    private Boolean preferPersonalAiApiSettings = true;
+
+    @NotNull
+    @Column(name = "PREFER_PERSONAL_PROMPTS", nullable = false)
+    private Boolean preferPersonalPrompts = true;
 
     @Column(name = "SMTP_SERVER", length = 128)
     private String smtpServer;
@@ -67,6 +71,14 @@ public class UserSettings extends StandardEntity {
 
     @Column(name = "IMAP_PASSWORD", length = 128)
     private String imapPassword;
+
+    public Boolean getPreferPersonalPrompts() {
+        return preferPersonalPrompts;
+    }
+
+    public void setPreferPersonalPrompts(Boolean preferPersonalPrompts) {
+        this.preferPersonalPrompts = preferPersonalPrompts;
+    }
 
     public Boolean getPreferPersonalAiApiSettings() {
         return preferPersonalAiApiSettings;

@@ -137,11 +137,14 @@ public class ExtSettingsWindow extends SettingsWindow {
                 .optional()
                 .orElseGet(this::createNewUserSetting);
         /*
-         * Пока алгоритм выбора API не реализован, поле только хранит намерение пользователя.
-         * Значение false сохраняет действующий административный маршрут вызовов по умолчанию.
+         * Персональные предпочтения включены по умолчанию. Флаги сохраняют выбор пользователя,
+         * но не подменяют отдельную бизнес-логику маршрутизации API и выбора промптов.
          */
         if (userSettings.getPreferPersonalAiApiSettings() == null) {
-            userSettings.setPreferPersonalAiApiSettings(false);
+            userSettings.setPreferPersonalAiApiSettings(true);
+        }
+        if (userSettings.getPreferPersonalPrompts() == null) {
+            userSettings.setPreferPersonalPrompts(true);
         }
         userSettingsDs.setItem(userSettings);
     }
@@ -420,14 +423,52 @@ public class ExtSettingsWindow extends SettingsWindow {
     private UserSettings createNewUserSetting() {
         UserSettings settings = metadata.create(UserSettings.class);
         settings.setUser((ExtUser) userSession.getUser());
-        settings.setPreferPersonalAiApiSettings(false);
+        settings.setPreferPersonalAiApiSettings(true);
+        settings.setPreferPersonalPrompts(true);
         return settings;
     }
 
     public void previewAiContext() {
-        // Формирует очищенный предпросмотр данных, разрешённых к передаче ИИ-провайдеру.
-        aiContextPreviewArea.setValue(userAiContextService.buildContextPreview(userAiProfileDs.getItem()));
-        previewGroup.setExpanded(true);
+        /*
+         * Предпросмотр является вспомогательным UI-сценарием и не должен закрывать окно
+         * из-за частично инициализированного datasource, сервиса или XML-компонента.
+         */
+        UserAiProfile profile = userAiProfileDs == null ? null : userAiProfileDs.getItem();
+        if (profile == null) {
+            showAiContextPreviewError("aiContextPreviewUnavailable");
+            return;
+        }
+        if (userAiContextService == null) {
+            log.error("UserAiContextService is not available in ExtSettingsWindow");
+            showAiContextPreviewError("aiContextPreviewError");
+            return;
+        }
+        if (aiContextPreviewArea == null || previewGroup == null) {
+            log.error("AI context preview components are not injected: area={}, group={}",
+                    aiContextPreviewArea != null, previewGroup != null);
+            showAiContextPreviewError("aiContextPreviewError");
+            return;
+        }
+
+        try {
+            String preview = userAiContextService.buildContextPreview(profile);
+            aiContextPreviewArea.setValue(preview == null ? "" : preview);
+            previewGroup.setExpanded(true);
+        } catch (RuntimeException e) {
+            log.error("Cannot build AI context preview", e);
+            showAiContextPreviewError("aiContextPreviewError");
+        }
+    }
+
+    private void showAiContextPreviewError(String messageKey) {
+        if (notifications == null) {
+            log.error("Cannot show AI context preview notification: {}", messageKey);
+            return;
+        }
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withCaption(getMessage(messageKey))
+                .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                .show();
     }
 
     public void clearAiProfile() {

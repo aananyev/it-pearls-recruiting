@@ -29,26 +29,36 @@ public class UserSettingsAiApiPreferenceTest {
     private final Metadata metadata = AppBeans.get(Metadata.class);
 
     @Test
-    public void userSettingsContainsPersonalAiApiPreference() {
+    public void userSettingsContainsPersonalAiPreferences() {
         MetaClass metaClass = metadata.getClassNN("hunttech_UserSettings");
         assertNotNull(metaClass.getPropertyNN("preferPersonalAiApiSettings"));
+        assertNotNull(metaClass.getPropertyNN("preferPersonalPrompts"));
         assertEquals(Boolean.class,
                 metaClass.getPropertyNN("preferPersonalAiApiSettings").getJavaType());
+        assertEquals(Boolean.class,
+                metaClass.getPropertyNN("preferPersonalPrompts").getJavaType());
     }
 
     @Test
-    public void newUserSettingsKeepsAdministrativeApiRouteByDefault() {
+    public void newUserSettingsEnablesPersonalAiPreferencesByDefault() {
         UserSettings settings = metadata.create(UserSettings.class);
-        assertEquals(Boolean.FALSE, settings.getPreferPersonalAiApiSettings());
+        assertEquals(Boolean.TRUE, settings.getPreferPersonalAiApiSettings());
+        assertEquals(Boolean.TRUE, settings.getPreferPersonalPrompts());
     }
 
     @Test
-    public void settingsWindowBindsCheckboxToUserSettings() throws IOException {
+    public void settingsWindowBindsPreferencesToUserSettings() throws IOException {
         String screenXml = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml");
+        String controller = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindow.java");
+
         assertTrue(screenXml.contains("id=\"preferPersonalAiApiSettingsField\""));
+        assertTrue(screenXml.contains("id=\"preferPersonalPromptsField\""));
         assertTrue(screenXml.contains("datasource=\"userSettingsDs\""));
         assertTrue(screenXml.contains("property=\"preferPersonalAiApiSettings\""));
+        assertTrue(screenXml.contains("property=\"preferPersonalPrompts\""));
+        assertTrue(controller.contains("context.addInstanceToCommit(userSettings)"));
     }
 
     @Test
@@ -207,19 +217,45 @@ public class UserSettingsAiApiPreferenceTest {
     }
 
     @Test
-    public void databaseMigrationsContainPreferenceColumn() throws IOException {
-        String updateSql = readProjectFile(
+    public void databaseMigrationsContainPersonalAiPreferenceColumns() throws IOException {
+        String initialUpdateSql = readProjectFile(
                 "modules/core/db/update/postgres/26/260723-1-addPreferPersonalAiApiSettings.sql");
-        String liquibase = readProjectFile(
+        String initialLiquibase = readProjectFile(
                 "modules/core/db/changelog/260723-1-addPreferPersonalAiApiSettings.xml");
+        String preferenceDefaultsUpdate = readProjectFile(
+                "modules/core/db/update/postgres/26/260724-1-enablePersonalAiPreferences.sql");
+        String preferenceDefaultsLiquibase = readProjectFile(
+                "modules/core/db/changelog/260724-1-enablePersonalAiPreferences.xml");
         String liquibaseMaster = readProjectFile(
                 "modules/core/db/changelog/db.changelog-master.xml");
 
-        assertTrue(updateSql.contains("PREFER_PERSONAL_AI_API_SETTINGS"));
-        assertTrue(updateSql.contains("DEFAULT FALSE"));
-        assertTrue(liquibase.contains("PREFER_PERSONAL_AI_API_SETTINGS"));
-        assertTrue(liquibase.contains("defaultValueBoolean=\"false\""));
+        // Выполненная историческая миграция остаётся неизменной; новый changeSet меняет default отдельно.
+        assertTrue(initialUpdateSql.contains("PREFER_PERSONAL_AI_API_SETTINGS"));
+        assertTrue(initialUpdateSql.contains("DEFAULT FALSE"));
+        assertTrue(initialLiquibase.contains("defaultValueBoolean=\"false\""));
+        assertTrue(preferenceDefaultsUpdate.contains("SET DEFAULT TRUE"));
+        assertTrue(preferenceDefaultsUpdate.contains("PREFER_PERSONAL_PROMPTS"));
+        assertTrue(preferenceDefaultsUpdate.contains("DEFAULT TRUE"));
+        assertTrue(preferenceDefaultsLiquibase.contains("defaultValueBoolean=\"true\""));
+        assertTrue(preferenceDefaultsLiquibase.contains("PREFER_PERSONAL_PROMPTS"));
         assertTrue(liquibaseMaster.contains("260723-1-addPreferPersonalAiApiSettings.xml"));
+        assertTrue(liquibaseMaster.contains("260724-1-enablePersonalAiPreferences.xml"));
+    }
+
+    @Test
+    public void settingsWindowPreviewHandlesMissingDependenciesWithoutNullPointerException()
+            throws IOException {
+        String controller = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindow.java");
+
+        // Регрессия фиксирует раздельную диагностику зависимостей вместо составной строки с NPE.
+        assertTrue(controller.contains("UserAiProfile profile = userAiProfileDs == null"));
+        assertTrue(controller.contains("if (profile == null)"));
+        assertTrue(controller.contains("if (userAiContextService == null)"));
+        assertTrue(controller.contains("if (aiContextPreviewArea == null || previewGroup == null)"));
+        assertTrue(controller.contains("preview == null ? \"\" : preview"));
+        assertTrue(controller.contains("catch (RuntimeException e)"));
+        assertTrue(controller.contains("log.error(\"Cannot build AI context preview\", e)"));
     }
 
     @Test

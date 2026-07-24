@@ -431,7 +431,7 @@
                                 <button id="aiConfigsTestBtn" caption="msg://msgAiTestConnection" icon="KEY" enable="false" invoke="onAiConfigsTestBtnClick"/>
                             </buttonsPanel>
                         </hbox>
-                        <!-- Флаг только сохраняет предпочтение пользователя; алгоритм маршрутизации API будет добавлен отдельно. -->
+                        <!-- Предпочтения сохраняются в UserSettings; маршрутизация API и разрешение промптов выполняются отдельными сервисами. -->
                         <vbox id="personalAiApiPreferenceBox"
                               spacing="true"
                               width="100%"
@@ -443,6 +443,12 @@
                                       caption="msg://preferPersonalAiApiSettings"
                                       stylename="ai-settings-preference-checkbox"/>
                             <label value="msg://preferPersonalAiApiSettingsHint" width="100%" stylename="ai-settings-help"/>
+                            <checkBox id="preferPersonalPromptsField"
+                                      datasource="userSettingsDs"
+                                      property="preferPersonalPrompts"
+                                      caption="msg://preferPersonalPrompts"
+                                      stylename="ai-settings-preference-checkbox"/>
+                            <label value="msg://preferPersonalPromptsHint" width="100%" stylename="ai-settings-help"/>
                         </vbox>
                         <vbox id="aiConnectionsCard"
                               width="100%"

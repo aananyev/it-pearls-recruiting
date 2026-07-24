@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260724-1-enablePersonalAiApiPreference" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="HUNTTECH_USER_SETTINGS"/>
+                <columnExists tableName="HUNTTECH_USER_SETTINGS"
+                              columnName="PREFER_PERSONAL_AI_API_SETTINGS"/>
+            </and>
+        </preConditions>
+        <addDefaultValue tableName="HUNTTECH_USER_SETTINGS"
+                         columnName="PREFER_PERSONAL_AI_API_SETTINGS"
+                         columnDataType="boolean"
+                         defaultValueBoolean="true"/>
+        <update tableName="HUNTTECH_USER_SETTINGS">
+            <column name="PREFER_PERSONAL_AI_API_SETTINGS" valueBoolean="true"/>
+            <where>PREFER_PERSONAL_AI_API_SETTINGS IS DISTINCT FROM TRUE</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="260724-2-addPreferPersonalPrompts" author="hunttech">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="HUNTTECH_USER_SETTINGS"/>
+                <not>
+                    <columnExists tableName="HUNTTECH_USER_SETTINGS"
+                                  columnName="PREFER_PERSONAL_PROMPTS"/>
+                </not>
+            </and>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_USER_SETTINGS">
+            <column name="PREFER_PERSONAL_PROMPTS"
+                    type="boolean"
+                    defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
