@@ -1,0 +1,139 @@
+// Локальные стили вкладок «Интерфейс» и «Настройка email» для тёмной темы.
+// Селекторы ограничены корнями вкладок и не меняют глобальные Vaadin-компоненты.
+@mixin settings-window-sections {
+  .interface-settings-editor,
+  .email-settings-editor {
+    .settings-section-sidebar {
+      box-sizing: border-box;
+      padding: 20px 18px;
+      border-radius: 14px;
+      background: linear-gradient(160deg, rgba(45, 103, 178, 0.34), rgba(28, 37, 51, 0.94));
+      border: 1px solid rgba(100, 168, 255, 0.28);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+    }
+
+    .settings-section-mark {
+      box-sizing: border-box;
+      display: inline-block;
+      width: 52px;
+      padding: 13px 0;
+      border-radius: 14px;
+      background: #3f8cff;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .settings-section-sidebar-title,
+    .settings-section-card-title {
+      color: #f4f7fb;
+      white-space: normal;
+    }
+
+    .settings-section-sidebar-title {
+      margin-top: 6px;
+    }
+
+    .settings-section-help {
+      color: #d7e0eb;
+      font-size: 12px;
+      line-height: 1.45;
+      opacity: 0.82;
+      white-space: normal;
+    }
+
+    .settings-section-navigation {
+      box-sizing: border-box;
+      padding-top: 8px;
+      border-top: 1px solid rgba(100, 168, 255, 0.24);
+    }
+
+    .settings-section-navigation-title {
+      padding: 6px 10px;
+      color: #d7e0eb;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.70;
+      text-transform: uppercase;
+    }
+
+    .settings-section-nav-item {
+      box-sizing: border-box;
+      padding: 9px 10px;
+      color: #d7e0eb;
+      border-left: 3px solid transparent;
+      border-radius: 0 7px 7px 0;
+      white-space: normal;
+      opacity: 0.82;
+    }
+
+    .settings-section-nav-item-active {
+      color: #8cc0ff;
+      background: rgba(100, 168, 255, 0.14);
+      border-left-color: #64a8ff;
+      opacity: 1;
+    }
+
+    .settings-section-hint,
+    .settings-section-warning {
+      box-sizing: border-box;
+      padding: 12px;
+      border-radius: 10px;
+    }
+
+    .settings-section-hint {
+      background: rgba(100, 168, 255, 0.10);
+      border: 1px solid rgba(100, 168, 255, 0.26);
+    }
+
+    .settings-section-warning {
+      background: rgba(245, 158, 11, 0.10);
+      border: 1px solid rgba(245, 158, 11, 0.30);
+    }
+
+    .settings-section-content {
+      box-sizing: border-box;
+      padding-left: 12px;
+      padding-right: 6px;
+    }
+
+    .settings-section-toolbar {
+      box-sizing: border-box;
+      padding: 4px 0 14px;
+      border-bottom: 1px solid rgba(181, 198, 218, 0.20);
+    }
+
+    .settings-section-toolbar-actions {
+      white-space: nowrap;
+    }
+
+    .settings-section-card {
+      box-sizing: border-box;
+      padding: 16px;
+      border-radius: 14px;
+      background: rgba(31, 42, 58, 0.94);
+      border: 1px solid rgba(181, 198, 218, 0.18);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+    }
+  }
+
+  .interface-settings-editor {
+    .interface-settings-card {
+      max-width: 900px;
+      border-color: rgba(100, 168, 255, 0.28);
+      background: linear-gradient(135deg, rgba(45, 103, 178, 0.18), rgba(31, 42, 58, 0.96));
+    }
+  }
+
+  .email-settings-editor {
+    .email-settings-grid {
+      margin-top: 2px;
+    }
+
+    .email-settings-card {
+      min-height: 310px;
+      border-top: 3px solid rgba(100, 168, 255, 0.72);
+    }
+  }
+}
