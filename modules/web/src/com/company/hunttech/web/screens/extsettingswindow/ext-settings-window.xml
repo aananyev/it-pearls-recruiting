@@ -205,44 +205,176 @@
                     </scrollBox>
                 </hbox>
             </tab>
-            <tab id="msgInterface" caption="msg://msgInterface">
-                <vbox spacing="true" margin="true">
-                    <grid id="grid" spacing="true" width="100%">
-                        <columns><column flex="0"/><column flex="1"/></columns>
-                        <rows>
-                            <row><label id="mainWindowLabel" value="msg://mainWindowMode" align="MIDDLE_LEFT"/><optionsGroup id="modeOptions"/></row>
-                            <row><label id="visualThemeLabel" value="msg://mainWindowTheme" align="MIDDLE_LEFT"/><lookupField id="appThemeField" required="true" width="theme://cuba.web.settings-window.appThemeField.width" requiredMessage="msg://mainWindowThemeMsg"/></row>
-                            <row><label id="languageLabel" value="msg://mainWindowLang" align="MIDDLE_LEFT"/><lookupField id="appLangField" width="theme://cuba.web.settings-window.appLocaleField.width"/></row>
-                            <row>
-                                <label id="timeZoneLabel" value="msg://com.haulmont.cuba.security.entity/User.timeZone" align="MIDDLE_LEFT"/>
-                                <hbox id="timeZoneBox" spacing="true" width="100%" expand="timeZoneAutoField">
-                                    <lookupField id="timeZoneLookup" width="theme://cuba.web.settings-window.timeZoneField.width"/>
-                                    <checkBox id="timeZoneAutoField" align="MIDDLE_LEFT"/>
-                                </hbox>
-                            </row>
-                            <row><label id="defaultScreenLabel" value="msg://defaultScreen" align="MIDDLE_LEFT"/><lookupField id="defaultScreenField" description="msg://defaultScreenDescription" newOptionAllowed="false" nullName="msg://noDefaultScreen" width="theme://cuba.web.settings-window.defaultScreenField.width"/></row>
-                            <row><button id="changePasswordBtn" icon="icons/change-pass.png"/></row>
-                            <row><button id="resetScreenSettingsBtn" icon="icons/trash.png" stylename="danger"/></row>
-                        </rows>
-                    </grid>
-                </vbox>
+            <tab id="msgInterface" caption="msg://msgInterface" margin="true" spacing="true">
+                <!-- Вкладка сохраняет component ID базового SettingsWindow и меняет только визуальные контейнеры. -->
+                <hbox id="interfaceSettingsMainBox"
+                      width="100%"
+                      height="100%"
+                      spacing="true"
+                      expand="interfaceSettingsContentScrollBox"
+                      stylename="interface-settings-editor">
+                    <vbox id="interfaceSettingsSidebar"
+                          width="270px"
+                          height="100%"
+                          spacing="true"
+                          expand="interfaceSettingsSidebarSpacer"
+                          stylename="settings-section-sidebar">
+                        <label value="UI" align="TOP_LEFT" stylename="settings-section-mark"/>
+                        <vbox id="interfaceSettingsSidebarIdentity" width="100%" spacing="false">
+                            <label value="msg://interfaceSettingsSidebarTitle" width="100%" stylename="h2 settings-section-sidebar-title"/>
+                            <label value="msg://interfaceSettingsSidebarDescription" width="100%" stylename="settings-section-help"/>
+                        </vbox>
+                        <vbox id="interfaceSettingsNavigation" width="100%" spacing="false" stylename="settings-section-navigation">
+                            <label value="msg://interfaceSettingsNavigationTitle" width="100%" stylename="settings-section-navigation-title"/>
+                            <label value="msg://interfaceSettingsWindowSection" width="100%" stylename="settings-section-nav-item settings-section-nav-item-active"/>
+                            <label value="msg://interfaceSettingsAppearanceSection" width="100%" stylename="settings-section-nav-item"/>
+                            <label value="msg://interfaceSettingsRegionalSection" width="100%" stylename="settings-section-nav-item"/>
+                            <label value="msg://interfaceSettingsStartupSection" width="100%" stylename="settings-section-nav-item"/>
+                        </vbox>
+                        <label id="interfaceSettingsSidebarSpacer"/>
+                        <vbox id="interfaceSettingsHintBox" width="100%" spacing="false" stylename="settings-section-hint">
+                            <label value="msg://interfaceSettingsApplyHint" width="100%" stylename="settings-section-help"/>
+                        </vbox>
+                    </vbox>
+                    <scrollBox id="interfaceSettingsContentScrollBox"
+                               width="100%"
+                               height="100%"
+                               orientation="vertical"
+                               scrollBars="vertical"
+                               stylename="settings-section-content">
+                        <vbox id="interfaceSettingsContent" width="100%" spacing="true">
+                            <hbox id="interfaceSettingsToolbar"
+                                  width="100%"
+                                  spacing="true"
+                                  expand="interfaceSettingsTitleBox"
+                                  stylename="settings-section-toolbar">
+                                <vbox id="interfaceSettingsTitleBox" width="100%" spacing="false">
+                                    <label value="msg://interfaceSettingsPageTitle" stylename="h1"/>
+                                    <label value="msg://interfaceSettingsPageDescription" width="100%" stylename="settings-section-help"/>
+                                </vbox>
+                                <buttonsPanel id="interfaceSettingsToolbarActions"
+                                              align="BOTTOM_RIGHT"
+                                              stylename="settings-section-toolbar-actions">
+                                    <button id="changePasswordBtn" icon="icons/change-pass.png"/>
+                                    <button id="resetScreenSettingsBtn" icon="icons/trash.png" stylename="danger"/>
+                                </buttonsPanel>
+                            </hbox>
+                            <vbox id="interfaceAppearanceCard"
+                                  width="100%"
+                                  spacing="true"
+                                  stylename="settings-section-card interface-settings-card">
+                                <vbox id="interfaceAppearanceHeader" width="100%" spacing="false">
+                                    <label value="msg://interfaceSettingsAppearanceTitle" stylename="h3 settings-section-card-title"/>
+                                    <label value="msg://interfaceSettingsAppearanceDescription" width="100%" stylename="settings-section-help"/>
+                                </vbox>
+                                <grid id="grid" spacing="true" width="100%">
+                                    <columns><column flex="0"/><column flex="1"/></columns>
+                                    <rows>
+                                        <row><label id="mainWindowLabel" value="msg://mainWindowMode" align="MIDDLE_LEFT"/><optionsGroup id="modeOptions"/></row>
+                                        <row><label id="visualThemeLabel" value="msg://mainWindowTheme" align="MIDDLE_LEFT"/><lookupField id="appThemeField" required="true" width="theme://cuba.web.settings-window.appThemeField.width" requiredMessage="msg://mainWindowThemeMsg"/></row>
+                                        <row><label id="languageLabel" value="msg://mainWindowLang" align="MIDDLE_LEFT"/><lookupField id="appLangField" width="theme://cuba.web.settings-window.appLocaleField.width"/></row>
+                                        <row>
+                                            <label id="timeZoneLabel" value="msg://com.haulmont.cuba.security.entity/User.timeZone" align="MIDDLE_LEFT"/>
+                                            <hbox id="timeZoneBox" spacing="true" width="100%" expand="timeZoneAutoField">
+                                                <lookupField id="timeZoneLookup" width="theme://cuba.web.settings-window.timeZoneField.width"/>
+                                                <checkBox id="timeZoneAutoField" align="MIDDLE_LEFT"/>
+                                            </hbox>
+                                        </row>
+                                        <row><label id="defaultScreenLabel" value="msg://defaultScreen" align="MIDDLE_LEFT"/><lookupField id="defaultScreenField" description="msg://defaultScreenDescription" newOptionAllowed="false" nullName="msg://noDefaultScreen" width="theme://cuba.web.settings-window.defaultScreenField.width"/></row>
+                                    </rows>
+                                </grid>
+                            </vbox>
+                        </vbox>
+                    </scrollBox>
+                </hbox>
             </tab>
-            <tab id="mailAccessTab" caption="msg://msgEmailSettings">
-                <vbox spacing="true" margin="true">
-                    <grid spacing="true">
-                        <columns count="4"/>
-                        <rows>
-                            <row><textField id="smtpServer" caption="SMTP server"/><textField id="pop3Server" caption="POP3 server"/><textField id="imapServer" caption="IMAP server"/></row>
-                            <row>
-                                <textField id="smtpPort" datatype="int" caption="SMTP port"><validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/></textField>
-                                <textField id="pop3Port" datatype="int" caption="POP3 port"><validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/></textField>
-                                <textField id="imapPort" datatype="int" caption="IMAP port"><validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/></textField>
-                            </row>
-                            <row><checkBox id="smtpPasswordRequired" caption="msg://msgSMTPPasswordRequired"/><checkBox id="pop3PasswordRequired" caption="msg://msgPop3PasswordRequired"/><checkBox id="imapPasswordRequired" caption="msg://msgImapPasswordRequired"/></row>
-                            <row><textField id="smtpPassword" caption="SMTP password"/><textField id="pop3Password" caption="POP3 password"/><textField id="imapPassword" caption="IMAP password"/></row>
-                        </rows>
-                    </grid>
-                </vbox>
+            <tab id="mailAccessTab" caption="msg://msgEmailSettings" margin="true" spacing="true">
+                <!-- Почтовые поля остаются ручными TextField-контрактами контроллера; datasource и сохранение не меняются. -->
+                <hbox id="emailSettingsMainBox"
+                      width="100%"
+                      height="100%"
+                      spacing="true"
+                      expand="emailSettingsContentScrollBox"
+                      stylename="email-settings-editor">
+                    <vbox id="emailSettingsSidebar"
+                          width="270px"
+                          height="100%"
+                          spacing="true"
+                          expand="emailSettingsSidebarSpacer"
+                          stylename="settings-section-sidebar">
+                        <label value="@" align="TOP_LEFT" stylename="settings-section-mark"/>
+                        <vbox id="emailSettingsSidebarIdentity" width="100%" spacing="false">
+                            <label value="msg://emailSettingsSidebarTitle" width="100%" stylename="h2 settings-section-sidebar-title"/>
+                            <label value="msg://emailSettingsSidebarDescription" width="100%" stylename="settings-section-help"/>
+                        </vbox>
+                        <vbox id="emailSettingsNavigation" width="100%" spacing="false" stylename="settings-section-navigation">
+                            <label value="msg://emailSettingsNavigationTitle" width="100%" stylename="settings-section-navigation-title"/>
+                            <label value="msg://emailSettingsSmtpSection" width="100%" stylename="settings-section-nav-item settings-section-nav-item-active"/>
+                            <label value="msg://emailSettingsPop3Section" width="100%" stylename="settings-section-nav-item"/>
+                            <label value="msg://emailSettingsImapSection" width="100%" stylename="settings-section-nav-item"/>
+                        </vbox>
+                        <label id="emailSettingsSidebarSpacer"/>
+                        <vbox id="emailSettingsSecurityBox" width="100%" spacing="false" stylename="settings-section-warning">
+                            <label value="msg://emailSettingsSecurityHint" width="100%" stylename="settings-section-help"/>
+                        </vbox>
+                    </vbox>
+                    <scrollBox id="emailSettingsContentScrollBox"
+                               width="100%"
+                               height="100%"
+                               orientation="vertical"
+                               scrollBars="vertical"
+                               stylename="settings-section-content">
+                        <vbox id="emailSettingsContent" width="100%" spacing="true">
+                            <hbox id="emailSettingsToolbar"
+                                  width="100%"
+                                  spacing="true"
+                                  expand="emailSettingsTitleBox"
+                                  stylename="settings-section-toolbar">
+                                <vbox id="emailSettingsTitleBox" width="100%" spacing="false">
+                                    <label value="msg://emailSettingsPageTitle" stylename="h1"/>
+                                    <label value="msg://emailSettingsPageDescription" width="100%" stylename="settings-section-help"/>
+                                </vbox>
+                            </hbox>
+                            <grid id="emailSettingsGrid" width="100%" spacing="true" stylename="email-settings-grid">
+                                <columns><column flex="1"/><column flex="1"/><column flex="1"/></columns>
+                                <rows>
+                                    <row>
+                                        <vbox id="smtpSettingsCard" width="100%" spacing="true" stylename="settings-section-card email-settings-card">
+                                            <label value="SMTP" stylename="h3 settings-section-card-title"/>
+                                            <label value="msg://emailSettingsSmtpDescription" width="100%" stylename="settings-section-help"/>
+                                            <textField id="smtpServer" caption="SMTP server" width="100%"/>
+                                            <textField id="smtpPort" datatype="int" caption="SMTP port" width="100%">
+                                                <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                            </textField>
+                                            <checkBox id="smtpPasswordRequired" caption="msg://msgSMTPPasswordRequired"/>
+                                            <textField id="smtpPassword" caption="SMTP password" width="100%"/>
+                                        </vbox>
+                                        <vbox id="pop3SettingsCard" width="100%" spacing="true" stylename="settings-section-card email-settings-card">
+                                            <label value="POP3" stylename="h3 settings-section-card-title"/>
+                                            <label value="msg://emailSettingsPop3Description" width="100%" stylename="settings-section-help"/>
+                                            <textField id="pop3Server" caption="POP3 server" width="100%"/>
+                                            <textField id="pop3Port" datatype="int" caption="POP3 port" width="100%">
+                                                <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                            </textField>
+                                            <checkBox id="pop3PasswordRequired" caption="msg://msgPop3PasswordRequired"/>
+                                            <textField id="pop3Password" caption="POP3 password" width="100%"/>
+                                        </vbox>
+                                        <vbox id="imapSettingsCard" width="100%" spacing="true" stylename="settings-section-card email-settings-card">
+                                            <label value="IMAP" stylename="h3 settings-section-card-title"/>
+                                            <label value="msg://emailSettingsImapDescription" width="100%" stylename="settings-section-help"/>
+                                            <textField id="imapServer" caption="IMAP server" width="100%"/>
+                                            <textField id="imapPort" datatype="int" caption="IMAP port" width="100%">
+                                                <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                            </textField>
+                                            <checkBox id="imapPasswordRequired" caption="msg://msgImapPasswordRequired"/>
+                                            <textField id="imapPassword" caption="IMAP password" width="100%"/>
+                                        </vbox>
+                                    </row>
+                                </rows>
+                            </grid>
+                        </vbox>
+                    </scrollBox>
+                </hbox>
             </tab>
             <tab id="aiAccessTab" caption="msg://msgAiSettings" margin="true" spacing="true">
                 <!-- Вкладка AI использует тот же двухпанельный паттерн, что и остальные Edit-формы:
