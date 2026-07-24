@@ -149,6 +149,14 @@ public class UserSettingsAiApiPreferenceTest {
                     styles.contains("@import \"com.company.hunttech/settings-window-sections\";"));
             assertTrue("В теме " + theme + " не подключён mixin вкладок",
                     styles.contains("@include settings-window-sections;"));
+            assertTrue("В теме " + theme + " отсутствует тёмная контекстная панель",
+                    scss.contains("background-color: #172638"));
+            assertTrue("В теме " + theme + " отсутствует акцент JobCandidateEdit",
+                    scss.contains("color: #ffb11b"));
+            assertTrue("В теме " + theme + " вкладки не получили высоту JobCandidateEdit",
+                    scss.contains("height: 48px"));
+            assertTrue("В теме " + theme + " поля не получили плотность JobCandidateEdit",
+                    scss.contains("min-height: 38px"));
             assertFalse("В теме " + theme + " найден глобальный .v-table",
                     scss.contains("\n.v-table"));
             assertFalse("В теме " + theme + " найден глобальный .v-label",
@@ -162,13 +170,13 @@ public class UserSettingsAiApiPreferenceTest {
         }
     }
 
-
     @Test
     public void settingsWindowVisualLayerUsesJobCandidatePrinciplesThroughOwnNamespace()
             throws IOException {
         /*
          * Визуальные токены JobCandidateEdit адаптируются, а не подключаются напрямую.
-         * Проверка закрепляет отдельный namespace и theme-aware переменные CUBA/Valo.
+         * Проверка закрепляет отдельный namespace, контрастную боковую панель,
+         * плотность полей и выраженную иерархию рабочей области.
          */
         String haloScss = readProjectFile(
                 "modules/web/themes/halo/com.company.hunttech/settings-window-sections.scss");
@@ -180,13 +188,21 @@ public class UserSettingsAiApiPreferenceTest {
         assertTrue(haloScss.contains("$v-panel-background-color"));
         assertTrue(haloScss.contains("$v-font-color"));
         assertTrue(haloScss.contains("$v-selection-color"));
+        assertTrue(haloScss.contains("background-color: #172638"));
+        assertTrue(haloScss.contains("linear-gradient(180deg, #172638"));
+        assertTrue(haloScss.contains("color: #ffb11b"));
+        assertTrue(haloScss.contains("box-shadow: 5px 0 20px"));
         assertTrue(haloScss.contains(".ext-settings-tabs"));
+        assertTrue(haloScss.contains("height: 48px"));
+        assertTrue(haloScss.contains("min-height: 58px"));
+        assertTrue(haloScss.contains("min-height: 38px"));
         assertTrue(haloScss.contains(".v-filterselect-focus"));
         assertTrue(haloScss.contains(".v-disabled"));
         assertFalse(haloScss.contains(".job-candidate-editor"));
 
         assertTrue(concept.contains("JobCandidateEdit"));
         assertTrue(concept.contains(".ext-settings-window"));
+        assertTrue(concept.contains("тёмная контекстная панель"));
         assertTrue(concept.contains("не обновляется автоматически"));
     }
 
