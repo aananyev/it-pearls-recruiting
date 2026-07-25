@@ -28,9 +28,12 @@
         </collection>
         <instance id="candidateCVDc"
                   class="com.company.hunttech.entity.CandidateCV">
-            <!-- Основной контейнер сохраняет существующий candidateCV-view и composition-коллекции;
-                 визуальный рефакторинг не изменяет fetch plan и DataContext-контракт формы. -->
+            <!-- Основной контейнер сохраняет candidateCV-view и composition-коллекции.
+                 Локальное расширение view загружает только поля, которые экран читает напрямую. -->
             <view extends="candidateCV-view">
+                <!-- Фото CandidateCV читается контроллером при открытии формы.
+                     Атрибут загружается заранее, чтобы detached getter не обращался к ValueHolder без session. -->
+                <property name="fileImageFace" view="_minimal"/>
                 <property name="toVacancy" view="_local">
                     <property name="projectName" view="_local">
                         <property name="projectDepartment" view="_local"/>
