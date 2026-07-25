@@ -22,7 +22,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
-      - name: Extract and execute scoped patch
+      - name: Extract scoped patch
         shell: bash
         run: |
           python3 - <<'PY'
@@ -37,13 +37,32 @@ jobs:
           shell = '\n'.join(line[10:] if line.startswith('          ') else line for line in lines) + '\n'
           Path('/tmp/apply-iteraction-usability.sh').write_text(shell, encoding='utf-8')
           PY
-          bash /tmp/apply-iteraction-usability.sh
+
+      - name: Execute scoped patch with diagnostic
+        shell: bash
+        run: |
+          set +e
+          bash /tmp/apply-iteraction-usability.sh > /tmp/apply-iteraction-usability.log 2>&1
+          status=$?
+          cat /tmp/apply-iteraction-usability.log
+          if [ "$status" -ne 0 ]; then
+            mkdir -p .ai/tasks
+            cp /tmp/apply-iteraction-usability.log .ai/tasks/iteraction-list-usability-apply-error.log
+            git config user.name "ChatGPT HRM HuntTech"
+            git config user.email "actions@users.noreply.github.com"
+            git add .ai/tasks/iteraction-list-usability-apply-error.log
+            git commit -m "chore(iteraction-list): сохранить диагностику применения patch"
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+            exit "$status"
+          fi
 
       - name: Remove bootstrap files
         shell: bash
         run: |
+          rm -f .github/workflows/iteraction-list-usability-navigation.yml
           rm -f .github/workflows/apply-iteraction-usability-pr.yml
           rm -f .ai/tasks/.iteraction-list-usability-navigation-trigger
+          rm -f .ai/tasks/iteraction-list-usability-apply-error.log
 
       - name: Validate resulting tree
         shell: bash
