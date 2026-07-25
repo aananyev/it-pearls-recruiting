@@ -63,8 +63,11 @@ public class CandidateCVEditVisualContractTest {
         List<String> protectedIds = Arrays.asList(
                 "openPositionsDc", "openPositionsDl", "candidateCVDc", "someFilesesDc", "skillTreesDc",
                 "resumePositionsDc", "resumePositionsLc", "usersDc", "usersDl",
+                "candidateCvMainLayout", "candidateCvSidebar", "candidateCvWorkspace",
                 "candidateLabel", "iteractionListLabelCandidate", "iteractionListLabelPosition",
-                "labelLastRecrutier", "machRegexpFromCV", "quoteTextArea",
+                "candidateCvSidebarTargetCard", "candidateCvSidebarResumePosition",
+                "candidateCvSidebarVacancy", "candidateCvSidebarProject", "candidateCvSidebarMetaCard",
+                "candidateCvSidebarSpacer", "labelLastRecrutier", "machRegexpFromCV", "quoteTextArea",
                 "tabSheet", "tabCandidate", "tabCV", "tabLetter", "tabSkillTree", "tabFiles",
                 "candidateScrolBox", "candidateVbox", "groupBox", "dropZone", "picVBox",
                 "candidateField", "resumePositionField", "candidateCVFieldOpenPosition",
@@ -109,6 +112,32 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(controller.contains("\"tabSkillTree\".equals(selectedTab.getName())"));
         assertTrue(controller.contains("private boolean cvTextInitialized;"));
         assertTrue(controller.contains("private boolean skillTabInitialized;"));
+    }
+
+    @Test
+    public void sidebarUsesLiveCandidateCvContainerBindings() throws IOException {
+        String xml = readProjectFile(SCREEN_XML);
+
+        /*
+         * Sidebar не хранит копии строк и не требует listener в контроллере:
+         * все значения читаются из того же InstanceContainer, что и picker-поля.
+         * Поэтому изменение candidate, resumePosition или toVacancy немедленно
+         * обновляет связанные Label средствами стандартного CUBA data binding.
+         */
+        assertTrue(xml.indexOf("id=\"candidateCvSidebar\"")
+                < xml.indexOf("<tabSheet id=\"tabSheet\""));
+        assertTrue(xml.contains("expand=\"candidateCvWorkspace\""));
+        assertTrue(xml.contains("expand=\"candidateCvSidebarSpacer\""));
+
+        assertComponentBinding(xml, "iteractionListLabelCandidate", "candidate.fullName");
+        assertComponentBinding(xml, "iteractionListLabelPosition", "candidate.personPosition");
+        assertComponentBinding(xml, "candidateCvSidebarResumePosition", "resumePosition");
+        assertComponentBinding(xml, "candidateCvSidebarVacancy", "toVacancy");
+        assertComponentBinding(xml, "candidateCvSidebarProject", "toVacancy.projectName");
+
+        assertTrue(xml.contains("stylename=\"candidate-cv-sidebar\""));
+        assertTrue(xml.contains("stylename=\"candidate-cv-workspace-shell\""));
+        assertFalse(xml.contains("stylename=\"candidate-cv-context-card\""));
     }
 
     @Test
@@ -190,6 +219,20 @@ public class CandidateCVEditVisualContractTest {
                     "@import \"com.company.hunttech/candidate-cv-editor\";"));
             assertTrue(theme, styles.contains("@include candidate-cv-editor-theme;"));
         }
+    }
+
+    private void assertComponentBinding(String xml, String componentId, String property) {
+        int idPosition = xml.indexOf("id=\"" + componentId + "\"");
+        assertTrue("Не найден компонент sidebar: " + componentId, idPosition >= 0);
+        int tagStart = xml.lastIndexOf('<', idPosition);
+        int tagEnd = xml.indexOf('>', idPosition);
+        assertTrue("Не найден XML-тег компонента: " + componentId,
+                tagStart >= 0 && tagEnd > idPosition);
+        String componentTag = xml.substring(tagStart, tagEnd + 1);
+        assertTrue(componentId + " должен быть привязан к candidateCVDc",
+                componentTag.contains("dataContainer=\"candidateCVDc\""));
+        assertTrue(componentId + " должен читать property=" + property,
+                componentTag.contains("property=\"" + property + "\""));
     }
 
     private String gitBlobSha1(byte[] content) throws NoSuchAlgorithmException {

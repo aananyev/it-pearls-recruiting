@@ -6,7 +6,7 @@
 **Controller:** `modules/web/src/com/company/hunttech/web/screens/candidatecv/CandidateCVEdit.java`
 **Descriptor:** `modules/web/src/com/company/hunttech/web/screens/candidatecv/candidate-cv-edit.xml`
 **Локальный SCSS namespace:** `.candidate-cv-editor`
-**Статус:** визуальный рефакторинг реализован; runtime-проверка ожидает Hermes
+**Статус:** постоянная левая панель и live-binding реализованы; runtime-проверка ожидает Hermes
 
 ## Назначение и бизнес-смысл (What & Why)
 
@@ -20,13 +20,13 @@
 
 Внутри формы сохраняются пять вкладок в исходном порядке:
 
-1. `tabCandidate` — «Кандидат»: связи с кандидатом, позицией, вакансией и владельцем, ссылки и файлы резюме, фотография.
+1. `tabCandidate` — «Кандидат»: связи с кандидатом, позицией, вакансией и владельцем, ссылки и файлы резюме. Фотография вынесена в постоянную левую панель.
 2. `tabCV` — «Резюме»: редактируемый текст резюме HRM HuntTech и рекомендации.
 3. `tabLetter` — «Сопроводительное письмо»: письмо, комментарий и vacancy-dependent рекомендации.
 4. `tabSkillTree` — дерево навыков, повторный разбор резюме и сопоставление с вакансией.
 5. `tabFiles` — дополнительные composition-файлы `CandidateCV`.
 
-Глобальная постоянная sidebar не используется: редактор резюме, письмо и `TreeDataGrid` требуют максимальной полезной ширины. Двухпанельная композиция применяется только внутри вкладок, где она соответствует бизнес-содержанию.
+Постоянная левая sidebar повторяет профильный паттерн `JobCandidateEdit`: фотография, ФИО, текущая позиция кандидата, должность в подготавливаемом резюме, вакансия и проект остаются видимыми на всех пяти вкладках. Правая workspace содержит `TabSheet` и footer. Ширина sidebar фиксирована, а рабочая область расширяется на оставшееся пространство.
 
 Связанные документы:
 
@@ -45,7 +45,9 @@
 - повторный выбор `tabSkillTree` → флаг уже установлен → лишняя повторная инициализация не выполняется;
 - сохранение без открытия `tabCV` → `cvTextInitialized == false` → существующий `TEXT_CV` и `contactInfoChecked` не перезаписываются;
 - изменение текста CV → значение отличается от baseline → `contactInfoChecked` сбрасывается и новый текст сохраняется;
-- выбор вакансии → контроллер читает `needLetter` и `templateLetter` → сохраняется существующая логика warning, шаблона и рекомендаций;
+- выбор кандидата в `candidateField` → меняется `candidateCVDc.candidate` → ФИО, текущая позиция и фотография в sidebar обновляются стандартным CUBA data binding без дополнительного loader;
+- выбор должности в `resumePositionField` → меняется `candidateCVDc.resumePosition` → значение «Должность в резюме» в sidebar обновляется сразу;
+- выбор вакансии в `candidateCVFieldOpenPosition` → меняется `candidateCVDc.toVacancy` → вакансия и проект в sidebar обновляются сразу, после чего контроллер читает `needLetter` и `templateLetter` и сохраняет существующую логику warning, шаблона и рекомендаций;
 - включение «только мои подписки» → loader получает параметр `subscriber` → показываются доступные пользователю вакансии;
 - выключение фильтра → параметр удаляется → выполняется существующая загрузка всех вакансий;
 - ввод ссылки исходного резюме → значение не `null` → ссылка показывается и кнопка импорта текста становится enabled;
@@ -123,15 +125,21 @@
 | Component ID | Тип | Вкладка/область | Data container / property | Actions / invoke | Java / состояние | Required | Бизнес-назначение |
 |---|---|---|---|---|---|---|---|
 | `tabSheet` | `TabSheet` | форма | — | selected-tab listener | Java; имена вкладок читаются lifecycle | — | навигация по пяти разделам |
-| `candidateLabel` | `HBox` | верхний контекст | — | — | presentation | — | постоянный контекст кандидата |
-| `iteractionListLabelCandidate` | `Label` | верхний контекст | `candidateCVDc / candidate.fullName` | — | динамическое значение | — | ФИО |
-| `iteractionListLabelPosition` | `Label` | верхний контекст | `candidateCVDc / candidate.personPosition` | — | динамическое значение | — | позиция |
-| `labelLastRecrutier` | `Label` | верхний контекст | — | — | существующее значение | — | служебная информация |
-| `machRegexpFromCV` | `Label` | верхний контекст | — | — | Java записывает email/телефон | — | результат распознавания |
-| `quoteTextArea` | `TextArea` | верхний контекст | — | — | Java задаёт текст; `visible=false`, `editable=false` | — | существующая цитата |
+| `candidateCvMainLayout` | `HBox` | корень формы | — | — | presentation | — | sidebar слева, workspace справа |
+| `candidateCvSidebar` | `VBox` | левая панель | — | — | постоянная область | — | контекст кандидата на всех вкладках |
+| `candidateLabel` | `HBox` | sidebar / профиль | — | — | presentation | — | фото, ФИО и текущая позиция |
+| `iteractionListLabelCandidate` | `Label` | sidebar / профиль | `candidateCVDc / candidate.fullName` | — | live data binding | — | ФИО |
+| `iteractionListLabelPosition` | `Label` | sidebar / профиль | `candidateCVDc / candidate.personPosition` | — | live data binding | — | текущая позиция кандидата |
+| `candidateCvSidebarResumePosition` | `Label` | sidebar / целевое резюме | `candidateCVDc / resumePosition` | — | live data binding | — | должность в резюме |
+| `candidateCvSidebarVacancy` | `Label` | sidebar / целевое резюме | `candidateCVDc / toVacancy` | — | live data binding | — | вакансия представления |
+| `candidateCvSidebarProject` | `Label` | sidebar / целевое резюме | `candidateCVDc / toVacancy.projectName` | — | live data binding | — | проект вакансии |
+| `candidateCvWorkspace` | `VBox` | правая область | — | — | expand `tabSheet` | — | вкладки и footer |
+| `labelLastRecrutier` | `Label` | sidebar / служебный контекст | — | — | существующее значение | — | служебная информация |
+| `machRegexpFromCV` | `Label` | sidebar / служебный контекст | — | — | Java записывает email/телефон | — | результат распознавания |
+| `quoteTextArea` | `TextArea` | sidebar / служебный контекст | — | — | Java задаёт текст; `visible=false`, `editable=false` | — | существующая цитата |
 | `candidateScrolBox` | `ScrollBox` | `tabCandidate` | — | — | presentation | — | прокрутка вкладки кандидата |
-| `candidateVbox` | `HBox` | `tabCandidate` | — | — | presentation | — | двухпанельная композиция |
-| `groupBox` | `VBox` | `tabCandidate` | — | — | presentation | — | левая рабочая область |
+| `candidateVbox` | `HBox` | `tabCandidate` | — | — | presentation | — | одноколоночная рабочая композиция |
+| `groupBox` | `VBox` | `tabCandidate` | — | — | presentation | — | основная рабочая область на всю ширину |
 | `candidateField` | `SuggestionPickerField` | основные данные | `candidateCVDc / candidate` | `lookup`, `open`, suggestion query | Java injection | yes | выбор кандидата |
 | `resumePositionField` | `LookupPickerField` | основные данные | `candidateCVDc / resumePosition`; `resumePositionsDc` | `lookup` | — | yes | позиция резюме |
 | `candidateCVFieldOpenPosition` | `LookupPickerField` | основные данные | `candidateCVDc / toVacancy`; `openPositionsDc` | `lookup`, `open`; option icon/style providers | Java injection, `@Subscribe`, `@Install` | no | вакансия |
@@ -144,7 +152,7 @@
 | `textFieldHuntTechCV` | `TextField` | резюме HRM HuntTech | `candidateCVDc / linkHuntTechCV` | — | Java injection, `@Subscribe` | no | ссылка на подготовленное CV |
 | `HuntTechCVLink` | `Link` | резюме HRM HuntTech | — | URL/visibility из Java | Java show/hide | — | открыть подготовленное CV |
 | `fileCVField` | `FileUploadField` | резюме HRM HuntTech | `candidateCVDc / fileCV` | upload | immediate; clear | — | файл подготовленного CV |
-| `dropZone` | `VBox` | фото | — | upload drop zone | `dropZone="dropZone"` | — | область drag-and-drop |
+| `dropZone` | `VBox` | sidebar / фото | — | upload drop zone | `dropZone="dropZone"` | — | область drag-and-drop профиля |
 | `picVBox` | `VBox` | фото | — | — | порядок изображений сохранён | — | frame фотографии |
 | `candidatePic` | `Image` | фото | `candidateCVDc / fileImageFace` | source change | Java injection/show/hide | — | фотография |
 | `candidateFaceDefaultImage` | `Image` | фото | theme image | — | Java injection/show/hide; initially hidden | — | fallback |
@@ -305,25 +313,29 @@ XML сохраняет:
 ### 7.2. Новая композиция
 
 ```text
-┌───────────────────────────────────────────────────────────────┐
-│ контекст кандидата: ФИО · позиция · служебные данные · цитата │
-├───────────────────────────────────────────────────────────────┤
-│ Кандидат · Резюме · Письмо · Навыки · Файлы                  │
-├───────────────────────────────────────────────────────────────┤
-│ карточки / редактор 4:1 рекомендации / таблицы                │
-├───────────────────────────────────────────────────────────────┤
-│ дата представления                     сохранить · отмена      │
-└───────────────────────────────────────────────────────────────┘
+┌──────────────────────┬──────────────────────────────────────────────┐
+│ фото кандидата       │ Кандидат · Резюме · Письмо · Навыки · Файлы│
+│ ФИО                  ├──────────────────────────────────────────────┤
+│ текущая позиция      │ карточки / редактор 4:1 / таблицы           │
+│                      │                                              │
+│ Должность в резюме   │                                              │
+│ Вакансия             │                                              │
+│ Проект               ├──────────────────────────────────────────────┤
+│ служебный контекст   │ дата представления       сохранить · отмена  │
+└──────────────────────┴──────────────────────────────────────────────┘
 ```
 
 Изменения presentation:
 
-- верхний контекст оформлен тёмной theme-aware панелью с акцентом `#ffb11b`;
+- постоянная левая панель шириной `296px` оформлена в стиле `JobCandidateEdit`: тёмный градиент, круглая фотография и акцент `#ffb11b`;
+- фотография и upload перенесены из вкладки «Кандидат» в sidebar без изменения `Image`, `dropZone`, binding и controller-driven fallback;
+- ФИО, текущая позиция, должность резюме, вакансия и проект привязаны непосредственно к `candidateCVDc`; изменения picker-полей отображаются сразу без ручного копирования значений;
+- `TabSheet` и footer находятся только в правой workspace, поэтому sidebar остаётся непрерывной по всей высоте;
 - вкладки имеют высоту `48px` и заметное selected-состояние;
-- основные данные, документы и фото собраны в локальные карточки радиусом `8px`;
+- основные данные и документы собраны в локальные карточки радиусом `8px`; фотография вынесена в постоянный профиль sidebar;
 - picker-поля занимают доступную ширину и не обрезают actions;
 - `onlyMySubscribeCheckBox` остаётся непосредственно под vacancy picker;
-- photo drop zone сохраняет рабочие размеры `220×292px`;
+- photo drop zone использует профильную геометрию `196×238px`, при этом оба изображения сохраняют тип `Image` и размер `176×176px`;
 - `tabCV` и `tabLetter` сохраняют пропорцию `4:1`;
 - toolbar имеет минимальную высоту `58px`, кнопки — не менее `38px`;
 - `RichTextArea` и таблицы используют доступную высоту;
@@ -408,7 +420,8 @@ SCSS использует `$v-app-background-color`, `$v-panel-background-color`
 - типы двух изображений;
 - actions таблицы файлов;
 - неизменные JPQL-фрагменты;
-- наличие `.candidate-cv-editor`;
+- наличие `.candidate-cv-editor`, `.candidate-cv-sidebar` и `.candidate-cv-workspace-shell`;
+- live bindings sidebar: `candidate.fullName`, `candidate.personPosition`, `resumePosition`, `toVacancy`, `toVacancy.projectName`;
 - подключение SCSS во всех семи темах;
 - отсутствие зависимости от `.job-candidate-editor` и `.ext-settings-window`;
 - отсутствие top-level глобальных Vaadin-селекторов.
@@ -457,6 +470,7 @@ git diff --check
 - открытие без преждевременного CV/SkillTree процесса;
 - пять вкладок в исходном порядке;
 - candidate, position и vacancy pickers;
+- немедленное обновление sidebar при смене кандидата, должности резюме и вакансии;
 - фильтр подписок, option icons/styles;
 - owner, ссылки, оба upload и clear;
 - photo upload, drop zone и fallback;
@@ -478,7 +492,9 @@ git diff --check
 - tabs имеют заметное selected-состояние;
 - picker actions не обрезаны;
 - filename и clear button видимы;
-- фото не искажено;
+- sidebar занимает полную высоту, не перекрывает workspace и сохраняет ширину;
+- фото не искажено и отображается круглым;
+- ФИО, текущая позиция, должность резюме, вакансия и проект синхронно меняются при изменении соответствующих picker-полей;
 - RichTextArea используют доступную высоту;
 - recommendation-панели читаемы;
 - SkillTree не имеет необоснованной горизонтальной прокрутки;
@@ -492,4 +508,5 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-25 | Добавлена постоянная левая панель в стиле `JobCandidateEdit`: фотография, ФИО, текущая позиция, должность резюме, вакансия и проект; значения синхронизируются через прямой `candidateCVDc` data binding без изменения контроллера |
 | 2026-07-25 | Выполнен строго визуальный рефакторинг `CandidateCVEdit`: добавлена карточная компоновка, постоянный контекст кандидата, локальный namespace для семи тем, регрессионная защита legacy ID, bindings, actions, invoke, upload, lazy-init и неизменности Java/entity/views |
