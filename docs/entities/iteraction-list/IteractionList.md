@@ -1,52 +1,40 @@
 # IteractionList — взаимодействие с кандидатом
 
 > Транзакционная запись о конкретном взаимодействии рекрутёра с кандидатом по вакансии.
-> Триггер оптимизации: «давай оптимизировать работу сущности IteractionList».
+> UI: [IteractionListEdit_Spec.md](../../ui/IteractionListEdit_Spec.md)
 
----
+## Назначение и бизнес-смысл (What & Why)
 
-## Business & Context Intro
+`IteractionList` — центральная транзакционная запись рекрутинговой воронки HRM HuntTech. Она связывает кандидата, вакансию, рекрутёра и тип взаимодействия, фиксирует дату, рейтинг, комментарий и дополнительное значение. Запись используется для истории кандидата, статусов процессов, подписок, email, календарей и отчётности.
 
-### Назначение и Бизнес-смысл (What & Why)
+## UI Context & Navigation
 
-`IteractionList` — транзакционная запись взаимодействия рекрутёра с кандидатом по конкретной вакансии: дата, тип, рейтинг, комментарий, рекрутёр. Ядро воронки HRM HuntTech между `JobCandidate` и `OpenPosition`.
+Основные экраны: `hunttech_IteractionList.browse`, `hunttech_IteractionList.edit`, `hunttech_IteractionListSimple.browse`, `hunttech_IteractionListBrowse`; взаимодействия также отображаются в `JobCandidateEdit`. Legacy-spec edit: [hunttech_IteractionList.edit_Spec.md](../../screens/iteraction-list/hunttech_IteractionList.edit_Spec.md).
 
-### Связи в интерфейсе и Навигация (UI Context & Navigation)
+Редизайн `IteractionListEdit` от 2026-07-25 изменяет только XML-reflow и локальный SCSS. Entity, поля, DB schema, views, JPQL и lifecycle не затронуты.
 
-Экраны: `hunttech_IteractionList.browse`, `hunttech_IteractionList.edit`, `hunttech_IteractionListSimple.browse`, `hunttech_IteractionListBrowse`; вкладки в JobCandidateEdit. UI Spec: [browse](../../screens/iteraction-list/hunttech_IteractionList.browse_Spec.md), [edit](../../screens/iteraction-list/hunttech_IteractionList.edit_Spec.md).
+## Behavior Summary
 
-### Краткий обзор бизнес-логики поведения (Behavior Summary)
-
-Связка candidate + vacancy + recrutier; рейтинг агрегируется в JobCandidateBrowse; batch-создание при закрытии вакансии; nested `vacancy` обязателен в browse-view кандидата.
-
----
+- создание записи → выбираются кандидат, вакансия и тип → контроллер заполняет служебные поля и проверяет процесс;
+- сохранение → формируется chainInteraction и snapshot вакансии → запись становится частью истории кандидата;
+- тип с дополнительным значением → контроллер показывает date/string/integer → значение дополняет комментарий;
+- тип найма или увольнения → BeforeCommit проверяет Employee → обновляется состояние занятости;
+- закрытие после commit → выполняются прежние уведомления и email;
+- открытие edit → LOB `comment` не входит в initial view → загружается узким reload после показа.
 
 ## 1. Обзор
 
 | Параметр | Значение |
-|----------|----------|
-| **Java-класс** | `com.company.hunttech.entity.IteractionList` |
-| **Имя в CUBA** | `hunttech_IteractionList` |
-| **Таблица БД** | `HUNTTECH_ITERACTION_LIST` |
-| **Тип данных** | транзакционная |
-| **Ожидаемый объём** | десятки тысяч — сотни тысяч записей |
-| **Критичность** | высокая — центральная сущность рекрутингового процесса |
-| **Ответственный модуль** | `global` (entity, views), `web` (экраны), `core` (сервисы) |
-
-### Назначение
-
-`IteractionList` фиксирует **факт взаимодействия** с кандидатом: тип (`Iteraction`), вакансию, рекрутёра, дату, рейтинг, комментарий и дополнительные поля (дата/строка/число в зависимости от типа). Используется в browse-экранах, карточке кандидата, календаре интервью, виджетах отчётности и email-рассылках.
-
-### Отображаемое имя
-
-- **NamePattern:** `%s|candidate`
-- **Lookup:** кандидат (`candidate`)
-
----
+|---|---|
+| Java-класс | `com.company.hunttech.entity.IteractionList` |
+| CUBA name | `hunttech_IteractionList` |
+| Таблица | `HUNTTECH_ITERACTION_LIST` |
+| Тип | транзакционная |
+| Критичность | высокая |
+| Модули | global, core, web |
+| NamePattern | `%s|candidate` |
 
 ## 2. Архитектура и связи
-
-### 2.1 Диаграмма связей
 
 ```mermaid
 erDiagram
@@ -57,218 +45,145 @@ erDiagram
     HUNTTECH_ITERACTION_LIST }o--o| HUNTTECH_ITERACTION_LIST : "chainInteraction"
 ```
 
-### 2.2 Исходящие связи (FK)
+### Исходящие связи
 
-| Поле Java | Колонка БД | Связанная сущность | Fetch | Обязательность |
-|-----------|------------|-------------------|-------|----------------|
-| `iteractionType` | `ITERACTION_TYPE_ID` | `Iteraction` | LAZY | нет |
-| `candidate` | `CANDIDATE_ID` | `JobCandidate` | LAZY | да |
-| `vacancy` | `VACANCY_ID` | `OpenPosition` | LAZY | нет |
-| `recrutier` | `RECRUTIER_ID` | `ExtUser` | LAZY | да |
-| `chainInteraction` | `CHAIN_INTERACTION_ID` | `IteractionList` (self) | LAZY | нет |
+| Поле | Связанная сущность | Fetch | Обязательность |
+|---|---|---|---|
+| `iteractionType` | `Iteraction` | LAZY | нет |
+| `candidate` | `JobCandidate` | LAZY | да |
+| `vacancy` | `OpenPosition` | LAZY | нет |
+| `recrutier` | `ExtUser` | LAZY | да |
+| `chainInteraction` | `IteractionList` | LAZY | нет |
 
-### 2.3 Входящие связи
+### Сервисы
 
-| Сущность | Поле | Назначение |
-|----------|------|------------|
-| `IteractionList` | `chainInteraction` | цепочка взаимодействий по паре кандидат+вакансия |
-| `JobCandidate` | `iteractionList` | коллекция взаимодействий кандидата |
-
-### 2.4 Сервисы
-
-| Сервис | Метод | Описание |
-|--------|-------|----------|
-| `InteractionServiceBean` | `getCountInteraction` | max(`numberIteraction`) для нумерации |
-| `InteractionServiceBean` | `getLastIteraction` | последнее взаимодействие кандидата (JPQL + `maxResults(1)`) |
-| `InteractionServiceBean` | `getMostPolularIteraction` | топ типов `Iteraction` за месяц по рекрутёру |
-| `EmailGenerationService` | `preparingMessage` | подстановка в шаблон письма |
-
----
+| Сервис | Метод | Назначение |
+|---|---|---|
+| `InteractionServiceBean` | `getCountInteraction` | получение max number для нумерации |
+| `InteractionServiceBean` | `getLastIteraction` | последнее взаимодействие кандидата |
+| `InteractionServiceBean` | `getMostPolularIteraction` | top типов за месяц по рекрутёру |
+| `EmailGenerationService` | `preparingMessage` | подготовка письма по шаблону |
 
 ## 3. Поля сущности
 
-### 3.1 Ключевые бизнес-поля
+| Поле | Тип / колонка | Назначение |
+|---|---|---|
+| `numberIteraction` | decimal / `NUMBER_ITERACTION` | сквозной номер |
+| `dateIteraction` | timestamp / `DATE_ITERACTION` | дата взаимодействия |
+| `rating` | integer / `RATING` | оценка 0–4 |
+| `candidate` | FK / `CANDIDATE_ID` | кандидат |
+| `vacancy` | FK / `VACANCY_ID` | вакансия |
+| `iteractionType` | FK / `ITERACTION_TYPE_ID` | тип взаимодействия |
+| `recrutier` | FK / `RECRUTIER_ID` | рекрутёр |
+| `communicationMethod` | varchar / `COMMUNICATION_METHOD` | способ связи |
+| `addDate`, `addString`, `addInteger` | mixed / `ADD_*` | динамическое значение |
+| `currentPriority` | integer / `CURRENT_PRIORITY` | snapshot приоритета вакансии |
+| `currentOpenClose` | boolean / `CURRENT_OPEN_CLOSE` | snapshot open/close |
+| `chainInteraction` | self FK | предыдущее взаимодействие |
+| `comment` | LOB / `COMMENT_` | комментарий взаимодействия |
 
-| Поле Java | Колонка БД | Тип | Описание |
-|-----------|------------|-----|----------|
-| `numberIteraction` | `NUMBER_ITERACTION` | decimal | сквозной номер записи |
-| `dateIteraction` | `DATE_ITERACTION` | timestamp | дата взаимодействия |
-| `rating` | `RATING` | integer | оценка 0–4 (звёзды в UI) |
-| `communicationMethod` | `COMMUNICATION_METHOD` | varchar(80) | способ связи |
-| `recrutierName` | `RECRUTIER_NAME` | varchar(80) | имя рекрутёра (денормализация) |
-| `addType` / `addDate` / `addString` / `addInteger` | `ADD_*` | mixed | доп. поля по настройке типа |
-| `currentPriority` | `CURRENT_PRIORITY` | integer | приоритет вакансии на момент создания |
-| `currentOpenClose` | `CURRENT_OPEN_CLOSE` | boolean | статус вакансии на момент создания |
+`comment` не входит в initial edit view и загружается отдельно; визуальная карточка комментария не меняет эту стратегию.
 
-### 3.2 LOB
+## 4. Views
 
-| Поле | Колонка | Тип | Где используется | Стратегия загрузки |
-|------|---------|-----|------------------|-------------------|
-| `comment` | `COMMENT_` | text (@Lob) | Edit (textArea), SimpleBrowse (иконка/tooltip) | **lazy reload** в Edit через `ViewBuilder`; в главном Browse **исключён** |
+| View | Назначение |
+|---|---|
+| `iteractionList-browse-view` | главный browse без LOB |
+| `iteractionList-edit-view` | edit без `comment` |
+| `iteractionList-simple-browse-view` | диалог по кандидату |
+| `iteractionList-picker-view` | lookup и сервисы |
+| `iteraction-list-type-view` | тип взаимодействия без тяжёлого email LOB |
+| `openPosition-iteraction-list-picker-view` | vacancy picker edit |
+| `iteractionList-view` | legacy consumers |
+| `iteractionList-job-candidate` | карточка кандидата |
 
----
-
-## 4. Представления (views.xml)
-
-| View | Extends | Назначение | Где используется |
-|------|---------|------------|------------------|
-| `iteractionList-browse-view` | `_minimal` | главный Browse, **без LOB** | `iteraction-list-browse.xml` |
-| `iteractionList-edit-view` | `_minimal` | Edit-форма **без comment** | `iteraction-list-edit.xml` |
-| `iteractionList-simple-browse-view` | `_minimal` | диалог по кандидату (малый объём) | `iteraction-list-simple-browse.xml` |
-| `iteractionList-picker-view` | `_minimal` | lookup / сервисы | `InteractionServiceBean.getLastIteraction` |
-| `iteraction-list-type-view` | `_minimal` | FK `iteractionType` (без LOB email) | Edit, `iteractionList-view`, `iteractionList-job-candidate` |
-| `openPosition-iteraction-list-picker-view` | `_minimal` | FK `vacancy` в Edit | `iteraction-list-edit.xml` (loader вакансий) |
-| `iteractionList-view` | `_local` | legacy, виджеты, календарь | ~25 потребителей (см. backlog) |
-| `iteractionList-job-candidate` | `_local` | карточка кандидата | `JobCandidateBrowse` |
-
-### FK cross-form
-
-- `iteractionType` → `iteraction-list-type-view` (или `_minimal` + `iterationName`, `pic`, `outstaffingSign` в browse)
-- `vacancy` в browse → `_minimal` + поля для `OpenPositionRowStyleHelper`
-- `vacancy` в edit → `openPosition-iteraction-list-picker-view`
-
----
+Редизайн 2026-07-25 не изменяет ни один view и не расширяет fetch graph.
 
 ## 5. Экраны
 
-Каталог: `modules/web/src/com/company/hunttech/web/screens/iteractionlist/`
-
-| Экран | Controller ID | Дескриптор | View |
-|-------|---------------|------------|------|
+| Экран | Controller | Descriptor | View |
+|---|---|---|---|
 | Browse | `hunttech_IteractionList.browse` | `iteraction-list-browse.xml` | `iteractionList-browse-view` |
 | Edit | `hunttech_IteractionList.edit` | `iteraction-list-edit.xml` | `iteractionList-edit-view` |
 | Simple Browse | `hunttech_IteractionListSimple.browse` | `iteraction-list-simple-browse.xml` | `iteractionList-simple-browse-view` |
 
-### 5.1 IteractionListBrowse
+### IteractionListEdit
 
-- **JPQL:** `order by e.numberIteraction desc` + фильтры (мои записи, internalProject, outstaffing)
-- **readOnly:** да
-- **cacheable loader:** **нет** (транзакционные данные)
-- **N+1:** batch-загрузка счётчиков `RecrutiesTasks` в `PostLoadEvent` → `OpenPositionRowStyleHelper`
-- **Фильтр excludeProperties:** `comment`, system fields, служебные поля
+- lazy LOB `comment`: reload в `AfterShow`;
+- lazy `Iteraction.textEmailToSend`: reload только перед письмом;
+- справочные loaders `iteractionTypesLc`, `openPositionsDl`, `usersDl`;
+- `openPositionsDl` защищён от ранней загрузки;
+- root style: `.iteraction-list-editor`;
+- тёмная context sidebar + светлая workspace;
+- `candidateImage` и `projectLogoImage` остаются двумя базовыми `Image`;
+- dynamic `buttonCallAction`/`addDate`/`addString`/`addInteger` сохраняют runtime contract;
+- все семь тем используют одинаковый локальный SCSS;
+- Java-контроллер не изменён.
 
-### 5.2 IteractionListEdit
-
-- **Lazy LOB:** `comment` загружается в `AfterShow` через `dataManager.reload` + `ViewBuilder`
-- **Lazy LOB типа:** `textEmailToSend` у `Iteraction` — reload при отправке письма кандидату
-- **Loaders (cacheable):** `iteractionTypesLc`, `openPositionsDl`, `usersDl` — справочники
-- **FK views:** `iteraction-list-type-view`, `openPosition-iteraction-list-picker-view`
-
-### 5.3 Cross-form потребители (legacy `iteractionList-view`)
-
-Календарь интервью, виджеты отчётов, `JobCandidateBrowse`, `InternalEmailerBrowse`, `OpenPositionBrowse` и др. — см. раздел backlog.
-
----
-
-## 6. База данных
-
-### 6.1 Индексы (PostgreSQL)
+## 6. База данных и индексы
 
 | Индекс | Колонки | Назначение |
-|--------|---------|------------|
-| `IDX_HUNTTECH_ITERACTION_LIST_ON_ITERACTION_TYPE` | `ITERACTION_TYPE_ID` | FK, фильтр outstaffing |
-| `IDX_HUNTTECH_ITERACTION_LIST_ON_CANDIDATE` | `CANDIDATE_ID` | фильтр по кандидату |
-| `IDX_HUNTTECH_ITERACTION_LIST_ON_VACANCY` | `VACANCY_ID` | фильтр по вакансии |
-| `IDX_HUNTTECH_ITERACTION_LIST_NUMBER_ITERACTION` | `NUMBER_ITERACTION` | ORDER BY desc |
-| `IDX_HUNTTECH_ITERACTION_LIST_DATE_ITERACTION` | `DATE_ITERACTION` | виджеты по дате |
+|---|---|---|
+| `IDX_HUNTTECH_ITERACTION_LIST_ON_ITERACTION_TYPE` | `ITERACTION_TYPE_ID` | FK и фильтры |
+| `IDX_HUNTTECH_ITERACTION_LIST_ON_CANDIDATE` | `CANDIDATE_ID` | кандидат |
+| `IDX_HUNTTECH_ITERACTION_LIST_ON_VACANCY` | `VACANCY_ID` | вакансия |
+| `IDX_HUNTTECH_ITERACTION_LIST_NUMBER_ITERACTION` | `NUMBER_ITERACTION` | сортировка |
+| `IDX_HUNTTECH_ITERACTION_LIST_DATE_ITERACTION` | `DATE_ITERACTION` | диапазоны дат |
+| `IDX_HUNTTECH_ITERACTION_LIST_CANDIDATE_NUMBER` | candidate, number desc, id | последнее взаимодействие |
+| `IDX_HUNTTECH_ITERACTION_LIST_CANDIDATE_VACANCY_DATE` | candidate, vacancy, date desc, id | chain и проверки |
+| `IDX_HUNTTECH_ITERACTION_LIST_RECRUTIER_DATE_TYPE` | recruiter, date desc, type | popular/statistics |
+| `IDX_HUNTTECH_ITERACTION_LIST_TYPE_DATE_NUMBER` | type, date desc, number desc | фильтры типов |
+| `IDX_HUNTTECH_ITERACTION_LIST_ACTIVE_NUMBER` | number desc, id | главный browse |
 
-### 6.1.1 Индексы производительности (миграция `260704-5`)
-
-Индексы ниже добавлены отдельной миграцией, чтобы ускорить реальные browse/edit сценарии без изменения бизнес-логики и данных.
-
-| Индекс | Колонки | Назначение |
-|--------|---------|------------|
-| `IDX_HUNTTECH_ITERACTION_LIST_CANDIDATE_NUMBER` | `CANDIDATE_ID, NUMBER_ITERACTION desc, ID` | Последнее взаимодействие кандидата, simple-browse, JobCandidate batch-cache |
-| `IDX_HUNTTECH_ITERACTION_LIST_CANDIDATE_VACANCY_DATE` | `CANDIDATE_ID, VACANCY_ID, DATE_ITERACTION desc, ID` | Цепочка candidate+vacancy, duplicate/project continuation checks |
-| `IDX_HUNTTECH_ITERACTION_LIST_RECRUTIER_DATE_TYPE` | `RECRUTIER_ID, DATE_ITERACTION desc, ITERACTION_TYPE_ID` | `getMostPolularIteraction` и статистика рекрутёра |
-| `IDX_HUNTTECH_ITERACTION_LIST_TYPE_DATE_NUMBER` | `ITERACTION_TYPE_ID, DATE_ITERACTION desc, NUMBER_ITERACTION desc` | Фильтры по типам взаимодействий, включая manager/outstaffing |
-| `IDX_HUNTTECH_ITERACTION_LIST_ACTIVE_NUMBER` | `NUMBER_ITERACTION desc, ID` | Главный browse по последним взаимодействиям |
-
-### 6.2 TOAST / LOB
-
-| Колонка | Влияние | Рекомендация |
-|---------|---------|--------------|
-| `COMMENT_` | TOAST при SELECT | исключить из `iteractionList-browse-view` |
-
----
+Liquibase и DB schema в UI-задаче 2026-07-25 не менялись.
 
 ## 7. Производительность
 
-### 7.1 Текущее состояние (после оптимизации 2026-06-22)
+| Область | Состояние |
+|---|---|
+| специализированные views | выполнено |
+| LOB lazy load | выполнено |
+| cacheable reference loaders | выполнено |
+| read-only browse | выполнено |
+| N+1 providers | batch-оптимизация выполнена |
+| vacancy early load guard | выполнено |
+| composite indexes `260704-5` | выполнено |
+| entity cache | не настроен |
+| legacy `iteractionList-view` | backlog |
 
-| Область | Статус | Комментарий |
-|---------|--------|-------------|
-| Специализированные views | ✅ | browse / edit / simple-browse / picker |
-| LOB lazy load | ✅ | comment в Edit, textEmailToSend при отправке |
-| cacheable loaders | ✅ | справочники; убран cacheable с browse |
-| readOnly browse | ✅ | главный Browse |
-| N+1 в providers | ✅ | batch RecrutiesTasks в Browse |
-| Entity cache (EclipseLink) | ⚠️ | не настроен |
-| Legacy `iteractionList-view` | ⚠️ | ~25 потребителей с `_local` FK |
-| Simple Browse comment LOB | ✅ | `COMMENT_` исключён из view; наличие комментария кэшируется пачкой, текст tooltip грузится по hover |
-| Edit vacancy loader | ✅ | `openPositionsDl` защищён от ранней загрузки до установки фильтра подписки |
-| Iteraction tab loaders | ✅ | дочерние типы и workStatus грузятся только при открытии нужных вкладок |
+XML-reflow и локальный SCSS не добавляют loader, query, service call, background task, fetch property или тяжёлое изображение.
 
-### 7.2 Выполненные оптимизации
+## 8. Ограничения и backlog
 
-- [x] `iteractionList-browse-view` — `_minimal`, без `comment`, узкие FK
-- [x] `iteractionList-edit-view` — без LOB, узкие FK
-- [x] `iteractionList-simple-browse-view` — для диалога по кандидату
-- [x] `iteractionList-picker-view` — для lookup/сервисов
-- [x] `iteraction-list-type-view` — FK Iteraction без `textEmailToSend`
-- [x] `openPosition-iteraction-list-picker-view` — loader вакансий в Edit
-- [x] Lazy load `comment` в Edit
-- [x] `cacheable="true"` на справочных loaders Edit
-- [x] Убран `cacheable` с transactional browse loaders
-- [x] Узкий `excludeProperties` (+ `comment`)
-- [x] `InteractionServiceBean.getLastIteraction` — JPQL вместо итерации в Java
-- [x] `OpenPositionRowStyleHelper` + batch в `IteractionListBrowse`
-- [x] `IteractionListSimpleBrowse` — batch cache наличия комментария вместо загрузки LOB в каждой строке
-- [x] `IteractionListEdit` — `openPositionsDl` не грузит все вакансии до установки `subscriber`
-- [x] `IteractionEdit` — вкладочные справочники защищены от преждевременной загрузки `@LoadDataBeforeShow`
-- [x] Индексы `260704-5` для candidate/vacancy/recruiter/type/date сценариев
+- оценить специализированный `iteractionList-widget-view` для legacy consumers;
+- оценить необходимость FTS сущности;
+- продолжать исключать LOB из массовых списков;
+- не менять lazy/comment contract ради presentation;
+- visual smoke редизайна должен подтвердить отсутствие горизонтальной прокрутки и пустых dynamic областей.
 
-### 7.3 Backlog
+## 9. Развёртывание
 
-| Проблема | Приоритет | Решение |
-|----------|-----------|---------|
-| `iteractionList-view` с `vacancy _local` в виджетах/календаре | средний | ввести `iteractionList-widget-view` с узкими FK |
-| FTS на `IteractionList` в `fts.xml` | низкий | оценить необходимость, убрать если не используется |
-| `comment` в simple-browse (малый объём) | низкий | batch-флаг «есть комментарий» без LOB |
-| JPQL `e.iteractionType.outstaffingSign` в browse | низкий | предзагрузка UUID типов с флагом |
-| LOB `comment` → отдельная 1:1 сущность | низкий | архитектурное решение |
+| Параметр | Значение |
+|---|---|
+| DBMS | PostgreSQL |
+| Web context | `/hrm/` |
+| FTS | entity включена |
+| Production | не изменён UI-задачей |
+| Проверка | Hermes по точному HEAD SHA |
 
-### 7.4 Потребители
-
-Основные: `IteractionListBrowse`, `IteractionListEdit`, `IteractionListSimpleBrowse`, `JobCandidateBrowse`, `InterviewCalendar`, виджеты (`MonthlyInterviewCountWidget`, `FunnelHuntingWidget`, …), `InteractionServiceBean`, `InternalEmailerBrowse`.
-
----
-
-## 8. Развёртывание
-
-| Параметр | Файл | Значение |
-|----------|------|----------|
-| DBMS | `app.properties` | postgres |
-| FTS | `fts.xml` | `IteractionList` включён |
-| Entity cache | `app.properties` | не настроен для сущности |
-
----
-
-## 9. История изменений
+## История изменений
 
 | Дата | Изменение |
-|------|-----------|
-| 2026-07-04 | Performance pack: LOB-free simple-browse comments, guarded vacancy loader in IteractionListEdit, guarded tab loaders in IteractionEdit, composite indexes `260704-5` |
-| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
-| 2026-06-22 | Исправление unfetched FK на Edit: `openPosition-iteraction-list-picker-view` — `cityPosition`/`cities` → `city-picker-view` для сравнения локаций в `IteractionListEdit` |
-| 2026-06-23 | Исправление unfetched `recrutier` в JobCandidate: `iteractionList-picker-view` + `iteractionList-job-candidate` → `extUser-picker-view`; FK в `job-candidate-edit.xml` |
-| 2026-06-23 | Исправление `iteractionList-browse-view`: поля @NamePattern для FK-колонок (`iteractionType.number`, `vacancy.vacansyID`, `recrutier.login/firstName/lastName`) |
-| 2026-06-23 | Оптимизация: specialized views, lazy LOB `comment`, batch N+1 RecrutiesTasks, `InteractionServiceBean.getLastIteraction`, документация |
+|---|---|
+| 2026-07-25 | Документация синхронизирована со строго визуальным редизайном `IteractionListEdit`; зафиксированы `.iteraction-list-editor`, сохранение entity/views/loaders/JPQL и отсутствие влияния XML/SCSS на data-контракт |
+| 2026-07-04 | Performance pack: LOB-free simple browse, guarded vacancy loader, guarded tab loaders и composite indexes `260704-5` |
+| 2026-06-26 | Добавлен Business & Context Intro |
+| 2026-06-23 | Исправлены специализированные views и unfetched FK |
+| 2026-06-22 | Введены specialized views, lazy LOB и batch-оптимизации |
 
----
+## Связанные документы
 
-## 10. Связанные документы
-
-- [Индекс документации](../../README.md)
+- [IteractionListEdit — каноническая UI-spec](../../ui/IteractionListEdit_Spec.md)
+- [IteractionList edit — legacy-spec](../../screens/iteraction-list/hunttech_IteractionList.edit_Spec.md)
 - [Iteraction — тип взаимодействия](../iteraction/Iteraction.md)
-- [Оптимизация сущностей](../../../.cursor/rules/entity-performance-optimization.mdc)
+- [Общая UI/UX-концепция](../../architecture/HRM_HuntTech_UI_UX_Design_Concept.md)
