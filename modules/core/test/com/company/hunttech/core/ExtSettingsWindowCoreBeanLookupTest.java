@@ -15,31 +15,49 @@ import static org.junit.Assert.assertTrue;
 public class ExtSettingsWindowCoreBeanLookupTest {
 
     @Test
-    public void coreServicesAreResolvedThroughAppBeansBeforeScreenInitialization() throws IOException {
+    public void middlewareServicesAreResolvedByCubaServiceNameBeforeScreenInitialization() throws IOException {
         String controller = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindow.java");
 
         /*
-         * Legacy web-контроллер не должен полагаться на @Inject для core-Spring-бинов:
-         * сервисы разрешаются из общего контекста CUBA до первого обращения к данным экрана.
+         * Core-реализации находятся в отдельном middleware webapp. Legacy web-контроллер
+         * должен получать именованные CUBA service proxy, а не искать core-бин по Java-типу.
          */
         assertFalse(controller.contains("@Inject private ImageProcessingService imageProcessingService;"));
         assertFalse(controller.contains("@Inject private UserAiContextService userAiContextService;"));
         assertTrue(controller.contains("private ImageProcessingService imageProcessingService;"));
         assertTrue(controller.contains("private UserAiContextService userAiContextService;"));
-        assertTrue(controller.contains("imageProcessingService = AppBeans.get(ImageProcessingService.class);"));
-        assertTrue(controller.contains("userAiContextService = AppBeans.get(UserAiContextService.class);"));
+        assertFalse(controller.contains("AppBeans.get(ImageProcessingService.class)"));
+        assertFalse(controller.contains("AppBeans.get(UserAiContextService.class)"));
+        assertTrue(controller.contains(
+                "imageProcessingService = (ImageProcessingService) AppBeans.get(ImageProcessingService.NAME);"));
+        assertTrue(controller.contains(
+                "userAiContextService = (UserAiContextService) AppBeans.get(UserAiContextService.NAME);"));
         assertTrue(controller.contains("import com.haulmont.cuba.core.global.*;")
                 || controller.contains("import com.haulmont.cuba.core.global.AppBeans;"));
 
         int imageServiceLookup = controller.indexOf(
-                "imageProcessingService = AppBeans.get(ImageProcessingService.class);");
+                "imageProcessingService = (ImageProcessingService) AppBeans.get(ImageProcessingService.NAME);");
         int contextServiceLookup = controller.indexOf(
-                "userAiContextService = AppBeans.get(UserAiContextService.class);");
+                "userAiContextService = (UserAiContextService) AppBeans.get(UserAiContextService.NAME);");
         int firstDataLoad = controller.indexOf("currentUser = (ExtUser) userSessionSource");
 
         assertTrue(imageServiceLookup >= 0 && imageServiceLookup < firstDataLoad);
         assertTrue(contextServiceLookup >= 0 && contextServiceLookup < firstDataLoad);
+    }
+
+    @Test
+    public void imageProcessingServiceKeepsRemoteSerializableContract() throws IOException {
+        String service = readProjectFile(
+                "modules/global/src/com/company/hunttech/app/ImageProcessingService.java");
+        String bean = readProjectFile(
+                "modules/core/src/com/company/hunttech/app/ImageProcessingServiceBean.java");
+        String result = readProjectFile(
+                "modules/global/src/com/company/hunttech/app/ProcessedImage.java");
+
+        assertTrue(service.contains("String NAME = \"hunttech_ImageProcessingService\";"));
+        assertTrue(bean.contains("@Service(ImageProcessingService.NAME)"));
+        assertTrue(result.contains("implements Serializable"));
     }
 
     private String readProjectFile(String relativePath) throws IOException {

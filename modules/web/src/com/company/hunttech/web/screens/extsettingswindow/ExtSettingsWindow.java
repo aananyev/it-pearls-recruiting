@@ -100,11 +100,11 @@ public class ExtSettingsWindow extends SettingsWindow {
     @Override
     public void init(Map<String, Object> params) {
         /*
-         * Core-сервисы получаем из общего Spring-контекста CUBA: legacy web-контроллер
-         * не гарантирует внедрение core-бинов через @Inject.
+         * Middleware-сервисы разрешаются по стабильным CUBA service name. В web-контексте
+         * это возвращает удалённые proxy, а не пытается получить core-Spring-бин по типу.
          */
-        imageProcessingService = AppBeans.get(ImageProcessingService.class);
-        userAiContextService = AppBeans.get(UserAiContextService.class);
+        imageProcessingService = (ImageProcessingService) AppBeans.get(ImageProcessingService.NAME);
+        userAiContextService = (UserAiContextService) AppBeans.get(UserAiContextService.NAME);
 
         currentUser = (ExtUser) userSessionSource.getUserSession().getUser();
         loadExtUser();
