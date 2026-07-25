@@ -65,6 +65,7 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
     private DateField<Date> dateFromField;
 
     private static final int DEFAULT_DATE_FILTER_DAYS = 90;
+    private static final String OPEN_POSITION_COPY_VIEW = "openPosition-iteraction-list-picker-view";
 
     private static final String QUERY_OUTSTAFFING_TYPES =
             "select e from hunttech_Iteraction e where e.outstaffingSign = true";
@@ -254,9 +255,10 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
         Screen screen = screenBuilders.editor(iteractionListsTable)
                 .newEntity()
                 .withInitializer(data -> {
-                    if (iteractionListsTable.getSingleSelected() != null) {
-                        data.setCandidate(iteractionListsTable.getSingleSelected().getCandidate());
-                        data.setVacancy(iteractionListsTable.getSingleSelected().getVacancy());
+                    IteractionList selectedInteraction = iteractionListsTable.getSingleSelected();
+                    if (selectedInteraction != null) {
+                        data.setCandidate(selectedInteraction.getCandidate());
+                        data.setVacancy(loadVacancyForCopy(selectedInteraction.getVacancy()));
                     }
                 })
                 .withScreenClass(IteractionListEdit.class)
@@ -264,6 +266,18 @@ public class IteractionListBrowse extends StandardLookup<IteractionList> {
                 .build();
 
         screen.show();
+    }
+
+    /**
+     * Перечитывает вакансию узким edit-view перед передачей в новую сущность.
+     * Browse-контейнер хранит сокращённый detached-граф, поэтому прямое копирование
+     * не гарантирует загрузку projectName.projectDepartment в IteractionListEdit.
+     */
+    private OpenPosition loadVacancyForCopy(OpenPosition vacancy) {
+        if (vacancy == null || vacancy.getId() == null) {
+            return null;
+        }
+        return dataManager.reload(vacancy, OPEN_POSITION_COPY_VIEW);
     }
 
     private void addIconColumn() {

@@ -16,9 +16,12 @@
 
 Профильное изображение кандидата в левой панели сохраняет единый контракт HRM HuntTech: `candidateImage` отображается через legacy-компонент `OvaFallbackImage`, имеет стабильную круглую геометрию и показывает `icons/no-programmer.jpeg`, если фотография кандидата отсутствует. Java-контроллер и модель данных не изменены.
 
+Сценарий «Копировать» создаёт новую сущность `IteractionList` из строки browse-экрана. Browse-контейнер намеренно использует компактный view, поэтому перед передачей вакансии в новый editor она перечитывается через `openPosition-iteraction-list-picker-view`. Это гарантирует загрузку `projectName.projectDepartment.companyName` и предотвращает `Cannot get unfetched attribute` при построении контекста компании и проекта.
+
 ## UI Context & Navigation
 
 - Экран открывается из `hunttech_IteractionList.browse`, карточки кандидата и связанных сценариев создания или редактирования взаимодействия.
+- Команда «Копировать» в `IteractionListBrowse` создаёт новый `IteractionList`, сохраняет кандидата и передаёт перечитанную вакансию с полным editor-графом проекта.
 - Picker кандидата сохраняет lookup и open для `JobCandidate`.
 - Picker вакансии сохраняет lookup и open для `OpenPosition`.
 - Выбор типа взаимодействия управляет существующими динамическими компонентами дополнительного действия.
@@ -31,6 +34,7 @@
 ## Behavior Summary
 
 - открытие нового взаимодействия → контроллер заполняет номер, дату и текущего рекрутёра → пользователь получает готовую форму;
+- нажатие «Копировать» в browse → выбранная строка содержит сокращённый detached-граф вакансии → `IteractionListBrowse` перечитывает вакансию через `openPosition-iteraction-list-picker-view` и только затем передаёт её в новый editor;
 - открытие формы → секция «Взаимодействие» раскрыта, «Комментарий» и «Популярные взаимодействия» свёрнуты → пользователь сразу видит основные поля;
 - раскрытие или сворачивание секции → меняется только presentation state `GroupBoxLayout` → значения и lifecycle не затрагиваются;
 - выбор кандидата с фотографией → сохраняется прежний `ContainerValueSource` → `OvaFallbackImage` отображает фотографию круглой;
@@ -47,6 +51,7 @@
 |---|---|
 | `@UiController` | `hunttech_IteractionList.edit` |
 | Java | `com.company.hunttech.web.screens.iteractionlist.IteractionListEdit` |
+| Источник копирования | `com.company.hunttech.web.screens.iteractionlist.IteractionListBrowse#onButtonCopyClick` |
 | Базовый класс | `StandardEditor<IteractionList>` |
 | `@EditedEntityContainer` | `iteractionListDc` |
 | Загрузка | `@LoadDataBeforeShow` |
@@ -61,9 +66,10 @@
 | `iteractionListDc` / `iteractionListDl` | `iteractionList-edit-view` | редактируемое взаимодействие | без изменений |
 | `iteractionTypesDc` / `iteractionTypesLc` | `iteraction-list-type-view` | типы взаимодействий | без изменений |
 | `openPositionDc` / `openPositionsDl` | `openPosition-iteraction-list-picker-view` | вакансии с действующими conditions | без изменений |
+| copy initializer `IteractionListBrowse` | `openPosition-iteraction-list-picker-view` | перечитывание вакансии перед передачей в новую сущность | добавлен безопасный reload |
 | `usersDc` / `usersDl` | `_minimal` | активные пользователи | без изменений |
 
-JPQL, query conditions, параметры loaders, `cacheable` и views сохранены. `IteractionListEdit.java`, entity, БД, Liquibase и `views.xml` не изменялись.
+`openPosition-iteraction-list-picker-view` содержит `projectName.projectDepartment.departamentRuName` и `projectName.projectDepartment.companyName.companyShortName`, которые читает `IteractionListEdit#vacancyFieldValueChange`. JPQL, query conditions, параметры loaders, `cacheable`, entity, БД, Liquibase и `views.xml` не изменялись.
 
 ## 3. Компоновка
 
@@ -168,9 +174,10 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-editor.scss
 
 ## 7. Ограничения изменений
 
-- бизнес-логика и Java handlers не изменены;
+- изменён только copy-initializer `IteractionListBrowse` и добавлен узкий reload вакансии;
+- `IteractionListEdit.java`, XML-дескрипторы и бизнес-обработчики editor не изменены;
 - entity, поля, БД, Liquibase не изменены;
-- loaders, JPQL, conditions и views не изменены;
+- loaders, JPQL, conditions и определения views не изменены;
 - component ID, captions существующих компонентов, actions и `invoke` не изменены;
 - runtime `visible`, `required`, `editable`, caption и stylename не переопределены статически;
 - production не изменяется в рамках разработки;
@@ -181,18 +188,18 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-editor.scss
 1. HEAD branch и HEAD PR совпадают с переданным SHA.
 2. Base PR = `master`, conflicts = NONE.
 3. `git diff --check`.
-4. `IteractionListEditAccordionLayoutTest` — `5/5 PASS`.
-5. `LeftSidebarAvatarComponentTest` — `2/2 PASS`.
-6. Compile web и core tests.
-7. `ScreenViewIntegrityTest` — `8/8 PASS`.
-8. Data View Integrity — getters контроллера входят в `iteractionList-edit-view`.
-9. `:app-web:buildScssThemes` — PASS для семи тем.
+4. `IteractionListCopyProjectDepartmentTest` — `1/1 PASS`.
+5. `IteractionListEditAccordionLayoutTest` — `5/5 PASS`.
+6. `LeftSidebarAvatarComponentTest` — `2/2 PASS`.
+7. Compile web и core tests.
+8. `ScreenViewIntegrityTest` — `8/8 PASS`.
+9. Data View Integrity — `openPosition-iteraction-list-picker-view` содержит все getters цепочки `projectName.projectDepartment.companyName`.
 10. `clean assemble` — `BUILD SUCCESSFUL`.
 11. Local deploy и HTTP `/hrm/` = `200`.
-12. Functional smoke: последовательно заполнить кандидата, вакансию, тип, dynamic fields, rating, рекрутёра, способ связи и комментарий; проверить подписку, save/cancel.
-13. Accordion smoke: свернуть и раскрыть каждый из трёх блоков, убедиться в сохранении введённых значений и отсутствии пустых горизонтальных областей.
-14. Visual smoke семи тем: аккордеоны визуально совпадают с `SettingsWindow`, поля идут одной колонкой, ширина единая, sidebar непрерывный, toolbar/footer только справа, horizontal scroll отсутствует.
-15. Tomcat logs: новых critical errors NONE; P1 = 0; P2 = 0.
+12. Copy smoke: выбрать строку с вакансией, нажать «Копировать», убедиться, что editor открывается без `Cannot get unfetched attribute [projectDepartment]`.
+13. Проверить копирование кандидата и вакансии, отображение компании, подразделения и проекта, затем сохранить новую запись.
+14. Повторить для вакансии без проекта и без подразделения — editor должен открыться без исключения.
+15. Tomcat logs: новых `IllegalStateException`, unfetched/detached errors и critical errors NONE; P1 = 0; P2 = 0.
 
 До отчёта Hermes статус задачи: `WAITING_FOR_HERMES`.
 
@@ -200,6 +207,7 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-editor.scss
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-25 | Исправлен сценарий «Копировать»: вакансия перечитывается через `openPosition-iteraction-list-picker-view` до открытия нового `IteractionListEdit`, что гарантирует загрузку `projectDepartment` и предотвращает unfetched-ошибку |
 | 2026-07-25 | Аккордеоны `IteractionListEdit` приведены к точному presentation-контракту `SettingsWindow`: `showAsPanel`, `margin`, первая секция раскрыта, остальные свёрнуты, переиспользованы эталонные theme-aware стили `user-ai-profile-section`; конкурирующий accordion-класс исключён |
 | 2026-07-25 | Основные рабочие блоки преобразованы в сворачиваемые секции; `gridIterationData` переведён на одну колонку, все поля расположены друг под другом без изменения business/data-контрактов |
 | 2026-07-25 | По итогам аудита переработанных форм `candidateImage` в левой панели заменён на `OvaFallbackImage` 104×104 px с fallback `icons/no-programmer.jpeg`; ID, binding и Java-инъекция `Image` сохранены |
