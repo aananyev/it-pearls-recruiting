@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
-        class="com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindowEmailNavigation"
+        class="com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindowInterfaceLayout"
         extends="/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml">
-    <!-- Базовая компоновка наследуется полностью; расширение добавляет только навигационное поведение контроллера. -->
+    <!-- Базовая форма наследуется полностью; контроллеры добавляют навигацию и выравнивание без изменения бизнес-логики. -->
     <layout/>
 </window>
