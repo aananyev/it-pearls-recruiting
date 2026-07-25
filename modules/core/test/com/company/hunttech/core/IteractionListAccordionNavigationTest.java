@@ -1,19 +1,100 @@
 package com.company.hunttech.core;
+
 import org.junit.Test;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import static org.junit.Assert.*;
-/** Защищает кликабельный индекс default-экрана IteractionListEdit. */
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+/**
+ * Защищает кликабельный индекс блоков default-экрана IteractionListEdit.
+ */
 public class IteractionListAccordionNavigationTest {
-    @Test public void defaultControllerCreatesFiveNavigationButtons() throws IOException {String c=controller();assertTrue(c.contains("@UiController("hunttech_IteractionList.edit")"));assertTrue(c.contains("iteractionListNavigation.removeAll()"));assertTrue(c.contains("participantsAccordionNav"));assertTrue(c.contains("popularAccordionNav"));assertEquals(5,count(c,"addExpandedStateChangeListener"));}
-    @Test public void navigationFocusesFirstFieldOfEachInputBlock() throws IOException {String c=controller();assertTrue(c.contains("candidateField::focus"));assertTrue(c.contains("iteractionTypeField::focus"));assertTrue(c.contains("ratingField::focus"));assertTrue(c.contains("commentField::focus"));assertTrue(c.contains("popularAccordion.setExpanded(popularAccordion == selectedAccordion)"));}
-    @Test public void navigationMethodsDoNotWriteEntityOrRunQueries() throws IOException {String c=controller();String n=c.substring(c.indexOf("private void initAccordionNavigation()"),c.indexOf("private static final String QUERY_CHAIN_LAST"));assertFalse(n.contains("getEditedEntity()"));assertFalse(n.contains("dataManager"));assertFalse(n.contains("commit("));assertFalse(n.contains("setValue("));}
-    @Test public void compatibilityControllerIsThinAliasWithUniqueId() throws IOException {String a=read("modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEditAccordionNavigation.java");assertTrue(a.contains("@UiController("hunttech_IteractionList.edit.accordion")"));assertTrue(a.contains("@UiDescriptor("iteraction-list-edit.xml")"));assertTrue(a.contains("extends IteractionListEdit"));assertFalse(a.contains("@Subscribe"));}
-    private String controller()throws IOException{return read("modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");}
-    private int count(String t,String token){int r=0,i=0;while((i=t.indexOf(token,i))>=0){r++;i+=token.length();}return r;}
-    private String read(String p)throws IOException{return new String(Files.readAllBytes(root().resolve(p)),StandardCharsets.UTF_8);}
-    private Path root(){Path r=Paths.get(System.getProperty("user.dir",".")).toAbsolutePath();while(r!=null&&!Files.exists(r.resolve("build.gradle"))){r=r.getParent();}assertNotNull(r);return r;}
+
+    @Test
+    public void defaultControllerCreatesFiveNavigationButtons() throws IOException {
+        String controller = controller();
+
+        assertTrue(controller.contains("@UiController(\"hunttech_IteractionList.edit\")"));
+        assertTrue(controller.contains("iteractionListNavigation.removeAll()"));
+        assertTrue(controller.contains("participantsAccordionNav"));
+        assertTrue(controller.contains("interactionAccordionNav"));
+        assertTrue(controller.contains("resultAccordionNav"));
+        assertTrue(controller.contains("commentAccordionNav"));
+        assertTrue(controller.contains("popularAccordionNav"));
+        assertEquals(5, count(controller, "addExpandedStateChangeListener"));
+    }
+
+    @Test
+    public void navigationFocusesFirstFieldOfEachInputBlock() throws IOException {
+        String controller = controller();
+
+        assertTrue(controller.contains("candidateField::focus"));
+        assertTrue(controller.contains("iteractionTypeField::focus"));
+        assertTrue(controller.contains("ratingField::focus"));
+        assertTrue(controller.contains("commentField::focus"));
+        assertTrue(controller.contains(
+                "popularAccordion.setExpanded(popularAccordion == selectedAccordion)"));
+    }
+
+    @Test
+    public void navigationMethodsDoNotWriteEntityOrRunQueries() throws IOException {
+        String controller = controller();
+        String navigation = controller.substring(
+                controller.indexOf("private void initAccordionNavigation()"),
+                controller.indexOf("private static final String QUERY_CHAIN_LAST"));
+
+        assertFalse(navigation.contains("getEditedEntity()"));
+        assertFalse(navigation.contains("dataManager"));
+        assertFalse(navigation.contains("commit("));
+        assertFalse(navigation.contains("setValue("));
+    }
+
+    @Test
+    public void compatibilityControllerIsThinAliasWithUniqueId() throws IOException {
+        String alias = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/"
+                        + "IteractionListEditAccordionNavigation.java");
+
+        assertTrue(alias.contains(
+                "@UiController(\"hunttech_IteractionList.edit.accordion\")"));
+        assertTrue(alias.contains("@UiDescriptor(\"iteraction-list-edit.xml\")"));
+        assertTrue(alias.contains("extends IteractionListEdit"));
+        assertFalse(alias.contains("@Subscribe"));
+    }
+
+    private String controller() throws IOException {
+        return readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");
+    }
+
+    private int count(String text, String token) {
+        int result = 0;
+        int index = 0;
+        while ((index = text.indexOf(token, index)) >= 0) {
+            result++;
+            index += token.length();
+        }
+        return result;
+    }
+
+    private String readProjectFile(String relativePath) throws IOException {
+        return new String(Files.readAllBytes(projectRoot().resolve(relativePath)), StandardCharsets.UTF_8);
+    }
+
+    private Path projectRoot() {
+        Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
+        while (root != null && !Files.exists(root.resolve("build.gradle"))) {
+            root = root.getParent();
+        }
+        assertNotNull("Не найден корень проекта HRM HuntTech", root);
+        return root;
+    }
 }
