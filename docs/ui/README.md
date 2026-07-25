@@ -7,6 +7,7 @@
 | Экран | Документ | Назначение |
 |---|---|---|
 | `JobCandidateEdit` | [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md) | Карточка кандидата, вкладки, история вакансий, анализ навыков и защита от OOM |
+| `CandidateCVEdit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) | Подготовка резюме, сопроводительного письма, дерева навыков, фотографии и дополнительных файлов без изменения lazy-init |
 | `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | Персональные настройки пользователя, интерфейса, email и AI |
 | `ExtSettingsWindowEmailNavigation` | [ExtSettingsWindowEmailNavigation_Spec.md](ExtSettingsWindowEmailNavigation_Spec.md) | Связь навигации SMTP, POP3 и IMAP слева с соответствующими аккордеонами справа |
 | `ExtSettingsWindowAvatar` | [ExtSettingsWindowAvatar_Spec.md](ExtSettingsWindowAvatar_Spec.md) | Круглая фотография пользователя через `OvaFallbackImage` без изменения модели данных |
@@ -68,6 +69,12 @@ Living-документация экранов, окон, фрагментов �
 | Detail fragment | `itpearls_JobCanidateDetailScreenFragment` | [itpearls_JobCanidateDetailScreenFragment_Spec.md](itpearls_JobCanidateDetailScreenFragment_Spec.md) |
 | Image face | `itpearls_JobCandidateImageFace` | [itpearls_JobCandidateImageFace_Spec.md](itpearls_JobCandidateImageFace_Spec.md) |
 | Select positions | `itpearls_SelectPersonPositions` | [itpearls_SelectPersonPositions_Spec.md](itpearls_SelectPersonPositions_Spec.md) |
+
+### CandidateCV
+
+| Форма | Controller | Документ |
+|-------|------------|----------|
+| Edit | `hunttech_CandidateCV.edit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) |
 
 ### OpenPosition
 
@@ -222,6 +229,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-25 | В каталог добавлена спецификация визуального и функционального контракта `CandidateCVEdit` с локальным SCSS для семи тем |
 | 2026-07-25 | В каталог добавлена каноническая спецификация визуального редизайна `IteractionListEdit` |
 | 2026-07-25 | В каталог добавлена спецификация кликабельной навигации SMTP, POP3 и IMAP для `ExtSettingsWindow` |
 | 2026-07-24 | В каталог добавлена спецификация аватара `ExtSettingsWindow`: `userPic` переведён на `OvaFallbackImage` без изменения Java, entity и БД |

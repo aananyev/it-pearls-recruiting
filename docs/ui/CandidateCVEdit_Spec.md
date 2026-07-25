@@ -1,0 +1,495 @@
+# CandidateCVEdit — спецификация визуального и функционального контракта
+
+**Проект:** HRM HuntTech
+**Платформа:** CUBA Platform 7.3-SNAPSHOT
+**UI controller:** `hunttech_CandidateCV.edit`
+**Controller:** `modules/web/src/com/company/hunttech/web/screens/candidatecv/CandidateCVEdit.java`
+**Descriptor:** `modules/web/src/com/company/hunttech/web/screens/candidatecv/candidate-cv-edit.xml`
+**Локальный SCSS namespace:** `.candidate-cv-editor`
+**Статус:** визуальный рефакторинг реализован; runtime-проверка ожидает Hermes
+
+## Назначение и бизнес-смысл (What & Why)
+
+`CandidateCVEdit` объединяет подготовку кандидата к представлению заказчику: связывает кандидата с позицией и вакансией, хранит исходное и нормализованное резюме HRM HuntTech, поддерживает сопроводительное письмо, дерево навыков, фотографию и дополнительные файлы. Экран должен позволять рекрутеру последовательно подготовить полный пакет представления кандидата, не теряя исходные документы и не смешивая редактируемый текст резюме со справочными рекомендациями.
+
+Визуальный рефакторинг приводит экран к общей UI/UX-концепции HRM HuntTech, уже применённой в `JobCandidateEdit` и `ExtSettingsWindow`. Цель — повысить читаемость и скорость работы пользователя без изменения бизнес-логики, lifecycle, загрузки данных, распознавания документов, сохранения или permissions.
+
+## UI Context & Navigation
+
+Экран открывается как modal editor сущности `CandidateCV` размером `1200×800 px`. Основные точки входа находятся в сценариях работы с резюме кандидата, представлениями на вакансии и связанных экранах `JobCandidate`.
+
+Внутри формы сохраняются пять вкладок в исходном порядке:
+
+1. `tabCandidate` — «Кандидат»: связи с кандидатом, позицией, вакансией и владельцем, ссылки и файлы резюме, фотография.
+2. `tabCV` — «Резюме»: редактируемый текст резюме HRM HuntTech и рекомендации.
+3. `tabLetter` — «Сопроводительное письмо»: письмо, комментарий и vacancy-dependent рекомендации.
+4. `tabSkillTree` — дерево навыков, повторный разбор резюме и сопоставление с вакансией.
+5. `tabFiles` — дополнительные composition-файлы `CandidateCV`.
+
+Глобальная постоянная sidebar не используется: редактор резюме, письмо и `TreeDataGrid` требуют максимальной полезной ширины. Двухпанельная композиция применяется только внутри вкладок, где она соответствует бизнес-содержанию.
+
+Связанные документы:
+
+- [Общая UI/UX-концепция](../architecture/HRM_HuntTech_UI_UX_Design_Concept.md);
+- [JobCandidateEdit](JobCandidateEdit_Spec.md);
+- [JobCandidate](../entities/job-candidate/JobCandidate.md);
+- [OpenPosition](../entities/open-position/OpenPosition_Spec.md);
+- [SkillTree](../entities/skill-tree/SkillTree.md).
+
+## Behavior Summary
+
+- открытие формы → `@LoadDataBeforeShow` инициирует стандартный lifecycle → pre-load listener не разрешает загрузить вакансии до установки фильтра пользователя;
+- `BeforeShow` → значение `TEXT_CV` сохраняется только как baseline → тяжёлый `RichTextArea` не инициализируется преждевременно;
+- первый выбор `tabCV` → `cvTextInitialized == false` → текст CV, рекомендации и подсветка компетенций инициализируются один раз;
+- первый выбор `tabSkillTree` → `skillTabInitialized == false` → CV инициализируется по необходимости, затем выполняется существующий разбор навыков;
+- повторный выбор `tabSkillTree` → флаг уже установлен → лишняя повторная инициализация не выполняется;
+- сохранение без открытия `tabCV` → `cvTextInitialized == false` → существующий `TEXT_CV` и `contactInfoChecked` не перезаписываются;
+- изменение текста CV → значение отличается от baseline → `contactInfoChecked` сбрасывается и новый текст сохраняется;
+- выбор вакансии → контроллер читает `needLetter` и `templateLetter` → сохраняется существующая логика warning, шаблона и рекомендаций;
+- включение «только мои подписки» → loader получает параметр `subscriber` → показываются доступные пользователю вакансии;
+- выключение фильтра → параметр удаляется → выполняется существующая загрузка всех вакансий;
+- ввод ссылки исходного резюме → значение не `null` → ссылка показывается и кнопка импорта текста становится enabled;
+- загрузка PDF → существующий parser извлекает текст и изображения → при наличии изображений открывается окно выбора фотографии;
+- загрузка DOCX → Apache POI извлекает текст → текст записывается в lazy-managed `candidateCVRichTextArea`;
+- загрузка DOC → контроллер показывает существующее предупреждение о нереализованной функции → визуальный слой не меняет это поведение;
+- отсутствие фотографии → контроллер скрывает `candidatePic` и показывает `candidateFaceDefaultImage`;
+- наличие фотографии → контроллер показывает `candidatePic` и скрывает fallback;
+- создание, редактирование или удаление дополнительного файла → используются actions таблицы → composition-коллекция сохраняется вместе с `CandidateCV`;
+- hover, focus, disabled, read-only и validation → меняется только presentation → `visible`, `editable`, `enable`, `required`, validators и permissions остаются исходными.
+
+## 1. Точка вызова и контекст
+
+Форма является `StandardEditor<CandidateCV>`:
+
+```java
+@UiController("hunttech_CandidateCV.edit")
+@UiDescriptor("candidate-cv-edit.xml")
+@EditedEntityContainer("candidateCVDc")
+@LoadDataBeforeShow
+```
+
+Диалоговый режим:
+
+```xml
+<dialogMode height="800"
+            modal="true"
+            width="1200"/>
+```
+
+Корневой presentation-контракт:
+
+```xml
+<layout stylename="candidate-cv-editor" ...>
+```
+
+`.candidate-cv-editor` не подключает `.job-candidate-editor` или `.ext-settings-window` и не создаёт глобальных Vaadin-селекторов.
+
+## 2. Связь с моделью данных
+
+### 2.1. Контейнеры и loaders
+
+| ID | Назначение | Контракт |
+|---|---|---|
+| `candidateCVDc` | редактируемая сущность `CandidateCV` | `candidateCV-view` с существующими вложенными properties |
+| `someFilesesDc` | composition дополнительных файлов | `property="someFiles"` |
+| `skillTreesDc` | composition дерева навыков | `property="skillTree"`, `skillTree-cv-tab-view` |
+| `openPositionsDc` | варианты вакансий | `openPosition-candidate-cv-picker-view` |
+| `openPositionsDl` | loader вакансий | JPQL и parameter `subscriber` не изменены |
+| `resumePositionsDc` | справочник позиций | `_local` |
+| `resumePositionsLc` | loader позиций | исходный JPQL не изменён |
+| `usersDc` | владельцы резюме | `_local` |
+| `usersDl` | loader пользователей | исходный JPQL не изменён |
+
+### 2.2. Поля `candidateCV-view`
+
+Экран сохраняет `candidateCV-view` и его расширение в XML. В функциональном контракте присутствуют:
+
+- `resumePosition`;
+- `toVacancy`, `positionType`, `projectName`, `projectDepartment`, `grade`;
+- `owner`;
+- `fileCV`;
+- `originalFileCV`;
+- `someFiles`, `fileType`, `fileDescriptor`, `fileOwner`;
+- `fileImageFace`;
+- `skillTree`;
+- `candidate`, `candidate.fileImageFace`, `candidate.personPosition`.
+
+`views.xml`, entity `CandidateCV`, fetch plans, JPQL и loaders не изменяются визуальным PR.
+
+## 3. Рабочая карта UI-контрактов
+
+Обозначения: «—» — контракт отсутствует; «Java» — компонент инъецируется или обрабатывается контроллером.
+
+| Component ID | Тип | Вкладка/область | Data container / property | Actions / invoke | Java / состояние | Required | Бизнес-назначение |
+|---|---|---|---|---|---|---|---|
+| `tabSheet` | `TabSheet` | форма | — | selected-tab listener | Java; имена вкладок читаются lifecycle | — | навигация по пяти разделам |
+| `candidateLabel` | `HBox` | верхний контекст | — | — | presentation | — | постоянный контекст кандидата |
+| `iteractionListLabelCandidate` | `Label` | верхний контекст | `candidateCVDc / candidate.fullName` | — | динамическое значение | — | ФИО |
+| `iteractionListLabelPosition` | `Label` | верхний контекст | `candidateCVDc / candidate.personPosition` | — | динамическое значение | — | позиция |
+| `labelLastRecrutier` | `Label` | верхний контекст | — | — | существующее значение | — | служебная информация |
+| `machRegexpFromCV` | `Label` | верхний контекст | — | — | Java записывает email/телефон | — | результат распознавания |
+| `quoteTextArea` | `TextArea` | верхний контекст | — | — | Java задаёт текст; `visible=false`, `editable=false` | — | существующая цитата |
+| `candidateScrolBox` | `ScrollBox` | `tabCandidate` | — | — | presentation | — | прокрутка вкладки кандидата |
+| `candidateVbox` | `HBox` | `tabCandidate` | — | — | presentation | — | двухпанельная композиция |
+| `groupBox` | `VBox` | `tabCandidate` | — | — | presentation | — | левая рабочая область |
+| `candidateField` | `SuggestionPickerField` | основные данные | `candidateCVDc / candidate` | `lookup`, `open`, suggestion query | Java injection | yes | выбор кандидата |
+| `resumePositionField` | `LookupPickerField` | основные данные | `candidateCVDc / resumePosition`; `resumePositionsDc` | `lookup` | — | yes | позиция резюме |
+| `candidateCVFieldOpenPosition` | `LookupPickerField` | основные данные | `candidateCVDc / toVacancy`; `openPositionsDc` | `lookup`, `open`; option icon/style providers | Java injection, `@Subscribe`, `@Install` | no | вакансия |
+| `onlyMySubscribeCheckBox` | `CheckBox` | рядом с вакансией | — | value listener | Java enabled/value/filter logic | no | фильтр вакансий пользователя |
+| `СandidateCVField` | `LookupField` | основные данные | `candidateCVDc / owner`; `usersDc` | — | legacy ID с кириллической `С` | no | владелец |
+| `textFieldIOriginalCV` | `TextField` | оригинальное резюме | `candidateCVDc / linkOriginalCv` | — | Java injection, `@Subscribe` | no | ссылка на источник |
+| `loadToCVTextArea` | `Button` | оригинальное резюме | — | `invoke="loadToCVTextArea"` | Java injection; initially disabled | — | импорт веб-текста |
+| `originalCVLink` | `Link` | оригинальное резюме | — | URL из Java | Java show/hide | — | открыть источник |
+| `fileOriginalCVField` | `FileUploadField` | оригинальное резюме | `candidateCVDc / originalFileCV` | upload events | Java `@Subscribe`; immediate; clear | — | загрузить PDF/DOC/DOCX |
+| `textFieldHuntTechCV` | `TextField` | резюме HRM HuntTech | `candidateCVDc / linkHuntTechCV` | — | Java injection, `@Subscribe` | no | ссылка на подготовленное CV |
+| `HuntTechCVLink` | `Link` | резюме HRM HuntTech | — | URL/visibility из Java | Java show/hide | — | открыть подготовленное CV |
+| `fileCVField` | `FileUploadField` | резюме HRM HuntTech | `candidateCVDc / fileCV` | upload | immediate; clear | — | файл подготовленного CV |
+| `dropZone` | `VBox` | фото | — | upload drop zone | `dropZone="dropZone"` | — | область drag-and-drop |
+| `picVBox` | `VBox` | фото | — | — | порядок изображений сохранён | — | frame фотографии |
+| `candidatePic` | `Image` | фото | `candidateCVDc / fileImageFace` | source change | Java injection/show/hide | — | фотография |
+| `candidateFaceDefaultImage` | `Image` | фото | theme image | — | Java injection/show/hide; initially hidden | — | fallback |
+| `fileImageFaceUpload` | `FileUploadField` | фото | `candidateCVDc / fileImageFace` | upload | Java injection; immediate; clear | — | загрузка фотографии |
+| `rescanSkills` | `Button` | `tabCV` toolbar | — | `rescanCV` | — | — | повторный разбор |
+| `resumeRecognitionButton` | `Button` | `tabCV` toolbar | — | `resumeRecognition` | — | — | распознать контакты |
+| `convertToTextButton` | `Button` | `tabCV` toolbar | — | `convertToText` | Java injection; dynamic enabled | — | HTML/text toggle |
+| `showOriginalButon` | `Button` | `tabCV` toolbar | — | `showOriginalText` | Java injection; dynamic caption | — | оригинал/подсветка |
+| `candidateCVRichTextArea` | `RichTextArea` | `tabCV` | lazy `TEXT_CV` management | value change | Java injection; role-based editable | yes | основной редактор CV |
+| `cvResomandation` | `RichTextArea` | `tabCV` | — | — | Java fills; `editable=false` | no | рекомендации по резюме |
+| `questionLetterRichTextArea` | `RichTextArea` | `tabLetter` | — | — | Java show/hide; `visible=false`, `editable=false` | no | vacancy template |
+| `letterRichTextArea` | `RichTextArea` | `tabLetter` | `candidateCVDc / letter` | — | Java injection | no | сопроводительное письмо |
+| `commentLetterRichTextArea` | `RichTextArea` | `tabLetter` | `candidateCVDc / commentLetter` | — | existing binding | no | комментарий |
+| `letterRecommendation` | `RichTextArea` | `tabLetter` | — | — | Java show/hide/fill; `visible=false`, `editable=false` | no | рекомендации |
+| `rescanResume` | `Button` | `tabSkillTree` toolbar | — | `rescanCV` | — | — | перестроить дерево |
+| `checkSkillFromJD` | `Button` | `tabSkillTree` toolbar | — | `checkSkillFromJD` | — | — | сравнить с вакансией |
+| `skillTreesTable` | `TreeDataGrid` | `tabSkillTree` | `skillTreesDc` | column generators/style | Java `@Install` | — | иерархия навыков |
+| `someFilesTable` | `Table` | `tabFiles` | `someFilesesDc` | `add/create/edit/remove` | actions сохранены | — | дополнительные файлы |
+| `datePostField` | `DateField` | footer | `candidateCVDc / datePost` | — | new record default from Java | no | дата представления |
+| `editActions` | `HBox` | footer | — | `windowCommitAndClose`, `windowClose` | стандартные actions | — | сохранение и отмена |
+
+## 4. Lifecycle и защищённые динамические состояния
+
+### 4.1. Lazy-init
+
+Контроллер проверяет именно имена:
+
+```java
+"tabCV".equals(selectedTab.getName())
+"tabSkillTree".equals(selectedTab.getName())
+```
+
+Поэтому сохраняются:
+
+- `tabSheet`;
+- `tabCV`;
+- `tabSkillTree`;
+- порядок selected-tab event;
+- расположение `candidateCVRichTextArea` внутри `tabCV`;
+- расположение `skillTreesTable` внутри `tabSkillTree`;
+- отсутствие новых listener, loader или автозапуска.
+
+### 4.2. Visibility
+
+Контроллер динамически показывает или скрывает:
+
+- `originalCVLink`;
+- `HuntTechCVLink`;
+- `questionLetterRichTextArea`;
+- `letterRecommendation`;
+- `candidatePic`;
+- `candidateFaceDefaultImage`.
+
+XML не делает скрытые компоненты видимыми статически. Локальный SCSS не резервирует для невидимых компонентов искусственные крупные области.
+
+### 4.3. Enabled, editable и required
+
+Контроллер изменяет:
+
+- enabled `loadToCVTextArea`;
+- enabled `convertToTextButton`;
+- editable `candidateCVRichTextArea` для групп `ACCOUNTING` и `MANAGEMENT`.
+
+XML сохраняет:
+
+- `candidateField required="true"`;
+- `resumePositionField required="true"`;
+- `candidateCVRichTextArea required="true"`;
+- `questionLetterRichTextArea editable="false"`;
+- `cvResomandation editable="false"`;
+- `letterRecommendation editable="false"`.
+
+## 5. Actions, invoke и table contracts
+
+### 5.1. Picker actions
+
+- `candidateField`: `picker_lookup`, `picker_open`;
+- `resumePositionField`: `picker_lookup`;
+- `candidateCVFieldOpenPosition`: `picker_lookup`, `picker_open`.
+
+`optionIconProvider` и `optionStyleProvider` вакансии остаются в Java без изменений.
+
+### 5.2. Invoke
+
+| Component | Invoke |
+|---|---|
+| `loadToCVTextArea` | `loadToCVTextArea` |
+| `rescanSkills` | `rescanCV` |
+| `resumeRecognitionButton` | `resumeRecognition` |
+| `convertToTextButton` | `convertToText` |
+| `showOriginalButon` | `showOriginalText` |
+| `rescanResume` | `rescanCV` |
+| `checkSkillFromJD` | `checkSkillFromJD` |
+
+### 5.3. SkillTree
+
+Сохраняются:
+
+- `dataContainer="skillTreesDc"`;
+- `hierarchyColumn="skillName"`;
+- `hierarchyProperty="skillTree"`;
+- колонки `skillName`, `specialisation`, `wikiPage`, `isComment`;
+- widths, maximumWidth, sort, renderers и `rowsCount`;
+- Java generators `wikiPage`, `isComment` и style provider.
+
+### 5.4. Дополнительные файлы
+
+Сохраняются колонки:
+
+- `fileDescription`;
+- `fileType.nameFileType`;
+- `fileComment`;
+- `fileDescriptor.size`;
+- `fileOwner.name`.
+
+Сохраняются actions `add`, `create`, `edit`, `remove` и buttons `someFilesTable.create`, `someFilesTable.edit`, `someFilesTable.remove`.
+
+## 6. Upload и parsing
+
+### 6.1. Оригинальное резюме
+
+`fileOriginalCVField` сохраняет:
+
+- `dataContainer="candidateCVDc"`;
+- `property="originalFileCV"`;
+- `fileStoragePutMode="IMMEDIATE"`;
+- `showFileName="true"`;
+- `showClearButton="true"`.
+
+Фактическое поведение контроллера:
+
+- PDF: извлечение текста и изображений;
+- DOCX: извлечение текста через Apache POI;
+- DOC: warning о том, что функция загрузки пока не реализована.
+
+### 6.2. Резюме HRM HuntTech
+
+`fileCVField` сохраняет binding `fileCV`, immediate upload, filename и clear button.
+
+### 6.3. Фотография
+
+`candidatePic` и `candidateFaceDefaultImage` остаются компонентами `Image`; замена на `OvaFallbackImage` не выполняется. Сохраняются `scaleMode="FILL"`, controller-driven visibility, binding `fileImageFace`, upload `fileImageFaceUpload`, `dropZone="dropZone"` и порядок компонентов.
+
+## 7. Визуальная компоновка
+
+### 7.1. Исходная композиция
+
+Исходный экран использовал:
+
+- обычный `GroupBox` для верхнего контекста;
+- `TabSheet` с базовым `framed`-оформлением;
+- поля вкладки «Кандидат» шириной `70%`;
+- отдельную photo drop zone справа;
+- toolbar без локальной визуальной системы;
+- таблицу дополнительных файлов высотой `300px`;
+- footer без выраженного отделения.
+
+### 7.2. Новая композиция
+
+```text
+┌───────────────────────────────────────────────────────────────┐
+│ контекст кандидата: ФИО · позиция · служебные данные · цитата │
+├───────────────────────────────────────────────────────────────┤
+│ Кандидат · Резюме · Письмо · Навыки · Файлы                  │
+├───────────────────────────────────────────────────────────────┤
+│ карточки / редактор 4:1 рекомендации / таблицы                │
+├───────────────────────────────────────────────────────────────┤
+│ дата представления                     сохранить · отмена      │
+└───────────────────────────────────────────────────────────────┘
+```
+
+Изменения presentation:
+
+- верхний контекст оформлен тёмной theme-aware панелью с акцентом `#ffb11b`;
+- вкладки имеют высоту `48px` и заметное selected-состояние;
+- основные данные, документы и фото собраны в локальные карточки радиусом `8px`;
+- picker-поля занимают доступную ширину и не обрезают actions;
+- `onlyMySubscribeCheckBox` остаётся непосредственно под vacancy picker;
+- photo drop zone сохраняет рабочие размеры `220×292px`;
+- `tabCV` и `tabLetter` сохраняют пропорцию `4:1`;
+- toolbar имеет минимальную высоту `58px`, кнопки — не менее `38px`;
+- `RichTextArea` и таблицы используют доступную высоту;
+- footer постоянно находится вне прокручиваемого содержимого вкладки;
+- primary presentation применяется только к `windowCommitAndClose`, action не меняется.
+
+## 8. Локальный SCSS и темы
+
+Для каждой темы существует файл:
+
+```text
+modules/web/themes/<theme>/com.company.hunttech/candidate-cv-editor.scss
+```
+
+Он подключается в соответствующий `styles.scss` через:
+
+```scss
+@import "com.company.hunttech/candidate-cv-editor";
+@include candidate-cv-editor-theme;
+```
+
+Поддерживаемые темы:
+
+- `halo`;
+- `havana`;
+- `helium`;
+- `hover`;
+- `hunttech-modern`;
+- `hunttech-modern-light`;
+- `hunttech-modern-dark`.
+
+SCSS использует `$v-app-background-color`, `$v-panel-background-color`, `$v-font-color`, `$v-selection-color`. Vaadin-селекторы допустимы только внутри `.candidate-cv-editor`. Анимации, тяжёлые изображения и глобальные overrides не добавляются.
+
+Локально оформлены:
+
+- hover и selected tab;
+- focus;
+- disabled;
+- read-only;
+- validation error;
+- required indicator;
+- picker actions и кнопки;
+- upload и filenames;
+- link;
+- checkbox;
+- RichTextArea;
+- table/grid header и selection;
+- TreeDataGrid hierarchy;
+- footer.
+
+## 9. Неизменённые функциональные контракты
+
+В PR должны оставаться неизменными:
+
+1. `CandidateCVEdit.java`;
+2. `CandidateCV.java`;
+3. `views.xml`;
+4. entity metadata, БД, Liquibase и SQL;
+5. loaders, JPQL и loader parameters;
+6. data containers и properties;
+7. component ID, captions и имена вкладок;
+8. picker actions;
+9. `invoke`;
+10. validators, required, permissions, visible и editable;
+11. upload properties и drop zone;
+12. типы `Image`, `RichTextArea`, picker, upload, `Table`, `TreeDataGrid`, `TabSheet`;
+13. распознавание, parsing, рекомендации, письмо, SkillTree и сохранение;
+14. lazy-init `tabCV` и `tabSkillTree`;
+15. сохранение существующего `TEXT_CV`, если вкладка CV не открывалась.
+
+## 10. Регрессионная проверка
+
+`CandidateCVEditVisualContractTest` проверяет:
+
+- Git blob SHA контроллера, entity и `views.xml`;
+- все защищённые legacy ID;
+- порядок пяти вкладок;
+- lifecycle-имена `tabCV` и `tabSkillTree`;
+- bindings, optionsContainer, picker actions;
+- invoke;
+- upload properties и `dropZone`;
+- типы двух изображений;
+- actions таблицы файлов;
+- неизменные JPQL-фрагменты;
+- наличие `.candidate-cv-editor`;
+- подключение SCSS во всех семи темах;
+- отсутствие зависимости от `.job-candidate-editor` и `.ext-settings-window`;
+- отсутствие top-level глобальных Vaadin-селекторов.
+
+## 11. Обязательные проверки Hermes
+
+```bash
+git diff --check
+
+./gradlew :app-web:compileJava \
+          :app-web:compileTestJava \
+          --no-daemon --stacktrace
+
+./gradlew :app-core:test \
+          --tests 'com.company.hunttech.core.CandidateCVEditVisualContractTest' \
+          --no-daemon --stacktrace
+
+./gradlew test \
+          --tests '*ScreenViewIntegrityTest*' \
+          --no-daemon --stacktrace
+
+./gradlew :app-web:buildScssThemes \
+          --no-daemon --stacktrace
+
+./gradlew clean assemble \
+          --no-daemon --stacktrace
+```
+
+Ожидания:
+
+- `CandidateCVEditVisualContractTest`: PASS;
+- `ScreenViewIntegrityTest`: 8/8 PASS;
+- Data View Integrity: PASS;
+- SCSS build: PASS;
+- `BUILD SUCCESSFUL`;
+- local deploy: PASS;
+- HTTP `/hrm/`: 200;
+- critical Tomcat errors: NONE.
+
+До отчёта Hermes compile, tests, SCSS, assemble, local deploy, functional smoke и visual smoke имеют статус `NOT VERIFIED`.
+
+## 12. Functional smoke
+
+Проверяются сценарии исходного задания:
+
+- открытие без преждевременного CV/SkillTree процесса;
+- пять вкладок в исходном порядке;
+- candidate, position и vacancy pickers;
+- фильтр подписок, option icons/styles;
+- owner, ссылки, оба upload и clear;
+- photo upload, drop zone и fallback;
+- lazy CV, PDF/DOCX parsing, warning для DOC, recognition, text conversion и original view;
+- role-based read-only и сохранение `TEXT_CV`;
+- письмо, комментарий, vacancy template и recommendation;
+- первый и повторный вход в SkillTree, rescanning и comparison;
+- create/edit/remove дополнительных файлов;
+- `datePost`, commit-and-close и cancel;
+- сохранение без открытия CV.
+
+## 13. Visual smoke
+
+В каждой из семи тем:
+
+- hard reload с отключённым browser cache;
+- `.candidate-cv-editor` присутствует в DOM;
+- локальный SCSS присутствует в собранном `styles.css`;
+- tabs имеют заметное selected-состояние;
+- picker actions не обрезаны;
+- filename и clear button видимы;
+- фото не искажено;
+- RichTextArea используют доступную высоту;
+- recommendation-панели читаемы;
+- SkillTree не имеет необоснованной горизонтальной прокрутки;
+- таблица файлов и footer доступны;
+- скрытые элементы не оставляют крупных пустот;
+- focus, disabled и read-only различимы;
+- другие формы не получают локальные стили CandidateCVEdit;
+- Tomcat logs не содержат новых критических ошибок.
+
+## История изменений
+
+| Дата | Изменение |
+|---|---|
+| 2026-07-25 | Выполнен строго визуальный рефакторинг `CandidateCVEdit`: добавлена карточная компоновка, постоянный контекст кандидата, локальный namespace для семи тем, регрессионная защита legacy ID, bindings, actions, invoke, upload, lazy-init и неизменности Java/entity/views |

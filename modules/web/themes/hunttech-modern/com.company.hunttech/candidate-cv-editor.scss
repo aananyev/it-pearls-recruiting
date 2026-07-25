@@ -1,0 +1,460 @@
+// Локальный визуальный слой CandidateCVEdit.
+// Все правила ограничены .candidate-cv-editor и не изменяют CUBA-контракты,
+// lifecycle, bindings, actions, загрузку данных или типы компонентов.
+@mixin candidate-cv-editor-theme {
+  .candidate-cv-editor {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    color: $v-font-color;
+    background: mix($v-app-background-color, $v-panel-background-color, 82%);
+    overflow: hidden;
+
+    > .v-slot,
+    .v-layout,
+    .v-slot {
+      min-width: 0;
+    }
+
+    .candidate-cv-context-card {
+      box-sizing: border-box;
+      min-height: 92px;
+      padding: 14px 20px;
+      color: #f8fafc;
+      background-color: #172638;
+      background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%);
+      border: 0;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.82);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
+    }
+
+    .candidate-cv-context-card > .v-slot,
+    .candidate-cv-context-card .v-horizontal {
+      width: 100%;
+      min-width: 0;
+    }
+
+    .candidate-cv-context-title,
+    .candidate-cv-context-title.v-label {
+      margin: 0;
+      color: #ffb11b !important;
+      font-size: 20px !important;
+      font-weight: 700 !important;
+      line-height: 27px !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+    }
+
+    .candidate-cv-context-position,
+    .candidate-cv-context-meta,
+    .candidate-cv-context-card .candidate-cv-context-position.v-label,
+    .candidate-cv-context-card .candidate-cv-context-meta.v-label {
+      color: rgba(248, 250, 252, 0.78) !important;
+      font-size: 13px !important;
+      line-height: 20px !important;
+      white-space: normal !important;
+    }
+
+    .candidate-cv-quote {
+      box-sizing: border-box;
+      color: #f8fafc !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      border-radius: 8px !important;
+      box-shadow: none !important;
+    }
+
+    .candidate-cv-tabs {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0;
+      background: $v-panel-background-color !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .candidate-cv-tabs > .v-tabsheet-tabcontainer {
+      padding: 0 20px;
+      background: $v-panel-background-color !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.16) !important;
+    }
+
+    .candidate-cv-tabs .v-tabsheet-tabs,
+    .candidate-cv-tabs .v-tabsheet-tabitem,
+    .candidate-cv-tabs .v-tabsheet-tabitem-selected {
+      height: 48px;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .candidate-cv-tabs .v-caption {
+      box-sizing: border-box;
+      height: 48px;
+      padding: 0 16px !important;
+      color: mix($v-font-color, $v-panel-background-color, 82%) !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      line-height: 48px !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-bottom: 3px solid transparent !important;
+    }
+
+    .candidate-cv-tabs .v-tabsheet-tabitem:hover .v-caption {
+      color: #ffb11b !important;
+    }
+
+    .candidate-cv-tabs .v-tabsheet-tabitem-selected .v-caption {
+      color: #ffb11b !important;
+      border-bottom-color: #ffb11b !important;
+    }
+
+    .candidate-cv-tabs > .v-tabsheet-content {
+      box-sizing: border-box;
+      height: calc(100% - 49px) !important;
+      padding: 16px 18px 18px;
+      background: mix($v-app-background-color, $v-panel-background-color, 82%) !important;
+      border: 0 !important;
+      overflow: hidden;
+    }
+
+    .candidate-cv-tabs .v-tabsheet-tabsheetpanel {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0;
+      background: transparent !important;
+      border: 0 !important;
+    }
+
+    .candidate-cv-scroll {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0;
+      background: transparent !important;
+      border: 0 !important;
+    }
+
+    .candidate-cv-scroll > .v-scrollable {
+      box-sizing: border-box;
+      padding-right: 6px;
+    }
+
+    .candidate-cv-candidate-layout,
+    .candidate-cv-column,
+    .candidate-cv-tab-content,
+    .candidate-cv-workspace {
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    .candidate-cv-candidate-layout {
+      padding: 2px;
+    }
+
+    .candidate-cv-tab-content {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .candidate-cv-card,
+    .candidate-cv-table-card,
+    .candidate-cv-recommendation {
+      box-sizing: border-box;
+      min-width: 0;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.15) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    .candidate-cv-card {
+      width: 100% !important;
+      padding: 18px 20px 20px;
+    }
+
+    .candidate-cv-photo-panel {
+      width: 244px !important;
+      min-width: 244px !important;
+      max-width: 244px !important;
+      align-items: center;
+    }
+
+    .candidate-cv-card-title,
+    .candidate-cv-card-title.v-label {
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      line-height: 24px !important;
+      white-space: normal !important;
+    }
+
+    .candidate-cv-main-card .v-textfield,
+    .candidate-cv-main-card .v-filterselect,
+    .candidate-cv-document-card .v-textfield,
+    .candidate-cv-footer .v-datefield-textfield {
+      box-sizing: border-box;
+      min-height: 38px;
+      font-size: 15px;
+    }
+
+    .candidate-cv-main-card .v-filterselect {
+      width: 100% !important;
+    }
+
+    .candidate-cv-main-card .v-filterselect-input,
+    .candidate-cv-document-card .v-textfield {
+      min-height: 38px;
+      font-size: 15px;
+    }
+
+    .candidate-cv-vacancy-group {
+      padding-bottom: 2px;
+    }
+
+    .candidate-cv-vacancy-group .v-checkbox {
+      margin-top: 2px;
+      color: mix($v-font-color, $v-panel-background-color, 82%);
+      font-size: 13px;
+    }
+
+    .candidate-cv-link-row {
+      width: 100% !important;
+      min-width: 0;
+    }
+
+    .candidate-cv-link-row .v-slot {
+      min-width: 0;
+    }
+
+    .candidate-cv-link-row .v-link {
+      min-height: 38px;
+      line-height: 38px;
+      white-space: nowrap;
+    }
+
+    .v-button,
+    .candidate-cv-toolbar .v-button,
+    .candidate-cv-footer .v-button,
+    .candidate-cv-document-card .v-button {
+      box-sizing: border-box;
+      min-height: 38px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .candidate-cv-toolbar {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 58px;
+      padding: 10px 12px;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.14) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    .candidate-cv-toolbar .v-button {
+      min-height: 38px;
+    }
+
+    .candidate-cv-document-card .v-upload {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0;
+      padding: 8px 10px;
+      background: mix($v-app-background-color, $v-panel-background-color, 62%);
+      border: 1px dashed rgba($v-font-color, 0.24);
+      border-radius: 8px;
+    }
+
+    .candidate-cv-document-card .v-upload .v-button {
+      max-width: 100%;
+    }
+
+    .candidate-cv-document-card .v-upload-immediate,
+    .candidate-cv-document-card .v-upload-filename,
+    .candidate-cv-document-card .v-upload .v-label {
+      max-width: 100%;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .candidate-cv-photo-dropzone {
+      box-sizing: border-box;
+      padding: 8px;
+      background: mix($v-app-background-color, $v-panel-background-color, 64%);
+      border: 1px dashed rgba($v-font-color, 0.28) !important;
+      border-radius: 8px !important;
+    }
+
+    .candidate-cv-photo-frame {
+      overflow: hidden;
+      border-radius: 8px;
+      background: mix($v-app-background-color, $v-panel-background-color, 70%);
+    }
+
+    .candidate-cv-photo,
+    .candidate-cv-photo img,
+    .candidate-cv-photo .v-image-element {
+      box-sizing: border-box;
+      border: 0 !important;
+      border-radius: 8px !important;
+      box-shadow: none !important;
+    }
+
+    .candidate-cv-photo-dropzone .v-upload {
+      width: 100%;
+      text-align: center;
+    }
+
+    .candidate-cv-rich-editor,
+    .candidate-cv-letter-comment,
+    .candidate-cv-recommendation {
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .candidate-cv-rich-editor .v-richtextarea-content,
+    .candidate-cv-letter-comment .v-richtextarea-content,
+    .candidate-cv-recommendation .v-richtextarea-content {
+      box-sizing: border-box;
+      height: 100% !important;
+      min-height: 0;
+    }
+
+    .candidate-cv-rich-editor iframe,
+    .candidate-cv-letter-comment iframe,
+    .candidate-cv-recommendation iframe {
+      box-sizing: border-box;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .candidate-cv-recommendation {
+      padding: 10px;
+      color: mix($v-font-color, $v-panel-background-color, 82%) !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 66%) !important;
+      overflow: auto;
+    }
+
+    .candidate-cv-letter-editor {
+      height: 100% !important;
+      padding: 14px 16px 16px;
+    }
+
+    .candidate-cv-letter-template {
+      background: mix($v-app-background-color, $v-panel-background-color, 66%);
+      border-radius: 8px;
+    }
+
+    .candidate-cv-letter-comment {
+      padding-top: 10px;
+      border-top: 1px solid rgba($v-font-color, 0.14);
+    }
+
+    .candidate-cv-table-card {
+      width: 100% !important;
+      height: 100% !important;
+      overflow: hidden;
+    }
+
+    .candidate-cv-table-card .v-grid-header,
+    .candidate-cv-table-card .v-table-header-wrap {
+      background: mix($v-app-background-color, $v-panel-background-color, 64%) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.16) !important;
+    }
+
+    .candidate-cv-table-card .v-grid-header .v-grid-cell,
+    .candidate-cv-table-card .v-table-header-cell {
+      color: mix($v-font-color, $v-panel-background-color, 88%) !important;
+      font-weight: 700 !important;
+    }
+
+    .candidate-cv-table-card .v-grid-row-selected > td,
+    .candidate-cv-table-card .v-table-row.v-selected,
+    .candidate-cv-table-card .v-table-row-odd.v-selected {
+      background: rgba($v-selection-color, 0.18) !important;
+    }
+
+    .candidate-cv-table-card .v-treegrid-expander {
+      color: $v-selection-color;
+    }
+
+    .candidate-cv-footer {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 62px;
+      padding: 10px 18px;
+      background: $v-panel-background-color !important;
+      border-top: 1px solid rgba($v-font-color, 0.16) !important;
+      box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.05);
+    }
+
+    .candidate-cv-primary-action,
+    .candidate-cv-footer .v-button-primary {
+      color: #172638 !important;
+      background: #ffb11b !important;
+      border-color: #e69a00 !important;
+      text-shadow: none !important;
+    }
+
+    .candidate-cv-primary-action:hover,
+    .candidate-cv-footer .v-button-primary:hover {
+      background: #ffc24a !important;
+      border-color: #ffb11b !important;
+    }
+
+    .v-textfield:focus,
+    .v-filterselect-focus,
+    .v-richtextarea:focus-within,
+    .v-datefield:focus-within {
+      border-color: $v-selection-color !important;
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.16) !important;
+    }
+
+    .v-disabled,
+    .v-readonly {
+      opacity: 0.66;
+    }
+
+    .v-disabled .v-button,
+    .v-button.v-disabled {
+      cursor: default;
+      box-shadow: none !important;
+    }
+
+    .v-errorindicator,
+    .v-textfield-error,
+    .v-filterselect-error,
+    .v-richtextarea-error {
+      border-color: #c94b4b !important;
+    }
+
+    .v-required-field-indicator {
+      color: #c94b4b !important;
+    }
+
+    .v-link {
+      color: $v-selection-color;
+      font-weight: 600;
+    }
+
+    @media (max-width: 1180px) {
+      .candidate-cv-tabs > .v-tabsheet-content {
+        padding: 12px;
+      }
+
+      .candidate-cv-card {
+        padding: 16px;
+      }
+
+      .candidate-cv-photo-panel {
+        width: 232px !important;
+        min-width: 232px !important;
+        max-width: 232px !important;
+      }
+    }
+  }
+}
