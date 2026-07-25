@@ -1,0 +1,109 @@
+// Локальное исправление затрагивает только левую панель вкладки «Обо мне».
+// Рабочая область, data binding, навигационные обработчики и сохранение не меняются.
+@mixin ext-settings-about-sidebar-fix {
+  .ext-settings-window {
+    .user-ai-profile-editor {
+      .v-slot-user-ai-profile-sidebar {
+        height: 100% !important;
+        min-height: 0 !important;
+        max-height: 100% !important;
+        overflow: hidden !important;
+      }
+
+      // Панель получает собственную вертикальную прокрутку и не заходит под footer SettingsWindow.
+      .user-ai-profile-sidebar {
+        height: calc(100% - 18px) !important;
+        min-height: 0 !important;
+        max-height: calc(100% - 18px) !important;
+        padding: 14px 14px 12px !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+      }
+
+      // Прямоугольная drop zone не должна переопределять круглую геометрию OvaFallbackImage.
+      .user-ai-profile-avatar {
+        box-sizing: border-box;
+        width: 184px !important;
+        height: 210px !important;
+        margin-right: auto;
+        margin-left: auto;
+        overflow: visible !important;
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+
+      .user-ai-profile-avatar .v-image,
+      .user-ai-profile-avatar .ht-oval-image,
+      .user-ai-profile-avatar img,
+      .user-ai-profile-avatar .v-image-element {
+        border-radius: 50% !important;
+      }
+
+      .user-ai-profile-avatar .v-image,
+      .user-ai-profile-avatar .ht-oval-image {
+        width: 152px !important;
+        height: 152px !important;
+        overflow: hidden !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 2px solid rgba(255, 255, 255, 0.92) !important;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28) !important;
+        clip-path: circle(50% at 50% 50%);
+      }
+
+      .user-ai-profile-avatar img,
+      .user-ai-profile-avatar .v-image-element {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+        clip-path: circle(50% at 50% 50%);
+      }
+
+      .user-ai-profile-identity {
+        padding-top: 0 !important;
+        padding-bottom: 2px !important;
+      }
+
+      .user-ai-profile-summary {
+        padding: 10px !important;
+      }
+
+      // Кнопки создаются контроллером из пунктов индекса; auto-height предотвращает наложение многострочных captions.
+      .user-ai-profile-navigation > .v-slot {
+        height: auto !important;
+        min-height: 0 !important;
+      }
+
+      .user-ai-profile-navigation .v-button.user-ai-profile-nav-item {
+        box-sizing: border-box;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 34px !important;
+        padding: 6px 8px !important;
+        white-space: normal !important;
+      }
+
+      .user-ai-profile-navigation .v-button.user-ai-profile-nav-item .v-button-wrap {
+        display: flex;
+        height: auto !important;
+        min-height: 22px !important;
+        align-items: center;
+        white-space: normal !important;
+      }
+
+      .user-ai-profile-navigation .v-button.user-ai-profile-nav-item .v-button-caption {
+        display: block;
+        width: 100%;
+        line-height: 17px !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere;
+        word-break: normal;
+      }
+
+      .user-ai-profile-sensitive-warning {
+        padding: 9px 10px !important;
+      }
+    }
+  }
+}

@@ -6,6 +6,7 @@
 @import "com.company.hunttech/job-candidate-editor.scss";
 @import "com.company.hunttech/user-ai-profile";
 @import "com.company.hunttech/settings-window-sections";
+@import "com.company.hunttech/ext-settings-about-sidebar-fix";
 @import "com.company.hunttech/iteraction-list-editor";
 @import "com.company.hunttech/candidate-cv-editor";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -16,6 +17,7 @@
   @include job-candidate-editor-theme;
   @include user-ai-profile;
   @include settings-window-sections;
+  @include ext-settings-about-sidebar-fix;
   @include iteraction-list-editor-theme;
   @include candidate-cv-editor-theme;
 }
