@@ -21,7 +21,7 @@ public class ExtSettingsWindowCoreBeanLookupTest {
 
         /*
          * Core-реализации находятся в отдельном middleware webapp. Legacy web-контроллер
-         * должен получать именованные CUBA service proxy, а не искать core-бин по Java-типу.
+         * должен получать зарегистрированные CUBA service proxy, а не искать core-бин по Java-типу.
          */
         assertFalse(controller.contains("@Inject private ImageProcessingService imageProcessingService;"));
         assertFalse(controller.contains("@Inject private UserAiContextService userAiContextService;"));
@@ -44,6 +44,21 @@ public class ExtSettingsWindowCoreBeanLookupTest {
 
         assertTrue(imageServiceLookup >= 0 && imageServiceLookup < firstDataLoad);
         assertTrue(contextServiceLookup >= 0 && contextServiceLookup < firstDataLoad);
+    }
+
+    @Test
+    public void webContextRegistersRequiredMiddlewareServiceProxies() throws IOException {
+        String webSpring = readProjectFile("modules/web/src/com/company/hunttech/web-spring.xml");
+
+        /*
+         * AppBeans.get(NAME) работает в web только после регистрации интерфейса в
+         * WebRemoteProxyBeanCreator. Отсутствие entry воспроизводит NoSuchBeanDefinitionException.
+         */
+        assertTrue(webSpring.contains("class=\"com.haulmont.cuba.web.sys.remoting.WebRemoteProxyBeanCreator\""));
+        assertTrue(webSpring.contains(
+                "key=\"hunttech_ImageProcessingService\"\n                       value=\"com.company.hunttech.app.ImageProcessingService\""));
+        assertTrue(webSpring.contains(
+                "key=\"hunttech_UserAiContextService\"\n                       value=\"com.company.hunttech.service.UserAiContextService\""));
     }
 
     @Test

@@ -18,20 +18,23 @@
 
 | Точка вызова | Роль |
 |--------------|------|
-| `ExtUserEdit` | Администратор загружает `officialPhoto`; лимиты показываются в подсказке upload |
-| `ExtSettingsWindow` | Пользователь загружает `userAvatar`; сервис вызывается через именованный CUBA middleware proxy |
+| `ExtUserEdit` | Администратор загружает `officialPhoto`; сервис инжектируется как зарегистрированный web-side middleware proxy |
+| `ExtSettingsWindow` | Пользователь загружает `userAvatar`; сервис получается через `AppBeans.get(ImageProcessingService.NAME)` |
 | `AvatarImageUploadHelper` | Общий web-слой: читает байты из `FileLoader`, вызывает сервис, при `processed=true` обновляет `FileDescriptor` и перезаписывает файл в хранилище |
+| `web-spring.xml` | Регистрирует интерфейс сервиса в `WebRemoteProxyBeanCreator`, чтобы web Spring context содержал proxy-bean `hunttech_ImageProcessingService` |
 
 Конфигурация лимитов доступна в UI через `HunttechImageConfig` (подсказки в upload-компонентах).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-- **Открытие `ExtSettingsWindow`** → контроллер получает `ImageProcessingService` через `AppBeans.get(ImageProcessingService.NAME)` → web-контекст использует CUBA service proxy без прямого доступа к core Spring bean.
+- **Запуск web-приложения** → `WebRemoteProxyBeanCreator` читает `remoteServices` → создаёт локальный proxy-bean `hunttech_ImageProcessingService`, направленный в middleware.
+- **Открытие `ExtSettingsWindow`** → контроллер получает зарегистрированный proxy через `AppBeans.get(ImageProcessingService.NAME)` → окно открывается без доступа к core Spring context.
 - **Загрузка файла** → web-слой читает байты → удалённо вызывает `process(data, fileName)` → если `processed=false`, дескриптор не меняется → если `processed=true`, обновляются `extension`, `size` и содержимое в `FileStorageService`.
 - **Пустые данные** → `DevelopmentException` («Empty image data»).
 - **Нераспознанный формат** (байты не читаются `ImageIO`) → исходные байты и имя/расширение без изменений, `processed=false`.
 - **Превышение лимита по ширине/высоте** → Thumbnailator уменьшает до `targetImageSize` по большей стороне, выход в `targetImageFormat`; расширение нормализуется (`jpeg` → `jpg`).
 - **Ошибка обработки** → `AvatarImageUploadHelper` журналирует warning и возвращает исходный дескриптор → загрузка пользователя не завершается жёсткой ошибкой.
+- **Отсутствие записи в `remoteServices`** → proxy-bean не создаётся → `AppBeans.get(ImageProcessingService.NAME)` и `@Inject ImageProcessingService` завершаются `NoSuchBeanDefinitionException`.
 
 ---
 
@@ -43,6 +46,7 @@
 | Реализация middleware | `modules/core/src/com/company/hunttech/app/ImageProcessingServiceBean.java` |
 | DTO результата | `modules/global/src/com/company/hunttech/app/ProcessedImage.java` |
 | Конфигурация | `modules/global/src/com/company/hunttech/config/HunttechImageConfig.java` |
+| Реестр web proxy | `modules/web/src/com/company/hunttech/web-spring.xml` |
 | CUBA service name | `hunttech_ImageProcessingService` |
 
 Зависимости реализации: **Thumbnailator** (`net.coobird:thumbnailator`), **Apache Commons Lang**, CUBA `Configuration`.
@@ -59,13 +63,22 @@ Spring component-scan в `modules/core/src/com/company/hunttech/spring.xml` вк
 imageProcessingService = (ImageProcessingService) AppBeans.get(ImageProcessingService.NAME);
 ```
 
+Однако стабильного `NAME` и аннотации core-реализации недостаточно. Web-приложение должно зарегистрировать интерфейс в `WebRemoteProxyBeanCreator`:
+
+```xml
+<entry key="hunttech_ImageProcessingService"
+       value="com.company.hunttech.app.ImageProcessingService"/>
+```
+
+После создания proxy-bean допустимы как именованный `AppBeans.get(NAME)`, так и штатная инъекция интерфейса в других web-экранах. Без этой записи `AppBeans` обращается к локальному web BeanFactory и получает `NoSuchBeanDefinitionException`.
+
 Class-based lookup запрещён:
 
 ```java
-AppBeans.get(ImageProcessingService.class); // неверно для отдельного core webapp
+AppBeans.get(ImageProcessingService.class); // не создаёт middleware proxy автоматически
 ```
 
-Причина: Java-тип интерфейса доступен web-модулю, но фактический `ImageProcessingServiceBean` живёт в Spring-контексте отдельного middleware webapp. Стабильное имя CUBA Service API позволяет web-контексту получить удалённый proxy вместо попытки найти core-реализацию локально.
+Причина: Java-тип интерфейса доступен web-модулю, но фактический `ImageProcessingServiceBean` живёт в Spring-контексте отдельного middleware webapp. `WebRemoteProxyBeanCreator` создаёт локальное представление удалённого Service API только для явно перечисленных `remoteServices`.
 
 ---
 
@@ -133,7 +146,7 @@ DTO реализует `Serializable`; это обязательная част�
 
 ### Экраны
 
-- **ExtUserEdit** — обработка upload `officialPhoto`; подсказка с `targetImageSize` и `targetImageFormat` из `HunttechImageConfig`.
+- **ExtUserEdit** — обработка upload `officialPhoto`; зарегистрированный proxy позволяет сохранить существующую `@Inject ImageProcessingService`.
 - **ExtSettingsWindow** — upload `userAvatar` на `extUserDs`; сервис разрешается по `ImageProcessingService.NAME`, затем передаётся в тот же helper.
 
 ---
@@ -143,7 +156,7 @@ DTO реализует `Serializable`; это обязательная част�
 | Файл | Назначение |
 |------|------------|
 | `modules/core/test/com/company/hunttech/app/ImageProcessingServiceBeanTest.java` | правила изменения размеров, формата и возврата оригинала |
-| `modules/core/test/com/company/hunttech/core/ExtSettingsWindowCoreBeanLookupTest.java` | именованный lookup CUBA service proxy, запрет class-based lookup, сериализуемость DTO |
+| `modules/core/test/com/company/hunttech/core/ExtSettingsWindowCoreBeanLookupTest.java` | именованный lookup, обязательная запись в `WebRemoteProxyBeanCreator`, запрет class-based lookup, сериализуемость DTO |
 
 Запуск:
 
@@ -159,16 +172,19 @@ DTO реализует `Serializable`; это обязательная част�
           --no-daemon --stacktrace
 ```
 
+Ожидается: `ExtSettingsWindowCoreBeanLookupTest` — 3/3 PASS.
+
 Runtime smoke выполняется на одном точном SHA: открыть `ExtSettingsWindow`, загрузить изображение крупнее `targetImageSize`, подтвердить успешную обработку, сохранение и повторное отображение без `NoSuchBeanDefinitionException` и cross-context ошибок.
 
 ---
 
 ## 7. Инструкция по развертыванию
 
-- Код входит в артефакты `app-global`, `app-core` и web-клиент, использующий service proxy; отдельной миграции БД для сервиса нет.
+- Код входит в артефакты `app-global`, `app-core` и web-клиент; отдельной миграции БД для сервиса нет.
+- Web-артефакт обязан содержать обе записи `hunttech_ImageProcessingService` и `hunttech_UserAiContextService` в `WebRemoteProxyBeanCreator`.
 - При первом использовании при необходимости задать ключи `hunttech.image.resize.*` в **Administration → Application Properties** (Database storage); иначе действуют дефолты из `@DefaultInt(1024)` / `@DefaultString("png")`.
 - Thumbnailator остаётся серверной зависимостью обработки и не переносится в UI-контроллер.
-- После сборки требуется локальный deploy точного HEAD, перезапуск Tomcat, HTTP `/hrm/` = 200 и smoke загрузки аватара.
+- После сборки требуется локальный deploy точного HEAD, перезапуск Tomcat, HTTP `/hrm/` = 200 и обязательный smoke открытия `ExtSettingsWindow` до проверки аватара.
 
 ---
 
@@ -176,6 +192,7 @@ Runtime smoke выполняется на одном точном SHA: откр�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-25 | Исправлена регистрация remoting: `hunttech_ImageProcessingService` и `hunttech_UserAiContextService` добавлены в `WebRemoteProxyBeanCreator`; устранена причина `NoSuchBeanDefinitionException` при открытии `ExtSettingsWindow` |
 | 2026-07-25 | `ExtSettingsWindow` переведён с class-based `AppBeans` lookup на именованный CUBA service proxy `ImageProcessingService.NAME`; закреплены граница web/core и сериализуемый удалённый контракт |
 | 2026-06-29 | Дефолт `defaultFallbackImagePath`: `images/hunttech-placeholder.svg` (фирменный SVG в темах hover/halo) |
 | 2026-06-29 | Рефакторинг в пакет `com.company.hunttech`: `HunttechImageConfig` (`hunttech.image.resize.size` / `format`), bean `hunttech_ImageProcessingService`; удалён лимит по KB; дефолты 1024 px и PNG; component-scan `com.company.hunttech` |

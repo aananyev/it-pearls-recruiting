@@ -14,17 +14,23 @@
 
 Вызывается вкладкой «Обо мне» для предпросмотра. В дальнейшем подключается к `HrmAiService` перед вызовом провайдера. Источник данных — профиль текущего пользователя из `UserSessionSource`.
 
+Web-контроллер не обращается к core Spring context напрямую. Интерфейс зарегистрирован в `modules/web/src/com/company/hunttech/web-spring.xml` как удалённый сервис `hunttech_UserAiContextService`; `WebRemoteProxyBeanCreator` создаёт локальный proxy-bean, который получает `ExtSettingsWindow` через `AppBeans.get(UserAiContextService.NAME)`.
+
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
+- запуск web-приложения → `WebRemoteProxyBeanCreator` регистрирует proxy `hunttech_UserAiContextService`;
+- открытие `ExtSettingsWindow` → proxy получается до загрузки datasource → окно не зависит от наличия core-бина в локальном BeanFactory;
 - профиль отсутствует/выключен/без согласия → пустой контекст;
 - активный профиль → разрешённые поля очищаются и ограничиваются;
 - обычные поля → попадают в `profileData`;
 - `customAiInstructions` → попадает в отдельный список инструкций;
-- предпросмотр → текст без внешнего HTTP-вызова.
+- предпросмотр → текст без внешнего HTTP-вызова;
+- отсутствие записи в `remoteServices` → `AppBeans.get(UserAiContextService.NAME)` завершается `NoSuchBeanDefinitionException` до открытия окна.
 
 ## 1. Контракт
 
 ```java
+String NAME = "hunttech_UserAiContextService";
 AiUserContext buildCurrentUserContext();
 AiUserContext buildContext(UserAiProfile profile);
 String buildCurrentUserContextPreview();
@@ -39,6 +45,7 @@ String buildContextPreview(UserAiProfile profile);
 | Реализация | `com.company.hunttech.service.UserAiContextServiceBean` |
 | DTO | `com.company.hunttech.service.dto.AiUserContext` |
 | Bean name | `hunttech_UserAiContextService` |
+| Реестр web proxy | `modules/web/src/com/company/hunttech/web-spring.xml` |
 | Entity | `hunttech_UserAiProfile` |
 
 ## 2. Источники и границы
@@ -50,6 +57,15 @@ String buildContextPreview(UserAiProfile profile);
 ```jpql
 select e from hunttech_UserAiProfile e where e.user = :user
 ```
+
+Удалённый интерфейс должен быть явно зарегистрирован в web-контексте:
+
+```xml
+<entry key="hunttech_UserAiContextService"
+       value="com.company.hunttech.service.UserAiContextService"/>
+```
+
+Аннотация `@Service(UserAiContextService.NAME)` регистрирует core-реализацию, но сама по себе не создаёт proxy-bean в отдельном webapp.
 
 ## 3. Sanitization
 
@@ -72,9 +88,14 @@ select e from hunttech_UserAiProfile e where e.user = :user
 
 `UserAiContextServiceBeanTest` в package `com.company.hunttech.service` проверяет выключенный профиль, отсутствие согласия, разделение данных и инструкций, sanitization, Unicode-лимиты, отсутствие конфигурационных полей и пропуск пустых значений.
 
+`ExtSettingsWindowCoreBeanLookupTest` дополнительно проверяет наличие `hunttech_UserAiContextService` в `WebRemoteProxyBeanCreator` и запрещает class-based lookup в web-контроллере.
+
+Runtime smoke: открыть `ExtSettingsWindow`, нажать «Показать передаваемые данные», подтвердить предпросмотр либо штатный warning без `NoSuchBeanDefinitionException` и закрытия формы.
+
 ## 7. История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-25 | `hunttech_UserAiContextService` зарегистрирован в `WebRemoteProxyBeanCreator`; зафиксирован обязательный web-side proxy для предпросмотра в `ExtSettingsWindow` |
 | 2026-07-22 | Контракт, bean name, DTO, JPQL и тест перенесены из контура `itpearls` в `com.company.hunttech`/`hunttech_*` без изменения поведения |
 | 2026-07-22 | Созданы контракт, DTO, core-реализация, sanitization, предпросмотр и unit-тесты |
