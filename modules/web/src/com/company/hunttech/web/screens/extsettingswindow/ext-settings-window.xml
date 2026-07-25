@@ -45,7 +45,7 @@
                           spacing="true"
                           expand="userAiProfileSidebarSpacer"
                           stylename="user-ai-profile-sidebar">
-                        <!-- Существующие component ID аватара являются контрактом контроллера и не переименовываются. -->
+                        <!-- Legacy component ID сохраняется: OvaFallbackImage совместим с Image-инъекцией контроллера. -->
                         <vbox id="dropZone"
                               spacing="true"
                               width="200px"
@@ -54,7 +54,16 @@
                               expand="picVBox"
                               stylename="dropzone-container user-ai-profile-avatar">
                             <vbox id="picVBox" align="TOP_CENTER" spacing="true">
-                                <image id="userPic" width="100%" height="100%" visible="true" align="TOP_CENTER" stylename="widget-border" scaleMode="FILL"/>
+                                <ovaFallbackImage id="userPic"
+                                                  width="176px"
+                                                  height="176px"
+                                                  ovalWidth="176px"
+                                                  ovalHeight="176px"
+                                                  fallbackThemePath="icons/no-programmer.jpeg"
+                                                  visible="true"
+                                                  align="TOP_CENTER"
+                                                  stylename="widget-border"
+                                                  scaleMode="SCALE_DOWN"/>
                                 <image id="defaultPic" width="100%" visible="false" align="TOP_CENTER" stylename="widget-border" scaleMode="FILL">
                                     <theme path="icons/no-programmer.jpeg"/>
                                 </image>

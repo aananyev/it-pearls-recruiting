@@ -7,6 +7,8 @@
 | Экран | Документ | Назначение |
 |---|---|---|
 | `JobCandidateEdit` | [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md) | Карточка кандидата, вкладки, история вакансий, анализ навыков и защита от OOM |
+| `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | Персональные настройки пользователя, интерфейса, email и AI |
+| `ExtSettingsWindowAvatar` | [ExtSettingsWindowAvatar_Spec.md](ExtSettingsWindowAvatar_Spec.md) | Круглая фотография пользователя через `OvaFallbackImage` без изменения модели данных |
 
 ## Правила актуализации
 
@@ -174,7 +176,7 @@ Living-документация экранов, окон, фрагментов �
 | Форма | Controller | Документ | Статус |
 |-------|------------|----------|--------|
 | Login (брендированный) | `loginBranded` | [login-screen.md](login-screen.md) | legacy (kebab) |
-| Настройки пользователя | `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | legacy `SettingsWindow`, активный |
+| Настройки пользователя | `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) · [аватар](ExtSettingsWindowAvatar_Spec.md) | legacy `SettingsWindow`, активный |
 
 ### AI-администрирование и персонализация
 
@@ -183,7 +185,7 @@ Living-документация экранов, окон, фрагментов �
 | Шаблоны промптов (browse) | `itpearls_VacancyPromptTemplate.browse` | [itpearls_VacancyPromptTemplate.browse_Spec.md](itpearls_VacancyPromptTemplate.browse_Spec.md) |
 | Шаблон промпта (edit) | `itpearls_VacancyPromptTemplate.edit` | [itpearls_VacancyPromptTemplate.edit_Spec.md](itpearls_VacancyPromptTemplate.edit_Spec.md) |
 | Мониторинг ключей (browse) | `itpearls_UserAiConfiguration.browse` | [itpearls_UserAiConfiguration.browse_Spec.md](itpearls_UserAiConfiguration.browse_Spec.md) |
-| Профессиональный ИИ-профиль | `ExtSettingsWindow` / вкладка `msgMyInfo` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) |
+| Профессиональный ИИ-профиль | `ExtSettingsWindow` / вкладка `msgMyInfo` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) · [аватар](ExtSettingsWindowAvatar_Spec.md) |
 
 ### ExtUser (Security)
 
@@ -209,6 +211,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 | Документ | Описание |
 |----------|----------|
 | [FallbackImage_Component.md](FallbackImage_Component.md) | `fallbackImage` — image с theme-fallback при пустом FileDescriptor |
+| [ExtSettingsWindowAvatar_Spec.md](ExtSettingsWindowAvatar_Spec.md) | `OvaFallbackImage` для фотографии пользователя во вкладке «Обо мне» |
 
 ---
 
@@ -216,6 +219,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-24 | В каталог добавлена спецификация аватара `ExtSettingsWindow`: `userPic` переведён на `OvaFallbackImage` без изменения Java, entity и БД |
 | 2026-07-23 | Введено обязательное правило одновременной адаптации всех поддерживаемых тем при любом изменении UI или локального SCSS |
 | 2026-07-22 | Добавлена спецификация `ExtSettingsWindow`: вкладка «Обо мне», `UserAiProfile`, согласие и предпросмотр контекста |
 | 2026-06-29 | Документация кастомного компонента FallbackImage |
