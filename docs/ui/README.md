@@ -8,6 +8,7 @@
 |---|---|---|
 | `JobCandidateEdit` | [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md) | Карточка кандидата, вкладки, история вакансий, анализ навыков и защита от OOM |
 | `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | Персональные настройки пользователя, интерфейса, email и AI |
+| `ExtSettingsWindowEmailNavigation` | [ExtSettingsWindowEmailNavigation_Spec.md](ExtSettingsWindowEmailNavigation_Spec.md) | Связь навигации SMTP, POP3 и IMAP слева с соответствующими аккордеонами справа |
 | `ExtSettingsWindowAvatar` | [ExtSettingsWindowAvatar_Spec.md](ExtSettingsWindowAvatar_Spec.md) | Круглая фотография пользователя через `OvaFallbackImage` без изменения модели данных |
 
 ## Правила актуализации
@@ -177,6 +178,7 @@ Living-документация экранов, окон, фрагментов �
 |-------|------------|----------|--------|
 | Login (брендированный) | `loginBranded` | [login-screen.md](login-screen.md) | legacy (kebab) |
 | Настройки пользователя | `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) · [аватар](ExtSettingsWindowAvatar_Spec.md) | legacy `SettingsWindow`, активный |
+| Навигация настроек email | `ExtSettingsWindowEmailNavigation` | [ExtSettingsWindowEmailNavigation_Spec.md](ExtSettingsWindowEmailNavigation_Spec.md) | legacy screen extension, активный |
 
 ### AI-администрирование и персонализация
 
@@ -219,6 +221,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-25 | В каталог добавлена спецификация кликабельной навигации SMTP, POP3 и IMAP для `ExtSettingsWindow` |
 | 2026-07-24 | В каталог добавлена спецификация аватара `ExtSettingsWindow`: `userPic` переведён на `OvaFallbackImage` без изменения Java, entity и БД |
 | 2026-07-23 | Введено обязательное правило одновременной адаптации всех поддерживаемых тем при любом изменении UI или локального SCSS |
 | 2026-07-22 | Добавлена спецификация `ExtSettingsWindow`: вкладка «Обо мне», `UserAiProfile`, согласие и предпросмотр контекста |
