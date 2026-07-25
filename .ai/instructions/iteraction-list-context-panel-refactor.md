@@ -4,6 +4,7 @@ PROJECT: HRM HuntTech
 
 Репозиторий: `aananyev/it-pearls-recruiting`  
 Ветка: `agent/iteraction-list-context-panel-refactor`  
+PR: `#49`  
 Base: `master`  
 Статус: `WAITING_FOR_HERMES`  
 Режим: проверка точного HEAD PR без изменения функционального кода, документации и production.
@@ -11,7 +12,7 @@ Base: `master`
 Перед началом Hermes обязан подтвердить:
 
 - ветка существует;
-- PR открыт из указанной ветки напрямую в `master`;
+- PR №49 открыт из указанной ветки напрямую в `master`;
 - HEAD ветки и HEAD PR совпадают с SHA из PR;
 - conflicts = NONE;
 - формулировка отчёта содержит `проверен HEAD: <SHA>`.
@@ -20,6 +21,7 @@ Base: `master`
 
 ```bash
 git diff --check
+./gradlew :app-web:compileJava :app-core:compileTestJava --no-daemon --stacktrace
 ./gradlew :app-core:test \
   --tests 'com.company.hunttech.core.IteractionListSidebarContextPanelTest' \
   --tests 'com.company.hunttech.core.LeftSidebarAvatarComponentTest' \
