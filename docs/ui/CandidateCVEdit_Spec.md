@@ -6,7 +6,7 @@
 **Controller:** `modules/web/src/com/company/hunttech/web/screens/candidatecv/CandidateCVEdit.java`
 **Descriptor:** `modules/web/src/com/company/hunttech/web/screens/candidatecv/candidate-cv-edit.xml`
 **Локальный SCSS namespace:** `.candidate-cv-editor`
-**Статус:** постоянная левая панель и live-binding реализованы; runtime-проверка ожидает Hermes
+**Статус:** live-sidebar сохранён; исправление runtime-view фотографии реализовано; проверка ожидает Hermes
 
 ## Назначение и бизнес-смысл (What & Why)
 
@@ -39,6 +39,7 @@
 ## Behavior Summary
 
 - открытие формы → `@LoadDataBeforeShow` инициирует стандартный lifecycle → pre-load listener не разрешает загрузить вакансии до установки фильтра пользователя;
+- загрузка `candidateCVDc` → runtime-view содержит прямой `CandidateCV.fileImageFace` → `setCandidatePicImage()` безопасно определяет фотографию после отделения сущности от persistence session;
 - `BeforeShow` → значение `TEXT_CV` сохраняется только как baseline → тяжёлый `RichTextArea` не инициализируется преждевременно;
 - первый выбор `tabCV` → `cvTextInitialized == false` → текст CV, рекомендации и подсветка компетенций инициализируются один раз;
 - первый выбор `tabSkillTree` → `skillTabInitialized == false` → CV инициализируется по необходимости, затем выполняется существующий разбор навыков;
@@ -92,7 +93,7 @@
 
 | ID | Назначение | Контракт |
 |---|---|---|
-| `candidateCVDc` | редактируемая сущность `CandidateCV` | `candidateCV-view` с существующими вложенными properties |
+| `candidateCVDc` | редактируемая сущность `CandidateCV` | `candidateCV-view` с прямым `fileImageFace` и существующими вложенными properties |
 | `someFilesesDc` | composition дополнительных файлов | `property="someFiles"` |
 | `skillTreesDc` | composition дерева навыков | `property="skillTree"`, `skillTree-cv-tab-view` |
 | `openPositionsDc` | варианты вакансий | `openPosition-candidate-cv-picker-view` |
@@ -116,7 +117,9 @@
 - `skillTree`;
 - `candidate`, `candidate.fileImageFace`, `candidate.personPosition`.
 
-`views.xml`, entity `CandidateCV`, fetch plans, JPQL и loaders не изменяются визуальным PR.
+Верхнеуровневый `CandidateCV.fileImageFace` обязателен в runtime-view, потому что `setCandidatePicImage()` читает именно атрибут редактируемого `CandidateCV`. Вложенный `candidate.fileImageFace` относится к связанной сущности `JobCandidate` и не загружает фотографию самого резюме.
+
+Глобальный `views.xml`, entity `CandidateCV`, JPQL и loaders не изменяются; исправление локализовано в runtime-view контейнера экрана.
 
 ## 3. Рабочая карта UI-контрактов
 
@@ -296,6 +299,8 @@ XML сохраняет:
 
 `candidatePic` и `candidateFaceDefaultImage` остаются компонентами `Image`; замена на `OvaFallbackImage` не выполняется. Сохраняются `scaleMode="FILL"`, controller-driven visibility, binding `fileImageFace`, upload `fileImageFaceUpload`, `dropZone="dropZone"` и порядок компонентов.
 
+`setCandidatePicImage()` не оборачивается в подавление `ValidationException` и не выполняет дополнительный `dataManager.reload()`: экранный runtime-view заранее загружает `CandidateCV.fileImageFace`. Это устраняет первопричину `instantiatingValueholderWithNullSession`, сохраняет один штатный lifecycle загрузки и не маскирует будущие нарушения Data View Integrity.
+
 ## 7. Визуальная компоновка
 
 ### 7.1. Исходная композиция
@@ -388,7 +393,7 @@ SCSS использует `$v-app-background-color`, `$v-panel-background-color`
 
 ## 9. Неизменённые функциональные контракты
 
-В PR должны оставаться неизменными:
+Для этого функционального исправления неизменными остаются:
 
 1. `CandidateCVEdit.java`;
 2. `CandidateCV.java`;
@@ -426,6 +431,8 @@ SCSS использует `$v-app-background-color`, `$v-panel-background-color`
 - отсутствие зависимости от `.job-candidate-editor` и `.ext-settings-window`;
 - отсутствие top-level глобальных Vaadin-селекторов.
 
+`CandidateCVEditPhotoViewContractTest` дополнительно проверяет, что `fileImageFace` является прямым property runtime-view `candidateCVDc`, а `candidatePic` и `fileImageFaceUpload` сохраняют binding `candidateCVDc / fileImageFace`.
+
 ## 11. Обязательные проверки Hermes
 
 ```bash
@@ -437,6 +444,7 @@ git diff --check
 
 ./gradlew :app-core:test \
           --tests 'com.company.hunttech.core.CandidateCVEditVisualContractTest' \
+          --tests 'com.company.hunttech.core.CandidateCVEditPhotoViewContractTest' \
           --no-daemon --stacktrace
 
 ./gradlew test \
@@ -453,6 +461,7 @@ git diff --check
 Ожидания:
 
 - `CandidateCVEditVisualContractTest`: PASS;
+- `CandidateCVEditPhotoViewContractTest`: 2/2 PASS;
 - `ScreenViewIntegrityTest`: 8/8 PASS;
 - Data View Integrity: PASS;
 - SCSS build: PASS;
@@ -473,7 +482,9 @@ git diff --check
 - немедленное обновление sidebar при смене кандидата, должности резюме и вакансии;
 - фильтр подписок, option icons/styles;
 - owner, ссылки, оба upload и clear;
-- photo upload, drop zone и fallback;
+- открытие существующего `CandidateCV` с фотографией → фото отображается без `instantiatingValueholderWithNullSession`;
+- открытие существующего `CandidateCV` без фотографии → отображается fallback без unfetched-ошибки;
+- photo upload, clear, повторное открытие, drop zone и fallback;
 - lazy CV, PDF/DOCX parsing, warning для DOC, recognition, text conversion и original view;
 - role-based read-only и сохранение `TEXT_CV`;
 - письмо, комментарий, vacancy template и recommendation;
@@ -508,5 +519,6 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-25 | В runtime-view `candidateCVDc` добавлен верхнеуровневый `CandidateCV.fileImageFace`; устранён вызов unfetched getter в `setCandidatePicImage()` и добавлен отдельный Data View Integrity тест фотографии |
 | 2026-07-25 | Добавлена постоянная левая панель в стиле `JobCandidateEdit`: фотография, ФИО, текущая позиция, должность резюме, вакансия и проект; значения синхронизируются через прямой `candidateCVDc` data binding без изменения контроллера |
 | 2026-07-25 | Выполнен строго визуальный рефакторинг `CandidateCVEdit`: добавлена карточная компоновка, постоянный контекст кандидата, локальный namespace для семи тем, регрессионная защита legacy ID, bindings, actions, invoke, upload, lazy-init и неизменности Java/entity/views |
