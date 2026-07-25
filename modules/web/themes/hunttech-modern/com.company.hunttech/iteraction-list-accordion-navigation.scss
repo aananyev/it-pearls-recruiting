@@ -119,5 +119,83 @@
         padding-left: 7px;
       }
     }
+
+
+// Двухколоночные picker-поля не должны расширять родительский HBox
+// за пределы диалога даже при длинных отображаемых значениях.
+.iteraction-list-main-layout,
+.iteraction-list-workspace,
+.iteraction-list-tabs,
+.iteraction-list-content,
+.iteraction-list-form-grid,
+.iteraction-list-form-grid > div,
+.iteraction-list-form-grid table {
+  box-sizing: border-box;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.iteraction-list-workspace,
+.iteraction-list-scroll {
+  overflow-x: hidden !important;
+}
+
+.iteraction-list-sidebar {
+  box-sizing: border-box;
+  min-width: 228px !important;
+  max-width: 228px !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.iteraction-list-primary-picker,
+.iteraction-list-primary-picker .v-filterselect,
+.iteraction-list-primary-picker .v-filterselect-input {
+  box-sizing: border-box;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.iteraction-list-popular-buttons,
+.iteraction-list-popular-buttons .v-expand {
+  box-sizing: border-box;
+  width: 100% !important;
+  min-width: 0 !important;
+  table-layout: fixed;
+}
+
+.iteraction-list-popular-buttons .v-slot {
+  box-sizing: border-box;
+  min-width: 0 !important;
+  max-width: 20% !important;
+  overflow: hidden;
+}
+
+.iteraction-list-popular-button {
+  box-sizing: border-box;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 52px;
+  padding-right: 8px !important;
+  padding-left: 8px !important;
+  white-space: normal !important;
+}
+
+.iteraction-list-popular-button .v-button-caption {
+  display: block;
+  overflow: hidden;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+@media (max-width: 1050px) {
+  .iteraction-list-sidebar {
+    min-width: 212px !important;
+    max-width: 212px !important;
+  }
+}
   }
 }

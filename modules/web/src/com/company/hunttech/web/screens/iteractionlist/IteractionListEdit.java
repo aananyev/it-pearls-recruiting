@@ -153,6 +153,150 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private InteractionService interactionService;
 
+    // Пять аккордеонов и левый индекс относятся только к presentation-слою:
+    // они не меняют значения сущности, loaders или порядок бизнес-обработчиков.
+    @Inject
+    private VBoxLayout iteractionListNavigation;
+    @Inject
+    private GroupBoxLayout participantsAccordion;
+    @Inject
+    private GroupBoxLayout interactionAccordion;
+    @Inject
+    private GroupBoxLayout resultAccordion;
+    @Inject
+    private GroupBoxLayout commentAccordion;
+    @Inject
+    private GroupBoxLayout popularAccordion;
+
+    private Button participantsAccordionNav;
+    private Button interactionAccordionNav;
+    private Button resultAccordionNav;
+    private Button commentAccordionNav;
+    private Button popularAccordionNav;
+
+    // Флаг предотвращает рекурсивные события GroupBox при синхронизации
+    // клика по левому индексу и клика по штатному заголовку аккордеона.
+    private boolean updatingAccordionState;
+
+    private static final int POPULAR_INTERACTION_BUTTONS = 5;
+    private static final String NAVIGATION_STYLE = "borderless iteraction-list-nav-item";
+    private static final String ACTIVE_NAVIGATION_STYLE =
+            "borderless iteraction-list-nav-item iteraction-list-nav-item-active";
+
+    @Subscribe
+    protected void onInitIteractionNavigation(InitEvent event) {
+        initAccordionNavigation();
+        initAccordionHeaderSynchronization();
+    }
+
+    /**
+     * Заменяет XML fallback LABEL на доступные с клавиатуры borderless-кнопки.
+     * Визуально индекс повторяет SettingsWindow, но дополнительно раскрывает
+     * соответствующий блок и переводит фокус в его первое рабочее поле.
+     */
+    private void initAccordionNavigation() {
+        Component navigationTitle = iteractionListNavigation.getComponent(0);
+        iteractionListNavigation.removeAll();
+        iteractionListNavigation.add(navigationTitle);
+
+        participantsAccordionNav = createNavigationButton(
+                "participantsAccordionNav", "msgAccordionParticipants",
+                () -> selectAccordion(participantsAccordion, participantsAccordionNav, candidateField::focus));
+        interactionAccordionNav = createNavigationButton(
+                "interactionAccordionNav", "msgAccordionInteraction",
+                () -> selectAccordion(interactionAccordion, interactionAccordionNav, iteractionTypeField::focus));
+        resultAccordionNav = createNavigationButton(
+                "resultAccordionNav", "msgAccordionResult",
+                () -> selectAccordion(resultAccordion, resultAccordionNav, ratingField::focus));
+        commentAccordionNav = createNavigationButton(
+                "commentAccordionNav", "msgAccordionComment",
+                () -> selectAccordion(commentAccordion, commentAccordionNav, commentField::focus));
+        popularAccordionNav = createNavigationButton(
+                "popularAccordionNav", "mshMostPopular",
+                () -> selectAccordion(popularAccordion, popularAccordionNav, () -> { }));
+
+        iteractionListNavigation.add(participantsAccordionNav);
+        iteractionListNavigation.add(interactionAccordionNav);
+        iteractionListNavigation.add(resultAccordionNav);
+        iteractionListNavigation.add(commentAccordionNav);
+        iteractionListNavigation.add(popularAccordionNav);
+
+        selectAccordion(participantsAccordion, participantsAccordionNav, () -> { });
+    }
+
+    /**
+     * Синхронизирует штатные заголовки GroupBox с активным пунктом слева.
+     * Раскрытие одного блока сворачивает остальные, не затрагивая data state.
+     */
+    private void initAccordionHeaderSynchronization() {
+        participantsAccordion.addExpandedStateChangeListener(event ->
+                synchronizeExpandedAccordion(participantsAccordion, participantsAccordionNav));
+        interactionAccordion.addExpandedStateChangeListener(event ->
+                synchronizeExpandedAccordion(interactionAccordion, interactionAccordionNav));
+        resultAccordion.addExpandedStateChangeListener(event ->
+                synchronizeExpandedAccordion(resultAccordion, resultAccordionNav));
+        commentAccordion.addExpandedStateChangeListener(event ->
+                synchronizeExpandedAccordion(commentAccordion, commentAccordionNav));
+        popularAccordion.addExpandedStateChangeListener(event ->
+                synchronizeExpandedAccordion(popularAccordion, popularAccordionNav));
+    }
+
+    private Button createNavigationButton(String id, String messageKey, Runnable handler) {
+        Button button = uiComponents.create(Button.class);
+        button.setId(id);
+        button.setCaption(messageBundle.getMessage(messageKey));
+        button.setWidth("100%");
+        button.setStyleName(NAVIGATION_STYLE);
+        button.addClickListener(clickEvent -> handler.run());
+        return button;
+    }
+
+    private void synchronizeExpandedAccordion(GroupBoxLayout accordion, Button navigationButton) {
+        if (!updatingAccordionState && accordion.isExpanded()) {
+            selectAccordion(accordion, navigationButton, () -> { });
+        }
+    }
+
+    /**
+     * Раскрывает ровно один раздел, обновляет active-style и после завершения
+     * синхронизации переводит фокус. Порядок важен, иначе CUBA может попытаться
+     * сфокусировать компонент внутри ещё свёрнутого GroupBox.
+     */
+    private void selectAccordion(GroupBoxLayout selectedAccordion,
+                                 Button selectedNavigationButton,
+                                 Runnable focusHandler) {
+        updatingAccordionState = true;
+        try {
+            participantsAccordion.setExpanded(participantsAccordion == selectedAccordion);
+            interactionAccordion.setExpanded(interactionAccordion == selectedAccordion);
+            resultAccordion.setExpanded(resultAccordion == selectedAccordion);
+            commentAccordion.setExpanded(commentAccordion == selectedAccordion);
+            popularAccordion.setExpanded(popularAccordion == selectedAccordion);
+            updateNavigationStyles(selectedNavigationButton);
+        } finally {
+            updatingAccordionState = false;
+        }
+        focusHandler.run();
+    }
+
+    private void updateNavigationStyles(Button selectedNavigationButton) {
+        participantsAccordionNav.setStyleName(
+                participantsAccordionNav == selectedNavigationButton
+                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+        interactionAccordionNav.setStyleName(
+                interactionAccordionNav == selectedNavigationButton
+                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+        resultAccordionNav.setStyleName(
+                resultAccordionNav == selectedNavigationButton
+                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+        commentAccordionNav.setStyleName(
+                commentAccordionNav == selectedNavigationButton
+                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+        popularAccordionNav.setStyleName(
+                popularAccordionNav == selectedNavigationButton
+                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+    }
+
     private static final String QUERY_CHAIN_LAST =
             "select e from hunttech_IteractionList e "
                     + "where e.vacancy = :vacancy and e.candidate = :candidate and e.iteractionType is not null "
@@ -1092,61 +1236,74 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         });
     }
 
+    /**
+     * Строит пять одинаковых быстрых кнопок по статистике текущего пользователя
+     * за скользящий год. Пустые позиции остаются отключёнными, чтобы геометрия
+     * блока не менялась при недостаточном объёме истории.
+     */
     private void setMostPopularIteraction() {
-        int maxCount = 5;
+        GregorianCalendar calendar = new GregorianCalendar();
+        Date periodEnd = calendar.getTime();
+        calendar.add(Calendar.YEAR, -1);
+        Date periodStart = calendar.getTime();
 
-        mostPopular = interactionService.getMostPolularIteraction(userSession.getUser(), maxCount);
+        List<KeyValueEntity> popularRows = dataManager.loadValues(QUERY_MOST_POPULAR)
+                .properties("iteractionType", "usageCount")
+                .parameter("user", userSession.getUser())
+                .parameter("periodStart", periodStart)
+                .parameter("periodEnd", periodEnd)
+                .list();
 
-        if (maxCount > mostPopular.size())
-            maxCount = mostPopular.size();
+        mostPopularHbox.removeAll();
+        List<Button> popularButtons = new ArrayList<>();
 
-        for (int i = 0; i < maxCount; i++) {
-            HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
-            VBoxLayout numberHBox = uiComponents.create(VBoxLayout.class);
+        for (int index = 0; index < POPULAR_INTERACTION_BUTTONS; index++) {
+            Button popularButton = uiComponents.create(Button.class);
+            popularButton.setWidth("100%");
+            popularButton.setStyleName("iteraction-list-popular-button");
 
-            retHBox.setWidth("100%");
-            retHBox.setHeightFull();
-            retHBox.setSpacing(true);
-            retHBox.setStyleName("label_button_mostpopular_green");
+            if (index < popularRows.size()) {
+                KeyValueEntity row = popularRows.get(index);
+                Iteraction interaction = row.getValue("iteractionType");
+                Number usageCount = row.getValue("usageCount");
 
-            Label numberLabel = uiComponents.create(Label.class);
-            numberLabel.setValue(new StringBuilder()
-                    .append(i + 1)
-                    .append(".")
-                    .toString());
-            numberLabel.setWidthAuto();
-            numberLabel.setStyleName("label_button_mostpopular_green");
-            numberLabel.setHtmlEnabled(true);
+                if (interaction != null) {
+                    popularButton.setCaption(interaction.getIterationName());
+                    popularButton.setDescription("Использовано за последний год: "
+                            + (usageCount == null ? 0 : usageCount.longValue()));
+                    popularButton.addClickListener(clickEvent -> {
+                        iteractionTypeField.setValue(interaction);
+                        iteractionTypeField.focus();
+                    });
+                } else {
+                    configureEmptyPopularButton(popularButton);
+                }
+            } else {
+                configureEmptyPopularButton(popularButton);
+            }
 
-            LinkButton mostPopularLabel = uiComponents.create(LinkButton.NAME);
-            mostPopularLabel.setCaption(new StringBuilder()
-                    .append(mostPopular.get(i).getIterationName())
-                    .append("<div style=\"overflow:hidden;>\"(")
-                    .append(i)
-                    .append(")</div>")
-                    .toString());
-            mostPopularLabel.setStyleName("label_button_mostpopular_green");
-            mostPopularLabel.setCaptionAsHtml(true);
-            mostPopularLabel.setWidthAuto();
-            mostPopularLabel.setHeightAuto();
-            mostPopularLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            mostPopularLabel.addClickListener(e -> {
-                String mostPopNumber = e.getSource().getCaption().substring(
-                        e.getSource().getCaption().length() - 8,
-                        e.getSource().getCaption().length() - 7);
-
-                iteractionTypeField.setValue(mostPopular.get(Integer.parseInt(mostPopNumber)));
-            });
-
-            retHBox.add(numberLabel);
-            retHBox.add(mostPopularLabel);
-            retHBox.expand(mostPopularLabel);
-
-            mostPopularHbox.add(retHBox);
+            mostPopularHbox.add(popularButton);
+            popularButtons.add(popularButton);
         }
+
+        // Одинаковый expand ratio гарантирует ровно 20% доступной ширины
+        // каждой кнопке независимо от длины названия взаимодействия.
+        mostPopularHbox.expand(popularButtons.toArray(new Component[0]));
     }
 
-    private static final String QUERY_MOST_POPULAR = "select e.iteractionType, count(e.iteractionType) from hunttech_IteractionList e where (e.dateIteraction between :endDate and :startDate) and e.iteractionType is not null and e.recrutier = :user group by e.iteractionType order by count(e.iteractionType) desc";
+    private void configureEmptyPopularButton(Button popularButton) {
+        popularButton.setCaption("Нет данных");
+        popularButton.setEnabled(false);
+    }
+
+    private static final String QUERY_MOST_POPULAR =
+            "select e.iteractionType, count(e.iteractionType) "
+                    + "from hunttech_IteractionList e "
+                    + "where e.dateIteraction between :periodStart and :periodEnd "
+                    + "and e.iteractionType is not null "
+                    + "and e.recrutier = :user "
+                    + "group by e.iteractionType "
+                    + "order by count(e.iteractionType) desc";
 
     /* public List<Iteraction> getMostPolularIteraction(User user, int maxCount) {
 

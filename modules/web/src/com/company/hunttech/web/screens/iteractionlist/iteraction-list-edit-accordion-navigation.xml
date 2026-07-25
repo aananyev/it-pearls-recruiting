@@ -338,7 +338,7 @@
                                                                        rowspan="1"
                                                                        colspan="1"
                                                                        caption="msg://msgCandidate"
-                                                                       width="100%"
+                                                                        width="100%"
                                                                        required="true"
                                                                        dataContainer="iteractionListDc"
                                                                        property="candidate">
@@ -365,7 +365,7 @@
                                                                        dataContainer="iteractionListDc"
                                                                        optionsContainer="openPositionDc"
                                                                        property="vacancy"
-                                                                       width="100%">
+                                                                        width="100%">
                                                         <actions>
                                                             <action id="lookup" type="picker_lookup"/>
                                                             <action id="open" type="picker_open" icon="EDIT_ACTION"/>
@@ -511,9 +511,9 @@
                                     <vbox width="100%"
                                           spacing="true">
                                         <hbox id="mostPopularHbox"
-                                              width="100%"
-                                              spacing="true"
-                                              align="MIDDLE_CENTER"/>
+                                               width="100%"
+                                               spacing="true"
+                                               align="MIDDLE_CENTER"/>
                                         <hbox id="mostPopularIteractionHBox"
                                               width="100%"
                                               spacing="true"/>
