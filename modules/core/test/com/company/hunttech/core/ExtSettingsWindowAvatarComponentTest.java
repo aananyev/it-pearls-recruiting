@@ -13,9 +13,19 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает XML-контракт фотографии пользователя во вкладке «Обо мне».
+ * Защищает XML- и SCSS-контракт фотографии пользователя и левой панели вкладки «Обо мне».
  */
 public class ExtSettingsWindowAvatarComponentTest {
+
+    private static final String[] SUPPORTED_THEMES = {
+            "halo",
+            "havana",
+            "helium",
+            "hover",
+            "hunttech-modern",
+            "hunttech-modern-light",
+            "hunttech-modern-dark"
+    };
 
     @Test
     public void aboutMeUsesOvaFallbackImageForUserPhoto() throws IOException {
@@ -50,6 +60,38 @@ public class ExtSettingsWindowAvatarComponentTest {
         assertTrue(screenXml.contains("id=\"userAvatarUpload\""));
         assertTrue(screenXml.contains("datasource=\"extUserDs\""));
         assertTrue(screenXml.contains("property=\"userAvatar\""));
+    }
+
+    @Test
+    public void aboutMeSidebarFixIsScopedAndIncludedInAllThemes() throws IOException {
+        for (String theme : SUPPORTED_THEMES) {
+            String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");
+            String sidebarFix = readProjectFile(
+                    "modules/web/themes/" + theme
+                            + "/com.company.hunttech/ext-settings-about-sidebar-fix.scss");
+
+            assertTrue(theme + ": partial не импортирован",
+                    styles.contains("@import \"com.company.hunttech/ext-settings-about-sidebar-fix\";"));
+            assertTrue(theme + ": mixin не подключён",
+                    styles.contains("@include ext-settings-about-sidebar-fix;"));
+
+            // Регрессия со скриншота: панель не должна заходить под footer, а длинные captions — перекрываться.
+            assertTrue(sidebarFix.contains("height: calc(100% - 18px) !important;"));
+            assertTrue(sidebarFix.contains("overflow-y: auto !important;"));
+            assertTrue(sidebarFix.contains("height: auto !important;"));
+            assertTrue(sidebarFix.contains(".v-button-caption"));
+            assertTrue(sidebarFix.contains("white-space: normal !important;"));
+
+            // Более специфичное локальное правило не даёт старому border-radius: 8px сделать аватар квадратным.
+            assertTrue(sidebarFix.contains(".ht-oval-image"));
+            assertTrue(sidebarFix.contains("border-radius: 50% !important;"));
+            assertTrue(sidebarFix.contains("clip-path: circle(50% at 50% 50%);"));
+
+            // Исправление ограничено левой панелью и не переоформляет рабочие карточки справа.
+            assertFalse(sidebarFix.contains(".user-ai-profile-content"));
+            assertFalse(sidebarFix.contains(".user-ai-profile-toolbar"));
+            assertFalse(sidebarFix.contains(".user-ai-profile-section"));
+        }
     }
 
     private String readProjectFile(String relativePath) throws IOException {
