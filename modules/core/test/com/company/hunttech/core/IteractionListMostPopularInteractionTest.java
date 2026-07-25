@@ -37,8 +37,9 @@ public class IteractionListMostPopularInteractionTest {
         assertTrue(controller.contains("index < POPULAR_INTERACTION_BUTTONS"));
         assertTrue(controller.contains("mostPopularHbox.removeAll()"));
         assertTrue(controller.contains("popularButton.setWidth(\"100%\")"));
-        assertTrue(controller.contains(
-                "mostPopularHbox.expand(popularButtons.toArray(new Component[0]))"));
+        assertTrue(controller.contains("for (Button popularButton : popularButtons)"));
+        assertTrue(controller.contains("mostPopularHbox.expand(popularButton)"));
+        assertFalse(controller.contains("toArray(new Component[0])"));
         assertTrue(controller.contains("configureEmptyPopularButton"));
     }
 

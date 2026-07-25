@@ -815,11 +815,13 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     retStr = retStr.replaceAll(emailKeys.get(EmailKeys.POSITION.getId()),
                             newsItem.getVacancy().getPositionType().getPositionEnName()); */
 /*            if (newsItem.getVacancy().getSalaryMin() != null)
-                retStr = retStr.replaceAll(emailKeys.get(EmailKeys.SALARY_MIN.getId()),
-                        newsItem.getVacancy().getSalaryMin().toString()); */
+                retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.SALARY_MIN.getId()),
+                    newsItem.getVacancy().getSalaryMin().toString()); */
 /*            if (newsItem.getVacancy().getSalaryMax() != null)
-                retStr = retStr.replaceAll(emailKeys.get(EmailKeys.SALARY_MAX.getId()),
-                        newsItem.getVacancy().getSalaryMax().toString()); */
+                retStr = strSimpleService.replaceAll(retStr,
+                    emailKeys.get(EmailKeys.SALARY_MAX.getId()),
+                    newsItem.getVacancy().getSalaryMax().toString()); */
 
        /* } catch (NullPointerException e) {
             log.error("Error", e);
@@ -1286,9 +1288,11 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
             popularButtons.add(popularButton);
         }
 
-        // Одинаковый expand ratio гарантирует ровно 20% доступной ширины
-        // каждой кнопке независимо от длины названия взаимодействия.
-        mostPopularHbox.expand(popularButtons.toArray(new Component[0]));
+        // HBoxLayout.expand в CUBA 7.3 принимает один Component за вызов.
+        // Равный expand ratio для каждой кнопки сохраняет геометрию 5 × 20%.
+        for (Button popularButton : popularButtons) {
+            mostPopularHbox.expand(popularButton);
+        }
     }
 
     private void configureEmptyPopularButton(Button popularButton) {
