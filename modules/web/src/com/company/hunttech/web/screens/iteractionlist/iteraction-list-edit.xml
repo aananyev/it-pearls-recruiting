@@ -117,22 +117,37 @@
                                stylename="iteraction-list-project-image"
                                scaleMode="FILL"/>
                     </hbox>
-                    <label value="msg://msgHeaderIteraction"
-                           width="100%"
-                           align="MIDDLE_CENTER"
-                           stylename="iteraction-list-profile-title"/>
-                    <label value="msg://msgIteractionList"
-                           width="100%"
-                           align="MIDDLE_CENTER"
-                           stylename="iteraction-list-profile-subtitle"/>
+                </vbox>
+
+                <!-- Fallback-label заменяются контроллером на пять borderless-кнопок.
+                     Индекс расположен сразу под изображениями кандидата и проекта. -->
+                <vbox id="iteractionListNavigation"
+                      width="100%"
+                      spacing="false"
+                      stylename="iteraction-list-navigation">
+                    <label width="100%"
+                           value="msg://msgAccordionNavigation"
+                           stylename="iteraction-list-navigation-title"/>
+                    <label width="100%"
+                           value="msg://msgAccordionParticipants"
+                           stylename="iteraction-list-nav-item iteraction-list-nav-item-active"/>
+                    <label width="100%"
+                           value="msg://msgAccordionInteraction"
+                           stylename="iteraction-list-nav-item"/>
+                    <label width="100%"
+                           value="msg://msgAccordionResult"
+                           stylename="iteraction-list-nav-item"/>
+                    <label width="100%"
+                           value="msg://msgAccordionComment"
+                           stylename="iteraction-list-nav-item"/>
+                    <label width="100%"
+                           value="msg://mshMostPopular"
+                           stylename="iteraction-list-nav-item"/>
                 </vbox>
 
                 <vbox width="100%"
                       spacing="true"
                       stylename="iteraction-list-sidebar-card iteraction-list-service-card">
-                    <label value="msg://msgHeaderIteraction"
-                           width="100%"
-                           stylename="iteraction-list-sidebar-card-title"/>
                     <vbox width="100%"
                           spacing="true"
                           stylename="iteraction-list-service-fields">
@@ -285,31 +300,6 @@
                     </hbox>
                 </vbox>
 
-                <!-- Fallback-label заменяются контроллером на пять borderless-кнопок.
-                     Расположение в sidebar соответствует SettingsWindow и не меняет обработчики. -->
-                <vbox id="iteractionListNavigation"
-                      width="100%"
-                      spacing="false"
-                      stylename="iteraction-list-navigation">
-                    <label width="100%"
-                           value="msg://msgAccordionNavigation"
-                           stylename="iteraction-list-navigation-title"/>
-                    <label width="100%"
-                           value="msg://msgAccordionParticipants"
-                           stylename="iteraction-list-nav-item iteraction-list-nav-item-active"/>
-                    <label width="100%"
-                           value="msg://msgAccordionInteraction"
-                           stylename="iteraction-list-nav-item"/>
-                    <label width="100%"
-                           value="msg://msgAccordionResult"
-                           stylename="iteraction-list-nav-item"/>
-                    <label width="100%"
-                           value="msg://msgAccordionComment"
-                           stylename="iteraction-list-nav-item"/>
-                    <label width="100%"
-                           value="msg://mshMostPopular"
-                           stylename="iteraction-list-nav-item"/>
-                </vbox>
                 <vbox id="iteractionListSidebarSpacer"
                       width="100%"
                       height="100%"

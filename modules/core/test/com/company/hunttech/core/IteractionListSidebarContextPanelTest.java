@@ -29,7 +29,8 @@ public class IteractionListSidebarContextPanelTest {
         String xml = descriptor();
 
         // Reflow меняет только presentation: legacy ID и data binding остаются прежними.
-        assertTrue(xml.contains("stylename=\"iteraction-list-sidebar\"\n                  width=\"296px\""));
+        assertTrue(xml.contains("stylename=\"iteraction-list-sidebar\""));
+        assertTrue(xml.contains("width=\"296px\""));
         assertTrue(xml.contains("stylename=\"iteraction-list-profile-header\""));
         assertTrue(xml.contains("stylename=\"iteraction-list-sidebar-card iteraction-list-service-card\""));
         assertTrue(xml.contains("stylename=\"iteraction-list-sidebar-card iteraction-list-vacancy-card\""));

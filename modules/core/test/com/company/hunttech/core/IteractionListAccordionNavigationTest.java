@@ -19,19 +19,24 @@ import static org.junit.Assert.assertTrue;
 public class IteractionListAccordionNavigationTest {
 
     @Test
-    public void navigationHostIsInsideSidebarBeforeWorkspace() throws IOException {
+    public void navigationHostIsImmediatelyBelowImagesBeforeContextCards() throws IOException {
         String descriptor = descriptor();
         String sidebar = section(descriptor,
                 "stylename=\"iteraction-list-sidebar\"",
                 "id=\"iteractionListWorkspace\"");
 
+        // Индекс должен быть первым рабочим элементом после изображений, чтобы пользователь
+        // видел навигацию до длинных служебных карточек при любой высоте окна.
         assertOrdered(sidebar,
                 "stylename=\"iteraction-list-profile-header\"",
+                "stylename=\"iteraction-list-identity-images\"",
+                "id=\"iteractionListNavigation\"",
                 "stylename=\"iteraction-list-sidebar-card iteraction-list-service-card\"",
                 "stylename=\"iteraction-list-sidebar-card iteraction-list-vacancy-card\"",
-                "id=\"iteractionListNavigation\"",
                 "id=\"iteractionListSidebarSpacer\"");
         assertEquals(5, count(sidebar, "stylename=\"iteraction-list-nav-item"));
+        assertFalse(sidebar.contains("value=\"msg://msgHeaderIteraction\""));
+        assertFalse(sidebar.contains("value=\"msg://msgIteractionList\""));
 
         String workspace = section(descriptor,
                 "id=\"iteractionListWorkspace\"",
