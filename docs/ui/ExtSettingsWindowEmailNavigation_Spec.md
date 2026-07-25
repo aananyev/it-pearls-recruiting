@@ -1,4 +1,4 @@
-# ExtSettingsWindowEmailNavigation — навигация по настройкам email
+# ExtSettingsWindowEmailNavigation — навигация по настройкам email и AI
 
 > Проект: **HRM HuntTech**.  
 > Экран: `settings`.  
@@ -12,35 +12,47 @@
 
 ### Назначение и бизнес-смысл (What & Why)
 
-Вкладка «Настройка email» содержит три независимых набора параметров: SMTP, POP3 и IMAP. В левой контекстной панели эти протоколы уже представлены как навигационный индекс, однако до изменения пункты были обычными `Label` и не управляли соответствующими секциями справа.
+Левые панели вкладок «Настройка email» и AI содержат навигационные индексы. Изначально элементы SMTP, POP3, IMAP, «Источник API» и «Подключения» были обычными `Label`: они выглядели как элементы выбора, но не управляли соответствующими рабочими блоками справа.
 
-Расширение делает левую навигацию функциональной: пользователь выбирает протокол слева и сразу получает раскрытый блок ввода нужного протокола справа. Это сокращает ручной поиск в длинной форме и связывает навигационный индекс с аккордеоном, не меняя загрузку, редактирование и сохранение почтовых настроек.
+Расширение делает эти индексы функциональными без перестройки формы и без переноса бизнес-логики. Пользователь выбирает пункт слева и получает соответствующий UI-контекст справа:
+
+- для email раскрывается нужный аккордеон и сворачиваются остальные;
+- для AI фокус переводится в карточку персональных предпочтений либо в таблицу подключений;
+- активный пункт левой панели синхронизируется с выбранным блоком.
 
 ### UI Context & Navigation
 
 Экран открывается через screen ID `settings`. `web-screens.xml` направляет этот ID на `ext-settings-window-email-navigation.xml`, который наследует действующий `ext-settings-window.xml` средствами legacy XML inheritance CUBA Platform.
 
-Пользовательский путь:
+Пользовательские пути:
 
 ```text
 Настройки → вкладка «Настройка email»
            → SMTP / POP3 / IMAP слева
-           → соответствующая секция справа
+           → соответствующий аккордеон справа
            → первое поле выбранного протокола
 ```
 
-Базовая двухпанельная компоновка, размеры, captions, sidebar, toolbar, ScrollBox, аккордеоны и поля ввода не перестраиваются.
+```text
+Настройки → вкладка AI
+           → Источник API / Подключения слева
+           → соответствующая карточка справа
+           → первое интерактивное содержимое карточки
+```
+
+Базовая двухпанельная компоновка, размеры, captions, sidebar, toolbar, карточки, аккордеоны и поля ввода не перестраиваются.
 
 ### Behavior Summary
 
-- открытие экрана → выполняется полный `ExtSettingsWindow.init()` → данные и значения email загружаются прежним способом;
-- завершение базовой инициализации → расширение сохраняет заголовок левой навигации и заменяет только три некликабельных пункта протоколов на borderless-кнопки → геометрия sidebar не меняется;
+- открытие экрана → выполняется полный `ExtSettingsWindow.init()` → данные и значения загружаются прежним способом;
+- завершение базовой инициализации → расширение заменяет только некликабельные пункты навигации на borderless-кнопки CUBA → геометрия sidebar не меняется;
 - нажатие SMTP → раскрывается `smtpSettingsSection`, POP3 и IMAP сворачиваются → фокус переходит в `smtpServer`;
 - нажатие POP3 → раскрывается `pop3SettingsSection`, SMTP и IMAP сворачиваются → фокус переходит в `pop3Server`;
 - нажатие IMAP → раскрывается `imapSettingsSection`, SMTP и POP3 сворачиваются → фокус переходит в `imapServer`;
-- изменение выбранного протокола → активный пункт слева получает `settings-section-nav-item-active` → остальные пункты возвращаются в обычное состояние;
-- перевод фокуса → вертикальный `ScrollBox` прокручивает выбранное поле в видимую область → дополнительный JavaScript не требуется;
-- сохранение окна → выполняются прежние `collectEmailSettings()` и `commit()` базового контроллера → значения и бизнес-логика не меняются.
+- нажатие «Источник API» → активируется соответствующий пункт слева → фокус переходит в `preferPersonalAiApiSettingsField` без изменения его значения;
+- нажатие «Подключения» → активируется соответствующий пункт слева → фокус переходит в `aiConfigsTable` без изменения выбранной строки;
+- переход по AI-навигации → операции создания, редактирования, удаления и проверки подключения не вызываются;
+- сохранение окна → выполняются прежние методы базового контроллера → бизнес-логика и данные не меняются.
 
 ## 1. Точка вызова и контекст
 
@@ -52,11 +64,12 @@
 | Расширяющий дескриптор | `/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-email-navigation.xml` |
 | Базовый контроллер | `ExtSettingsWindow` |
 | Расширяющий контроллер | `ExtSettingsWindowEmailNavigation` |
-| Вкладка | `mailAccessTab` |
-| Левая навигация | `emailSettingsNavigation` |
-| Правый контейнер | `emailSettingsContentScrollBox` / `emailSettingsAccordion` |
+| Email-вкладка | `mailAccessTab` |
+| Email-навигация | `emailSettingsNavigation` |
+| AI-вкладка | `aiAccessTab` |
+| AI-навигация | `aiSettingsNavigation` |
 
-Расширяющий XML содержит только ссылку `extends`, новый controller class и пустой наследуемый `<layout/>`. Все визуальные компоненты загружаются из базового дескриптора.
+Расширяющий XML содержит только ссылку `extends`, controller class и пустой наследуемый `<layout/>`. Все визуальные компоненты загружаются из базового дескриптора.
 
 ## 2. Связь с моделью данных
 
@@ -64,15 +77,17 @@
 
 Сохраняются:
 
-- entity `UserSettings`;
-- datasource `userSettingsDs`;
+- entity `UserSettings` и `UserAiConfiguration`;
+- datasource `userSettingsDs` и `userAiConfigsDs`;
 - поля SMTP, POP3 и IMAP;
-- `setEmailSettings()`;
-- `collectEmailSettings()`;
+- оба AI-checkbox;
+- таблица `aiConfigsTable`;
+- `setEmailSettings()` и `collectEmailSettings()`;
+- действия `onAiConfigsCreateBtnClick`, `onAiConfigsEditBtnClick`, `onAiConfigsRemoveBtnClick`, `onAiConfigsTestBtnClick`;
 - общий `CommitContext`;
-- БД, Liquibase, views и JPQL.
+- БД, Liquibase, views, JPQL и сервисы.
 
-Расширяющий контроллер не инжектирует `DataManager`, `UserSettings`, datasource или сервисы.
+Расширяющий контроллер не инжектирует `DataManager`, datasource или сервисы и не записывает значения в сущности.
 
 ## 3. Иерархия и взаимосвязь форм
 
@@ -80,24 +95,29 @@
 settings
 └── ext-settings-window-email-navigation.xml
     └── extends ext-settings-window.xml
-        └── mailAccessTab
-            └── emailSettingsMainBox
-                ├── emailSettingsSidebar
-                │   └── emailSettingsNavigation
-                │       ├── существующий заголовок
-                │       ├── emailSettingsSmtpNav [Button]
-                │       ├── emailSettingsPop3Nav [Button]
-                │       └── emailSettingsImapNav [Button]
-                └── emailSettingsContentScrollBox
-                    └── emailSettingsAccordion
-                        ├── smtpSettingsSection
-                        ├── pop3SettingsSection
-                        └── imapSettingsSection
+        ├── mailAccessTab
+        │   ├── emailSettingsNavigation
+        │   │   ├── emailSettingsSmtpNav [Button]
+        │   │   ├── emailSettingsPop3Nav [Button]
+        │   │   └── emailSettingsImapNav [Button]
+        │   └── emailSettingsAccordion
+        │       ├── smtpSettingsSection
+        │       ├── pop3SettingsSection
+        │       └── imapSettingsSection
+        └── aiAccessTab
+            ├── aiSettingsNavigation
+            │   ├── aiSettingsSourceNav [Button]
+            │   └── aiSettingsConnectionsNav [Button]
+            └── aiSettingsContent
+                ├── personalAiApiPreferenceBox
+                │   └── preferPersonalAiApiSettingsField
+                └── aiConnectionsCard
+                    └── aiConfigsTable
 ```
 
 ## 4. Модель поведения и интерактивность
 
-Выбор является взаимоисключающим:
+### 4.1. Email
 
 | Действие | Раскрывается | Сворачиваются | Фокус |
 |---|---|---|---|
@@ -105,19 +125,28 @@ settings
 | POP3 | `pop3SettingsSection` | SMTP, IMAP | `pop3Server` |
 | IMAP | `imapSettingsSection` | SMTP, POP3 | `imapServer` |
 
-При открытии экрана активен SMTP, что соответствует начальному состоянию базового аккордеона.
+При открытии экрана активен SMTP. Введённые значения не сбрасываются при сворачивании секции: `GroupBoxLayout.setExpanded()` меняет только presentation state.
 
-Введённые значения не сбрасываются при сворачивании секции: `GroupBoxLayout.setExpanded()` меняет только presentation state и не пересоздаёт поля.
+### 4.2. AI
+
+| Действие | Правый блок | Фокус | Не изменяется |
+|---|---|---|---|
+| Источник API | `personalAiApiPreferenceBox` | `preferPersonalAiApiSettingsField` | значения обоих checkbox |
+| Подключения | `aiConnectionsCard` | `aiConfigsTable` | выбранная строка и состояния AI-действий |
+
+Карточки AI не скрываются и не преобразуются в аккордеоны. Выбор слева является навигационным и не изменяет данные.
 
 ## 5. Логика управляющих элементов
 
-Кнопки создаются через штатный `UiComponents`:
+Кнопки создаются через штатный `UiComponents`.
+
+### 5.1. Email
 
 - `emailSettingsSmtpNav`;
 - `emailSettingsPop3Nav`;
 - `emailSettingsImapNav`.
 
-Общий стиль:
+Обычный стиль:
 
 ```text
 borderless settings-section-nav-item
@@ -129,25 +158,36 @@ borderless settings-section-nav-item
 borderless settings-section-nav-item settings-section-nav-item-active
 ```
 
-Используются существующие message keys:
+### 5.2. AI
 
-- `emailSettingsSmtpSection`;
-- `emailSettingsPop3Section`;
-- `emailSettingsImapSection`.
+- `aiSettingsSourceNav`;
+- `aiSettingsConnectionsNav`.
 
-Новые message keys и изменения локализации не требуются.
+Обычный стиль:
+
+```text
+borderless ai-settings-nav-item
+```
+
+Активный стиль:
+
+```text
+borderless ai-settings-nav-item ai-settings-nav-item-active
+```
+
+Используются существующие message keys; новые ключи локализации не требуются.
 
 ## 6. Визуальная компоновка элементов
 
 Форма визуально не перестраивается:
 
-- сохраняется `emailSettingsNavigation`;
-- сохраняется порядок SMTP → POP3 → IMAP;
+- сохраняются `emailSettingsNavigation` и `aiSettingsNavigation`;
+- сохраняется исходный порядок пунктов;
 - кнопки имеют ширину `100%`;
 - используются существующие локальные SCSS-классы;
 - новый SCSS не добавляется;
 - семь тем не получают отдельных изменений;
-- глобальные `.v-button`, `.v-label`, `.v-tabsheet` и другие Vaadin-селекторы не изменяются.
+- глобальные `.v-button`, `.v-label`, `.v-table`, `.v-tabsheet` и другие Vaadin-селекторы не изменяются.
 
 ## 7. Соответствие CUBA Platform 7.3
 
@@ -156,9 +196,10 @@ borderless settings-section-nav-item settings-section-nav-item-active
 3. Контроллер наследуется от `ExtSettingsWindow`.
 4. UI-компоненты создаются через `UiComponents`.
 5. Кнопки используют штатные click listeners.
-6. Аккордеоны управляются через `GroupBoxLayout.setExpanded()`.
-7. Фокус устанавливается штатным `TextField.focus()`.
-8. Data API, lifecycle загрузки и commit базового контроллера не переопределяются.
+6. Email-аккордеоны управляются через `GroupBoxLayout.setExpanded()`.
+7. Фокус email устанавливается через `TextField.focus()`.
+8. `Table<UserAiConfiguration>` реализует `Component.Focusable`, поэтому AI-таблица получает фокус штатным `focus()`.
+9. Data API, lifecycle загрузки и commit базового контроллера не переопределяются.
 
 ## 8. Обязательные проверки
 
@@ -171,6 +212,7 @@ git diff --check
 
 ./gradlew :app-core:test \
           --tests 'com.company.hunttech.core.ExtSettingsWindowEmailNavigationTest' \
+          --tests 'com.company.hunttech.core.ExtSettingsWindowAiNavigationTest' \
           --no-daemon --stacktrace
 
 ./gradlew test \
@@ -184,6 +226,7 @@ git diff --check
 Ожидается:
 
 - `ExtSettingsWindowEmailNavigationTest` — 3/3 PASS;
+- `ExtSettingsWindowAiNavigationTest` — 3/3 PASS;
 - `ScreenViewIntegrityTest` — 8/8 PASS;
 - Data View Integrity — PASS/N/A, поскольку getters, views и datasource не меняются;
 - SCSS — N/A по diff;
@@ -194,21 +237,21 @@ git diff --check
 
 ### Smoke Hermes
 
-1. Открыть `settings` и вкладку «Настройка email».
-2. Подтвердить, что внешний вид и размеры формы не изменились.
-3. Нажать SMTP: раскрыт только SMTP, курсор в `smtpServer`.
-4. Ввести тестовое значение без сохранения.
-5. Нажать POP3: раскрыт только POP3, курсор в `pop3Server`.
-6. Нажать SMTP повторно: введённое значение осталось.
-7. Нажать IMAP: раскрыт только IMAP, курсор в `imapServer`.
-8. Проверить активную подсветку выбранного пункта слева.
-9. Проверить отсутствие горизонтальной прокрутки и обрезки.
-10. Сохранить допустимые значения и повторно открыть экран.
-11. Убедиться, что загрузка и сохранение работают без регрессии.
-12. Проверить AI-предпочтения, аватар и остальные вкладки.
+1. Открыть `settings` и проверить отсутствие визуальной регрессии всех вкладок.
+2. Во вкладке email повторить smoke SMTP, POP3 и IMAP из предыдущего изменения.
+3. Открыть вкладку AI: активен пункт «Источник API».
+4. Нажать «Источник API»: фокус находится на первом checkbox, его значение не изменилось.
+5. Изменить значение checkbox вручную, затем нажать «Подключения».
+6. Проверить активную подсветку «Подключения» и фокус таблицы.
+7. Убедиться, что выбранная строка таблицы не изменилась автоматически.
+8. Вернуться к «Источнику API»: ранее введённое значение checkbox сохранено до Save/Cancel.
+9. Проверить Create/Edit/Remove/Test — действия работают прежним способом.
+10. Проверить Save, Cancel и повторное открытие окна.
+11. Проверить отсутствие новых ошибок в Tomcat logs.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-25 | Добавлена кликабельная AI-навигация: «Источник API» фокусирует персональные предпочтения, «Подключения» — таблицу конфигураций; значения, выбор таблицы и AI-действия не изменяются |
 | 2026-07-25 | Добавлена кликабельная навигация SMTP, POP3 и IMAP: выбранный пункт раскрывает соответствующий аккордеон, сворачивает остальные и фокусирует первое поле без изменения формы и бизнес-логики |
