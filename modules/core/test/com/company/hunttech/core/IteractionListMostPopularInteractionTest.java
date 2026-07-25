@@ -53,16 +53,20 @@ public class IteractionListMostPopularInteractionTest {
     }
 
     @Test
-    public void popularHostIsReachableFromWorkspaceNavigation() throws IOException {
+    public void popularNavigationIsInSidebarAndButtonHostIsInWorkspace() throws IOException {
         String descriptor = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+        String sidebar = descriptor.substring(
+                descriptor.indexOf("stylename=\"iteraction-list-sidebar\""),
+                descriptor.indexOf("id=\"iteractionListWorkspace\""));
         String workspace = descriptor.substring(descriptor.indexOf("id=\"iteractionListWorkspace\""));
 
-        assertTrue(workspace.contains("id=\"iteractionListNavigation\""));
-        assertTrue(workspace.contains("value=\"msg://mshMostPopular\""));
+        assertTrue(sidebar.contains("id=\"iteractionListNavigation\""));
+        assertTrue(sidebar.contains("value=\"msg://mshMostPopular\""));
         assertTrue(workspace.contains("id=\"popularAccordion\""));
         assertTrue(workspace.contains("id=\"mostPopularHbox\""));
         assertTrue(workspace.contains("height=\"AUTO\""));
+        assertFalse(workspace.contains("id=\"iteractionListNavigation\""));
     }
 
     @Test

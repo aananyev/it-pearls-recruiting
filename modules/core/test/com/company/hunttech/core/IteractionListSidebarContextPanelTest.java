@@ -15,7 +15,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает читаемую геометрию контекстной панели IteractionListEdit
+ * Защищает профильную геометрию sidebar IteractionListEdit
  * и одинаковый локальный CSS-контракт во всех поддерживаемых темах.
  */
 public class IteractionListSidebarContextPanelTest {
@@ -25,12 +25,17 @@ public class IteractionListSidebarContextPanelTest {
             "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark");
 
     @Test
-    public void sidebarUsesReadableWidthAndPreservesLegacyBindings() throws IOException {
-        String xml = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+    public void sidebarUsesCandidateCvGeometryAndPreservesLegacyBindings() throws IOException {
+        String xml = descriptor();
 
-        // Регрессия защищает presentation-reflow, не меняя legacy ID и data binding.
-        assertTrue(xml.contains("stylename=\"iteraction-list-sidebar\"\n                  width=\"272px\""));
+        // Reflow меняет только presentation: legacy ID и data binding остаются прежними.
+        assertTrue(xml.contains("stylename=\"iteraction-list-sidebar\"\n                  width=\"296px\""));
+        assertTrue(xml.contains("stylename=\"iteraction-list-profile-header\""));
+        assertTrue(xml.contains("stylename=\"iteraction-list-sidebar-card iteraction-list-service-card\""));
+        assertTrue(xml.contains("stylename=\"iteraction-list-sidebar-card iteraction-list-vacancy-card\""));
+        assertTrue(xml.contains("id=\"candidateImage\""));
+        assertTrue(xml.contains("property=\"candidate.fileImageFace\""));
+        assertTrue(xml.contains("id=\"projectLogoImage\""));
         assertTrue(xml.contains("id=\"numberIteractionField\""));
         assertTrue(xml.contains("property=\"numberIteraction\""));
         assertTrue(xml.contains("id=\"dateIteractionField\""));
@@ -44,37 +49,46 @@ public class IteractionListSidebarContextPanelTest {
     }
 
     @Test
-    public void contextMetricsUseDedicatedRowsInsteadOfDenseCaptionLayout() throws IOException {
-        String xml = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+    public void contextMetricsUseCardsAndDedicatedInformationRows() throws IOException {
+        String xml = descriptor();
 
         assertTrue(xml.contains("stylename=\"iteraction-list-service-field\""));
+        assertTrue(xml.contains("stylename=\"iteraction-list-sidebar-info-row\""));
         assertTrue(xml.contains("stylename=\"iteraction-list-sidebar-value-row\""));
         assertTrue(xml.contains("stylename=\"iteraction-list-sidebar-cost\""));
         assertTrue(xml.contains("stylename=\"iteraction-list-sidebar-cost-line\""));
         assertTrue(xml.contains("stylename=\"iteraction-list-sidebar-cost-value\""));
         assertTrue(xml.contains("stylename=\"iteraction-list-sidebar-cost-unit\""));
+        assertTrue(xml.contains("id=\"iteractionListNavigation\""));
+        assertTrue(xml.contains("id=\"iteractionListSidebarSpacer\""));
     }
 
     @Test
-    public void allThemesKeepScopedCaptionAndSidebarGeometry() throws IOException {
+    public void allThemesKeepScopedReferenceGeometry() throws IOException {
         for (String theme : THEMES) {
-            String editorScss = readProjectFile(
-                    "modules/web/themes/" + theme + "/com.company.hunttech/iteraction-list-editor.scss");
-            String navigationScss = readProjectFile(
-                    "modules/web/themes/" + theme + "/com.company.hunttech/iteraction-list-accordion-navigation.scss");
+            String scss = readProjectFile(
+                    "modules/web/themes/" + theme
+                            + "/com.company.hunttech/iteraction-list-accordion-navigation.scss");
 
-            assertTrue(editorScss.contains(".iteraction-list-context-card .v-panel-caption"));
-            assertFalse(editorScss.contains(
-                    ".iteraction-list-context-card .v-panel-caption,\n    .iteraction-list-context-card .v-caption"));
-            assertTrue(editorScss.contains(".iteraction-list-service-fields .v-caption"));
-            assertTrue(editorScss.contains("width: 272px !important;"));
-            assertTrue(editorScss.contains("width: 252px !important;"));
-            assertTrue(editorScss.contains(".iteraction-list-sidebar-cost-value"));
-            assertTrue(navigationScss.contains("min-width: 272px !important;"));
-            assertTrue(navigationScss.contains("min-width: 252px !important;"));
-            assertFalse(navigationScss.contains("min-width: 212px !important;"));
+            assertTrue(scss.contains(".iteraction-list-editor"));
+            assertTrue(scss.contains("width: 296px !important;"));
+            assertTrue(scss.contains("width: 276px !important;"));
+            assertTrue(scss.contains("width: 260px !important;"));
+            assertTrue(scss.contains(".iteraction-list-profile-header"));
+            assertTrue(scss.contains(".iteraction-list-sidebar-card"));
+            assertTrue(scss.contains(".iteraction-list-sidebar-card-title"));
+            assertTrue(scss.contains(".iteraction-list-service-fields .v-caption"));
+            assertTrue(scss.contains(".iteraction-list-sidebar-info-row"));
+            assertTrue(scss.contains(".iteraction-list-sidebar-cost-value"));
+            assertTrue(scss.contains(".iteraction-list-navigation"));
+            assertFalse(scss.contains("min-width: 212px !important;"));
+            assertFalse(scss.contains(".iteraction-list-context-card .v-panel-caption,"));
         }
+    }
+
+    private String descriptor() throws IOException {
+        return readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
     }
 
     private String readProjectFile(String relativePath) throws IOException {

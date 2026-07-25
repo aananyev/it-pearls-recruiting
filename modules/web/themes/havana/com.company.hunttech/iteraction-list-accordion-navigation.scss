@@ -1,59 +1,285 @@
 /*
- * IteractionListEdit — локальная навигация рабочей области HRM HuntTech.
- * Селектор и аккордеоны повторяют паттерн SettingsWindow, а все правила
- * ограничены корнем .iteraction-list-editor и не влияют на другие экраны.
+ * IteractionListEdit — комбинированный presentation-контракт HRM HuntTech.
+ * Sidebar следует CandidateCVEdit, индекс и аккордеоны — SettingsWindow.
+ * Все Vaadin-селекторы ограничены корнем .iteraction-list-editor.
  */
 @mixin iteraction-list-accordion-navigation-theme {
   .iteraction-list-editor {
     .iteraction-list-main-layout,
     .iteraction-list-workspace,
     .iteraction-list-tabs,
-    .iteraction-list-section-layout,
     .iteraction-list-scroll,
-    .iteraction-list-content {
+    .iteraction-list-content,
+    .iteraction-list-form-grid,
+    .iteraction-list-dynamic-panel {
       box-sizing: border-box;
       min-width: 0 !important;
       max-width: 100% !important;
     }
 
+    .iteraction-list-main-layout,
     .iteraction-list-workspace,
+    .iteraction-list-tabs,
     .iteraction-list-scroll {
+      width: 100% !important;
+      height: 100% !important;
       overflow-x: hidden !important;
     }
 
+    // Постоянная контекстная панель повторяет геометрию CandidateCVEdit.
     .iteraction-list-sidebar {
       box-sizing: border-box;
-      min-width: 228px !important;
-      max-width: 228px !important;
+      width: 296px !important;
+      min-width: 296px !important;
+      max-width: 296px !important;
+      height: 100% !important;
+      padding: 20px 18px 16px;
+      color: #f8fafc !important;
       overflow-x: hidden;
       overflow-y: auto;
     }
 
-    // Селектор находится внутри правой рабочей области и не прокручивается
-    // вместе с аккордеонами, поэтому доступен при любой позиции формы.
-    .iteraction-list-section-layout {
+    .iteraction-list-sidebar > .v-slot {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .iteraction-list-sidebar > .v-spacing {
+      height: 14px !important;
+    }
+
+    .iteraction-list-profile-header,
+    .iteraction-list-profile-header > .v-slot {
+      width: 100% !important;
+      min-width: 0;
+      text-align: center;
+    }
+
+    .iteraction-list-identity-images {
+      min-height: 120px;
+      padding: 0 0 6px;
+    }
+
+    .iteraction-list-candidate-image,
+    .iteraction-list-candidate-image img,
+    .iteraction-list-candidate-image .v-image-element {
+      width: 112px !important;
+      height: 112px !important;
+      min-width: 112px !important;
+      min-height: 112px !important;
+      max-width: 112px !important;
+      max-height: 112px !important;
+    }
+
+    .iteraction-list-project-image,
+    .iteraction-list-project-image img,
+    .iteraction-list-project-image .v-image-element {
+      width: 80px !important;
+      height: 80px !important;
+      min-width: 80px !important;
+      min-height: 80px !important;
+      max-width: 80px !important;
+      max-height: 80px !important;
+    }
+
+    .iteraction-list-profile-title,
+    .iteraction-list-profile-title.v-label {
+      display: block;
+      width: 100% !important;
+      color: #ffb11b !important;
+      font-size: 20px !important;
+      font-weight: 700 !important;
+      line-height: 27px !important;
+      text-align: center !important;
+      white-space: normal !important;
+    }
+
+    .iteraction-list-profile-subtitle,
+    .iteraction-list-profile-subtitle.v-label {
+      display: block;
+      width: 100% !important;
+      color: rgba(248, 250, 252, 0.72) !important;
+      font-size: 13px !important;
+      line-height: 20px !important;
+      text-align: center !important;
+      white-space: normal !important;
+    }
+
+    .iteraction-list-sidebar-card {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0;
+      padding: 14px;
+      color: #f8fafc !important;
+      background: rgba(255, 255, 255, 0.055) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      border-radius: 8px !important;
+      box-shadow: none !important;
+    }
+
+    .iteraction-list-sidebar-card-title,
+    .iteraction-list-sidebar-card-title.v-label {
+      display: block;
+      width: 100% !important;
+      color: #ffb11b !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 21px !important;
+      white-space: normal !important;
+    }
+
+    .iteraction-list-service-fields {
+      width: 100% !important;
+      padding: 2px 0 0;
+    }
+
+    .iteraction-list-service-fields > .v-slot,
+    .iteraction-list-service-field {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .iteraction-list-service-fields .v-caption {
+      min-height: 0;
+      height: auto !important;
+      padding: 0 0 5px !important;
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      line-height: 18px !important;
+      text-transform: none;
+      background: transparent !important;
+      border: 0 !important;
+    }
+
+    .iteraction-list-sidebar-card .v-textfield,
+    .iteraction-list-sidebar-card .v-datefield-textfield {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 38px;
+      color: #f8fafc !important;
+      font-size: 14px !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-color: rgba(255, 255, 255, 0.24) !important;
+      border-radius: 6px;
+      box-shadow: none !important;
+    }
+
+    .iteraction-list-sidebar-card .v-readonly,
+    .iteraction-list-sidebar-card .v-readonly .v-textfield,
+    .iteraction-list-sidebar-card .v-readonly .v-datefield-textfield {
+      color: rgba(248, 250, 252, 0.88) !important;
+      opacity: 1 !important;
+    }
+
+    .iteraction-list-sidebar-info-row {
+      width: 100% !important;
+      min-width: 0;
+      padding: 9px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .iteraction-list-sidebar-caption,
+    .iteraction-list-sidebar-caption.v-label {
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      line-height: 18px !important;
+      text-transform: none;
+      white-space: normal !important;
+    }
+
+    .iteraction-list-sidebar-value,
+    .iteraction-list-sidebar-value.v-label,
+    .iteraction-list-sidebar-value * {
+      display: block;
+      width: 100% !important;
+      min-width: 0;
+      color: #f8fafc !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .iteraction-list-sidebar-value-row,
+    .iteraction-list-sidebar-value-row > .v-slot {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .iteraction-list-sidebar-warning {
+      width: 30px !important;
+      min-width: 30px !important;
+      height: 30px !important;
+      padding: 0 !important;
+    }
+
+    .iteraction-list-priority-image {
+      max-width: 22px;
+      max-height: 28px;
+    }
+
+    .iteraction-list-sidebar-cost {
+      width: 100% !important;
+      min-width: 0;
+      padding: 10px 0 2px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .iteraction-list-sidebar-cost > .v-slot,
+    .iteraction-list-sidebar-cost-line {
+      width: 100% !important;
+      min-width: 0;
+    }
+
+    .iteraction-list-sidebar-cost-value {
+      color: #ffcf66 !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
+      line-height: 22px !important;
+    }
+
+    .iteraction-list-sidebar-cost-unit {
+      color: rgba(248, 250, 252, 0.72) !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      line-height: 18px !important;
+      white-space: normal !important;
+    }
+
+    .iteraction-list-rating-context {
+      width: 100% !important;
+      min-height: 0;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .iteraction-list-sidebar-spacer {
       width: 100% !important;
       height: 100% !important;
-      overflow: hidden;
+      min-height: 12px;
     }
 
+    // Индекс находится в sidebar, как в SettingsWindow.
     .iteraction-list-navigation {
       box-sizing: border-box;
-      width: 210px !important;
-      min-width: 210px !important;
-      max-width: 210px !important;
-      height: 100% !important;
-      padding: 12px 8px;
-      border-right: 1px solid rgba(127, 127, 127, 0.20);
-      background: rgba(127, 127, 127, 0.045);
-      overflow-x: hidden;
-      overflow-y: auto;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 10px 0 4px;
+      background: transparent !important;
+      border: 0 !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
+      overflow: visible;
     }
 
     .iteraction-list-navigation-title {
       box-sizing: border-box;
-      padding: 6px 10px 10px;
-      color: rgba(80, 80, 80, 0.68) !important;
+      padding: 6px 10px 8px;
+      color: rgba(248, 250, 252, 0.58) !important;
       font-size: 11px !important;
       font-weight: 700 !important;
       letter-spacing: 0.5px;
@@ -67,7 +293,7 @@
       min-height: 38px;
       height: auto !important;
       padding: 8px 10px;
-      color: inherit !important;
+      color: rgba(248, 250, 252, 0.82) !important;
       font-size: 13px !important;
       font-weight: 500 !important;
       line-height: 18px !important;
@@ -90,18 +316,74 @@
 
     .iteraction-list-nav-item:hover,
     .iteraction-list-nav-item:focus {
-      background: rgba(127, 127, 127, 0.10) !important;
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
     }
 
     .iteraction-list-nav-item-active,
     .iteraction-list-nav-item-active:hover,
     .iteraction-list-nav-item-active:focus {
-      color: #c87a00 !important;
-      background: rgba(255, 177, 27, 0.13) !important;
-      border-left-color: #ff9d00 !important;
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.11) !important;
+      border-left-color: #ffb11b !important;
     }
 
-    // Локальная копия подтверждённой геометрии аккордеона SettingsWindow.
+    // Рабочая область повторяет вертикальный ритм SettingsWindow и CandidateCVEdit.
+    .iteraction-list-toolbar {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 58px;
+      padding: 10px 20px;
+    }
+
+    .iteraction-list-toolbar-title-box,
+    .iteraction-list-toolbar-title-box > .v-slot {
+      width: 100% !important;
+      min-width: 0;
+    }
+
+    .iteraction-list-toolbar-title {
+      font-size: 20px !important;
+      line-height: 27px !important;
+    }
+
+    .iteraction-list-toolbar-context {
+      font-size: 12px !important;
+      line-height: 18px !important;
+    }
+
+    .iteraction-list-tabs > .v-tabsheet-tabcontainer,
+    .iteraction-list-tabs .v-tabsheet-tabs,
+    .iteraction-list-tabs .v-tabsheet-tabitem,
+    .iteraction-list-tabs .v-tabsheet-tabitem-selected,
+    .iteraction-list-tabs .v-tabsheet-tabitem .v-caption {
+      height: 48px;
+    }
+
+    .iteraction-list-tabs .v-tabsheet-tabitem .v-caption {
+      box-sizing: border-box;
+      padding: 0 16px !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      line-height: 48px !important;
+    }
+
+    .iteraction-list-tabs > .v-tabsheet-content {
+      height: calc(100% - 49px) !important;
+    }
+
+    .iteraction-list-scroll > .v-scrollable {
+      box-sizing: border-box;
+      padding-right: 6px;
+    }
+
+    .iteraction-list-content {
+      width: 100% !important;
+      min-width: 0 !important;
+      padding: 18px 20px 24px;
+    }
+
+    // Каноническая геометрия аккордеона SettingsWindow.
     .iteraction-list-accordion-section,
     .user-ai-profile-section {
       box-sizing: border-box;
@@ -113,18 +395,29 @@
       border: 1px solid rgba(127, 127, 127, 0.20) !important;
       overflow: hidden;
       background: rgba(255, 255, 255, 0.45) !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
     }
 
     .iteraction-list-accordion-section .v-panel-caption,
     .user-ai-profile-section .v-panel-caption {
-      padding-top: 9px;
-      padding-bottom: 9px;
+      min-height: 44px;
+      padding: 9px 16px;
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+      font-size: 15px !important;
       font-weight: 600 !important;
+      line-height: 24px !important;
       background: rgba(127, 127, 127, 0.045) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.12) !important;
     }
 
-    // GridLayout сам распределяет explicit flex-колонки. Запрещено задавать
-    // ширину его внутренних DIV/TABLE: это схлопывало SuggestionPickerField.
+    .iteraction-list-accordion-section .v-panel-content {
+      box-sizing: border-box;
+      padding: 18px 20px 20px !important;
+      background: $v-panel-background-color !important;
+      border: 0 !important;
+    }
+
+    // GridLayout самостоятельно распределяет explicit flex-колонки.
     .iteraction-list-accordion-section .v-gridlayout,
     .iteraction-list-form-grid {
       box-sizing: border-box;
@@ -135,8 +428,20 @@
     .iteraction-list-accordion-section .v-gridlayout-slot {
       box-sizing: border-box;
       min-width: 0 !important;
-      padding: 7px 8px;
+      padding: 8px 10px;
       vertical-align: top;
+    }
+
+    .iteraction-list-accordion-section .v-caption {
+      height: auto !important;
+      min-height: 0;
+      padding: 0 0 5px !important;
+      color: mix($v-font-color, $v-panel-background-color, 82%) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 19px !important;
+      background: transparent !important;
+      border: 0 !important;
     }
 
     .iteraction-list-accordion-section .v-textfield,
@@ -149,10 +454,59 @@
       width: 100% !important;
       min-width: 0 !important;
       max-width: 100% !important;
+      font-size: 15px !important;
     }
 
+    .iteraction-list-accordion-section .v-textfield,
+    .iteraction-list-accordion-section .v-filterselect,
+    .iteraction-list-accordion-section .v-datefield-textfield {
+      min-height: 38px;
+    }
+
+    .iteraction-list-accordion-section .v-textarea {
+      min-height: 150px;
+      line-height: 1.45 !important;
+      resize: vertical;
+    }
+
+    .iteraction-list-accordion-section .v-textfield:hover,
+    .iteraction-list-accordion-section .v-filterselect:hover,
+    .iteraction-list-accordion-section .v-datefield:hover,
+    .iteraction-list-accordion-section .v-textarea:hover {
+      border-color: rgba($v-font-color, 0.42) !important;
+    }
+
+    .iteraction-list-accordion-section .v-textfield:focus,
+    .iteraction-list-accordion-section .v-filterselect-focus,
+    .iteraction-list-accordion-section .v-datefield-focus .v-datefield-textfield,
+    .iteraction-list-accordion-section .v-textarea:focus {
+      border-color: $v-selection-color !important;
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.18) !important;
+      outline: 0;
+    }
+
+    .iteraction-list-accordion-section .v-filterselect-button,
+    .iteraction-list-accordion-section .c-pickerfield-layout .v-button,
     .iteraction-list-accordion-section .v-button {
       min-height: 38px;
+    }
+
+    .iteraction-list-vacancy-column .v-checkbox {
+      margin-top: 2px;
+      font-size: 13px;
+    }
+
+    .iteraction-list-dynamic-panel,
+    .iteraction-list-dynamic-panel > .v-slot,
+    .iteraction-list-dynamic-panel .v-button {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .iteraction-list-dynamic-panel {
+      padding: 0 !important;
+      background: transparent !important;
+      border: 0 !important;
     }
 
     .iteraction-list-popular-buttons,
@@ -189,24 +543,68 @@
       white-space: normal;
     }
 
-    @media (max-width: 1100px) {
-      .iteraction-list-navigation {
-        width: 190px !important;
-        min-width: 190px !important;
-        max-width: 190px !important;
+    .iteraction-list-footer {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 62px;
+      padding: 11px 20px;
+      white-space: nowrap;
+    }
+
+    .iteraction-list-footer .v-button {
+      min-height: 40px;
+      padding: 0 18px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 1200px) {
+      .iteraction-list-sidebar {
+        width: 276px !important;
+        min-width: 276px !important;
+        max-width: 276px !important;
+        padding-right: 14px;
+        padding-left: 14px;
       }
 
-      .iteraction-list-navigation-title,
-      .iteraction-list-nav-item {
-        padding-right: 7px;
-        padding-left: 7px;
+      .iteraction-list-content {
+        padding-right: 14px;
+        padding-left: 14px;
+      }
+
+      .iteraction-list-accordion-section .v-panel-content {
+        padding-right: 14px !important;
+        padding-left: 14px !important;
       }
     }
 
-    @media (max-width: 1050px) {
+    @media (max-width: 1080px) {
       .iteraction-list-sidebar {
-        min-width: 212px !important;
-        max-width: 212px !important;
+        width: 260px !important;
+        min-width: 260px !important;
+        max-width: 260px !important;
+      }
+
+      .iteraction-list-candidate-image,
+      .iteraction-list-candidate-image img,
+      .iteraction-list-candidate-image .v-image-element {
+        width: 100px !important;
+        height: 100px !important;
+        min-width: 100px !important;
+        min-height: 100px !important;
+        max-width: 100px !important;
+        max-height: 100px !important;
+      }
+
+      .iteraction-list-project-image,
+      .iteraction-list-project-image img,
+      .iteraction-list-project-image .v-image-element {
+        width: 70px !important;
+        height: 70px !important;
+        min-width: 70px !important;
+        min-height: 70px !important;
+        max-width: 70px !important;
+        max-height: 70px !important;
       }
     }
   }

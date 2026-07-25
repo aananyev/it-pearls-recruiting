@@ -14,27 +14,30 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает видимый селектор блоков default-экрана IteractionListEdit.
+ * Защищает индекс пяти разделов IteractionListEdit в постоянной sidebar.
  */
 public class IteractionListAccordionNavigationTest {
 
     @Test
-    public void navigationHostIsInsideRightWorkspace() throws IOException {
+    public void navigationHostIsInsideSidebarBeforeWorkspace() throws IOException {
         String descriptor = descriptor();
-        String workspace = section(descriptor,
-                "id=\"iteractionListWorkspace\"",
-                "id=\"editActions\"");
-
-        assertOrdered(workspace,
-                "id=\"iteractionListSectionLayout\"",
-                "id=\"iteractionListNavigation\"",
-                "id=\"iteractionListContentScrollBox\"");
-        assertEquals(5, count(workspace, "stylename=\"iteraction-list-nav-item"));
-
         String sidebar = section(descriptor,
                 "stylename=\"iteraction-list-sidebar\"",
                 "id=\"iteractionListWorkspace\"");
-        assertFalse(sidebar.contains("id=\"iteractionListNavigation\""));
+
+        assertOrdered(sidebar,
+                "stylename=\"iteraction-list-profile-header\"",
+                "stylename=\"iteraction-list-sidebar-card iteraction-list-service-card\"",
+                "stylename=\"iteraction-list-sidebar-card iteraction-list-vacancy-card\"",
+                "id=\"iteractionListNavigation\"",
+                "id=\"iteractionListSidebarSpacer\"");
+        assertEquals(5, count(sidebar, "stylename=\"iteraction-list-nav-item"));
+
+        String workspace = section(descriptor,
+                "id=\"iteractionListWorkspace\"",
+                "id=\"editActions\"");
+        assertFalse(workspace.contains("id=\"iteractionListNavigation\""));
+        assertFalse(workspace.contains("id=\"iteractionListSectionLayout\""));
     }
 
     @Test

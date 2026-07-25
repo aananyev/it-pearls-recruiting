@@ -52,8 +52,8 @@ public class LeftSidebarAvatarComponentTest {
          */
         assertTrue(iteractionXml.contains("dataContainer=\"iteractionListDc\""));
         assertTrue(iteractionXml.contains("property=\"candidate.fileImageFace\""));
-        assertTrue(iteractionXml.contains("ovalWidth=\"104px\""));
-        assertTrue(iteractionXml.contains("ovalHeight=\"104px\""));
+        assertTrue(iteractionXml.contains("ovalWidth=\"112px\""));
+        assertTrue(iteractionXml.contains("ovalHeight=\"112px\""));
         assertTrue(iteractionXml.contains("fallbackThemePath=\"icons/no-programmer.jpeg\""));
         assertTrue(iteractionXml.contains("scaleMode=\"SCALE_DOWN\""));
         assertTrue(controller.contains("private Image candidateImage;"));

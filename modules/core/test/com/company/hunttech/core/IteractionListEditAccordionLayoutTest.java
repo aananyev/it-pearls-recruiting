@@ -15,22 +15,25 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает runtime-видимость селекторов, пяти аккордеонов и основных picker-полей.
+ * Защищает эталонную компоновку IteractionListEdit:
+ * профильная sidebar CandidateCVEdit, индекс SettingsWindow и пять аккордеонов.
  */
 public class IteractionListEditAccordionLayoutTest {
 
     @Test
-    public void defaultDescriptorContainsWorkspaceSelectorAndFiveAccordions() throws Exception {
+    public void defaultDescriptorContainsSidebarNavigationAndFiveAccordions() throws Exception {
         Path descriptorPath = projectRoot().resolve(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
         DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(descriptorPath.toFile());
-        String descriptor = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+        String descriptor = descriptor();
 
         assertOrdered(descriptor,
-                "id=\"iteractionListWorkspace\"",
-                "id=\"iteractionListSectionLayout\"",
+                "stylename=\"iteraction-list-sidebar\"",
+                "stylename=\"iteraction-list-profile-header\"",
+                "stylename=\"iteraction-list-sidebar-card iteraction-list-service-card\"",
+                "stylename=\"iteraction-list-sidebar-card iteraction-list-vacancy-card\"",
                 "id=\"iteractionListNavigation\"",
+                "id=\"iteractionListWorkspace\"",
                 "id=\"iteractionListContentScrollBox\"",
                 "id=\"participantsAccordion\"",
                 "id=\"interactionAccordion\"",
@@ -38,13 +41,13 @@ public class IteractionListEditAccordionLayoutTest {
                 "id=\"commentAccordion\"",
                 "id=\"popularAccordion\"");
         assertTrue(descriptor.contains("id=\"mostPopularHbox\""));
+        assertFalse(descriptor.contains("id=\"iteractionListSectionLayout\""));
     }
 
     @Test
     public void candidateAndVacancyUseTwoExplicitFlexColumns() throws IOException {
-        String descriptor = descriptor();
         String participants = section(
-                descriptor,
+                descriptor(),
                 "id=\"participantsAccordion\"",
                 "id=\"interactionAccordion\"");
 
@@ -55,6 +58,23 @@ public class IteractionListEditAccordionLayoutTest {
         assertTrue(participants.contains("property=\"candidate\""));
         assertTrue(participants.contains("type=\"picker_lookup\""));
         assertTrue(participants.contains("type=\"picker_open\""));
+    }
+
+    @Test
+    public void interactionUsesReadableSingleColumnFlow() throws IOException {
+        String interaction = section(
+                descriptor(),
+                "id=\"interactionAccordion\"",
+                "id=\"resultAccordion\"");
+
+        assertEquals(1, count(interaction, "<column flex=\"1\"/>"));
+        assertOrdered(interaction,
+                "id=\"iteractionTypeField\"",
+                "id=\"buttonsPanelCallAction\"",
+                "id=\"buttonCallAction\"",
+                "id=\"addString\"",
+                "id=\"addDate\"",
+                "id=\"addInteger\"");
     }
 
     @Test
@@ -94,10 +114,11 @@ public class IteractionListEditAccordionLayoutTest {
         assertTrue(descriptor.contains("invoke=\"callActionEntity\""));
         assertTrue(descriptor.contains("invoke=\"onButtonSubscribeClick\""));
         assertTrue(descriptor.contains("action=\"windowCommitAndClose\""));
+        assertTrue(descriptor.contains("action=\"windowClose\""));
     }
 
     @Test
-    public void allThemesKeepGridInternalsUnderCubaControl() throws IOException {
+    public void allThemesKeepReferenceGeometryAndGridInternalsUnderCubaControl() throws IOException {
         String[] themes = {
                 "halo", "havana", "helium", "hover",
                 "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark"
@@ -107,10 +128,14 @@ public class IteractionListEditAccordionLayoutTest {
             String scss = readProjectFile("modules/web/themes/" + theme
                     + "/com.company.hunttech/iteraction-list-accordion-navigation.scss");
             assertTrue(scss.contains(".iteraction-list-editor"));
-            assertTrue(scss.contains(".iteraction-list-section-layout"));
-            assertTrue(scss.contains("width: 210px !important"));
-            assertTrue(scss.contains(".iteraction-list-primary-picker"));
+            assertTrue(scss.contains("width: 296px !important;"));
+            assertTrue(scss.contains("width: 276px !important;"));
+            assertTrue(scss.contains("width: 260px !important;"));
+            assertTrue(scss.contains(".iteraction-list-sidebar-card"));
+            assertTrue(scss.contains(".iteraction-list-navigation"));
+            assertTrue(scss.contains(".iteraction-list-accordion-section"));
             assertTrue(scss.contains("max-width: 20% !important"));
+            assertFalse(scss.contains(".iteraction-list-section-layout"));
             assertFalse(scss.contains(".iteraction-list-form-grid > div"));
             assertFalse(scss.contains(".iteraction-list-form-grid table"));
         }

@@ -4,32 +4,41 @@
 > XML: `modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml`  
 > Entity: [IteractionList](../entities/iteraction-list/IteractionList.md)  
 > Legacy-spec: [hunttech_IteractionList.edit_Spec.md](../screens/iteraction-list/hunttech_IteractionList.edit_Spec.md)  
-> UI/UX-концепция: [HRM_HuntTech_UI_UX_Design_Concept.md](../architecture/HRM_HuntTech_UI_UX_Design_Concept.md)
+> UI/UX-концепция: [HRM_HuntTech_UI_UX_Design_Concept.md](../architecture/HRM_HuntTech_UI_UX_Design_Concept.md)  
+> Визуальные референсы: [ExtSettingsWindow](ExtSettingsWindow_Spec.md), [CandidateCVEdit](CandidateCVEdit_Spec.md)
 
 ## Назначение и бизнес-смысл (What & Why)
 
-`IteractionListEdit` фиксирует взаимодействие рекрутёра с кандидатом по вакансии: кандидата, вакансию, тип взаимодействия, дополнительное действие, результат, способ коммуникации, рекрутёра и комментарий. Экран участвует в истории кандидата, подписках, уведомлениях и изменении статусов процесса, поэтому UI-изменения обязаны сохранять существующие data bindings, component ID, actions, `invoke`, loaders и lifecycle CUBA Platform 7.3.
+`IteractionListEdit` фиксирует взаимодействие рекрутёра с кандидатом по вакансии: кандидата, вакансию, тип взаимодействия, дополнительное действие, результат, способ коммуникации, рекрутёра и комментарий. Экран участвует в истории кандидата, подписках, уведомлениях и изменении статусов процесса, поэтому визуальный рефакторинг обязан сохранять data bindings, component ID, actions, `invoke`, loaders, JPQL, views и lifecycle CUBA Platform 7.3.
 
-Компоновка от 2026-07-25 разделяет рабочий сценарий на пять сворачиваемых блоков. Поля «Кандидат» и «Вакансия» находятся в одной строке, используют единый локальный CSS-контракт и не расширяют диалог по горизонтали. Левый индекс ускоряет переход между блоками. Блок «Частые взаимодействия» показывает пять наиболее часто используемых текущим пользователем типов за скользящий календарный год. Контекстная панель расширена до читаемой ширины 272 px; служебные captions, значения, статус, приоритет и стоимость разделены на собственные визуальные уровни без наложения строк.
+Компоновка от 2026-07-26 объединяет два подтверждённых паттерна HRM HuntTech:
+
+- `CandidateCVEdit` задаёт постоянную тёмную профильную sidebar с изображениями и контекстными карточками;
+- `ExtSettingsWindow` задаёт вертикальный индекс разделов и полноширинные аккордеоны в светлой рабочей области.
+
+Цель изменений — устранить перегруженную карточку слева, освободить полезную ширину справа и выстроить предсказуемый сценарий заполнения без изменения функциональности формы.
 
 ## UI Context & Navigation
 
 - Экран открывается из `hunttech_IteractionList.browse`, карточки кандидата и связанных сценариев создания или редактирования взаимодействия.
 - Команда «Копировать» сохраняет существующий сценарий безопасной передачи кандидата и вакансии.
-- Picker кандидата сохраняет lookup/open для `JobCandidate`; picker вакансии — lookup/open для `OpenPosition`.
-- Левый индекс расположен в порядке: «Кандидат и вакансия» → «Тип и действие» → «Результат» → «Комментарий» → «Частые взаимодействия».
+- Picker кандидата сохраняет suggestion, lookup и open для `JobCandidate`; picker вакансии — lookup и open для `OpenPosition`.
+- Постоянная sidebar содержит профильный контекст, служебную карточку взаимодействия, карточку вакансии и индекс пяти разделов.
+- Индекс расположен в порядке: «Кандидат и вакансия» → «Тип и действие» → «Результат» → «Комментарий» → «Частые взаимодействия».
 - Клик по пункту индекса раскрывает соответствующий `GroupBoxLayout`, сворачивает остальные блоки, выделяет активный пункт и переводит фокус в первое рабочее поле блока.
-- Клики по штатным заголовкам аккордеонов синхронизируют активный пункт слева.
-- Экран остаётся модальным диалогом `1100 × 650`; sidebar использует ширину `272 px`, а при viewport до 1100 px — `252 px`.
+- Клики по штатным заголовкам аккордеонов синхронизируют активный пункт sidebar.
+- Правая область содержит toolbar, штатный `TabSheet`, прокручиваемые полноширинные аккордеоны и footer действий.
+- Диалог имеет размер `1240 × 760 px`; sidebar использует `296 px`, при сужении — `276 px` и `260 px`.
 - Сохранение выполняет `windowCommitAndClose`, отмена — `windowClose`.
 
 ## Behavior Summary
 
 - открытие нового взаимодействия → контроллер заполняет номер, дату и текущего рекрутёра → пользователь получает готовую форму;
 - открытие формы → раскрыт блок «Кандидат и вакансия», остальные четыре блока свёрнуты → основной контекст доступен первым;
-- выбор пункта слева → раскрывается ровно один связанный блок → фокус переводится в `candidateField`, `iteractionTypeField`, `ratingField` или `commentField`;
+- выбор пункта sidebar → раскрывается ровно один связанный блок → фокус переводится в `candidateField`, `iteractionTypeField`, `ratingField` или `commentField`;
 - выбор кандидата или вакансии → выполняются прежние обработчики изображения, статуса, подписок, приоритета и проекта → бизнес-поведение не меняется;
 - выбор типа взаимодействия → прежняя Java-логика управляет `buttonCallAction`, `addString`, `addDate` и `addInteger`;
+- динамическое действие → отображается под типом взаимодействия в одной вертикальной последовательности → runtime `visible`, `required` и captions остаются под управлением контроллера;
 - открытие блока частых взаимодействий → отображаются ровно пять равных кнопок → названия берутся из агрегированной статистики текущего пользователя за последний год;
 - клик по заполненной быстрой кнопке → точный объект `Iteraction` устанавливается в `iteractionTypeField` → caption не разбирается и поиск по строке не выполняется;
 - недостаточно пяти типов → свободные позиции показываются как disabled-кнопки «Нет данных» → геометрия блока остаётся стабильной;
@@ -45,7 +54,7 @@
 | `@EditedEntityContainer` | `iteractionListDc` |
 | Загрузка | `@LoadDataBeforeShow` |
 | Root namespace | `.iteraction-list-editor` |
-| Диалог | `width=1100`, `height=650`, `modal=true` |
+| Диалог | `width=1240`, `height=760`, `modal=true` |
 | Темы | `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light`, `hunttech-modern-dark` |
 
 ## 2. Data-контракты
@@ -57,17 +66,21 @@
 | `openPositionDc` / `openPositionsDl` | `openPosition-iteraction-list-picker-view` | вакансии с действующими conditions | без изменений |
 | `usersDc` / `usersDl` | `_minimal` | активные пользователи | без изменений |
 
-Entity, поля, БД, Liquibase, definitions views, существующие loaders и их JPQL не изменяются. Новый агрегирующий JPQL находится только в контроллере и читает статистику `IteractionList`.
+Entity, поля, БД, Liquibase, definitions views, существующие loaders и их JPQL не изменяются. Агрегирующий запрос частых взаимодействий остаётся в существующем контроллере и читает статистику `IteractionList`.
 
 ## 3. Компоновка
 
 ```text
 main layout 100% × 100%
-├─ sidebar 272 px
-│  ├─ карточка контекста кандидата и вакансии
-│  └─ индекс пяти разделов
+├─ sidebar 296 px / 276 px / 260 px
+│  ├─ профиль: candidateImage + projectLogoImage
+│  ├─ карточка взаимодействия: номер + дата
+│  ├─ карточка вакансии: подразделение, проект, статус, приоритет, стоимость, рейтинг
+│  ├─ индекс пяти разделов
+│  └─ spacer
 └─ workspace
-   ├─ toolbar
+   ├─ toolbar: заголовок + контекст
+   ├─ TabSheet 48 px
    ├─ scrollable content
    │  ├─ Кандидат и вакансия [expanded]
    │  ├─ Тип и действие [collapsed]
@@ -77,28 +90,71 @@ main layout 100% × 100%
    └─ footer
 ```
 
-`candidateField` и `vacancyFiels` располагаются в двух колонках одной строки и используют `iteraction-list-primary-picker`. Workspace, GridLayout, picker-поля и их Vaadin-обёртки имеют локальные ограничения `min-width: 0` и `max-width: 100%`.
+### 3.1. Sidebar по модели CandidateCVEdit
 
-### 3.1. Контекстная панель
+- внешний фон сохраняет градиент `#172638 → #132130 → #0f1b28`;
+- основная ширина — `296 px`, совпадающая с профильной панелью `CandidateCVEdit`;
+- `candidateImage` остаётся `OvaFallbackImage`, размер увеличен до `112 × 112 px`;
+- `projectLogoImage` имеет размер `80 × 80 px`;
+- служебные значения разделены на две внутренние карточки вместо одного длинного `GroupBoxLayout`;
+- карточки имеют радиус `8 px`, тонкую полупрозрачную границу и локальные заголовки;
+- `companyLabel`, `projectLabel`, `statusOfVacansyLabel` и `currentPriorityLabel` переносят длинные значения;
+- HTML внутри `companyLabel` наследует светлый цвет sidebar;
+- статус и приоритет используют строки с `expand` текстового компонента, поэтому warning/icon не вытесняют подпись;
+- `outstaffingCostHBox` сохраняет ID и binding, но caption и значение стоимости разделены;
+- вертикальная прокрутка разрешена только sidebar, горизонтальная прокрутка запрещена.
 
-Панель сохраняет legacy-компоненты и bindings, но использует отдельную визуальную иерархию:
+### 3.2. Индекс по модели SettingsWindow
 
-- `numberIteractionField` и `dateIteractionField` имеют компактные служебные captions, а не стиль заголовка `GroupBoxLayout`;
-- `companyLabel`, `projectLabel`, `statusOfVacansyLabel` и `currentPriorityLabel` переносят длинные значения только по словам;
-- HTML внутри `companyLabel` наследует светлый цвет контекстной панели;
-- статус и приоритет используют строки с `expand` для текстового значения, поэтому warning/icon не вытесняют подпись;
-- `outstaffingCostHBox` сохраняет ID и binding, но caption и значение стоимости разделены на две строки;
-- горизонтальная прокрутка и наложение текста внутри sidebar не допускаются.
+`iteractionListNavigation` располагается в постоянной sidebar после контекстных карточек. XML содержит пять fallback `Label`, чтобы структура оставалась читаемой в CUBA Designer. На `InitEvent` контроллер заменяет их borderless-кнопками.
 
-## 4. Контракт навигации
+Навигация меняет только presentation state `GroupBoxLayout`; она не записывает entity, не вызывает `DataManager` и не выполняет commit. Активный пункт использует акцент `#ffb11b`, левую границу `3 px` и полупрозрачный фон.
 
-XML содержит пять fallback `Label`, чтобы структура оставалась читаемой в CUBA Designer. На `InitEvent` контроллер заменяет их borderless-кнопками. Навигация меняет только presentation state `GroupBoxLayout`; она не записывает entity, не вызывает `DataManager` и не выполняет commit.
+### 3.3. Workspace
 
-Совместимый controller `hunttech_IteractionList.edit.accordion` остаётся тонким alias к основному экрану и использует тот же descriptor, чтобы не поддерживать две расходящиеся реализации.
+- toolbar имеет минимальную высоту `58 px` и вертикальную пару «заголовок + контекст»;
+- штатный `TabSheet` сохранён, высота строки вкладки — `48 px`;
+- содержимое прокручивается внутри workspace и не двигает sidebar;
+- удалена дополнительная колонка навигации шириной `210 px`, поэтому аккордеоны используют всю доступную ширину;
+- content padding — преимущественно `18–20 px`;
+- footer имеет высоту не менее `62 px`, существующие действия выровнены справа.
 
-## 5. Частые взаимодействия за скользящий год
+### 3.4. Аккордеоны
 
-Один агрегирующий запрос:
+Каждая секция использует штатный `GroupBoxLayout`:
+
+```xml
+<groupBox width="100%"
+          spacing="true"
+          margin="true"
+          collapsable="true"
+          collapsed="false|true"
+          showAsPanel="true"
+          stylename="iteraction-list-accordion-section ...">
+```
+
+Геометрия соответствует `ExtSettingsWindow`:
+
+- радиус `7 px`;
+- theme-aware граница `1 px`;
+- интервал между секциями `10 px`;
+- caption с вертикальным padding `9 px`, размером `15 px` и насыщенностью `600`;
+- panel content имеет padding `18–20 px`;
+- поля имеют высоту около `38 px`;
+- horizontal overflow отсутствует.
+
+### 3.5. Поля и колонки
+
+- `candidateField` и `vacancyFiels` остаются в двух explicit flex-колонках одной строки;
+- оба picker-поля используют `iteraction-list-primary-picker`;
+- `interactionAccordion` использует одну колонку: тип взаимодействия сверху, динамический блок ниже;
+- `resultAccordion` сохраняет две колонки для рейтинга и рекрутёра, способ коммуникации занимает всю ширину;
+- `commentField` занимает всю ширину секции;
+- внутренние `DIV` и `TABLE` штатного CUBA `GridLayout` не переопределяются SCSS.
+
+## 4. Частые взаимодействия за скользящий год
+
+Один существующий агрегирующий запрос:
 
 - ограничивает выборку текущим `recrutier`;
 - использует период от текущего момента минус один календарный год до текущего момента;
@@ -108,9 +164,9 @@ XML содержит пять fallback `Label`, чтобы структура о
 
 Контроллер всегда создаёт пять CUBA `Button`. HBox получает одинаковый expand ratio для всех пяти компонентов; SCSS ограничивает каждый slot двадцатью процентами доступной ширины. Номер позиции определяется порядком результата запроса, но не включается в caption и не используется для обратного поиска.
 
-В CUBA Platform 7.3 метод `HBoxLayout.expand(Component)` принимает ровно один компонент за вызов. Поэтому после создания кнопок контроллер проходит по `List<Button>` и отдельно вызывает `mostPopularHbox.expand(popularButton)` для каждой позиции. Передача массива `Component[]` запрещена контрактным тестом, а одинаковый expand ratio сохраняет геометрию `5 × 20%`.
+В CUBA Platform 7.3 метод `HBoxLayout.expand(Component)` принимает ровно один компонент за вызов. Поэтому контроллер отдельно вызывает `mostPopularHbox.expand(popularButton)` для каждой позиции.
 
-## 6. Сохранённые component-контракты
+## 5. Сохранённые component-контракты
 
 | Компоненты | Сохранённый контракт |
 |---|---|
@@ -129,41 +185,46 @@ XML содержит пять fallback `Label`, чтобы структура о
 | `subscribeButton` | `invoke="onButtonSubscribeClick"` |
 | footer | subscribe → commit-and-close → cancel |
 
-## 7. Локальный SCSS
+Совместимый controller `hunttech_IteractionList.edit.accordion` остаётся тонким alias к основному экрану и использует тот же descriptor.
 
-Все правила ограничены корнем `.iteraction-list-editor`. Одинаковый файл `iteraction-list-accordion-navigation.scss` используется во всех семи темах. Глобальные `.v-table`, `.v-label`, `.v-button`, `.v-tabsheet` не изменяются; Vaadin-селекторы применяются только как потомки локального root-класса. Селектор заголовка карточки ограничен `.iteraction-list-context-card .v-panel-caption` и больше не захватывает captions вложенных полей. Геометрия `272/252 px`, стили значений и стоимость синхронизированы во всех темах.
+## 6. Локальный SCSS
 
-## 8. Ограничения изменений
+Все правила ограничены корнем `.iteraction-list-editor`. Файл `iteraction-list-accordion-navigation.scss` синхронизирован во всех семи темах и содержит объединённый контракт sidebar, индекса, workspace, аккордеонов и полей.
 
+Запрещённые глобальные `.v-table`, `.v-label`, `.v-button`, `.v-tabsheet`, `.v-panel` не изменяются. Vaadin-селекторы применяются только как потомки локального root-класса. Структура и размеры во всех темах одинаковы.
+
+## 7. Ограничения изменений
+
+- Java-контроллер и существующая бизнес-логика не изменены;
 - entity, поля, БД, Liquibase и definitions views не изменены;
-- существующие loader ID, conditions, actions, bindings, component ID и `invoke` сохранены;
-- новый JPQL используется только для read-only статистики текущего пользователя;
+- loader ID, conditions, JPQL, bindings, component ID, actions и `invoke` сохранены;
+- validation, required, editable, visible и enable-состояния не изменены;
 - навигация не изменяет данные и lifecycle;
-- CI/CD workflow не изменяются;
 - production не изменяется;
 - merge допускается только после отчёта Hermes по точному HEAD SHA и прямой команды Алексея.
 
-## 9. Обязательная проверка Hermes
+## 8. Обязательная проверка Hermes
 
 1. HEAD branch и HEAD PR совпадают с SHA, указанным в PR.
 2. Base PR = `master`, conflicts = NONE.
 3. `git diff --check`.
-4. `IteractionListEditAccordionLayoutTest` — `5/5 PASS`.
-5. `IteractionListAccordionNavigationTest` — `4/4 PASS`.
-6. `IteractionListMostPopularInteractionTest` — `4/4 PASS`.
-7. `LeftSidebarAvatarComponentTest` — `2/2 PASS`.
-8. `IteractionListSidebarContextPanelTest` — `3/3 PASS`.
-9. Compile web и core tests.
-10. `ScreenViewIntegrityTest` — `8/8 PASS`.
-11. Data View Integrity — PASS.
-12. `:app-web:buildScssThemes` — PASS для семи тем.
-13. `clean assemble` — `BUILD SUCCESSFUL`.
-14. Local deploy и HTTP `/hrm/` = `200`.
-15. Functional smoke: candidate/vacancy, lookup/open, тип, dynamic fields, rating, recruiter, communication, comment, subscription, save/cancel.
-16. Navigation smoke: каждый пункт раскрывает один блок, выделяется и фокусирует первое поле; заголовки GroupBox синхронизируют индекс.
-17. Popular smoke: ровно пять равных кнопок, top-5 текущего пользователя за год, прямое присваивание типа, disabled placeholders.
-18. Visual smoke семи тем: sidebar имеет геометрию 272/252 px, captions «Номер»/«Дата» компактны, длинные подразделение/проект/статус/приоритет переносятся без наложения, стоимость отображается двумя строками, горизонтальная прокрутка отсутствует; candidate/vacancy имеют одинаковое оформление.
-19. Tomcat logs: новых critical errors NONE; P1 = 0; P2 = 0.
+4. `IteractionListEditAccordionLayoutTest` — PASS.
+5. `IteractionListAccordionNavigationTest` — PASS.
+6. `IteractionListSidebarContextPanelTest` — PASS.
+7. `IteractionListAccordionCssContractTest` — PASS.
+8. `IteractionListMostPopularInteractionTest` — PASS.
+9. `LeftSidebarAvatarComponentTest` — PASS.
+10. Compile web и core tests — PASS.
+11. `ScreenViewIntegrityTest` — `8/8 PASS`.
+12. Data View Integrity — PASS.
+13. `:app-web:buildScssThemes` — PASS для семи тем.
+14. `clean assemble` — `BUILD SUCCESSFUL`.
+15. Local deploy и HTTP `/hrm/` = `200`.
+16. Functional smoke: candidate/vacancy, lookup/open, тип, dynamic fields, rating, recruiter, communication, comment, subscription, save/cancel.
+17. Navigation smoke: каждый пункт sidebar раскрывает один блок, выделяется и фокусирует первое поле; заголовки GroupBox синхронизируют индекс.
+18. Popular smoke: ровно пять равных кнопок, top-5 текущего пользователя за год, прямое присваивание типа, disabled placeholders.
+19. Visual smoke семи тем: геометрия sidebar, карточки, индекс, toolbar, вкладка 48 px, полноширинные аккордеоны, отсутствие горизонтальной прокрутки и наложений.
+20. Tomcat logs: новых critical errors NONE; P1 = 0; P2 = 0.
 
 До отчёта Hermes статус задачи: `WAITING_FOR_HERMES`.
 
@@ -171,13 +232,11 @@ XML содержит пять fallback `Label`, чтобы структура о
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-26 | Компоновка синхронизирована с `CandidateCVEdit` и `ExtSettingsWindow`: профильная sidebar 296/276/260 px, раздельные контекстные карточки, индекс пяти разделов слева и полноширинные аккордеоны справа |
 | 2026-07-25 | Контекстная панель расширена до 272/252 px, captions полей отделены от заголовка карточки, длинные значения и стоимость получили читаемую компоновку без наложений |
 | 2026-07-25 | Исправлена совместимость с CUBA 7.3: `HBoxLayout.expand` вызывается отдельно для каждой из пяти быстрых кнопок вместо передачи `Component[]` |
 | 2026-07-25 | Добавлены двухколоночная строка кандидата и вакансии, кликабельный индекс пяти блоков и пять равных кнопок частых взаимодействий текущего пользователя за скользящий год |
 | 2026-07-25 | Исправлен сценарий «Копировать»: вакансия перечитывается через `openPosition-iteraction-list-picker-view` до открытия нового `IteractionListEdit` |
 | 2026-07-25 | Аккордеоны приведены к presentation-контракту `SettingsWindow`; первая секция раскрыта, остальные свёрнуты |
-| 2026-07-25 | В семи темах добавлено локальное CSS-оформление аккордеонов внутри `.iteraction-list-editor` |
-| 2026-07-25 | Основные рабочие блоки преобразованы в сворачиваемые секции без изменения data-контрактов |
-| 2026-07-25 | `candidateImage` заменён на `OvaFallbackImage` 104×104 px с fallback `icons/no-programmer.jpeg` |
-| 2026-07-25 | Sidebar, toolbar, footer и рабочая геометрия синхронизированы во всех семи темах |
+| 2026-07-25 | `candidateImage` заменён на `OvaFallbackImage` с fallback `icons/no-programmer.jpeg` |
 | 2026-07-25 | Выполнена двухпанельная визуальная адаптация с локальным namespace `.iteraction-list-editor` |
