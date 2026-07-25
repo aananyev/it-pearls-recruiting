@@ -44,6 +44,7 @@
 ### Behavior Summary
 
 - открытие окна → базовый `SettingsWindow` находит legacy-компоненты по ID → отображаются текущие настройки;
+- начало `init()` → `ImageProcessingService` и `UserAiContextService` разрешаются через `AppBeans.get(...)` → legacy web-контроллер получает core-Spring-бины без `@Inject`;
 - загрузка `UserSettings` → отсутствующие или legacy-null AI-предпочтения нормализуются в `true` → оба checkbox включены;
 - пользователь меняет AI-предпочтение → binding изменяет соответствующее поле `UserSettings` → отдельный обработчик не требуется;
 - сохранение окна → `userSettings` добавляется в общий `CommitContext` → оба значения сохраняются атомарно;
@@ -55,6 +56,7 @@
 - нажатие AI-действий → выполняются существующие `invoke`-методы → визуальный слой не инициирует запросы и не меняет маршрутизацию;
 - нажатие «Показать передаваемые данные» → контроллер проверяет профиль, сервис и XML-компоненты → предпросмотр раскрывается либо показывается понятное предупреждение без закрытия формы;
 - ошибка сервиса предпросмотра → stack trace записывается в журнал приложения → пользователю показывается warning вместо `NullPointerException`;
+- загрузка или очистка аватара → обработчик использует `ImageProcessingService`, полученный из общего Spring-контекста → изображение обрабатывается без ошибки инъекции web-контроллера;
 - hover, focus, disabled и read-only → меняется только presentation → required, validators, permissions и editable-состояния остаются прежними;
 - смена темы → используется одинаковый локальный SCSS-контракт семи тем → component ID и поведение не меняются.
 
@@ -72,7 +74,7 @@
 | Footer style | `ext-settings-footer` |
 | Поддерживаемые темы | `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light`, `hunttech-modern-dark` |
 
-Экран остаётся legacy-экраном CUBA Platform 7.3. Корневые секции `<window>`, `<dsContext>` и `<layout>` сохранены. Актуальный экран одновременно содержит AI-предпочтения, null-safe предпросмотр, аватар `OvaFallbackImage` и визуальный email-аккордеон. Изменение email-компоновки не затрагивает entity, БД, контроллер, actions, JPQL, views и операции `UserAiConfiguration`.
+Экран остаётся legacy-экраном CUBA Platform 7.3. Корневые секции `<window>`, `<dsContext>` и `<layout>` сохранены. Актуальный экран одновременно содержит AI-предпочтения, null-safe предпросмотр, аватар `OvaFallbackImage` и визуальный email-аккордеон. `ImageProcessingService` и `UserAiContextService` относятся к core-Spring-контексту и поэтому разрешаются через `AppBeans` в начале lifecycle `init()`; остальные UI-компоненты и web-зависимости сохраняют штатную инъекцию.
 
 ## 2. Связь с моделью данных
 
@@ -126,6 +128,19 @@ context.addInstanceToCommit(userSettings);
 - `imapServer`, `imapPort`, `imapPasswordRequired`, `imapPassword`.
 
 Поля портов сохраняют `datatype="int"` и `IntegerValidator`. Перенос полей в `GroupBoxLayout` не меняет инъекции, загрузку `setEmailSettings()` и сбор значений `collectEmailSettings()`.
+
+### 2.3. Получение core-сервисов
+
+`ImageProcessingService` и `UserAiContextService` объявлены обычными полями контроллера без `@Inject`. В начале `init()` они разрешаются из общего Spring-контекста CUBA:
+
+```java
+imageProcessingService = AppBeans.get(ImageProcessingService.class);
+userAiContextService = AppBeans.get(UserAiContextService.class);
+```
+
+Получение выполняется до определения текущего пользователя, загрузки datasource и регистрации UI-listener. Это устраняет зависимость legacy web-контроллера от прямой инъекции core-бинов и одновременно гарантирует готовность сервисов до сценариев обработки аватара и предпросмотра ИИ-контекста.
+
+Импорт `AppBeans` обеспечивается существующим `import com.haulmont.cuba.core.global.*;`. Бизнес-логика `ImageProcessingService`, `UserAiContextService`, `AvatarImageUploadHelper` и `previewAiContext()` не переносится и не изменяется.
 
 ## 3. База данных
 
@@ -224,7 +239,7 @@ SMTP, POP3 и IMAP представлены тремя полноширинны�
 
 ### 5.3. Вкладка «Обо мне» и предпросмотр
 
-Сохраняются datasource, consent-логика, валидация опыта, аватар `OvaFallbackImage` и атомарное сохранение. `previewAiContext()` не отправляет HTTP-запрос к LLM.
+Сохраняются datasource, consent-логика, валидация опыта, аватар `OvaFallbackImage` и атомарное сохранение. `previewAiContext()` не отправляет HTTP-запрос к LLM. `UserAiContextService` должен быть разрешён через `AppBeans` до выполнения этого действия.
 
 Предпросмотр выполняется последовательно:
 
@@ -250,6 +265,10 @@ SMTP, POP3 и IMAP представлены тремя полноширинны�
 Таблица продолжает использовать `userAiConfigsDs`; endpoint и HTTP-логика провайдера не переносятся в экран.
 
 Оба новых значения являются предпочтениями. Экран не выбирает конкретный API, не проверяет наличие ключа и не определяет, какой текст считать личным промптом.
+
+### 5.5. Аватар и обработка изображения
+
+Компонент `userPic` и fallback `defaultPic` сохраняют утверждённый контракт `OvaFallbackImage`. Обработка нового файла выполняется прежним `AvatarImageUploadHelper.processUploadedImage(...)`; изменён только способ получения `ImageProcessingService`. Core-сервис должен быть доступен после `AppBeans.get(...)` до срабатывания upload-listener.
 
 ## 6. Визуальный контракт
 
@@ -335,9 +354,10 @@ SMTP, POP3 и IMAP представлены тремя полноширинны�
 6. AI-checkbox используют штатный legacy datasource-binding.
 7. `UserSettings` сохраняется через существующий `CommitContext`.
 8. Почтовый аккордеон использует штатные атрибуты `GroupBoxLayout`: `collapsable`, `collapsed`, `showAsPanel`.
-9. Визуальный слой подключается только через `stylename` и theme extension.
-10. SCSS не инициирует загрузку данных и не вмешивается в lifecycle.
-11. Глобальные Vaadin-селекторы не добавляются.
+9. Core-сервисы `ImageProcessingService` и `UserAiContextService` разрешаются через `AppBeans.get(...)` в начале `init()`; `@Inject` для этих полей не используется.
+10. Визуальный слой подключается только через `stylename` и theme extension.
+11. SCSS не инициирует загрузку данных и не вмешивается в lifecycle.
+12. Глобальные Vaadin-селекторы не добавляются.
 
 ## 8. Обязательные проверки
 
@@ -354,6 +374,7 @@ git diff --check
 ./gradlew :app-core:test \
           --tests 'com.company.hunttech.core.UserSettingsAiApiPreferenceTest' \
           --tests 'com.company.hunttech.core.ExtSettingsWindowAvatarComponentTest' \
+          --tests 'com.company.hunttech.core.ExtSettingsWindowCoreBeanLookupTest' \
           --no-daemon --stacktrace
 
 ./gradlew test \
@@ -374,6 +395,7 @@ git diff --check
 
 - `UserSettingsAiApiPreferenceTest` — 11/11 PASS;
 - `ExtSettingsWindowAvatarComponentTest` — 2/2 PASS;
+- `ExtSettingsWindowCoreBeanLookupTest` — 1/1 PASS;
 - `ScreenViewIntegrityTest` — 8/8 PASS;
 - Data View Integrity — PASS;
 - SQL и Liquibase — PASS;
@@ -387,19 +409,21 @@ git diff --check
 
 Проверить:
 
-- окно открывается после `updateDb`;
+- окно открывается после `updateDb` без ошибки внедрения core-бинов;
+- `ImageProcessingService` и `UserAiContextService` доступны после `init()`;
 - оба checkbox включены у новой записи пользователя;
 - существующая запись после миграции получает оба значения `true`;
 - пользователь может выключить каждый checkbox независимо;
 - `okBtn` сохраняет оба значения;
 - после повторного открытия состояния восстановлены;
 - Cancel не фиксирует несохранённые изменения;
-- нажатие «Показать передаваемые данные» не вызывает `NullPointerException`;
+- нажатие «Показать передаваемые данные» не вызывает `NullPointerException` и не падает из-за отсутствующего core-бина;
 - при корректном профиле показывается очищенный предпросмотр;
 - при недоступном профиле или ошибке сервиса форма остаётся открытой, показывается warning;
 - журнал содержит stack trace исходной runtime-ошибки без потери контекста;
 - значения SMTP, POP3 и IMAP загружаются и сохраняются прежними методами;
 - раскрытие и сворачивание почтовых секций не изменяет введённые значения;
+- загрузка и очистка аватара используют `ImageProcessingService`, полученный через `AppBeans`;
 - аватар `OvaFallbackImage`, upload и fallback работают без регрессии.
 
 ### 8.2. Визуальный smoke
@@ -428,6 +452,7 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-25 | `ImageProcessingService` и `UserAiContextService` переведены с `@Inject` на `AppBeans.get(...)` в начале `init()`; добавлена регрессионная проверка доступности core-бинов в legacy web-контроллере |
 | 2026-07-25 | PR #17 перебазирован на актуальный `master`; документация email-аккордеона объединена с AI-предпочтениями и `OvaFallbackImage` без потери функциональных контрактов |
 | 2026-07-24 | SMTP, POP3 и IMAP вкладки «Настройка email» перестроены из трёхколоночной сетки в вертикальный аккордеон; component ID, валидаторы, загрузка и сохранение значений не изменены |
 | 2026-07-24 | Оба персональных AI-предпочтения включены по умолчанию; добавлен checkbox «Предпочитать мои промпты», сохранение в `UserSettings`, миграции и null-safe исправление `previewAiContext()` |

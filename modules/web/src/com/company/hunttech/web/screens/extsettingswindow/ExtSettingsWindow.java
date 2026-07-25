@@ -40,9 +40,9 @@ public class ExtSettingsWindow extends SettingsWindow {
     @Inject private DataManager dataManager;
     @Inject private FileLoader fileLoader;
     @Inject private FileStorageService fileStorageService;
-    @Inject private ImageProcessingService imageProcessingService;
+    private ImageProcessingService imageProcessingService;
     @Inject private HunttechImageConfig hunttechImageConfig;
-    @Inject private UserAiContextService userAiContextService;
+    private UserAiContextService userAiContextService;
     @Inject private HrmAiService hrmAiService;
     @Inject private Notifications notifications;
     @Inject private Dialogs dialogs;
@@ -99,6 +99,13 @@ public class ExtSettingsWindow extends SettingsWindow {
 
     @Override
     public void init(Map<String, Object> params) {
+        /*
+         * Core-сервисы получаем из общего Spring-контекста CUBA: legacy web-контроллер
+         * не гарантирует внедрение core-бинов через @Inject.
+         */
+        imageProcessingService = AppBeans.get(ImageProcessingService.class);
+        userAiContextService = AppBeans.get(UserAiContextService.class);
+
         currentUser = (ExtUser) userSessionSource.getUserSession().getUser();
         loadExtUser();
         loadOrCreateUserSettings();
