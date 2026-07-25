@@ -290,31 +290,18 @@
                                    stylename="iteraction-list-scroll">
                             <vbox width="100%"
                                   spacing="true"
-                                  stylename="iteraction-list-content">
-                                <!-- Основные рабочие блоки оформлены как сворачиваемые секции.
-                                     Component ID и порядок обработки контроллером сохранены. -->
-                                <groupBox width="100%"
-                                          caption="msg://mshMostPopular"
-                                          stylename="iteraction-list-popular-card"
-                                          spacing="true"
-                                          collapsable="true">
-                                    <vbox width="100%"
-                                          spacing="true">
-                                        <hbox id="mostPopularHbox"
-                                              width="100%"
-                                              spacing="true"
-                                              align="MIDDLE_CENTER"/>
-                                        <hbox id="mostPopularIteractionHBox"
-                                              width="100%"
-                                              spacing="true"/>
-                                    </vbox>
-                                </groupBox>
-
+                                  stylename="iteraction-list-content user-ai-profile-editor">
+                                <!-- Аккордеоны повторяют канонический SettingsWindow-контракт:
+                                     первая рабочая секция раскрыта, остальные свернуты;
+                                     значения, bindings и lifecycle не зависят от collapsed-состояния. -->
                                 <groupBox width="100%"
                                           caption="msg://msgIteractionList"
-                                          stylename="iteraction-list-popular-card iteraction-list-form-card"
+                                          stylename="user-ai-profile-section iteraction-list-form-card"
                                           spacing="true"
-                                          collapsable="true">
+                                          margin="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          showAsPanel="true">
                                     <!-- Одноколоночная сетка сохраняет тип GridLayout и legacy ID,
                                          но располагает все поля последовательно друг под другом. -->
                                     <grid id="gridIterationData"
@@ -454,9 +441,12 @@
 
                                 <groupBox width="100%"
                                           caption="msg://msgComment"
-                                          stylename="iteraction-list-popular-card iteraction-list-comment-card"
+                                          stylename="user-ai-profile-section iteraction-list-comment-card"
                                           spacing="true"
-                                          collapsable="true">
+                                          margin="true"
+                                          collapsable="true"
+                                          collapsed="true"
+                                          showAsPanel="true">
                                     <textArea id="commentField"
                                               property="comment"
                                               rows="7"
@@ -464,6 +454,26 @@
                                               dataContainer="iteractionListDc"
                                               caption="msg://msgComment"
                                               height="160px"/>
+                                </groupBox>
+
+                                <groupBox width="100%"
+                                          caption="msg://mshMostPopular"
+                                          stylename="user-ai-profile-section"
+                                          spacing="true"
+                                          margin="true"
+                                          collapsable="true"
+                                          collapsed="true"
+                                          showAsPanel="true">
+                                    <vbox width="100%"
+                                          spacing="true">
+                                        <hbox id="mostPopularHbox"
+                                              width="100%"
+                                              spacing="true"
+                                              align="MIDDLE_CENTER"/>
+                                        <hbox id="mostPopularIteractionHBox"
+                                              width="100%"
+                                              spacing="true"/>
+                                    </vbox>
                                 </groupBox>
                             </vbox>
                         </scrollBox>

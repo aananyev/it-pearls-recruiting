@@ -12,6 +12,8 @@
 
 Компоновка от 2026-07-25 разделяет рабочее содержимое на сворачиваемые секции и переводит основные поля в одну вертикальную колонку. Такая структура уменьшает визуальную перегрузку, исключает конкуренцию подписей и picker-компонентов за ширину и сохраняет последовательность работы рекрутёра сверху вниз.
 
+Аккордеоны приведены к каноническому визуальному контракту `SettingsWindow`: `GroupBoxLayout` использует `showAsPanel="true"`, `margin="true"`, полноширинное вертикальное расположение и класс `user-ai-profile-section`. Рабочая область сохраняет собственный корень `.iteraction-list-editor`, а дочерний контейнер аккордеонов дополнительно получает `user-ai-profile-editor`, чтобы использовать эталонные theme-aware стили `SettingsWindow` без дублирования SCSS и без глобальных селекторов.
+
 Профильное изображение кандидата в левой панели сохраняет единый контракт HRM HuntTech: `candidateImage` отображается через legacy-компонент `OvaFallbackImage`, имеет стабильную круглую геометрию и показывает `icons/no-programmer.jpeg`, если фотография кандидата отсутствует. Java-контроллер и модель данных не изменены.
 
 ## UI Context & Navigation
@@ -20,7 +22,8 @@
 - Picker кандидата сохраняет lookup и open для `JobCandidate`.
 - Picker вакансии сохраняет lookup и open для `OpenPosition`.
 - Выбор типа взаимодействия управляет существующими динамическими компонентами дополнительного действия.
-- Основные секции «Популярные взаимодействия», «Взаимодействие» и «Комментарий» можно сворачивать и раскрывать независимо.
+- Основные секции расположены в рабочем порядке: «Взаимодействие» → «Комментарий» → «Популярные взаимодействия».
+- Секция «Взаимодействие» раскрыта при открытии формы; остальные секции стартуют свёрнутыми, как в `SettingsWindow`.
 - Кнопка подписки открывает существующий editor подписки.
 - Сохранение выполняет `windowCommitAndClose`, отмена — `windowClose`.
 - Экран остаётся модальным диалогом `1000 × 650`.
@@ -28,14 +31,15 @@
 ## Behavior Summary
 
 - открытие нового взаимодействия → контроллер заполняет номер, дату и текущего рекрутёра → пользователь получает готовую форму;
-- раскрытие или сворачивание секции → меняется только presentation state GroupBox → значения и lifecycle не затрагиваются;
+- открытие формы → секция «Взаимодействие» раскрыта, «Комментарий» и «Популярные взаимодействия» свёрнуты → пользователь сразу видит основные поля;
+- раскрытие или сворачивание секции → меняется только presentation state `GroupBoxLayout` → значения и lifecycle не затрагиваются;
 - выбор кандидата с фотографией → сохраняется прежний `ContainerValueSource` → `OvaFallbackImage` отображает фотографию круглой;
 - выбор кандидата без фотографии → существующая Java-логика и `fallbackThemePath` указывают на `icons/no-programmer.jpeg` → sidebar не содержит пустого изображения;
 - выбор вакансии → сохраняются проверки закрытия, подписки, статуса, приоритета и логотипа → sidebar обновляет вакансию;
 - выбор типа взаимодействия → Java переключает `buttonCallAction`, `addString`, `addDate` или `addInteger` → дополнительное значение отображается следующей строкой под типом;
 - изменение rating → Java сохраняет прежнее оформление и правила → оценка отображается в форме и sidebar;
 - сохранение → выполняются прежние BeforeCommit/AfterCommit/BeforeClose обработчики → данные и связанные процессы изменяются как до reflow;
-- смена темы → локальный mixin `.iteraction-list-editor` применяет presentation-слой → функциональные контракты не меняются.
+- смена темы → применяются локальные mixin экрана и эталонный accordion-слой `SettingsWindow` → функциональные контракты не меняются.
 
 ## 1. Технический контекст
 
@@ -77,8 +81,7 @@ main layout 100% × 100%
 └─ workspace, expanded
    ├─ toolbar 52 px
    ├─ TabSheet 42 px + scrollable content
-   │  ├─ accordion: popular interactions
-   │  ├─ accordion: interaction data
+   │  ├─ accordion: interaction data [expanded]
    │  │  ├─ candidate
    │  │  ├─ vacancy
    │  │  ├─ subscription filter
@@ -87,7 +90,8 @@ main layout 100% × 100%
    │  │  ├─ rating
    │  │  ├─ recruiter
    │  │  └─ communication method
-   │  └─ accordion: comment
+   │  ├─ accordion: comment [collapsed]
+   │  └─ accordion: popular interactions [collapsed]
    └─ footer 54 px
 ```
 
@@ -101,7 +105,31 @@ main layout 100% × 100%
 - Фото кандидата сохраняет `OvaFallbackImage`; логотип проекта остаётся отдельным обычным `Image`.
 - Комментарий остаётся отдельным блоком высотой `160 px`, чтобы его можно было быстро свернуть.
 
-## 4. Сохранённые component-контракты
+## 4. Канонический контракт аккордеона SettingsWindow
+
+Каждая рабочая секция использует те же presentation-атрибуты, что и аккордеоны вкладки «Обо мне» `SettingsWindow`:
+
+```xml
+<groupBox width="100%"
+          spacing="true"
+          margin="true"
+          collapsable="true"
+          collapsed="false|true"
+          showAsPanel="true"
+          stylename="user-ai-profile-section [iteraction-list-form-card|iteraction-list-comment-card]">
+```
+
+Состояния при открытии:
+
+| Секция | Начальное состояние | Причина |
+|---|---|---|
+| `msgIteractionList` | раскрыта | основной рабочий сценарий |
+| `msgComment` | свёрнута | дополнительная информация |
+| `mshMostPopular` | свёрнута | вспомогательные быстрые действия |
+
+Визуальные параметры берутся из существующего `user-ai-profile.scss` каждой темы: радиус `7 px`, тонкая theme-aware граница, лёгкая поверхность, отступ между секциями `10 px`, отдельный фон заголовка и насыщенность `600`. Конкурирующий класс `iteraction-list-accordion-section` намеренно не используется, поскольку его более поздний SCSS переопределил бы эталонные размеры заголовка и внутренних отступов. Глобальные `.v-*` селекторы не добавляются.
+
+## 5. Сохранённые component-контракты
 
 | Компоненты | Сохранённый контракт |
 |---|---|
@@ -122,17 +150,23 @@ main layout 100% × 100%
 
 Component ID, bindings, actions, `invoke`, validators и runtime-управляемые состояния не изменены. `OvaFallbackImage` наследует базовый CUBA `Image`, поэтому существующее поле `private Image candidateImage` в контроллере остаётся совместимым.
 
-## 5. Локальный SCSS
+## 6. Локальный SCSS и переиспользование эталона
 
-Во всех семи темах используется одинаковый файл:
+Аккордеоны не получают приблизительную копию оформления. XML-контейнер `iteraction-list-content` дополнительно использует класс `user-ai-profile-editor`, а секции — только эталонный panel-класс `user-ai-profile-section` и локальные классы полей. Поэтому для заголовков, границ, поверхности и интервалов применяется тот же фактический SCSS, что и в `SettingsWindow`:
+
+```text
+modules/web/themes/<theme>/com.company.hunttech/user-ai-profile.scss
+```
+
+Собственные стили полей, footer, toolbar и sidebar продолжают находиться в:
 
 ```text
 modules/web/themes/<theme>/com.company.hunttech/iteraction-list-editor.scss
 ```
 
-Новые SCSS-правила не требуются: секции используют существующий локальный стиль `iteraction-list-popular-card`, а поля — существующие namespace-классы `iteraction-list-form-card` и `iteraction-list-comment-card`. Глобальные Vaadin-селекторы вне `.iteraction-list-editor` не изменяются.
+Такое композиционное переиспользование сохраняет корневой namespace `.iteraction-list-editor`, не подключает `JobCandidateEdit` как зависимость, не создаёт глобальных `.v-*` правил и гарантирует одинаковую геометрию аккордеонов с `SettingsWindow` во всех семи темах.
 
-## 6. Ограничения изменений
+## 7. Ограничения изменений
 
 - бизнес-логика и Java handlers не изменены;
 - entity, поля, БД, Liquibase не изменены;
@@ -142,12 +176,12 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-editor.scss
 - production не изменяется в рамках разработки;
 - merge допускается только после отчёта Hermes по точному HEAD SHA.
 
-## 7. Обязательная проверка Hermes
+## 8. Обязательная проверка Hermes
 
 1. HEAD branch и HEAD PR совпадают с переданным SHA.
 2. Base PR = `master`, conflicts = NONE.
 3. `git diff --check`.
-4. `IteractionListEditAccordionLayoutTest` — `3/3 PASS`.
+4. `IteractionListEditAccordionLayoutTest` — `5/5 PASS`.
 5. `LeftSidebarAvatarComponentTest` — `2/2 PASS`.
 6. Compile web и core tests.
 7. `ScreenViewIntegrityTest` — `8/8 PASS`.
@@ -157,7 +191,7 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-editor.scss
 11. Local deploy и HTTP `/hrm/` = `200`.
 12. Functional smoke: последовательно заполнить кандидата, вакансию, тип, dynamic fields, rating, рекрутёра, способ связи и комментарий; проверить подписку, save/cancel.
 13. Accordion smoke: свернуть и раскрыть каждый из трёх блоков, убедиться в сохранении введённых значений и отсутствии пустых горизонтальных областей.
-14. Visual smoke семи тем: поля идут одной колонкой, ширина единая, sidebar непрерывный, toolbar/footer только справа, horizontal scroll отсутствует.
+14. Visual smoke семи тем: аккордеоны визуально совпадают с `SettingsWindow`, поля идут одной колонкой, ширина единая, sidebar непрерывный, toolbar/footer только справа, horizontal scroll отсутствует.
 15. Tomcat logs: новых critical errors NONE; P1 = 0; P2 = 0.
 
 До отчёта Hermes статус задачи: `WAITING_FOR_HERMES`.
@@ -166,6 +200,7 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-editor.scss
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-25 | Аккордеоны `IteractionListEdit` приведены к точному presentation-контракту `SettingsWindow`: `showAsPanel`, `margin`, первая секция раскрыта, остальные свёрнуты, переиспользованы эталонные theme-aware стили `user-ai-profile-section`; конкурирующий accordion-класс исключён |
 | 2026-07-25 | Основные рабочие блоки преобразованы в сворачиваемые секции; `gridIterationData` переведён на одну колонку, все поля расположены друг под другом без изменения business/data-контрактов |
 | 2026-07-25 | По итогам аудита переработанных форм `candidateImage` в левой панели заменён на `OvaFallbackImage` 104×104 px с fallback `icons/no-programmer.jpeg`; ID, binding и Java-инъекция `Image` сохранены |
 | 2026-07-25 | Улучшена компоновка: sidebar сделан непрерывным по высоте, toolbar и footer перенесены в workspace, ширина sidebar уменьшена, поля выстроены по сценарию рекрутёра, геометрия синхронизирована в семи темах |
