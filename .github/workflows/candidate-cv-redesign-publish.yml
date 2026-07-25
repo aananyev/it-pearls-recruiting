@@ -61,44 +61,44 @@ jobs:
           test_path = Path('modules/core/test/com/company/hunttech/core/CandidateCVEditVisualContractTest.java')
           test = test_path.read_text(encoding='utf-8')
           old_ids = '''                "tabSheet", "tabCandidate", "tabCV", "tabLetter", "tabSkillTree", "tabFiles",
-'''
+          '''
           new_ids = '''                "openPositionsDc", "openPositionsDl", "candidateCVDc", "someFilesesDc", "skillTreesDc",
                 "resumePositionsDc", "resumePositionsLc", "usersDc", "usersDl",
                 "candidateLabel", "iteractionListLabelCandidate", "iteractionListLabelPosition",
                 "labelLastRecrutier", "machRegexpFromCV", "quoteTextArea",
                 "tabSheet", "tabCandidate", "tabCV", "tabLetter", "tabSkillTree", "tabFiles",
-'''
+          '''
           if old_ids not in test:
               raise SystemExit('Protected ID patch anchor missing')
           test = test.replace(old_ids, new_ids, 1)
 
           old_layout_ids = '''                "letterRecommendation", "rescanResume", "checkSkillFromJD", "skillTreesTable",
                 "someFilesTable", "datePostField", "editActions"
-'''
+          '''
           new_layout_ids = '''                "letterRecommendation", "rescanResume", "checkSkillFromJD", "skillTreesTable",
                 "cvVbox", "candidateCVHBox", "letterHBox", "letterVbox", "skillBox",
                 "someFilesTable", "datePostField", "editActions"
-'''
+          '''
           if old_layout_ids not in test:
               raise SystemExit('Layout ID patch anchor missing')
           test = test.replace(old_layout_ids, new_layout_ids, 1)
 
           tab_assert_anchor = '''        assertTrue(skills < files);
 
-        String controller = readProjectFile(CONTROLLER);
-'''
+                  String controller = readProjectFile(CONTROLLER);
+          '''
           tab_asserts = '''        assertTrue(skills < files);
 
-        assertTrue(xml.contains("caption=\\"msg://msgCandidate\\""));
-        assertTrue(xml.contains("caption=\\"msg://msgCV\\""));
-        assertTrue(xml.contains("caption=\\"msg://msgLetter\\""));
-        assertTrue(xml.contains("caption=\\"msg://msgCVSkillTree\\""));
-        assertTrue(xml.contains("caption=\\"mainMsg://msgFiles\\""));
-        assertTrue(xml.contains("<dialogMode height=\\"800\\""));
-        assertTrue(xml.contains("width=\\"1200\\"/>"));
+                  assertTrue(xml.contains("caption=\\"msg://msgCandidate\\""));
+                  assertTrue(xml.contains("caption=\\"msg://msgCV\\""));
+                  assertTrue(xml.contains("caption=\\"msg://msgLetter\\""));
+                  assertTrue(xml.contains("caption=\\"msg://msgCVSkillTree\\""));
+                  assertTrue(xml.contains("caption=\\"mainMsg://msgFiles\\""));
+                  assertTrue(xml.contains("<dialogMode height=\\"800\\""));
+                  assertTrue(xml.contains("width=\\"1200\\"/>"));
 
-        String controller = readProjectFile(CONTROLLER);
-'''
+                  String controller = readProjectFile(CONTROLLER);
+          '''
           if tab_assert_anchor not in test:
               raise SystemExit('Tab assertion patch anchor missing')
           test = test.replace(tab_assert_anchor, tab_asserts, 1)
@@ -141,11 +141,11 @@ jobs:
 
           section = '''### CandidateCV
 
-| Форма | Controller | Документ |
-|-------|------------|----------|
-| Edit | `hunttech_CandidateCV.edit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) |
+          | Форма | Controller | Документ |
+          |-------|------------|----------|
+          | Edit | `hunttech_CandidateCV.edit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) |
 
-'''
+          '''
           if '### CandidateCV\n' not in readme:
               anchor = '### OpenPosition\n'
               if anchor not in readme:
