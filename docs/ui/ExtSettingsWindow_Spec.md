@@ -4,7 +4,7 @@
 > XML: `ext-settings-window.xml`.  
 > Базовый класс: `com.haulmont.cuba.web.app.ui.core.settings.SettingsWindow`.  
 > Локальный визуальный namespace: `.ext-settings-window`.  
-> Связанные документы: [UI/UX-концепция HRM HuntTech](../architecture/HRM_HuntTech_UI_UX_Design_Concept.md), [UserSettings](../entities/user-settings/UserSettings.md), [UserAiProfile](../entities/UserAiProfile.md), [UserAiContextService](../services/UserAiContextService.md).
+> Связанные документы: [UI/UX-концепция HRM HuntTech](../architecture/HRM_HuntTech_UI_UX_Design_Concept.md), [UserSettings](../entities/user-settings/UserSettings.md), [UserAiProfile](../entities/UserAiProfile.md), [UserAiContextService](../services/UserAiContextService.md), [аватар ExtSettingsWindow](ExtSettingsWindowAvatar_Spec.md).
 
 ## Business & Context Intro
 
@@ -19,7 +19,7 @@
 
 По умолчанию пользователь предпочитает собственные API-подключения и промпты. Это делает персональный контур основным при наличии подходящих настроек, но не переносит в экран алгоритмы маршрутизации, fallback или разрешения конфликтов промптов.
 
-Визуальный слой должен быть явно узнаваемой частью общего дизайн-языка HRM HuntTech. Для этого форма использует подтверждённую композицию `JobCandidateEdit`: тёмная контекстная панель слева, светлая рабочая область справа, выраженные вкладки, toolbar, карточки и поля высотой 38 px. Изменение AI-предпочтений не перестраивает утверждённую компоновку и не затрагивает локальный SCSS семи тем.
+Визуальный слой должен быть явно узнаваемой частью общего дизайн-языка HRM HuntTech. Для этого форма использует подтверждённую композицию `JobCandidateEdit`: тёмная контекстная панель слева, светлая рабочая область справа, выраженные вкладки, toolbar, карточки и поля высотой 38 px. SMTP, POP3 и IMAP располагаются вертикально в полноширинных раскрываемых секциях, чтобы фиксированная sidebar не сжимала почтовые поля. AI-предпочтения, аватар `OvaFallbackImage` и локальный SCSS семи тем сохраняются.
 
 ### UI Context & Navigation
 
@@ -32,7 +32,7 @@
 | «Настройка email» | `mailAccessTab` | поля `UserSettings`, заполняемые и собираемые контроллером вручную |
 | AI | `aiAccessTab` | два предпочтения `UserSettings`, коллекция `UserAiConfiguration` |
 
-Все четыре вкладки используют общий корневой визуальный слой `.ext-settings-window`. Внутри каждой вкладки сохраняется существующая двухпанельная структура: контекст и индекс разделов слева, рабочая область с toolbar и карточками справа.
+Все четыре вкладки используют общий корневой визуальный слой `.ext-settings-window`. Внутри каждой вкладки сохраняется существующая двухпанельная структура: контекст и индекс разделов слева, рабочая область с toolbar и карточками либо аккордеонами справа.
 
 На вкладке AI карточка `personalAiApiPreferenceBox` содержит:
 
@@ -49,7 +49,9 @@
 - сохранение окна → `userSettings` добавляется в общий `CommitContext` → оба значения сохраняются атомарно;
 - повторное открытие → значения загружаются из `HUNTTECH_USER_SETTINGS` → checkbox восстанавливают сохранённое состояние;
 - изменение режима, темы, языка, часового пояса или стартового экрана → работает штатная логика CUBA → значения применяются без нового контроллерного кода;
-- открытие вкладки email → `setEmailSettings()` заполняет прежние поля → datasource и порядок сохранения не меняются;
+- открытие вкладки email → `setEmailSettings()` заполняет прежние поля → SMTP отображается раскрытым, а POP3 и IMAP доступны в следующих вертикальных секциях;
+- раскрытие или сворачивание почтовой секции → меняется только видимость её содержимого → значения полей и порядок сохранения не меняются;
+- сохранение окна → `collectEmailSettings()` читает те же `TextField` и `CheckBox` → значения записываются в `UserSettings`;
 - нажатие AI-действий → выполняются существующие `invoke`-методы → визуальный слой не инициирует запросы и не меняет маршрутизацию;
 - нажатие «Показать передаваемые данные» → контроллер проверяет профиль, сервис и XML-компоненты → предпросмотр раскрывается либо показывается понятное предупреждение без закрытия формы;
 - ошибка сервиса предпросмотра → stack trace записывается в журнал приложения → пользователю показывается warning вместо `NullPointerException`;
@@ -70,7 +72,7 @@
 | Footer style | `ext-settings-footer` |
 | Поддерживаемые темы | `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light`, `hunttech-modern-dark` |
 
-Экран остаётся legacy-экраном CUBA Platform 7.3. Корневые секции `<window>`, `<dsContext>` и `<layout>` сохранены. Изменение ограничено двумя полями `UserSettings`, их XML-binding, миграциями и null-safe обработкой предпросмотра. Существующие actions, JPQL, views и операции `UserAiConfiguration` не меняются.
+Экран остаётся legacy-экраном CUBA Platform 7.3. Корневые секции `<window>`, `<dsContext>` и `<layout>` сохранены. Актуальный экран одновременно содержит AI-предпочтения, null-safe предпросмотр, аватар `OvaFallbackImage` и визуальный email-аккордеон. Изменение email-компоновки не затрагивает entity, БД, контроллер, actions, JPQL, views и операции `UserAiConfiguration`.
 
 ## 2. Связь с моделью данных
 
@@ -123,7 +125,7 @@ context.addInstanceToCommit(userSettings);
 - `pop3Server`, `pop3Port`, `pop3PasswordRequired`, `pop3Password`;
 - `imapServer`, `imapPort`, `imapPasswordRequired`, `imapPassword`.
 
-Поля портов сохраняют `datatype="int"` и `IntegerValidator`.
+Поля портов сохраняют `datatype="int"` и `IntegerValidator`. Перенос полей в `GroupBoxLayout` не меняет инъекции, загрузку `setEmailSettings()` и сбор значений `collectEmailSettings()`.
 
 ## 3. База данных
 
@@ -157,6 +159,7 @@ ext-settings-window
 │   ├── msgMyInfo
 │   │   └── userAiProfileMainBox
 │   │       ├── userAiProfileSidebar (270 px)
+│   │       │   └── userPic [OvaFallbackImage, 176×176]
 │   │       └── userAiProfileContentScrollBox
 │   ├── msgInterface
 │   │   └── interfaceSettingsMainBox
@@ -166,6 +169,12 @@ ext-settings-window
 │   │   └── emailSettingsMainBox
 │   │       ├── emailSettingsSidebar (270 px)
 │   │       └── emailSettingsContentScrollBox
+│   │           └── emailSettingsContent
+│   │               ├── emailSettingsToolbar
+│   │               └── emailSettingsAccordion
+│   │                   ├── smtpSettingsSection — раскрыт
+│   │                   ├── pop3SettingsSection — свёрнут
+│   │                   └── imapSettingsSection — свёрнут
 │   └── aiAccessTab
 │       └── aiSettingsMainBox
 │           ├── aiSettingsSidebar (270 px)
@@ -197,17 +206,25 @@ ext-settings-window
 
 ### 5.2. Вкладка «Настройка email»
 
-Порядок внутри каждой карточки сохраняется:
+SMTP, POP3 и IMAP представлены тремя полноширинными секциями `GroupBoxLayout`, расположенными вертикально в контейнере `emailSettingsAccordion`.
+
+Начальное состояние:
+
+- `smtpSettingsSection` — раскрыта;
+- `pop3SettingsSection` — свёрнута;
+- `imapSettingsSection` — свёрнута.
+
+Порядок внутри каждой секции сохраняется:
 
 ```text
 сервер → порт → требование пароля → пароль
 ```
 
-SMTP, POP3 и IMAP остаются тремя равноправными карточками. Пароли не передаются в ИИ-контекст.
+Сохраняются внутренние контейнеры `smtpSettingsCard`, `pop3SettingsCard`, `imapSettingsCard`, все 12 component ID почтовых полей, типы полей и `IntegerValidator`. Раскрытие секций не требует Java-обработчиков и не сохраняется между сеансами. Пароли не передаются в ИИ-контекст.
 
 ### 5.3. Вкладка «Обо мне» и предпросмотр
 
-Сохраняются datasource, consent-логика, валидация опыта и атомарное сохранение. `previewAiContext()` не отправляет HTTP-запрос к LLM.
+Сохраняются datasource, consent-логика, валидация опыта, аватар `OvaFallbackImage` и атомарное сохранение. `previewAiContext()` не отправляет HTTP-запрос к LLM.
 
 Предпросмотр выполняется последовательно:
 
@@ -269,15 +286,17 @@ SMTP, POP3 и IMAP остаются тремя равноправными кар
 - рабочая область начинается после разделителя и имеет самостоятельный фон;
 - hover не меняет размеры элементов.
 
-### 6.4. Рабочая область, toolbar и карточки
+### 6.4. Рабочая область, toolbar, карточки и аккордеоны
 
 - фон рабочей области вычисляется из `$v-app-background-color` и `$v-panel-background-color`;
 - toolbar имеет минимальную высоту 58 px, внутренние отступы и локальную тень;
 - карточки имеют радиус 8 px, рамку, внутренний отступ 20–22 px и тень `0 2px 8px`;
 - заголовки карточек — 18 px, насыщенность 700;
 - заголовки toolbar — 20 px, насыщенность 700;
-- email-карточки получают верхнюю акцентную границу 3 px;
-- второй checkbox использует существующий класс `ai-settings-preference-checkbox`, поэтому новая глобальная стилизация не требуется.
+- email-секции используют уже проверенный локальный стиль `user-ai-profile-section`, поэтому визуально совпадают с аккордеонами вкладки «Обо мне» без нового глобального SCSS;
+- каждая email-секция занимает 100% рабочей ширины и рассчитывает высоту по содержимому;
+- прежний трёхколоночный `emailSettingsGrid` удалён из XML, поэтому фиксированная sidebar больше не сжимает три протокола в одну строку;
+- второй AI-checkbox использует существующий класс `ai-settings-preference-checkbox`, поэтому новая глобальная стилизация не требуется.
 
 ### 6.5. Поля и состояния
 
@@ -313,11 +332,12 @@ SMTP, POP3 и IMAP остаются тремя равноправными кар
 3. Data API остаётся `dsContext`.
 4. Legacy component ID не переименовываются.
 5. Существующие `datasource`, `property`, `required`, validators, actions и `invoke` сохраняются.
-6. Новые checkbox используют штатный legacy datasource-binding.
+6. AI-checkbox используют штатный legacy datasource-binding.
 7. `UserSettings` сохраняется через существующий `CommitContext`.
-8. Визуальный слой подключается только через `stylename` и theme extension.
-9. SCSS не инициирует загрузку данных и не вмешивается в lifecycle.
-10. Глобальные Vaadin-селекторы не добавляются.
+8. Почтовый аккордеон использует штатные атрибуты `GroupBoxLayout`: `collapsable`, `collapsed`, `showAsPanel`.
+9. Визуальный слой подключается только через `stylename` и theme extension.
+10. SCSS не инициирует загрузку данных и не вмешивается в lifecycle.
+11. Глобальные Vaadin-селекторы не добавляются.
 
 ## 8. Обязательные проверки
 
@@ -333,6 +353,7 @@ git diff --check
 
 ./gradlew :app-core:test \
           --tests 'com.company.hunttech.core.UserSettingsAiApiPreferenceTest' \
+          --tests 'com.company.hunttech.core.ExtSettingsWindowAvatarComponentTest' \
           --no-daemon --stacktrace
 
 ./gradlew test \
@@ -352,6 +373,7 @@ git diff --check
 Ожидается:
 
 - `UserSettingsAiApiPreferenceTest` — 11/11 PASS;
+- `ExtSettingsWindowAvatarComponentTest` — 2/2 PASS;
 - `ScreenViewIntegrityTest` — 8/8 PASS;
 - Data View Integrity — PASS;
 - SQL и Liquibase — PASS;
@@ -375,7 +397,10 @@ git diff --check
 - нажатие «Показать передаваемые данные» не вызывает `NullPointerException`;
 - при корректном профиле показывается очищенный предпросмотр;
 - при недоступном профиле или ошибке сервиса форма остаётся открытой, показывается warning;
-- журнал содержит stack trace исходной runtime-ошибки без потери контекста.
+- журнал содержит stack trace исходной runtime-ошибки без потери контекста;
+- значения SMTP, POP3 и IMAP загружаются и сохраняются прежними методами;
+- раскрытие и сворачивание почтовых секций не изменяет введённые значения;
+- аватар `OvaFallbackImage`, upload и fallback работают без регрессии.
 
 ### 8.2. Визуальный smoke
 
@@ -387,8 +412,12 @@ git diff --check
 - toolbar 58 px и карточки с выраженной границей;
 - поля высотой 38 px;
 - оба AI-checkbox полностью видимы и не перекрываются;
+- SMTP, POP3 и IMAP расположены вертикально и занимают всю ширину рабочей области;
+- SMTP раскрыт при первом открытии, POP3 и IMAP свёрнуты;
+- каждая почтовая секция раскрывается и сворачивается без потери введённых значений;
 - отсутствие обрезки и горизонтальной прокрутки при ширине 1200 px;
 - focus, hover, read-only, disabled и validation states;
+- круглый аватар отображается через `OvaFallbackImage` без искажения;
 - отсутствие влияния на `JobCandidateEdit` и другие формы;
 - наличие `.ext-settings-window` и `#172638` в развёрнутом `VAADIN/themes/*/styles.css`;
 - hard reload браузера с отключённым cache перед итоговым сравнением.
@@ -399,6 +428,8 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-25 | PR #17 перебазирован на актуальный `master`; документация email-аккордеона объединена с AI-предпочтениями и `OvaFallbackImage` без потери функциональных контрактов |
+| 2026-07-24 | SMTP, POP3 и IMAP вкладки «Настройка email» перестроены из трёхколоночной сетки в вертикальный аккордеон; component ID, валидаторы, загрузка и сохранение значений не изменены |
 | 2026-07-24 | Оба персональных AI-предпочтения включены по умолчанию; добавлен checkbox «Предпочитать мои промпты», сохранение в `UserSettings`, миграции и null-safe исправление `previewAiContext()` |
 | 2026-07-24 | Исправлена недостаточно заметная визуальная адаптация: все вкладки получили тёмную контекстную панель, акцент `#ffb11b`, вкладки 48 px, toolbar 58 px, поля 38 px и выраженные карточки в дизайн-языке `JobCandidateEdit`; XML и бизнес-логика не изменены |
 | 2026-07-24 | Визуальное оформление `ExtSettingsWindow` адаптировано к дизайн-языку `JobCandidateEdit` через локальный namespace и theme-aware состояния; реализация признана визуально недостаточной после локального deploy |
