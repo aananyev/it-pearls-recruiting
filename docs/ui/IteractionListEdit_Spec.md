@@ -1,38 +1,38 @@
 # IteractionListEdit — спецификация экранной формы
 
-> Controller: `hunttech_IteractionList.edit`
-> XML: `modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml`
-> Entity: [IteractionList](../entities/iteraction-list/IteractionList.md)
-> Legacy-spec: [hunttech_IteractionList.edit_Spec.md](../screens/iteraction-list/hunttech_IteractionList.edit_Spec.md)
+> Controller: `hunttech_IteractionList.edit`  
+> XML: `modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml`  
+> Entity: [IteractionList](../entities/iteraction-list/IteractionList.md)  
+> Legacy-spec: [hunttech_IteractionList.edit_Spec.md](../screens/iteraction-list/hunttech_IteractionList.edit_Spec.md)  
 > UI/UX-концепция: [HRM_HuntTech_UI_UX_Design_Concept.md](../architecture/HRM_HuntTech_UI_UX_Design_Concept.md)
 
 ## Назначение и бизнес-смысл (What & Why)
 
-`IteractionListEdit` фиксирует конкретное взаимодействие рекрутёра с кандидатом по вакансии: участника процесса, вакансию, тип взаимодействия, рейтинг, способ коммуникации, рекрутёра, дополнительное значение и комментарий. Экран влияет на цепочку взаимодействий, статус кандидата, подписки, уведомления, сведения о трудоустройстве и историю вакансии, поэтому визуальная адаптация обязана сохранять все CUBA- и бизнес-контракты.
+`IteractionListEdit` фиксирует взаимодействие рекрутёра с кандидатом по вакансии: участника процесса, вакансию, тип взаимодействия, рейтинг, способ коммуникации, рекрутёра, дополнительное значение и комментарий. Экран участвует в формировании истории кандидата, статусов процесса, подписок, уведомлений и связанных действий, поэтому визуальные изменения не должны изменять lifecycle, data-контракты и бизнес-логику.
 
-Редизайн от 2026-07-25 решает только задачу визуальной иерархии: постоянный контекст кандидата и вакансии вынесен в тёмную панель, рабочие поля сгруппированы в светлые карточки, а существующие действия закреплены в нижней панели. Java-контроллер, entity, БД, loaders, JPQL, views, bindings, actions и `invoke` не изменялись.
+Уточнение компоновки от 2026-07-25 устраняет визуальный разрыв двухпанельной формы: тёмная контекстная панель теперь занимает полную высоту диалога, а toolbar, вкладка и footer относятся только к светлой рабочей области. Рабочие поля выстроены в последовательности фактической работы рекрутёра.
 
 ## UI Context & Navigation
 
-- Экран открывается из `hunttech_IteractionList.browse`, карточки кандидата и связанных сценариев создания/редактирования взаимодействия.
-- Picker кандидата открывает lookup и editor `JobCandidate`.
-- Picker вакансии открывает lookup и editor `OpenPosition`.
-- Кнопка динамического действия может открыть экран класса, заданного типом взаимодействия.
-- Подписка открывает editor `SubscribeCandidateAction`.
-- Сохранение выполняется стандартным action `windowCommitAndClose`; отмена — `windowClose`.
-- Экран остаётся модальным диалогом `1000 × 650`; размер не изменён.
+- Экран открывается из `hunttech_IteractionList.browse`, карточки кандидата и связанных сценариев создания или редактирования взаимодействия.
+- Picker кандидата сохраняет lookup и open для `JobCandidate`.
+- Picker вакансии сохраняет lookup и open для `OpenPosition`.
+- Выбор типа взаимодействия управляет существующими динамическими компонентами дополнительного действия.
+- Кнопка подписки открывает существующий editor подписки.
+- Сохранение выполняет `windowCommitAndClose`, отмена — `windowClose`.
+- Экран остаётся модальным диалогом `1000 × 650`.
 
 ## Behavior Summary
 
-- открытие нового взаимодействия → контейнер получает новую entity → контроллер заполняет номер, дату и текущего рекрутёра;
-- выбор кандидата → меняется `candidateField` → сохраняются прежние проверки владения кандидатом и source фотографии;
-- выбор вакансии → меняется `vacancyFiels` → выполняются прежние проверки закрытия, соответствия кандидату, подписки, статуса, приоритета и логотипа проекта;
-- выбор типа взаимодействия → меняется `iteractionTypeField` → контроллер переключает `buttonCallAction`, `addDate`, `addString` или `addInteger`, их caption и required;
-- ввод дополнительного значения → срабатывает существующий listener → значение добавляется в комментарий;
-- сохранение → выполняются прежние BeforeCommit/AfterCommit/BeforeClose обработчики → формируется цепочка, обновляются статусы, новости, подписки и email;
-- смена темы → подключается локальный mixin `iteraction-list-editor-theme` → структура и поведение формы не меняются.
+- открытие нового взаимодействия → контроллер заполняет номер, дату и текущего рекрутёра → пользователь получает готовую форму;
+- выбор кандидата → сохраняются прежние проверки и загрузка фотографии → sidebar обновляет контекст;
+- выбор вакансии → сохраняются проверки закрытия, подписки, статуса, приоритета и логотипа → sidebar обновляет вакансию;
+- выбор типа взаимодействия → Java переключает `buttonCallAction`, `addString`, `addDate` или `addInteger` → дополнительное значение остаётся в соседней колонке;
+- изменение rating → Java сохраняет прежнее оформление и правила → оценка отображается в форме и sidebar;
+- сохранение → выполняются прежние BeforeCommit/AfterCommit/BeforeClose обработчики → данные и связанные процессы изменяются как до reflow;
+- смена темы → локальный mixin `.iteraction-list-editor` применяет presentation-слой → функциональные контракты не меняются.
 
-## 1. Точка вызова и технический контекст
+## 1. Технический контекст
 
 | Параметр | Значение |
 |---|---|
@@ -43,148 +43,124 @@
 | Загрузка | `@LoadDataBeforeShow` |
 | Root namespace | `.iteraction-list-editor` |
 | Диалог | `width=1000`, `height=650`, `modal=true` |
-| Эталонная тема | `halo` |
-| Активная тема по умолчанию | `hover` |
-| Поддерживаемые темы | `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light`, `hunttech-modern-dark` |
+| Темы | `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light`, `hunttech-modern-dark` |
 
 ## 2. Data-контракты
 
-| Контейнер / loader | Тип / view | Назначение | Статус редизайна |
+| Контейнер / loader | View | Назначение | Статус |
 |---|---|---|---|
-| `iteractionListDc` / `iteractionListDl` | `IteractionList`, `iteractionList-edit-view` | редактируемое взаимодействие | без изменений |
-| `iteractionTypesDc` / `iteractionTypesLc` | `Iteraction`, `iteraction-list-type-view` | типы взаимодействий | без изменений |
-| `openPositionDc` / `openPositionsDl` | `OpenPosition`, `openPosition-iteraction-list-picker-view` | вакансии с фильтрами | без изменений |
-| `usersDc` / `usersDl` | `User`, `_minimal` | рекрутёры | без изменений |
+| `iteractionListDc` / `iteractionListDl` | `iteractionList-edit-view` | редактируемое взаимодействие | без изменений |
+| `iteractionTypesDc` / `iteractionTypesLc` | `iteraction-list-type-view` | типы взаимодействий | без изменений |
+| `openPositionDc` / `openPositionsDl` | `openPosition-iteraction-list-picker-view` | вакансии с действующими conditions | без изменений |
+| `usersDc` / `usersDl` | `_minimal` | активные пользователи | без изменений |
 
-Сохранены исходные JPQL, query conditions, параметры loaders, `cacheable`, views и защита `openPositionsDl` от ранней загрузки. `iteractionList-edit-view` не изменялся.
+JPQL, query conditions, параметры loaders, `cacheable` и views сохранены. `IteractionListEdit.java`, entity, БД, Liquibase и `views.xml` не изменялись.
 
-## 3. Карта component ID и сохранённых контрактов
-
-| ID | Тип | Binding / action / invoke | Java-инъекция и обработчик | Динамическое состояние | Было → стало | Контракт |
-|---|---|---|---|---|---|---|
-| `numberIteractionField` | `TextField<BigDecimal>` | `iteractionListDc.numberIteraction` | `@Inject`; `setIteractionNumber()` | read-only | верхний groupBox → sidebar, служебный блок | сохранён |
-| `dateIteractionField` | `DateField<Date>` | `iteractionListDc.dateIteraction` | `@Inject`; `setCurrentDate()`, `onBeforeShow()` | editable только для новой entity | верхний groupBox → sidebar | сохранён |
-| `closingDateVacancyLabel` | `Label<String>` | — | `@Inject`; `setClosingDateLabel()` | `visible` и style меняет Java | верхний groupBox → sidebar | сохранён |
-| `companyLabel` | `Label<String>` | HTML value | `@Inject`; `vacancyFieldValueChange()` | value меняет Java | верхний groupBox → sidebar | сохранён |
-| `projectLabel` | `Label<String>` | — | `@Inject`; `vacancyFieldValueChange()` | value меняет Java | верхний groupBox → sidebar | сохранён |
-| `ratingLabel` | `Label<String>` | — | `@Inject`; listener `setRatingField()` | `visible=false`, runtime style | верхний groupBox → sidebar rating block | сохранён |
-| `ratingImage` | `Image` | runtime theme resource | `@Inject`; `setPriorityLabel()` | `visible=false`, source меняет Java | верхний groupBox → sidebar rating block | сохранён |
-| `projectLogoImage` | `Image` | runtime `vacancy.projectName.projectLogo` | `@Inject`; `onInit()`, `onVacancyFielsValueChange()` | source/valueSource меняет Java | верхний groupBox → sidebar, отдельное изображение | сохранён |
-| `candidateImage` | `Image` | `iteractionListDc.candidate.fileImageFace` | `@Inject`; `onInit()`, `onCandidateFieldValueChange()` | source/valueSource меняет Java | верхний groupBox → sidebar, отдельное изображение | сохранён |
-| `mostPopularHbox` | `HBoxLayout` | динамические LinkButton | `@Inject`; `setMostPopularIteraction()` | Java добавляет компоненты | отдельный groupBox → карточка популярных | сохранён |
-| `mostPopularIteractionHBox` | `HBoxLayout` | — | прямой injection отсутствует | остаётся отдельной XML-точкой | grid → та же карточка, отдельный контейнер | сохранён |
-| `statusOfVacansyLabel` | `Label<String>` | — | `@Inject`; `setStatusOfVacancyLabel()` | value/style меняет Java | grid → sidebar | сохранён |
-| `alternativeVacancyLinkButton` | `LinkButton` | click-логика/description Java | `@Inject`; `setStatusOfVacancyLabel()` | `visible=false`, description меняет Java | grid → sidebar рядом со статусом | сохранён |
-| `trafficLighterImage` | `Image` | runtime theme resource | `@Inject`; `setPriorityLabel()` | source меняет Java | grid → sidebar | сохранён |
-| `currentPriorityLabel` | `Label<String>` | — | `@Inject`; `setPriorityLabel()` | value меняет Java | grid → sidebar | сохранён |
-| `outstaffingCostHBox` | `HBoxLayout` | `vacancy.outstaffingCost` | `@Inject`; `onVacancyFielsValueChange2()` | `visible=false`, Java включает по данным | grid → sidebar | сохранён |
-| `ratingField` | `LookupField` | `iteractionListDc.rating` | `@Inject`; `setRatingField()`, `@Install optionStyleProvider` | `required=true` | grid → рабочая карточка | сохранён |
-| `candidateField` | `SuggestionPickerField<JobCandidate>` | `iteractionListDc.candidate`; lookup/open; исходный query | `@Inject`; несколько value listeners | `required=true` | grid → первый ряд рабочей карточки | сохранён |
-| `vacancyFiels` | `LookupPickerField<OpenPosition>` | `iteractionListDc.vacancy`; lookup/open | `@Inject`; два `@Subscribe`, три `@Install` | options, icons, styles и dialogs меняет Java | grid → первый ряд рабочей карточки | сохранён |
-| `onlyMySubscribeCheckBox` | `CheckBox` | runtime loader parameter | `@Inject`; `setOnlyMySubscribeCheckBox()` | value/listener меняет Java | рядом с вакансией → рядом с вакансией | сохранён |
-| `iteractionTypeField` | `LookupPickerField<Iteraction>` | `iteractionListDc.iteractionType`; lookup | `@Inject`; `onIteractionTypeFieldValueChange()` | `required=true`; управляет dynamic fields | grid → рабочая карточка | сохранён |
-| `buttonsPanelCallAction` | `ButtonsPanel` | — | injection отсутствует | адаптивный host динамических вариантов | grid → рабочая карточка | сохранён |
-| `buttonCallAction` | `Button` | `invoke="callActionEntity"` | `@Inject`; `changeField()` | Java меняет visible/caption | dynamic panel → общий dynamic panel | сохранён |
-| `addString` | `TextField<String>` | `iteractionListDc.addString` | `@Inject`; `changeField()`, `@Subscribe` | Java меняет visible/required/caption | dynamic panel → общий dynamic panel | сохранён |
-| `addDate` | `DateField<Date>` | `iteractionListDc.addDate` | `@Inject`; `changeField()`, `@Subscribe` | Java меняет visible/required/caption/value | dynamic panel → общий dynamic panel | сохранён |
-| `addInteger` | `TextField<Integer>` | `iteractionListDc.addInteger` | `@Inject`; `changeField()`, `@Subscribe` | Java меняет visible/required/caption | dynamic panel → общий dynamic panel | сохранён |
-| `communicationMethodField` | `TextField<String>` | `iteractionListDc.communicationMethod` | injection отсутствует | стандартное binding | grid → рабочая карточка | сохранён |
-| `recrutierField` | `LookupPickerField<ExtUser>` | `iteractionListDc.recrutier`; lookup | `@Inject`; `onAfterShow()`, `@Install optionIconProvider` | value для новой entity задаёт Java | grid → рабочая карточка | сохранён |
-| `commentField` | `TextArea<String>` | `iteractionListDc.comment` | `@Inject`; lazy load, required и автодополнение | required меняет Java | под grid → полноширинная карточка | сохранён |
-| `subscribeButton` | `Button` | `invoke="onButtonSubscribeClick"` | публичный handler | доступность штатная | footer → локально оформленный footer | сохранён |
-| `windowCommitAndClose` | standard action button | action | CUBA lifecycle | primary только presentation | footer → footer | сохранён |
-| `windowClose` | standard action button | action | CUBA lifecycle | secondary только presentation | footer → footer | сохранён |
-
-## 4. Новая визуальная композиция
+## 3. Компоновка
 
 ```text
-toolbar 58 px
-└─ main layout
-   ├─ sidebar 270 px
-   │  ├─ candidateImage + projectLogoImage
-   │  ├─ number/date/closingDate
-   │  ├─ company/project
-   │  ├─ vacancy status/priority/outstaffing
-   │  └─ rating context
-   └─ workspace
-      ├─ штатный TabSheet 48 px
-      └─ vertical ScrollBox
-         ├─ popular interactions card
-         ├─ primary interaction card
-         │  ├─ candidate + vacancy
-         │  ├─ rating
-         │  ├─ interaction type + dynamic host
-         │  └─ communication + recruiter
-         └─ full-width comment card
-footer 58 px: subscribe → commit-and-close → cancel
+main layout 100% × 100%
+├─ sidebar 252 px, full height
+│  └─ context card
+│     ├─ candidateImage 104 px + projectLogoImage 76 px
+│     ├─ numberIteractionField
+│     ├─ dateIteractionField
+│     ├─ closingDateVacancyLabel
+│     ├─ companyLabel / projectLabel
+│     ├─ vacancy status / priority / outstaffing
+│     └─ rating context
+└─ workspace, expanded
+   ├─ toolbar 52 px
+   ├─ TabSheet 42 px + scrollable content
+   │  ├─ popular interactions card
+   │  ├─ form card
+   │  │  ├─ candidate + vacancy / subscription filter
+   │  │  ├─ interaction type + dynamic action/value
+   │  │  ├─ rating + recruiter
+   │  │  └─ communication method, full width
+   │  └─ comment card, full width
+   └─ footer 54 px
 ```
 
-Выбран двухпанельный layout, поскольку исходный диалог шириной 1000 px оставляет около 700 px полезной рабочей области после sidebar. Рабочая сетка сохраняет две колонки, а комментарий вынесен в отдельную полноширинную карточку. Аккордеоны для основных полей не использованы: кандидат, вакансия, рейтинг и тип взаимодействия должны быть доступны без дополнительного раскрытия. Штатно collapsable остаётся только существующий блок популярных взаимодействий и контекстный groupBox.
+### Причины решений
+
+- Sidebar больше не пересекается верхней и нижней светлыми панелями и воспринимается как единая контекстная область.
+- Ширина sidebar уменьшена с `270` до `252 px`, поэтому рабочая область получила дополнительное пространство без потери читаемости.
+- Фото кандидата остаётся главным визуальным объектом; логотип проекта уменьшен и используется как вторичный контекст.
+- Номер и дата расположены вертикально: captions и значения не сжимаются в узкой панели.
+- Компания, проект, статус и приоритет оформлены как `caption → value`, а не как длинные горизонтальные строки.
+- `ratingField` больше не занимает две колонки; он расположен рядом с `recrutierField`.
+- `communicationMethodField` занимает всю ширину и не конкурирует с picker рекрутёра.
+- `onlyMySubscribeCheckBox` выровнен по левой границе поля вакансии.
+- Комментарий уменьшен до `160 px`, чтобы основные поля и footer были доступны при меньшем объёме прокрутки.
+
+## 4. Сохранённые component-контракты
+
+| Компоненты | Сохранённый контракт |
+|---|---|
+| `candidateField`, `vacancyFiels` | bindings, lookup/open actions и query |
+| `iteractionTypeField` | binding, lookup и Java value-change |
+| `buttonCallAction` | `invoke="callActionEntity"` |
+| `addString`, `addDate`, `addInteger` | bindings и runtime visible/required/caption |
+| `ratingField` | binding, required, option style provider |
+| `recrutierField` | binding, optionsContainer и option icon provider |
+| `commentField` | binding, lazy reload, runtime required и автодополнение |
+| `candidateImage`, `projectLogoImage` | отдельные `Image`, прежние source/valueSource |
+| `mostPopularHbox`, `mostPopularIteractionHBox` | отдельные XML-контейнеры |
+| `subscribeButton` | `invoke="onButtonSubscribeClick"` |
+| footer | порядок subscribe → commit-and-close → cancel |
+
+Component ID, типы data-компонентов, bindings, actions, `invoke`, validators и runtime-управляемые состояния не изменены.
 
 ## 5. Локальный SCSS
 
-Для каждой темы создан файл:
+Во всех семи темах используется одинаковый файл:
 
 ```text
 modules/web/themes/<theme>/com.company.hunttech/iteraction-list-editor.scss
 ```
 
-Корень и mixin:
+Правила вложены только в `.iteraction-list-editor`. Локальный слой оформляет sidebar, toolbar, TabSheet, карточки, picker actions, checkbox, dynamic panel, comment, footer, focus, hover, disabled, read-only, required и validation error.
 
-```scss
-@mixin iteraction-list-editor-theme {
-  .iteraction-list-editor {
-    // только локальные правила формы
-  }
-}
-```
+Адаптивная геометрия при viewport до `1100 px`:
 
-SCSS оформляет toolbar, sidebar, карточки, TabSheet, поля, picker actions, checkbox, link button, focus, hover, disabled, read-only, validation error, required и footer. Все Vaadin-селекторы вложены в `.iteraction-list-editor`. Зависимости от `.job-candidate-editor` и `.ext-settings-window` нет.
+- sidebar: `232 px`;
+- candidate image: `94 px`;
+- project image: `68 px`;
+- уменьшенные горизонтальные padding рабочей области.
 
-## 6. Неизменённые функциональные контракты
+Глобальные `.v-table`, `.v-label`, `.v-button`, `.v-tabsheet` вне namespace не изменялись.
 
-- `IteractionListEdit.java` не изменён;
-- entity, поля, Liquibase, SQL и БД не изменены;
-- `iteractionList-edit-view` и `views.xml` не изменены;
-- все loaders, JPQL и query conditions идентичны исходным;
-- component ID, типы компонентов, bindings, actions, `invoke`, validators и captions существующих компонентов сохранены;
-- `Image` не заменены на другие типы;
-- `candidateImage` и `projectLogoImage` остаются отдельными компонентами;
-- runtime `visible`, `required`, `editable`, caption и styles контроллера не переопределены XML;
-- порядок footer-действий сохранён;
-- производительность data-слоя не изменяется: loaders, сервисы, background tasks и изображения не добавлены.
+## 6. Ограничения изменений
 
-## 7. Адаптивность и ограничения
+- бизнес-логика и Java handlers не изменены;
+- entity, поля, БД, Liquibase не изменены;
+- loaders, JPQL, conditions и views не изменены;
+- component ID, captions существующих компонентов, actions и `invoke` не изменены;
+- runtime `visible`, `required`, `editable`, caption и stylename не переопределены статически;
+- production не изменяется в рамках разработки;
+- merge допускается только после отчёта Hermes по точному HEAD SHA.
 
-- `dialogMode` сохранён `1000 × 650`;
-- sidebar имеет базовую ширину 270 px и локальное уменьшение до 242 px при узком viewport;
-- основной horizontal scroll не предусматривается;
-- рабочие контейнеры используют `min-width: 0`;
-- скрытые dynamic components остаются в одном контейнере и не получают статических `visible`/`required`;
-- фактическая геометрия, отсутствие пустых slot и читаемость captions должны быть подтверждены visual smoke после локального deploy.
+## 7. Обязательная проверка Hermes
 
-## 8. Проверки
+1. HEAD branch и HEAD PR совпадают с переданным SHA.
+2. Base PR = `master`, conflicts = NONE.
+3. `git diff --check`.
+4. Compile web и web tests.
+5. `ScreenViewIntegrityTest` — `8/8 PASS`.
+6. Data View Integrity — getters контроллера входят в `iteractionList-edit-view`.
+7. `:app-web:buildScssThemes` — PASS для семи тем.
+8. `clean assemble` — `BUILD SUCCESSFUL`.
+9. Local deploy и HTTP `/hrm/` = `200`.
+10. Functional smoke: кандидат, вакансия, тип, dynamic fields, rating, рекрутёр, подписка, save/cancel.
+11. Visual smoke семи тем: sidebar непрерывный, toolbar/footer только справа, нет horizontal scroll и пустых dynamic slots.
+12. Tomcat logs: новых critical errors NONE; P1 = 0; P2 = 0.
 
-| Проверка | Статус до Hermes |
-|---|---|
-| XML well-formed | PASS, локальная структурная проверка |
-| Состав изменённых файлов | PASS: XML, локальный SCSS, theme imports, docs |
-| Java изменён | NO |
-| component ID / binding static audit | PASS |
-| `git diff --check` | NOT VERIFIED |
-| compile / compileTestJava | NOT VERIFIED |
-| `ScreenViewIntegrityTest` 8/8 | NOT VERIFIED |
-| Data View Integrity | NOT VERIFIED |
-| `buildScssThemes` | NOT VERIFIED |
-| `clean assemble` | NOT VERIFIED |
-| local deploy / HTTP 200 | NOT VERIFIED |
-| visual smoke семи тем | NOT VERIFIED |
-| Tomcat logs / P1 / P2 | NOT VERIFIED |
-
-До проверки Hermes статус задачи: `WAITING_FOR_HERMES`.
+До отчёта Hermes статус задачи: `WAITING_FOR_HERMES`.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
-| 2026-07-25 | Выполнена строго визуальная адаптация `IteractionListEdit`: двухпанельная композиция, локальный namespace `.iteraction-list-editor`, карточки, theme-aware состояния семи тем и сохранение всех Java/data/CUBA-контрактов |
+| 2026-07-25 | Улучшена компоновка: sidebar сделан непрерывным по высоте, toolbar и footer перенесены в workspace, ширина sidebar уменьшена, поля выстроены по сценарию рекрутёра, геометрия синхронизирована в семи темах |
+| 2026-07-25 | Выполнена строго визуальная адаптация `IteractionListEdit`: двухпанельная композиция, локальный namespace `.iteraction-list-editor`, карточки и theme-aware состояния семи тем |

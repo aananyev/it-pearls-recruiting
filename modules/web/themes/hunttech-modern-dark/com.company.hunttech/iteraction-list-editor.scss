@@ -1,7 +1,7 @@
 /*
  * IteractionListEdit — локальный визуальный слой HRM HuntTech.
- * Тёмная контекстная панель сохраняет runtime-управляемый контекст,
- * а светлая рабочая область группирует прежние поля без изменения CUBA-контрактов.
+ * Sidebar занимает полную высоту формы, а toolbar и действия относятся
+ * только к рабочей области. Правила не меняют CUBA- и бизнес-контракты.
  */
 @mixin iteraction-list-editor-theme {
   .iteraction-list-editor {
@@ -13,38 +13,14 @@
     background: mix($v-app-background-color, $v-panel-background-color, 82%);
     overflow: hidden;
 
-    .iteraction-list-toolbar,
     .iteraction-list-main-layout,
     .iteraction-list-sidebar,
     .iteraction-list-workspace,
+    .iteraction-list-toolbar,
     .iteraction-list-content,
     .iteraction-list-card,
     .iteraction-list-footer {
       box-sizing: border-box;
-    }
-
-    .iteraction-list-toolbar {
-      width: 100% !important;
-      min-height: 58px;
-      padding: 11px 20px 10px;
-      background: $v-panel-background-color !important;
-      border-bottom: 1px solid rgba($v-font-color, 0.16);
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
-    }
-
-    .iteraction-list-toolbar-title {
-      color: mix($v-font-color, $v-panel-background-color, 92%) !important;
-      font-size: 20px !important;
-      font-weight: 700 !important;
-      line-height: 28px !important;
-      white-space: normal !important;
-    }
-
-    .iteraction-list-toolbar-context {
-      color: mix($v-font-color, $v-panel-background-color, 62%) !important;
-      font-size: 13px !important;
-      line-height: 22px !important;
-      white-space: normal !important;
     }
 
     .iteraction-list-main-layout {
@@ -61,11 +37,11 @@
     }
 
     .iteraction-list-sidebar {
-      width: 270px !important;
-      min-width: 270px !important;
-      max-width: 270px !important;
+      width: 252px !important;
+      min-width: 252px !important;
+      max-width: 252px !important;
       height: 100% !important;
-      padding: 16px 14px;
+      padding: 14px 12px;
       color: #f8fafc !important;
       border-right: 1px solid rgba(15, 23, 42, 0.78);
       box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18);
@@ -83,17 +59,17 @@
       color: #f8fafc !important;
       background: rgba(255, 255, 255, 0.055) !important;
       border: 1px solid rgba(255, 255, 255, 0.18) !important;
-      border-radius: 8px !important;
+      border-radius: 10px !important;
       box-shadow: none !important;
       overflow: hidden;
     }
 
     .iteraction-list-context-card .v-panel-caption,
     .iteraction-list-context-card .v-caption {
-      min-height: 42px;
-      padding: 10px 12px;
+      min-height: 40px;
+      padding: 9px 11px;
       color: #ffb11b !important;
-      font-size: 17px !important;
+      font-size: 16px !important;
       font-weight: 700 !important;
       line-height: 22px !important;
       background: rgba(255, 255, 255, 0.045) !important;
@@ -101,7 +77,7 @@
     }
 
     .iteraction-list-context-card .v-panel-content {
-      padding: 13px !important;
+      padding: 12px !important;
       color: #f8fafc !important;
       background: transparent !important;
       border: 0 !important;
@@ -115,28 +91,20 @@
       word-break: break-word;
     }
 
-    .iteraction-list-sidebar-caption {
-      color: rgba(248, 250, 252, 0.66) !important;
-      font-size: 12px !important;
-      font-weight: 600 !important;
-      line-height: 18px !important;
-    }
-
-    .iteraction-list-sidebar-section {
-      width: 100% !important;
-      padding: 10px 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.14);
+    .iteraction-list-identity-images {
+      min-height: 112px;
+      padding: 2px 0 6px;
     }
 
     .iteraction-list-candidate-image,
     .iteraction-list-candidate-image img,
     .iteraction-list-candidate-image .v-image-element {
-      width: 100px !important;
-      height: 100px !important;
-      min-width: 100px !important;
-      min-height: 100px !important;
-      max-width: 100px !important;
-      max-height: 100px !important;
+      width: 104px !important;
+      height: 104px !important;
+      min-width: 104px !important;
+      min-height: 104px !important;
+      max-width: 104px !important;
+      max-height: 104px !important;
       border-radius: 50% !important;
       object-fit: cover !important;
     }
@@ -151,26 +119,33 @@
     .iteraction-list-project-image,
     .iteraction-list-project-image img,
     .iteraction-list-project-image .v-image-element {
-      width: 100px !important;
-      height: 100px !important;
-      min-width: 100px !important;
-      min-height: 100px !important;
-      max-width: 100px !important;
-      max-height: 100px !important;
-      border-radius: 8px !important;
+      width: 76px !important;
+      height: 76px !important;
+      min-width: 76px !important;
+      min-height: 76px !important;
+      max-width: 76px !important;
+      max-height: 76px !important;
+      border-radius: 9px !important;
       object-fit: contain !important;
     }
 
     .iteraction-list-project-image {
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.94) !important;
-      border: 1px solid rgba(255, 255, 255, 0.52) !important;
-      box-shadow: 0 7px 18px rgba(0, 0, 0, 0.22);
+      background: rgba(255, 255, 255, 0.96) !important;
+      border: 1px solid rgba(255, 255, 255, 0.56) !important;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+    }
+
+    .iteraction-list-service-fields {
+      width: 100% !important;
+      padding: 2px 0 4px;
     }
 
     .iteraction-list-context-card .v-textfield,
     .iteraction-list-context-card .v-datefield-textfield {
-      min-height: 36px;
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 34px;
       color: #f8fafc !important;
       background: rgba(255, 255, 255, 0.08) !important;
       border-color: rgba(255, 255, 255, 0.24) !important;
@@ -180,8 +155,37 @@
     .iteraction-list-context-card .v-readonly,
     .iteraction-list-context-card .v-readonly .v-textfield,
     .iteraction-list-context-card .v-readonly .v-datefield-textfield {
-      color: rgba(248, 250, 252, 0.82) !important;
+      color: rgba(248, 250, 252, 0.84) !important;
       opacity: 1 !important;
+    }
+
+    .iteraction-list-closing-date {
+      padding: 8px 10px;
+      color: #ffcf66 !important;
+      background: rgba(255, 177, 27, 0.10) !important;
+      border: 1px solid rgba(255, 177, 27, 0.24);
+      border-radius: 7px;
+    }
+
+    .iteraction-list-sidebar-section {
+      width: 100% !important;
+      padding: 10px 0 2px;
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .iteraction-list-sidebar-metric {
+      width: 100% !important;
+      min-width: 0;
+      padding-bottom: 4px;
+    }
+
+    .iteraction-list-sidebar-caption {
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      line-height: 17px !important;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
     }
 
     .iteraction-list-context-card .v-button-link {
@@ -189,14 +193,14 @@
     }
 
     .iteraction-list-rating-context {
-      min-height: 52px;
-      padding-top: 8px;
+      min-height: 50px;
+      padding-top: 9px;
       border-top: 1px solid rgba(255, 255, 255, 0.14);
     }
 
     .iteraction-list-rating-context .v-label {
       color: #ffb11b !important;
-      font-size: 20px !important;
+      font-size: 19px !important;
       font-weight: 700 !important;
     }
 
@@ -209,6 +213,30 @@
       overflow: hidden;
     }
 
+    .iteraction-list-toolbar {
+      width: 100% !important;
+      min-height: 52px;
+      padding: 9px 18px 8px;
+      background: $v-panel-background-color !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.16);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+    }
+
+    .iteraction-list-toolbar-title {
+      color: mix($v-font-color, $v-panel-background-color, 92%) !important;
+      font-size: 19px !important;
+      font-weight: 700 !important;
+      line-height: 27px !important;
+      white-space: normal !important;
+    }
+
+    .iteraction-list-toolbar-context {
+      color: mix($v-font-color, $v-panel-background-color, 60%) !important;
+      font-size: 12px !important;
+      line-height: 21px !important;
+      white-space: normal !important;
+    }
+
     .iteraction-list-tabs {
       width: 100% !important;
       height: 100% !important;
@@ -219,27 +247,27 @@
     }
 
     .iteraction-list-tabs > .v-tabsheet-tabcontainer {
-      padding: 0 18px;
+      padding: 0 16px;
       background: $v-panel-background-color !important;
-      border-bottom: 1px solid rgba($v-font-color, 0.16) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.14) !important;
     }
 
     .iteraction-list-tabs .v-tabsheet-tabs,
     .iteraction-list-tabs .v-tabsheet-tabitem,
     .iteraction-list-tabs .v-tabsheet-tabitem-selected {
-      height: 48px;
+      height: 42px;
       background: transparent !important;
       border: 0 !important;
       box-shadow: none !important;
     }
 
     .iteraction-list-tabs .v-caption {
-      height: 48px;
-      padding: 0 16px !important;
-      color: mix($v-font-color, $v-panel-background-color, 78%) !important;
-      font-size: 15px !important;
+      height: 42px;
+      padding: 0 14px !important;
+      color: mix($v-font-color, $v-panel-background-color, 76%) !important;
+      font-size: 14px !important;
       font-weight: 600 !important;
-      line-height: 48px !important;
+      line-height: 42px !important;
       background: transparent !important;
       border: 0 !important;
       border-bottom: 3px solid transparent !important;
@@ -255,14 +283,15 @@
     }
 
     .iteraction-list-tabs > .v-tabsheet-content {
-      height: calc(100% - 49px) !important;
+      height: calc(100% - 43px) !important;
       padding: 0 !important;
       background: transparent !important;
       border: 0 !important;
       overflow: hidden;
     }
 
-    .iteraction-list-tabs .v-tabsheet-tabsheetpanel {
+    .iteraction-list-tabs .v-tabsheet-tabsheetpanel,
+    .iteraction-list-scroll {
       width: 100% !important;
       height: 100% !important;
       min-width: 0;
@@ -270,16 +299,10 @@
       border: 0 !important;
     }
 
-    .iteraction-list-scroll {
-      width: 100% !important;
-      height: 100% !important;
-      background: transparent !important;
-    }
-
     .iteraction-list-content {
       width: 100% !important;
       min-width: 0 !important;
-      padding: 16px 18px 20px;
+      padding: 14px 16px 18px;
     }
 
     .iteraction-list-card,
@@ -288,12 +311,12 @@
       min-width: 0 !important;
       background: $v-panel-background-color !important;
       border: 1px solid rgba($v-font-color, 0.15) !important;
-      border-radius: 8px !important;
+      border-radius: 9px !important;
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
     }
 
     .iteraction-list-card {
-      padding: 18px 20px 20px;
+      padding: 15px 17px 17px;
     }
 
     .iteraction-list-popular-card {
@@ -301,48 +324,49 @@
     }
 
     .iteraction-list-popular-card .v-panel-caption {
-      min-height: 46px;
-      padding: 11px 15px;
+      min-height: 42px;
+      padding: 9px 14px;
       color: mix($v-font-color, $v-panel-background-color, 90%) !important;
-      font-size: 17px !important;
+      font-size: 15px !important;
       font-weight: 700 !important;
-      line-height: 24px !important;
+      line-height: 23px !important;
       background: mix($v-app-background-color, $v-panel-background-color, 68%) !important;
       border-bottom: 1px solid rgba($v-font-color, 0.14) !important;
     }
 
     .iteraction-list-popular-card .v-panel-content {
-      padding: 14px 16px !important;
+      padding: 11px 14px !important;
       background: $v-panel-background-color !important;
       border: 0 !important;
     }
 
-    .iteraction-list-card .v-gridlayout,
-    .iteraction-list-card .v-gridlayout > div,
-    .iteraction-list-card table {
+    .iteraction-list-form-card .v-gridlayout,
+    .iteraction-list-form-card .v-gridlayout > div,
+    .iteraction-list-form-card table {
       width: 100% !important;
       min-width: 0 !important;
       table-layout: fixed;
     }
 
-    .iteraction-list-card .v-gridlayout-slot {
+    .iteraction-list-form-card .v-gridlayout-slot {
       min-width: 0 !important;
-      padding: 7px 8px;
+      padding: 6px 8px;
       vertical-align: top;
     }
 
-    .iteraction-list-card .v-caption {
+    .iteraction-list-form-card .v-caption,
+    .iteraction-list-comment-card .v-caption {
       color: mix($v-font-color, $v-panel-background-color, 82%) !important;
       font-size: 13px !important;
       font-weight: 600 !important;
-      line-height: 20px !important;
+      line-height: 19px !important;
     }
 
-    .iteraction-list-card .v-textfield,
-    .iteraction-list-card .v-textarea,
-    .iteraction-list-card .v-filterselect,
-    .iteraction-list-card .v-filterselect-input,
-    .iteraction-list-card .v-datefield-textfield {
+    .iteraction-list-form-card .v-textfield,
+    .iteraction-list-form-card .v-filterselect,
+    .iteraction-list-form-card .v-filterselect-input,
+    .iteraction-list-form-card .v-datefield-textfield,
+    .iteraction-list-comment-card .v-textarea {
       box-sizing: border-box;
       min-height: 38px;
       font-size: 15px !important;
@@ -352,60 +376,66 @@
       box-shadow: none !important;
     }
 
-    .iteraction-list-card .v-textarea {
-      min-height: 160px;
+    .iteraction-list-comment-card .v-textarea {
+      min-height: 145px;
       line-height: 1.45 !important;
       resize: vertical;
     }
 
-    .iteraction-list-card .v-textfield:hover,
-    .iteraction-list-card .v-textarea:hover,
-    .iteraction-list-card .v-filterselect:hover,
-    .iteraction-list-card .v-datefield:hover {
+    .iteraction-list-form-card .v-textfield:hover,
+    .iteraction-list-form-card .v-filterselect:hover,
+    .iteraction-list-form-card .v-datefield:hover,
+    .iteraction-list-comment-card .v-textarea:hover {
       border-color: rgba($v-font-color, 0.42) !important;
     }
 
-    .iteraction-list-card .v-textfield:focus,
-    .iteraction-list-card .v-textarea:focus,
-    .iteraction-list-card .v-filterselect-focus,
-    .iteraction-list-card .v-datefield-focus .v-datefield-textfield {
+    .iteraction-list-form-card .v-textfield:focus,
+    .iteraction-list-form-card .v-filterselect-focus,
+    .iteraction-list-form-card .v-datefield-focus .v-datefield-textfield,
+    .iteraction-list-comment-card .v-textarea:focus {
       border-color: $v-selection-color !important;
       box-shadow: 0 0 0 2px rgba($v-selection-color, 0.18) !important;
       outline: 0;
     }
 
-    .iteraction-list-card .v-readonly,
-    .iteraction-list-card .v-readonly .v-textfield,
-    .iteraction-list-card .v-readonly .v-textarea,
-    .iteraction-list-card .v-readonly .v-filterselect-input {
+    .iteraction-list-form-card .v-readonly,
+    .iteraction-list-form-card .v-readonly .v-textfield,
+    .iteraction-list-form-card .v-readonly .v-filterselect-input,
+    .iteraction-list-comment-card .v-readonly .v-textarea {
       color: mix($v-font-color, $v-panel-background-color, 72%) !important;
       background: mix($v-app-background-color, $v-panel-background-color, 72%) !important;
       opacity: 1 !important;
     }
 
-    .iteraction-list-card .v-disabled {
+    .iteraction-list-form-card .v-disabled,
+    .iteraction-list-comment-card .v-disabled {
       opacity: 0.58 !important;
     }
 
-    .iteraction-list-card .v-textfield-error,
-    .iteraction-list-card .v-textarea-error,
-    .iteraction-list-card .v-filterselect-error,
-    .iteraction-list-card .v-datefield-error .v-datefield-textfield {
+    .iteraction-list-form-card .v-textfield-error,
+    .iteraction-list-form-card .v-filterselect-error,
+    .iteraction-list-form-card .v-datefield-error .v-datefield-textfield,
+    .iteraction-list-comment-card .v-textarea-error {
       border-color: #d9534f !important;
       box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.14) !important;
     }
 
-    .iteraction-list-card .v-required-field-indicator {
+    .iteraction-list-form-card .v-required-field-indicator,
+    .iteraction-list-comment-card .v-required-field-indicator {
       color: #d9534f !important;
     }
 
-    .iteraction-list-card .v-filterselect-button,
-    .iteraction-list-card .c-pickerfield-layout .v-button {
+    .iteraction-list-form-card .v-filterselect-button,
+    .iteraction-list-form-card .c-pickerfield-layout .v-button {
       min-width: 38px;
       min-height: 38px;
     }
 
-    .iteraction-list-card .v-checkbox {
+    .iteraction-list-vacancy-column .v-checkbox {
+      margin-top: -2px;
+    }
+
+    .iteraction-list-form-card .v-checkbox {
       color: mix($v-font-color, $v-panel-background-color, 82%) !important;
       font-size: 13px !important;
       line-height: 20px !important;
@@ -429,13 +459,13 @@
     }
 
     .iteraction-list-comment-card {
-      padding-bottom: 18px;
+      padding-bottom: 15px;
     }
 
     .iteraction-list-footer {
       width: 100% !important;
-      min-height: 58px;
-      padding: 9px 18px;
+      min-height: 54px;
+      padding: 8px 16px;
       background: $v-panel-background-color !important;
       border-top: 1px solid rgba($v-font-color, 0.16);
       box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.04);
@@ -443,7 +473,7 @@
     }
 
     .iteraction-list-footer .v-button,
-    .iteraction-list-card .v-button {
+    .iteraction-list-form-card .v-button {
       min-height: 38px;
       padding: 0 16px;
       font-size: 14px;
@@ -452,12 +482,12 @@
     }
 
     .iteraction-list-footer .v-button:hover,
-    .iteraction-list-card .v-button:hover {
+    .iteraction-list-form-card .v-button:hover {
       filter: brightness(0.98);
     }
 
     .iteraction-list-footer .v-button:focus,
-    .iteraction-list-card .v-button:focus {
+    .iteraction-list-form-card .v-button:focus {
       box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
       outline: 0;
     }
@@ -478,21 +508,43 @@
 
     @media (max-width: 1100px) {
       .iteraction-list-sidebar {
-        width: 242px !important;
-        min-width: 242px !important;
-        max-width: 242px !important;
+        width: 232px !important;
+        min-width: 232px !important;
+        max-width: 232px !important;
+        padding-right: 10px;
+        padding-left: 10px;
+      }
+
+      .iteraction-list-candidate-image,
+      .iteraction-list-candidate-image img,
+      .iteraction-list-candidate-image .v-image-element {
+        width: 94px !important;
+        height: 94px !important;
+        min-width: 94px !important;
+        min-height: 94px !important;
+        max-width: 94px !important;
+        max-height: 94px !important;
+      }
+
+      .iteraction-list-project-image,
+      .iteraction-list-project-image img,
+      .iteraction-list-project-image .v-image-element {
+        width: 68px !important;
+        height: 68px !important;
+        min-width: 68px !important;
+        min-height: 68px !important;
+        max-width: 68px !important;
+        max-height: 68px !important;
+      }
+
+      .iteraction-list-content {
         padding-right: 11px;
         padding-left: 11px;
       }
 
-      .iteraction-list-content {
+      .iteraction-list-card {
         padding-right: 12px;
         padding-left: 12px;
-      }
-
-      .iteraction-list-card {
-        padding-right: 14px;
-        padding-left: 14px;
       }
     }
   }
