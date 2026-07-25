@@ -1,0 +1,267 @@
+name: Publish CandidateCVEdit redesign
+
+on:
+  push:
+    branches:
+      - agent/candidate-cv-edit-redesign
+    paths:
+      - .candidate-cv-redesign-trigger
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Apply and validate reviewed redesign
+        shell: bash
+        env:
+          BASE_SHA: 56c395f3c8d2b8e6a4cff264333f2e1cb94cab0b
+        run: |
+          set -euo pipefail
+          git fetch origin master agent/candidate-cv-edit-redesign
+          actual_master="$(git rev-parse origin/master)"
+          if [ "$actual_master" != "$BASE_SHA" ]; then
+            echo "MASTER_MOVED: expected $BASE_SHA, actual $actual_master" >&2
+            exit 20
+          fi
+
+          for immutable in \
+            modules/web/src/com/company/hunttech/web/screens/candidatecv/CandidateCVEdit.java \
+            modules/global/src/com/company/hunttech/entity/CandidateCV.java \
+            modules/global/src/com/company/hunttech/views.xml; do
+            test "$(git rev-parse HEAD:$immutable)" = "$(git rev-parse $BASE_SHA:$immutable)"
+          done
+
+          python3 - <<'PYAPPLY'
+          from pathlib import Path
+          import base64
+          import json
+          import re
+
+          source = Path('.candidate-cv-payload-source').read_text(encoding='utf-8')
+          payload_match = re.search(
+              r'payload = json\.loads\(base64\.b64decode\("([A-Za-z0-9+/=]+)"', source)
+          scss_match = re.search(
+              r'scss = base64\.b64decode\("([A-Za-z0-9+/=]+)"\)\.decode', source)
+          if not payload_match or not scss_match:
+              raise SystemExit('Payload markers not found')
+
+          payload = json.loads(base64.b64decode(payload_match.group(1)).decode('utf-8'))
+          for relative_path, content in payload.items():
+              path = Path(relative_path)
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_text(content, encoding='utf-8')
+
+          test_path = Path('modules/core/test/com/company/hunttech/core/CandidateCVEditVisualContractTest.java')
+          test = test_path.read_text(encoding='utf-8')
+          old_ids = '''                "tabSheet", "tabCandidate", "tabCV", "tabLetter", "tabSkillTree", "tabFiles",
+          '''
+          new_ids = '''                "openPositionsDc", "openPositionsDl", "candidateCVDc", "someFilesesDc", "skillTreesDc",
+                "resumePositionsDc", "resumePositionsLc", "usersDc", "usersDl",
+                "candidateLabel", "iteractionListLabelCandidate", "iteractionListLabelPosition",
+                "labelLastRecrutier", "machRegexpFromCV", "quoteTextArea",
+                "tabSheet", "tabCandidate", "tabCV", "tabLetter", "tabSkillTree", "tabFiles",
+          '''
+          if old_ids not in test:
+              raise SystemExit('Protected ID patch anchor missing')
+          test = test.replace(old_ids, new_ids, 1)
+
+          old_layout_ids = '''                "letterRecommendation", "rescanResume", "checkSkillFromJD", "skillTreesTable",
+                "someFilesTable", "datePostField", "editActions"
+          '''
+          new_layout_ids = '''                "letterRecommendation", "rescanResume", "checkSkillFromJD", "skillTreesTable",
+                "cvVbox", "candidateCVHBox", "letterHBox", "letterVbox", "skillBox",
+                "someFilesTable", "datePostField", "editActions"
+          '''
+          if old_layout_ids not in test:
+              raise SystemExit('Layout ID patch anchor missing')
+          test = test.replace(old_layout_ids, new_layout_ids, 1)
+
+          tab_assert_anchor = '''        assertTrue(skills < files);
+
+                  String controller = readProjectFile(CONTROLLER);
+          '''
+          tab_asserts = '''        assertTrue(skills < files);
+
+                  assertTrue(xml.contains("caption=\\"msg://msgCandidate\\""));
+                  assertTrue(xml.contains("caption=\\"msg://msgCV\\""));
+                  assertTrue(xml.contains("caption=\\"msg://msgLetter\\""));
+                  assertTrue(xml.contains("caption=\\"msg://msgCVSkillTree\\""));
+                  assertTrue(xml.contains("caption=\\"mainMsg://msgFiles\\""));
+                  assertTrue(xml.contains("<dialogMode height=\\"800\\""));
+                  assertTrue(xml.contains("width=\\"1200\\"/>"));
+
+                  String controller = readProjectFile(CONTROLLER);
+          '''
+          if tab_assert_anchor not in test:
+              raise SystemExit('Tab assertion patch anchor missing')
+          test = test.replace(tab_assert_anchor, tab_asserts, 1)
+          test_path.write_text(test, encoding='utf-8')
+
+          scss = base64.b64decode(scss_match.group(1)).decode('utf-8')
+          themes = [
+              'halo', 'havana', 'helium', 'hover', 'hunttech-modern',
+              'hunttech-modern-light', 'hunttech-modern-dark'
+          ]
+          for theme in themes:
+              scss_path = Path('modules/web/themes') / theme / 'com.company.hunttech/candidate-cv-editor.scss'
+              scss_path.parent.mkdir(parents=True, exist_ok=True)
+              scss_path.write_text(scss, encoding='utf-8')
+
+              styles_path = Path('modules/web/themes') / theme / 'styles.scss'
+              styles = styles_path.read_text(encoding='utf-8')
+              import_anchor = '@import "com.company.hunttech/iteraction-list-editor";'
+              import_line = '@import "com.company.hunttech/candidate-cv-editor";'
+              include_anchor = '  @include iteraction-list-editor-theme;'
+              include_line = '  @include candidate-cv-editor-theme;'
+              if import_line not in styles:
+                  if import_anchor not in styles:
+                      raise SystemExit('SCSS import anchor missing: ' + theme)
+                  styles = styles.replace(import_anchor, import_anchor + '\n' + import_line, 1)
+              if include_line not in styles:
+                  if include_anchor not in styles:
+                      raise SystemExit('SCSS include anchor missing: ' + theme)
+                  styles = styles.replace(include_anchor, include_anchor + '\n' + include_line, 1)
+              styles_path.write_text(styles, encoding='utf-8')
+
+          readme_path = Path('docs/ui/README.md')
+          readme = readme_path.read_text(encoding='utf-8')
+          top_anchor = '| `JobCandidateEdit` | [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md) | Карточка кандидата, вкладки, история вакансий, анализ навыков и защита от OOM |'
+          top_row = '| `CandidateCVEdit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) | Подготовка резюме, сопроводительного письма, дерева навыков, фотографии и дополнительных файлов без изменения lazy-init |'
+          if top_row not in readme:
+              if top_anchor not in readme:
+                  raise SystemExit('README screen anchor missing')
+              readme = readme.replace(top_anchor, top_anchor + '\n' + top_row, 1)
+
+          section = '''### CandidateCV
+
+          | Форма | Controller | Документ |
+          |-------|------------|----------|
+          | Edit | `hunttech_CandidateCV.edit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) |
+
+          '''
+          if '### CandidateCV\n' not in readme:
+              anchor = '### OpenPosition\n'
+              if anchor not in readme:
+                  raise SystemExit('README catalog anchor missing')
+              readme = readme.replace(anchor, section + anchor, 1)
+
+          history_header = '| Дата | Изменение |\n|------|-----------|'
+          history_row = '| 2026-07-25 | В каталог добавлена спецификация визуального и функционального контракта `CandidateCVEdit` с локальным SCSS для семи тем |'
+          if history_row not in readme:
+              if history_header not in readme:
+                  raise SystemExit('README history anchor missing')
+              readme = readme.replace(history_header, history_header + '\n' + history_row, 1)
+          readme_path.write_text(readme, encoding='utf-8')
+          PYAPPLY
+
+          rm -f \
+            .candidate-cv-payload-source \
+            .candidate-cv-redesign-trigger \
+            .github/workflows/candidate-cv-redesign-publish.yml
+
+          python3 - <<'PYVALIDATE'
+          from pathlib import Path
+          import re
+          import xml.etree.ElementTree as ET
+
+          xml_path = Path('modules/web/src/com/company/hunttech/web/screens/candidatecv/candidate-cv-edit.xml')
+          text = xml_path.read_text(encoding='utf-8')
+          root = ET.fromstring(text)
+          protected_ids = [
+              'tabSheet', 'tabCandidate', 'tabCV', 'tabLetter', 'tabSkillTree', 'tabFiles',
+              'candidateScrolBox', 'candidateVbox', 'groupBox', 'dropZone', 'picVBox',
+              'candidateField', 'resumePositionField', 'candidateCVFieldOpenPosition',
+              'onlyMySubscribeCheckBox', 'СandidateCVField', 'textFieldIOriginalCV',
+              'loadToCVTextArea', 'originalCVLink', 'fileOriginalCVField',
+              'textFieldHuntTechCV', 'HuntTechCVLink', 'fileCVField', 'candidatePic',
+              'candidateFaceDefaultImage', 'fileImageFaceUpload', 'rescanSkills',
+              'resumeRecognitionButton', 'convertToTextButton', 'showOriginalButon',
+              'candidateCVRichTextArea', 'cvResomandation', 'questionLetterRichTextArea',
+              'letterRichTextArea', 'commentLetterRichTextArea', 'letterRecommendation',
+              'rescanResume', 'checkSkillFromJD', 'skillTreesTable', 'someFilesTable',
+              'datePostField', 'editActions'
+          ]
+          found = {node.attrib['id'] for node in root.iter() if 'id' in node.attrib}
+          missing = [item for item in protected_ids if item not in found]
+          if missing:
+              raise SystemExit('Missing protected IDs: ' + ', '.join(missing))
+
+          tabs = [node.attrib.get('id') for node in root.iter() if node.tag.endswith('tab')]
+          if tabs != ['tabCandidate', 'tabCV', 'tabLetter', 'tabSkillTree', 'tabFiles']:
+              raise SystemExit('Tab order changed: ' + repr(tabs))
+          invokes = re.findall(r'invoke="([^"]+)"', text)
+          expected = ['loadToCVTextArea', 'rescanCV', 'resumeRecognition', 'convertToText', 'showOriginalText', 'rescanCV', 'checkSkillFromJD']
+          if invokes != expected:
+              raise SystemExit('Invoke contract changed: ' + repr(invokes))
+          for fragment in [
+              'stylename="candidate-cv-editor"', 'dropZone="dropZone"',
+              '<image id="candidatePic"', '<image id="candidateFaceDefaultImage"',
+              'action="someFilesTable.create"', 'action="someFilesTable.edit"',
+              'action="someFilesTable.remove"'
+          ]:
+              if fragment not in text:
+                  raise SystemExit('Missing XML contract: ' + fragment)
+
+          themes = ['halo', 'havana', 'helium', 'hover', 'hunttech-modern', 'hunttech-modern-light', 'hunttech-modern-dark']
+          for theme in themes:
+              scss = (Path('modules/web/themes') / theme / 'com.company.hunttech/candidate-cv-editor.scss').read_text(encoding='utf-8')
+              styles = (Path('modules/web/themes') / theme / 'styles.scss').read_text(encoding='utf-8')
+              if '.candidate-cv-editor {' not in scss:
+                  raise SystemExit('Namespace missing: ' + theme)
+              if '@import "com.company.hunttech/candidate-cv-editor";' not in styles:
+                  raise SystemExit('Import missing: ' + theme)
+              if '@include candidate-cv-editor-theme;' not in styles:
+                  raise SystemExit('Include missing: ' + theme)
+              depth = 0
+              for line in scss.splitlines():
+                  if depth == 0 and re.match(r'^\.v-[\w-]+', line.strip()):
+                      raise SystemExit('Global Vaadin selector: ' + theme + ': ' + line.strip())
+                  depth += line.count('{') - line.count('}')
+              if depth:
+                  raise SystemExit('Unbalanced SCSS: ' + theme)
+          PYVALIDATE
+
+          cat > /tmp/expected-files <<'LIST'
+          docs/ui/CandidateCVEdit_Spec.md
+          docs/ui/README.md
+          modules/core/test/com/company/hunttech/core/CandidateCVEditVisualContractTest.java
+          modules/web/src/com/company/hunttech/web/screens/candidatecv/candidate-cv-edit.xml
+          modules/web/themes/halo/com.company.hunttech/candidate-cv-editor.scss
+          modules/web/themes/halo/styles.scss
+          modules/web/themes/havana/com.company.hunttech/candidate-cv-editor.scss
+          modules/web/themes/havana/styles.scss
+          modules/web/themes/helium/com.company.hunttech/candidate-cv-editor.scss
+          modules/web/themes/helium/styles.scss
+          modules/web/themes/hover/com.company.hunttech/candidate-cv-editor.scss
+          modules/web/themes/hover/styles.scss
+          modules/web/themes/hunttech-modern/com.company.hunttech/candidate-cv-editor.scss
+          modules/web/themes/hunttech-modern/styles.scss
+          modules/web/themes/hunttech-modern-dark/com.company.hunttech/candidate-cv-editor.scss
+          modules/web/themes/hunttech-modern-dark/styles.scss
+          modules/web/themes/hunttech-modern-light/com.company.hunttech/candidate-cv-editor.scss
+          modules/web/themes/hunttech-modern-light/styles.scss
+          LIST
+          sed -i 's/^          //' /tmp/expected-files
+          sort -o /tmp/expected-files /tmp/expected-files
+          git diff --name-only "$BASE_SHA" | sort > /tmp/actual-files
+          diff -u /tmp/expected-files /tmp/actual-files
+          git diff --check "$BASE_SHA"
+
+          git reset --mixed "$BASE_SHA"
+          git add -A
+          git diff --cached --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "refactor(candidate-cv): адаптировать форму к UI/UX-концепции" \
+            -m "- перестроить визуальную компоновку без изменения функциональных контрактов
+          - добавить локальный SCSS для семи поддерживаемых тем
+          - закрепить legacy ID тестом и синхронизировать документацию"
+          git push --force-with-lease=refs/heads/agent/candidate-cv-edit-redesign:"$GITHUB_SHA" \
+            origin HEAD:refs/heads/agent/candidate-cv-edit-redesign
