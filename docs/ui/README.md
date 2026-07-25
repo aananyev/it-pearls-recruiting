@@ -10,6 +10,7 @@
 | `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | Персональные настройки пользователя, интерфейса, email и AI |
 | `ExtSettingsWindowEmailNavigation` | [ExtSettingsWindowEmailNavigation_Spec.md](ExtSettingsWindowEmailNavigation_Spec.md) | Связь навигации SMTP, POP3 и IMAP слева с соответствующими аккордеонами справа |
 | `ExtSettingsWindowAvatar` | [ExtSettingsWindowAvatar_Spec.md](ExtSettingsWindowAvatar_Spec.md) | Круглая фотография пользователя через `OvaFallbackImage` без изменения модели данных |
+| `IteractionListEdit` | [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) | Строго визуальный редизайн взаимодействия: контекстная панель, рабочие карточки и сохранённые CUBA-контракты |
 
 ## Правила актуализации
 
@@ -81,7 +82,7 @@ Living-документация экранов, окон, фрагментов �
 | Форма | Controller | Документ |
 |-------|------------|----------|
 | Browse | `itpearls_IteractionList.browse` | [itpearls_IteractionList.browse_Spec.md](itpearls_IteractionList.browse_Spec.md) |
-| Edit | `itpearls_IteractionList.edit` | [itpearls_IteractionList.edit_Spec.md](itpearls_IteractionList.edit_Spec.md) |
+| Edit | `itpearls_IteractionList.edit` | [itpearls_IteractionList.edit_Spec.md](itpearls_IteractionList.edit_Spec.md) · [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) |
 | Simple browse | `itpearls_IteractionListSimple.browse` | [itpearls_IteractionListSimple.browse_Spec.md](itpearls_IteractionListSimple.browse_Spec.md) |
 | Fragment (jobcandidate) | `itpearls_IteractionListBrowse` | [itpearls_IteractionListBrowse_Spec.md](itpearls_IteractionListBrowse_Spec.md) |
 
@@ -221,6 +222,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-25 | В каталог добавлена каноническая спецификация визуального редизайна `IteractionListEdit` |
 | 2026-07-25 | В каталог добавлена спецификация кликабельной навигации SMTP, POP3 и IMAP для `ExtSettingsWindow` |
 | 2026-07-24 | В каталог добавлена спецификация аватара `ExtSettingsWindow`: `userPic` переведён на `OvaFallbackImage` без изменения Java, entity и БД |
 | 2026-07-23 | Введено обязательное правило одновременной адаптации всех поддерживаемых тем при любом изменении UI или локального SCSS |
@@ -228,4 +230,3 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 | 2026-06-29 | Документация кастомного компонента FallbackImage |
 | 2026-06-27 | AI-администрирование: VacancyPromptTemplate browse/edit, UserAiConfiguration browse, меню aiAdministration |
 | 2026-06-26 | Каталог дополнен UI Spec для 16 documented entities (40 новых файлов + 7 ранее созданных JobCandidate/OpenPosition) |
-| 2026-06-26 | Введён каталог UI Spec, соглашение `{FormName}_Spec.md`, archive/, связь с living-ui-documentation |
