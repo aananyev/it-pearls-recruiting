@@ -1,0 +1,654 @@
+name: Apply IteractionList usability navigation
+
+on:
+  push:
+    branches:
+      - agent/iteraction-list-usability-navigation
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/iteraction-list-usability-navigation
+          fetch-depth: 0
+
+      - name: Apply scoped HRM HuntTech changes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from textwrap import dedent
+          import xml.etree.ElementTree as ET
+
+          root = Path(".")
+          screen_dir = root / "modules/web/src/com/company/hunttech/web/screens/iteractionlist"
+          test_dir = root / "modules/core/test/com/company/hunttech/core"
+          themes = [
+              "halo", "havana", "helium", "hover",
+              "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark"
+          ]
+
+          def replace_once(text, old, new, label):
+              if old not in text:
+                  raise RuntimeError(f"Не найден маркер для изменения: {label}")
+              return text.replace(old, new, 1)
+
+          def replace_section(text, heading, next_heading, new_section):
+              start = text.index(heading)
+              end = text.index(next_heading, start)
+              return text[:start] + new_section.rstrip() + "\n\n" + text[end:]
+
+          # Полный descriptor уже содержит проверенную пятисекционную разметку.
+          # Он становится descriptor по умолчанию, чтобы legacy screen ID получил
+          # кликабельную навигацию без XML merge и дублирования component ID.
+          source_xml_path = screen_dir / "iteraction-list-edit-accordion-navigation.xml"
+          target_xml_path = screen_dir / "iteraction-list-edit.xml"
+          xml = source_xml_path.read_text(encoding="utf-8")
+          xml = replace_once(xml, 'width="1000"/>', 'width="1100"/>', "ширина диалога")
+          xml = replace_once(xml, 'width="252px"', 'width="228px"', "ширина sidebar")
+          xml = replace_once(
+              xml,
+              'caption="msg://msgCandidate"\n                                                                        width="100%"',
+              'caption="msg://msgCandidate"\n                                                                        stylename="iteraction-list-primary-picker"\n                                                                        width="100%"',
+              "стиль поля Кандидат")
+          xml = replace_once(
+              xml,
+              'property="vacancy"\n                                                                        width="100%">',
+              'property="vacancy"\n                                                                        stylename="iteraction-list-primary-picker"\n                                                                        width="100%">',
+              "стиль поля Вакансия")
+          xml = replace_once(
+              xml,
+              '<hbox id="mostPopularHbox"\n                                               width="100%"\n                                               spacing="true"\n                                               align="MIDDLE_CENTER"/>',
+              '<hbox id="mostPopularHbox"\n                                               width="100%"\n                                               spacing="true"\n                                               align="MIDDLE_CENTER"\n                                               stylename="iteraction-list-popular-buttons"/>',
+              "контейнер частых взаимодействий")
+          target_xml_path.write_text(xml, encoding="utf-8")
+
+          java_path = screen_dir / "IteractionListEdit.java"
+          java = java_path.read_text(encoding="utf-8")
+
+          injection_marker = '''    @Inject
+              private InteractionService interactionService;
+          '''
+          injection_replacement = '''    @Inject
+              private InteractionService interactionService;
+
+              // Пять аккордеонов и левый индекс относятся только к presentation-слою:
+              // они не меняют значения сущности, loaders или порядок бизнес-обработчиков.
+              @Inject
+              private VBoxLayout iteractionListNavigation;
+              @Inject
+              private GroupBoxLayout participantsAccordion;
+              @Inject
+              private GroupBoxLayout interactionAccordion;
+              @Inject
+              private GroupBoxLayout resultAccordion;
+              @Inject
+              private GroupBoxLayout commentAccordion;
+              @Inject
+              private GroupBoxLayout popularAccordion;
+
+              private Button participantsAccordionNav;
+              private Button interactionAccordionNav;
+              private Button resultAccordionNav;
+              private Button commentAccordionNav;
+              private Button popularAccordionNav;
+
+              // Флаг предотвращает рекурсивные события GroupBox при синхронизации
+              // клика по левому индексу и клика по штатному заголовку аккордеона.
+              private boolean updatingAccordionState;
+          '''
+          java = replace_once(java, injection_marker, injection_replacement, "инъекции навигации")
+
+          query_marker = '''    private static final String QUERY_CHAIN_LAST =
+          '''
+          constants_and_navigation = '''    private static final int POPULAR_INTERACTION_BUTTONS = 5;
+              private static final String NAVIGATION_STYLE = "borderless iteraction-list-nav-item";
+              private static final String ACTIVE_NAVIGATION_STYLE =
+                      "borderless iteraction-list-nav-item iteraction-list-nav-item-active";
+
+              @Subscribe
+              protected void onInitIteractionNavigation(InitEvent event) {
+                  initAccordionNavigation();
+                  initAccordionHeaderSynchronization();
+              }
+
+              /**
+               * Заменяет XML fallback LABEL на доступные с клавиатуры borderless-кнопки.
+               * Визуально индекс повторяет SettingsWindow, но дополнительно раскрывает
+               * соответствующий блок и переводит фокус в его первое рабочее поле.
+               */
+              private void initAccordionNavigation() {
+                  Component navigationTitle = iteractionListNavigation.getComponent(0);
+                  iteractionListNavigation.removeAll();
+                  iteractionListNavigation.add(navigationTitle);
+
+                  participantsAccordionNav = createNavigationButton(
+                          "participantsAccordionNav", "msgAccordionParticipants",
+                          () -> selectAccordion(participantsAccordion, participantsAccordionNav, candidateField::focus));
+                  interactionAccordionNav = createNavigationButton(
+                          "interactionAccordionNav", "msgAccordionInteraction",
+                          () -> selectAccordion(interactionAccordion, interactionAccordionNav, iteractionTypeField::focus));
+                  resultAccordionNav = createNavigationButton(
+                          "resultAccordionNav", "msgAccordionResult",
+                          () -> selectAccordion(resultAccordion, resultAccordionNav, ratingField::focus));
+                  commentAccordionNav = createNavigationButton(
+                          "commentAccordionNav", "msgAccordionComment",
+                          () -> selectAccordion(commentAccordion, commentAccordionNav, commentField::focus));
+                  popularAccordionNav = createNavigationButton(
+                          "popularAccordionNav", "mshMostPopular",
+                          () -> selectAccordion(popularAccordion, popularAccordionNav, () -> { }));
+
+                  iteractionListNavigation.add(participantsAccordionNav);
+                  iteractionListNavigation.add(interactionAccordionNav);
+                  iteractionListNavigation.add(resultAccordionNav);
+                  iteractionListNavigation.add(commentAccordionNav);
+                  iteractionListNavigation.add(popularAccordionNav);
+
+                  selectAccordion(participantsAccordion, participantsAccordionNav, () -> { });
+              }
+
+              /**
+               * Синхронизирует штатные заголовки GroupBox с активным пунктом слева.
+               * Раскрытие одного блока сворачивает остальные, не затрагивая data state.
+               */
+              private void initAccordionHeaderSynchronization() {
+                  participantsAccordion.addExpandedStateChangeListener(event ->
+                          synchronizeExpandedAccordion(participantsAccordion, participantsAccordionNav));
+                  interactionAccordion.addExpandedStateChangeListener(event ->
+                          synchronizeExpandedAccordion(interactionAccordion, interactionAccordionNav));
+                  resultAccordion.addExpandedStateChangeListener(event ->
+                          synchronizeExpandedAccordion(resultAccordion, resultAccordionNav));
+                  commentAccordion.addExpandedStateChangeListener(event ->
+                          synchronizeExpandedAccordion(commentAccordion, commentAccordionNav));
+                  popularAccordion.addExpandedStateChangeListener(event ->
+                          synchronizeExpandedAccordion(popularAccordion, popularAccordionNav));
+              }
+
+              private Button createNavigationButton(String id, String messageKey, Runnable handler) {
+                  Button button = uiComponents.create(Button.class);
+                  button.setId(id);
+                  button.setCaption(messageBundle.getMessage(messageKey));
+                  button.setWidth("100%");
+                  button.setStyleName(NAVIGATION_STYLE);
+                  button.addClickListener(clickEvent -> handler.run());
+                  return button;
+              }
+
+              private void synchronizeExpandedAccordion(GroupBoxLayout accordion, Button navigationButton) {
+                  if (!updatingAccordionState && accordion.isExpanded()) {
+                      selectAccordion(accordion, navigationButton, () -> { });
+                  }
+              }
+
+              /**
+               * Раскрывает ровно один раздел, обновляет active-style и после завершения
+               * синхронизации переводит фокус. Порядок важен, иначе CUBA может попытаться
+               * сфокусировать компонент внутри ещё свёрнутого GroupBox.
+               */
+              private void selectAccordion(GroupBoxLayout selectedAccordion,
+                                           Button selectedNavigationButton,
+                                           Runnable focusHandler) {
+                  updatingAccordionState = true;
+                  try {
+                      participantsAccordion.setExpanded(participantsAccordion == selectedAccordion);
+                      interactionAccordion.setExpanded(interactionAccordion == selectedAccordion);
+                      resultAccordion.setExpanded(resultAccordion == selectedAccordion);
+                      commentAccordion.setExpanded(commentAccordion == selectedAccordion);
+                      popularAccordion.setExpanded(popularAccordion == selectedAccordion);
+                      updateNavigationStyles(selectedNavigationButton);
+                  } finally {
+                      updatingAccordionState = false;
+                  }
+                  focusHandler.run();
+              }
+
+              private void updateNavigationStyles(Button selectedNavigationButton) {
+                  participantsAccordionNav.setStyleName(
+                          participantsAccordionNav == selectedNavigationButton
+                                  ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+                  interactionAccordionNav.setStyleName(
+                          interactionAccordionNav == selectedNavigationButton
+                                  ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+                  resultAccordionNav.setStyleName(
+                          resultAccordionNav == selectedNavigationButton
+                                  ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+                  commentAccordionNav.setStyleName(
+                          commentAccordionNav == selectedNavigationButton
+                                  ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+                  popularAccordionNav.setStyleName(
+                          popularAccordionNav == selectedNavigationButton
+                                  ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+              }
+
+          '''
+          java = replace_once(java, query_marker, constants_and_navigation + query_marker, "методы навигации")
+
+          method_start = java.index("    private void setMostPopularIteraction() {")
+          method_end = java.index("    private static final String QUERY_MOST_POPULAR", method_start)
+          popular_method = '''    /**
+               * Строит пять одинаковых быстрых кнопок по статистике текущего пользователя
+               * за скользящий год. Пустые позиции остаются отключёнными, чтобы геометрия
+               * блока не менялась при недостаточном объёме истории.
+               */
+              private void setMostPopularIteraction() {
+                  GregorianCalendar calendar = new GregorianCalendar();
+                  Date periodEnd = calendar.getTime();
+                  calendar.add(Calendar.YEAR, -1);
+                  Date periodStart = calendar.getTime();
+
+                  List<KeyValueEntity> popularRows = dataManager.loadValues(QUERY_MOST_POPULAR)
+                          .properties("iteractionType", "usageCount")
+                          .parameter("user", userSession.getUser())
+                          .parameter("periodStart", periodStart)
+                          .parameter("periodEnd", periodEnd)
+                          .list();
+
+                  mostPopularHbox.removeAll();
+                  List<Button> popularButtons = new ArrayList<>();
+
+                  for (int index = 0; index < POPULAR_INTERACTION_BUTTONS; index++) {
+                      Button popularButton = uiComponents.create(Button.class);
+                      popularButton.setWidth("100%");
+                      popularButton.setStyleName("iteraction-list-popular-button");
+
+                      if (index < popularRows.size()) {
+                          KeyValueEntity row = popularRows.get(index);
+                          Iteraction interaction = row.getValue("iteractionType");
+                          Number usageCount = row.getValue("usageCount");
+
+                          if (interaction != null) {
+                              popularButton.setCaption(interaction.getIterationName());
+                              popularButton.setDescription("Использовано за последний год: "
+                                      + (usageCount == null ? 0 : usageCount.longValue()));
+                              popularButton.addClickListener(clickEvent -> {
+                                  iteractionTypeField.setValue(interaction);
+                                  iteractionTypeField.focus();
+                              });
+                          } else {
+                              configureEmptyPopularButton(popularButton);
+                          }
+                      } else {
+                          configureEmptyPopularButton(popularButton);
+                      }
+
+                      mostPopularHbox.add(popularButton);
+                      popularButtons.add(popularButton);
+                  }
+
+                  // Одинаковый expand ratio гарантирует ровно 20% доступной ширины
+                  // каждой кнопке независимо от длины названия взаимодействия.
+                  mostPopularHbox.expand(popularButtons.toArray(new Component[0]));
+              }
+
+              private void configureEmptyPopularButton(Button popularButton) {
+                  popularButton.setCaption("Нет данных");
+                  popularButton.setEnabled(false);
+              }
+
+          '''
+          java = java[:method_start] + popular_method + java[method_end:]
+
+          old_query = 'private static final String QUERY_MOST_POPULAR = "select e.iteractionType, count(e.iteractionType) from hunttech_IteractionList e where (e.dateIteraction between :endDate and :startDate) and e.iteractionType is not null and e.recrutier = :user group by e.iteractionType order by count(e.iteractionType) desc";'
+          new_query = '''private static final String QUERY_MOST_POPULAR =
+                      "select e.iteractionType, count(e.iteractionType) "
+                              + "from hunttech_IteractionList e "
+                              + "where e.dateIteraction between :periodStart and :periodEnd "
+                              + "and e.iteractionType is not null "
+                              + "and e.recrutier = :user "
+                              + "group by e.iteractionType "
+                              + "order by count(e.iteractionType) desc";'''
+          java = replace_once(java, old_query, new_query, "годовой JPQL частых взаимодействий")
+          java_path.write_text(java, encoding="utf-8")
+
+          compatibility_controller = dedent('''
+              package com.company.hunttech.web.screens.iteractionlist;
+
+              import com.haulmont.cuba.gui.screen.EditedEntityContainer;
+              import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
+              import com.haulmont.cuba.gui.screen.UiController;
+              import com.haulmont.cuba.gui.screen.UiDescriptor;
+
+              /**
+               * Совместимый alias для временного screen ID аккордеонной версии.
+               * Основной legacy ID и вся presentation-логика находятся в IteractionListEdit.
+               */
+              @UiController("hunttech_IteractionList.edit.accordion")
+              @UiDescriptor("iteraction-list-edit.xml")
+              @EditedEntityContainer("iteractionListDc")
+              @LoadDataBeforeShow
+              public class IteractionListEditAccordionNavigation extends IteractionListEdit {
+              }
+          ''').lstrip()
+          (screen_dir / "IteractionListEditAccordionNavigation.java").write_text(
+              compatibility_controller, encoding="utf-8")
+
+          responsive_scss = dedent(r'''
+                // Двухколоночные picker-поля не должны расширять родительский HBox
+                // за пределы диалога даже при длинных отображаемых значениях.
+                .iteraction-list-main-layout,
+                .iteraction-list-workspace,
+                .iteraction-list-tabs,
+                .iteraction-list-content,
+                .iteraction-list-form-grid,
+                .iteraction-list-form-grid > div,
+                .iteraction-list-form-grid table {
+                  box-sizing: border-box;
+                  width: 100% !important;
+                  min-width: 0 !important;
+                  max-width: 100% !important;
+                }
+
+                .iteraction-list-workspace,
+                .iteraction-list-scroll {
+                  overflow-x: hidden !important;
+                }
+
+                .iteraction-list-sidebar {
+                  box-sizing: border-box;
+                  min-width: 228px !important;
+                  max-width: 228px !important;
+                  overflow-x: hidden;
+                  overflow-y: auto;
+                }
+
+                .iteraction-list-primary-picker,
+                .iteraction-list-primary-picker .v-filterselect,
+                .iteraction-list-primary-picker .v-filterselect-input {
+                  box-sizing: border-box;
+                  width: 100% !important;
+                  min-width: 0 !important;
+                  max-width: 100% !important;
+                }
+
+                .iteraction-list-popular-buttons,
+                .iteraction-list-popular-buttons .v-expand {
+                  box-sizing: border-box;
+                  width: 100% !important;
+                  min-width: 0 !important;
+                  table-layout: fixed;
+                }
+
+                .iteraction-list-popular-buttons .v-slot {
+                  box-sizing: border-box;
+                  min-width: 0 !important;
+                  max-width: 20% !important;
+                  overflow: hidden;
+                }
+
+                .iteraction-list-popular-button {
+                  box-sizing: border-box;
+                  width: 100% !important;
+                  min-width: 0 !important;
+                  height: 52px;
+                  padding-right: 8px !important;
+                  padding-left: 8px !important;
+                  white-space: normal !important;
+                }
+
+                .iteraction-list-popular-button .v-button-caption {
+                  display: block;
+                  overflow: hidden;
+                  line-height: 16px;
+                  text-overflow: ellipsis;
+                  white-space: normal;
+                }
+
+                @media (max-width: 1050px) {
+                  .iteraction-list-sidebar {
+                    min-width: 212px !important;
+                    max-width: 212px !important;
+                  }
+                }
+          ''').rstrip()
+
+          for theme in themes:
+              scss_path = root / "modules/web/themes" / theme / "com.company.hunttech" / "iteraction-list-accordion-navigation.scss"
+              scss = scss_path.read_text(encoding="utf-8")
+              if ".iteraction-list-primary-picker" not in scss:
+                  insert_at = scss.rfind("  }\n}")
+                  if insert_at < 0:
+                      raise RuntimeError(f"Не найден корень SCSS в теме {theme}")
+                  scss = scss[:insert_at] + "\n" + responsive_scss + "\n" + scss[insert_at:]
+              scss_path.write_text(scss, encoding="utf-8")
+
+          layout_test = dedent('''
+              package com.company.hunttech.core;
+
+              import org.junit.Test;
+
+              import javax.xml.parsers.DocumentBuilderFactory;
+              import java.io.IOException;
+              import java.nio.charset.StandardCharsets;
+              import java.nio.file.Files;
+              import java.nio.file.Path;
+              import java.nio.file.Paths;
+
+              import static org.junit.Assert.assertEquals;
+              import static org.junit.Assert.assertNotNull;
+              import static org.junit.Assert.assertTrue;
+
+              /** Защищает responsive-контракт пяти аккордеонов и двух основных picker-полей. */
+              public class IteractionListEditAccordionLayoutTest {
+                  @Test public void defaultDescriptorContainsNavigationAndFiveAccordions() throws Exception {
+                      Path descriptorPath = projectRoot().resolve("modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+                      DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(descriptorPath.toFile());
+                      String descriptor = readProjectFile("modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+                      assertTrue(descriptor.contains("id=\"iteractionListNavigation\""));
+                      assertTrue(descriptor.contains("id=\"participantsAccordion\""));
+                      assertTrue(descriptor.contains("id=\"interactionAccordion\""));
+                      assertTrue(descriptor.contains("id=\"resultAccordion\""));
+                      assertTrue(descriptor.contains("id=\"commentAccordion\""));
+                      assertTrue(descriptor.contains("id=\"popularAccordion\""));
+                      assertEquals(5, count(descriptor, "stylename=\"iteraction-list-nav-item"));
+                  }
+                  @Test public void candidateAndVacancyShareStyleAndFitOneRow() throws IOException {
+                      String descriptor = readProjectFile("modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+                      String participants = descriptor.substring(descriptor.indexOf("id=\"participantsAccordion\""), descriptor.indexOf("id=\"interactionAccordion\""));
+                      assertTrue(participants.contains("<columns count=\"2\"/>"));
+                      assertEquals(2, count(participants, "stylename=\"iteraction-list-primary-picker\""));
+                      assertTrue(descriptor.contains("width=\"1100\"/>"));
+                      assertTrue(descriptor.contains("width=\"228px\""));
+                  }
+                  @Test public void onlyFirstAccordionIsExpandedInitially() throws IOException {
+                      String d = readProjectFile("modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+                      assertTrue(section(d,"id=\"participantsAccordion\"","id=\"interactionAccordion\"").contains("collapsed=\"false\""));
+                      assertTrue(section(d,"id=\"interactionAccordion\"","id=\"resultAccordion\"").contains("collapsed=\"true\""));
+                      assertTrue(section(d,"id=\"resultAccordion\"","id=\"commentAccordion\"").contains("collapsed=\"true\""));
+                      assertTrue(section(d,"id=\"commentAccordion\"","id=\"popularAccordion\"").contains("collapsed=\"true\""));
+                      assertTrue(d.substring(d.indexOf("id=\"popularAccordion\"")).contains("collapsed=\"true\""));
+                  }
+                  @Test public void businessBindingsAndActionsRemainAvailable() throws IOException {
+                      String d = readProjectFile("modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+                      assertOrdered(d,"id=\"candidateField\"","id=\"vacancyFiels\"","id=\"iteractionTypeField\"","id=\"buttonsPanelCallAction\"","id=\"ratingField\"","id=\"recrutierField\"","id=\"communicationMethodField\"","id=\"commentField\"","id=\"mostPopularHbox\"");
+                      assertTrue(d.contains("invoke=\"callActionEntity\""));
+                      assertTrue(d.contains("invoke=\"onButtonSubscribeClick\""));
+                      assertTrue(d.contains("action=\"windowCommitAndClose\""));
+                  }
+                  @Test public void allThemesConstrainWidthInsideLocalRoot() throws IOException {
+                      String[] themes={"halo","havana","helium","hover","hunttech-modern","hunttech-modern-light","hunttech-modern-dark"};
+                      for(String theme:themes){String s=readProjectFile("modules/web/themes/"+theme+"/com.company.hunttech/iteraction-list-accordion-navigation.scss");assertTrue(s.contains(".iteraction-list-editor"));assertTrue(s.contains(".iteraction-list-primary-picker"));assertTrue(s.contains("max-width: 20% !important"));assertTrue(s.contains("overflow-x: hidden !important"));}
+                  }
+                  private String section(String t,String s,String e){return t.substring(t.indexOf(s),t.indexOf(e,t.indexOf(s)));}
+                  private int count(String t,String token){int r=0,i=0;while((i=t.indexOf(token,i))>=0){r++;i+=token.length();}return r;}
+                  private void assertOrdered(String d,String...m){int p=-1;for(String x:m){int c=d.indexOf(x);assertTrue(c>=0);assertTrue(c>p);p=c;}}
+                  private String readProjectFile(String p)throws IOException{return new String(Files.readAllBytes(projectRoot().resolve(p)),StandardCharsets.UTF_8);}
+                  private Path projectRoot(){Path r=Paths.get(System.getProperty("user.dir",".")).toAbsolutePath();while(r!=null&&!Files.exists(r.resolve("build.gradle"))){r=r.getParent();}assertNotNull("Не найден корень проекта HRM HuntTech",r);return r;}
+              }
+          ''').lstrip()
+          (test_dir / "IteractionListEditAccordionLayoutTest.java").write_text(layout_test, encoding="utf-8")
+
+          navigation_test = dedent('''
+              package com.company.hunttech.core;
+              import org.junit.Test;
+              import java.io.IOException;
+              import java.nio.charset.StandardCharsets;
+              import java.nio.file.Files;
+              import java.nio.file.Path;
+              import java.nio.file.Paths;
+              import static org.junit.Assert.*;
+              /** Защищает кликабельный индекс default-экрана IteractionListEdit. */
+              public class IteractionListAccordionNavigationTest {
+                  @Test public void defaultControllerCreatesFiveNavigationButtons() throws IOException {String c=controller();assertTrue(c.contains("@UiController(\"hunttech_IteractionList.edit\")"));assertTrue(c.contains("iteractionListNavigation.removeAll()"));assertTrue(c.contains("participantsAccordionNav"));assertTrue(c.contains("popularAccordionNav"));assertEquals(5,count(c,"addExpandedStateChangeListener"));}
+                  @Test public void navigationFocusesFirstFieldOfEachInputBlock() throws IOException {String c=controller();assertTrue(c.contains("candidateField::focus"));assertTrue(c.contains("iteractionTypeField::focus"));assertTrue(c.contains("ratingField::focus"));assertTrue(c.contains("commentField::focus"));assertTrue(c.contains("popularAccordion.setExpanded(popularAccordion == selectedAccordion)"));}
+                  @Test public void navigationMethodsDoNotWriteEntityOrRunQueries() throws IOException {String c=controller();String n=c.substring(c.indexOf("private void initAccordionNavigation()"),c.indexOf("private static final String QUERY_CHAIN_LAST"));assertFalse(n.contains("getEditedEntity()"));assertFalse(n.contains("dataManager"));assertFalse(n.contains("commit("));assertFalse(n.contains("setValue("));}
+                  @Test public void compatibilityControllerIsThinAliasWithUniqueId() throws IOException {String a=read("modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEditAccordionNavigation.java");assertTrue(a.contains("@UiController(\"hunttech_IteractionList.edit.accordion\")"));assertTrue(a.contains("@UiDescriptor(\"iteraction-list-edit.xml\")"));assertTrue(a.contains("extends IteractionListEdit"));assertFalse(a.contains("@Subscribe"));}
+                  private String controller()throws IOException{return read("modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");}
+                  private int count(String t,String token){int r=0,i=0;while((i=t.indexOf(token,i))>=0){r++;i+=token.length();}return r;}
+                  private String read(String p)throws IOException{return new String(Files.readAllBytes(root().resolve(p)),StandardCharsets.UTF_8);}
+                  private Path root(){Path r=Paths.get(System.getProperty("user.dir",".")).toAbsolutePath();while(r!=null&&!Files.exists(r.resolve("build.gradle"))){r=r.getParent();}assertNotNull(r);return r;}
+              }
+          ''').lstrip()
+          (test_dir / "IteractionListAccordionNavigationTest.java").write_text(navigation_test, encoding="utf-8")
+
+          popular_test = dedent('''
+              package com.company.hunttech.core;
+              import org.junit.Test;
+              import java.io.IOException;
+              import java.nio.charset.StandardCharsets;
+              import java.nio.file.Files;
+              import java.nio.file.Path;
+              import java.nio.file.Paths;
+              import static org.junit.Assert.*;
+              /** Защищает годовой контракт пяти быстрых кнопок взаимодействий. */
+              public class IteractionListMostPopularInteractionTest {
+                  @Test public void queryUsesCurrentUserAndRollingYear() throws IOException {String c=controller();assertTrue(c.contains("POPULAR_INTERACTION_BUTTONS = 5"));assertTrue(c.contains("calendar.add(Calendar.YEAR, -1)"));assertTrue(c.contains("e.recrutier = :user"));assertTrue(c.contains("e.dateIteraction between :periodStart and :periodEnd"));assertTrue(c.contains(".parameter(\"user\", userSession.getUser())"));}
+                  @Test public void exactlyFiveEqualButtonsAreCreated() throws IOException {String c=controller();assertTrue(c.contains("index < POPULAR_INTERACTION_BUTTONS"));assertTrue(c.contains("mostPopularHbox.removeAll()"));assertTrue(c.contains("popularButton.setWidth(\"100%\")"));assertTrue(c.contains("mostPopularHbox.expand(popularButtons.toArray(new Component[0]))"));assertTrue(c.contains("configureEmptyPopularButton"));}
+                  @Test public void clickAssignsExactInteractionWithoutCaptionParsing() throws IOException {String c=controller();assertTrue(c.contains("iteractionTypeField.setValue(interaction)"));assertTrue(c.contains("iteractionTypeField.focus()"));assertFalse(c.contains("getCaption().substring"));assertFalse(c.contains("setCaptionAsHtml(true)"));}
+                  @Test public void descriptorAndScssProtectFiveButtonGeometry() throws IOException {String d=read("modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");String s=read("modules/web/themes/halo/com.company.hunttech/iteraction-list-accordion-navigation.scss");assertTrue(d.contains("stylename=\"iteraction-list-popular-buttons\""));assertTrue(s.contains("max-width: 20% !important"));assertTrue(s.contains(".iteraction-list-popular-button"));}
+                  private String controller()throws IOException{return read("modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");}
+                  private String read(String p)throws IOException{return new String(Files.readAllBytes(root().resolve(p)),StandardCharsets.UTF_8);}
+                  private Path root(){Path r=Paths.get(System.getProperty("user.dir",".")).toAbsolutePath();while(r!=null&&!Files.exists(r.resolve("build.gradle"))){r=r.getParent();}assertNotNull(r);return r;}
+              }
+          ''').lstrip()
+          (test_dir / "IteractionListMostPopularInteractionTest.java").write_text(popular_test, encoding="utf-8")
+
+          docs_path = root / "docs/ui/IteractionListEdit_Spec.md"
+          docs = docs_path.read_text(encoding="utf-8")
+          docs = docs.replace("Компоновка от 2026-07-25 разделяет рабочее содержимое на сворачиваемые секции и переводит основные поля в одну вертикальную колонку. Такая структура уменьшает визуальную перегрузку, исключает конкуренцию подписей и picker-компонентов за ширину и сохраняет последовательность работы рекрутёра сверху вниз.", "Компоновка от 2026-07-25 разделяет рабочее содержимое на пять сворачиваемых секций. Поля «Кандидат» и «Вакансия» размещены в одной адаптивной строке, используют общий локальный CSS-контракт и не могут расширять рабочую область за пределы диалога.")
+          docs = docs.replace("- Основные секции расположены в рабочем порядке: «Взаимодействие» → «Комментарий» → «Популярные взаимодействия».", "- Левый индекс расположен в порядке: «Кандидат и вакансия» → «Тип и действие» → «Результат» → «Комментарий» → «Частые взаимодействия».")
+          docs = docs.replace("- Секция «Взаимодействие» раскрыта при открытии формы; остальные секции стартуют свёрнутыми, как в `SettingsWindow`.", "- Секция «Кандидат и вакансия» раскрыта при открытии; остальные четыре секции стартуют свёрнутыми. Клик по пункту слева раскрывает один блок и переводит фокус в его первое поле.")
+          docs = docs.replace("- Экран остаётся модальным диалогом `1000 × 650`.", "- Экран остаётся модальным диалогом `1100 × 650`; sidebar ограничен шириной `228 px`.")
+          docs = docs.replace("| Диалог | `width=1000`, `height=650`, `modal=true` |", "| Диалог | `width=1100`, `height=650`, `modal=true` |")
+          docs = docs.replace("JPQL, query conditions, параметры loaders, `cacheable` и views сохранены. `IteractionListEdit.java`, entity, БД, Liquibase и `views.xml` не изменялись.", "JPQL loaders, query conditions, `cacheable` и views сохранены. В `IteractionListEdit.java` добавлены presentation-навигация и отдельный агрегирующий JPQL топ-5; entity, БД, Liquibase и `views.xml` не изменялись.")
+          section3 = dedent('''
+              ## 3. Компоновка
+
+              Sidebar ограничен шириной `228 px`; workspace, GridLayout и picker-поля используют `min-width: 0` и `max-width: 100%`. Поля `candidateField` и `vacancyFiels` размещены в двух колонках одной строки и используют общий класс `iteraction-list-primary-picker`.
+
+              В sidebar расположен кликабельный индекс пяти блоков: кандидат и вакансия; тип и действие; результат; комментарий; частые взаимодействия. В последнем блоке всегда отображаются пять равных кнопок по 20% доступной ширины.
+          ''')
+          docs = replace_section(docs, "## 3. Компоновка", "## 4. Канонический контракт", section3)
+          section4 = dedent('''
+              ## 4. Канонический контракт навигации SettingsWindow
+
+              XML `Label` служат fallback-разметкой. На `InitEvent` они заменяются borderless-кнопками: клик раскрывает ровно один `GroupBoxLayout`, синхронизирует active-style и переводит фокус в первое поле. Клики по штатным заголовкам аккордеонов синхронизируют левый индекс.
+          ''')
+          docs = replace_section(docs, "## 4. Канонический контракт", "## 5. Сохранённые component-контракты", section4)
+          docs = docs.replace("| `gridIterationData` | legacy ID и тип `GridLayout`; изменено только число колонок с 2 на 1 |", "| `gridIterationData` | legacy ID и тип `GridLayout`; две адаптивные колонки для кандидата и вакансии |")
+          docs = docs.replace("| `candidateField`, `vacancyFiels` | bindings, lookup/open actions и query |", "| `candidateField`, `vacancyFiels` | bindings, lookup/open actions и query; единый класс `iteraction-list-primary-picker` |")
+          docs = docs.replace("| `mostPopularHbox`, `mostPopularIteractionHBox` | отдельные XML-контейнеры |", "| `mostPopularHbox`, `mostPopularIteractionHBox` | пять равных быстрых кнопок; выбор устанавливает точный `Iteraction` без парсинга caption |")
+          section6 = dedent('''
+              ## 6. Частые взаимодействия за скользящий год
+
+              Один агрегирующий JPQL-запрос выбирает типы текущего пользователя за период от текущей даты минус один календарный год до текущего момента, группирует по `iteractionType` и сортирует по количеству по убыванию. Первые пять типов отображаются как равные CUBA `Button`; клик напрямую устанавливает объект в `iteractionTypeField`. Недостающие позиции — disabled-кнопки «Нет данных».
+
+              ## 7. Локальный SCSS и responsive-контракт
+
+              Все правила ограничены корнем `.iteraction-list-editor`. Локальные селекторы ограничивают ширину picker, запрещают horizontal overflow и фиксируют пять slots по 20% во всех семи темах.
+          ''')
+          docs = replace_section(docs, "## 6. Локальный SCSS", "## 7. Ограничения изменений", section6)
+          section8 = dedent('''
+              ## 8. Ограничения изменений
+
+              - entity, БД, Liquibase и `views.xml` не изменены;
+              - loaders, их JPQL, conditions и views не изменены;
+              - component ID, bindings, actions и `invoke` сохранены;
+              - новый JPQL используется только для агрегирования статистики текущего пользователя за год;
+              - navigation не записывает entity и не выполняет commit;
+              - merge и production запрещены до отдельной команды.
+          ''')
+          docs = replace_section(docs, "## 7. Ограничения изменений", "## 8. Обязательная проверка Hermes", section8)
+          section9 = dedent('''
+              ## 9. Обязательная проверка Hermes
+
+              Проверить точный HEAD/base/conflicts; `git diff --check`; профильные тесты `5/5`, `4/4`, `4/4`, avatar `2/2`; compile; `ScreenViewIntegrityTest 8/8`; Data View Integrity; SCSS семи тем; `clean assemble`; local deploy; HTTP `/hrm/` 200. Smoke обязан подтвердить одинаковый CSS кандидата и вакансии, отсутствие horizontal scroll, пять фокусирующих пунктов слева и пять равных годовых кнопок с установкой точного типа.
+
+              До отчёта Hermes статус: `WAITING_FOR_HERMES`.
+          ''')
+          docs = replace_section(docs, "## 8. Обязательная проверка Hermes", "## История изменений", section9)
+          history_header = "| Дата | Изменение |\n|---|---|\n"
+          history_row = "| 2026-07-25 | Добавлены responsive-компоновка кандидата и вакансии, кликабельный индекс пяти блоков и пять равных кнопок частых взаимодействий текущего пользователя за скользящий год |\n"
+          docs = replace_once(docs, history_header, history_header + history_row, "история спецификации")
+          docs_path.write_text(docs, encoding="utf-8")
+
+          instruction_path = root / ".ai/instructions/iteraction-list-usability-navigation.md"
+          instruction_path.parent.mkdir(parents=True, exist_ok=True)
+          instruction_path.write_text(dedent('''
+              # Hermes — проверка IteractionListEdit usability navigation
+
+              PROJECT: HRM HuntTech
+              REPO: aananyev/it-pearls-recruiting
+              BRANCH: agent/iteraction-list-usability-navigation
+              BASE: master
+              VERIFIED HEAD: полный HEAD SHA из PR; несовпадение означает HEAD_MISMATCH
+              MODE: проверка без изменения кода
+
+              Команды: `git diff --check`; compile web/core; профильные тесты IteractionListEditAccordionLayoutTest, IteractionListAccordionNavigationTest, IteractionListMostPopularInteractionTest, LeftSidebarAvatarComponentTest; ScreenViewIntegrityTest 8/8; buildScssThemes; clean assemble.
+
+              Local smoke: HTTP `/hrm/` 200; кандидат и вакансия в одной строке без horizontal scroll и с одинаковым CSS; пять пунктов слева раскрывают блоки и фокусируют поля; пять равных кнопок соответствуют топ-5 текущего пользователя за год и устанавливают точный тип; save/cancel/subscription без регрессии; Tomcat critical errors NONE; P1=0; P2=0.
+
+              Hermes не меняет код/docs, не делает commit/push/rebase/merge и не изменяет production. Отчёт обязан содержать `проверен HEAD: <SHA>`.
+          ''').lstrip(), encoding="utf-8")
+
+          ET.parse(target_xml_path)
+          java_check = java_path.read_text(encoding="utf-8")
+          xml_check = target_xml_path.read_text(encoding="utf-8")
+          assert 'calendar.add(Calendar.YEAR, -1)' in java_check
+          assert 'iteractionTypeField.setValue(interaction)' in java_check
+          assert 'getCaption().substring' not in java_check
+          assert xml_check.count('stylename="iteraction-list-primary-picker"') == 2
+          assert 'id="iteractionListNavigation"' in xml_check
+          assert 'id="popularAccordion"' in xml_check
+          for theme in themes:
+              check = (root / "modules/web/themes" / theme / "com.company.hunttech" / "iteraction-list-accordion-navigation.scss").read_text(encoding="utf-8")
+              assert ".iteraction-list-primary-picker" in check
+              assert "max-width: 20% !important" in check
+
+          workflow_path = root / ".github/workflows/iteraction-list-usability-navigation.yml"
+          if workflow_path.exists():
+              workflow_path.unlink()
+          PY
+
+      - name: Validate patch text
+        shell: bash
+        run: |
+          git diff --check
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          ET.parse(Path("modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml"))
+          print("XML и статические контракты: PASS")
+          PY
+
+      - name: Commit and push implementation
+        shell: bash
+        run: |
+          git config user.name "ChatGPT HRM HuntTech"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "feat(iteraction-list): улучшить навигацию и частые взаимодействия" \
+            -m "- ограничить ширину двух picker-полей внутри диалога
+          - добавить кликабельный индекс пяти блоков с фокусировкой
+          - вывести пять равных кнопок топ-взаимодействий пользователя за год
+          - обновить тесты, документацию и инструкцию Hermes
+
+          [branch: agent/iteraction-list-usability-navigation]
+          [deploy-local]
+          [prompt: проверить точный HEAD PR в master; выполнить профильные тесты, ScreenViewIntegrityTest 8/8, Data View Integrity, SCSS семи тем, clean assemble, local deploy, HTTP /hrm/ 200 и smoke навигации/пяти годовых кнопок без изменения кода, merge и production]"
+          git push origin HEAD:agent/iteraction-list-usability-navigation
