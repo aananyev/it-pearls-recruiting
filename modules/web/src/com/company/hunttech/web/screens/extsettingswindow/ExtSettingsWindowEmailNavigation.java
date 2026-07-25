@@ -1,6 +1,9 @@
 package com.company.hunttech.web.screens.extsettingswindow;
 
 import com.company.hunttech.entity.UserAiConfiguration;
+import com.company.hunttech.entity.UserAiProfile;
+import com.company.hunttech.service.UserAiContextBuilder;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.CheckBox;
@@ -12,6 +15,9 @@ import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.components.TextArea;
 import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.components.VBoxLayout;
+import com.haulmont.cuba.gui.data.Datasource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.Map;
@@ -21,10 +27,11 @@ import java.util.Map;
  * с существующими рабочими блоками справа.
  *
  * Загрузка, редактирование, валидация и сохранение настроек остаются
- * в базовом контроллере; расширение управляет только presentation state.
+ * в базовом контроллере; расширение управляет presentation state и локальным preview.
  */
 public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
 
+    private static final Logger log = LoggerFactory.getLogger(ExtSettingsWindowEmailNavigation.class);
     private static final String NAVIGATION_STYLE = "borderless settings-section-nav-item";
     private static final String ACTIVE_NAVIGATION_STYLE =
             "borderless settings-section-nav-item settings-section-nav-item-active";
@@ -37,6 +44,8 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
 
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private Notifications notifications;
 
     @Inject
     private VBoxLayout emailSettingsNavigation;
@@ -86,6 +95,8 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     private CheckBox profileEnabledField;
     @Inject
     private TextArea<String> aiContextPreviewArea;
+    @Inject
+    private Datasource<UserAiProfile> userAiProfileDs;
 
     @Inject
     private VBoxLayout interfaceSettingsNavigation;
@@ -121,6 +132,44 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         initAiSettingsNavigation();
         initUserAiProfileNavigation();
         initInterfaceSettingsNavigation();
+    }
+
+    /**
+     * Формирует предпросмотр из текущего состояния datasource, включая несохранённые изменения.
+     * Удалённый вызов здесь не используется: передача редактируемой CUBA entity в middleware
+     * не нужна для UI-сценария и делала кнопку зависимой от remoting/serialization.
+     */
+    @Override
+    public void previewAiContext() {
+        UserAiProfile profile = userAiProfileDs == null ? null : userAiProfileDs.getItem();
+        if (profile == null) {
+            showAiContextPreviewError("aiContextPreviewUnavailable");
+            return;
+        }
+        if (aiContextPreviewArea == null || previewGroup == null) {
+            log.error("AI context preview components are not injected: area={}, group={}",
+                    aiContextPreviewArea != null, previewGroup != null);
+            showAiContextPreviewError("aiContextPreviewError");
+            return;
+        }
+
+        try {
+            aiContextPreviewArea.setValue(UserAiContextBuilder.buildPreview(profile));
+            previewGroup.setExpanded(true);
+            updateUserAiProfileNavigationStyles(userAiProfilePreviewNav);
+            // Фокус прокручивает длинную форму к раскрытому результату и делает действие видимым пользователю.
+            aiContextPreviewArea.focus();
+        } catch (RuntimeException e) {
+            log.error("Cannot build AI context preview from current datasource", e);
+            showAiContextPreviewError("aiContextPreviewError");
+        }
+    }
+
+    private void showAiContextPreviewError(String messageKey) {
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withCaption(getMessage(messageKey))
+                .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                .show();
     }
 
     /**

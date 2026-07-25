@@ -75,6 +75,26 @@ public class ExtSettingsWindowCoreBeanLookupTest {
         assertTrue(result.contains("implements Serializable"));
     }
 
+    @Test
+    public void previewButtonUsesCurrentDatasourceWithoutRemoteEntityCall() throws IOException {
+        String descriptor = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml");
+        String navigationController = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindowEmailNavigation.java");
+
+        /*
+         * Фактический screen controller переопределяет invoke-метод: preview строится из
+         * текущей entity datasource и не передаёт редактируемый профиль через remoting.
+         */
+        assertTrue(descriptor.contains("id=\"previewAiContextBtn\""));
+        assertTrue(descriptor.contains("invoke=\"previewAiContext\""));
+        assertTrue(navigationController.contains("public void previewAiContext()"));
+        assertTrue(navigationController.contains("UserAiContextBuilder.buildPreview(profile)"));
+        assertFalse(navigationController.contains("userAiContextService.buildContextPreview(profile)"));
+        assertTrue(navigationController.contains("previewGroup.setExpanded(true);"));
+        assertTrue(navigationController.contains("aiContextPreviewArea.focus();"));
+    }
+
     private String readProjectFile(String relativePath) throws IOException {
         Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
         while (root != null && !Files.exists(root.resolve("build.gradle"))) {

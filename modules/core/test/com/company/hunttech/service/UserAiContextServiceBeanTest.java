@@ -60,15 +60,14 @@ public class UserAiContextServiceBeanTest {
 
     @Test
     public void sanitizer_removesControlCharactersAndNormalizesWhitespace() {
-        UserAiContextServiceBean service = new UserAiContextServiceBean();
-        String result = service.sanitize("  Руководитель\u0000\t  HRM  \r\n\n\nархитектор  ", 100);
+        String result = UserAiContextBuilder.sanitize(
+                "  Руководитель\u0000\t  HRM  \r\n\n\nархитектор  ", 100);
         assertEquals("Руководитель HRM \n\nархитектор", result);
     }
 
     @Test
     public void sanitizer_respectsUnicodeCodePointLimit() {
-        UserAiContextServiceBean service = new UserAiContextServiceBean();
-        String result = service.sanitize("АБВГД", 3);
+        String result = UserAiContextBuilder.sanitize("АБВГД", 3);
         assertEquals("АБВ", result);
     }
 
@@ -82,6 +81,17 @@ public class UserAiContextServiceBeanTest {
         assertTrue(preview.contains("API-ключи"));
         assertFalse(preview.contains("SMTP"));
         assertFalse(preview.contains("apiKey"));
+    }
+
+    @Test
+    public void localBuilder_previewUsesCurrentUnsavedProfileValues() {
+        UserAiProfile profile = activeProfile();
+        profile.setCurrentPosition("Несохранённая должность из datasource");
+
+        String preview = UserAiContextBuilder.buildPreview(profile);
+
+        assertTrue(preview.contains("Несохранённая должность из datasource"));
+        assertEquals(preview, new UserAiContextServiceBean().buildContextPreview(profile));
     }
 
     @Test

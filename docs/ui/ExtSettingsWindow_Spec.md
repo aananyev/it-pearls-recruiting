@@ -1,10 +1,11 @@
 # ExtSettingsWindow — настройки пользователя
 
 > Экран HRM HuntTech: `com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindow`.  
-> XML: `ext-settings-window.xml`.  
+> Фактическое расширение screen ID `settings`: `ExtSettingsWindowEmailNavigation`.  
+> XML: `ext-settings-window.xml`, расширение `ext-settings-window-email-navigation.xml`.  
 > Базовый класс: `com.haulmont.cuba.web.app.ui.core.settings.SettingsWindow`.  
 > Локальный визуальный namespace: `.ext-settings-window`.  
-> Связанные документы: [UI/UX-концепция HRM HuntTech](../architecture/HRM_HuntTech_UI_UX_Design_Concept.md), [UserSettings](../entities/user-settings/UserSettings.md), [UserAiProfile](../entities/UserAiProfile.md), [UserAiContextService](../services/UserAiContextService.md), [ImageProcessingService](../services/file-storage/ImageProcessingService.md), [аватар ExtSettingsWindow](ExtSettingsWindowAvatar_Spec.md).
+> Связанные документы: [UI/UX-концепция HRM HuntTech](../architecture/HRM_HuntTech_UI_UX_Design_Concept.md), [UserSettings](../entities/user-settings/UserSettings.md), [UserAiProfile](../entities/UserAiProfile.md), [UserAiContextService](../services/UserAiContextService.md), [ImageProcessingService](../services/file-storage/ImageProcessingService.md), [навигация и preview фактического экрана](ExtSettingsWindowEmailNavigation_Spec.md), [аватар ExtSettingsWindow](ExtSettingsWindowAvatar_Spec.md).
 
 ## Business & Context Intro
 
@@ -23,11 +24,11 @@
 
 ### UI Context & Navigation
 
-Экран открывается из стандартного меню настроек CUBA Platform. В `web-screens.xml` screen ID `settings` зарегистрирован на шаблон `/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml`.
+Экран открывается из стандартного меню настроек CUBA Platform. В `web-screens.xml` screen ID `settings` зарегистрирован на расширяющий шаблон `/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-email-navigation.xml`, который наследует базовый `ext-settings-window.xml`.
 
 | Вкладка | ID | Источник данных и ответственность |
 |---|---|---|
-| «Обо мне» | `msgMyInfo` | `ExtUser`, `UserAiProfile`, предпросмотр ИИ-контекста |
+| «Обо мне» | `msgMyInfo` | `ExtUser`, `UserAiProfile`, локальный предпросмотр текущего ИИ-контекста |
 | «Интерфейс» | `msgInterface` | компоненты и методы базового `SettingsWindow` |
 | «Настройка email» | `mailAccessTab` | поля `UserSettings`, заполняемые и собираемые контроллером вручную |
 | AI | `aiAccessTab` | два предпочтения `UserSettings`, коллекция `UserAiConfiguration` |
@@ -45,6 +46,7 @@
 
 - открытие окна → базовый `SettingsWindow` находит legacy-компоненты по ID → отображаются текущие настройки;
 - начало `init()` → `ImageProcessingService` и `UserAiContextService` разрешаются через `AppBeans.get(<Service>.NAME)` → web-контекст получает именованные CUBA middleware proxy без прямого доступа к core Spring context;
+- завершение базовой инициализации → `ExtSettingsWindowEmailNavigation` подключает кликабельную email- и AI-навигацию → данные и commit не меняются;
 - загрузка `UserSettings` → отсутствующие или legacy-null AI-предпочтения нормализуются в `true` → оба checkbox включены;
 - пользователь меняет AI-предпочтение → binding изменяет соответствующее поле `UserSettings` → отдельный обработчик не требуется;
 - сохранение окна → `userSettings` добавляется в общий `CommitContext` → оба значения сохраняются атомарно;
@@ -54,8 +56,9 @@
 - раскрытие или сворачивание почтовой секции → меняется только видимость её содержимого → значения полей и порядок сохранения не меняются;
 - сохранение окна → `collectEmailSettings()` читает те же `TextField` и `CheckBox` → значения записываются в `UserSettings`;
 - нажатие AI-действий → выполняются существующие `invoke`-методы → визуальный слой не инициирует запросы и не меняет маршрутизацию;
-- нажатие «Показать передаваемые данные» → контроллер проверяет профиль, service proxy и XML-компоненты → предпросмотр раскрывается либо показывается понятное предупреждение без закрытия формы;
-- ошибка сервиса предпросмотра → stack trace записывается в журнал приложения → пользователю показывается warning вместо `NullPointerException`;
+- нажатие «Показать передаваемые данные» → фактический controller берёт текущий `userAiProfileDs.item` → `UserAiContextBuilder` локально формирует очищенный preview → секция раскрывается и форма прокручивается к результату;
+- профиль выключен или согласие отсутствует → preview явно сообщает, что контекст не передаётся → окно остаётся открытым;
+- ошибка построения предпросмотра → stack trace записывается в журнал приложения → пользователю показывается warning без закрытия формы;
 - загрузка или очистка аватара → обработчик вызывает `ImageProcessingService` через именованный middleware proxy → изображение обрабатывается в core без cross-context зависимости web-контроллера;
 - hover, focus, disabled и read-only → меняется только presentation → required, validators, permissions и editable-состояния остаются прежними;
 - смена темы → используется одинаковый локальный SCSS-контракт семи тем → component ID и поведение не меняются.
@@ -64,7 +67,8 @@
 
 | Параметр | Значение |
 |---|---|
-| Контроллер | `com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindow` |
+| Базовый контроллер | `com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindow` |
+| Фактический контроллер | `com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindowEmailNavigation` |
 | Базовый класс | `SettingsWindow` |
 | XML schema | legacy `window.xsd` |
 | Data API | legacy `dsContext` |
@@ -74,7 +78,7 @@
 | Footer style | `ext-settings-footer` |
 | Поддерживаемые темы | `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light`, `hunttech-modern-dark` |
 
-Экран остаётся legacy-экраном CUBA Platform 7.3. Корневые секции `<window>`, `<dsContext>` и `<layout>` сохранены. Актуальный экран одновременно содержит AI-предпочтения, null-safe предпросмотр, аватар `OvaFallbackImage` и визуальный email-аккордеон. `ImageProcessingService` и `UserAiContextService` являются middleware Service API и поэтому разрешаются в начале `init()` по стабильным CUBA service name; остальные UI-компоненты и web-зависимости сохраняют штатную инъекцию.
+Экран остаётся legacy-экраном CUBA Platform 7.3. Корневые секции `<window>`, `<dsContext>` и `<layout>` сохранены. Актуальный экран одновременно содержит AI-предпочтения, null-safe локальный предпросмотр, аватар `OvaFallbackImage`, кликабельную навигацию и визуальный email-аккордеон. `ImageProcessingService` и `UserAiContextService` остаются middleware Service API и разрешаются по стабильным CUBA service name; фактическая кнопка preview не передаёт редактируемую entity в middleware и использует общий builder модуля `global`.
 
 ## 2. Связь с моделью данных
 
@@ -82,7 +86,7 @@
 |---|---|---|---|
 | `extUserDs` | `ExtUser` | `extUser-view` | пользователь, аватар и fallback почтовых значений |
 | `userSettingsDs` | `UserSettings` | `userSettings-view` | почтовые параметры, предпочтение личного API и личных промптов |
-| `userAiProfileDs` | `UserAiProfile` | `userAiProfile-view` | профессиональный ИИ-профиль |
+| `userAiProfileDs` | `UserAiProfile` | `userAiProfile-view` | профессиональный ИИ-профиль и текущий источник UI-preview |
 | `userAiConfigsDs` | `UserAiConfiguration` | `userAiConfiguration-view` | персональные AI-подключения |
 
 Используемые запросы:
@@ -129,11 +133,11 @@ context.addInstanceToCommit(userSettings);
 
 Поля портов сохраняют `datatype="int"` и `IntegerValidator`. Перенос полей в `GroupBoxLayout` не меняет инъекции, загрузку `setEmailSettings()` и сбор значений `collectEmailSettings()`.
 
-### 2.3. Получение middleware-сервисов
+### 2.3. Middleware-сервисы и локальный builder
 
-`ImageProcessingService` и `UserAiContextService` объявлены обычными полями контроллера без `@Inject`. Их интерфейсы и DTO находятся в `global`, а реализации зарегистрированы в `core` через `@Service(<Interface>.NAME)`.
+`ImageProcessingService` и `UserAiContextService` объявлены обычными полями базового контроллера без `@Inject`. Их интерфейсы и DTO находятся в `global`, а реализации зарегистрированы в `core` через `@Service(<Interface>.NAME)`.
 
-В начале `init()` web-контроллер получает именованные CUBA service proxy:
+В начале `init()` базовый web-контроллер получает именованные CUBA service proxy:
 
 ```java
 imageProcessingService = (ImageProcessingService) AppBeans.get(ImageProcessingService.NAME);
@@ -151,7 +155,14 @@ AppBeans.get(UserAiContextService.class);
 
 `ImageProcessingService.process(...)` возвращает `ProcessedImage`, размещённый в `global` и реализующий `Serializable`; это обеспечивает удалённый контракт передачи байтов, имени, расширения и признака обработки между web и middleware.
 
-Импорт `AppBeans` обеспечивается существующим `import com.haulmont.cuba.core.global.*;`. Бизнес-логика `ImageProcessingService`, `UserAiContextService`, `AvatarImageUploadHelper` и `previewAiContext()` не переносится в UI и не изменяется.
+Кнопка предпросмотра использует иной безопасный путь:
+
+```java
+UserAiProfile profile = userAiProfileDs.getItem();
+String preview = UserAiContextBuilder.buildPreview(profile);
+```
+
+`UserAiContextBuilder` размещён в `global`, не зависит от Spring и применяется также `UserAiContextServiceBean`. UI получает единые sanitization и лимиты, но использует текущее состояние datasource, включая несохранённые изменения. `userAiContextService.buildContextPreview(profile)` фактическим screen controller не вызывается.
 
 ## 3. База данных
 
@@ -180,37 +191,41 @@ AppBeans.get(UserAiContextService.class);
 ## 4. Иерархия формы
 
 ```text
-ext-settings-window
-├── settingsTabSheet [ext-settings-tabs]
-│   ├── msgMyInfo
-│   │   └── userAiProfileMainBox
-│   │       ├── userAiProfileSidebar (270 px)
-│   │       │   └── userPic [OvaFallbackImage, 176×176]
-│   │       └── userAiProfileContentScrollBox
-│   ├── msgInterface
-│   │   └── interfaceSettingsMainBox
-│   │       ├── interfaceSettingsSidebar (270 px)
-│   │       └── interfaceSettingsContentScrollBox
-│   ├── mailAccessTab
-│   │   └── emailSettingsMainBox
-│   │       ├── emailSettingsSidebar (270 px)
-│   │       └── emailSettingsContentScrollBox
-│   │           └── emailSettingsContent
-│   │               ├── emailSettingsToolbar
-│   │               └── emailSettingsAccordion
-│   │                   ├── smtpSettingsSection — раскрыт
-│   │                   ├── pop3SettingsSection — свёрнут
-│   │                   └── imapSettingsSection — свёрнут
-│   └── aiAccessTab
-│       └── aiSettingsMainBox
-│           ├── aiSettingsSidebar (270 px)
-│           └── aiSettingsContent
-│               ├── aiSettingsToolbar
-│               ├── personalAiApiPreferenceBox
-│               │   ├── preferPersonalAiApiSettingsField
-│               │   └── preferPersonalPromptsField
-│               └── aiConnectionsCard
-└── buttons [ext-settings-footer]
+settings
+└── ext-settings-window-email-navigation.xml
+    └── extends ext-settings-window.xml
+        └── settingsTabSheet [ext-settings-tabs]
+            ├── msgMyInfo
+            │   └── userAiProfileMainBox
+            │       ├── userAiProfileSidebar (270 px)
+            │       │   └── userPic [OvaFallbackImage, 176×176]
+            │       └── userAiProfileContentScrollBox
+            │           ├── previewAiContextBtn [invoke=previewAiContext]
+            │           └── previewGroup
+            │               └── aiContextPreviewArea
+            ├── msgInterface
+            │   └── interfaceSettingsMainBox
+            │       ├── interfaceSettingsSidebar (270 px)
+            │       └── interfaceSettingsContentScrollBox
+            ├── mailAccessTab
+            │   └── emailSettingsMainBox
+            │       ├── emailSettingsSidebar (270 px)
+            │       └── emailSettingsContentScrollBox
+            │           └── emailSettingsContent
+            │               ├── emailSettingsToolbar
+            │               └── emailSettingsAccordion
+            │                   ├── smtpSettingsSection — раскрыт
+            │                   ├── pop3SettingsSection — свёрнут
+            │                   └── imapSettingsSection — свёрнут
+            └── aiAccessTab
+                └── aiSettingsMainBox
+                    ├── aiSettingsSidebar (270 px)
+                    └── aiSettingsContent
+                        ├── aiSettingsToolbar
+                        ├── personalAiApiPreferenceBox
+                        │   ├── preferPersonalAiApiSettingsField
+                        │   └── preferPersonalPromptsField
+                        └── aiConnectionsCard
 ```
 
 Ширина боковых панелей задана существующим XML и не меняется. При ширине viewport до 1366 px локальный SCSS уменьшает фактическую ширину панели до 250 px, не перестраивая XML и не перенося компоненты.
@@ -246,23 +261,23 @@ SMTP, POP3 и IMAP представлены тремя полноширинны�
 сервер → порт → требование пароля → пароль
 ```
 
-Сохраняются внутренние контейнеры `smtpSettingsCard`, `pop3SettingsCard`, `imapSettingsCard`, все 12 component ID почтовых полей, типы полей и `IntegerValidator`. Раскрытие секций не требует Java-обработчиков и не сохраняется между сеансами. Пароли не передаются в ИИ-контекст.
+Сохраняются внутренние контейнеры `smtpSettingsCard`, `pop3SettingsCard`, `imapSettingsCard`, все 12 component ID почтовых полей, типы полей и `IntegerValidator`. Раскрытие секций не требует изменения загрузки или сохранения. Пароли не передаются в ИИ-контекст.
 
 ### 5.3. Вкладка «Обо мне» и предпросмотр
 
-Сохраняются datasource, consent-логика, валидация опыта, аватар `OvaFallbackImage` и атомарное сохранение. `previewAiContext()` не отправляет HTTP-запрос к LLM. `UserAiContextService` должен быть разрешён через именованный CUBA middleware proxy до выполнения этого действия.
+Сохраняются datasource, consent-логика, валидация опыта, аватар `OvaFallbackImage` и атомарное сохранение. `previewAiContext()` не отправляет HTTP-запрос к LLM и не сохраняет профиль.
 
-Предпросмотр выполняется последовательно:
+Фактический controller `ExtSettingsWindowEmailNavigation` переопределяет публичный invoke-метод. Предпросмотр выполняется последовательно:
 
-1. безопасно извлекается `UserAiProfile`;
-2. проверяется доступность `UserAiContextService`;
-3. проверяется инъекция `aiContextPreviewArea` и `previewGroup`;
-4. вызывается `buildContextPreview(profile)`;
-5. `null`-результат преобразуется в пустую строку;
-6. секция раскрывается через `setExpanded(true)`;
+1. безопасно извлекается текущий `UserAiProfile` из `userAiProfileDs`;
+2. проверяется инъекция `aiContextPreviewArea` и `previewGroup`;
+3. вызывается локальный `UserAiContextBuilder.buildPreview(profile)`;
+4. текст устанавливается в `aiContextPreviewArea`;
+5. секция раскрывается через `setExpanded(true)`;
+6. `focus()` прокручивает длинную форму к результату;
 7. `RuntimeException` журналируется со stack trace и преобразуется в warning.
 
-Такой порядок исключает исходный составной вызов, в котором невозможно было определить источник `NullPointerException`.
+Такой порядок обеспечивает preview несохранённых значений и исключает remote-передачу редактируемой CUBA entity. Если профиль выключен или согласие отсутствует, builder возвращает понятное сообщение вместо пустой области.
 
 ### 5.4. Вкладка AI
 
@@ -336,10 +351,10 @@ Core-сервис должен быть доступен после `AppBeans.ge
 - карточки имеют радиус 8 px, рамку, внутренний отступ 20–22 px и тень `0 2px 8px`;
 - заголовки карточек — 18 px, насыщенность 700;
 - заголовки toolbar — 20 px, насыщенность 700;
-- email-секции используют уже проверенный локальный стиль `user-ai-profile-section`, поэтому визуально совпадают с аккордеонами вкладки «Обо мне» без нового глобального SCSS;
-- каждая email-секция занимает 100% рабочей ширины и рассчитывает высоту по содержимому;
+- email-секции используют локальный стиль `user-ai-profile-section` и занимают 100% рабочей ширины;
 - прежний трёхколоночный `emailSettingsGrid` удалён из XML, поэтому фиксированная sidebar больше не сжимает три протокола в одну строку;
-- второй AI-checkbox использует существующий класс `ai-settings-preference-checkbox`, поэтому новая глобальная стилизация не требуется.
+- второй AI-checkbox использует существующий класс `ai-settings-preference-checkbox`;
+- preview сохраняет существующий `previewGroup` и read-only `aiContextPreviewArea`; после действия меняются только expanded/focus state.
 
 ### 6.5. Поля и состояния
 
@@ -370,19 +385,22 @@ Core-сервис должен быть доступен после `AppBeans.ge
 
 ## 7. Соответствие CUBA Platform 7.3
 
-1. Экран остаётся XML-экраном `window.xsd`.
-2. Вкладки остаются дочерними компонентами `TabSheet`.
-3. Data API остаётся `dsContext`.
-4. Legacy component ID не переименовываются.
-5. Существующие `datasource`, `property`, `required`, validators, actions и `invoke` сохраняются.
-6. AI-checkbox используют штатный legacy datasource-binding.
-7. `UserSettings` сохраняется через существующий `CommitContext`.
-8. Почтовый аккордеон использует штатные атрибуты `GroupBoxLayout`: `collapsable`, `collapsed`, `showAsPanel`.
-9. Middleware-сервисы `ImageProcessingService` и `UserAiContextService` разрешаются через `AppBeans.get(<Service>.NAME)` в начале `init()`; `@Inject` и class-based lookup для этих полей не используются.
-10. DTO удалённых Service API размещаются в `global` и реализуют `Serializable`.
-11. Визуальный слой подключается только через `stylename` и theme extension.
-12. SCSS не инициирует загрузку данных и не вмешивается в lifecycle.
-13. Глобальные Vaadin-селекторы не добавляются.
+1. Базовый экран остаётся XML-экраном `window.xsd`.
+2. Фактический screen ID `settings` использует штатное legacy XML inheritance.
+3. Вкладки остаются дочерними компонентами `TabSheet`.
+4. Data API остаётся `dsContext`.
+5. Legacy component ID не переименовываются.
+6. Существующие `datasource`, `property`, `required`, validators, actions и `invoke` сохраняются.
+7. `previewAiContextBtn` сохраняет `invoke="previewAiContext"`, а Java override фактического controller вызывается полиморфно.
+8. AI-checkbox используют штатный legacy datasource-binding.
+9. `UserSettings` сохраняется через существующий `CommitContext`.
+10. Почтовый аккордеон использует штатные атрибуты `GroupBoxLayout`: `collapsable`, `collapsed`, `showAsPanel`.
+11. Middleware-сервисы разрешаются через `AppBeans.get(<Service>.NAME)`; `@Inject` и class-based lookup для этих полей не используются.
+12. UI-preview использует stateless `UserAiContextBuilder` из `global`, не передавая редактируемую entity через remoting.
+13. DTO удалённых Service API размещаются в `global` и реализуют `Serializable`.
+14. Визуальный слой подключается только через `stylename` и theme extension.
+15. SCSS не инициирует загрузку данных и не вмешивается в lifecycle.
+16. Глобальные Vaadin-селекторы не добавляются.
 
 ## 8. Обязательные проверки
 
@@ -397,17 +415,17 @@ git diff --check
           --no-daemon --stacktrace
 
 ./gradlew :app-core:test \
+          --tests 'com.company.hunttech.service.UserAiContextServiceBeanTest' \
+          --tests 'com.company.hunttech.core.ExtSettingsWindowCoreBeanLookupTest' \
+          --tests 'com.company.hunttech.core.ExtSettingsWindowEmailNavigationTest' \
+          --tests 'com.company.hunttech.core.ExtSettingsWindowAiNavigationTest' \
           --tests 'com.company.hunttech.core.UserSettingsAiApiPreferenceTest' \
           --tests 'com.company.hunttech.core.ExtSettingsWindowAvatarComponentTest' \
-          --tests 'com.company.hunttech.core.ExtSettingsWindowCoreBeanLookupTest' \
           --tests 'com.company.hunttech.app.ImageProcessingServiceBeanTest' \
           --no-daemon --stacktrace
 
 ./gradlew test \
           --tests '*ScreenViewIntegrityTest*' \
-          --no-daemon --stacktrace
-
-./gradlew updateDb \
           --no-daemon --stacktrace
 
 ./gradlew :app-web:buildScssThemes \
@@ -419,13 +437,16 @@ git diff --check
 
 Ожидается:
 
+- `UserAiContextServiceBeanTest` — 8/8 PASS;
+- `ExtSettingsWindowCoreBeanLookupTest` — 4/4 PASS;
+- `ExtSettingsWindowEmailNavigationTest` — 3/3 PASS;
+- `ExtSettingsWindowAiNavigationTest` — 3/3 PASS;
 - `UserSettingsAiApiPreferenceTest` — 11/11 PASS;
 - `ExtSettingsWindowAvatarComponentTest` — 2/2 PASS;
-- `ExtSettingsWindowCoreBeanLookupTest` — 2/2 PASS;
 - `ImageProcessingServiceBeanTest` — PASS;
 - `ScreenViewIntegrityTest` — 8/8 PASS;
 - Data View Integrity — PASS;
-- SQL и Liquibase — PASS;
+- SQL и Liquibase — N/A по diff;
 - SCSS — PASS/N/A по diff, контрольная сборка всех тем — PASS;
 - `BUILD SUCCESSFUL`;
 - локальный deploy того же HEAD;
@@ -436,7 +457,7 @@ git diff --check
 
 Проверить:
 
-- окно открывается после `updateDb` без `NoSuchBeanDefinitionException`, ошибки создания контроллера и cross-context ошибки;
+- окно фактически открывается без `NoSuchBeanDefinitionException`, ошибки создания контроллера и cross-context ошибки;
 - `ImageProcessingService` и `UserAiContextService` доступны после `init()` как CUBA middleware proxy;
 - class-based lookup `AppBeans.get(ImageProcessingService.class)` и `AppBeans.get(UserAiContextService.class)` отсутствует;
 - оба checkbox включены у новой записи пользователя;
@@ -445,16 +466,17 @@ git diff --check
 - `okBtn` сохраняет оба значения;
 - после повторного открытия состояния восстановлены;
 - Cancel не фиксирует несохранённые изменения;
-- нажатие «Показать передаваемые данные» не вызывает `NullPointerException` и не падает из-за недоступного core-бина;
-- при корректном профиле показывается очищенный предпросмотр;
-- при недоступном профиле или ошибке сервиса форма остаётся открытой, показывается warning;
-- журнал содержит stack trace исходной runtime-ошибки без потери контекста;
+- изменить `currentPosition` и `aboutMe` без Save, нажать «Показать передаваемые данные» → новые значения присутствуют в preview;
+- `previewGroup` раскрывается, фокус/прокрутка переводят пользователя к `aiContextPreviewArea`;
+- при выключенном профиле либо согласии preview сообщает, что контекст не передаётся;
+- preview не содержит SMTP/POP3/IMAP-пароли, API-ключи и конфигурации подключения;
+- runtime-ошибка не закрывает форму, журнал содержит stack trace, пользователю показывается warning;
 - значения SMTP, POP3 и IMAP загружаются и сохраняются прежними методами;
 - раскрытие и сворачивание почтовых секций не изменяет введённые значения;
 - загрузка изображения меньше лимита сохраняет оригинал;
 - загрузка изображения больше `targetImageSize` вызывает обработку в middleware и успешное повторное отображение;
 - аватар `OvaFallbackImage`, upload, очистка и fallback работают без регрессии;
-- в логах отсутствуют новые serialization errors, `ClassCastException`, `NoSuchBeanDefinitionException` и критические ошибки.
+- в логах отсутствуют новые serialization errors, `ClassCastException`, `NoSuchBeanDefinitionException`, `NullPointerException` и критические ошибки.
 
 ### 8.2. Визуальный smoke
 
@@ -469,7 +491,8 @@ git diff --check
 - SMTP, POP3 и IMAP расположены вертикально и занимают всю ширину рабочей области;
 - SMTP раскрыт при первом открытии, POP3 и IMAP свёрнуты;
 - каждая почтовая секция раскрывается и сворачивается без потери введённых значений;
-- отсутствие обрезки и горизонтальной прокрутки при ширине 1200 px;
+- previewGroup раскрывается, текст читаем и не обрезан;
+- отсутствие горизонтальной прокрутки при ширине 1200 px;
 - focus, hover, read-only, disabled и validation states;
 - круглый аватар отображается через `OvaFallbackImage` без искажения;
 - отсутствие влияния на `JobCandidateEdit` и другие формы;
@@ -482,6 +505,7 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-25 | Восстановлена кнопка «Показать передаваемые данные»: фактический controller формирует preview локально через общий `UserAiContextBuilder`, отражает несохранённые значения, раскрывает секцию и фокусирует результат без remote-передачи `UserAiProfile` |
 | 2026-07-25 | Исправлен cross-context доступ: `ImageProcessingService` и `UserAiContextService` разрешаются по стабильному CUBA service name и вызываются через middleware proxy; class-based `AppBeans` lookup удалён |
 | 2026-07-25 | `ImageProcessingService` и `UserAiContextService` переведены с `@Inject` на `AppBeans.get(...)` в начале `init()`; добавлена регрессионная проверка доступности core-бинов в legacy web-контроллере |
 | 2026-07-25 | PR #17 перебазирован на актуальный `master`; документация email-аккордеона объединена с AI-предпочтениями и `OvaFallbackImage` без потери функциональных контрактов |
