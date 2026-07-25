@@ -7,6 +7,7 @@
 @import "com.company.hunttech/user-ai-profile";
 @import "com.company.hunttech/settings-window-sections";
 @import "com.company.hunttech/iteraction-list-editor";
+@import "com.company.hunttech/iteraction-list-accordion-navigation";
 @import "com.company.hunttech/candidate-cv-editor";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -17,5 +18,6 @@
   @include user-ai-profile;
   @include settings-window-sections;
   @include iteraction-list-editor-theme;
+  @include iteraction-list-accordion-navigation-theme;
   @include candidate-cv-editor-theme;
 }
