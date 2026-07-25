@@ -346,43 +346,66 @@
                                     <label value="msg://emailSettingsPageDescription" width="100%" stylename="settings-section-help"/>
                                 </vbox>
                             </hbox>
-                            <grid id="emailSettingsGrid" width="100%" spacing="true" stylename="email-settings-grid">
-                                <columns><column flex="1"/><column flex="1"/><column flex="1"/></columns>
-                                <rows>
-                                    <row>
-                                        <vbox id="smtpSettingsCard" width="100%" spacing="true" stylename="settings-section-card email-settings-card">
-                                            <label value="SMTP" stylename="h3 settings-section-card-title"/>
-                                            <label value="msg://emailSettingsSmtpDescription" width="100%" stylename="settings-section-help"/>
-                                            <textField id="smtpServer" caption="SMTP server" width="100%"/>
-                                            <textField id="smtpPort" datatype="int" caption="SMTP port" width="100%">
-                                                <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
-                                            </textField>
-                                            <checkBox id="smtpPasswordRequired" caption="msg://msgSMTPPasswordRequired"/>
-                                            <textField id="smtpPassword" caption="SMTP password" width="100%"/>
-                                        </vbox>
-                                        <vbox id="pop3SettingsCard" width="100%" spacing="true" stylename="settings-section-card email-settings-card">
-                                            <label value="POP3" stylename="h3 settings-section-card-title"/>
-                                            <label value="msg://emailSettingsPop3Description" width="100%" stylename="settings-section-help"/>
-                                            <textField id="pop3Server" caption="POP3 server" width="100%"/>
-                                            <textField id="pop3Port" datatype="int" caption="POP3 port" width="100%">
-                                                <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
-                                            </textField>
-                                            <checkBox id="pop3PasswordRequired" caption="msg://msgPop3PasswordRequired"/>
-                                            <textField id="pop3Password" caption="POP3 password" width="100%"/>
-                                        </vbox>
-                                        <vbox id="imapSettingsCard" width="100%" spacing="true" stylename="settings-section-card email-settings-card">
-                                            <label value="IMAP" stylename="h3 settings-section-card-title"/>
-                                            <label value="msg://emailSettingsImapDescription" width="100%" stylename="settings-section-help"/>
-                                            <textField id="imapServer" caption="IMAP server" width="100%"/>
-                                            <textField id="imapPort" datatype="int" caption="IMAP port" width="100%">
-                                                <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
-                                            </textField>
-                                            <checkBox id="imapPasswordRequired" caption="msg://msgImapPasswordRequired"/>
-                                            <textField id="imapPassword" caption="IMAP password" width="100%"/>
-                                        </vbox>
-                                    </row>
-                                </rows>
-                            </grid>
+                            <!-- Протоколы располагаются вертикально, чтобы поля не сжимались после вычета фиксированной sidebar. -->
+                            <vbox id="emailSettingsAccordion" width="100%" spacing="true">
+                                <groupBox id="smtpSettingsSection"
+                                          caption="SMTP"
+                                          width="100%"
+                                          spacing="true"
+                                          margin="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          showAsPanel="true"
+                                          stylename="user-ai-profile-section">
+                                    <vbox id="smtpSettingsCard" width="100%" spacing="true">
+                                        <label value="msg://emailSettingsSmtpDescription" width="100%" stylename="settings-section-help"/>
+                                        <textField id="smtpServer" caption="SMTP server" width="100%"/>
+                                        <textField id="smtpPort" datatype="int" caption="SMTP port" width="100%">
+                                            <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                        </textField>
+                                        <checkBox id="smtpPasswordRequired" caption="msg://msgSMTPPasswordRequired"/>
+                                        <textField id="smtpPassword" caption="SMTP password" width="100%"/>
+                                    </vbox>
+                                </groupBox>
+                                <groupBox id="pop3SettingsSection"
+                                          caption="POP3"
+                                          width="100%"
+                                          spacing="true"
+                                          margin="true"
+                                          collapsable="true"
+                                          collapsed="true"
+                                          showAsPanel="true"
+                                          stylename="user-ai-profile-section">
+                                    <vbox id="pop3SettingsCard" width="100%" spacing="true">
+                                        <label value="msg://emailSettingsPop3Description" width="100%" stylename="settings-section-help"/>
+                                        <textField id="pop3Server" caption="POP3 server" width="100%"/>
+                                        <textField id="pop3Port" datatype="int" caption="POP3 port" width="100%">
+                                            <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                        </textField>
+                                        <checkBox id="pop3PasswordRequired" caption="msg://msgPop3PasswordRequired"/>
+                                        <textField id="pop3Password" caption="POP3 password" width="100%"/>
+                                    </vbox>
+                                </groupBox>
+                                <groupBox id="imapSettingsSection"
+                                          caption="IMAP"
+                                          width="100%"
+                                          spacing="true"
+                                          margin="true"
+                                          collapsable="true"
+                                          collapsed="true"
+                                          showAsPanel="true"
+                                          stylename="user-ai-profile-section">
+                                    <vbox id="imapSettingsCard" width="100%" spacing="true">
+                                        <label value="msg://emailSettingsImapDescription" width="100%" stylename="settings-section-help"/>
+                                        <textField id="imapServer" caption="IMAP server" width="100%"/>
+                                        <textField id="imapPort" datatype="int" caption="IMAP port" width="100%">
+                                            <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                        </textField>
+                                        <checkBox id="imapPasswordRequired" caption="msg://msgImapPasswordRequired"/>
+                                        <textField id="imapPassword" caption="IMAP password" width="100%"/>
+                                    </vbox>
+                                </groupBox>
+                            </vbox>
                         </vbox>
                     </scrollBox>
                 </hbox>
