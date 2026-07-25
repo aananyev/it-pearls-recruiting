@@ -1,0 +1,130 @@
+/*
+ * IteractionListEdit — локальная аккордеонная навигация HRM HuntTech.
+ * Все Vaadin-селекторы ограничены корнем .iteraction-list-editor.
+ */
+@mixin iteraction-list-accordion-navigation-theme {
+  .iteraction-list-editor {
+    .iteraction-list-navigation {
+      box-sizing: border-box;
+      width: 100% !important;
+      padding: 10px 0 4px;
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .iteraction-list-navigation-title {
+      box-sizing: border-box;
+      padding: 6px 10px 8px;
+      color: rgba(248, 250, 252, 0.58) !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: normal !important;
+    }
+
+    .iteraction-list-nav-item {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 38px;
+      padding: 8px 10px;
+      color: rgba(248, 250, 252, 0.82) !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      line-height: 18px !important;
+      text-align: left !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-left: 3px solid transparent !important;
+      border-radius: 0 5px 5px 0 !important;
+      box-shadow: none !important;
+      white-space: normal !important;
+      transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+
+    .iteraction-list-nav-item .v-button-caption {
+      display: block;
+      width: 100%;
+      text-align: left;
+      white-space: normal;
+    }
+
+    .iteraction-list-nav-item:hover,
+    .iteraction-list-nav-item:focus {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .iteraction-list-nav-item-active,
+    .iteraction-list-nav-item-active:hover,
+    .iteraction-list-nav-item-active:focus {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.11) !important;
+      border-left-color: #ffb11b !important;
+    }
+
+    .iteraction-list-accordion-section {
+      width: 100% !important;
+      min-width: 0 !important;
+      padding: 0 !important;
+      overflow: hidden;
+      border-radius: 8px !important;
+    }
+
+    .iteraction-list-accordion-section .v-panel-caption {
+      min-height: 48px;
+      padding: 11px 15px;
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      line-height: 24px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 68%) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.15) !important;
+    }
+
+    .iteraction-list-accordion-section .v-panel-content {
+      padding: 16px 18px !important;
+      background: $v-panel-background-color !important;
+      border: 0 !important;
+    }
+
+    .iteraction-list-accordion-section .v-gridlayout,
+    .iteraction-list-accordion-section .v-gridlayout > div,
+    .iteraction-list-accordion-section table {
+      width: 100% !important;
+      min-width: 0 !important;
+      table-layout: fixed;
+    }
+
+    .iteraction-list-accordion-section .v-gridlayout-slot {
+      min-width: 0 !important;
+      padding: 7px 8px;
+      vertical-align: top;
+    }
+
+    .iteraction-list-accordion-section .v-textfield,
+    .iteraction-list-accordion-section .v-textarea,
+    .iteraction-list-accordion-section .v-filterselect,
+    .iteraction-list-accordion-section .v-filterselect-input,
+    .iteraction-list-accordion-section .v-datefield-textfield {
+      box-sizing: border-box;
+      width: 100% !important;
+    }
+
+    .iteraction-list-accordion-section .v-button {
+      min-height: 38px;
+    }
+
+    @media (max-width: 1100px) {
+      .iteraction-list-navigation-title,
+      .iteraction-list-nav-item {
+        padding-right: 7px;
+        padding-left: 7px;
+      }
+
+      .iteraction-list-accordion-section .v-panel-content {
+        padding-right: 12px !important;
+        padding-left: 12px !important;
+      }
+    }
+  }
+}

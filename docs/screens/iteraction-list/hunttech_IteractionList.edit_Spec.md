@@ -1,97 +1,54 @@
-# hunttech_IteractionList.edit — legacy-спецификация
+# `hunttech_IteractionList.edit` — legacy-спецификация
 
-> Каноническая UI-спецификация: [IteractionListEdit_Spec.md](../../ui/IteractionListEdit_Spec.md)  
-> Controller: `hunttech_IteractionList.edit`  
-> XML: `modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml`
+> Каноническая UI-spec: [IteractionListEdit_Spec.md](../../ui/IteractionListEdit_Spec.md)  
+> Screen ID: `hunttech_IteractionList.edit`  
+> Presentation-controller: `IteractionListEditAccordionNavigation`  
+> Descriptor: `iteraction-list-edit-accordion-navigation.xml`
 
 ## Назначение и бизнес-смысл (What & Why)
 
-Экран создаёт и редактирует взаимодействие рекрутёра с кандидатом по вакансии. Он сохраняет кандидата, вакансию, тип взаимодействия, рейтинг, рекрутёра, способ связи, дополнительное значение и комментарий. Любой reflow должен сохранять существующие CUBA-компоненты и lifecycle контроллера.
+Экран регистрирует взаимодействие рекрутёра с кандидатом по вакансии. Аккордеонная компоновка уменьшает визуальную плотность и оставляет пользователю один активный рабочий контекст, не изменяя бизнес-правила создания и сохранения `IteractionList`.
 
 ## UI Context & Navigation
 
-- вход из browse взаимодействий, карточки кандидата и связанных рекрутинговых сценариев;
-- lookup/open кандидата и вакансии;
-- lookup типа взаимодействия и рекрутёра;
-- динамическое действие, определяемое выбранным типом;
-- подписка через существующую кнопку;
-- стандартные save-and-close и cancel.
+Экран вызывается прежним screen ID из browse взаимодействий, карточки кандидата и связанных действий. Новый controller наследует `IteractionListEdit`, поэтому все точки открытия, стандартные actions и lifecycle сохраняются. В левой контекстной панели расположен индекс из пяти визуально LABEL-подобных borderless-кнопок.
 
 ## Behavior Summary
 
-- форма открывается → loaders и Java lifecycle работают как раньше → отображается двухпанельная композиция;
-- кандидат или вакансия меняются → существующие listeners обновляют контекст → sidebar показывает актуальные данные;
-- тип взаимодействия меняется → Java включает один из dynamic controls → layout сохраняет соседнюю колонку;
-- сохранение или отмена → выполняются прежние actions → footer остаётся доступным в workspace.
+- открытие → раскрывается «Кандидат и вакансия» → остальные аккордеоны свёрнуты;
+- клик слева → выбранный раздел раскрывается → остальные сворачиваются, active style и фокус синхронизируются;
+- раскрытие заголовком → `ExpandedStateChangeListener` синхронизирует левый индекс;
+- выбор кандидата, вакансии или типа → выполняются прежние handlers базового controller;
+- сохранение и отмена → выполняются прежние actions без вмешательства presentation-controller.
 
-## Компоновка от 2026-07-25
+## Компоновка
 
-```text
-sidebar full height 252 px
-└─ candidate / project / service fields / vacancy context
+1. `participantsAccordion` — кандидат и вакансия.
+2. `interactionAccordion` — тип и динамическое действие/значение.
+3. `resultAccordion` — рейтинг, рекрутёр, способ связи.
+4. `commentAccordion` — комментарий.
+5. `popularAccordion` — частые взаимодействия.
 
-workspace
-├─ toolbar 52 px
-├─ TabSheet + ScrollBox
-│  ├─ popular interactions
-│  ├─ candidate + vacancy
-│  ├─ interaction type + dynamic field
-│  ├─ rating + recruiter
-│  ├─ communication method
-│  └─ comment
-└─ footer 54 px
-```
-
-Ключевое отличие от первой версии редизайна: toolbar и footer больше не проходят над и под sidebar. Тёмная панель формирует непрерывную вертикальную область, а все рабочие действия остаются справа.
+Sidebar сохраняет `OvaFallbackImage candidateImage`, логотип проекта, служебные поля, компанию, проект, статус, приоритет, outstaffing и rating context.
 
 ## Сохранённые контракты
 
-- `dialogMode` — `1000 × 650`, modal;
-- `iteractionListDc` — `iteractionList-edit-view`;
-- loaders, JPQL, conditions, views — без изменений;
-- Java-контроллер — без изменений;
-- все component ID — сохранены;
-- picker actions — сохранены;
-- `buttonCallAction.invoke="callActionEntity"` — сохранён;
-- `subscribeButton.invoke="onButtonSubscribeClick"` — сохранён;
-- `windowCommitAndClose` и `windowClose` — сохранены;
-- `candidateImage` и `projectLogoImage` остаются отдельными `Image`;
-- dynamic `visible`, `required`, caption и value задаются Java как раньше.
-
-## Локальный SCSS
-
-Namespace: `.iteraction-list-editor`.
-
-Поддерживаемые темы:
-
-- `halo`;
-- `havana`;
-- `helium`;
-- `hover`;
-- `hunttech-modern`;
-- `hunttech-modern-light`;
-- `hunttech-modern-dark`.
-
-Вне namespace глобальные Vaadin-селекторы не изменяются.
+- data containers, loaders, JPQL, query conditions и views — без изменений;
+- `IteractionListEdit.java` — без изменений;
+- component ID, bindings, actions, `invoke`, captions существующих полей — без изменений;
+- runtime `visible`, `required`, caption и source продолжают задаваться базовым controller;
+- footer: subscribe → commit-and-close → cancel;
+- entity, БД и Liquibase не изменяются.
 
 ## Проверки
 
-Обязательны:
-
-- XML well-formed;
-- component ID / binding / action audit;
-- `ScreenViewIntegrityTest` — 8/8;
-- Data View Integrity;
-- SCSS build;
-- `clean assemble`;
-- local deploy;
-- HTTP `/hrm/` = 200;
-- functional и visual smoke семи тем;
-- Tomcat logs без новых critical errors.
+Обязательны `IteractionListAccordionNavigationTest`, `ScreenViewIntegrityTest 8/8`, Data View Integrity, SCSS build семи тем, `clean assemble`, local deploy, HTTP `/hrm/` = 200 и functional/visual smoke по точному HEAD SHA.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
-| 2026-07-25 | Уточнена компоновка `IteractionListEdit`: непрерывный sidebar, toolbar/footer внутри workspace, более компактная геометрия и новый порядок рабочих полей |
-| 2026-07-25 | Зафиксирован визуальный редизайн формы по общей UI/UX-концепции HRM HuntTech без изменения бизнес-логики |
+| 2026-07-25 | Добавлены аккордеоны и кликабельная навигация в левой панели; активный раздел, header clicks и фокус синхронизированы без изменения бизнес-логики |
+| 2026-07-25 | Профильное изображение кандидата переведено на `OvaFallbackImage` с fallback без изменения legacy-контракта |
+| 2026-07-25 | Уточнена двухпанельная компоновка формы |
+| 2026-07-25 | Выполнен первоначальный UI/UX-редизайн формы |

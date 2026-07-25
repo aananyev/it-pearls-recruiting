@@ -6,6 +6,7 @@
 @import "com.company.hunttech/settings-window-sections";
 @import "com.company.hunttech/ext-settings-about-sidebar-fix";
 @import "com.company.hunttech/iteraction-list-editor";
+@import "com.company.hunttech/iteraction-list-accordion-navigation";
 @import "com.company.hunttech/candidate-cv-editor";
 /* Шрифт Inter для подтем hunttech-modern-light / hunttech-modern-dark */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
@@ -21,6 +22,7 @@
   @include settings-window-sections;
   @include ext-settings-about-sidebar-fix;
   @include iteraction-list-editor-theme;
+  @include iteraction-list-accordion-navigation-theme;
   @include candidate-cv-editor-theme;
 }
 

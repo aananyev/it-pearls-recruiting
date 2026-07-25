@@ -6,6 +6,7 @@
 @import "com.company.hunttech/settings-window-sections";
 @import "com.company.hunttech/ext-settings-about-sidebar-fix";
 @import "com.company.hunttech/iteraction-list-editor";
+@import "com.company.hunttech/iteraction-list-accordion-navigation";
 @import "com.company.hunttech/candidate-cv-editor";
 @import "com.company.hunttech/chat-style.css";
 @import url('https://fonts.googleapis.com/css2?familyhalo=Antonio&family=Kanit&family=Teko:wght@500&display=swap');
@@ -21,5 +22,6 @@
   @include settings-window-sections;
   @include ext-settings-about-sidebar-fix;
   @include iteraction-list-editor-theme;
+  @include iteraction-list-accordion-navigation-theme;
   @include candidate-cv-editor-theme;
 }
