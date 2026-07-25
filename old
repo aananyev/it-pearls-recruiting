@@ -1,0 +1,7 @@
+=== Entity enhanced in JAR ===
+jar tf modules/global/build/libs/app-global-0.1-SNAPSHOT.jar 2>/dev/null | grep -q UserAiProfile.class && echo PASS || echo FAIL
+
+echo === HTTP 200 ===
+curl -s -m 5 -o /dev/null -w %{http_code}n http://localhost:8080/hrm/ | grep -q 200 && echo PASS || echo FAIL
+
+echo === Core JAR timestamp ===

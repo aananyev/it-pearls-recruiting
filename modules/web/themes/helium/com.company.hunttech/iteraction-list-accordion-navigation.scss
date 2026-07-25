@@ -1,21 +1,59 @@
 /*
- * IteractionListEdit — локальная аккордеонная навигация HRM HuntTech.
- * Геометрия секций повторяет SettingsWindow, а все Vaadin-селекторы
+ * IteractionListEdit — локальная навигация рабочей области HRM HuntTech.
+ * Селектор и аккордеоны повторяют паттерн SettingsWindow, а все правила
  * ограничены корнем .iteraction-list-editor и не влияют на другие экраны.
  */
 @mixin iteraction-list-accordion-navigation-theme {
   .iteraction-list-editor {
+    .iteraction-list-main-layout,
+    .iteraction-list-workspace,
+    .iteraction-list-tabs,
+    .iteraction-list-section-layout,
+    .iteraction-list-scroll,
+    .iteraction-list-content {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .iteraction-list-workspace,
+    .iteraction-list-scroll {
+      overflow-x: hidden !important;
+    }
+
+    .iteraction-list-sidebar {
+      box-sizing: border-box;
+      min-width: 228px !important;
+      max-width: 228px !important;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    // Селектор находится внутри правой рабочей области и не прокручивается
+    // вместе с аккордеонами, поэтому доступен при любой позиции формы.
+    .iteraction-list-section-layout {
+      width: 100% !important;
+      height: 100% !important;
+      overflow: hidden;
+    }
+
     .iteraction-list-navigation {
       box-sizing: border-box;
-      width: 100% !important;
-      padding: 10px 0 4px;
-      border-top: 1px solid rgba(255, 255, 255, 0.16);
+      width: 210px !important;
+      min-width: 210px !important;
+      max-width: 210px !important;
+      height: 100% !important;
+      padding: 12px 8px;
+      border-right: 1px solid rgba(127, 127, 127, 0.20);
+      background: rgba(127, 127, 127, 0.045);
+      overflow-x: hidden;
+      overflow-y: auto;
     }
 
     .iteraction-list-navigation-title {
       box-sizing: border-box;
-      padding: 6px 10px 8px;
-      color: rgba(248, 250, 252, 0.58) !important;
+      padding: 6px 10px 10px;
+      color: rgba(80, 80, 80, 0.68) !important;
       font-size: 11px !important;
       font-weight: 700 !important;
       letter-spacing: 0.5px;
@@ -27,8 +65,9 @@
       box-sizing: border-box;
       width: 100% !important;
       min-height: 38px;
+      height: auto !important;
       padding: 8px 10px;
-      color: rgba(248, 250, 252, 0.82) !important;
+      color: inherit !important;
       font-size: 13px !important;
       font-weight: 500 !important;
       line-height: 18px !important;
@@ -51,16 +90,15 @@
 
     .iteraction-list-nav-item:hover,
     .iteraction-list-nav-item:focus {
-      color: #ffffff !important;
-      background: rgba(255, 255, 255, 0.08) !important;
+      background: rgba(127, 127, 127, 0.10) !important;
     }
 
     .iteraction-list-nav-item-active,
     .iteraction-list-nav-item-active:hover,
     .iteraction-list-nav-item-active:focus {
-      color: #ffb11b !important;
-      background: rgba(255, 177, 27, 0.11) !important;
-      border-left-color: #ffb11b !important;
+      color: #c87a00 !important;
+      background: rgba(255, 177, 27, 0.13) !important;
+      border-left-color: #ff9d00 !important;
     }
 
     // Локальная копия подтверждённой геометрии аккордеона SettingsWindow.
@@ -85,15 +123,17 @@
       background: rgba(127, 127, 127, 0.045) !important;
     }
 
+    // GridLayout сам распределяет explicit flex-колонки. Запрещено задавать
+    // ширину его внутренних DIV/TABLE: это схлопывало SuggestionPickerField.
     .iteraction-list-accordion-section .v-gridlayout,
-    .iteraction-list-accordion-section .v-gridlayout > div,
-    .iteraction-list-accordion-section table {
+    .iteraction-list-form-grid {
+      box-sizing: border-box;
       width: 100% !important;
       min-width: 0 !important;
-      table-layout: fixed;
     }
 
     .iteraction-list-accordion-section .v-gridlayout-slot {
+      box-sizing: border-box;
       min-width: 0 !important;
       padding: 7px 8px;
       vertical-align: top;
@@ -103,16 +143,59 @@
     .iteraction-list-accordion-section .v-textarea,
     .iteraction-list-accordion-section .v-filterselect,
     .iteraction-list-accordion-section .v-filterselect-input,
-    .iteraction-list-accordion-section .v-datefield-textfield {
+    .iteraction-list-accordion-section .v-datefield-textfield,
+    .iteraction-list-primary-picker {
       box-sizing: border-box;
       width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
     }
 
     .iteraction-list-accordion-section .v-button {
       min-height: 38px;
     }
 
+    .iteraction-list-popular-buttons,
+    .iteraction-list-popular-buttons .v-expand {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 52px;
+      table-layout: fixed;
+    }
+
+    .iteraction-list-popular-buttons .v-slot {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      max-width: 20% !important;
+      overflow: hidden;
+    }
+
+    .iteraction-list-popular-button {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 52px;
+      padding-right: 8px !important;
+      padding-left: 8px !important;
+      white-space: normal !important;
+    }
+
+    .iteraction-list-popular-button .v-button-caption {
+      display: block;
+      overflow: hidden;
+      line-height: 16px;
+      text-overflow: ellipsis;
+      white-space: normal;
+    }
+
     @media (max-width: 1100px) {
+      .iteraction-list-navigation {
+        width: 190px !important;
+        min-width: 190px !important;
+        max-width: 190px !important;
+      }
+
       .iteraction-list-navigation-title,
       .iteraction-list-nav-item {
         padding-right: 7px;
@@ -120,82 +203,11 @@
       }
     }
 
-
-// Двухколоночные picker-поля не должны расширять родительский HBox
-// за пределы диалога даже при длинных отображаемых значениях.
-.iteraction-list-main-layout,
-.iteraction-list-workspace,
-.iteraction-list-tabs,
-.iteraction-list-content,
-.iteraction-list-form-grid,
-.iteraction-list-form-grid > div,
-.iteraction-list-form-grid table {
-  box-sizing: border-box;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-}
-
-.iteraction-list-workspace,
-.iteraction-list-scroll {
-  overflow-x: hidden !important;
-}
-
-.iteraction-list-sidebar {
-  box-sizing: border-box;
-  min-width: 272px !important;
-  max-width: 272px !important;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.iteraction-list-primary-picker,
-.iteraction-list-primary-picker .v-filterselect,
-.iteraction-list-primary-picker .v-filterselect-input {
-  box-sizing: border-box;
-  width: 100% !important;
-  min-width: 0 !important;
-  max-width: 100% !important;
-}
-
-.iteraction-list-popular-buttons,
-.iteraction-list-popular-buttons .v-expand {
-  box-sizing: border-box;
-  width: 100% !important;
-  min-width: 0 !important;
-  table-layout: fixed;
-}
-
-.iteraction-list-popular-buttons .v-slot {
-  box-sizing: border-box;
-  min-width: 0 !important;
-  max-width: 20% !important;
-  overflow: hidden;
-}
-
-.iteraction-list-popular-button {
-  box-sizing: border-box;
-  width: 100% !important;
-  min-width: 0 !important;
-  height: 52px;
-  padding-right: 8px !important;
-  padding-left: 8px !important;
-  white-space: normal !important;
-}
-
-.iteraction-list-popular-button .v-button-caption {
-  display: block;
-  overflow: hidden;
-  line-height: 16px;
-  text-overflow: ellipsis;
-  white-space: normal;
-}
-
-@media (max-width: 1050px) {
-  .iteraction-list-sidebar {
-    min-width: 252px !important;
-    max-width: 252px !important;
-  }
-}
+    @media (max-width: 1050px) {
+      .iteraction-list-sidebar {
+        min-width: 212px !important;
+        max-width: 212px !important;
+      }
+    }
   }
 }

@@ -1,0 +1,18 @@
+{
+  "Hermes → ChatGPT": {
+    "description": "Hermes пишет сюда результаты сборок, найденные ошибки, задачи на исправление",
+    "actions": [
+      "create_pr_finding",
+      "build_report",
+      "verification_result",
+      "error_fix_request"
+    ]
+  },
+  "ChatGPT → Hermes": {
+    "description": "ChatGPT создаёт PR, указывает статус и что сделано",
+    "actions": [
+      "pr_created",
+      "status_update"
+    ]
+  }
+}
