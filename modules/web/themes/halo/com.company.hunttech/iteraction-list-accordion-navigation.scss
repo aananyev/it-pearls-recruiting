@@ -1,6 +1,7 @@
 /*
  * IteractionListEdit — локальная аккордеонная навигация HRM HuntTech.
- * Все Vaadin-селекторы ограничены корнем .iteraction-list-editor.
+ * Геометрия секций повторяет SettingsWindow, а все Vaadin-селекторы
+ * ограничены корнем .iteraction-list-editor и не влияют на другие экраны.
  */
 @mixin iteraction-list-accordion-navigation-theme {
   .iteraction-list-editor {
@@ -62,29 +63,26 @@
       border-left-color: #ffb11b !important;
     }
 
-    .iteraction-list-accordion-section {
+    // Локальная копия подтверждённой геометрии аккордеона SettingsWindow.
+    .iteraction-list-accordion-section,
+    .user-ai-profile-section {
+      box-sizing: border-box;
       width: 100% !important;
       min-width: 0 !important;
+      margin-bottom: 10px;
       padding: 0 !important;
+      border-radius: 7px !important;
+      border: 1px solid rgba(127, 127, 127, 0.20) !important;
       overflow: hidden;
-      border-radius: 8px !important;
+      background: rgba(255, 255, 255, 0.45) !important;
     }
 
-    .iteraction-list-accordion-section .v-panel-caption {
-      min-height: 48px;
-      padding: 11px 15px;
-      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
-      font-size: 16px !important;
-      font-weight: 700 !important;
-      line-height: 24px !important;
-      background: mix($v-app-background-color, $v-panel-background-color, 68%) !important;
-      border-bottom: 1px solid rgba($v-font-color, 0.15) !important;
-    }
-
-    .iteraction-list-accordion-section .v-panel-content {
-      padding: 16px 18px !important;
-      background: $v-panel-background-color !important;
-      border: 0 !important;
+    .iteraction-list-accordion-section .v-panel-caption,
+    .user-ai-profile-section .v-panel-caption {
+      padding-top: 9px;
+      padding-bottom: 9px;
+      font-weight: 600 !important;
+      background: rgba(127, 127, 127, 0.045) !important;
     }
 
     .iteraction-list-accordion-section .v-gridlayout,
@@ -119,11 +117,6 @@
       .iteraction-list-nav-item {
         padding-right: 7px;
         padding-left: 7px;
-      }
-
-      .iteraction-list-accordion-section .v-panel-content {
-        padding-right: 12px !important;
-        padding-left: 12px !important;
       }
     }
   }
