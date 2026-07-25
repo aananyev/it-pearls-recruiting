@@ -3,5 +3,5 @@
     <screen id="sec$User.browse" template="com/company/hunttech/web/screens/extuser/ext-user-browse.xml"/>
     <screen id="sec$User.lookup" template="com/company/hunttech/web/screens/extuser/ext-user-browse.xml"/>
     <screen id="sec$User.edit" template="com/company/hunttech/web/screens/extuser/ext-user-edit.xml"/>
-    <screen id="settings" template="/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml"/>
+    <screen id="settings" template="/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-email-navigation.xml"/>
 </screen-config>
