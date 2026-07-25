@@ -86,7 +86,7 @@
               spacing="false"
               expand="iteractionListWorkspace">
             <vbox stylename="iteraction-list-sidebar"
-                  width="228px"
+                  width="272px"
                   height="100%"
                   spacing="true">
                 <groupBox spacing="true"
@@ -127,6 +127,7 @@
                               spacing="true"
                               stylename="iteraction-list-service-fields">
                             <textField id="numberIteractionField"
+                                       stylename="iteraction-list-service-field"
                                        dataContainer="iteractionListDc"
                                        property="numberIteraction"
                                        editable="false"
@@ -134,6 +135,7 @@
                                        width="100%"
                                        align="MIDDLE_LEFT"/>
                             <dateField id="dateIteractionField"
+                                       stylename="iteraction-list-service-field"
                                        dataContainer="iteractionListDc"
                                        property="dateIteraction"
                                        editable="false"
@@ -159,6 +161,7 @@
                                        stylename="iteraction-list-sidebar-caption"
                                        width="100%"/>
                                 <label id="companyLabel"
+                                       stylename="iteraction-list-sidebar-value"
                                        width="100%"
                                        height="AUTO"
                                        htmlEnabled="true"/>
@@ -170,6 +173,7 @@
                                        stylename="iteraction-list-sidebar-caption"
                                        width="100%"/>
                                 <label id="projectLabel"
+                                       stylename="iteraction-list-sidebar-value"
                                        width="100%"
                                        height="AUTO"/>
                             </vbox>
@@ -185,18 +189,22 @@
                                        stylename="iteraction-list-sidebar-caption"
                                        width="100%"/>
                                 <hbox spacing="true"
-                                      width="100%"
-                                      align="MIDDLE_LEFT">
-                                    <label id="statusOfVacansyLabel"
-                                           width="100%"
-                                           align="MIDDLE_LEFT"/>
-                                    <linkButton id="alternativeVacancyLinkButton"
-                                                visible="false"
-                                                descriptionAsHtml="true"
-                                                description="msg://msgAlarmAlternativeVacancy"
-                                                stylename="huge"
-                                                icon="WARNING"/>
-                                </hbox>
+                            width="100%"
+                            align="MIDDLE_LEFT"
+                            expand="statusOfVacansyLabel"
+                            stylename="iteraction-list-sidebar-value-row">
+                          <label id="statusOfVacansyLabel"
+                                 width="100%"
+                                 height="AUTO"
+                                 stylename="iteraction-list-sidebar-value iteraction-list-status-value"
+                                 align="MIDDLE_LEFT"/>
+                          <linkButton id="alternativeVacancyLinkButton"
+                                      visible="false"
+                                      descriptionAsHtml="true"
+                                      description="msg://msgAlarmAlternativeVacancy"
+                                      stylename="huge iteraction-list-sidebar-warning"
+                                      icon="WARNING"/>
+                      </hbox>
                             </vbox>
                             <vbox width="100%"
                                   spacing="false"
@@ -205,34 +213,50 @@
                                        stylename="iteraction-list-sidebar-caption"
                                        width="100%"/>
                                 <hbox spacing="true"
-                                      width="100%"
-                                      align="MIDDLE_LEFT">
-                                    <image id="trafficLighterImage"
-                                           width="AUTO"
-                                           align="MIDDLE_LEFT"
-                                           height="AUTO"/>
-                                    <label id="currentPriorityLabel"
-                                           align="MIDDLE_LEFT"
-                                           width="100%"/>
-                                </hbox>
+                            width="100%"
+                            align="MIDDLE_LEFT"
+                            expand="currentPriorityLabel"
+                            stylename="iteraction-list-sidebar-value-row">
+                          <image id="trafficLighterImage"
+                                 width="AUTO"
+                                 align="MIDDLE_LEFT"
+                                 height="AUTO"
+                                 stylename="iteraction-list-priority-image"/>
+                          <label id="currentPriorityLabel"
+                                 align="MIDDLE_LEFT"
+                                 width="100%"
+                                 height="AUTO"
+                                 stylename="iteraction-list-sidebar-value"/>
+                      </hbox>
                             </vbox>
                             <hbox id="outstaffingCostHBox"
-                                  spacing="true"
-                                  width="100%"
-                                  visible="false"
-                                  align="MIDDLE_LEFT">
-                                <label value="msg://msgOutstaffCost"
-                                       stylename="iteraction-list-sidebar-caption"
-                                       width="AUTO"
-                                       align="MIDDLE_LEFT"/>
-                                <label dataContainer="iteractionListDc"
-                                       align="MIDDLE_LEFT"
-                                       property="vacancy.outstaffingCost"/>
-                                <label value="msg://msgRubPerHour"
-                                       stylename="iteraction-list-sidebar-caption"
-                                       width="AUTO"
-                                       align="MIDDLE_LEFT"/>
-                            </hbox>
+                        spacing="false"
+                        width="100%"
+                        visible="false"
+                        align="MIDDLE_LEFT"
+                        stylename="iteraction-list-sidebar-cost">
+                      <vbox width="100%"
+                            spacing="false">
+                          <label value="msg://msgOutstaffCost"
+                                 stylename="iteraction-list-sidebar-caption"
+                                 width="100%"
+                                 align="MIDDLE_LEFT"/>
+                          <hbox width="100%"
+                                spacing="true"
+                                align="MIDDLE_LEFT"
+                                stylename="iteraction-list-sidebar-cost-line">
+                              <label dataContainer="iteractionListDc"
+                                     align="MIDDLE_LEFT"
+                                     property="vacancy.outstaffingCost"
+                                     width="AUTO"
+                                     stylename="iteraction-list-sidebar-cost-value"/>
+                              <label value="msg://msgRubPerHour"
+                                     stylename="iteraction-list-sidebar-cost-unit"
+                                     width="AUTO"
+                                     align="MIDDLE_LEFT"/>
+                          </hbox>
+                      </vbox>
+                  </hbox>
                         </vbox>
 
                         <hbox id="labelHBox"

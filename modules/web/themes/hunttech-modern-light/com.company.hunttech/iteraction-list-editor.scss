@@ -37,9 +37,9 @@
     }
 
     .iteraction-list-sidebar {
-      width: 252px !important;
-      min-width: 252px !important;
-      max-width: 252px !important;
+      width: 272px !important;
+      min-width: 272px !important;
+      max-width: 272px !important;
       height: 100% !important;
       padding: 14px 12px;
       color: #f8fafc !important;
@@ -59,17 +59,18 @@
       color: #f8fafc !important;
       background: rgba(255, 255, 255, 0.055) !important;
       border: 1px solid rgba(255, 255, 255, 0.18) !important;
-      border-radius: 10px !important;
+      border-radius: 8px !important;
       box-shadow: none !important;
       overflow: hidden;
     }
 
-    .iteraction-list-context-card .v-panel-caption,
-    .iteraction-list-context-card .v-caption {
-      min-height: 40px;
-      padding: 9px 11px;
+    // Заголовок карточки отделён от caption полей: прежний широкий
+    // селектор превращал «Номер» и «Дата» в крупные панельные заголовки.
+    .iteraction-list-context-card .v-panel-caption {
+      min-height: 38px;
+      padding: 8px 11px;
       color: #ffb11b !important;
-      font-size: 16px !important;
+      font-size: 15px !important;
       font-weight: 700 !important;
       line-height: 22px !important;
       background: rgba(255, 255, 255, 0.045) !important;
@@ -77,7 +78,7 @@
     }
 
     .iteraction-list-context-card .v-panel-content {
-      padding: 12px !important;
+      padding: 12px 12px 14px !important;
       color: #f8fafc !important;
       background: transparent !important;
       border: 0 !important;
@@ -87,13 +88,20 @@
     .iteraction-list-context-card .v-captiontext {
       color: #f8fafc !important;
       white-space: normal !important;
-      overflow-wrap: anywhere;
-      word-break: break-word;
+      overflow-wrap: break-word;
+      word-break: normal;
+    }
+
+    // companyLabel может содержать HTML из legacy-контроллера; вложенная
+    // разметка наследует контраст панели и не возвращается к чёрному тексту.
+    .iteraction-list-context-card .v-label *,
+    .iteraction-list-context-card .v-captiontext * {
+      color: inherit !important;
     }
 
     .iteraction-list-identity-images {
       min-height: 112px;
-      padding: 2px 0 6px;
+      padding: 2px 0 8px;
     }
 
     .iteraction-list-candidate-image,
@@ -125,7 +133,7 @@
       min-height: 76px !important;
       max-width: 76px !important;
       max-height: 76px !important;
-      border-radius: 9px !important;
+      border-radius: 8px !important;
       object-fit: contain !important;
     }
 
@@ -138,24 +146,45 @@
 
     .iteraction-list-service-fields {
       width: 100% !important;
-      padding: 2px 0 4px;
+      padding: 2px 0 8px;
+    }
+
+    .iteraction-list-service-fields > .v-slot,
+    .iteraction-list-service-field {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .iteraction-list-service-fields .v-caption {
+      min-height: 0;
+      padding: 0 0 4px !important;
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
+      line-height: 15px !important;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: transparent !important;
+      border: 0 !important;
     }
 
     .iteraction-list-context-card .v-textfield,
     .iteraction-list-context-card .v-datefield-textfield {
       box-sizing: border-box;
       width: 100% !important;
-      min-height: 34px;
+      min-height: 36px;
       color: #f8fafc !important;
+      font-size: 14px !important;
       background: rgba(255, 255, 255, 0.08) !important;
       border-color: rgba(255, 255, 255, 0.24) !important;
+      border-radius: 6px;
       box-shadow: none !important;
     }
 
     .iteraction-list-context-card .v-readonly,
     .iteraction-list-context-card .v-readonly .v-textfield,
     .iteraction-list-context-card .v-readonly .v-datefield-textfield {
-      color: rgba(248, 250, 252, 0.84) !important;
+      color: rgba(248, 250, 252, 0.86) !important;
       opacity: 1 !important;
     }
 
@@ -169,23 +198,85 @@
 
     .iteraction-list-sidebar-section {
       width: 100% !important;
-      padding: 10px 0 2px;
+      padding: 10px 0 4px;
       border-top: 1px solid rgba(255, 255, 255, 0.14);
     }
 
     .iteraction-list-sidebar-metric {
       width: 100% !important;
       min-width: 0;
-      padding-bottom: 4px;
+      padding-bottom: 9px;
     }
 
     .iteraction-list-sidebar-caption {
       color: rgba(248, 250, 252, 0.62) !important;
-      font-size: 11px !important;
+      font-size: 10.5px !important;
       font-weight: 700 !important;
-      line-height: 17px !important;
-      letter-spacing: 0.02em;
+      line-height: 15px !important;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
+    }
+
+    .iteraction-list-sidebar-value {
+      display: block;
+      width: 100% !important;
+      min-width: 0;
+      color: #f8fafc !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      line-height: 18px !important;
+      white-space: normal !important;
+      overflow-wrap: break-word;
+      word-break: normal;
+    }
+
+    .iteraction-list-sidebar-value-row {
+      width: 100% !important;
+      min-width: 0;
+    }
+
+    .iteraction-list-sidebar-value-row > .v-slot {
+      min-width: 0 !important;
+    }
+
+    .iteraction-list-sidebar-warning {
+      width: 30px !important;
+      min-width: 30px !important;
+      height: 30px !important;
+      padding: 0 !important;
+    }
+
+    .iteraction-list-priority-image {
+      max-width: 22px;
+      max-height: 28px;
+    }
+
+    .iteraction-list-sidebar-cost {
+      width: 100% !important;
+      min-width: 0;
+      padding: 9px 0 3px;
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .iteraction-list-sidebar-cost > .v-slot,
+    .iteraction-list-sidebar-cost-line {
+      width: 100% !important;
+      min-width: 0;
+    }
+
+    .iteraction-list-sidebar-cost-value {
+      color: #ffcf66 !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      line-height: 21px !important;
+    }
+
+    .iteraction-list-sidebar-cost-unit {
+      color: rgba(248, 250, 252, 0.70) !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      line-height: 16px !important;
+      white-space: normal !important;
     }
 
     .iteraction-list-context-card .v-button-link {
@@ -508,9 +599,9 @@
 
     @media (max-width: 1100px) {
       .iteraction-list-sidebar {
-        width: 232px !important;
-        min-width: 232px !important;
-        max-width: 232px !important;
+        width: 252px !important;
+        min-width: 252px !important;
+        max-width: 252px !important;
         padding-right: 10px;
         padding-left: 10px;
       }
