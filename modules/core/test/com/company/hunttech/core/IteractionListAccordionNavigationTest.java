@@ -14,9 +14,28 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает кликабельный индекс блоков default-экрана IteractionListEdit.
+ * Защищает видимый селектор блоков default-экрана IteractionListEdit.
  */
 public class IteractionListAccordionNavigationTest {
+
+    @Test
+    public void navigationHostIsInsideRightWorkspace() throws IOException {
+        String descriptor = descriptor();
+        String workspace = section(descriptor,
+                "id=\"iteractionListWorkspace\"",
+                "id=\"editActions\"");
+
+        assertOrdered(workspace,
+                "id=\"iteractionListSectionLayout\"",
+                "id=\"iteractionListNavigation\"",
+                "id=\"iteractionListContentScrollBox\"");
+        assertEquals(5, count(workspace, "stylename=\"iteraction-list-nav-item"));
+
+        String sidebar = section(descriptor,
+                "stylename=\"iteraction-list-sidebar\"",
+                "id=\"iteractionListWorkspace\"");
+        assertFalse(sidebar.contains("id=\"iteractionListNavigation\""));
+    }
 
     @Test
     public void defaultControllerCreatesFiveNavigationButtons() throws IOException {
@@ -70,9 +89,32 @@ public class IteractionListAccordionNavigationTest {
         assertFalse(alias.contains("@Subscribe"));
     }
 
+    private String descriptor() throws IOException {
+        return readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+    }
+
     private String controller() throws IOException {
         return readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");
+    }
+
+    private String section(String text, String startMarker, String endMarker) {
+        int start = text.indexOf(startMarker);
+        assertTrue("Не найден начальный XML-маркер: " + startMarker, start >= 0);
+        int end = text.indexOf(endMarker, start);
+        assertTrue("Не найден конечный XML-маркер: " + endMarker, end > start);
+        return text.substring(start, end);
+    }
+
+    private void assertOrdered(String text, String... markers) {
+        int previous = -1;
+        for (String marker : markers) {
+            int current = text.indexOf(marker);
+            assertTrue("Не найден XML-маркер: " + marker, current >= 0);
+            assertTrue("Нарушен порядок XML-маркера: " + marker, current > previous);
+            previous = current;
+        }
     }
 
     private int count(String text, String token) {

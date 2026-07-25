@@ -10,50 +10,56 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает responsive-контракт пяти аккордеонов и двух основных picker-полей.
+ * Защищает runtime-видимость селекторов, пяти аккордеонов и основных picker-полей.
  */
 public class IteractionListEditAccordionLayoutTest {
 
     @Test
-    public void defaultDescriptorContainsNavigationAndFiveAccordions() throws Exception {
+    public void defaultDescriptorContainsWorkspaceSelectorAndFiveAccordions() throws Exception {
         Path descriptorPath = projectRoot().resolve(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
         DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(descriptorPath.toFile());
         String descriptor = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
 
-        assertTrue(descriptor.contains("id=\"iteractionListNavigation\""));
-        assertTrue(descriptor.contains("id=\"participantsAccordion\""));
-        assertTrue(descriptor.contains("id=\"interactionAccordion\""));
-        assertTrue(descriptor.contains("id=\"resultAccordion\""));
-        assertTrue(descriptor.contains("id=\"commentAccordion\""));
-        assertTrue(descriptor.contains("id=\"popularAccordion\""));
-        assertEquals(5, count(descriptor, "stylename=\"iteraction-list-nav-item"));
+        assertOrdered(descriptor,
+                "id=\"iteractionListWorkspace\"",
+                "id=\"iteractionListSectionLayout\"",
+                "id=\"iteractionListNavigation\"",
+                "id=\"iteractionListContentScrollBox\"",
+                "id=\"participantsAccordion\"",
+                "id=\"interactionAccordion\"",
+                "id=\"resultAccordion\"",
+                "id=\"commentAccordion\"",
+                "id=\"popularAccordion\"");
+        assertTrue(descriptor.contains("id=\"mostPopularHbox\""));
     }
 
     @Test
-    public void candidateAndVacancyShareStyleAndFitOneRow() throws IOException {
-        String descriptor = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+    public void candidateAndVacancyUseTwoExplicitFlexColumns() throws IOException {
+        String descriptor = descriptor();
         String participants = section(
                 descriptor,
                 "id=\"participantsAccordion\"",
                 "id=\"interactionAccordion\"");
 
-        assertTrue(participants.contains("<columns count=\"2\"/>"));
+        assertEquals(2, count(participants, "<column flex=\"1\"/>"));
         assertEquals(2, count(participants, "stylename=\"iteraction-list-primary-picker\""));
-        assertTrue(descriptor.contains("width=\"1100\"/>"));
-        assertTrue(descriptor.contains("width=\"228px\""));
+        assertOrdered(participants, "id=\"candidateField\"", "id=\"vacancyFiels\"");
+        assertTrue(participants.contains("dataContainer=\"iteractionListDc\""));
+        assertTrue(participants.contains("property=\"candidate\""));
+        assertTrue(participants.contains("type=\"picker_lookup\""));
+        assertTrue(participants.contains("type=\"picker_open\""));
     }
 
     @Test
     public void onlyFirstAccordionIsExpandedInitially() throws IOException {
-        String descriptor = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+        String descriptor = descriptor();
 
         assertTrue(section(descriptor,
                 "id=\"participantsAccordion\"",
@@ -73,8 +79,7 @@ public class IteractionListEditAccordionLayoutTest {
 
     @Test
     public void businessBindingsAndActionsRemainAvailable() throws IOException {
-        String descriptor = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+        String descriptor = descriptor();
 
         assertOrdered(descriptor,
                 "id=\"candidateField\"",
@@ -92,7 +97,7 @@ public class IteractionListEditAccordionLayoutTest {
     }
 
     @Test
-    public void allThemesConstrainWidthInsideLocalRoot() throws IOException {
+    public void allThemesKeepGridInternalsUnderCubaControl() throws IOException {
         String[] themes = {
                 "halo", "havana", "helium", "hover",
                 "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark"
@@ -102,15 +107,26 @@ public class IteractionListEditAccordionLayoutTest {
             String scss = readProjectFile("modules/web/themes/" + theme
                     + "/com.company.hunttech/iteraction-list-accordion-navigation.scss");
             assertTrue(scss.contains(".iteraction-list-editor"));
+            assertTrue(scss.contains(".iteraction-list-section-layout"));
+            assertTrue(scss.contains("width: 210px !important"));
             assertTrue(scss.contains(".iteraction-list-primary-picker"));
             assertTrue(scss.contains("max-width: 20% !important"));
-            assertTrue(scss.contains("overflow-x: hidden !important"));
+            assertFalse(scss.contains(".iteraction-list-form-grid > div"));
+            assertFalse(scss.contains(".iteraction-list-form-grid table"));
         }
+    }
+
+    private String descriptor() throws IOException {
+        return readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
     }
 
     private String section(String text, String startMarker, String endMarker) {
         int start = text.indexOf(startMarker);
-        return text.substring(start, text.indexOf(endMarker, start));
+        assertTrue("Не найден начальный XML-маркер: " + startMarker, start >= 0);
+        int end = text.indexOf(endMarker, start);
+        assertTrue("Не найден конечный XML-маркер: " + endMarker, end > start);
+        return text.substring(start, end);
     }
 
     private int count(String text, String token) {
