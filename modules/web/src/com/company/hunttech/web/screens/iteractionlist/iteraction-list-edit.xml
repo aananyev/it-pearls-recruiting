@@ -291,8 +291,8 @@
                             <vbox width="100%"
                                   spacing="true"
                                   stylename="iteraction-list-content">
-                                <!-- Legacy-контейнеры популярных взаимодействий сохранены
-                                     раздельно и остаются доступными Java-контроллеру. -->
+                                <!-- Основные рабочие блоки оформлены как сворачиваемые секции.
+                                     Component ID и порядок обработки контроллером сохранены. -->
                                 <groupBox width="100%"
                                           caption="msg://mshMostPopular"
                                           stylename="iteraction-list-popular-card"
@@ -310,14 +310,18 @@
                                     </vbox>
                                 </groupBox>
 
-                                <vbox width="100%"
-                                      spacing="true"
-                                      stylename="iteraction-list-card iteraction-list-form-card">
+                                <groupBox width="100%"
+                                          caption="msg://msgIteractionList"
+                                          stylename="iteraction-list-popular-card iteraction-list-form-card"
+                                          spacing="true"
+                                          collapsable="true">
+                                    <!-- Одноколоночная сетка сохраняет тип GridLayout и legacy ID,
+                                         но располагает все поля последовательно друг под другом. -->
                                     <grid id="gridIterationData"
                                           spacing="true"
                                           width="100%"
                                           stylename="iteraction-list-form-grid">
-                                        <columns count="2"/>
+                                        <columns count="1"/>
                                         <rows>
                                             <row id="row">
                                                 <suggestionPickerField id="candidateField"
@@ -345,6 +349,8 @@
                                                         order by e.secondName, e.firstName
                                                     </query>
                                                 </suggestionPickerField>
+                                            </row>
+                                            <row>
                                                 <vbox spacing="true"
                                                       width="100%"
                                                       stylename="iteraction-list-vacancy-column">
@@ -383,6 +389,8 @@
                                                                 type="picker_lookup"/>
                                                     </actions>
                                                 </lookupPickerField>
+                                            </row>
+                                            <row>
                                                 <!-- Runtime-видимость, required и caption вариантов
                                                      дополнительного действия по-прежнему задаёт Java. -->
                                                 <buttonsPanel id="buttonsPanelCallAction"
@@ -419,6 +427,8 @@
                                                              property="rating"
                                                              description="msg://msgRatingDecription"
                                                              width="100%"/>
+                                            </row>
+                                            <row>
                                                 <lookupPickerField id="recrutierField"
                                                                    caption="msg://msgRecrutier"
                                                                    width="100%"
@@ -436,16 +446,17 @@
                                                            width="100%"
                                                            caption="msg://msgCommunicationMethod"
                                                            dataContainer="iteractionListDc"
-                                                           property="communicationMethod"
-                                                           colspan="2"/>
+                                                           property="communicationMethod"/>
                                             </row>
                                         </rows>
                                     </grid>
-                                </vbox>
+                                </groupBox>
 
-                                <vbox width="100%"
-                                      spacing="true"
-                                      stylename="iteraction-list-card iteraction-list-comment-card">
+                                <groupBox width="100%"
+                                          caption="msg://msgComment"
+                                          stylename="iteraction-list-popular-card iteraction-list-comment-card"
+                                          spacing="true"
+                                          collapsable="true">
                                     <textArea id="commentField"
                                               property="comment"
                                               rows="7"
@@ -453,7 +464,7 @@
                                               dataContainer="iteractionListDc"
                                               caption="msg://msgComment"
                                               height="160px"/>
-                                </vbox>
+                                </groupBox>
                             </vbox>
                         </scrollBox>
                     </tab>

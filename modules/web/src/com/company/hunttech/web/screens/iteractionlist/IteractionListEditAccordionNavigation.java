@@ -28,7 +28,7 @@ import javax.inject.Inject;
  * Data containers, loaders, JPQL, lifecycle и бизнес-обработчики остаются
  * в {@link IteractionListEdit} без изменений.
  */
-@UiController("hunttech_IteractionList.edit")
+@UiController("hunttech_IteractionList.edit.accordion")
 @UiDescriptor("iteraction-list-edit-accordion-navigation.xml")
 @EditedEntityContainer("iteractionListDc")
 @LoadDataBeforeShow
