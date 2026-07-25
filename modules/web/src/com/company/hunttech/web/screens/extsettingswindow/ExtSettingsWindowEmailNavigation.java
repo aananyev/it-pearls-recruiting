@@ -6,7 +6,10 @@ import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.CheckBox;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.GroupBoxLayout;
+import com.haulmont.cuba.gui.components.LookupField;
+import com.haulmont.cuba.gui.components.OptionsGroup;
 import com.haulmont.cuba.gui.components.Table;
+import com.haulmont.cuba.gui.components.TextArea;
 import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.components.VBoxLayout;
 
@@ -14,8 +17,11 @@ import javax.inject.Inject;
 import java.util.Map;
 
 /**
- * Дополняет вкладки email и AI связью между навигацией слева и рабочими блоками справа.
- * Загрузка, редактирование и сохранение настроек остаются в базовом контроллере.
+ * Связывает навигационные индексы всех вкладок ExtSettingsWindow
+ * с существующими рабочими блоками справа.
+ *
+ * Загрузка, редактирование, валидация и сохранение настроек остаются
+ * в базовом контроллере; расширение управляет только presentation state.
  */
 public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
 
@@ -25,9 +31,13 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     private static final String AI_NAVIGATION_STYLE = "borderless ai-settings-nav-item";
     private static final String ACTIVE_AI_NAVIGATION_STYLE =
             "borderless ai-settings-nav-item ai-settings-nav-item-active";
+    private static final String PROFILE_NAVIGATION_STYLE = "borderless user-ai-profile-nav-item";
+    private static final String ACTIVE_PROFILE_NAVIGATION_STYLE =
+            "borderless user-ai-profile-nav-item user-ai-profile-nav-item-active";
 
     @Inject
     private UiComponents uiComponents;
+
     @Inject
     private VBoxLayout emailSettingsNavigation;
     @Inject
@@ -42,6 +52,7 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     private TextField<String> pop3Server;
     @Inject
     private TextField<String> imapServer;
+
     @Inject
     private VBoxLayout aiSettingsNavigation;
     @Inject
@@ -49,17 +60,67 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
     @Inject
     private Table<UserAiConfiguration> aiConfigsTable;
 
+    @Inject
+    private VBoxLayout userAiProfileSectionNavigation;
+    @Inject
+    private GroupBoxLayout professionalProfileGroup;
+    @Inject
+    private GroupBoxLayout recruitingProfileGroup;
+    @Inject
+    private GroupBoxLayout responsePreferencesGroup;
+    @Inject
+    private GroupBoxLayout goalsGroup;
+    @Inject
+    private GroupBoxLayout privacyGroup;
+    @Inject
+    private GroupBoxLayout previewGroup;
+    @Inject
+    private TextField<String> currentPositionField;
+    @Inject
+    private TextArea<String> recruitingSpecializationsField;
+    @Inject
+    private LookupField preferredLanguageField;
+    @Inject
+    private TextArea<String> professionalGoalsField;
+    @Inject
+    private CheckBox profileEnabledField;
+    @Inject
+    private TextArea<String> aiContextPreviewArea;
+
+    @Inject
+    private VBoxLayout interfaceSettingsNavigation;
+    @Inject
+    private OptionsGroup modeOptions;
+    @Inject
+    private LookupField appThemeField;
+    @Inject
+    private LookupField appLangField;
+    @Inject
+    private LookupField defaultScreenField;
+
     private Button emailSettingsSmtpNav;
     private Button emailSettingsPop3Nav;
     private Button emailSettingsImapNav;
     private Button aiSettingsSourceNav;
     private Button aiSettingsConnectionsNav;
+    private Button userAiProfileProfessionalNav;
+    private Button userAiProfileRecruitingNav;
+    private Button userAiProfileResponseNav;
+    private Button userAiProfileGoalsNav;
+    private Button userAiProfilePrivacyNav;
+    private Button userAiProfilePreviewNav;
+    private Button interfaceSettingsWindowNav;
+    private Button interfaceSettingsAppearanceNav;
+    private Button interfaceSettingsRegionalNav;
+    private Button interfaceSettingsStartupNav;
 
     @Override
     public void init(Map<String, Object> params) {
         super.init(params);
         initEmailSettingsNavigation();
         initAiSettingsNavigation();
+        initUserAiProfileNavigation();
+        initInterfaceSettingsNavigation();
     }
 
     /**
@@ -109,6 +170,75 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         updateAiNavigationStyles(aiSettingsSourceNav);
     }
 
+    /**
+     * Связывает шесть пунктов профиля пользователя с шестью существующими
+     * секциями-аккордеонами без изменения datasource-binding и consent-логики.
+     */
+    private void initUserAiProfileNavigation() {
+        Component navigationTitle = userAiProfileSectionNavigation.getComponent(0);
+        userAiProfileSectionNavigation.removeAll();
+        userAiProfileSectionNavigation.add(navigationTitle);
+
+        userAiProfileProfessionalNav = createNavigationButton(
+                "userAiProfileProfessionalNav", "professionalProfile",
+                this::selectProfessionalProfile, PROFILE_NAVIGATION_STYLE);
+        userAiProfileRecruitingNav = createNavigationButton(
+                "userAiProfileRecruitingNav", "recruitingProfile",
+                this::selectRecruitingProfile, PROFILE_NAVIGATION_STYLE);
+        userAiProfileResponseNav = createNavigationButton(
+                "userAiProfileResponseNav", "responsePreferences",
+                this::selectResponsePreferences, PROFILE_NAVIGATION_STYLE);
+        userAiProfileGoalsNav = createNavigationButton(
+                "userAiProfileGoalsNav", "goalsAndInterests",
+                this::selectGoalsAndInterests, PROFILE_NAVIGATION_STYLE);
+        userAiProfilePrivacyNav = createNavigationButton(
+                "userAiProfilePrivacyNav", "privacyAndBoundaries",
+                this::selectPrivacyAndBoundaries, PROFILE_NAVIGATION_STYLE);
+        userAiProfilePreviewNav = createNavigationButton(
+                "userAiProfilePreviewNav", "aiContextPreview",
+                this::selectAiContextPreview, PROFILE_NAVIGATION_STYLE);
+
+        userAiProfileSectionNavigation.add(userAiProfileProfessionalNav);
+        userAiProfileSectionNavigation.add(userAiProfileRecruitingNav);
+        userAiProfileSectionNavigation.add(userAiProfileResponseNav);
+        userAiProfileSectionNavigation.add(userAiProfileGoalsNav);
+        userAiProfileSectionNavigation.add(userAiProfilePrivacyNav);
+        userAiProfileSectionNavigation.add(userAiProfilePreviewNav);
+        // Вкладка «Обо мне» уже содержит раскрытый первый аккордеон; синхронизируем только подсветку.
+        updateUserAiProfileNavigationStyles(userAiProfileProfessionalNav);
+    }
+
+    /**
+     * Делает индекс интерфейсных настроек кликабельным. Вкладка содержит одну
+     * штатную карточку, поэтому выбор переводит фокус на первое поле нужной группы,
+     * не скрывая и не перестраивая legacy-компоненты SettingsWindow.
+     */
+    private void initInterfaceSettingsNavigation() {
+        Component navigationTitle = interfaceSettingsNavigation.getComponent(0);
+        interfaceSettingsNavigation.removeAll();
+        interfaceSettingsNavigation.add(navigationTitle);
+
+        interfaceSettingsWindowNav = createNavigationButton(
+                "interfaceSettingsWindowNav", "interfaceSettingsWindowSection",
+                this::selectInterfaceWindowSettings, NAVIGATION_STYLE);
+        interfaceSettingsAppearanceNav = createNavigationButton(
+                "interfaceSettingsAppearanceNav", "interfaceSettingsAppearanceSection",
+                this::selectInterfaceAppearanceSettings, NAVIGATION_STYLE);
+        interfaceSettingsRegionalNav = createNavigationButton(
+                "interfaceSettingsRegionalNav", "interfaceSettingsRegionalSection",
+                this::selectInterfaceRegionalSettings, NAVIGATION_STYLE);
+        interfaceSettingsStartupNav = createNavigationButton(
+                "interfaceSettingsStartupNav", "interfaceSettingsStartupSection",
+                this::selectInterfaceStartupSettings, NAVIGATION_STYLE);
+
+        interfaceSettingsNavigation.add(interfaceSettingsWindowNav);
+        interfaceSettingsNavigation.add(interfaceSettingsAppearanceNav);
+        interfaceSettingsNavigation.add(interfaceSettingsRegionalNav);
+        interfaceSettingsNavigation.add(interfaceSettingsStartupNav);
+        // Скрытая при открытии вкладка не получает фокус до явного выбора пользователя.
+        updateInterfaceNavigationStyles(interfaceSettingsWindowNav);
+    }
+
     private Button createNavigationButton(String id,
                                           String messageKey,
                                           Runnable handler,
@@ -152,6 +282,56 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         aiConfigsTable.focus();
     }
 
+    public void selectProfessionalProfile() {
+        selectUserAiProfileSection(
+                professionalProfileGroup, userAiProfileProfessionalNav, currentPositionField::focus);
+    }
+
+    public void selectRecruitingProfile() {
+        selectUserAiProfileSection(
+                recruitingProfileGroup, userAiProfileRecruitingNav, recruitingSpecializationsField::focus);
+    }
+
+    public void selectResponsePreferences() {
+        selectUserAiProfileSection(
+                responsePreferencesGroup, userAiProfileResponseNav, preferredLanguageField::focus);
+    }
+
+    public void selectGoalsAndInterests() {
+        selectUserAiProfileSection(
+                goalsGroup, userAiProfileGoalsNav, professionalGoalsField::focus);
+    }
+
+    public void selectPrivacyAndBoundaries() {
+        selectUserAiProfileSection(
+                privacyGroup, userAiProfilePrivacyNav, profileEnabledField::focus);
+    }
+
+    public void selectAiContextPreview() {
+        selectUserAiProfileSection(
+                previewGroup, userAiProfilePreviewNav, aiContextPreviewArea::focus);
+    }
+
+    public void selectInterfaceWindowSettings() {
+        updateInterfaceNavigationStyles(interfaceSettingsWindowNav);
+        modeOptions.focus();
+    }
+
+    public void selectInterfaceAppearanceSettings() {
+        updateInterfaceNavigationStyles(interfaceSettingsAppearanceNav);
+        appThemeField.focus();
+    }
+
+    public void selectInterfaceRegionalSettings() {
+        updateInterfaceNavigationStyles(interfaceSettingsRegionalNav);
+        appLangField.focus();
+    }
+
+    public void selectInterfaceStartupSettings() {
+        updateInterfaceNavigationStyles(interfaceSettingsStartupNav);
+        defaultScreenField.focus();
+    }
+
     /**
      * Реализует взаимоисключающий выбор протокола: раскрывает выбранную секцию,
      * сворачивает остальные, синхронизирует активный пункт слева и переводит
@@ -175,6 +355,24 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         selectedFirstField.focus();
     }
 
+    /**
+     * Раскрывает выбранный раздел профиля, сворачивает остальные и переводит
+     * фокус на первое штатное поле. Значения сущности и состояние consent не меняются.
+     */
+    private void selectUserAiProfileSection(GroupBoxLayout selectedSection,
+                                            Button selectedNavigationButton,
+                                            Runnable focusHandler) {
+        professionalProfileGroup.setExpanded(professionalProfileGroup == selectedSection);
+        recruitingProfileGroup.setExpanded(recruitingProfileGroup == selectedSection);
+        responsePreferencesGroup.setExpanded(responsePreferencesGroup == selectedSection);
+        goalsGroup.setExpanded(goalsGroup == selectedSection);
+        privacyGroup.setExpanded(privacyGroup == selectedSection);
+        previewGroup.setExpanded(previewGroup == selectedSection);
+
+        updateUserAiProfileNavigationStyles(selectedNavigationButton);
+        focusHandler.run();
+    }
+
     private void updateAiNavigationStyles(Button selectedNavigationButton) {
         aiSettingsSourceNav.setStyleName(
                 aiSettingsSourceNav == selectedNavigationButton
@@ -182,5 +380,41 @@ public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
         aiSettingsConnectionsNav.setStyleName(
                 aiSettingsConnectionsNav == selectedNavigationButton
                         ? ACTIVE_AI_NAVIGATION_STYLE : AI_NAVIGATION_STYLE);
+    }
+
+    private void updateUserAiProfileNavigationStyles(Button selectedNavigationButton) {
+        userAiProfileProfessionalNav.setStyleName(
+                userAiProfileProfessionalNav == selectedNavigationButton
+                        ? ACTIVE_PROFILE_NAVIGATION_STYLE : PROFILE_NAVIGATION_STYLE);
+        userAiProfileRecruitingNav.setStyleName(
+                userAiProfileRecruitingNav == selectedNavigationButton
+                        ? ACTIVE_PROFILE_NAVIGATION_STYLE : PROFILE_NAVIGATION_STYLE);
+        userAiProfileResponseNav.setStyleName(
+                userAiProfileResponseNav == selectedNavigationButton
+                        ? ACTIVE_PROFILE_NAVIGATION_STYLE : PROFILE_NAVIGATION_STYLE);
+        userAiProfileGoalsNav.setStyleName(
+                userAiProfileGoalsNav == selectedNavigationButton
+                        ? ACTIVE_PROFILE_NAVIGATION_STYLE : PROFILE_NAVIGATION_STYLE);
+        userAiProfilePrivacyNav.setStyleName(
+                userAiProfilePrivacyNav == selectedNavigationButton
+                        ? ACTIVE_PROFILE_NAVIGATION_STYLE : PROFILE_NAVIGATION_STYLE);
+        userAiProfilePreviewNav.setStyleName(
+                userAiProfilePreviewNav == selectedNavigationButton
+                        ? ACTIVE_PROFILE_NAVIGATION_STYLE : PROFILE_NAVIGATION_STYLE);
+    }
+
+    private void updateInterfaceNavigationStyles(Button selectedNavigationButton) {
+        interfaceSettingsWindowNav.setStyleName(
+                interfaceSettingsWindowNav == selectedNavigationButton
+                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+        interfaceSettingsAppearanceNav.setStyleName(
+                interfaceSettingsAppearanceNav == selectedNavigationButton
+                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+        interfaceSettingsRegionalNav.setStyleName(
+                interfaceSettingsRegionalNav == selectedNavigationButton
+                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+        interfaceSettingsStartupNav.setStyleName(
+                interfaceSettingsStartupNav == selectedNavigationButton
+                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
     }
 }
