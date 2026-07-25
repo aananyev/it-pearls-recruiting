@@ -100,15 +100,20 @@
                               spacing="true"
                               align="MIDDLE_CENTER"
                               stylename="iteraction-list-identity-images">
-                            <image id="candidateImage"
-                                   dataContainer="iteractionListDc"
-                                   property="candidate.fileImageFace"
-                                   width="104px"
-                                   height="104px"
-                                   visible="true"
-                                   align="MIDDLE_CENTER"
-                                   stylename="iteraction-list-candidate-image"
-                                   scaleMode="FILL"/>
+                            <!-- Профильное изображение в левой панели использует единый
+                                 OvaFallbackImage и сохраняет legacy ID и Image-инъекцию контроллера. -->
+                            <ovaFallbackImage id="candidateImage"
+                                              dataContainer="iteractionListDc"
+                                              property="candidate.fileImageFace"
+                                              width="104px"
+                                              height="104px"
+                                              ovalWidth="104px"
+                                              ovalHeight="104px"
+                                              fallbackThemePath="icons/no-programmer.jpeg"
+                                              visible="true"
+                                              align="MIDDLE_CENTER"
+                                              stylename="iteraction-list-candidate-image"
+                                              scaleMode="SCALE_DOWN"/>
                             <image id="projectLogoImage"
                                    width="76px"
                                    height="76px"
