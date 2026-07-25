@@ -77,31 +77,18 @@
             spacing="false"
             width="100%"
             height="100%">
-        <hbox stylename="iteraction-list-toolbar"
-              width="100%"
-              spacing="true"
-              align="MIDDLE_LEFT">
-            <label value="msg://editorCaption"
-                   stylename="iteraction-list-toolbar-title"
-                   width="AUTO"/>
-            <label value="msg://msgIteractionList"
-                   stylename="iteraction-list-toolbar-context"
-                   width="AUTO"/>
-        </hbox>
-
         <hbox id="iteractionListMainLayout"
               stylename="iteraction-list-main-layout"
               width="100%"
               height="100%"
               spacing="false"
               expand="iteractionListWorkspace">
-            <!-- Контекстная панель сохраняет все runtime-управляемые изображения,
-                 статусы и служебные поля. Контроллер продолжает менять source,
-                 visible и stylename прежних component ID без новых listeners. -->
+            <!-- Боковая панель занимает полную высоту диалога и сохраняет
+                 runtime-управляемый контекст кандидата и вакансии. -->
             <vbox stylename="iteraction-list-sidebar"
-                  width="270px"
+                  width="252px"
                   height="100%"
-                  spacing="true">
+                  spacing="false">
                 <groupBox spacing="true"
                           width="100%"
                           collapsable="true"
@@ -111,27 +98,29 @@
                           spacing="true">
                         <hbox width="100%"
                               spacing="true"
-                              align="TOP_CENTER">
+                              align="MIDDLE_CENTER"
+                              stylename="iteraction-list-identity-images">
                             <image id="candidateImage"
                                    dataContainer="iteractionListDc"
                                    property="candidate.fileImageFace"
-                                   width="100px"
-                                   height="100px"
+                                   width="104px"
+                                   height="104px"
                                    visible="true"
-                                   align="TOP_CENTER"
+                                   align="MIDDLE_CENTER"
                                    stylename="iteraction-list-candidate-image"
                                    scaleMode="FILL"/>
                             <image id="projectLogoImage"
-                                   width="100px"
-                                   height="100px"
+                                   width="76px"
+                                   height="76px"
                                    visible="true"
-                                   align="TOP_CENTER"
+                                   align="MIDDLE_CENTER"
                                    stylename="iteraction-list-project-image"
                                    scaleMode="FILL"/>
                         </hbox>
 
-                        <hbox width="100%"
-                              spacing="true">
+                        <vbox width="100%"
+                              spacing="true"
+                              stylename="iteraction-list-service-fields">
                             <textField id="numberIteractionField"
                                        dataContainer="iteractionListDc"
                                        property="numberIteraction"
@@ -146,10 +135,10 @@
                                        caption="msg://msgDate"
                                        width="100%"
                                        align="MIDDLE_LEFT"/>
-                        </hbox>
+                        </vbox>
 
                         <label id="closingDateVacancyLabel"
-                               stylename="h4"
+                               stylename="h4 iteraction-list-closing-date"
                                width="100%"
                                visible="false"
                                height="AUTO"
@@ -158,76 +147,81 @@
                         <vbox stylename="iteraction-list-sidebar-section"
                               width="100%"
                               spacing="true">
-                            <hbox spacing="true"
-                                  width="100%">
+                            <vbox width="100%"
+                                  spacing="false"
+                                  stylename="iteraction-list-sidebar-metric">
                                 <label value="msg://msgCompanyDepartament"
                                        stylename="iteraction-list-sidebar-caption"
-                                       width="AUTO"/>
-                                <label value=": "
-                                       stylename="iteraction-list-sidebar-caption"
-                                       width="AUTO"/>
+                                       width="100%"/>
                                 <label id="companyLabel"
                                        width="100%"
                                        height="AUTO"
                                        htmlEnabled="true"/>
-                            </hbox>
-                            <hbox spacing="true"
-                                  width="100%">
+                            </vbox>
+                            <vbox width="100%"
+                                  spacing="false"
+                                  stylename="iteraction-list-sidebar-metric">
                                 <label value="msg://msgProject"
                                        stylename="iteraction-list-sidebar-caption"
-                                       width="AUTO"/>
-                                <label value=": "
-                                       stylename="iteraction-list-sidebar-caption"
-                                       width="AUTO"/>
+                                       width="100%"/>
                                 <label id="projectLabel"
                                        width="100%"
                                        height="AUTO"/>
-                            </hbox>
+                            </vbox>
                         </vbox>
 
                         <vbox stylename="iteraction-list-sidebar-section"
                               width="100%"
                               spacing="true">
-                            <hbox spacing="true"
-                                  width="100%"
-                                  align="MIDDLE_LEFT">
+                            <vbox width="100%"
+                                  spacing="false"
+                                  stylename="iteraction-list-sidebar-metric">
                                 <label value="msg://msgStatusOfVacansy"
                                        stylename="iteraction-list-sidebar-caption"
-                                       width="AUTO"/>
-                                <label id="statusOfVacansyLabel"
-                                       width="AUTO"
-                                       align="MIDDLE_LEFT"/>
-                                <linkButton id="alternativeVacancyLinkButton"
-                                            visible="false"
-                                            descriptionAsHtml="true"
-                                            description="msg://msgAlarmAlternativeVacancy"
-                                            stylename="huge"
-                                            icon="WARNING"/>
-                            </hbox>
-                            <hbox spacing="true"
-                                  width="100%"
-                                  align="MIDDLE_LEFT">
+                                       width="100%"/>
+                                <hbox spacing="true"
+                                      width="100%"
+                                      align="MIDDLE_LEFT">
+                                    <label id="statusOfVacansyLabel"
+                                           width="100%"
+                                           align="MIDDLE_LEFT"/>
+                                    <linkButton id="alternativeVacancyLinkButton"
+                                                visible="false"
+                                                descriptionAsHtml="true"
+                                                description="msg://msgAlarmAlternativeVacancy"
+                                                stylename="huge"
+                                                icon="WARNING"/>
+                                </hbox>
+                            </vbox>
+                            <vbox width="100%"
+                                  spacing="false"
+                                  stylename="iteraction-list-sidebar-metric">
                                 <label value="msg://msgPriority"
                                        stylename="iteraction-list-sidebar-caption"
-                                       width="AUTO"/>
-                                <image id="trafficLighterImage"
-                                       width="AUTO"
-                                       align="MIDDLE_CENTER"
-                                       height="AUTO"/>
-                                <label id="currentPriorityLabel"
-                                       align="MIDDLE_CENTER"
-                                       width="AUTO"/>
-                            </hbox>
+                                       width="100%"/>
+                                <hbox spacing="true"
+                                      width="100%"
+                                      align="MIDDLE_LEFT">
+                                    <image id="trafficLighterImage"
+                                           width="AUTO"
+                                           align="MIDDLE_LEFT"
+                                           height="AUTO"/>
+                                    <label id="currentPriorityLabel"
+                                           align="MIDDLE_LEFT"
+                                           width="100%"/>
+                                </hbox>
+                            </vbox>
                             <hbox id="outstaffingCostHBox"
                                   spacing="true"
                                   width="100%"
-                                  visible="false">
+                                  visible="false"
+                                  align="MIDDLE_LEFT">
                                 <label value="msg://msgOutstaffCost"
                                        stylename="iteraction-list-sidebar-caption"
                                        width="AUTO"
                                        align="MIDDLE_LEFT"/>
                                 <label dataContainer="iteractionListDc"
-                                       align="MIDDLE_CENTER"
+                                       align="MIDDLE_LEFT"
                                        property="vacancy.outstaffingCost"/>
                                 <label value="msg://msgRubPerHour"
                                        stylename="iteraction-list-sidebar-caption"
@@ -264,6 +258,18 @@
                   height="100%"
                   spacing="false"
                   expand="iteractionListTabSheeet">
+                <hbox stylename="iteraction-list-toolbar"
+                      width="100%"
+                      spacing="true"
+                      align="MIDDLE_LEFT">
+                    <label value="msg://editorCaption"
+                           stylename="iteraction-list-toolbar-title"
+                           width="AUTO"/>
+                    <label value="msg://msgIteractionList"
+                           stylename="iteraction-list-toolbar-context"
+                           width="AUTO"/>
+                </hbox>
+
                 <tabSheet id="iteractionListTabSheeet"
                           width="100%"
                           height="100%"
@@ -280,9 +286,8 @@
                             <vbox width="100%"
                                   spacing="true"
                                   stylename="iteraction-list-content">
-                                <!-- Оба legacy-контейнера популярных взаимодействий сохранены
-                                     раздельно: mostPopularHbox наполняется Java-контроллером,
-                                     mostPopularIteractionHBox остаётся прежней XML-точкой. -->
+                                <!-- Legacy-контейнеры популярных взаимодействий сохранены
+                                     раздельно и остаются доступными Java-контроллеру. -->
                                 <groupBox width="100%"
                                           caption="msg://mshMostPopular"
                                           stylename="iteraction-list-popular-card"
@@ -302,10 +307,11 @@
 
                                 <vbox width="100%"
                                       spacing="true"
-                                      stylename="iteraction-list-card">
+                                      stylename="iteraction-list-card iteraction-list-form-card">
                                     <grid id="gridIterationData"
                                           spacing="true"
-                                          width="100%">
+                                          width="100%"
+                                          stylename="iteraction-list-form-grid">
                                         <columns count="2"/>
                                         <rows>
                                             <row id="row">
@@ -335,7 +341,8 @@
                                                     </query>
                                                 </suggestionPickerField>
                                                 <vbox spacing="true"
-                                                      width="100%">
+                                                      width="100%"
+                                                      stylename="iteraction-list-vacancy-column">
                                                     <lookupPickerField id="vacancyFiels"
                                                                        caption="mainMsg://msgVacancy"
                                                                        dataContainer="iteractionListDc"
@@ -351,22 +358,11 @@
                                                         </actions>
                                                     </lookupPickerField>
                                                     <checkBox id="onlyMySubscribeCheckBox"
-                                                              align="TOP_RIGHT"
+                                                              align="TOP_LEFT"
                                                               width="AUTO"
                                                               description="msg://msgOnlyMySebscribeDec"
                                                               caption="msg://msgOnlyMySubscribe"/>
                                                 </vbox>
-                                            </row>
-                                            <row id="rating">
-                                                <lookupField id="ratingField"
-                                                             required="true"
-                                                             align="MIDDLE_LEFT"
-                                                             caption="msg://msgRating"
-                                                             dataContainer="iteractionListDc"
-                                                             property="rating"
-                                                             description="msg://msgRatingDecription"
-                                                             width="100%"
-                                                             colspan="2"/>
                                             </row>
                                             <row>
                                                 <lookupPickerField id="iteractionTypeField"
@@ -382,18 +378,17 @@
                                                                 type="picker_lookup"/>
                                                     </actions>
                                                 </lookupPickerField>
-                                                <!-- Динамические варианты дополнительного действия собраны
-                                                     в одном адаптивном контейнере. Их visible, required,
-                                                     caption и invoke по-прежнему определяет контроллер. -->
+                                                <!-- Runtime-видимость, required и caption вариантов
+                                                     дополнительного действия по-прежнему задаёт Java. -->
                                                 <buttonsPanel id="buttonsPanelCallAction"
                                                               width="100%"
-                                                              align="BOTTOM_CENTER"
+                                                              align="BOTTOM_LEFT"
                                                               stylename="iteraction-list-dynamic-panel">
                                                     <vbox width="100%"
                                                           spacing="true">
                                                         <button id="buttonCallAction"
                                                                 invoke="callActionEntity"
-                                                                align="BOTTOM_CENTER"
+                                                                align="BOTTOM_LEFT"
                                                                 width="100%"/>
                                                         <textField id="addString"
                                                                    dataContainer="iteractionListDc"
@@ -410,12 +405,15 @@
                                                     </vbox>
                                                 </buttonsPanel>
                                             </row>
-                                            <row>
-                                                <textField id="communicationMethodField"
-                                                           width="100%"
-                                                           caption="msg://msgCommunicationMethod"
-                                                           dataContainer="iteractionListDc"
-                                                           property="communicationMethod"/>
+                                            <row id="rating">
+                                                <lookupField id="ratingField"
+                                                             required="true"
+                                                             align="MIDDLE_LEFT"
+                                                             caption="msg://msgRating"
+                                                             dataContainer="iteractionListDc"
+                                                             property="rating"
+                                                             description="msg://msgRatingDecription"
+                                                             width="100%"/>
                                                 <lookupPickerField id="recrutierField"
                                                                    caption="msg://msgRecrutier"
                                                                    width="100%"
@@ -428,6 +426,14 @@
                                                     </actions>
                                                 </lookupPickerField>
                                             </row>
+                                            <row>
+                                                <textField id="communicationMethodField"
+                                                           width="100%"
+                                                           caption="msg://msgCommunicationMethod"
+                                                           dataContainer="iteractionListDc"
+                                                           property="communicationMethod"
+                                                           colspan="2"/>
+                                            </row>
                                         </rows>
                                     </grid>
                                 </vbox>
@@ -437,33 +443,33 @@
                                       stylename="iteraction-list-card iteraction-list-comment-card">
                                     <textArea id="commentField"
                                               property="comment"
-                                              rows="8"
+                                              rows="7"
                                               width="100%"
                                               dataContainer="iteractionListDc"
                                               caption="msg://msgComment"
-                                              height="180px"/>
+                                              height="160px"/>
                                 </vbox>
                             </vbox>
                         </scrollBox>
                     </tab>
                 </tabSheet>
-            </vbox>
-        </hbox>
 
-        <hbox id="editActions"
-              stylename="iteraction-list-footer"
-              width="100%"
-              spacing="true"
-              align="MIDDLE_RIGHT">
-            <button id="subscribeButton"
-                    invoke="onButtonSubscribeClick"
-                    caption="mainMsg://msgSubscribe"
-                    icon="BELL"
-                    stylename="iteraction-list-subscribe-action"/>
-            <button action="windowCommitAndClose"
-                    stylename="iteraction-list-primary-action"/>
-            <button action="windowClose"
-                    stylename="iteraction-list-secondary-action"/>
+                <hbox id="editActions"
+                      stylename="iteraction-list-footer"
+                      width="100%"
+                      spacing="true"
+                      align="MIDDLE_RIGHT">
+                    <button id="subscribeButton"
+                            invoke="onButtonSubscribeClick"
+                            caption="mainMsg://msgSubscribe"
+                            icon="BELL"
+                            stylename="iteraction-list-subscribe-action"/>
+                    <button action="windowCommitAndClose"
+                            stylename="iteraction-list-primary-action"/>
+                    <button action="windowClose"
+                            stylename="iteraction-list-secondary-action"/>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>
