@@ -1,0 +1,499 @@
+/*
+ * IteractionListEdit — локальный визуальный слой HRM HuntTech.
+ * Тёмная контекстная панель сохраняет runtime-управляемый контекст,
+ * а светлая рабочая область группирует прежние поля без изменения CUBA-контрактов.
+ */
+@mixin iteraction-list-editor-theme {
+  .iteraction-list-editor {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    color: $v-font-color;
+    background: mix($v-app-background-color, $v-panel-background-color, 82%);
+    overflow: hidden;
+
+    .iteraction-list-toolbar,
+    .iteraction-list-main-layout,
+    .iteraction-list-sidebar,
+    .iteraction-list-workspace,
+    .iteraction-list-content,
+    .iteraction-list-card,
+    .iteraction-list-footer {
+      box-sizing: border-box;
+    }
+
+    .iteraction-list-toolbar {
+      width: 100% !important;
+      min-height: 58px;
+      padding: 11px 20px 10px;
+      background: $v-panel-background-color !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.16);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+    }
+
+    .iteraction-list-toolbar-title {
+      color: mix($v-font-color, $v-panel-background-color, 92%) !important;
+      font-size: 20px !important;
+      font-weight: 700 !important;
+      line-height: 28px !important;
+      white-space: normal !important;
+    }
+
+    .iteraction-list-toolbar-context {
+      color: mix($v-font-color, $v-panel-background-color, 62%) !important;
+      font-size: 13px !important;
+      line-height: 22px !important;
+      white-space: normal !important;
+    }
+
+    .iteraction-list-main-layout {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .v-slot-iteraction-list-sidebar,
+    .iteraction-list-sidebar {
+      background-color: #172638 !important;
+      background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%) !important;
+    }
+
+    .iteraction-list-sidebar {
+      width: 270px !important;
+      min-width: 270px !important;
+      max-width: 270px !important;
+      height: 100% !important;
+      padding: 16px 14px;
+      color: #f8fafc !important;
+      border-right: 1px solid rgba(15, 23, 42, 0.78);
+      box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18);
+      overflow-x: hidden;
+      overflow-y: auto;
+
+      > .v-slot {
+        width: 100% !important;
+        min-width: 0;
+      }
+    }
+
+    .iteraction-list-context-card {
+      width: 100% !important;
+      color: #f8fafc !important;
+      background: rgba(255, 255, 255, 0.055) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      border-radius: 8px !important;
+      box-shadow: none !important;
+      overflow: hidden;
+    }
+
+    .iteraction-list-context-card .v-panel-caption,
+    .iteraction-list-context-card .v-caption {
+      min-height: 42px;
+      padding: 10px 12px;
+      color: #ffb11b !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
+      line-height: 22px !important;
+      background: rgba(255, 255, 255, 0.045) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+    }
+
+    .iteraction-list-context-card .v-panel-content {
+      padding: 13px !important;
+      color: #f8fafc !important;
+      background: transparent !important;
+      border: 0 !important;
+    }
+
+    .iteraction-list-context-card .v-label,
+    .iteraction-list-context-card .v-captiontext {
+      color: #f8fafc !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .iteraction-list-sidebar-caption {
+      color: rgba(248, 250, 252, 0.66) !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      line-height: 18px !important;
+    }
+
+    .iteraction-list-sidebar-section {
+      width: 100% !important;
+      padding: 10px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .iteraction-list-candidate-image,
+    .iteraction-list-candidate-image img,
+    .iteraction-list-candidate-image .v-image-element {
+      width: 100px !important;
+      height: 100px !important;
+      min-width: 100px !important;
+      min-height: 100px !important;
+      max-width: 100px !important;
+      max-height: 100px !important;
+      border-radius: 50% !important;
+      object-fit: cover !important;
+    }
+
+    .iteraction-list-candidate-image {
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.10) !important;
+      border: 3px solid rgba(255, 255, 255, 0.90) !important;
+      box-shadow: 0 7px 18px rgba(0, 0, 0, 0.26);
+    }
+
+    .iteraction-list-project-image,
+    .iteraction-list-project-image img,
+    .iteraction-list-project-image .v-image-element {
+      width: 100px !important;
+      height: 100px !important;
+      min-width: 100px !important;
+      min-height: 100px !important;
+      max-width: 100px !important;
+      max-height: 100px !important;
+      border-radius: 8px !important;
+      object-fit: contain !important;
+    }
+
+    .iteraction-list-project-image {
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.94) !important;
+      border: 1px solid rgba(255, 255, 255, 0.52) !important;
+      box-shadow: 0 7px 18px rgba(0, 0, 0, 0.22);
+    }
+
+    .iteraction-list-context-card .v-textfield,
+    .iteraction-list-context-card .v-datefield-textfield {
+      min-height: 36px;
+      color: #f8fafc !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-color: rgba(255, 255, 255, 0.24) !important;
+      box-shadow: none !important;
+    }
+
+    .iteraction-list-context-card .v-readonly,
+    .iteraction-list-context-card .v-readonly .v-textfield,
+    .iteraction-list-context-card .v-readonly .v-datefield-textfield {
+      color: rgba(248, 250, 252, 0.82) !important;
+      opacity: 1 !important;
+    }
+
+    .iteraction-list-context-card .v-button-link {
+      color: #ffb11b !important;
+    }
+
+    .iteraction-list-rating-context {
+      min-height: 52px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .iteraction-list-rating-context .v-label {
+      color: #ffb11b !important;
+      font-size: 20px !important;
+      font-weight: 700 !important;
+    }
+
+    .iteraction-list-workspace {
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 100% !important;
+      padding: 0;
+      background: mix($v-app-background-color, $v-panel-background-color, 82%) !important;
+      overflow: hidden;
+    }
+
+    .iteraction-list-tabs {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .iteraction-list-tabs > .v-tabsheet-tabcontainer {
+      padding: 0 18px;
+      background: $v-panel-background-color !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.16) !important;
+    }
+
+    .iteraction-list-tabs .v-tabsheet-tabs,
+    .iteraction-list-tabs .v-tabsheet-tabitem,
+    .iteraction-list-tabs .v-tabsheet-tabitem-selected {
+      height: 48px;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .iteraction-list-tabs .v-caption {
+      height: 48px;
+      padding: 0 16px !important;
+      color: mix($v-font-color, $v-panel-background-color, 78%) !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      line-height: 48px !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-bottom: 3px solid transparent !important;
+    }
+
+    .iteraction-list-tabs .v-tabsheet-tabitem:hover .v-caption {
+      color: $v-selection-color !important;
+    }
+
+    .iteraction-list-tabs .v-tabsheet-tabitem-selected .v-caption {
+      color: $v-selection-color !important;
+      border-bottom-color: $v-selection-color !important;
+    }
+
+    .iteraction-list-tabs > .v-tabsheet-content {
+      height: calc(100% - 49px) !important;
+      padding: 0 !important;
+      background: transparent !important;
+      border: 0 !important;
+      overflow: hidden;
+    }
+
+    .iteraction-list-tabs .v-tabsheet-tabsheetpanel {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0;
+      background: transparent !important;
+      border: 0 !important;
+    }
+
+    .iteraction-list-scroll {
+      width: 100% !important;
+      height: 100% !important;
+      background: transparent !important;
+    }
+
+    .iteraction-list-content {
+      width: 100% !important;
+      min-width: 0 !important;
+      padding: 16px 18px 20px;
+    }
+
+    .iteraction-list-card,
+    .iteraction-list-popular-card {
+      width: 100% !important;
+      min-width: 0 !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.15) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    .iteraction-list-card {
+      padding: 18px 20px 20px;
+    }
+
+    .iteraction-list-popular-card {
+      overflow: hidden;
+    }
+
+    .iteraction-list-popular-card .v-panel-caption {
+      min-height: 46px;
+      padding: 11px 15px;
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
+      line-height: 24px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 68%) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.14) !important;
+    }
+
+    .iteraction-list-popular-card .v-panel-content {
+      padding: 14px 16px !important;
+      background: $v-panel-background-color !important;
+      border: 0 !important;
+    }
+
+    .iteraction-list-card .v-gridlayout,
+    .iteraction-list-card .v-gridlayout > div,
+    .iteraction-list-card table {
+      width: 100% !important;
+      min-width: 0 !important;
+      table-layout: fixed;
+    }
+
+    .iteraction-list-card .v-gridlayout-slot {
+      min-width: 0 !important;
+      padding: 7px 8px;
+      vertical-align: top;
+    }
+
+    .iteraction-list-card .v-caption {
+      color: mix($v-font-color, $v-panel-background-color, 82%) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
+    }
+
+    .iteraction-list-card .v-textfield,
+    .iteraction-list-card .v-textarea,
+    .iteraction-list-card .v-filterselect,
+    .iteraction-list-card .v-filterselect-input,
+    .iteraction-list-card .v-datefield-textfield {
+      box-sizing: border-box;
+      min-height: 38px;
+      font-size: 15px !important;
+      background: $v-panel-background-color !important;
+      border-color: rgba($v-font-color, 0.24) !important;
+      border-radius: $v-border-radius;
+      box-shadow: none !important;
+    }
+
+    .iteraction-list-card .v-textarea {
+      min-height: 160px;
+      line-height: 1.45 !important;
+      resize: vertical;
+    }
+
+    .iteraction-list-card .v-textfield:hover,
+    .iteraction-list-card .v-textarea:hover,
+    .iteraction-list-card .v-filterselect:hover,
+    .iteraction-list-card .v-datefield:hover {
+      border-color: rgba($v-font-color, 0.42) !important;
+    }
+
+    .iteraction-list-card .v-textfield:focus,
+    .iteraction-list-card .v-textarea:focus,
+    .iteraction-list-card .v-filterselect-focus,
+    .iteraction-list-card .v-datefield-focus .v-datefield-textfield {
+      border-color: $v-selection-color !important;
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.18) !important;
+      outline: 0;
+    }
+
+    .iteraction-list-card .v-readonly,
+    .iteraction-list-card .v-readonly .v-textfield,
+    .iteraction-list-card .v-readonly .v-textarea,
+    .iteraction-list-card .v-readonly .v-filterselect-input {
+      color: mix($v-font-color, $v-panel-background-color, 72%) !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 72%) !important;
+      opacity: 1 !important;
+    }
+
+    .iteraction-list-card .v-disabled {
+      opacity: 0.58 !important;
+    }
+
+    .iteraction-list-card .v-textfield-error,
+    .iteraction-list-card .v-textarea-error,
+    .iteraction-list-card .v-filterselect-error,
+    .iteraction-list-card .v-datefield-error .v-datefield-textfield {
+      border-color: #d9534f !important;
+      box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.14) !important;
+    }
+
+    .iteraction-list-card .v-required-field-indicator {
+      color: #d9534f !important;
+    }
+
+    .iteraction-list-card .v-filterselect-button,
+    .iteraction-list-card .c-pickerfield-layout .v-button {
+      min-width: 38px;
+      min-height: 38px;
+    }
+
+    .iteraction-list-card .v-checkbox {
+      color: mix($v-font-color, $v-panel-background-color, 82%) !important;
+      font-size: 13px !important;
+      line-height: 20px !important;
+    }
+
+    .iteraction-list-dynamic-panel,
+    .iteraction-list-dynamic-panel .v-button {
+      width: 100% !important;
+    }
+
+    .iteraction-list-dynamic-panel {
+      min-width: 0;
+      padding: 0 !important;
+      background: transparent !important;
+      border: 0 !important;
+    }
+
+    .iteraction-list-dynamic-panel > .v-slot {
+      width: 100% !important;
+      min-width: 0;
+    }
+
+    .iteraction-list-comment-card {
+      padding-bottom: 18px;
+    }
+
+    .iteraction-list-footer {
+      width: 100% !important;
+      min-height: 58px;
+      padding: 9px 18px;
+      background: $v-panel-background-color !important;
+      border-top: 1px solid rgba($v-font-color, 0.16);
+      box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.04);
+      white-space: nowrap;
+    }
+
+    .iteraction-list-footer .v-button,
+    .iteraction-list-card .v-button {
+      min-height: 38px;
+      padding: 0 16px;
+      font-size: 14px;
+      border-radius: $v-border-radius;
+      box-shadow: none !important;
+    }
+
+    .iteraction-list-footer .v-button:hover,
+    .iteraction-list-card .v-button:hover {
+      filter: brightness(0.98);
+    }
+
+    .iteraction-list-footer .v-button:focus,
+    .iteraction-list-card .v-button:focus {
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
+      outline: 0;
+    }
+
+    .iteraction-list-primary-action {
+      color: #ffffff !important;
+      background: $v-selection-color !important;
+      border-color: $v-selection-color !important;
+    }
+
+    .iteraction-list-secondary-action {
+      background: transparent !important;
+    }
+
+    .iteraction-list-subscribe-action {
+      border-color: rgba($v-selection-color, 0.55) !important;
+    }
+
+    @media (max-width: 1100px) {
+      .iteraction-list-sidebar {
+        width: 242px !important;
+        min-width: 242px !important;
+        max-width: 242px !important;
+        padding-right: 11px;
+        padding-left: 11px;
+      }
+
+      .iteraction-list-content {
+        padding-right: 12px;
+        padding-left: 12px;
+      }
+
+      .iteraction-list-card {
+        padding-right: 14px;
+        padding-left: 14px;
+      }
+    }
+  }
+}
