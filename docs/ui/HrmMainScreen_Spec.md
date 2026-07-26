@@ -1,17 +1,20 @@
-# HrmMainScreen — устойчивый фон главного экрана
+# HrmMainScreen — тематический фон главного экрана
 
 > Экран HRM HuntTech: `hrmMainScreen`.  
 > Контроллер: `com.company.hunttech.web.screens.mainscreen.HrmMainScreen`.  
+> Сервис выбора ресурса: `MainScreenBackgroundService`.  
 > Базовый экран: `ExtMainScreen`.  
 > XML: `hrm-main-screen.xml`, наследует `ext-main-screen.xml`.
 
 ## Назначение и бизнес-смысл (What & Why)
 
-Главный экран остаётся основной рабочей точкой dashboard HRM HuntTech. Фоновое изображение персонализирует рабочую область, но не должно влиять на меню, widgets, уведомления, favicon, резервы и загрузку бизнес-данных. Отдельный декоративный слой устраняет двойную отрисовку и делает runtime-контракт проверяемым.
+Главный экран является основной рабочей точкой dashboard HRM HuntTech. Фон персонализирует рабочую область, но не должен влиять на меню, widgets, уведомления, favicon, резервы и загрузку бизнес-данных.
+
+Стандартные фоны являются частью визуальной темы и поставляются как статические JPG-файлы. Это отделяет дизайн темы от Java-кода, исключает runtime-генерацию SVG и позволяет проверять полноту каталога на этапе сборки. Пользовательский фон остаётся отдельным персональным ресурсом в FileStorage и имеет приоритет над тематическим каталогом.
 
 ## UI Context & Navigation
 
-Экран создаётся через новый Screens API CUBA Platform 7.3:
+Экран создаётся через Screens API CUBA Platform 7.3:
 
 - `cuba.web.mainScreenId=hrmMainScreen`;
 - `@UiController("hrmMainScreen")`;
@@ -23,35 +26,101 @@
 ## Behavior Summary
 
 - вход → создаётся фактический `HrmMainScreen` → наследуемая бизнес-логика `ExtMainScreen` выполняется без изменений;
-- `AfterShowEvent` → Vaadin UI и connector tree готовы → ресурс фона регистрируется скрытым `Image`;
-- пользовательский маркированный файл существует → используется нормализованный JPEG;
-- пользовательского файла нет → выбирается SVG активной темы;
-- системный SVG выбран → предыдущий вариант темы известен в `UserSession` → немедленное повторение исключается;
-- ресурс зарегистрирован → inline `background-*` назначается только `mainScreenBackgroundLayer`;
-- layer применён → dashboard остаётся прозрачным и располагается выше по `z-index`;
-- SettingsWindow успешно сохранён → публикуется UI-scoped event → layer получает новый ресурс без перезахода;
-- ошибка декоративного слоя → записывается warning → открытие главного экрана не блокируется.
+- `AfterShowEvent` → Vaadin UI готов → `MainScreenBackgroundService` разрешает ресурс;
+- `UserSettings.fileImageFace` содержит существующий файл с префиксом `hrm-main-background-` → используется пользовательский `StreamResource`;
+- пользовательского файла нет → выбирается случайный `1.jpg … 10.jpg` из `backgrounds/` активной темы;
+- предыдущий индекс темы известен в `UserSession` → немедленное повторение исключается;
+- ресурс разрешён → скрытый Vaadin `Image` регистрирует URL → динамический локальный CSS назначает фон только `mainVBox`;
+- dashboard получает прозрачный локальный стиль → фон остаётся видимым под рабочими widgets;
+- SettingsWindow успешно сохранён → публикуется UI-scoped event → фон обновляется без перезахода;
+- пользовательский файл повреждён или отсутствует → сервис возвращается к тематическому каталогу;
+- ошибка декоративного фона → записывается warning/error → открытие главного экрана не должно блокироваться.
 
-## Структура background layer
+## Каталог тематических фонов
+
+Для каждой поддерживаемой темы репозиторий содержит ровно десять JPG-файлов размером `1920 × 1080`:
 
 ```text
-mainVBox (position: relative; overflow: hidden)
-├── mainScreenBackgroundLayer (absolute; z-index: 0; pointer-events: none)
-├── mainDashboard (relative; z-index: 1; transparent)
-└── backgroundResourceHolder внутри layer (Vaadin Image 0 × 0)
+modules/web/themes/{theme}/backgrounds/
+├── 1.jpg
+├── 2.jpg
+├── ...
+└── 10.jpg
 ```
 
-`mainVBox` и `mainDashboard` не получают `background-image`. Единственный владелец изображения — `mainScreenBackgroundLayer`.
+Поддерживаемые темы:
+
+```text
+halo
+havana
+helium
+hover
+hunttech-modern
+hunttech-modern-light
+hunttech-modern-dark
+```
+
+Изображения нейтральные, без текста и логотипов, с палитрой соответствующей темы. В Java-коде отсутствуют SVG-шаблоны, палитры и генераторы геометрии.
+
+## Разрешение theme-ресурса
+
+`MainScreenBackgroundService` хранит индекс варианта в диапазоне `0..9`, а имя файла формирует как `variant + 1`. Для стандартного режима возвращается:
+
+```java
+new ThemeResource("backgrounds/" + (variant + 1) + ".jpg")
+```
+
+`ThemeResource` разрешает путь относительно активной Vaadin-темы:
+
+```text
+VAADIN/themes/{activeTheme}/backgrounds/{1..10}.jpg
+```
+
+Allowlist поддерживаемых тем используется для нормализации имени и отдельного session-ключа. Неизвестное или отсутствующее имя темы нормализуется к `hover`.
+
+## Пользовательский фон
+
+Пользовательская цепочка не меняется:
+
+```text
+Upload → MainScreenBackgroundImageProcessor → FileStorage
+→ UserSettings.fileImageFace
+```
+
+Контракт пользовательского файла:
+
+- имя начинается с `hrm-main-background-`;
+- файл хранится в FileStorage;
+- файл имеет приоритет над тематическим ресурсом;
+- legacy-фотография в `fileImageFace` без указанного префикса не считается фоном;
+- при Cancel временно созданные файлы очищаются по существующему контракту SettingsWindow.
+
+## Применение ресурса в HrmMainScreen
+
+Архитектура контроллера не меняется:
+
+```text
+mainVBox
+├── backgroundResourceHolder (скрытый Vaadin Image 0 × 0)
+└── mainDashboard (локальный прозрачный стиль)
+```
+
+После регистрации ресурса контроллер:
+
+1. получает URL через `ResourceReference`;
+2. удаляет несовместимый префикс `app://APP`, если он присутствует;
+3. создаёт уникальный локальный CSS-класс;
+4. назначает `background-image`, `background-position`, `background-repeat` и `background-size` на `mainVBox`;
+5. оставляет dashboard прозрачным.
 
 ## Runtime-маркеры
 
 | Элемент | Маркер | Назначение |
 |---|---|---|
-| `mainScreenBackgroundLayer` | `data-hrm-main-background="applied"` | подтверждает выполнение background lifecycle |
-| `mainScreenBackgroundLayer` | `data-hrm-main-background-resource="<connector URL>"` | позволяет проверить фактический ресурс |
+| `mainVBox` | `data-hrm-main-background="applied"` | подтверждает выполнение background lifecycle |
 | `mainVBox` | `data-hrm-main-controller="HrmMainScreen"` | подтверждает фактический root controller |
 
-Назначенные через `HtmlAttributes` значения проверяются screen-level integration тестом. Реальный computed style браузера, HTTP-статус connector URL и screenshot проверяются Hermes после clean deploy.
+Назначенные через `HtmlAttributes` значения проверяются integration-тестом. Реальный computed style, HTTP-статус theme-ресурса и screenshot проверяются Hermes после clean deploy.
 
 ## Выбор системного варианта
 
@@ -66,45 +135,48 @@ mainVBox (position: relative; overflow: hidden)
 - не обновляет чужие UI-сеансы;
 - не публикуется при Cancel или неуспешной загрузке.
 
-## Интеграционные проверки
+## Автоматические проверки
 
-`HrmMainScreenIntegrationTest` запускается в штатном CUBA `TestContainer` и проверяет:
+`MainScreenBackgroundContractTest` проверяет:
 
-1. разрешение screen ID `hrmMainScreen` в класс `HrmMainScreen`;
-2. наличие выделенного layer в реальном component tree;
-3. assigned DOM-маркеры и CSS-контракт `layer/dashboard`;
-4. отсутствие background-image на `mainVBox` и dashboard;
-5. повторное применение после `MainScreenBackgroundChangedEvent`;
-6. работу нормализатора изображения и регистрацию WEBP reader.
+1. отсутствие `createSvg`, `createPalettes`, `Palette` и MIME `image/svg+xml`;
+2. использование `ThemeResource` с путём `backgrounds/{1..10}.jpg`;
+3. наличие allowlist всех семи тем;
+4. наличие ровно десяти файлов в каждом `theme/backgrounds`;
+5. имена `1.jpg … 10.jpg`;
+6. декодирование каждого файла через `ImageIO`;
+7. размер каждого изображения `1920 × 1080`;
+8. сохранение приоритета пользовательского фона и session-антиповтора;
+9. неизменность интеграционного контракта `HrmMainScreen`;
+10. неизменность SettingsWindow/FileStorage-цепочки.
 
-Тест не эмулирует реальный браузерный computed style и HTTP connector request. Эти проверки обязательны в runtime smoke Hermes.
-
-## Наследование ExtMainScreen
-
-`HrmMainScreen extends ExtMainScreen`. Методы `publishMyNotification`, `checkPersonalReserveCandidates`, favicon, dashboard loaders и notification events не копируются и не переопределяются.
+`HrmMainScreenIntegrationTest` продолжает проверять создание экрана, DOM-маркеры, регистрацию ресурса и обновление по `MainScreenBackgroundChangedEvent`.
 
 ## Проверки Hermes
 
 Hermes проверяет точный HEAD PR:
 
+- `git diff --check`;
 - compile web/core tests;
 - `MainScreenBackgroundContractTest 10/10`;
 - `HrmMainScreenIntegrationTest`;
 - `ScreenViewIntegrityTest 8/8`;
-- SCSS семи тем;
+- сборку SCSS семи тем;
 - `clean assemble`;
 - clean local deploy;
 - `/hrm/` = HTTP 200;
-- фактический controller, DOM-маркеры, computed style;
-- connector resource HTTP 200 и MIME;
-- screenshot системного и пользовательского режима;
-- мгновенное обновление после «ОК»;
+- системный фон для каждой из семи тем;
+- отсутствие `app://APP` в итоговом CSS URL;
+- HTTP 200 и MIME `image/jpeg` для theme-ресурса;
+- отсутствие немедленного повтора после обновления/перезахода;
+- приоритет пользовательского фона;
 - отсутствие Tomcat critical errors, P1 и P2.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-26 | Стандартные фоны вынесены из Java runtime-SVG в каталоги семи тем: 7 × 10 JPG; контрактный тест проверяет состав и формат файлов |
 | 2026-07-26 | Добавлен единый background layer, UI-scoped refresh, исключение повтора SVG и screen-level integration test |
 | 2026-07-26 | Синхронизированы оба `mainScreenId`; динамический фон переведён на inline CSS через `HtmlAttributes` |
 | 2026-07-26 | Удалена несовместимая legacy-регистрация `hrmMainScreen` |

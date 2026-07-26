@@ -2,11 +2,14 @@ package com.company.hunttech.core;
 
 import org.junit.Test;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -15,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Закрепляет архитектурный контракт фона до запуска screen-level и браузерной проверки.
- * Тест не подменяет фактический computed DOM style и HTTP-проверку connector-ресурса.
+ * Тест не подменяет фактический computed DOM style и HTTP-проверку theme-ресурса.
  */
 public class MainScreenBackgroundContractTest {
 
@@ -25,19 +28,42 @@ public class MainScreenBackgroundContractTest {
     };
 
     @Test
-    public void generatedCatalogContainsTenVariantsForAllSevenThemes() throws IOException {
+    public void themeCatalogContainsTenRasterVariantsForAllSevenThemes() throws IOException {
         String service = source(
                 "modules/web/src/com/company/hunttech/web/screens/mainscreen/MainScreenBackgroundService.java");
+
+        // Регрессия запрещает возврат runtime-SVG: фон должен разрешаться только из каталога активной темы.
         assertTrue(service.contains("VARIANT_COUNT = 10"));
-        assertEquals(THEMES.length, countOccurrences(service, "palettes.put("));
+        assertTrue(service.contains("new ThemeResource(\"backgrounds/\" + (variant + 1) + \".jpg\")"));
+        assertTrue(service.contains("SUPPORTED_THEMES"));
+        assertFalse(service.contains("createSvg("));
+        assertFalse(service.contains("createPalettes("));
+        assertFalse(service.contains("class Palette"));
+        assertFalse(service.contains("image/svg+xml"));
+
         for (String theme : THEMES) {
-            assertTrue(service.contains("palettes.put(\"" + theme + "\""));
+            assertTrue(service.contains("\"" + theme + "\""));
+            Path backgroundDirectory = projectRoot()
+                    .resolve("modules/web/themes")
+                    .resolve(theme)
+                    .resolve("backgrounds");
+            assertTrue("Не найден каталог фонов темы " + theme,
+                    Files.isDirectory(backgroundDirectory));
+
+            try (Stream<Path> files = Files.list(backgroundDirectory)) {
+                assertEquals("Тема " + theme + " должна содержать ровно 10 файлов",
+                        10L, files.filter(Files::isRegularFile).count());
+            }
+
+            for (int variant = 1; variant <= 10; variant++) {
+                Path background = backgroundDirectory.resolve(variant + ".jpg");
+                assertTrue("Не найден JPG " + background, Files.isRegularFile(background));
+                BufferedImage image = ImageIO.read(background.toFile());
+                assertNotNull("Файл не распознан как растровое изображение: " + background, image);
+                assertEquals("Неверная ширина фона " + background, 1920, image.getWidth());
+                assertEquals("Неверная высота фона " + background, 1080, image.getHeight());
+            }
         }
-        for (int variant = 0; variant < 10; variant++) {
-            assertTrue(service.contains("case " + variant + ":"));
-        }
-        assertTrue(service.contains("image/svg+xml"));
-        assertTrue(service.contains("viewBox=\\\"0 0 1920 1080\\\""));
     }
 
     @Test
@@ -226,16 +252,6 @@ public class MainScreenBackgroundContractTest {
                 properties.contains("cuba.web.mainScreenId=hrmMainScreen"));
         assertFalse(sourceName + " не должен возвращать legacy ExtMainScreen",
                 properties.contains("cuba.web.mainScreenId=extMainScreen"));
-    }
-
-    private int countOccurrences(String source, String fragment) {
-        int count = 0;
-        int offset = 0;
-        while ((offset = source.indexOf(fragment, offset)) >= 0) {
-            count++;
-            offset += fragment.length();
-        }
-        return count;
     }
 
     private String source(String relativePath) throws IOException {
