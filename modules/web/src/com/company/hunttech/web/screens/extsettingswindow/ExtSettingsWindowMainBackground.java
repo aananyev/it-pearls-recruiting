@@ -1,11 +1,16 @@
 package com.company.hunttech.web.screens.extsettingswindow;
 
 import com.company.hunttech.entity.UserSettings;
+import com.company.hunttech.web.screens.mainscreen.MainScreenBackgroundChangedEvent;
+import com.company.hunttech.web.screens.mainscreen.MainScreenBackgroundImageProcessor;
 import com.company.hunttech.web.screens.mainscreen.MainScreenBackgroundService;
 import com.haulmont.cuba.core.app.FileStorageService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Events;
+import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.FileStorageException;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.UiComponents;
@@ -18,9 +23,11 @@ import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.data.Datasource;
 
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedHashSet;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -32,13 +39,14 @@ import java.util.UUID;
  */
 public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceLayout {
 
-    private static final long MAX_BACKGROUND_FILE_SIZE = 15L * 1024L * 1024L;
     private static final Set<String> SUPPORTED_EXTENSIONS = new LinkedHashSet<>(
             Arrays.asList(".png", ".jpg", ".jpeg", ".webp"));
     private static final String STATUS_THEME = "Используется случайный фон активной темы.";
-    private static final String STATUS_CUSTOM = "Используется персональное изображение пользователя.";
-    private static final String UNSUPPORTED_FILE = "Поддерживаются PNG, JPG, JPEG и WEBP размером до 15 МБ.";
-    private static final String REMOVE_ERROR = "Не удалось удалить прежний файл фона. Ссылка на него больше не используется.";
+    private static final String STATUS_CUSTOM = "Используется пользовательский фон.";
+    private static final String UPLOAD_ERROR =
+            "Не удалось загрузить изображение. Проверьте формат, содержимое и размер файла.";
+    private static final String REMOVE_ERROR =
+            "Не удалось удалить неиспользуемый файл фона. Ссылка на него больше не используется.";
     private static final String NAVIGATION_STYLE = "borderless settings-section-nav-item";
     private static final String ACTIVE_NAVIGATION_STYLE =
             "borderless settings-section-nav-item settings-section-nav-item-active";
@@ -52,9 +60,17 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
     @Inject
     private MainScreenBackgroundService mainScreenBackgroundService;
     @Inject
+    private MainScreenBackgroundImageProcessor imageProcessor;
+    @Inject
     private DataManager dataManager;
     @Inject
+    private FileLoader fileLoader;
+    @Inject
     private FileStorageService fileStorageService;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private Events events;
     @Inject
     private Notifications notifications;
     @Inject
@@ -64,24 +80,34 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
     @Inject
     private VBoxLayout interfaceSettingsNavigation;
 
-    /** Файлы удаляются только после подтверждённого commit, чтобы Cancel не разрушал прежнюю настройку. */
+    /** Старые фоны удаляются только после подтверждённого commit, чтобы Cancel не разрушал настройку. */
     private final Set<FileDescriptor> pendingRemoval = new LinkedHashSet<>();
+    /** Новые нормализованные файлы удаляются при discard или если после commit они не стали активными. */
+    private final Set<FileDescriptor> pendingCreated = new LinkedHashSet<>();
     private FileDescriptor currentBackground;
     private Button interfaceSettingsBackgroundNav;
     private boolean successfulCommitClosing;
+    private boolean backgroundChanged;
 
     @Override
     public void init(Map<String, Object> params) {
         super.init(params);
         initBackgroundNavigation();
         mainScreenBackgroundUpload.setPermittedExtensions(SUPPORTED_EXTENSIONS);
-        mainScreenBackgroundUpload.setFileSizeLimit(MAX_BACKGROUND_FILE_SIZE);
+        mainScreenBackgroundUpload.setFileSizeLimit(
+                MainScreenBackgroundImageProcessor.MAX_INPUT_BYTES);
 
         FileDescriptor storedFile = userSettingsDs.getItem() == null
                 ? null : userSettingsDs.getItem().getFileImageFace();
-        currentBackground = mainScreenBackgroundService.isCustomBackground(storedFile) ? storedFile : null;
+        currentBackground = mainScreenBackgroundService.isCustomBackground(storedFile)
+                ? storedFile : null;
         mainScreenBackgroundUpload.setValue(currentBackground);
-        mainScreenBackgroundUpload.addFileUploadSucceedListener(event -> onMainScreenBackgroundUploaded());
+
+        // Datasource и статус меняются только после полного декодирования и безопасной нормализации файла.
+        mainScreenBackgroundUpload.addFileUploadSucceedListener(
+                event -> onMainScreenBackgroundUploaded());
+        mainScreenBackgroundUpload.addFileUploadErrorListener(
+                event -> onMainScreenBackgroundUploadError());
         refreshBackgroundStatus();
     }
 
@@ -95,7 +121,8 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         interfaceSettingsBackgroundNav.setCaption("Фон главного экрана");
         interfaceSettingsBackgroundNav.setWidth("100%");
         interfaceSettingsBackgroundNav.setStyleName(NAVIGATION_STYLE);
-        interfaceSettingsBackgroundNav.addClickListener(event -> selectInterfaceBackgroundSettings());
+        interfaceSettingsBackgroundNav.addClickListener(
+                event -> selectInterfaceBackgroundSettings());
         interfaceSettingsNavigation.add(interfaceSettingsBackgroundNav);
     }
 
@@ -135,7 +162,8 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
 
     private void setBackgroundNavigationActive(boolean active) {
         if (interfaceSettingsBackgroundNav != null) {
-            interfaceSettingsBackgroundNav.setStyleName(active ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+            interfaceSettingsBackgroundNav.setStyleName(
+                    active ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
         }
     }
 
@@ -144,29 +172,87 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         if (uploaded == null || userSettingsDs.getItem() == null) {
             return;
         }
-        if (!isSupportedImage(uploaded)) {
-            removeStoredFile(uploaded);
+
+        String originalName = uploaded.getName();
+        FileDescriptor normalizedDescriptor = null;
+        try {
+            MainScreenBackgroundImageProcessor.ProcessedImage processed;
+            try (InputStream stream = fileLoader.openStream(uploaded)) {
+                processed = imageProcessor.process(stream.readAllBytes(), originalName);
+            }
+
+            normalizedDescriptor = createNormalizedDescriptor(processed, originalName);
+            FileDescriptor committedDescriptor = dataManager.commit(normalizedDescriptor);
+            pendingCreated.add(committedDescriptor);
+
+            if (currentBackground != null
+                    && !Objects.equals(currentBackground.getId(), committedDescriptor.getId())) {
+                pendingRemoval.add(currentBackground);
+            }
+
+            currentBackground = committedDescriptor;
+            userSettingsDs.getItem().setFileImageFace(committedDescriptor);
+            mainScreenBackgroundUpload.setValue(committedDescriptor);
+            backgroundChanged = true;
+            refreshBackgroundStatus();
+        } catch (MainScreenBackgroundImageProcessor.ImageValidationException e) {
+            if (normalizedDescriptor != null) {
+                removeStoredFile(normalizedDescriptor, true);
+            }
             mainScreenBackgroundUpload.setValue(currentBackground);
+            refreshBackgroundStatus();
             notifications.create(Notifications.NotificationType.WARNING)
-                    .withCaption(UNSUPPORTED_FILE)
+                    .withCaption(e.getMessage())
                     .show();
-            return;
+        } catch (Exception e) {
+            if (normalizedDescriptor != null) {
+                removeStoredFile(normalizedDescriptor, true);
+            }
+            mainScreenBackgroundUpload.setValue(currentBackground);
+            refreshBackgroundStatus();
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(UPLOAD_ERROR)
+                    .show();
+        } finally {
+            // IMMEDIATE upload является временным входом; хранится только новый нормализованный descriptor.
+            removeStoredFile(uploaded, false);
         }
+    }
 
-        if (currentBackground != null && !Objects.equals(currentBackground.getId(), uploaded.getId())) {
-            pendingRemoval.add(currentBackground);
+    private FileDescriptor createNormalizedDescriptor(
+            MainScreenBackgroundImageProcessor.ProcessedImage processed,
+            String originalName) throws FileStorageException {
+        FileDescriptor descriptor = metadata.create(FileDescriptor.class);
+        descriptor.setName(MainScreenBackgroundService.CUSTOM_BACKGROUND_PREFIX
+                + descriptor.getId() + "-" + safeOriginalName(originalName) + ".jpg");
+        descriptor.setExtension(processed.getExtension());
+        descriptor.setSize((long) processed.getBytes().length);
+        descriptor.setCreateDate(new Date());
+        fileLoader.saveStream(descriptor,
+                () -> new ByteArrayInputStream(processed.getBytes()));
+        return descriptor;
+    }
+
+    private String safeOriginalName(String originalName) {
+        String value = originalName == null ? "background" : originalName.trim();
+        int dot = value.lastIndexOf('.');
+        if (dot > 0) {
+            value = value.substring(0, dot);
         }
+        value = value.replaceAll("[^\\p{L}\\p{N}._-]+", "_");
+        if (value.isEmpty()) {
+            value = "background";
+        }
+        return value.length() > 80 ? value.substring(0, 80) : value;
+    }
 
-        String extension = uploaded.getExtension();
-        uploaded.setName(MainScreenBackgroundService.CUSTOM_BACKGROUND_PREFIX
-                + uploaded.getId()
-                + (extension == null || extension.isEmpty() ? "" : "." + extension.toLowerCase(Locale.ROOT)));
-        FileDescriptor committedDescriptor = dataManager.commit(uploaded);
-
-        currentBackground = committedDescriptor;
-        userSettingsDs.getItem().setFileImageFace(committedDescriptor);
-        mainScreenBackgroundUpload.setValue(committedDescriptor);
+    private void onMainScreenBackgroundUploadError() {
+        // Ошибка transport/upload не должна менять редактируемый datasource или режим фона.
+        mainScreenBackgroundUpload.setValue(currentBackground);
         refreshBackgroundStatus();
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withCaption(UPLOAD_ERROR)
+                .show();
     }
 
     public void clearMainScreenBackground() {
@@ -178,23 +264,31 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         currentBackground = null;
         userSettingsDs.getItem().setFileImageFace(null);
         mainScreenBackgroundUpload.setValue(null);
+        backgroundChanged = true;
         refreshBackgroundStatus();
     }
 
     /**
-     * После успешного сохранения закрывает SettingsWindow без повторного диалога
-     * несохранённых изменений: данные уже записаны действующей commit-цепочкой.
+     * После успешного сохранения закрывает SettingsWindow без повторного диалога,
+     * очищает только неиспользуемые маркированные файлы и обновляет текущую UI-вкладку.
      */
     @Override
     protected void commit() {
-        UUID settingsId = userSettingsDs.getItem() == null ? null : userSettingsDs.getItem().getId();
+        UUID settingsId = userSettingsDs.getItem() == null
+                ? null : userSettingsDs.getItem().getId();
+        boolean publishBackgroundChange = backgroundChanged;
         successfulCommitClosing = true;
         try {
             super.commit();
         } finally {
             successfulCommitClosing = false;
         }
+
         cleanupUnreferencedBackgrounds(settingsId);
+        backgroundChanged = false;
+        if (publishBackgroundChange) {
+            events.publish(new MainScreenBackgroundChangedEvent(this));
+        }
     }
 
     @Override
@@ -204,7 +298,7 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
 
     /**
      * Отмена всегда требует явного выбора: остаться в форме либо закрыть её с
-     * отбрасыванием datasource-изменений. Сохранение из этого сценария недоступно.
+     * отбрасыванием datasource-изменений и удалением временно созданных фонов.
      */
     @Override
     protected void cancel() {
@@ -217,49 +311,74 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
                                 .withPrimary(true),
                         new BaseAction("discardSettings")
                                 .withCaption("Выйти без сохранения")
-                                .withHandler(event -> closeWithDiscard())
+                                .withHandler(event -> discardAndClose())
                 )
                 .show();
     }
 
-    private void refreshBackgroundStatus() {
-        mainScreenBackgroundStatusLabel.setValue(currentBackground == null ? STATUS_THEME : STATUS_CUSTOM);
+    private void discardAndClose() {
+        for (FileDescriptor descriptor : new LinkedHashSet<>(pendingCreated)) {
+            removeStoredFile(descriptor, true);
+        }
+        pendingCreated.clear();
+        pendingRemoval.clear();
+        backgroundChanged = false;
+        closeWithDiscard();
     }
 
-    private boolean isSupportedImage(FileDescriptor descriptor) {
-        String extension = descriptor.getExtension();
-        return extension != null && SUPPORTED_EXTENSIONS.contains("." + extension.toLowerCase(Locale.ROOT));
+    private void refreshBackgroundStatus() {
+        mainScreenBackgroundStatusLabel.setValue(
+                currentBackground == null ? STATUS_THEME : STATUS_CUSTOM);
     }
 
     private void cleanupUnreferencedBackgrounds(UUID settingsId) {
-        UUID activeFileId = null;
-        if (settingsId != null) {
-            activeFileId = dataManager.load(UserSettings.class)
-                    .id(settingsId)
-                    .view("userSettings-view")
-                    .optional()
-                    .map(UserSettings::getFileImageFace)
-                    .map(FileDescriptor::getId)
-                    .orElse(null);
-        }
+        UUID activeFileId = loadActiveFileId(settingsId);
+        Set<FileDescriptor> cleanupCandidates = new LinkedHashSet<>(pendingRemoval);
+        cleanupCandidates.addAll(pendingCreated);
 
-        for (FileDescriptor descriptor : pendingRemoval) {
+        for (FileDescriptor descriptor : cleanupCandidates) {
             if (mainScreenBackgroundService.isCustomBackground(descriptor)
                     && !Objects.equals(descriptor.getId(), activeFileId)) {
-                removeStoredFile(descriptor);
+                removeStoredFile(descriptor, true);
             }
         }
         pendingRemoval.clear();
+        pendingCreated.clear();
     }
 
-    private void removeStoredFile(FileDescriptor descriptor) {
+    private UUID loadActiveFileId(UUID settingsId) {
+        if (settingsId == null) {
+            return null;
+        }
+        return dataManager.load(UserSettings.class)
+                .id(settingsId)
+                .view("userSettings-view")
+                .optional()
+                .map(UserSettings::getFileImageFace)
+                .map(FileDescriptor::getId)
+                .orElse(null);
+    }
+
+    /**
+     * deleteDescriptor=false применяется к временному IMMEDIATE upload: его запись
+     * может ещё не быть закоммичена CUBA, поэтому удаление metadata выполняется best effort.
+     */
+    private void removeStoredFile(FileDescriptor descriptor, boolean deleteDescriptor) {
         if (descriptor == null) {
             return;
         }
         try {
             fileStorageService.removeFile(descriptor);
-            dataManager.remove(descriptor);
-        } catch (FileStorageException e) {
+            if (deleteDescriptor) {
+                dataManager.remove(descriptor);
+            } else {
+                try {
+                    dataManager.remove(descriptor);
+                } catch (RuntimeException ignored) {
+                    // Временный FileDescriptor мог не попасть в middleware store.
+                }
+            }
+        } catch (FileStorageException | RuntimeException e) {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption(REMOVE_ERROR)
                     .show();

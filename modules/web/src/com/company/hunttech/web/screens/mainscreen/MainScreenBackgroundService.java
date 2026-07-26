@@ -1,11 +1,12 @@
 package com.company.hunttech.web.screens.mainscreen;
 
-import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.UserSettings;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FileLoader;
+import com.haulmont.cuba.security.entity.User;
+import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.server.Resource;
 import com.vaadin.server.StreamResource;
 import org.slf4j.Logger;
@@ -38,18 +39,21 @@ public class MainScreenBackgroundService {
     private static final String QUERY_USER_SETTINGS =
             "select e from hunttech_UserSettings e where e.user = :currentUser";
     private static final String DEFAULT_THEME = "hover";
+    private static final String LAST_VARIANT_ATTRIBUTE = "hrm.main.background.lastVariant.";
     private static final Map<String, Palette> PALETTES = createPalettes();
 
     @Inject
     private DataManager dataManager;
     @Inject
     private FileLoader fileLoader;
+    @Inject
+    private UserSession userSession;
 
     /**
-     * Разрешает фон при каждом создании главного экрана. Повторный вход формирует
-     * новый случайный индекс, если пользователь не сохранил собственное изображение.
+     * Разрешает фон при каждом создании или обновлении главного экрана. Для системного
+     * каталога сессия исключает немедленное повторение предыдущего варианта темы.
      */
-    public Resource resolveForUser(ExtUser currentUser, String themeName) {
+    public Resource resolveForUser(User currentUser, String themeName) {
         FileDescriptor customBackground = loadUserBackground(currentUser);
         Optional<Resource> customResource = createCustomResource(customBackground);
         if (customResource.isPresent()) {
@@ -57,7 +61,7 @@ public class MainScreenBackgroundService {
         }
 
         String normalizedTheme = normalizeTheme(themeName);
-        int variant = ThreadLocalRandom.current().nextInt(VARIANT_COUNT);
+        int variant = nextVariant(normalizedTheme);
         return createGeneratedResource(normalizedTheme, variant);
     }
 
@@ -71,7 +75,23 @@ public class MainScreenBackgroundService {
                 && descriptor.getName().startsWith(CUSTOM_BACKGROUND_PREFIX);
     }
 
-    private FileDescriptor loadUserBackground(ExtUser currentUser) {
+    private int nextVariant(String normalizedTheme) {
+        String attributeName = LAST_VARIANT_ATTRIBUTE + normalizedTheme;
+        Integer previous = userSession.getAttribute(attributeName);
+        int variant;
+
+        if (previous == null || previous < 0 || previous >= VARIANT_COUNT) {
+            variant = ThreadLocalRandom.current().nextInt(VARIANT_COUNT);
+        } else {
+            int candidate = ThreadLocalRandom.current().nextInt(VARIANT_COUNT - 1);
+            variant = candidate >= previous ? candidate + 1 : candidate;
+        }
+
+        userSession.setAttribute(attributeName, variant);
+        return variant;
+    }
+
+    private FileDescriptor loadUserBackground(User currentUser) {
         if (currentUser == null || currentUser.getId() == null) {
             return null;
         }

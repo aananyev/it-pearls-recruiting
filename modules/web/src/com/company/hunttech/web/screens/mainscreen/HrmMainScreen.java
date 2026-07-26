@@ -1,7 +1,7 @@
 package com.company.hunttech.web.screens.mainscreen;
 
-import com.company.hunttech.entity.ExtUser;
 import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.CssLayout;
 import com.haulmont.cuba.gui.components.HtmlAttributes;
 import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.screen.Subscribe;
@@ -11,16 +11,17 @@ import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ResourceReference;
 import com.vaadin.server.Sizeable.Unit;
-import com.vaadin.ui.AbstractOrderedLayout;
+import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.UI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
 
 /**
- * Добавляет к действующему ExtMainScreen только персональный фон рабочей области.
+ * Добавляет к действующему ExtMainScreen изолированный слой фонового изображения.
  * Все уведомления, dashboard, favicon и прочая бизнес-логика наследуются без изменений.
  */
 @UiController("hrmMainScreen")
@@ -36,15 +37,18 @@ public class HrmMainScreen extends ExtMainScreen {
     @Inject
     private VBoxLayout mainVBox;
     @Inject
+    private CssLayout mainScreenBackgroundLayer;
+    @Inject
     private Component mainDashboard;
     @Inject
     private HtmlAttributes htmlAttributes;
 
     /**
      * Нулевого размера Image владеет динамическим ресурсом в Vaadin connector tree.
-     * Компонент остаётся подключённым к UI, но не занимает место в mainVBox.
+     * Компонент остаётся внутри background layer, но не участвует в компоновке dashboard.
      */
     private Image backgroundResourceHolder;
+    private String lastAppliedResourceUrl;
 
     /**
      * Применяет фон после присоединения компонентов к текущему UI. BeforeShow
@@ -52,14 +56,26 @@ public class HrmMainScreen extends ExtMainScreen {
      */
     @Subscribe
     public void onAfterShowBackground(AfterShowEvent event) {
+        refreshBackground();
+    }
+
+    /**
+     * UiEvent доставляется только в текущую браузерную вкладку после успешного сохранения
+     * SettingsWindow и позволяет обновить фон без повторного входа.
+     */
+    @EventListener
+    public void onMainScreenBackgroundChanged(MainScreenBackgroundChangedEvent event) {
+        refreshBackground();
+    }
+
+    private void refreshBackground() {
         try {
             UI currentUi = UI.getCurrent();
             if (currentUi == null) {
-                throw new IllegalStateException("Vaadin UI недоступен после открытия главного экрана");
+                throw new IllegalStateException("Vaadin UI недоступен для обновления фона главного экрана");
             }
-            String themeName = currentUi.getTheme();
             Resource resource = mainScreenBackgroundService.resolveForUser(
-                    (ExtUser) userSession.getUser(), themeName);
+                    userSession.getUser(), currentUi.getTheme());
             applyBackground(currentUi, resource);
         } catch (RuntimeException e) {
             // Ошибка декоративного слоя не должна блокировать открытие главного экрана.
@@ -68,26 +84,52 @@ public class HrmMainScreen extends ExtMainScreen {
     }
 
     private void applyBackground(UI currentUi, Resource resource) {
-        AbstractOrderedLayout vaadinLayout = mainVBox.unwrap(AbstractOrderedLayout.class);
-        com.vaadin.ui.Component vaadinDashboard = mainDashboard.unwrap(com.vaadin.ui.Component.class);
-        ensureAttachedToCurrentUi(currentUi, vaadinLayout, "mainVBox");
+        com.vaadin.ui.CssLayout vaadinLayer =
+                mainScreenBackgroundLayer.unwrap(com.vaadin.ui.CssLayout.class);
+        com.vaadin.ui.Component vaadinDashboard =
+                mainDashboard.unwrap(com.vaadin.ui.Component.class);
+
+        ensureAttachedToCurrentUi(currentUi, vaadinLayer, "mainScreenBackgroundLayer");
         ensureAttachedToCurrentUi(currentUi, vaadinDashboard, "mainDashboard");
 
-        String resourceUrl = registerBackgroundResource(currentUi, vaadinLayout, resource);
+        String resourceUrl = registerBackgroundResource(currentUi, vaadinLayer, resource);
+        configureLayerLayout();
+        applyInlineBackground(mainScreenBackgroundLayer, resourceUrl);
 
-        /*
-         * HtmlAttributes передаёт CSS через штатный connector CUBA и назначает inline-style
-         * фактическим DOM-элементам. Это устраняет гонку динамического Page CSS, при которой
-         * правило присутствовало на странице, но не применялось после рендеринга UI.
-         */
-        applyInlineBackground(mainVBox, resourceUrl);
-        applyInlineBackground(mainDashboard, resourceUrl);
-        htmlAttributes.setDomAttribute(mainVBox, "data-hrm-main-background", "applied");
-        htmlAttributes.setDomAttribute(mainDashboard, "data-hrm-main-background", "applied");
+        htmlAttributes.setDomAttribute(mainScreenBackgroundLayer,
+                "data-hrm-main-background", "applied");
+        htmlAttributes.setDomAttribute(mainScreenBackgroundLayer,
+                "data-hrm-main-background-resource", resourceUrl);
+        htmlAttributes.setDomAttribute(mainVBox,
+                "data-hrm-main-controller", HrmMainScreen.class.getSimpleName());
+        lastAppliedResourceUrl = resourceUrl;
 
-        log.debug("Main screen background applied inline: theme={}, resourceUrl={}, layoutClass={}, dashboardClass={}",
+        log.debug("Main screen background applied: theme={}, resourceUrl={}, layerClass={}, dashboardClass={}",
                 currentUi.getTheme(), resourceUrl,
-                vaadinLayout.getClass().getName(), vaadinDashboard.getClass().getName());
+                vaadinLayer.getClass().getName(), vaadinDashboard.getClass().getName());
+    }
+
+    /**
+     * Фон принадлежит только выделенному слою. Dashboard остаётся прозрачной рабочей
+     * поверхностью поверх него; mainVBox задаёт локальный positioning context.
+     */
+    private void configureLayerLayout() {
+        htmlAttributes.setCssProperty(mainVBox, "position", "relative");
+        htmlAttributes.setCssProperty(mainVBox, "overflow", "hidden");
+
+        htmlAttributes.setCssProperty(mainScreenBackgroundLayer, "position", "absolute");
+        htmlAttributes.setCssProperty(mainScreenBackgroundLayer, "top", "0");
+        htmlAttributes.setCssProperty(mainScreenBackgroundLayer, "right", "0");
+        htmlAttributes.setCssProperty(mainScreenBackgroundLayer, "bottom", "0");
+        htmlAttributes.setCssProperty(mainScreenBackgroundLayer, "left", "0");
+        htmlAttributes.setCssProperty(mainScreenBackgroundLayer, "width", "100%");
+        htmlAttributes.setCssProperty(mainScreenBackgroundLayer, "height", "100%");
+        htmlAttributes.setCssProperty(mainScreenBackgroundLayer, "z-index", "0");
+        htmlAttributes.setCssProperty(mainScreenBackgroundLayer, "pointer-events", "none");
+
+        htmlAttributes.setCssProperty(mainDashboard, "position", "relative");
+        htmlAttributes.setCssProperty(mainDashboard, "z-index", "1");
+        htmlAttributes.setCssProperty(mainDashboard, "background-color", "transparent");
     }
 
     private void applyInlineBackground(Component component, String resourceUrl) {
@@ -101,20 +143,22 @@ public class HrmMainScreen extends ExtMainScreen {
 
     /**
      * Регистрирует StreamResource через штатный ресурсный ключ Image `src`.
-     * Компонент добавляется в layout до получения URL, поэтому connector уже
+     * Компонент добавляется в layer до получения URL, поэтому connector уже
      * связан с UI и способен обслужить системный SVG или пользовательский файл.
      */
     private String registerBackgroundResource(UI currentUi,
-                                              AbstractOrderedLayout vaadinLayout,
+                                              ComponentContainer vaadinLayer,
                                               Resource resource) {
-        if (backgroundResourceHolder != null && backgroundResourceHolder.getParent() == vaadinLayout) {
-            vaadinLayout.removeComponent(backgroundResourceHolder);
+        if (backgroundResourceHolder != null
+                && backgroundResourceHolder.getParent() instanceof ComponentContainer) {
+            ((ComponentContainer) backgroundResourceHolder.getParent())
+                    .removeComponent(backgroundResourceHolder);
         }
 
         backgroundResourceHolder = new Image(null, resource);
         backgroundResourceHolder.setWidth(0, Unit.PIXELS);
         backgroundResourceHolder.setHeight(0, Unit.PIXELS);
-        vaadinLayout.addComponent(backgroundResourceHolder);
+        vaadinLayer.addComponent(backgroundResourceHolder);
         ensureAttachedToCurrentUi(currentUi, backgroundResourceHolder, "backgroundResourceHolder");
 
         String resourceUrl = ResourceReference.create(
@@ -131,6 +175,10 @@ public class HrmMainScreen extends ExtMainScreen {
         if (component == null || component.getUI() != currentUi) {
             throw new IllegalStateException(componentName + " не присоединён к текущему Vaadin UI");
         }
+    }
+
+    String getLastAppliedResourceUrl() {
+        return lastAppliedResourceUrl;
     }
 
     private String escapeCssUrl(String value) {

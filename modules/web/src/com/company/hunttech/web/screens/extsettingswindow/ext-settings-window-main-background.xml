@@ -46,14 +46,20 @@
                                           stylename="main-screen-background-option main-screen-background-custom-option">
                                         <label value="Персональное изображение"
                                                stylename="main-screen-background-option-title"/>
-                                        <label value="PNG, JPG, JPEG или WEBP до 15 МБ. Рекомендуемое соотношение сторон — 16:9."
+                                        <label value="PNG, JPG, JPEG или WEBP до 15 МБ. Файл проверяется, уменьшается и сохраняется без EXIF."
                                                width="100%"
                                                stylename="settings-section-help main-screen-background-option-help"/>
+                                        <!-- uploadButtonCaption управляет реальной Vaadin-кнопкой выбора файла.
+                                             Явная высота исключает схлопывание интерактивной области. -->
                                         <upload id="mainScreenBackgroundUpload"
                                                 fileStoragePutMode="IMMEDIATE"
-                                                caption="Выбрать изображение"
+                                                uploadButtonCaption="Выбрать изображение"
                                                 width="100%"
-                                                showFileName="false"
+                                                height="36px"
+                                                accept="*.png,*.jpg,*.jpeg,*.webp"
+                                                permittedExtensions=".png,.jpg,.jpeg,.webp"
+                                                fileSizeLimit="15728640"
+                                                showFileName="true"
                                                 showClearButton="false"
                                                 stylename="main-screen-background-upload"/>
                                     </vbox>
@@ -64,7 +70,7 @@
                                           stylename="main-screen-background-option main-screen-background-default-option">
                                         <label value="Системные фоны"
                                                stylename="main-screen-background-option-title"/>
-                                        <label value="Для каждой темы доступно 10 вариантов. Новый фон выбирается при следующем входе."
+                                        <label value="Для каждой темы доступно 10 вариантов без немедленного повторения. Новый фон применяется после сохранения."
                                                width="100%"
                                                stylename="settings-section-help main-screen-background-option-help"/>
                                         <button id="clearMainScreenBackgroundBtn"
