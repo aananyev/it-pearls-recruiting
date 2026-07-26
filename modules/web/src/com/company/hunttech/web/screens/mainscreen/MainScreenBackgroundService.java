@@ -46,14 +46,12 @@ public class MainScreenBackgroundService {
     private DataManager dataManager;
     @Inject
     private FileLoader fileLoader;
-    @Inject
-    private UserSession userSession;
 
     /**
      * Разрешает фон при каждом создании или обновлении главного экрана. Для системного
      * каталога сессия исключает немедленное повторение предыдущего варианта темы.
      */
-    public Resource resolveForUser(User currentUser, String themeName) {
+    public Resource resolveForUser(User currentUser, String themeName, UserSession session) {
         FileDescriptor customBackground = loadUserBackground(currentUser);
         Optional<Resource> customResource = createCustomResource(customBackground);
         if (customResource.isPresent()) {
@@ -61,7 +59,7 @@ public class MainScreenBackgroundService {
         }
 
         String normalizedTheme = normalizeTheme(themeName);
-        int variant = nextVariant(normalizedTheme);
+        int variant = nextVariant(session, normalizedTheme);
         return createGeneratedResource(normalizedTheme, variant);
     }
 
@@ -75,9 +73,9 @@ public class MainScreenBackgroundService {
                 && descriptor.getName().startsWith(CUSTOM_BACKGROUND_PREFIX);
     }
 
-    private int nextVariant(String normalizedTheme) {
+    private int nextVariant(UserSession session, String normalizedTheme) {
         String attributeName = LAST_VARIANT_ATTRIBUTE + normalizedTheme;
-        Integer previous = userSession.getAttribute(attributeName);
+        Integer previous = session.getAttribute(attributeName);
         int variant;
 
         if (previous == null || previous < 0 || previous >= VARIANT_COUNT) {
@@ -87,7 +85,7 @@ public class MainScreenBackgroundService {
             variant = candidate >= previous ? candidate + 1 : candidate;
         }
 
-        userSession.setAttribute(attributeName, variant);
+        session.setAttribute(attributeName, variant);
         return variant;
     }
 

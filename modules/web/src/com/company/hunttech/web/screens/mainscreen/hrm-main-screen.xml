@@ -8,7 +8,7 @@
                  workArea, loaders или бизнес-события наследуемого ExtMainScreen. -->
             <cssLayout id="mainScreenBackgroundLayer"
                        width="100%"
-                       height="0px"
+                       height="100%"
                        stylename="hrm-main-screen-background-layer"
                        ext:index="0"/>
         </vbox>

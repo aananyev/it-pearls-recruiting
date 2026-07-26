@@ -56,6 +56,7 @@ public class HrmMainScreen extends ExtMainScreen {
      */
     @Subscribe
     public void onAfterShowBackground(AfterShowEvent event) {
+        log.info("HrmMainScreen.onAfterShowBackground called, applying background");
         refreshBackground();
     }
 
@@ -75,7 +76,7 @@ public class HrmMainScreen extends ExtMainScreen {
                 throw new IllegalStateException("Vaadin UI недоступен для обновления фона главного экрана");
             }
             Resource resource = mainScreenBackgroundService.resolveForUser(
-                    userSession.getUser(), currentUi.getTheme());
+                    userSession.getUser(), currentUi.getTheme(), userSession);
             applyBackground(currentUi, resource);
         } catch (RuntimeException e) {
             // Ошибка декоративного слоя не должна блокировать открытие главного экрана.
