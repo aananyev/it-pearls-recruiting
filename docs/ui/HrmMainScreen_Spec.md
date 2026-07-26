@@ -1,4 +1,4 @@
-# HrmMainScreen — персональный фон главного экрана
+# HrmMainScreen — устойчивый фон главного экрана
 
 > Экран HRM HuntTech: `hrmMainScreen`.  
 > Контроллер: `com.company.hunttech.web.screens.mainscreen.HrmMainScreen`.  
@@ -7,73 +7,105 @@
 
 ## Назначение и бизнес-смысл (What & Why)
 
-Главный экран остаётся рабочей точкой входа в dashboard HRM HuntTech и получает персональный либо случайный тематический фон без изменения dashboard, уведомлений, резервов, favicon и меню.
+Главный экран остаётся основной рабочей точкой dashboard HRM HuntTech. Фоновое изображение персонализирует рабочую область, но не должно влиять на меню, widgets, уведомления, favicon, резервы и загрузку бизнес-данных. Отдельный декоративный слой устраняет двойную отрисовку и делает runtime-контракт проверяемым.
 
 ## UI Context & Navigation
 
 Экран создаётся через новый Screens API CUBA Platform 7.3:
 
-- `cuba.web.mainScreenId=hrmMainScreen` выбирает ID главного экрана;
-- `@UiController("hrmMainScreen")` регистрирует Java-контроллер;
-- `@UiDescriptor("hrm-main-screen.xml")` связывает controller с descriptor.
+- `cuba.web.mainScreenId=hrmMainScreen`;
+- `@UiController("hrmMainScreen")`;
+- `@UiDescriptor("hrm-main-screen.xml")`;
+- legacy-регистрация `hrmMainScreen` в `web-screens.xml` отсутствует.
 
-Значение `cuba.web.mainScreenId` должно совпадать в обоих проектных источниках:
-
-- `modules/web/src/com/company/hunttech/web-app.properties`;
-- `com/company/hunttech/web-app.properties`.
-
-`hrmMainScreen` нельзя одновременно регистрировать в legacy `web-screens.xml`. Такая запись подменяет новый screen legacy-описанием и при входе приводит к `DevelopmentException: Unable to create screen hrmMainScreen with type FRAGMENT`.
-
-Персональный файл задаётся в `SettingsWindow` → «Интерфейс» → «Фон главного экрана».
+Персональный файл задаётся в `SettingsWindow` → «Интерфейс» → «Фон главного экрана». После успешного «ОК» текущая браузерная вкладка получает `MainScreenBackgroundChangedEvent` и обновляет фон без повторного входа.
 
 ## Behavior Summary
 
-- вход → оба `web-app.properties` выбирают `hrmMainScreen`;
-- `@UiController("hrmMainScreen")` создаёт фактический controller `HrmMainScreen`;
-- `ExtMainScreen.BeforeShow` → выполняются прежние favicon и служебные проверки;
-- `HrmMainScreen.AfterShow` → проверяется `UI.getCurrent()` и connector ownership;
-- пользовательский маркированный файл → имеет абсолютный приоритет;
-- файла нет → выбирается вариант `0..9` палитры активной темы;
-- ресурс регистрируется Vaadin `Image` размером `0 × 0`;
-- CUBA `HtmlAttributes` назначает inline `background-*` фактическим DOM-элементам `mainVBox` и `mainDashboard`;
-- DOM получает маркер `data-hrm-main-background="applied"` для runtime smoke;
-- `ExtMainScreen.AfterShow` → прежние уведомления и проверки резерва продолжают работать;
-- наличие `hrmMainScreen` в legacy `web-screens.xml` → конфигурационная ошибка и блокировка входа.
+- вход → создаётся фактический `HrmMainScreen` → наследуемая бизнес-логика `ExtMainScreen` выполняется без изменений;
+- `AfterShowEvent` → Vaadin UI и connector tree готовы → ресурс фона регистрируется скрытым `Image`;
+- пользовательский маркированный файл существует → используется нормализованный JPEG;
+- пользовательского файла нет → выбирается SVG активной темы;
+- системный SVG выбран → предыдущий вариант темы известен в `UserSession` → немедленное повторение исключается;
+- ресурс зарегистрирован → inline `background-*` назначается только `mainScreenBackgroundLayer`;
+- layer применён → dashboard остаётся прозрачным и располагается выше по `z-index`;
+- SettingsWindow успешно сохранён → публикуется UI-scoped event → layer получает новый ресурс без перезахода;
+- ошибка декоративного слоя → записывается warning → открытие главного экрана не блокируется.
 
-## Технический контракт
+## Структура background layer
 
-| Параметр | Значение |
-|---|---|
-| Screen ID | `hrmMainScreen` |
-| Web-module property | `cuba.web.mainScreenId=hrmMainScreen` |
-| App-component property | `cuba.web.mainScreenId=hrmMainScreen` |
-| Регистрация controller | `@UiController("hrmMainScreen")` |
-| Descriptor | `@UiDescriptor("hrm-main-screen.xml")` |
-| Legacy `web-screens.xml` | запись `hrmMainScreen` отсутствует |
-| Lifecycle | `AfterShowEvent` |
-| CSS API | CUBA `HtmlAttributes.setCssProperty()` |
-| Поверхности | `mainVBox`, `mainDashboard` |
-| Владелец ресурса | Vaadin `Image`, `0 × 0` |
-| Каталог | 7 тем × 10 SVG |
+```text
+mainVBox (position: relative; overflow: hidden)
+├── mainScreenBackgroundLayer (absolute; z-index: 0; pointer-events: none)
+├── mainDashboard (relative; z-index: 1; transparent)
+└── backgroundResourceHolder внутри layer (Vaadin Image 0 × 0)
+```
 
-`Page.getStyles().add()` не используется. Vaadin 7/8 может добавить динамическое правило в `Page`, но не применить его к уже отрисованным компонентам без дополнительного обновления. `HtmlAttributes` является штатным API CUBA для программного назначения DOM/CSS-атрибутов и передаёт inline-style через connector конкретного компонента.
+`mainVBox` и `mainDashboard` не получают `background-image`. Единственный владелец изображения — `mainScreenBackgroundLayer`.
 
-`ResourceReference` сохраняется только для получения URL динамического `StreamResource`. Сначала скрытый `Image` добавляется в `mainVBox`, затем проверяется его принадлежность текущему UI, после чего URL передаётся в `HtmlAttributes`.
+## Runtime-маркеры
+
+| Элемент | Маркер | Назначение |
+|---|---|---|
+| `mainScreenBackgroundLayer` | `data-hrm-main-background="applied"` | подтверждает выполнение background lifecycle |
+| `mainScreenBackgroundLayer` | `data-hrm-main-background-resource="<connector URL>"` | позволяет проверить фактический ресурс |
+| `mainVBox` | `data-hrm-main-controller="HrmMainScreen"` | подтверждает фактический root controller |
+
+Назначенные через `HtmlAttributes` значения проверяются screen-level integration тестом. Реальный computed style браузера, HTTP-статус connector URL и screenshot проверяются Hermes после clean deploy.
+
+## Выбор системного варианта
+
+Для каждой из семи тем сохраняется последний индекс `0..9` в `UserSession`. Следующий индекс выбирается из девяти остальных вариантов. Состояние относится только к текущей пользовательской сессии и не записывается в БД.
+
+## Событие обновления
+
+`MainScreenBackgroundChangedEvent` реализует `UiEvent`. Событие:
+
+- публикуется только после успешной commit-цепочки SettingsWindow;
+- доставляется синхронно в текущую браузерную вкладку;
+- не обновляет чужие UI-сеансы;
+- не публикуется при Cancel или неуспешной загрузке.
+
+## Интеграционные проверки
+
+`HrmMainScreenIntegrationTest` запускается в штатном CUBA `TestContainer` и проверяет:
+
+1. разрешение screen ID `hrmMainScreen` в класс `HrmMainScreen`;
+2. наличие выделенного layer в реальном component tree;
+3. assigned DOM-маркеры и CSS-контракт `layer/dashboard`;
+4. отсутствие background-image на `mainVBox` и dashboard;
+5. повторное применение после `MainScreenBackgroundChangedEvent`;
+6. работу нормализатора изображения и регистрацию WEBP reader.
+
+Тест не эмулирует реальный браузерный computed style и HTTP connector request. Эти проверки обязательны в runtime smoke Hermes.
 
 ## Наследование ExtMainScreen
 
-`HrmMainScreen extends ExtMainScreen`; методы `publishMyNotification`, `checkPersonalReserveCandidates`, favicon и dashboard loaders не копируются и не переопределяются. Исправление затрагивает только конфигурацию выбора root screen и декоративный CSS-слой.
+`HrmMainScreen extends ExtMainScreen`. Методы `publishMyNotification`, `checkPersonalReserveCandidates`, favicon, dashboard loaders и notification events не копируются и не переопределяются.
 
 ## Проверки Hermes
 
-Обязательны `MainScreenBackgroundContractTest 10/10`, `ScreenViewIntegrityTest 8/8`, compile, SCSS семи тем, `clean assemble`, local deploy, HTTP 200 и новый login smoke. После входа должен быть создан фактический controller `HrmMainScreen`; в DOM `mainVBox` и dashboard присутствует `data-hrm-main-background="applied"`, inline `background-image` содержит connector URL, ресурс возвращает HTTP 200, системный или персональный фон отображается.
+Hermes проверяет точный HEAD PR:
+
+- compile web/core tests;
+- `MainScreenBackgroundContractTest 10/10`;
+- `HrmMainScreenIntegrationTest`;
+- `ScreenViewIntegrityTest 8/8`;
+- SCSS семи тем;
+- `clean assemble`;
+- clean local deploy;
+- `/hrm/` = HTTP 200;
+- фактический controller, DOM-маркеры, computed style;
+- connector resource HTTP 200 и MIME;
+- screenshot системного и пользовательского режима;
+- мгновенное обновление после «ОК»;
+- отсутствие Tomcat critical errors, P1 и P2.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
-| 2026-07-26 | Синхронизированы оба `mainScreenId`; динамический фон переведён с `Page.getStyles().add()` на inline CSS через `HtmlAttributes` |
-| 2026-07-26 | Удалена несовместимая legacy-регистрация `hrmMainScreen`; закреплён контракт `mainScreenId + @UiController + @UiDescriptor` |
-| 2026-07-26 | Добавлены проверки UI и connector ownership |
-| 2026-07-26 | Исправлена регистрация динамического ресурса после `AfterShow` |
+| 2026-07-26 | Добавлен единый background layer, UI-scoped refresh, исключение повтора SVG и screen-level integration test |
+| 2026-07-26 | Синхронизированы оба `mainScreenId`; динамический фон переведён на inline CSS через `HtmlAttributes` |
+| 2026-07-26 | Удалена несовместимая legacy-регистрация `hrmMainScreen` |
 | 2026-07-26 | Добавлен каталог 7 × 10 и приоритет персонального фона |
