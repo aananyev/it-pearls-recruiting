@@ -33,6 +33,7 @@ public final class FileDescriptorImageHelper {
             return false;
         }
         try {
+            // Проверяем физическое наличие файла в хранилище, а не только метаданные в БД.
             return fileLoader.fileExists(fileDescriptor);
         } catch (FileStorageException e) {
             log.warn("Cannot check file existence for descriptor id={}: {}",
@@ -48,14 +49,19 @@ public final class FileDescriptorImageHelper {
             if (isSameFileDescriptorSource(image, fileDescriptor)) {
                 return;
             }
-            image.setSource(FileDescriptorResource.class).setFileDescriptor(fileDescriptor);
-        } else {
-            if (isSameThemeSource(image, fallbackThemePath)) {
+            try {
+                image.setSource(FileDescriptorResource.class).setFileDescriptor(fileDescriptor);
                 return;
+            } catch (RuntimeException e) {
+                log.warn("Cannot set FileDescriptorResource for id={}: {}. Falling back to theme.",
+                        fileDescriptor.getId(), e.getMessage());
             }
-            logMissingFile(fileDescriptor);
-            image.setSource(ThemeResource.class).setPath(fallbackThemePath);
         }
+        if (isSameThemeSource(image, fallbackThemePath)) {
+            return;
+        }
+        logMissingFile(fileDescriptor);
+        image.setSource(ThemeResource.class).setPath(fallbackThemePath);
     }
 
     private static boolean isSameFileDescriptorSource(Image image, FileDescriptor fileDescriptor) {
