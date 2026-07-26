@@ -49,11 +49,17 @@
                                         <label value="PNG, JPG, JPEG или WEBP до 15 МБ. Рекомендуемое соотношение сторон — 16:9."
                                                width="100%"
                                                stylename="settings-section-help main-screen-background-option-help"/>
+                                        <!-- uploadButtonCaption управляет реальной Vaadin-кнопкой выбора файла.
+                                             Явная высота исключает схлопывание интерактивной области в наследуемом layout. -->
                                         <upload id="mainScreenBackgroundUpload"
                                                 fileStoragePutMode="IMMEDIATE"
-                                                caption="Выбрать изображение"
+                                                uploadButtonCaption="Выбрать изображение"
                                                 width="100%"
-                                                showFileName="false"
+                                                height="36px"
+                                                accept="*.png,*.jpg,*.jpeg,*.webp"
+                                                permittedExtensions=".png,.jpg,.jpeg,.webp"
+                                                fileSizeLimit="15728640"
+                                                showFileName="true"
                                                 showClearButton="false"
                                                 stylename="main-screen-background-upload"/>
                                     </vbox>
