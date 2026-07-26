@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        extends="/com/company/hunttech/web/screens/mainscreen/ext-main-screen.xml">
+    <!-- Наследуется полный dashboard и вся логика ExtMainScreen; контроллер добавляет только фон mainVBox. -->
+    <layout/>
+</window>
