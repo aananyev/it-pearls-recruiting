@@ -88,16 +88,17 @@ public class MainScreenBackgroundContractTest {
     }
 
     @Test
-    public void dedicatedLayerOwnsTheOnlyBackgroundImage() throws IOException {
+    public void mainContainerStretchesTheOnlyBackgroundImageToFullArea() throws IOException {
         String controller = source(
                 "modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
 
-        // Фон применяется через CSS-инъекцию на mainVBox, не через отдельный слой
+        // Фон заполняет mainVBox целиком при любом соотношении сторон дисплея, без обрезки и пустых полос.
         assertTrue(controller.contains("vaadinVBox.addStyleName(currentBackgroundStyleName)"));
         assertTrue(controller.contains("vaadinDashboard.addStyleName(\"hrm-dashboard-transparent\")"));
         assertTrue(controller.contains("page.getStyles().add(css)"));
         assertTrue(controller.contains("background-image: url('"));
-        assertTrue(controller.contains("background-size: cover"));
+        assertTrue(controller.contains("background-size: 100% 100%"));
+        assertFalse(controller.contains("background-size: cover"));
         assertTrue(controller.contains("background: transparent !important"));
         assertTrue(controller.contains("data-hrm-main-background"));
         assertFalse(controller.contains("private CssLayout mainScreenBackgroundLayer"));
