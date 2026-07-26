@@ -32,6 +32,8 @@ public class CandidateCVEditVisualContractTest {
             "modules/global/src/com/company/hunttech/views.xml";
     private static final String ENTITY =
             "modules/global/src/com/company/hunttech/entity/CandidateCV.java";
+    private static final String DESIGN_CONCEPT =
+            "docs/architecture/HRM_HuntTech_UI_UX_Design_Concept.md";
 
     private static final List<String> THEMES = Arrays.asList(
             "halo",
@@ -65,6 +67,13 @@ public class CandidateCVEditVisualContractTest {
                 "candidateLabel", "iteractionListLabelCandidate", "iteractionListLabelPosition",
                 "candidateCvSidebarTargetCard", "candidateCvSidebarResumePosition",
                 "candidateCvSidebarVacancy", "candidateCvSidebarProject", "candidateCvSidebarMetaCard",
+                "candidateCvSectionNavigation", "candidateCvCandidateNavigation", "candidateCvCvNavigation",
+                "candidateCvLetterNavigation", "candidateCvSkillNavigation", "candidateCvFilesNavigation",
+                "candidateCvMainDataNav", "candidateCvOriginalCvNav", "candidateCvHuntTechCvNav",
+                "candidateCvTextNav", "candidateCvRecommendationNav", "candidateCvLetterTemplateNav",
+                "candidateCvLetterBodyNav", "candidateCvLetterCommentNav",
+                "candidateCvLetterRecommendationNav", "candidateCvSkillActionsNav",
+                "candidateCvSkillTreeNav", "candidateCvFilesTableNav",
                 "candidateCvSidebarSpacer", "labelLastRecrutier", "machRegexpFromCV", "quoteTextArea",
                 "tabSheet", "tabCandidate", "tabCV", "tabLetter", "tabSkillTree", "tabFiles",
                 "candidateScrolBox", "candidateVbox", "groupBox", "dropZone", "picVBox",
@@ -136,6 +145,75 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(xml.contains("stylename=\"candidate-cv-sidebar\""));
         assertTrue(xml.contains("stylename=\"candidate-cv-workspace-shell\""));
         assertFalse(xml.contains("stylename=\"candidate-cv-context-card\""));
+    }
+
+
+    @Test
+    public void sidebarContainsStaticNavigationAndMandatoryEditFormOrder() throws IOException {
+        String xml = readProjectFile(SCREEN_XML);
+        String controller = readProjectFile(CONTROLLER);
+
+        int visualImage = xml.indexOf("id=\"candidatePic\"");
+        int entityName = xml.indexOf("id=\"iteractionListLabelCandidate\"");
+        int navigation = xml.indexOf("id=\"candidateCvSectionNavigation\"");
+        int entityDetails = xml.indexOf("id=\"candidateCvSidebarTargetCard\"");
+        int optionalContent = xml.indexOf("id=\"candidateCvSidebarMetaCard\"");
+
+        assertTrue("Sidebar должен содержать визуальный образ сущности", visualImage >= 0);
+        assertTrue("Sidebar должен содержать наименование сущности", entityName > visualImage);
+        assertTrue("Label-навигация должна идти после наименования", navigation > entityName);
+        assertTrue("Детализация должна идти после label-навигации", entityDetails > navigation);
+        assertTrue("Прочие элементы должны идти после детализации", optionalContent > entityDetails);
+
+        List<String> staticButtons = Arrays.asList(
+                "candidateCvMainDataNav", "candidateCvOriginalCvNav", "candidateCvHuntTechCvNav",
+                "candidateCvTextNav", "candidateCvRecommendationNav", "candidateCvLetterTemplateNav",
+                "candidateCvLetterBodyNav", "candidateCvLetterCommentNav",
+                "candidateCvLetterRecommendationNav", "candidateCvSkillActionsNav",
+                "candidateCvSkillTreeNav", "candidateCvFilesTableNav");
+        for (String buttonId : staticButtons) {
+            assertTrue("Навигационная кнопка должна быть объявлена в XML: " + buttonId,
+                    xml.contains("<button id=\"" + buttonId + "\""));
+        }
+
+        for (String invoke : Arrays.asList(
+                "navigateCandidateMainData", "navigateCandidateOriginalCv", "navigateCandidateHuntTechCv",
+                "navigateCvText", "navigateCvRecommendations", "navigateLetterTemplate",
+                "navigateLetterBody", "navigateLetterComment", "navigateLetterRecommendations",
+                "navigateSkillActions", "navigateSkillTree", "navigateFilesTable")) {
+            assertTrue("Отсутствует invoke label-навигации: " + invoke,
+                    xml.contains("invoke=\"" + invoke + "\""));
+            assertTrue("Отсутствует Java handler label-навигации: " + invoke,
+                    controller.contains("public void " + invoke + "()"));
+        }
+
+        assertTrue(controller.contains("syncSidebarSectionNavigation();"));
+        assertTrue(controller.contains("candidateCvCandidateNavigation.setVisible(\"tabCandidate\".equals(selectedTabName))"));
+        assertTrue(controller.contains("candidateCvCvNavigation.setVisible(\"tabCV\".equals(selectedTabName))"));
+        assertTrue(controller.contains("candidateCvLetterNavigation.setVisible(\"tabLetter\".equals(selectedTabName))"));
+        assertTrue(controller.contains("candidateCvSkillNavigation.setVisible(\"tabSkillTree\".equals(selectedTabName))"));
+        assertTrue(controller.contains("candidateCvFilesNavigation.setVisible(\"tabFiles\".equals(selectedTabName))"));
+        assertFalse("Навигация не должна динамически создавать кнопки",
+                controller.contains("uiComponents.create(Button.class)"));
+        assertFalse("Навигация не должна удалять XML-компоненты",
+                controller.contains("replaceNavigationLabels"));
+        assertFalse("Навигация не должна обходить lazy lifecycle вкладок",
+                controller.contains("tabSheet.setSelectedTab"));
+    }
+
+    @Test
+    public void designConceptDefinesMandatoryEditSidebarOrder() throws IOException {
+        String concept = readProjectFile(DESIGN_CONCEPT);
+        assertTrue(concept.contains("Для каждой Edit-формы HRM HuntTech левая контекстная панель является обязательной"));
+        int visual = concept.indexOf("1. **Визуальный образ экземпляра**");
+        int name = concept.indexOf("2. **Наименование экземпляра**");
+        int navigation = concept.indexOf("3. **Label-навигация**");
+        int details = concept.indexOf("4. **Детализация основных элементов**");
+        int optional = concept.indexOf("5. **Прочее по необходимости**");
+        assertTrue(visual >= 0 && visual < name);
+        assertTrue(name < navigation);
+        assertTrue(navigation < details);
+        assertTrue(details < optional);
     }
 
     @Test
@@ -234,6 +312,9 @@ public class CandidateCVEditVisualContractTest {
 
             assertTrue(theme, scss.contains("@mixin candidate-cv-editor-theme"));
             assertTrue(theme, scss.contains(".candidate-cv-editor {"));
+            assertTrue(theme, scss.contains(".candidate-cv-navigation {"));
+            assertTrue(theme, scss.contains(".candidate-cv-nav-item.v-button"));
+            assertTrue(theme, scss.contains(".candidate-cv-nav-item-active.v-button"));
             assertFalse(theme, scss.contains(".job-candidate-editor"));
             assertFalse(theme, scss.contains(".ext-settings-window"));
             assertFalse(theme, forbiddenTopLevelSelector.matcher(scss).find());
