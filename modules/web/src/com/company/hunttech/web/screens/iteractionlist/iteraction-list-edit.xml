@@ -93,6 +93,8 @@
                 <vbox width="100%"
                       spacing="true"
                       stylename="iteraction-list-profile-header">
+                    <!-- Оба OvaFallbackImage используют одинаковую квадратную геометрию
+                         и общий круглый стиль; источники данных и fallback не меняются. -->
                     <hbox width="100%"
                           spacing="true"
                           align="MIDDLE_CENTER"
@@ -110,15 +112,15 @@
                                           stylename="iteraction-list-candidate-image"
                                           scaleMode="SCALE_DOWN"/>
                         <ovaFallbackImage id="projectLogoImage"
-                               width="80px"
-                               height="80px"
-                               ovalWidth="80px"
-                               ovalHeight="80px"
-                               fallbackThemePath="icons/no-company.png"
-                               visible="true"
-                               align="MIDDLE_CENTER"
-                               stylename="iteraction-list-project-image"
-                               scaleMode="SCALE_DOWN"/>
+                                          width="112px"
+                                          height="112px"
+                                          ovalWidth="112px"
+                                          ovalHeight="112px"
+                                          fallbackThemePath="icons/no-company.png"
+                                          visible="true"
+                                          align="MIDDLE_CENTER"
+                                          stylename="iteraction-list-candidate-image"
+                                          scaleMode="SCALE_DOWN"/>
                     </hbox>
                 </vbox>
 
@@ -369,7 +371,7 @@
                                           margin="true"
                                           collapsable="true"
                                           collapsed="false"
-                                      visible="true"
+                                          visible="true"
                                           showAsPanel="true"
                                           stylename="iteraction-list-accordion-section iteraction-list-form-section iteraction-list-participants-section">
                                     <grid id="gridIterationData"
