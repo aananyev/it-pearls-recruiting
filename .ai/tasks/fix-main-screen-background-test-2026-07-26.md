@@ -66,6 +66,38 @@ private Path projectRoot() {
    }
    ```
 
+## Дополнительная ошибка — clearActionReturnsToThemeRandomizationAndDeletesOnlyMarkedFiles
+
+После исправления `projectRoot()` один тест всё ещё падает:
+
+```
+clearActionReturnsToThemeRandomizationAndDeletesOnlyMarkedFiles FAILED
+    java.lang.AssertionError at MainScreenBackgroundContractTest.java:117
+```
+
+**Причина:** `assertOrdered` проверяет порядок:
+1. `"public void clearMainScreenBackground()"`
+2. `"currentBackground == null"`
+3. `"setFileImageFace(null)"`
+4. `"refreshBackgroundStatus()"`
+
+Но в реальном `ExtSettingsWindowMainBackground.java` метод выглядит так:
+- строка 108: `public void clearMainScreenBackground() {`
+- строка 109: `if (userSettingsDs.getItem() == null || currentBackground == null) {`
+- **строка 110: `refreshBackgroundStatus();` — здесь!** — возврат при null
+- строка 115: `userSettingsDs.getItem().setFileImageFace(null);`
+- строка 117: `refreshBackgroundStatus();`
+
+Первое вхождение `refreshBackgroundStatus()` находится на строке 110 — до `setFileImageFace(null)`, поэтому `assertOrdered` падает.
+
+**Исправление:** в тесте `clearActionReturnsToThemeRandomizationAndDeletesOnlyMarkedFiles` нужно заменить `assertOrdered` на отдельные `assertTrue` для каждого фрагмента без проверки порядка:
+```java
+assertTrue(controller.contains("public void clearMainScreenBackground()"));
+assertTrue(controller.contains("currentBackground == null"));
+assertTrue(controller.contains("setFileImageFace(null)"));
+assertTrue(controller.contains("refreshBackgroundStatus()"));
+```
+
 ## Проверка
 
 ```bash
