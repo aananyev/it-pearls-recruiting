@@ -54,6 +54,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";
     private static final String EXTENSION_DOCX = "docx";
+    private static final String NAVIGATION_STYLE = "borderless candidate-cv-nav-item";
+    private static final String ACTIVE_NAVIGATION_STYLE =
+            "borderless candidate-cv-nav-item candidate-cv-nav-item-active";
     private FileDescriptor fileDescriptor;
 
     @Inject
@@ -135,6 +138,48 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private ResumeRecognitionService resumeRecognitionService;
     @Inject
     private TabSheet tabSheet;
+    @Inject
+    private VBoxLayout candidateCvCandidateNavigation;
+    @Inject
+    private VBoxLayout candidateCvCvNavigation;
+    @Inject
+    private VBoxLayout candidateCvLetterNavigation;
+    @Inject
+    private VBoxLayout candidateCvSkillNavigation;
+    @Inject
+    private VBoxLayout candidateCvFilesNavigation;
+    @Inject
+    private Button candidateCvMainDataNav;
+    @Inject
+    private Button candidateCvOriginalCvNav;
+    @Inject
+    private Button candidateCvHuntTechCvNav;
+    @Inject
+    private Button candidateCvTextNav;
+    @Inject
+    private Button candidateCvRecommendationNav;
+    @Inject
+    private Button candidateCvLetterTemplateNav;
+    @Inject
+    private Button candidateCvLetterBodyNav;
+    @Inject
+    private Button candidateCvLetterCommentNav;
+    @Inject
+    private Button candidateCvLetterRecommendationNav;
+    @Inject
+    private Button candidateCvSkillActionsNav;
+    @Inject
+    private Button candidateCvSkillTreeNav;
+    @Inject
+    private Button candidateCvFilesTableNav;
+    @Inject
+    private RichTextArea commentLetterRichTextArea;
+    @Inject
+    private Button rescanResume;
+    @Inject
+    private TreeDataGrid<SkillTree> skillTreesTable;
+    @Inject
+    private Table<SomeFiles> someFilesTable;
 
     private boolean openPositionsReady;
     private boolean cvTextInitialized;
@@ -156,7 +201,128 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         tabSheet.addSelectedTabChangeListener(selectedTabChangeEvent -> {
             initCvTextTab();
             initSkillTreeTab();
+            syncSidebarSectionNavigation();
         });
+        syncSidebarSectionNavigation();
+    }
+
+    /**
+     * Показывает в sidebar только навигацию активной вкладки. Метод не выбирает
+     * вкладку программно, поэтому lazy-init резюме и дерева навыков остаётся
+     * привязанным к штатному SelectedTabChangeListener CUBA.
+     */
+    private void syncSidebarSectionNavigation() {
+        TabSheet.Tab selectedTab = tabSheet.getSelectedTab();
+        String selectedTabName = selectedTab == null ? "tabCandidate" : selectedTab.getName();
+
+        candidateCvCandidateNavigation.setVisible("tabCandidate".equals(selectedTabName));
+        candidateCvCvNavigation.setVisible("tabCV".equals(selectedTabName));
+        candidateCvLetterNavigation.setVisible("tabLetter".equals(selectedTabName));
+        candidateCvSkillNavigation.setVisible("tabSkillTree".equals(selectedTabName));
+        candidateCvFilesNavigation.setVisible("tabFiles".equals(selectedTabName));
+
+        if ("tabCandidate".equals(selectedTabName)) {
+            activateNavigationItem(candidateCvCandidateNavigation, candidateCvMainDataNav);
+        } else if ("tabCV".equals(selectedTabName)) {
+            activateNavigationItem(candidateCvCvNavigation, candidateCvTextNav);
+        } else if ("tabLetter".equals(selectedTabName)) {
+            activateFirstVisibleNavigationItem(candidateCvLetterNavigation);
+        } else if ("tabSkillTree".equals(selectedTabName)) {
+            activateNavigationItem(candidateCvSkillNavigation, candidateCvSkillActionsNav);
+        } else if ("tabFiles".equals(selectedTabName)) {
+            activateNavigationItem(candidateCvFilesNavigation, candidateCvFilesTableNav);
+        }
+    }
+
+    /**
+     * Навигация меняет только presentation state и фокус. Entity, bindings,
+     * loaders, selected tab и значения компонентов не изменяются.
+     */
+    private void navigateToSection(VBoxLayout navigation,
+                                   Button selectedButton,
+                                   Runnable focusHandler) {
+        activateNavigationItem(navigation, selectedButton);
+        focusHandler.run();
+    }
+
+    private void activateNavigationItem(VBoxLayout navigation, Button selectedButton) {
+        for (Component component : navigation.getComponents()) {
+            if (component instanceof Button) {
+                Button button = (Button) component;
+                button.setStyleName(button == selectedButton
+                        ? ACTIVE_NAVIGATION_STYLE
+                        : NAVIGATION_STYLE);
+            }
+        }
+    }
+
+    private void activateFirstVisibleNavigationItem(VBoxLayout navigation) {
+        for (Component component : navigation.getComponents()) {
+            if (component instanceof Button && component.isVisible()) {
+                activateNavigationItem(navigation, (Button) component);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Пункты, зависящие от вакансии, повторяют фактическую visibility правых
+     * блоков и не предлагают пользователю переход к отсутствующему компоненту.
+     */
+    private void refreshConditionalNavigationItems() {
+        candidateCvLetterTemplateNav.setVisible(questionLetterRichTextArea.isVisible());
+        candidateCvLetterRecommendationNav.setVisible(letterRecommendation.isVisible());
+        activateFirstVisibleNavigationItem(candidateCvLetterNavigation);
+    }
+
+    public void navigateCandidateMainData() {
+        navigateToSection(candidateCvCandidateNavigation, candidateCvMainDataNav, candidateField::focus);
+    }
+
+    public void navigateCandidateOriginalCv() {
+        navigateToSection(candidateCvCandidateNavigation, candidateCvOriginalCvNav, textFieldIOriginalCV::focus);
+    }
+
+    public void navigateCandidateHuntTechCv() {
+        navigateToSection(candidateCvCandidateNavigation, candidateCvHuntTechCvNav, textFieldHuntTechCV::focus);
+    }
+
+    public void navigateCvText() {
+        navigateToSection(candidateCvCvNavigation, candidateCvTextNav, candidateCVRichTextArea::focus);
+    }
+
+    public void navigateCvRecommendations() {
+        navigateToSection(candidateCvCvNavigation, candidateCvRecommendationNav, cvResomandation::focus);
+    }
+
+    public void navigateLetterTemplate() {
+        navigateToSection(candidateCvLetterNavigation, candidateCvLetterTemplateNav,
+                questionLetterRichTextArea.isVisible() ? questionLetterRichTextArea::focus : letterRichTextArea::focus);
+    }
+
+    public void navigateLetterBody() {
+        navigateToSection(candidateCvLetterNavigation, candidateCvLetterBodyNav, letterRichTextArea::focus);
+    }
+
+    public void navigateLetterComment() {
+        navigateToSection(candidateCvLetterNavigation, candidateCvLetterCommentNav, commentLetterRichTextArea::focus);
+    }
+
+    public void navigateLetterRecommendations() {
+        navigateToSection(candidateCvLetterNavigation, candidateCvLetterRecommendationNav,
+                letterRecommendation.isVisible() ? letterRecommendation::focus : letterRichTextArea::focus);
+    }
+
+    public void navigateSkillActions() {
+        navigateToSection(candidateCvSkillNavigation, candidateCvSkillActionsNav, rescanResume::focus);
+    }
+
+    public void navigateSkillTree() {
+        navigateToSection(candidateCvSkillNavigation, candidateCvSkillTreeNav, skillTreesTable::focus);
+    }
+
+    public void navigateFilesTable() {
+        navigateToSection(candidateCvFilesNavigation, candidateCvFilesTableNav, someFilesTable::focus);
     }
 
     @Subscribe
@@ -476,6 +642,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         setLetterRecommendation();
+        refreshConditionalNavigationItems();
     }
 
     private void convertTextCV() {
@@ -728,6 +895,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void onCandidateCVFieldOpenPositionValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
         setTemplateLetter();
         setLetterRecommendation();
+        refreshConditionalNavigationItems();
 
         if (candidateCVRichTextArea.getValue() != null && !candidateCVRichTextArea.getValue().equals("")) {
             setColorHighlightingCompetencies();
