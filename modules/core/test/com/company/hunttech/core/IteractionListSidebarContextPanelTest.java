@@ -38,8 +38,15 @@ public class IteractionListSidebarContextPanelTest {
         assertTrue(xml.contains("property=\"candidate.fileImageFace\""));
         assertTrue(xml.contains("<ovaFallbackImage id=\"projectLogoImage\""));
         assertTrue(xml.contains("fallbackThemePath=\"icons/no-company.png\""));
-        assertTrue(xml.contains("ovalWidth=\"80px\""));
-        assertTrue(xml.contains("ovalHeight=\"80px\""));
+
+        /*
+         * Оба изображения должны занимать одинаковый квадратный slot. Общий
+         * локальный стиль не позволяет поздним theme-правилам вернуть логотипу
+         * прямоугольную геометрию или отличный от кандидата размер.
+         */
+        assertProfileImageGeometry(componentBlock(xml, "candidateImage"));
+        assertProfileImageGeometry(componentBlock(xml, "projectLogoImage"));
+
         assertTrue(xml.contains("id=\"numberIteractionField\""));
         assertTrue(xml.contains("property=\"numberIteraction\""));
         assertTrue(xml.contains("id=\"dateIteractionField\""));
@@ -88,6 +95,22 @@ public class IteractionListSidebarContextPanelTest {
             assertFalse(scss.contains("min-width: 212px !important;"));
             assertFalse(scss.contains(".iteraction-list-context-card .v-panel-caption,"));
         }
+    }
+
+    private void assertProfileImageGeometry(String imageBlock) {
+        assertTrue(imageBlock.contains("width=\"112px\""));
+        assertTrue(imageBlock.contains("height=\"112px\""));
+        assertTrue(imageBlock.contains("ovalWidth=\"112px\""));
+        assertTrue(imageBlock.contains("ovalHeight=\"112px\""));
+        assertTrue(imageBlock.contains("stylename=\"iteraction-list-candidate-image\""));
+    }
+
+    private String componentBlock(String xml, String componentId) {
+        int start = xml.indexOf("id=\"" + componentId + "\"");
+        assertTrue("Не найден компонент " + componentId, start >= 0);
+        int end = xml.indexOf("/>", start);
+        assertTrue("Не найдено завершение компонента " + componentId, end >= 0);
+        return xml.substring(start, end + 2);
     }
 
     private String descriptor() throws IOException {
