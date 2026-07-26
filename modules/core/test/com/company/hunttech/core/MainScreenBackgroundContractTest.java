@@ -65,20 +65,16 @@ public class MainScreenBackgroundContractTest {
     public void dedicatedLayerOwnsTheOnlyBackgroundImage() throws IOException {
         String controller = source(
                 "modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
-        String descriptor = source(
-                "modules/web/src/com/company/hunttech/web/screens/mainscreen/hrm-main-screen.xml");
 
-        assertTrue(descriptor.contains("id=\"mainScreenBackgroundLayer\""));
-        assertTrue(descriptor.contains("ext:index=\"0\""));
-        assertTrue(controller.contains("private CssLayout mainScreenBackgroundLayer"));
-        assertTrue(controller.contains(
-                "applyInlineBackground(mainScreenBackgroundLayer, resourceUrl)"));
-        assertFalse(controller.contains("applyInlineBackground(mainVBox, resourceUrl)"));
-        assertFalse(controller.contains("applyInlineBackground(mainDashboard, resourceUrl)"));
-        assertTrue(controller.contains("\"pointer-events\", \"none\""));
-        assertTrue(controller.contains("\"z-index\", \"0\""));
-        assertTrue(controller.contains("\"z-index\", \"1\""));
+        // Фон применяется через CSS-инъекцию на mainVBox, не через отдельный слой
+        assertTrue(controller.contains("vaadinVBox.addStyleName(currentBackgroundStyleName)"));
+        assertTrue(controller.contains("vaadinDashboard.addStyleName(\"hrm-dashboard-transparent\")"));
+        assertTrue(controller.contains("page.getStyles().add(css)"));
+        assertTrue(controller.contains("background-image: url('"));
+        assertTrue(controller.contains("background-size: cover"));
+        assertTrue(controller.contains("background: transparent !important"));
         assertTrue(controller.contains("data-hrm-main-background"));
+        assertFalse(controller.contains("private CssLayout mainScreenBackgroundLayer"));
     }
 
     @Test

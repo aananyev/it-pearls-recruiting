@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
-        xmlns:ext="http://schemas.haulmont.com/cuba/screen/window-ext.xsd"
         extends="/com/company/hunttech/web/screens/mainscreen/ext-main-screen.xml">
-    <layout>
-        <vbox id="mainVBox">
-            <!-- Выделенный декоративный слой добавляется первым и не меняет dashboard,
-                 workArea, loaders или бизнес-события наследуемого ExtMainScreen. -->
-            <cssLayout id="mainScreenBackgroundLayer"
-                       width="100%"
-                       height="100%"
-                       stylename="hrm-main-screen-background-layer"
-                       ext:index="0"/>
-        </vbox>
-    </layout>
+    <!-- Наследуется полный dashboard и вся логика ExtMainScreen.
+         Контроллер HrmMainScreen добавляет фон через CSS-инъекцию в Page. -->
+    <layout/>
 </window>
