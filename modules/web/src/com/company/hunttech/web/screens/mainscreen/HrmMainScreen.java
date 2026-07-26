@@ -1,12 +1,13 @@
 package com.company.hunttech.web.screens.mainscreen;
 
 import com.company.hunttech.entity.ExtUser;
+import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.HtmlAttributes;
 import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
-import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ResourceReference;
 import com.vaadin.server.Sizeable.Unit;
@@ -17,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.util.UUID;
 
 /**
  * Добавляет к действующему ExtMainScreen только персональный фон рабочей области.
@@ -36,7 +36,9 @@ public class HrmMainScreen extends ExtMainScreen {
     @Inject
     private VBoxLayout mainVBox;
     @Inject
-    private com.haulmont.cuba.gui.components.Component mainDashboard;
+    private Component mainDashboard;
+    @Inject
+    private HtmlAttributes htmlAttributes;
 
     /**
      * Нулевого размера Image владеет динамическим ресурсом в Vaadin connector tree.
@@ -72,30 +74,29 @@ public class HrmMainScreen extends ExtMainScreen {
         ensureAttachedToCurrentUi(currentUi, vaadinDashboard, "mainDashboard");
 
         String resourceUrl = registerBackgroundResource(currentUi, vaadinLayout, resource);
-        String sessionStyle = "hrm-main-screen-background-"
-                + UUID.randomUUID().toString().replace("-", "");
 
-        // Один локальный класс назначается рабочему контейнеру и dashboard:
-        // внутренний dashboard не должен перекрывать фон родительского mainVBox.
-        vaadinLayout.addStyleName("hrm-main-screen-background");
-        vaadinLayout.addStyleName(sessionStyle);
-        vaadinDashboard.addStyleName("hrm-main-screen-background");
-        vaadinDashboard.addStyleName(sessionStyle);
+        /*
+         * HtmlAttributes передаёт CSS через штатный connector CUBA и назначает inline-style
+         * фактическим DOM-элементам. Это устраняет гонку динамического Page CSS, при которой
+         * правило присутствовало на странице, но не применялось после рендеринга UI.
+         */
+        applyInlineBackground(mainVBox, resourceUrl);
+        applyInlineBackground(mainDashboard, resourceUrl);
+        htmlAttributes.setDomAttribute(mainVBox, "data-hrm-main-background", "applied");
+        htmlAttributes.setDomAttribute(mainDashboard, "data-hrm-main-background", "applied");
 
-        Page page = currentUi.getPage();
-        if (page == null) {
-            throw new IllegalStateException("Vaadin Page недоступна после открытия главного экрана");
-        }
-        page.getStyles().add(
-                "." + sessionStyle + " {"
-                        + "background-image:url('" + escapeCssUrl(resourceUrl) + "') !important;"
-                        + "background-position:center center !important;"
-                        + "background-repeat:no-repeat !important;"
-                        + "background-size:cover !important;"
-                        + "}");
-        log.debug("Main screen background applied: theme={}, resourceUrl={}, layoutClass={}, dashboardClass={}",
+        log.debug("Main screen background applied inline: theme={}, resourceUrl={}, layoutClass={}, dashboardClass={}",
                 currentUi.getTheme(), resourceUrl,
                 vaadinLayout.getClass().getName(), vaadinDashboard.getClass().getName());
+    }
+
+    private void applyInlineBackground(Component component, String resourceUrl) {
+        String backgroundImage = "url('" + escapeCssUrl(resourceUrl) + "')";
+        htmlAttributes.setCssProperty(component, "background-image", backgroundImage);
+        htmlAttributes.setCssProperty(component, "background-position", "center center");
+        htmlAttributes.setCssProperty(component, "background-repeat", "no-repeat");
+        htmlAttributes.setCssProperty(component, "background-size", "cover");
+        htmlAttributes.setCssProperty(component, "background-color", "transparent");
     }
 
     /**

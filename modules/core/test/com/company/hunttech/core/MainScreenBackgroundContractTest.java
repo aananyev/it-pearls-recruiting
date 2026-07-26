@@ -41,12 +41,15 @@ public class MainScreenBackgroundContractTest {
     }
 
     @Test
-    public void annotatedMainScreenIsNotRegisteredAsLegacyScreen() throws IOException {
-        String properties = source("modules/web/src/com/company/hunttech/web-app.properties");
+    public void annotatedMainScreenIsConfiguredConsistentlyAndNotRegisteredAsLegacyScreen() throws IOException {
+        String moduleProperties = source("modules/web/src/com/company/hunttech/web-app.properties");
+        String componentProperties = source("com/company/hunttech/web-app.properties");
         String screenConfig = source("modules/web/src/com/company/hunttech/web-screens.xml");
         String controller = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
         String descriptor = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/hrm-main-screen.xml");
-        assertTrue(properties.contains("cuba.web.mainScreenId=hrmMainScreen"));
+
+        assertMainScreenId(moduleProperties, "web-модуль");
+        assertMainScreenId(componentProperties, "app-component");
         assertFalse("@UiController main screen нельзя регистрировать в legacy screens.xml",
                 screenConfig.contains("<screen id=\"hrmMainScreen\""));
         assertFalse("Legacy screens.xml не должен ссылаться на descriptor нового main screen",
@@ -58,20 +61,27 @@ public class MainScreenBackgroundContractTest {
     }
 
     @Test
-    public void dynamicResourceIsRegisteredAfterVaadinConnectorAttach() throws IOException {
+    public void dynamicResourceUsesCubaInlineCssAfterVaadinConnectorAttach() throws IOException {
         String controller = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
         assertTrue(controller.contains("onAfterShowBackground(AfterShowEvent event)"));
         assertTrue(controller.contains("UI currentUi = UI.getCurrent()"));
-        assertTrue(controller.contains("Page page = currentUi.getPage()"));
         assertFalse(controller.contains("Page.getCurrent()"));
+        assertFalse(controller.contains("page.getStyles().add"));
+        assertFalse(controller.contains("UUID.randomUUID"));
+        assertTrue(controller.contains("private HtmlAttributes htmlAttributes"));
         assertOrdered(controller,
                 "new Image(null, resource)",
                 "vaadinLayout.addComponent(backgroundResourceHolder)",
                 "ensureAttachedToCurrentUi(currentUi, backgroundResourceHolder",
                 "ResourceReference.create(",
                 "backgroundResourceHolder, \"src\"");
-        assertTrue(controller.contains("ensureAttachedToCurrentUi(currentUi, vaadinDashboard"));
-        assertTrue(controller.contains("vaadinDashboard.addStyleName(sessionStyle)"));
+        assertOrdered(controller,
+                "String resourceUrl = registerBackgroundResource",
+                "applyInlineBackground(mainVBox, resourceUrl)",
+                "applyInlineBackground(mainDashboard, resourceUrl)");
+        assertTrue(controller.contains("htmlAttributes.setCssProperty(component, \"background-image\""));
+        assertTrue(controller.contains("htmlAttributes.setCssProperty(component, \"background-size\", \"cover\")"));
+        assertTrue(controller.contains("data-hrm-main-background"));
         assertTrue(controller.contains("backgroundResourceHolder.setWidth(0, Unit.PIXELS)"));
     }
 
@@ -158,6 +168,13 @@ public class MainScreenBackgroundContractTest {
         assertTrue(controller.contains("setFileImageFace(null)"));
         assertTrue(controller.contains("mainScreenBackgroundService.isCustomBackground(descriptor)"));
         assertTrue(controller.contains("!Objects.equals(descriptor.getId(), activeFileId)"));
+    }
+
+    private void assertMainScreenId(String properties, String sourceName) {
+        assertTrue(sourceName + " должен выбирать HrmMainScreen",
+                properties.contains("cuba.web.mainScreenId=hrmMainScreen"));
+        assertFalse(sourceName + " не должен возвращать legacy ExtMainScreen",
+                properties.contains("cuba.web.mainScreenId=extMainScreen"));
     }
 
     private int countOccurrences(String source, String fragment) {
