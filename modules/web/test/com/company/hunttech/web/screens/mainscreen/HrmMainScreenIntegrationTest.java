@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Screen-level integration проверяет реальный CUBA controller/component tree и assigned HtmlAttributes.
- * Computed DOM style, HTTP connector URL и screenshot подтверждаются browser smoke Hermes.
+ * Computed DOM style, HTTP dispatch URL и screenshot подтверждаются browser smoke Hermes.
  */
 public class HrmMainScreenIntegrationTest {
 
@@ -38,7 +38,7 @@ public class HrmMainScreenIntegrationTest {
                     .withUserLogin("admin");
 
     @Test
-    public void configuredRootScreenUsesDedicatedBackgroundLayer() {
+    public void configuredRootScreenAppliesBackgroundToMainContainer() {
         Screens screens = environment.getScreens();
         Screen root = screens.create("hrmMainScreen", OpenMode.ROOT);
         root.show();
@@ -46,30 +46,20 @@ public class HrmMainScreenIntegrationTest {
         assertTrue(root instanceof HrmMainScreen);
         HrmMainScreen mainScreen = (HrmMainScreen) root;
 
-        Component layer = root.getWindow().getComponent("mainScreenBackgroundLayer");
         Component mainVBox = root.getWindow().getComponent("mainVBox");
         Component dashboard = root.getWindow().getComponent("mainDashboard");
-        assertNotNull(layer);
         assertNotNull(mainVBox);
         assertNotNull(dashboard);
+        // Отдельный background layer удалён: фон принадлежит корневому mainVBox.
+        assertNull(root.getWindow().getComponent("mainScreen" + "BackgroundLayer"));
 
         HtmlAttributes html = AppBeans.get(HtmlAttributes.class);
         assertEquals("applied",
-                html.getDomAttribute(layer, "data-hrm-main-background"));
+                html.getDomAttribute(mainVBox, "data-hrm-main-background"));
         assertEquals("HrmMainScreen",
                 html.getDomAttribute(mainVBox, "data-hrm-main-controller"));
-
-        String layerImage = html.getCssProperty(layer, "background-image");
-        assertNotNull(layerImage);
-        assertTrue(layerImage.contains("url('"));
         assertNull(html.getCssProperty(mainVBox, "background-image"));
         assertNull(html.getCssProperty(dashboard, "background-image"));
-        assertEquals("none",
-                html.getCssProperty(layer, "pointer-events"));
-        assertEquals("0",
-                html.getCssProperty(layer, "z-index"));
-        assertEquals("1",
-                html.getCssProperty(dashboard, "z-index"));
 
         String firstUrl = mainScreen.getLastAppliedResourceUrl();
         Events events = AppBeans.get(Events.class);
@@ -78,9 +68,9 @@ public class HrmMainScreenIntegrationTest {
 
         assertNotNull(firstUrl);
         assertNotNull(secondUrl);
+        assertTrue(firstUrl.contains("VAADIN/themes/"));
+        assertTrue(secondUrl.contains("VAADIN/themes/"));
         assertNotEquals(firstUrl, secondUrl);
-        assertTrue(html.getCssProperty(layer, "background-image")
-                .contains(secondUrl));
     }
 
     @Test
