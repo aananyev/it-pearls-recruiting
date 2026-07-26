@@ -11,6 +11,7 @@ import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ResourceReference;
 import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.UI;
@@ -22,7 +23,9 @@ import javax.inject.Inject;
 import java.util.UUID;
 
 /**
- * Чекпоинт-версия: каждый шаг логируется для диагностики отсутствия фона.
+ * Применяет фоновое изображение через CSS-инъекцию в Page.
+ * Системные фоны загружаются из VAADIN/themes/{name}/backgrounds/{n}.jpg.
+ * Пользовательский фон — из FileStorage через StreamResource.
  */
 @UiController("hrmMainScreen")
 @UiDescriptor("hrm-main-screen.xml")
@@ -45,7 +48,6 @@ public class HrmMainScreen extends ExtMainScreen {
     private String lastAppliedResourceUrl;
     private String currentBackgroundStyleName;
 
-    // --- ЧЕКПОИНТ 0: конструктор ---
     public HrmMainScreen() {
         log.warn("### CHECKPOINT-0: HrmMainScreen constructor called ###");
     }
@@ -83,30 +85,42 @@ public class HrmMainScreen extends ExtMainScreen {
         }
     }
 
-    private void applyBackground(UI currentUi, Resource resource) {
-        log.warn("### CHECKPOINT-8: applyBackground() called ###");
-        AbstractOrderedLayout vaadinVBox = mainVBox.unwrap(AbstractOrderedLayout.class);
-        log.warn("### CHECKPOINT-9: vaadinVBox = {} ###", vaadinVBox);
+    /**
+     * Строит CSS-совместимый URL для фонового изображения.
+     * ThemeResource даёт theme://... — браузер не понимает, конвертируем в HTTP-путь.
+     * StreamResource (пользовательский фон) использует ResourceReference.
+     */
+    private String buildBackgroundUrl(UI currentUi, Resource resource) {
+        if (resource instanceof ThemeResource) {
+            ThemeResource themeResource = (ThemeResource) resource;
+            // ThemeResource для "backgrounds/8.jpg" → VAADIN/themes/halo/backgrounds/8.jpg
+            String themeName = currentUi.getTheme();
+            return "VAADIN/themes/" + themeName + "/" + themeResource.getResourceId();
+        }
 
-        String resourceUrl = registerBackgroundResource(currentUi, vaadinVBox, resource);
-        log.warn("### CHECKPOINT-10: resourceUrl = {} ###", resourceUrl);
+        // StreamResource (пользовательский фон или legacy SVG)
+        AbstractOrderedLayout vaadinVBox = mainVBox.unwrap(AbstractOrderedLayout.class);
+        return registerBackgroundResource(currentUi, vaadinVBox, resource);
+    }
+
+    private void applyBackground(UI currentUi, Resource resource) {
+        AbstractOrderedLayout vaadinVBox = mainVBox.unwrap(AbstractOrderedLayout.class);
+        AbstractOrderedLayout vaadinDashboard = mainDashboard.unwrap(AbstractOrderedLayout.class);
+
+        String resourceUrl = buildBackgroundUrl(currentUi, resource);
 
         Page page = Page.getCurrent();
-        log.warn("### CHECKPOINT-11: Page.getCurrent() = {} ###", page);
         if (page == null) {
-            log.error("### CHECKPOINT-FAIL: Page.getCurrent() is NULL ###");
             throw new IllegalStateException("Vaadin Page недоступна");
         }
 
-        AbstractOrderedLayout vaadinDashboard = mainDashboard.unwrap(AbstractOrderedLayout.class);
-        log.warn("### CHECKPOINT-12: vaadinDashboard = {} ###", vaadinDashboard);
-
+        if (currentBackgroundStyleName != null) {
+            // Старый стиль остаётся в DOM, новый класс переопределяет
+        }
         currentBackgroundStyleName = "hrm-bg-" + UUID.randomUUID().toString().replace("-", "");
-        log.warn("### CHECKPOINT-13: styleName = {} ###", currentBackgroundStyleName);
 
         vaadinVBox.addStyleName(currentBackgroundStyleName);
         vaadinDashboard.addStyleName("hrm-dashboard-transparent");
-        log.warn("### CHECKPOINT-14: styleNames added ###");
 
         String css = "." + currentBackgroundStyleName + " {"
                 + "background-image: url('" + escapeCssUrl(resourceUrl) + "') !important;"
@@ -131,7 +145,6 @@ public class HrmMainScreen extends ExtMainScreen {
     private String registerBackgroundResource(UI currentUi,
                                               AbstractOrderedLayout vaadinLayout,
                                               Resource resource) {
-        log.warn("### CHECKPOINT-R1: registerBackgroundResource() ###");
         if (backgroundResourceHolder != null
                 && backgroundResourceHolder.getParent() instanceof com.vaadin.ui.ComponentContainer) {
             ((com.vaadin.ui.ComponentContainer) backgroundResourceHolder.getParent())
@@ -143,18 +156,14 @@ public class HrmMainScreen extends ExtMainScreen {
         backgroundResourceHolder.setHeight(0, Unit.PIXELS);
         backgroundResourceHolder.setVisible(false);
         vaadinLayout.addComponent(backgroundResourceHolder);
-        log.warn("### CHECKPOINT-R2: Image added to layout ###");
 
         String resourceUrl = ResourceReference.create(
                 resource, backgroundResourceHolder, "src").getURL();
-        // Vaadin возвращает app://APP/..., браузер не резолвит в CSS.
-        // Преобразуем в HTTP-путь относительно контекста приложения.
+        // Vaadin возвращает app://APP/... для StreamResource, браузер не резолвит в CSS
         if (resourceUrl != null && resourceUrl.startsWith("app://APP")) {
             resourceUrl = resourceUrl.replace("app://APP", "");
         }
-        log.warn("### CHECKPOINT-R3: ResourceReference URL = {} ###", resourceUrl);
         if (resourceUrl == null || resourceUrl.trim().isEmpty()) {
-            log.error("### CHECKPOINT-FAIL: ResourceReference returned empty URL ###");
             throw new IllegalStateException("Vaadin не зарегистрировал ресурс фонового изображения");
         }
         return resourceUrl;
