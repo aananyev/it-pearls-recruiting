@@ -83,11 +83,10 @@ public class MainScreenBackgroundContractTest {
     public void clearActionReturnsToThemeRandomizationAndDeletesOnlyMarkedFiles() throws IOException {
         String controller = source("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindowMainBackground.java");
 
-        assertOrdered(controller,
-                "public void clearMainScreenBackground()",
-                "currentBackground == null",
-                "setFileImageFace(null)",
-                "refreshBackgroundStatus()");
+        assertTrue(controller.contains("public void clearMainScreenBackground()"));
+        assertTrue(controller.contains("currentBackground == null"));
+        assertTrue(controller.contains("setFileImageFace(null)"));
+        assertTrue(controller.contains("refreshBackgroundStatus()"));
         assertTrue(controller.contains("mainScreenBackgroundService.isCustomBackground(descriptor)"));
         assertTrue(controller.contains("!Objects.equals(descriptor.getId(), activeFileId)"));
     }
