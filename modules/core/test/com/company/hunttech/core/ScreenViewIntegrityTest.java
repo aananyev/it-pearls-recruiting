@@ -66,19 +66,20 @@ public class ScreenViewIntegrityTest {
     @Test
     public void test6_extUser_entity_registered() {
         Metadata metadata = AppBeans.get(Metadata.class);
-        assertNotNull(metadata.getClassNN("itpearls_ExtUser"));
+        assertNotNull(metadata.getClassNN("hunttech_ExtUser"));
     }
 
     @Test
     public void test7_jobCandidate_entity_registered() {
         Metadata metadata = AppBeans.get(Metadata.class);
-        assertNotNull(metadata.getClassNN("itpearls_JobCandidate"));
+        assertNotNull(metadata.getClassNN("hunttech_JobCandidate"));
     }
 
     @Test
     public void test8_hunttech_model_root_registered() {
         Metadata metadata = AppBeans.get(Metadata.class);
-        assertNotNull(metadata.getClassNN("itpearls_ExtUser"));
+        assertNotNull(metadata.getClassNN("hunttech_ExtUser"));
+        assertNotNull(metadata.getClassNN("hunttech_JobCandidate"));
         assertNotNull(metadata.getClassNN("hunttech_UserAiProfile"));
     }
 
