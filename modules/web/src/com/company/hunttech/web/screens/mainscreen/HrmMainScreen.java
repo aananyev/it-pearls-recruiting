@@ -22,9 +22,7 @@ import javax.inject.Inject;
 import java.util.UUID;
 
 /**
- * Применяет фоновое изображение главного экрана через CSS-инъекцию в Page.
- * Не зависит от Vaadin layout-менеджера: фон накладывается на mainVBox
- * средствами браузерного CSS, не конфликтуя с Dashboard.
+ * Чекпоинт-версия: каждый шаг логируется для диагностики отсутствия фона.
  */
 @UiController("hrmMainScreen")
 @UiDescriptor("hrm-main-screen.xml")
@@ -47,54 +45,69 @@ public class HrmMainScreen extends ExtMainScreen {
     private String lastAppliedResourceUrl;
     private String currentBackgroundStyleName;
 
+    // --- ЧЕКПОИНТ 0: конструктор ---
+    public HrmMainScreen() {
+        log.warn("### CHECKPOINT-0: HrmMainScreen constructor called ###");
+    }
+
     @Subscribe
     public void onAfterShowBackground(AfterShowEvent event) {
-        log.info("HrmMainScreen.onAfterShowBackground called, applying background");
+        log.warn("### CHECKPOINT-1: AfterShowEvent fired ###");
         refreshBackground();
     }
 
     @EventListener
     public void onMainScreenBackgroundChanged(MainScreenBackgroundChangedEvent event) {
+        log.warn("### CHECKPOINT-EVENT: MainScreenBackgroundChangedEvent received ###");
         refreshBackground();
     }
 
     private void refreshBackground() {
+        log.warn("### CHECKPOINT-2: refreshBackground() called ###");
         try {
             UI currentUi = UI.getCurrent();
+            log.warn("### CHECKPOINT-3: UI.getCurrent() = {} ###", currentUi);
             if (currentUi == null) {
-                throw new IllegalStateException("Vaadin UI недоступен для обновления фона главного экрана");
+                log.error("### CHECKPOINT-FAIL: UI.getCurrent() is NULL ###");
+                throw new IllegalStateException("Vaadin UI недоступен");
             }
+            log.warn("### CHECKPOINT-4: UI theme = {} ###", currentUi.getTheme());
+            log.warn("### CHECKPOINT-5: user = {} ###", userSession.getUser());
             Resource resource = mainScreenBackgroundService.resolveForUser(
                     userSession.getUser(), currentUi.getTheme(), userSession);
+            log.warn("### CHECKPOINT-6: resource = {} ###", resource);
             applyBackground(currentUi, resource);
+            log.warn("### CHECKPOINT-7: applyBackground() returned ###");
         } catch (RuntimeException e) {
-            log.warn("Cannot apply main screen background: {}", e.getMessage(), e);
+            log.error("### CHECKPOINT-FAIL: {} ###", e.getMessage(), e);
         }
     }
 
     private void applyBackground(UI currentUi, Resource resource) {
+        log.warn("### CHECKPOINT-8: applyBackground() called ###");
         AbstractOrderedLayout vaadinVBox = mainVBox.unwrap(AbstractOrderedLayout.class);
-        AbstractOrderedLayout vaadinDashboard = mainDashboard.unwrap(AbstractOrderedLayout.class);
+        log.warn("### CHECKPOINT-9: vaadinVBox = {} ###", vaadinVBox);
 
         String resourceUrl = registerBackgroundResource(currentUi, vaadinVBox, resource);
+        log.warn("### CHECKPOINT-10: resourceUrl = {} ###", resourceUrl);
 
-        // Удаляем предыдущий динамический стиль фона, если есть
         Page page = Page.getCurrent();
+        log.warn("### CHECKPOINT-11: Page.getCurrent() = {} ###", page);
         if (page == null) {
+            log.error("### CHECKPOINT-FAIL: Page.getCurrent() is NULL ###");
             throw new IllegalStateException("Vaadin Page недоступна");
         }
 
-        // Генерируем уникальное имя класса для этого сеанса
-        if (currentBackgroundStyleName != null) {
-            // Старый стиль остаётся в DOM, но новый класс переопределяет фон
-        }
-        currentBackgroundStyleName = "hrm-bg-" + UUID.randomUUID().toString().replace("-", "");
+        AbstractOrderedLayout vaadinDashboard = mainDashboard.unwrap(AbstractOrderedLayout.class);
+        log.warn("### CHECKPOINT-12: vaadinDashboard = {} ###", vaadinDashboard);
 
-        // Добавляем класс к mainVBox и dashboard
+        currentBackgroundStyleName = "hrm-bg-" + UUID.randomUUID().toString().replace("-", "");
+        log.warn("### CHECKPOINT-13: styleName = {} ###", currentBackgroundStyleName);
+
         vaadinVBox.addStyleName(currentBackgroundStyleName);
         vaadinDashboard.addStyleName("hrm-dashboard-transparent");
+        log.warn("### CHECKPOINT-14: styleNames added ###");
 
-        // Инжектируем CSS в head страницы
         String css = "." + currentBackgroundStyleName + " {"
                 + "background-image: url('" + escapeCssUrl(resourceUrl) + "') !important;"
                 + "background-position: center center !important;"
@@ -104,26 +117,21 @@ public class HrmMainScreen extends ExtMainScreen {
                 + ".hrm-dashboard-transparent {"
                 + "background: transparent !important;"
                 + "}";
+        log.warn("### CHECKPOINT-15: css = {} ###", css);
 
         page.getStyles().add(css);
+        log.warn("### CHECKPOINT-16: page.getStyles().add() returned ###");
 
-        // Маркеры для диагностики
         htmlAttributes.setDomAttribute(mainVBox, "data-hrm-main-background", "applied");
         htmlAttributes.setDomAttribute(mainVBox, "data-hrm-main-controller", HrmMainScreen.class.getSimpleName());
         lastAppliedResourceUrl = resourceUrl;
-
-        log.info("Main screen background applied: theme={}, class={}",
-                currentUi.getTheme(), currentBackgroundStyleName);
+        log.warn("### CHECKPOINT-17: ALL DONE, background applied ###");
     }
 
-    /**
-     * Регистрирует StreamResource через нулевого размера Image.
-     * Компонент не влияет на layout, но обеспечивает обслуживание
-     * динамического ресурса Vaadin connector-ом.
-     */
     private String registerBackgroundResource(UI currentUi,
                                               AbstractOrderedLayout vaadinLayout,
                                               Resource resource) {
+        log.warn("### CHECKPOINT-R1: registerBackgroundResource() ###");
         if (backgroundResourceHolder != null
                 && backgroundResourceHolder.getParent() instanceof com.vaadin.ui.ComponentContainer) {
             ((com.vaadin.ui.ComponentContainer) backgroundResourceHolder.getParent())
@@ -135,10 +143,18 @@ public class HrmMainScreen extends ExtMainScreen {
         backgroundResourceHolder.setHeight(0, Unit.PIXELS);
         backgroundResourceHolder.setVisible(false);
         vaadinLayout.addComponent(backgroundResourceHolder);
+        log.warn("### CHECKPOINT-R2: Image added to layout ###");
 
         String resourceUrl = ResourceReference.create(
                 resource, backgroundResourceHolder, "src").getURL();
+        // Vaadin возвращает app://APP/..., браузер не резолвит в CSS.
+        // Преобразуем в HTTP-путь относительно контекста приложения.
+        if (resourceUrl != null && resourceUrl.startsWith("app://APP")) {
+            resourceUrl = resourceUrl.replace("app://APP", "");
+        }
+        log.warn("### CHECKPOINT-R3: ResourceReference URL = {} ###", resourceUrl);
         if (resourceUrl == null || resourceUrl.trim().isEmpty()) {
+            log.error("### CHECKPOINT-FAIL: ResourceReference returned empty URL ###");
             throw new IllegalStateException("Vaadin не зарегистрировал ресурс фонового изображения");
         }
         return resourceUrl;
