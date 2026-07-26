@@ -10,6 +10,7 @@
 @import "com.company.hunttech/iteraction-list-editor";
 @import "com.company.hunttech/iteraction-list-accordion-navigation";
 @import "com.company.hunttech/candidate-cv-editor";
+@import "com.company.hunttech/iteraction-list-reference-finish";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 .hunttech-modern-light {
@@ -22,4 +23,5 @@
   @include iteraction-list-editor-theme;
   @include iteraction-list-accordion-navigation-theme;
   @include candidate-cv-editor-theme;
+  @include iteraction-list-reference-finish-theme;
 }

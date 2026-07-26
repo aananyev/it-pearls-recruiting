@@ -109,40 +109,17 @@
                                           align="MIDDLE_CENTER"
                                           stylename="iteraction-list-candidate-image"
                                           scaleMode="SCALE_DOWN"/>
-                        <image id="projectLogoImage"
+                        <ovaFallbackImage id="projectLogoImage"
                                width="80px"
                                height="80px"
+                               ovalWidth="80px"
+                               ovalHeight="80px"
+                               fallbackThemePath="icons/no-company.png"
                                visible="true"
                                align="MIDDLE_CENTER"
                                stylename="iteraction-list-project-image"
-                               scaleMode="FILL"/>
+                               scaleMode="SCALE_DOWN"/>
                     </hbox>
-                </vbox>
-
-                <!-- Fallback-label заменяются контроллером на пять borderless-кнопок.
-                     Индекс расположен сразу под изображениями кандидата и проекта. -->
-                <vbox id="iteractionListNavigation"
-                      width="100%"
-                      spacing="false"
-                      stylename="iteraction-list-navigation">
-                    <label width="100%"
-                           value="msg://msgAccordionNavigation"
-                           stylename="iteraction-list-navigation-title"/>
-                    <label width="100%"
-                           value="msg://msgAccordionParticipants"
-                           stylename="iteraction-list-nav-item iteraction-list-nav-item-active"/>
-                    <label width="100%"
-                           value="msg://msgAccordionInteraction"
-                           stylename="iteraction-list-nav-item"/>
-                    <label width="100%"
-                           value="msg://msgAccordionResult"
-                           stylename="iteraction-list-nav-item"/>
-                    <label width="100%"
-                           value="msg://msgAccordionComment"
-                           stylename="iteraction-list-nav-item"/>
-                    <label width="100%"
-                           value="msg://mshMostPopular"
-                           stylename="iteraction-list-nav-item"/>
                 </vbox>
 
                 <vbox width="100%"
@@ -168,6 +145,32 @@
                                    width="100%"
                                    align="MIDDLE_LEFT"/>
                     </vbox>
+                </vbox>
+
+                <!-- Fallback-label заменяются контроллером на пять borderless-кнопок.
+                     Индекс расположен после служебной карточки номера и даты. -->
+                <vbox id="iteractionListNavigation"
+                      width="100%"
+                      spacing="false"
+                      stylename="iteraction-list-navigation">
+                    <label width="100%"
+                           value="msg://msgAccordionNavigation"
+                           stylename="iteraction-list-navigation-title"/>
+                    <label width="100%"
+                           value="msg://msgAccordionParticipants"
+                           stylename="iteraction-list-nav-item iteraction-list-nav-item-active"/>
+                    <label width="100%"
+                           value="msg://msgAccordionInteraction"
+                           stylename="iteraction-list-nav-item"/>
+                    <label width="100%"
+                           value="msg://msgAccordionResult"
+                           stylename="iteraction-list-nav-item"/>
+                    <label width="100%"
+                           value="msg://msgAccordionComment"
+                           stylename="iteraction-list-nav-item"/>
+                    <label width="100%"
+                           value="msg://mshMostPopular"
+                           stylename="iteraction-list-nav-item"/>
                 </vbox>
 
                 <vbox width="100%"
@@ -346,6 +349,19 @@
                             <vbox width="100%"
                                   spacing="true"
                                   stylename="iteraction-list-content">
+                                <!-- Пять быстрых действий находятся перед аккордеонами и сохраняют
+                                     существующий runtime-контракт mostPopularHbox. -->
+                                <vbox id="mostPopularQuickActions"
+                                      width="100%"
+                                      spacing="false"
+                                      stylename="iteraction-list-quick-actions-card">
+                                      <hbox id="mostPopularHbox"
+                                            width="100%"
+                                            height="AUTO"
+                                            spacing="true"
+                                            align="MIDDLE_CENTER"
+                                            stylename="iteraction-list-popular-buttons"/>
+                                </vbox>
                                 <groupBox id="participantsAccordion"
                                           caption="msg://msgAccordionParticipants"
                                           width="100%"
@@ -353,8 +369,9 @@
                                           margin="true"
                                           collapsable="true"
                                           collapsed="false"
+                                      visible="true"
                                           showAsPanel="true"
-                                          stylename="iteraction-list-accordion-section iteraction-list-form-section">
+                                          stylename="iteraction-list-accordion-section iteraction-list-form-section iteraction-list-participants-section">
                                     <grid id="gridIterationData"
                                           spacing="true"
                                           width="100%"
@@ -552,12 +569,6 @@
                                           stylename="iteraction-list-accordion-section iteraction-list-popular-section">
                                     <vbox width="100%"
                                           spacing="true">
-                                        <hbox id="mostPopularHbox"
-                                              width="100%"
-                                              height="AUTO"
-                                              spacing="true"
-                                              align="MIDDLE_CENTER"
-                                              stylename="iteraction-list-popular-buttons"/>
                                         <hbox id="mostPopularIteractionHBox"
                                               width="100%"
                                               spacing="true"/>

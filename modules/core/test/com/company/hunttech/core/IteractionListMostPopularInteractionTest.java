@@ -64,7 +64,10 @@ public class IteractionListMostPopularInteractionTest {
         assertTrue(sidebar.contains("id=\"iteractionListNavigation\""));
         assertTrue(sidebar.contains("value=\"msg://mshMostPopular\""));
         assertTrue(workspace.contains("id=\"popularAccordion\""));
+        assertTrue(workspace.contains("id=\"mostPopularQuickActions\""));
         assertTrue(workspace.contains("id=\"mostPopularHbox\""));
+        assertTrue(workspace.indexOf("id=\"mostPopularQuickActions\"")
+                < workspace.indexOf("id=\"participantsAccordion\""));
         assertTrue(workspace.contains("height=\"AUTO\""));
         assertFalse(workspace.contains("id=\"iteractionListNavigation\""));
     }
@@ -73,10 +76,12 @@ public class IteractionListMostPopularInteractionTest {
     public void scssProtectsVisibleFiveButtonGeometry() throws IOException {
         String scss = readProjectFile(
                 "modules/web/themes/halo/com.company.hunttech/"
-                        + "iteraction-list-accordion-navigation.scss");
+                        + "iteraction-list-reference-finish.scss");
 
-        assertTrue(scss.contains("min-height: 52px"));
-        assertTrue(scss.contains("max-width: 20% !important"));
+        assertTrue(scss.contains("min-height: 46px"));
+        assertTrue(scss.contains("width: 20% !important"));
+        assertTrue(scss.contains("background: #2e7d32 !important"));
+        assertTrue(scss.contains("border-radius: 999px !important"));
         assertTrue(scss.contains(".iteraction-list-popular-button"));
     }
 

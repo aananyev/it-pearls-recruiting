@@ -31,11 +31,12 @@ public class IteractionListEditAccordionLayoutTest {
                 "stylename=\"iteraction-list-sidebar\"",
                 "stylename=\"iteraction-list-profile-header\"",
                 "stylename=\"iteraction-list-identity-images\"",
-                "id=\"iteractionListNavigation\"",
                 "stylename=\"iteraction-list-sidebar-card iteraction-list-service-card\"",
+                "id=\"iteractionListNavigation\"",
                 "stylename=\"iteraction-list-sidebar-card iteraction-list-vacancy-card\"",
                 "id=\"iteractionListWorkspace\"",
                 "id=\"iteractionListContentScrollBox\"",
+                "id=\"mostPopularQuickActions\"",
                 "id=\"participantsAccordion\"",
                 "id=\"interactionAccordion\"",
                 "id=\"resultAccordion\"",
@@ -103,6 +104,7 @@ public class IteractionListEditAccordionLayoutTest {
         String descriptor = descriptor();
 
         assertOrdered(descriptor,
+                "id=\"mostPopularHbox\"",
                 "id=\"candidateField\"",
                 "id=\"vacancyFiels\"",
                 "id=\"iteractionTypeField\"",
@@ -110,8 +112,7 @@ public class IteractionListEditAccordionLayoutTest {
                 "id=\"ratingField\"",
                 "id=\"recrutierField\"",
                 "id=\"communicationMethodField\"",
-                "id=\"commentField\"",
-                "id=\"mostPopularHbox\"");
+                "id=\"commentField\"");
         assertTrue(descriptor.contains("invoke=\"callActionEntity\""));
         assertTrue(descriptor.contains("invoke=\"onButtonSubscribeClick\""));
         assertTrue(descriptor.contains("action=\"windowCommitAndClose\""));

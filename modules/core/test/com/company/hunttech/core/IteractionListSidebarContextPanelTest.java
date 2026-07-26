@@ -36,7 +36,10 @@ public class IteractionListSidebarContextPanelTest {
         assertTrue(xml.contains("stylename=\"iteraction-list-sidebar-card iteraction-list-vacancy-card\""));
         assertTrue(xml.contains("id=\"candidateImage\""));
         assertTrue(xml.contains("property=\"candidate.fileImageFace\""));
-        assertTrue(xml.contains("id=\"projectLogoImage\""));
+        assertTrue(xml.contains("<ovaFallbackImage id=\"projectLogoImage\""));
+        assertTrue(xml.contains("fallbackThemePath=\"icons/no-company.png\""));
+        assertTrue(xml.contains("ovalWidth=\"80px\""));
+        assertTrue(xml.contains("ovalHeight=\"80px\""));
         assertTrue(xml.contains("id=\"numberIteractionField\""));
         assertTrue(xml.contains("property=\"numberIteraction\""));
         assertTrue(xml.contains("id=\"dateIteractionField\""));

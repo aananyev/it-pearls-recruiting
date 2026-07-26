@@ -8,6 +8,7 @@
 @import "com.company.hunttech/iteraction-list-editor";
 @import "com.company.hunttech/iteraction-list-accordion-navigation";
 @import "com.company.hunttech/candidate-cv-editor";
+@import "com.company.hunttech/iteraction-list-reference-finish";
 /* Шрифт Inter для подтем hunttech-modern-light / hunttech-modern-dark */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap');
@@ -24,6 +25,7 @@
   @include iteraction-list-editor-theme;
   @include iteraction-list-accordion-navigation-theme;
   @include candidate-cv-editor-theme;
+  @include iteraction-list-reference-finish-theme;
 }
 
 .active-customer {

@@ -37,6 +37,8 @@ public class LeftSidebarAvatarComponentTest {
         assertTrue(iteractionXml.contains("stylename=\"iteraction-list-sidebar\""));
         assertTrue(iteractionXml.contains("<ovaFallbackImage id=\"candidateImage\""));
         assertFalse(iteractionXml.contains("<image id=\"candidateImage\""));
+        assertTrue(iteractionXml.contains("<ovaFallbackImage id=\"projectLogoImage\""));
+        assertFalse(iteractionXml.contains("<image id=\"projectLogoImage\""));
     }
 
     @Test
