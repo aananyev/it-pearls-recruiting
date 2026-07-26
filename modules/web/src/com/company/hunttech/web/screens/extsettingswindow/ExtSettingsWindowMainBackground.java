@@ -6,9 +6,15 @@ import com.haulmont.cuba.core.app.FileStorageService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FileStorageException;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.FileUploadField;
 import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.components.VBoxLayout;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.data.Datasource;
 
 import javax.inject.Inject;
@@ -33,6 +39,9 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
     private static final String STATUS_CUSTOM = "Используется персональное изображение пользователя.";
     private static final String UNSUPPORTED_FILE = "Поддерживаются PNG, JPG, JPEG и WEBP размером до 15 МБ.";
     private static final String REMOVE_ERROR = "Не удалось удалить прежний файл фона. Ссылка на него больше не используется.";
+    private static final String NAVIGATION_STYLE = "borderless settings-section-nav-item";
+    private static final String ACTIVE_NAVIGATION_STYLE =
+            "borderless settings-section-nav-item settings-section-nav-item-active";
 
     @Inject
     private Datasource<UserSettings> userSettingsDs;
@@ -48,14 +57,23 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
     private FileStorageService fileStorageService;
     @Inject
     private Notifications notifications;
+    @Inject
+    private Dialogs dialogs;
+    @Inject
+    private UiComponents uiComponents;
+    @Inject
+    private VBoxLayout interfaceSettingsNavigation;
 
     /** Файлы удаляются только после подтверждённого commit, чтобы Cancel не разрушал прежнюю настройку. */
     private final Set<FileDescriptor> pendingRemoval = new LinkedHashSet<>();
     private FileDescriptor currentBackground;
+    private Button interfaceSettingsBackgroundNav;
+    private boolean successfulCommitClosing;
 
     @Override
     public void init(Map<String, Object> params) {
         super.init(params);
+        initBackgroundNavigation();
         mainScreenBackgroundUpload.setPermittedExtensions(SUPPORTED_EXTENSIONS);
         mainScreenBackgroundUpload.setFileSizeLimit(MAX_BACKGROUND_FILE_SIZE);
 
@@ -68,9 +86,59 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
     }
 
     /**
-     * Помечает новый FileDescriptor специальным префиксом. Это исключает трактовку
-     * legacy-фотографии из fileImageFace как пользовательского фонового изображения.
+     * Добавляет пятый пункт в существующий индекс вкладки «Интерфейс». Навигация
+     * переводит фокус к upload-компоненту и не изменяет значения формы.
      */
+    private void initBackgroundNavigation() {
+        interfaceSettingsBackgroundNav = uiComponents.create(Button.class);
+        interfaceSettingsBackgroundNav.setId("interfaceSettingsBackgroundNav");
+        interfaceSettingsBackgroundNav.setCaption("Фон главного экрана");
+        interfaceSettingsBackgroundNav.setWidth("100%");
+        interfaceSettingsBackgroundNav.setStyleName(NAVIGATION_STYLE);
+        interfaceSettingsBackgroundNav.addClickListener(event -> selectInterfaceBackgroundSettings());
+        interfaceSettingsNavigation.add(interfaceSettingsBackgroundNav);
+    }
+
+    public void selectInterfaceBackgroundSettings() {
+        for (Component component : interfaceSettingsNavigation.getComponents()) {
+            if (component instanceof Button) {
+                ((Button) component).setStyleName(NAVIGATION_STYLE);
+            }
+        }
+        interfaceSettingsBackgroundNav.setStyleName(ACTIVE_NAVIGATION_STYLE);
+        mainScreenBackgroundUpload.focus();
+    }
+
+    @Override
+    public void selectInterfaceWindowSettings() {
+        setBackgroundNavigationActive(false);
+        super.selectInterfaceWindowSettings();
+    }
+
+    @Override
+    public void selectInterfaceAppearanceSettings() {
+        setBackgroundNavigationActive(false);
+        super.selectInterfaceAppearanceSettings();
+    }
+
+    @Override
+    public void selectInterfaceRegionalSettings() {
+        setBackgroundNavigationActive(false);
+        super.selectInterfaceRegionalSettings();
+    }
+
+    @Override
+    public void selectInterfaceStartupSettings() {
+        setBackgroundNavigationActive(false);
+        super.selectInterfaceStartupSettings();
+    }
+
+    private void setBackgroundNavigationActive(boolean active) {
+        if (interfaceSettingsBackgroundNav != null) {
+            interfaceSettingsBackgroundNav.setStyleName(active ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
+        }
+    }
+
     private void onMainScreenBackgroundUploaded() {
         FileDescriptor uploaded = mainScreenBackgroundUpload.getFileDescriptor();
         if (uploaded == null || userSettingsDs.getItem() == null) {
@@ -101,10 +169,6 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         refreshBackgroundStatus();
     }
 
-    /**
-     * Сбрасывает только маркированный персональный фон. Не относящийся к фону legacy-файл
-     * в том же историческом поле не изменяется новой логикой.
-     */
     public void clearMainScreenBackground() {
         if (userSettingsDs.getItem() == null || currentBackground == null) {
             refreshBackgroundStatus();
@@ -117,11 +181,45 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         refreshBackgroundStatus();
     }
 
+    /**
+     * После успешного сохранения закрывает SettingsWindow без повторного диалога
+     * несохранённых изменений: данные уже записаны действующей commit-цепочкой.
+     */
     @Override
     protected void commit() {
         UUID settingsId = userSettingsDs.getItem() == null ? null : userSettingsDs.getItem().getId();
-        super.commit();
+        successfulCommitClosing = true;
+        try {
+            super.commit();
+        } finally {
+            successfulCommitClosing = false;
+        }
         cleanupUnreferencedBackgrounds(settingsId);
+    }
+
+    @Override
+    public boolean hasUnsavedChanges() {
+        return !successfulCommitClosing && super.hasUnsavedChanges();
+    }
+
+    /**
+     * Отмена всегда требует явного выбора: остаться в форме либо закрыть её с
+     * отбрасыванием datasource-изменений. Сохранение из этого сценария недоступно.
+     */
+    @Override
+    protected void cancel() {
+        dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
+                .withCaption("Выход из настроек")
+                .withMessage("Остаться в экране или выйти без сохранения?")
+                .withActions(
+                        new BaseAction("stayInSettings")
+                                .withCaption("Остаться")
+                                .withPrimary(true),
+                        new BaseAction("discardSettings")
+                                .withCaption("Выйти без сохранения")
+                                .withHandler(event -> closeWithDiscard())
+                )
+                .show();
     }
 
     private void refreshBackgroundStatus() {
@@ -133,10 +231,6 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         return extension != null && SUPPORTED_EXTENSIONS.contains("." + extension.toLowerCase(Locale.ROOT));
     }
 
-    /**
-     * После commit перечитывает активную ссылку и удаляет только собственные background-файлы,
-     * которые больше не используются. Legacy-файлы без префикса никогда не удаляются.
-     */
     private void cleanupUnreferencedBackgrounds(UUID settingsId) {
         UUID activeFileId = null;
         if (settingsId != null) {

@@ -9,6 +9,7 @@ import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ResourceReference;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.UI;
@@ -38,9 +39,8 @@ public class HrmMainScreen extends ExtMainScreen {
     private com.haulmont.cuba.gui.components.Component mainDashboard;
 
     /**
-     * Скрытый Image владеет динамическим ресурсом в Vaadin connector tree.
-     * Без такого владельца URL StreamResource формируется, но запрос браузера
-     * не обслуживается connector-ом и фон остаётся пустым.
+     * Нулевого размера Image владеет динамическим ресурсом в Vaadin connector tree.
+     * Компонент остаётся подключённым к UI, но не занимает место в mainVBox.
      */
     private Image backgroundResourceHolder;
 
@@ -51,20 +51,27 @@ public class HrmMainScreen extends ExtMainScreen {
     @Subscribe
     public void onAfterShowBackground(AfterShowEvent event) {
         try {
-            String themeName = UI.getCurrent() == null ? null : UI.getCurrent().getTheme();
+            UI currentUi = UI.getCurrent();
+            if (currentUi == null) {
+                throw new IllegalStateException("Vaadin UI недоступен после открытия главного экрана");
+            }
+            String themeName = currentUi.getTheme();
             Resource resource = mainScreenBackgroundService.resolveForUser(
                     (ExtUser) userSession.getUser(), themeName);
-            applyBackground(resource);
+            applyBackground(currentUi, resource);
         } catch (RuntimeException e) {
             // Ошибка декоративного слоя не должна блокировать открытие главного экрана.
             log.warn("Cannot apply main screen background: {}", e.getMessage(), e);
         }
     }
 
-    private void applyBackground(Resource resource) {
+    private void applyBackground(UI currentUi, Resource resource) {
         AbstractOrderedLayout vaadinLayout = mainVBox.unwrap(AbstractOrderedLayout.class);
         com.vaadin.ui.Component vaadinDashboard = mainDashboard.unwrap(com.vaadin.ui.Component.class);
-        String resourceUrl = registerBackgroundResource(vaadinLayout, resource);
+        ensureAttachedToCurrentUi(currentUi, vaadinLayout, "mainVBox");
+        ensureAttachedToCurrentUi(currentUi, vaadinDashboard, "mainDashboard");
+
+        String resourceUrl = registerBackgroundResource(currentUi, vaadinLayout, resource);
         String sessionStyle = "hrm-main-screen-background-"
                 + UUID.randomUUID().toString().replace("-", "");
 
@@ -75,7 +82,7 @@ public class HrmMainScreen extends ExtMainScreen {
         vaadinDashboard.addStyleName("hrm-main-screen-background");
         vaadinDashboard.addStyleName(sessionStyle);
 
-        Page page = Page.getCurrent();
+        Page page = currentUi.getPage();
         if (page == null) {
             throw new IllegalStateException("Vaadin Page недоступна после открытия главного экрана");
         }
@@ -86,6 +93,9 @@ public class HrmMainScreen extends ExtMainScreen {
                         + "background-repeat:no-repeat !important;"
                         + "background-size:cover !important;"
                         + "}");
+        log.debug("Main screen background applied: theme={}, resourceUrl={}, layoutClass={}, dashboardClass={}",
+                currentUi.getTheme(), resourceUrl,
+                vaadinLayout.getClass().getName(), vaadinDashboard.getClass().getName());
     }
 
     /**
@@ -93,10 +103,18 @@ public class HrmMainScreen extends ExtMainScreen {
      * Компонент добавляется в layout до получения URL, поэтому connector уже
      * связан с UI и способен обслужить системный SVG или пользовательский файл.
      */
-    private String registerBackgroundResource(AbstractOrderedLayout vaadinLayout, Resource resource) {
+    private String registerBackgroundResource(UI currentUi,
+                                              AbstractOrderedLayout vaadinLayout,
+                                              Resource resource) {
+        if (backgroundResourceHolder != null && backgroundResourceHolder.getParent() == vaadinLayout) {
+            vaadinLayout.removeComponent(backgroundResourceHolder);
+        }
+
         backgroundResourceHolder = new Image(null, resource);
-        backgroundResourceHolder.setVisible(false);
+        backgroundResourceHolder.setWidth(0, Unit.PIXELS);
+        backgroundResourceHolder.setHeight(0, Unit.PIXELS);
         vaadinLayout.addComponent(backgroundResourceHolder);
+        ensureAttachedToCurrentUi(currentUi, backgroundResourceHolder, "backgroundResourceHolder");
 
         String resourceUrl = ResourceReference.create(
                 resource, backgroundResourceHolder, "src").getURL();
@@ -104,6 +122,14 @@ public class HrmMainScreen extends ExtMainScreen {
             throw new IllegalStateException("Vaadin не зарегистрировал ресурс фонового изображения");
         }
         return resourceUrl;
+    }
+
+    private void ensureAttachedToCurrentUi(UI currentUi,
+                                           com.vaadin.ui.Component component,
+                                           String componentName) {
+        if (component == null || component.getUI() != currentUi) {
+            throw new IllegalStateException(componentName + " не присоединён к текущему Vaadin UI");
+        }
     }
 
     private String escapeCssUrl(String value) {

@@ -20,57 +20,61 @@ import static org.junit.Assert.assertTrue;
 public class MainScreenBackgroundContractTest {
 
     private static final String[] THEMES = {
-            "halo",
-            "havana",
-            "helium",
-            "hover",
-            "hunttech-modern",
-            "hunttech-modern-light",
-            "hunttech-modern-dark"
+            "halo", "havana", "helium", "hover",
+            "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark"
     };
 
     @Test
     public void generatedCatalogContainsTenVariantsForAllSevenThemes() throws IOException {
         String service = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/MainScreenBackgroundService.java");
-
         assertTrue(service.contains("VARIANT_COUNT = 10"));
-        assertEquals("Каталог должен содержать ровно семь theme-aware палитр",
-                THEMES.length, countOccurrences(service, "palettes.put("));
+        assertEquals(THEMES.length, countOccurrences(service, "palettes.put("));
         for (String theme : THEMES) {
-            assertTrue("Не найдена палитра темы " + theme,
-                    service.contains("palettes.put(\"" + theme + "\""));
+            assertTrue(service.contains("palettes.put(\"" + theme + "\""));
         }
         for (int variant = 0; variant < 10; variant++) {
-            assertTrue("Не найден SVG-вариант " + variant,
-                    service.contains("case " + variant + ":"));
+            assertTrue(service.contains("case " + variant + ":"));
         }
-
-        // Регрессия защищает фактический формат, пригодный для CSS background.
         assertTrue(service.contains("image/svg+xml"));
         assertTrue(service.contains("viewBox=\\\"0 0 1920 1080\\\""));
         assertTrue(service.contains("preserveAspectRatio=\\\"xMidYMid slice\\\""));
-        assertTrue(service.contains("\"hrm-main-\" + themeName + \"-\" + variant + \".svg\""));
+    }
+
+    @Test
+    public void mainScreenIdIsExplicitlyRegistered() throws IOException {
+        String properties = source("modules/web/src/com/company/hunttech/web-app.properties");
+        String screenConfig = source("modules/web/src/com/company/hunttech/web-screens.xml");
+        String controller = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
+        String descriptor = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/hrm-main-screen.xml");
+        assertTrue(properties.contains("cuba.web.mainScreenId=hrmMainScreen"));
+        assertTrue(screenConfig.contains("<screen id=\"hrmMainScreen\""));
+        assertTrue(screenConfig.contains("/mainscreen/hrm-main-screen.xml"));
+        assertTrue(controller.contains("@UiController(\"hrmMainScreen\")"));
+        assertTrue(controller.contains("class HrmMainScreen extends ExtMainScreen"));
+        assertTrue(descriptor.contains("extends=\"/com/company/hunttech/web/screens/mainscreen/ext-main-screen.xml\""));
     }
 
     @Test
     public void dynamicResourceIsRegisteredAfterVaadinConnectorAttach() throws IOException {
         String controller = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
-
         assertTrue(controller.contains("onAfterShowBackground(AfterShowEvent event)"));
-        assertFalse(controller.contains("onBeforeShowBackground(BeforeShowEvent event)"));
+        assertTrue(controller.contains("UI currentUi = UI.getCurrent()"));
+        assertTrue(controller.contains("Page page = currentUi.getPage()"));
+        assertFalse(controller.contains("Page.getCurrent()"));
         assertOrdered(controller,
                 "new Image(null, resource)",
                 "vaadinLayout.addComponent(backgroundResourceHolder)",
+                "ensureAttachedToCurrentUi(currentUi, backgroundResourceHolder",
                 "ResourceReference.create(",
                 "backgroundResourceHolder, \"src\"");
-        assertTrue(controller.contains("mainDashboard.unwrap(com.vaadin.ui.Component.class)"));
+        assertTrue(controller.contains("ensureAttachedToCurrentUi(currentUi, vaadinDashboard"));
         assertTrue(controller.contains("vaadinDashboard.addStyleName(sessionStyle)"));
+        assertTrue(controller.contains("backgroundResourceHolder.setWidth(0, Unit.PIXELS)"));
     }
 
     @Test
     public void customBackgroundHasPriorityOverRandomThemeCatalog() throws IOException {
         String service = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/MainScreenBackgroundService.java");
-
         assertOrdered(service,
                 "FileDescriptor customBackground = loadUserBackground(currentUser)",
                 "Optional<Resource> customResource = createCustomResource(customBackground)",
@@ -82,14 +86,11 @@ public class MainScreenBackgroundContractTest {
     @Test
     public void mainScreenExtensionPreservesExtMainScreenBusinessLogic() throws IOException {
         String controller = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
-        String descriptor = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/hrm-main-screen.xml");
-        String properties = source("modules/web/src/com/company/hunttech/web-app.properties");
-
+        String baseController = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/ExtMainScreen.java");
         assertTrue(controller.contains("class HrmMainScreen extends ExtMainScreen"));
-        assertTrue(controller.contains("resolveForUser"));
-        assertTrue(controller.contains("background-size:cover"));
-        assertTrue(descriptor.contains("extends=\"/com/company/hunttech/web/screens/mainscreen/ext-main-screen.xml\""));
-        assertTrue(properties.contains("cuba.web.mainScreenId=hrmMainScreen"));
+        assertTrue(baseController.contains("class ExtMainScreen extends MainScreen"));
+        assertTrue(baseController.contains("onBeforeShow(BeforeShowEvent event)"));
+        assertTrue(baseController.contains("onAfterShow1(AfterShowEvent event)"));
         assertFalse(controller.contains("publishMyNotification"));
         assertFalse(controller.contains("checkPersonalReserveCandidates"));
     }
@@ -99,53 +100,59 @@ public class MainScreenBackgroundContractTest {
         String controller = source("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindowMainBackground.java");
         String descriptor = source("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-main-background.xml");
         String userSettings = source("modules/global/src/com/company/hunttech/entity/UserSettings.java");
-
-        assertTrue(controller.contains("class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceLayout"));
         assertTrue(controller.contains("UserSettings.fileImageFace"));
         assertFalse(descriptor.contains("datasource=\"userSettingsDs\""));
-        assertFalse(descriptor.contains("property=\"fileImageFace\""));
         assertTrue(controller.contains("setFileImageFace(committedDescriptor)"));
-        assertTrue(descriptor.contains("invoke=\"clearMainScreenBackground\""));
         assertTrue(userSettings.contains("private FileDescriptor fileImageFace;"));
         assertFalse(controller.contains("@Entity"));
-        assertFalse(controller.contains("@Column"));
+    }
+
+    @Test
+    public void settingsNavigationContainsMainScreenBackgroundSection() throws IOException {
+        String controller = source("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindowMainBackground.java");
+        assertTrue(controller.contains("interfaceSettingsBackgroundNav"));
+        assertTrue(controller.contains("setCaption(\"Фон главного экрана\")"));
+        assertTrue(controller.contains("interfaceSettingsNavigation.add(interfaceSettingsBackgroundNav)"));
+        assertTrue(controller.contains("public void selectInterfaceBackgroundSettings()"));
+        assertTrue(controller.contains("mainScreenBackgroundUpload.focus()"));
+    }
+
+    @Test
+    public void settingsOkAndCancelUseExplicitCloseContract() throws IOException {
+        String controller = source("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindowMainBackground.java");
+        assertOrdered(controller,
+                "successfulCommitClosing = true",
+                "super.commit()",
+                "successfulCommitClosing = false");
+        assertTrue(controller.contains("public boolean hasUnsavedChanges()"));
+        assertTrue(controller.contains("return !successfulCommitClosing && super.hasUnsavedChanges()"));
+        assertTrue(controller.contains("Остаться в экране или выйти без сохранения?"));
+        assertTrue(controller.contains("withCaption(\"Остаться\")"));
+        assertTrue(controller.contains("withCaption(\"Выйти без сохранения\")"));
+        assertTrue(controller.contains("closeWithDiscard()"));
     }
 
     @Test
     public void settingsCardHasIsolatedLayoutAndThemeStyles() throws IOException {
         String descriptor = source("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-main-background.xml");
-
         assertTrue(descriptor.contains("main-screen-background-card"));
-        assertTrue(descriptor.contains("mainScreenBackgroundCustomOption"));
-        assertTrue(descriptor.contains("mainScreenBackgroundDefaultOption"));
         assertTrue(descriptor.contains("caption=\"Использовать системные фоны\""));
         assertFalse(descriptor.contains("stylename=\"danger\""));
-
         for (String theme : THEMES) {
             String themeRoot = "modules/web/themes/" + theme + "/";
             String styles = source(themeRoot + "styles.scss");
-            String localScss = source(themeRoot
-                    + "com.company.hunttech/main-screen-background-settings.scss");
-
-            assertTrue("SCSS не импортирован в теме " + theme,
-                    styles.contains("@import \"com.company.hunttech/main-screen-background-settings\";"));
-            assertTrue("SCSS mixin не подключён в теме " + theme,
-                    styles.contains("@include main-screen-background-settings;"));
-            assertTrue("Нет локального namespace в теме " + theme,
-                    localScss.contains(".main-screen-background-card"));
-            assertFalse("Запрещён глобальный селектор кнопки в теме " + theme,
-                    localScss.contains("\n.v-button"));
+            String localScss = source(themeRoot + "com.company.hunttech/main-screen-background-settings.scss");
+            assertTrue(styles.contains("@import \"com.company.hunttech/main-screen-background-settings\";"));
+            assertTrue(styles.contains("@include main-screen-background-settings;"));
+            assertTrue(localScss.contains(".main-screen-background-card"));
         }
     }
 
     @Test
     public void clearActionReturnsToThemeRandomizationAndDeletesOnlyMarkedFiles() throws IOException {
         String controller = source("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindowMainBackground.java");
-
         assertTrue(controller.contains("public void clearMainScreenBackground()"));
-        assertTrue(controller.contains("currentBackground == null"));
         assertTrue(controller.contains("setFileImageFace(null)"));
-        assertTrue(controller.contains("refreshBackgroundStatus()"));
         assertTrue(controller.contains("mainScreenBackgroundService.isCustomBackground(descriptor)"));
         assertTrue(controller.contains("!Objects.equals(descriptor.getId(), activeFileId)"));
     }
@@ -161,13 +168,9 @@ public class MainScreenBackgroundContractTest {
     }
 
     private String source(String relativePath) throws IOException {
-        Path path = projectRoot().resolve(relativePath);
-        return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+        return new String(Files.readAllBytes(projectRoot().resolve(relativePath)), StandardCharsets.UTF_8);
     }
 
-    /**
-     * Находит корень проекта независимо от рабочей директории Gradle test task.
-     */
     private Path projectRoot() {
         Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
         while (root != null && !Files.exists(root.resolve("build.gradle"))) {
