@@ -83,8 +83,8 @@
               height="100%"
               spacing="false"
               expand="iteractionListWorkspace">
-            <!-- Sidebar объединяет профильный паттерн CandidateCVEdit и индекс SettingsWindow.
-                 Все legacy ID, bindings и runtime-компоненты сохраняются без изменения. -->
+            <!-- Sidebar хранит постоянный контекст редактируемого IteractionList.
+                 Component ID, bindings и runtime-компоненты бизнес-логики сохранены. -->
             <vbox stylename="iteraction-list-sidebar"
                   width="296px"
                   height="100%"
@@ -93,8 +93,8 @@
                 <vbox width="100%"
                       spacing="true"
                       stylename="iteraction-list-profile-header">
-                    <!-- Оба OvaFallbackImage используют одинаковую квадратную геометрию
-                         и общий круглый стиль; источники данных и fallback не меняются. -->
+                    <!-- Фотография кандидата является основным образом экземпляра,
+                         а меньший логотип проекта сохраняет контекст вакансии. -->
                     <hbox width="100%"
                           spacing="true"
                           align="MIDDLE_CENTER"
@@ -112,16 +112,58 @@
                                           stylename="iteraction-list-candidate-image"
                                           scaleMode="SCALE_DOWN"/>
                         <ovaFallbackImage id="projectLogoImage"
-                                          width="112px"
-                                          height="112px"
-                                          ovalWidth="112px"
-                                          ovalHeight="112px"
+                                          width="80px"
+                                          height="80px"
+                                          ovalWidth="80px"
+                                          ovalHeight="80px"
                                           fallbackThemePath="icons/no-company.png"
                                           visible="true"
                                           align="MIDDLE_CENTER"
-                                          stylename="iteraction-list-candidate-image"
+                                          stylename="iteraction-list-project-image"
                                           scaleMode="SCALE_DOWN"/>
                     </hbox>
+                    <!-- Наименование экземпляра читается из того же dataContainer;
+                         новые loader, query или Java-обработчики не требуются. -->
+                    <label id="iteractionCandidateNameLabel"
+                           dataContainer="iteractionListDc"
+                           property="candidate.fullName"
+                           stylename="iteraction-list-profile-title"
+                           width="100%"
+                           height="AUTO"
+                           align="MIDDLE_CENTER"/>
+                    <label id="iteractionVacancyNameLabel"
+                           dataContainer="iteractionListDc"
+                           property="vacancy.vacansyName"
+                           stylename="iteraction-list-profile-subtitle"
+                           width="100%"
+                           height="AUTO"
+                           align="MIDDLE_CENTER"/>
+                </vbox>
+
+                <!-- Fallback-label заменяются существующим контроллером на пять
+                     borderless-кнопок. Индекс следует сразу после имени экземпляра. -->
+                <vbox id="iteractionListNavigation"
+                      width="100%"
+                      spacing="false"
+                      stylename="iteraction-list-navigation">
+                    <label width="100%"
+                           value="msg://msgAccordionNavigation"
+                           stylename="iteraction-list-navigation-title"/>
+                    <label width="100%"
+                           value="msg://msgAccordionParticipants"
+                           stylename="iteraction-list-nav-item iteraction-list-nav-item-active"/>
+                    <label width="100%"
+                           value="msg://msgAccordionInteraction"
+                           stylename="iteraction-list-nav-item"/>
+                    <label width="100%"
+                           value="msg://msgAccordionResult"
+                           stylename="iteraction-list-nav-item"/>
+                    <label width="100%"
+                           value="msg://msgAccordionComment"
+                           stylename="iteraction-list-nav-item"/>
+                    <label width="100%"
+                           value="msg://mshMostPopular"
+                           stylename="iteraction-list-nav-item"/>
                 </vbox>
 
                 <vbox width="100%"
@@ -147,32 +189,6 @@
                                    width="100%"
                                    align="MIDDLE_LEFT"/>
                     </vbox>
-                </vbox>
-
-                <!-- Fallback-label заменяются контроллером на пять borderless-кнопок.
-                     Индекс расположен после служебной карточки номера и даты. -->
-                <vbox id="iteractionListNavigation"
-                      width="100%"
-                      spacing="false"
-                      stylename="iteraction-list-navigation">
-                    <label width="100%"
-                           value="msg://msgAccordionNavigation"
-                           stylename="iteraction-list-navigation-title"/>
-                    <label width="100%"
-                           value="msg://msgAccordionParticipants"
-                           stylename="iteraction-list-nav-item iteraction-list-nav-item-active"/>
-                    <label width="100%"
-                           value="msg://msgAccordionInteraction"
-                           stylename="iteraction-list-nav-item"/>
-                    <label width="100%"
-                           value="msg://msgAccordionResult"
-                           stylename="iteraction-list-nav-item"/>
-                    <label width="100%"
-                           value="msg://msgAccordionComment"
-                           stylename="iteraction-list-nav-item"/>
-                    <label width="100%"
-                           value="msg://mshMostPopular"
-                           stylename="iteraction-list-nav-item"/>
                 </vbox>
 
                 <vbox width="100%"
@@ -351,19 +367,6 @@
                             <vbox width="100%"
                                   spacing="true"
                                   stylename="iteraction-list-content">
-                                <!-- Пять быстрых действий находятся перед аккордеонами и сохраняют
-                                     существующий runtime-контракт mostPopularHbox. -->
-                                <vbox id="mostPopularQuickActions"
-                                      width="100%"
-                                      spacing="false"
-                                      stylename="iteraction-list-quick-actions-card">
-                                      <hbox id="mostPopularHbox"
-                                            width="100%"
-                                            height="AUTO"
-                                            spacing="true"
-                                            align="MIDDLE_CENTER"
-                                            stylename="iteraction-list-popular-buttons"/>
-                                </vbox>
                                 <groupBox id="participantsAccordion"
                                           caption="msg://msgAccordionParticipants"
                                           width="100%"
@@ -442,8 +445,8 @@
                                           collapsed="true"
                                           showAsPanel="true"
                                           stylename="iteraction-list-accordion-section iteraction-list-form-section">
-                                    <!-- Динамический блок расположен под типом взаимодействия, как поля
-                                         основной карточки CandidateCVEdit; runtime visible/required остаются Java-контрактом. -->
+                                    <!-- Динамический блок расположен под типом взаимодействия;
+                                         runtime visible/required остаются Java-контрактом. -->
                                     <grid id="interactionAccordionGrid"
                                           spacing="true"
                                           width="100%"
@@ -569,12 +572,19 @@
                                           collapsed="true"
                                           showAsPanel="true"
                                           stylename="iteraction-list-accordion-section iteraction-list-popular-section">
-                                    <vbox width="100%"
-                                          spacing="true">
-                                        <hbox id="mostPopularIteractionHBox"
+                                    <!-- Хост пяти runtime-кнопок находится в собственном бизнес-разделе.
+                                         Java-контракт mostPopularHbox и прямое присваивание типа сохранены. -->
+                                    <hbox id="mostPopularIteractionHBox"
+                                          width="100%"
+                                          spacing="false"
+                                          stylename="iteraction-list-popular-host">
+                                        <hbox id="mostPopularHbox"
                                               width="100%"
-                                              spacing="true"/>
-                                    </vbox>
+                                              height="AUTO"
+                                              spacing="true"
+                                              align="MIDDLE_CENTER"
+                                              stylename="iteraction-list-popular-buttons"/>
+                                    </hbox>
                                 </groupBox>
                             </vbox>
                         </scrollBox>
@@ -584,16 +594,26 @@
                       stylename="iteraction-list-footer"
                       width="100%"
                       spacing="true"
+                      expand="editActionsSpacer"
                       align="MIDDLE_RIGHT">
-                    <button id="subscribeButton"
-                            invoke="onButtonSubscribeClick"
-                            caption="mainMsg://msgSubscribe"
-                            icon="BELL"
-                            stylename="iteraction-list-subscribe-action"/>
-                    <button action="windowCommitAndClose"
-                            stylename="iteraction-list-primary-action"/>
-                    <button action="windowClose"
-                            stylename="iteraction-list-secondary-action"/>
+                    <vbox id="editActionsSpacer"
+                          width="100%"
+                          height="1px"/>
+                    <hbox id="editActionsGroup"
+                          width="AUTO"
+                          spacing="true"
+                          align="MIDDLE_RIGHT"
+                          stylename="iteraction-list-footer-actions">
+                        <button id="subscribeButton"
+                                invoke="onButtonSubscribeClick"
+                                caption="mainMsg://msgSubscribe"
+                                icon="BELL"
+                                stylename="iteraction-list-subscribe-action"/>
+                        <button action="windowCommitAndClose"
+                                stylename="iteraction-list-primary-action"/>
+                        <button action="windowClose"
+                                stylename="iteraction-list-secondary-action"/>
+                    </hbox>
                 </hbox>
             </vbox>
         </hbox>

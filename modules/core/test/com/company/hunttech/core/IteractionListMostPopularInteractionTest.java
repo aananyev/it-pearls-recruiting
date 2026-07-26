@@ -53,21 +53,22 @@ public class IteractionListMostPopularInteractionTest {
     }
 
     @Test
-    public void popularNavigationIsInSidebarAndButtonHostIsInWorkspace() throws IOException {
+    public void popularNavigationAndButtonHostShareOneBusinessSection() throws IOException {
         String descriptor = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
         String sidebar = descriptor.substring(
                 descriptor.indexOf("stylename=\"iteraction-list-sidebar\""),
                 descriptor.indexOf("id=\"iteractionListWorkspace\""));
         String workspace = descriptor.substring(descriptor.indexOf("id=\"iteractionListWorkspace\""));
+        int popularAccordion = workspace.indexOf("id=\"popularAccordion\"");
+        int popularHost = workspace.indexOf("id=\"mostPopularHbox\"");
 
         assertTrue(sidebar.contains("id=\"iteractionListNavigation\""));
         assertTrue(sidebar.contains("value=\"msg://mshMostPopular\""));
-        assertTrue(workspace.contains("id=\"popularAccordion\""));
-        assertTrue(workspace.contains("id=\"mostPopularQuickActions\""));
-        assertTrue(workspace.contains("id=\"mostPopularHbox\""));
-        assertTrue(workspace.indexOf("id=\"mostPopularQuickActions\"")
-                < workspace.indexOf("id=\"participantsAccordion\""));
+        assertTrue(popularAccordion >= 0);
+        assertTrue(popularHost > popularAccordion);
+        assertTrue(workspace.contains("id=\"mostPopularIteractionHBox\""));
+        assertFalse(workspace.contains("id=\"mostPopularQuickActions\""));
         assertTrue(workspace.contains("height=\"AUTO\""));
         assertFalse(workspace.contains("id=\"iteractionListNavigation\""));
     }
@@ -78,11 +79,14 @@ public class IteractionListMostPopularInteractionTest {
                 "modules/web/themes/halo/com.company.hunttech/"
                         + "iteraction-list-reference-finish.scss");
 
-        assertTrue(scss.contains("min-height: 46px"));
+        assertTrue(scss.contains("min-height: 40px"));
         assertTrue(scss.contains("width: 20% !important"));
-        assertTrue(scss.contains("background: #2e7d32 !important"));
-        assertTrue(scss.contains("border-radius: 999px !important"));
-        assertTrue(scss.contains(".iteraction-list-popular-button"));
+        assertTrue(scss.contains("height: 40px !important"));
+        assertTrue(scss.contains("border-radius: 8px !important"));
+        assertTrue(scss.contains(".iteraction-list-popular-button .v-button-caption"));
+        assertTrue(scss.contains("visibility: visible !important"));
+        assertFalse(scss.contains("background: #2e7d32 !important"));
+        assertFalse(scss.contains("border-radius: 999px !important"));
     }
 
     private String controller() throws IOException {
