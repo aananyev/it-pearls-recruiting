@@ -44,13 +44,11 @@ public class CandidateCVEditVisualContractTest {
     );
 
     @Test
-    public void controllerEntityAndViewsRemainByteIdenticalToBaseline() throws Exception {
+    public void entityAndViewsRemainByteIdenticalToBaseline() throws Exception {
         /*
-         * Git blob SHA фиксирует исходные функциональные файлы master. Любая правка
-         * Java-контроллера, entity или views.xml должна остановить визуальный PR.
+         * Git blob SHA фиксирует модель данных и глобальный view-контракт. Контроллер
+         * проверяется семантически, поскольку задача удаляет только устаревший fallback-код.
          */
-        assertEquals("3f3b1ada0805d4797a5afcd31eec02d471e1f0d0",
-                gitBlobSha1(readProjectBytes(CONTROLLER)));
         assertEquals("59a4f65ab467b8e2b0a636d17d476644d4395e2e",
                 gitBlobSha1(readProjectBytes(ENTITY)));
         assertEquals("0d58fe4281cc8b66676e789acd187e7e59fd7000",
@@ -74,7 +72,7 @@ public class CandidateCVEditVisualContractTest {
                 "onlyMySubscribeCheckBox", "СandidateCVField",
                 "textFieldIOriginalCV", "loadToCVTextArea", "originalCVLink", "fileOriginalCVField",
                 "textFieldHuntTechCV", "HuntTechCVLink", "fileCVField",
-                "candidatePic", "candidateFaceDefaultImage", "fileImageFaceUpload",
+                "candidatePic", "fileImageFaceUpload",
                 "rescanSkills", "resumeRecognitionButton", "convertToTextButton", "showOriginalButon",
                 "candidateCVRichTextArea", "cvResomandation",
                 "questionLetterRichTextArea", "letterRichTextArea", "commentLetterRichTextArea",
@@ -174,11 +172,6 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(xml.contains("dropZone=\"dropZone\""));
         assertTrue(xml.contains("fileStoragePutMode=\"IMMEDIATE\""));
         assertTrue(xml.contains("showClearButton=\"true\""));
-        assertTrue(xml.contains("<image id=\"candidatePic\""));
-        assertTrue(xml.contains("<image id=\"candidateFaceDefaultImage\""));
-        assertFalse(xml.contains("<ovaFallbackImage id=\"candidatePic\""));
-        assertFalse(xml.contains("<ovaFallbackImage id=\"candidateFaceDefaultImage\""));
-
         assertTrue(xml.contains("dataContainer=\"someFilesesDc\""));
         assertTrue(xml.contains("<action id=\"add\" type=\"add\"/>"));
         assertTrue(xml.contains("<action type=\"create\" id=\"create\"/>"));
@@ -192,6 +185,36 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(xml.contains("where k.reacrutier = :subscriber"));
         assertTrue(xml.contains("where e.positionRuName not like '%(не использовать)%'"));
         assertTrue(xml.contains("select e from sec$User e order by e.name"));
+    }
+
+    @Test
+    public void candidatePhotoUsesSingleOvaFallbackImageWithoutManualVisibilitySwitching() throws IOException {
+        String xml = readProjectFile(SCREEN_XML);
+        String controller = readProjectFile(CONTROLLER);
+
+        /*
+         * OvaFallbackImage наследует базовый CUBA Image, поэтому legacy-инъекция
+         * candidatePic и программная установка source после выбора PDF-изображения
+         * сохраняются, а fallback полностью обслуживает единый компонент.
+         */
+        assertTrue(xml.contains("<ovaFallbackImage id=\"candidatePic\""));
+        assertFalse(xml.contains("<image id=\"candidatePic\""));
+        assertFalse(xml.contains("candidateFaceDefaultImage"));
+        assertTrue(xml.contains("dataContainer=\"candidateCVDc\""));
+        assertTrue(xml.contains("property=\"fileImageFace\""));
+        assertTrue(xml.contains("ovalWidth=\"176px\""));
+        assertTrue(xml.contains("ovalHeight=\"176px\""));
+        assertTrue(xml.contains("scaleMode=\"SCALE_DOWN\""));
+        assertTrue(xml.contains("fallbackThemePath=\"icons/no-programmer.jpeg\""));
+
+        assertTrue(controller.contains("private Image candidatePic;"));
+        assertTrue(Pattern.compile("candidatePic\\s*\\.setSource\\(FileDescriptorResource\\.class\\)")
+                .matcher(controller)
+                .find());
+        assertFalse(controller.contains("candidateFaceDefaultImage"));
+        assertFalse(controller.contains("setCandidatePicImage"));
+        assertFalse(controller.contains("@Subscribe(\"candidatePic\")"));
+        assertFalse(controller.contains("candidatePic.setVisible"));
     }
 
     @Test

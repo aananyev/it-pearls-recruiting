@@ -36,9 +36,9 @@ public class CandidateCVEditPhotoViewContractTest {
         assertEquals("candidateCV-view", runtimeView.getAttribute("extends"));
 
         /*
-         * setCandidatePicImage() читает CandidateCV.fileImageFace, поэтому вложенного
-         * candidate.fileImageFace недостаточно: верхнеуровневый атрибут обязан быть
-         * прямым property runtime-view до отделения сущности от persistence session.
+         * OvaFallbackImage получает CandidateCV.fileImageFace через data binding, поэтому
+         * вложенного candidate.fileImageFace недостаточно: верхнеуровневый атрибут обязан
+         * быть прямым property runtime-view до отделения сущности от persistence session.
          */
         Element directPhotoProperty = findDirectProperty(runtimeView, "fileImageFace");
         assertNotNull("CandidateCV.fileImageFace отсутствует в runtime-view редактора",
@@ -50,7 +50,7 @@ public class CandidateCVEditPhotoViewContractTest {
     public void photoComponentsKeepCandidateCvFileImageFaceBinding() throws Exception {
         Document document = parseProjectXml(SCREEN_XML);
 
-        Element candidatePic = findElementById(document, "image", "candidatePic");
+        Element candidatePic = findElementById(document, "ovaFallbackImage", "candidatePic");
         Element photoUpload = findElementById(document, "upload", "fileImageFaceUpload");
 
         assertNotNull("Не найден компонент candidatePic", candidatePic);
@@ -59,6 +59,9 @@ public class CandidateCVEditPhotoViewContractTest {
         // Оба компонента работают с тем же верхнеуровневым атрибутом, который проверяется в runtime-view.
         assertEquals("candidateCVDc", candidatePic.getAttribute("dataContainer"));
         assertEquals("fileImageFace", candidatePic.getAttribute("property"));
+        assertEquals("176px", candidatePic.getAttribute("ovalWidth"));
+        assertEquals("176px", candidatePic.getAttribute("ovalHeight"));
+        assertEquals("icons/no-programmer.jpeg", candidatePic.getAttribute("fallbackThemePath"));
         assertEquals("candidateCVDc", photoUpload.getAttribute("dataContainer"));
         assertEquals("fileImageFace", photoUpload.getAttribute("property"));
     }

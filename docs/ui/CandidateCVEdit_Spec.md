@@ -6,7 +6,7 @@
 **Controller:** `modules/web/src/com/company/hunttech/web/screens/candidatecv/CandidateCVEdit.java`
 **Descriptor:** `modules/web/src/com/company/hunttech/web/screens/candidatecv/candidate-cv-edit.xml`
 **Локальный SCSS namespace:** `.candidate-cv-editor`
-**Статус:** live-sidebar сохранён; исправление runtime-view фотографии реализовано; проверка ожидает Hermes
+**Статус:** `candidatePic` переведён на единый `OvaFallbackImage`; проверка ожидает Hermes
 
 ## Назначение и бизнес-смысл (What & Why)
 
@@ -39,7 +39,7 @@
 ## Behavior Summary
 
 - открытие формы → `@LoadDataBeforeShow` инициирует стандартный lifecycle → pre-load listener не разрешает загрузить вакансии до установки фильтра пользователя;
-- загрузка `candidateCVDc` → runtime-view содержит прямой `CandidateCV.fileImageFace` → `setCandidatePicImage()` безопасно определяет фотографию после отделения сущности от persistence session;
+- загрузка `candidateCVDc` → runtime-view содержит прямой `CandidateCV.fileImageFace` → единый `OvaFallbackImage` получает фотографию через стандартный data binding;
 - `BeforeShow` → значение `TEXT_CV` сохраняется только как baseline → тяжёлый `RichTextArea` не инициализируется преждевременно;
 - первый выбор `tabCV` → `cvTextInitialized == false` → текст CV, рекомендации и подсветка компетенций инициализируются один раз;
 - первый выбор `tabSkillTree` → `skillTabInitialized == false` → CV инициализируется по необходимости, затем выполняется существующий разбор навыков;
@@ -55,8 +55,7 @@
 - загрузка PDF → существующий parser извлекает текст и изображения → при наличии изображений открывается окно выбора фотографии;
 - загрузка DOCX → Apache POI извлекает текст → текст записывается в lazy-managed `candidateCVRichTextArea`;
 - загрузка DOC → контроллер показывает существующее предупреждение о нереализованной функции → визуальный слой не меняет это поведение;
-- отсутствие фотографии → контроллер скрывает `candidatePic` и показывает `candidateFaceDefaultImage`;
-- наличие фотографии → контроллер показывает `candidatePic` и скрывает fallback;
+- фотография отсутствует, очищена или недоступна в storage → `OvaFallbackImage` показывает `icons/no-programmer.jpeg` без второго компонента и ручного `visible`;
 - создание, редактирование или удаление дополнительного файла → используются actions таблицы → composition-коллекция сохраняется вместе с `CandidateCV`;
 - hover, focus, disabled, read-only и validation → меняется только presentation → `visible`, `editable`, `enable`, `required`, validators и permissions остаются исходными.
 
@@ -117,7 +116,7 @@
 - `skillTree`;
 - `candidate`, `candidate.fileImageFace`, `candidate.personPosition`.
 
-Верхнеуровневый `CandidateCV.fileImageFace` обязателен в runtime-view, потому что `setCandidatePicImage()` читает именно атрибут редактируемого `CandidateCV`. Вложенный `candidate.fileImageFace` относится к связанной сущности `JobCandidate` и не загружает фотографию самого резюме.
+Верхнеуровневый `CandidateCV.fileImageFace` обязателен в runtime-view для data binding `candidatePic` и существующей логики сохранения фотографии. Вложенный `candidate.fileImageFace` относится к связанной сущности `JobCandidate` и не загружает фотографию самого резюме.
 
 Глобальный `views.xml`, entity `CandidateCV`, JPQL и loaders не изменяются; исправление локализовано в runtime-view контейнера экрана.
 
@@ -156,9 +155,8 @@
 | `HuntTechCVLink` | `Link` | резюме HRM HuntTech | — | URL/visibility из Java | Java show/hide | — | открыть подготовленное CV |
 | `fileCVField` | `FileUploadField` | резюме HRM HuntTech | `candidateCVDc / fileCV` | upload | immediate; clear | — | файл подготовленного CV |
 | `dropZone` | `VBox` | sidebar / фото | — | upload drop zone | `dropZone="dropZone"` | — | область drag-and-drop профиля |
-| `picVBox` | `VBox` | фото | — | — | порядок изображений сохранён | — | frame фотографии |
-| `candidatePic` | `Image` | фото | `candidateCVDc / fileImageFace` | source change | Java injection/show/hide | — | фотография |
-| `candidateFaceDefaultImage` | `Image` | фото | theme image | — | Java injection/show/hide; initially hidden | — | fallback |
+| `picVBox` | `VBox` | фото | — | — | единый компонент изображения | — | frame фотографии |
+| `candidatePic` | `OvaFallbackImage` | фото | `candidateCVDc / fileImageFace` | встроенный fallback | Java-инъекция базового `Image`; без ручного visibility | — | фотография или theme fallback |
 | `fileImageFaceUpload` | `FileUploadField` | фото | `candidateCVDc / fileImageFace` | upload | Java injection; immediate; clear | — | загрузка фотографии |
 | `rescanSkills` | `Button` | `tabCV` toolbar | — | `rescanCV` | — | — | повторный разбор |
 | `resumeRecognitionButton` | `Button` | `tabCV` toolbar | — | `resumeRecognition` | — | — | распознать контакты |
@@ -205,11 +203,9 @@
 - `originalCVLink`;
 - `HuntTechCVLink`;
 - `questionLetterRichTextArea`;
-- `letterRecommendation`;
-- `candidatePic`;
-- `candidateFaceDefaultImage`.
+- `letterRecommendation`.
 
-XML не делает скрытые компоненты видимыми статически. Локальный SCSS не резервирует для невидимых компонентов искусственные крупные области.
+Фотография больше не участвует в ручном переключении visibility: `OvaFallbackImage` сохраняет одну геометрию и самостоятельно выбирает bound resource или fallback. XML не делает остальные скрытые компоненты видимыми статически.
 
 ### 4.3. Enabled, editable и required
 
@@ -297,9 +293,9 @@ XML сохраняет:
 
 ### 6.3. Фотография
 
-`candidatePic` и `candidateFaceDefaultImage` остаются компонентами `Image`; замена на `OvaFallbackImage` не выполняется. Сохраняются `scaleMode="FILL"`, controller-driven visibility, binding `fileImageFace`, upload `fileImageFaceUpload`, `dropZone="dropZone"` и порядок компонентов.
+`candidatePic` является единым `OvaFallbackImage` размером `176×176 px`, сохраняет binding `candidateCVDc / fileImageFace`, upload `fileImageFaceUpload` и `dropZone="dropZone"`. Круглая геометрия задаётся `ovalWidth`/`ovalHeight`, `SCALE_DOWN` исключает искажение, а `fallbackThemePath="icons/no-programmer.jpeg"` обслуживает отсутствие, очистку и недоступность файла.
 
-`setCandidatePicImage()` не оборачивается в подавление `ValidationException` и не выполняет дополнительный `dataManager.reload()`: экранный runtime-view заранее загружает `CandidateCV.fileImageFace`. Это устраняет первопричину `instantiatingValueholderWithNullSession`, сохраняет один штатный lifecycle загрузки и не маскирует будущие нарушения Data View Integrity.
+`candidateFaceDefaultImage`, `setCandidatePicImage()` и `@Subscribe("candidatePic")` удалены. Контроллер сохраняет совместимую инъекцию `Image candidatePic` и программную установку `FileDescriptorResource` после выбора изображения из PDF; `OvaFallbackImage` наследует базовый CUBA `Image`.
 
 ## 7. Визуальная компоновка
 
@@ -333,14 +329,14 @@ XML сохраняет:
 Изменения presentation:
 
 - постоянная левая панель шириной `296px` оформлена в стиле `JobCandidateEdit`: тёмный градиент, круглая фотография и акцент `#ffb11b`;
-- фотография и upload перенесены из вкладки «Кандидат» в sidebar без изменения `Image`, `dropZone`, binding и controller-driven fallback;
+- фотография и upload находятся в sidebar; `candidatePic` использует единый `OvaFallbackImage` без параллельного fallback-компонента;
 - ФИО, текущая позиция, должность резюме, вакансия и проект привязаны непосредственно к `candidateCVDc`; изменения picker-полей отображаются сразу без ручного копирования значений;
 - `TabSheet` и footer находятся только в правой workspace, поэтому sidebar остаётся непрерывной по всей высоте;
 - вкладки имеют высоту `48px` и заметное selected-состояние;
 - основные данные и документы собраны в локальные карточки радиусом `8px`; фотография вынесена в постоянный профиль sidebar;
 - picker-поля занимают доступную ширину и не обрезают actions;
 - `onlyMySubscribeCheckBox` остаётся непосредственно под vacancy picker;
-- photo drop zone использует профильную геометрию `196×238px`, при этом оба изображения сохраняют тип `Image` и размер `176×176px`;
+- photo drop zone использует профильную геометрию `196×238px`, единый `OvaFallbackImage` имеет размер и oval-геометрию `176×176px`;
 - `tabCV` и `tabLetter` сохраняют пропорцию `4:1`;
 - toolbar имеет минимальную высоту `58px`, кнопки — не менее `38px`;
 - `RichTextArea` и таблицы используют доступную высоту;
@@ -391,25 +387,22 @@ SCSS использует `$v-app-background-color`, `$v-panel-background-color`
 - TreeDataGrid hierarchy;
 - footer.
 
-## 9. Неизменённые функциональные контракты
+## 9. Сохранённые функциональные контракты
 
-Для этого функционального исправления неизменными остаются:
+Минимальное изменение контроллера ограничено удалением ручного fallback. Неизменными остаются:
 
-1. `CandidateCVEdit.java`;
-2. `CandidateCV.java`;
-3. `views.xml`;
-4. entity metadata, БД, Liquibase и SQL;
-5. loaders, JPQL и loader parameters;
-6. data containers и properties;
-7. component ID, captions и имена вкладок;
-8. picker actions;
-9. `invoke`;
-10. validators, required, permissions, visible и editable;
-11. upload properties и drop zone;
-12. типы `Image`, `RichTextArea`, picker, upload, `Table`, `TreeDataGrid`, `TabSheet`;
-13. распознавание, parsing, рекомендации, письмо, SkillTree и сохранение;
-14. lazy-init `tabCV` и `tabSkillTree`;
-15. сохранение существующего `TEXT_CV`, если вкладка CV не открывалась.
+1. `CandidateCV.java` и `views.xml`;
+2. entity metadata, БД, Liquibase и SQL;
+3. loaders, JPQL и loader parameters;
+4. data containers и properties;
+5. component ID `candidatePic`, captions и имена вкладок;
+6. picker actions и `invoke`;
+7. validators, required, permissions и editable;
+8. upload properties и drop zone;
+9. типы `RichTextArea`, picker, upload, `Table`, `TreeDataGrid`, `TabSheet`;
+10. распознавание, parsing, рекомендации, письмо, SkillTree и сохранение;
+11. lazy-init `tabCV` и `tabSkillTree`;
+12. сохранение существующего `TEXT_CV`, если вкладка CV не открывалась.
 
 ## 10. Регрессионная проверка
 
@@ -422,7 +415,7 @@ SCSS использует `$v-app-background-color`, `$v-panel-background-color`
 - bindings, optionsContainer, picker actions;
 - invoke;
 - upload properties и `dropZone`;
-- типы двух изображений;
+- единый `OvaFallbackImage`, fallback path и отсутствие manual visibility;
 - actions таблицы файлов;
 - неизменные JPQL-фрагменты;
 - наличие `.candidate-cv-editor`, `.candidate-cv-sidebar` и `.candidate-cv-workspace-shell`;
@@ -519,6 +512,7 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-26 | `candidatePic` переведён на единый `OvaFallbackImage` 176×176 px с `icons/no-programmer.jpeg`; удалены `candidateFaceDefaultImage`, `setCandidatePicImage()` и ручное переключение visibility; обновлены оба контрактных теста фотографии |
 | 2026-07-25 | В runtime-view `candidateCVDc` добавлен верхнеуровневый `CandidateCV.fileImageFace`; устранён вызов unfetched getter в `setCandidatePicImage()` и добавлен отдельный Data View Integrity тест фотографии |
 | 2026-07-25 | Добавлена постоянная левая панель в стиле `JobCandidateEdit`: фотография, ФИО, текущая позиция, должность резюме, вакансия и проект; значения синхронизируются через прямой `candidateCVDc` data binding без изменения контроллера |
 | 2026-07-25 | Выполнен строго визуальный рефакторинг `CandidateCVEdit`: добавлена карточная компоновка, постоянный контекст кандидата, локальный namespace для семи тем, регрессионная защита legacy ID, bindings, actions, invoke, upload, lazy-init и неизменности Java/entity/views |

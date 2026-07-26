@@ -110,7 +110,8 @@
                           width="100%"
                           align="TOP_CENTER"
                           spacing="true">
-                        <!-- Drop zone, изображения и upload сохраняют прежние ID, типы, binding и порядок. -->
+                        <!-- Единый OvaFallbackImage показывает сохранённую фотографию или theme fallback
+                             без параллельного Image и ручного переключения visibility в контроллере. -->
                         <vbox id="dropZone"
                               spacing="true"
                               width="196px"
@@ -123,23 +124,17 @@
                                   height="176px"
                                   align="TOP_CENTER"
                                   stylename="candidate-cv-photo-frame">
-                                <image id="candidatePic"
-                                       dataContainer="candidateCVDc"
-                                       property="fileImageFace"
-                                       width="176px"
-                                       height="176px"
-                                       align="TOP_CENTER"
-                                       stylename="widget-border candidate-cv-photo"
-                                       scaleMode="FILL"/>
-                                <image id="candidateFaceDefaultImage"
-                                       width="176px"
-                                       height="176px"
-                                       visible="false"
-                                       align="TOP_CENTER"
-                                       stylename="widget-border candidate-cv-photo"
-                                       scaleMode="FILL">
-                                    <theme path="icons/no-programmer.jpeg"/>
-                                </image>
+                                <ovaFallbackImage id="candidatePic"
+                                                  dataContainer="candidateCVDc"
+                                                  property="fileImageFace"
+                                                  width="176px"
+                                                  height="176px"
+                                                  ovalWidth="176px"
+                                                  ovalHeight="176px"
+                                                  align="TOP_CENTER"
+                                                  stylename="widget-border candidate-cv-photo"
+                                                  scaleMode="SCALE_DOWN"
+                                                  fallbackThemePath="icons/no-programmer.jpeg"/>
                             </vbox>
                             <upload id="fileImageFaceUpload"
                                     fileStoragePutMode="IMMEDIATE"
