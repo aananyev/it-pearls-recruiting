@@ -141,9 +141,7 @@ public class MainScreenBackgroundService {
      * VAADIN/themes/{activeTheme}/backgrounds/{1..10}.jpg.
      */
     private Resource createGeneratedResource(int variant) {
-        ThemeResource resource = new ThemeResource("backgrounds/" + (variant + 1) + ".jpg");
-        resource.setCacheTime(0);
-        return resource;
+        return new ThemeResource("backgrounds/" + (variant + 1) + ".jpg");
     }
 
     private StreamResource byteResource(byte[] bytes, String fileName, String mimeType) {
