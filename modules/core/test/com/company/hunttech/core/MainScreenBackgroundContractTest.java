@@ -41,15 +41,18 @@ public class MainScreenBackgroundContractTest {
     }
 
     @Test
-    public void mainScreenIdIsExplicitlyRegistered() throws IOException {
+    public void annotatedMainScreenIsNotRegisteredAsLegacyScreen() throws IOException {
         String properties = source("modules/web/src/com/company/hunttech/web-app.properties");
         String screenConfig = source("modules/web/src/com/company/hunttech/web-screens.xml");
         String controller = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
         String descriptor = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/hrm-main-screen.xml");
         assertTrue(properties.contains("cuba.web.mainScreenId=hrmMainScreen"));
-        assertTrue(screenConfig.contains("<screen id=\"hrmMainScreen\""));
-        assertTrue(screenConfig.contains("/mainscreen/hrm-main-screen.xml"));
+        assertFalse("@UiController main screen нельзя регистрировать в legacy screens.xml",
+                screenConfig.contains("<screen id=\"hrmMainScreen\""));
+        assertFalse("Legacy screens.xml не должен ссылаться на descriptor нового main screen",
+                screenConfig.contains("/mainscreen/hrm-main-screen.xml"));
         assertTrue(controller.contains("@UiController(\"hrmMainScreen\")"));
+        assertTrue(controller.contains("@UiDescriptor(\"hrm-main-screen.xml\")"));
         assertTrue(controller.contains("class HrmMainScreen extends ExtMainScreen"));
         assertTrue(descriptor.contains("extends=\"/com/company/hunttech/web/screens/mainscreen/ext-main-screen.xml\""));
     }

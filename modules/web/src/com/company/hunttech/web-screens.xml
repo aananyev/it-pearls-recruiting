@@ -3,8 +3,6 @@
     <screen id="sec$User.browse" template="com/company/hunttech/web/screens/extuser/ext-user-browse.xml"/>
     <screen id="sec$User.lookup" template="com/company/hunttech/web/screens/extuser/ext-user-browse.xml"/>
     <screen id="sec$User.edit" template="com/company/hunttech/web/screens/extuser/ext-user-edit.xml"/>
-    <!-- mainScreenId должен быть явно зарегистрирован: иначе CUBA не создаёт HrmMainScreen и его lifecycle не выполняется. -->
-    <screen id="hrmMainScreen" template="/com/company/hunttech/web/screens/mainscreen/hrm-main-screen.xml"/>
     <!-- Расширение добавляет настройку персонального фона, наследуя действующую компоновку SettingsWindow. -->
     <screen id="settings" template="/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-main-background.xml"/>
 </screen-config>
