@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -92,8 +93,20 @@ public class MainScreenBackgroundContractTest {
     }
 
     private String source(String relativePath) throws IOException {
-        Path path = Paths.get(relativePath);
+        Path path = projectRoot().resolve(relativePath);
         return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Находит корень проекта независимо от рабочей директории Gradle test task.
+     */
+    private Path projectRoot() {
+        Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
+        while (root != null && !Files.exists(root.resolve("build.gradle"))) {
+            root = root.getParent();
+        }
+        assertNotNull("Не найден корень проекта HRM HuntTech", root);
+        return root;
     }
 
     private void assertOrdered(String source, String... fragments) {
