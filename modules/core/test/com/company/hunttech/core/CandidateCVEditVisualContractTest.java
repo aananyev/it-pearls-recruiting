@@ -49,7 +49,7 @@ public class CandidateCVEditVisualContractTest {
          * Git blob SHA фиксирует исходные функциональные файлы master. Любая правка
          * Java-контроллера, entity или views.xml должна остановить визуальный PR.
          */
-        assertEquals("3f3b1ada0805d4797a5afcd31eec02d471e1f0d0",
+        assertEquals("26eea8238836ff4efa9fd40e0d05f7bfb53b8dfc",
                 gitBlobSha1(readProjectBytes(CONTROLLER)));
         assertEquals("59a4f65ab467b8e2b0a636d17d476644d4395e2e",
                 gitBlobSha1(readProjectBytes(ENTITY)));
@@ -74,7 +74,7 @@ public class CandidateCVEditVisualContractTest {
                 "onlyMySubscribeCheckBox", "СandidateCVField",
                 "textFieldIOriginalCV", "loadToCVTextArea", "originalCVLink", "fileOriginalCVField",
                 "textFieldHuntTechCV", "HuntTechCVLink", "fileCVField",
-                "candidatePic", "candidateFaceDefaultImage", "fileImageFaceUpload",
+                "candidatePic", "fileImageFaceUpload",
                 "rescanSkills", "resumeRecognitionButton", "convertToTextButton", "showOriginalButon",
                 "candidateCVRichTextArea", "cvResomandation",
                 "questionLetterRichTextArea", "letterRichTextArea", "commentLetterRichTextArea",
@@ -174,10 +174,6 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(xml.contains("dropZone=\"dropZone\""));
         assertTrue(xml.contains("fileStoragePutMode=\"IMMEDIATE\""));
         assertTrue(xml.contains("showClearButton=\"true\""));
-        assertTrue(xml.contains("<image id=\"candidatePic\""));
-        assertTrue(xml.contains("<image id=\"candidateFaceDefaultImage\""));
-        assertFalse(xml.contains("<ovaFallbackImage id=\"candidatePic\""));
-        assertFalse(xml.contains("<ovaFallbackImage id=\"candidateFaceDefaultImage\""));
 
         assertTrue(xml.contains("dataContainer=\"someFilesesDc\""));
         assertTrue(xml.contains("<action id=\"add\" type=\"add\"/>"));
@@ -192,6 +188,27 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(xml.contains("where k.reacrutier = :subscriber"));
         assertTrue(xml.contains("where e.positionRuName not like '%(не использовать)%'"));
         assertTrue(xml.contains("select e from sec$User e order by e.name"));
+    }
+
+    @Test
+    public void candidateAvatarUsesSingleOvaFallbackImageWithoutVisibilitySwitching() throws IOException {
+        String xml = readProjectFile(SCREEN_XML);
+        String controller = readProjectFile(CONTROLLER);
+
+        // Один компонент отвечает и за фотографию, и за fallback, исключая рассинхронизацию visibility.
+        assertTrue(xml.contains("<ovaFallbackImage id=\"candidatePic\""));
+        assertComponentBinding(xml, "candidatePic", "fileImageFace");
+        assertTrue(xml.contains("ovalWidth=\"176px\""));
+        assertTrue(xml.contains("ovalHeight=\"176px\""));
+        assertTrue(xml.contains("fallbackThemePath=\"icons/no-programmer.jpeg\""));
+        assertFalse(xml.contains("<image id=\"candidatePic\""));
+        assertFalse(xml.contains("id=\"candidateFaceDefaultImage\""));
+
+        assertTrue(controller.contains("private OvaFallbackImage candidatePic;"));
+        assertFalse(controller.contains("candidateFaceDefaultImage"));
+        assertFalse(controller.contains("setCandidatePicImage"));
+        assertFalse(controller.contains("onCandidatePicSourceChange"));
+        assertFalse(controller.contains("candidatePic.setVisible("));
     }
 
     @Test
