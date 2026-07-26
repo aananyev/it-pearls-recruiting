@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
+        xmlns:ext="http://schemas.haulmont.com/cuba/window-ext.xsd"
+        class="com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindowMainBackground"
+        extends="/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-email-navigation.xml">
+    <layout>
+        <tabSheet id="settingsTabSheet">
+            <tab id="msgInterface">
+                <hbox id="interfaceSettingsMainBox">
+                    <scrollBox id="interfaceSettingsContentScrollBox">
+                        <vbox id="interfaceSettingsContent">
+                            <!-- Новая карточка использует существующий визуальный контракт вкладки
+                                 и не перестраивает штатные компоненты SettingsWindow. -->
+                            <vbox id="mainScreenBackgroundCard"
+                                  width="100%"
+                                  spacing="true"
+                                  stylename="settings-section-card interface-settings-card"
+                                  ext:index="2">
+                                <vbox id="mainScreenBackgroundHeader" width="100%" spacing="false">
+                                    <label value="Фон главного экрана"
+                                           stylename="h3 settings-section-card-title"/>
+                                    <label value="Загрузите собственное изображение или используйте десять нейтральных фонов, подготовленных для каждой темы оформления."
+                                           width="100%"
+                                           stylename="settings-section-help"/>
+                                </vbox>
+                                <hbox id="mainScreenBackgroundActions"
+                                      width="100%"
+                                      spacing="true"
+                                      expand="mainScreenBackgroundStatusLabel">
+                                    <upload id="mainScreenBackgroundUpload"
+                                            fileStoragePutMode="IMMEDIATE"
+                                            caption="Загрузить изображение"
+                                            width="280px"
+                                            showFileName="false"
+                                            showClearButton="false"/>
+                                    <label id="mainScreenBackgroundStatusLabel"
+                                           width="100%"
+                                           align="MIDDLE_LEFT"
+                                           stylename="settings-section-help"/>
+                                    <button id="clearMainScreenBackgroundBtn"
+                                            caption="Очистить фоновое изображение"
+                                            invoke="clearMainScreenBackground"
+                                            stylename="danger"
+                                            align="MIDDLE_RIGHT"/>
+                                </hbox>
+                                <label value="Персональное изображение имеет приоритет. После очистки при каждом новом входе случайно выбирается один из десяти фонов активной темы."
+                                       width="100%"
+                                       stylename="settings-section-help"/>
+                            </vbox>
+                        </vbox>
+                    </scrollBox>
+                </hbox>
+            </tab>
+        </tabSheet>
+    </layout>
+</window>
