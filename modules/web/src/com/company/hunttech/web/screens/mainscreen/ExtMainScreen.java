@@ -37,10 +37,16 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Calendar;
 
+import com.haulmont.cuba.gui.screen.UiController;
+import com.haulmont.cuba.gui.screen.UiDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @UiController("extMainScreen")
 @UiDescriptor("ext-main-screen.xml")
 public class ExtMainScreen extends MainScreen {
+
+    private static final Logger log = LoggerFactory.getLogger(ExtMainScreen.class);
     @Inject
     private Notifications notifications;
     @Inject
@@ -408,12 +414,17 @@ public class ExtMainScreen extends MainScreen {
         FileDescriptor fileDescriptor = applicationSetupService.getCompanyImage();
 
         if (fileDescriptor != null) {
-            logoImage.setSource(FileDescriptorResource.class)
-                    .setFileDescriptor(fileDescriptor);
-        } else {
-            logoImage.setSource(ThemeResource.class)
-                    .setPath("./VAADIN/themes/hover/icons/no-company.png");
+            try {
+                logoImage.setSource(FileDescriptorResource.class)
+                        .setFileDescriptor(fileDescriptor);
+                return;
+            } catch (RuntimeException e) {
+                log.warn("Cannot set company logo from FileDescriptor id={}: {}. Falling back to theme.",
+                        fileDescriptor.getId(), e.getMessage());
+            }
         }
+        logoImage.setSource(ThemeResource.class)
+                .setPath("./VAADIN/themes/hover/icons/no-company.png");
     }
 
     @Override
