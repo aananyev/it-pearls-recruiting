@@ -115,7 +115,32 @@ public class MainScreenBackgroundContractTest {
         String userSettings = source("modules/global/src/com/company/hunttech/entity/UserSettings.java");
         assertTrue(controller.contains("UserSettings.fileImageFace"));
         assertFalse(descriptor.contains("datasource=\"userSettingsDs\""));
+        assertTrue(descriptor.contains("uploadButtonCaption=\"Выбрать изображение\""));
+        assertTrue(descriptor.contains("showFileName=\"true\""));
+        assertTrue(descriptor.contains("height=\"36px\""));
+        assertTrue(descriptor.contains("accept=\"*.png,*.jpg,*.jpeg,*.webp\""));
+        assertTrue(descriptor.contains("permittedExtensions=\".png,.jpg,.jpeg,.webp\""));
+        assertTrue(descriptor.contains("fileSizeLimit=\"15728640\""));
+        assertFalse(descriptor.contains("caption=\"Выбрать изображение\""));
+        assertTrue(controller.contains("addFileUploadSucceedListener"));
+        assertTrue(controller.contains("addFileUploadErrorListener"));
+        assertTrue(controller.contains("Используется случайный фон активной темы."));
+        assertTrue(controller.contains("Используется пользовательский фон."));
+        assertFalse(controller.contains("Используется персональное изображение пользователя."));
         assertTrue(controller.contains("setFileImageFace(committedDescriptor)"));
+        assertTrue(controller.contains("\"-\" + originalName"));
+        String uploadHandler = between(controller,
+                "private void onMainScreenBackgroundUploaded()",
+                "private void onMainScreenBackgroundUploadError()");
+        assertOrdered(uploadHandler,
+                "FileDescriptor committedDescriptor = dataManager.commit(uploaded)",
+                "setFileImageFace(committedDescriptor)",
+                "mainScreenBackgroundUpload.setValue(committedDescriptor)",
+                "refreshBackgroundStatus()");
+        String uploadErrorHandler = between(controller,
+                "private void onMainScreenBackgroundUploadError()",
+                "public void clearMainScreenBackground()");
+        assertFalse(uploadErrorHandler.contains("setFileImageFace"));
         assertTrue(userSettings.contains("private FileDescriptor fileImageFace;"));
         assertFalse(controller.contains("@Entity"));
     }
@@ -143,6 +168,10 @@ public class MainScreenBackgroundContractTest {
         assertTrue(controller.contains("withCaption(\"Остаться\")"));
         assertTrue(controller.contains("withCaption(\"Выйти без сохранения\")"));
         assertTrue(controller.contains("closeWithDiscard()"));
+        String cancelHandler = between(controller,
+                "protected void cancel()",
+                "private void refreshBackgroundStatus()");
+        assertFalse(cancelHandler.contains("super.commit()"));
     }
 
     @Test
@@ -157,7 +186,9 @@ public class MainScreenBackgroundContractTest {
             String localScss = source(themeRoot + "com.company.hunttech/main-screen-background-settings.scss");
             assertTrue(styles.contains("@import \"com.company.hunttech/main-screen-background-settings\";"));
             assertTrue(styles.contains("@include main-screen-background-settings;"));
+            assertTrue(localScss.contains(".ext-settings-window"));
             assertTrue(localScss.contains(".main-screen-background-card"));
+            assertFalse(localScss.contains("pointer-events"));
         }
     }
 
@@ -168,6 +199,10 @@ public class MainScreenBackgroundContractTest {
         assertTrue(controller.contains("setFileImageFace(null)"));
         assertTrue(controller.contains("mainScreenBackgroundService.isCustomBackground(descriptor)"));
         assertTrue(controller.contains("!Objects.equals(descriptor.getId(), activeFileId)"));
+        String clearHandler = between(controller,
+                "public void clearMainScreenBackground()",
+                "protected void commit()");
+        assertFalse(clearHandler.contains("dataManager.commit"));
     }
 
     private void assertMainScreenId(String properties, String sourceName) {
@@ -198,6 +233,14 @@ public class MainScreenBackgroundContractTest {
         }
         assertNotNull("Не найден корень проекта HRM HuntTech", root);
         return root;
+    }
+
+    private String between(String source, String startFragment, String endFragment) {
+        int start = source.indexOf(startFragment);
+        int end = source.indexOf(endFragment, start + startFragment.length());
+        assertTrue("Не найдено начало фрагмента: " + startFragment, start >= 0);
+        assertTrue("Не найден конец фрагмента: " + endFragment, end > start);
+        return source.substring(start, end);
     }
 
     private void assertOrdered(String source, String... fragments) {
