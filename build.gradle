@@ -206,12 +206,18 @@ configure(webModule) {
     dependencies {
         compileOnly(servletApi)
         compile(guiModule)
+        // Pure-Java ImageIO reader enables content validation and normalization of WEBP uploads.
+        compile 'com.twelvemonkeys.imageio:imageio-webp:3.13.1'
         testCompile 'org.mockito:mockito-core:3.12.4'
+        testCompile 'org.junit.jupiter:junit-jupiter-api:5.5.2'
+        testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+        testRuntime 'org.junit.vintage:junit-vintage-engine:5.5.2'
     }
 
     compileTestJava.dependsOn ':app-core:compileTestJava'
 
     test {
+        useJUnitPlatform()
         workingDir = rootProject.projectDir
     }
 
