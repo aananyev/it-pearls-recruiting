@@ -12,6 +12,8 @@
 
 Стандартные фоны являются частью визуальной темы и поставляются как статические JPG-файлы. Это отделяет дизайн темы от Java-кода, исключает runtime-генерацию SVG и позволяет проверять полноту каталога на этапе сборки. Пользовательский фон остаётся отдельным персональным ресурсом в FileStorage и имеет приоритет над тематическим каталогом.
 
+Недоступность физического файла при сохранённом `FileDescriptor` не должна блокировать вход пользователя. В этом случае экран временно возвращается к системному фону, не удаляя metadata: после восстановления FileStorage персональный фон снова применяется автоматически.
+
 ## UI Context & Navigation
 
 Экран создаётся через Screens API CUBA Platform 7.3:
@@ -27,15 +29,16 @@
 
 - вход → создаётся фактический `HrmMainScreen` → наследуемая бизнес-логика `ExtMainScreen` выполняется без изменений;
 - `AfterShowEvent` → Vaadin UI готов → `MainScreenBackgroundService` разрешает ресурс;
-- `UserSettings.fileImageFace` содержит существующий файл с префиксом `hrm-main-background-` → используется пользовательский `StreamResource`;
-- пользовательского файла нет → выбирается случайный `1.jpg … 10.jpg` из `backgrounds/` активной темы;
+- `UserSettings.fileImageFace` содержит файл с префиксом `hrm-main-background-` → `FileLoader.openStream()` проверяет физическую доступность FileStorage;
+- пользовательский файл доступен → создаётся `ExternalResource` с прямым URL `/{context}/dispatch/download?f={uuid}`;
+- пользовательский файл отсутствует или FileStorage возвращает ошибку → исключение перехватывается → descriptor сохраняется в БД → выбирается системный фон активной темы;
+- пользовательского descriptor нет → выбирается случайный `1.jpg … 10.jpg` из `backgrounds/` активной темы;
 - предыдущий индекс темы известен в `UserSession` → немедленное повторение исключается;
-- ресурс разрешён → скрытый Vaadin `Image` регистрирует URL → динамический локальный CSS назначает фон только `mainVBox`;
+- ресурс разрешён → динамический локальный CSS назначает фон только `mainVBox`;
 - CSS применён → изображение растягивается до `100% × 100%` рабочей области без пустых полос и обрезки;
 - dashboard получает прозрачный локальный стиль → фон остаётся видимым под рабочими widgets;
 - SettingsWindow успешно сохранён → публикуется UI-scoped event → фон обновляется без перезахода;
-- пользовательский файл повреждён или отсутствует → сервис возвращается к тематическому каталогу;
-- ошибка декоративного фона → записывается warning/error → открытие главного экрана не должно блокироваться.
+- ошибка декоративного фона → записывается warning/error → открытие главного экрана не блокируется.
 
 ## Каталог тематических фонов
 
@@ -81,7 +84,7 @@ Allowlist поддерживаемых тем используется для н
 
 ## Пользовательский фон
 
-Пользовательская цепочка не меняется:
+Пользовательская цепочка сохранения не меняется:
 
 ```text
 Upload → MainScreenBackgroundImageProcessor → FileStorage
@@ -94,26 +97,40 @@ Upload → MainScreenBackgroundImageProcessor → FileStorage
 - файл хранится в FileStorage;
 - файл имеет приоритет над тематическим ресурсом;
 - legacy-фотография в `fileImageFace` без указанного префикса не считается фоном;
-- при Cancel временно созданные файлы очищаются по существующему контракту SettingsWindow.
+- при Cancel временно созданные файлы очищаются по существующему контракту SettingsWindow;
+- перед выдачей URL сервис открывает поток через `FileLoader.openStream()` и сразу закрывает его;
+- `FileStorageException` или `IOException` преобразуются в системный fallback;
+- недоступный `FileDescriptor` не удаляется из БД;
+- browser URL формируется через существующий helper:
+
+```text
+/{cuba.webContextName}/dispatch/download?f={fileDescriptor.uuid}
+```
+
+Прямой dispatch URL не зависит от Vaadin connector resource key и остаётся одинаковым после обновления UI или перезапуска Tomcat. Фактическая выдача файла по-прежнему зависит от доступности FileStorage и штатной web-аутентификации CUBA.
 
 ## Применение ресурса в HrmMainScreen
 
-Архитектура контроллера не меняется:
+Архитектура контроллера:
 
 ```text
-mainVBox
-├── backgroundResourceHolder (скрытый Vaadin Image 0 × 0)
+mainVBox (динамический CSS-класс фона)
 └── mainDashboard (локальный прозрачный стиль)
 ```
 
-После регистрации ресурса контроллер:
+Скрытый Vaadin `Image`, `ResourceReference` и connector URL для пользовательского фона не используются.
 
-1. получает URL через `ResourceReference`;
-2. удаляет несовместимый префикс `app://APP`, если он присутствует;
-3. создаёт уникальный локальный CSS-класс;
-4. назначает `background-image`, `background-position`, `background-repeat` и `background-size` на `mainVBox`;
-5. устанавливает `background-size: 100% 100%`, чтобы изображение совпадало с шириной и высотой рабочей области;
-6. оставляет dashboard прозрачным.
+Контроллер разрешает только два штатных типа:
+
+1. `ThemeResource` → `VAADIN/themes/{theme}/backgrounds/{n}.jpg`;
+2. `ExternalResource` → `/{context}/dispatch/download?f={uuid}`.
+
+После разрешения URL контроллер:
+
+1. создаёт уникальный локальный CSS-класс;
+2. назначает `background-image`, `background-position`, `background-repeat` и `background-size` на `mainVBox`;
+3. устанавливает `background-size: 100% 100%`, чтобы изображение совпадало с шириной и высотой рабочей области;
+4. оставляет dashboard прозрачным.
 
 ### Масштабирование на дисплеях
 
@@ -132,7 +149,7 @@ mainVBox
 | `mainVBox` | `data-hrm-main-background="applied"` | подтверждает выполнение background lifecycle |
 | `mainVBox` | `data-hrm-main-controller="HrmMainScreen"` | подтверждает фактический root controller |
 
-Назначенные через `HtmlAttributes` значения проверяются integration-тестом. Реальный computed style, HTTP-статус theme-ресурса и screenshot проверяются Hermes после clean deploy.
+Назначенные через `HtmlAttributes` значения проверяются integration-тестом. Реальный computed style, HTTP-статус theme/dispatch-ресурса и screenshot проверяются Hermes после clean deploy.
 
 ## Выбор системного варианта
 
@@ -160,10 +177,12 @@ mainVBox
 7. размер каждого изображения `1920 × 1080`;
 8. сохранение приоритета пользовательского фона и session-антиповтора;
 9. применение `background-size: 100% 100%` и отсутствие `background-size: cover`;
-10. неизменность интеграционного контракта `HrmMainScreen`;
-11. неизменность SettingsWindow/FileStorage-цепочки.
+10. перехват ошибок `FileLoader.openStream()` и системный fallback;
+11. прямой dispatch URL через `ExternalResource`;
+12. отсутствие `ResourceReference`, скрытого `Image` и `app://APP`;
+13. неизменность SettingsWindow/FileStorage-цепочки.
 
-`HrmMainScreenIntegrationTest` продолжает проверять создание экрана, DOM-маркеры, регистрацию ресурса и обновление по `MainScreenBackgroundChangedEvent`.
+`HrmMainScreenIntegrationTest` проверяет фактический root screen, `mainVBox`, dashboard, DOM-маркеры, отсутствие удалённого `mainScreenBackgroundLayer` и обновление системного URL по `MainScreenBackgroundChangedEvent`.
 
 ## Проверки Hermes
 
@@ -179,18 +198,20 @@ Hermes проверяет точный HEAD PR:
 - clean local deploy;
 - `/hrm/` = HTTP 200;
 - системный фон для каждой из семи тем;
-- отсутствие `app://APP` в итоговом CSS URL;
-- HTTP 200 и MIME `image/jpeg` для theme-ресурса;
+- пользовательский URL имеет вид `/hrm/dispatch/download?f={uuid}` и не содержит `connector` или `app://APP`;
+- dispatch-ресурс отвечает HTTP 200 и `image/jpeg` до и после перезапуска Tomcat;
+- отсутствующий физический файл при сохранённом descriptor не блокирует вход и включает системный fallback;
+- descriptor не удаляется при временной недоступности FileStorage;
 - computed `background-size: 100% 100%` на `1366 × 768`, `1920 × 1080` и `2560 × 1440`;
 - отсутствие пустых полос и обрезки изображения на указанных разрешениях;
 - отсутствие немедленного повтора после обновления/перезахода;
-- приоритет пользовательского фона и его полноэкранное растягивание;
 - отсутствие Tomcat critical errors, P1 и P2.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-26 | Пользовательский фон переведён с Vaadin connector на прямой FileStorage dispatch URL; ошибка чтения файла включает системный fallback без удаления descriptor |
 | 2026-07-26 | Фон главного экрана переведён с `cover` на точное растягивание `100% × 100%` для заполнения рабочей области на любом дисплее |
 | 2026-07-26 | Стандартные фоны вынесены из Java runtime-SVG в каталоги семи тем: 7 × 10 JPG; контрактный тест проверяет состав и формат файлов |
 | 2026-07-26 | Добавлен единый background layer, UI-scoped refresh, исключение повтора SVG и screen-level integration test |

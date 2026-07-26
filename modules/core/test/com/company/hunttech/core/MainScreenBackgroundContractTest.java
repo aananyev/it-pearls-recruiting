@@ -105,6 +105,31 @@ public class MainScreenBackgroundContractTest {
     }
 
     @Test
+    public void customBackgroundUsesDirectDispatchUrlAndFallsBackOnStorageFailure()
+            throws IOException {
+        String service = source(
+                "modules/web/src/com/company/hunttech/web/screens/mainscreen/MainScreenBackgroundService.java");
+        String controller = source(
+                "modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
+
+        // FileStorage проверяется до выдачи URL; недоступный файл не блокирует системный fallback.
+        assertTrue(service.contains("try (InputStream ignored = fileLoader.openStream(descriptor))"));
+        assertTrue(service.contains("catch (FileStorageException | IOException e)"));
+        assertTrue(service.contains("return Optional.empty()"));
+        assertTrue(service.contains("new ExternalResource("));
+        assertTrue(service.contains("FileDescriptorImageHelper.buildDispatchDownloadUrl(descriptor)"));
+        assertFalse(service.contains("new StreamResource("));
+        assertFalse(service.contains("readAllBytes()"));
+
+        // Пользовательский URL больше не зависит от Vaadin connector и скрытого Image-владельца.
+        assertTrue(controller.contains("resource instanceof ExternalResource"));
+        assertTrue(controller.contains("((ExternalResource) resource).getURL()"));
+        assertFalse(controller.contains("ResourceReference.create"));
+        assertFalse(controller.contains("backgroundResourceHolder"));
+        assertFalse(controller.contains("app://APP"));
+    }
+
+    @Test
     public void backgroundRefreshUsesUiEventAndAvoidsImmediateVariantRepeat()
             throws IOException {
         String controller = source(
@@ -227,6 +252,7 @@ public class MainScreenBackgroundContractTest {
         assertTrue(integrationTest.contains("screens.create(\"hrmMainScreen\", OpenMode.ROOT)"));
         assertTrue(integrationTest.contains("data-hrm-main-background"));
         assertTrue(integrationTest.contains("MainScreenBackgroundChangedEvent"));
+        assertFalse(integrationTest.contains("mainScreenBackgroundLayer"));
     }
 
     @Test

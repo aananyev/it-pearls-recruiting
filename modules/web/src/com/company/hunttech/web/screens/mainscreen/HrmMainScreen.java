@@ -7,13 +7,11 @@ import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
+import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
-import com.vaadin.server.ResourceReference;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.AbstractOrderedLayout;
-import com.vaadin.ui.Image;
 import com.vaadin.ui.UI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +23,7 @@ import java.util.UUID;
 /**
  * Применяет фоновое изображение через CSS-инъекцию в Page.
  * Системные фоны загружаются из VAADIN/themes/{name}/backgrounds/{n}.jpg.
- * Пользовательский фон — из FileStorage через StreamResource.
+ * Пользовательский фон загружается из FileStorage по прямому dispatch URL.
  */
 @UiController("hrmMainScreen")
 @UiDescriptor("hrm-main-screen.xml")
@@ -44,7 +42,6 @@ public class HrmMainScreen extends ExtMainScreen {
     @Inject
     private HtmlAttributes htmlAttributes;
 
-    private Image backgroundResourceHolder;
     private String lastAppliedResourceUrl;
     private String currentBackgroundStyleName;
 
@@ -86,9 +83,9 @@ public class HrmMainScreen extends ExtMainScreen {
     }
 
     /**
-     * Строит CSS-совместимый URL для фонового изображения.
-     * ThemeResource даёт theme://... — браузер не понимает, конвертируем в HTTP-путь.
-     * StreamResource (пользовательский фон) использует ResourceReference.
+     * Строит CSS-совместимый URL без Vaadin connector для обоих штатных типов ресурса.
+     * ThemeResource разрешается относительно активной темы, а ExternalResource уже
+     * содержит прямой FileStorage dispatch URL пользовательского файла.
      */
     private String buildBackgroundUrl(UI currentUi, Resource resource) {
         if (resource instanceof ThemeResource) {
@@ -97,10 +94,11 @@ public class HrmMainScreen extends ExtMainScreen {
             String themeName = currentUi.getTheme();
             return "VAADIN/themes/" + themeName + "/" + themeResource.getResourceId();
         }
-
-        // StreamResource (пользовательский фон или legacy SVG)
-        AbstractOrderedLayout vaadinVBox = mainVBox.unwrap(AbstractOrderedLayout.class);
-        return registerBackgroundResource(currentUi, vaadinVBox, resource);
+        if (resource instanceof ExternalResource) {
+            return ((ExternalResource) resource).getURL();
+        }
+        throw new IllegalArgumentException("Неподдерживаемый тип фонового ресурса: "
+                + (resource == null ? "null" : resource.getClass().getName()));
     }
 
     /**
@@ -145,33 +143,6 @@ public class HrmMainScreen extends ExtMainScreen {
         htmlAttributes.setDomAttribute(mainVBox, "data-hrm-main-controller", HrmMainScreen.class.getSimpleName());
         lastAppliedResourceUrl = resourceUrl;
         log.warn("### CHECKPOINT-17: ALL DONE, background applied ###");
-    }
-
-    private String registerBackgroundResource(UI currentUi,
-                                              AbstractOrderedLayout vaadinLayout,
-                                              Resource resource) {
-        if (backgroundResourceHolder != null
-                && backgroundResourceHolder.getParent() instanceof com.vaadin.ui.ComponentContainer) {
-            ((com.vaadin.ui.ComponentContainer) backgroundResourceHolder.getParent())
-                    .removeComponent(backgroundResourceHolder);
-        }
-
-        backgroundResourceHolder = new Image(null, resource);
-        backgroundResourceHolder.setWidth(0, Unit.PIXELS);
-        backgroundResourceHolder.setHeight(0, Unit.PIXELS);
-        backgroundResourceHolder.setVisible(false);
-        vaadinLayout.addComponent(backgroundResourceHolder);
-
-        String resourceUrl = ResourceReference.create(
-                resource, backgroundResourceHolder, "src").getURL();
-        // Vaadin возвращает app://APP/... для StreamResource, браузер не резолвит в CSS
-        if (resourceUrl != null && resourceUrl.startsWith("app://APP")) {
-            resourceUrl = resourceUrl.replace("app://APP", "");
-        }
-        if (resourceUrl == null || resourceUrl.trim().isEmpty()) {
-            throw new IllegalStateException("Vaadin не зарегистрировал ресурс фонового изображения");
-        }
-        return resourceUrl;
     }
 
     String getLastAppliedResourceUrl() {

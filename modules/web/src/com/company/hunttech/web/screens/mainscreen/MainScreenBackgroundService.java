@@ -5,17 +5,18 @@ import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FileLoader;
+import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
+import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Resource;
-import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
@@ -118,18 +119,20 @@ public class MainScreenBackgroundService {
                 .orElse(null);
     }
 
+    /**
+     * Проверяет физическую доступность пользовательского файла до выдачи browser URL.
+     * Descriptor сохраняется в БД при ошибке хранилища: после восстановления файла
+     * пользовательский фон снова станет доступен без повторной настройки.
+     */
     private Optional<Resource> createCustomResource(FileDescriptor descriptor) {
-        if (!isCustomBackground(descriptor)
-                || !FileDescriptorImageHelper.fileExists(fileLoader, descriptor)) {
+        if (!isCustomBackground(descriptor)) {
             return Optional.empty();
         }
 
-        try (InputStream inputStream = fileLoader.openStream(descriptor)) {
-            byte[] bytes = inputStream.readAllBytes();
-            StreamResource resource = byteResource(bytes, descriptor.getName(), mimeType(descriptor));
-            resource.setCacheTime(0);
-            return Optional.of(resource);
-        } catch (Exception e) {
+        try (InputStream ignored = fileLoader.openStream(descriptor)) {
+            return Optional.of(new ExternalResource(
+                    FileDescriptorImageHelper.buildDispatchDownloadUrl(descriptor)));
+        } catch (FileStorageException | IOException e) {
             log.warn("Cannot load custom main screen background id={}: {}",
                     descriptor.getId(), e.getMessage());
             return Optional.empty();
@@ -144,36 +147,11 @@ public class MainScreenBackgroundService {
         return new ThemeResource("backgrounds/" + (variant + 1) + ".jpg");
     }
 
-    private StreamResource byteResource(byte[] bytes, String fileName, String mimeType) {
-        StreamResource resource = new StreamResource(
-                (StreamResource.StreamSource) () -> new ByteArrayInputStream(bytes), fileName);
-        resource.setMIMEType(mimeType);
-        return resource;
-    }
-
     private String normalizeTheme(String themeName) {
         if (themeName == null) {
             return DEFAULT_THEME;
         }
         String normalized = themeName.toLowerCase(Locale.ROOT);
         return SUPPORTED_THEMES.contains(normalized) ? normalized : DEFAULT_THEME;
-    }
-
-    private String mimeType(FileDescriptor descriptor) {
-        String extension = descriptor.getExtension();
-        if (extension == null) {
-            return "application/octet-stream";
-        }
-        switch (extension.toLowerCase(Locale.ROOT)) {
-            case "png":
-                return "image/png";
-            case "jpg":
-            case "jpeg":
-                return "image/jpeg";
-            case "webp":
-                return "image/webp";
-            default:
-                return "application/octet-stream";
-        }
     }
 }
