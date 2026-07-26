@@ -323,7 +323,18 @@ public class ExtSettingsWindow extends SettingsWindow {
     private void onUserAvatarUploaded() {
         ExtUser user = extUserDs.getItem();
         if (user == null) return;
-        FileDescriptor newAvatar = processUploadedAvatar(userAvatarUpload.getFileDescriptor());
+        FileDescriptor uploaded = userAvatarUpload.getFileDescriptor();
+        if (uploaded == null) {
+            Object value = userAvatarUpload.getValue();
+            if (value instanceof FileDescriptor) {
+                uploaded = (FileDescriptor) value;
+            }
+        }
+        if (uploaded == null) {
+            log.warn("User avatar upload did not produce a FileDescriptor");
+            return;
+        }
+        FileDescriptor newAvatar = processUploadedAvatar(uploaded);
         FileDescriptor oldAvatar = user.getUserAvatar();
         removeStoredFileIfUnreferenced(oldAvatar, user.getOfficialPhoto(), newAvatar);
         user.setUserAvatar(newAvatar);
