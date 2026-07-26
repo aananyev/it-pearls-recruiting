@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -18,21 +19,52 @@ import static org.junit.Assert.assertTrue;
  */
 public class MainScreenBackgroundContractTest {
 
+    private static final String[] THEMES = {
+            "halo",
+            "havana",
+            "helium",
+            "hover",
+            "hunttech-modern",
+            "hunttech-modern-light",
+            "hunttech-modern-dark"
+    };
+
     @Test
     public void generatedCatalogContainsTenVariantsForAllSevenThemes() throws IOException {
         String service = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/MainScreenBackgroundService.java");
 
         assertTrue(service.contains("VARIANT_COUNT = 10"));
-        assertTrue(service.contains("palettes.put(\"halo\""));
-        assertTrue(service.contains("palettes.put(\"havana\""));
-        assertTrue(service.contains("palettes.put(\"helium\""));
-        assertTrue(service.contains("palettes.put(\"hover\""));
-        assertTrue(service.contains("palettes.put(\"hunttech-modern\""));
-        assertTrue(service.contains("palettes.put(\"hunttech-modern-light\""));
-        assertTrue(service.contains("palettes.put(\"hunttech-modern-dark\""));
-        for (int variant = 0; variant < 10; variant++) {
-            assertTrue(service.contains("case " + variant + ":") || variant == 9 && service.contains("case 9:"));
+        assertEquals("Каталог должен содержать ровно семь theme-aware палитр",
+                THEMES.length, countOccurrences(service, "palettes.put("));
+        for (String theme : THEMES) {
+            assertTrue("Не найдена палитра темы " + theme,
+                    service.contains("palettes.put(\"" + theme + "\""));
         }
+        for (int variant = 0; variant < 10; variant++) {
+            assertTrue("Не найден SVG-вариант " + variant,
+                    service.contains("case " + variant + ":"));
+        }
+
+        // Регрессия защищает фактический формат, пригодный для CSS background.
+        assertTrue(service.contains("image/svg+xml"));
+        assertTrue(service.contains("viewBox=\\\"0 0 1920 1080\\\""));
+        assertTrue(service.contains("preserveAspectRatio=\\\"xMidYMid slice\\\""));
+        assertTrue(service.contains("\"hrm-main-\" + themeName + \"-\" + variant + \".svg\""));
+    }
+
+    @Test
+    public void dynamicResourceIsRegisteredAfterVaadinConnectorAttach() throws IOException {
+        String controller = source("modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
+
+        assertTrue(controller.contains("onAfterShowBackground(AfterShowEvent event)"));
+        assertFalse(controller.contains("onBeforeShowBackground(BeforeShowEvent event)"));
+        assertOrdered(controller,
+                "new Image(null, resource)",
+                "vaadinLayout.addComponent(backgroundResourceHolder)",
+                "ResourceReference.create(",
+                "backgroundResourceHolder, \"src\"");
+        assertTrue(controller.contains("mainDashboard.unwrap(com.vaadin.ui.Component.class)"));
+        assertTrue(controller.contains("vaadinDashboard.addStyleName(sessionStyle)"));
     }
 
     @Test
@@ -80,6 +112,33 @@ public class MainScreenBackgroundContractTest {
     }
 
     @Test
+    public void settingsCardHasIsolatedLayoutAndThemeStyles() throws IOException {
+        String descriptor = source("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-main-background.xml");
+
+        assertTrue(descriptor.contains("main-screen-background-card"));
+        assertTrue(descriptor.contains("mainScreenBackgroundCustomOption"));
+        assertTrue(descriptor.contains("mainScreenBackgroundDefaultOption"));
+        assertTrue(descriptor.contains("caption=\"Использовать системные фоны\""));
+        assertFalse(descriptor.contains("stylename=\"danger\""));
+
+        for (String theme : THEMES) {
+            String themeRoot = "modules/web/themes/" + theme + "/";
+            String styles = source(themeRoot + "styles.scss");
+            String localScss = source(themeRoot
+                    + "com.company.hunttech/main-screen-background-settings.scss");
+
+            assertTrue("SCSS не импортирован в теме " + theme,
+                    styles.contains("@import \"com.company.hunttech/main-screen-background-settings\";"));
+            assertTrue("SCSS mixin не подключён в теме " + theme,
+                    styles.contains("@include main-screen-background-settings;"));
+            assertTrue("Нет локального namespace в теме " + theme,
+                    localScss.contains(".main-screen-background-card"));
+            assertFalse("Запрещён глобальный селектор кнопки в теме " + theme,
+                    localScss.contains("\n.v-button"));
+        }
+    }
+
+    @Test
     public void clearActionReturnsToThemeRandomizationAndDeletesOnlyMarkedFiles() throws IOException {
         String controller = source("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindowMainBackground.java");
 
@@ -89,6 +148,16 @@ public class MainScreenBackgroundContractTest {
         assertTrue(controller.contains("refreshBackgroundStatus()"));
         assertTrue(controller.contains("mainScreenBackgroundService.isCustomBackground(descriptor)"));
         assertTrue(controller.contains("!Objects.equals(descriptor.getId(), activeFileId)"));
+    }
+
+    private int countOccurrences(String source, String fragment) {
+        int count = 0;
+        int offset = 0;
+        while ((offset = source.indexOf(fragment, offset)) >= 0) {
+            count++;
+            offset += fragment.length();
+        }
+        return count;
     }
 
     private String source(String relativePath) throws IOException {

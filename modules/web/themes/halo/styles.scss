@@ -4,6 +4,7 @@
 @import "com.company.hunttech/halo-ext";
 @import "com.company.hunttech/user-ai-profile";
 @import "com.company.hunttech/settings-window-sections";
+@import "com.company.hunttech/main-screen-background-settings";
 @import "com.company.hunttech/ext-settings-about-sidebar-fix";
 @import "com.company.hunttech/iteraction-list-editor";
 @import "com.company.hunttech/iteraction-list-accordion-navigation";
@@ -21,6 +22,7 @@
   @include com_company_hunttech-halo-ext;
   @include user-ai-profile;
   @include settings-window-sections;
+  @include main-screen-background-settings;
   @include ext-settings-about-sidebar-fix;
   @include iteraction-list-editor-theme;
   @include iteraction-list-accordion-navigation-theme;

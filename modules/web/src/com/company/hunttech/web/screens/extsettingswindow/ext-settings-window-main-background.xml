@@ -9,43 +9,75 @@
                 <hbox id="interfaceSettingsMainBox">
                     <scrollBox id="interfaceSettingsContentScrollBox">
                         <vbox id="interfaceSettingsContent">
-                            <!-- Новая карточка использует существующий визуальный контракт вкладки
-                                 и не перестраивает штатные компоненты SettingsWindow. -->
+                            <!-- Карточка изолирована собственным CSS namespace.
+                                 Соседние блоки вкладки «Интерфейс» не перестраиваются. -->
                             <vbox id="mainScreenBackgroundCard"
                                   width="100%"
-                                  spacing="true"
-                                  stylename="settings-section-card interface-settings-card"
+                                  spacing="false"
+                                  stylename="settings-section-card interface-settings-card main-screen-background-card"
                                   ext:index="2">
-                                <vbox id="mainScreenBackgroundHeader" width="100%" spacing="false">
-                                    <label value="Фон главного экрана"
-                                           stylename="h3 settings-section-card-title"/>
-                                    <label value="Загрузите собственное изображение или используйте десять нейтральных фонов, подготовленных для каждой темы оформления."
-                                           width="100%"
-                                           stylename="settings-section-help"/>
-                                </vbox>
-                                <hbox id="mainScreenBackgroundActions"
+                                <hbox id="mainScreenBackgroundHeader"
                                       width="100%"
                                       spacing="true"
-                                      expand="mainScreenBackgroundStatusLabel">
-                                    <upload id="mainScreenBackgroundUpload"
-                                            fileStoragePutMode="IMMEDIATE"
-                                            caption="Загрузить изображение"
-                                            width="280px"
-                                            showFileName="false"
-                                            showClearButton="false"/>
+                                      expand="mainScreenBackgroundHeaderText"
+                                      stylename="main-screen-background-header">
+                                    <vbox id="mainScreenBackgroundHeaderText"
+                                          width="100%"
+                                          spacing="false">
+                                        <label value="Фон главного экрана"
+                                               stylename="h3 settings-section-card-title"/>
+                                        <label value="Выберите персональное изображение или системный каталог активной темы."
+                                               width="100%"
+                                               stylename="settings-section-help main-screen-background-header-help"/>
+                                    </vbox>
                                     <label id="mainScreenBackgroundStatusLabel"
-                                           width="100%"
-                                           align="MIDDLE_LEFT"
-                                           stylename="settings-section-help"/>
-                                    <button id="clearMainScreenBackgroundBtn"
-                                            caption="Очистить фоновое изображение"
-                                            invoke="clearMainScreenBackground"
-                                            stylename="danger"
-                                            align="MIDDLE_RIGHT"/>
+                                           align="MIDDLE_RIGHT"
+                                           stylename="main-screen-background-status"/>
                                 </hbox>
-                                <label value="Персональное изображение имеет приоритет. После очистки при каждом новом входе случайно выбирается один из десяти фонов активной темы."
+
+                                <hbox id="mainScreenBackgroundOptions"
+                                      width="100%"
+                                      spacing="true"
+                                      expand="mainScreenBackgroundCustomOption"
+                                      stylename="main-screen-background-options">
+                                    <vbox id="mainScreenBackgroundCustomOption"
+                                          width="100%"
+                                          spacing="true"
+                                          stylename="main-screen-background-option main-screen-background-custom-option">
+                                        <label value="Персональное изображение"
+                                               stylename="main-screen-background-option-title"/>
+                                        <label value="PNG, JPG, JPEG или WEBP до 15 МБ. Рекомендуемое соотношение сторон — 16:9."
+                                               width="100%"
+                                               stylename="settings-section-help main-screen-background-option-help"/>
+                                        <upload id="mainScreenBackgroundUpload"
+                                                fileStoragePutMode="IMMEDIATE"
+                                                caption="Выбрать изображение"
+                                                width="100%"
+                                                showFileName="false"
+                                                showClearButton="false"
+                                                stylename="main-screen-background-upload"/>
+                                    </vbox>
+
+                                    <vbox id="mainScreenBackgroundDefaultOption"
+                                          width="300px"
+                                          spacing="true"
+                                          stylename="main-screen-background-option main-screen-background-default-option">
+                                        <label value="Системные фоны"
+                                               stylename="main-screen-background-option-title"/>
+                                        <label value="Для каждой темы доступно 10 вариантов. Новый фон выбирается при следующем входе."
+                                               width="100%"
+                                               stylename="settings-section-help main-screen-background-option-help"/>
+                                        <button id="clearMainScreenBackgroundBtn"
+                                                caption="Использовать системные фоны"
+                                                width="100%"
+                                                invoke="clearMainScreenBackground"
+                                                stylename="main-screen-background-default-button"/>
+                                    </vbox>
+                                </hbox>
+
+                                <label value="Персональное изображение всегда имеет приоритет. После очистки используется случайный фон активной темы."
                                        width="100%"
-                                       stylename="settings-section-help"/>
+                                       stylename="settings-section-help main-screen-background-note"/>
                             </vbox>
                         </vbox>
                     </scrollBox>

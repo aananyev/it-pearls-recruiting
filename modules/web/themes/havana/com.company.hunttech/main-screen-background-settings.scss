@@ -1,0 +1,133 @@
+// Локальная карточка выбора фона главного экрана.
+// Стили ограничены одним блоком SettingsWindow и не изменяют соседние настройки.
+@mixin main-screen-background-settings {
+  .ext-settings-window {
+    .main-screen-background-card {
+      max-width: 980px;
+      padding: 0 !important;
+      overflow: hidden;
+      border-top: 3px solid $v-selection-color !important;
+    }
+
+    .main-screen-background-card .v-label {
+      line-height: 1.45 !important;
+    }
+
+    .main-screen-background-header {
+      box-sizing: border-box;
+      padding: 18px 20px 15px;
+      background: linear-gradient(
+        135deg,
+        rgba($v-selection-color, 0.075),
+        rgba($v-panel-background-color, 0.96)
+      ) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.13);
+    }
+
+    .main-screen-background-header-help {
+      margin-top: 3px;
+      font-size: 13px !important;
+    }
+
+    .main-screen-background-status {
+      box-sizing: border-box;
+      max-width: 310px;
+      padding: 7px 12px;
+      color: mix($v-selection-color, $v-font-color, 72%) !important;
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      line-height: 18px !important;
+      text-align: center;
+      white-space: normal !important;
+      background: rgba($v-selection-color, 0.10) !important;
+      border: 1px solid rgba($v-selection-color, 0.24);
+      border-radius: 999px;
+    }
+
+    .main-screen-background-options {
+      box-sizing: border-box;
+      padding: 16px 20px 14px;
+    }
+
+    .main-screen-background-option {
+      box-sizing: border-box;
+      min-height: 158px;
+      padding: 16px;
+      background: mix($v-app-background-color, $v-panel-background-color, 54%) !important;
+      border: 1px solid rgba($v-font-color, 0.14);
+      border-radius: 7px;
+    }
+
+    .main-screen-background-custom-option {
+      border-color: rgba($v-selection-color, 0.24);
+      background: linear-gradient(
+        145deg,
+        rgba($v-selection-color, 0.055),
+        mix($v-app-background-color, $v-panel-background-color, 48%)
+      ) !important;
+    }
+
+    .main-screen-background-option-title {
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 21px !important;
+    }
+
+    .main-screen-background-option-help {
+      min-height: 44px;
+      font-size: 13px !important;
+      line-height: 1.45 !important;
+    }
+
+    .main-screen-background-upload,
+    .main-screen-background-default-button {
+      width: 100% !important;
+    }
+
+    .main-screen-background-default-button {
+      color: $v-selection-color !important;
+      font-weight: 700 !important;
+      background: transparent !important;
+      border-color: rgba($v-selection-color, 0.38) !important;
+      box-shadow: none !important;
+    }
+
+    .main-screen-background-default-button:hover,
+    .main-screen-background-default-button:focus {
+      background: rgba($v-selection-color, 0.08) !important;
+      border-color: $v-selection-color !important;
+    }
+
+    .main-screen-background-note {
+      box-sizing: border-box;
+      margin: 0 20px 20px;
+      padding: 10px 12px;
+      color: mix($v-font-color, $v-panel-background-color, 72%) !important;
+      font-size: 12px !important;
+      line-height: 1.45 !important;
+      background: rgba($v-font-color, 0.035) !important;
+      border-left: 3px solid rgba($v-selection-color, 0.58);
+      border-radius: 0 5px 5px 0;
+    }
+  }
+
+  @media (max-width: 1366px) {
+    .ext-settings-window {
+      .main-screen-background-header,
+      .main-screen-background-options {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .main-screen-background-default-option {
+        width: 270px !important;
+      }
+
+      .main-screen-background-note {
+        margin-left: 16px;
+        margin-right: 16px;
+      }
+    }
+  }
+}
