@@ -36,8 +36,9 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
     private static final Set<String> SUPPORTED_EXTENSIONS = new LinkedHashSet<>(
             Arrays.asList(".png", ".jpg", ".jpeg", ".webp"));
     private static final String STATUS_THEME = "Используется случайный фон активной темы.";
-    private static final String STATUS_CUSTOM = "Используется персональное изображение пользователя.";
+    private static final String STATUS_CUSTOM = "Используется пользовательский фон.";
     private static final String UNSUPPORTED_FILE = "Поддерживаются PNG, JPG, JPEG и WEBP размером до 15 МБ.";
+    private static final String UPLOAD_ERROR = "Не удалось загрузить изображение. Проверьте формат и размер файла.";
     private static final String REMOVE_ERROR = "Не удалось удалить прежний файл фона. Ссылка на него больше не используется.";
     private static final String NAVIGATION_STYLE = "borderless settings-section-nav-item";
     private static final String ACTIVE_NAVIGATION_STYLE =
@@ -81,7 +82,9 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
                 ? null : userSettingsDs.getItem().getFileImageFace();
         currentBackground = mainScreenBackgroundService.isCustomBackground(storedFile) ? storedFile : null;
         mainScreenBackgroundUpload.setValue(currentBackground);
+        // Статус и datasource меняются только после подтверждённого CUBA события успешной загрузки.
         mainScreenBackgroundUpload.addFileUploadSucceedListener(event -> onMainScreenBackgroundUploaded());
+        mainScreenBackgroundUpload.addFileUploadErrorListener(event -> onMainScreenBackgroundUploadError());
         refreshBackgroundStatus();
     }
 
@@ -157,16 +160,25 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
             pendingRemoval.add(currentBackground);
         }
 
-        String extension = uploaded.getExtension();
+        String originalName = uploaded.getName();
         uploaded.setName(MainScreenBackgroundService.CUSTOM_BACKGROUND_PREFIX
                 + uploaded.getId()
-                + (extension == null || extension.isEmpty() ? "" : "." + extension.toLowerCase(Locale.ROOT)));
+                + (originalName == null || originalName.trim().isEmpty() ? "" : "-" + originalName));
         FileDescriptor committedDescriptor = dataManager.commit(uploaded);
 
         currentBackground = committedDescriptor;
         userSettingsDs.getItem().setFileImageFace(committedDescriptor);
         mainScreenBackgroundUpload.setValue(committedDescriptor);
         refreshBackgroundStatus();
+    }
+
+    private void onMainScreenBackgroundUploadError() {
+        // Ошибка загрузки не должна переводить форму в пользовательский режим или менять редактируемый datasource.
+        mainScreenBackgroundUpload.setValue(currentBackground);
+        refreshBackgroundStatus();
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withCaption(UPLOAD_ERROR)
+                .show();
     }
 
     public void clearMainScreenBackground() {
