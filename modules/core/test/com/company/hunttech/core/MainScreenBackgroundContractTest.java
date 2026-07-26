@@ -53,7 +53,7 @@ public class MainScreenBackgroundContractTest {
 
         assertMainScreenId(moduleProperties, "web-модуль");
         assertMainScreenId(componentProperties, "app-component");
-        assertTrue(screenConfig.contains("<screen id=\"hrmMainScreen\""));
+        assertFalse(screenConfig.contains("<screen id=\"hrmMainScreen\""));
         assertTrue(controller.contains("@UiController(\"hrmMainScreen\")"));
         assertTrue(controller.contains("@UiDescriptor(\"hrm-main-screen.xml\")"));
         assertTrue(controller.contains("class HrmMainScreen extends ExtMainScreen"));
