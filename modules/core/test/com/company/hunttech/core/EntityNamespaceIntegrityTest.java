@@ -130,6 +130,12 @@ public class EntityNamespaceIntegrityTest {
             if (lowerPath.contains("/com/company/itpearls/")) {
                 violations.add(relativePath + ": legacy package path");
             }
+            if (source.contains("com.company.itpearls")) {
+                violations.add(relativePath + ": legacy Java package reference");
+            }
+            if (source.contains("ITPEARLS_")) {
+                violations.add(relativePath + ": legacy database table reference");
+            }
 
             List<String> forbiddenContracts = Arrays.asList(
                     "@entity(name = \"" + LEGACY_ENTITY_PREFIX,
