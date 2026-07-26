@@ -103,6 +103,11 @@ public class HrmMainScreen extends ExtMainScreen {
         return registerBackgroundResource(currentUi, vaadinVBox, resource);
     }
 
+    /**
+     * Назначает фон корневому контейнеру главного экрана. Размер 100% × 100%
+     * намеренно растягивает изображение до границ viewport без пустых полос и обрезки
+     * при любом соотношении сторон дисплея.
+     */
     private void applyBackground(UI currentUi, Resource resource) {
         AbstractOrderedLayout vaadinVBox = mainVBox.unwrap(AbstractOrderedLayout.class);
         AbstractOrderedLayout vaadinDashboard = mainDashboard.unwrap(AbstractOrderedLayout.class);
@@ -126,7 +131,7 @@ public class HrmMainScreen extends ExtMainScreen {
                 + "background-image: url('" + escapeCssUrl(resourceUrl) + "') !important;"
                 + "background-position: center center !important;"
                 + "background-repeat: no-repeat !important;"
-                + "background-size: cover !important;"
+                + "background-size: 100% 100% !important;"
                 + "}"
                 + ".hrm-dashboard-transparent {"
                 + "background: transparent !important;"
