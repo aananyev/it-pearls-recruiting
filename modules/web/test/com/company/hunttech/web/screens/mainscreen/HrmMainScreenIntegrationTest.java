@@ -50,7 +50,8 @@ public class HrmMainScreenIntegrationTest {
         Component dashboard = root.getWindow().getComponent("mainDashboard");
         assertNotNull(mainVBox);
         assertNotNull(dashboard);
-        assertNull(root.getWindow().getComponent("mainScreenBackgroundLayer"));
+        // Отдельный background layer удалён: фон принадлежит корневому mainVBox.
+        assertNull(root.getWindow().getComponent("mainScreen" + "BackgroundLayer"));
 
         HtmlAttributes html = AppBeans.get(HtmlAttributes.class);
         assertEquals("applied",
