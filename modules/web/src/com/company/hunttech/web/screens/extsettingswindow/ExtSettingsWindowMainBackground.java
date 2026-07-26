@@ -103,7 +103,6 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
                 ? storedFile : null;
         mainScreenBackgroundUpload.setValue(currentBackground);
 
-        // Datasource и статус меняются только после полного декодирования и безопасной нормализации файла.
         mainScreenBackgroundUpload.addFileUploadSucceedListener(
                 event -> onMainScreenBackgroundUploaded());
         mainScreenBackgroundUpload.addFileUploadErrorListener(
@@ -111,10 +110,6 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         refreshBackgroundStatus();
     }
 
-    /**
-     * Добавляет пятый пункт в существующий индекс вкладки «Интерфейс». Навигация
-     * переводит фокус к upload-компоненту и не изменяет значения формы.
-     */
     private void initBackgroundNavigation() {
         interfaceSettingsBackgroundNav = uiComponents.create(Button.class);
         interfaceSettingsBackgroundNav.setId("interfaceSettingsBackgroundNav");
@@ -167,8 +162,23 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         }
     }
 
+    /**
+     * FileUploadField.getFileDescriptor() может вернуть null при IMMEDIATE.
+     * getValue() всегда возвращает загруженный FileDescriptor после успешного upload.
+     */
+    private FileDescriptor getUploadedDescriptor() {
+        FileDescriptor descriptor = mainScreenBackgroundUpload.getFileDescriptor();
+        if (descriptor == null) {
+            Object value = mainScreenBackgroundUpload.getValue();
+            if (value instanceof FileDescriptor) {
+                descriptor = (FileDescriptor) value;
+            }
+        }
+        return descriptor;
+    }
+
     private void onMainScreenBackgroundUploaded() {
-        FileDescriptor uploaded = mainScreenBackgroundUpload.getFileDescriptor();
+        FileDescriptor uploaded = getUploadedDescriptor();
         if (uploaded == null || userSettingsDs.getItem() == null) {
             return;
         }
@@ -247,7 +257,6 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
     }
 
     private void onMainScreenBackgroundUploadError() {
-        // Ошибка transport/upload не должна менять редактируемый datasource или режим фона.
         mainScreenBackgroundUpload.setValue(currentBackground);
         refreshBackgroundStatus();
         notifications.create(Notifications.NotificationType.WARNING)
@@ -268,10 +277,6 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         refreshBackgroundStatus();
     }
 
-    /**
-     * После успешного сохранения закрывает SettingsWindow без повторного диалога,
-     * очищает только неиспользуемые маркированные файлы и обновляет текущую UI-вкладку.
-     */
     @Override
     protected void commit() {
         UUID settingsId = userSettingsDs.getItem() == null
@@ -296,10 +301,6 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
         return !successfulCommitClosing && super.hasUnsavedChanges();
     }
 
-    /**
-     * Отмена всегда требует явного выбора: остаться в форме либо закрыть её с
-     * отбрасыванием datasource-изменений и удалением временно созданных фонов.
-     */
     @Override
     protected void cancel() {
         dialogs.createOptionDialog(Dialogs.MessageType.CONFIRMATION)
