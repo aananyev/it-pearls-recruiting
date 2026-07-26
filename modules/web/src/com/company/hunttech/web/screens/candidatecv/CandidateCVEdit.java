@@ -19,6 +19,7 @@ import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import com.haulmont.cuba.security.global.UserSession;
+import com.hunttech.hrm.gui.components.OvaFallbackImage;
 import net.htmlparser.jericho.Source;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.RandomAccessRead;
@@ -111,7 +112,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private SuggestionPickerField candidateField;
     @Inject
-    private Image candidatePic;
+    private OvaFallbackImage candidatePic;
     @Inject
     private UserSessionSource userSessionSource;
     @Inject
@@ -131,8 +132,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private CollectionContainer<OpenPosition> openPositionsDc;
     private StringBuffer textResumeStringBuffer = null;
-    @Inject
-    private Image candidateFaceDefaultImage;
     @Inject
     private ResumeRecognitionService resumeRecognitionService;
     @Inject
@@ -357,7 +356,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
 
             } else if (fileDescriptor.getExtension().equals(EXTENSION_DOCX)) {
-
                 XWPFDocument doc = new XWPFDocument(inputStream);
                 POITextExtractor extractor = new XWPFWordExtractor(doc);
                 textResume = extractor.getText().replaceAll("\n", breakLine[0]);
@@ -479,8 +477,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         setLetterRecommendation();
-//        setVisibleLogo();
-        setCandidatePicImage();
     }
 
     private void convertTextCV() {
@@ -611,32 +607,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 "</ol>";
 
         cvResomandation.setValue(text);
-    }
-
-/*    public void setVisibleLogo() {
-
-        if (candidatePic.getValueSource().getValue() == null) {
-            //candidatePic.setVisible(false);
-            //candidateFaceDefaultImage.setVisible(true);
-        } else {
-            candidatePic.setVisible(true);
-            candidateFaceDefaultImage.setVisible(false);
-        }
-    } */
-
-    private void setCandidatePicImage() {
-        if (getEditedEntity().getFileImageFace() == null) {
-            candidateFaceDefaultImage.setVisible(true);
-            candidatePic.setVisible(false);
-        } else {
-            candidateFaceDefaultImage.setVisible(false);
-            candidatePic.setVisible(true);
-        }
-    }
-
-    @Subscribe("candidatePic")
-    public void onCandidatePicSourceChange(ResourceView.SourceChangeEvent event) {
-        setCandidatePicImage();
     }
 
     private void setLetterRecommendation() {
