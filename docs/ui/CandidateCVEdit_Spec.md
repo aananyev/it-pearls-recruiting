@@ -6,7 +6,7 @@
 **Controller:** `modules/web/src/com/company/hunttech/web/screens/candidatecv/CandidateCVEdit.java`
 **Descriptor:** `modules/web/src/com/company/hunttech/web/screens/candidatecv/candidate-cv-edit.xml`
 **Локальный SCSS namespace:** `.candidate-cv-editor`
-**Статус:** `candidatePic` переведён на единый `OvaFallbackImage`; проверка ожидает Hermes
+**Статус:** добавлена индивидуальная label-навигация блоков для всех пяти вкладок; проверка ожидает Hermes
 
 ## Назначение и бизнес-смысл (What & Why)
 
@@ -26,7 +26,7 @@
 4. `tabSkillTree` — дерево навыков, повторный разбор резюме и сопоставление с вакансией.
 5. `tabFiles` — дополнительные composition-файлы `CandidateCV`.
 
-Постоянная левая sidebar повторяет профильный паттерн `JobCandidateEdit`: фотография, ФИО, текущая позиция кандидата, должность в подготавливаемом резюме, вакансия и проект остаются видимыми на всех пяти вкладках. Правая workspace содержит `TabSheet` и footer. Ширина sidebar фиксирована, а рабочая область расширяется на оставшееся пространство.
+Постоянная левая sidebar повторяет профильный паттерн `JobCandidateEdit`: фотография, ФИО, текущая позиция кандидата, должность в подготавливаемом резюме, вакансия и проект остаются видимыми на всех пяти вкладках. Непосредственно под профилем размещён индекс «Разделы вкладки»: для активной вкладки показывается только её собственный набор блоков, а выбор пункта переводит фокус в соответствующий штатный компонент правой панели. Правая workspace содержит `TabSheet` и footer. Ширина sidebar фиксирована, а рабочая область расширяется на оставшееся пространство.
 
 Связанные документы:
 
@@ -41,6 +41,8 @@
 - открытие формы → `@LoadDataBeforeShow` инициирует стандартный lifecycle → pre-load listener не разрешает загрузить вакансии до установки фильтра пользователя;
 - загрузка `candidateCVDc` → runtime-view содержит прямой `CandidateCV.fileImageFace` → единый `OvaFallbackImage` получает фотографию через стандартный data binding;
 - `BeforeShow` → значение `TEXT_CV` сохраняется только как baseline → тяжёлый `RichTextArea` не инициализируется преждевременно;
+- переключение вкладки → selected-tab listener сохраняет исходный lazy lifecycle и показывает в sidebar только индивидуальную навигацию выбранной вкладки;
+- выбор пункта sidebar → меняется только active-style и вызывается `focus()` существующего поля, редактора, кнопки или таблицы → правая область прокручивается без изменения данных и без программного `setSelectedTab()`;
 - первый выбор `tabCV` → `cvTextInitialized == false` → текст CV, рекомендации и подсветка компетенций инициализируются один раз;
 - первый выбор `tabSkillTree` → `skillTabInitialized == false` → CV инициализируется по необходимости, затем выполняется существующий разбор навыков;
 - повторный выбор `tabSkillTree` → флаг уже установлен → лишняя повторная инициализация не выполняется;
@@ -135,6 +137,12 @@
 | `candidateCvSidebarResumePosition` | `Label` | sidebar / целевое резюме | `candidateCVDc / resumePosition` | — | live data binding | — | должность в резюме |
 | `candidateCvSidebarVacancy` | `Label` | sidebar / целевое резюме | `candidateCVDc / toVacancy` | — | live data binding | — | вакансия представления |
 | `candidateCvSidebarProject` | `Label` | sidebar / целевое резюме | `candidateCVDc / toVacancy.projectName` | — | live data binding | — | проект вакансии |
+| `candidateCvSectionNavigation` | `VBox` | sidebar / навигация | — | динамические borderless-кнопки | Java синхронизирует с selected tab | — | контекстный индекс блоков активной вкладки |
+| `candidateCvCandidateNavigation` | `VBox` | `tabCandidate` index | — | основные данные / оригинальное CV / HRM HuntTech CV | focus существующих полей | — | навигация блоков вкладки кандидата |
+| `candidateCvCvNavigation` | `VBox` | `tabCV` index | — | текст / рекомендации | focus RichTextArea | — | навигация вкладки резюме |
+| `candidateCvLetterNavigation` | `VBox` | `tabLetter` index | — | шаблон / письмо / комментарий / рекомендации | optional items повторяют visibility блоков | — | навигация письма |
+| `candidateCvSkillNavigation` | `VBox` | `tabSkillTree` index | — | действия / дерево | focus button или TreeDataGrid | — | навигация навыков |
+| `candidateCvFilesNavigation` | `VBox` | `tabFiles` index | — | дополнительные файлы | focus Table | — | навигация файлов |
 | `candidateCvWorkspace` | `VBox` | правая область | — | — | expand `tabSheet` | — | вкладки и footer |
 | `labelLastRecrutier` | `Label` | sidebar / служебный контекст | — | — | существующее значение | — | служебная информация |
 | `machRegexpFromCV` | `Label` | sidebar / служебный контекст | — | — | Java записывает email/телефон | — | результат распознавания |
@@ -196,7 +204,21 @@
 - расположение `skillTreesTable` внутри `tabSkillTree`;
 - отсутствие новых listener, loader или автозапуска.
 
-### 4.2. Visibility
+### 4.2. Индивидуальная навигация вкладок
+
+XML содержит пять отдельных navigation-container в порядке вкладок. В runtime исходные `Label` заменяются borderless-кнопками с тем же текстом, потому что CUBA `Label` не является интерактивным компонентом. Визуально пункты остаются label-подобными: активный пункт получает акцентную левую границу и фон.
+
+Карта переходов:
+
+- `tabCandidate`: основные данные → `candidateField`; оригинальное резюме → `textFieldIOriginalCV`; резюме HRM HuntTech → `textFieldHuntTechCV`;
+- `tabCV`: текст резюме → `candidateCVRichTextArea`; рекомендации → `cvResomandation`;
+- `tabLetter`: шаблон вакансии → `questionLetterRichTextArea`; письмо → `letterRichTextArea`; внутренний комментарий → `commentLetterRichTextArea`; рекомендации → `letterRecommendation`;
+- `tabSkillTree`: проверка навыков → `rescanResume`; дерево навыков → `skillTreesTable`;
+- `tabFiles`: дополнительные файлы → `someFilesTable`.
+
+Пункты шаблона и рекомендаций письма видимы только одновременно с соответствующими vacancy-dependent блоками. Навигация не вызывает `tabSheet.setSelectedTab()` и не меняет `cvTextInitialized`/`skillTabInitialized` вне исходного selected-tab listener.
+
+### 4.3. Visibility
 
 Контроллер динамически показывает или скрывает:
 
@@ -207,7 +229,7 @@
 
 Фотография больше не участвует в ручном переключении visibility: `OvaFallbackImage` сохраняет одну геометрию и самостоятельно выбирает bound resource или fallback. XML не делает остальные скрытые компоненты видимыми статически.
 
-### 4.3. Enabled, editable и required
+### 4.4. Enabled, editable и required
 
 Контроллер изменяет:
 
@@ -512,6 +534,7 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-26 | В sidebar добавлена индивидуальная label-навигация для `tabCandidate`, `tabCV`, `tabLetter`, `tabSkillTree` и `tabFiles`; пункты фокусируют штатные блоки справа, selected tab и lazy lifecycle не изменяются |
 | 2026-07-26 | `candidatePic` переведён на единый `OvaFallbackImage` 176×176 px с `icons/no-programmer.jpeg`; удалены `candidateFaceDefaultImage`, `setCandidatePicImage()` и ручное переключение visibility; обновлены оба контрактных теста фотографии |
 | 2026-07-25 | В runtime-view `candidateCVDc` добавлен верхнеуровневый `CandidateCV.fileImageFace`; устранён вызов unfetched getter в `setCandidatePicImage()` и добавлен отдельный Data View Integrity тест фотографии |
 | 2026-07-25 | Добавлена постоянная левая панель в стиле `JobCandidateEdit`: фотография, ФИО, текущая позиция, должность резюме, вакансия и проект; значения синхронизируются через прямой `candidateCVDc` data binding без изменения контроллера |

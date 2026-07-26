@@ -148,6 +148,79 @@
       word-break: break-word;
     }
 
+
+    .candidate-cv-navigation {
+      box-sizing: border-box;
+      width: 100% !important;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
+    }
+
+    .candidate-cv-navigation-title,
+    .candidate-cv-navigation-title.v-label {
+      display: block;
+      width: 100% !important;
+      padding: 6px 10px 8px;
+      color: rgba(248, 250, 252, 0.58) !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: normal !important;
+    }
+
+    .candidate-cv-tab-navigation {
+      width: 100% !important;
+      min-width: 0;
+    }
+
+    .candidate-cv-nav-item.v-button {
+      box-sizing: border-box;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 34px !important;
+      padding: 7px 10px !important;
+      color: rgba(248, 250, 252, 0.82) !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      line-height: 18px !important;
+      text-align: left !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-left: 3px solid transparent !important;
+      border-radius: 0 5px 5px 0 !important;
+      box-shadow: none !important;
+      text-shadow: none !important;
+      transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+
+    .candidate-cv-nav-item.v-button .v-button-wrap,
+    .candidate-cv-nav-item.v-button .v-button-caption {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      color: inherit !important;
+      line-height: 18px !important;
+      text-align: left !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .candidate-cv-nav-item.v-button:hover,
+    .candidate-cv-nav-item.v-button:focus {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .candidate-cv-nav-item-active.v-button,
+    .candidate-cv-nav-item-active.v-button:hover,
+    .candidate-cv-nav-item-active.v-button:focus {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.11) !important;
+      border-left-color: #ffb11b !important;
+    }
+
     .candidate-cv-sidebar-meta {
       padding-top: 10px;
       padding-bottom: 10px;

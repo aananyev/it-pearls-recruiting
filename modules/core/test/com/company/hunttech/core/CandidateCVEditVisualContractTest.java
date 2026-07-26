@@ -65,6 +65,8 @@ public class CandidateCVEditVisualContractTest {
                 "candidateLabel", "iteractionListLabelCandidate", "iteractionListLabelPosition",
                 "candidateCvSidebarTargetCard", "candidateCvSidebarResumePosition",
                 "candidateCvSidebarVacancy", "candidateCvSidebarProject", "candidateCvSidebarMetaCard",
+                "candidateCvSectionNavigation", "candidateCvCandidateNavigation", "candidateCvCvNavigation",
+                "candidateCvLetterNavigation", "candidateCvSkillNavigation", "candidateCvFilesNavigation",
                 "candidateCvSidebarSpacer", "labelLastRecrutier", "machRegexpFromCV", "quoteTextArea",
                 "tabSheet", "tabCandidate", "tabCV", "tabLetter", "tabSkillTree", "tabFiles",
                 "candidateScrolBox", "candidateVbox", "groupBox", "dropZone", "picVBox",
@@ -136,6 +138,52 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(xml.contains("stylename=\"candidate-cv-sidebar\""));
         assertTrue(xml.contains("stylename=\"candidate-cv-workspace-shell\""));
         assertFalse(xml.contains("stylename=\"candidate-cv-context-card\""));
+    }
+
+    @Test
+    public void sidebarNavigationIsIndividualForEveryTabAndFocusesExistingBlocks() throws IOException {
+        String xml = readProjectFile(SCREEN_XML);
+        String controller = readProjectFile(CONTROLLER);
+
+        for (String navigationId : Arrays.asList(
+                "candidateCvCandidateNavigation", "candidateCvCvNavigation",
+                "candidateCvLetterNavigation", "candidateCvSkillNavigation",
+                "candidateCvFilesNavigation")) {
+            assertTrue("Отсутствует navigation container: " + navigationId,
+                    xml.contains("id=\"" + navigationId + "\""));
+        }
+
+        for (String messageKey : Arrays.asList(
+                "candidateCvNavMainData", "candidateCvNavOriginalCv", "candidateCvNavHuntTechCv",
+                "candidateCvNavCvText", "candidateCvNavCvRecommendations",
+                "candidateCvNavLetterTemplate", "candidateCvNavLetter",
+                "candidateCvNavLetterComment", "candidateCvNavLetterRecommendations",
+                "candidateCvNavSkillActions", "candidateCvNavSkillTree", "candidateCvNavFiles")) {
+            assertTrue("Отсутствует navigation label: " + messageKey,
+                    xml.contains("value=\"msg://" + messageKey + "\""));
+        }
+
+        assertTrue(controller.contains("initSidebarSectionNavigation();"));
+        assertTrue(controller.contains("syncSidebarSectionNavigation();"));
+        assertTrue(controller.contains("candidateCvCandidateNavigation.setVisible(\"tabCandidate\".equals(selectedTabName))"));
+        assertTrue(controller.contains("candidateCvCvNavigation.setVisible(\"tabCV\".equals(selectedTabName))"));
+        assertTrue(controller.contains("candidateCvLetterNavigation.setVisible(\"tabLetter\".equals(selectedTabName))"));
+        assertTrue(controller.contains("candidateCvSkillNavigation.setVisible(\"tabSkillTree\".equals(selectedTabName))"));
+        assertTrue(controller.contains("candidateCvFilesNavigation.setVisible(\"tabFiles\".equals(selectedTabName))"));
+
+        for (String focusTarget : Arrays.asList(
+                "candidateField.focus()", "textFieldIOriginalCV.focus()", "textFieldHuntTechCV.focus()",
+                "candidateCVRichTextArea.focus()", "cvResomandation.focus()",
+                "letterRichTextArea.focus()", "commentLetterRichTextArea.focus()",
+                "this.rescanResume.focus()", "skillTreesTable.focus()", "someFilesTable.focus()")) {
+            assertTrue("Навигация не фокусирует штатный блок: " + focusTarget,
+                    controller.contains(focusTarget));
+        }
+
+        // Навигация не выбирает вкладку программно и не обходит lazy lifecycle CV/SkillTree.
+        assertFalse(controller.contains("tabSheet.setSelectedTab"));
+        assertTrue(controller.contains("candidateCvLetterTemplateNav.setVisible(questionLetterRichTextArea.isVisible())"));
+        assertTrue(controller.contains("candidateCvLetterRecommendationNav.setVisible(letterRecommendation.isVisible())"));
     }
 
     @Test
@@ -234,6 +282,9 @@ public class CandidateCVEditVisualContractTest {
 
             assertTrue(theme, scss.contains("@mixin candidate-cv-editor-theme"));
             assertTrue(theme, scss.contains(".candidate-cv-editor {"));
+            assertTrue(theme, scss.contains(".candidate-cv-navigation {"));
+            assertTrue(theme, scss.contains(".candidate-cv-nav-item.v-button"));
+            assertTrue(theme, scss.contains(".candidate-cv-nav-item-active.v-button"));
             assertFalse(theme, scss.contains(".job-candidate-editor"));
             assertFalse(theme, scss.contains(".ext-settings-window"));
             assertFalse(theme, forbiddenTopLevelSelector.matcher(scss).find());

@@ -160,6 +160,59 @@
                     </vbox>
                 </hbox>
 
+                <!-- Контекстная навигация показывает только блоки активной вкладки.
+                     Labels являются XML-контрактом; контроллер заменяет их borderless-кнопками,
+                     визуально идентичными Label и переводящими фокус на штатные поля справа. -->
+                <vbox id="candidateCvSectionNavigation"
+                      width="100%"
+                      spacing="false"
+                      stylename="candidate-cv-navigation">
+                    <label width="100%"
+                           value="msg://candidateCvNavigationTitle"
+                           stylename="candidate-cv-navigation-title"/>
+                    <vbox id="candidateCvCandidateNavigation"
+                          width="100%"
+                          spacing="false"
+                          stylename="candidate-cv-tab-navigation">
+                        <label width="100%" value="msg://candidateCvNavMainData" stylename="candidate-cv-nav-item candidate-cv-nav-item-active"/>
+                        <label width="100%" value="msg://candidateCvNavOriginalCv" stylename="candidate-cv-nav-item"/>
+                        <label width="100%" value="msg://candidateCvNavHuntTechCv" stylename="candidate-cv-nav-item"/>
+                    </vbox>
+                    <vbox id="candidateCvCvNavigation"
+                          width="100%"
+                          spacing="false"
+                          visible="false"
+                          stylename="candidate-cv-tab-navigation">
+                        <label width="100%" value="msg://candidateCvNavCvText" stylename="candidate-cv-nav-item candidate-cv-nav-item-active"/>
+                        <label width="100%" value="msg://candidateCvNavCvRecommendations" stylename="candidate-cv-nav-item"/>
+                    </vbox>
+                    <vbox id="candidateCvLetterNavigation"
+                          width="100%"
+                          spacing="false"
+                          visible="false"
+                          stylename="candidate-cv-tab-navigation">
+                        <label width="100%" value="msg://candidateCvNavLetterTemplate" stylename="candidate-cv-nav-item"/>
+                        <label width="100%" value="msg://candidateCvNavLetter" stylename="candidate-cv-nav-item candidate-cv-nav-item-active"/>
+                        <label width="100%" value="msg://candidateCvNavLetterComment" stylename="candidate-cv-nav-item"/>
+                        <label width="100%" value="msg://candidateCvNavLetterRecommendations" stylename="candidate-cv-nav-item"/>
+                    </vbox>
+                    <vbox id="candidateCvSkillNavigation"
+                          width="100%"
+                          spacing="false"
+                          visible="false"
+                          stylename="candidate-cv-tab-navigation">
+                        <label width="100%" value="msg://candidateCvNavSkillActions" stylename="candidate-cv-nav-item candidate-cv-nav-item-active"/>
+                        <label width="100%" value="msg://candidateCvNavSkillTree" stylename="candidate-cv-nav-item"/>
+                    </vbox>
+                    <vbox id="candidateCvFilesNavigation"
+                          width="100%"
+                          spacing="false"
+                          visible="false"
+                          stylename="candidate-cv-tab-navigation">
+                        <label width="100%" value="msg://candidateCvNavFiles" stylename="candidate-cv-nav-item candidate-cv-nav-item-active"/>
+                    </vbox>
+                </vbox>
+
                 <vbox id="candidateCvSidebarTargetCard"
                       width="100%"
                       spacing="true"
@@ -200,6 +253,8 @@
                                stylename="candidate-cv-sidebar-value"/>
                     </vbox>
                 </vbox>
+
+
 
                 <vbox id="candidateCvSidebarMetaCard"
                       width="100%"

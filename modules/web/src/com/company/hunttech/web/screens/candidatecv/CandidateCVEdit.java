@@ -54,6 +54,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";
     private static final String EXTENSION_DOCX = "docx";
+    private static final String NAVIGATION_STYLE = "borderless candidate-cv-nav-item";
+    private static final String ACTIVE_NAVIGATION_STYLE =
+            "borderless candidate-cv-nav-item candidate-cv-nav-item-active";
     private FileDescriptor fileDescriptor;
 
     @Inject
@@ -135,6 +138,27 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private ResumeRecognitionService resumeRecognitionService;
     @Inject
     private TabSheet tabSheet;
+    @Inject
+    private VBoxLayout candidateCvCandidateNavigation;
+    @Inject
+    private VBoxLayout candidateCvCvNavigation;
+    @Inject
+    private VBoxLayout candidateCvLetterNavigation;
+    @Inject
+    private VBoxLayout candidateCvSkillNavigation;
+    @Inject
+    private VBoxLayout candidateCvFilesNavigation;
+    @Inject
+    private RichTextArea commentLetterRichTextArea;
+    @Inject
+    private Button rescanResume;
+    @Inject
+    private TreeDataGrid<SkillTree> skillTreesTable;
+    @Inject
+    private Table<SomeFiles> someFilesTable;
+
+    private Button candidateCvLetterTemplateNav;
+    private Button candidateCvLetterRecommendationNav;
 
     private boolean openPositionsReady;
     private boolean cvTextInitialized;
@@ -153,10 +177,148 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             }
         });
 
+        initSidebarSectionNavigation();
         tabSheet.addSelectedTabChangeListener(selectedTabChangeEvent -> {
             initCvTextTab();
             initSkillTreeTab();
+            syncSidebarSectionNavigation();
         });
+        syncSidebarSectionNavigation();
+    }
+
+    /**
+     * Создаёт отдельный набор label-подобных кнопок для каждой вкладки.
+     * Навигация меняет только presentation state и фокус: значения сущности,
+     * selected tab, loaders и lazy-флаги остаются под существующим lifecycle.
+     */
+    private void initSidebarSectionNavigation() {
+        replaceNavigationLabels(candidateCvCandidateNavigation,
+                createNavigationButton("candidateCvMainDataNav", "candidateCvNavMainData",
+                        candidateCvCandidateNavigation, () -> candidateField.focus()),
+                createNavigationButton("candidateCvOriginalCvNav", "candidateCvNavOriginalCv",
+                        candidateCvCandidateNavigation, () -> textFieldIOriginalCV.focus()),
+                createNavigationButton("candidateCvHuntTechCvNav", "candidateCvNavHuntTechCv",
+                        candidateCvCandidateNavigation, () -> textFieldHuntTechCV.focus()));
+
+        replaceNavigationLabels(candidateCvCvNavigation,
+                createNavigationButton("candidateCvTextNav", "candidateCvNavCvText",
+                        candidateCvCvNavigation, () -> candidateCVRichTextArea.focus()),
+                createNavigationButton("candidateCvRecommendationNav", "candidateCvNavCvRecommendations",
+                        candidateCvCvNavigation, () -> cvResomandation.focus()));
+
+        candidateCvLetterTemplateNav = createNavigationButton(
+                "candidateCvLetterTemplateNav", "candidateCvNavLetterTemplate",
+                candidateCvLetterNavigation, this::focusLetterTemplate);
+        candidateCvLetterRecommendationNav = createNavigationButton(
+                "candidateCvLetterRecommendationNav", "candidateCvNavLetterRecommendations",
+                candidateCvLetterNavigation, this::focusLetterRecommendation);
+        replaceNavigationLabels(candidateCvLetterNavigation,
+                candidateCvLetterTemplateNav,
+                createNavigationButton("candidateCvLetterBodyNav", "candidateCvNavLetter",
+                        candidateCvLetterNavigation, () -> letterRichTextArea.focus()),
+                createNavigationButton("candidateCvLetterCommentNav", "candidateCvNavLetterComment",
+                        candidateCvLetterNavigation, () -> commentLetterRichTextArea.focus()),
+                candidateCvLetterRecommendationNav);
+
+        replaceNavigationLabels(candidateCvSkillNavigation,
+                createNavigationButton("candidateCvSkillActionsNav", "candidateCvNavSkillActions",
+                        candidateCvSkillNavigation, () -> this.rescanResume.focus()),
+                createNavigationButton("candidateCvSkillTreeNav", "candidateCvNavSkillTree",
+                        candidateCvSkillNavigation, () -> skillTreesTable.focus()));
+
+        replaceNavigationLabels(candidateCvFilesNavigation,
+                createNavigationButton("candidateCvFilesTableNav", "candidateCvNavFiles",
+                        candidateCvFilesNavigation, () -> someFilesTable.focus()));
+
+        refreshConditionalNavigationItems();
+    }
+
+    private Button createNavigationButton(String id,
+                                          String messageKey,
+                                          VBoxLayout navigation,
+                                          Runnable focusHandler) {
+        Button button = uiComponents.create(Button.class);
+        button.setId(id);
+        button.setCaption(messageBundle.getMessage(messageKey));
+        button.setWidth("100%");
+        button.setStyleName(NAVIGATION_STYLE);
+        button.addClickListener(event -> {
+            updateNavigationStyles(navigation, button);
+            focusHandler.run();
+        });
+        return button;
+    }
+
+    private void replaceNavigationLabels(VBoxLayout navigation, Button... buttons) {
+        navigation.removeAll();
+        for (Button button : buttons) {
+            navigation.add(button);
+        }
+        activateFirstVisibleNavigationItem(navigation);
+    }
+
+    /**
+     * Показывает только индекс текущей вкладки. Метод не вызывает setSelectedTab(),
+     * поэтому навигация не открывает скрытые вкладки и не обходит lazy-init CV/SkillTree.
+     */
+    private void syncSidebarSectionNavigation() {
+        TabSheet.Tab selectedTab = tabSheet.getSelectedTab();
+        String selectedTabName = selectedTab == null ? "tabCandidate" : selectedTab.getName();
+
+        candidateCvCandidateNavigation.setVisible("tabCandidate".equals(selectedTabName));
+        candidateCvCvNavigation.setVisible("tabCV".equals(selectedTabName));
+        candidateCvLetterNavigation.setVisible("tabLetter".equals(selectedTabName));
+        candidateCvSkillNavigation.setVisible("tabSkillTree".equals(selectedTabName));
+        candidateCvFilesNavigation.setVisible("tabFiles".equals(selectedTabName));
+    }
+
+    private void updateNavigationStyles(VBoxLayout navigation, Button selectedButton) {
+        for (Component component : navigation.getComponents()) {
+            if (component instanceof Button) {
+                Button button = (Button) component;
+                button.setStyleName(button == selectedButton
+                        ? ACTIVE_NAVIGATION_STYLE
+                        : NAVIGATION_STYLE);
+            }
+        }
+    }
+
+    private void activateFirstVisibleNavigationItem(VBoxLayout navigation) {
+        for (Component component : navigation.getComponents()) {
+            if (component instanceof Button && component.isVisible()) {
+                updateNavigationStyles(navigation, (Button) component);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Vacancy-dependent пункты повторяют фактическую видимость блоков письма,
+     * чтобы sidebar не предлагал переход к отсутствующему UI-компоненту.
+     */
+    private void refreshConditionalNavigationItems() {
+        if (candidateCvLetterTemplateNav == null || candidateCvLetterRecommendationNav == null) {
+            return;
+        }
+        candidateCvLetterTemplateNav.setVisible(questionLetterRichTextArea.isVisible());
+        candidateCvLetterRecommendationNav.setVisible(letterRecommendation.isVisible());
+        activateFirstVisibleNavigationItem(candidateCvLetterNavigation);
+    }
+
+    private void focusLetterTemplate() {
+        if (questionLetterRichTextArea.isVisible()) {
+            questionLetterRichTextArea.focus();
+        } else {
+            letterRichTextArea.focus();
+        }
+    }
+
+    private void focusLetterRecommendation() {
+        if (letterRecommendation.isVisible()) {
+            letterRecommendation.focus();
+        } else {
+            letterRichTextArea.focus();
+        }
     }
 
     @Subscribe
@@ -476,6 +638,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         setLetterRecommendation();
+        refreshConditionalNavigationItems();
     }
 
     private void convertTextCV() {
@@ -728,6 +891,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void onCandidateCVFieldOpenPositionValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
         setTemplateLetter();
         setLetterRecommendation();
+        refreshConditionalNavigationItems();
 
         if (candidateCVRichTextArea.getValue() != null && !candidateCVRichTextArea.getValue().equals("")) {
             setColorHighlightingCompetencies();
