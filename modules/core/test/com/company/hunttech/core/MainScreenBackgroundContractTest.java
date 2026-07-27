@@ -93,8 +93,8 @@ public class MainScreenBackgroundContractTest {
                 "modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
 
         // Фон заполняет mainVBox целиком при любом соотношении сторон дисплея, без обрезки и пустых полос.
-        assertTrue(controller.contains("vaadinVBox.addStyleName(currentBackgroundStyleName)"));
-        assertTrue(controller.contains("vaadinDashboard.addStyleName(\"hrm-dashboard-transparent\")"));
+        assertTrue(controller.contains("vbox.addStyleName(currentBackgroundStyleName)"));
+        assertTrue(controller.contains("dashboard.addStyleName(\"hrm-dashboard-transparent\")"));
         assertTrue(controller.contains("page.getStyles().add(css)"));
         assertTrue(controller.contains("background-image: url('"));
         assertTrue(controller.contains("background-size: 100% 100%"));
@@ -122,7 +122,7 @@ public class MainScreenBackgroundContractTest {
 
         // StreamResource регистрируется через Vaadin connector и конвертируется в HTTP.
         assertTrue(controller.contains("resource instanceof StreamResource"));
-        assertTrue(controller.contains("registerBackgroundResource"));
+        assertTrue(controller.contains("registerResource"));
         assertTrue(controller.contains("ResourceReference.create"));
         assertTrue(controller.contains("backgroundResourceHolder"));
         assertTrue(controller.contains("app://APP"));
