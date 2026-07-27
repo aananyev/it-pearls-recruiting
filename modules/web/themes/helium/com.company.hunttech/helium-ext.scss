@@ -522,6 +522,23 @@ rating_battery_yellow_3:before {
 }
 
 @mixin com_company_hunttech-helium-ext {
+/* Title for navigation sections — uppercase label copied from SettingsWindow */
+.label-nav-title {
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.66;
+  text-transform: uppercase;
+}
+
+.label-nav-item {
+  box-sizing: border-box;
+  padding: 7px 10px;
+  border-left: 3px solid transparent;
+  white-space: normal;
+  opacity: 0.78;
+}
+
 
 .rating_box {
         font_size: x-large;
