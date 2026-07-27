@@ -46,10 +46,14 @@
   .edit-sidebar-identity,
   .edit-sidebar-summary,
   .edit-sidebar-hint,
-  .edit-sidebar-warning,
   .edit-sidebar-spacer {
     box-sizing: border-box;
     width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .edit-sidebar-warning {
+    box-sizing: border-box;
     min-width: 0 !important;
   }
 

@@ -3,7 +3,9 @@
 PROJECT: HRM HuntTech
 STATUS: WAITING_FOR_HERMES
 
-Проверить точный HEAD ветки `agent/iteraction-list-edit-standard-compliance` и PR `<PR_NUMBER>` напрямую в `master`. Код и документацию не изменять; commit, push, rebase, merge и production не выполнять.
+Проверить точный HEAD ветки `agent/iteraction-list-edit-standard-compliance` и PR №84 напрямую в `master`. Полный проверяемый SHA указан в описании PR после финального commit. До запуска обязательно подтвердить: branch HEAD = PR HEAD = указанному SHA. Несовпадение → `HEAD_MISMATCH`, проверку остановить.
+
+Код и документацию не изменять; commit, push, rebase, merge и production не выполнять.
 
 ## Область изменения
 

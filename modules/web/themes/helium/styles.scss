@@ -16,7 +16,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap');
 
 .helium {
+  // include auto-generated app components SCSS
   @include app_components;
+
   @include com_company_hunttech-helium-ext;
   @include user-ai-profile;
   @include settings-window-sections;

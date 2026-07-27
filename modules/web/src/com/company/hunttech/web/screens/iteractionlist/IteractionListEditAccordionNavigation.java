@@ -8,6 +8,7 @@ import com.haulmont.cuba.gui.screen.Screen.AfterShowEvent;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.hunttech.hrm.gui.components.OvaFallbackImage;
 
 import javax.inject.Inject;
 
@@ -54,7 +55,7 @@ public class IteractionListEditAccordionNavigation extends IteractionListEdit {
     @Inject
     private HBoxLayout mostPopularHbox;
     @Inject
-    private Image projectLogoImage;
+    private OvaFallbackImage projectLogoImage;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -142,6 +143,8 @@ public class IteractionListEditAccordionNavigation extends IteractionListEdit {
         projectLogoImage.addStyleName("iteraction-list-project-image");
         projectLogoImage.setWidth("80px");
         projectLogoImage.setHeight("80px");
+        projectLogoImage.setOvalWidth("80px");
+        projectLogoImage.setOvalHeight("80px");
     }
 
     /**

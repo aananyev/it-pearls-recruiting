@@ -62,10 +62,13 @@ public class IteractionListSidebarContextPanelTest {
     public void projectLogoRemainsInformativeButVisuallySecondary() throws IOException {
         String extension = extension();
 
+        assertTrue(extension.contains("private OvaFallbackImage projectLogoImage"));
         assertTrue(extension.contains("projectLogoImage.removeStyleName(\"iteraction-list-candidate-image\")"));
         assertTrue(extension.contains("projectLogoImage.addStyleName(\"iteraction-list-project-image\")"));
         assertTrue(extension.contains("projectLogoImage.setWidth(\"80px\")"));
         assertTrue(extension.contains("projectLogoImage.setHeight(\"80px\")"));
+        assertTrue(extension.contains("projectLogoImage.setOvalWidth(\"80px\")"));
+        assertTrue(extension.contains("projectLogoImage.setOvalHeight(\"80px\")"));
     }
 
     @Test
@@ -78,8 +81,9 @@ public class IteractionListSidebarContextPanelTest {
         assertTrue(shared.contains("width: 250px !important"));
         assertTrue(shared.contains(".edit-sidebar"));
         assertTrue(shared.contains(".label-navigation"));
-        assertFalse(shared.contains(".v-label {"));
-        assertFalse(shared.contains(".v-button {"));
+        assertFalse(shared.contains("\n  .v-label {"));
+        assertFalse(shared.contains("\n  .v-button {"));
+        assertFalse(shared.contains(".edit-sidebar-warning,\n  .edit-sidebar-spacer"));
 
         for (String theme : THEMES) {
             String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");

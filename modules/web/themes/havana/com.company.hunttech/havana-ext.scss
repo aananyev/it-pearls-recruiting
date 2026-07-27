@@ -522,44 +522,6 @@ rating_battery_yellow_3:before {
 }
 
 @mixin com_company_hunttech-havana-ext {
-/* Title for navigation sections — global style from iteraction-list-navigation-title */
-.label-navigation {
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
-  height: auto;
-  padding: 10px 0 4px;
-  background: transparent;
-  border: 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.16);
-  overflow: visible;
-}
-
-.label-nav-title {
-  box-sizing: border-box;
-  padding: 6px 10px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  white-space: normal;
-}
-
-.label-nav-item-active {
-  color: #2f80ed;
-  background: rgba(47, 128, 237, 0.08);
-  border-left-color: #2f80ed;
-  opacity: 1;
-}
-
-.label-nav-item {
-  box-sizing: border-box;
-  padding: 7px 10px;
-  border-left: 3px solid transparent;
-  white-space: normal;
-  opacity: 0.78;
-}
-
 
 .rating_box {
         font_size: x-large;
