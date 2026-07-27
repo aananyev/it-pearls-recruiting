@@ -41,7 +41,7 @@ SettingsWindow → Интерфейс → Фон главного экрана
 | Открытие главного экрана | Descriptor не имеет префикс `hrm-main-background-` | Legacy-файл не считается пользовательским фоном |
 | Разрешение пользовательского фона | Файл доступен в FileStorage | Поток читается через `readAllBytes()`, создаётся `StreamResource` |
 | Регистрация пользовательского фона | Получен `StreamResource` | Вызывается `registerBackgroundResource()`, ресурс закрепляется скрытым `Image` в Vaadin connector tree |
-| Формирование URL | `ResourceReference` вернул `app://APP...` | Префикс `app://APP` удаляется, CSS получает HTTP-путь |
+| Формирование URL | `ResourceReference` вернул `app://APP...` | Префикс `app://APP` заменяется на текущий servlet context path, поэтому CSS получает путь вида `/hrm/connector/...` |
 | Чтение FileStorage | `FileStorageException` или `IOException` | Исключение перехватывается, применяется системный фон |
 | Сохранение SettingsWindow | Commit успешен | Публикуется UI-scoped событие и фон обновляется |
 | Смена системного варианта | Предыдущий индекс известен | Немедленное повторение варианта исключается |
@@ -134,10 +134,12 @@ FileLoader.openStream(descriptor)
 3. устанавливает размер holder `0 × 0` и скрывает его;
 4. добавляет holder в `mainVBox`;
 5. получает URL через `ResourceReference.create(resource, holder, "src").getURL()`;
-6. преобразует `app://APP` в относительный HTTP-путь;
+6. заменяет `app://APP` на `VaadinServlet.getCurrent().getServletContext().getContextPath()`;
 7. отклоняет пустой URL как ошибку регистрации.
 
 Скрытый `Image` является владельцем `StreamResource`. Его нельзя удалять до использования URL браузером, иначе connector resource key перестанет обслуживаться.
+
+Connector URL обязан включать web-контекст приложения. Для локального контекста HRM HuntTech корректный путь начинается с `/hrm/connector/`; путь `/connector/` без `/hrm` адресует корень Tomcat и не обслуживается приложением.
 
 ## Применение CSS
 
@@ -176,7 +178,8 @@ background-size: 100% 100%;
 - перехват ошибок FileStorage и системный fallback;
 - вызов `registerBackgroundResource()`;
 - регистрацию через `ResourceReference` и `backgroundResourceHolder`;
-- преобразование `app://APP`;
+- импорт `VaadinServlet` и динамический servlet context path;
+- запрет преобразования `app://APP` в пустую строку;
 - отсутствие `ExternalResource` в `HrmMainScreen`;
 - неизменность системного `ThemeResource` и каталога тем.
 
@@ -197,8 +200,8 @@ Hermes проверяет точный HEAD PR:
 - `clean assemble` с `BUILD SUCCESSFUL`;
 - clean local deploy;
 - `http://localhost:8080/hrm/` → HTTP 200;
-- пользовательский connector URL возвращает HTTP 200 и корректный `Content-Type`;
-- URL не содержит `/dispatch/download?f=` и необработанный `app://APP`;
+- пользовательский connector URL начинается с `/hrm/connector/`, возвращает HTTP 200 и корректный `Content-Type`;
+- URL не начинается с `/connector/`, не содержит `/dispatch/download?f=` и необработанный `app://APP`;
 - системные фоны семи тем продолжают работать;
 - недоступный файл включает системный fallback без удаления descriptor;
 - Tomcat critical errors отсутствуют; P1=0; P2=0.
@@ -207,6 +210,7 @@ Hermes проверяет точный HEAD PR:
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-27 | Connector URL пользовательского `StreamResource` дополнен динамическим servlet context path через `VaadinServlet`, чтобы браузер обращался к `/hrm/connector/...`, а не к корневому `/connector/...` |
 | 2026-07-27 | Пользовательский фон закреплён как `StreamResource` с байтами FileStorage, MIME-типом и Vaadin connector URL через `registerBackgroundResource()`; системные `ThemeResource` не изменены |
 | 2026-07-26 | Пользовательский фон временно переводился на прямой FileStorage dispatch URL; ошибка чтения файла включала системный fallback без удаления descriptor |
 | 2026-07-26 | Фон переведён с `cover` на точное растягивание `100% × 100%` |
