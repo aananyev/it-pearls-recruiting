@@ -8,14 +8,14 @@
 2. Пользователь — текущий рекрутёр из `UserSession`.
 3. Период — один календарный месяц назад от момента открытия формы.
 4. Ранжирование — группировка по `Iteraction.iteractionType`, сортировка по числу использований по убыванию.
-5. Лимит — до пяти фактически найденных типов; искусственные placeholder-кнопки не создаются.
+5. Сервис возвращает до пяти фактически найденных типов; форма всегда показывает пять UI-позиций, а отсутствующие данные представлены disabled-кнопками «Нет данных» без бизнес-действия.
 6. Клик устанавливает точный объект `Iteraction` в `iteractionTypeField`; поиск и разбор caption запрещены.
 7. Дальнейший UI/UX-рефакторинг может менять только визуальное оформление и расположение host-контейнера, но не сервис, период, фильтр пользователя, лимит и обработчик клика.
 
 Контракт защищён `IteractionListMostPopularInteractionTest`. Любое его изменение требует отдельного прямого согласования, обновления этой спецификации и повторной проверки Hermes.
 
 
-> Controller: `hunttech_IteractionList.edit`  
+> Controller: `hunttech_IteractionList.edit` (`IteractionListEditAccordionNavigation` extends `IteractionListEdit`)  
 > XML: `modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml`  
 > Entity: [IteractionList](../entities/iteraction-list/IteractionList.md)  
 > Legacy-spec: [hunttech_IteractionList.edit_Spec.md](../screens/iteraction-list/hunttech_IteractionList.edit_Spec.md)  
@@ -28,14 +28,14 @@
 
 Запись участвует в истории кандидата, подписках, уведомлениях и изменении статусов рекрутингового процесса. Поэтому исправление компоновки и изображений не должно менять component ID, data bindings, actions, `invoke`, loader conditions, JPQL, validation и lifecycle CUBA Platform 7.3.
 
-Блок до пяти частых взаимодействий является ускорителем ежедневного ввода. Он должен быть видим сразу после открытия вкладки, до первого аккордеона, чтобы пользователь мог выбрать наиболее вероятный тип взаимодействия без дополнительного раскрытия секции.
+Блок пяти постоянно видимых позиций частых взаимодействий является ускорителем ежедневного ввода. Он должен быть видим сразу после открытия вкладки, до первого аккордеона, чтобы пользователь мог выбрать наиболее вероятный тип взаимодействия без дополнительного раскрытия секции.
 
 ## UI Context & Navigation
 
 - Экран открывается из `hunttech_IteractionList.browse`, карточки кандидата и связанных сценариев создания, копирования или редактирования взаимодействия.
 - Picker кандидата сохраняет suggestion, lookup и open для `JobCandidate`; picker вакансии сохраняет lookup и open для `OpenPosition`.
 - Постоянная sidebar сохраняет утверждённую последовательность: фотография кандидата и логотип проекта → ФИО → название вакансии → индекс разделов → номер/дата → карточка вакансии.
-- Правая область сохраняет toolbar и штатный `TabSheet`; внутри вкладки перед первым рабочим аккордеоном постоянно отображается блок до пяти быстрых взаимодействий.
+- Правая область сохраняет toolbar и штатный `TabSheet`; внутри вкладки перед первым рабочим аккордеоном постоянно отображается блок из пяти быстрых позиций.
 - В раскрытом разделе «Кандидат и вакансия» оба picker-поля занимают одну строку одинаковой высоты; checkbox «Показывать только мои подписки» располагается отдельной строкой ниже.
 - Клик по пункту sidebar раскрывает связанный аккордеон и переводит фокус в первое поле. Пункт «Частые взаимодействия» сохраняет legacy navigation-контракт, а сами кнопки остаются видимыми независимо от состояния аккордеонов.
 - Сохранение выполняет `windowCommitAndClose`, отмена — `windowClose`.
@@ -43,8 +43,8 @@
 ## Behavior Summary
 
 - открытие нового взаимодействия → контроллер заполняет номер, дату и текущего рекрутёра → пользователь получает готовый экземпляр `IteractionList`;
-- открытие вкладки → `mostPopularHbox` уже находится перед первым аккордеоном → отображаются до пяти фактически найденных быстрых кнопок без дополнительного действия;
-- сервис возвращает менее пяти типов → форма отображает только фактически найденные действия → искусственные placeholder-кнопки не создаются;
+- открытие вкладки → `mostPopularHbox` уже находится перед первым аккордеоном → отображаются ровно пять визуальных позиций;
+- сервис возвращает менее пяти типов → найденные позиции активны, остальные показывают disabled «Нет данных» → бизнес-логика сервиса и сущности не изменяется;
 - клик по заполненной быстрой кнопке → контроллер передаёт точный объект `Iteraction` в `iteractionTypeField` → зависимые runtime-поля обновляются штатным обработчиком;
 - открытие существующего взаимодействия → `iteractionList-edit-view` загружает candidate/vacancy-контекст → sidebar и picker-поля отображают текущую запись;
 - ввод в `candidateField` → suggestion query использует узкий `jobCandidate-iteraction-list-suggestion-view` → загружаются только поля, читаемые формой, включая `fileImageFace`, позицию и город;
@@ -61,7 +61,7 @@
 | Параметр | Значение |
 |---|---|
 | `@UiController` | `hunttech_IteractionList.edit` |
-| Java | `com.company.hunttech.web.screens.iteractionlist.IteractionListEdit` |
+| Java | `IteractionListEditAccordionNavigation` → `IteractionListEdit` |
 | Базовый класс | `StandardEditor<IteractionList>` |
 | `@EditedEntityContainer` | `iteractionListDc` |
 | Загрузка | `@LoadDataBeforeShow` |
@@ -121,12 +121,13 @@ main layout 100% × 100%
 
 `mostPopularQuickActions` находится внутри `iteractionListTab`, в прокручиваемой рабочей области, непосредственно перед `participantsAccordion`.
 
-Компоненты `mostPopularIteractionHBox` и `mostPopularHbox` сохранены без переименования. Контроллер продолжает:
+Компоненты `mostPopularIteractionHBox` и `mostPopularHbox` сохранены без переименования. Базовый контроллер продолжает:
 
-- строить пять кнопок;
-- рассчитывать статистику текущего пользователя за последний календарный месяц;
-- сохранять ширину каждой позиции 20%;
+- получать до пяти фактических действий через `InteractionService` за последний календарный месяц;
+- создавать активные кнопки только для фактически найденных `Iteraction`;
 - устанавливать точный `Iteraction` без разбора caption.
+
+`IteractionListEditAccordionNavigation` является presentation-расширением с тем же screen ID. После выполнения базового `BeforeShow` оно дополняет отсутствующие позиции до пяти disabled-кнопками «Нет данных». Расширение не инъецирует `InteractionService` или `DataManager`, не выполняет запросы и не меняет сущность.
 
 `popularAccordion` оставлен невидимым compatibility-компонентом, потому что существующий presentation-контроллер инъецирует его и синхронизирует пятый пункт sidebar. Он не содержит кнопок и не участвует в визуальной компоновке.
 
@@ -136,27 +137,13 @@ main layout 100% × 100%
 
 Для первой секции установлен минимальный запас по высоте, достаточный для caption секции, picker-полей, отдельной строки checkbox и нижнего внутреннего отступа.
 
-SCSS не задаёт фиксированную высоту бизнес-полям и не изменяет их bindings, required или visible-состояния.
-
-### 3.3. Визуальный контракт аккордеонов SettingsWindow
-
-Рабочие аккордеоны `IteractionListEdit` используют тот же итоговый SCSS-контракт, что и `SettingsWindow` (`user-ai-profile-section`):
-
-- поверхность секции — `$v-panel-background-color`, граница `rgba($v-font-color, 0.15)`, радиус `8px`, тень `0 2px 8px rgba(15, 23, 42, 0.05)`;
-- заголовок — минимальная высота `50px`, отступы `12px 16px`, шрифт `17px / 700`, фон `mix($v-app-background-color, $v-panel-background-color, 68%)`;
-- поля — минимальная высота `38px`, шрифт `15px`, граница `rgba($v-font-color, 0.20)`, радиус `5px`;
-- подписи полей — `13px / 600`, checkbox и option group — `14px`, кнопки — `14px` и минимальная высота `38px`;
-- focus, hover, readonly и disabled-состояния повторяют `SettingsWindow` без глобальных Vaadin-селекторов.
-
-Правила продублированы во всех семи темах и ограничены корнем `.iteraction-list-editor`. Естественная высота секций и layout-исправления CUBA Platform 7.3 сохранены, поэтому визуальная унификация не меняет component ID, data bindings, required/visible, actions, `invoke`, Java lifecycle и бизнес-логику.
-
-### 3.4. Поля кандидата и вакансии
+### 3.3. Поля кандидата и вакансии
 
 `candidateField` и `vacancyFiels` остаются двумя explicit flex-колонками `GridLayout`. Правый picker больше не обёрнут в `VBox` вместе с checkbox, поэтому обе колонки имеют одинаковую вертикальную геометрию.
 
 `onlyMySubscribeCheckBox` сохраняет legacy ID, caption, description и существующий listener контроллера. Изменилось только его расположение: отдельная полноширинная строка под picker-полями.
 
-### 3.5. Фокус и прокрутка
+### 3.4. Фокус и прокрутка
 
 Внутренний scroll-container использует `scroll-padding-top: 18px`. При переходе по label-навигации и вызове `focus()` браузер оставляет заголовок раскрытого аккордеона видимым, а не помещает его под строку вкладок.
 
@@ -193,23 +180,23 @@ Metadata `FileDescriptor` не удаляется и не изменяется. 
 | `commentField` | binding, lazy reload и runtime required |
 | `candidateImage` | legacy ID, `OvaFallbackImage`, candidate binding и fallback |
 | `projectLogoImage` | legacy ID, Java-инъекция, `OvaFallbackImage` и fallback |
-| `mostPopularHbox` | пять равных быстрых кнопок; прямое присваивание `Iteraction`; расположен перед первым аккордеоном |
+| `mostPopularHbox` | пять равных UI-позиций; активные назначают точный `Iteraction`, пустые disabled; расположен перед первым аккордеоном |
 | `popularAccordion` | скрытый compatibility-компонент для существующей Java-инъекции и sidebar navigation |
 | footer | subscribe → commit-and-close → cancel |
 
 ## 6. Локальный SCSS
 
-Все правила ограничены корнем `.iteraction-list-editor`. Заголовки, поверхности секций, поля, подписи, кнопки, checkbox и состояния focus/hover/readonly/disabled повторяют итоговый локальный контракт `SettingsWindow`. Существующие правила `.iteraction-list-popular-host`, `.iteraction-list-popular-buttons` и `.iteraction-list-popular-button` продолжают обеспечивать равную геометрию и читаемость пяти кнопок во всех семи темах.
+Все правила ограничены корнем `.iteraction-list-editor`. Существующие правила `.iteraction-list-popular-host`, `.iteraction-list-popular-buttons` и `.iteraction-list-popular-button` продолжают обеспечивать равную геометрию и читаемость пяти кнопок во всех семи темах.
 
 Глобальные `.v-table`, `.v-label`, `.v-button`, `.v-tabsheet` и `.v-panel` не изменяются.
 
 ## 7. Ограничения изменений
 
-- бизнес-обработчики `IteractionListEdit.java` не изменены;
+- бизнес-логика `InteractionService` и штатные обработчики формы не изменены;
 - entity, поля, БД и Liquibase не изменены;
 - loader ID, conditions и JPQL коллекций сохранены;
 - component ID, bindings, actions и `invoke` сохранены;
-- изменено только расположение runtime-host пяти кнопок в XML;
+- изменено только создание пяти UI-позиций в runtime-host;
 - production не изменяется;
 - merge допускается только после отчёта Hermes по точному HEAD SHA и прямой команды Алексея.
 
@@ -223,8 +210,8 @@ Metadata `FileDescriptor` не удаляется и не изменяется. 
 6. `:app-web:buildScssThemes` — PASS для семи тем.
 7. `clean assemble` — `BUILD SUCCESSFUL`.
 8. Clean local deploy и HTTP `/hrm/` = `200`.
-9. Visual smoke: внутри вкладки над первым аккордеоном видны до пяти кнопок; кнопки не исчезают при переключении аккордеонов.
-10. Functional smoke: клик по заполненной кнопке устанавливает тип взаимодействия; candidate/vacancy, dynamic fields, rating, comment, subscription, save/cancel работают без регрессии.
+9. Visual smoke: внутри вкладки над первым аккордеоном всегда видны ровно пять кнопок; кнопки не исчезают при переключении аккордеонов.
+10. Functional smoke: активная кнопка устанавливает точный тип взаимодействия; disabled «Нет данных» ничего не меняет; candidate/vacancy, dynamic fields, rating, comment, subscription, save/cancel работают без регрессии.
 11. Tomcat logs: новых `Cannot get unfetched attribute`, `ClassCastException`, P1 и P2 нет.
 
 До отчёта Hermes статус задачи: `WAITING_FOR_HERMES`.
@@ -233,7 +220,7 @@ Metadata `FileDescriptor` не удаляется и не изменяется. 
 
 | Дата | Изменение |
 |---|---|
-| 2026-07-27 | Аккордеоны, заголовки и визуальные состояния элементов формы в точности унифицированы с итоговым SCSS-контрактом SettingsWindow во всех семи темах |
+| 2026-07-27 | Восстановлены ровно пять постоянно видимых UI-позиций; пустые позиции disabled, бизнес-логика `InteractionService` не изменена |
 | 2026-07-27 | Восстановлен и закреплён исторический контракт быстрых взаимодействий: сервис, текущий пользователь, последний месяц, до пяти точных `Iteraction` |
 | 2026-07-27 | Блок пяти быстрых взаимодействий возвращён внутрь вкладки и размещён перед первым аккордеоном; `mostPopularHbox` и Java-логика сохранены |
 | 2026-07-27 | Устранено наложение первой секции: picker-поля выровнены в одной строке, checkbox вынесен ниже GridLayout, аккордеоны переведены на естественную высоту; suggestion кандидата получил узкий view, а изображения — безопасную проверку FileStorage и fallback |

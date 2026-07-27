@@ -86,16 +86,19 @@ public class IteractionListAccordionNavigationTest {
     }
 
     @Test
-    public void compatibilityControllerIsThinAliasWithUniqueId() throws IOException {
-        String alias = readProjectFile(
+    public void presentationExtensionKeepsMainScreenIdAndOnlyAddsDisabledSlots() throws IOException {
+        String extension = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/"
                         + "IteractionListEditAccordionNavigation.java");
 
-        assertTrue(alias.contains(
-                "@UiController(\"hunttech_IteractionList.edit.accordion\")"));
-        assertTrue(alias.contains("@UiDescriptor(\"iteraction-list-edit.xml\")"));
-        assertTrue(alias.contains("extends IteractionListEdit"));
-        assertFalse(alias.contains("@Subscribe"));
+        assertTrue(extension.contains("@UiController(\"hunttech_IteractionList.edit\")"));
+        assertTrue(extension.contains("@UiDescriptor(\"iteraction-list-edit.xml\")"));
+        assertTrue(extension.contains("extends IteractionListEdit"));
+        assertTrue(extension.contains("onAfterShowEnsureFivePopularButtons"));
+        assertTrue(extension.contains("emptyButton.setEnabled(false)"));
+        assertFalse(extension.contains("private InteractionService"));
+        assertFalse(extension.contains("DataManager"));
+        assertFalse(extension.contains("setValue("));
     }
 
     private String descriptor() throws IOException {
