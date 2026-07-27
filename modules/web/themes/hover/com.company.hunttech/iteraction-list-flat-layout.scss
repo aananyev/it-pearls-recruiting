@@ -1,15 +1,12 @@
 /*
- * IteractionListEdit — плоская вертикальная компоновка блоков ввода.
+ * IteractionListEdit — точная плоская компоновка блоков ввода HRM HuntTech.
  *
- * Слой подключается после iteraction-list-accordion-navigation и ограничен
- * корнем .iteraction-list-editor. Он не меняет глобальные Vaadin-компоненты.
+ * Селекторы ограничены корнем .iteraction-list-editor и не изменяют глобальные
+ * Vaadin-компоненты. XML использует обычные VBoxLayout, а не GroupBoxLayout.
  */
 @mixin iteraction-list-flat-layout-theme {
   .iteraction-list-editor {
-    /*
-     * Sidebar уплотнён для сохранения критичного контекста вакансии в пределах
-     * стандартной высоты экрана. Прокрутка остаётся локальной для sidebar.
-     */
+    // Sidebar сохраняет критичный контекст вакансии без разрыва значений.
     .iteraction-list-sidebar {
       width: 312px !important;
       min-width: 312px !important;
@@ -66,10 +63,6 @@
       line-height: 17px !important;
     }
 
-    /*
-     * Status и priority в XML остаются прежними компонентами, но на узкой
-     * sidebar отображаются как две полноширинные строки вместо двух 50%-колонок.
-     */
     .iteraction-list-vacancy-state-summary {
       display: block !important;
       width: 100% !important;
@@ -163,36 +156,24 @@
       line-height: 17px !important;
     }
 
-    /*
-     * Базовый controller создаёт legacy-пятый пункт для скрытого
-     * popularAccordion. В плоской форме quick actions находятся отдельно,
-     * поэтому шестой slot (title + 5 buttons) не отображается.
-     * XML fallback содержит только title + 4 labels и не затрагивается.
-     */
-    .label-navigation > .v-slot:nth-child(6) {
-      display: none !important;
-      width: 0 !important;
-      height: 0 !important;
-      min-height: 0 !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      overflow: hidden !important;
-    }
-
     .iteraction-list-sidebar-card {
       padding: 11px 12px !important;
     }
 
-    /*
-     * GroupBox сохраняется только как совместимый тип component injection.
-     * Сворачивание отключено XML, заголовок оформлен как статический title,
-     * а содержимое принудительно остаётся видимым при legacy setExpanded().
-     */
-    .iteraction-list-flat-section {
+    // Правая область состоит из четырёх обычных VBox-карточек.
+    .iteraction-list-flat-content {
+      padding-top: 14px !important;
+    }
+
+    .iteraction-list-flat-section,
+    .v-slot-iteraction-list-flat-section {
       box-sizing: border-box;
       width: 100% !important;
       min-width: 0 !important;
       height: auto !important;
+    }
+
+    .iteraction-list-flat-section {
       margin: 0 0 12px !important;
       padding: 0 !important;
       background: $v-panel-background-color !important;
@@ -203,57 +184,136 @@
       transition: border-color 140ms ease, box-shadow 140ms ease;
     }
 
-    .iteraction-list-flat-section .v-panel-caption {
-      min-height: 46px !important;
+    .iteraction-list-flat-section-header,
+    .v-slot-iteraction-list-flat-section-header {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .iteraction-list-flat-section-header {
+      min-height: 46px;
       padding: 11px 16px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 68%) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.12) !important;
+    }
+
+    .iteraction-list-flat-section-title,
+    .iteraction-list-flat-section-title.v-label,
+    .v-label-iteraction-list-flat-section-title {
+      display: block;
+      width: 100% !important;
       color: mix($v-font-color, $v-panel-background-color, 90%) !important;
       font-size: 16px !important;
       font-weight: 700 !important;
       line-height: 23px !important;
-      background: mix($v-app-background-color, $v-panel-background-color, 68%) !important;
-      border-bottom: 1px solid rgba($v-font-color, 0.12) !important;
-      cursor: default !important;
-      pointer-events: none !important;
+      white-space: normal !important;
     }
 
-    .iteraction-list-flat-section .v-panel-caption .v-icon,
-    .iteraction-list-flat-section .v-panel-caption .v-panel-captionwrap:before,
-    .iteraction-list-flat-section .v-panel-caption .v-panel-captionwrap:after {
-      display: none !important;
-    }
-
-    .iteraction-list-flat-section .v-panel-content,
-    .iteraction-list-flat-section.v-panel-collapsed .v-panel-content,
-    .iteraction-list-flat-section .v-panel-content > div {
-      display: block !important;
-      visibility: visible !important;
-      width: 100% !important;
-      height: auto !important;
-      min-height: 0 !important;
-      max-height: none !important;
-      opacity: 1 !important;
-      overflow: visible !important;
-    }
-
-    .iteraction-list-flat-section .v-panel-content {
+    .iteraction-list-flat-section-body,
+    .v-slot-iteraction-list-flat-section-body {
       box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+    }
+
+    .iteraction-list-flat-section-body {
       padding: 14px 16px 16px !important;
       background: $v-panel-background-color !important;
-      border: 0 !important;
     }
 
-    /*
-     * Нажатие label-navigation переводит focus в первое поле целевой секции.
-     * :focus-within подсвечивает весь блок без записи в entity и без Java state.
-     */
+    .iteraction-list-flat-section-active,
     .iteraction-list-flat-section:focus-within {
       border-color: $v-selection-color !important;
       box-shadow: 0 0 0 2px rgba($v-selection-color, 0.18),
                   0 5px 16px rgba(15, 23, 42, 0.08) !important;
     }
 
-    .iteraction-list-flat-content {
-      padding-top: 14px !important;
+    .iteraction-list-flat-section .v-gridlayout,
+    .iteraction-list-form-grid {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .iteraction-list-flat-section .v-gridlayout-slot {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      padding: 6px 8px;
+      vertical-align: top;
+    }
+
+    .iteraction-list-flat-section .v-caption .v-captiontext {
+      color: mix($v-font-color, $v-panel-background-color, 72%) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+    }
+
+    .iteraction-list-flat-section .v-textfield,
+    .iteraction-list-flat-section .v-filterselect,
+    .iteraction-list-flat-section .v-filterselect-input,
+    .iteraction-list-flat-section .v-datefield,
+    .iteraction-list-flat-section .v-datefield-textfield {
+      min-height: 38px !important;
+      font-size: 15px !important;
+      line-height: 38px !important;
+    }
+
+    .iteraction-list-flat-section .v-textarea {
+      font-size: 15px !important;
+      line-height: 1.45 !important;
+    }
+
+    .iteraction-list-flat-section .v-textfield,
+    .iteraction-list-flat-section .v-textarea,
+    .iteraction-list-flat-section .v-filterselect,
+    .iteraction-list-flat-section .v-datefield-textfield {
+      box-sizing: border-box;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.20) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+      transition: border-color 120ms ease, box-shadow 120ms ease;
+    }
+
+    .iteraction-list-flat-section .v-textfield:focus,
+    .iteraction-list-flat-section .v-textarea:focus,
+    .iteraction-list-flat-section .v-filterselect-focus,
+    .iteraction-list-flat-section .v-datefield-focus .v-datefield-textfield,
+    .iteraction-list-flat-section .v-button:focus {
+      border-color: $v-selection-color !important;
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
+    }
+
+    .iteraction-list-flat-section .v-checkbox {
+      padding: 3px 0;
+    }
+
+    .iteraction-list-flat-section .v-checkbox label {
+      color: mix($v-font-color, $v-panel-background-color, 78%) !important;
+      font-size: 14px !important;
+      line-height: 1.4 !important;
+    }
+
+    .iteraction-list-flat-section .v-button {
+      min-height: 38px;
+      padding-left: 14px;
+      padding-right: 14px;
+      font-size: 14px !important;
+      border-radius: 5px !important;
+    }
+
+    .iteraction-list-comment-section .v-textarea {
+      min-height: 150px;
+      resize: vertical;
+    }
+
+    .iteraction-list-dynamic-panel,
+    .iteraction-list-dynamic-panel > .v-slot,
+    .iteraction-list-dynamic-panel .v-button {
+      width: 100% !important;
+      min-width: 0 !important;
     }
 
     @media (max-width: 1366px) {
@@ -265,7 +325,8 @@
         padding-left: 14px !important;
       }
 
-      .iteraction-list-flat-section .v-panel-content {
+      .iteraction-list-flat-section-header,
+      .iteraction-list-flat-section-body {
         padding-right: 14px !important;
         padding-left: 14px !important;
       }

@@ -14,9 +14,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает исторический бизнес-контракт пяти быстрых взаимодействий.
- * Визуальный рефакторинг не вправе менять пользователя, месячный период,
- * ранжирование или назначение точного объекта Iteraction.
+ * Защищает исторический бизнес-контракт и ровно пять визуальных позиций
+ * быстрых взаимодействий в активном IteractionListEdit.
  */
 public class IteractionListMostPopularInteractionTest {
 
@@ -49,36 +48,50 @@ public class IteractionListMostPopularInteractionTest {
     }
 
     @Test
-    public void fiveVisualPositionsPreserveRealButtonsAndDisableEmptySlots() throws IOException {
+    public void activeControllerAlwaysBuildsFiveVisualPositions() throws IOException {
         String controller = controller();
-        String presentation = presentation();
+        String builder = section(
+                controller,
+                "private void setMostPopularIteraction()",
+                "@Subscribe\n    public void onAfterShow");
 
-        // Базовый контроллер сохраняет фактический Iteraction внутри listener.
-        assertTrue(controller.contains(
-                "int buttonCount = Math.min(POPULAR_INTERACTION_BUTTONS, mostPopular.size())"));
-        assertTrue(controller.contains("Iteraction interaction = mostPopular.get(index)"));
-        assertTrue(controller.contains("iteractionTypeField.setValue(interaction)"));
-        assertTrue(controller.contains("iteractionTypeField.focus()"));
-        assertFalse(controller.contains("getCaption().substring"));
-        assertFalse(controller.contains("QUERY_MOST_POPULAR"));
-
-        // Presentation-слой добавляет только недостающие disabled-позиции.
-        assertTrue(presentation.contains(
-                "while (visiblePosition < POPULAR_INTERACTION_BUTTONS)"));
-        assertTrue(presentation.contains("emptyButton.setCaption(EMPTY_POPULAR_CAPTION)"));
-        assertTrue(presentation.contains("emptyButton.setEnabled(false)"));
-        assertTrue(presentation.contains("mostPopularHbox.expand(emptyButton)"));
-        assertFalse(presentation.contains("InteractionService"));
-        assertFalse(presentation.contains("setValue("));
-        String normalization = section(
-                presentation,
-                "private void normalizePopularButtons()",
-                "\n    }\n}");
-        assertFalse(normalization.contains("addClickListener"));
+        assertTrue(builder.contains(
+                "for (int index = 0; index < POPULAR_INTERACTION_BUTTONS; index++)"));
+        assertTrue(builder.contains(
+                "Iteraction interaction = index < mostPopular.size()"));
+        assertTrue(builder.contains("createPopularInteractionButton(interaction)"));
+        assertTrue(builder.contains("mostPopularHbox.add(popularButton)"));
+        assertTrue(builder.contains("mostPopularHbox.expand(popularButton)"));
+        assertTrue(builder.contains("mostPopular = Collections.emptyList()"));
     }
 
     @Test
-    public void quickActionsStayBetweenToolbarAndAccordionScrollArea() throws IOException {
+    public void realButtonsPreserveExactInteractionAndEmptySlotsAreDisabled()
+            throws IOException {
+        String controller = controller();
+        String factory = section(
+                controller,
+                "private Button createPopularInteractionButton(Iteraction interaction)",
+                "@Subscribe\n    public void onAfterShow");
+
+        assertTrue(factory.contains("if (interaction == null)"));
+        assertTrue(factory.contains("popularButton.setCaption(EMPTY_POPULAR_CAPTION)"));
+        assertTrue(factory.contains("popularButton.setEnabled(false)"));
+        assertTrue(factory.contains("return popularButton"));
+        assertTrue(factory.contains("popularButton.setCaption(interaction.getIterationName())"));
+        assertTrue(factory.contains("iteractionTypeField.setValue(interaction)"));
+        assertTrue(factory.contains("iteractionTypeField.focus()"));
+        assertFalse(factory.contains("getCaption().substring"));
+
+        String emptyBranch = section(
+                factory,
+                "if (interaction == null)",
+                "popularButton.setCaption(interaction.getIterationName())");
+        assertFalse(emptyBranch.contains("addClickListener"));
+    }
+
+    @Test
+    public void quickActionsStayBetweenToolbarAndInputBlocks() throws IOException {
         String descriptor = descriptor();
         String workspace = descriptor.substring(descriptor.indexOf("id=\"iteractionListWorkspace\""));
 
@@ -90,10 +103,7 @@ public class IteractionListMostPopularInteractionTest {
                 "id=\"participantsAccordion\"",
                 "id=\"editActions\"");
         assertEquals(1, count(workspace, "id=\"mostPopularHbox\""));
-        assertFalse(section(
-                workspace,
-                "id=\"mostPopularQuickActions\"",
-                "id=\"iteractionListContentScrollBox\"").contains("visible=\"false\""));
+        assertFalse(workspace.contains("id=\"popularAccordion\""));
         assertFalse(workspace.contains("id=\"popularAccordionNav\""));
     }
 
@@ -112,12 +122,6 @@ public class IteractionListMostPopularInteractionTest {
     private String controller() throws IOException {
         return readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");
-    }
-
-    private String presentation() throws IOException {
-        return readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/"
-                        + "IteractionListEditAccordionNavigation.java");
     }
 
     private String descriptor() throws IOException {

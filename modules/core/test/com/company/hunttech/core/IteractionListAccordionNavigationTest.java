@@ -14,13 +14,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает label-навигацию четырёх реальных аккордеонов и отсутствие
- * бизнес-действий в presentation-контроллере IteractionListEdit.
+ * Защищает label-навигацию четырёх постоянных блоков и отсутствие
+ * бизнес-действий в её presentation-участке активного controller.
  */
 public class IteractionListAccordionNavigationTest {
 
     @Test
-    public void descriptorContainsOnlyRealAccordionNavigationItems() throws IOException {
+    public void descriptorContainsExactlyFourSectionNavigationItems() throws IOException {
         String descriptor = descriptor();
         String sidebar = section(
                 descriptor,
@@ -35,38 +35,40 @@ public class IteractionListAccordionNavigationTest {
     }
 
     @Test
-    public void runtimeNavigationKeepsBaseClassAndTogglesOnlyActiveState() throws IOException {
-        String presentation = presentation();
+    public void activeControllerCreatesFourButtonsAndTogglesOnlyPresentationStyles()
+            throws IOException {
+        String presentation = activePresentation();
 
-        assertTrue(presentation.contains(
-                "NAVIGATION_STYLE = \"borderless label-nav-item\""));
-        assertTrue(presentation.contains(
-                "ACTIVE_NAVIGATION_STYLE = \"label-nav-item-active\""));
-        assertTrue(presentation.contains("button.addStyleName(\"label-nav-item\")"));
-        assertTrue(presentation.contains(
-                "button.addStyleName(ACTIVE_NAVIGATION_STYLE)"));
-        assertTrue(presentation.contains(
-                "button.removeStyleName(ACTIVE_NAVIGATION_STYLE)"));
-        assertFalse(presentation.contains("iteraction-list-nav-item-active"));
+        assertTrue(presentation.contains("NAVIGATION_STYLE"));
+        assertTrue(presentation.contains("ACTIVE_NAVIGATION_STYLE"));
+        assertTrue(presentation.contains("ACTIVE_SECTION_STYLE"));
+        assertEquals(4, count(presentation, "createNavigationButton(" ) - 1);
+        assertEquals(4, count(presentation, "::focus"));
+        assertTrue(presentation.contains("section.addStyleName(ACTIVE_SECTION_STYLE)"));
+        assertTrue(presentation.contains("section.removeStyleName(ACTIVE_SECTION_STYLE)"));
+        assertFalse(presentation.contains("setExpanded("));
+        assertFalse(presentation.contains("addExpandedStateChangeListener"));
+        assertFalse(presentation.contains("synchronizeExpandedAccordion"));
+        assertFalse(presentation.contains("popularAccordionNav"));
     }
 
     @Test
-    public void navigationUsesFourFocusTargetsAndSynchronizesManualExpansion() throws IOException {
-        String presentation = presentation();
+    public void navigationUsesFourExpectedFocusTargets() throws IOException {
+        String presentation = activePresentation();
 
         assertTrue(presentation.contains("candidateField::focus"));
         assertTrue(presentation.contains("iteractionTypeField::focus"));
         assertTrue(presentation.contains("ratingField::focus"));
         assertTrue(presentation.contains("commentField::focus"));
-        assertEquals(4, count(presentation, "addExpandedStateChangeListener"));
-        assertTrue(presentation.contains("updatingAccordionState"));
-        assertTrue(presentation.contains("synchronizeExpandedAccordion"));
-        assertFalse(presentation.contains("focusFirstPopularButton"));
+        assertTrue(presentation.contains("selectSection(participantsAccordion"));
+        assertTrue(presentation.contains("selectSection(interactionAccordion"));
+        assertTrue(presentation.contains("selectSection(resultAccordion"));
+        assertTrue(presentation.contains("selectSection(commentAccordion"));
     }
 
     @Test
-    public void presentationLayerDoesNotWriteEntityRunLoadersOrCommit() throws IOException {
-        String presentation = presentation();
+    public void navigationPresentationDoesNotWriteEntityRunLoadersOrCommit() throws IOException {
+        String presentation = activePresentation();
 
         assertFalse(presentation.contains("DataManager"));
         assertFalse(presentation.contains("InteractionService"));
@@ -76,32 +78,25 @@ public class IteractionListAccordionNavigationTest {
         assertFalse(presentation.contains("setValue("));
     }
 
-    @Test
-    public void legacyPresentationInitializerIsExplicitlyReplaced() throws IOException {
-        String presentation = presentation();
-
-        assertTrue(presentation.contains(
-                "protected void onInitIteractionNavigation(InitEvent event)"));
-        assertTrue(presentation.contains("@Override"));
-        assertFalse(presentation.contains("popularNavigationButton"));
-    }
-
     private String descriptor() throws IOException {
         return readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
     }
 
-    private String presentation() throws IOException {
-        return readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/"
-                        + "IteractionListEditAccordionNavigation.java");
+    private String activePresentation() throws IOException {
+        String controller = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");
+        return section(
+                controller,
+                "private static final int POPULAR_INTERACTION_BUTTONS",
+                "private static final String QUERY_CHAIN_LAST");
     }
 
     private String section(String text, String startMarker, String endMarker) {
         int start = text.indexOf(startMarker);
-        assertTrue("Не найден начальный XML-маркер: " + startMarker, start >= 0);
+        assertTrue("Не найден начальный маркер: " + startMarker, start >= 0);
         int end = text.indexOf(endMarker, start);
-        assertTrue("Не найден конечный XML-маркер: " + endMarker, end > start);
+        assertTrue("Не найден конечный маркер: " + endMarker, end > start);
         return text.substring(start, end);
     }
 

@@ -153,92 +153,67 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     @Inject
     private InteractionService interactionService;
 
-    // Пять аккордеонов и левый индекс относятся только к presentation-слою:
-    // они не меняют значения сущности, loaders или порядок бизнес-обработчиков.
+    // Четыре постоянных блока и левый индекс относятся только к presentation-слою:
+    // навигация не меняет entity, loaders, сервисы или порядок бизнес-обработчиков.
     @Inject
     private VBoxLayout iteractionListNavigation;
     @Inject
-    private GroupBoxLayout participantsAccordion;
+    private VBoxLayout participantsAccordion;
     @Inject
-    private GroupBoxLayout interactionAccordion;
+    private VBoxLayout interactionAccordion;
     @Inject
-    private GroupBoxLayout resultAccordion;
+    private VBoxLayout resultAccordion;
     @Inject
-    private GroupBoxLayout commentAccordion;
-    @Inject
-    private GroupBoxLayout popularAccordion;
+    private VBoxLayout commentAccordion;
 
     private Button participantsAccordionNav;
     private Button interactionAccordionNav;
     private Button resultAccordionNav;
     private Button commentAccordionNav;
-    private Button popularAccordionNav;
-
-    // Флаг предотвращает рекурсивные события GroupBox при синхронизации
-    // клика по левому индексу и клика по штатному заголовку аккордеона.
-    private boolean updatingAccordionState;
 
     private static final int POPULAR_INTERACTION_BUTTONS = 5;
-    private static final String NAVIGATION_STYLE = "borderless iteraction-list-nav-item";
+    private static final String EMPTY_POPULAR_CAPTION = "Нет данных";
+    private static final String NAVIGATION_STYLE =
+            "borderless iteraction-list-nav-item label-nav-item";
     private static final String ACTIVE_NAVIGATION_STYLE =
-            "borderless iteraction-list-nav-item iteraction-list-nav-item-active";
+            "borderless iteraction-list-nav-item label-nav-item label-nav-item-active";
+    private static final String ACTIVE_SECTION_STYLE =
+            "iteraction-list-flat-section-active";
 
     @Subscribe
     protected void onInitIteractionNavigation(InitEvent event) {
-        initAccordionNavigation();
-        initAccordionHeaderSynchronization();
+        initSectionNavigation();
     }
 
     /**
-     * Заменяет XML fallback LABEL на доступные с клавиатуры borderless-кнопки.
-     * Визуально индекс повторяет SettingsWindow, но дополнительно раскрывает
-     * соответствующий блок и переводит фокус в его первое рабочее поле.
+     * Заменяет XML fallback LABEL на четыре keyboard-доступные кнопки.
+     * Клик выделяет постоянный блок и переводит фокус в первое рабочее поле;
+     * высота и видимость остальных блоков при этом не меняются.
      */
-    private void initAccordionNavigation() {
+    private void initSectionNavigation() {
         Component navigationTitle = iteractionListNavigation.getComponent(0);
         iteractionListNavigation.removeAll();
         iteractionListNavigation.add(navigationTitle);
 
         participantsAccordionNav = createNavigationButton(
                 "participantsAccordionNav", "msgAccordionParticipants",
-                () -> selectAccordion(participantsAccordion, participantsAccordionNav, candidateField::focus));
+                () -> selectSection(participantsAccordion, participantsAccordionNav, candidateField::focus));
         interactionAccordionNav = createNavigationButton(
                 "interactionAccordionNav", "msgAccordionInteraction",
-                () -> selectAccordion(interactionAccordion, interactionAccordionNav, iteractionTypeField::focus));
+                () -> selectSection(interactionAccordion, interactionAccordionNav, iteractionTypeField::focus));
         resultAccordionNav = createNavigationButton(
                 "resultAccordionNav", "msgAccordionResult",
-                () -> selectAccordion(resultAccordion, resultAccordionNav, ratingField::focus));
+                () -> selectSection(resultAccordion, resultAccordionNav, ratingField::focus));
         commentAccordionNav = createNavigationButton(
                 "commentAccordionNav", "msgAccordionComment",
-                () -> selectAccordion(commentAccordion, commentAccordionNav, commentField::focus));
-        popularAccordionNav = createNavigationButton(
-                "popularAccordionNav", "mshMostPopular",
-                () -> selectAccordion(popularAccordion, popularAccordionNav, () -> { }));
+                () -> selectSection(commentAccordion, commentAccordionNav, commentField::focus));
 
         iteractionListNavigation.add(participantsAccordionNav);
         iteractionListNavigation.add(interactionAccordionNav);
         iteractionListNavigation.add(resultAccordionNav);
         iteractionListNavigation.add(commentAccordionNav);
-        iteractionListNavigation.add(popularAccordionNav);
 
-        selectAccordion(participantsAccordion, participantsAccordionNav, () -> { });
-    }
-
-    /**
-     * Синхронизирует штатные заголовки GroupBox с активным пунктом слева.
-     * Раскрытие одного блока сворачивает остальные, не затрагивая data state.
-     */
-    private void initAccordionHeaderSynchronization() {
-        participantsAccordion.addExpandedStateChangeListener(event ->
-                synchronizeExpandedAccordion(participantsAccordion, participantsAccordionNav));
-        interactionAccordion.addExpandedStateChangeListener(event ->
-                synchronizeExpandedAccordion(interactionAccordion, interactionAccordionNav));
-        resultAccordion.addExpandedStateChangeListener(event ->
-                synchronizeExpandedAccordion(resultAccordion, resultAccordionNav));
-        commentAccordion.addExpandedStateChangeListener(event ->
-                synchronizeExpandedAccordion(commentAccordion, commentAccordionNav));
-        popularAccordion.addExpandedStateChangeListener(event ->
-                synchronizeExpandedAccordion(popularAccordion, popularAccordionNav));
+        selectSection(participantsAccordion, participantsAccordionNav, () -> { });
     }
 
     private Button createNavigationButton(String id, String messageKey, Runnable handler) {
@@ -251,32 +226,31 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         return button;
     }
 
-    private void synchronizeExpandedAccordion(GroupBoxLayout accordion, Button navigationButton) {
-        if (!updatingAccordionState && accordion.isExpanded()) {
-            selectAccordion(accordion, navigationButton, () -> { });
-        }
+    /**
+     * Меняет только presentation-state: выбранный блок и пункт навигации получают
+     * active-style, после чего focus обеспечивает штатную прокрутку ScrollBox.
+     */
+    private void selectSection(VBoxLayout selectedSection,
+                               Button selectedNavigationButton,
+                               Runnable focusHandler) {
+        updateSectionStyles(selectedSection);
+        updateNavigationStyles(selectedNavigationButton);
+        focusHandler.run();
     }
 
-    /**
-     * Раскрывает ровно один раздел, обновляет active-style и после завершения
-     * синхронизации переводит фокус. Порядок важен, иначе CUBA может попытаться
-     * сфокусировать компонент внутри ещё свёрнутого GroupBox.
-     */
-    private void selectAccordion(GroupBoxLayout selectedAccordion,
-                                 Button selectedNavigationButton,
-                                 Runnable focusHandler) {
-        updatingAccordionState = true;
-        try {
-            participantsAccordion.setExpanded(participantsAccordion == selectedAccordion);
-            interactionAccordion.setExpanded(interactionAccordion == selectedAccordion);
-            resultAccordion.setExpanded(resultAccordion == selectedAccordion);
-            commentAccordion.setExpanded(commentAccordion == selectedAccordion);
-            popularAccordion.setExpanded(popularAccordion == selectedAccordion);
-            updateNavigationStyles(selectedNavigationButton);
-        } finally {
-            updatingAccordionState = false;
+    private void updateSectionStyles(VBoxLayout selectedSection) {
+        setSectionActive(participantsAccordion, participantsAccordion == selectedSection);
+        setSectionActive(interactionAccordion, interactionAccordion == selectedSection);
+        setSectionActive(resultAccordion, resultAccordion == selectedSection);
+        setSectionActive(commentAccordion, commentAccordion == selectedSection);
+    }
+
+    private void setSectionActive(VBoxLayout section, boolean active) {
+        if (active) {
+            section.addStyleName(ACTIVE_SECTION_STYLE);
+        } else {
+            section.removeStyleName(ACTIVE_SECTION_STYLE);
         }
-        focusHandler.run();
     }
 
     private void updateNavigationStyles(Button selectedNavigationButton) {
@@ -291,9 +265,6 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                         ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
         commentAccordionNav.setStyleName(
                 commentAccordionNav == selectedNavigationButton
-                        ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
-        popularAccordionNav.setStyleName(
-                popularAccordionNav == selectedNavigationButton
                         ? ACTIVE_NAVIGATION_STYLE : NAVIGATION_STYLE);
     }
 
@@ -806,10 +777,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
                     retStr = retStr.replaceAll(emailKeys.get(EmailKeys.DEPARTAMENT.getId()), newsItem.getVacancy().getProjectName().getProjectName()); */
 /*            if (newsItem.getRecrutier() != null)
                 if (newsItem.getRecrutier().getName() != null)
-                    retStr = retStr.replaceAll(emailKeys.get(EmailKeys.RESEARCHER_NAME.getId()), newsItem.getRecrutier().getName()); */
+                    retStr = strSimpleService.replaceAll(retStr, emailKeys.get(EmailKeys.RESEARCHER_NAME.getId()), newsItem.getRecrutier().getName()); */
 /*            if (newsItem.getVacancy() != null)
                 if (newsItem.getVacancy().getComment() != null)
-                    retStr = retStr.replaceAll(emailKeys.get(EmailKeys.JOB_DESCRIPTION.getId()), newsItem.getVacancy().getComment()); */
+                    retStr = strSimpleService.replaceAll(retStr, emailKeys.get(EmailKeys.JOB_DESCRIPTION.getId()), newsItem.getVacancy().getComment()); */
 /*            if (newsItem.getVacancy().getPositionType() != null)
                 if (newsItem.getVacancy().getPositionType().getPositionEnName() != null)
                     retStr = retStr.replaceAll(emailKeys.get(EmailKeys.POSITION.getId()),
@@ -1239,45 +1210,58 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     /**
-     * Строит быстрые действия по неизменяемому бизнес-контракту формы:
-     * {@link InteractionService} возвращает до пяти наиболее частых типов
-     * взаимодействия текущего рекрутёра за последний календарный месяц.
-     *
-     * Визуальный рефакторинг не должен переносить агрегацию в контроллер,
-     * менять период, пользователя или назначение точного объекта Iteraction.
+     * Строит ровно пять визуальных позиций по неизменяемому бизнес-контракту:
+     * {@link InteractionService} возвращает наиболее частые типы текущего
+     * рекрутёра за последний календарный месяц, а пустые позиции disabled.
      */
     private void setMostPopularIteraction() {
         mostPopular = interactionService.getMostPolularIteraction(
                 userSession.getUser(), POPULAR_INTERACTION_BUTTONS);
+        if (mostPopular == null) {
+            mostPopular = Collections.emptyList();
+        }
 
         mostPopularHbox.removeAll();
         List<Button> popularButtons = new ArrayList<>();
-        int buttonCount = Math.min(POPULAR_INTERACTION_BUTTONS, mostPopular.size());
 
-        for (int index = 0; index < buttonCount; index++) {
-            Iteraction interaction = mostPopular.get(index);
-            if (interaction == null) {
-                continue;
-            }
-
-            Button popularButton = uiComponents.create(Button.class);
-            popularButton.setWidth("100%");
-            popularButton.setStyleName("iteraction-list-popular-button");
-            popularButton.setCaption(interaction.getIterationName());
-            popularButton.addClickListener(clickEvent -> {
-                iteractionTypeField.setValue(interaction);
-                iteractionTypeField.focus();
-            });
-
+        for (int index = 0; index < POPULAR_INTERACTION_BUTTONS; index++) {
+            Iteraction interaction = index < mostPopular.size()
+                    ? mostPopular.get(index) : null;
+            Button popularButton = createPopularInteractionButton(interaction);
             mostPopularHbox.add(popularButton);
             popularButtons.add(popularButton);
         }
 
         // HBoxLayout.expand в CUBA 7.3 принимает один Component за вызов.
-        // Одинаковый expand ratio сохраняет равную ширину фактически созданных кнопок.
+        // Пять одинаковых expand ratio сохраняют точную сетку 5 × 20%.
         for (Button popularButton : popularButtons) {
             mostPopularHbox.expand(popularButton);
         }
+    }
+
+    /**
+     * Реальная кнопка сохраняет точный Iteraction в listener. Заглушка не имеет
+     * listener и disabled, поэтому не может изменить поле или DataContext.
+     */
+    private Button createPopularInteractionButton(Iteraction interaction) {
+        Button popularButton = uiComponents.create(Button.class);
+        popularButton.setWidth("100%");
+        popularButton.setStyleName("iteraction-list-popular-button");
+
+        if (interaction == null) {
+            popularButton.setCaption(EMPTY_POPULAR_CAPTION);
+            popularButton.setDescription(EMPTY_POPULAR_CAPTION);
+            popularButton.setEnabled(false);
+            return popularButton;
+        }
+
+        popularButton.setCaption(interaction.getIterationName());
+        popularButton.setDescription(interaction.getIterationName());
+        popularButton.addClickListener(clickEvent -> {
+            iteractionTypeField.setValue(interaction);
+            iteractionTypeField.focus();
+        });
+        return popularButton;
     }
 
     @Subscribe

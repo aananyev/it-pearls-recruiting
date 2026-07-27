@@ -84,7 +84,7 @@
               spacing="false"
               expand="iteractionListWorkspace">
 
-            <!-- Sidebar содержит только контекст. Component ID сохранены для controller. -->
+            <!-- Sidebar содержит контекст кандидата и вакансии. -->
             <vbox stylename="iteraction-list-sidebar edit-sidebar"
                   width="270px"
                   height="100%"
@@ -135,7 +135,7 @@
                            height="AUTO"
                            align="MIDDLE_CENTER"/>
 
-                    <!-- Статус и приоритет доступны до навигации по рабочим блокам. -->
+                    <!-- Статус и приоритет доступны до навигации по блокам ввода. -->
                     <hbox id="vacancyStateSummary"
                           width="100%"
                           height="AUTO"
@@ -198,7 +198,7 @@
                     </hbox>
                 </vbox>
 
-                <!-- Runtime controller заменяет fallback LABEL на keyboard-доступные кнопки. -->
+                <!-- Runtime controller заменяет fallback LABEL четырьмя кнопками. -->
                 <vbox id="iteractionListNavigation"
                       width="100%"
                       spacing="false"
@@ -329,7 +329,7 @@
                       stylename="iteraction-list-sidebar-spacer edit-sidebar-spacer"/>
             </vbox>
 
-            <!-- Справа расположены постоянные вертикальные блоки без accordion interaction. -->
+            <!-- Справа расположены четыре обычных VBox-блока без accordion API. -->
             <vbox id="iteractionListWorkspace"
                   stylename="iteraction-list-workspace edit-workspace"
                   width="100%"
@@ -387,23 +387,25 @@
                           margin="true"
                           stylename="iteraction-list-content iteraction-list-flat-content edit-workspace-content">
 
-                        <!-- GroupBox ID сохранён для controller injection, но сворачивание отключено. -->
-                        <groupBox id="participantsAccordion"
-                                  caption="msg://msgAccordionParticipants"
-                                  width="100%"
-                                  height="AUTO"
-                                  spacing="true"
+                        <vbox id="participantsAccordion"
+                              width="100%"
+                              height="AUTO"
+                              spacing="false"
+                              stylename="iteraction-list-flat-section iteraction-list-flat-section-active iteraction-list-form-section iteraction-list-participants-section edit-card">
+                            <vbox width="100%"
+                                  spacing="false"
                                   margin="true"
-                                  collapsable="false"
-                                  collapsed="false"
-                                  visible="true"
-                                  showAsPanel="true"
-                                  stylename="iteraction-list-flat-section iteraction-list-form-section iteraction-list-participants-section edit-card">
+                                  stylename="iteraction-list-flat-section-header">
+                                <label value="msg://msgAccordionParticipants"
+                                       width="100%"
+                                       stylename="iteraction-list-flat-section-title edit-card-title"/>
+                            </vbox>
                             <vbox id="participantsAccordionContent"
                                   width="100%"
                                   height="AUTO"
                                   spacing="true"
-                                  stylename="iteraction-list-section-content">
+                                  margin="true"
+                                  stylename="iteraction-list-flat-section-body iteraction-list-section-content">
                                 <grid id="gridIterationData"
                                       width="100%"
                                       height="AUTO"
@@ -465,23 +467,27 @@
                                           caption="msg://msgOnlyMySubscribe"
                                           stylename="iteraction-list-subscription-filter"/>
                             </vbox>
-                        </groupBox>
+                        </vbox>
 
-                        <groupBox id="interactionAccordion"
-                                  caption="msg://msgAccordionInteraction"
-                                  width="100%"
-                                  height="AUTO"
-                                  spacing="true"
+                        <vbox id="interactionAccordion"
+                              width="100%"
+                              height="AUTO"
+                              spacing="false"
+                              stylename="iteraction-list-flat-section iteraction-list-form-section edit-card">
+                            <vbox width="100%"
+                                  spacing="false"
                                   margin="true"
-                                  collapsable="false"
-                                  collapsed="false"
-                                  showAsPanel="true"
-                                  stylename="iteraction-list-flat-section iteraction-list-form-section edit-card">
+                                  stylename="iteraction-list-flat-section-header">
+                                <label value="msg://msgAccordionInteraction"
+                                       width="100%"
+                                       stylename="iteraction-list-flat-section-title edit-card-title"/>
+                            </vbox>
                             <!-- Visible/required/caption динамических полей определяет business-controller. -->
                             <vbox width="100%"
                                   height="AUTO"
                                   spacing="true"
-                                  stylename="iteraction-list-dynamic-fields iteraction-list-section-content">
+                                  margin="true"
+                                  stylename="iteraction-list-flat-section-body iteraction-list-dynamic-fields iteraction-list-section-content">
                                 <lookupPickerField id="iteractionTypeField"
                                                    optionsContainer="iteractionTypesDc"
                                                    caption="msg://msgIteractionType"
@@ -518,87 +524,96 @@
                                     </vbox>
                                 </buttonsPanel>
                             </vbox>
-                        </groupBox>
+                        </vbox>
 
-                        <groupBox id="resultAccordion"
-                                  caption="msg://msgAccordionResult"
-                                  width="100%"
+                        <vbox id="resultAccordion"
+                              width="100%"
+                              height="AUTO"
+                              spacing="false"
+                              stylename="iteraction-list-flat-section iteraction-list-form-section edit-card">
+                            <vbox width="100%"
+                                  spacing="false"
+                                  margin="true"
+                                  stylename="iteraction-list-flat-section-header">
+                                <label value="msg://msgAccordionResult"
+                                       width="100%"
+                                       stylename="iteraction-list-flat-section-title edit-card-title"/>
+                            </vbox>
+                            <vbox width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
-                                  collapsable="false"
-                                  collapsed="false"
-                                  showAsPanel="true"
-                                  stylename="iteraction-list-flat-section iteraction-list-form-section edit-card">
-                            <grid id="resultAccordionGrid"
-                                  width="100%"
-                                  height="AUTO"
-                                  spacing="true"
-                                  stylename="iteraction-list-form-grid iteraction-list-section-content">
-                                <columns>
-                                    <column flex="1"/>
-                                    <column flex="1"/>
-                                </columns>
-                                <rows>
-                                    <row id="rating">
-                                        <lookupField id="ratingField"
-                                                     required="true"
-                                                     align="MIDDLE_LEFT"
-                                                     caption="msg://msgRating"
-                                                     dataContainer="iteractionListDc"
-                                                     property="rating"
-                                                     description="msg://msgRatingDecription"
-                                                     width="100%"/>
-                                        <lookupPickerField id="recrutierField"
-                                                           caption="msg://msgRecrutier"
-                                                           width="100%"
-                                                           dataContainer="iteractionListDc"
-                                                           property="recrutier"
-                                                           optionsContainer="usersDc">
-                                            <actions>
-                                                <action id="lookup" type="picker_lookup"/>
-                                            </actions>
-                                        </lookupPickerField>
-                                    </row>
-                                    <row>
-                                        <textField id="communicationMethodField"
-                                                   width="100%"
-                                                   caption="msg://msgCommunicationMethod"
-                                                   dataContainer="iteractionListDc"
-                                                   property="communicationMethod"
-                                                   colspan="2"/>
-                                    </row>
-                                </rows>
-                            </grid>
-                        </groupBox>
-
-                        <groupBox id="commentAccordion"
-                                  caption="msg://msgAccordionComment"
-                                  width="100%"
-                                  height="AUTO"
-                                  spacing="true"
-                                  margin="true"
-                                  collapsable="false"
-                                  collapsed="false"
-                                  showAsPanel="true"
-                                  stylename="iteraction-list-flat-section iteraction-list-form-section iteraction-list-comment-section edit-card">
-                            <textArea id="commentField"
-                                      dataContainer="iteractionListDc"
-                                      property="comment"
-                                      caption="msg://msgComment"
+                                  stylename="iteraction-list-flat-section-body iteraction-list-section-content">
+                                <grid id="resultAccordionGrid"
                                       width="100%"
-                                      height="170px"
-                                      rows="7"/>
-                        </groupBox>
+                                      height="AUTO"
+                                      spacing="true"
+                                      stylename="iteraction-list-form-grid">
+                                    <columns>
+                                        <column flex="1"/>
+                                        <column flex="1"/>
+                                    </columns>
+                                    <rows>
+                                        <row id="rating">
+                                            <lookupField id="ratingField"
+                                                         required="true"
+                                                         align="MIDDLE_LEFT"
+                                                         caption="msg://msgRating"
+                                                         dataContainer="iteractionListDc"
+                                                         property="rating"
+                                                         description="msg://msgRatingDecription"
+                                                         width="100%"/>
+                                            <lookupPickerField id="recrutierField"
+                                                               caption="msg://msgRecrutier"
+                                                               width="100%"
+                                                               dataContainer="iteractionListDc"
+                                                               property="recrutier"
+                                                               optionsContainer="usersDc">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                        </row>
+                                        <row>
+                                            <textField id="communicationMethodField"
+                                                       width="100%"
+                                                       caption="msg://msgCommunicationMethod"
+                                                       dataContainer="iteractionListDc"
+                                                       property="communicationMethod"
+                                                       colspan="2"/>
+                                        </row>
+                                    </rows>
+                                </grid>
+                            </vbox>
+                        </vbox>
 
-                        <!-- Legacy injection остаётся невидимой; quick actions находятся выше. -->
-                        <groupBox id="popularAccordion"
-                                  visible="false"
-                                  width="100%"
+                        <vbox id="commentAccordion"
+                              width="100%"
+                              height="AUTO"
+                              spacing="false"
+                              stylename="iteraction-list-flat-section iteraction-list-form-section iteraction-list-comment-section edit-card">
+                            <vbox width="100%"
+                                  spacing="false"
+                                  margin="true"
+                                  stylename="iteraction-list-flat-section-header">
+                                <label value="msg://msgAccordionComment"
+                                       width="100%"
+                                       stylename="iteraction-list-flat-section-title edit-card-title"/>
+                            </vbox>
+                            <vbox width="100%"
                                   height="AUTO"
-                                  collapsable="false"
-                                  collapsed="false"
-                                  stylename="iteraction-list-popular-section"/>
+                                  spacing="true"
+                                  margin="true"
+                                  stylename="iteraction-list-flat-section-body">
+                                <textArea id="commentField"
+                                          dataContainer="iteractionListDc"
+                                          property="comment"
+                                          caption="msg://msgComment"
+                                          width="100%"
+                                          height="170px"
+                                          rows="7"/>
+                            </vbox>
+                        </vbox>
                     </vbox>
                 </scrollBox>
 

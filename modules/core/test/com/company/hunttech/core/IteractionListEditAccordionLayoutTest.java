@@ -15,8 +15,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает двухпанельную компоновку IteractionListEdit с четырьмя постоянными
- * вертикальными блоками и сохранёнными business bindings.
+ * Защищает точную двухпанельную компоновку IteractionListEdit с четырьмя
+ * постоянными VBox-блоками и неизменными business bindings.
  */
 public class IteractionListEditAccordionLayoutTest {
 
@@ -26,7 +26,7 @@ public class IteractionListEditAccordionLayoutTest {
     };
 
     @Test
-    public void descriptorParsesAndFollowsEditScreenOrder() throws Exception {
+    public void descriptorParsesAndFollowsDesignedScreenOrder() throws Exception {
         Path descriptorPath = projectRoot().resolve(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
         DocumentBuilderFactory.newInstance()
@@ -48,22 +48,26 @@ public class IteractionListEditAccordionLayoutTest {
                 "id=\"commentAccordion\"",
                 "id=\"editActions\"");
         assertFalse(descriptor.contains("<tabSheet"));
-        assertFalse(descriptor.contains("id=\"iteractionListTabSheeet\""));
+        assertFalse(descriptor.contains("<groupBox"));
         assertEquals(1, count(descriptor, "id=\"mostPopularHbox\""));
     }
 
     @Test
-    public void workspaceContainsFourPermanentVerticalInputBlocks() throws IOException {
+    public void workspaceContainsFourPermanentVBoxInputBlocks() throws IOException {
         String descriptor = descriptor();
 
-        assertEquals(4, count(descriptor, "iteraction-list-flat-section"));
-        assertEquals(5, count(descriptor, "collapsable=\"false\""));
-        assertEquals(5, count(descriptor, "collapsed=\"false\""));
-        assertFalse(descriptor.contains("collapsable=\"true\""));
-        assertFalse(descriptor.contains("edit-accordion-section"));
-        assertTrue(descriptor.contains("iteraction-list-flat-content"));
+        assertEquals(4, count(descriptor,
+                "stylename=\"iteraction-list-flat-section"));
+        assertEquals(4, count(descriptor,
+                "stylename=\"iteraction-list-flat-section-title edit-card-title\""));
+        assertEquals(4, count(descriptor,
+                "stylename=\"iteraction-list-flat-section-body"));
+        assertFalse(descriptor.contains("collapsable="));
+        assertFalse(descriptor.contains("collapsed="));
+        assertFalse(descriptor.contains("showAsPanel="));
+        assertFalse(descriptor.contains("id=\"popularAccordion\""));
+        assertTrue(descriptor.contains("iteraction-list-flat-section-active"));
         assertTrue(descriptor.contains("id=\"participantsAccordionContent\""));
-        assertTrue(descriptor.contains("iteraction-list-section-content"));
     }
 
     @Test
@@ -107,16 +111,34 @@ public class IteractionListEditAccordionLayoutTest {
     }
 
     @Test
-    public void everyThemeUsesLocalFlatLayoutContract() throws IOException {
+    public void activeControllerUsesVBoxSectionsWithoutExpandedState() throws IOException {
+        String controller = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");
+
+        assertEquals(5, count(controller, "private VBoxLayout"));
+        assertFalse(controller.contains("GroupBoxLayout"));
+        assertFalse(controller.contains("setExpanded("));
+        assertFalse(controller.contains("addExpandedStateChangeListener"));
+        assertFalse(controller.contains("popularAccordionNav"));
+        assertTrue(controller.contains("ACTIVE_SECTION_STYLE"));
+        assertTrue(controller.contains("selectSection("));
+    }
+
+    @Test
+    public void everyThemeUsesExactLocalFlatLayoutContract() throws IOException {
         for (String theme : THEMES) {
             String partial = readProjectFile(
                     "modules/web/themes/" + theme
                             + "/com.company.hunttech/iteraction-list-flat-layout.scss");
             assertTrue(theme, partial.contains("@mixin iteraction-list-flat-layout-theme"));
+            assertTrue(theme, partial.contains(".iteraction-list-flat-section-header"));
+            assertTrue(theme, partial.contains(".iteraction-list-flat-section-title"));
+            assertTrue(theme, partial.contains(".iteraction-list-flat-section-body"));
+            assertTrue(theme, partial.contains(".iteraction-list-flat-section-active"));
             assertTrue(theme, partial.contains(".iteraction-list-flat-section:focus-within"));
-            assertTrue(theme, partial.contains(".label-navigation > .v-slot:nth-child(6)"));
-            assertTrue(theme, partial.contains("display: block !important"));
             assertTrue(theme, partial.contains("width: 312px !important"));
+            assertFalse(theme, partial.contains(".v-panel-collapsed"));
+            assertFalse(theme, partial.contains("nth-child(6)"));
             assertFalse(theme, partial.contains("\n  .v-panel {"));
             assertFalse(theme, partial.contains("\n  .v-button {"));
 
@@ -125,9 +147,6 @@ public class IteractionListEditAccordionLayoutTest {
                     "@import \"com.company.hunttech/iteraction-list-flat-layout\";"));
             assertTrue(theme, styles.contains(
                     "@include iteraction-list-flat-layout-theme;"));
-            assertOrdered(styles,
-                    "@include iteraction-list-accordion-navigation-theme;",
-                    "@include iteraction-list-flat-layout-theme;");
         }
     }
 
