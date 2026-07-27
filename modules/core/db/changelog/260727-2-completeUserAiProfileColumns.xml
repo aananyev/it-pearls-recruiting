@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!--
+        Follow-up для БД, где HUNTTECH_USER_AI_PROFILE была создана вручную
+        или частично. Исходный createTable changeSet помечает существующую
+        таблицу как MARK_RAN, поэтому недостающие колонки нужно сверять отдельно.
+    -->
+    <preConditions onFail="HALT" onError="HALT">
+        <dbms type="postgresql"/>
+        <tableExists tableName="HUNTTECH_USER_AI_PROFILE"/>
+    </preConditions>
+
+    <changeSet id="260727-22-completeUserAiProfileColumns" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="HUNTTECH_USER_AI_PROFILE"/>
+        </preConditions>
+        <sql splitStatements="true" stripComments="true">
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS USER_ID uuid;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS PROFILE_ENABLED boolean DEFAULT false;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS EXTERNAL_PROCESSING_ALLOWED boolean DEFAULT false;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS CONSENT_VERSION varchar(32);
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS CONSENT_ACCEPTED_AT timestamp;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS PROFILE_CONFIRMED_AT timestamp;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS ABOUT_ME text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS CURRENT_POSITION varchar(255);
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS FUNCTIONAL_ROLE integer;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS SENIORITY_LEVEL integer;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS PROFESSIONAL_EXPERIENCE_YEARS integer;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS RECRUITING_EXPERIENCE_YEARS integer;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS CURRENT_RESPONSIBILITIES text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS EDUCATION text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS CERTIFICATIONS text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS DOMAIN_EXPERTISE text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS INDUSTRIES text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS RECRUITING_SPECIALIZATIONS text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS TARGET_ROLES text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS CANDIDATE_LEVELS varchar(255);
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS HIRING_GEOGRAPHIES text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS DECISION_PRIORITIES text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS CLIENT_PROJECT_CONTEXT text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS PROFESSIONAL_GOALS text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS PROFESSIONAL_INTERESTS text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS DEVELOPMENT_AREAS text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS CURRENT_PRIORITIES text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS PREFERRED_LANGUAGE integer;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS RESPONSE_DETAIL_LEVEL integer;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS COMMUNICATION_STYLE integer;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS TERMINOLOGY_LEVEL integer;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS PREFERRED_ANSWER_STRUCTURE integer;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS CUSTOM_AI_INSTRUCTIONS text;
+            ALTER TABLE HUNTTECH_USER_AI_PROFILE ADD COLUMN IF NOT EXISTS COMMUNICATION_CONSTRAINTS text;
+        </sql>
+    </changeSet>
+
+    <changeSet id="260727-23-enforceUserAiProfileRequiredColumns" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="HUNTTECH_USER_AI_PROFILE"/>
+                <columnExists tableName="HUNTTECH_USER_AI_PROFILE" columnName="USER_ID"/>
+                <columnExists tableName="HUNTTECH_USER_AI_PROFILE" columnName="PROFILE_ENABLED"/>
+                <columnExists tableName="HUNTTECH_USER_AI_PROFILE" columnName="EXTERNAL_PROCESSING_ALLOWED"/>
+            </and>
+        </preConditions>
+        <sql splitStatements="false" stripComments="true"><![CDATA[
+DO $$
+BEGIN
+    UPDATE HUNTTECH_USER_AI_PROFILE
+       SET PROFILE_ENABLED = false
+     WHERE PROFILE_ENABLED IS NULL;
+
+    UPDATE HUNTTECH_USER_AI_PROFILE
+       SET EXTERNAL_PROCESSING_ALLOWED = false
+     WHERE EXTERNAL_PROCESSING_ALLOWED IS NULL;
+
+    ALTER TABLE HUNTTECH_USER_AI_PROFILE
+        ALTER COLUMN PROFILE_ENABLED SET DEFAULT false;
+    ALTER TABLE HUNTTECH_USER_AI_PROFILE
+        ALTER COLUMN PROFILE_ENABLED SET NOT NULL;
+    ALTER TABLE HUNTTECH_USER_AI_PROFILE
+        ALTER COLUMN EXTERNAL_PROCESSING_ALLOWED SET DEFAULT false;
+    ALTER TABLE HUNTTECH_USER_AI_PROFILE
+        ALTER COLUMN EXTERNAL_PROCESSING_ALLOWED SET NOT NULL;
+
+    IF EXISTS (
+        SELECT 1
+          FROM HUNTTECH_USER_AI_PROFILE
+         WHERE USER_ID IS NULL
+    ) THEN
+        RAISE EXCEPTION
+            'HUNTTECH_USER_AI_PROFILE содержит строки без USER_ID; автоматическое заполнение владельца невозможно';
+    END IF;
+
+    ALTER TABLE HUNTTECH_USER_AI_PROFILE
+        ALTER COLUMN USER_ID SET NOT NULL;
+END
+$$;
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="260727-24-addUserAiProfileExperienceChecks" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <tableExists tableName="HUNTTECH_USER_AI_PROFILE"/>
+        </preConditions>
+        <sql splitStatements="false" stripComments="true"><![CDATA[
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+         WHERE lower(conname) = 'chk_hunttech_user_ai_profile_prof_exp'
+           AND conrelid = 'hunttech_user_ai_profile'::regclass
+    ) THEN
+        ALTER TABLE HUNTTECH_USER_AI_PROFILE
+            ADD CONSTRAINT CHK_HUNTTECH_USER_AI_PROFILE_PROF_EXP
+            CHECK (PROFESSIONAL_EXPERIENCE_YEARS IS NULL
+                OR PROFESSIONAL_EXPERIENCE_YEARS BETWEEN 0 AND 70);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+         WHERE lower(conname) = 'chk_hunttech_user_ai_profile_recr_exp'
+           AND conrelid = 'hunttech_user_ai_profile'::regclass
+    ) THEN
+        ALTER TABLE HUNTTECH_USER_AI_PROFILE
+            ADD CONSTRAINT CHK_HUNTTECH_USER_AI_PROFILE_RECR_EXP
+            CHECK (RECRUITING_EXPERIENCE_YEARS IS NULL
+                OR RECRUITING_EXPERIENCE_YEARS BETWEEN 0 AND 70);
+    END IF;
+END
+$$;
+        ]]></sql>
+    </changeSet>
+
+</databaseChangeLog>

@@ -6,3 +6,10 @@ project(":${modulePrefix}-core").projectDir = new File(settingsDir, 'modules/cor
 project(":${modulePrefix}-web").projectDir = new File(settingsDir, 'modules/web')
 project(":${modulePrefix}-gui").projectDir = new File(settingsDir, 'modules/gui')
 project(":${modulePrefix}-web-toolkit").projectDir = new File(settingsDir, 'modules/web-toolkit')
+
+// DB-baseline подключается только к app-core и расширяет существующий CUBA updateDb.
+gradle.beforeProject { project ->
+    if (project.path == ":${modulePrefix}-core") {
+        project.apply from: new File(settingsDir, 'gradle/cuba-db-baseline.gradle')
+    }
+}

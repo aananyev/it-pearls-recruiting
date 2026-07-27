@@ -1,0 +1,105 @@
+/*
+ * Согласует имена уже выполненных CUBA update-скриптов после восстановления
+ * production-БД. SYS_DB_CHANGELOG содержит старый component folder
+ * 70-IT-Pearls, а текущая сборка формирует другой folder приложения.
+ * Alias создаётся только при доказанном совпадении полного пути после
+ * /update/postgres/; отсутствующие в истории скрипты не помечаются выполненными.
+ */
+afterEvaluate {
+    def updateDbTask = tasks.findByName('updateDb')
+    if (updateDbTask == null) {
+        throw new GradleException('В app-core не найден обязательный CUBA task updateDb')
+    }
+
+    updateDbTask.doFirst {
+        if (project.hasProperty('skipLegacyCubaBaseline')) {
+            logger.lifecycle('Baseline исторических CUBA scripts отключён через -PskipLegacyCubaBaseline')
+            return
+        }
+
+        File sourceUpdateRoot = file('db/update/postgres')
+        File assembledDbRoot = file("${buildDir}/db")
+        String reconciliationSuffix = '26/260727-2-reconcileProductionSchema.sql'
+
+        // Выбираются только старые update-файлы текущего приложения. Новый
+        // reconciliation SQL должен остаться pending и выполниться штатным updateDb.
+        Set<String> legacySourceSuffixes = fileTree(sourceUpdateRoot) {
+            include '**/*.sql'
+            include '**/*.upgrade.groovy'
+        }.files.collect { File script ->
+            sourceUpdateRoot.toPath().relativize(script.toPath()).toString().replace('\\', '/')
+        }.findAll { String suffix ->
+            suffix < reconciliationSuffix
+        } as Set<String>
+
+        List<Map<String, String>> assembledLegacyScripts = fileTree(assembledDbRoot) {
+            include '**/update/postgres/**/*.sql'
+            include '**/update/postgres/**/*.upgrade.groovy'
+        }.files.collect { File script ->
+            String path = assembledDbRoot.toPath().relativize(script.toPath())
+                    .toString().replace('\\', '/')
+            int marker = path.indexOf('/update/postgres/')
+            if (marker < 0) {
+                return null
+            }
+            String suffix = path.substring(marker + '/update/postgres/'.length())
+            return legacySourceSuffixes.contains(suffix)
+                    ? [path: path, suffix: suffix]
+                    : null
+        }.findAll { it != null }.sort { left, right -> left.path <=> right.path }
+
+        if (assembledLegacyScripts.isEmpty()) {
+            throw new GradleException(
+                    'Не найдены собранные historical update scripts текущего приложения; проверь assembleDbScripts')
+        }
+
+        String aliasValues = assembledLegacyScripts.collect { Map<String, String> script ->
+            "('${script.path.replace("'", "''")}', '${script.suffix.replace("'", "''")}')"
+        }.join(',\n        ')
+
+        File baselineSql = file("${buildDir}/tmp/db/baseline-legacy-cuba-scripts.sql")
+        baselineSql.parentFile.mkdirs()
+        baselineSql.setText("""
+DO \$baseline\$
+BEGIN
+    -- Для пустой БД CUBA должна выполнить штатную инициализацию без baseline.
+    IF to_regclass('public.sec_user') IS NULL
+       OR to_regclass('public.sys_db_changelog') IS NULL THEN
+        RAISE NOTICE 'Legacy CUBA baseline пропущен: база ещё не инициализирована';
+        RETURN;
+    END IF;
+
+    WITH aliases(current_script_name, source_suffix) AS (
+        VALUES
+        ${aliasValues}
+    )
+    INSERT INTO SYS_DB_CHANGELOG (SCRIPT_NAME, CREATE_TS, IS_INIT)
+    SELECT aliases.current_script_name, CURRENT_TIMESTAMP, 0
+      FROM aliases
+     WHERE EXISTS (
+        SELECT 1
+          FROM SYS_DB_CHANGELOG executed
+         WHERE replace(lower(executed.SCRIPT_NAME), '\\', '/')
+               LIKE '%/update/postgres/' || lower(aliases.source_suffix)
+     )
+    ON CONFLICT (SCRIPT_NAME) DO NOTHING;
+END
+\$baseline\$;
+^
+""".stripIndent(), 'UTF-8')
+
+        // delimiter='^' не разрезает PL/pgSQL DO-блок по внутренним ';'.
+        ant.sql(
+                driver: 'org.postgresql.Driver',
+                url: "jdbc:postgresql://${updateDbTask.host}/${updateDbTask.dbName}",
+                userid: updateDbTask.dbUser,
+                password: updateDbTask.dbPassword,
+                classpath: configurations.jdbc.asPath,
+                autocommit: true,
+                onerror: 'abort',
+                delimiter: '^',
+                delimitertype: 'row',
+                src: baselineSql
+        )
+    }
+}

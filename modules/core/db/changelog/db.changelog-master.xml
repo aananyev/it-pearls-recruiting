@@ -20,4 +20,8 @@
     <include file="260727-1-reconcileProductionSchema.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Дополняет уже существующую частично созданную таблицу ИИ-профиля. -->
+    <include file="260727-2-completeUserAiProfileColumns.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
