@@ -13,6 +13,13 @@
     white-space: normal;
   }
 
+  .label-nav-item-active {
+    color: #2f80ed;
+    background: rgba(47, 128, 237, 0.08);
+    border-left-color: #2f80ed;
+    opacity: 1;
+  }
+
   .label-nav-item {
     box-sizing: border-box;
     padding: 7px 10px;
