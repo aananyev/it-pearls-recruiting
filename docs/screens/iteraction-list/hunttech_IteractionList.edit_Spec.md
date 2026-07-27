@@ -1,70 +1,117 @@
 # `hunttech_IteractionList.edit` — legacy-спецификация
 
-> Каноническая UI-spec: [IteractionListEdit_Spec.md](../../ui/IteractionListEdit_Spec.md)  
-> Общий Edit-стандарт: [HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md](../../architecture/HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md)  
-> Screen ID: `hunttech_IteractionList.edit`  
-> Presentation-controller: `IteractionListEditAccordionNavigation`
+> Каноническая спецификация: [IteractionListEdit_Spec.md](../../ui/IteractionListEdit_Spec.md)
+> Общий UI-контракт: [HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md](../../architecture/HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md)
+> Screen ID: `hunttech_IteractionList.edit`
 
-## Назначение и бизнес-смысл (What & Why)
+## 1. Назначение и бизнес-смысл (What & Why)
 
-Экран регистрирует взаимодействие рекрутёра с кандидатом по вакансии. Presentation-слой использует общий визуальный API Edit-экранов, но не меняет правила создания, валидации, сохранения, подписок, уведомлений и изменения статусов `IteractionList`.
+Экран создаёт или изменяет один `IteractionList`: факт взаимодействия текущего рекрутёра с кандидатом по вакансии. Он сохраняет тип и результат контакта, дополнительные данные, оценку, канал коммуникации и комментарий, а также участвует в цепочке статусов, подписок, уведомлений и автоматических действий HRM HuntTech.
 
-Пять частых взаимодействий остаются персональным ускорителем. Фактические типы возвращает прежний `InteractionService`; недостающие позиции отображаются disabled.
+Визуальный рефакторинг не меняет entity, сервисы, БД, loaders, JPQL, views, bindings, validation или стандартный lifecycle CUBA Platform 7.3.
 
-## UI Context & Navigation
+## 2. UI Context & Navigation
 
-Sidebar сохраняет фотографию кандидата, логотип проекта, имя, вакансию и весь служебный контекст. Runtime-навигация создаётся как пять keyboard-доступных borderless-кнопок с классами `label-nav-item`; активное состояние добавляет только `label-nav-item-active`.
+Экран продолжает открываться по legacy ID из browse взаимодействий, карточки кандидата, сценариев создания, редактирования и копирования.
 
-Правая область сохраняет toolbar, постоянную карточку быстрых действий, TabSheet, четыре рабочих аккордеона и footer-actions.
+Новая композиция:
 
-## Behavior Summary
+```text
+edit-sidebar
+└── identity → label-navigation → context
 
-- открытие → базовый контроллер выполняет прежний lifecycle → presentation-extension добавляет semantic stylename;
-- клик navigation → раскрывается существующий GroupBox и переводится focus → entity и loaders не меняются;
-- клик активной быстрой кнопки → точный `Iteraction` устанавливается в `iteractionTypeField` → прежний handler обновляет зависимые поля;
-- отсутствие статистики → отображаются пять disabled-позиций `Нет данных`;
-- сохранение и отмена → выполняются прежние CUBA actions.
+edit-workspace
+└── toolbar → five quick actions → accordion scroll → footer
+```
 
-## Неизменяемый бизнес-контракт
+В sidebar четыре navigation-пункта, соответствующие четырём реальным рабочим GroupBox. Пять быстрых действий находятся вне аккордеонов и всегда видимы.
 
-1. `InteractionService.getMostPolularIteraction(currentUser, 5)`.
-2. Период — последний календарный месяц.
-3. Фильтр — текущий рекрутёр.
-4. Группировка по типу, сортировка `count DESC`.
-5. Активная кнопка назначает точный `Iteraction`.
-6. Entity, JPQL, loaders, views, bindings, validators, actions и `invoke` не изменяются.
+## 3. Behavior Summary
 
-## Общие semantic stylename
+- новый объект → номер, дата и рекрутёр задаются прежним controller → открыт раздел кандидата и вакансии;
+- клик navigation → выбранный GroupBox раскрывается → focus переходит в первое поле;
+- ручное раскрытие GroupBox → active-state navigation синхронизируется;
+- статистика пользователя содержит менее пяти типов → оставшиеся позиции disabled `Нет данных`;
+- клик активной кнопки → точный `Iteraction` устанавливается в `iteractionTypeField` → штатные dynamic handlers выполняются;
+- save/cancel → стандартные CUBA actions сохраняются без самописного commit.
 
-- `edit-screen-layout`;
-- `edit-sidebar` и sidebar-роли;
-- `label-navigation`, `label-nav-title`, `label-nav-item`, `label-nav-item-active`;
-- `edit-workspace`, `edit-workspace-scroll`, `edit-workspace-content`;
-- `edit-toolbar`, `edit-toolbar-title`, `edit-toolbar-description`;
-- `edit-card`, `edit-card-title`;
-- `edit-tabs`;
-- `edit-accordion-section`;
-- `edit-footer-actions`.
+## 4. Неизменяемый контракт быстрых взаимодействий
 
-Локальный namespace `.iteraction-list-editor` сохраняется. Общий SCSS находится в одном файле `modules/web/themes/common/edit-screen-shared-styles.scss` и подключается всеми семью темами.
+Источник:
 
-## Специфика формы
+```java
+InteractionService.getMostPolularIteraction(userSession.getUser(), 5)
+```
 
-- фотография кандидата остаётся главным образом;
-- логотип проекта сохраняется как отдельный контекст размером `80 × 80`;
-- карточка быстрых действий постоянно видима между toolbar и TabSheet;
-- `participantsAccordion` раскрыт по умолчанию;
-- `popularAccordion` остаётся скрытым compatibility-компонентом;
-- horizontal form scroll запрещён.
+Алгоритм реализации 2024 года:
 
-## Проверки
+```text
+текущий рекрутёр
+→ последний календарный месяц
+→ group by iteractionType
+→ count
+→ order by count DESC
+→ первые пять типов
+```
 
-Обязательны профильные contract tests, `ScreenViewIntegrityTest 8/8`, SCSS build семи тем, `clean assemble`, clean local deploy, HTTP `/hrm/` = 200, DOM/visual/functional smoke и проверка Tomcat logs по точному HEAD SHA.
+Запрещены UI JPQL, `DataManager`-агрегация, caption parsing и повторный поиск типа. Listener активной кнопки замыкает точный `Iteraction`.
 
-## История изменений
+## 5. Рабочие разделы
+
+| Раздел | Компоненты |
+|---|---|
+| Кандидат и вакансия | `candidateField`, `vacancyFiels`, `onlyMySubscribeCheckBox` |
+| Тип и действие | `iteractionTypeField`, `buttonCallAction`, `addString`, `addDate`, `addInteger` |
+| Результат | `ratingField`, `recrutierField`, `communicationMethodField` |
+| Комментарий | `commentField` |
+
+`popularAccordion` остаётся невидимым compatibility-компонентом только из-за legacy-инъекции базового controller. Он не является пользовательским разделом.
+
+## 6. Component и action contracts
+
+Сохранены:
+
+- `iteractionListDc`, `iteractionTypesDc`, `openPositionDc`, `usersDc`;
+- `iteractionListDl`, `iteractionTypesLc`, `openPositionsDl`, `usersDl`;
+- `candidateImage`, `projectLogoImage`;
+- все field ID и property bindings;
+- picker lookup/open actions;
+- `invoke="callActionEntity"`;
+- `invoke="onButtonSubscribeClick"`;
+- `action="windowCommitAndClose"`;
+- `action="windowClose"`.
+
+## 7. Data View Integrity
+
+Обязательны:
+
+- `iteractionList-edit-view`;
+- `jobCandidate-iteraction-list-suggestion-view`;
+- `openPosition-iteraction-list-picker-view`;
+- `iteraction-list-type-view`;
+- `ScreenViewIntegrityTest 8/8 PASS`;
+- отсутствие `Cannot get unfetched attribute` и N+1.
+
+## 8. Изображения
+
+- `candidateImage`: `OvaFallbackImage`, 112 px, fallback `icons/no-programmer.jpeg`;
+- `projectLogoImage`: `OvaFallbackImage`, 80 px, fallback `icons/no-company.png`;
+- физические пути FileStorage не используются;
+- project logo не конкурирует с фотографией кандидата.
+
+## 9. Responsive и SCSS
+
+- sidebar: `270px`;
+- viewport `<=1366px`: `250px`;
+- workspace: `min-width: 0`, `overflow-x: hidden`;
+- GroupBox: `height=AUTO`;
+- единственный source shared styles: `themes/common/edit-screen-shared-styles.scss`;
+- семь theme-local импортов реализованы symbolic links на общий source;
+- локальные правила ограничены `.iteraction-list-editor`.
+
+## 10. История изменений
 
 | Дата | Изменение |
 |---|---|
-| 2026-07-27 | `IteractionListEdit` приведён к общему контракту Edit-экранов без изменения бизнес-логики и CUBA-контрактов |
-| 2026-07-27 | Восстановлены пять постоянно видимых быстрых позиций и месячный контракт сервиса |
-| 2026-07-25 | Выполнен первоначальный двухпанельный UI/UX-редизайн |
+| 2026-07-27 | Зафиксирована новая from-scratch архитектура экрана, четыре navigation-раздела, пять постоянных quick-action позиций и единый shared SCSS source. |
+| 2026-07-27 | Экран приведён к общему Edit-стандарту HRM HuntTech. |
