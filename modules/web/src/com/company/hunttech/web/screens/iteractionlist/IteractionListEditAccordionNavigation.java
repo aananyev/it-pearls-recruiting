@@ -4,6 +4,7 @@ import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.EditedEntityContainer;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
+import com.haulmont.cuba.gui.screen.MessageBundle;
 import com.haulmont.cuba.gui.screen.Screen.AfterShowEvent;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
