@@ -80,9 +80,10 @@ public class HrmMainScreen extends ExtMainScreen {
         }
         if (resource instanceof StreamResource) {
             AbstractOrderedLayout vbox = mainVBox.unwrap(AbstractOrderedLayout.class);
-            return registerResource(vbox, resource);
+            return registerBackgroundResource(vbox, resource);
         }
-        throw new IllegalArgumentException("Unsupported resource: " + (resource == null ? "null" : resource.getClass().getName()));
+        throw new IllegalArgumentException("Unsupported resource: "
+                + (resource == null ? "null" : resource.getClass().getName()));
     }
 
     private void applyBackground(UI currentUi, Resource resource) {
@@ -112,7 +113,13 @@ public class HrmMainScreen extends ExtMainScreen {
         lastAppliedResourceUrl = resourceUrl;
     }
 
-    private String registerResource(AbstractOrderedLayout vaadinLayout, Resource resource) {
+    /**
+     * Регистрирует StreamResource через скрытый Image в Vaadin connector tree.
+     * Владелец ресурса остаётся присоединённым к layout, а внутренний URL
+     * app://APP преобразуется в HTTP-путь, пригодный для CSS background-image.
+     */
+    private String registerBackgroundResource(AbstractOrderedLayout vaadinLayout,
+                                              Resource resource) {
         if (backgroundResourceHolder != null
                 && backgroundResourceHolder.getParent() instanceof com.vaadin.ui.ComponentContainer) {
             ((com.vaadin.ui.ComponentContainer) backgroundResourceHolder.getParent())
