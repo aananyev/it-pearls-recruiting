@@ -1,233 +1,175 @@
 # IteractionListEdit — спецификация экранной формы
 
-## Неизменяемый бизнес-контракт быстрых взаимодействий
-
-Этот раздел имеет приоритет над описаниями прежних визуальных вариантов формы. Без отдельной прямой задачи Алексея запрещено изменять следующие правила:
-
-1. Источник данных — `InteractionService.getMostPolularIteraction(User, int)`; локальная JPQL-агрегация в UI-контроллере запрещена.
-2. Пользователь — текущий рекрутёр из `UserSession`.
-3. Период — один календарный месяц назад от момента открытия формы.
-4. Ранжирование — группировка по `Iteraction.iteractionType`, сортировка по числу использований по убыванию.
-5. Сервис возвращает до пяти фактически найденных типов; форма всегда показывает пять UI-позиций, а отсутствующие данные представлены disabled-кнопками «Нет данных» без бизнес-действия.
-6. Клик устанавливает точный объект `Iteraction` в `iteractionTypeField`; поиск и разбор caption запрещены.
-7. Дальнейший UI/UX-рефакторинг может менять только визуальное оформление и расположение host-контейнера, но не сервис, период, фильтр пользователя, лимит и обработчик клика.
-
-Контракт защищён `IteractionListMostPopularInteractionTest`. Любое его изменение требует отдельного прямого согласования, обновления этой спецификации и повторной проверки Hermes.
-
-
-> Controller: `hunttech_IteractionList.edit` (`IteractionListEditAccordionNavigation` extends `IteractionListEdit`)  
+> Screen ID: `hunttech_IteractionList.edit`  
+> Presentation-controller: `IteractionListEditAccordionNavigation` → `IteractionListEdit`  
 > XML: `modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml`  
 > Entity: [IteractionList](../entities/iteraction-list/IteractionList.md)  
-> Legacy-spec: [hunttech_IteractionList.edit_Spec.md](../screens/iteraction-list/hunttech_IteractionList.edit_Spec.md)  
-> UI/UX-концепция: [HRM_HuntTech_UI_UX_Design_Concept.md](../architecture/HRM_HuntTech_UI_UX_Design_Concept.md)  
-> Компонент изображений: [OvaFallbackImage](../screens/components/OvaFallbackImage.md)
+> Общий стандарт: [HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md](../architecture/HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md)  
+> UI/UX-концепция: [HRM_HuntTech_UI_UX_Design_Concept.md](../architecture/HRM_HuntTech_UI_UX_Design_Concept.md)
 
 ## Назначение и бизнес-смысл (What & Why)
 
-`IteractionListEdit` фиксирует экземпляр `IteractionList`: взаимодействие рекрутёра с кандидатом по конкретной вакансии. Пользователь выбирает кандидата, вакансию и тип взаимодействия, вводит предусмотренные типом дополнительные данные, оценку, способ коммуникации, рекрутёра и комментарий.
+`IteractionListEdit` регистрирует взаимодействие рекрутёра с кандидатом по конкретной вакансии. Форма объединяет выбор кандидата, вакансии и типа взаимодействия, зависимые дополнительные значения, оценку, способ связи, рекрутёра и комментарий.
 
-Запись участвует в истории кандидата, подписках, уведомлениях и изменении статусов рекрутингового процесса. Поэтому исправление компоновки и изображений не должно менять component ID, data bindings, actions, `invoke`, loader conditions, JPQL, validation и lifecycle CUBA Platform 7.3.
+Экран участвует в истории кандидата, подписках, уведомлениях, статусах рекрутингового процесса и последующих действиях. Поэтому визуальная унификация выполняется только в presentation-слое и не изменяет entity, bindings, loaders, JPQL, views, validation, actions, `invoke` и save lifecycle CUBA Platform 7.3.
 
-Блок пяти постоянно видимых позиций частых взаимодействий является ускорителем ежедневного ввода. Он должен быть видим сразу после открытия вкладки, до первого аккордеона, чтобы пользователь мог выбрать наиболее вероятный тип взаимодействия без дополнительного раскрытия секции.
+Пять частых взаимодействий являются персональным ускорителем ввода. Пользователь всегда видит пять равных позиций: фактически найденные типы активны, отсутствующие позиции отображаются как disabled `Нет данных`.
 
 ## UI Context & Navigation
 
-- Экран открывается из `hunttech_IteractionList.browse`, карточки кандидата и связанных сценариев создания, копирования или редактирования взаимодействия.
-- Picker кандидата сохраняет suggestion, lookup и open для `JobCandidate`; picker вакансии сохраняет lookup и open для `OpenPosition`.
-- Постоянная sidebar сохраняет утверждённую последовательность: фотография кандидата и логотип проекта → ФИО → название вакансии → индекс разделов → номер/дата → карточка вакансии.
-- Правая область сохраняет toolbar и штатный `TabSheet`; внутри вкладки перед первым рабочим аккордеоном постоянно отображается блок из пяти быстрых позиций.
-- В раскрытом разделе «Кандидат и вакансия» оба picker-поля занимают одну строку одинаковой высоты; checkbox «Показывать только мои подписки» располагается отдельной строкой ниже.
-- Клик по пункту sidebar раскрывает связанный аккордеон и переводит фокус в первое поле. Пункт «Частые взаимодействия» сохраняет legacy navigation-контракт, а сами кнопки остаются видимыми независимо от состояния аккордеонов.
-- Сохранение выполняет `windowCommitAndClose`, отмена — `windowClose`.
+- Экран открывается из browse взаимодействий, карточки кандидата и связанных сценариев создания, копирования и редактирования.
+- Постоянная sidebar показывает фотографию кандидата, логотип проекта, ФИО, вакансию, label-навигацию, номер и дату взаимодействия, компанию, проект, статус, приоритет, стоимость и rating context.
+- Обязательный порядок sidebar: визуальный образ → наименование → `label-navigation` → детализация → spacer.
+- Правая рабочая область содержит toolbar, постоянно видимую карточку быстрых действий, штатный TabSheet, прокручиваемый поток аккордеонов и footer-actions.
+- Label-навигация раскрывает существующий `GroupBoxLayout`, обновляет только `label-nav-item-active` и переводит keyboard focus в первое рабочее поле.
+- Кнопка «Частые взаимодействия» фокусирует первую доступную быструю кнопку; entity и loaders при навигации не изменяются.
+- Сохранение выполняет `windowCommitAndClose`, отмена — `windowClose`, подписка — существующий `onButtonSubscribeClick`.
 
 ## Behavior Summary
 
-- открытие нового взаимодействия → контроллер заполняет номер, дату и текущего рекрутёра → пользователь получает готовый экземпляр `IteractionList`;
-- открытие вкладки → `mostPopularHbox` уже находится перед первым аккордеоном → отображаются ровно пять визуальных позиций;
-- сервис возвращает менее пяти типов → найденные позиции активны, остальные показывают disabled «Нет данных» → бизнес-логика сервиса и сущности не изменяется;
-- клик по заполненной быстрой кнопке → контроллер передаёт точный объект `Iteraction` в `iteractionTypeField` → зависимые runtime-поля обновляются штатным обработчиком;
-- открытие существующего взаимодействия → `iteractionList-edit-view` загружает candidate/vacancy-контекст → sidebar и picker-поля отображают текущую запись;
-- ввод в `candidateField` → suggestion query использует узкий `jobCandidate-iteraction-list-suggestion-view` → загружаются только поля, читаемые формой, включая `fileImageFace`, позицию и город;
-- выбор кандидата → `candidate` записывается в `iteractionListDc` → ФИО и фотография отражают выбранный экземпляр;
-- выбор вакансии → `vacancy` записывается в `iteractionListDc` → название, проект, логотип и контекст вакансии обновляются прежними обработчиками;
-- доступный `FileDescriptor` → `FileLoader.openStream()` успешно открывает физический файл → стандартный `FileDescriptorResource` отображает изображение;
-- descriptor отсутствует, поле unfetched или физический файл недоступен → `OvaFallbackImage` применяет theme fallback → форма продолжает открываться без ошибки UI-thread;
-- раскрытие первого аккордеона → два picker-поля и checkbox занимают естественную высоту → следующий заголовок не перекрывает содержимое;
-- выбор типа взаимодействия → прежняя Java-логика управляет `buttonCallAction`, `addString`, `addDate` и `addInteger`;
+- открытие формы → базовый контроллер загружает данные и выполняет прежний lifecycle → presentation-extension добавляет общие semantic stylename;
+- открытие нового взаимодействия → заполняются номер, дата и текущий рекрутёр → пользователь получает готовый экземпляр `IteractionList`;
+- открытие экрана → создаются пять доступных с клавиатуры пунктов label-навигации → активен раздел «Кандидат и вакансия»;
+- клик по пункту navigation → раскрывается соответствующий аккордеон и меняется только active-state → данные сущности не изменяются;
+- сервис возвращает 0–4 популярных типа → недостающие позиции дополняются disabled `Нет данных` → пользователь всегда видит пять мест;
+- сервис возвращает 5+ типов → отображаются первые пять в порядке сервиса → логика ранжирования не меняется;
+- клик по активной быстрой кнопке → точный `Iteraction` устанавливается в `iteractionTypeField` → штатный value-change handler управляет required, дополнительными полями и action-кнопкой;
+- выбор кандидата или вакансии → прежние handlers обновляют контекст sidebar → component ID и bindings сохранены;
 - сохранение → выполняются прежние BeforeCommit/AfterCommit/BeforeClose обработчики → бизнес-логика не меняется.
 
-## 1. Технический контекст
+## 1. Неизменяемый бизнес-контракт быстрых взаимодействий
 
-| Параметр | Значение |
+1. Источник — `InteractionService.getMostPolularIteraction(User, int)`.
+2. Пользователь — текущий рекрутёр из `UserSession`.
+3. Период — последний календарный месяц.
+4. Ранжирование — `group by iteractionType`, `count DESC`.
+5. Лимит фактических результатов — до пяти.
+6. Активная кнопка передаёт точный объект `Iteraction`; разбор caption запрещён.
+7. Disabled-placeholder не имеет click listener и не изменяет сущность.
+8. Локальная JPQL-агрегация в UI-контроллере запрещена.
+
+Контракт защищён `IteractionListMostPopularInteractionTest`.
+
+## 2. Общий контракт Edit-экранов
+
+### 2.1. Локальный namespace и semantic stylename
+
+Локальный root `.iteraction-list-editor` сохраняется. `IteractionListEditAccordionNavigation` рекурсивно добавляет общие классы поверх существующих локальных классов:
+
+| Локальная роль | Общий stylename |
 |---|---|
-| `@UiController` | `hunttech_IteractionList.edit` |
-| Java | `IteractionListEditAccordionNavigation` → `IteractionListEdit` |
-| Базовый класс | `StandardEditor<IteractionList>` |
-| `@EditedEntityContainer` | `iteractionListDc` |
-| Загрузка | `@LoadDataBeforeShow` |
-| Root namespace | `.iteraction-list-editor` |
-| Диалог | `width=1240`, `height=760`, `modal=true` |
-| Темы | `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light`, `hunttech-modern-dark` |
+| `iteraction-list-main-layout` | `edit-screen-layout` |
+| `iteraction-list-sidebar` | `edit-sidebar` |
+| `iteraction-list-identity-images` | `edit-sidebar-visual` |
+| `iteraction-list-profile-header` | `edit-sidebar-identity` |
+| `iteraction-list-profile-title` | `edit-sidebar-title` |
+| `iteraction-list-profile-subtitle` | `edit-sidebar-subtitle` |
+| `iteraction-list-sidebar-card` | `edit-sidebar-summary` |
+| `iteraction-list-sidebar-warning` | `edit-sidebar-warning` |
+| `iteraction-list-sidebar-spacer` | `edit-sidebar-spacer` |
+| `iteraction-list-workspace` | `edit-workspace` |
+| `iteraction-list-toolbar` | `edit-toolbar` |
+| `iteraction-list-toolbar-title` | `edit-toolbar-title` |
+| `iteraction-list-toolbar-context` | `edit-toolbar-description` |
+| `iteraction-list-quick-actions` | `edit-card` |
+| `iteraction-list-quick-actions-title` | `edit-card-title` |
+| `iteraction-list-tabs` | `edit-tabs` |
+| `iteraction-list-scroll` | `edit-workspace-scroll` |
+| `iteraction-list-content` | `edit-workspace-content` |
+| `iteraction-list-accordion-section` | `edit-accordion-section` |
+| `iteraction-list-footer` | `edit-footer-actions` |
 
-## 2. Data View Integrity и lazy loading
+### 2.2. Label-навигация
+
+Контейнер использует только `label-navigation`, заголовок — `label-nav-title`, каждый runtime-пункт — `borderless label-nav-item`. Активность задаётся дополнительным `label-nav-item-active`; базовый класс не заменяется.
+
+Runtime-кнопки создаются presentation-extension после базовой инициализации. Они используют прежние message keys, существующие GroupBox и focus targets. Навигационные методы не содержат `DataManager`, `InteractionService`, loaders, commit или `setValue()`.
+
+### 2.3. Shared SCSS
+
+Единый источник: `modules/web/themes/common/edit-screen-shared-styles.scss`.
+
+Все семь `styles.scss` импортируют shared partial и последним вызывают `edit-screen-shared-styles`. Независимые копии общих правил в локальных файлах не создаются.
+
+Геометрический контракт:
+
+- sidebar — `270px`, при viewport до `1366px` — `250px`;
+- toolbar и footer — минимум `58px`;
+- tabs — `48px`;
+- однострочные поля и кнопки — минимум `38px`;
+- card/accordion radius — `8px`;
+- workspace и внутренние контейнеры — `min-width: 0`;
+- горизонтальная прокрутка формы запрещена;
+- Vaadin-селекторы ограничены semantic-классами.
+
+## 3. Специфика формы
+
+### 3.1. Визуальная иерархия sidebar
+
+Фотография кандидата остаётся главным образом `112 × 112`. Логотип проекта сохраняет отдельный component ID и fallback, но presentation-extension возвращает ему стиль `iteraction-list-project-image` и размер `80 × 80`, чтобы он не конкурировал с кандидатом.
+
+### 3.2. Постоянная карточка быстрых действий
+
+`mostPopularQuickActions` расположена между toolbar и TabSheet. Такое положение соответствует специфике формы: быстрые действия видимы независимо от выбранной вкладки и состояния аккордеонов. Контейнер получает общий класс `edit-card`, заголовок — `edit-card-title`.
+
+### 3.3. Рабочие аккордеоны
+
+1. `participantsAccordion` — кандидат, вакансия, фильтр подписок; раскрыт по умолчанию.
+2. `interactionAccordion` — тип и динамические значения/action.
+3. `resultAccordion` — рейтинг, рекрутёр, способ связи.
+4. `commentAccordion` — комментарий.
+5. `popularAccordion` — скрытый compatibility-компонент для legacy presentation-контракта.
+
+Каждый рабочий GroupBox получает `edit-accordion-section`, остаётся полноширинным и использует естественную высоту.
+
+## 4. Data View Integrity
 
 | Источник | View | Назначение |
 |---|---|---|
-| `iteractionListDc` / `iteractionListDl` | `iteractionList-edit-view` | редактируемый экземпляр и исходный candidate/vacancy-контекст |
-| `candidateField` suggestion query | `jobCandidate-iteraction-list-suggestion-view` | узкий detached-граф кандидата для обработчиков формы |
-| `openPositionDc` / `openPositionsDl` | `openPosition-iteraction-list-picker-view` | вакансии, проект, подразделение и логотип |
-| `iteractionTypesDc` / `iteractionTypesLc` | `iteraction-list-type-view` | типы взаимодействий и динамические настройки |
-| `usersDc` / `usersDl` | `_minimal` | активные пользователи |
+| `iteractionListDc` | `iteractionList-edit-view` | редактируемая запись и candidate/vacancy-контекст |
+| `candidateField` | `jobCandidate-iteraction-list-suggestion-view` | узкий suggestion-граф кандидата |
+| `openPositionDc` | `openPosition-iteraction-list-picker-view` | вакансия, проект, подразделение, логотип |
+| `iteractionTypesDc` | `iteraction-list-type-view` | тип взаимодействия и динамические настройки |
+| `usersDc` | `_minimal` | активные пользователи |
 
-`jobCandidate-iteraction-list-suggestion-view` вынесен в `modules/global/src/com/company/hunttech/iteraction-list-views.xml` и подключён через `cuba.viewsConfig`. Он содержит:
-
-- `fullName`, составные части имени, `email`, `status`, `blockCandidate`;
-- `fileImageFace`;
-- `personPosition`;
-- `cityOfResidence`.
-
-В view намеренно не входят `candidateCv`, `iteractionList`, `skillTree`, `jobHistory`, договоры и другие тяжёлые коллекции. Это исключает загрузку полного графа кандидата для фонового suggestion-поиска и одновременно предотвращает чтение unfetched-полей обработчиками формы.
-
-`openPosition-iteraction-list-picker-view` сохраняется как существующий узкий граф вакансии и уже включает `projectName.projectLogo` и `projectDepartment.companyName.fileCompanyLogo`.
-
-## 3. Компоновка
-
-```text
-main layout 100% × 100%
-├─ sidebar 296 px / 276 px / 260 px
-│  ├─ candidateImage 112 × 112 + projectLogoImage 80 × 80
-│  ├─ candidate.fullName
-│  ├─ vacancy.vacansyName
-│  ├─ индекс пяти presentation-разделов
-│  ├─ карточка взаимодействия: номер + дата
-│  ├─ карточка вакансии
-│  └─ spacer
-└─ workspace
-   ├─ toolbar
-   ├─ TabSheet 48 px
-   ├─ scrollBox
-   │  ├─ mostPopularQuickActions: 5 кнопок [always visible]
-   │  ├─ Кандидат и вакансия [expanded]
-   │  │  ├─ GridLayout: candidateField | vacancyFiels
-   │  │  └─ onlyMySubscribeCheckBox
-   │  ├─ Тип и действие [collapsed]
-   │  ├─ Результат [collapsed]
-   │  ├─ Комментарий [collapsed]
-   │  └─ popularAccordion [hidden compatibility component]
-   └─ footer: subscribe / commit / cancel
-```
-
-### 3.1. Постоянный блок быстрых взаимодействий
-
-`mostPopularQuickActions` находится внутри `iteractionListTab`, в прокручиваемой рабочей области, непосредственно перед `participantsAccordion`.
-
-Компоненты `mostPopularIteractionHBox` и `mostPopularHbox` сохранены без переименования. Базовый контроллер продолжает:
-
-- получать до пяти фактических действий через `InteractionService` за последний календарный месяц;
-- создавать активные кнопки только для фактически найденных `Iteraction`;
-- устанавливать точный `Iteraction` без разбора caption.
-
-`IteractionListEditAccordionNavigation` является presentation-расширением с тем же screen ID. После выполнения базового `BeforeShow` оно дополняет отсутствующие позиции до пяти disabled-кнопками «Нет данных». Расширение не инъецирует `InteractionService` или `DataManager`, не выполняет запросы и не меняет сущность.
-
-`popularAccordion` оставлен невидимым compatibility-компонентом, потому что существующий presentation-контроллер инъецирует его и синхронизирует пятый пункт sidebar. Он не содержит кнопок и не участвует в визуальной компоновке.
-
-### 3.2. Естественная высота аккордеонов
-
-Каждый рабочий `GroupBoxLayout`, его Vaadin slot, panel-content и внутренний `GridLayout` используют естественную высоту (`AUTO` / `height: auto`). Это необходимо, потому что CUBA/Vaadin рассчитывает размер соседних layout-slot по фактической высоте дочернего контейнера.
-
-Для первой секции установлен минимальный запас по высоте, достаточный для caption секции, picker-полей, отдельной строки checkbox и нижнего внутреннего отступа.
-
-### 3.3. Поля кандидата и вакансии
-
-`candidateField` и `vacancyFiels` остаются двумя explicit flex-колонками `GridLayout`. Правый picker больше не обёрнут в `VBox` вместе с checkbox, поэтому обе колонки имеют одинаковую вертикальную геометрию.
-
-`onlyMySubscribeCheckBox` сохраняет legacy ID, caption, description и существующий listener контроллера. Изменилось только его расположение: отдельная полноширинная строка под picker-полями.
-
-### 3.4. Фокус и прокрутка
-
-Внутренний scroll-container использует `scroll-padding-top: 18px`. При переходе по label-навигации и вызове `focus()` браузер оставляет заголовок раскрытого аккордеона видимым, а не помещает его под строку вкладок.
-
-## 4. FileStorage и fallback изображений
-
-`FileDescriptor` хранит metadata файла, а бинарное содержимое находится в FileStorage. Поэтому безопасная цепочка изображения имеет вид:
-
-```text
-ValueSource / controller
-→ FileDescriptor
-→ FileLoader.openStream(descriptor)
-→ readable: FileDescriptorResource
-→ unavailable/unfetched/error: ThemeResource fallback
-```
-
-`FileDescriptorImageHelper.fileExists()` проверяет фактическую читаемость файла через `FileLoader.openStream()` в `try-with-resources`. Поток закрывается сразу после проверки; байты изображения не копируются в память этим helper.
-
-`FallbackImageResourceDelegate` перехватывает `RuntimeException` при чтении bound `ValueSource` и при разрешении ресурса. Это покрывает detached/unfetched-атрибуты и ошибки presentation-цепочки: компонент отображает fallback вместо прекращения открытия экрана.
-
-Metadata `FileDescriptor` не удаляется и не изменяется. При восстановлении физического файла стандартное отображение снова доступно.
+Контроллер не должен читать unfetched-атрибуты detached-сущностей. Тяжёлые коллекции кандидата в suggestion-view не включаются.
 
 ## 5. Сохранённые component-контракты
 
-| Компоненты | Сохранённый контракт |
+| Компоненты | Контракт |
 |---|---|
-| `candidateField`, `vacancyFiels` | bindings, lookup/open actions, query/optionsContainer |
-| `onlyMySubscribeCheckBox` | ID, caption, description, value-change listener и loader filtering |
-| `iteractionTypeField` | binding, lookup и value-change |
+| `candidateField`, `vacancyFiels` | bindings, suggestion/lookup/open, optionsContainer |
+| `onlyMySubscribeCheckBox` | ID, caption, description, loader filtering |
+| `iteractionTypeField` | binding, lookup, value-change |
 | `buttonCallAction` | `invoke="callActionEntity"` |
-| `addString`, `addDate`, `addInteger` | bindings и runtime visible/required/caption |
-| `ratingField` | binding, required, option style provider |
-| `recrutierField` | binding, optionsContainer и option icon provider |
-| `communicationMethodField` | binding и caption |
-| `commentField` | binding, lazy reload и runtime required |
-| `candidateImage` | legacy ID, `OvaFallbackImage`, candidate binding и fallback |
-| `projectLogoImage` | legacy ID, Java-инъекция, `OvaFallbackImage` и fallback |
-| `mostPopularHbox` | пять равных UI-позиций; активные назначают точный `Iteraction`, пустые disabled; расположен перед первым аккордеоном |
-| `popularAccordion` | скрытый compatibility-компонент для существующей Java-инъекции и sidebar navigation |
+| `addString`, `addDate`, `addInteger` | binding и runtime visible/required/caption |
+| `ratingField`, `recrutierField`, `communicationMethodField` | binding и прежние providers |
+| `commentField` | binding, lazy reload, runtime required |
+| `candidateImage`, `projectLogoImage` | legacy ID, source/fallback и Java-инъекция |
+| `mostPopularHbox` | пять равных позиций и точный `Iteraction` |
 | footer | subscribe → commit-and-close → cancel |
 
-## 6. Локальный SCSS
+## 6. Обязательная проверка Hermes
 
-Все правила ограничены корнем `.iteraction-list-editor`. Существующие правила `.iteraction-list-popular-host`, `.iteraction-list-popular-buttons` и `.iteraction-list-popular-button` продолжают обеспечивать равную геометрию и читаемость пяти кнопок во всех семи темах.
-
-Глобальные `.v-table`, `.v-label`, `.v-button`, `.v-tabsheet` и `.v-panel` не изменяются.
-
-## 7. Ограничения изменений
-
-- бизнес-логика `InteractionService` и штатные обработчики формы не изменены;
-- entity, поля, БД и Liquibase не изменены;
-- loader ID, conditions и JPQL коллекций сохранены;
-- component ID, bindings, actions и `invoke` сохранены;
-- изменено только создание пяти UI-позиций в runtime-host;
-- production не изменяется;
-- merge допускается только после отчёта Hermes по точному HEAD SHA и прямой команды Алексея.
-
-## 8. Обязательная проверка Hermes
-
-1. Branch HEAD = PR HEAD = SHA, указанный в PR.
-2. Base PR = `master`, conflicts = NONE.
-3. `git diff --check`.
-4. `IteractionListEditAccordionLayoutTest`, `IteractionListMostPopularInteractionTest`, `IteractionListAccordionNavigationTest`, `IteractionListRpcCompatibilityContractTest` — PASS.
+1. Branch HEAD = PR HEAD = переданный SHA; base = `master`; conflicts = NONE.
+2. `git diff --check`.
+3. Compile web и core tests.
+4. `IteractionListEditAccordionLayoutTest`, `IteractionListAccordionNavigationTest`, `IteractionListSidebarContextPanelTest`, `IteractionListMostPopularInteractionTest`, `IteractionListRpcCompatibilityContractTest` — PASS.
 5. `ScreenViewIntegrityTest` — `8/8 PASS`.
 6. `:app-web:buildScssThemes` — PASS для семи тем.
 7. `clean assemble` — `BUILD SUCCESSFUL`.
-8. Clean local deploy и HTTP `/hrm/` = `200`.
-9. Visual smoke: внутри вкладки над первым аккордеоном всегда видны ровно пять кнопок; кнопки не исчезают при переключении аккордеонов.
-10. Functional smoke: активная кнопка устанавливает точный тип взаимодействия; disabled «Нет данных» ничего не меняет; candidate/vacancy, dynamic fields, rating, comment, subscription, save/cancel работают без регрессии.
-11. Tomcat logs: новых `Cannot get unfetched attribute`, `ClassCastException`, P1 и P2 нет.
-
-До отчёта Hermes статус задачи: `WAITING_FOR_HERMES`.
+8. Clean local deploy, HTTP `/hrm/` = `200`.
+9. DOM smoke: общие semantic classes присутствуют, одновременно активен один navigation-item.
+10. Visual smoke Halo + остальные темы: sidebar 270/250, toolbar/footer 58, tabs 48, fields 38, горизонтального scroll нет.
+11. Functional smoke: candidate/vacancy, пять быстрых кнопок, dynamic fields, rating, comment, subscription, save/cancel без регрессии.
+12. Tomcat logs: новых critical errors нет; P1=0; P2=0.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
-| 2026-07-27 | Восстановлены ровно пять постоянно видимых UI-позиций; пустые позиции disabled, бизнес-логика `InteractionService` не изменена |
-| 2026-07-27 | Восстановлен и закреплён исторический контракт быстрых взаимодействий: сервис, текущий пользователь, последний месяц, до пяти точных `Iteraction` |
-| 2026-07-27 | Блок пяти быстрых взаимодействий возвращён внутрь вкладки и размещён перед первым аккордеоном; `mostPopularHbox` и Java-логика сохранены |
-| 2026-07-27 | Устранено наложение первой секции: picker-поля выровнены в одной строке, checkbox вынесен ниже GridLayout, аккордеоны переведены на естественную высоту; suggestion кандидата получил узкий view, а изображения — безопасную проверку FileStorage и fallback |
-| 2026-07-27 | Sidebar приведена к порядку «образ → имя → навигация → детали», частые взаимодействия перенесены в свой аккордеон, аккордеоны и footer уплотнены |
-| 2026-07-26 | `candidateImage` и `projectLogoImage` унифицированы как `OvaFallbackImage` |
-| 2026-07-26 | Восстановлен видимый аккордеон «Кандидат и вакансия», добавлен блок пяти быстрых действий |
-| 2026-07-26 | Компоновка синхронизирована с `CandidateCVEdit` и `ExtSettingsWindow` |
-| 2026-07-25 | Добавлены двухколоночная строка кандидата и вакансии, кликабельный индекс и пять быстрых взаимодействий |
-| 2026-07-25 | Исправлен сценарий «Копировать» для detached-вакансии |
-| 2026-07-25 | Выполнена двухпанельная визуальная адаптация с локальным namespace `.iteraction-list-editor` |
+| 2026-07-27 | Форма приведена к `HRM_HuntTech_Edit_Screen_Shared_Style_Contract`: общие semantic stylename, shared SCSS семи тем, корректный active-state и нормативная геометрия без изменения бизнес-логики |
+| 2026-07-27 | Восстановлены пять постоянно видимых быстрых позиций; пустые позиции disabled |
+| 2026-07-27 | Закреплён исторический месячный контракт `InteractionService` |
+| 2026-07-27 | Аккордеоны, sidebar и fallback изображений приведены к актуальной UI/UX-концепции |
+| 2026-07-25 | Выполнен первоначальный двухпанельный UI/UX-редизайн |

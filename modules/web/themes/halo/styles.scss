@@ -10,6 +10,7 @@
 @import "com.company.hunttech/iteraction-list-accordion-navigation";
 @import "com.company.hunttech/candidate-cv-editor";
 @import "com.company.hunttech/iteraction-list-reference-finish";
+@import "../common/edit-screen-shared-styles";
 @import "com.company.hunttech/chat-style.css";
 @import url('https://fonts.googleapis.com/css2?familyhalo=Antonio&family=Kanit&family=Teko:wght@500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap');
@@ -28,4 +29,5 @@
   @include iteraction-list-accordion-navigation-theme;
   @include candidate-cv-editor-theme;
   @include iteraction-list-reference-finish-theme;
+  @include edit-screen-shared-styles;
 }

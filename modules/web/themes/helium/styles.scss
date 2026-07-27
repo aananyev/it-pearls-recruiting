@@ -10,14 +10,13 @@
 @import "com.company.hunttech/iteraction-list-accordion-navigation";
 @import "com.company.hunttech/candidate-cv-editor";
 @import "com.company.hunttech/iteraction-list-reference-finish";
+@import "../common/edit-screen-shared-styles";
 @import url('https://fonts.googleapis.com/css2?familyhalo=Antonio&family=Kanit&family=Teko:wght@500&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans+Condensed:wght@300&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300&display=swap');
 
 .helium {
-  // include auto-generated app components SCSS
   @include app_components;
-
   @include com_company_hunttech-helium-ext;
   @include user-ai-profile;
   @include settings-window-sections;
@@ -27,4 +26,5 @@
   @include iteraction-list-accordion-navigation-theme;
   @include candidate-cv-editor-theme;
   @include iteraction-list-reference-finish-theme;
+  @include edit-screen-shared-styles;
 }
