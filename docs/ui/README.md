@@ -13,7 +13,7 @@
 | `ExtSettingsWindowEmailNavigation` | [ExtSettingsWindowEmailNavigation_Spec.md](ExtSettingsWindowEmailNavigation_Spec.md) | Связь навигации SMTP, POP3 и IMAP слева с соответствующими аккордеонами справа |
 | `ExtSettingsWindowAvatar` | [ExtSettingsWindowAvatar_Spec.md](ExtSettingsWindowAvatar_Spec.md) | Круглая фотография пользователя через `OvaFallbackImage` без изменения модели данных |
 | `HrmMainScreen` | [HrmMainScreen_Spec.md](HrmMainScreen_Spec.md) | Главный dashboard с персональным фоном либо случайным каталогом 7 × 10 нейтральных SVG |
-| `IteractionListEdit` | [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) | Строго визуальный редизайн взаимодействия: контекстная панель, рабочие карточки и сохранённые CUBA-контракты |
+| `IteractionListEdit` | [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) · [XML-компоновка](IteractionListEdit_XmlLayout_2026-07-27.md) | Бизнес-логика взаимодействия, контекстная sidebar, аккордеоны и сохранённые CUBA-контракты |
 
 ## Правила актуализации
 
@@ -91,7 +91,7 @@ Living-документация экранов, окон, фрагментов �
 | Форма | Controller | Документ |
 |-------|------------|----------|
 | Browse | `itpearls_IteractionList.browse` | [itpearls_IteractionList.browse_Spec.md](itpearls_IteractionList.browse_Spec.md) |
-| Edit | `itpearls_IteractionList.edit` | [itpearls_IteractionList.edit_Spec.md](itpearls_IteractionList.edit_Spec.md) · [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) |
+| Edit | `itpearls_IteractionList.edit` | [itpearls_IteractionList.edit_Spec.md](itpearls_IteractionList.edit_Spec.md) · [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) · [XML-компоновка](IteractionListEdit_XmlLayout_2026-07-27.md) |
 | Simple browse | `itpearls_IteractionListSimple.browse` | [itpearls_IteractionListSimple.browse_Spec.md](itpearls_IteractionListSimple.browse_Spec.md) |
 | Fragment (jobcandidate) | `itpearls_IteractionListBrowse` | [itpearls_IteractionListBrowse_Spec.md](itpearls_IteractionListBrowse_Spec.md) |
 
@@ -233,6 +233,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-27 | Добавлено living-дополнение по XML-компоновке `IteractionListEdit`: статус и приоритет перед label-навигацией, первый аккордеон открыт по умолчанию |
 | 2026-07-26 | Добавлены спецификации `HrmMainScreen` и `ExtSettingsWindowMainBackground` для персонального фона и каталога 7 × 10 тематических изображений |
 | 2026-07-25 | В каталог добавлена спецификация визуального и функционального контракта `CandidateCVEdit` с локальным SCSS для семи тем |
 | 2026-07-25 | В каталог добавлена каноническая спецификация визуального редизайна `IteractionListEdit` |
