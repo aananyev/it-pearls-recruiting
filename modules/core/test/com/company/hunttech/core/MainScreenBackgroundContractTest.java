@@ -124,12 +124,16 @@ public class MainScreenBackgroundContractTest {
         assertTrue(service.contains("readAllBytes()"));
         assertTrue(service.contains("resource.setMIMEType"));
 
-        // StreamResource регистрируется через Vaadin connector и конвертируется в HTTP.
+        // StreamResource регистрируется через Vaadin connector; URL сохраняет web-контекст приложения.
         assertTrue(controller.contains("resource instanceof StreamResource"));
         assertTrue(controller.contains("registerBackgroundResource"));
         assertTrue(controller.contains("ResourceReference.create"));
         assertTrue(controller.contains("backgroundResourceHolder"));
         assertTrue(controller.contains("app://APP"));
+        assertTrue(controller.contains("import com.vaadin.server.VaadinServlet;"));
+        assertTrue(controller.contains(
+                "VaadinServlet.getCurrent().getServletContext().getContextPath()"));
+        assertFalse(controller.contains("url.replace(\"app://APP\", \"\")"));
         assertFalse(controller.contains("ExternalResource"));
     }
 
