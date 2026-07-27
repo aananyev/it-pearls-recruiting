@@ -21,7 +21,9 @@
 - персонализация включена без согласия → сохранение блокируется;
 - согласие подтверждено → фиксируются версия и дата согласия;
 - профиль выключен → данные сохраняются, но не включаются в ИИ-контекст;
-- очистка → удаляются только поля профиля, аватар и учётная запись не меняются.
+- очистка → удаляются только поля профиля, аватар и учётная запись не меняются;
+- таблица профиля отсутствует в копии production-БД → reconciliation создаёт её → экран получает физический контракт entity;
+- таблица уже существует → changeSet фиксируется как `MARK_RAN` → данные не перезаписываются.
 
 ## 1. Обзор сущности
 
@@ -90,14 +92,24 @@ select e from hunttech_UserAiProfile e where e.user = :currentUser
 
 ## 5. База данных и миграции
 
-- первоначальное безопасное создание: `modules/core/db/update/postgres/26/260722-1-createUserAiProfile.sql`;
-- совместимость с ранее созданной legacy-таблицей: `modules/core/db/update/postgres/26/260722-2-migrateUserAiProfileToHunttech.sql`;
-- Liquibase mirrors: `260722-1-addUserAiProfile.xml`, `260722-2-migrateUserAiProfileToHunttech.xml`;
-- Liquibase master: `modules/core/db/changelog/db.changelog-master.xml`.
+Активный Liquibase-контур:
 
-Первый скрипт создаёт `HUNTTECH_USER_AI_PROFILE` только при отсутствии и новой, и legacy-таблицы. Второй скрипт без копирования строк переименовывает `ITPEARLS_USER_AI_PROFILE` и связанные ограничения в `HUNTTECH_*`. Если одновременно существуют обе таблицы, миграция останавливается с ошибкой для ручного разбора и не удаляет данные.
+- `modules/core/db/changelog/260727-1-reconcileProductionSchema.xml`;
+- `modules/core/db/changelog/db.changelog-master.xml`;
+- [план сверки production-схемы](../database/migrations/production-schema-reconciliation-2026-07-27.md).
 
-Итоговая таблица содержит FK на `SEC_USER`, уникальный индекс `IDX_HUNTTECH_USER_AI_PROFILE_UNQ_USER` и ограничения диапазона опыта. Миграция предназначена только для локальной базы `hunttech`; production в рамках этапа не используется.
+Reconciliation создаёт `HUNTTECH_USER_AI_PROFILE` только при отсутствии, после чего отдельными changeSet добавляет:
+
+- FK `FK_HUNTTECH_USER_AI_PROFILE_ON_USER`;
+- уникальный индекс `IDX_HUNTTECH_USER_AI_PROFILE_UNQ_USER`.
+
+Если таблица, FK или индекс уже существуют, соответствующий changeSet получает `MARK_RAN`. Строки существующей таблицы не копируются и не обновляются.
+
+Исторические файлы `260722-1-addUserAiProfile.xml` и `260722-2-migrateUserAiProfileToHunttech.xml` сохранены для аудита, но напрямую не включаются в активный master, поскольку production-схема частично формировалась старыми CUBA SQL-скриптами.
+
+### Таблица параметров
+
+В актуальной модели отсутствуют `UserAiProfileParameters`, `@CollectionTable` и DDL-контракт `HUNTTECH_USER_AI_PROFILE_PARAMETERS`. Поэтому reconciliation не создаёт неподтверждённую таблицу. Для неё требуется отдельная задача после определения entity, колонок, связей, индексов и бизнес-смысла.
 
 ## 6. Безопасность
 
@@ -111,6 +123,7 @@ select e from hunttech_UserAiProfile e where e.user = :currentUser
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-27 | Таблица, FK и уникальный индекс включены в единый reconciliation-changelog; зафиксировано отсутствие контракта отдельной таблицы параметров |
 | 2026-07-22 | Добавлена безопасная compatibility-миграция legacy-таблицы через rename; при наличии обеих таблиц выполнение останавливается без удаления данных |
 | 2026-07-22 | Сущность, entity name, Java namespace и таблица перенесены в контур `hunttech`; enum ID и бизнес-контракт сохранены |
 | 2026-07-22 | Созданы сущность, enum, PostgreSQL/CUBA update-скрипт, Liquibase changelog и безопасный контекстный сервис |

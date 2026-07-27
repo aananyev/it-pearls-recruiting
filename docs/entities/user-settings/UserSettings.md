@@ -22,6 +22,7 @@
 - `UserSettings.user` → владелец настроек `ExtUser`;
 - `UserSettings.preferPersonalAiApiSettings` → предпочтение пользователя по источнику API;
 - `UserSettings.preferPersonalPrompts` → предпочтение пользователя по применению личных промптов;
+- `UserSettings.fileImageFace` → фотография пользователя в `SYS_FILE`;
 - `UserAiConfiguration` → конкретные персональные подключения к провайдерам;
 - административные API-настройки и системные промпты → отдельные контуры, которые этой задачей не изменяются.
 
@@ -32,7 +33,9 @@
 - значение отсутствует в legacy-записи → контроллер применяет безопасное `true`;
 - пользователь меняет checkbox → значение изменяется в `userSettingsDs`;
 - сохранение окна → оба флага фиксируются в общей транзакции `CommitContext` вместе с остальными пользовательскими настройками;
-- повторное открытие → checkbox восстанавливаются из `HUNTTECH_USER_SETTINGS`;
+- фотография загружена до reconciliation → UUID хранится в `IMAGE_ID` → Liquibase переименовывает колонку в `FILE_IMAGE_FACE` без потери значения;
+- обе image-колонки существуют → `FILE_IMAGE_FACE` заполняется только при `NULL` → исходная строка не удаляется;
+- повторное открытие → checkbox и фотография восстанавливаются из `HUNTTECH_USER_SETTINGS`;
 - вызов AI-сервиса → флаги доступны для выбора приоритета, но маршрутизация API и разрешение промптов остаются ответственностью профильных сервисов.
 
 ## 1. Поля
@@ -42,7 +45,7 @@
 | `user` | `USER_ID` | `ExtUser`, one-to-one | владелец персональных настроек |
 | `preferPersonalAiApiSettings` | `PREFER_PERSONAL_AI_API_SETTINGS` | `Boolean`, not null | предпочитать личные настройки API; по умолчанию `true` |
 | `preferPersonalPrompts` | `PREFER_PERSONAL_PROMPTS` | `Boolean`, not null | предпочитать личные промпты; по умолчанию `true` |
-| `fileImageFace` | `IMAGE_ID` | `FileDescriptor` | legacy-фотография пользователя |
+| `fileImageFace` | `FILE_IMAGE_FACE` | `FileDescriptor` | фотография пользователя после reconciliation |
 | `smtp*`, `pop3*`, `imap*` | соответствующие колонки | почтовые параметры | существующий контракт персональной почты |
 
 ## 2. Семантика AI-предпочтений
@@ -59,7 +62,7 @@
 
 ## 3. Представления и загрузка
 
-SettingsWindow использует `userSettings-view`, расширяющий `_local`. Оба Boolean-поля включаются в view как локальные скалярные атрибуты без отдельного расширения графа сущности.
+SettingsWindow использует `userSettings-view`, расширяющий `_local`. Оба Boolean-поля и `fileImageFace` включаются в view как локальные атрибуты; связь с `FileDescriptor` должна загружаться по существующему контракту экрана.
 
 Запись загружается JPQL:
 
@@ -88,19 +91,21 @@ context.addInstanceToCommit(userSettings);
 
 ## 5. База данных
 
-Историческая миграция поля API остаётся неизменной:
+Исторические миграции сохранены как справочные артефакты, но активный Liquibase master использует единый reconciliation-changelog:
 
-- PostgreSQL: `modules/core/db/update/postgres/26/260723-1-addPreferPersonalAiApiSettings.sql`;
-- Liquibase: `modules/core/db/changelog/260723-1-addPreferPersonalAiApiSettings.xml`.
+- Liquibase: `modules/core/db/changelog/260727-1-reconcileProductionSchema.xml`;
+- план и проверки: [Сверка production-схемы PostgreSQL 11](../../database/migrations/production-schema-reconciliation-2026-07-27.md).
 
-Изменение нового поведения выполнено отдельной миграцией:
+Reconciliation:
 
-- PostgreSQL: `modules/core/db/update/postgres/26/260724-1-enablePersonalAiPreferences.sql`;
-- Liquibase: `modules/core/db/changelog/260724-1-enablePersonalAiPreferences.xml`;
-- `PREFER_PERSONAL_AI_API_SETTINGS` получает default `TRUE`, существующие строки переводятся в `TRUE`;
-- добавляется `PREFER_PERSONAL_PROMPTS BOOLEAN NOT NULL DEFAULT TRUE`.
+- добавляет `PREFER_PERSONAL_AI_API_SETTINGS BOOLEAN NOT NULL DEFAULT TRUE`, если колонки нет;
+- добавляет `PREFER_PERSONAL_PROMPTS BOOLEAN NOT NULL DEFAULT TRUE`, если колонки нет;
+- переименовывает `IMAGE_ID` в `FILE_IMAGE_FACE` с сохранением UUID;
+- при одновременном наличии обеих колонок копирует только отсутствующие значения в `FILE_IMAGE_FACE`;
+- переименовывает либо создаёт FK на `SYS_FILE.ID` и индекс фотографии;
+- не содержит `DROP TABLE`, `DROP COLUMN`, `DELETE` или `TRUNCATE`.
 
-Отдельная миграция не изменяет уже зарегистрированный changeSet и сохраняет корректную историю обновления CUBA.
+Существующие записи предпочтений не переводятся массово в `TRUE`: default применяется при создании отсутствующих колонок и для новых строк.
 
 ## 6. Проверки
 
@@ -113,11 +118,20 @@ context.addInstanceToCommit(userSettings);
 5. наличие PostgreSQL- и Liquibase-миграций с default `TRUE`;
 6. null-safe контракт предпросмотра AI-контекста.
 
-Дополнительно обязательны `ScreenViewIntegrityTest`, Data View Integrity для SettingsWindow, `updateDb` и общая сборка проекта.
+`DatabaseSchemaReconciliationChangelogTest` дополнительно фиксирует:
+
+1. единственный активный reconciliation include;
+2. `MARK_RAN` для каждого changeSet;
+3. переход `IMAGE_ID → FILE_IMAGE_FACE`;
+4. отсутствие destructive DDL/DML;
+5. соответствие `@JoinColumn` новой физической колонке.
+
+Дополнительно обязательны `ScreenViewIntegrityTest`, Data View Integrity для SettingsWindow, Liquibase validation, применение на disposable-копии БД и общая сборка проекта.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-27 | Активирован единый reconciliation-changelog; `fileImageFace` переведён с `IMAGE_ID` на `FILE_IMAGE_FACE` с сохранением данных, FK и индекса |
 | 2026-07-24 | Оба AI-предпочтения включены по умолчанию; добавлен `preferPersonalPrompts`, миграции, binding и проверки сохранения через `UserSettings` |
 | 2026-07-23 | Добавлен `preferPersonalAiApiSettings`, checkbox во вкладке AI, безопасный default `false`, миграции и автотесты; маршрутизация API намеренно не изменена |
