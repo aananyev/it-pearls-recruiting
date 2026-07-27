@@ -66,15 +66,7 @@ public class HrmMainScreen extends ExtMainScreen {
             }
             Resource resource = mainScreenBackgroundService.resolveForUser(
                     userSession.getUser(), currentUi.getTheme(), userSession);
-            log.info("BG: resolveForUser returned {}",
-                    resource == null ? "null" : resource.getClass().getSimpleName());
-            if (resource instanceof StreamResource) {
-                log.info("BG: StreamResource name={}",
-                        ((StreamResource) resource).getFilename());
-            }
             applyBackground(currentUi, resource);
-            log.info("BG: applied, source={}",
-                    resource instanceof StreamResource ? "data-uri" : lastAppliedResourceUrl);
         } catch (RuntimeException e) {
             log.warn("Cannot apply background: {}", e.getMessage(), e);
         }
