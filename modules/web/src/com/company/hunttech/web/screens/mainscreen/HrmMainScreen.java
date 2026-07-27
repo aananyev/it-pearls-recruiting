@@ -25,8 +25,8 @@ import java.util.UUID;
 
 /**
  * Применяет фоновое изображение через CSS-инъекцию в Page.
- * Системные фоны загружаются из VAADIN/themes/{name}/backgrounds/{n}.jpg.
- * Пользовательский фон — StreamResource с байтами файла из FileStorage.
+ * Системные фоны — VAADIN/themes/{name}/backgrounds/{n}.jpg.
+ * Пользовательский фон — StreamResource с байтами из FileStorage.
  */
 @UiController("hrmMainScreen")
 @UiDescriptor("hrm-main-screen.xml")
@@ -69,44 +69,34 @@ public class HrmMainScreen extends ExtMainScreen {
                     userSession.getUser(), currentUi.getTheme(), userSession);
             applyBackground(currentUi, resource);
         } catch (RuntimeException e) {
-            log.warn("Cannot apply main screen background: {}", e.getMessage(), e);
+            log.warn("Cannot apply background: {}", e.getMessage(), e);
         }
     }
 
-    /**
-     * Строит CSS-совместимый URL.
-     * ThemeResource → VAADIN/themes/{theme}/backgrounds/{n}.jpg
-     * StreamResource → регистрируется через Vaadin connector → HTTP-путь
-     */
     private String buildBackgroundUrl(UI currentUi, Resource resource) {
         if (resource instanceof ThemeResource) {
-            ThemeResource themeResource = (ThemeResource) resource;
-            String themeName = currentUi.getTheme();
-            return "VAADIN/themes/" + themeName + "/" + themeResource.getResourceId();
+            ThemeResource tr = (ThemeResource) resource;
+            return "VAADIN/themes/" + currentUi.getTheme() + "/" + tr.getResourceId();
         }
         if (resource instanceof StreamResource) {
-            AbstractOrderedLayout vaadinVBox = mainVBox.unwrap(AbstractOrderedLayout.class);
-            return registerBackgroundResource(currentUi, vaadinVBox, resource);
+            AbstractOrderedLayout vbox = mainVBox.unwrap(AbstractOrderedLayout.class);
+            return registerResource(vbox, resource);
         }
-        throw new IllegalArgumentException("Неподдерживаемый тип фонового ресурса: "
-                + (resource == null ? "null" : resource.getClass().getName()));
+        throw new IllegalArgumentException("Unsupported resource: " + (resource == null ? "null" : resource.getClass().getName()));
     }
 
     private void applyBackground(UI currentUi, Resource resource) {
-        AbstractOrderedLayout vaadinVBox = mainVBox.unwrap(AbstractOrderedLayout.class);
-        AbstractOrderedLayout vaadinDashboard = mainDashboard.unwrap(AbstractOrderedLayout.class);
-
         String resourceUrl = buildBackgroundUrl(currentUi, resource);
-
         Page page = Page.getCurrent();
         if (page == null) {
-            throw new IllegalStateException("Vaadin Page недоступна");
+            throw new IllegalStateException("Page недоступна");
         }
 
         currentBackgroundStyleName = "hrm-bg-" + UUID.randomUUID().toString().replace("-", "");
-
-        vaadinVBox.addStyleName(currentBackgroundStyleName);
-        vaadinDashboard.addStyleName("hrm-dashboard-transparent");
+        AbstractOrderedLayout vbox = mainVBox.unwrap(AbstractOrderedLayout.class);
+        AbstractOrderedLayout dashboard = mainDashboard.unwrap(AbstractOrderedLayout.class);
+        vbox.addStyleName(currentBackgroundStyleName);
+        dashboard.addStyleName("hrm-dashboard-transparent");
 
         String css = "." + currentBackgroundStyleName + " {"
                 + "background-image: url('" + escapeCssUrl(resourceUrl) + "') !important;"
@@ -114,10 +104,7 @@ public class HrmMainScreen extends ExtMainScreen {
                 + "background-repeat: no-repeat !important;"
                 + "background-size: 100% 100% !important;"
                 + "}"
-                + ".hrm-dashboard-transparent {"
-                + "background: transparent !important;"
-                + "}";
-
+                + ".hrm-dashboard-transparent {background: transparent !important;}";
         page.getStyles().add(css);
 
         htmlAttributes.setDomAttribute(mainVBox, "data-hrm-main-background", "applied");
@@ -125,41 +112,33 @@ public class HrmMainScreen extends ExtMainScreen {
         lastAppliedResourceUrl = resourceUrl;
     }
 
-    /**
-     * Регистрирует StreamResource через нулевого размера Image в Vaadin connector tree.
-     * Возвращает HTTP-путь для CSS background-image.
-     */
-    private String registerBackgroundResource(UI currentUi,
-                                              AbstractOrderedLayout vaadinLayout,
-                                              Resource resource) {
+    private String registerResource(AbstractOrderedLayout vaadinLayout, Resource resource) {
         if (backgroundResourceHolder != null
                 && backgroundResourceHolder.getParent() instanceof com.vaadin.ui.ComponentContainer) {
             ((com.vaadin.ui.ComponentContainer) backgroundResourceHolder.getParent())
                     .removeComponent(backgroundResourceHolder);
         }
-
         backgroundResourceHolder = new Image(null, resource);
         backgroundResourceHolder.setWidth(0, Unit.PIXELS);
         backgroundResourceHolder.setHeight(0, Unit.PIXELS);
         backgroundResourceHolder.setVisible(false);
         vaadinLayout.addComponent(backgroundResourceHolder);
 
-        String resourceUrl = ResourceReference.create(
-                resource, backgroundResourceHolder, "src").getURL();
-        if (resourceUrl != null && resourceUrl.startsWith("app://APP")) {
-            resourceUrl = resourceUrl.replace("app://APP", "");
+        String url = ResourceReference.create(resource, backgroundResourceHolder, "src").getURL();
+        if (url != null && url.startsWith("app://APP")) {
+            url = url.replace("app://APP", "");
         }
-        if (resourceUrl == null || resourceUrl.trim().isEmpty()) {
-            throw new IllegalStateException("Vaadin не зарегистрировал ресурс фонового изображения");
+        if (url == null || url.trim().isEmpty()) {
+            throw new IllegalStateException("Не удалось зарегистрировать фоновый ресурс");
         }
-        return resourceUrl;
+        return url;
     }
 
     String getLastAppliedResourceUrl() {
         return lastAppliedResourceUrl;
     }
 
-    private String escapeCssUrl(String value) {
+    private static String escapeCssUrl(String value) {
         return value == null ? "" : value.replace("\\", "\\\\").replace("'", "\\'");
     }
 }
