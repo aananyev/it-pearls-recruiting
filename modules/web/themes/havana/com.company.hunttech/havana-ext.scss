@@ -522,13 +522,15 @@ rating_battery_yellow_3:before {
 }
 
 @mixin com_company_hunttech-havana-ext {
-/* Title for navigation sections — uppercase label copied from SettingsWindow */
+/* Title for navigation sections — global style from iteraction-list-navigation-title */
 .label-nav-title {
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  opacity: 0.66;
+  box-sizing: border-box;
+  padding: 6px 10px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
+  white-space: normal;
 }
 
 .label-nav-item {
