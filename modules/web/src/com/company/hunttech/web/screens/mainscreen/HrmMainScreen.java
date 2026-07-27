@@ -75,8 +75,8 @@ public class HrmMainScreen extends ExtMainScreen {
 
     /**
      * Строит CSS-совместимый URL.
-     * ThemeResource → VAADIN/themes/{theme}/backgrounds/{n}.jpg
-     * StreamResource → регистрируется через Vaadin connector → HTTP-путь
+     * ThemeResource → VAADIN/themes/{theme}/backgrounds/{n}.jpg.
+     * StreamResource → регистрируется через Vaadin connector → HTTP-путь.
      */
     private String buildBackgroundUrl(UI currentUi, Resource resource) {
         if (resource instanceof ThemeResource) {
@@ -86,7 +86,7 @@ public class HrmMainScreen extends ExtMainScreen {
         }
         if (resource instanceof StreamResource) {
             AbstractOrderedLayout vaadinVBox = mainVBox.unwrap(AbstractOrderedLayout.class);
-            return registerBackgroundResource(currentUi, vaadinVBox, resource);
+            return registerBackgroundResource(vaadinVBox, (StreamResource) resource);
         }
         throw new IllegalArgumentException("Неподдерживаемый тип фонового ресурса: "
                 + (resource == null ? "null" : resource.getClass().getName()));
@@ -126,12 +126,12 @@ public class HrmMainScreen extends ExtMainScreen {
     }
 
     /**
-     * Регистрирует StreamResource через нулевого размера Image в Vaadin connector tree.
-     * Возвращает HTTP-путь для CSS background-image.
+     * Регистрирует пользовательский StreamResource через нулевого размера Image,
+     * который остаётся владельцем ресурса в Vaadin connector tree. Возвращаемый URL
+     * преобразуется из внутренней схемы app://APP в HTTP-путь для CSS background-image.
      */
-    private String registerBackgroundResource(UI currentUi,
-                                              AbstractOrderedLayout vaadinLayout,
-                                              Resource resource) {
+    private String registerBackgroundResource(AbstractOrderedLayout vaadinLayout,
+                                              StreamResource resource) {
         if (backgroundResourceHolder != null
                 && backgroundResourceHolder.getParent() instanceof com.vaadin.ui.ComponentContainer) {
             ((com.vaadin.ui.ComponentContainer) backgroundResourceHolder.getParent())
