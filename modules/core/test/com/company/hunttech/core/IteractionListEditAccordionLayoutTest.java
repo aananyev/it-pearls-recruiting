@@ -15,9 +15,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает двухпанельную XML-компоновку IteractionListEdit и business bindings.
+ * Защищает двухпанельную компоновку IteractionListEdit с четырьмя постоянными
+ * вертикальными блоками и сохранёнными business bindings.
  */
 public class IteractionListEditAccordionLayoutTest {
+
+    private static final String[] THEMES = {
+            "halo", "havana", "helium", "hover",
+            "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark"
+    };
 
     @Test
     public void descriptorParsesAndFollowsEditScreenOrder() throws Exception {
@@ -47,13 +53,17 @@ public class IteractionListEditAccordionLayoutTest {
     }
 
     @Test
-    public void contentUsesNaturalHeightAndExplicitInnerContainers() throws IOException {
+    public void workspaceContainsFourPermanentVerticalInputBlocks() throws IOException {
         String descriptor = descriptor();
 
+        assertEquals(4, count(descriptor, "iteraction-list-flat-section"));
+        assertEquals(5, count(descriptor, "collapsable=\"false\""));
+        assertEquals(5, count(descriptor, "collapsed=\"false\""));
+        assertFalse(descriptor.contains("collapsable=\"true\""));
+        assertFalse(descriptor.contains("edit-accordion-section"));
+        assertTrue(descriptor.contains("iteraction-list-flat-content"));
         assertTrue(descriptor.contains("id=\"participantsAccordionContent\""));
         assertTrue(descriptor.contains("iteraction-list-section-content"));
-        assertTrue(descriptor.contains("margin=\"true\""));
-        assertEquals(4, count(descriptor, "edit-accordion-section"));
     }
 
     @Test
@@ -97,48 +107,27 @@ public class IteractionListEditAccordionLayoutTest {
     }
 
     @Test
-    public void firstAccordionIsOpenAndAllOtherWorkingSectionsAreClosed() throws IOException {
-        String descriptor = descriptor();
-        String participants = section(
-                descriptor,
-                "id=\"participantsAccordion\"",
-                "id=\"interactionAccordion\"");
-        String interaction = section(
-                descriptor,
-                "id=\"interactionAccordion\"",
-                "id=\"resultAccordion\"");
-        String result = section(
-                descriptor,
-                "id=\"resultAccordion\"",
-                "id=\"commentAccordion\"");
-        String comment = section(
-                descriptor,
-                "id=\"commentAccordion\"",
-                "id=\"popularAccordion\"");
-
-        assertTrue(participants.contains("height=\"AUTO\""));
-        assertTrue(participants.contains("collapsed=\"false\""));
-        assertTrue(interaction.contains("collapsed=\"true\""));
-        assertTrue(result.contains("collapsed=\"true\""));
-        assertTrue(comment.contains("collapsed=\"true\""));
-    }
-
-    @Test
-    public void everyThemeLocalSharedContractPreventsHorizontalScroll() throws IOException {
-        String[] themes = {
-                "halo", "havana", "helium", "hover",
-                "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark"
-        };
-
-        for (String theme : themes) {
-            String shared = readProjectFile(
+    public void everyThemeUsesLocalFlatLayoutContract() throws IOException {
+        for (String theme : THEMES) {
+            String partial = readProjectFile(
                     "modules/web/themes/" + theme
-                            + "/com.company.hunttech/edit-screen-shared-styles.scss");
-            assertTrue(theme, shared.contains("width: 270px !important"));
-            assertTrue(theme, shared.contains("@media (max-width: 1366px)"));
-            assertTrue(theme, shared.contains("width: 250px !important"));
-            assertTrue(theme, shared.contains("min-width: 0 !important"));
-            assertTrue(theme, shared.contains("overflow-x: hidden !important"));
+                            + "/com.company.hunttech/iteraction-list-flat-layout.scss");
+            assertTrue(theme, partial.contains("@mixin iteraction-list-flat-layout-theme"));
+            assertTrue(theme, partial.contains(".iteraction-list-flat-section:focus-within"));
+            assertTrue(theme, partial.contains(".label-navigation > .v-slot:nth-child(6)"));
+            assertTrue(theme, partial.contains("display: block !important"));
+            assertTrue(theme, partial.contains("width: 312px !important"));
+            assertFalse(theme, partial.contains("\n  .v-panel {"));
+            assertFalse(theme, partial.contains("\n  .v-button {"));
+
+            String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");
+            assertTrue(theme, styles.contains(
+                    "@import \"com.company.hunttech/iteraction-list-flat-layout\";"));
+            assertTrue(theme, styles.contains(
+                    "@include iteraction-list-flat-layout-theme;"));
+            assertOrdered(styles,
+                    "@include iteraction-list-accordion-navigation-theme;",
+                    "@include iteraction-list-flat-layout-theme;");
         }
     }
 

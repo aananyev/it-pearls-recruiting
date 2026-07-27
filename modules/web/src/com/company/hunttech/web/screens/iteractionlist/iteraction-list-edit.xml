@@ -135,8 +135,7 @@
                            height="AUTO"
                            align="MIDDLE_CENTER"/>
 
-                    <!-- Статус и приоритет размещены непосредственно под названием вакансии,
-                         чтобы решение о работе с позицией принималось до перехода по разделам. -->
+                    <!-- Статус и приоритет доступны до навигации по рабочим блокам. -->
                     <hbox id="vacancyStateSummary"
                           width="100%"
                           height="AUTO"
@@ -199,7 +198,7 @@
                     </hbox>
                 </vbox>
 
-                <!-- XML fallback сохраняет доступность при отсутствии runtime navigation. -->
+                <!-- Runtime controller заменяет fallback LABEL на keyboard-доступные кнопки. -->
                 <vbox id="iteractionListNavigation"
                       width="100%"
                       spacing="false"
@@ -330,7 +329,7 @@
                       stylename="iteraction-list-sidebar-spacer edit-sidebar-spacer"/>
             </vbox>
 
-            <!-- Workspace сохраняет toolbar, quick actions, natural-height accordions и footer. -->
+            <!-- Справа расположены постоянные вертикальные блоки без accordion interaction. -->
             <vbox id="iteractionListWorkspace"
                   stylename="iteraction-list-workspace edit-workspace"
                   width="100%"
@@ -386,19 +385,20 @@
                           height="AUTO"
                           spacing="true"
                           margin="true"
-                          stylename="iteraction-list-content edit-workspace-content">
-                        <!-- Первый раздел раскрыт декларативно; controller не требуется. -->
+                          stylename="iteraction-list-content iteraction-list-flat-content edit-workspace-content">
+
+                        <!-- GroupBox ID сохранён для controller injection, но сворачивание отключено. -->
                         <groupBox id="participantsAccordion"
                                   caption="msg://msgAccordionParticipants"
                                   width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
-                                  collapsable="true"
+                                  collapsable="false"
                                   collapsed="false"
                                   visible="true"
                                   showAsPanel="true"
-                                  stylename="iteraction-list-accordion-section iteraction-list-form-section iteraction-list-participants-section edit-accordion-section">
+                                  stylename="iteraction-list-flat-section iteraction-list-form-section iteraction-list-participants-section edit-card">
                             <vbox id="participantsAccordionContent"
                                   width="100%"
                                   height="AUTO"
@@ -473,10 +473,10 @@
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
-                                  collapsable="true"
-                                  collapsed="true"
+                                  collapsable="false"
+                                  collapsed="false"
                                   showAsPanel="true"
-                                  stylename="iteraction-list-accordion-section iteraction-list-form-section edit-accordion-section">
+                                  stylename="iteraction-list-flat-section iteraction-list-form-section edit-card">
                             <!-- Visible/required/caption динамических полей определяет business-controller. -->
                             <vbox width="100%"
                                   height="AUTO"
@@ -526,10 +526,10 @@
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
-                                  collapsable="true"
-                                  collapsed="true"
+                                  collapsable="false"
+                                  collapsed="false"
                                   showAsPanel="true"
-                                  stylename="iteraction-list-accordion-section iteraction-list-form-section edit-accordion-section">
+                                  stylename="iteraction-list-flat-section iteraction-list-form-section edit-card">
                             <grid id="resultAccordionGrid"
                                   width="100%"
                                   height="AUTO"
@@ -578,10 +578,10 @@
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
-                                  collapsable="true"
-                                  collapsed="true"
+                                  collapsable="false"
+                                  collapsed="false"
                                   showAsPanel="true"
-                                  stylename="iteraction-list-accordion-section iteraction-list-comment-section edit-accordion-section">
+                                  stylename="iteraction-list-flat-section iteraction-list-form-section iteraction-list-comment-section edit-card">
                             <textArea id="commentField"
                                       dataContainer="iteractionListDc"
                                       property="comment"
@@ -591,13 +591,13 @@
                                       rows="7"/>
                         </groupBox>
 
-                        <!-- Требуется для legacy field injection базового controller. -->
+                        <!-- Legacy injection остаётся невидимой; quick actions находятся выше. -->
                         <groupBox id="popularAccordion"
                                   visible="false"
                                   width="100%"
                                   height="AUTO"
-                                  collapsable="true"
-                                  collapsed="true"
+                                  collapsable="false"
+                                  collapsed="false"
                                   stylename="iteraction-list-popular-section"/>
                     </vbox>
                 </scrollBox>

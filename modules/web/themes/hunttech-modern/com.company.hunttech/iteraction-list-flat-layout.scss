@@ -1,0 +1,287 @@
+/*
+ * IteractionListEdit — плоская вертикальная компоновка блоков ввода.
+ *
+ * Слой подключается после iteraction-list-accordion-navigation и ограничен
+ * корнем .iteraction-list-editor. Он не меняет глобальные Vaadin-компоненты.
+ */
+@mixin iteraction-list-flat-layout-theme {
+  .iteraction-list-editor {
+    /*
+     * Sidebar уплотнён для сохранения критичного контекста вакансии в пределах
+     * стандартной высоты экрана. Прокрутка остаётся локальной для sidebar.
+     */
+    .iteraction-list-sidebar {
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
+      padding: 14px 16px 12px !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+    }
+
+    .iteraction-list-sidebar > .v-spacing {
+      height: 10px !important;
+    }
+
+    .iteraction-list-profile-header > .v-spacing {
+      height: 7px !important;
+    }
+
+    .iteraction-list-identity-images {
+      min-height: 98px !important;
+      padding-bottom: 0 !important;
+    }
+
+    .iteraction-list-candidate-image,
+    .iteraction-list-candidate-image img,
+    .iteraction-list-candidate-image .v-image-element {
+      width: 96px !important;
+      height: 96px !important;
+      min-width: 96px !important;
+      min-height: 96px !important;
+      max-width: 96px !important;
+      max-height: 96px !important;
+    }
+
+    .iteraction-list-project-image,
+    .iteraction-list-project-image img,
+    .iteraction-list-project-image .v-image-element {
+      width: 64px !important;
+      height: 64px !important;
+      min-width: 64px !important;
+      min-height: 64px !important;
+      max-width: 64px !important;
+      max-height: 64px !important;
+    }
+
+    .iteraction-list-profile-title,
+    .iteraction-list-profile-title.v-label {
+      font-size: 18px !important;
+      line-height: 24px !important;
+    }
+
+    .iteraction-list-profile-subtitle,
+    .iteraction-list-profile-subtitle.v-label {
+      font-size: 12px !important;
+      line-height: 17px !important;
+    }
+
+    /*
+     * Status и priority в XML остаются прежними компонентами, но на узкой
+     * sidebar отображаются как две полноширинные строки вместо двух 50%-колонок.
+     */
+    .iteraction-list-vacancy-state-summary {
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 8px 0 4px !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .iteraction-list-vacancy-state-summary > .v-slot {
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      float: none !important;
+    }
+
+    .iteraction-list-vacancy-state-summary > .v-spacing {
+      display: block !important;
+      width: 100% !important;
+      height: 4px !important;
+    }
+
+    .iteraction-list-vacancy-state-summary .iteraction-list-sidebar-info-row {
+      display: grid !important;
+      grid-template-columns: 92px minmax(0, 1fr);
+      align-items: center;
+      column-gap: 10px;
+      width: 100% !important;
+      min-width: 0 !important;
+      padding: 4px 0 !important;
+      border-top: 0 !important;
+    }
+
+    .iteraction-list-vacancy-state-summary .iteraction-list-sidebar-info-row > .v-slot {
+      width: auto !important;
+      min-width: 0 !important;
+    }
+
+    .iteraction-list-vacancy-state-summary .iteraction-list-sidebar-caption,
+    .iteraction-list-vacancy-state-summary .iteraction-list-sidebar-caption.v-label {
+      font-size: 11px !important;
+      line-height: 15px !important;
+      white-space: normal !important;
+    }
+
+    .iteraction-list-vacancy-state-summary .iteraction-list-sidebar-value-row {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .iteraction-list-vacancy-state-summary .iteraction-list-status-value,
+    .iteraction-list-vacancy-state-summary .iteraction-list-status-value.v-label,
+    .iteraction-list-vacancy-state-summary .iteraction-list-status-value * {
+      width: auto !important;
+      min-width: 0 !important;
+      white-space: nowrap !important;
+      overflow-wrap: normal !important;
+      word-break: normal !important;
+    }
+
+    .iteraction-list-vacancy-state-summary .iteraction-list-sidebar-warning {
+      width: 28px !important;
+      min-width: 28px !important;
+      height: 28px !important;
+    }
+
+    .iteraction-list-vacancy-state-summary .iteraction-list-priority-image {
+      width: auto !important;
+      max-width: 18px !important;
+      max-height: 24px !important;
+    }
+
+    .label-navigation,
+    .iteraction-list-navigation {
+      padding-top: 6px !important;
+      padding-bottom: 2px !important;
+    }
+
+    .label-nav-title,
+    .iteraction-list-navigation-title {
+      padding-top: 4px !important;
+      padding-bottom: 5px !important;
+    }
+
+    .label-nav-item,
+    .iteraction-list-nav-item {
+      min-height: 34px !important;
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      line-height: 17px !important;
+    }
+
+    /*
+     * Базовый controller создаёт legacy-пятый пункт для скрытого
+     * popularAccordion. В плоской форме quick actions находятся отдельно,
+     * поэтому шестой slot (title + 5 buttons) не отображается.
+     * XML fallback содержит только title + 4 labels и не затрагивается.
+     */
+    .label-navigation > .v-slot:nth-child(6) {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+    }
+
+    .iteraction-list-sidebar-card {
+      padding: 11px 12px !important;
+    }
+
+    /*
+     * GroupBox сохраняется только как совместимый тип component injection.
+     * Сворачивание отключено XML, заголовок оформлен как статический title,
+     * а содержимое принудительно остаётся видимым при legacy setExpanded().
+     */
+    .iteraction-list-flat-section {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      margin: 0 0 12px !important;
+      padding: 0 !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.15) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+      overflow: hidden !important;
+      transition: border-color 140ms ease, box-shadow 140ms ease;
+    }
+
+    .iteraction-list-flat-section .v-panel-caption {
+      min-height: 46px !important;
+      padding: 11px 16px !important;
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      line-height: 23px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 68%) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.12) !important;
+      cursor: default !important;
+      pointer-events: none !important;
+    }
+
+    .iteraction-list-flat-section .v-panel-caption .v-icon,
+    .iteraction-list-flat-section .v-panel-caption .v-panel-captionwrap:before,
+    .iteraction-list-flat-section .v-panel-caption .v-panel-captionwrap:after {
+      display: none !important;
+    }
+
+    .iteraction-list-flat-section .v-panel-content,
+    .iteraction-list-flat-section.v-panel-collapsed .v-panel-content,
+    .iteraction-list-flat-section .v-panel-content > div {
+      display: block !important;
+      visibility: visible !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      opacity: 1 !important;
+      overflow: visible !important;
+    }
+
+    .iteraction-list-flat-section .v-panel-content {
+      box-sizing: border-box;
+      padding: 14px 16px 16px !important;
+      background: $v-panel-background-color !important;
+      border: 0 !important;
+    }
+
+    /*
+     * Нажатие label-navigation переводит focus в первое поле целевой секции.
+     * :focus-within подсвечивает весь блок без записи в entity и без Java state.
+     */
+    .iteraction-list-flat-section:focus-within {
+      border-color: $v-selection-color !important;
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.18),
+                  0 5px 16px rgba(15, 23, 42, 0.08) !important;
+    }
+
+    .iteraction-list-flat-content {
+      padding-top: 14px !important;
+    }
+
+    @media (max-width: 1366px) {
+      .iteraction-list-sidebar {
+        width: 296px !important;
+        min-width: 296px !important;
+        max-width: 296px !important;
+        padding-right: 14px !important;
+        padding-left: 14px !important;
+      }
+
+      .iteraction-list-flat-section .v-panel-content {
+        padding-right: 14px !important;
+        padding-left: 14px !important;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .iteraction-list-sidebar {
+        width: 284px !important;
+        min-width: 284px !important;
+        max-width: 284px !important;
+      }
+
+      .iteraction-list-vacancy-state-summary .iteraction-list-sidebar-info-row {
+        grid-template-columns: 84px minmax(0, 1fr);
+        column-gap: 8px;
+      }
+    }
+  }
+}
