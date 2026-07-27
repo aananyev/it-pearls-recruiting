@@ -11,13 +11,10 @@ import com.haulmont.cuba.gui.components.SuggestionPickerField;
 import com.haulmont.cuba.gui.components.TextArea;
 import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.screen.EditedEntityContainer;
-import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.MessageBundle;
 import com.haulmont.cuba.gui.screen.Screen.AfterShowEvent;
 import com.haulmont.cuba.gui.screen.Screen.InitEvent;
 import com.haulmont.cuba.gui.screen.Subscribe;
-import com.haulmont.cuba.gui.screen.UiController;
-import com.haulmont.cuba.gui.screen.UiDescriptor;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -31,10 +28,6 @@ import java.util.List;
  * быстрых взаимодействий. Этот класс управляет только label-навигацией,
  * состояниями аккордеонов и пятью стабильными визуальными позициями.
  */
-@UiController("hunttech_IteractionList.edit")
-@UiDescriptor("iteraction-list-edit.xml")
-@EditedEntityContainer("iteractionListDc")
-@LoadDataBeforeShow
 public class IteractionListEditAccordionNavigation extends IteractionListEdit {
 
     private static final int POPULAR_INTERACTION_BUTTONS = 5;
