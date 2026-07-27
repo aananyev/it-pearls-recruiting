@@ -9,19 +9,18 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
 import com.vaadin.server.Page;
 import com.vaadin.server.Resource;
-import com.vaadin.server.ResourceReference;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.AbstractOrderedLayout;
-import com.vaadin.ui.Image;
 import com.vaadin.ui.UI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 
 import javax.inject.Inject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Base64;
 import java.util.UUID;
 
 /**
@@ -46,7 +45,6 @@ public class HrmMainScreen extends ExtMainScreen {
     @Inject
     private HtmlAttributes htmlAttributes;
 
-    private Image backgroundResourceHolder;
     private String lastAppliedResourceUrl;
     private String currentBackgroundStyleName;
 
@@ -75,7 +73,8 @@ public class HrmMainScreen extends ExtMainScreen {
                         ((StreamResource) resource).getFilename());
             }
             applyBackground(currentUi, resource);
-            log.info("BG: applied, URL={}", lastAppliedResourceUrl);
+            log.info("BG: applied, source={}",
+                    resource instanceof StreamResource ? "data-uri" : lastAppliedResourceUrl);
         } catch (RuntimeException e) {
             log.warn("Cannot apply background: {}", e.getMessage(), e);
         }
@@ -87,8 +86,7 @@ public class HrmMainScreen extends ExtMainScreen {
             return "VAADIN/themes/" + currentUi.getTheme() + "/" + tr.getResourceId();
         }
         if (resource instanceof StreamResource) {
-            AbstractOrderedLayout vbox = mainVBox.unwrap(AbstractOrderedLayout.class);
-            return registerBackgroundResource(vbox, resource);
+            return registerBackgroundResource(resource);
         }
         throw new IllegalArgumentException("Unsupported resource: "
                 + (resource == null ? "null" : resource.getClass().getName()));
@@ -122,31 +120,35 @@ public class HrmMainScreen extends ExtMainScreen {
     }
 
     /**
-     * Регистрирует StreamResource через скрытый Image в Vaadin connector tree.
-     * Владелец ресурса остаётся присоединённым к layout, а внутренний URL
-     * app://APP преобразуется в HTTP-путь с web-контекстом приложения.
+     * Преобразует пользовательский StreamResource в data URI без Vaadin connector URL.
+     * StreamSource возвращает новый поток поверх байтов, уже загруженных сервисом из FileStorage,
+     * поэтому повторного чтения физического файла и HTTP-запроса к connector не происходит.
      */
-    private String registerBackgroundResource(AbstractOrderedLayout vaadinLayout,
-                                              Resource resource) {
-        if (backgroundResourceHolder != null
-                && backgroundResourceHolder.getParent() instanceof com.vaadin.ui.ComponentContainer) {
-            ((com.vaadin.ui.ComponentContainer) backgroundResourceHolder.getParent())
-                    .removeComponent(backgroundResourceHolder);
+    private String registerBackgroundResource(Resource resource) {
+        StreamResource streamResource = (StreamResource) resource;
+        StreamResource.StreamSource streamSource = streamResource.getStreamSource();
+        if (streamSource == null) {
+            throw new IllegalStateException("Источник пользовательского фона недоступен");
         }
-        backgroundResourceHolder = new Image(null, resource);
-        backgroundResourceHolder.setWidth(0, Unit.PIXELS);
-        backgroundResourceHolder.setHeight(0, Unit.PIXELS);
-        backgroundResourceHolder.setVisible(false);
-        vaadinLayout.addComponent(backgroundResourceHolder);
 
-        String url = ResourceReference.create(resource, backgroundResourceHolder, "src").getURL();
-        if (url != null && url.startsWith("app://APP")) {
-            url = url.replace("app://APP", VaadinServlet.getCurrent().getServletContext().getContextPath());
+        try (InputStream stream = streamSource.getStream()) {
+            if (stream == null) {
+                throw new IllegalStateException("Поток пользовательского фона недоступен");
+            }
+            byte[] bytes = stream.readAllBytes();
+            if (bytes.length == 0) {
+                throw new IllegalStateException("Пользовательский фон не содержит данных");
+            }
+
+            String mimeType = streamResource.getMIMEType();
+            if (mimeType == null || !mimeType.startsWith("image/")) {
+                mimeType = "image/jpeg";
+            }
+            return "data:" + mimeType + ";base64,"
+                    + Base64.getEncoder().encodeToString(bytes);
+        } catch (IOException e) {
+            throw new IllegalStateException("Не удалось прочитать пользовательский фон", e);
         }
-        if (url == null || url.trim().isEmpty()) {
-            throw new IllegalStateException("Не удалось зарегистрировать фоновый ресурс");
-        }
-        return url;
     }
 
     String getLastAppliedResourceUrl() {
