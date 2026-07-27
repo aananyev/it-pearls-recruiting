@@ -13,6 +13,7 @@ import com.vaadin.server.ResourceReference;
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
+import com.vaadin.server.VaadinServlet;
 import com.vaadin.ui.AbstractOrderedLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.UI;
@@ -123,7 +124,7 @@ public class HrmMainScreen extends ExtMainScreen {
     /**
      * Регистрирует StreamResource через скрытый Image в Vaadin connector tree.
      * Владелец ресурса остаётся присоединённым к layout, а внутренний URL
-     * app://APP преобразуется в HTTP-путь, пригодный для CSS background-image.
+     * app://APP преобразуется в HTTP-путь с web-контекстом приложения.
      */
     private String registerBackgroundResource(AbstractOrderedLayout vaadinLayout,
                                               Resource resource) {
@@ -140,7 +141,7 @@ public class HrmMainScreen extends ExtMainScreen {
 
         String url = ResourceReference.create(resource, backgroundResourceHolder, "src").getURL();
         if (url != null && url.startsWith("app://APP")) {
-            url = url.replace("app://APP", "");
+            url = url.replace("app://APP", VaadinServlet.getCurrent().getServletContext().getContextPath());
         }
         if (url == null || url.trim().isEmpty()) {
             throw new IllegalStateException("Не удалось зарегистрировать фоновый ресурс");
