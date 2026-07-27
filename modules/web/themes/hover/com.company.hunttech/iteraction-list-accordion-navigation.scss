@@ -38,6 +38,14 @@
       overflow-x: hidden;
       overflow-y: auto;
     }
+    .iteraction-list-title {
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.66;
+      text-transform: uppercase;
+    }
+
 
     .iteraction-list-sidebar > .v-slot {
       width: 100% !important;
