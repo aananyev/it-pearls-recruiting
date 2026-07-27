@@ -69,9 +69,9 @@
             </loader>
         </collection>
     </data>
-    <dialogMode height="760"
+    <dialogMode height="100%"
                 modal="true"
-                width="1240"/>
+                width="100%"/>
     <layout stylename="iteraction-list-editor"
             expand="iteractionListMainLayout"
             spacing="false"
@@ -112,14 +112,14 @@
                                           stylename="iteraction-list-candidate-image"
                                           scaleMode="SCALE_DOWN"/>
                         <ovaFallbackImage id="projectLogoImage"
-                                          width="80px"
-                                          height="80px"
-                                          ovalWidth="80px"
-                                          ovalHeight="80px"
+                                          width="112px"
+                                          height="112px"
+                                          ovalWidth="112px"
+                                          ovalHeight="112px"
                                           fallbackThemePath="icons/no-company.png"
                                           visible="true"
                                           align="MIDDLE_CENTER"
-                                          stylename="iteraction-list-project-image"
+                                          stylename="iteraction-list-candidate-image"
                                           scaleMode="SCALE_DOWN"/>
                     </hbox>
                     <!-- Наименование экземпляра читается из того же dataContainer. -->
@@ -144,25 +144,25 @@
                 <vbox id="iteractionListNavigation"
                       width="100%"
                       spacing="false"
-                      stylename="iteraction-list-navigation">
+                      stylename="label-navigation">
                     <label width="100%"
                            value="msg://msgAccordionNavigation"
-                           stylename="iteraction-list-navigation-title"/>
+                           stylename="label-nav-title"/>
                     <label width="100%"
                            value="msg://msgAccordionParticipants"
-                           stylename="iteraction-list-nav-item iteraction-list-nav-item-active"/>
+                           stylename="label-nav-item label-nav-item-active"/>
                     <label width="100%"
                            value="msg://msgAccordionInteraction"
-                           stylename="iteraction-list-nav-item"/>
+                           stylename="label-nav-item"/>
                     <label width="100%"
                            value="msg://msgAccordionResult"
-                           stylename="iteraction-list-nav-item"/>
+                           stylename="label-nav-item"/>
                     <label width="100%"
                            value="msg://msgAccordionComment"
-                           stylename="iteraction-list-nav-item"/>
+                           stylename="label-nav-item"/>
                     <label width="100%"
                            value="msg://mshMostPopular"
-                           stylename="iteraction-list-nav-item"/>
+                           stylename="label-nav-item"/>
                 </vbox>
 
                 <vbox width="100%"
@@ -349,6 +349,30 @@
                                width="100%"/>
                     </vbox>
                 </hbox>
+                <!-- Пять частых взаимодействий постоянно видимы внутри вкладки
+     непосредственно перед первым аккордеоном. -->
+                <vbox id="mostPopularQuickActions"
+                      width="100%"
+                      height="AUTO"
+                      spacing="true"
+                      stylename="iteraction-list-quick-actions">
+                    <label value="msg://mshMostPopular"
+                           width="100%"
+                           stylename="iteraction-list-quick-actions-title"/>
+                    <hbox id="mostPopularIteractionHBox"
+                          width="100%"
+                          height="AUTO"
+                          spacing="false"
+                          stylename="iteraction-list-popular-host">
+                        <hbox id="mostPopularHbox"
+                              width="100%"
+                              height="AUTO"
+                              spacing="true"
+                              align="MIDDLE_CENTER"
+                              stylename="iteraction-list-popular-buttons"/>
+                    </hbox>
+                </vbox>
+
                 <tabSheet id="iteractionListTabSheeet"
                           width="100%"
                           height="100%"
@@ -367,31 +391,8 @@
                                   height="AUTO"
                                   spacing="true"
                                   stylename="iteraction-list-content">
-                                <!-- Пять частых взаимодействий постоянно видимы внутри вкладки
-                                     непосредственно перед первым аккордеоном. -->
-                                <vbox id="mostPopularQuickActions"
-                                      width="100%"
-                                      height="AUTO"
-                                      spacing="true"
-                                      stylename="iteraction-list-quick-actions">
-                                    <label value="msg://mshMostPopular"
-                                           width="100%"
-                                           stylename="iteraction-list-quick-actions-title"/>
-                                    <hbox id="mostPopularIteractionHBox"
-                                          width="100%"
-                                          height="AUTO"
-                                          spacing="false"
-                                          stylename="iteraction-list-popular-host">
-                                        <hbox id="mostPopularHbox"
-                                              width="100%"
-                                              height="AUTO"
-                                              spacing="true"
-                                              align="MIDDLE_CENTER"
-                                              stylename="iteraction-list-popular-buttons"/>
-                                    </hbox>
-                                </vbox>
                                 <groupBox id="participantsAccordion"
-                                          caption="msg://msgAccordionParticipants"
+                                          caption="Кандидат и вакансия"
                                           width="100%"
                                           height="AUTO"
                                           spacing="true"
@@ -421,6 +422,7 @@
                                                                        caption="msg://msgCandidate"
                                                                        stylename="iteraction-list-primary-picker"
                                                                        width="100%"
+                                                                       height="AUTO"
                                                                        required="true"
                                                                        dataContainer="iteractionListDc"
                                                                        property="candidate">
@@ -445,6 +447,7 @@
                                                                    dataContainer="iteractionListDc"
                                                                    optionsContainer="openPositionDc"
                                                                    property="vacancy"
+                                                                   height="AUTO"
                                                                    stylename="iteraction-list-primary-picker"
                                                                    width="100%">
                                                     <actions>
@@ -458,6 +461,7 @@
                                     <checkBox id="onlyMySubscribeCheckBox"
                                               align="MIDDLE_LEFT"
                                               width="100%"
+                                              height="AUTO"
                                               description="msg://msgOnlyMySebscribeDec"
                                               caption="msg://msgOnlyMySubscribe"
                                               stylename="iteraction-list-subscription-filter"/>
@@ -488,6 +492,7 @@
                                                                    optionsContainer="iteractionTypesDc"
                                                                    caption="msg://msgIteractionType"
                                                                    width="100%"
+                                                                   height="AUTO"
                                                                    required="true"
                                                                    dataContainer="iteractionListDc"
                                                                    property="iteractionType">

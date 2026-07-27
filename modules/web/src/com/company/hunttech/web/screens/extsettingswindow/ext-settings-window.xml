@@ -62,7 +62,6 @@
                                                   fallbackThemePath="icons/no-programmer.jpeg"
                                                   visible="true"
                                                   align="TOP_CENTER"
-                                                  stylename="widget-border"
                                                   scaleMode="SCALE_DOWN"/>
                                 <image id="defaultPic" width="100%" visible="false" align="TOP_CENTER" stylename="widget-border" scaleMode="FILL">
                                     <theme path="icons/no-programmer.jpeg"/>
