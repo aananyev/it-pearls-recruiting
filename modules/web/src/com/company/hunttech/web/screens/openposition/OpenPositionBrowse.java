@@ -184,11 +184,15 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
             }
 
             if (event.getItem().getProjectName().getProjectLogo() != null) {
-                image.setSource(FileDescriptorResource.class)
-                        .setFileDescriptor(event
-                                .getItem()
-                                .getProjectName()
-                                .getProjectLogo());
+                try {
+                    image.setSource(FileDescriptorResource.class)
+                            .setFileDescriptor(event
+                                    .getItem()
+                                    .getProjectName()
+                                    .getProjectLogo());
+                } catch (RuntimeException e) {
+                    image.setSource(ThemeResource.class).setPath(icons_no_company_png);
+                }
             } else {
                 image.setSource(ThemeResource.class).setPath(icons_no_company_png);
             }
@@ -232,13 +236,17 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                     }
 
                     if (event.getItem().getProjectName().getProjectDepartment().getCompanyName().getFileCompanyLogo() != null) {
-                        image.setSource(FileDescriptorResource.class)
-                                .setFileDescriptor(event
-                                        .getItem()
-                                        .getProjectName()
-                                        .getProjectDepartment()
-                                        .getCompanyName()
-                                        .getFileCompanyLogo());
+                        try {
+                            image.setSource(FileDescriptorResource.class)
+                                    .setFileDescriptor(event
+                                            .getItem()
+                                            .getProjectName()
+                                            .getProjectDepartment()
+                                            .getCompanyName()
+                                            .getFileCompanyLogo());
+                        } catch (RuntimeException e) {
+                            image.setSource(ThemeResource.class).setPath(String.valueOf(StdPictures.NO_COMPANY));
+                        }
                     } else {
                         image.setSource(ThemeResource.class).setPath(String.valueOf(StdPictures.NO_COMPANY));
                     }
