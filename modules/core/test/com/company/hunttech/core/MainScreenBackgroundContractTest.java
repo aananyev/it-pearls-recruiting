@@ -122,7 +122,7 @@ public class MainScreenBackgroundContractTest {
 
         // StreamResource регистрируется через Vaadin connector и конвертируется в HTTP.
         assertTrue(controller.contains("resource instanceof StreamResource"));
-        assertTrue(controller.contains("registerResource"));
+        assertTrue(controller.contains("registerBackgroundResource"));
         assertTrue(controller.contains("ResourceReference.create"));
         assertTrue(controller.contains("backgroundResourceHolder"));
         assertTrue(controller.contains("app://APP"));
