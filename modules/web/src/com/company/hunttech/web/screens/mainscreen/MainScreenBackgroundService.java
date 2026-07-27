@@ -8,14 +8,15 @@ import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.security.entity.User;
 import com.haulmont.cuba.security.global.UserSession;
-import com.vaadin.server.ExternalResource;
 import com.vaadin.server.Resource;
+import com.vaadin.server.StreamResource;
 import com.vaadin.server.ThemeResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -44,10 +45,6 @@ public class MainScreenBackgroundService {
     private static final String DEFAULT_THEME = "hover";
     private static final String LAST_VARIANT_ATTRIBUTE = "hrm.main.background.lastVariant.";
 
-    /**
-     * Allowlist не даёт сформировать путь к каталогу, которого нет в поставке web-тем.
-     * Порядок соответствует перечню тем, для которых репозиторий хранит 10 JPG-фонов.
-     */
     private static final Set<String> SUPPORTED_THEMES = Collections.unmodifiableSet(
             new LinkedHashSet<>(Arrays.asList(
                     "halo",
@@ -120,22 +117,45 @@ public class MainScreenBackgroundService {
     }
 
     /**
-     * Проверяет физическую доступность пользовательского файла до выдачи browser URL.
-     * Descriptor сохраняется в БД при ошибке хранилища: после восстановления файла
-     * пользовательский фон снова станет доступен без повторной настройки.
+     * Читает байты пользовательского файла из FileStorage и упаковывает в StreamResource.
+     * StreamResource регистрируется через ResourceReference в HrmMainScreen — даёт
+     * стабильный Vaadin connector URL, не зависящий от dispatch-сервлета.
      */
     private Optional<Resource> createCustomResource(FileDescriptor descriptor) {
         if (!isCustomBackground(descriptor)) {
             return Optional.empty();
         }
 
-        try (InputStream ignored = fileLoader.openStream(descriptor)) {
-            return Optional.of(new ExternalResource(
-                    FileDescriptorImageHelper.buildDispatchDownloadUrl(descriptor)));
+        try (InputStream stream = fileLoader.openStream(descriptor)) {
+            byte[] bytes = stream.readAllBytes();
+            StreamResource resource = new StreamResource(
+                    (StreamResource.StreamSource) () -> new ByteArrayInputStream(bytes),
+                    descriptor.getName());
+            resource.setMIMEType(mimeType(descriptor));
+            resource.setCacheTime(-1);
+            return Optional.of(resource);
         } catch (FileStorageException | IOException e) {
             log.warn("Cannot load custom main screen background id={}: {}",
                     descriptor.getId(), e.getMessage());
             return Optional.empty();
+        }
+    }
+
+    private String mimeType(FileDescriptor descriptor) {
+        String extension = descriptor.getExtension();
+        if (extension == null) {
+            return "application/octet-stream";
+        }
+        switch (extension.toLowerCase(Locale.ROOT)) {
+            case "png":
+                return "image/png";
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+            case "webp":
+                return "image/webp";
+            default:
+                return "application/octet-stream";
         }
     }
 
