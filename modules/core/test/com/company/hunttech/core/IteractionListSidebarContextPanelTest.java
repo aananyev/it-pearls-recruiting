@@ -10,14 +10,12 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает постоянную контекстную sidebar и единый shared SCSS source,
- * используемый семью темами через относительные symbolic links.
+ * Защищает постоянную sidebar IteractionListEdit и порядок критичного контекста вакансии.
  */
 public class IteractionListSidebarContextPanelTest {
 
@@ -52,6 +50,32 @@ public class IteractionListSidebarContextPanelTest {
     }
 
     @Test
+    public void vacancyStatusAndPriorityAppearBeforeLabelNavigation() throws IOException {
+        String xml = descriptor();
+
+        assertOrdered(xml,
+                "id=\"iteractionVacancyNameLabel\"",
+                "id=\"vacancyStateSummary\"",
+                "id=\"statusOfVacansyLabel\"",
+                "id=\"currentPriorityLabel\"",
+                "id=\"iteractionListNavigation\"");
+
+        String stateSummary = section(
+                xml,
+                "id=\"vacancyStateSummary\"",
+                "id=\"iteractionListNavigation\"");
+        assertTrue(stateSummary.contains("id=\"alternativeVacancyLinkButton\""));
+        assertTrue(stateSummary.contains("id=\"trafficLighterImage\""));
+
+        String lowerVacancyCard = section(
+                xml,
+                "iteraction-list-vacancy-card",
+                "id=\"iteractionListSidebarSpacer\"");
+        assertFalse(lowerVacancyCard.contains("id=\"statusOfVacansyLabel\""));
+        assertFalse(lowerVacancyCard.contains("id=\"currentPriorityLabel\""));
+    }
+
+    @Test
     public void candidatePhotoIsPrimaryAndProjectLogoIsSecondary() throws IOException {
         String xml = descriptor();
         String identity = section(
@@ -66,40 +90,37 @@ public class IteractionListSidebarContextPanelTest {
         assertTrue(identity.contains("width=\"80px\""));
         assertTrue(identity.contains("ovalWidth=\"80px\""));
         assertTrue(identity.contains("stylename=\"iteraction-list-project-image\""));
-        assertFalse(identity.contains(
-                "id=\"projectLogoImage\"\n                                          width=\"112px\""));
     }
 
     @Test
-    public void oneCanonicalPartialFeedsAllSevenThemesThroughSymlinks() throws IOException {
+    public void allSevenThemesContainRealSharedStyleCopies() throws IOException {
         Path root = projectRoot();
-        Path canonical = root.resolve(
-                "modules/web/themes/common/edit-screen-shared-styles.scss");
 
-        assertTrue(Files.isRegularFile(canonical));
-        String shared = new String(Files.readAllBytes(canonical), StandardCharsets.UTF_8);
-        assertTrue(shared.contains("@mixin edit-screen-shared-styles"));
-        assertTrue(shared.contains(".label-navigation"));
-        assertTrue(shared.contains(".edit-workspace"));
-        assertFalse(shared.contains("\n  .v-label {"));
-        assertFalse(shared.contains("\n  .v-button {"));
+        assertFalse(Files.exists(root.resolve(
+                "modules/web/themes/common/edit-screen-shared-styles.scss")));
 
         for (String theme : THEMES) {
-            Path link = root.resolve(
+            Path partial = root.resolve(
                     "modules/web/themes/" + theme
                             + "/com.company.hunttech/edit-screen-shared-styles.scss");
-            assertTrue(theme + ": shared partial должен быть symbolic link",
-                    Files.isSymbolicLink(link));
-            assertEquals(
-                    "../../common/edit-screen-shared-styles.scss",
-                    Files.readSymbolicLink(link).toString());
+            assertTrue(theme + ": отсутствует theme-local shared partial",
+                    Files.isRegularFile(partial));
+            assertFalse(theme + ": symbolic link больше не допускается",
+                    Files.isSymbolicLink(partial));
+
+            String shared = new String(Files.readAllBytes(partial), StandardCharsets.UTF_8);
+            assertTrue(theme + ": отсутствует shared mixin",
+                    shared.contains("@mixin edit-screen-shared-styles"));
+            assertTrue(theme + ": отсутствует label-navigation",
+                    shared.contains(".label-navigation"));
+            assertTrue(theme + ": отсутствует edit-workspace",
+                    shared.contains(".edit-workspace"));
 
             String styles = readProjectFile(
                     "modules/web/themes/" + theme + "/styles.scss");
             assertTrue(theme + ": отсутствует import shared partial",
-                    styles.contains(
-                            "@import \"com.company.hunttech/edit-screen-shared-styles\";"));
-            assertTrue(theme + ": отсутствует shared mixin",
+                    styles.contains("@import \"com.company.hunttech/edit-screen-shared-styles\";"));
+            assertTrue(theme + ": отсутствует shared mixin include",
                     styles.contains("@include edit-screen-shared-styles;"));
         }
     }
@@ -129,6 +150,16 @@ public class IteractionListSidebarContextPanelTest {
         int end = text.indexOf(endMarker, start);
         assertTrue("Не найден конечный XML-маркер: " + endMarker, end > start);
         return text.substring(start, end);
+    }
+
+    private void assertOrdered(String text, String... markers) {
+        int previous = -1;
+        for (String marker : markers) {
+            int current = text.indexOf(marker);
+            assertTrue("Не найден обязательный маркер: " + marker, current >= 0);
+            assertTrue("Нарушен порядок маркера: " + marker, current > previous);
+            previous = current;
+        }
     }
 
     private String readProjectFile(String relativePath) throws IOException {

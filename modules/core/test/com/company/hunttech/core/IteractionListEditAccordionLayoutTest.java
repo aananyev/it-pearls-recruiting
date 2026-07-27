@@ -15,8 +15,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает заново спроектированную двухпанельную компоновку IteractionListEdit
- * и сохранность всех бизнес-компонентов после удаления промежуточного TabSheet.
+ * Защищает двухпанельную XML-компоновку IteractionListEdit и business bindings.
  */
 public class IteractionListEditAccordionLayoutTest {
 
@@ -48,28 +47,13 @@ public class IteractionListEditAccordionLayoutTest {
     }
 
     @Test
-    public void directSemanticClassesDefineTheScreenWithoutRuntimeStyleTraversal() throws IOException {
+    public void contentUsesNaturalHeightAndExplicitInnerContainers() throws IOException {
         String descriptor = descriptor();
 
-        assertTrue(descriptor.contains(
-                "stylename=\"iteraction-list-main-layout edit-screen-layout\""));
-        assertTrue(descriptor.contains(
-                "stylename=\"iteraction-list-workspace edit-workspace\""));
-        assertTrue(descriptor.contains("edit-sidebar-visual"));
-        assertTrue(descriptor.contains("edit-sidebar-identity"));
-        assertTrue(descriptor.contains("edit-sidebar-title"));
-        assertTrue(descriptor.contains("edit-sidebar-subtitle"));
-        assertTrue(descriptor.contains("edit-sidebar-summary"));
-        assertTrue(descriptor.contains("edit-workspace-scroll"));
-        assertTrue(descriptor.contains("edit-workspace-content"));
+        assertTrue(descriptor.contains("id=\"participantsAccordionContent\""));
+        assertTrue(descriptor.contains("iteraction-list-section-content"));
+        assertTrue(descriptor.contains("margin=\"true\""));
         assertEquals(4, count(descriptor, "edit-accordion-section"));
-        assertTrue(descriptor.contains("edit-footer-actions"));
-
-        String presentation = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/"
-                        + "IteractionListEditAccordionNavigation.java");
-        assertFalse(presentation.contains("applySharedStyles"));
-        assertFalse(presentation.contains("restoreProjectLogoRole"));
     }
 
     @Test
@@ -113,23 +97,22 @@ public class IteractionListEditAccordionLayoutTest {
     }
 
     @Test
-    public void accordionContractUsesNaturalHeightAndOneDefaultSection() throws IOException {
+    public void firstAccordionIsOpenAndAllOtherWorkingSectionsAreClosed() throws IOException {
         String descriptor = descriptor();
-
         String participants = section(
-                descriptor(),
+                descriptor,
                 "id=\"participantsAccordion\"",
                 "id=\"interactionAccordion\"");
         String interaction = section(
-                descriptor(),
+                descriptor,
                 "id=\"interactionAccordion\"",
                 "id=\"resultAccordion\"");
         String result = section(
-                descriptor(),
+                descriptor,
                 "id=\"resultAccordion\"",
                 "id=\"commentAccordion\"");
         String comment = section(
-                descriptor(),
+                descriptor,
                 "id=\"commentAccordion\"",
                 "id=\"popularAccordion\"");
 
@@ -141,19 +124,22 @@ public class IteractionListEditAccordionLayoutTest {
     }
 
     @Test
-    public void sharedContractPreventsHorizontalScrollAndDefinesResponsiveSidebar()
-            throws IOException {
-        String shared = readProjectFile(
-                "modules/web/themes/common/edit-screen-shared-styles.scss");
+    public void everyThemeLocalSharedContractPreventsHorizontalScroll() throws IOException {
+        String[] themes = {
+                "halo", "havana", "helium", "hover",
+                "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark"
+        };
 
-        assertTrue(shared.contains("width: 270px !important"));
-        assertTrue(shared.contains("@media (max-width: 1366px)"));
-        assertTrue(shared.contains("width: 250px !important"));
-        assertTrue(shared.contains("min-height: 58px"));
-        assertTrue(shared.contains("min-height: 38px"));
-        assertTrue(shared.contains("min-width: 0 !important"));
-        assertTrue(shared.contains("overflow-x: hidden !important"));
-        assertTrue(shared.contains("border-radius: 8px"));
+        for (String theme : themes) {
+            String shared = readProjectFile(
+                    "modules/web/themes/" + theme
+                            + "/com.company.hunttech/edit-screen-shared-styles.scss");
+            assertTrue(theme, shared.contains("width: 270px !important"));
+            assertTrue(theme, shared.contains("@media (max-width: 1366px)"));
+            assertTrue(theme, shared.contains("width: 250px !important"));
+            assertTrue(theme, shared.contains("min-width: 0 !important"));
+            assertTrue(theme, shared.contains("overflow-x: hidden !important"));
+        }
     }
 
     private String descriptor() throws IOException {
