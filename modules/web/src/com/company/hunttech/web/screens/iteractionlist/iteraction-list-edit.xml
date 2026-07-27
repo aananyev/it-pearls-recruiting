@@ -122,8 +122,7 @@
                                           stylename="iteraction-list-project-image"
                                           scaleMode="SCALE_DOWN"/>
                     </hbox>
-                    <!-- Наименование экземпляра читается из того же dataContainer;
-                         новые loader, query или Java-обработчики не требуются. -->
+                    <!-- Наименование экземпляра читается из того же dataContainer. -->
                     <label id="iteractionCandidateNameLabel"
                            dataContainer="iteractionListDc"
                            property="candidate.fullName"
@@ -365,11 +364,13 @@
                                    height="100%"
                                    stylename="iteraction-list-scroll">
                             <vbox width="100%"
+                                  height="AUTO"
                                   spacing="true"
                                   stylename="iteraction-list-content">
                                 <groupBox id="participantsAccordion"
                                           caption="msg://msgAccordionParticipants"
                                           width="100%"
+                                          height="AUTO"
                                           spacing="true"
                                           margin="true"
                                           collapsable="true"
@@ -377,9 +378,13 @@
                                           visible="true"
                                           showAsPanel="true"
                                           stylename="iteraction-list-accordion-section iteraction-list-form-section iteraction-list-participants-section">
+                                    <!-- Кандидат и вакансия занимают одну строку одинаковой высоты.
+                                         Фильтр подписок вынесен ниже GridLayout, чтобы его slot не
+                                         перекрывал следующий заголовок GroupBox в CUBA 7.3. -->
                                     <grid id="gridIterationData"
                                           spacing="true"
                                           width="100%"
+                                          height="AUTO"
                                           stylename="iteraction-list-form-grid">
                                         <columns>
                                             <column flex="1"/>
@@ -401,6 +406,7 @@
                                                         <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                                     </actions>
                                                     <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                                           view="jobCandidate-iteraction-list-suggestion-view"
                                                            escapeValueForLike="true"
                                                            searchStringFormat="%$searchString%">
                                                         select e
@@ -411,34 +417,32 @@
                                                         order by e.secondName, e.firstName
                                                     </query>
                                                 </suggestionPickerField>
-                                                <vbox spacing="true"
-                                                      width="100%"
-                                                      stylename="iteraction-list-vacancy-column">
-                                                    <lookupPickerField id="vacancyFiels"
-                                                                       caption="mainMsg://msgVacancy"
-                                                                       dataContainer="iteractionListDc"
-                                                                       optionsContainer="openPositionDc"
-                                                                       property="vacancy"
-                                                                       stylename="iteraction-list-primary-picker"
-                                                                       width="100%">
-                                                        <actions>
-                                                            <action id="lookup" type="picker_lookup"/>
-                                                            <action id="open" type="picker_open" icon="EDIT_ACTION"/>
-                                                        </actions>
-                                                    </lookupPickerField>
-                                                    <checkBox id="onlyMySubscribeCheckBox"
-                                                              align="TOP_LEFT"
-                                                              width="AUTO"
-                                                              description="msg://msgOnlyMySebscribeDec"
-                                                              caption="msg://msgOnlyMySubscribe"/>
-                                                </vbox>
+                                                <lookupPickerField id="vacancyFiels"
+                                                                   caption="mainMsg://msgVacancy"
+                                                                   dataContainer="iteractionListDc"
+                                                                   optionsContainer="openPositionDc"
+                                                                   property="vacancy"
+                                                                   stylename="iteraction-list-primary-picker"
+                                                                   width="100%">
+                                                    <actions>
+                                                        <action id="lookup" type="picker_lookup"/>
+                                                        <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                                                    </actions>
+                                                </lookupPickerField>
                                             </row>
                                         </rows>
                                     </grid>
+                                    <checkBox id="onlyMySubscribeCheckBox"
+                                              align="MIDDLE_LEFT"
+                                              width="100%"
+                                              description="msg://msgOnlyMySebscribeDec"
+                                              caption="msg://msgOnlyMySubscribe"
+                                              stylename="iteraction-list-subscription-filter"/>
                                 </groupBox>
                                 <groupBox id="interactionAccordion"
                                           caption="msg://msgAccordionInteraction"
                                           width="100%"
+                                          height="AUTO"
                                           spacing="true"
                                           margin="true"
                                           collapsable="true"
@@ -450,6 +454,7 @@
                                     <grid id="interactionAccordionGrid"
                                           spacing="true"
                                           width="100%"
+                                          height="AUTO"
                                           stylename="iteraction-list-form-grid iteraction-list-single-column-grid">
                                         <columns>
                                             <column flex="1"/>
@@ -500,6 +505,7 @@
                                 <groupBox id="resultAccordion"
                                           caption="msg://msgAccordionResult"
                                           width="100%"
+                                          height="AUTO"
                                           spacing="true"
                                           margin="true"
                                           collapsable="true"
@@ -509,6 +515,7 @@
                                     <grid id="resultAccordionGrid"
                                           spacing="true"
                                           width="100%"
+                                          height="AUTO"
                                           stylename="iteraction-list-form-grid">
                                         <columns>
                                             <column flex="1"/>
@@ -549,6 +556,7 @@
                                 <groupBox id="commentAccordion"
                                           caption="msg://msgAccordionComment"
                                           width="100%"
+                                          height="AUTO"
                                           spacing="true"
                                           margin="true"
                                           collapsable="true"
@@ -566,6 +574,7 @@
                                 <groupBox id="popularAccordion"
                                           caption="msg://mshMostPopular"
                                           width="100%"
+                                          height="AUTO"
                                           spacing="true"
                                           margin="true"
                                           collapsable="true"

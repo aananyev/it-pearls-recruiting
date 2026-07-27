@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
+    <!--
+      Узкий граф используется только фоновым suggestion-поиском IteractionListEdit.
+      Он содержит атрибуты, которые читаются обработчиками после выбора кандидата,
+      и не загружает коллекции резюме, взаимодействий, навыков и договоров.
+    -->
+    <view entity="hunttech_JobCandidate"
+          name="jobCandidate-iteraction-list-suggestion-view"
+          extends="_minimal">
+        <property name="fullName"/>
+        <property name="firstName"/>
+        <property name="middleName"/>
+        <property name="secondName"/>
+        <property name="email"/>
+        <property name="status"/>
+        <property name="blockCandidate"/>
+        <property name="fileImageFace" view="_minimal"/>
+        <property name="personPosition" view="position-picker-view"/>
+        <property name="cityOfResidence" view="city-picker-view"/>
+    </view>
+</views>
