@@ -72,7 +72,11 @@ public class DatabaseSchemaReconciliationChangelogTest {
     }
 
     private static String readProjectFile(String relativePath) throws IOException {
-        Path path = Paths.get(relativePath);
+        Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
+        while (root != null && !Files.exists(root.resolve("build.gradle"))) {
+            root = root.getParent();
+        }
+        Path path = root.resolve(relativePath);
         return new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
     }
 
