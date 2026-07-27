@@ -1,25 +1,35 @@
 package com.company.hunttech.web.screens.iteractionlist;
 
 import com.haulmont.cuba.gui.UiComponents;
-import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.GroupBoxLayout;
+import com.haulmont.cuba.gui.components.HBoxLayout;
+import com.haulmont.cuba.gui.components.LookupField;
+import com.haulmont.cuba.gui.components.LookupPickerField;
+import com.haulmont.cuba.gui.components.SuggestionPickerField;
+import com.haulmont.cuba.gui.components.TextArea;
+import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.screen.EditedEntityContainer;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.MessageBundle;
 import com.haulmont.cuba.gui.screen.Screen.AfterShowEvent;
+import com.haulmont.cuba.gui.screen.Screen.InitEvent;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
-import com.hunttech.hrm.gui.components.OvaFallbackImage;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Presentation-расширение основного экрана взаимодействия.
+ * Presentation-контроллер заново спроектированного IteractionListEdit.
  *
- * Базовый {@link IteractionListEdit} сохраняет бизнес-логику загрузки,
- * валидации и сохранения. Расширение применяет общий визуальный контракт
- * Edit-экранов, строит доступную label-навигацию и дополняет блок частых
- * действий до пяти визуальных позиций.
+ * Базовый {@link IteractionListEdit} остаётся единственным владельцем загрузки,
+ * валидации, динамических полей, подписок, сохранения и исторического сервиса
+ * быстрых взаимодействий. Этот класс управляет только label-навигацией,
+ * состояниями аккордеонов и пятью стабильными визуальными позициями.
  */
 @UiController("hunttech_IteractionList.edit")
 @UiDescriptor("iteraction-list-edit.xml")
@@ -30,9 +40,9 @@ public class IteractionListEditAccordionNavigation extends IteractionListEdit {
     private static final int POPULAR_INTERACTION_BUTTONS = 5;
     private static final String NAVIGATION_STYLE = "borderless label-nav-item";
     private static final String ACTIVE_NAVIGATION_STYLE = "label-nav-item-active";
+    private static final String POPULAR_BUTTON_STYLE = "iteraction-list-popular-button";
+    private static final String EMPTY_POPULAR_CAPTION = "Нет данных";
 
-    @Inject
-    private HBoxLayout iteractionListMainLayout;
     @Inject
     private VBoxLayout iteractionListNavigation;
     @Inject
@@ -44,8 +54,6 @@ public class IteractionListEditAccordionNavigation extends IteractionListEdit {
     @Inject
     private GroupBoxLayout commentAccordion;
     @Inject
-    private GroupBoxLayout popularAccordion;
-    @Inject
     private SuggestionPickerField candidateField;
     @Inject
     private LookupPickerField iteractionTypeField;
@@ -56,8 +64,6 @@ public class IteractionListEditAccordionNavigation extends IteractionListEdit {
     @Inject
     private HBoxLayout mostPopularHbox;
     @Inject
-    private OvaFallbackImage projectLogoImage;
-    @Inject
     private UiComponents uiComponents;
     @Inject
     private MessageBundle messageBundle;
@@ -66,136 +72,89 @@ public class IteractionListEditAccordionNavigation extends IteractionListEdit {
     private Button interactionNavigationButton;
     private Button resultNavigationButton;
     private Button commentNavigationButton;
-    private Button popularNavigationButton;
 
-    // Флаг предотвращает рекурсивные события GroupBox при синхронизации
-    // пользовательского клика и штатного ExpandedStateChangeListener CUBA.
-    private boolean updatingSharedNavigation;
-    private boolean sharedNavigationInitialized;
+    // Флаг исключает рекурсивные ExpandedStateChangeEvent при синхронизации
+    // пользовательского клика, ручного раскрытия GroupBox и active-state.
+    private boolean updatingAccordionState;
+    private boolean navigationInitialized;
 
     /**
-     * Запускается после базового BeforeShow: реальные быстрые действия уже
-     * созданы, а XML-компоненты доступны для безопасной presentation-адаптации.
+     * Отключает legacy presentation-инициализацию базового контроллера.
+     * Бизнес lifecycle не затрагивается: переопределён только обработчик,
+     * который ранее создавал пять навигационных пунктов, включая быстрые кнопки.
+     */
+    @Override
+    @Subscribe
+    protected void onInitIteractionNavigation(InitEvent event) {
+        // Новая label-навигация строится после создания XML-компонентов.
+    }
+
+    /**
+     * Выполняется после базового BeforeShow: сервис уже создал кнопки для точных
+     * Iteraction, поэтому presentation-слой может безопасно оформить позиции
+     * и дополнить отсутствующие disabled-заглушками без бизнес-listener.
      */
     @Subscribe
-    protected void onAfterShowApplyEditScreenContract(AfterShowEvent event) {
-        applySharedStyles(iteractionListMainLayout);
-        restoreProjectLogoRole();
-        rebuildSharedNavigation();
-        ensureFivePopularButtons();
+    protected void onAfterShowInitializePresentation(AfterShowEvent event) {
+        initializeNavigation();
+        normalizePopularButtons();
     }
 
     /**
-     * Добавляет общие semantic stylename поверх локального namespace экрана.
-     * Component ID, bindings, loaders и значения сущности не изменяются.
+     * Создаёт пункты только для четырёх реальных рабочих аккордеонов.
+     * Быстрые действия постоянно видимы над scroll-area и не являются разделом.
      */
-    private void applySharedStyles(Component component) {
-        addSharedStyle(component, "iteraction-list-main-layout", "edit-screen-layout");
-        addSharedStyle(component, "iteraction-list-sidebar", "edit-sidebar");
-        addSharedStyle(component, "iteraction-list-identity-images", "edit-sidebar-visual");
-        addSharedStyle(component, "iteraction-list-profile-header", "edit-sidebar-identity");
-        addSharedStyle(component, "iteraction-list-profile-title", "edit-sidebar-title");
-        addSharedStyle(component, "iteraction-list-profile-subtitle", "edit-sidebar-subtitle");
-        addSharedStyle(component, "iteraction-list-sidebar-card", "edit-sidebar-summary");
-        addSharedStyle(component, "iteraction-list-sidebar-warning", "edit-sidebar-warning");
-        addSharedStyle(component, "iteraction-list-sidebar-spacer", "edit-sidebar-spacer");
-        addSharedStyle(component, "iteraction-list-workspace", "edit-workspace");
-        addSharedStyle(component, "iteraction-list-toolbar", "edit-toolbar");
-        addSharedStyle(component, "iteraction-list-toolbar-title", "edit-toolbar-title");
-        addSharedStyle(component, "iteraction-list-toolbar-context", "edit-toolbar-description");
-        addSharedStyle(component, "iteraction-list-quick-actions", "edit-card");
-        addSharedStyle(component, "iteraction-list-quick-actions-title", "edit-card-title");
-        addSharedStyle(component, "iteraction-list-tabs", "edit-tabs");
-        addSharedStyle(component, "iteraction-list-scroll", "edit-workspace-scroll");
-        addSharedStyle(component, "iteraction-list-content", "edit-workspace-content");
-        addSharedStyle(component, "iteraction-list-accordion-section", "edit-accordion-section");
-        addSharedStyle(component, "iteraction-list-footer", "edit-footer-actions");
-        addSharedStyle(component, "iteraction-list-footer-actions", "edit-toolbar-actions");
-
-        if (component instanceof ComponentContainer) {
-            for (Component child : ((ComponentContainer) component).getOwnComponents()) {
-                applySharedStyles(child);
-            }
-        }
-    }
-
-    private void addSharedStyle(Component component, String localStyle, String sharedStyle) {
-        String styleName = component.getStyleName();
-        if (styleName != null && containsStyle(styleName, localStyle)) {
-            component.addStyleName(sharedStyle);
-        }
-    }
-
-    private boolean containsStyle(String styleName, String expectedStyle) {
-        for (String token : styleName.split("\\s+")) {
-            if (expectedStyle.equals(token)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Возвращает проектному логотипу отдельную визуальную роль: он остаётся
-     * информативным, но не конкурирует с основной фотографией кандидата.
-     */
-    private void restoreProjectLogoRole() {
-        projectLogoImage.removeStyleName("iteraction-list-candidate-image");
-        projectLogoImage.addStyleName("iteraction-list-project-image");
-        projectLogoImage.setWidth("80px");
-        projectLogoImage.setHeight("80px");
-        projectLogoImage.setOvalWidth("80px");
-        projectLogoImage.setOvalHeight("80px");
-    }
-
-    /**
-     * Заменяет legacy runtime-кнопки базового контроллера общими label-кнопками.
-     * Навигация управляет только раскрытием, active-state и keyboard focus.
-     */
-    private void rebuildSharedNavigation() {
-        if (sharedNavigationInitialized) {
+    private void initializeNavigation() {
+        if (navigationInitialized) {
             return;
         }
 
         Component navigationTitle = iteractionListNavigation.getComponent(0);
         iteractionListNavigation.removeAll();
-        navigationTitle.removeStyleName("iteraction-list-navigation-title");
         navigationTitle.addStyleName("label-nav-title");
         iteractionListNavigation.add(navigationTitle);
 
-        participantsNavigationButton = createSharedNavigationButton(
-                "participantsAccordionNav", "msgAccordionParticipants",
-                () -> selectSharedAccordion(participantsAccordion,
-                        participantsNavigationButton, candidateField::focus));
-        interactionNavigationButton = createSharedNavigationButton(
-                "interactionAccordionNav", "msgAccordionInteraction",
-                () -> selectSharedAccordion(interactionAccordion,
-                        interactionNavigationButton, iteractionTypeField::focus));
-        resultNavigationButton = createSharedNavigationButton(
-                "resultAccordionNav", "msgAccordionResult",
-                () -> selectSharedAccordion(resultAccordion,
-                        resultNavigationButton, ratingField::focus));
-        commentNavigationButton = createSharedNavigationButton(
-                "commentAccordionNav", "msgAccordionComment",
-                () -> selectSharedAccordion(commentAccordion,
-                        commentNavigationButton, commentField::focus));
-        popularNavigationButton = createSharedNavigationButton(
-                "popularAccordionNav", "mshMostPopular",
-                () -> selectSharedAccordion(popularAccordion,
-                        popularNavigationButton, this::focusFirstPopularButton));
+        participantsNavigationButton = createNavigationButton(
+                "participantsAccordionNav",
+                "msgAccordionParticipants",
+                () -> selectAccordion(
+                        participantsAccordion,
+                        participantsNavigationButton,
+                        candidateField::focus));
+        interactionNavigationButton = createNavigationButton(
+                "interactionAccordionNav",
+                "msgAccordionInteraction",
+                () -> selectAccordion(
+                        interactionAccordion,
+                        interactionNavigationButton,
+                        iteractionTypeField::focus));
+        resultNavigationButton = createNavigationButton(
+                "resultAccordionNav",
+                "msgAccordionResult",
+                () -> selectAccordion(
+                        resultAccordion,
+                        resultNavigationButton,
+                        ratingField::focus));
+        commentNavigationButton = createNavigationButton(
+                "commentAccordionNav",
+                "msgAccordionComment",
+                () -> selectAccordion(
+                        commentAccordion,
+                        commentNavigationButton,
+                        commentField::focus));
 
         iteractionListNavigation.add(participantsNavigationButton);
         iteractionListNavigation.add(interactionNavigationButton);
         iteractionListNavigation.add(resultNavigationButton);
         iteractionListNavigation.add(commentNavigationButton);
-        iteractionListNavigation.add(popularNavigationButton);
 
-        attachSharedAccordionListeners();
-        updateSharedNavigationStyles(participantsNavigationButton);
-        sharedNavigationInitialized = true;
+        attachAccordionListeners();
+        selectAccordion(participantsAccordion, participantsNavigationButton, () -> {
+        });
+        navigationInitialized = true;
     }
 
-    private Button createSharedNavigationButton(String id, String messageKey, Runnable handler) {
+    private Button createNavigationButton(String id, String messageKey, Runnable handler) {
         Button button = uiComponents.create(Button.class);
         button.setId(id);
         button.setCaption(messageBundle.getMessage(messageKey));
@@ -205,57 +164,65 @@ public class IteractionListEditAccordionNavigation extends IteractionListEdit {
         return button;
     }
 
-    private void attachSharedAccordionListeners() {
+    /**
+     * Ручное раскрытие заголовком выбирает тот же раздел, сворачивает остальные
+     * и синхронизирует active-state. Флаг предотвращает повторный вход listener.
+     */
+    private void attachAccordionListeners() {
         participantsAccordion.addExpandedStateChangeListener(event ->
-                synchronizeSharedNavigation(participantsAccordion, participantsNavigationButton));
+                synchronizeExpandedAccordion(participantsAccordion, participantsNavigationButton));
         interactionAccordion.addExpandedStateChangeListener(event ->
-                synchronizeSharedNavigation(interactionAccordion, interactionNavigationButton));
+                synchronizeExpandedAccordion(interactionAccordion, interactionNavigationButton));
         resultAccordion.addExpandedStateChangeListener(event ->
-                synchronizeSharedNavigation(resultAccordion, resultNavigationButton));
+                synchronizeExpandedAccordion(resultAccordion, resultNavigationButton));
         commentAccordion.addExpandedStateChangeListener(event ->
-                synchronizeSharedNavigation(commentAccordion, commentNavigationButton));
-        popularAccordion.addExpandedStateChangeListener(event ->
-                synchronizeSharedNavigation(popularAccordion, popularNavigationButton));
+                synchronizeExpandedAccordion(commentAccordion, commentNavigationButton));
     }
 
-    private void synchronizeSharedNavigation(GroupBoxLayout accordion, Button navigationButton) {
-        if (!updatingSharedNavigation && accordion.isExpanded()) {
-            updateSharedNavigationStyles(navigationButton);
+    private void synchronizeExpandedAccordion(GroupBoxLayout accordion, Button navigationButton) {
+        if (!updatingAccordionState && accordion.isExpanded()) {
+            selectAccordion(accordion, navigationButton, () -> {
+            });
         }
     }
 
-    private void selectSharedAccordion(GroupBoxLayout selectedAccordion,
-                                       Button selectedNavigationButton,
-                                       Runnable focusHandler) {
-        updatingSharedNavigation = true;
+    /**
+     * Меняет только presentation-state. Метод не пишет entity, не запускает
+     * loader, не обращается к сервисам и не выполняет commit.
+     */
+    private void selectAccordion(GroupBoxLayout selectedAccordion,
+                                 Button selectedNavigationButton,
+                                 Runnable focusHandler) {
+        updatingAccordionState = true;
         try {
             participantsAccordion.setExpanded(participantsAccordion == selectedAccordion);
             interactionAccordion.setExpanded(interactionAccordion == selectedAccordion);
             resultAccordion.setExpanded(resultAccordion == selectedAccordion);
             commentAccordion.setExpanded(commentAccordion == selectedAccordion);
-            popularAccordion.setExpanded(popularAccordion == selectedAccordion);
-            updateSharedNavigationStyles(selectedNavigationButton);
+            updateNavigationStyles(selectedNavigationButton);
         } finally {
-            updatingSharedNavigation = false;
+            updatingAccordionState = false;
         }
         focusHandler.run();
     }
 
     /**
-     * Базовый `label-nav-item` сохраняется постоянно; меняется только
-     * `label-nav-item-active`, как требует общий контракт Edit-экранов.
+     * Базовый `label-nav-item` сохраняется постоянно; добавляется или удаляется
+     * только состояние `label-nav-item-active`.
      */
-    private void updateSharedNavigationStyles(Button selectedNavigationButton) {
-        setNavigationActive(participantsNavigationButton,
+    private void updateNavigationStyles(Button selectedNavigationButton) {
+        setNavigationActive(
+                participantsNavigationButton,
                 participantsNavigationButton == selectedNavigationButton);
-        setNavigationActive(interactionNavigationButton,
+        setNavigationActive(
+                interactionNavigationButton,
                 interactionNavigationButton == selectedNavigationButton);
-        setNavigationActive(resultNavigationButton,
+        setNavigationActive(
+                resultNavigationButton,
                 resultNavigationButton == selectedNavigationButton);
-        setNavigationActive(commentNavigationButton,
+        setNavigationActive(
+                commentNavigationButton,
                 commentNavigationButton == selectedNavigationButton);
-        setNavigationActive(popularNavigationButton,
-                popularNavigationButton == selectedNavigationButton);
     }
 
     private void setNavigationActive(Button button, boolean active) {
@@ -267,32 +234,45 @@ public class IteractionListEditAccordionNavigation extends IteractionListEdit {
         }
     }
 
-    private void focusFirstPopularButton() {
-        for (Component component : mostPopularHbox.getOwnComponents()) {
-            if (component instanceof Button && component.isEnabled()) {
-                ((Button) component).focus();
-                return;
-            }
-        }
-    }
-
     /**
-     * Выполняется после базового BeforeShow, когда реальные кнопки уже созданы.
-     * Пустые позиции не имеют listener и не могут изменить редактируемую сущность.
+     * Сохраняет точные Iteraction и listeners кнопок, созданных базовым
+     * контроллером. Недостающие позиции не имеют click listener, disabled
+     * и потому не могут изменить field value или DataContext.
      */
-    private void ensureFivePopularButtons() {
-        int currentButtonCount = mostPopularHbox.getOwnComponents().size();
+    private void normalizePopularButtons() {
+        List<Component> currentComponents =
+                new ArrayList<>(mostPopularHbox.getOwnComponents());
 
-        while (currentButtonCount < POPULAR_INTERACTION_BUTTONS) {
+        int visiblePosition = 0;
+        for (Component component : currentComponents) {
+            if (!(component instanceof Button)) {
+                mostPopularHbox.remove(component);
+                continue;
+            }
+            if (visiblePosition >= POPULAR_INTERACTION_BUTTONS) {
+                mostPopularHbox.remove(component);
+                continue;
+            }
+
+            Button button = (Button) component;
+            button.addStyleName(POPULAR_BUTTON_STYLE);
+            button.setWidth("100%");
+            button.setDescription(button.getCaption());
+            mostPopularHbox.expand(button);
+            visiblePosition++;
+        }
+
+        while (visiblePosition < POPULAR_INTERACTION_BUTTONS) {
             Button emptyButton = uiComponents.create(Button.class);
             emptyButton.setWidth("100%");
-            emptyButton.setStyleName("iteraction-list-popular-button");
-            emptyButton.setCaption("Нет данных");
+            emptyButton.setStyleName(POPULAR_BUTTON_STYLE);
+            emptyButton.setCaption(EMPTY_POPULAR_CAPTION);
+            emptyButton.setDescription(EMPTY_POPULAR_CAPTION);
             emptyButton.setEnabled(false);
 
             mostPopularHbox.add(emptyButton);
             mostPopularHbox.expand(emptyButton);
-            currentButtonCount++;
+            visiblePosition++;
         }
     }
 }
