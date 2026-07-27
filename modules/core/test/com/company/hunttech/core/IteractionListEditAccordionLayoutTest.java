@@ -15,67 +15,78 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает фактическую компоновку IteractionListEdit и сохранность всех
- * бизнес-компонентов после миграции на общий контракт Edit-экранов.
+ * Защищает заново спроектированную двухпанельную компоновку IteractionListEdit
+ * и сохранность всех бизнес-компонентов после удаления промежуточного TabSheet.
  */
 public class IteractionListEditAccordionLayoutTest {
 
     @Test
-    public void descriptorContainsContextQuickActionsTabsAndAccordions() throws Exception {
+    public void descriptorParsesAndFollowsEditScreenOrder() throws Exception {
         Path descriptorPath = projectRoot().resolve(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
-        DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(descriptorPath.toFile());
-        String descriptor = descriptor();
+        DocumentBuilderFactory.newInstance()
+                .newDocumentBuilder()
+                .parse(descriptorPath.toFile());
 
+        String descriptor = descriptor();
         assertOrdered(descriptor,
-                "stylename=\"iteraction-list-sidebar\"",
-                "stylename=\"iteraction-list-profile-header\"",
-                "id=\"iteractionCandidateNameLabel\"",
-                "id=\"iteractionVacancyNameLabel\"",
-                "id=\"iteractionListNavigation\"",
+                "id=\"iteractionListMainLayout\"",
+                "stylename=\"iteraction-list-sidebar edit-sidebar\"",
                 "id=\"iteractionListWorkspace\"",
-                "stylename=\"iteraction-list-toolbar\"",
+                "stylename=\"iteraction-list-toolbar edit-toolbar\"",
                 "id=\"mostPopularQuickActions\"",
                 "id=\"mostPopularHbox\"",
-                "id=\"iteractionListTabSheeet\"",
                 "id=\"iteractionListContentScrollBox\"",
                 "id=\"participantsAccordion\"",
                 "id=\"interactionAccordion\"",
                 "id=\"resultAccordion\"",
                 "id=\"commentAccordion\"",
-                "id=\"popularAccordion\"",
                 "id=\"editActions\"");
+        assertFalse(descriptor.contains("<tabSheet"));
+        assertFalse(descriptor.contains("id=\"iteractionListTabSheeet\""));
         assertEquals(1, count(descriptor, "id=\"mostPopularHbox\""));
-        assertFalse(descriptor.contains("id=\"iteractionListSectionLayout\""));
     }
 
     @Test
-    public void candidateAndVacancyUseTwoExplicitFlexColumns() throws IOException {
-        String participants = section(descriptor(),
-                "id=\"participantsAccordion\"", "id=\"interactionAccordion\"");
-
-        assertEquals(2, count(participants, "<column flex=\"1\"/>"));
-        assertEquals(2, count(participants, "stylename=\"iteraction-list-primary-picker\""));
-        assertOrdered(participants, "id=\"candidateField\"", "id=\"vacancyFiels\"");
-        assertTrue(participants.contains("property=\"candidate\""));
-        assertTrue(participants.contains("property=\"vacancy\""));
-        assertTrue(participants.contains("id=\"onlyMySubscribeCheckBox\""));
-    }
-
-    @Test
-    public void quickActionsRemainVisibleBetweenToolbarAndTabs() throws IOException {
+    public void directSemanticClassesDefineTheScreenWithoutRuntimeStyleTraversal() throws IOException {
         String descriptor = descriptor();
 
-        assertOrdered(descriptor,
-                "stylename=\"iteraction-list-toolbar\"",
-                "id=\"mostPopularQuickActions\"",
-                "id=\"iteractionListTabSheeet\"",
-                "id=\"participantsAccordion\"");
-        String quickActions = section(descriptor,
-                "id=\"mostPopularQuickActions\"", "id=\"iteractionListTabSheeet\"");
-        assertTrue(quickActions.contains("value=\"msg://mshMostPopular\""));
-        assertTrue(quickActions.contains("id=\"mostPopularHbox\""));
-        assertFalse(quickActions.contains("visible=\"false\""));
+        assertTrue(descriptor.contains(
+                "stylename=\"iteraction-list-main-layout edit-screen-layout\""));
+        assertTrue(descriptor.contains(
+                "stylename=\"iteraction-list-workspace edit-workspace\""));
+        assertTrue(descriptor.contains("edit-sidebar-visual"));
+        assertTrue(descriptor.contains("edit-sidebar-identity"));
+        assertTrue(descriptor.contains("edit-sidebar-title"));
+        assertTrue(descriptor.contains("edit-sidebar-subtitle"));
+        assertTrue(descriptor.contains("edit-sidebar-summary"));
+        assertTrue(descriptor.contains("edit-workspace-scroll"));
+        assertTrue(descriptor.contains("edit-workspace-content"));
+        assertEquals(4, count(descriptor, "edit-accordion-section"));
+        assertTrue(descriptor.contains("edit-footer-actions"));
+
+        String presentation = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/"
+                        + "IteractionListEditAccordionNavigation.java");
+        assertFalse(presentation.contains("applySharedStyles"));
+        assertFalse(presentation.contains("restoreProjectLogoRole"));
+    }
+
+    @Test
+    public void candidateAndVacancyUseTwoEqualColumnsAndSeparateSubscriptionRow()
+            throws IOException {
+        String participants = section(
+                descriptor(),
+                "id=\"participantsAccordion\"",
+                "id=\"interactionAccordion\"");
+
+        assertEquals(2, count(participants, "<column flex=\"1\"/>"));
+        assertOrdered(participants,
+                "id=\"candidateField\"",
+                "id=\"vacancyFiels\"",
+                "id=\"onlyMySubscribeCheckBox\"");
+        assertTrue(participants.contains("property=\"candidate\""));
+        assertTrue(participants.contains("property=\"vacancy\""));
     }
 
     @Test
@@ -98,17 +109,47 @@ public class IteractionListEditAccordionLayoutTest {
         assertTrue(descriptor.contains("invoke=\"onButtonSubscribeClick\""));
         assertTrue(descriptor.contains("action=\"windowCommitAndClose\""));
         assertTrue(descriptor.contains("action=\"windowClose\""));
+        assertTrue(descriptor.contains("required=\"true\""));
     }
 
     @Test
-    public void sharedContractDefinesReferenceGeometryWithoutHorizontalScroll() throws IOException {
+    public void accordionContractUsesNaturalHeightAndOneDefaultSection() throws IOException {
+        String descriptor = descriptor();
+
+        String participants = section(
+                descriptor(),
+                "id=\"participantsAccordion\"",
+                "id=\"interactionAccordion\"");
+        String interaction = section(
+                descriptor(),
+                "id=\"interactionAccordion\"",
+                "id=\"resultAccordion\"");
+        String result = section(
+                descriptor(),
+                "id=\"resultAccordion\"",
+                "id=\"commentAccordion\"");
+        String comment = section(
+                descriptor(),
+                "id=\"commentAccordion\"",
+                "id=\"popularAccordion\"");
+
+        assertTrue(participants.contains("height=\"AUTO\""));
+        assertTrue(participants.contains("collapsed=\"false\""));
+        assertTrue(interaction.contains("collapsed=\"true\""));
+        assertTrue(result.contains("collapsed=\"true\""));
+        assertTrue(comment.contains("collapsed=\"true\""));
+    }
+
+    @Test
+    public void sharedContractPreventsHorizontalScrollAndDefinesResponsiveSidebar()
+            throws IOException {
         String shared = readProjectFile(
                 "modules/web/themes/common/edit-screen-shared-styles.scss");
 
         assertTrue(shared.contains("width: 270px !important"));
+        assertTrue(shared.contains("@media (max-width: 1366px)"));
         assertTrue(shared.contains("width: 250px !important"));
         assertTrue(shared.contains("min-height: 58px"));
-        assertTrue(shared.contains("min-height: 48px"));
         assertTrue(shared.contains("min-height: 38px"));
         assertTrue(shared.contains("min-width: 0 !important"));
         assertTrue(shared.contains("overflow-x: hidden !important"));
@@ -149,7 +190,8 @@ public class IteractionListEditAccordionLayoutTest {
     }
 
     private String readProjectFile(String relativePath) throws IOException {
-        return new String(Files.readAllBytes(projectRoot().resolve(relativePath)),
+        return new String(
+                Files.readAllBytes(projectRoot().resolve(relativePath)),
                 StandardCharsets.UTF_8);
     }
 

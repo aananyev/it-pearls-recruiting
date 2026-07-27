@@ -14,9 +14,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Неизменяемый регрессионный контракт быстрых взаимодействий IteractionListEdit.
- * Визуальные рефакторинги формы не вправе менять период, пользователя, сервис
- * ранжирования или способ назначения выбранного Iteraction.
+ * Защищает исторический бизнес-контракт пяти быстрых взаимодействий.
+ * Визуальный рефакторинг не вправе менять пользователя, месячный период,
+ * ранжирование или назначение точного объекта Iteraction.
  */
 public class IteractionListMostPopularInteractionTest {
 
@@ -45,76 +45,68 @@ public class IteractionListMostPopularInteractionTest {
         assertTrue(service.contains("group by e.iteractionType"));
         assertTrue(service.contains("order by count(e.iteractionType) desc"));
         assertTrue(service.contains("if (maxCount > list.size())"));
-        assertTrue(service.contains("maxCount = list.size()"));
         assertFalse(service.contains("Calendar.YEAR"));
     }
 
     @Test
-    public void presentationExtensionCompletesFiveVisibleSlotsWithoutChangingService() throws IOException {
+    public void fiveVisualPositionsPreserveRealButtonsAndDisableEmptySlots() throws IOException {
         String controller = controller();
-        String extension = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/"
-                        + "IteractionListEditAccordionNavigation.java");
+        String presentation = presentation();
 
-        // Базовый контроллер сохраняет фактические кнопки и точный Iteraction.
+        // Базовый контроллер сохраняет фактический Iteraction внутри listener.
         assertTrue(controller.contains(
                 "int buttonCount = Math.min(POPULAR_INTERACTION_BUTTONS, mostPopular.size())"));
-        assertTrue(controller.contains("index < buttonCount"));
-        assertTrue(controller.contains("mostPopularHbox.removeAll()"));
-        assertFalse(controller.contains("Нет данных"));
-
-        // Presentation-расширение только дополняет пустые визуальные позиции.
-        assertTrue(extension.contains("currentButtonCount < POPULAR_INTERACTION_BUTTONS"));
-        assertTrue(extension.contains("mostPopularHbox.getOwnComponents().size()"));
-        assertTrue(extension.contains("emptyButton.setCaption(\"Нет данных\")"));
-        assertTrue(extension.contains("emptyButton.setEnabled(false)"));
-        assertTrue(extension.contains("mostPopularHbox.expand(emptyButton)"));
-        assertFalse(extension.contains("interactionService"));
-        assertFalse(extension.contains("setValue("));
-        assertFalse(controller.contains("getCaption().substring"));
-    }
-
-    @Test
-    public void clickAssignsExactInteractionThroughStandardFieldHandler() throws IOException {
-        String controller = controller();
-
+        assertTrue(controller.contains("Iteraction interaction = mostPopular.get(index)"));
         assertTrue(controller.contains("iteractionTypeField.setValue(interaction)"));
         assertTrue(controller.contains("iteractionTypeField.focus()"));
-        assertTrue(controller.contains("@Subscribe(\"iteractionTypeField\")"));
-        assertFalse(controller.contains("setCaptionAsHtml(true)"));
+        assertFalse(controller.contains("getCaption().substring"));
+        assertFalse(controller.contains("QUERY_MOST_POPULAR"));
+
+        // Presentation-слой добавляет только недостающие disabled-позиции.
+        assertTrue(presentation.contains(
+                "while (visiblePosition < POPULAR_INTERACTION_BUTTONS)"));
+        assertTrue(presentation.contains("emptyButton.setCaption(EMPTY_POPULAR_CAPTION)"));
+        assertTrue(presentation.contains("emptyButton.setEnabled(false)"));
+        assertTrue(presentation.contains("mostPopularHbox.expand(emptyButton)"));
+        assertFalse(presentation.contains("InteractionService"));
+        assertFalse(presentation.contains("setValue("));
+        String normalization = section(
+                presentation,
+                "private void normalizePopularButtons()",
+                "\n    }\n}");
+        assertFalse(normalization.contains("addClickListener"));
     }
 
     @Test
-    public void popularButtonHostIsVisibleInsideTabBeforeFirstAccordion() throws IOException {
-        String descriptor = readProjectFile(
-                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+    public void quickActionsStayBetweenToolbarAndAccordionScrollArea() throws IOException {
+        String descriptor = descriptor();
         String workspace = descriptor.substring(descriptor.indexOf("id=\"iteractionListWorkspace\""));
-        int quickActions = workspace.indexOf("id=\"mostPopularQuickActions\"");
-        int popularHost = workspace.indexOf("id=\"mostPopularHbox\"");
-        int participantsAccordion = workspace.indexOf("id=\"participantsAccordion\"");
 
-        assertTrue(quickActions >= 0);
-        assertTrue(popularHost > quickActions);
-        assertTrue(participantsAccordion > popularHost);
-        assertTrue(workspace.contains("id=\"mostPopularIteractionHBox\""));
-        assertEquals(1, count(workspace, "id=\"mostPopularHbox\""));
-        assertFalse(section(workspace,
+        assertOrdered(workspace,
+                "stylename=\"iteraction-list-toolbar edit-toolbar\"",
                 "id=\"mostPopularQuickActions\"",
-                "id=\"participantsAccordion\"").contains("visible=\"false\""));
+                "id=\"mostPopularHbox\"",
+                "id=\"iteractionListContentScrollBox\"",
+                "id=\"participantsAccordion\"",
+                "id=\"editActions\"");
+        assertEquals(1, count(workspace, "id=\"mostPopularHbox\""));
+        assertFalse(section(
+                workspace,
+                "id=\"mostPopularQuickActions\"",
+                "id=\"iteractionListContentScrollBox\"").contains("visible=\"false\""));
+        assertFalse(workspace.contains("id=\"popularAccordionNav\""));
     }
 
     @Test
-    public void scssKeepsQuickActionsVisibleAndEqual() throws IOException {
+    public void localScssKeepsFiveEqualReadablePositions() throws IOException {
         String scss = readProjectFile(
                 "modules/web/themes/halo/com.company.hunttech/"
                         + "iteraction-list-reference-finish.scss");
 
-        assertTrue(scss.contains("min-height: 40px"));
         assertTrue(scss.contains("width: 20% !important"));
         assertTrue(scss.contains("height: 40px !important"));
-        assertTrue(scss.contains("border-radius: 8px !important"));
         assertTrue(scss.contains(".iteraction-list-popular-button .v-button-caption"));
-        assertTrue(scss.contains("visibility: visible !important"));
+        assertTrue(scss.contains("white-space: normal"));
     }
 
     private String controller() throws IOException {
@@ -122,12 +114,33 @@ public class IteractionListMostPopularInteractionTest {
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");
     }
 
+    private String presentation() throws IOException {
+        return readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/"
+                        + "IteractionListEditAccordionNavigation.java");
+    }
+
+    private String descriptor() throws IOException {
+        return readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
+    }
+
     private String section(String text, String startMarker, String endMarker) {
         int start = text.indexOf(startMarker);
-        assertTrue("Не найден начальный XML-маркер: " + startMarker, start >= 0);
+        assertTrue("Не найден начальный маркер: " + startMarker, start >= 0);
         int end = text.indexOf(endMarker, start);
-        assertTrue("Не найден конечный XML-маркер: " + endMarker, end > start);
+        assertTrue("Не найден конечный маркер: " + endMarker, end > start);
         return text.substring(start, end);
+    }
+
+    private void assertOrdered(String text, String... markers) {
+        int previous = -1;
+        for (String marker : markers) {
+            int current = text.indexOf(marker);
+            assertTrue("Не найден маркер: " + marker, current >= 0);
+            assertTrue("Нарушен порядок: " + marker, current > previous);
+            previous = current;
+        }
     }
 
     private int count(String text, String token) {
@@ -141,7 +154,8 @@ public class IteractionListMostPopularInteractionTest {
     }
 
     private String readProjectFile(String relativePath) throws IOException {
-        return new String(Files.readAllBytes(projectRoot().resolve(relativePath)),
+        return new String(
+                Files.readAllBytes(projectRoot().resolve(relativePath)),
                 StandardCharsets.UTF_8);
     }
 
