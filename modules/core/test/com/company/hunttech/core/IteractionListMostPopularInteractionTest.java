@@ -50,19 +50,27 @@ public class IteractionListMostPopularInteractionTest {
     }
 
     @Test
-    public void formCreatesUpToFiveEqualGreenButtons() throws IOException {
+    public void presentationExtensionCompletesFiveVisibleSlotsWithoutChangingService() throws IOException {
         String controller = controller();
+        String extension = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/iteractionlist/"
+                        + "IteractionListEditAccordionNavigation.java");
 
+        // Базовый контроллер сохраняет фактические кнопки и точный Iteraction.
         assertTrue(controller.contains(
                 "int buttonCount = Math.min(POPULAR_INTERACTION_BUTTONS, mostPopular.size())"));
         assertTrue(controller.contains("index < buttonCount"));
-        assertTrue(controller.contains(
-                "popularButton.setStyleName(\"iteraction-list-popular-button\")"));
-        assertTrue(controller.contains("popularButton.setWidth(\"100%\")"));
         assertTrue(controller.contains("mostPopularHbox.removeAll()"));
-        assertTrue(controller.contains("mostPopularHbox.expand(popularButton)"));
-        assertFalse(controller.contains("configureEmptyPopularButton"));
         assertFalse(controller.contains("Нет данных"));
+
+        // Presentation-расширение только дополняет пустые визуальные позиции.
+        assertTrue(extension.contains("currentButtonCount < POPULAR_INTERACTION_BUTTONS"));
+        assertTrue(extension.contains("mostPopularHbox.getOwnComponents().size()"));
+        assertTrue(extension.contains("emptyButton.setCaption(\"Нет данных\")"));
+        assertTrue(extension.contains("emptyButton.setEnabled(false)"));
+        assertTrue(extension.contains("mostPopularHbox.expand(emptyButton)"));
+        assertFalse(extension.contains("interactionService"));
+        assertFalse(extension.contains("setValue("));
         assertFalse(controller.contains("getCaption().substring"));
     }
 
