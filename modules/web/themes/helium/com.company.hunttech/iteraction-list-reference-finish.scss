@@ -53,25 +53,46 @@
     .iteraction-list-tabs > .v-tabsheet-content {
       box-sizing: border-box;
       height: calc(100% - 49px) !important;
-      padding: 12px 16px 16px;
+      padding: 14px 16px 18px;
       background: mix($v-app-background-color, $v-panel-background-color, 82%) !important;
       border: 0 !important;
       overflow: hidden;
     }
 
-    // Заголовки аккордеонов соответствуют каноническим 15 px / 600,
-    // поэтому секции не превращаются в высокие пустые полосы.
+    // Фокус внутри раскрытого блока не должен прятать его заголовок под вкладкой.
+    .iteraction-list-scroll > .v-scrollable {
+      box-sizing: border-box;
+      scroll-padding-top: 18px;
+    }
+
+    .iteraction-list-content {
+      box-sizing: border-box;
+      height: auto !important;
+      min-height: 100%;
+      padding-top: 8px !important;
+      padding-bottom: 24px !important;
+      overflow: visible !important;
+    }
+
+    // GroupBox и его Vaadin-slot используют естественную высоту содержимого.
+    // Это предотвращает наложение следующего заголовка на checkbox и picker-поля.
     .v-slot-iteraction-list-accordion-section,
     .iteraction-list-accordion-section {
       box-sizing: border-box;
       display: block !important;
       width: 100% !important;
       min-width: 0 !important;
+      height: auto !important;
+      min-height: 0 !important;
       visibility: visible !important;
     }
 
+    .v-slot-iteraction-list-accordion-section {
+      overflow: visible !important;
+    }
+
     .iteraction-list-accordion-section {
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       padding: 0 !important;
       background: $v-panel-background-color !important;
       border: 1px solid rgba($v-font-color, 0.15) !important;
@@ -97,9 +118,48 @@
 
     .iteraction-list-accordion-section .v-panel-content {
       box-sizing: border-box;
-      padding: 16px 18px 18px !important;
+      height: auto !important;
+      min-height: 0 !important;
+      padding: 16px 18px 20px !important;
       background: $v-panel-background-color !important;
       border: 0 !important;
+      overflow: visible !important;
+    }
+
+    .iteraction-list-accordion-section .v-panel-content > .v-widget,
+    .iteraction-list-accordion-section .v-panel-content > .v-layout,
+    .iteraction-list-form-grid {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      min-height: 0 !important;
+    }
+
+    // В первой секции GridLayout содержит только два picker-поля одинаковой
+    // высоты, а фильтр подписок идёт отдельной строкой с собственным интервалом.
+    .iteraction-list-participants-section .v-panel-content {
+      min-height: 126px !important;
+    }
+
+    .iteraction-list-subscription-filter {
+      display: block !important;
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 26px;
+      margin-top: 8px;
+      padding: 2px 8px 0;
+      color: mix($v-font-color, $v-panel-background-color, 82%) !important;
+      line-height: 20px;
+      overflow: visible !important;
+    }
+
+    .v-slot-iteraction-list-subscription-filter {
+      box-sizing: border-box;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 28px;
+      overflow: visible !important;
     }
 
     // Имя кандидата и выбранная вакансия образуют человекочитаемое

@@ -14,12 +14,14 @@ import com.haulmont.cuba.gui.components.ThemeResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Objects;
 
 /**
- * Safe loading of {@link FileDescriptor} images in UI: checks physical file presence
- * before {@link FileDescriptorResource} to avoid UI thread failures when DB metadata
- * exists but the file is missing from {@code cuba.fileStorageDir}.
+ * Safe loading of {@link FileDescriptor} images in UI: checks that the physical file
+ * can actually be opened before {@link FileDescriptorResource} is created. This keeps
+ * stale metadata or temporarily unavailable storage from breaking the Vaadin UI thread.
  */
 public final class FileDescriptorImageHelper {
 
@@ -32,11 +34,16 @@ public final class FileDescriptorImageHelper {
         if (fileDescriptor == null || fileLoader == null) {
             return false;
         }
-        try {
-            // Проверяем физическое наличие файла в хранилище, а не только метаданные в БД.
-            return fileLoader.fileExists(fileDescriptor);
-        } catch (FileStorageException e) {
-            log.warn("Cannot check file existence for descriptor id={}: {}",
+        /*
+         * FileDescriptor confirms only metadata in the database. FileLoader.openStream()
+         * verifies the same path that FileDescriptorResource will read and therefore also
+         * catches unavailable storage, missing physical files and broken storage routing.
+         * The stream is not copied into memory and is closed immediately after validation.
+         */
+        try (InputStream stream = fileLoader.openStream(fileDescriptor)) {
+            return stream != null;
+        } catch (FileStorageException | IOException e) {
+            log.warn("Cannot open file from storage for descriptor id={}: {}",
                     fileDescriptor.getId(), e.getMessage());
             return false;
         }
@@ -143,7 +150,7 @@ public final class FileDescriptorImageHelper {
 
     private static void logMissingFile(FileDescriptor fileDescriptor) {
         if (fileDescriptor != null) {
-            log.warn("File missing in storage: id={}, name={}.{}",
+            log.warn("File missing or unreadable in storage: id={}, name={}.{}",
                     fileDescriptor.getId(), fileDescriptor.getName(), fileDescriptor.getExtension());
         }
     }
