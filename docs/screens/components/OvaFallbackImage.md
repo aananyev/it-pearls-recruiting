@@ -1,189 +1,179 @@
 # OvaFallbackImage — кастомный UI-компонент HRM HuntTech
 
-> **Расположение документации:** `docs/ui-components/` (legacy). При миграции на нумерованную структуру проекта — целевой путь: `docs/03_ui_components/OvaFallbackImage.md`.
->
-> См. также: [OvalImage](OvalImage.md) — только круглый аватар; [FallbackImage](FallbackImage.md) — только placeholder.
->
-> **Миграция:** компонент `roundImageWithFallback` / `RoundImageWithFallback` переименован в `ovaFallbackImage` / `OvaFallbackImage` (2026-06-30).
+> **Расположение документации:** `docs/ui-components/` (legacy). При миграции на нумерованную структуру проекта — целевой путь: `docs/03_ui_components/OvaFallbackImage.md`.  
+> См. также: [OvalImage](OvalImage.md), [FallbackImage](FallbackImage.md), [ImageProcessingService](../../services/file-storage/ImageProcessingService.md).  
+> Legacy-имя `OvaFallbackImage` и XML-тег `ovaFallbackImage` сохраняются без переименования.
 
----
+## Назначение и бизнес-смысл (What & Why)
 
-## История изменений
+`OvaFallbackImage` — единый CUBA-компонент HRM HuntTech для круглого или овального изображения с theme fallback. Он применяется для фотографий кандидатов и пользователей, логотипов проектов и компаний, когда экран должен сохранять стабильную геометрию независимо от наличия файла.
 
-| Дата | Изменение |
-|------|-----------|
-| 2026-07-21 | `JobCandidateEdit.candidatePic` переведён на `OvaFallbackImage` 176×176 с привязкой к `fileImageFace` и fallback `icons/no-programmer.jpeg` |
-| 2026-06-30 | Рефакторинг `RoundImageWithFallback` → `OvaFallbackImage` с composition/delegation через `OvalImageShapeDelegate` и `FallbackImageResourceDelegate` |
-| 2026-06-30 | Создание предшественника `RoundImageWithFallback` (объединение API `OvalImage` и `FallbackImage`) |
+Компонент решает три бизнес-задачи:
 
----
+- пользователь всегда видит понятный визуальный идентификатор или placeholder;
+- отсутствующий либо временно недоступный файл не блокирует открытие формы;
+- экран не создаёт два независимых `Image` и не переключает их видимость вручную.
 
-## Назначение и бизнес-смысл
+`FileDescriptor` содержит metadata, но физический файл хранится отдельно. Поэтому ненулевое значение поля не является достаточным подтверждением того, что ресурс можно прочитать и передать Vaadin.
 
-**OvaFallbackImage** (`ovaFallbackImage` — имя в screen XML и константа `OvaFallbackImage.NAME`) — единый CUBA-компонент для **круглых аватаров с placeholder**, когда привязанное поле (`FileDescriptor`) пусто, отсутствует в хранилище или не загружается.
+## UI Context & Navigation
 
-Типичные сценарии в HRM HuntTech:
+Компонент используется внутри screen descriptor как обычный data-bound `Image`:
 
-- фото профиля пользователя (`ExtUser.officialPhoto`) — круг + SVG-placeholder;
-- миниатюра кандидата на edit/browse без дублирования `<ovalImage>` + Java-логики fallback;
-- любые экраны, где раньше требовалась пара `OvalImage` + `FallbackImage` или ручная подстановка theme-ресурса.
+- `JobCandidateEdit` — профиль кандидата;
+- `CandidateCVEdit` — фотография кандидата;
+- `ExtSettingsWindow` — фотография пользователя;
+- `IteractionListEdit` — фотография кандидата и логотип проекта;
+- другие экраны с локальным fallback-контрактом.
 
----
+`OvaFallbackImage` не создаёт навигацию, loaders или отдельное состояние формы. Источником истины остаётся `dataContainer/property` либо явно заданный `Resource`.
 
-## Архитектурная структура
+## Behavior Summary
+
+- bound значение равно `null` → применяется `fallbackThemePath` → layout сохраняет размер изображения;
+- bound значение содержит `FileDescriptor` → helper открывает файл через `FileLoader.openStream()` → при успехе используется стандартный `FileDescriptorResource`;
+- metadata существует, но физический файл отсутствует или storage недоступен → ошибка преобразуется в fallback → UI продолжает строиться;
+- nested property unfetched на detached entity → чтение `ValueSource` перехватывается → отображается fallback до загрузки подходящего view;
+- физический файл восстановлен и экран получает загруженный descriptor → стандартное изображение отображается снова;
+- изменение темы → fallback разрешается как `ThemeResource` активной темы;
+- изменение `ovalWidth` или `ovalHeight` → второй размер синхронизируется → форма сохраняет круглую геометрию.
+
+## 1. Архитектурная структура
 
 | Слой | Путь | Роль |
-|------|------|------|
-| **gui** (контракт) | [`modules/gui/src/com/hunttech/hrm/gui/components/OvaFallbackImage.java`](../../../modules/gui/src/com/hunttech/hrm/gui/components/OvaFallbackImage.java) | Интерфейс `extends OvalImage, FallbackImage` |
-| **web** (реализация) | [`modules/web/src/com/hunttech/hrm/web/components/WebOvaFallbackImage.java`](../../../modules/web/src/com/hunttech/hrm/web/components/WebOvaFallbackImage.java) | Vaadin/CUBA web-компонент; делегирует oval и fallback поведение |
-| **web** (delegates) | [`modules/web/src/com/hunttech/hrm/web/components/delegate/`](../../../modules/web/src/com/hunttech/hrm/web/components/delegate) | `OvalImageShapeDelegate`, `FallbackImageResourceDelegate` |
-| **web** (XML-loader) | [`modules/web/src/com/hunttech/hrm/web/loaders/OvaFallbackImageLoader.java`](../../../modules/web/src/com/hunttech/hrm/web/loaders/OvaFallbackImageLoader.java) | Читает `ovalWidth`, `ovalHeight`, `fallbackThemePath` |
-| **регистрация XML** | [`modules/web/src/com/hunttech/hrm/web/cuba-ui-component.xml`](../../../modules/web/src/com/hunttech/hrm/web/cuba-ui-component.xml) | Связка имени, класса и loader'а |
-| **регистрация Java** | [`modules/web/src/com/hunttech/hrm/web/config/HunttechUiComponentsRegistrar.java`](../../../modules/web/src/com/hunttech/hrm/web/config/HunttechUiComponentsRegistrar.java) | `webUiComponents.register(OvaFallbackImage.NAME, ...)` |
-| **конфиг** | [`modules/global/src/com/company/hunttech/config/HunttechImageConfig.java`](../../../modules/global/src/com/company/hunttech/config/HunttechImageConfig.java) | Глобальный `hunttech.defaultFallbackImagePath` |
-| **стили** | `modules/web/themes/*/com.company.hunttech/*-ext.scss` | Класс `.ht-oval-image` (`border-radius: 50%`) |
+|---|---|---|
+| gui | `modules/gui/src/com/hunttech/hrm/gui/components/OvaFallbackImage.java` | интерфейс `extends OvalImage, FallbackImage` |
+| web | `modules/web/src/com/hunttech/hrm/web/components/WebOvaFallbackImage.java` | реализация поверх стандартного `WebImage` |
+| delegate | `modules/web/src/com/hunttech/hrm/web/components/delegate/OvalImageShapeDelegate.java` | геометрия и класс `ht-oval-image` |
+| delegate | `modules/web/src/com/hunttech/hrm/web/components/delegate/FallbackImageResourceDelegate.java` | разрешение bound value и fallback |
+| helper | `modules/web/src/com/company/hunttech/web/util/FileDescriptorImageHelper.java` | проверка физической читаемости и создание ресурсов |
+| loader | `modules/web/src/com/hunttech/hrm/web/loaders/OvaFallbackImageLoader.java` | атрибуты `ovalWidth`, `ovalHeight`, `fallbackThemePath` |
+| XML registration | `modules/web/src/com/hunttech/hrm/web/cuba-ui-component.xml` | регистрация XML-тега |
+| Java registration | `modules/web/src/com/hunttech/hrm/web/config/HunttechUiComponentsRegistrar.java` | регистрация в `UiComponents` |
+| config | `modules/global/src/com/company/hunttech/config/HunttechImageConfig.java` | глобальный fallback path |
 
-### Composition / delegation (Decorator)
+`WebOvaFallbackImage` наследует стандартный CUBA `WebImage`. Собственный Vaadin `ServerRpc` компонент не регистрирует; oval- и fallback-поведение реализуются composition/delegation.
 
-Java не поддерживает наследование от двух реализаций. Архитектура:
+## 2. Геометрия изображения
 
-1. **Интерфейс** `OvaFallbackImage extends OvalImage, FallbackImage` — единый контракт через multiple interface inheritance.
-2. **Web-класс** `WebOvaFallbackImage extends WebImage` — одна Vaadin-обёртка; поведение делегируется:
-   - `OvalImageShapeDelegate` — размеры 1:1, CSS `ht-oval-image`;
-   - `FallbackImageResourceDelegate` — placeholder при null / пустом / отсутствующем файле.
-3. **Host-интерфейсы** `OvalImageHost`, `FallbackImageHost` — callbacks для делегатов без дублирования `WebImage` API.
-4. **Loader** `OvaFallbackImageLoader` — объединяет атрибуты `OvalImageLoader` и `FallbackImageLoader`.
+- `ht-oval-image` задаёт `border-radius: 50%`;
+- `ovalWidth` и `ovalHeight` задаются явно для стабильного slot;
+- при указании только одного oval-размера loader синхронизирует второй;
+- `SCALE_DOWN` или `CONTAIN` используются, когда искажение исходного изображения недопустимо;
+- локальный экранный SCSS может задавать рамку, фон и тень только внутри namespace экрана.
 
-```mermaid
-flowchart TD
-    IF[OvaFallbackImage interface] --> Web[WebOvaFallbackImage]
-    Web --> OvalDel[OvalImageShapeDelegate]
-    Web --> FallDel[FallbackImageResourceDelegate]
-    OvalDel --> CSS[ht-oval-image]
-    FallDel --> Config[HunttechImageConfig]
-    XML[ovaFallbackImage XML] --> Loader[OvaFallbackImageLoader]
-    Loader --> Web
-```
-
----
-
-## Поведение
-
-### Круг (oval sizing)
-
-- CSS-класс `ht-oval-image` задаётся делегатом в конструкторе.
-- `setOvalWidth` / `setOvalHeight` синхронизируют второй размер, если он пуст (как в `WebOvalImage`).
-- `OvaFallbackImageLoader` при XML-загрузке копирует один атрибут в другой, если задан только один.
-
-### Fallback (placeholder)
-
-Приоритет источника fallback:
-
-| Приоритет | Источник | Как задаётся |
-|-----------|----------|--------------|
-| 1 | Java | `setFallbackThemePath()` / `setFallbackResource()` |
-| 2 | Screen XML | `fallbackThemePath="..."` |
-| 3 | Глобальная конфигурация | `hunttech.defaultFallbackImagePath` в `HunttechImageConfig` |
-
-В `updateComponent` (`FallbackImageResourceDelegate.tryApplyFallback`): если значение `valueSource` — `null`, пустая строка или `FileDescriptor` без файла в хранилище (`FileDescriptorImageHelper.fileExists`) и задан `fallbackResource` — отображается theme-ресурс; иначе стандартная логика `WebImage`.
-
----
-
-## Примеры использования
-
-### Screen XML
+Пример:
 
 ```xml
-<ovaFallbackImage id="userAvatar"
-                  ovalWidth="180px"
-                  fallbackThemePath="images/hunttech-placeholder.svg"
-                  align="MIDDLE_CENTER"
-                  scaleMode="SCALE_DOWN"
-                  dataContainer="userDs"
-                  property="officialPhoto"/>
-```
-
-Достаточно одного размера — второй синхронизируется loader'ом:
-
-```xml
-<ovaFallbackImage id="candidateThumb"
-                  ovalHeight="80px"
-                  dataContainer="jobCandidateDc"
-                  property="fileImageFace"
-                  scaleMode="CONTAIN"/>
-```
-
-### Java — программное создание
-
-```java
-import com.hunttech.hrm.gui.components.OvaFallbackImage;
-import com.haulmont.cuba.gui.UiComponents;
-
-OvaFallbackImage image = uiComponents.create(OvaFallbackImage.NAME);
-image.setOvalWidth("28px");
-image.setFallbackThemePath("icons/local-placeholder.jpeg");
-image.setScaleMode(Image.ScaleMode.CONTAIN);
-parentLayout.add(image);
-```
-
-### Интеграция в JobCandidateEdit
-
-Профиль кандидата использует компонент напрямую в screen descriptor:
-
-```xml
-<ovaFallbackImage id="candidatePic"
-                  dataContainer="jobCandidateDc"
-                  property="fileImageFace"
-                  width="176px" height="176px"
-                  ovalWidth="176px" ovalHeight="176px"
-                  stylename="job-candidate-avatar"
+<ovaFallbackImage id="candidateImage"
+                  dataContainer="iteractionListDc"
+                  property="candidate.fileImageFace"
+                  width="112px"
+                  height="112px"
+                  ovalWidth="112px"
+                  ovalHeight="112px"
                   scaleMode="SCALE_DOWN"
                   fallbackThemePath="icons/no-programmer.jpeg"/>
 ```
 
-Контракт интеграции:
+## 3. Fallback и FileStorage
 
-- `dataContainer` и `property` оставляют источником истины `JobCandidate.fileImageFace`;
-- валидный `FileDescriptor` отображается стандартной логикой ValueSource;
-- `JobCandidateEdit.setCandidatePicImage()` дополнительно проверяет наличие бинарного файла,
-  потому что ненулевой detached `FileDescriptor` не гарантирует наличие содержимого в storage;
-- при очистке `fileImageFaceUpload` обработчик `BeforeValueClearEvent` вызывает
-  `candidatePic.applyFallback()`, чтобы placeholder появился до следующего server round-trip;
-- отдельный `FileUploadSucceedEvent` не устанавливает source вручную: после изменения
-  data-bound атрибута компонент получает новый ресурс из ValueSource;
-- второй компонент `candidateDefaultPic` не создаётся, поэтому реальное изображение и
-  placeholder всегда имеют одинаковые размеры и занимают один layout slot.
+Приоритет fallback:
 
-Не следует возвращать ручное переключение `setVisible()` между двумя `Image`: оно создаёт
-два независимых источника состояния и может рассинхронизироваться с `DataContext`.
+| Приоритет | Источник |
+|---|---|
+| 1 | `setFallbackResource()` / `setFallbackThemePath()` в Java |
+| 2 | `fallbackThemePath` в screen XML |
+| 3 | `hunttech.defaultFallbackImagePath` |
 
-Пользовательский сценарий описан в
-[JobCandidateEdit: инструкция пользователя](../job-candidate/job-candidate-edit.md).
+Безопасная цепочка:
 
----
+```text
+ValueSource<FileDescriptor>
+→ tryApplyFallback()
+→ FileDescriptorImageHelper.fileExists()
+→ FileLoader.openStream(descriptor)
+→ readable: стандартное обновление WebImage
+→ unavailable/error: fallbackResource
+```
 
-## Тесты
+### 3.1. Проверка физического файла
 
-[`modules/web/src/test/java/com/hunttech/hrm/web/components/WebOvaFallbackImageTest.java`](../../../modules/web/src/test/java/com/hunttech/hrm/web/components/WebOvaFallbackImageTest.java):
+`FileDescriptorImageHelper.fileExists()` использует `FileLoader.openStream()` в `try-with-resources`. Это проверяет фактический маршрут FileStorage, а не только наличие metadata. Поток закрывается сразу после открытия; helper не вызывает `readAllBytes()` и не удерживает бинарное содержимое в памяти.
 
-- fallback из `HunttechImageConfig` и переопределение через `setFallbackThemePath`;
-- `updateComponent` с `null` → theme fallback, с `FileDescriptor` в хранилище → без подстановки, с отсутствующим файлом → fallback;
-- синхронизация `ovalWidth` / `ovalHeight`;
-- наличие стиля `ht-oval-image`.
+Перехватываются:
 
-Интеграционный XML-контракт `JobCandidateEdit` дополнительно проверяется в
-[`JobCandidateEditComponentRendererTest`](../../../modules/web/src/test/java/com/company/hunttech/web/screens/jobcandidate/JobCandidateEditComponentRendererTest.java):
+- `FileStorageException` при недоступности storage или отсутствии файла;
+- `IOException` при закрытии/чтении потока;
+- `RuntimeException` при создании presentation-ресурса.
 
-- тип `ovaFallbackImage`;
-- размеры `176px` и oval-размеры;
-- `fallbackThemePath`;
-- привязка к `jobCandidateDc.fileImageFace`;
-- отсутствие активного `candidateDefaultPic` в DOM дескриптора.
+При ошибке descriptor не удаляется и сущность не изменяется.
 
----
+### 3.2. Защита detached/unfetched value
 
-## См. также
+`FallbackImageResourceDelegate.tryApplyFallback()` оборачивает чтение `valueSource.getValue()` в `try/catch`. Это важно для nested binding вида `candidate.fileImageFace`: detached-объект может быть получен из picker с узким view, в котором поле изображения отсутствует.
 
-- [OvalImage](OvalImage.md) — только круглый аватар без fallback
-- [FallbackImage](FallbackImage.md) — только placeholder без круга
-- [ImageProcessingService](../../services/file-storage/ImageProcessingService.md) — сжатие загружаемых фото
+Результат ошибки presentation-слоя:
+
+- исключение не выходит в lifecycle экрана;
+- компонент получает `fallbackResource`;
+- owning screen обязан использовать view, содержащий атрибуты, которые реально читает контроллер или binding.
+
+Fallback не заменяет Data View Integrity. Он предотвращает падение UI, а корректный узкий view обеспечивает отображение фактического изображения.
+
+## 4. Программное использование
+
+```java
+OvaFallbackImage image = uiComponents.create(OvaFallbackImage.NAME);
+image.setOvalWidth("80px");
+image.setOvalHeight("80px");
+image.setFallbackThemePath("icons/no-company.png");
+image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+```
+
+Для обычного `Image` и программного источника используется `FileDescriptorImageHelper`:
+
+```java
+FileDescriptorImageHelper.setCandidateFace(image, fileLoader, descriptor);
+FileDescriptorImageHelper.setCompanyLogo(image, fileLoader, descriptor);
+```
+
+Helper сначала сбрасывает прежний `ValueSource`, проверяет физическую доступность и назначает `FileDescriptorResource` либо `ThemeResource`.
+
+## 5. Ограничения и правила применения
+
+- component ID, `dataContainer` и `property` сохраняются при визуальном рефакторинге;
+- нельзя считать ненулевой `FileDescriptor` гарантией существования бинарного файла;
+- нельзя читать nested image getter detached-сущности без подходящего view или `PersistenceHelper.isLoaded`;
+- нельзя возвращать пару `realImage/defaultImage` и ручное `setVisible()` без отдельного обоснования;
+- storage failure не должен удалять metadata автоматически;
+- fallback не должен инициировать loaders, запросы или commit;
+- глобальные Vaadin-селекторы ради одного изображения запрещены.
+
+## 6. Проверки
+
+Обязательные сценарии:
+
+1. `null` descriptor → theme fallback.
+2. Существующий и читаемый файл → фактическое изображение.
+3. Metadata существует, физический файл отсутствует → fallback без ошибки экрана.
+4. FileStorage временно недоступен → fallback и диагностический warning.
+5. Nested property unfetched → fallback без `Cannot get unfetched attribute` в UI-thread.
+6. После загрузки подходящего view реальное изображение отображается.
+7. Размер, круглая форма и scale mode одинаковы для файла и placeholder.
+8. Проверка выполняется во всех поддерживаемых темах экрана.
+
+Контракт компонента и интеграции дополнительно защищается тестами:
+
+- `WebOvaFallbackImageTest`;
+- `LeftSidebarAvatarComponentTest`;
+- `IteractionListRpcCompatibilityContractTest`;
+- `IteractionListLayoutStorageContractTest`.
+
+## История изменений
+
+| Дата | Изменение |
+|---|---|
+| 2026-07-27 | Проверка descriptor переведена на фактическое `FileLoader.openStream()`; `FallbackImageResourceDelegate` защищён от unfetched `ValueSource` и ошибок FileStorage с переходом на theme fallback |
+| 2026-07-21 | `JobCandidateEdit.candidatePic` переведён на `OvaFallbackImage` 176×176 с binding и fallback |
+| 2026-06-30 | `RoundImageWithFallback` переименован в `OvaFallbackImage`; oval и fallback поведение вынесены в delegates |
