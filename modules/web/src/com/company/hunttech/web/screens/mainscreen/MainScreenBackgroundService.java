@@ -67,13 +67,21 @@ public class MainScreenBackgroundService {
      */
     public Resource resolveForUser(User currentUser, String themeName, UserSession session) {
         FileDescriptor customBackground = loadUserBackground(currentUser);
+        log.info("BG: resolveForUser: customBackground={}",
+                customBackground == null ? "null" : customBackground.getId().toString());
+        if (customBackground != null) {
+            log.info("BG: resolveForUser: checking isCustomBackground={}, name={}",
+                    isCustomBackground(customBackground), customBackground.getName());
+        }
         Optional<Resource> customResource = createCustomResource(customBackground);
         if (customResource.isPresent()) {
+            log.info("BG: resolveForUser: using custom resource");
             return customResource.get();
         }
 
         String normalizedTheme = normalizeTheme(themeName);
         int variant = nextVariant(session, normalizedTheme);
+        log.info("BG: resolveForUser: falling back to theme {} variant {}", normalizedTheme, variant);
         return createGeneratedResource(variant);
     }
 
@@ -105,15 +113,19 @@ public class MainScreenBackgroundService {
 
     private FileDescriptor loadUserBackground(User currentUser) {
         if (currentUser == null || currentUser.getId() == null) {
+            log.info("BG: loadUserBackground: user null");
             return null;
         }
-        return dataManager.load(UserSettings.class)
+        FileDescriptor fd = dataManager.load(UserSettings.class)
                 .query(QUERY_USER_SETTINGS)
                 .parameter("currentUser", currentUser)
                 .view("userSettings-view")
                 .optional()
                 .map(UserSettings::getFileImageFace)
                 .orElse(null);
+        log.info("BG: loadUserBackground: {}",
+                fd == null ? "null" : fd.getId() + " name=" + fd.getName());
+        return fd;
     }
 
     /**
@@ -123,11 +135,16 @@ public class MainScreenBackgroundService {
      */
     private Optional<Resource> createCustomResource(FileDescriptor descriptor) {
         if (!isCustomBackground(descriptor)) {
+            log.info("BG: createCustomResource: not custom background, name={}",
+                    descriptor == null ? "null" : descriptor.getName());
             return Optional.empty();
         }
 
+        log.info("BG: createCustomResource: opening stream for id={} name={}",
+                descriptor.getId(), descriptor.getName());
         try (InputStream stream = fileLoader.openStream(descriptor)) {
             byte[] bytes = stream.readAllBytes();
+            log.info("BG: createCustomResource: loaded {} bytes", bytes.length);
             StreamResource resource = new StreamResource(
                     (StreamResource.StreamSource) () -> new ByteArrayInputStream(bytes),
                     descriptor.getName());
