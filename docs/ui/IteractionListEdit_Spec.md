@@ -138,13 +138,25 @@ main layout 100% × 100%
 
 SCSS не задаёт фиксированную высоту бизнес-полям и не изменяет их bindings, required или visible-состояния.
 
-### 3.3. Поля кандидата и вакансии
+### 3.3. Визуальный контракт аккордеонов SettingsWindow
+
+Рабочие аккордеоны `IteractionListEdit` используют тот же итоговый SCSS-контракт, что и `SettingsWindow` (`user-ai-profile-section`):
+
+- поверхность секции — `$v-panel-background-color`, граница `rgba($v-font-color, 0.15)`, радиус `8px`, тень `0 2px 8px rgba(15, 23, 42, 0.05)`;
+- заголовок — минимальная высота `50px`, отступы `12px 16px`, шрифт `17px / 700`, фон `mix($v-app-background-color, $v-panel-background-color, 68%)`;
+- поля — минимальная высота `38px`, шрифт `15px`, граница `rgba($v-font-color, 0.20)`, радиус `5px`;
+- подписи полей — `13px / 600`, checkbox и option group — `14px`, кнопки — `14px` и минимальная высота `38px`;
+- focus, hover, readonly и disabled-состояния повторяют `SettingsWindow` без глобальных Vaadin-селекторов.
+
+Правила продублированы во всех семи темах и ограничены корнем `.iteraction-list-editor`. Естественная высота секций и layout-исправления CUBA Platform 7.3 сохранены, поэтому визуальная унификация не меняет component ID, data bindings, required/visible, actions, `invoke`, Java lifecycle и бизнес-логику.
+
+### 3.4. Поля кандидата и вакансии
 
 `candidateField` и `vacancyFiels` остаются двумя explicit flex-колонками `GridLayout`. Правый picker больше не обёрнут в `VBox` вместе с checkbox, поэтому обе колонки имеют одинаковую вертикальную геометрию.
 
 `onlyMySubscribeCheckBox` сохраняет legacy ID, caption, description и существующий listener контроллера. Изменилось только его расположение: отдельная полноширинная строка под picker-полями.
 
-### 3.4. Фокус и прокрутка
+### 3.5. Фокус и прокрутка
 
 Внутренний scroll-container использует `scroll-padding-top: 18px`. При переходе по label-навигации и вызове `focus()` браузер оставляет заголовок раскрытого аккордеона видимым, а не помещает его под строку вкладок.
 
@@ -187,7 +199,7 @@ Metadata `FileDescriptor` не удаляется и не изменяется. 
 
 ## 6. Локальный SCSS
 
-Все правила ограничены корнем `.iteraction-list-editor`. Существующие правила `.iteraction-list-popular-host`, `.iteraction-list-popular-buttons` и `.iteraction-list-popular-button` продолжают обеспечивать равную геометрию и читаемость пяти кнопок во всех семи темах.
+Все правила ограничены корнем `.iteraction-list-editor`. Заголовки, поверхности секций, поля, подписи, кнопки, checkbox и состояния focus/hover/readonly/disabled повторяют итоговый локальный контракт `SettingsWindow`. Существующие правила `.iteraction-list-popular-host`, `.iteraction-list-popular-buttons` и `.iteraction-list-popular-button` продолжают обеспечивать равную геометрию и читаемость пяти кнопок во всех семи темах.
 
 Глобальные `.v-table`, `.v-label`, `.v-button`, `.v-tabsheet` и `.v-panel` не изменяются.
 
@@ -221,6 +233,7 @@ Metadata `FileDescriptor` не удаляется и не изменяется. 
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-27 | Аккордеоны, заголовки и визуальные состояния элементов формы в точности унифицированы с итоговым SCSS-контрактом SettingsWindow во всех семи темах |
 | 2026-07-27 | Восстановлен и закреплён исторический контракт быстрых взаимодействий: сервис, текущий пользователь, последний месяц, до пяти точных `Iteraction` |
 | 2026-07-27 | Блок пяти быстрых взаимодействий возвращён внутрь вкладки и размещён перед первым аккордеоном; `mostPopularHbox` и Java-логика сохранены |
 | 2026-07-27 | Устранено наложение первой секции: picker-поля выровнены в одной строке, checkbox вынесен ниже GridLayout, аккордеоны переведены на естественную высоту; suggestion кандидата получил узкий view, а изображения — безопасную проверку FileStorage и fallback |

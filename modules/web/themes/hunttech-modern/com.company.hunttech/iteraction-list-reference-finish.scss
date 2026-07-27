@@ -74,8 +74,8 @@
       overflow: visible !important;
     }
 
-    // GroupBox и его Vaadin-slot используют естественную высоту содержимого.
-    // Это предотвращает наложение следующего заголовка на checkbox и picker-поля.
+    // GroupBox сохраняет естественную высоту, но визуально полностью
+    // повторяет итоговый аккордеон SettingsWindow: поверхность, заголовок и поля.
     .v-slot-iteraction-list-accordion-section,
     .iteraction-list-accordion-section {
       box-sizing: border-box;
@@ -92,7 +92,7 @@
     }
 
     .iteraction-list-accordion-section {
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       padding: 0 !important;
       background: $v-panel-background-color !important;
       border: 1px solid rgba($v-font-color, 0.15) !important;
@@ -104,11 +104,11 @@
     .iteraction-list-accordion-section .v-panel-caption {
       box-sizing: border-box;
       display: block !important;
-      min-height: 44px;
-      padding: 9px 16px;
+      min-height: 50px;
+      padding: 12px 16px;
       color: mix($v-font-color, $v-panel-background-color, 90%) !important;
-      font-size: 15px !important;
-      font-weight: 600 !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
       line-height: 24px !important;
       visibility: visible !important;
       opacity: 1 !important;
@@ -120,7 +120,6 @@
       box-sizing: border-box;
       height: auto !important;
       min-height: 0 !important;
-      padding: 16px 18px 20px !important;
       background: $v-panel-background-color !important;
       border: 0 !important;
       overflow: visible !important;
@@ -134,6 +133,104 @@
       min-width: 0 !important;
       height: auto !important;
       min-height: 0 !important;
+    }
+
+    // Поля, подписи, фокус и состояния формы повторяют SettingsWindow.
+    .iteraction-list-accordion-section .v-textfield,
+    .iteraction-list-accordion-section .v-filterselect,
+    .iteraction-list-accordion-section .v-filterselect-input,
+    .iteraction-list-accordion-section .v-datefield,
+    .iteraction-list-accordion-section .v-datefield-textfield {
+      min-height: 38px !important;
+      font-size: 15px !important;
+      line-height: 38px !important;
+    }
+
+    .iteraction-list-accordion-section .v-textarea {
+      font-size: 15px !important;
+      line-height: 1.45 !important;
+    }
+
+    .iteraction-list-accordion-section .v-textfield,
+    .iteraction-list-accordion-section .v-textarea,
+    .iteraction-list-accordion-section .v-filterselect,
+    .iteraction-list-accordion-section .v-datefield-textfield {
+      box-sizing: border-box;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.20) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+      transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+
+    .iteraction-list-accordion-section .v-textfield,
+    .iteraction-list-accordion-section .v-textarea {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .iteraction-list-accordion-section .v-filterselect-input {
+      padding-left: 10px !important;
+    }
+
+    .iteraction-list-accordion-section .v-caption .v-captiontext {
+      color: mix($v-font-color, $v-panel-background-color, 72%) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+    }
+
+    .iteraction-list-accordion-section .v-textfield:focus,
+    .iteraction-list-accordion-section .v-textarea:focus,
+    .iteraction-list-accordion-section .v-filterselect-focus,
+    .iteraction-list-accordion-section .v-datefield-focus .v-datefield-textfield,
+    .iteraction-list-accordion-section .v-button:focus {
+      border-color: $v-selection-color !important;
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
+    }
+
+    .iteraction-list-accordion-section .v-textfield-readonly,
+    .iteraction-list-accordion-section .v-textarea-readonly,
+    .iteraction-list-accordion-section .v-filterselect-readonly,
+    .iteraction-list-accordion-section .v-readonly {
+      background: mix($v-app-background-color, $v-panel-background-color, 62%) !important;
+    }
+
+    .iteraction-list-accordion-section .v-checkbox {
+      padding: 3px 0;
+    }
+
+    .iteraction-list-accordion-section .v-checkbox label,
+    .iteraction-list-accordion-section .v-select-optiongroup label {
+      color: mix($v-font-color, $v-panel-background-color, 78%) !important;
+      font-size: 14px !important;
+      line-height: 1.4 !important;
+    }
+
+    .iteraction-list-accordion-section .v-button {
+      min-height: 38px;
+      padding-left: 14px;
+      padding-right: 14px;
+      font-size: 14px !important;
+      border-radius: 5px !important;
+      transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+    }
+
+    .iteraction-list-accordion-section .v-button:hover {
+      border-color: rgba($v-font-color, 0.34) !important;
+    }
+
+    .iteraction-list-accordion-section .v-button-primary {
+      font-weight: 700 !important;
+      box-shadow: 0 3px 10px rgba($v-selection-color, 0.18) !important;
+    }
+
+    .iteraction-list-accordion-section .v-disabled {
+      opacity: 0.55;
+    }
+
+    .iteraction-list-comment-section .v-textarea {
+      min-height: 150px;
+      resize: vertical;
     }
 
     // В первой секции GridLayout содержит только два picker-поля одинаковой
@@ -194,7 +291,7 @@
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22) !important;
     }
 
-    // Пять частых взаимодействий находятся внутри своего аккордеона.
+    // Пять частых взаимодействий расположены перед первым аккордеоном.
     // Кнопки остаются равными, но используют стандартную геометрию 40 px,
     // theme-aware поверхность и гарантированно видимый caption.
     .iteraction-list-popular-host,
