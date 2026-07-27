@@ -113,20 +113,20 @@ public class MainScreenBackgroundContractTest {
                 "modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
 
         // FileStorage проверяется до выдачи URL; недоступный файл не блокирует системный fallback.
-        assertTrue(service.contains("try (InputStream ignored = fileLoader.openStream(descriptor))"));
+        assertTrue(service.contains("try (InputStream stream = fileLoader.openStream(descriptor))"));
         assertTrue(service.contains("catch (FileStorageException | IOException e)"));
         assertTrue(service.contains("return Optional.empty()"));
-        assertTrue(service.contains("new ExternalResource("));
-        assertTrue(service.contains("FileDescriptorImageHelper.buildDispatchDownloadUrl(descriptor)"));
-        assertFalse(service.contains("new StreamResource("));
-        assertFalse(service.contains("readAllBytes()"));
+        assertTrue(service.contains("new StreamResource("));
+        assertTrue(service.contains("readAllBytes()"));
+        assertTrue(service.contains("resource.setMIMEType"));
 
-        // Пользовательский URL больше не зависит от Vaadin connector и скрытого Image-владельца.
-        assertTrue(controller.contains("resource instanceof ExternalResource"));
-        assertTrue(controller.contains("((ExternalResource) resource).getURL()"));
-        assertFalse(controller.contains("ResourceReference.create"));
-        assertFalse(controller.contains("backgroundResourceHolder"));
-        assertFalse(controller.contains("app://APP"));
+        // StreamResource регистрируется через Vaadin connector и конвертируется в HTTP.
+        assertTrue(controller.contains("resource instanceof StreamResource"));
+        assertTrue(controller.contains("registerBackgroundResource"));
+        assertTrue(controller.contains("ResourceReference.create"));
+        assertTrue(controller.contains("backgroundResourceHolder"));
+        assertTrue(controller.contains("app://APP"));
+        assertFalse(controller.contains("ExternalResource"));
     }
 
     @Test
