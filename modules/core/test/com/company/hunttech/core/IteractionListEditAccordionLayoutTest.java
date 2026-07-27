@@ -16,12 +16,12 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Защищает эталонную компоновку IteractionListEdit:
- * профильный контекст, индекс разделов и пять полноширинных аккордеонов.
+ * профильный контекст, индекс разделов, видимый блок быстрых действий и рабочие аккордеоны.
  */
 public class IteractionListEditAccordionLayoutTest {
 
     @Test
-    public void defaultDescriptorContainsEntityIdentityNavigationAndFiveAccordions() throws Exception {
+    public void defaultDescriptorContainsEntityIdentityNavigationQuickActionsAndAccordions() throws Exception {
         Path descriptorPath = projectRoot().resolve(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
         DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(descriptorPath.toFile());
@@ -38,13 +38,14 @@ public class IteractionListEditAccordionLayoutTest {
                 "stylename=\"iteraction-list-sidebar-card iteraction-list-vacancy-card\"",
                 "id=\"iteractionListWorkspace\"",
                 "id=\"iteractionListContentScrollBox\"",
+                "id=\"mostPopularQuickActions\"",
+                "id=\"mostPopularHbox\"",
                 "id=\"participantsAccordion\"",
                 "id=\"interactionAccordion\"",
                 "id=\"resultAccordion\"",
                 "id=\"commentAccordion\"",
-                "id=\"popularAccordion\"",
-                "id=\"mostPopularHbox\"");
-        assertFalse(descriptor.contains("id=\"mostPopularQuickActions\""));
+                "id=\"popularAccordion\"");
+        assertEquals(1, count(descriptor, "id=\"mostPopularHbox\""));
         assertFalse(descriptor.contains("id=\"iteractionListSectionLayout\""));
     }
 
@@ -82,9 +83,15 @@ public class IteractionListEditAccordionLayoutTest {
     }
 
     @Test
-    public void onlyFirstAccordionIsExpandedInitially() throws IOException {
+    public void quickActionsAreVisibleAndOnlyFirstWorkingAccordionIsExpandedInitially() throws IOException {
         String descriptor = descriptor();
+        String quickActions = section(
+                descriptor(),
+                "id=\"mostPopularQuickActions\"",
+                "id=\"participantsAccordion\"");
 
+        assertTrue(quickActions.contains("id=\"mostPopularHbox\""));
+        assertFalse(quickActions.contains("collapsed=\"true\""));
         assertTrue(section(descriptor,
                 "id=\"participantsAccordion\"",
                 "id=\"interactionAccordion\"").contains("collapsed=\"false\""));
@@ -94,22 +101,25 @@ public class IteractionListEditAccordionLayoutTest {
         assertTrue(section(descriptor,
                 "id=\"resultAccordion\"",
                 "id=\"commentAccordion\"").contains("collapsed=\"true\""));
-        assertTrue(section(descriptor,
-                "id=\"commentAccordion\"",
-                "id=\"popularAccordion\"").contains("collapsed=\"true\""));
-        assertTrue(descriptor.substring(descriptor.indexOf("id=\"popularAccordion\""))
-                .contains("collapsed=\"true\""));
+
+        String legacyPopular = descriptor.substring(descriptor.indexOf("id=\"popularAccordion\""));
+        assertTrue(legacyPopular.contains("visible=\"false\""));
+        assertTrue(legacyPopular.contains("collapsed=\"true\""));
     }
 
     @Test
-    public void popularButtonsBelongToFrequentInteractionsSection() throws IOException {
+    public void popularButtonsAreInsideTabBeforeFirstAccordion() throws IOException {
         String descriptor = descriptor();
-        String popular = section(descriptor, "id=\"popularAccordion\"", "id=\"editActions\"");
+        String quickActions = section(
+                descriptor(),
+                "id=\"mostPopularQuickActions\"",
+                "id=\"participantsAccordion\"");
 
-        // Один runtime-хост находится внутри своего бизнес-раздела и не дублируется над формой.
-        assertOrdered(popular, "id=\"mostPopularIteractionHBox\"", "id=\"mostPopularHbox\"");
+        // Runtime-хост находится внутри вкладки, видим постоянно и не дублируется.
+        assertOrdered(quickActions, "id=\"mostPopularIteractionHBox\"", "id=\"mostPopularHbox\"");
+        assertTrue(quickActions.contains("value=\"msg://mshMostPopular\""));
         assertEquals(1, count(descriptor, "id=\"mostPopularHbox\""));
-        assertFalse(descriptor.contains("id=\"mostPopularQuickActions\""));
+        assertFalse(descriptor.contains("id=\"mostPopularQuickActions\" visible=\"false\""));
     }
 
     @Test
@@ -117,6 +127,7 @@ public class IteractionListEditAccordionLayoutTest {
         String descriptor = descriptor();
 
         assertOrdered(descriptor,
+                "id=\"mostPopularHbox\"",
                 "id=\"candidateField\"",
                 "id=\"vacancyFiels\"",
                 "id=\"iteractionTypeField\"",
@@ -124,8 +135,7 @@ public class IteractionListEditAccordionLayoutTest {
                 "id=\"ratingField\"",
                 "id=\"recrutierField\"",
                 "id=\"communicationMethodField\"",
-                "id=\"commentField\"",
-                "id=\"mostPopularHbox\"");
+                "id=\"commentField\"");
         assertTrue(descriptor.contains("invoke=\"callActionEntity\""));
         assertTrue(descriptor.contains("invoke=\"onButtonSubscribeClick\""));
         assertTrue(descriptor.contains("action=\"windowCommitAndClose\""));

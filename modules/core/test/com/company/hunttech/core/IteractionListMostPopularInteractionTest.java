@@ -8,12 +8,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает годовой контракт пяти быстрых кнопок взаимодействий.
+ * Защищает годовой контракт пяти быстрых кнопок взаимодействий
+ * и их постоянное расположение внутри вкладки перед аккордеонами.
  */
 public class IteractionListMostPopularInteractionTest {
 
@@ -53,24 +55,25 @@ public class IteractionListMostPopularInteractionTest {
     }
 
     @Test
-    public void popularNavigationAndButtonHostShareOneBusinessSection() throws IOException {
+    public void popularButtonHostIsVisibleInsideTabBeforeFirstAccordion() throws IOException {
         String descriptor = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
-        String sidebar = descriptor.substring(
-                descriptor.indexOf("stylename=\"iteraction-list-sidebar\""),
-                descriptor.indexOf("id=\"iteractionListWorkspace\""));
         String workspace = descriptor.substring(descriptor.indexOf("id=\"iteractionListWorkspace\""));
-        int popularAccordion = workspace.indexOf("id=\"popularAccordion\"");
+        int quickActions = workspace.indexOf("id=\"mostPopularQuickActions\"");
         int popularHost = workspace.indexOf("id=\"mostPopularHbox\"");
+        int participantsAccordion = workspace.indexOf("id=\"participantsAccordion\"");
+        int legacyPopularAccordion = workspace.indexOf("id=\"popularAccordion\"");
 
-        assertTrue(sidebar.contains("id=\"iteractionListNavigation\""));
-        assertTrue(sidebar.contains("value=\"msg://mshMostPopular\""));
-        assertTrue(popularAccordion >= 0);
-        assertTrue(popularHost > popularAccordion);
+        assertTrue(quickActions >= 0);
+        assertTrue(popularHost > quickActions);
+        assertTrue(participantsAccordion > popularHost);
+        assertTrue(legacyPopularAccordion > participantsAccordion);
         assertTrue(workspace.contains("id=\"mostPopularIteractionHBox\""));
-        assertFalse(workspace.contains("id=\"mostPopularQuickActions\""));
-        assertTrue(workspace.contains("height=\"AUTO\""));
-        assertFalse(workspace.contains("id=\"iteractionListNavigation\""));
+        assertEquals(1, count(workspace, "id=\"mostPopularHbox\""));
+        assertFalse(section(workspace,
+                "id=\"mostPopularQuickActions\"",
+                "id=\"participantsAccordion\"").contains("visible=\"false\""));
+        assertTrue(workspace.substring(legacyPopularAccordion).contains("visible=\"false\""));
     }
 
     @Test
@@ -92,6 +95,24 @@ public class IteractionListMostPopularInteractionTest {
     private String controller() throws IOException {
         return readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/IteractionListEdit.java");
+    }
+
+    private String section(String text, String startMarker, String endMarker) {
+        int start = text.indexOf(startMarker);
+        assertTrue("Не найден начальный XML-маркер: " + startMarker, start >= 0);
+        int end = text.indexOf(endMarker, start);
+        assertTrue("Не найден конечный XML-маркер: " + endMarker, end > start);
+        return text.substring(start, end);
+    }
+
+    private int count(String text, String token) {
+        int result = 0;
+        int index = 0;
+        while ((index = text.indexOf(token, index)) >= 0) {
+            result++;
+            index += token.length();
+        }
+        return result;
     }
 
     private String readProjectFile(String relativePath) throws IOException {

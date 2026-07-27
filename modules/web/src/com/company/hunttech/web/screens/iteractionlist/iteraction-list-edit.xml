@@ -367,6 +367,29 @@
                                   height="AUTO"
                                   spacing="true"
                                   stylename="iteraction-list-content">
+                                <!-- Пять частых взаимодействий постоянно видимы внутри вкладки
+                                     непосредственно перед первым аккордеоном. -->
+                                <vbox id="mostPopularQuickActions"
+                                      width="100%"
+                                      height="AUTO"
+                                      spacing="true"
+                                      stylename="iteraction-list-quick-actions">
+                                    <label value="msg://mshMostPopular"
+                                           width="100%"
+                                           stylename="iteraction-list-quick-actions-title"/>
+                                    <hbox id="mostPopularIteractionHBox"
+                                          width="100%"
+                                          height="AUTO"
+                                          spacing="false"
+                                          stylename="iteraction-list-popular-host">
+                                        <hbox id="mostPopularHbox"
+                                              width="100%"
+                                              height="AUTO"
+                                              spacing="true"
+                                              align="MIDDLE_CENTER"
+                                              stylename="iteraction-list-popular-buttons"/>
+                                    </hbox>
+                                </vbox>
                                 <groupBox id="participantsAccordion"
                                           caption="msg://msgAccordionParticipants"
                                           width="100%"
@@ -571,30 +594,15 @@
                                               caption="msg://msgComment"
                                               height="170px"/>
                                 </groupBox>
+                                <!-- Невидимый legacy GroupBox сохраняет Java-инъекцию и навигационный
+                                     presentation-контракт; сами пять кнопок находятся выше и видимы всегда. -->
                                 <groupBox id="popularAccordion"
-                                          caption="msg://mshMostPopular"
+                                          visible="false"
                                           width="100%"
                                           height="AUTO"
-                                          spacing="true"
-                                          margin="true"
                                           collapsable="true"
                                           collapsed="true"
-                                          showAsPanel="true"
-                                          stylename="iteraction-list-accordion-section iteraction-list-popular-section">
-                                    <!-- Хост пяти runtime-кнопок находится в собственном бизнес-разделе.
-                                         Java-контракт mostPopularHbox и прямое присваивание типа сохранены. -->
-                                    <hbox id="mostPopularIteractionHBox"
-                                          width="100%"
-                                          spacing="false"
-                                          stylename="iteraction-list-popular-host">
-                                        <hbox id="mostPopularHbox"
-                                              width="100%"
-                                              height="AUTO"
-                                              spacing="true"
-                                              align="MIDDLE_CENTER"
-                                              stylename="iteraction-list-popular-buttons"/>
-                                    </hbox>
-                                </groupBox>
+                                          stylename="iteraction-list-popular-section"/>
                             </vbox>
                         </scrollBox>
                     </tab>
