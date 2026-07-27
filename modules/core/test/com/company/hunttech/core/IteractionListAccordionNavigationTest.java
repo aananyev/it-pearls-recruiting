@@ -19,18 +19,20 @@ import static org.junit.Assert.assertTrue;
 public class IteractionListAccordionNavigationTest {
 
     @Test
-    public void navigationHostIsAfterServiceCardBeforeVacancyContext() throws IOException {
+    public void navigationFollowsEntityNameAndPrecedesContextDetails() throws IOException {
         String descriptor = descriptor();
         String sidebar = section(descriptor,
                 "stylename=\"iteraction-list-sidebar\"",
                 "id=\"iteractionListWorkspace\"");
 
-        // Номер и дата идут сразу после изображений; индекс остаётся выше длинной карточки вакансии.
+        // Порядок следует UI/UX-концепции: образ → имя → индекс → детализация.
         assertOrdered(sidebar,
                 "stylename=\"iteraction-list-profile-header\"",
                 "stylename=\"iteraction-list-identity-images\"",
-                "stylename=\"iteraction-list-sidebar-card iteraction-list-service-card\"",
+                "id=\"iteractionCandidateNameLabel\"",
+                "id=\"iteractionVacancyNameLabel\"",
                 "id=\"iteractionListNavigation\"",
+                "stylename=\"iteraction-list-sidebar-card iteraction-list-service-card\"",
                 "stylename=\"iteraction-list-sidebar-card iteraction-list-vacancy-card\"",
                 "id=\"iteractionListSidebarSpacer\"");
         assertEquals(5, count(sidebar, "stylename=\"iteraction-list-nav-item"));

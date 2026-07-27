@@ -16,12 +16,12 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Защищает эталонную компоновку IteractionListEdit:
- * профильная sidebar CandidateCVEdit, индекс SettingsWindow и пять аккордеонов.
+ * профильный контекст, индекс разделов и пять полноширинных аккордеонов.
  */
 public class IteractionListEditAccordionLayoutTest {
 
     @Test
-    public void defaultDescriptorContainsSidebarNavigationAndFiveAccordions() throws Exception {
+    public void defaultDescriptorContainsEntityIdentityNavigationAndFiveAccordions() throws Exception {
         Path descriptorPath = projectRoot().resolve(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/iteraction-list-edit.xml");
         DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(descriptorPath.toFile());
@@ -31,18 +31,20 @@ public class IteractionListEditAccordionLayoutTest {
                 "stylename=\"iteraction-list-sidebar\"",
                 "stylename=\"iteraction-list-profile-header\"",
                 "stylename=\"iteraction-list-identity-images\"",
-                "stylename=\"iteraction-list-sidebar-card iteraction-list-service-card\"",
+                "id=\"iteractionCandidateNameLabel\"",
+                "id=\"iteractionVacancyNameLabel\"",
                 "id=\"iteractionListNavigation\"",
+                "stylename=\"iteraction-list-sidebar-card iteraction-list-service-card\"",
                 "stylename=\"iteraction-list-sidebar-card iteraction-list-vacancy-card\"",
                 "id=\"iteractionListWorkspace\"",
                 "id=\"iteractionListContentScrollBox\"",
-                "id=\"mostPopularQuickActions\"",
                 "id=\"participantsAccordion\"",
                 "id=\"interactionAccordion\"",
                 "id=\"resultAccordion\"",
                 "id=\"commentAccordion\"",
-                "id=\"popularAccordion\"");
-        assertTrue(descriptor.contains("id=\"mostPopularHbox\""));
+                "id=\"popularAccordion\"",
+                "id=\"mostPopularHbox\"");
+        assertFalse(descriptor.contains("id=\"mostPopularQuickActions\""));
         assertFalse(descriptor.contains("id=\"iteractionListSectionLayout\""));
     }
 
@@ -100,11 +102,21 @@ public class IteractionListEditAccordionLayoutTest {
     }
 
     @Test
+    public void popularButtonsBelongToFrequentInteractionsSection() throws IOException {
+        String descriptor = descriptor();
+        String popular = section(descriptor, "id=\"popularAccordion\"", "id=\"editActions\"");
+
+        // Один runtime-хост находится внутри своего бизнес-раздела и не дублируется над формой.
+        assertOrdered(popular, "id=\"mostPopularIteractionHBox\"", "id=\"mostPopularHbox\"");
+        assertEquals(1, count(descriptor, "id=\"mostPopularHbox\""));
+        assertFalse(descriptor.contains("id=\"mostPopularQuickActions\""));
+    }
+
+    @Test
     public void businessBindingsAndActionsRemainAvailable() throws IOException {
         String descriptor = descriptor();
 
         assertOrdered(descriptor,
-                "id=\"mostPopularHbox\"",
                 "id=\"candidateField\"",
                 "id=\"vacancyFiels\"",
                 "id=\"iteractionTypeField\"",
@@ -112,11 +124,18 @@ public class IteractionListEditAccordionLayoutTest {
                 "id=\"ratingField\"",
                 "id=\"recrutierField\"",
                 "id=\"communicationMethodField\"",
-                "id=\"commentField\"");
+                "id=\"commentField\"",
+                "id=\"mostPopularHbox\"");
         assertTrue(descriptor.contains("invoke=\"callActionEntity\""));
         assertTrue(descriptor.contains("invoke=\"onButtonSubscribeClick\""));
         assertTrue(descriptor.contains("action=\"windowCommitAndClose\""));
         assertTrue(descriptor.contains("action=\"windowClose\""));
+        assertOrdered(descriptor,
+                "id=\"editActionsSpacer\"",
+                "id=\"editActionsGroup\"",
+                "id=\"subscribeButton\"",
+                "action=\"windowCommitAndClose\"",
+                "action=\"windowClose\"");
     }
 
     @Test
