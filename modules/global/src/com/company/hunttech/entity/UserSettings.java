@@ -25,7 +25,7 @@ public class UserSettings extends StandardEntity {
     private ExtUser user;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "IMAGE_ID")
+    @JoinColumn(name = "FILE_IMAGE_FACE")
     private FileDescriptor fileImageFace;
 
     @NotNull

@@ -5,10 +5,19 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <include file="260627-1-addAiEntities.xml" relativeToChangelogFile="true"/>
-    <include file="260722-1-addUserAiProfile.xml" relativeToChangelogFile="true"/>
-    <include file="260722-2-migrateUserAiProfileToHunttech.xml" relativeToChangelogFile="true"/>
-    <include file="260723-1-addPreferPersonalAiApiSettings.xml" relativeToChangelogFile="true"/>
-    <include file="260724-1-enablePersonalAiPreferences.xml" relativeToChangelogFile="true"/>
+    <!--
+        Исторические changelog-файлы сохранены в репозитории, но больше не включаются
+        напрямую: их частично применяли CUBA SQL-скриптами вне Liquibase, поэтому
+        последовательное выполнение может повторно создать уже существующие объекты.
+
+        Заменены единым reconciliation-changelog:
+        - 260627-1-addAiEntities.xml
+        - 260722-1-addUserAiProfile.xml
+        - 260722-2-migrateUserAiProfileToHunttech.xml
+        - 260723-1-addPreferPersonalAiApiSettings.xml
+        - 260724-1-enablePersonalAiPreferences.xml
+    -->
+    <include file="260727-1-reconcileProductionSchema.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

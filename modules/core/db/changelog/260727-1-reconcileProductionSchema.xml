@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!--
+        Идемпотентная сверка схемы для БД, где часть AI-изменений ранее
+        применялась CUBA SQL-скриптами вне Liquibase. Каждый объект создаётся
+        отдельным changeSet; существующий объект приводит changeSet к MARK_RAN.
+    -->
+    <preConditions onFail="HALT" onError="HALT">
+        <dbms type="postgresql"/>
+        <tableExists tableName="HUNTTECH_OPEN_POSITION"/>
+        <tableExists tableName="HUNTTECH_USER_SETTINGS"/>
+        <tableExists tableName="SEC_USER"/>
+        <tableExists tableName="SYS_FILE"/>
+    </preConditions>
+
+    <changeSet id="260727-1-addOpenPositionRawDescription" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not><columnExists tableName="HUNTTECH_OPEN_POSITION" columnName="RAW_DESCRIPTION"/></not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_OPEN_POSITION">
+            <column name="RAW_DESCRIPTION" type="clob"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260727-2-addOpenPositionInterviewChecklist" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not><columnExists tableName="HUNTTECH_OPEN_POSITION" columnName="INTERVIEW_CHECKLIST"/></not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_OPEN_POSITION">
+            <column name="INTERVIEW_CHECKLIST" type="clob"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260727-3-addOpenPositionSearchMap" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not><columnExists tableName="HUNTTECH_OPEN_POSITION" columnName="SEARCH_MAP"/></not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_OPEN_POSITION">
+            <column name="SEARCH_MAP" type="clob"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260727-4-addOpenPositionInterviewPlan" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not><columnExists tableName="HUNTTECH_OPEN_POSITION" columnName="INTERVIEW_PLAN"/></not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_OPEN_POSITION">
+            <column name="INTERVIEW_PLAN" type="clob"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260727-5-createUserAiConfiguration" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not><tableExists tableName="HUNTTECH_USER_AI_CONFIGURATION"/></not>
+        </preConditions>
+        <createTable tableName="HUNTTECH_USER_AI_CONFIGURATION">
+            <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="VERSION" type="int"><constraints nullable="false"/></column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="USER_ID" type="uuid"><constraints nullable="false"/></column>
+            <column name="PROVIDER_CODE" type="varchar(64)"/>
+            <column name="API_KEY" type="varchar(512)"/>
+            <column name="DEFAULT_MODEL_NAME" type="varchar(128)"/>
+            <column name="IS_ACTIVE" type="boolean" defaultValueBoolean="true"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="260727-6-addUserAiConfigurationUserFk" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="HUNTTECH_USER_AI_CONFIGURATION"/>
+                <not>
+                    <foreignKeyConstraintExists
+                            foreignKeyName="FK_HUNTTECH_USER_AI_CONFIGURATION_ON_USER"
+                            foreignKeyTableName="HUNTTECH_USER_AI_CONFIGURATION"/>
+                </not>
+            </and>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseTableName="HUNTTECH_USER_AI_CONFIGURATION"
+                baseColumnNames="USER_ID"
+                constraintName="FK_HUNTTECH_USER_AI_CONFIGURATION_ON_USER"
+                referencedTableName="SEC_USER"
+                referencedColumnNames="ID"/>
+    </changeSet>
+
+    <changeSet id="260727-7-addUserAiConfigurationUserIndex" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="HUNTTECH_USER_AI_CONFIGURATION"/>
+                <not>
+                    <indexExists tableName="HUNTTECH_USER_AI_CONFIGURATION"
+                                 indexName="IDX_HUNTTECH_USER_AI_CONFIGURATION_USER"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="HUNTTECH_USER_AI_CONFIGURATION"
+                     indexName="IDX_HUNTTECH_USER_AI_CONFIGURATION_USER">
+            <column name="USER_ID"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="260727-8-createVacancyPromptTemplate" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not><tableExists tableName="HUNTTECH_VACANCY_PROMPT_TEMPLATE"/></not>
+        </preConditions>
+        <createTable tableName="HUNTTECH_VACANCY_PROMPT_TEMPLATE">
+            <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="VERSION" type="int"><constraints nullable="false"/></column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="CODE" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="NAME" type="varchar(255)"><constraints nullable="false"/></column>
+            <column name="PROMPT_TEXT" type="clob"/>
+            <column name="SYSTEM_CONTEXT" type="varchar(1000)"/>
+            <column name="TEMPERATURE" type="double" defaultValueNumeric="0.7"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="260727-9-addVacancyPromptTemplateCodeIndex" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="HUNTTECH_VACANCY_PROMPT_TEMPLATE"/>
+                <not>
+                    <indexExists tableName="HUNTTECH_VACANCY_PROMPT_TEMPLATE"
+                                 indexName="IDX_HUNTTECH_VACANCY_PROMPT_TEMPLATE_CODE"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="HUNTTECH_VACANCY_PROMPT_TEMPLATE"
+                     indexName="IDX_HUNTTECH_VACANCY_PROMPT_TEMPLATE_CODE"
+                     unique="true">
+            <column name="CODE"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="260727-10-createUserAiProfile" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not><tableExists tableName="HUNTTECH_USER_AI_PROFILE"/></not>
+        </preConditions>
+        <createTable tableName="HUNTTECH_USER_AI_PROFILE">
+            <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="VERSION" type="int"><constraints nullable="false"/></column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="USER_ID" type="uuid"><constraints nullable="false"/></column>
+            <column name="PROFILE_ENABLED" type="boolean" defaultValueBoolean="false"><constraints nullable="false"/></column>
+            <column name="EXTERNAL_PROCESSING_ALLOWED" type="boolean" defaultValueBoolean="false"><constraints nullable="false"/></column>
+            <column name="CONSENT_VERSION" type="varchar(32)"/>
+            <column name="CONSENT_ACCEPTED_AT" type="timestamp"/>
+            <column name="PROFILE_CONFIRMED_AT" type="timestamp"/>
+            <column name="ABOUT_ME" type="clob"/>
+            <column name="CURRENT_POSITION" type="varchar(255)"/>
+            <column name="FUNCTIONAL_ROLE" type="int"/>
+            <column name="SENIORITY_LEVEL" type="int"/>
+            <column name="PROFESSIONAL_EXPERIENCE_YEARS" type="int"/>
+            <column name="RECRUITING_EXPERIENCE_YEARS" type="int"/>
+            <column name="CURRENT_RESPONSIBILITIES" type="clob"/>
+            <column name="EDUCATION" type="clob"/>
+            <column name="CERTIFICATIONS" type="clob"/>
+            <column name="DOMAIN_EXPERTISE" type="clob"/>
+            <column name="INDUSTRIES" type="clob"/>
+            <column name="RECRUITING_SPECIALIZATIONS" type="clob"/>
+            <column name="TARGET_ROLES" type="clob"/>
+            <column name="CANDIDATE_LEVELS" type="varchar(255)"/>
+            <column name="HIRING_GEOGRAPHIES" type="clob"/>
+            <column name="DECISION_PRIORITIES" type="clob"/>
+            <column name="CLIENT_PROJECT_CONTEXT" type="clob"/>
+            <column name="PROFESSIONAL_GOALS" type="clob"/>
+            <column name="PROFESSIONAL_INTERESTS" type="clob"/>
+            <column name="DEVELOPMENT_AREAS" type="clob"/>
+            <column name="CURRENT_PRIORITIES" type="clob"/>
+            <column name="PREFERRED_LANGUAGE" type="int"/>
+            <column name="RESPONSE_DETAIL_LEVEL" type="int"/>
+            <column name="COMMUNICATION_STYLE" type="int"/>
+            <column name="TERMINOLOGY_LEVEL" type="int"/>
+            <column name="PREFERRED_ANSWER_STRUCTURE" type="int"/>
+            <column name="CUSTOM_AI_INSTRUCTIONS" type="clob"/>
+            <column name="COMMUNICATION_CONSTRAINTS" type="clob"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="260727-11-addUserAiProfileUserFk" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="HUNTTECH_USER_AI_PROFILE"/>
+                <not>
+                    <foreignKeyConstraintExists
+                            foreignKeyName="FK_HUNTTECH_USER_AI_PROFILE_ON_USER"
+                            foreignKeyTableName="HUNTTECH_USER_AI_PROFILE"/>
+                </not>
+            </and>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseTableName="HUNTTECH_USER_AI_PROFILE"
+                baseColumnNames="USER_ID"
+                constraintName="FK_HUNTTECH_USER_AI_PROFILE_ON_USER"
+                referencedTableName="SEC_USER"
+                referencedColumnNames="ID"/>
+    </changeSet>
+
+    <changeSet id="260727-12-addUserAiProfileUserIndex" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <tableExists tableName="HUNTTECH_USER_AI_PROFILE"/>
+                <not>
+                    <indexExists tableName="HUNTTECH_USER_AI_PROFILE"
+                                 indexName="IDX_HUNTTECH_USER_AI_PROFILE_UNQ_USER"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="HUNTTECH_USER_AI_PROFILE"
+                     indexName="IDX_HUNTTECH_USER_AI_PROFILE_UNQ_USER"
+                     unique="true">
+            <column name="USER_ID"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="260727-13-addPreferPersonalAiApiSettings" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <columnExists tableName="HUNTTECH_USER_SETTINGS"
+                              columnName="PREFER_PERSONAL_AI_API_SETTINGS"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_USER_SETTINGS">
+            <column name="PREFER_PERSONAL_AI_API_SETTINGS"
+                    type="boolean"
+                    defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260727-14-addPreferPersonalPrompts" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <columnExists tableName="HUNTTECH_USER_SETTINGS"
+                              columnName="PREFER_PERSONAL_PROMPTS"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_USER_SETTINGS">
+            <column name="PREFER_PERSONAL_PROMPTS"
+                    type="boolean"
+                    defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!--
+        Текущая entity-модель после этого changeSet использует FILE_IMAGE_FACE.
+        Переименование PostgreSQL сохраняет UUID и автоматически переносит
+        ссылку существующего FK/индекса на новое имя колонки.
+    -->
+    <changeSet id="260727-15-addFileImageFaceWhenLegacyColumnMissing" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <not><columnExists tableName="HUNTTECH_USER_SETTINGS" columnName="IMAGE_ID"/></not>
+                <not><columnExists tableName="HUNTTECH_USER_SETTINGS" columnName="FILE_IMAGE_FACE"/></not>
+            </and>
+        </preConditions>
+        <addColumn tableName="HUNTTECH_USER_SETTINGS">
+            <column name="FILE_IMAGE_FACE" type="uuid"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260727-16-renameImageIdToFileImageFace" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <columnExists tableName="HUNTTECH_USER_SETTINGS" columnName="IMAGE_ID"/>
+                <not><columnExists tableName="HUNTTECH_USER_SETTINGS" columnName="FILE_IMAGE_FACE"/></not>
+            </and>
+        </preConditions>
+        <renameColumn tableName="HUNTTECH_USER_SETTINGS"
+                      oldColumnName="IMAGE_ID"
+                      newColumnName="FILE_IMAGE_FACE"
+                      columnDataType="uuid"/>
+    </changeSet>
+
+    <changeSet id="260727-17-copyImageIdWhenBothColumnsExist" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <columnExists tableName="HUNTTECH_USER_SETTINGS" columnName="IMAGE_ID"/>
+                <columnExists tableName="HUNTTECH_USER_SETTINGS" columnName="FILE_IMAGE_FACE"/>
+            </and>
+        </preConditions>
+        <sql>
+            UPDATE HUNTTECH_USER_SETTINGS
+               SET FILE_IMAGE_FACE = IMAGE_ID
+             WHERE FILE_IMAGE_FACE IS NULL
+               AND IMAGE_ID IS NOT NULL
+        </sql>
+    </changeSet>
+
+    <changeSet id="260727-18-renameUserSettingsImageFk" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <foreignKeyConstraintExists
+                        foreignKeyName="FK_HUNTTECH_USER_SETTINGS_ON_IMAGE"
+                        foreignKeyTableName="HUNTTECH_USER_SETTINGS"/>
+                <not>
+                    <foreignKeyConstraintExists
+                            foreignKeyName="FK_HUNTTECH_USER_SETTINGS_ON_FILE_IMAGE_FACE"
+                            foreignKeyTableName="HUNTTECH_USER_SETTINGS"/>
+                </not>
+            </and>
+        </preConditions>
+        <sql>
+            ALTER TABLE HUNTTECH_USER_SETTINGS
+            RENAME CONSTRAINT FK_HUNTTECH_USER_SETTINGS_ON_IMAGE
+            TO FK_HUNTTECH_USER_SETTINGS_ON_FILE_IMAGE_FACE
+        </sql>
+    </changeSet>
+
+    <changeSet id="260727-19-addUserSettingsFileImageFaceFk" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <columnExists tableName="HUNTTECH_USER_SETTINGS" columnName="FILE_IMAGE_FACE"/>
+                <not>
+                    <foreignKeyConstraintExists
+                            foreignKeyName="FK_HUNTTECH_USER_SETTINGS_ON_IMAGE"
+                            foreignKeyTableName="HUNTTECH_USER_SETTINGS"/>
+                </not>
+                <not>
+                    <foreignKeyConstraintExists
+                            foreignKeyName="FK_HUNTTECH_USER_SETTINGS_ON_FILE_IMAGE_FACE"
+                            foreignKeyTableName="HUNTTECH_USER_SETTINGS"/>
+                </not>
+            </and>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseTableName="HUNTTECH_USER_SETTINGS"
+                baseColumnNames="FILE_IMAGE_FACE"
+                constraintName="FK_HUNTTECH_USER_SETTINGS_ON_FILE_IMAGE_FACE"
+                referencedTableName="SYS_FILE"
+                referencedColumnNames="ID"/>
+    </changeSet>
+
+    <changeSet id="260727-20-renameUserSettingsImageIndex" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <indexExists tableName="HUNTTECH_USER_SETTINGS"
+                             indexName="IDX_HUNTTECH_USER_SETTINGS_ON_IMAGE"/>
+                <not>
+                    <indexExists tableName="HUNTTECH_USER_SETTINGS"
+                                 indexName="IDX_HUNTTECH_USER_SETTINGS_ON_FILE_IMAGE_FACE"/>
+                </not>
+            </and>
+        </preConditions>
+        <sql>
+            ALTER INDEX IDX_HUNTTECH_USER_SETTINGS_ON_IMAGE
+            RENAME TO IDX_HUNTTECH_USER_SETTINGS_ON_FILE_IMAGE_FACE
+        </sql>
+    </changeSet>
+
+    <changeSet id="260727-21-addUserSettingsFileImageFaceIndex" author="hunttech">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <and>
+                <columnExists tableName="HUNTTECH_USER_SETTINGS" columnName="FILE_IMAGE_FACE"/>
+                <not>
+                    <indexExists tableName="HUNTTECH_USER_SETTINGS"
+                                 indexName="IDX_HUNTTECH_USER_SETTINGS_ON_IMAGE"/>
+                </not>
+                <not>
+                    <indexExists tableName="HUNTTECH_USER_SETTINGS"
+                                 indexName="IDX_HUNTTECH_USER_SETTINGS_ON_FILE_IMAGE_FACE"/>
+                </not>
+            </and>
+        </preConditions>
+        <createIndex tableName="HUNTTECH_USER_SETTINGS"
+                     indexName="IDX_HUNTTECH_USER_SETTINGS_ON_FILE_IMAGE_FACE">
+            <column name="FILE_IMAGE_FACE"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
