@@ -1239,103 +1239,46 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
     }
 
     /**
-     * Строит пять одинаковых быстрых кнопок по статистике текущего пользователя
-     * за скользящий год. Пустые позиции остаются отключёнными, чтобы геометрия
-     * блока не менялась при недостаточном объёме истории.
+     * Строит быстрые действия по неизменяемому бизнес-контракту формы:
+     * {@link InteractionService} возвращает до пяти наиболее частых типов
+     * взаимодействия текущего рекрутёра за последний календарный месяц.
+     *
+     * Визуальный рефакторинг не должен переносить агрегацию в контроллер,
+     * менять период, пользователя или назначение точного объекта Iteraction.
      */
     private void setMostPopularIteraction() {
-        GregorianCalendar calendar = new GregorianCalendar();
-        Date periodEnd = calendar.getTime();
-        calendar.add(Calendar.YEAR, -1);
-        Date periodStart = calendar.getTime();
-
-        List<KeyValueEntity> popularRows = dataManager.loadValues(QUERY_MOST_POPULAR)
-                .properties("iteractionType", "usageCount")
-                .parameter("user", userSession.getUser())
-                .parameter("periodStart", periodStart)
-                .parameter("periodEnd", periodEnd)
-                .list();
+        mostPopular = interactionService.getMostPolularIteraction(
+                userSession.getUser(), POPULAR_INTERACTION_BUTTONS);
 
         mostPopularHbox.removeAll();
         List<Button> popularButtons = new ArrayList<>();
+        int buttonCount = Math.min(POPULAR_INTERACTION_BUTTONS, mostPopular.size());
 
-        for (int index = 0; index < POPULAR_INTERACTION_BUTTONS; index++) {
+        for (int index = 0; index < buttonCount; index++) {
+            Iteraction interaction = mostPopular.get(index);
+            if (interaction == null) {
+                continue;
+            }
+
             Button popularButton = uiComponents.create(Button.class);
             popularButton.setWidth("100%");
             popularButton.setStyleName("iteraction-list-popular-button");
-
-            if (index < popularRows.size()) {
-                KeyValueEntity row = popularRows.get(index);
-                Iteraction interaction = row.getValue("iteractionType");
-                Number usageCount = row.getValue("usageCount");
-
-                if (interaction != null) {
-                    popularButton.setCaption(interaction.getIterationName());
-                    popularButton.setDescription("Использовано за последний год: "
-                            + (usageCount == null ? 0 : usageCount.longValue()));
-                    popularButton.addClickListener(clickEvent -> {
-                        iteractionTypeField.setValue(interaction);
-                        iteractionTypeField.focus();
-                    });
-                } else {
-                    configureEmptyPopularButton(popularButton);
-                }
-            } else {
-                configureEmptyPopularButton(popularButton);
-            }
+            popularButton.setCaption(interaction.getIterationName());
+            popularButton.addClickListener(clickEvent -> {
+                iteractionTypeField.setValue(interaction);
+                iteractionTypeField.focus();
+            });
 
             mostPopularHbox.add(popularButton);
             popularButtons.add(popularButton);
         }
 
         // HBoxLayout.expand в CUBA 7.3 принимает один Component за вызов.
-        // Равный expand ratio для каждой кнопки сохраняет геометрию 5 × 20%.
+        // Одинаковый expand ratio сохраняет равную ширину фактически созданных кнопок.
         for (Button popularButton : popularButtons) {
             mostPopularHbox.expand(popularButton);
         }
     }
-
-    private void configureEmptyPopularButton(Button popularButton) {
-        popularButton.setCaption("Нет данных");
-        popularButton.setEnabled(false);
-    }
-
-    private static final String QUERY_MOST_POPULAR =
-            "select e.iteractionType, count(e.iteractionType) "
-                    + "from hunttech_IteractionList e "
-                    + "where e.dateIteraction between :periodStart and :periodEnd "
-                    + "and e.iteractionType is not null "
-                    + "and e.recrutier = :user "
-                    + "group by e.iteractionType "
-                    + "order by count(e.iteractionType) desc";
-
-    /* public List<Iteraction> getMostPolularIteraction(User user, int maxCount) {
-
-        GregorianCalendar gregorianCalendar = new GregorianCalendar();
-        gregorianCalendar.setTime(new Date());
-
-        Date startDate = gregorianCalendar.getTime();
-        gregorianCalendar.add(Calendar.MONTH, -1);
-        Date endDate = gregorianCalendar.getTime();
-
-        List<KeyValueEntity> list = dataManager.loadValues(QUERY_MOST_POPULAR)
-                .properties("iteractionType", "count")
-                .parameter("user", user)
-                .parameter("startDate", startDate)
-                .parameter("endDate", endDate)
-                .list();
-
-        List<Iteraction> retIteraction = new ArrayList<>();
-
-        if (maxCount > list.size())
-            maxCount = list.size();
-
-        for (int i = 0; i < maxCount; i++) {
-            retIteraction.add(list.get(i).getValue("iteractionType"));
-        }
-
-        return retIteraction;
-    }*/
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {

@@ -14,43 +14,65 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает годовой контракт пяти быстрых кнопок взаимодействий
- * и их постоянное расположение внутри вкладки перед аккордеонами.
+ * Неизменяемый регрессионный контракт быстрых взаимодействий IteractionListEdit.
+ * Визуальные рефакторинги формы не вправе менять период, пользователя, сервис
+ * ранжирования или способ назначения выбранного Iteraction.
  */
 public class IteractionListMostPopularInteractionTest {
 
     @Test
-    public void queryUsesCurrentUserAndRollingYear() throws IOException {
+    public void controllerDelegatesRankingToInteractionService() throws IOException {
         String controller = controller();
 
         assertTrue(controller.contains("POPULAR_INTERACTION_BUTTONS = 5"));
-        assertTrue(controller.contains("calendar.add(Calendar.YEAR, -1)"));
-        assertTrue(controller.contains("e.recrutier = :user"));
+        assertTrue(controller.contains("private InteractionService interactionService"));
+        assertTrue(controller.contains("interactionService.getMostPolularIteraction("));
         assertTrue(controller.contains(
-                "e.dateIteraction between :periodStart and :periodEnd"));
-        assertTrue(controller.contains(
-                ".parameter(\"user\", userSession.getUser())"));
+                "userSession.getUser(), POPULAR_INTERACTION_BUTTONS"));
+        assertFalse(controller.contains("calendar.add(Calendar.YEAR, -1)"));
+        assertFalse(controller.contains("dataManager.loadValues(QUERY_MOST_POPULAR)"));
+        assertFalse(controller.contains("private static final String QUERY_MOST_POPULAR"));
     }
 
     @Test
-    public void exactlyFiveEqualButtonsAreCreated() throws IOException {
+    public void serviceOwnsCurrentUserRollingMonthContract() throws IOException {
+        String service = readProjectFile(
+                "modules/core/src/com/company/hunttech/core/InteractionServiceBean.java");
+
+        assertTrue(service.contains("gregorianCalendar.add(Calendar.MONTH, -1)"));
+        assertTrue(service.contains("e.dateIteraction between :endDate and :startDate"));
+        assertTrue(service.contains("e.recrutier = :user"));
+        assertTrue(service.contains("group by e.iteractionType"));
+        assertTrue(service.contains("order by count(e.iteractionType) desc"));
+        assertTrue(service.contains("if (maxCount > list.size())"));
+        assertTrue(service.contains("maxCount = list.size()"));
+        assertFalse(service.contains("Calendar.YEAR"));
+    }
+
+    @Test
+    public void formCreatesUpToFiveEqualGreenButtons() throws IOException {
         String controller = controller();
 
-        assertTrue(controller.contains("index < POPULAR_INTERACTION_BUTTONS"));
-        assertTrue(controller.contains("mostPopularHbox.removeAll()"));
+        assertTrue(controller.contains(
+                "int buttonCount = Math.min(POPULAR_INTERACTION_BUTTONS, mostPopular.size())"));
+        assertTrue(controller.contains("index < buttonCount"));
+        assertTrue(controller.contains(
+                "popularButton.setStyleName(\"iteraction-list-popular-button\")"));
         assertTrue(controller.contains("popularButton.setWidth(\"100%\")"));
+        assertTrue(controller.contains("mostPopularHbox.removeAll()"));
         assertTrue(controller.contains("mostPopularHbox.expand(popularButton)"));
-        assertFalse(controller.contains("toArray(new Component[0])"));
-        assertTrue(controller.contains("configureEmptyPopularButton"));
+        assertFalse(controller.contains("configureEmptyPopularButton"));
+        assertFalse(controller.contains("Нет данных"));
+        assertFalse(controller.contains("getCaption().substring"));
     }
 
     @Test
-    public void clickAssignsExactInteractionWithoutCaptionParsing() throws IOException {
+    public void clickAssignsExactInteractionThroughStandardFieldHandler() throws IOException {
         String controller = controller();
 
         assertTrue(controller.contains("iteractionTypeField.setValue(interaction)"));
         assertTrue(controller.contains("iteractionTypeField.focus()"));
-        assertFalse(controller.contains("getCaption().substring"));
+        assertTrue(controller.contains("@Subscribe(\"iteractionTypeField\")"));
         assertFalse(controller.contains("setCaptionAsHtml(true)"));
     }
 
@@ -62,22 +84,19 @@ public class IteractionListMostPopularInteractionTest {
         int quickActions = workspace.indexOf("id=\"mostPopularQuickActions\"");
         int popularHost = workspace.indexOf("id=\"mostPopularHbox\"");
         int participantsAccordion = workspace.indexOf("id=\"participantsAccordion\"");
-        int legacyPopularAccordion = workspace.indexOf("id=\"popularAccordion\"");
 
         assertTrue(quickActions >= 0);
         assertTrue(popularHost > quickActions);
         assertTrue(participantsAccordion > popularHost);
-        assertTrue(legacyPopularAccordion > participantsAccordion);
         assertTrue(workspace.contains("id=\"mostPopularIteractionHBox\""));
         assertEquals(1, count(workspace, "id=\"mostPopularHbox\""));
         assertFalse(section(workspace,
                 "id=\"mostPopularQuickActions\"",
                 "id=\"participantsAccordion\"").contains("visible=\"false\""));
-        assertTrue(workspace.substring(legacyPopularAccordion).contains("visible=\"false\""));
     }
 
     @Test
-    public void scssProtectsVisibleFiveButtonGeometry() throws IOException {
+    public void scssKeepsQuickActionsVisibleAndEqual() throws IOException {
         String scss = readProjectFile(
                 "modules/web/themes/halo/com.company.hunttech/"
                         + "iteraction-list-reference-finish.scss");
@@ -88,8 +107,6 @@ public class IteractionListMostPopularInteractionTest {
         assertTrue(scss.contains("border-radius: 8px !important"));
         assertTrue(scss.contains(".iteraction-list-popular-button .v-button-caption"));
         assertTrue(scss.contains("visibility: visible !important"));
-        assertFalse(scss.contains("background: #2e7d32 !important"));
-        assertFalse(scss.contains("border-radius: 999px !important"));
     }
 
     private String controller() throws IOException {
@@ -116,7 +133,8 @@ public class IteractionListMostPopularInteractionTest {
     }
 
     private String readProjectFile(String relativePath) throws IOException {
-        return new String(Files.readAllBytes(projectRoot().resolve(relativePath)), StandardCharsets.UTF_8);
+        return new String(Files.readAllBytes(projectRoot().resolve(relativePath)),
+                StandardCharsets.UTF_8);
     }
 
     private Path projectRoot() {
