@@ -1,28 +1,36 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Корневой экран объявляет editor взаимодействия и подключает пакет локализованных сообщений. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://editorCaption"
         messagesPack="com.company.hunttech.web.screens.iteractionlist"
         icon="REORDER">
+    <!-- Раздел данных связывает визуальные компоненты с редактируемой сущностью и справочниками. -->
     <data>
-        <!-- Корневой контейнер и view являются контрактом business-controller. -->
+        <!-- Контейнер редактируемого взаимодействия хранит текущий экземпляр IteractionList и полный edit-view. -->
         <instance id="iteractionListDc"
                   class="com.company.hunttech.entity.IteractionList"
                   view="iteractionList-edit-view">
+            <!-- Loader загружает или создаёт экземпляр, который редактирует экран. -->
             <loader id="iteractionListDl"/>
         </instance>
-        <!-- Параметр number устанавливается controller для первой группы процесса. -->
+        <!-- Коллекция типов взаимодействий поставляет варианты для обязательного поля «Тип взаимодействия». -->
         <collection id="iteractionTypesDc"
                     class="com.company.hunttech.entity.Iteraction"
                     view="iteraction-list-type-view">
+            <!-- Кэшируемый loader загружает допустимые типы после установки controller-параметра number. -->
             <loader id="iteractionTypesLc" cacheable="true">
+                <!-- JPQL выбирает только элементы, включённые в дерево взаимодействий, и сортирует их по названию. -->
                 <query>
                     <![CDATA[select e from hunttech_Iteraction e
                     where e.iteractionTree is not null
                     order by e.iterationName
                         ]]>
+                    <!-- Условие добавляет фильтр по номеру группы дерева, выбранной business-controller. -->
                     <condition>
+                        <!-- JPQL-условие подключает именованный параметр number без изменения базового запроса. -->
                         <c:jpql>
+                            <!-- Фрагмент WHERE ограничивает типы одной веткой дерева взаимодействий. -->
                             <c:where>
                                 e.iteractionTree.number like :number
                             </c:where>
@@ -31,22 +39,30 @@
                 </query>
             </loader>
         </collection>
-        <!-- Вакансии сохраняют подписочный и departmental filters controller. -->
+        <!-- Коллекция вакансий поставляет варианты для поля «Вакансия» с учётом подразделения и подписок. -->
         <collection id="openPositionDc"
                     class="com.company.hunttech.entity.OpenPosition"
                     view="openPosition-iteraction-list-picker-view">
+            <!-- Кэшируемый loader загружает вакансии и принимает параметры departament и subscriber от controller. -->
             <loader id="openPositionsDl" cacheable="true">
+                <!-- JPQL возвращает вакансии в порядке состояния открытия и наименования. -->
                 <query>
                     <![CDATA[select e from hunttech_OpenPosition e
                                 order by e.openClose, e.vacansyName]]>
+                    <!-- Составное условие объединяет фильтр подразделения и режим «только мои подписки». -->
                     <condition>
+                        <!-- Логический AND требует одновременного выполнения включённых controller-ом фильтров. -->
                         <and>
+                            <!-- Первый JPQL-фрагмент ограничивает вакансии текущим подразделением. -->
                             <c:jpql>
+                                <!-- WHERE использует параметр departament, который устанавливает controller. -->
                                 <c:where>
                                     e.companyDepartament = :departament
                                 </c:where>
                             </c:jpql>
+                            <!-- Второй JPQL-фрагмент ограничивает вакансии активными заданиями текущего рекрутёра. -->
                             <c:jpql>
+                                <!-- WHERE проверяет подписчика, незакрытый статус задачи и действующий период подписки. -->
                                 <c:where>
                                     e in (select k.openPosition from hunttech_RecrutiesTasks k
                                     where k.reacrutier = :subscriber
@@ -59,10 +75,13 @@
                 </query>
             </loader>
         </collection>
+        <!-- Коллекция активных пользователей поставляет варианты ответственного рекрутёра. -->
         <collection id="usersDc"
                     class="com.haulmont.cuba.security.entity.User"
                     view="_minimal">
+            <!-- Кэшируемый loader исключает неактивных пользователей из выбора рекрутёра. -->
             <loader id="usersDl" cacheable="true">
+                <!-- JPQL сортирует активных пользователей по отображаемому имени. -->
                 <query>
                     <![CDATA[select e from sec$User e where e.active = true order by e.name]]>
                 </query>
@@ -70,13 +89,16 @@
         </collection>
     </data>
 
+    <!-- Диалоговый режим разворачивает editor на всю доступную область браузера. -->
     <dialogMode height="100%" modal="true" width="100%"/>
 
+    <!-- Корневой layout задаёт локальный CSS namespace и передаёт высоту двухпанельной компоновке. -->
     <layout stylename="iteraction-list-editor"
             expand="iteractionListMainLayout"
             spacing="false"
             width="100%"
             height="100%">
+        <!-- Главный HBox делит экран на постоянную sidebar и расширяемую рабочую область. -->
         <hbox id="iteractionListMainLayout"
               stylename="iteraction-list-main-layout edit-screen-layout"
               width="100%"
@@ -84,24 +106,26 @@
               spacing="false"
               expand="iteractionListWorkspace">
 
-            <!-- Sidebar содержит контекст кандидата и вакансии. -->
+            <!-- Sidebar удерживает контекст кандидата, вакансии, навигацию и служебные сведения при прокрутке формы. -->
             <vbox id="iteractionListSidebar"
                   stylename="iteraction-list-sidebar edit-sidebar"
                   width="312px"
                   height="100%"
                   spacing="true"
                   expand="iteractionListSidebarSpacer">
+                <!-- Профильный блок объединяет изображения, имя кандидата, вакансию, статус и приоритет. -->
                 <vbox width="100%"
                       height="AUTO"
                       spacing="true"
                       stylename="iteraction-list-profile-header edit-sidebar-identity">
-                    <!-- Оба OvaFallbackImage имеют один визуальный контракт 96 × 96. -->
+                    <!-- Горизонтальный контейнер показывает фотографию кандидата и логотип проекта одинакового размера. -->
                     <hbox id="iteractionIdentityImages"
                           width="100%"
                           height="AUTO"
                           spacing="true"
                           align="MIDDLE_CENTER"
                           stylename="iteraction-list-identity-images edit-sidebar-visual">
+                        <!-- OvaFallbackImage кандидата читает фотографию из entity и показывает fallback при отсутствии файла. -->
                         <ovaFallbackImage id="candidateImage"
                                           dataContainer="iteractionListDc"
                                           property="candidate.fileImageFace"
@@ -114,6 +138,7 @@
                                           align="MIDDLE_CENTER"
                                           stylename="iteraction-list-context-image iteraction-list-candidate-image"
                                           scaleMode="SCALE_DOWN"/>
+                        <!-- OvaFallbackImage проекта показывает логотип выбранной вакансии или нейтральный company fallback. -->
                         <ovaFallbackImage id="projectLogoImage"
                                           width="96px"
                                           height="96px"
@@ -125,6 +150,7 @@
                                           stylename="iteraction-list-context-image iteraction-list-project-image"
                                           scaleMode="SCALE_DOWN"/>
                     </hbox>
+                    <!-- Label имени идентифицирует кандидата, для которого создаётся взаимодействие. -->
                     <label id="iteractionCandidateNameLabel"
                            dataContainer="iteractionListDc"
                            property="candidate.fullName"
@@ -132,6 +158,7 @@
                            width="100%"
                            height="AUTO"
                            align="MIDDLE_CENTER"/>
+                    <!-- Label вакансии фиксирует контекст взаимодействия до перехода к разделам ввода. -->
                     <label id="iteractionVacancyNameLabel"
                            dataContainer="iteractionListDc"
                            property="vacancy.vacansyName"
@@ -140,32 +167,37 @@
                            height="AUTO"
                            align="MIDDLE_CENTER"/>
 
-                    <!-- Статус и приоритет остаются одной горизонтальной парой. -->
+                    <!-- HBox располагает статус вакансии и её приоритет одной горизонтальной парой 50/50. -->
                     <hbox id="vacancyStateSummary"
                           width="100%"
                           height="AUTO"
                           spacing="true"
                           align="TOP_LEFT"
                           stylename="iteraction-list-vacancy-state-summary edit-sidebar-summary">
+                        <!-- Левая ячейка содержит состояние открытия вакансии и предупреждение об альтернативных вакансиях. -->
                         <vbox id="vacancyStatusSummary"
                               width="50%"
                               height="AUTO"
                               spacing="false"
                               stylename="iteraction-list-vacancy-state-cell iteraction-list-sidebar-info-row">
+                            <!-- Caption объясняет, что следующее значение относится к статусу вакансии. -->
                             <label value="msg://msgStatusOfVacansy"
                                    width="100%"
                                    stylename="iteraction-list-sidebar-caption"/>
+                            <!-- Строка значения объединяет текст статуса и условную кнопку предупреждения. -->
                             <hbox width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   align="MIDDLE_LEFT"
                                   expand="statusOfVacansyLabel"
                                   stylename="iteraction-list-sidebar-value-row">
+                                <!-- Label получает вычисленный controller-ом текст «Открыта» или «Закрыта». -->
                                 <label id="statusOfVacansyLabel"
                                        width="100%"
                                        height="AUTO"
                                        align="MIDDLE_LEFT"
                                        stylename="iteraction-list-sidebar-value iteraction-list-status-value"/>
+                                <!-- LinkButton сигнализирует о найденных альтернативных вакансиях и остаётся скрытым без предупреждения. -->
                                 <linkButton id="alternativeVacancyLinkButton"
                                             visible="false"
                                             descriptionAsHtml="true"
@@ -174,25 +206,30 @@
                                             icon="WARNING"/>
                             </hbox>
                         </vbox>
+                        <!-- Правая ячейка показывает текущий приоритет вакансии и его визуальный индикатор. -->
                         <vbox id="vacancyPrioritySummary"
                               width="50%"
                               height="AUTO"
                               spacing="false"
                               stylename="iteraction-list-vacancy-state-cell iteraction-list-sidebar-info-row">
+                            <!-- Caption объясняет, что следующая строка содержит приоритет вакансии. -->
                             <label value="msg://msgPriority"
                                    width="100%"
                                    stylename="iteraction-list-sidebar-caption"/>
+                            <!-- Строка значения объединяет светофор приоритета и его текстовое название. -->
                             <hbox width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   align="MIDDLE_LEFT"
                                   expand="currentPriorityLabel"
                                   stylename="iteraction-list-sidebar-value-row">
+                                <!-- Image отображает назначенный controller-ом графический индикатор приоритета. -->
                                 <image id="trafficLighterImage"
                                        width="AUTO"
                                        height="AUTO"
                                        align="MIDDLE_LEFT"
                                        stylename="iteraction-list-priority-image"/>
+                                <!-- Label выводит человекочитаемое значение приоритета вакансии. -->
                                 <label id="currentPriorityLabel"
                                        width="100%"
                                        height="AUTO"
@@ -203,46 +240,53 @@
                     </hbox>
                 </vbox>
 
-                <!-- Runtime controller сохраняет первый компонент и заменяет fallback LABEL кнопками. -->
+                <!-- Контейнер label-навигации хранит постоянный заголовок и runtime-кнопки перехода к четырём блокам формы. -->
                 <vbox id="iteractionListNavigation"
                       width="100%"
                       height="AUTO"
                       spacing="false"
                       stylename="label-navigation iteraction-list-navigation">
+                    <!-- Заголовок «Разделы формы» остаётся первым компонентом и не удаляется controller-ом. -->
                     <label id="iteractionListNavigationTitle"
                            width="100%"
                            height="AUTO"
                            value="msg://msgAccordionNavigation"
                            stylename="label-nav-title iteraction-list-navigation-title"/>
+                    <!-- Fallback-пункт первого раздела показывает активное состояние до создания runtime-кнопок. -->
                     <label width="100%"
                            height="AUTO"
                            value="msg://msgAccordionParticipants"
                            stylename="label-nav-item iteraction-list-nav-item label-nav-item-active iteraction-list-nav-item-active"/>
+                    <!-- Fallback-пункт обозначает переход к выбору типа и дополнительных параметров действия. -->
                     <label width="100%"
                            height="AUTO"
                            value="msg://msgAccordionInteraction"
                            stylename="label-nav-item iteraction-list-nav-item"/>
+                    <!-- Fallback-пункт обозначает переход к оценке, рекрутёру и способу связи. -->
                     <label width="100%"
                            height="AUTO"
                            value="msg://msgAccordionResult"
                            stylename="label-nav-item iteraction-list-nav-item"/>
+                    <!-- Fallback-пункт обозначает переход к обязательному комментарию взаимодействия. -->
                     <label width="100%"
                            height="AUTO"
                            value="msg://msgAccordionComment"
                            stylename="label-nav-item iteraction-list-nav-item"/>
                 </vbox>
 
-                <!-- Служебная карточка ограничивает поля внутренней шириной sidebar. -->
+                <!-- Служебная карточка группирует неизменяемые номер и дату текущего взаимодействия. -->
                 <vbox id="iteractionServiceCard"
                       width="100%"
                       height="AUTO"
                       spacing="false"
                       stylename="iteraction-list-sidebar-card iteraction-list-service-card edit-sidebar-summary">
+                    <!-- Внутренний контейнер ограничивает оба служебных поля шириной карточки. -->
                     <vbox id="iteractionServiceFields"
                           width="100%"
                           height="AUTO"
                           spacing="true"
                           stylename="iteraction-list-service-fields">
+                        <!-- Read-only поле показывает последовательный номер взаимодействия, назначенный business-controller. -->
                         <textField id="numberIteractionField"
                                    stylename="iteraction-list-service-field"
                                    dataContainer="iteractionListDc"
@@ -251,6 +295,7 @@
                                    caption="msg://msgNumber"
                                    width="100%"
                                    align="MIDDLE_LEFT"/>
+                        <!-- Read-only поле показывает дату и время взаимодействия из редактируемой сущности. -->
                         <dateField id="dateIteractionField"
                                    stylename="iteraction-list-service-field"
                                    dataContainer="iteractionListDc"
@@ -262,25 +307,29 @@
                     </vbox>
                 </vbox>
 
-                <!-- Карточка вакансии содержит собственное наименование вакансии. -->
+                <!-- Карточка вакансии раскрывает бизнес-контекст выбранной позиции без перехода в отдельный экран. -->
                 <vbox id="iteractionVacancyCard"
                       width="100%"
                       height="AUTO"
                       spacing="true"
                       stylename="iteraction-list-sidebar-card iteraction-list-vacancy-card edit-sidebar-summary">
+                    <!-- Заголовок визуально отделяет vacancy context от служебных данных взаимодействия. -->
                     <label value="mainMsg://msgVacancy"
                            width="100%"
                            height="AUTO"
                            stylename="iteraction-list-sidebar-card-title"/>
+                    <!-- Строка наименования повторяет выбранную вакансию внутри подробной vacancy-card. -->
                     <vbox id="sidebarVacancyNameRow"
                           width="100%"
                           height="AUTO"
                           spacing="false"
                           stylename="iteraction-list-sidebar-info-row iteraction-list-vacancy-name-row">
+                        <!-- Caption поясняет значение связанного ниже названия вакансии. -->
                         <label value="msg://msgVacancyName"
                                width="100%"
                                height="AUTO"
                                stylename="iteraction-list-sidebar-caption"/>
+                        <!-- Label читает vacancy.vacansyName из текущего взаимодействия без дополнительного loader. -->
                         <label id="sidebarVacancyNameLabel"
                                dataContainer="iteractionListDc"
                                property="vacancy.vacansyName"
@@ -288,39 +337,47 @@
                                height="AUTO"
                                stylename="iteraction-list-sidebar-value iteraction-list-vacancy-name-value"/>
                     </vbox>
+                    <!-- Скрытый label отображает controller-сообщение о сроке закрытия вакансии, когда оно актуально. -->
                     <label id="closingDateVacancyLabel"
                            stylename="h4 iteraction-list-closing-date"
                            width="100%"
                            visible="false"
                            height="AUTO"
                            align="MIDDLE_LEFT"/>
+                    <!-- Контейнер компании и подразделения группирует caption и вычисленное HTML-значение. -->
                     <vbox width="100%"
                           height="AUTO"
                           spacing="false"
                           stylename="iteraction-list-sidebar-info-row">
+                        <!-- Caption обозначает организационный контекст вакансии. -->
                         <label value="msg://msgCompanyDepartament"
                                width="100%"
                                height="AUTO"
                                stylename="iteraction-list-sidebar-caption"/>
+                        <!-- Label принимает сформированное controller-ом HTML-наименование компании и подразделения. -->
                         <label id="companyLabel"
                                width="100%"
                                height="AUTO"
                                htmlEnabled="true"
                                stylename="iteraction-list-sidebar-value"/>
                     </vbox>
+                    <!-- Контейнер проекта группирует caption и название проекта выбранной вакансии. -->
                     <vbox width="100%"
                           height="AUTO"
                           spacing="false"
                           stylename="iteraction-list-sidebar-info-row">
+                        <!-- Caption поясняет, что следующее значение относится к проекту вакансии. -->
                         <label value="msg://msgProject"
                                width="100%"
                                height="AUTO"
                                stylename="iteraction-list-sidebar-caption"/>
+                        <!-- Label получает controller-ом название проекта или остаётся пустым при отсутствии связи. -->
                         <label id="projectLabel"
                                width="100%"
                                height="AUTO"
                                stylename="iteraction-list-sidebar-value"/>
                     </vbox>
+                    <!-- Условный блок ставки показывается только для вакансий с применимой outstaffing-cost. -->
                     <hbox id="outstaffingCostHBox"
                           width="100%"
                           height="AUTO"
@@ -328,23 +385,28 @@
                           spacing="false"
                           align="MIDDLE_LEFT"
                           stylename="iteraction-list-sidebar-cost">
+                        <!-- Вертикальный контейнер объединяет caption ставки и строку суммы с единицей измерения. -->
                         <vbox width="100%" height="AUTO" spacing="false">
+                            <!-- Caption обозначает предельную ставку вакансии. -->
                             <label value="msg://msgOutstaffCost"
                                    width="100%"
                                    height="AUTO"
                                    align="MIDDLE_LEFT"
                                    stylename="iteraction-list-sidebar-caption"/>
+                            <!-- Строка ставки размещает числовое значение и подпись «рублей в час». -->
                             <hbox width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   align="MIDDLE_LEFT"
                                   stylename="iteraction-list-sidebar-cost-line">
+                                <!-- Label читает outstaffingCost непосредственно из выбранной вакансии. -->
                                 <label dataContainer="iteractionListDc"
                                        property="vacancy.outstaffingCost"
                                        width="AUTO"
                                        height="AUTO"
                                        align="MIDDLE_LEFT"
                                        stylename="iteraction-list-sidebar-cost-value"/>
+                                <!-- Label поясняет единицу измерения числовой ставки. -->
                                 <label value="msg://msgRubPerHour"
                                        width="AUTO"
                                        height="AUTO"
@@ -353,18 +415,21 @@
                             </hbox>
                         </vbox>
                     </hbox>
+                    <!-- Контейнер контекста рейтинга резервирует место для условной оценки вакансии и пиктограммы. -->
                     <hbox id="labelHBox"
                           width="100%"
                           height="AUTO"
                           spacing="true"
                           align="MIDDLE_LEFT"
                           stylename="iteraction-list-rating-context">
+                        <!-- Скрытый label выводит текстовую оценку, когда controller считает её применимой. -->
                         <label id="ratingLabel"
                                visible="false"
                                width="AUTO"
                                height="AUTO"
                                align="MIDDLE_LEFT"
                                stylename="h1"/>
+                        <!-- Скрытое изображение визуализирует рейтинг, когда controller назначает ресурс и включает видимость. -->
                         <image id="ratingImage"
                                visible="false"
                                width="50px"
@@ -374,34 +439,39 @@
                     </hbox>
                 </vbox>
 
+                <!-- Spacer забирает оставшуюся высоту sidebar и удерживает информационные карточки сверху. -->
                 <vbox id="iteractionListSidebarSpacer"
                       width="100%"
                       height="100%"
                       stylename="iteraction-list-sidebar-spacer edit-sidebar-spacer"/>
             </vbox>
 
-            <!-- Справа расположены четыре обычных VBox-блока без accordion API. -->
+            <!-- Рабочая область содержит toolbar, быстрые действия, прокручиваемые поля и постоянный footer. -->
             <vbox id="iteractionListWorkspace"
                   stylename="iteraction-list-workspace edit-workspace"
                   width="100%"
                   height="100%"
                   spacing="false"
                   expand="iteractionListContentScrollBox">
+                <!-- Toolbar показывает назначение editor и контекст текущего списка взаимодействий. -->
                 <hbox stylename="iteraction-list-toolbar edit-toolbar"
                       width="100%"
                       height="AUTO"
                       spacing="true"
                       expand="iteractionListToolbarTitleBox"
                       align="MIDDLE_LEFT">
+                    <!-- Контейнер заголовков вертикально объединяет основное название и поясняющую строку. -->
                     <vbox id="iteractionListToolbarTitleBox"
                           width="100%"
                           height="AUTO"
                           spacing="false"
                           stylename="iteraction-list-toolbar-title-box">
+                        <!-- Основной заголовок сообщает, что пользователь редактирует список взаимодействий. -->
                         <label value="msg://editorCaption"
                                width="100%"
                                height="AUTO"
                                stylename="iteraction-list-toolbar-title edit-toolbar-title"/>
+                        <!-- Контекстная строка уточняет тип редактируемых данных. -->
                         <label value="msg://msgIteractionList"
                                width="100%"
                                height="AUTO"
@@ -409,20 +479,24 @@
                     </vbox>
                 </hbox>
 
+                <!-- Карточка быстрых действий позволяет одним кликом выбрать один из пяти частых типов взаимодействия. -->
                 <vbox id="mostPopularQuickActions"
                       width="100%"
                       height="AUTO"
                       spacing="true"
                       stylename="iteraction-list-quick-actions edit-card">
+                    <!-- Заголовок объясняет назначение динамически созданных кнопок. -->
                     <label value="msg://mshMostPopular"
                            width="100%"
                            height="AUTO"
                            stylename="iteraction-list-quick-actions-title edit-card-title"/>
+                    <!-- Host-контейнер изолирует runtime-ряд кнопок от внешней карточки. -->
                     <hbox id="mostPopularIteractionHBox"
                           width="100%"
                           height="AUTO"
                           spacing="false"
                           stylename="iteraction-list-popular-host">
+                        <!-- Runtime-контейнер получает пять реальных или disabled-кнопок из business-controller. -->
                         <hbox id="mostPopularHbox"
                               width="100%"
                               height="AUTO"
@@ -432,49 +506,62 @@
                     </hbox>
                 </vbox>
 
+                <!-- Вертикальный ScrollBox прокручивает только блоки ввода, сохраняя toolbar, быстрые действия и footer. -->
                 <scrollBox id="iteractionListContentScrollBox"
                            orientation="vertical"
                            width="100%"
                            height="100%"
                            stylename="iteraction-list-scroll edit-workspace-scroll">
+                    <!-- Контейнер контента располагает четыре смысловых блока формы вертикально друг под другом. -->
                     <vbox width="100%"
                           height="AUTO"
                           spacing="true"
                           margin="true"
                           stylename="iteraction-list-content iteraction-list-flat-content edit-workspace-content">
 
+                        <!-- Первый блок определяет участников взаимодействия: кандидата и вакансию. -->
                         <vbox id="participantsAccordion"
                               width="100%"
                               height="AUTO"
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-flat-section-active iteraction-list-form-section iteraction-list-participants-section edit-card">
+                            <!-- Header визуально отделяет название блока участников от его полей. -->
                             <vbox width="100%"
                                   height="AUTO"
                                   spacing="false"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-header">
+                                <!-- Заголовок сообщает, что блок связывает кандидата с вакансией. -->
                                 <label value="msg://msgAccordionParticipants"
                                        width="100%"
                                        height="AUTO"
                                        stylename="iteraction-list-flat-section-title edit-card-title"/>
                             </vbox>
+                            <!-- Body содержит picker-поля и фильтр доступных вакансий. -->
                             <vbox id="participantsAccordionContent"
                                   width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-body iteraction-list-section-content">
+                                <!-- Grid размещает поля кандидата и вакансии в двух равных колонках. -->
                                 <grid id="gridIterationData"
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
                                       stylename="iteraction-list-form-grid">
+                                    <!-- Columns объявляют двухколоночную структуру основного контекста взаимодействия. -->
                                     <columns>
+                                        <!-- Левая колонка растягивает поле выбора кандидата. -->
                                         <column flex="1"/>
+                                        <!-- Правая колонка растягивает поле выбора вакансии симметрично кандидату. -->
                                         <column flex="1"/>
                                     </columns>
+                                    <!-- Rows группируют логически связанные поля grid. -->
                                     <rows>
+                                        <!-- Единственная строка располагает candidateField и vacancyFiels на одном уровне. -->
                                         <row id="row">
+                                            <!-- SuggestionPickerField ищет кандидата по ФИО, исключая заблокированные и технические записи. -->
                                             <suggestionPickerField id="candidateField"
                                                                    inputPrompt="mainMsg://msgStartInput"
                                                                    minSearchStringLength="3"
@@ -485,10 +572,14 @@
                                                                    required="true"
                                                                    dataContainer="iteractionListDc"
                                                                    property="candidate">
+                                                <!-- Actions предоставляют выбор кандидата из lookup и открытие его карточки. -->
                                                 <actions>
+                                                    <!-- Lookup action открывает стандартный экран выбора кандидата. -->
                                                     <action id="lookup" type="picker_lookup"/>
+                                                    <!-- Open action открывает карточку уже выбранного кандидата для просмотра или редактирования. -->
                                                     <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                                 </actions>
+                                                <!-- Suggestion query выполняет безопасный поиск по подстроке имени в заданном narrow view. -->
                                                 <query entityClass="com.company.hunttech.entity.JobCandidate"
                                                        view="jobCandidate-iteraction-list-suggestion-view"
                                                        escapeValueForLike="true"
@@ -501,6 +592,7 @@
                                                     order by e.secondName, e.firstName
                                                 </query>
                                             </suggestionPickerField>
+                                            <!-- LookupPickerField выбирает вакансию из отфильтрованного openPositionDc. -->
                                             <lookupPickerField id="vacancyFiels"
                                                                caption="mainMsg://msgVacancy"
                                                                dataContainer="iteractionListDc"
@@ -509,14 +601,18 @@
                                                                height="AUTO"
                                                                width="100%"
                                                                stylename="iteraction-list-primary-picker">
+                                                <!-- Actions позволяют выбрать вакансию из списка и открыть её editor. -->
                                                 <actions>
+                                                    <!-- Lookup action открывает стандартный список допустимых вакансий. -->
                                                     <action id="lookup" type="picker_lookup"/>
+                                                    <!-- Open action открывает карточку уже выбранной вакансии. -->
                                                     <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                                 </actions>
                                             </lookupPickerField>
                                         </row>
                                     </rows>
                                 </grid>
+                                <!-- CheckBox включает фильтрацию вакансий только по активным подпискам текущего пользователя. -->
                                 <checkBox id="onlyMySubscribeCheckBox"
                                           width="100%"
                                           height="AUTO"
@@ -527,27 +623,31 @@
                             </vbox>
                         </vbox>
 
+                        <!-- Второй блок определяет тип взаимодействия и динамические дополнительные значения. -->
                         <vbox id="interactionAccordion"
                               width="100%"
                               height="AUTO"
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-form-section edit-card">
+                            <!-- Header визуально отделяет название блока действия от динамических полей. -->
                             <vbox width="100%"
                                   height="AUTO"
                                   spacing="false"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-header">
+                                <!-- Заголовок сообщает, что блок описывает тип и выполняемое действие. -->
                                 <label value="msg://msgAccordionInteraction"
                                        width="100%"
                                        height="AUTO"
                                        stylename="iteraction-list-flat-section-title edit-card-title"/>
                             </vbox>
-                            <!-- Visible/required/caption динамических полей определяет business-controller. -->
+                            <!-- Body содержит обязательный тип взаимодействия и controller-управляемую динамическую область. -->
                             <vbox width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-body iteraction-list-dynamic-fields iteraction-list-section-content">
+                                <!-- LookupPickerField выбирает тип взаимодействия из ветки iteractionTypesDc. -->
                                 <lookupPickerField id="iteractionTypeField"
                                                    optionsContainer="iteractionTypesDc"
                                                    caption="msg://msgIteractionType"
@@ -556,28 +656,36 @@
                                                    required="true"
                                                    dataContainer="iteractionListDc"
                                                    property="iteractionType">
+                                    <!-- Actions оставляют стандартный lookup для сложного выбора типа. -->
                                     <actions>
+                                        <!-- Lookup action открывает справочник доступных типов взаимодействий. -->
                                         <action id="lookup" type="picker_lookup"/>
                                     </actions>
                                 </lookupPickerField>
+                                <!-- ButtonsPanel резервирует область, чьё содержимое и видимость зависят от выбранного типа. -->
                                 <buttonsPanel id="buttonsPanelCallAction"
                                               width="100%"
                                               height="AUTO"
                                               align="BOTTOM_LEFT"
                                               stylename="iteraction-list-dynamic-panel">
+                                    <!-- Внутренний VBox располагает controller-action и три альтернативных dynamic value поля. -->
                                     <vbox width="100%" height="AUTO" spacing="true">
+                                        <!-- Button вызывает callActionEntity для типа взаимодействия с внешним экраном или действием. -->
                                         <button id="buttonCallAction"
                                                 invoke="callActionEntity"
                                                 width="100%"
                                                 align="BOTTOM_LEFT"/>
+                                        <!-- TextField хранит строковое дополнительное значение для interaction type с addType=1. -->
                                         <textField id="addString"
                                                    dataContainer="iteractionListDc"
                                                    property="addString"
                                                    width="100%"/>
+                                        <!-- DateField хранит дополнительную дату для interaction type с addType=2. -->
                                         <dateField id="addDate"
                                                    dataContainer="iteractionListDc"
                                                    property="addDate"
                                                    width="100%"/>
+                                        <!-- TextField хранит числовое дополнительное значение для interaction type с addType=3. -->
                                         <textField id="addInteger"
                                                    dataContainer="iteractionListDc"
                                                    property="addInteger"
@@ -587,39 +695,49 @@
                             </vbox>
                         </vbox>
 
-                        <!-- Результат и вложенные Vaadin-обёртки сохраняют естественную высоту AUTO. -->
+                        <!-- Третий блок фиксирует оценку результата, ответственного рекрутёра и способ связи. -->
                         <vbox id="resultAccordion"
                               width="100%"
                               height="AUTO"
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-result-section iteraction-list-form-section edit-card">
+                            <!-- Header визуально отделяет название блока оценки от его полей. -->
                             <vbox width="100%"
                                   height="AUTO"
                                   spacing="false"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-header">
+                                <!-- Заголовок сообщает, что блок описывает оценку и канал коммуникации. -->
                                 <label value="msg://msgAccordionResult"
                                        width="100%"
                                        height="AUTO"
                                        stylename="iteraction-list-flat-section-title edit-card-title"/>
                             </vbox>
+                            <!-- Body растёт по AUTO и содержит grid результата без фиксированной высоты. -->
                             <vbox id="resultAccordionBody"
                                   width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-body iteraction-list-result-body iteraction-list-section-content">
+                                <!-- Grid размещает оценку и рекрутёра в первой строке, способ связи — на всю вторую строку. -->
                                 <grid id="resultAccordionGrid"
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
                                       stylename="iteraction-list-form-grid iteraction-list-result-grid">
+                                    <!-- Columns объявляют две равные колонки результата. -->
                                     <columns>
+                                        <!-- Левая колонка содержит оценку кандидата. -->
                                         <column flex="1"/>
+                                        <!-- Правая колонка содержит ответственного рекрутёра. -->
                                         <column flex="1"/>
                                     </columns>
+                                    <!-- Rows задают основную строку оценки и отдельную строку способа связи. -->
                                     <rows>
+                                        <!-- Первая строка объединяет обязательную оценку и выбранного рекрутёра. -->
                                         <row id="rating">
+                                            <!-- LookupField сохраняет оценку коммуникации в свойство rating. -->
                                             <lookupField id="ratingField"
                                                          required="true"
                                                          align="MIDDLE_LEFT"
@@ -628,18 +746,23 @@
                                                          property="rating"
                                                          description="msg://msgRatingDecription"
                                                          width="100%"/>
+                                            <!-- LookupPickerField выбирает ответственного рекрутёра из активных usersDc. -->
                                             <lookupPickerField id="recrutierField"
                                                                caption="msg://msgRecrutier"
                                                                width="100%"
                                                                dataContainer="iteractionListDc"
                                                                property="recrutier"
                                                                optionsContainer="usersDc">
+                                                <!-- Actions предоставляют стандартный lookup пользователя. -->
                                                 <actions>
+                                                    <!-- Lookup action открывает список активных пользователей для выбора рекрутёра. -->
                                                     <action id="lookup" type="picker_lookup"/>
                                                 </actions>
                                             </lookupPickerField>
                                         </row>
+                                        <!-- Вторая строка выделена способу связи и растягивает поле на обе колонки. -->
                                         <row>
+                                            <!-- TextField сохраняет канал коммуникации, например телефон, email или мессенджер. -->
                                             <textField id="communicationMethodField"
                                                        width="100%"
                                                        caption="msg://msgCommunicationMethod"
@@ -652,26 +775,31 @@
                             </vbox>
                         </vbox>
 
+                        <!-- Четвёртый блок хранит содержательный комментарий рекрутёра о взаимодействии. -->
                         <vbox id="commentAccordion"
                               width="100%"
                               height="AUTO"
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-form-section iteraction-list-comment-section edit-card">
+                            <!-- Header визуально отделяет название комментария от многострочного поля. -->
                             <vbox width="100%"
                                   height="AUTO"
                                   spacing="false"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-header">
+                                <!-- Заголовок обозначает последний смысловой раздел формы. -->
                                 <label value="msg://msgAccordionComment"
                                        width="100%"
                                        height="AUTO"
                                        stylename="iteraction-list-flat-section-title edit-card-title"/>
                             </vbox>
+                            <!-- Body задаёт внутренние отступы для многострочного комментария. -->
                             <vbox width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-body">
+                                <!-- TextArea сохраняет обязательное бизнес-описание контакта в свойство comment. -->
                                 <textArea id="commentField"
                                           dataContainer="iteractionListDc"
                                           property="comment"
@@ -684,6 +812,7 @@
                     </vbox>
                 </scrollBox>
 
+                <!-- Footer удерживает подписку, сохранение и отмену вне прокручиваемого содержимого. -->
                 <hbox id="editActions"
                       stylename="iteraction-list-footer edit-footer-actions"
                       width="100%"
@@ -691,20 +820,25 @@
                       spacing="true"
                       expand="editActionsSpacer"
                       align="MIDDLE_RIGHT">
+                    <!-- Spacer выталкивает группу действий к правому краю footer. -->
                     <vbox id="editActionsSpacer" width="100%" height="1px"/>
+                    <!-- Группа действий объединяет пользовательские и стандартные editor-команды. -->
                     <hbox id="editActionsGroup"
                           width="AUTO"
                           height="AUTO"
                           spacing="true"
                           align="MIDDLE_RIGHT"
                           stylename="iteraction-list-footer-actions">
+                        <!-- Button открывает или создаёт подписку пользователя на кандидата. -->
                         <button id="subscribeButton"
                                 invoke="onButtonSubscribeClick"
                                 caption="mainMsg://msgSubscribe"
                                 icon="BELL"
                                 stylename="iteraction-list-subscribe-action"/>
+                        <!-- Стандартная action сохраняет IteractionList и закрывает editor. -->
                         <button action="windowCommitAndClose"
                                 stylename="iteraction-list-primary-action"/>
+                        <!-- Стандартная action закрывает editor без подтверждённого сохранения изменений. -->
                         <button action="windowClose"
                                 stylename="iteraction-list-secondary-action"/>
                     </hbox>
