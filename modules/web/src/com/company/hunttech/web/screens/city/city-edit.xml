@@ -1,39 +1,66 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Edit-экран города сохраняет исходные loaders, bindings и actions, изменяя только presentation-композицию. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
-        messagesPack="com.company.hunttech.web.screens.city" icon="BANK">
+        focusComponent="cityRuNameField"
+        messagesPack="com.company.hunttech.web.screens.city"
+        icon="BANK">
     <data>
-        <instance id="cityDc"
-                  class="com.company.hunttech.entity.City"
-                  view="city-edit-view">
+        <instance id="cityDc" class="com.company.hunttech.entity.City" view="city-edit-view">
             <loader/>
         </instance>
         <collection id="cityRegionsDc" class="com.company.hunttech.entity.Region" view="region-picker-view">
             <loader id="cityRegionsLc" cacheable="true">
-                <query>
-                    <![CDATA[select e from hunttech_Region e]]>
-                </query>
+                <query><![CDATA[select e from hunttech_Region e]]></query>
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="cityDc">
-            <column width="100%">
-                <textField id="cityRuNameField" property="cityRuName"/>
-                <textField id="cityPhoneCodeField" property="cityPhoneCode"/>
-                <lookupPickerField id="cityRegionField" optionsContainer="cityRegionsDc" property="cityRegion">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-            </column>
-        </form>
-        <hbox id="editActions" spacing="true">
-            <button action="windowCommitAndClose"/>
-            <button action="windowClose"/>
+    <dialogMode height="100%" width="100%" modal="true"/>
+    <layout stylename="city-editor" expand="cityMainLayout" spacing="false" width="100%" height="100%">
+        <hbox id="cityMainLayout" stylename="edit-screen-layout" expand="cityWorkspace" spacing="false" width="100%" height="100%">
+            <vbox id="citySidebar" stylename="edit-sidebar" width="280px" height="100%" spacing="true" expand="citySidebarSpacer">
+                <vbox id="cityIdentity" stylename="edit-sidebar-identity" width="100%" spacing="true">
+                    <label value="Город" stylename="edit-sidebar-subtitle" width="100%"/>
+                    <label id="citySidebarTitle" dataContainer="cityDc" property="cityRuName" stylename="edit-sidebar-title" width="100%"/>
+                </vbox>
+                <vbox id="cityNavigation" stylename="label-navigation" width="100%" spacing="false">
+                    <label value="Разделы" stylename="label-nav-title" width="100%"/>
+                    <button id="cityMainNav" caption="Основные данные" stylename="borderless label-nav-item label-nav-item-active" width="100%" invoke="focusMainSection"/>
+                </vbox>
+                <vbox id="citySidebarSummary" stylename="edit-sidebar-summary" width="100%" spacing="true">
+                    <label value="Регион" stylename="edit-sidebar-subtitle"/>
+                    <label dataContainer="cityDc" property="cityRegion.regionRuName" width="100%"/>
+                </vbox>
+                <vbox id="citySidebarSpacer" stylename="edit-sidebar-spacer"/>
+                <label value="Город используется в адресах кандидатов, компаний и вакансий HRM HuntTech." stylename="edit-sidebar-hint" width="100%"/>
+            </vbox>
+            <vbox id="cityWorkspace" stylename="edit-workspace" expand="cityWorkspaceScroll" width="100%" height="100%" spacing="false">
+                <hbox id="cityToolbar" stylename="edit-toolbar" width="100%" spacing="true">
+                    <vbox id="cityToolbarText" width="100%" spacing="false">
+                        <label value="Карточка города" stylename="edit-toolbar-title"/>
+                        <label value="Наименование, телефонный код и принадлежность региону" stylename="edit-toolbar-subtitle"/>
+                    </vbox>
+                </hbox>
+                <scrollBox id="cityWorkspaceScroll" stylename="edit-workspace-scroll" width="100%" height="100%">
+                    <vbox id="citySections" width="100%" spacing="true">
+                        <groupBox id="cityMainSection" caption="Основные данные" stylename="edit-section-card" width="100%" spacing="true">
+                            <form id="form" dataContainer="cityDc" width="100%">
+                                <column width="100%">
+                                    <textField id="cityRuNameField" property="cityRuName" width="100%"/>
+                                    <textField id="cityPhoneCodeField" property="cityPhoneCode" width="100%"/>
+                                    <lookupPickerField id="cityRegionField" optionsContainer="cityRegionsDc" property="cityRegion" width="100%">
+                                        <actions><action id="lookup" type="picker_lookup"/></actions>
+                                    </lookupPickerField>
+                                </column>
+                            </form>
+                        </groupBox>
+                    </vbox>
+                </scrollBox>
+                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
+                    <vbox id="cityActionsSpacer" width="100%"/>
+                    <button action="windowCommitAndClose"/><button action="windowClose"/>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>
