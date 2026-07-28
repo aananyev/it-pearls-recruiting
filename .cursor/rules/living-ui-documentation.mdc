@@ -9,7 +9,7 @@ alwaysApply: true
 
 Проект: **CUBA 7.3**, HRM HuntTech. Документация UI — **на русском**, только факты из XML/Java.
 
-Связанные правила: [`.cursorrules`](../../.cursorrules) · [living-documentation.mdc](living-documentation.mdc) (сущности) · [data-view-integrity.mdc](data-view-integrity.mdc) (view ↔ Java) · [documentation-with-dates.mdc](documentation-with-dates.mdc) · шаблон [ui-template.md](../../docs/templates/ui-template.md).
+Связанные правила: [`.cursorrules`](../../.cursorrules) · [living-documentation.mdc](living-documentation.mdc) (сущности) · [xml-screen-documentation.mdc](xml-screen-documentation.mdc) (inline-документация XML) · [data-view-integrity.mdc](data-view-integrity.mdc) (view ↔ Java) · [documentation-with-dates.mdc](documentation-with-dates.mdc) · шаблон [ui-template.md](../../docs/templates/ui-template.md).
 
 ---
 
@@ -48,6 +48,23 @@ alwaysApply: true
 **Пересечение с entity living-doc:** правка browse/edit/view сущности обновляет **и** `docs/entities/{EntityName}.md` (§2 Интерфейсный слой), **и** соответствующий `docs/ui/{FormName}_Spec.md`. UI Spec — детализация формы; entity doc — контекст сущности целиком.
 
 **Не откладывать.** UI-код без синхронизированной спецификации = незавершённая задача.
+
+---
+
+## Обязательное документирование XML-дескриптора
+
+Любое создание или изменение XML-экрана дополнительно активирует [xml-screen-documentation.mdc](xml-screen-documentation.mdc).
+
+Обязательные условия:
+
+1. Новый descriptor создаётся со смысловым комментарием непосредственно перед каждым открывающим XML-элементом.
+2. При первом изменении legacy descriptor выполняется аудит всего файла, а не только изменённых строк.
+3. Комментарий объясняет бизнес-смысл, binding, источник данных, действие, CUBA-ограничение либо причину layout-группировки.
+4. Комментарии вида `Элемент vbox`, `Поле label`, `TODO` и повтор имени тега без смысла запрещены.
+5. Inline comments не заменяют `docs/ui/{FormName}_Spec.md`, а UI Spec не заменяет inline comments.
+6. Если задача только документирует XML, после удаления comments descriptor должен быть структурно эквивалентен исходному.
+
+XML-задача без полного inline-аудита и синхронизации UI Spec считается незавершённой.
 
 ---
 
@@ -106,15 +123,16 @@ Cross-link в шапке: на `docs/entities/{EntityName}.md` и/или `docs/a
 4. При привязке к сущности — синхронизирован `docs/entities/{EntityName}.md` (см. [living-documentation.mdc](living-documentation.mdc)).
 5. Новый Spec → строка в `docs/ui/README.md` и при необходимости в `docs/README.md`.
 6. «История изменений» — YYYY-MM-DD сверху.
-7. Финал ответа — **UI Diff-log**:
+7. Для созданного или изменённого XML выполнен полный semantic comments audit по [xml-screen-documentation.mdc](xml-screen-documentation.mdc).
+8. Финал ответа — **UI Diff-log**:
 
 ```
 Синхронизация UI-документации [Имя_Формы]: <что изменено в UI-коде> → <какие разделы Spec обновлены>
 ```
 
-8. При правке контроллера/XML view — [data-view-integrity.mdc](data-view-integrity.mdc); при optimize/refactor — DoD-фраза «Валидация View пройдена: …».
+9. При правке контроллера/XML view — [data-view-integrity.mdc](data-view-integrity.mdc); при optimize/refactor — DoD-фраза «Валидация View пройдена: …».
 
-9. **Не коммитить**, пока пользователь явно не попросит.
+10. **Не коммитить**, пока пользователь явно не попросит.
 
 ---
 
@@ -140,6 +158,7 @@ Cross-link в шапке: на `docs/entities/{EntityName}.md` и/или `docs/a
 **Living sync (правка UI):**
 - [ ] Определить `{FormName}` по `@UiController` / классу
 - [ ] Scan: XML дескриптор, Java контроллер/фрагмент, menu, messages, views
+- [ ] Для XML: прокомментировать каждый открывающий элемент и провести аудит всего descriptor
 - [ ] Business & Context Intro (3 подраздела) до технических разделов
 - [ ] View integrity: getters/generators ⊆ view контейнера — [data-view-integrity.mdc](data-view-integrity.mdc)
 - [ ] `docs/ui/{FormName}_Spec.md` — 6 разделов, без заглушек

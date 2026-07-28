@@ -1,0 +1,177 @@
+---
+description: >-
+  Обязательное документирование XML-экранов CUBA 7.3: смысловые inline-комментарии
+  перед каждым открывающим элементом и синхронизация docs/ui при create/modify/refactor.
+alwaysApply: true
+---
+
+# Документирование XML-экранов CUBA 7.3
+
+Проект: **HRM HuntTech**.
+
+Связанные правила: [`.cursorrules`](../../.cursorrules) · [living-ui-documentation.mdc](living-ui-documentation.mdc) · [data-view-integrity.mdc](data-view-integrity.mdc) · [documentation-with-dates.mdc](documentation-with-dates.mdc).
+
+## 1. Обязательный триггер
+
+Правило применяется при любом **создании, изменении, исправлении, рефакторинге или удалении** XML-дескриптора экрана, окна или UI-фрагмента в `modules/web/src/**`, включая:
+
+- `*-browse.xml`;
+- `*-edit.xml`;
+- `*-view.xml`;
+- `*-lookup.xml`;
+- `*-window.xml`;
+- `*-fragment.xml`;
+- XML login/main/settings/dashboard экранов;
+- другие XML-файлы, загружаемые CUBA как UI descriptor.
+
+Задача считается незавершённой, пока одновременно не выполнены:
+
+1. inline-документирование XML по этому правилу;
+2. актуализация `docs/ui/{FormName}_Spec.md`;
+3. обновление истории изменений и индекса при новом документе;
+4. Data View Integrity и профильные тесты экрана.
+
+## 2. Область аудита
+
+### Новый XML
+
+Новый descriptor создаётся сразу полностью документированным: смысловой комментарий располагается непосредственно перед каждым открывающим XML-элементом.
+
+### Изменяемый существующий XML
+
+При первом изменении существующего descriptor проводится аудит **всего файла**, а не только изменённых строк. Все открывающие элементы файла должны соответствовать этому правилу.
+
+Не допускается оставить непонятные legacy-блоки без комментариев под предлогом того, что они не входили в первоначальный diff.
+
+## 3. Что именно комментировать
+
+Отдельный комментарий обязателен перед каждым открывающим элементом, включая:
+
+- корневой `window`, `fragment`, `layout`;
+- `data`, `dataContext`, `instance`, `collection`, `loader`;
+- `query`, `condition`, `and`, `or`, `c:jpql`, `c:where`;
+- layout-контейнеры: `vbox`, `hbox`, `grid`, `scrollBox`, `tabSheet`, `tab`, `groupBox`, `buttonsPanel`;
+- структурные элементы: `columns`, `column`, `rows`, `row`;
+- поля и отображение: `label`, `textField`, `textArea`, `dateField`, `checkBox`, `lookupField`, `lookupPickerField`, `suggestionPickerField`, `table`, `dataGrid`, `image` и кастомные компоненты;
+- `actions`, `action`, `button`, `validator`, `formatter` и другие элементы поведения.
+
+Отдельный комментарий не требуется для:
+
+- XML declaration;
+- closing tags;
+- текста внутри CDATA;
+- уже существующих XML comments;
+- namespace declarations и атрибутов одного открывающего тега.
+
+## 4. Содержание комментария
+
+Комментарий должен отвечать хотя бы на один вопрос:
+
+- какую бизнес-задачу решает элемент;
+- какие данные он хранит, читает или изменяет;
+- откуда берутся options или значения;
+- зачем нужен loader/query/condition и какой параметр использует;
+- зачем элементы объединены в этот layout;
+- что происходит при action/button;
+- какое ограничение CUBA 7.3 или runtime-риск предотвращает структура;
+- почему компонент скрыт, read-only, required или динамический.
+
+Для нетривиальных элементов рекомендуется формула:
+
+```text
+<!-- [Что это] + [какие данные/действие] + [зачем это нужно пользователю или controller]. -->
+```
+
+Примеры допустимых комментариев:
+
+```xml
+<!-- Коллекция вакансий поставляет варианты picker-поля с учётом подразделения и активных подписок рекрутёра. -->
+<collection id="openPositionDc" ...>
+
+<!-- LookupPickerField выбирает вакансию и сохраняет связь в свойство vacancy текущего IteractionList. -->
+<lookupPickerField id="vacancyField" ...>
+
+<!-- Footer отделяет действия сохранения от прокручиваемого содержимого и сохраняет кнопки доступными при длинной форме. -->
+<hbox id="editActions" ...>
+```
+
+## 5. Запрещённые комментарии
+
+Запрещены:
+
+- повтор имени тега без смысла: `Элемент vbox`, `Поле label`, `Кнопка button`;
+- очевидное описание геометрии без причины: `HBox располагает элементы горизонтально`;
+- `TODO`, `TBD`, `потом описать`, `временный блок` без объяснения;
+- комментарии, противоречащие фактическому binding или controller;
+- домыслы о бизнес-логике, которых нет в XML/Java;
+- копирование одного и того же общего текста перед разными элементами.
+
+Комментарии пишутся на русском. Legacy ID, package, component ID, property, table, key и Java/XML-имена сохраняются без перевода и переименования.
+
+## 6. Living-документация экрана
+
+Любое изменение XML одновременно обновляет `docs/ui/{FormName}_Spec.md`.
+
+Обязательно проверить и актуализировать:
+
+1. **Назначение и бизнес-смысл (What & Why)**;
+2. **UI Context & Navigation**;
+3. **Behavior Summary**;
+4. Data containers, loaders, views, JPQL и bindings;
+5. layout hierarchy и CSS/stylename;
+6. actions/buttons и lifecycle, если XML влияет на поведение;
+7. историю изменений — новая строка первой, дата `YYYY-MM-DD`.
+
+Новый Spec добавляется в `docs/ui/README.md` и профильный README экрана, если он существует или создаётся в задаче.
+
+Inline comments не заменяют UI Spec. UI Spec не заменяет inline comments.
+
+## 7. Безопасность изменений
+
+При добавлении комментариев запрещено незаметно менять:
+
+- component ID;
+- порядок элементов;
+- `dataContainer`, `property`, `optionsContainer`;
+- loader IDs, JPQL, conditions и параметры;
+- views;
+- actions, `invoke`, validators;
+- `required`, `visible`, `editable`, `enabled`;
+- width/height/expand/align/spacing/margin;
+- stylename;
+- business-controller и lifecycle.
+
+Если задача состоит только в документировании, XML после удаления comments должен быть структурно эквивалентен исходному XML.
+
+## 8. Проверки
+
+Для каждого изменённого XML:
+
+- XML parse: PASS;
+- semantic comments coverage: PASS;
+- Data View Integrity: PASS;
+- соответствующая UI Spec синхронизирована;
+- профильные XML/visual contract tests обновлены;
+- `./gradlew test --tests '*ScreenViewIntegrityTest*' --no-daemon --stacktrace` → `8/8 PASS`;
+- при изменении SCSS: `./gradlew :app-web:buildScssThemes --no-daemon --stacktrace`;
+- `./gradlew clean assemble --no-daemon --stacktrace` → `BUILD SUCCESSFUL`;
+- Hermes: local deploy, HTTP `/hrm/` = 200 и browser smoke.
+
+Для нового или существенно переработанного descriptor должен быть добавлен тест, проверяющий наличие смысловых комментариев. Для небольшой правки допускается расширить существующий XML contract test, если он уже покрывает descriptor.
+
+## 9. Definition of Done
+
+XML-задача не завершена, если хотя бы одно условие не выполнено:
+
+- каждый открывающий элемент документирован;
+- комментарии содержательны и соответствуют коду;
+- `docs/ui/{FormName}_Spec.md` обновлён;
+- history и README синхронизированы;
+- Data View Integrity пройдена;
+- тесты и сборка переданы Hermes по точному HEAD.
+
+Финальный UI Diff-log:
+
+```text
+Синхронизация XML-документации [Имя_Формы]: прокомментированы элементы descriptor → обновлены разделы [перечень] UI Spec.
+```
