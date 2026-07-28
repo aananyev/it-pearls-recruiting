@@ -114,7 +114,8 @@
                   spacing="true"
                   expand="iteractionListSidebarSpacer">
                 <!-- Профильный блок объединяет изображения, имя кандидата, вакансию, статус и приоритет. -->
-                <vbox width="100%"
+                <vbox id="iteractionProfileSummaryBox"
+                      width="100%"
                       height="AUTO"
                       spacing="true"
                       stylename="iteraction-list-profile-header edit-sidebar-identity">
@@ -185,7 +186,8 @@
                                    width="100%"
                                    stylename="iteraction-list-sidebar-caption"/>
                             <!-- Строка значения объединяет текст статуса и условную кнопку предупреждения. -->
-                            <hbox width="100%"
+                            <hbox id="vacancyStatusValueBox"
+                                  width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   align="MIDDLE_LEFT"
@@ -217,7 +219,8 @@
                                    width="100%"
                                    stylename="iteraction-list-sidebar-caption"/>
                             <!-- Строка значения объединяет светофор приоритета и его текстовое название. -->
-                            <hbox width="100%"
+                            <hbox id="vacancyPriorityValueBox"
+                                  width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   align="MIDDLE_LEFT"
@@ -345,7 +348,8 @@
                            height="AUTO"
                            align="MIDDLE_LEFT"/>
                     <!-- Контейнер компании и подразделения группирует caption и вычисленное HTML-значение. -->
-                    <vbox width="100%"
+                    <vbox id="vacancyCompanyDepartmentBox"
+                          width="100%"
                           height="AUTO"
                           spacing="false"
                           stylename="iteraction-list-sidebar-info-row">
@@ -362,7 +366,8 @@
                                stylename="iteraction-list-sidebar-value"/>
                     </vbox>
                     <!-- Контейнер проекта группирует caption и название проекта выбранной вакансии. -->
-                    <vbox width="100%"
+                    <vbox id="vacancyProjectBox"
+                          width="100%"
                           height="AUTO"
                           spacing="false"
                           stylename="iteraction-list-sidebar-info-row">
@@ -386,7 +391,7 @@
                           align="MIDDLE_LEFT"
                           stylename="iteraction-list-sidebar-cost">
                         <!-- Вертикальный контейнер объединяет caption ставки и строку суммы с единицей измерения. -->
-                        <vbox width="100%" height="AUTO" spacing="false">
+                        <vbox id="outstaffingCostContentBox" width="100%" height="AUTO" spacing="false">
                             <!-- Caption обозначает предельную ставку вакансии. -->
                             <label value="msg://msgOutstaffCost"
                                    width="100%"
@@ -394,7 +399,8 @@
                                    align="MIDDLE_LEFT"
                                    stylename="iteraction-list-sidebar-caption"/>
                             <!-- Строка ставки размещает числовое значение и подпись «рублей в час». -->
-                            <hbox width="100%"
+                            <hbox id="outstaffingCostValueBox"
+                                  width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   align="MIDDLE_LEFT"
@@ -416,7 +422,7 @@
                         </vbox>
                     </hbox>
                     <!-- Контейнер контекста рейтинга резервирует место для условной оценки вакансии и пиктограммы. -->
-                    <hbox id="labelHBox"
+                    <hbox id="vacancyRatingContextBox"
                           width="100%"
                           height="AUTO"
                           spacing="true"
@@ -454,7 +460,8 @@
                   spacing="false"
                   expand="iteractionListContentScrollBox">
                 <!-- Toolbar показывает назначение editor и контекст текущего списка взаимодействий. -->
-                <hbox stylename="iteraction-list-toolbar edit-toolbar"
+                <hbox id="iteractionListToolbarBox"
+                      stylename="iteraction-list-toolbar edit-toolbar"
                       width="100%"
                       height="AUTO"
                       spacing="true"
@@ -513,7 +520,8 @@
                            height="100%"
                            stylename="iteraction-list-scroll edit-workspace-scroll">
                     <!-- Контейнер контента располагает четыре смысловых блока формы вертикально друг под другом. -->
-                    <vbox width="100%"
+                    <vbox id="iteractionListSectionsBox"
+                          width="100%"
                           height="AUTO"
                           spacing="true"
                           margin="true"
@@ -526,7 +534,8 @@
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-flat-section-active iteraction-list-form-section iteraction-list-participants-section edit-card">
                             <!-- Header визуально отделяет название блока участников от его полей. -->
-                            <vbox width="100%"
+                            <vbox id="participantsSectionHeaderBox"
+                                  width="100%"
                                   height="AUTO"
                                   spacing="false"
                                   margin="true"
@@ -630,7 +639,8 @@
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-form-section edit-card">
                             <!-- Header визуально отделяет название блока действия от динамических полей. -->
-                            <vbox width="100%"
+                            <vbox id="interactionSectionHeaderBox"
+                                  width="100%"
                                   height="AUTO"
                                   spacing="false"
                                   margin="true"
@@ -642,7 +652,8 @@
                                        stylename="iteraction-list-flat-section-title edit-card-title"/>
                             </vbox>
                             <!-- Body содержит обязательный тип взаимодействия и controller-управляемую динамическую область. -->
-                            <vbox width="100%"
+                            <vbox id="interactionSectionBodyBox"
+                                  width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
@@ -669,7 +680,7 @@
                                               align="BOTTOM_LEFT"
                                               stylename="iteraction-list-dynamic-panel">
                                     <!-- Внутренний VBox располагает controller-action и три альтернативных dynamic value поля. -->
-                                    <vbox width="100%" height="AUTO" spacing="true">
+                                    <vbox id="dynamicActionFieldsBox" width="100%" height="AUTO" spacing="true">
                                         <!-- Button вызывает callActionEntity для типа взаимодействия с внешним экраном или действием. -->
                                         <button id="buttonCallAction"
                                                 invoke="callActionEntity"
@@ -702,7 +713,8 @@
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-result-section iteraction-list-form-section edit-card">
                             <!-- Header визуально отделяет название блока оценки от его полей. -->
-                            <vbox width="100%"
+                            <vbox id="resultSectionHeaderBox"
+                                  width="100%"
                                   height="AUTO"
                                   spacing="false"
                                   margin="true"
@@ -782,7 +794,8 @@
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-form-section iteraction-list-comment-section edit-card">
                             <!-- Header визуально отделяет название комментария от многострочного поля. -->
-                            <vbox width="100%"
+                            <vbox id="commentSectionHeaderBox"
+                                  width="100%"
                                   height="AUTO"
                                   spacing="false"
                                   margin="true"
@@ -794,7 +807,8 @@
                                        stylename="iteraction-list-flat-section-title edit-card-title"/>
                             </vbox>
                             <!-- Body задаёт внутренние отступы для многострочного комментария. -->
-                            <vbox width="100%"
+                            <vbox id="commentSectionBodyBox"
+                                  width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
