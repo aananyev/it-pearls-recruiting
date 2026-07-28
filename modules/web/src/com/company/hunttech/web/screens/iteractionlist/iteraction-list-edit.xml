@@ -85,39 +85,44 @@
               expand="iteractionListWorkspace">
 
             <!-- Sidebar содержит контекст кандидата и вакансии. -->
-            <vbox stylename="iteraction-list-sidebar edit-sidebar"
-                  width="270px"
+            <vbox id="iteractionListSidebar"
+                  stylename="iteraction-list-sidebar edit-sidebar"
+                  width="312px"
                   height="100%"
                   spacing="true"
                   expand="iteractionListSidebarSpacer">
                 <vbox width="100%"
+                      height="AUTO"
                       spacing="true"
                       stylename="iteraction-list-profile-header edit-sidebar-identity">
-                    <hbox width="100%"
+                    <!-- Оба OvaFallbackImage имеют один визуальный контракт 96 × 96. -->
+                    <hbox id="iteractionIdentityImages"
+                          width="100%"
+                          height="AUTO"
                           spacing="true"
                           align="MIDDLE_CENTER"
                           stylename="iteraction-list-identity-images edit-sidebar-visual">
                         <ovaFallbackImage id="candidateImage"
                                           dataContainer="iteractionListDc"
                                           property="candidate.fileImageFace"
-                                          width="112px"
-                                          height="112px"
-                                          ovalWidth="112px"
-                                          ovalHeight="112px"
+                                          width="96px"
+                                          height="96px"
+                                          ovalWidth="96px"
+                                          ovalHeight="96px"
                                           fallbackThemePath="icons/no-programmer.jpeg"
                                           visible="true"
                                           align="MIDDLE_CENTER"
-                                          stylename="iteraction-list-candidate-image"
+                                          stylename="iteraction-list-context-image iteraction-list-candidate-image"
                                           scaleMode="SCALE_DOWN"/>
                         <ovaFallbackImage id="projectLogoImage"
-                                          width="80px"
-                                          height="80px"
-                                          ovalWidth="80px"
-                                          ovalHeight="80px"
+                                          width="96px"
+                                          height="96px"
+                                          ovalWidth="96px"
+                                          ovalHeight="96px"
                                           fallbackThemePath="icons/no-company.png"
                                           visible="true"
                                           align="MIDDLE_CENTER"
-                                          stylename="iteraction-list-project-image"
+                                          stylename="iteraction-list-context-image iteraction-list-project-image"
                                           scaleMode="SCALE_DOWN"/>
                     </hbox>
                     <label id="iteractionCandidateNameLabel"
@@ -135,7 +140,7 @@
                            height="AUTO"
                            align="MIDDLE_CENTER"/>
 
-                    <!-- Статус и приоритет доступны до навигации по блокам ввода. -->
+                    <!-- Статус и приоритет остаются одной горизонтальной парой. -->
                     <hbox id="vacancyStateSummary"
                           width="100%"
                           height="AUTO"
@@ -146,7 +151,7 @@
                               width="50%"
                               height="AUTO"
                               spacing="false"
-                              stylename="iteraction-list-sidebar-info-row">
+                              stylename="iteraction-list-vacancy-state-cell iteraction-list-sidebar-info-row">
                             <label value="msg://msgStatusOfVacansy"
                                    width="100%"
                                    stylename="iteraction-list-sidebar-caption"/>
@@ -173,7 +178,7 @@
                               width="50%"
                               height="AUTO"
                               spacing="false"
-                              stylename="iteraction-list-sidebar-info-row">
+                              stylename="iteraction-list-vacancy-state-cell iteraction-list-sidebar-info-row">
                             <label value="msg://msgPriority"
                                    width="100%"
                                    stylename="iteraction-list-sidebar-caption"/>
@@ -198,55 +203,91 @@
                     </hbox>
                 </vbox>
 
-                <!-- Runtime controller заменяет fallback LABEL четырьмя кнопками. -->
+                <!-- Runtime controller сохраняет первый компонент и заменяет fallback LABEL кнопками. -->
                 <vbox id="iteractionListNavigation"
                       width="100%"
+                      height="AUTO"
                       spacing="false"
-                      stylename="label-navigation">
-                    <label width="100%"
+                      stylename="label-navigation iteraction-list-navigation">
+                    <label id="iteractionListNavigationTitle"
+                           width="100%"
+                           height="AUTO"
                            value="msg://msgAccordionNavigation"
-                           stylename="label-nav-title"/>
+                           stylename="label-nav-title iteraction-list-navigation-title"/>
                     <label width="100%"
+                           height="AUTO"
                            value="msg://msgAccordionParticipants"
-                           stylename="label-nav-item label-nav-item-active"/>
+                           stylename="label-nav-item iteraction-list-nav-item label-nav-item-active iteraction-list-nav-item-active"/>
                     <label width="100%"
+                           height="AUTO"
                            value="msg://msgAccordionInteraction"
-                           stylename="label-nav-item"/>
+                           stylename="label-nav-item iteraction-list-nav-item"/>
                     <label width="100%"
+                           height="AUTO"
                            value="msg://msgAccordionResult"
-                           stylename="label-nav-item"/>
+                           stylename="label-nav-item iteraction-list-nav-item"/>
                     <label width="100%"
+                           height="AUTO"
                            value="msg://msgAccordionComment"
-                           stylename="label-nav-item"/>
+                           stylename="label-nav-item iteraction-list-nav-item"/>
                 </vbox>
 
-                <vbox width="100%"
-                      spacing="true"
+                <!-- Служебная карточка ограничивает поля внутренней шириной sidebar. -->
+                <vbox id="iteractionServiceCard"
+                      width="100%"
+                      height="AUTO"
+                      spacing="false"
                       stylename="iteraction-list-sidebar-card iteraction-list-service-card edit-sidebar-summary">
-                    <textField id="numberIteractionField"
-                               stylename="iteraction-list-service-field"
-                               dataContainer="iteractionListDc"
-                               property="numberIteraction"
-                               editable="false"
-                               caption="msg://msgNumber"
-                               width="100%"
-                               align="MIDDLE_LEFT"/>
-                    <dateField id="dateIteractionField"
-                               stylename="iteraction-list-service-field"
-                               dataContainer="iteractionListDc"
-                               property="dateIteraction"
-                               editable="false"
-                               caption="msg://msgDate"
-                               width="100%"
-                               align="MIDDLE_LEFT"/>
+                    <vbox id="iteractionServiceFields"
+                          width="100%"
+                          height="AUTO"
+                          spacing="true"
+                          stylename="iteraction-list-service-fields">
+                        <textField id="numberIteractionField"
+                                   stylename="iteraction-list-service-field"
+                                   dataContainer="iteractionListDc"
+                                   property="numberIteraction"
+                                   editable="false"
+                                   caption="msg://msgNumber"
+                                   width="100%"
+                                   align="MIDDLE_LEFT"/>
+                        <dateField id="dateIteractionField"
+                                   stylename="iteraction-list-service-field"
+                                   dataContainer="iteractionListDc"
+                                   property="dateIteraction"
+                                   editable="false"
+                                   caption="msg://msgDate"
+                                   width="100%"
+                                   align="MIDDLE_LEFT"/>
+                    </vbox>
                 </vbox>
 
-                <vbox width="100%"
+                <!-- Карточка вакансии содержит собственное наименование вакансии. -->
+                <vbox id="iteractionVacancyCard"
+                      width="100%"
+                      height="AUTO"
                       spacing="true"
                       stylename="iteraction-list-sidebar-card iteraction-list-vacancy-card edit-sidebar-summary">
                     <label value="mainMsg://msgVacancy"
                            width="100%"
+                           height="AUTO"
                            stylename="iteraction-list-sidebar-card-title"/>
+                    <vbox id="sidebarVacancyNameRow"
+                          width="100%"
+                          height="AUTO"
+                          spacing="false"
+                          stylename="iteraction-list-sidebar-info-row iteraction-list-vacancy-name-row">
+                        <label value="msg://msgVacancyName"
+                               width="100%"
+                               height="AUTO"
+                               stylename="iteraction-list-sidebar-caption"/>
+                        <label id="sidebarVacancyNameLabel"
+                               dataContainer="iteractionListDc"
+                               property="vacancy.vacansyName"
+                               width="100%"
+                               height="AUTO"
+                               stylename="iteraction-list-sidebar-value iteraction-list-vacancy-name-value"/>
+                    </vbox>
                     <label id="closingDateVacancyLabel"
                            stylename="h4 iteraction-list-closing-date"
                            width="100%"
@@ -254,10 +295,12 @@
                            height="AUTO"
                            align="MIDDLE_LEFT"/>
                     <vbox width="100%"
+                          height="AUTO"
                           spacing="false"
                           stylename="iteraction-list-sidebar-info-row">
                         <label value="msg://msgCompanyDepartament"
                                width="100%"
+                               height="AUTO"
                                stylename="iteraction-list-sidebar-caption"/>
                         <label id="companyLabel"
                                width="100%"
@@ -266,10 +309,12 @@
                                stylename="iteraction-list-sidebar-value"/>
                     </vbox>
                     <vbox width="100%"
+                          height="AUTO"
                           spacing="false"
                           stylename="iteraction-list-sidebar-info-row">
                         <label value="msg://msgProject"
                                width="100%"
+                               height="AUTO"
                                stylename="iteraction-list-sidebar-caption"/>
                         <label id="projectLabel"
                                width="100%"
@@ -278,26 +323,31 @@
                     </vbox>
                     <hbox id="outstaffingCostHBox"
                           width="100%"
+                          height="AUTO"
                           visible="false"
                           spacing="false"
                           align="MIDDLE_LEFT"
                           stylename="iteraction-list-sidebar-cost">
-                        <vbox width="100%" spacing="false">
+                        <vbox width="100%" height="AUTO" spacing="false">
                             <label value="msg://msgOutstaffCost"
                                    width="100%"
+                                   height="AUTO"
                                    align="MIDDLE_LEFT"
                                    stylename="iteraction-list-sidebar-caption"/>
                             <hbox width="100%"
+                                  height="AUTO"
                                   spacing="true"
                                   align="MIDDLE_LEFT"
                                   stylename="iteraction-list-sidebar-cost-line">
                                 <label dataContainer="iteractionListDc"
                                        property="vacancy.outstaffingCost"
                                        width="AUTO"
+                                       height="AUTO"
                                        align="MIDDLE_LEFT"
                                        stylename="iteraction-list-sidebar-cost-value"/>
                                 <label value="msg://msgRubPerHour"
                                        width="AUTO"
+                                       height="AUTO"
                                        align="MIDDLE_LEFT"
                                        stylename="iteraction-list-sidebar-cost-unit"/>
                             </hbox>
@@ -305,6 +355,7 @@
                     </hbox>
                     <hbox id="labelHBox"
                           width="100%"
+                          height="AUTO"
                           spacing="true"
                           align="MIDDLE_LEFT"
                           stylename="iteraction-list-rating-context">
@@ -338,18 +389,22 @@
                   expand="iteractionListContentScrollBox">
                 <hbox stylename="iteraction-list-toolbar edit-toolbar"
                       width="100%"
+                      height="AUTO"
                       spacing="true"
                       expand="iteractionListToolbarTitleBox"
                       align="MIDDLE_LEFT">
                     <vbox id="iteractionListToolbarTitleBox"
                           width="100%"
+                          height="AUTO"
                           spacing="false"
                           stylename="iteraction-list-toolbar-title-box">
                         <label value="msg://editorCaption"
                                width="100%"
+                               height="AUTO"
                                stylename="iteraction-list-toolbar-title edit-toolbar-title"/>
                         <label value="msg://msgIteractionList"
                                width="100%"
+                               height="AUTO"
                                stylename="iteraction-list-toolbar-context edit-toolbar-description"/>
                     </vbox>
                 </hbox>
@@ -361,6 +416,7 @@
                       stylename="iteraction-list-quick-actions edit-card">
                     <label value="msg://mshMostPopular"
                            width="100%"
+                           height="AUTO"
                            stylename="iteraction-list-quick-actions-title edit-card-title"/>
                     <hbox id="mostPopularIteractionHBox"
                           width="100%"
@@ -393,11 +449,13 @@
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-flat-section-active iteraction-list-form-section iteraction-list-participants-section edit-card">
                             <vbox width="100%"
+                                  height="AUTO"
                                   spacing="false"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-header">
                                 <label value="msg://msgAccordionParticipants"
                                        width="100%"
+                                       height="AUTO"
                                        stylename="iteraction-list-flat-section-title edit-card-title"/>
                             </vbox>
                             <vbox id="participantsAccordionContent"
@@ -475,11 +533,13 @@
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-form-section edit-card">
                             <vbox width="100%"
+                                  height="AUTO"
                                   spacing="false"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-header">
                                 <label value="msg://msgAccordionInteraction"
                                        width="100%"
+                                       height="AUTO"
                                        stylename="iteraction-list-flat-section-title edit-card-title"/>
                             </vbox>
                             <!-- Visible/required/caption динамических полей определяет business-controller. -->
@@ -502,9 +562,10 @@
                                 </lookupPickerField>
                                 <buttonsPanel id="buttonsPanelCallAction"
                                               width="100%"
+                                              height="AUTO"
                                               align="BOTTOM_LEFT"
                                               stylename="iteraction-list-dynamic-panel">
-                                    <vbox width="100%" spacing="true">
+                                    <vbox width="100%" height="AUTO" spacing="true">
                                         <button id="buttonCallAction"
                                                 invoke="callActionEntity"
                                                 width="100%"
@@ -526,29 +587,33 @@
                             </vbox>
                         </vbox>
 
+                        <!-- Результат и вложенные Vaadin-обёртки сохраняют естественную высоту AUTO. -->
                         <vbox id="resultAccordion"
                               width="100%"
                               height="AUTO"
                               spacing="false"
-                              stylename="iteraction-list-flat-section iteraction-list-form-section edit-card">
+                              stylename="iteraction-list-flat-section iteraction-list-result-section iteraction-list-form-section edit-card">
                             <vbox width="100%"
+                                  height="AUTO"
                                   spacing="false"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-header">
                                 <label value="msg://msgAccordionResult"
                                        width="100%"
+                                       height="AUTO"
                                        stylename="iteraction-list-flat-section-title edit-card-title"/>
                             </vbox>
-                            <vbox width="100%"
+                            <vbox id="resultAccordionBody"
+                                  width="100%"
                                   height="AUTO"
                                   spacing="true"
                                   margin="true"
-                                  stylename="iteraction-list-flat-section-body iteraction-list-section-content">
+                                  stylename="iteraction-list-flat-section-body iteraction-list-result-body iteraction-list-section-content">
                                 <grid id="resultAccordionGrid"
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
-                                      stylename="iteraction-list-form-grid">
+                                      stylename="iteraction-list-form-grid iteraction-list-result-grid">
                                     <columns>
                                         <column flex="1"/>
                                         <column flex="1"/>
@@ -593,11 +658,13 @@
                               spacing="false"
                               stylename="iteraction-list-flat-section iteraction-list-form-section iteraction-list-comment-section edit-card">
                             <vbox width="100%"
+                                  height="AUTO"
                                   spacing="false"
                                   margin="true"
                                   stylename="iteraction-list-flat-section-header">
                                 <label value="msg://msgAccordionComment"
                                        width="100%"
+                                       height="AUTO"
                                        stylename="iteraction-list-flat-section-title edit-card-title"/>
                             </vbox>
                             <vbox width="100%"
@@ -620,12 +687,14 @@
                 <hbox id="editActions"
                       stylename="iteraction-list-footer edit-footer-actions"
                       width="100%"
+                      height="AUTO"
                       spacing="true"
                       expand="editActionsSpacer"
                       align="MIDDLE_RIGHT">
                     <vbox id="editActionsSpacer" width="100%" height="1px"/>
                     <hbox id="editActionsGroup"
                           width="AUTO"
+                          height="AUTO"
                           spacing="true"
                           align="MIDDLE_RIGHT"
                           stylename="iteraction-list-footer-actions">

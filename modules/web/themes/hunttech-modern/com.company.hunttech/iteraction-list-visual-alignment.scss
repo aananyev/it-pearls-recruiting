@@ -1,0 +1,353 @@
+/*
+ * IteractionListEdit — финальное визуальное выравнивание XML-контракта.
+ *
+ * Слой загружается после legacy/reference partials и исправляет только локальный
+ * namespace .iteraction-list-editor. Глобальные Vaadin-компоненты не затрагиваются.
+ */
+@mixin iteraction-list-visual-alignment-theme {
+  .iteraction-list-editor {
+    // Оба OvaFallbackImage имеют одинаковую геометрию.
+    .iteraction-list-context-image,
+    .iteraction-list-context-image img,
+    .iteraction-list-context-image .v-image-element,
+    .iteraction-list-candidate-image,
+    .iteraction-list-candidate-image img,
+    .iteraction-list-candidate-image .v-image-element,
+    .iteraction-list-project-image,
+    .iteraction-list-project-image img,
+    .iteraction-list-project-image .v-image-element {
+      box-sizing: border-box;
+      width: 96px !important;
+      height: 96px !important;
+      min-width: 96px !important;
+      min-height: 96px !important;
+      max-width: 96px !important;
+      max-height: 96px !important;
+      border-radius: 50% !important;
+      object-fit: contain !important;
+    }
+
+    .iteraction-list-identity-images {
+      min-height: 104px !important;
+    }
+
+    // Каноническая label-навигация HRM HuntTech в тёмной sidebar.
+    .label-navigation,
+    .iteraction-list-navigation,
+    .v-slot-label-navigation,
+    .v-slot-iteraction-list-navigation {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      visibility: visible !important;
+    }
+
+    .label-navigation,
+    .iteraction-list-navigation {
+      padding: 10px 0 4px !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
+      overflow: visible !important;
+    }
+
+    .label-nav-title,
+    .iteraction-list-navigation-title,
+    .v-label-label-nav-title,
+    .v-label-iteraction-list-navigation-title {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      height: auto !important;
+      padding: 6px 10px 8px !important;
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      line-height: 16px !important;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: normal !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    .label-nav-item,
+    .iteraction-list-nav-item,
+    .v-button-label-nav-item,
+    .v-label-label-nav-item {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 38px !important;
+      height: auto !important;
+      padding: 8px 10px !important;
+      color: rgba(248, 250, 252, 0.82) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
+      text-align: left !important;
+      white-space: normal !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-left: 3px solid transparent !important;
+      border-radius: 0 5px 5px 0 !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+    }
+
+    .label-nav-item .v-button-caption,
+    .iteraction-list-nav-item .v-button-caption {
+      display: block;
+      width: 100%;
+      color: inherit !important;
+      text-align: left !important;
+      white-space: normal !important;
+    }
+
+    .label-nav-item:hover,
+    .label-nav-item:focus,
+    .iteraction-list-nav-item:hover,
+    .iteraction-list-nav-item:focus {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .label-nav-item-active,
+    .iteraction-list-nav-item-active,
+    .v-button-label-nav-item-active,
+    .v-label-label-nav-item-active {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.12) !important;
+      border-left-color: #ffb11b !important;
+    }
+
+    // Статус вакансии и приоритет — одна горизонтальная пара 50/50.
+    .iteraction-list-vacancy-state-summary {
+      box-sizing: border-box;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: stretch !important;
+      gap: 8px;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 8px 0 4px !important;
+    }
+
+    .iteraction-list-vacancy-state-summary > .v-slot {
+      box-sizing: border-box;
+      display: block !important;
+      flex: 1 1 0 !important;
+      width: calc(50% - 4px) !important;
+      min-width: 0 !important;
+      max-width: calc(50% - 4px) !important;
+      height: auto !important;
+      float: none !important;
+    }
+
+    .iteraction-list-vacancy-state-summary > .v-spacing {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    .iteraction-list-vacancy-state-cell,
+    .iteraction-list-vacancy-state-summary .iteraction-list-sidebar-info-row {
+      box-sizing: border-box;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 8px 9px !important;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      border-radius: 6px;
+    }
+
+    .iteraction-list-vacancy-state-cell > .v-slot,
+    .iteraction-list-vacancy-state-cell .iteraction-list-sidebar-value-row {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+    }
+
+    .iteraction-list-vacancy-state-cell .iteraction-list-sidebar-caption {
+      min-height: 18px;
+      margin-bottom: 4px;
+      font-size: 11px !important;
+      line-height: 15px !important;
+      white-space: normal !important;
+    }
+
+    .iteraction-list-vacancy-state-cell .iteraction-list-sidebar-value,
+    .iteraction-list-vacancy-state-cell .iteraction-list-status-value {
+      width: 100% !important;
+      min-width: 0 !important;
+      font-size: 13px !important;
+      line-height: 18px !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+
+    // Карточки sidebar не могут выходить за внутреннюю ширину родителя.
+    .iteraction-list-service-card,
+    .iteraction-list-vacancy-card,
+    .v-slot-iteraction-list-service-card,
+    .v-slot-iteraction-list-vacancy-card,
+    .iteraction-list-service-fields,
+    .iteraction-list-service-fields > .v-slot,
+    .iteraction-list-service-field,
+    .iteraction-list-vacancy-card > .v-slot,
+    .iteraction-list-vacancy-card .iteraction-list-sidebar-info-row,
+    .iteraction-list-vacancy-card .iteraction-list-sidebar-cost,
+    .iteraction-list-vacancy-card .iteraction-list-sidebar-cost-line {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    .iteraction-list-service-card,
+    .iteraction-list-vacancy-card {
+      overflow: hidden !important;
+    }
+
+    .iteraction-list-service-card .v-caption,
+    .iteraction-list-service-card .v-textfield,
+    .iteraction-list-service-card .v-datefield,
+    .iteraction-list-service-card .v-datefield-textfield,
+    .iteraction-list-service-card .v-datefield-button {
+      box-sizing: border-box;
+      max-width: 100% !important;
+    }
+
+    .iteraction-list-service-card .v-textfield,
+    .iteraction-list-service-card .v-datefield,
+    .iteraction-list-service-card .v-datefield-textfield {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .iteraction-list-vacancy-card .iteraction-list-sidebar-value,
+    .iteraction-list-vacancy-card .iteraction-list-sidebar-value *,
+    .iteraction-list-vacancy-name-value,
+    .iteraction-list-vacancy-name-value.v-label,
+    .iteraction-list-closing-date,
+    .iteraction-list-closing-date.v-label {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .iteraction-list-vacancy-name-row {
+      padding-top: 6px !important;
+    }
+
+    .iteraction-list-vacancy-name-value,
+    .iteraction-list-vacancy-name-value.v-label {
+      color: #ffcf66 !important;
+      font-weight: 700 !important;
+    }
+
+    .iteraction-list-sidebar-cost-line {
+      display: flex !important;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 4px 6px;
+    }
+
+    // SuggestionPickerField и LookupPickerField используют один визуальный контракт.
+    .iteraction-list-primary-picker,
+    .v-slot-iteraction-list-primary-picker,
+    .iteraction-list-primary-picker .v-filterselect,
+    .iteraction-list-primary-picker .v-filterselect-input,
+    .iteraction-list-primary-picker .v-textfield,
+    .iteraction-list-primary-picker .v-button,
+    .iteraction-list-primary-picker .c-pickerfield,
+    .iteraction-list-primary-picker .c-suggestionfield {
+      box-sizing: border-box;
+      min-height: 38px !important;
+    }
+
+    .iteraction-list-primary-picker,
+    .v-slot-iteraction-list-primary-picker,
+    .iteraction-list-primary-picker .v-filterselect,
+    .iteraction-list-primary-picker .c-pickerfield,
+    .iteraction-list-primary-picker .c-suggestionfield {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .iteraction-list-primary-picker .v-filterselect-input,
+    .iteraction-list-primary-picker .v-textfield {
+      height: 38px !important;
+      min-height: 38px !important;
+      padding: 0 10px !important;
+      font-size: 15px !important;
+      line-height: 38px !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.20) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+    }
+
+    .iteraction-list-primary-picker .v-button,
+    .iteraction-list-primary-picker .v-filterselect-button {
+      height: 38px !important;
+      min-height: 38px !important;
+    }
+
+    // Блок «Оценка и коммуникация» и все GridLayout-обёртки растут по содержимому.
+    .iteraction-list-result-section,
+    .v-slot-iteraction-list-result-section,
+    .iteraction-list-result-body,
+    .v-slot-iteraction-list-result-body,
+    .iteraction-list-result-grid,
+    .iteraction-list-result-grid > div,
+    .iteraction-list-result-grid table,
+    .iteraction-list-result-grid tbody,
+    .iteraction-list-result-grid tr,
+    .iteraction-list-result-grid .v-gridlayout,
+    .iteraction-list-result-grid .v-gridlayout-layout,
+    .iteraction-list-result-grid .v-gridlayout-slot {
+      box-sizing: border-box;
+      height: auto !important;
+      min-height: 0 !important;
+    }
+
+    .iteraction-list-result-section,
+    .iteraction-list-result-body,
+    .iteraction-list-result-grid {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      overflow: visible !important;
+    }
+
+    @media (max-width: 1100px) {
+      .iteraction-list-vacancy-state-summary {
+        gap: 6px;
+      }
+
+      .iteraction-list-vacancy-state-summary > .v-slot {
+        width: calc(50% - 3px) !important;
+        max-width: calc(50% - 3px) !important;
+      }
+    }
+  }
+}
