@@ -29,8 +29,19 @@ public class IteractionListAccordionCssContractTest {
         for (String theme : THEMES) {
             String scss = readProjectFile("modules/web/themes/" + theme
                     + "/com.company.hunttech/iteraction-list-reference-finish.scss");
+            String shared = readProjectFile("modules/web/themes/" + theme
+                    + "/com.company.hunttech/edit-screen-shared-styles.scss");
             String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");
 
+            assertTrue(shared.contains(".edit-form-control"));
+            assertTrue(shared.contains(".edit-form-control .v-textfield"));
+            assertTrue(shared.contains(".edit-form-control .v-textarea"));
+            assertTrue(shared.contains(".edit-form-control .c-pickerfield-layout"));
+            String visual = readProjectFile("modules/web/themes/" + theme
+                    + "/com.company.hunttech/iteraction-list-visual-alignment.scss");
+            assertTrue(visual.contains(".iteraction-list-participants-grid .v-gridlayout-slot"));
+            assertTrue(visual.contains(".iteraction-list-result-grid .v-gridlayout-slot"));
+            assertTrue(visual.contains("margin-top: 12px !important;"));
             assertTrue(scss.contains(".iteraction-list-editor"));
             assertTrue(scss.contains(".iteraction-list-accordion-section"));
             assertTrue(scss.contains(".iteraction-list-popular-host"));
@@ -43,6 +54,10 @@ public class IteractionListAccordionCssContractTest {
             assertFalse(scss.contains("@mixin iteraction-list-reference-finish-theme {\n  .v-panel"));
             assertTrue(styles.indexOf("@import \"com.company.hunttech/iteraction-list-reference-finish\";")
                     > styles.indexOf("@import \"com.company.hunttech/candidate-cv-editor\";"));
+            assertTrue(styles.indexOf("@import \"com.company.hunttech/iteraction-list-visual-alignment\";")
+                    > styles.indexOf("@import \"com.company.hunttech/edit-screen-shared-styles\";"));
+            assertTrue(styles.indexOf("@include iteraction-list-visual-alignment-theme;")
+                    > styles.indexOf("@include edit-screen-shared-styles;"));
             assertTrue(styles.indexOf("@include iteraction-list-reference-finish-theme;")
                     > styles.indexOf("@include candidate-cv-editor-theme;"));
         }

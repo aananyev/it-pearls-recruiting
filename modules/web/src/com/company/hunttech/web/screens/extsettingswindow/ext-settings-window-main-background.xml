@@ -14,7 +14,7 @@
                             <vbox id="mainScreenBackgroundCard"
                                   width="100%"
                                   spacing="false"
-                                  stylename="settings-section-card interface-settings-card main-screen-background-card"
+                                  stylename="settings-section-card interface-settings-card main-screen-background-card edit-card"
                                   ext:index="2">
                                 <hbox id="mainScreenBackgroundHeader"
                                       width="100%"
@@ -25,7 +25,7 @@
                                           width="100%"
                                           spacing="false">
                                         <label value="Фон главного экрана"
-                                               stylename="h3 settings-section-card-title"/>
+                                               stylename="h3 settings-section-card-title edit-card-title"/>
                                         <label value="Выберите персональное изображение или системный каталог активной темы."
                                                width="100%"
                                                stylename="settings-section-help main-screen-background-header-help"/>

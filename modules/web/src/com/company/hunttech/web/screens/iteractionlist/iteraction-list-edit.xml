@@ -558,7 +558,7 @@
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
-                                      stylename="iteraction-list-form-grid">
+                                      stylename="iteraction-list-form-grid iteraction-list-participants-grid">
                                     <!-- Columns объявляют двухколоночную структуру основного контекста взаимодействия. -->
                                     <columns>
                                         <!-- Левая колонка растягивает поле выбора кандидата. -->
@@ -575,7 +575,7 @@
                                                                    inputPrompt="mainMsg://msgStartInput"
                                                                    minSearchStringLength="3"
                                                                    caption="msg://msgCandidate"
-                                                                   stylename="iteraction-list-primary-picker"
+                                                                   stylename="edit-form-control iteraction-list-primary-picker"
                                                                    width="100%"
                                                                    height="AUTO"
                                                                    required="true"
@@ -609,7 +609,7 @@
                                                                property="vacancy"
                                                                height="AUTO"
                                                                width="100%"
-                                                               stylename="iteraction-list-primary-picker">
+                                                               stylename="edit-form-control iteraction-list-primary-picker">
                                                 <!-- Actions позволяют выбрать вакансию из списка и открыть её editor. -->
                                                 <actions>
                                                     <!-- Lookup action открывает стандартный список допустимых вакансий. -->
@@ -664,6 +664,7 @@
                                                    caption="msg://msgIteractionType"
                                                    width="100%"
                                                    height="AUTO"
+                                                   stylename="edit-form-control"
                                                    required="true"
                                                    dataContainer="iteractionListDc"
                                                    property="iteractionType">
@@ -757,6 +758,7 @@
                                                          dataContainer="iteractionListDc"
                                                          property="rating"
                                                          description="msg://msgRatingDecription"
+                                                         stylename="edit-form-control"
                                                          width="100%"/>
                                             <!-- LookupPickerField выбирает ответственного рекрутёра из активных usersDc. -->
                                             <lookupPickerField id="recrutierField"
@@ -764,6 +766,7 @@
                                                                width="100%"
                                                                dataContainer="iteractionListDc"
                                                                property="recrutier"
+                                                               stylename="edit-form-control"
                                                                optionsContainer="usersDc">
                                                 <!-- Actions предоставляют стандартный lookup пользователя. -->
                                                 <actions>
@@ -780,6 +783,7 @@
                                                        caption="msg://msgCommunicationMethod"
                                                        dataContainer="iteractionListDc"
                                                        property="communicationMethod"
+                                                       stylename="edit-form-control"
                                                        colspan="2"/>
                                         </row>
                                     </rows>
@@ -818,6 +822,7 @@
                                           dataContainer="iteractionListDc"
                                           property="comment"
                                           caption="msg://msgComment"
+                                          stylename="edit-form-control"
                                           width="100%"
                                           height="170px"
                                           rows="7"/>

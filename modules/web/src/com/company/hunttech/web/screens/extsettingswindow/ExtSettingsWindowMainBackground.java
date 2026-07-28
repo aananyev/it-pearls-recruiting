@@ -47,9 +47,9 @@ public class ExtSettingsWindowMainBackground extends ExtSettingsWindowInterfaceL
             "Не удалось загрузить изображение. Проверьте формат, содержимое и размер файла.";
     private static final String REMOVE_ERROR =
             "Не удалось удалить неиспользуемый файл фона. Ссылка на него больше не используется.";
-    private static final String NAVIGATION_STYLE = "borderless settings-section-nav-item";
+    private static final String NAVIGATION_STYLE = "borderless settings-section-nav-item label-nav-item";
     private static final String ACTIVE_NAVIGATION_STYLE =
-            "borderless settings-section-nav-item settings-section-nav-item-active";
+            "borderless settings-section-nav-item settings-section-nav-item-active label-nav-item label-nav-item-active";
 
     @Inject
     private Datasource<UserSettings> userSettingsDs;

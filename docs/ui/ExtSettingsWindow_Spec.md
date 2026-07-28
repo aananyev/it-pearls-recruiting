@@ -35,6 +35,15 @@
 
 Все четыре вкладки используют общий корневой визуальный слой `.ext-settings-window`. Внутри каждой вкладки сохраняется существующая двухпанельная структура: контекст и индекс разделов слева, рабочая область с toolbar и карточками либо аккордеонами справа.
 
+Экран остаётся эталонной формой для общего UI API Edit-экранов. Legacy-классы `settings-section-*`, `ai-settings-*` и `user-ai-profile-*` сохранены для совместимости текущего SCSS, но XML fallback и runtime-кнопки навигации дополнительно используют глобальные классы:
+
+- `edit-sidebar`, `edit-workspace`, `edit-workspace-scroll`;
+- `edit-toolbar`, `edit-toolbar-actions`;
+- `edit-card`, `edit-card-title`, `edit-accordion-section`;
+- `label-navigation`, `label-nav-title`, `label-nav-item`, `label-nav-item-active`.
+
+Глобальные stylename описывают визуальную роль, а legacy stylename временно оставлены как экранный namespace. Component ID, datasource, validators, `invoke` и бизнес-логика не меняются.
+
 На вкладке AI карточка `personalAiApiPreferenceBox` содержит:
 
 - `preferPersonalAiApiSettingsField` — «Предпочитать использовать в запросах мои настройки API»;
@@ -505,6 +514,7 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-28 | Эталонный экран начал использовать глобальные stylename Edit-форм поверх legacy-классов: sidebar, navigation, toolbar, card, accordion и runtime navigation-buttons получили общий UI API без изменения component ID и бизнес-логики |
 | 2026-07-25 | Восстановлена кнопка «Показать передаваемые данные»: фактический controller формирует preview локально через общий `UserAiContextBuilder`, отражает несохранённые значения, раскрывает секцию и фокусирует результат без remote-передачи `UserAiProfile` |
 | 2026-07-25 | Исправлен cross-context доступ: `ImageProcessingService` и `UserAiContextService` разрешаются по стабильному CUBA service name и вызываются через middleware proxy; class-based `AppBeans` lookup удалён |
 | 2026-07-25 | `ImageProcessingService` и `UserAiContextService` переведены с `@Inject` на `AppBeans.get(...)` в начале `init()`; добавлена регрессионная проверка доступности core-бинов в legacy web-контроллере |
