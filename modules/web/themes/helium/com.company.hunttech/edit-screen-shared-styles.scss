@@ -14,6 +14,7 @@
   .edit-toolbar,
   .edit-card,
   .edit-accordion-section,
+  .edit-form-control,
   .edit-footer-actions {
     box-sizing: border-box;
     min-width: 0 !important;
@@ -240,6 +241,69 @@
     font-size: 12px !important;
     line-height: 18px !important;
     white-space: normal !important;
+  }
+
+  .edit-form-control,
+  .v-slot-edit-form-control,
+  .edit-form-control .v-filterselect,
+  .edit-form-control .v-filterselect-input,
+  .edit-form-control .v-textfield,
+  .edit-form-control .v-textarea,
+  .edit-form-control .v-datefield,
+  .edit-form-control .v-datefield-textfield,
+  .edit-form-control .c-pickerfield,
+  .edit-form-control .c-pickerfield-layout,
+  .edit-form-control .c-suggestionfield {
+    box-sizing: border-box;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .edit-form-control .c-pickerfield-layout {
+    table-layout: fixed;
+  }
+
+  .edit-form-control .c-pickerfield-layout-cell {
+    box-sizing: border-box;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .edit-form-control .v-filterselect-input,
+  .edit-form-control .v-textfield,
+  .edit-form-control .v-datefield-textfield {
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 10px !important;
+    font-size: 15px !important;
+    line-height: 38px !important;
+    background: $v-panel-background-color !important;
+    border: 1px solid rgba($v-font-color, 0.20) !important;
+    border-radius: 5px !important;
+    box-shadow: none !important;
+  }
+
+  .edit-form-control .v-textarea {
+    min-height: 150px !important;
+    padding: 8px 10px !important;
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+    background: $v-panel-background-color !important;
+    border: 1px solid rgba($v-font-color, 0.20) !important;
+    border-radius: 5px !important;
+    box-shadow: none !important;
+    resize: vertical;
+  }
+
+  .edit-form-control .v-button,
+  .edit-form-control .v-filterselect-button {
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
   }
 
   .edit-accordion-section {

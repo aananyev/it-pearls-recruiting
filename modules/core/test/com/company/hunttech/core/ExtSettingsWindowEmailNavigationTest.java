@@ -22,15 +22,20 @@ public class ExtSettingsWindowEmailNavigationTest {
         String extensionXml = readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/"
                         + "ext-settings-window-email-navigation.xml");
+        String mainBackgroundXml = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/extsettingswindow/"
+                        + "ext-settings-window-main-background.xml");
         String screensXml = readProjectFile("modules/web/src/com/company/hunttech/web-screens.xml");
 
         assertTrue(extensionXml.contains(
                 "extends=\"/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window.xml\""));
         assertTrue(extensionXml.contains(
-                "class=\"com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindowEmailNavigation\""));
+                "class=\"com.company.hunttech.web.screens.extsettingswindow.ExtSettingsWindowInterfaceLayout\""));
+        assertTrue(mainBackgroundXml.contains(
+                "extends=\"/com/company/hunttech/web/screens/extsettingswindow/ext-settings-window-email-navigation.xml\""));
         assertTrue(screensXml.contains(
                 "id=\"settings\" template=\"/com/company/hunttech/web/screens/extsettingswindow/"
-                        + "ext-settings-window-email-navigation.xml\""));
+                        + "ext-settings-window-main-background.xml\""));
     }
 
     @Test

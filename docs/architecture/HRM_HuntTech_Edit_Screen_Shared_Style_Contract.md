@@ -194,6 +194,7 @@ label-navigation
 | `edit-card` | постоянно видимая тематическая карточка |
 | `edit-card-title` | заголовок карточки |
 | `edit-help` | поясняющий текст внутри рабочей области |
+| `edit-form-control` | единый визуальный контракт `TextField`, `TextArea`, `LookupField`, `LookupPickerField`, `SuggestionPickerField`, `DateField` и совместимых полей |
 | `edit-accordion-section` | полноширинный `GroupBoxLayout` по эталону SettingsWindow |
 | `edit-footer-actions` | нижняя панель штатных действий save/cancel и других существующих actions |
 
@@ -293,6 +294,7 @@ $v-border-radius
 .label-navigation { ... }
 .label-nav-item { ... }
 .edit-toolbar { ... }
+.edit-form-control .v-textfield { ... }
 .edit-accordion-section .v-panel-caption { ... }
 .edit-workspace .v-textfield { ... }
 ```
@@ -322,6 +324,7 @@ $v-border-radius
 | `settings-section-toolbar-actions`, `user-ai-profile-toolbar-actions`, `ai-settings-toolbar-actions` | `edit-toolbar-actions` |
 | `settings-section-card`, `ai-settings-card` | `edit-card` |
 | `settings-section-card-title`, `ai-settings-card-title` | `edit-card-title` |
+| Поля правой рабочей области, требующие единой геометрии | `edit-form-control` |
 | `user-ai-profile-section` и почтовые accordion-классы | `edit-accordion-section` |
 | `ext-settings-footer` | `edit-footer-actions` |
 
@@ -403,4 +406,5 @@ Hermes подтверждает:
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-28 | Добавлен общий `edit-form-control` для единообразной геометрии полей Edit-форм и уточнено целевое соответствие существующих экранов глобальному UI API |
 | 2026-07-27 | Утверждены единое имя блока `label-navigation`, классы `label-nav-title`, `label-nav-item`, `label-nav-item-active`, общий набор sidebar/workspace-stylename и целевое соответствие на примере `ExtSettingsWindow` |

@@ -32,15 +32,15 @@ import java.util.Map;
 public class ExtSettingsWindowEmailNavigation extends ExtSettingsWindow {
 
     private static final Logger log = LoggerFactory.getLogger(ExtSettingsWindowEmailNavigation.class);
-    private static final String NAVIGATION_STYLE = "borderless settings-section-nav-item";
+    private static final String NAVIGATION_STYLE = "borderless settings-section-nav-item label-nav-item";
     private static final String ACTIVE_NAVIGATION_STYLE =
-            "borderless settings-section-nav-item settings-section-nav-item-active";
-    private static final String AI_NAVIGATION_STYLE = "borderless ai-settings-nav-item";
+            "borderless settings-section-nav-item settings-section-nav-item-active label-nav-item label-nav-item-active";
+    private static final String AI_NAVIGATION_STYLE = "borderless ai-settings-nav-item label-nav-item";
     private static final String ACTIVE_AI_NAVIGATION_STYLE =
-            "borderless ai-settings-nav-item ai-settings-nav-item-active";
-    private static final String PROFILE_NAVIGATION_STYLE = "borderless user-ai-profile-nav-item";
+            "borderless ai-settings-nav-item ai-settings-nav-item-active label-nav-item label-nav-item-active";
+    private static final String PROFILE_NAVIGATION_STYLE = "borderless user-ai-profile-nav-item label-nav-item";
     private static final String ACTIVE_PROFILE_NAVIGATION_STYLE =
-            "borderless user-ai-profile-nav-item user-ai-profile-nav-item-active";
+            "borderless user-ai-profile-nav-item user-ai-profile-nav-item-active label-nav-item label-nav-item-active";
 
     @Inject
     private UiComponents uiComponents;

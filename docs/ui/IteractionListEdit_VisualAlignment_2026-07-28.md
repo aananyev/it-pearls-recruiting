@@ -15,7 +15,7 @@
 
 Экран открывается как editor взаимодействия из browse, карточки кандидата и связанных vacancy workflows. Слева постоянно отображаются:
 
-1. два одинаковых `OvaFallbackImage`;
+1. фотография кандидата и меньший логотип проекта;
 2. имя кандидата и выбранная вакансия;
 3. горизонтальная пара «Статус вакансии» / «Приоритет»;
 4. заголовок и пункты `label-navigation`;
@@ -36,12 +36,13 @@
 | показать статус и приоритет | вакансия выбрана | значения располагаются горизонтально в двух равных ячейках |
 | показать номер и дату | всегда | оба поля полностью помещаются в service-card |
 | показать контекст вакансии | вакансия выбрана | карточка не выходит за sidebar и содержит наименование вакансии |
+| показать поля результата и комментария | любое содержимое GridLayout | блоки не перекрываются, поля имеют единый визуальный контракт |
 
 ## 4. Точный XML-контракт
 
 ### 4.1. Изображения
 
-`candidateImage` и `projectLogoImage` используют:
+`candidateImage` использует:
 
 ```xml
 width="96px"
@@ -50,6 +51,8 @@ ovalWidth="96px"
 ovalHeight="96px"
 stylename="iteraction-list-context-image ..."
 ```
+
+`projectLogoImage` остаётся `OvaFallbackImage`, но финальный SCSS задаёт логотипу `80 × 80`, чтобы он воспринимался вторичным визуальным контекстом и не конкурировал с фотографией кандидата.
 
 ### 4.2. Label-навигация
 
@@ -101,7 +104,16 @@ SCSS устанавливает `height:auto`, `min-height:0` и `overflow:visib
 modules/web/themes/<theme>/com.company.hunttech/iteraction-list-visual-alignment.scss
 ```
 
-Он подключается после `iteraction-list-reference-finish` и до `edit-screen-shared-styles`. Порядок нужен, чтобы отменить поздние legacy-правила размеров изображений и вертикального status layout.
+Он подключается после общего `edit-screen-shared-styles`, `iteraction-list-reference-finish` и прочих legacy/reference partials. Порядок нужен, чтобы общий Edit-контракт работал как базовый слой, а локальный экранный слой финально ограничивал карточки, GridLayout, поля, action-кнопки и размеры изображений.
+
+`iteraction-list-visual-alignment.scss` дополнительно закрепляет:
+
+- `projectLogoImage` `80 × 80`;
+- `edit-form-control` для `iteractionTypeField`, `ratingField`, `recrutierField`, `communicationMethodField`, `commentField`;
+- одинаковую высоту `38px` и фиксированные action-кнопки picker-полей;
+- `table-layout: fixed` и `min-width: 0` для Vaadin GridLayout wrappers;
+- `overflow-x: hidden` для рабочей scroll-area;
+- отсутствие перекрытия `resultAccordion` и `commentAccordion`.
 
 Поддерживаемые темы:
 
@@ -147,13 +159,15 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-visual-alignment
 Критерии PASS:
 
 - горизонтальный overflow отсутствует;
-- оба изображения одинаковы;
+- фотография кандидата крупнее логотипа проекта, логотип не обрезается;
 - заголовок и стили navigation видимы;
 - status/priority находятся в одной строке;
 - service-card и vacancy-card не выходят за sidebar;
 - vacancy-card содержит название вакансии;
 - candidate/vacancy controls одинаковы;
+- result/recruiter/communication/comment controls используют единый визуальный контракт;
 - result-card растёт по содержимому;
+- comment-card начинается ниже result-card и не перекрывает его поля;
 - footer не перекрывает рабочую область.
 
 Статический render-review не заменяет CUBA/Vaadin browser smoke Hermes.
@@ -180,4 +194,5 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-visual-alignment
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-28 | Shared Edit SCSS переведён в базовый слой, локальный final partial ограничивает GridLayout, picker/action-кнопки, `edit-form-control`, рабочий scroll overflow и размер логотипа проекта `80 × 80`; добавлены критерии отсутствия перекрытия result/comment. |
 | 2026-07-28 | Унифицированы `OvaFallbackImage`, восстановлены title/styles label-навигации, выровнены picker-поля, status/priority, sidebar-карточки и AUTO-геометрия блока результата; в vacancy-card добавлено наименование вакансии. |

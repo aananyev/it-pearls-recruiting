@@ -95,6 +95,18 @@ Legacy component ID с суффиксом `Accordion` сохранены рад�
 - имеют статический title и отдельный body;
 - используют локальный класс `iteraction-list-flat-section`.
 
+### 2.3.1. Единый визуальный контракт полей
+
+Основные поля ввода в правой рабочей области используют общий stylename `edit-form-control`:
+
+- `iteractionTypeField`;
+- `ratingField`;
+- `recrutierField`;
+- `communicationMethodField`;
+- `commentField`.
+
+`candidateField` и `vacancyFiels` сохраняют специализированный `iteraction-list-primary-picker`, но итоговая SCSS-геометрия совпадает с `edit-form-control`: высота `38px`, единая рамка, фон, focus-state и фиксированная ширина action-кнопок. Это устраняет расхождения между `SuggestionPickerField`, `LookupPickerField`, `LookupField`, `TextField` и `TextArea` без изменения bindings, actions и validators.
+
 ### 2.4. Label-navigation
 
 `IteractionListEdit` заменяет XML fallback labels четырьмя keyboard-доступными кнопками.
@@ -538,6 +550,9 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-flat-layout.scss
 - viewport 1700×950 и 1366×768;
 - семь тем;
 - отсутствие horizontal scroll.
+- `projectLogoImage` меньше фотографии кандидата и не обрезается;
+- `resultAccordion` и `commentAccordion` не перекрываются при любом содержимом GridLayout;
+- `iteractionTypeField`, `ratingField`, `recrutierField`, `communicationMethodField`, `commentField`, `candidateField` и `vacancyFiels` имеют единую геометрию.
 
 ### Quick actions
 
@@ -601,6 +616,7 @@ Runtime:
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-28 | Уточнён визуальный слой: общий `edit-screen-shared-styles` применяется как базовый SCSS-контракт, локальный `iteraction-list-visual-alignment` финально ограничивает карточки, GridLayout, picker/action-кнопки, поля результата и комментарий; добавлен `edit-form-control` для однотипных полей. |
 | 2026-07-28 | XML, active-controller и SCSS синхронизированы с точным render-контрактом: четыре обычных VBox-блока, четыре navigation target, отсутствие expanded state и ровно пять quick-action позиций. |
 | 2026-07-27 | Зафиксирована подробная бизнес-логика: lifecycle, loaders, candidate/vacancy rules, dynamic fields, subscriptions, Employee, chain interaction, notifications, email и риски. |
 | 2026-07-27 | Экран переведён на двухпанельную компоновку HRM HuntTech. |

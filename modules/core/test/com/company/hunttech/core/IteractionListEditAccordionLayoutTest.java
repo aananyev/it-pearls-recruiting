@@ -56,8 +56,10 @@ public class IteractionListEditAccordionLayoutTest {
     public void workspaceContainsFourPermanentVBoxInputBlocks() throws IOException {
         String descriptor = descriptor();
 
-        assertEquals(4, count(descriptor,
-                "stylename=\"iteraction-list-flat-section"));
+        assertEquals(1, count(descriptor, "id=\"participantsAccordion\""));
+        assertEquals(1, count(descriptor, "id=\"interactionAccordion\""));
+        assertEquals(1, count(descriptor, "id=\"resultAccordion\""));
+        assertEquals(1, count(descriptor, "id=\"commentAccordion\""));
         assertEquals(4, count(descriptor,
                 "stylename=\"iteraction-list-flat-section-title edit-card-title\""));
         assertEquals(4, count(descriptor,
@@ -108,6 +110,8 @@ public class IteractionListEditAccordionLayoutTest {
         assertTrue(descriptor.contains("action=\"windowCommitAndClose\""));
         assertTrue(descriptor.contains("action=\"windowClose\""));
         assertTrue(descriptor.contains("required=\"true\""));
+        assertEquals(7, count(descriptor, "edit-form-control"));
+        assertTrue(descriptor.contains("iteraction-list-form-grid iteraction-list-participants-grid"));
     }
 
     @Test
