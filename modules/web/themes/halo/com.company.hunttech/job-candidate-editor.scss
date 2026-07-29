@@ -580,6 +580,20 @@
       padding-right: 8px !important;
     }
 
+    /* Each form row is a GridLayout slot containing an HBox, not a table
+       caption cell.  Stabilize that HBox split so labels do not wrap by syllable. */
+    .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-small {
+      width: 118px !important;
+      min-width: 118px !important;
+      vertical-align: top;
+    }
+
+    .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-edit-form-control {
+      width: calc(100% - 118px) !important;
+      min-width: 0 !important;
+      vertical-align: top;
+    }
+
     /* Все slot-компоненты GridLayout растягиваются одинаково; отдельный
        selector второй колонки и глубокие цепочки больше не нужны. */
     .job-candidate-form-grid .v-gridlayout-slot,
@@ -761,6 +775,15 @@
       .job-candidate-form-grid td:first-child {
         width: 112px !important;
         min-width: 112px !important;
+      }
+
+      .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-small {
+        width: 96px !important;
+        min-width: 96px !important;
+      }
+
+      .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-edit-form-control {
+        width: calc(100% - 96px) !important;
       }
 
       .job-candidate-form-row > .v-slot:first-child {
