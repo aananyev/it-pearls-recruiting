@@ -80,7 +80,8 @@ public class IteractionListEditAccordionLayoutTest {
                 "id=\"participantsAccordion\"",
                 "id=\"interactionAccordion\"");
 
-        assertEquals(2, count(participants, "<column flex=\"1\"/>"));
+        assertEquals(2, count(participants, "<column width=\"50%\"/>"));
+        assertEquals(0, count(participants, "<column flex=\"1\"/>"));
         assertOrdered(participants,
                 "id=\"candidateField\"",
                 "id=\"vacancyFiels\"",

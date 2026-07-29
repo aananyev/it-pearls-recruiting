@@ -550,7 +550,12 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-flat-layout.scss
 - viewport 1700×950 и 1366×768;
 - семь тем;
 - отсутствие horizontal scroll.
-- `projectLogoImage` меньше фотографии кандидата и не обрезается;
+- `candidateImage` и `projectLogoImage` имеют одинаковый размер `96 × 96`, не обрезаются и симметрично центрированы в верхней части sidebar;
+- fallback-изображения визуально заполняют круги без избыточных внутренних полей;
+- карточка номера и даты расположена сразу под профильным блоком кандидата, а date/time control целиком помещается внутри sidebar;
+- candidate/vacancy и rating/recruiter сохраняют две видимые колонки `50/50` при длинном значении слева;
+- candidate/vacancy используют одинаковый шрифт `15px`; option icon/image вакансии и рекрутёра имеют `20 × 20` и не пересекаются с текстом;
+- checkbox «Показывать только мои подписки» выровнен с подписью и допускает безопасный перенос текста;
 - `resultAccordion` и `commentAccordion` не перекрываются при любом содержимом GridLayout;
 - `iteractionTypeField`, `ratingField`, `recrutierField`, `communicationMethodField`, `commentField`, `candidateField` и `vacancyFiels` имеют единую геометрию.
 
@@ -616,6 +621,8 @@ Runtime:
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-28 | Унифицирована типографика candidate/vacancy, provider-пиктограммы отделены от текста, fallback-изображения увеличены внутри кругов, checkbox подписок выровнен; service-card перенесена под профиль кандидата и защищена от переполнения date/time-контролом. |
+| 2026-07-28 | Двухколоночные GridLayout закреплены как `50/50` на уровне absolute-positioned slot-ов CUBA 7.3, корням сеток сохранена ненулевая высота, локальная ширина sidebar синхронизирована с Vaadin slot, внутренний date/time layout служебной карточки ограничен шириной родителя, оба верхних `OvaFallbackImage` выровнены до `96 × 96`; добавлены regression-критерии видимости vacancy/recruiter и отсутствия переполнения. |
 | 2026-07-28 | Уточнён визуальный слой: общий `edit-screen-shared-styles` применяется как базовый SCSS-контракт, локальный `iteraction-list-visual-alignment` финально ограничивает карточки, GridLayout, picker/action-кнопки, поля результата и комментарий; добавлен `edit-form-control` для однотипных полей. |
 | 2026-07-28 | XML, active-controller и SCSS синхронизированы с точным render-контрактом: четыре обычных VBox-блока, четыре navigation target, отсутствие expanded state и ровно пять quick-action позиций. |
 | 2026-07-27 | Зафиксирована подробная бизнес-логика: lifecycle, loaders, candidate/vacancy rules, dynamic fields, subscriptions, Employee, chain interaction, notifications, email и риски. |

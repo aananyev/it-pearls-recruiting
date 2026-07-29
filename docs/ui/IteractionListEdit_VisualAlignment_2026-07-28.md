@@ -15,11 +15,11 @@
 
 Экран открывается как editor взаимодействия из browse, карточки кандидата и связанных vacancy workflows. Слева постоянно отображаются:
 
-1. фотография кандидата и меньший логотип проекта;
+1. фотография кандидата и логотип проекта одинакового размера;
 2. имя кандидата и выбранная вакансия;
-3. горизонтальная пара «Статус вакансии» / «Приоритет»;
-4. заголовок и пункты `label-navigation`;
-5. карточка номера и даты;
+3. карточка номера и даты непосредственно под профильным блоком кандидата;
+4. горизонтальная пара «Статус вакансии» / «Приоритет»;
+5. заголовок и пункты `label-navigation`;
 6. карточка вакансии с её наименованием, компанией и проектом.
 
 Справа находятся toolbar, пять быстрых взаимодействий, четыре постоянных блока ввода и footer. Label-навигация изменяет только active-style и focus target; скрытие блоков не выполняется.
@@ -32,6 +32,8 @@
 | открыть sidebar | всегда | заголовок «Разделы формы» и четыре пункта навигации видимы и оформлены единым стилем |
 | выбрать пункт навигации | клик пользователя | выбранный пункт и соответствующая карточка получают active-style, focus переводится в первое поле |
 | выбрать кандидата или вакансию | поле доступно | оба picker-поля имеют одинаковую высоту, границу, фон и геометрию action-кнопок |
+| показать выбранную вакансию или рекрутёра | option icon/image задан provider-ом | пиктограмма имеет размер `20 × 20`, а текст начинается после зарезервированной области `40px` |
+| показать фильтр подписок | всегда | checkbox и подпись находятся в одной строке, вертикально выровнены и не перекрываются |
 | заполнить результат | любое число строк/длина значений | блок «Оценка и коммуникация» растёт по `height=AUTO` |
 | показать статус и приоритет | вакансия выбрана | значения располагаются горизонтально в двух равных ячейках |
 | показать номер и дату | всегда | оба поля полностью помещаются в service-card |
@@ -52,7 +54,7 @@ ovalHeight="96px"
 stylename="iteraction-list-context-image ..."
 ```
 
-`projectLogoImage` остаётся `OvaFallbackImage`, но финальный SCSS задаёт логотипу `80 × 80`, чтобы он воспринимался вторичным визуальным контекстом и не конкурировал с фотографией кандидата.
+`candidateImage` и `projectLogoImage` остаются `OvaFallbackImage`. Финальный SCSS задаёт обоим размер `96 × 96`; две равные половины `iteractionListIdentityImagesBox` и `align="MIDDLE_CENTER"` обеспечивают симметричное центрирование в sidebar.
 
 ### 4.2. Label-навигация
 
@@ -70,6 +72,7 @@ label-nav-item-active iteraction-list-nav-item-active
 ### 4.3. Sidebar-карточки
 
 - service-card: `iteractionServiceCard` → `iteractionServiceFields`;
+- service-card расположен после `iteractionVacancyNameLabel` и до `vacancyStateSummary`;
 - vacancy-card: `iteractionVacancyCard`;
 - vacancy name: `sidebarVacancyNameLabel` → `vacancy.vacansyName`;
 - все внутренние layout и fields имеют `width="100%"`, `height="AUTO"` и локальное ограничение `max-width: 100%`.
@@ -87,6 +90,8 @@ iteraction-list-primary-picker
 ```
 
 Финальный SCSS нормализует `SuggestionPickerField` и `LookupPickerField`, включая input и action buttons.
+`c-suggestionfield` использует те же `15px`, `38px` и горизонтальные отступы, что `v-filterselect-input`.
+Общий `edit-form-control` увеличивает provider-пиктограмму до `20 × 20` и резервирует перед текстом `40px`.
 
 ### 4.6. Оценка и коммуникация
 
@@ -94,7 +99,13 @@ iteraction-list-primary-picker
 - `resultAccordionBody`: `height="AUTO"`, class `iteraction-list-result-body`;
 - `resultAccordionGrid`: `height="AUTO"`, class `iteraction-list-result-grid`.
 
-SCSS устанавливает `height:auto`, `min-height:0` и `overflow:visible` для CUBA/Vaadin GridLayout wrappers.
+У CUBA 7.3 ячейки `GridLayout` рендерятся как absolute-positioned `.v-gridlayout-slot`. Поэтому локальный SCSS:
+
+- сохраняет вычисленную высоту корня `59px` для candidate/vacancy и `126px` для двухстрочного result;
+- закрепляет ширину slot-ов первой строки как `50%` и позицию правого slot как `left: 50%`;
+- оставляет communication в следующей строке с `width: 100%` и `left: 0`;
+- сохраняет верхние `19px` каждого slot для caption, чтобы подпись не накладывалась на control;
+- не применяет `height:auto` к корню GridLayout: это схлопывает контейнер до `0px` и вызывает наложение следующей секции.
 
 ## 5. SCSS и темы
 
@@ -108,10 +119,11 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-visual-alignment
 
 `iteraction-list-visual-alignment.scss` дополнительно закрепляет:
 
-- `projectLogoImage` `80 × 80`;
+- одинаковый размер `96 × 96` и симметричное центрирование `candidateImage`/`projectLogoImage`;
 - `edit-form-control` для `iteractionTypeField`, `ratingField`, `recrutierField`, `communicationMethodField`, `commentField`;
 - одинаковую высоту `38px` и фиксированные action-кнопки picker-полей;
-- `table-layout: fixed` и `min-width: 0` для Vaadin GridLayout wrappers;
+- одинаковую типографику `15px` у candidate/vacancy, отдельную область под provider-пиктограммы и выровненный checkbox подписок;
+- `min-width: 0` для Vaadin GridLayout wrappers и локальную геометрию absolute-positioned slot-ов;
 - `overflow-x: hidden` для рабочей scroll-area;
 - отсутствие перекрытия `resultAccordion` и `commentAccordion`.
 
@@ -159,13 +171,17 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-visual-alignment
 Критерии PASS:
 
 - горизонтальный overflow отсутствует;
-- фотография кандидата крупнее логотипа проекта, логотип не обрезается;
+- фотография кандидата и логотип проекта одинаковы по размеру `96 × 96`, не обрезаются и симметрично центрированы;
 - заголовок и стили navigation видимы;
 - status/priority находятся в одной строке;
 - service-card и vacancy-card не выходят за sidebar;
+- локальные `312px` у sidebar и его Vaadin slot совпадают, поэтому workspace не перекрывает правую часть карточек;
+- date, calendar и time служебной карточки остаются внутри её правой границы;
+- карточка номера и даты расположена сразу под ФИО/вакансией кандидата; её field slots имеют высоту под фактический control `38px`;
 - vacancy-card содержит название вакансии;
-- candidate/vacancy controls одинаковы;
+- candidate/vacancy controls одинаковы и занимают две видимые колонки `50/50`;
 - result/recruiter/communication/comment controls используют единый визуальный контракт;
+- rating/recruiter занимают две видимые колонки `50/50`, communication располагается отдельной полноширинной строкой;
 - result-card растёт по содержимому;
 - comment-card начинается ниже result-card и не перекрывает его поля;
 - footer не перекрывает рабочую область.
@@ -194,5 +210,7 @@ modules/web/themes/<theme>/com.company.hunttech/iteraction-list-visual-alignment
 
 | Дата | Изменение |
 |---|---|
-| 2026-07-28 | Shared Edit SCSS переведён в базовый слой, локальный final partial ограничивает GridLayout, picker/action-кнопки, `edit-form-control`, рабочий scroll overflow и размер логотипа проекта `80 × 80`; добавлены критерии отсутствия перекрытия result/comment. |
+| 2026-07-28 | Поле кандидата выровнено с вакансией по типографике `15px`; provider-пиктограммы вакансии/рекрутёра увеличены до `20 × 20` и отделены от текста областью `40px`; fallback-изображения масштабированы внутри кругов; checkbox подписок выровнен с подписью; service-card перенесена под профиль кандидата, а date/time-контролу закреплена непротекающая геометрия. |
+| 2026-07-28 | Колонки candidate/vacancy и rating/recruiter закреплены как `50/50` с учётом absolute-positioned slot-ов CUBA GridLayout; корням сеток возвращена ненулевая высота, communication оставлен полноширинной второй строкой; ширина sidebar синхронизирована с его Vaadin slot, date/time layout ограничен шириной карточки; оба верхних `OvaFallbackImage` выровнены до `96 × 96`. |
+| 2026-07-28 | Shared Edit SCSS переведён в базовый слой, локальный final partial ограничивает GridLayout, picker/action-кнопки, `edit-form-control`, рабочий scroll overflow и одинаковый размер изображений `96 × 96`; добавлены критерии отсутствия перекрытия result/comment. |
 | 2026-07-28 | Унифицированы `OvaFallbackImage`, восстановлены title/styles label-навигации, выровнены picker-поля, status/priority, sidebar-карточки и AUTO-геометрия блока результата; в vacancy-card добавлено наименование вакансии. |

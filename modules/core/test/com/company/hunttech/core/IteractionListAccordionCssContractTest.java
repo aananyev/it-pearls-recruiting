@@ -37,10 +37,17 @@ public class IteractionListAccordionCssContractTest {
             assertTrue(shared.contains(".edit-form-control .v-textfield"));
             assertTrue(shared.contains(".edit-form-control .v-textarea"));
             assertTrue(shared.contains(".edit-form-control .c-pickerfield-layout"));
+            assertTrue(shared.contains(".edit-form-control .c-suggestionfield"));
+            assertTrue(shared.contains(".edit-form-control .v-filterselect > .v-icon"));
+            assertTrue(shared.contains(".v-icon + .v-filterselect-input"));
+            assertTrue(shared.contains("padding-left: 40px !important;"));
             String visual = readProjectFile("modules/web/themes/" + theme
                     + "/com.company.hunttech/iteraction-list-visual-alignment.scss");
-            assertTrue(visual.contains(".iteraction-list-participants-grid .v-gridlayout-slot"));
-            assertTrue(visual.contains(".iteraction-list-result-grid .v-gridlayout-slot"));
+            assertTrue(visual.contains(".iteraction-list-form-grid.iteraction-list-participants-grid"));
+            assertTrue(visual.contains(".iteraction-list-form-grid.iteraction-list-result-grid"));
+            assertTrue(visual.contains("> .v-gridlayout-slot:last-child"));
+            assertTrue(visual.contains(".iteraction-list-service-card .c-datefield-layout"));
+            assertTrue(visual.contains("> .c-timefield-wrapper"));
             assertTrue(visual.contains("margin-top: 12px !important;"));
             assertTrue(scss.contains(".iteraction-list-editor"));
             assertTrue(scss.contains(".iteraction-list-accordion-section"));

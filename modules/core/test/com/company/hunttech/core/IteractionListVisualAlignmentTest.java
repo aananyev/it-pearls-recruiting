@@ -37,6 +37,8 @@ public class IteractionListVisualAlignmentTest {
         assertEquals(2, count(descriptor, "height=\"96px\""));
         assertEquals(2, count(descriptor, "ovalWidth=\"96px\""));
         assertEquals(2, count(descriptor, "ovalHeight=\"96px\""));
+        assertEquals(4, count(descriptor, "<column width=\"50%\"/>"));
+        assertEquals(0, count(descriptor, "<column flex=\"1\"/>"));
 
         assertTrue(descriptor.contains("id=\"iteractionListNavigationTitle\""));
         assertTrue(descriptor.contains(
@@ -45,7 +47,14 @@ public class IteractionListVisualAlignmentTest {
                 "stylename=\"label-nav-title iteraction-list-navigation-title\""));
         assertEquals(4, count(descriptor, "label-nav-item iteraction-list-nav-item"));
 
-        assertEquals(2, count(descriptor, "stylename=\"iteraction-list-primary-picker\""));
+        assertEquals(2, count(descriptor,
+                "stylename=\"edit-form-control iteraction-list-primary-picker\""));
+        assertOrdered(descriptor,
+                "id=\"iteractionCandidateNameLabel\"",
+                "id=\"iteractionVacancyNameLabel\"",
+                "id=\"iteractionServiceCard\"",
+                "id=\"vacancyStateSummary\"",
+                "id=\"iteractionListNavigation\"");
 
         String result = section(
                 descriptor,
@@ -61,7 +70,7 @@ public class IteractionListVisualAlignmentTest {
                 descriptor,
                 "id=\"vacancyStateSummary\"",
                 "id=\"iteractionListNavigation\"");
-        assertTrue(state.contains("<hbox id=\"vacancyStateSummary\""));
+        assertTrue(state.startsWith("id=\"vacancyStateSummary\""));
         assertEquals(2, count(state, "width=\"50%\""));
 
         assertTrue(descriptor.contains("id=\"iteractionServiceCard\""));
@@ -91,9 +100,9 @@ public class IteractionListVisualAlignmentTest {
             assertTrue(theme, styles.contains(
                     "@include iteraction-list-visual-alignment-theme;"));
             assertOrdered(styles,
+                    "@include edit-screen-shared-styles;",
                     "@include iteraction-list-reference-finish-theme;",
-                    "@include iteraction-list-visual-alignment-theme;",
-                    "@include edit-screen-shared-styles;");
+                    "@include iteraction-list-visual-alignment-theme;");
         }
     }
 
@@ -104,6 +113,8 @@ public class IteractionListVisualAlignmentTest {
                         + "iteraction-list-visual-alignment.scss");
 
         assertTrue(partial.contains("width: 96px !important"));
+        assertTrue(partial.contains("object-view-box: inset(8%)"));
+        assertTrue(partial.contains("object-view-box: inset(5%)"));
         assertTrue(partial.contains(".label-navigation"));
         assertTrue(partial.contains(".label-nav-title"));
         assertTrue(partial.contains(".label-nav-item-active"));
@@ -113,6 +124,19 @@ public class IteractionListVisualAlignmentTest {
         assertTrue(partial.contains(".iteraction-list-vacancy-card"));
         assertTrue(partial.contains(".iteraction-list-primary-picker"));
         assertTrue(partial.contains(".iteraction-list-result-section"));
+        assertTrue(partial.contains(".iteraction-list-service-card .c-datefield-layout"));
+        assertTrue(partial.contains("flex: 0 0 56px;"));
+        assertTrue(partial.contains("min-height: 61px !important;"));
+        assertTrue(partial.contains(".iteraction-list-subscription-filter > label"));
+        assertTrue(partial.contains("padding: 0 0 0 28px !important;"));
+        assertTrue(partial.contains(".v-slot-iteraction-list-sidebar"));
+        assertTrue(partial.contains("width: 312px !important;"));
+        assertTrue(partial.contains(".iteraction-list-form-grid.iteraction-list-participants-grid"));
+        assertTrue(partial.contains("height: 59px !important;"));
+        assertTrue(partial.contains(".iteraction-list-form-grid.iteraction-list-result-grid"));
+        assertTrue(partial.contains("height: 126px !important;"));
+        assertTrue(partial.contains("padding: 19px 8px 0 !important;"));
+        assertTrue(partial.contains("left: 50% !important;"));
         assertTrue(partial.contains("height: auto !important"));
         assertTrue(partial.contains(".iteraction-list-vacancy-name-value"));
         assertFalse(partial.contains("\n  .v-label {"));

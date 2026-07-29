@@ -1,9 +1,8 @@
 /*
  * Общий визуальный API Edit-экранов HRM HuntTech.
  *
- * Единственный исходный partial хранится в themes/common. Перед buildScssThemes
- * Gradle временно копирует его в каталог каждой темы, потому что CUBA 7.3
- * компилирует темы из изолированного themes-tmp.
+ * CUBA 7.3 компилирует темы из изолированного themes-tmp, поэтому каждая тема
+ * содержит реальную синхронную копию partial. Все семь копий изменяются вместе.
  */
 @mixin edit-screen-shared-styles {
   .edit-screen-layout,
@@ -272,16 +271,41 @@
 
   .edit-form-control .v-filterselect-input,
   .edit-form-control .v-textfield,
-  .edit-form-control .v-datefield-textfield {
+  .edit-form-control .v-datefield-textfield,
+  .edit-form-control .c-suggestionfield {
     height: 38px !important;
     min-height: 38px !important;
     padding: 0 10px !important;
+    font-family: inherit !important;
     font-size: 15px !important;
+    font-weight: 400 !important;
     line-height: 38px !important;
     background: $v-panel-background-color !important;
     border: 1px solid rgba($v-font-color, 0.20) !important;
     border-radius: 5px !important;
     box-shadow: none !important;
+  }
+
+  // LookupPickerField резервирует место под option icon/image:
+  // бизнес-индикатор остаётся крупным, а текст никогда не начинается под ним.
+  .edit-form-control .v-filterselect > .v-icon {
+    box-sizing: border-box;
+    position: absolute !important;
+    top: 50% !important;
+    left: 8px !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 !important;
+    transform: translateY(-50%);
+    object-fit: contain;
+    color: $v-font-color;
+    font-size: 20px !important;
+    line-height: 20px !important;
+    text-align: center;
+  }
+
+  .edit-form-control .v-filterselect > .v-icon + .v-filterselect-input {
+    padding-left: 40px !important;
   }
 
   .edit-form-control .v-textarea {

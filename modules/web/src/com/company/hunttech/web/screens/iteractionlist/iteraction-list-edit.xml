@@ -113,7 +113,7 @@
                   height="100%"
                   spacing="true"
                   expand="iteractionListSidebarSpacer">
-                <!-- Профильный блок объединяет изображения, имя кандидата, вакансию, статус и приоритет. -->
+                <!-- Профильный блок объединяет изображения, имя кандидата, служебные данные, статус и приоритет вакансии. -->
                 <vbox id="iteractionProfileSummaryBox"
                       width="100%"
                       height="AUTO"
@@ -167,6 +167,39 @@
                            width="100%"
                            height="AUTO"
                            align="MIDDLE_CENTER"/>
+
+                    <!-- Служебная карточка следует сразу за профилем кандидата и не смешивается с навигацией формы. -->
+                    <vbox id="iteractionServiceCard"
+                          width="100%"
+                          height="AUTO"
+                          spacing="false"
+                          stylename="iteraction-list-sidebar-card iteraction-list-service-card edit-sidebar-summary">
+                        <!-- Внутренний контейнер ограничивает оба служебных поля шириной карточки. -->
+                        <vbox id="iteractionServiceFields"
+                              width="100%"
+                              height="AUTO"
+                              spacing="true"
+                              stylename="iteraction-list-service-fields">
+                            <!-- Read-only поле показывает последовательный номер взаимодействия, назначенный business-controller. -->
+                            <textField id="numberIteractionField"
+                                       stylename="iteraction-list-service-field"
+                                       dataContainer="iteractionListDc"
+                                       property="numberIteraction"
+                                       editable="false"
+                                       caption="msg://msgNumber"
+                                       width="100%"
+                                       align="MIDDLE_LEFT"/>
+                            <!-- Read-only поле показывает дату и время взаимодействия из редактируемой сущности. -->
+                            <dateField id="dateIteractionField"
+                                       stylename="iteraction-list-service-field"
+                                       dataContainer="iteractionListDc"
+                                       property="dateIteraction"
+                                       editable="false"
+                                       caption="msg://msgDate"
+                                       width="100%"
+                                       align="MIDDLE_LEFT"/>
+                        </vbox>
+                    </vbox>
 
                     <!-- HBox располагает статус вакансии и её приоритет одной горизонтальной парой 50/50. -->
                     <hbox id="vacancyStateSummary"
@@ -275,39 +308,6 @@
                            height="AUTO"
                            value="msg://msgAccordionComment"
                            stylename="label-nav-item iteraction-list-nav-item"/>
-                </vbox>
-
-                <!-- Служебная карточка группирует неизменяемые номер и дату текущего взаимодействия. -->
-                <vbox id="iteractionServiceCard"
-                      width="100%"
-                      height="AUTO"
-                      spacing="false"
-                      stylename="iteraction-list-sidebar-card iteraction-list-service-card edit-sidebar-summary">
-                    <!-- Внутренний контейнер ограничивает оба служебных поля шириной карточки. -->
-                    <vbox id="iteractionServiceFields"
-                          width="100%"
-                          height="AUTO"
-                          spacing="true"
-                          stylename="iteraction-list-service-fields">
-                        <!-- Read-only поле показывает последовательный номер взаимодействия, назначенный business-controller. -->
-                        <textField id="numberIteractionField"
-                                   stylename="iteraction-list-service-field"
-                                   dataContainer="iteractionListDc"
-                                   property="numberIteraction"
-                                   editable="false"
-                                   caption="msg://msgNumber"
-                                   width="100%"
-                                   align="MIDDLE_LEFT"/>
-                        <!-- Read-only поле показывает дату и время взаимодействия из редактируемой сущности. -->
-                        <dateField id="dateIteractionField"
-                                   stylename="iteraction-list-service-field"
-                                   dataContainer="iteractionListDc"
-                                   property="dateIteraction"
-                                   editable="false"
-                                   caption="msg://msgDate"
-                                   width="100%"
-                                   align="MIDDLE_LEFT"/>
-                    </vbox>
                 </vbox>
 
                 <!-- Карточка вакансии раскрывает бизнес-контекст выбранной позиции без перехода в отдельный экран. -->
@@ -561,10 +561,10 @@
                                       stylename="iteraction-list-form-grid iteraction-list-participants-grid">
                                     <!-- Columns объявляют двухколоночную структуру основного контекста взаимодействия. -->
                                     <columns>
-                                        <!-- Левая колонка растягивает поле выбора кандидата. -->
-                                        <column flex="1"/>
-                                        <!-- Правая колонка растягивает поле выбора вакансии симметрично кандидату. -->
-                                        <column flex="1"/>
+                                        <!-- Левая колонка занимает ровно половину ширины и не вытесняет vacancy-picker длинным ФИО. -->
+                                        <column width="50%"/>
+                                        <!-- Правая колонка сохраняет половину ширины независимо от длины значения кандидата. -->
+                                        <column width="50%"/>
                                     </columns>
                                     <!-- Rows группируют логически связанные поля grid. -->
                                     <rows>
@@ -741,10 +741,10 @@
                                       stylename="iteraction-list-form-grid iteraction-list-result-grid">
                                     <!-- Columns объявляют две равные колонки результата. -->
                                     <columns>
-                                        <!-- Левая колонка содержит оценку кандидата. -->
-                                        <column flex="1"/>
-                                        <!-- Правая колонка содержит ответственного рекрутёра. -->
-                                        <column flex="1"/>
+                                        <!-- Левая колонка занимает ровно половину ширины и не вытесняет поле рекрутёра. -->
+                                        <column width="50%"/>
+                                        <!-- Правая колонка сохраняет половину ширины независимо от текста оценки. -->
+                                        <column width="50%"/>
                                     </columns>
                                     <!-- Rows задают основную строку оценки и отдельную строку способа связи. -->
                                     <rows>

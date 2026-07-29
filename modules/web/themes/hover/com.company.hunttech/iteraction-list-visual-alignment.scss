@@ -6,6 +6,15 @@
  */
 @mixin iteraction-list-visual-alignment-theme {
   .iteraction-list-editor {
+    // Локальная ширина sidebar должна совпадать с шириной Vaadin slot.
+    // Иначе глобальный edit-sidebar (270px) сдвигает workspace на 42px влево.
+    .v-slot-iteraction-list-sidebar {
+      box-sizing: border-box;
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
+    }
+
     // Оба OvaFallbackImage имеют одинаковую геометрию.
     .iteraction-list-context-image,
     .iteraction-list-context-image img,
@@ -28,14 +37,30 @@
     .iteraction-list-project-image img,
     .iteraction-list-project-image .v-image-element {
       box-sizing: border-box;
-      width: 80px !important;
-      height: 80px !important;
-      min-width: 80px !important;
-      min-height: 80px !important;
-      max-width: 80px !important;
-      max-height: 80px !important;
+      width: 96px !important;
+      height: 96px !important;
+      min-width: 96px !important;
+      min-height: 96px !important;
+      max-width: 96px !important;
+      max-height: 96px !important;
       border-radius: 50% !important;
       object-fit: contain !important;
+    }
+
+    // Fallback-файлы содержат собственные светлые поля. Object view box
+    // увеличивает только стандартную иллюстрацию, не затрагивая реальные фото и логотипы.
+    .iteraction-list-candidate-image[src*="/icons/no-programmer.jpeg"],
+    .iteraction-list-candidate-image img[src*="/icons/no-programmer.jpeg"],
+    .iteraction-list-candidate-image .v-image-element[src*="/icons/no-programmer.jpeg"] {
+      object-view-box: inset(8%);
+      object-fit: cover !important;
+    }
+
+    .iteraction-list-project-image[src*="/icons/no-company.png"],
+    .iteraction-list-project-image img[src*="/icons/no-company.png"],
+    .iteraction-list-project-image .v-image-element[src*="/icons/no-company.png"] {
+      object-view-box: inset(5%);
+      object-fit: cover !important;
     }
 
     .iteraction-list-identity-images {
@@ -247,6 +272,56 @@
       min-width: 0 !important;
     }
 
+    .iteraction-list-service-fields > .v-slot-iteraction-list-service-field,
+    .iteraction-list-service-fields > .v-slot-iteraction-list-service-field > .v-has-caption {
+      box-sizing: border-box;
+      min-height: 61px !important;
+      height: auto !important;
+    }
+
+    // DateField с временем помещает date-input, календарь и time-input
+    // в одну строку внутри узкой sidebar-card.
+    .iteraction-list-service-card .c-datefield-layout {
+      display: flex !important;
+      align-items: stretch;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: 38px !important;
+      min-height: 38px !important;
+      overflow: hidden;
+    }
+
+    .iteraction-list-service-card .c-datefield-layout > .v-datefield {
+      flex: 1 1 0;
+      width: 0 !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      height: 38px !important;
+      min-height: 38px !important;
+    }
+
+    .iteraction-list-service-card .c-datefield-layout > .c-timefield-wrapper {
+      flex: 0 0 56px;
+      width: 56px !important;
+      min-width: 56px !important;
+      max-width: 56px !important;
+      height: 38px !important;
+      min-height: 38px !important;
+      margin: 0 0 0 6px !important;
+    }
+
+    .iteraction-list-service-card .c-timefield-layout,
+    .iteraction-list-service-card .c-timefield {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: 38px !important;
+      min-height: 38px !important;
+      margin: 0 !important;
+    }
+
     .iteraction-list-vacancy-card .iteraction-list-sidebar-value,
     .iteraction-list-vacancy-card .iteraction-list-sidebar-value *,
     .iteraction-list-vacancy-name-value,
@@ -323,6 +398,53 @@
       min-height: 38px !important;
     }
 
+    // Нативный input остаётся доступным для клавиатуры, а label получает
+    // собственную область слева под единый визуальный индикатор checkbox.
+    .iteraction-list-subscription-filter {
+      box-sizing: border-box;
+      position: relative !important;
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 28px !important;
+      margin: 8px 0 0 !important;
+      padding: 3px 8px !important;
+      overflow: visible !important;
+    }
+
+    .iteraction-list-subscription-filter > input {
+      position: absolute !important;
+      top: 4px !important;
+      left: 8px !important;
+      width: 18px !important;
+      height: 18px !important;
+      margin: 0 !important;
+      opacity: 0;
+    }
+
+    .iteraction-list-subscription-filter > label {
+      box-sizing: border-box;
+      position: relative !important;
+      display: block !important;
+      width: 100% !important;
+      min-height: 20px;
+      margin: 0 !important;
+      padding: 0 0 0 28px !important;
+      line-height: 20px !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+    }
+
+    .iteraction-list-subscription-filter > label::before,
+    .iteraction-list-subscription-filter > label::after {
+      top: 1px !important;
+      left: 0 !important;
+      width: 18px !important;
+      height: 18px !important;
+      line-height: 18px !important;
+      text-align: center;
+    }
+
     // Общие edit-стили подключаются как базовый слой; локальная форма
     // возвращает карточкам собственную геометрию и не даёт shared padding
     // раздвигать секции после их XML-компоновки.
@@ -390,21 +512,47 @@
       min-width: 0 !important;
       max-width: 100% !important;
       height: auto !important;
-      padding: 6px 8px !important;
+      padding: 19px 8px 0 !important;
       vertical-align: top;
       overflow: visible !important;
     }
 
-    .iteraction-list-participants-grid .v-gridlayout-slot,
-    .iteraction-list-result-grid .v-gridlayout-slot {
+    // CUBA GridLayout оставляет slot-ы absolute-positioned. При процентных
+    // колонках их inline width может стать 0px, поэтому геометрия фиксируется
+    // на локальных классах формы с более высокой специфичностью.
+    .iteraction-list-form-grid.iteraction-list-participants-grid {
+      height: 59px !important;
+      min-height: 59px !important;
+    }
+
+    .iteraction-list-form-grid.iteraction-list-result-grid {
+      height: 126px !important;
+      min-height: 126px !important;
+    }
+
+    .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot,
+    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot {
       width: 50% !important;
       min-width: 0 !important;
       max-width: 50% !important;
     }
 
-    .iteraction-list-result-grid .v-gridlayout-slot[colspan="2"],
-    .iteraction-list-result-grid .v-gridlayout-slot.v-gridlayout-slot-colspan-2 {
+    .iteraction-list-form-grid.iteraction-list-participants-grid > .v-gridlayout-slot:last-child,
+    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:nth-last-child(2) {
+      left: 50% !important;
+    }
+
+    .iteraction-list-form-grid.iteraction-list-result-grid > .v-gridlayout-slot:last-child {
+      left: 0 !important;
       width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    .iteraction-list-participants-grid .v-gridlayout-slot > *,
+    .iteraction-list-result-grid .v-gridlayout-slot > * {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
       max-width: 100% !important;
     }
 
@@ -439,7 +587,6 @@
     .v-slot-iteraction-list-result-section,
     .iteraction-list-result-body,
     .v-slot-iteraction-list-result-body,
-    .iteraction-list-result-grid,
     .iteraction-list-result-grid > div,
     .iteraction-list-result-grid table,
     .iteraction-list-result-grid tbody,

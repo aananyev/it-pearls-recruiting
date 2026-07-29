@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -45,6 +46,11 @@ public class IteractionListSidebarContextPanelTest {
         assertTrue(xml.contains("property=\"numberIteraction\""));
         assertTrue(xml.contains("id=\"dateIteractionField\""));
         assertTrue(xml.contains("property=\"dateIteraction\""));
+        assertOrdered(xml,
+                "id=\"iteractionCandidateNameLabel\"",
+                "id=\"iteractionVacancyNameLabel\"",
+                "id=\"iteractionServiceCard\"",
+                "id=\"vacancyStateSummary\"");
         assertTrue(xml.contains("id=\"outstaffingCostHBox\""));
         assertTrue(xml.contains("property=\"vacancy.outstaffingCost\""));
     }
@@ -84,12 +90,22 @@ public class IteractionListSidebarContextPanelTest {
                 "id=\"iteractionCandidateNameLabel\"");
 
         assertTrue(identity.contains("id=\"candidateImage\""));
-        assertTrue(identity.contains("width=\"112px\""));
-        assertTrue(identity.contains("ovalWidth=\"112px\""));
+        assertTrue(identity.contains("width=\"96px\""));
+        assertTrue(identity.contains("ovalWidth=\"96px\""));
         assertTrue(identity.contains("id=\"projectLogoImage\""));
-        assertTrue(identity.contains("width=\"80px\""));
-        assertTrue(identity.contains("ovalWidth=\"80px\""));
-        assertTrue(identity.contains("stylename=\"iteraction-list-project-image\""));
+        assertEquals(2, count(identity, "width=\"96px\""));
+        assertEquals(2, count(identity, "ovalWidth=\"96px\""));
+        assertTrue(identity.contains("iteraction-list-project-image"));
+
+        String alignment = readProjectFile(
+                "modules/web/themes/hover/com.company.hunttech/"
+                        + "iteraction-list-visual-alignment.scss");
+        String projectImage = section(
+                alignment,
+                ".iteraction-list-project-image,",
+                ".iteraction-list-identity-images");
+        assertTrue(projectImage.contains("width: 96px !important"));
+        assertTrue(projectImage.contains("height: 96px !important"));
     }
 
     @Test
@@ -160,6 +176,16 @@ public class IteractionListSidebarContextPanelTest {
             assertTrue("Нарушен порядок маркера: " + marker, current > previous);
             previous = current;
         }
+    }
+
+    private int count(String text, String token) {
+        int result = 0;
+        int index = 0;
+        while ((index = text.indexOf(token, index)) >= 0) {
+            result++;
+            index += token.length();
+        }
+        return result;
     }
 
     private String readProjectFile(String relativePath) throws IOException {
