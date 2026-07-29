@@ -245,6 +245,44 @@
                     </vbox>
                 </vbox>
 
+                <!-- Sidebar navigation: кнопки переключения вкладок по Edit-контракту идут сразу после имени. -->
+                <vbox id="candidateNavigation"
+                      width="100%"
+                      spacing="false"
+                      stylename="job-candidate-navigation label-navigation">
+                    <label value="Разделы формы"
+                           width="100%"
+                           stylename="label-nav-title"/>
+                    <button id="candidateNavMain" invoke="candidateNavMain"
+                            caption="Основное"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item label-nav-item-active"/>
+                    <button id="candidateNavPositions" invoke="candidateNavPositions"
+                            caption="Позиции и вакансии"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <button id="candidateNavIteraction" invoke="candidateNavIteraction"
+                            caption="Взаимодействия"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <button id="candidateNavResume" invoke="candidateNavResume"
+                            caption="Резюме и файлы"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <button id="candidateNavContactInfo" invoke="candidateNavContactInfo"
+                            caption="Контакты"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <button id="candidateNavComments" invoke="candidateNavComments"
+                            caption="Комментарии"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <button id="candidateNavHistory" invoke="candidateNavHistory"
+                            caption="История"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
+                </vbox>
+
                 <!-- Summary: status + rating + key info -->
                 <vbox id="candidateProfileSummary"
                       width="100%"
@@ -359,44 +397,6 @@
                             </row>
                         </rows>
                     </grid>
-                </vbox>
-
-                <!-- Sidebar navigation: кнопки переключения вкладок -->
-                <vbox id="candidateNavigation"
-                      width="100%"
-                      spacing="false"
-                      stylename="job-candidate-navigation label-navigation">
-                    <label value="Разделы формы"
-                           width="100%"
-                           stylename="label-nav-title"/>
-                    <button id="candidateNavMain" invoke="candidateNavMain"
-                            caption="Основное"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item label-nav-item-active"/>
-                    <button id="candidateNavPositions" invoke="candidateNavPositions"
-                            caption="Позиции и вакансии"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <button id="candidateNavIteraction" invoke="candidateNavIteraction"
-                            caption="Взаимодействия"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <button id="candidateNavResume" invoke="candidateNavResume"
-                            caption="Резюме и файлы"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <button id="candidateNavContactInfo" invoke="candidateNavContactInfo"
-                            caption="Контакты"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <button id="candidateNavComments" invoke="candidateNavComments"
-                            caption="Комментарии"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <button id="candidateNavHistory" invoke="candidateNavHistory"
-                            caption="История"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
                 </vbox>
 
                 <!-- Свободное пространство прижимает HR-Мастер к нижней границе sidebar. -->
@@ -940,7 +940,8 @@
                                                 <action id="remove" type="remove"/>
                                             </actions>
                                         </dataGrid>
-                                        <vbox spacing="true" width="AUTO" height="AUTO">
+                                        <vbox spacing="true" width="220px" height="AUTO"
+                                              stylename="job-candidate-social-actions">
                                             <button id="addSocialNetworkListsButton" visible="false" enable="false"
                                                     width="100%" caption="msg://msgAddSocialNetworks"
                                                     description="msg://msgAddSocialNetworksDesc"
@@ -1165,7 +1166,7 @@
                                   expand="tabResumeVbox"
                                   stylename="job-candidate-accordion-content">
 
-                                <vbox id="tabResumeVbox" spacing="true" height="100%"
+                                <vbox id="tabResumeVbox" spacing="true" width="100%" height="100%"
                                       expand="jobCandidateCandidateCvTable">
                                     <hbox spacing="true" width="100%" align="MIDDLE_RIGHT">
                                         <button id="checkSkillFromJD" caption="msg://msgCheckSkills" align="BOTTOM_LEFT"
@@ -1254,7 +1255,7 @@
                                   expand="tabCommentsVbox"
                                   stylename="job-candidate-accordion-content">
 
-                                <vbox id="tabCommentsVbox" spacing="true" height="100%"
+                                <vbox id="tabCommentsVbox" spacing="true" width="100%" height="100%"
                                       expand="jobCandidateCommentsDataGrid">
                                     <dataGrid id="jobCandidateCommentsDataGrid"
                                               dataContainer="interactionCommentDc"
@@ -1343,7 +1344,7 @@
                 <!-- Нижняя панель основных действий. -->
                 <hbox width="100%" spacing="false">
                     <hbox id="jobCandidateBottomBar"
-                          width="AUTO"
+                          width="100%"
                           spacing="true"
                           align="MIDDLE_RIGHT"
                           stylename="job-candidate-bottom-bar edit-footer-actions">
