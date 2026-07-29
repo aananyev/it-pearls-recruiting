@@ -8,6 +8,7 @@
 |---|---|---|
 | `JobCandidateEdit` | [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md) | Карточка кандидата, вкладки, история вакансий, анализ навыков и защита от OOM |
 | `CandidateCVEdit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) | Подготовка резюме с постоянной live-sidebar кандидата, сопроводительным письмом, деревом навыков, фотографией и файлами без изменения lazy-init |
+| `ExtUserEdit` | [ExtUserEdit_Spec.md](ExtUserEdit_Spec.md) | Администрирование профиля пользователя, ролей, замещений, email и AI в общем Edit-контракте |
 | `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | Персональные настройки пользователя, интерфейса, email и AI |
 | `ExtSettingsWindowMainBackground` | [ExtSettingsWindowMainBackground_Spec.md](ExtSettingsWindowMainBackground_Spec.md) | Загрузка, очистка и безопасное хранение персонального фона без изменения entity и БД |
 | `ExtSettingsWindowEmailNavigation` | [ExtSettingsWindowEmailNavigation_Spec.md](ExtSettingsWindowEmailNavigation_Spec.md) | Связь навигации SMTP, POP3 и IMAP слева с соответствующими аккордеонами справа |
@@ -205,7 +206,7 @@ Living-документация экранов, окон, фрагментов �
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Edit | `sec$User.edit` / `itpearls_ExtUserEdit` | [itpearls_ExtUserEdit_Spec.md](itpearls_ExtUserEdit_Spec.md) |
+| Edit | `sec$User.edit` / `ExtUserEditor` | [ExtUserEdit_Spec.md](ExtUserEdit_Spec.md) |
 | AI config edit | `itpearls_UserAiConfiguration.edit` | (модаль внутри ExtUser edit) · entity [UserAiConfiguration.md](../entities/UserAiConfiguration.md) |
 
 ---
@@ -213,7 +214,7 @@ Living-документация экранов, окон, фрагментов �
 ## Связь с документацией сущностей
 
 | Сценарий | Entity doc | UI Spec |
-|----------|------------|---------|
+|----------|------------|----------|
 | Browse/Edit сущности | `docs/entities/{EntityName}.md` §2 | `docs/ui/{FormName}_Spec.md` — детализация формы |
 | Экран без одной entity (login, dashboard) | — | только `docs/ui/{FormName}_Spec.md` |
 | Триггер «Сделай документацию сущности …» | `docs/architecture/{EntityName}_Spec.md` | §3–5 architecture могут ссылаться на UI Spec |
@@ -233,6 +234,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-29 | Добавлена каноническая спецификация `ExtUserEdit`; экран сопоставлен общему `edit-*`/`label-*` UI API и семи темам. |
 | 2026-07-29 | Обновлена спецификация `JobCandidateEdit`: экран приведён к общим `edit-*`/`label-*` stylename и видимой sidebar-навигации с active-state |
 | 2026-07-27 | Добавлено living-дополнение по XML-компоновке `IteractionListEdit`: статус и приоритет перед label-навигацией, первый аккордеон открыт по умолчанию |
 | 2026-07-26 | Добавлены спецификации `HrmMainScreen` и `ExtSettingsWindowMainBackground` для персонального фона и каталога 7 × 10 тематических изображений |
