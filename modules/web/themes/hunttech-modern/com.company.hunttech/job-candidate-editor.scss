@@ -25,6 +25,7 @@
 
   .job-candidate-sidebar {
     box-sizing: border-box;
+    min-width: 0;
     padding: 18px 16px;
 
     background: $v-panel-background-color;
@@ -37,6 +38,9 @@
   }
 
   .job-candidate-sidebar > .v-slot {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
     height: auto !important;
     flex: 0 0 auto !important;
   }
@@ -82,7 +86,9 @@
   }
 
   .job-candidate-profile-header > .v-slot {
-    width: 100%;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
     height: auto !important;
   }
 
@@ -97,6 +103,16 @@
     object-fit: cover;
 
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.16);
+  }
+
+  .job-candidate-avatar .v-embedded-image,
+  .job-candidate-avatar .v-image-element,
+  .job-candidate-avatar img {
+    display: block !important;
+    width: 112px !important;
+    height: 112px !important;
+    object-fit: cover !important;
+    object-position: center center !important;
   }
 
   .job-candidate-profile-header .v-upload {
@@ -504,14 +520,26 @@
 
   .job-candidate-navigation {
     box-sizing: border-box;
-    width: 100%;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-top: 10px;
+    border-top: 1px solid rgba($v-font-color, 0.12);
   }
 
-  .job-candidate-nav-item {
+  .job-candidate-navigation .label-nav-title {
+    color: rgba($v-font-color, 0.62) !important;
+    padding-left: 8px;
+    padding-right: 8px;
+    letter-spacing: .5px;
+  }
+
+  .job-candidate-nav-item,
+  .v-button-job-candidate-nav-item {
     box-sizing: border-box;
     width: 100% !important;
     text-align: left;
     padding: 6px 10px !important;
+    min-height: 34px;
 
     color: rgba($v-font-color, 0.72) !important;
     font-size: 12px !important;
@@ -525,7 +553,10 @@
     transition: color 120ms ease, background 120ms ease;
   }
 
-  .job-candidate-nav-item:hover {
+  .job-candidate-nav-item:hover,
+  .job-candidate-nav-item:focus,
+  .v-button-job-candidate-nav-item:hover,
+  .v-button-job-candidate-nav-item:focus {
     color: $v-font-color !important;
     background: mix(
       $v-selection-color,
@@ -540,6 +571,17 @@
       $v-panel-background-color,
       12%
     ) !important;
+  }
+
+  .job-candidate-navigation .label-nav-item-active,
+  .job-candidate-navigation .v-button-label-nav-item-active {
+    color: $v-selection-color !important;
+    background: mix(
+      $v-selection-color,
+      $v-panel-background-color,
+      12%
+    ) !important;
+    border-left-color: $v-selection-color !important;
   }
 
   /* ==========================================================

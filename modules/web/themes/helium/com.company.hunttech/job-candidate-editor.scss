@@ -26,15 +26,23 @@
     /* Box model задаётся только контейнерам макета, а не каждому DOM-узлу. */
     .job-candidate-main-layout,
     .job-candidate-sidebar,
+    .edit-sidebar,
+    .label-navigation,
     .job-candidate-profile-header,
     .job-candidate-sidebar-card,
     .job-candidate-workspace,
+    .edit-workspace,
     .job-candidate-top-bar,
+    .edit-toolbar,
     .job-candidate-tabs,
+    .edit-tabs,
     .job-candidate-accordion-section,
+    .edit-accordion-section,
     .job-candidate-accordion-header,
     .job-candidate-accordion-content,
     .job-candidate-card,
+    .edit-card,
+    .edit-form-control,
     .job-candidate-form-grid,
     .job-candidate-form-row,
     .job-candidate-table,
@@ -101,6 +109,7 @@
       #picVBox {
         width: 100% !important;
         min-width: 0;
+        max-width: 100% !important;
       }
 
       .v-upload {
@@ -146,6 +155,14 @@
       background: rgba(255, 255, 255, .10) !important;
       border: 4px solid rgba(255, 255, 255, .96) !important;
       box-shadow: 0 8px 24px rgba(0, 0, 0, .30);
+    }
+
+    .job-candidate-avatar .v-embedded-image,
+    .job-candidate-avatar .v-image-element,
+    .job-candidate-avatar img {
+      display: block !important;
+      object-fit: cover !important;
+      object-position: center center !important;
     }
 
     /* The controller adds h2/h2-red at runtime but must retain this structural class. */
@@ -299,7 +316,41 @@
     }
 
     .job-candidate-navigation {
-      display: none !important;
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, .16);
+    }
+
+    .job-candidate-navigation .label-nav-title {
+      color: rgba(248, 250, 252, .72) !important;
+      padding-left: 8px;
+      padding-right: 8px;
+      letter-spacing: .5px;
+    }
+
+    .job-candidate-navigation .job-candidate-nav-item,
+    .job-candidate-navigation .v-button-job-candidate-nav-item {
+      color: rgba(248, 250, 252, .86) !important;
+      min-height: 36px;
+      margin: 1px 0;
+      border-radius: 0 5px 5px 0 !important;
+    }
+
+    .job-candidate-navigation .job-candidate-nav-item:hover,
+    .job-candidate-navigation .job-candidate-nav-item:focus,
+    .job-candidate-navigation .v-button-job-candidate-nav-item:hover,
+    .job-candidate-navigation .v-button-job-candidate-nav-item:focus {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, .10) !important;
+    }
+
+    .job-candidate-navigation .label-nav-item-active,
+    .job-candidate-navigation .v-button-label-nav-item-active {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, .14) !important;
+      border-left-color: #ffb11b !important;
     }
 
     .job-candidate-profile-footer {
@@ -424,6 +475,7 @@
 
     /* Видимый accordion-слой */
     .job-candidate-accordion-section,
+    .edit-accordion-section,
     .job-candidate-accordion-content,
     .job-candidate-card-row {
       width: 100% !important;

@@ -248,7 +248,7 @@ layout stylename="job-candidate-editor"
 │   │   ├── vbox id="candidateProfileHeader" — круглое фото 176×176, ФИО, должность
 │   │   ├── vbox id="candidateProfileSummary" — рейтинг, город, компания, резюме
 │   │   ├── vbox id="candidateProfileContacts" — email, телефон, Telegram (linkButtons + labels)
-│   │   ├── vbox id="candidateNavigation" — 8 кнопок вертикальной навигации по вкладкам
+│   │   ├── vbox id="candidateNavigation" — `label-navigation` по вкладкам с active-state
 │   │   ├── vbox id="candidateProfileFooter" — кнопка HR-Мастер
 │   │   └── hidden placeholders: skillBox, suggestVacancyTable, lastProjects, ...
 │   └── vbox id="jobCandidateWorkspace" (job-candidate-workspace)
@@ -318,7 +318,7 @@ layout stylename="job-candidate-editor"
 #### Стили и состояние блокировки
 
 `updateFullNameStyle(boolean blocked)` всегда восстанавливает структурный класс
-`job-candidate-profile-name`, затем добавляет `h2` или `h2-red`. Это необходимо, потому что
+`job-candidate-profile-name edit-sidebar-title`, затем добавляет `h2` или `h2-red`. Это необходимо, потому что
 `Component.setStyleName()` в CUBA заменяет весь набор классов. Потеря структурного класса
 лишала ФИО размеров, цвета, переноса и позиционирования профильного блока.
 
@@ -446,6 +446,22 @@ jobCandidateSidebar (260 px) | jobCandidateWorkspace (flex)
 | `job-candidate-table`, `-table-card`, `-table-comments`, `-position-column` | Единый стиль таблиц |
 | `job-candidate-sidebar-section`, `-quick-actions`, `-quick-action`, `-info-grid` | Legacy-стили |
 
+### Общие stylename Edit-контракта
+
+Экран сохраняет локальный namespace `job-candidate-editor`, но типовые роли размечены
+общими stylename из `HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md`:
+
+| Stylename | Где используется |
+|-----------|------------------|
+| `edit-screen-layout` | root layout и двухпанельный `jobCandidateMainLayout` |
+| `edit-sidebar`, `edit-sidebar-visual`, `edit-sidebar-identity`, `edit-sidebar-title`, `edit-sidebar-subtitle`, `edit-sidebar-summary`, `edit-sidebar-spacer` | левая панель и профиль кандидата |
+| `label-navigation`, `label-nav-title`, `label-nav-item`, `label-nav-item-active` | `candidateNavigation` и кнопки переключения вкладок |
+| `edit-workspace`, `edit-toolbar`, `edit-toolbar-description`, `edit-toolbar-actions`, `edit-tabs` | правая рабочая область, верхняя панель и вкладки |
+| `edit-card`, `edit-card-title`, `edit-accordion-section`, `edit-form-control`, `edit-footer-actions` | карточки, секции, поля ввода и нижние действия |
+
+`JobCandidateEdit.java` меняет только presentation-класс `label-nav-item-active` при
+смене вкладки. Данные, loaders, validation и save lifecycle остаются прежними.
+
 ### Поддерживаемые темы
 
 - Halo
@@ -474,7 +490,6 @@ git checkout e246a7bc -- modules/web/themes/*/com.company.hunttech/job-candidate
 ### Известные ограничения
 
 - `tabPositions` остаётся `visible="false"` — требует раскомментирования Java-кода
-- Вертикальная навигация на текущий момент не подсвечивает активную вкладку (выполняется только переключение, без обратной связи CSS)
 - bodyRowHeight таблиц изменён на 36px (компактный режим)
 
 ---
@@ -483,6 +498,7 @@ git checkout e246a7bc -- modules/web/themes/*/com.company.hunttech/job-candidate
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-29 | `JobCandidateEdit` приведён к общему контракту Edit-форм: добавлены `edit-*`/`label-*` stylename, показана sidebar-навигация, синхронизирован `label-nav-item-active`, сохранён `edit-sidebar-title` при runtime-блокировке кандидата и усилена защита sidebar от переполнения. |
 | 2026-07-21 | Исправлен процент заполнения: 15 активных input properties, расчёт по `jobCandidateDc` без создания lazy-вкладок и запросов; добавлены null/detached тесты. |
 | 2026-07-21 | Поля Имя/Отчество/Фамилия выровнены единым hbox-контрактом; ФИО центрировано и синхронизировано с типографикой рейтинга; sidebar labels уменьшены на один пункт. |
 | 2026-07-21 | `candidatePic` заменён на data-bound `OvaFallbackImage` размером 176×176 с fallback `icons/no-programmer.jpeg`; ручное переключение двух `Image` удалено. |

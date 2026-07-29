@@ -165,7 +165,7 @@
 
     <dialogMode height="750" width="1200"/>
 
-    <layout stylename="job-candidate-editor"
+    <layout stylename="job-candidate-editor edit-screen-layout"
             expand="jobCandidateMainLayout"
             spacing="false"
             width="100%"
@@ -176,7 +176,7 @@
               height="100%"
               spacing="false"
               expand="jobCandidateWorkspace"
-              stylename="job-candidate-main-layout">
+              stylename="job-candidate-main-layout edit-screen-layout">
 
             <!-- ===== SIDEBAR ===== -->
             <vbox id="jobCandidateSidebar"
@@ -184,14 +184,14 @@
                   height="100%"
                   spacing="true"
                   expand="candidateSidebarSpacer"
-                  stylename="job-candidate-sidebar">
+                  stylename="job-candidate-sidebar edit-sidebar">
 
                 <!-- Profile Header: photo + name + position -->
                 <vbox id="candidateProfileHeader"
                       width="100%"
                       spacing="true"
                       align="TOP_CENTER"
-                      stylename="job-candidate-profile-header">
+                      stylename="job-candidate-profile-header edit-sidebar-visual">
                     <vbox id="dropZone"
                           spacing="true"
                           align="TOP_CENTER">
@@ -233,14 +233,14 @@
                                 showClearButton="true"
                                 property="fileImageFace"/>
                     </vbox>
-                    <vbox width="100%" spacing="false">
+                    <vbox width="100%" spacing="false" stylename="edit-sidebar-identity">
                         <label id="fullNameField"
                                width="100%"
-                               stylename="job-candidate-profile-name"
+                               stylename="job-candidate-profile-name edit-sidebar-title"
                                align="MIDDLE_CENTER"/>
                         <label id="personPositionLabel"
                                width="100%"
-                               stylename="job-candidate-profile-position"
+                               stylename="job-candidate-profile-position edit-sidebar-subtitle"
                                align="MIDDLE_CENTER"/>
                     </vbox>
                 </vbox>
@@ -249,7 +249,7 @@
                 <vbox id="candidateProfileSummary"
                       width="100%"
                       spacing="true"
-                      stylename="job-candidate-profile-summary job-candidate-sidebar-card">
+                      stylename="job-candidate-profile-summary job-candidate-sidebar-card edit-sidebar-summary">
                     <vbox id="statusRatingRow"
                           width="100%"
                           spacing="false"
@@ -320,7 +320,7 @@
                 <vbox id="candidateProfileContacts"
                       width="100%"
                       spacing="true"
-                      stylename="job-candidate-profile-contacts job-candidate-sidebar-card">
+                      stylename="job-candidate-profile-contacts job-candidate-sidebar-card edit-sidebar-summary">
                     <grid spacing="true" width="100%">
                         <columns count="2"/>
                         <rows>
@@ -365,48 +365,51 @@
                 <vbox id="candidateNavigation"
                       width="100%"
                       spacing="false"
-                      stylename="job-candidate-navigation">
+                      stylename="job-candidate-navigation label-navigation">
+                    <label value="Разделы формы"
+                           width="100%"
+                           stylename="label-nav-title"/>
                     <button id="candidateNavMain" invoke="candidateNavMain"
                             caption="Основное"
                             width="100%"
-                            stylename="job-candidate-nav-item"/>
+                            stylename="borderless job-candidate-nav-item label-nav-item label-nav-item-active"/>
                     <button id="candidateNavPositions" invoke="candidateNavPositions"
                             caption="Позиции и вакансии"
                             width="100%"
-                            stylename="job-candidate-nav-item"/>
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
                     <button id="candidateNavIteraction" invoke="candidateNavIteraction"
                             caption="Взаимодействия"
                             width="100%"
-                            stylename="job-candidate-nav-item"/>
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
                     <button id="candidateNavResume" invoke="candidateNavResume"
                             caption="Резюме и файлы"
                             width="100%"
-                            stylename="job-candidate-nav-item"/>
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
                     <button id="candidateNavContactInfo" invoke="candidateNavContactInfo"
                             caption="Контакты"
                             width="100%"
-                            stylename="job-candidate-nav-item"/>
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
                     <button id="candidateNavComments" invoke="candidateNavComments"
                             caption="Комментарии"
                             width="100%"
-                            stylename="job-candidate-nav-item"/>
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
                     <button id="candidateNavHistory" invoke="candidateNavHistory"
                             caption="История"
                             width="100%"
-                            stylename="job-candidate-nav-item"/>
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
                 </vbox>
 
                 <!-- Свободное пространство прижимает HR-Мастер к нижней границе sidebar. -->
                 <vbox id="candidateSidebarSpacer"
                       width="100%"
                       height="100%"
-                      stylename="job-candidate-sidebar-spacer"/>
+                      stylename="job-candidate-sidebar-spacer edit-sidebar-spacer"/>
 
                 <!-- Quick Actions -->
                 <vbox id="candidateProfileFooter"
                       width="100%"
                       spacing="true"
-                      stylename="job-candidate-profile-footer">
+                      stylename="job-candidate-profile-footer edit-sidebar-summary">
                     <button id="createCandidateCvButton"
                             caption="Создать резюме"
                             invoke="createCandidateCv"
@@ -477,7 +480,7 @@
                   height="100%"
                   spacing="false"
                   expand="tabSheetSocialNetworks"
-                  stylename="job-candidate-workspace">
+                  stylename="job-candidate-workspace edit-workspace">
 
                 <!-- Верхняя панель: служебная информация слева, меню «Еще» справа. -->
                 <hbox id="jobCandidateTopBar"
@@ -485,13 +488,13 @@
                       spacing="true"
                       expand="jobCandidateAuditBox"
                       align="MIDDLE_LEFT"
-                      stylename="job-candidate-top-bar">
+                      stylename="job-candidate-top-bar edit-toolbar">
                     <hbox id="jobCandidateAuditBox"
                           width="100%"
                           spacing="true"
                           expand="createdUpdatedLabel"
                           align="MIDDLE_LEFT"
-                          stylename="job-candidate-audit-box">
+                          stylename="job-candidate-audit-box edit-toolbar-description">
                         <label id="createdUpdatedLabel"
                                width="100%"
                                align="MIDDLE_LEFT"
@@ -500,7 +503,7 @@
                     <popupButton id="moreActionsPopUpButton"
                                  caption="Еще"
                                  align="MIDDLE_RIGHT"
-                                 stylename="job-candidate-more-actions">
+                                 stylename="job-candidate-more-actions edit-toolbar-actions">
                         <popup>
                             <vbox spacing="true">
                                 <button id="blockCandidateButton"
@@ -520,7 +523,7 @@
 
                 <!-- TabSheet -->
                 <tabSheet id="tabSheetSocialNetworks"
-                          stylename="framed job-candidate-tabs"
+                          stylename="framed job-candidate-tabs edit-tabs"
                           width="100%"
                           height="100%">
 
@@ -532,7 +535,7 @@
                         <vbox id="jobCandidateMainSection"
                               width="100%"
                               spacing="true"
-                              stylename="job-candidate-accordion-section job-candidate-accordion-open">
+                              stylename="job-candidate-accordion-section job-candidate-accordion-open edit-accordion-section">
 
                             <hbox id="jobCandidateMainSectionHeader"
                                   width="100%"
@@ -551,9 +554,9 @@
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
-                                      stylename="job-candidate-card job-candidate-half-card">
+                                      stylename="job-candidate-card job-candidate-half-card edit-card">
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
-                                        <label value="Персональные данные" stylename="job-candidate-card-title"/>
+                                        <label value="Персональные данные" stylename="job-candidate-card-title edit-card-title"/>
                                     </hbox>
                                     <grid id="personalDataGrid"
                                           spacing="true"
@@ -575,6 +578,7 @@
                                                                      dataContainer="jobCandidateDc"
                                                                      property="firstName"
                                                                      width="100%"
+                                                                     stylename="edit-form-control"
                                                                      minSearchStringLength="1"
                                                                      editable="true"
                                                                      inputPrompt="msg://msgPressEnter">
@@ -601,6 +605,7 @@
                                                                      box.expandRatio="4"
                                                                      property="middleName"
                                                                      width="100%"
+                                                                     stylename="edit-form-control"
                                                                      minSearchStringLength="1"
                                                                      editable="true"
                                                                      inputPrompt="msg://msgPressEnter">
@@ -625,6 +630,7 @@
                                                                      box.expandRatio="4"
                                                                      property="secondName"
                                                                      width="100%"
+                                                                     stylename="edit-form-control"
                                                                      minSearchStringLength="1"
                                                                      editable="true"
                                                                      inputPrompt="msg://msgPressEnter">
@@ -645,6 +651,7 @@
                                                                box.expandRatio="4"
                                                                dataContainer="jobCandidateDc"
                                                                property="birdhDate"
+                                                               stylename="edit-form-control"
                                                                width="AUTO"/>
                                                 </hbox>
                                             </row>
@@ -655,6 +662,7 @@
                                                                        box.expandRatio="4"
                                                                        dataContainer="jobCandidateDc"
                                                                        width="100%"
+                                                                       stylename="edit-form-control"
                                                                        optionsContainer="citiesDc"
                                                                        property="cityOfResidence"
                                                                        required="true">
@@ -672,9 +680,9 @@
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
-                                      stylename="job-candidate-card job-candidate-half-card">
+                                      stylename="job-candidate-card job-candidate-half-card edit-card">
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
-                                        <label value="Профессиональные данные" stylename="job-candidate-card-title"/>
+                                        <label value="Профессиональные данные" stylename="job-candidate-card-title edit-card-title"/>
                                     </hbox>
                                     <grid id="professionalDataGrid"
                                           spacing="true"
@@ -691,6 +699,7 @@
                                                                        dataContainer="jobCandidateDc"
                                                                        property="personPosition"
                                                                        width="100%"
+                                                                       stylename="edit-form-control"
                                                                        required="true">
                                                         <actions>
                                                             <action id="lookup" type="picker_lookup"/>
@@ -707,6 +716,7 @@
                                                                            dataContainer="jobCandidateDc"
                                                                            property="currentCompany"
                                                                            width="100%"
+                                                                           stylename="edit-form-control"
                                                                            minSearchStringLength="2"
                                                                            suggestionsLimit="50"
                                                                            asyncSearchDelayMs="300"
@@ -763,7 +773,7 @@
                                    width="100%"
                                    height="100%"
                                    spacing="true">
-                            <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section">
+                            <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section edit-accordion-section">
                                 <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                     <label value="Контакты" stylename="job-candidate-accordion-title"/>
                                 </hbox>
@@ -775,10 +785,10 @@
                                               width="100%" height="AUTO"
                                               spacing="true"
                                               box.expandRatio="1"
-                                              stylename="job-candidate-card job-candidate-half-card job-candidate-contact-card">
+                                              stylename="job-candidate-card job-candidate-half-card job-candidate-contact-card edit-card">
                                             <hbox width="100%" align="MIDDLE_LEFT"
                                                   stylename="job-candidate-card-heading">
-                                                <label value="Основные контакты" stylename="job-candidate-card-title"/>
+                                                <label value="Основные контакты" stylename="job-candidate-card-title edit-card-title"/>
                                             </hbox>
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="emailField"
                                                   stylename="job-candidate-form-row">
@@ -786,6 +796,7 @@
                                                 <textField id="emailField"
                                                            dataContainer="jobCandidateDc"
                                                            property="email"
+                                                           stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox>
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="phoneField"
@@ -794,6 +805,7 @@
                                                 <textField id="phoneField"
                                                            dataContainer="jobCandidateDc"
                                                            property="phone"
+                                                           stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox>
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
@@ -802,6 +814,7 @@
                                                 <textField id="mobilePhoneField"
                                                            dataContainer="jobCandidateDc"
                                                            property="mobilePhone"
+                                                           stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox>
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
@@ -810,6 +823,7 @@
                                                 <textField id="telegramNameField"
                                                            dataContainer="jobCandidateDc"
                                                            property="telegramName"
+                                                           stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox>
                                         </vbox>
@@ -818,11 +832,11 @@
                                               width="100%" height="AUTO"
                                               spacing="true"
                                               box.expandRatio="1"
-                                              stylename="job-candidate-card job-candidate-half-card job-candidate-contact-card">
+                                              stylename="job-candidate-card job-candidate-half-card job-candidate-contact-card edit-card">
                                             <hbox width="100%" align="MIDDLE_LEFT"
                                                   stylename="job-candidate-card-heading">
                                                 <label value="Дополнительные контакты"
-                                                       stylename="job-candidate-card-title"/>
+                                                       stylename="job-candidate-card-title edit-card-title"/>
                                             </hbox>
                                             <!--
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
@@ -833,6 +847,7 @@
                                                            visible="false"
                                                            dataContainer="jobCandidateDc"
                                                            property="telegramGroup"
+                                                           stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox> -->
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
@@ -841,6 +856,7 @@
                                                 <textField id="whatsupNameField"
                                                            dataContainer="jobCandidateDc"
                                                            property="whatsupName"
+                                                           stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox>
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
@@ -849,6 +865,7 @@
                                                 <textField id="wiberNameField"
                                                            dataContainer="jobCandidateDc"
                                                            property="wiberName"
+                                                           stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox>
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
@@ -857,6 +874,7 @@
                                                 <textField id="skypeNameField"
                                                            dataContainer="jobCandidateDc"
                                                            property="skypeName"
+                                                           stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox>
 
@@ -872,6 +890,7 @@
                                 <radioButtonGroup id="priorityCommunicationMethodRadioButton"
                                                   orientation="horizontal"
                                                   width="100%"
+                                                  stylename="edit-form-control"
                                                   dataContainer="jobCandidateDc"
                                                   property="priorityContact"/>
                             </hbox>
@@ -881,7 +900,7 @@
                                   height="560px"
                                   spacing="true"
                                   expand="contactSocialNetworksContent"
-                                  stylename="job-candidate-accordion-section">
+                                  stylename="job-candidate-accordion-section edit-accordion-section">
                                 <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                     <label value="Социальные сети" stylename="job-candidate-accordion-title"/>
                                 </hbox>
@@ -953,7 +972,7 @@
                               height="100%"
                               spacing="true"
                               expand="tabPositionsContent"
-                              stylename="job-candidate-accordion-section">
+                              stylename="job-candidate-accordion-section edit-accordion-section">
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Позиции и вакансии" stylename="job-candidate-accordion-title"/>
                             </hbox>
@@ -974,7 +993,7 @@
                                           width="100%" height="100%"
                                           spacing="true"
                                           box.expandRatio="1"
-                                          stylename="job-candidate-card job-candidate-position-column">
+                                          stylename="job-candidate-card job-candidate-position-column edit-card">
                                         <table id="lastProjectTable"
                                                width="100%"
                                                height="100%"
@@ -1007,7 +1026,7 @@
                                           width="100%" height="100%"
                                           spacing="true"
                                           box.expandRatio="1"
-                                          stylename="job-candidate-card job-candidate-position-column">
+                                          stylename="job-candidate-card job-candidate-position-column edit-card">
                                         <table id="suggestVacancyTable"
                                                contextMenuEnabled="false"
                                                width="100%"
@@ -1040,7 +1059,7 @@
                               height="100%"
                               spacing="true"
                               expand="tabIteractionContent"
-                              stylename="job-candidate-accordion-section">
+                              stylename="job-candidate-accordion-section edit-accordion-section">
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Взаимодействия" stylename="job-candidate-accordion-title"/>
                             </hbox>
@@ -1053,7 +1072,8 @@
 
                                 <lookupPickerField id="vacancyFilterLookupPickerField"
                                                    caption="msg://msgVacancyFiler"
-                                                   visible="true" width="AUTO">
+                                                   visible="true" width="AUTO"
+                                                   stylename="edit-form-control">
                                     <actions>
                                         <action id="lookup" type="picker_lookup"/>
                                         <action id="open" type="picker_open" icon="EDIT_ACTION"/>
@@ -1134,7 +1154,7 @@
                               height="100%"
                               spacing="true"
                               expand="tabResumeContent"
-                              stylename="job-candidate-accordion-section">
+                              stylename="job-candidate-accordion-section edit-accordion-section">
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Резюме и файлы" stylename="job-candidate-accordion-title"/>
                             </hbox>
@@ -1223,7 +1243,7 @@
                               height="100%"
                               spacing="true"
                               expand="tabCommentsContent"
-                              stylename="job-candidate-accordion-section">
+                              stylename="job-candidate-accordion-section edit-accordion-section">
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Комментарии" stylename="job-candidate-accordion-title"/>
                             </hbox>
@@ -1257,11 +1277,11 @@
                                         </columns>
                                     </dataGrid>
                                     <groupBox stylename="well" spacing="true" width="100%">
-                                        <textField id="chatMessageTextField" stylename="large" width="100%"/>
+                                        <textField id="chatMessageTextField" stylename="large edit-form-control" width="100%"/>
                                         <hbox width="100%" expand="vacancyPopupPickerField" spacing="true">
                                             <lookupPickerField id="vacancyPopupPickerField"
                                                                align="MIDDLE_LEFT"
-                                                               stylename="large"
+                                                               stylename="large edit-form-control"
                                                                optionsContainer="openPositionDc"
                                                                width="100%"/>
                                             <button id="sendCommentButton"
@@ -1285,14 +1305,14 @@
                          caption="История"
                          spacing="true"
                          margin="true">
-                        <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section">
+                        <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section edit-accordion-section">
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="История" stylename="job-candidate-accordion-title"/>
                             </hbox>
                             <vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
 
                                 <groupBox caption="Данные записи"
-                                          stylename="light job-candidate-card"
+                                          stylename="light job-candidate-card edit-card"
                                           spacing="true" width="100%">
                                     <grid spacing="true" width="100%">
                                         <columns count="2"/>
@@ -1326,7 +1346,7 @@
                           width="AUTO"
                           spacing="true"
                           align="MIDDLE_RIGHT"
-                          stylename="job-candidate-bottom-bar">
+                          stylename="job-candidate-bottom-bar edit-footer-actions">
                         <button id="windowCommitAndCloseButton"
                                 action="windowCommitAndClose"
                                 caption="Сохранить и закрыть"
