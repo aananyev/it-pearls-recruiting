@@ -23,6 +23,8 @@ public class DatabaseSchemaReconciliationChangelogTest {
             "modules/core/db/changelog/260727-1-reconcileProductionSchema.xml";
     private static final String PROFILE_COMPLETION_CHANGELOG =
             "modules/core/db/changelog/260727-2-completeUserAiProfileColumns.xml";
+    private static final String ACCOUNTING_BOT_CHANGELOG =
+            "modules/core/db/changelog/260729-1-addAccountingBotEntities.xml";
     private static final String CHANGELOG_MASTER =
             "modules/core/db/changelog/db.changelog-master.xml";
     private static final String CUBA_UPDATE_SQL =
@@ -38,12 +40,14 @@ public class DatabaseSchemaReconciliationChangelogTest {
     public void masterUsesOrderedReconciliationChangelogChain() throws IOException {
         String master = readProjectFile(CHANGELOG_MASTER);
 
-        // Старые AI-файлы не возвращаются в активную цепочку; follow-up идёт после основной сверки.
-        assertEquals(2, countOccurrences(master, "<include file="));
+        // Старые AI-файлы не возвращаются в активную цепочку; новые additive-файлы идут после сверки.
+        assertEquals(3, countOccurrences(master, "<include file="));
         int reconciliationIndex = master.indexOf("260727-1-reconcileProductionSchema.xml");
         int completionIndex = master.indexOf("260727-2-completeUserAiProfileColumns.xml");
+        int accountingBotIndex = master.indexOf("260729-1-addAccountingBotEntities.xml");
         assertTrue(reconciliationIndex >= 0);
         assertTrue(completionIndex > reconciliationIndex);
+        assertTrue(accountingBotIndex > completionIndex);
     }
 
     @Test
@@ -129,6 +133,7 @@ public class DatabaseSchemaReconciliationChangelogTest {
     public void reconciliationContainsNoDestructiveStatements() throws IOException {
         String migrations = (readProjectFile(CHANGELOG)
                 + readProjectFile(PROFILE_COMPLETION_CHANGELOG)
+                + readProjectFile(ACCOUNTING_BOT_CHANGELOG)
                 + readProjectFile(CUBA_UPDATE_SQL)).toLowerCase(Locale.ROOT);
 
         // Допустимы additive DDL, rename и точечное заполнение обязательных значений.

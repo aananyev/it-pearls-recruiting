@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!--
+        Создает только новые таблицы бухгалтерского Telegram-бота.
+        Существующие справочники HRM HuntTech используются по ссылкам и не изменяются.
+    -->
+    <preConditions onFail="HALT" onError="HALT">
+        <dbms type="postgresql"/>
+        <tableExists tableName="HUNTTECH_COMPANY"/>
+        <tableExists tableName="HUNTTECH_CURRENCY"/>
+        <tableExists tableName="SEC_USER"/>
+        <tableExists tableName="HUNTTECH_LABOR_AGREEMENT"/>
+    </preConditions>
+
+    <changeSet id="260729-1-createAccountingBotTables" author="hunttech">
+        <sql splitStatements="true" stripComments="true">
+            CREATE TABLE IF NOT EXISTS HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY (
+                ID uuid PRIMARY KEY,
+                VERSION integer NOT NULL,
+                CREATE_TS timestamp,
+                CREATED_BY varchar(50),
+                UPDATE_TS timestamp,
+                UPDATED_BY varchar(50),
+                DELETE_TS timestamp,
+                DELETED_BY varchar(50),
+                CODE varchar(64) NOT NULL,
+                NAME_RU varchar(128) NOT NULL,
+                ACTIVE boolean DEFAULT true,
+                SORT_ORDER integer,
+                MATCH_KEYWORDS text,
+                COMMENT_ text
+            );
+
+            CREATE TABLE IF NOT EXISTS HUNTTECH_ACCOUNTING_RECIPIENT (
+                ID uuid PRIMARY KEY,
+                VERSION integer NOT NULL,
+                CREATE_TS timestamp,
+                CREATED_BY varchar(50),
+                UPDATE_TS timestamp,
+                UPDATED_BY varchar(50),
+                DELETE_TS timestamp,
+                DELETED_BY varchar(50),
+                NAME varchar(255) NOT NULL,
+                EMAIL varchar(255) NOT NULL,
+                ACTIVE boolean DEFAULT true,
+                RECIPIENT_ROLE integer NOT NULL,
+                FLOW_TYPE integer NOT NULL,
+                SEND_AS_TO boolean DEFAULT true,
+                SEND_AS_CC boolean DEFAULT false,
+                SEND_AS_BCC boolean DEFAULT false,
+                COMMENT_ text
+            );
+
+            CREATE TABLE IF NOT EXISTS HUNTTECH_ACCOUNTING_COMPANY_ALIAS (
+                ID uuid PRIMARY KEY,
+                VERSION integer NOT NULL,
+                CREATE_TS timestamp,
+                CREATED_BY varchar(50),
+                UPDATE_TS timestamp,
+                UPDATED_BY varchar(50),
+                DELETE_TS timestamp,
+                DELETED_BY varchar(50),
+                COMPANY_ID uuid NOT NULL,
+                ALIAS varchar(255) NOT NULL,
+                INN varchar(16),
+                YANDEX_DISK_FOLDER_PATH varchar(1000),
+                ACTIVE boolean DEFAULT true,
+                COMMENT_ text
+            );
+
+            CREATE TABLE IF NOT EXISTS HUNTTECH_ACCOUNTING_AUTOMATION_SETTINGS (
+                ID uuid PRIMARY KEY,
+                VERSION integer NOT NULL,
+                CREATE_TS timestamp,
+                CREATED_BY varchar(50),
+                UPDATE_TS timestamp,
+                UPDATED_BY varchar(50),
+                DELETE_TS timestamp,
+                DELETED_BY varchar(50),
+                NAME varchar(255) NOT NULL,
+                ACTIVE boolean DEFAULT true,
+                TELEGRAM_BOT_USERNAME varchar(128),
+                CONFIRMATION_TELEGRAM_USER_ID varchar(64),
+                YANDEX_DISK_ROOT_PATH varchar(1000),
+                INCOMING_SCANS_PATH varchar(500),
+                PRIMARY_DOCUMENTS_PATH varchar(500),
+                ADVANCE_REPORTS_PATH varchar(500),
+                PRIMARY_SEND_SCHEDULE varchar(128),
+                ADVANCE_REPORT_SEND_SCHEDULE varchar(128),
+                SENDER_USER_ID uuid,
+                PRIMARY_SUBJECT_PATTERN varchar(255),
+                ADVANCE_REPORT_SUBJECT_PATTERN varchar(255),
+                COMMENT_ text
+            );
+
+            CREATE TABLE IF NOT EXISTS HUNTTECH_ACCOUNTING_EMAIL_BATCH (
+                ID uuid PRIMARY KEY,
+                VERSION integer NOT NULL,
+                CREATE_TS timestamp,
+                CREATED_BY varchar(50),
+                UPDATE_TS timestamp,
+                UPDATED_BY varchar(50),
+                DELETE_TS timestamp,
+                DELETED_BY varchar(50),
+                FLOW_TYPE integer NOT NULL,
+                PERIOD_DATE date,
+                PERIOD_YEAR integer,
+                PERIOD_MONTH integer,
+                STATUS integer NOT NULL,
+                SUBJECT varchar(255) NOT NULL,
+                BODY text,
+                SENDER_USER_ID uuid,
+                SENDER_EMAIL varchar(255),
+                TO_EMAILS text,
+                CC_EMAILS text,
+                BCC_EMAILS text,
+                SENT_AT timestamp,
+                YANDEX_MAIL_MESSAGE_ID varchar(255),
+                ERROR_MESSAGE text
+            );
+
+            CREATE TABLE IF NOT EXISTS HUNTTECH_ACCOUNTING_DOCUMENT (
+                ID uuid PRIMARY KEY,
+                VERSION integer NOT NULL,
+                CREATE_TS timestamp,
+                CREATED_BY varchar(50),
+                UPDATE_TS timestamp,
+                UPDATED_BY varchar(50),
+                DELETE_TS timestamp,
+                DELETED_BY varchar(50),
+                FLOW_TYPE integer NOT NULL,
+                DOCUMENT_TYPE integer NOT NULL,
+                STATUS integer NOT NULL,
+                RECEIVED_AT timestamp NOT NULL,
+                DOCUMENT_DATE date,
+                DOCUMENT_NUMBER varchar(128),
+                COMPANY_ID uuid,
+                RECOGNIZED_COMPANY_NAME varchar(255),
+                RECOGNIZED_INN varchar(16),
+                AMOUNT numeric(19, 2),
+                CURRENCY_ID uuid,
+                EXPENSE_CATEGORY_ID uuid,
+                LABOR_AGREEMENT_ID uuid,
+                ORIGINAL_FILE_NAME varchar(255),
+                FINAL_FILE_NAME varchar(255),
+                YANDEX_DISK_ORIGINAL_PATH varchar(1000),
+                YANDEX_DISK_FINAL_PATH varchar(1000),
+                FILE_HASH varchar(128),
+                FILE_SIZE bigint,
+                MIME_TYPE varchar(128),
+                TELEGRAM_CHAT_ID varchar(64),
+                TELEGRAM_MESSAGE_ID bigint,
+                TELEGRAM_FILE_ID varchar(255),
+                CONFIRMED_BY_TELEGRAM_USER_ID varchar(64),
+                CONFIRMED_AT timestamp,
+                EMAIL_BATCH_ID uuid,
+                SENT_AT timestamp,
+                ERROR_MESSAGE text,
+                COMMENT_ text
+            );
+
+            CREATE TABLE IF NOT EXISTS HUNTTECH_ACCOUNTING_DOCUMENT_EVENT (
+                ID uuid PRIMARY KEY,
+                VERSION integer NOT NULL,
+                CREATE_TS timestamp,
+                CREATED_BY varchar(50),
+                UPDATE_TS timestamp,
+                UPDATED_BY varchar(50),
+                DELETE_TS timestamp,
+                DELETED_BY varchar(50),
+                DOCUMENT_ID uuid NOT NULL,
+                EVENT_AT timestamp NOT NULL,
+                EVENT_TYPE integer NOT NULL,
+                OLD_STATUS integer,
+                NEW_STATUS integer,
+                MESSAGE text,
+                SOURCE varchar(64),
+                TELEGRAM_USER_ID varchar(64)
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="260729-2-addAccountingBotIndexes" author="hunttech">
+        <sql splitStatements="true" stripComments="true">
+            CREATE UNIQUE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_EXPENSE_CATEGORY_CODE
+                ON HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY (CODE);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_RECIPIENT_EMAIL
+                ON HUNTTECH_ACCOUNTING_RECIPIENT (EMAIL);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_RECIPIENT_FLOW
+                ON HUNTTECH_ACCOUNTING_RECIPIENT (FLOW_TYPE);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_COMPANY_ALIAS_COMPANY
+                ON HUNTTECH_ACCOUNTING_COMPANY_ALIAS (COMPANY_ID);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_COMPANY_ALIAS_ALIAS
+                ON HUNTTECH_ACCOUNTING_COMPANY_ALIAS (ALIAS);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_AUTOMATION_ACTIVE
+                ON HUNTTECH_ACCOUNTING_AUTOMATION_SETTINGS (ACTIVE);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_EMAIL_BATCH_FLOW
+                ON HUNTTECH_ACCOUNTING_EMAIL_BATCH (FLOW_TYPE);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_EMAIL_BATCH_STATUS
+                ON HUNTTECH_ACCOUNTING_EMAIL_BATCH (STATUS);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_EMAIL_BATCH_SENDER
+                ON HUNTTECH_ACCOUNTING_EMAIL_BATCH (SENDER_USER_ID);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_DOCUMENT_COMPANY
+                ON HUNTTECH_ACCOUNTING_DOCUMENT (COMPANY_ID);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_DOCUMENT_BATCH
+                ON HUNTTECH_ACCOUNTING_DOCUMENT (EMAIL_BATCH_ID);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_DOCUMENT_STATUS
+                ON HUNTTECH_ACCOUNTING_DOCUMENT (STATUS);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_DOCUMENT_FLOW
+                ON HUNTTECH_ACCOUNTING_DOCUMENT (FLOW_TYPE);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_DOCUMENT_HASH
+                ON HUNTTECH_ACCOUNTING_DOCUMENT (FILE_HASH);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_DOC_EVENT_DOCUMENT
+                ON HUNTTECH_ACCOUNTING_DOCUMENT_EVENT (DOCUMENT_ID);
+            CREATE INDEX IF NOT EXISTS IDX_HUNTTECH_ACC_DOC_EVENT_TYPE
+                ON HUNTTECH_ACCOUNTING_DOCUMENT_EVENT (EVENT_TYPE);
+        </sql>
+    </changeSet>
+
+    <changeSet id="260729-3-addAccountingBotForeignKeys" author="hunttech">
+        <sql splitStatements="false" stripComments="true"><![CDATA[
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+         WHERE lower(conname) = 'fk_hunttech_acc_company_alias_company'
+           AND conrelid = 'hunttech_accounting_company_alias'::regclass
+    ) THEN
+        ALTER TABLE HUNTTECH_ACCOUNTING_COMPANY_ALIAS
+            ADD CONSTRAINT FK_HUNTTECH_ACC_COMPANY_ALIAS_COMPANY
+            FOREIGN KEY (COMPANY_ID) REFERENCES HUNTTECH_COMPANY(ID);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+         WHERE lower(conname) = 'fk_hunttech_acc_auto_sender_user'
+           AND conrelid = 'hunttech_accounting_automation_settings'::regclass
+    ) THEN
+        ALTER TABLE HUNTTECH_ACCOUNTING_AUTOMATION_SETTINGS
+            ADD CONSTRAINT FK_HUNTTECH_ACC_AUTO_SENDER_USER
+            FOREIGN KEY (SENDER_USER_ID) REFERENCES SEC_USER(ID);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+         WHERE lower(conname) = 'fk_hunttech_acc_batch_sender_user'
+           AND conrelid = 'hunttech_accounting_email_batch'::regclass
+    ) THEN
+        ALTER TABLE HUNTTECH_ACCOUNTING_EMAIL_BATCH
+            ADD CONSTRAINT FK_HUNTTECH_ACC_BATCH_SENDER_USER
+            FOREIGN KEY (SENDER_USER_ID) REFERENCES SEC_USER(ID);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+         WHERE lower(conname) = 'fk_hunttech_acc_doc_company'
+           AND conrelid = 'hunttech_accounting_document'::regclass
+    ) THEN
+        ALTER TABLE HUNTTECH_ACCOUNTING_DOCUMENT
+            ADD CONSTRAINT FK_HUNTTECH_ACC_DOC_COMPANY
+            FOREIGN KEY (COMPANY_ID) REFERENCES HUNTTECH_COMPANY(ID);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+         WHERE lower(conname) = 'fk_hunttech_acc_doc_currency'
+           AND conrelid = 'hunttech_accounting_document'::regclass
+    ) THEN
+        ALTER TABLE HUNTTECH_ACCOUNTING_DOCUMENT
+            ADD CONSTRAINT FK_HUNTTECH_ACC_DOC_CURRENCY
+            FOREIGN KEY (CURRENCY_ID) REFERENCES HUNTTECH_CURRENCY(ID);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+         WHERE lower(conname) = 'fk_hunttech_acc_doc_expense'
+           AND conrelid = 'hunttech_accounting_document'::regclass
+    ) THEN
+        ALTER TABLE HUNTTECH_ACCOUNTING_DOCUMENT
+            ADD CONSTRAINT FK_HUNTTECH_ACC_DOC_EXPENSE
+            FOREIGN KEY (EXPENSE_CATEGORY_ID) REFERENCES HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY(ID);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+         WHERE lower(conname) = 'fk_hunttech_acc_doc_agreement'
+           AND conrelid = 'hunttech_accounting_document'::regclass
+    ) THEN
+        ALTER TABLE HUNTTECH_ACCOUNTING_DOCUMENT
+            ADD CONSTRAINT FK_HUNTTECH_ACC_DOC_AGREEMENT
+            FOREIGN KEY (LABOR_AGREEMENT_ID) REFERENCES HUNTTECH_LABOR_AGREEMENT(ID);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+         WHERE lower(conname) = 'fk_hunttech_acc_doc_batch'
+           AND conrelid = 'hunttech_accounting_document'::regclass
+    ) THEN
+        ALTER TABLE HUNTTECH_ACCOUNTING_DOCUMENT
+            ADD CONSTRAINT FK_HUNTTECH_ACC_DOC_BATCH
+            FOREIGN KEY (EMAIL_BATCH_ID) REFERENCES HUNTTECH_ACCOUNTING_EMAIL_BATCH(ID);
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint
+         WHERE lower(conname) = 'fk_hunttech_acc_event_document'
+           AND conrelid = 'hunttech_accounting_document_event'::regclass
+    ) THEN
+        ALTER TABLE HUNTTECH_ACCOUNTING_DOCUMENT_EVENT
+            ADD CONSTRAINT FK_HUNTTECH_ACC_EVENT_DOCUMENT
+            FOREIGN KEY (DOCUMENT_ID) REFERENCES HUNTTECH_ACCOUNTING_DOCUMENT(ID);
+    END IF;
+END
+$$;
+        ]]></sql>
+    </changeSet>
+
+    <changeSet id="260729-4-seedAccountingBotReferences" author="hunttech">
+        <sql splitStatements="true" stripComments="true">
+            INSERT INTO HUNTTECH_CURRENCY (ID, VERSION, CREATE_TS, CREATED_BY, CURRENCY_LONG_NAME, CURRENCY_SHORT_NAME)
+            SELECT '26072900-0000-4000-8000-000000000001'::uuid, 1, now(), 'accounting-bot-migration', 'Российский рубль', 'RUB'
+            WHERE NOT EXISTS (
+                SELECT 1 FROM HUNTTECH_CURRENCY WHERE CURRENCY_SHORT_NAME = 'RUB'
+            );
+
+            INSERT INTO HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY (ID, VERSION, CREATE_TS, CREATED_BY, CODE, NAME_RU, ACTIVE, SORT_ORDER, MATCH_KEYWORDS)
+            SELECT '26072900-0000-4000-8000-000000000101'::uuid, 1, now(), 'accounting-bot-migration', 'FUEL', 'Топливо', true, 10, 'топливо, бензин, дизель, азс'
+            WHERE NOT EXISTS (SELECT 1 FROM HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY WHERE CODE = 'FUEL');
+
+            INSERT INTO HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY (ID, VERSION, CREATE_TS, CREATED_BY, CODE, NAME_RU, ACTIVE, SORT_ORDER, MATCH_KEYWORDS)
+            SELECT '26072900-0000-4000-8000-000000000102'::uuid, 1, now(), 'accounting-bot-migration', 'SERVICES', 'Услуги', true, 20, 'услуга, услуги, сервис'
+            WHERE NOT EXISTS (SELECT 1 FROM HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY WHERE CODE = 'SERVICES');
+
+            INSERT INTO HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY (ID, VERSION, CREATE_TS, CREATED_BY, CODE, NAME_RU, ACTIVE, SORT_ORDER, MATCH_KEYWORDS)
+            SELECT '26072900-0000-4000-8000-000000000103'::uuid, 1, now(), 'accounting-bot-migration', 'TRANSPORT', 'Транспорт', true, 30, 'такси, парковка, проезд, транспорт'
+            WHERE NOT EXISTS (SELECT 1 FROM HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY WHERE CODE = 'TRANSPORT');
+
+            INSERT INTO HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY (ID, VERSION, CREATE_TS, CREATED_BY, CODE, NAME_RU, ACTIVE, SORT_ORDER, MATCH_KEYWORDS)
+            SELECT '26072900-0000-4000-8000-000000000104'::uuid, 1, now(), 'accounting-bot-migration', 'COMMUNICATION', 'Связь и интернет', true, 40, 'связь, интернет, телефон'
+            WHERE NOT EXISTS (SELECT 1 FROM HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY WHERE CODE = 'COMMUNICATION');
+
+            INSERT INTO HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY (ID, VERSION, CREATE_TS, CREATED_BY, CODE, NAME_RU, ACTIVE, SORT_ORDER, MATCH_KEYWORDS)
+            SELECT '26072900-0000-4000-8000-000000000105'::uuid, 1, now(), 'accounting-bot-migration', 'MATERIALS', 'Материалы и товары', true, 50, 'товар, материалы, канцтовары'
+            WHERE NOT EXISTS (SELECT 1 FROM HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY WHERE CODE = 'MATERIALS');
+
+            INSERT INTO HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY (ID, VERSION, CREATE_TS, CREATED_BY, CODE, NAME_RU, ACTIVE, SORT_ORDER, MATCH_KEYWORDS)
+            SELECT '26072900-0000-4000-8000-000000000106'::uuid, 1, now(), 'accounting-bot-migration', 'OTHER', 'Другое', true, 90, 'прочее, другое'
+            WHERE NOT EXISTS (SELECT 1 FROM HUNTTECH_ACCOUNTING_EXPENSE_CATEGORY WHERE CODE = 'OTHER');
+
+            INSERT INTO HUNTTECH_ACCOUNTING_RECIPIENT (ID, VERSION, CREATE_TS, CREATED_BY, NAME, EMAIL, ACTIVE, RECIPIENT_ROLE, FLOW_TYPE, SEND_AS_TO, SEND_AS_CC, SEND_AS_BCC)
+            SELECT '26072900-0000-4000-8000-000000000201'::uuid, 1, now(), 'accounting-bot-migration', 'Ирина Русскова', 'i.russkova@key-success.ru', true, 10, 90, true, false, false
+            WHERE NOT EXISTS (
+                SELECT 1 FROM HUNTTECH_ACCOUNTING_RECIPIENT
+                 WHERE lower(EMAIL) = lower('i.russkova@key-success.ru')
+                   AND FLOW_TYPE = 90
+            );
+        </sql>
+    </changeSet>
+</databaseChangeLog>

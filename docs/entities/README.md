@@ -4,6 +4,7 @@
 
 | Документ | Краткое описание |
 | -------- | ---------------- |
+| [AccountingBotEntities.md](accounting-bot/AccountingBotEntities.md) | Бухгалтерский Telegram-бот — сущности документов, чеков, писем, получателей и аудита |
 | [City.md](city/City.md) | City — город |
 | [Company.md](company/Company.md) | Company — компания |
 | [CompanyDepartament.md](company-departament/CompanyDepartament.md) | CompanyDepartament — департамент компании |
