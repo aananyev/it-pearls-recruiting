@@ -331,6 +331,26 @@
     box-sizing: border-box;
   }
 
+  /* GridLayout wraps each logical row into one slot.  Its inline 20/80 split
+     makes Russian captions collapse on compact workspaces, so keep a stable
+     caption column and give the control the remaining width. */
+  .job-candidate-form-grid .v-gridlayout-slot {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-small {
+    width: 118px !important;
+    min-width: 118px !important;
+    vertical-align: top;
+  }
+
+  .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-edit-form-control {
+    width: calc(100% - 118px) !important;
+    min-width: 0 !important;
+    vertical-align: top;
+  }
+
   /* ==========================================================
      ACCORDION
      ========================================================== */
@@ -615,6 +635,17 @@
 
   .job-candidate-profile-footer .v-button {
     width: 100%;
+  }
+
+  @media (max-width: 1366px) {
+    .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-small {
+      width: 96px !important;
+      min-width: 96px !important;
+    }
+
+    .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-edit-form-control {
+      width: calc(100% - 96px) !important;
+    }
   }
 
   /* ==========================================================
