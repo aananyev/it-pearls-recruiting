@@ -244,27 +244,26 @@ flowchart TD
 |```
 layout stylename="job-candidate-editor"
 ├── hbox id="jobCandidateMainLayout" (job-candidate-main-layout)
-│   ├── vbox id="jobCandidateSidebar" width="260px" (job-candidate-sidebar)
+│   ├── vbox id="jobCandidateSidebar" width="312px" (job-candidate-sidebar)
 │   │   ├── vbox id="candidateProfileHeader" — круглое фото 176×176, ФИО, должность
+│   │   ├── vbox id="candidateNavigation" — `label-navigation` по вкладкам с active-state
 │   │   ├── vbox id="candidateProfileSummary" — рейтинг, город, компания, резюме
 │   │   ├── vbox id="candidateProfileContacts" — email, телефон, Telegram (linkButtons + labels)
-│   │   ├── vbox id="candidateNavigation" — `label-navigation` по вкладкам с active-state
-│   │   ├── vbox id="candidateProfileFooter" — кнопка HR-Мастер
+│   │   ├── vbox id="candidateProfileFooter" — быстрые действия: резюме, взаимодействие, HR-Мастер
 │   │   └── hidden placeholders: skillBox, suggestVacancyTable, lastProjects, ...
 │   └── vbox id="jobCandidateWorkspace" (job-candidate-workspace)
 │       ├── hbox id="jobCandidateTopBar" (job-candidate-top-bar)
-│       │   ├── hbox id="jobCandidateTopBarPrimary" — createdByLabel
-│       │   └── hbox id="jobCandidateTopBarSecondary" — commit&close, Отмена, Еще (popup: блокировка, подписка)
+│       │   ├── hbox id="jobCandidateAuditBox" — createdUpdatedLabel
+│       │   └── popupButton id="moreActionsPopUpButton" — Еще (popup: блокировка, подписка)
 │       ├── tabSheet id="tabSheetSocialNetworks" (framed job-candidate-tabs, lazy)
 │       │   ├── tab tabMain (Основное) — аккордеон, 2 карточки: Персональные/Профессиональные данные
 │       │   ├── tab tabContactInfo (Контакты) — аккордеон, 2 колонки inline-полей
-│       │   ├── tab tabPositions (Позиции и вакансии) — visible="false", двухколоночный layout
+│       │   ├── tab tabPositions (Позиции и вакансии) — аккордеон, две табличные карточки
 │       │   ├── tab tabIteraction (Взаимодействия) — аккордеон, dataGrid
 │       │   ├── tab tabResume (Резюме и файлы) — аккордеон, dataGrid
-│       │   ├── tab tabSocialNetworks (Социальные сети) — аккордеон, dataGrid
 │       │   ├── tab commentsTab (Комментарии) — аккордеон, dataGrid + чат
 │       │   └── tab tabHistory (История) — аккордеон, метаданные записи
-│       └── hidden: fullNameTextField, blockCandidateCheckBox, ...
+│       └── hbox id="jobCandidateBottomBar" — commit&close, Отмена
 ├── dialogMode height="750" width="1200"
 ```
 
@@ -489,7 +488,7 @@ git checkout e246a7bc -- modules/web/themes/*/com.company.hunttech/job-candidate
 
 ### Известные ограничения
 
-- `tabPositions` остаётся `visible="false"` — требует раскомментирования Java-кода
+- таблицы вкладки `tabPositions` имеют много фиксированных колонок; при узкой рабочей области допускается локальная горизонтальная прокрутка внутри таблицы, без прокрутки всей формы
 - bodyRowHeight таблиц изменён на 36px (компактный режим)
 
 ---
@@ -498,6 +497,7 @@ git checkout e246a7bc -- modules/web/themes/*/com.company.hunttech/job-candidate
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-07-29 | Компоновка уточнена по контракту Edit-форм: `candidateNavigation` стоит сразу после профиля, sidebar зафиксирован как 312px, actions сохранения описаны в нижней панели, вкладки и табличные контейнеры защищены от переполнения без изменения loaders/actions/bindings. |
 | 2026-07-29 | `JobCandidateEdit` приведён к общему контракту Edit-форм: добавлены `edit-*`/`label-*` stylename, показана sidebar-навигация, синхронизирован `label-nav-item-active`, сохранён `edit-sidebar-title` при runtime-блокировке кандидата и усилена защита sidebar от переполнения. |
 | 2026-07-21 | Исправлен процент заполнения: 15 активных input properties, расчёт по `jobCandidateDc` без создания lazy-вкладок и запросов; добавлены null/detached тесты. |
 | 2026-07-21 | Поля Имя/Отчество/Фамилия выровнены единым hbox-контрактом; ФИО центрировано и синхронизировано с типографикой рейтинга; sidebar labels уменьшены на один пункт. |

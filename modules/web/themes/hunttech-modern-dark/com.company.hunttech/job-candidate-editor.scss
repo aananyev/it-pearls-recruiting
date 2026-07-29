@@ -380,6 +380,19 @@
     width: 100%;
   }
 
+  .job-candidate-tabs > .v-tabsheet-tabcontainer {
+    padding-left: 12px;
+    padding-right: 12px;
+    overflow: hidden;
+  }
+
+  .job-candidate-tabs .v-caption {
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 14px !important;
+    white-space: nowrap !important;
+  }
+
   /* ==========================================================
      TOP BAR
      ========================================================== */
@@ -543,6 +556,24 @@
   .job-candidate-position-column .job-candidate-table {
     border: none;
     border-radius: 0;
+    min-height: 0 !important;
+    overflow-x: auto;
+  }
+
+  .job-candidate-social-actions {
+    box-sizing: border-box;
+    width: 220px !important;
+    min-width: 220px !important;
+    max-width: 220px !important;
+  }
+
+  .job-candidate-social-actions .v-button {
+    width: 100% !important;
+    min-height: 36px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 13px !important;
+    white-space: normal !important;
   }
 
   /* ==========================================================
