@@ -30,6 +30,12 @@
     background: transparent;
   }
 
+  .v-slot-job-candidate-sidebar {
+    width: 312px !important;
+    min-width: 312px !important;
+    max-width: 312px !important;
+  }
+
   /* ==========================================================
      SIDEBAR
      ========================================================== */
@@ -386,11 +392,21 @@
     overflow: hidden;
   }
 
+  .job-candidate-tabs .v-tabsheet-tabitemcell,
+  .job-candidate-tabs .v-tabsheet-tabitem,
+  .job-candidate-tabs .v-tabsheet-tabitem-selected {
+    max-width: 112px;
+  }
+
   .job-candidate-tabs .v-caption {
-    padding-left: 10px;
-    padding-right: 10px;
-    font-size: 14px !important;
+    box-sizing: border-box;
+    max-width: 112px;
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 13px !important;
     white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* ==========================================================
