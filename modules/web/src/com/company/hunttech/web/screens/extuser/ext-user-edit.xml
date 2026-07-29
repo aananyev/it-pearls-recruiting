@@ -271,90 +271,93 @@
                     <tab id="emailSettingsTab" caption="msg://msgEmailSettings" margin="true" spacing="true" expand="emailScrollBox">
                         <!-- Вертикальная прокрутка удерживает пять полноширинных почтовых секций внутри workspace. -->
                         <scrollBox id="emailScrollBox" width="100%" height="100%" spacing="true">
-                            <!-- Серверные адреса раскрыты по умолчанию как основной почтовый раздел. -->
-                            <groupBox id="propertiesEmailBox" caption="msg://msgMailServers" width="100%" spacing="true" margin="true" collapsable="true" collapsed="false" showAsPanel="true" stylename="edit-accordion-section">
-                                <!-- FieldGroup сохраняет smtpServer/pop3Server/imapServer и исходные IDs. -->
-                                <fieldGroup id="emailFieldGroupLeft" datasource="userDs" width="100%" stylename="edit-form-control">
-                                    <!-- Серверные адреса располагаются вертикально на полной ширине. -->
-                                    <column width="100%">
-                                        <!-- SMTP server сохраняется в userDs.smtpServer. -->
-                                        <field id="smtpServer" caption="SMTP server"/>
-                                        <!-- POP3 server сохраняется в userDs.pop3Server. -->
-                                        <field id="pop3Server" caption="POP3 server"/>
-                                        <!-- IMAP server сохраняется в userDs.imapServer. -->
-                                        <field id="imapServer" caption="IMAP server"/>
-                                    </column>
-                                </fieldGroup>
-                            </groupBox>
-                            <!-- Порты вынесены в отдельную сворачиваемую секцию с прежними validators. -->
-                            <groupBox id="emailPortsBox" caption="msg://msgMailPorts" width="100%" spacing="true" margin="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="edit-accordion-section">
-                                <!-- FieldGroup сохраняет smtpPort/pop3Port/imapPort и исходный datasource. -->
-                                <fieldGroup id="emailFieldGroupRight" datasource="userDs" width="100%" stylename="edit-form-control">
-                                    <!-- Портовые значения располагаются вертикально и проходят IntegerValidator. -->
-                                    <column width="100%">
-                                        <!-- SMTP port должен быть целым числом. -->
-                                        <field id="smtpPort" caption="SMTP port">
-                                            <!-- IntegerValidator предотвращает сохранение нечислового SMTP-порта. -->
-                                            <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
-                                        </field>
-                                        <!-- POP3 port должен быть целым числом. -->
-                                        <field id="pop3Port" caption="POP3 port">
-                                            <!-- IntegerValidator предотвращает сохранение нечислового POP3-порта. -->
-                                            <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
-                                        </field>
-                                        <!-- IMAP port должен быть целым числом. -->
-                                        <field id="imapPort" caption="IMAP port">
-                                            <!-- IntegerValidator предотвращает сохранение нечислового IMAP-порта. -->
-                                            <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
-                                        </field>
-                                    </column>
-                                </fieldGroup>
-                            </groupBox>
-                            <!-- Признаки обязательности пароля сохраняются отдельным accordion без изменения контракта. -->
-                            <groupBox id="emailAuthenticationBox" caption="msg://msgMailAuthentication" width="100%" spacing="true" margin="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="edit-accordion-section">
-                                <!-- FieldGroup сохраняет три boolean bindings обязательности пароля. -->
-                                <fieldGroup id="emailFieldPasswordRequired" datasource="userDs" width="100%">
-                                    <!-- Boolean-поля располагаются вертикально и сохраняют исходный порядок. -->
-                                    <column width="100%">
-                                        <!-- SMTP password required управляет существующим required-state smtpPassword. -->
-                                        <field id="smtpPasswordRequired"/>
-                                        <!-- POP3 password required сохраняет существующий пользовательский флаг. -->
-                                        <field id="pop3PasswordRequired"/>
-                                        <!-- IMAP password required сохраняет существующий пользовательский флаг. -->
-                                        <field id="imapPasswordRequired"/>
-                                    </column>
-                                </fieldGroup>
-                            </groupBox>
-                            <!-- Учётные имена протоколов сгруппированы без изменения контракта. -->
-                            <groupBox id="emailAccountsBox" caption="msg://msgMailAccounts" width="100%" spacing="true" margin="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="edit-accordion-section">
-                                <!-- FieldGroup сохраняет smtpUser/pop3User/imapUser и исходный datasource. -->
-                                <fieldGroup id="emailFieldGroupUser" datasource="userDs" width="100%" stylename="edit-form-control">
-                                    <!-- Имена учётных записей располагаются вертикально на полной ширине. -->
-                                    <column width="100%">
-                                        <!-- SMTP user сохраняется в userDs.smtpUser. -->
-                                        <field id="smtpUser" caption="SMTP user"/>
-                                        <!-- POP3 user сохраняется в userDs.pop3User. -->
-                                        <field id="pop3User" caption="POP3 user"/>
-                                        <!-- IMAP user сохраняется в userDs.imapUser. -->
-                                        <field id="imapUser" caption="IMAP user"/>
-                                    </column>
-                                </fieldGroup>
-                            </groupBox>
-                            <!-- Пароли протоколов сгруппированы в отдельную закрытую по умолчанию секцию. -->
-                            <groupBox id="emailPasswordsBox" caption="msg://msgMailPasswords" width="100%" spacing="true" margin="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="edit-accordion-section">
-                                <!-- FieldGroup сохраняет smtpPassword/pop3Password/imapPassword и required-state. -->
-                                <fieldGroup id="emailFieldGroupPasswords" datasource="userDs" width="100%" stylename="edit-form-control">
-                                    <!-- Password-поля располагаются вертикально на полной ширине. -->
-                                    <column width="100%">
-                                        <!-- SMTP password сохраняется в userDs.smtpPassword. -->
-                                        <field id="smtpPassword" caption="SMTP password"/>
-                                        <!-- POP3 password сохраняется в userDs.pop3Password. -->
-                                        <field id="pop3Password" caption="POP3 password"/>
-                                        <!-- IMAP password сохраняется в userDs.imapPassword. -->
-                                        <field id="imapPassword" caption="IMAP password"/>
-                                    </column>
-                                </fieldGroup>
-                            </groupBox>
+                            <!-- Legacy ID propertiesEmailGrid сохранён как вертикальный визуальный контейнер пяти accordion-секций. -->
+                            <vbox id="propertiesEmailGrid" width="100%" spacing="true">
+                                <!-- Серверные адреса раскрыты по умолчанию как основной почтовый раздел. -->
+                                <groupBox id="propertiesEmailBox" caption="msg://msgMailServers" width="100%" spacing="true" margin="true" collapsable="true" collapsed="false" showAsPanel="true" stylename="edit-accordion-section">
+                                    <!-- FieldGroup сохраняет smtpServer/pop3Server/imapServer и исходные IDs. -->
+                                    <fieldGroup id="emailFieldGroupLeft" datasource="userDs" width="100%" stylename="edit-form-control">
+                                        <!-- Серверные адреса располагаются вертикально на полной ширине. -->
+                                        <column width="100%">
+                                            <!-- SMTP server сохраняется в userDs.smtpServer. -->
+                                            <field id="smtpServer" caption="SMTP server"/>
+                                            <!-- POP3 server сохраняется в userDs.pop3Server. -->
+                                            <field id="pop3Server" caption="POP3 server"/>
+                                            <!-- IMAP server сохраняется в userDs.imapServer. -->
+                                            <field id="imapServer" caption="IMAP server"/>
+                                        </column>
+                                    </fieldGroup>
+                                </groupBox>
+                                <!-- Порты вынесены в отдельную сворачиваемую секцию с прежними validators. -->
+                                <groupBox id="emailPortsBox" caption="msg://msgMailPorts" width="100%" spacing="true" margin="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="edit-accordion-section">
+                                    <!-- FieldGroup сохраняет smtpPort/pop3Port/imapPort и исходный datasource. -->
+                                    <fieldGroup id="emailFieldGroupRight" datasource="userDs" width="100%" stylename="edit-form-control">
+                                        <!-- Портовые значения располагаются вертикально и проходят IntegerValidator. -->
+                                        <column width="100%">
+                                            <!-- SMTP port должен быть целым числом. -->
+                                            <field id="smtpPort" caption="SMTP port">
+                                                <!-- IntegerValidator предотвращает сохранение нечислового SMTP-порта. -->
+                                                <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                            </field>
+                                            <!-- POP3 port должен быть целым числом. -->
+                                            <field id="pop3Port" caption="POP3 port">
+                                                <!-- IntegerValidator предотвращает сохранение нечислового POP3-порта. -->
+                                                <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                            </field>
+                                            <!-- IMAP port должен быть целым числом. -->
+                                            <field id="imapPort" caption="IMAP port">
+                                                <!-- IntegerValidator предотвращает сохранение нечислового IMAP-порта. -->
+                                                <validator class="com.haulmont.cuba.gui.components.validators.IntegerValidator"/>
+                                            </field>
+                                        </column>
+                                    </fieldGroup>
+                                </groupBox>
+                                <!-- Признаки обязательности пароля сохраняются отдельным accordion без изменения контракта. -->
+                                <groupBox id="emailAuthenticationBox" caption="msg://msgMailAuthentication" width="100%" spacing="true" margin="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="edit-accordion-section">
+                                    <!-- FieldGroup сохраняет три boolean bindings обязательности пароля. -->
+                                    <fieldGroup id="emailFieldPasswordRequired" datasource="userDs" width="100%">
+                                        <!-- Boolean-поля располагаются вертикально и сохраняют исходный порядок. -->
+                                        <column width="100%">
+                                            <!-- SMTP password required управляет существующим required-state smtpPassword. -->
+                                            <field id="smtpPasswordRequired"/>
+                                            <!-- POP3 password required сохраняет существующий пользовательский флаг. -->
+                                            <field id="pop3PasswordRequired"/>
+                                            <!-- IMAP password required сохраняет существующий пользовательский флаг. -->
+                                            <field id="imapPasswordRequired"/>
+                                        </column>
+                                    </fieldGroup>
+                                </groupBox>
+                                <!-- Учётные имена протоколов сгруппированы без изменения контракта. -->
+                                <groupBox id="emailAccountsBox" caption="msg://msgMailAccounts" width="100%" spacing="true" margin="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="edit-accordion-section">
+                                    <!-- FieldGroup сохраняет smtpUser/pop3User/imapUser и исходный datasource. -->
+                                    <fieldGroup id="emailFieldGroupUser" datasource="userDs" width="100%" stylename="edit-form-control">
+                                        <!-- Имена учётных записей располагаются вертикально на полной ширине. -->
+                                        <column width="100%">
+                                            <!-- SMTP user сохраняется в userDs.smtpUser. -->
+                                            <field id="smtpUser" caption="SMTP user"/>
+                                            <!-- POP3 user сохраняется в userDs.pop3User. -->
+                                            <field id="pop3User" caption="POP3 user"/>
+                                            <!-- IMAP user сохраняется в userDs.imapUser. -->
+                                            <field id="imapUser" caption="IMAP user"/>
+                                        </column>
+                                    </fieldGroup>
+                                </groupBox>
+                                <!-- Пароли протоколов сгруппированы в отдельную закрытую по умолчанию секцию. -->
+                                <groupBox id="emailPasswordsBox" caption="msg://msgMailPasswords" width="100%" spacing="true" margin="true" collapsable="true" collapsed="true" showAsPanel="true" stylename="edit-accordion-section">
+                                    <!-- FieldGroup сохраняет smtpPassword/pop3Password/imapPassword и required-state. -->
+                                    <fieldGroup id="emailFieldGroupPasswords" datasource="userDs" width="100%" stylename="edit-form-control">
+                                        <!-- Password-поля располагаются вертикально на полной ширине. -->
+                                        <column width="100%">
+                                            <!-- SMTP password сохраняется в userDs.smtpPassword. -->
+                                            <field id="smtpPassword" caption="SMTP password"/>
+                                            <!-- POP3 password сохраняется в userDs.pop3Password. -->
+                                            <field id="pop3Password" caption="POP3 password"/>
+                                            <!-- IMAP password сохраняется в userDs.imapPassword. -->
+                                            <field id="imapPassword" caption="IMAP password"/>
+                                        </column>
+                                    </fieldGroup>
+                                </groupBox>
+                            </vbox>
                         </scrollBox>
                     </tab>
                     <!-- AI-вкладка сохраняет существующую таблицу и CRUD-кнопки внутри общей карточки. -->

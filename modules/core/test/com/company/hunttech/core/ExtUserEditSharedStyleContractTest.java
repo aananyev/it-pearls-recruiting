@@ -110,6 +110,7 @@ public class ExtUserEditSharedStyleContractTest {
                 "id=\"contactsFieldGroup\"",
                 "id=\"rolesTable\"",
                 "id=\"substTable\"",
+                "id=\"propertiesEmailGrid\"",
                 "id=\"emailFieldGroupLeft\"",
                 "id=\"emailFieldGroupRight\"",
                 "id=\"emailFieldPasswordRequired\"",
@@ -141,7 +142,7 @@ public class ExtUserEditSharedStyleContractTest {
         assertAccordion(descriptor, "emailAuthenticationBox", "true");
         assertAccordion(descriptor, "emailAccountsBox", "true");
         assertAccordion(descriptor, "emailPasswordsBox", "true");
-        assertFalse(descriptor.contains("id=\"propertiesEmailGrid\""));
+        assertTrue(descriptor.contains("id=\"propertiesEmailGrid\""));
     }
 
     @Test
