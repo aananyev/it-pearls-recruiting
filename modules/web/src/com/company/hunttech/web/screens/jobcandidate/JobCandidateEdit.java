@@ -195,6 +195,20 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Inject
     private Button blockCandidateButton;
+    @Inject
+    private Button candidateNavMain;
+    @Inject
+    private Button candidateNavPositions;
+    @Inject
+    private Button candidateNavIteraction;
+    @Inject
+    private Button candidateNavResume;
+    @Inject
+    private Button candidateNavContactInfo;
+    @Inject
+    private Button candidateNavComments;
+    @Inject
+    private Button candidateNavHistory;
 //    @Inject
 //    private Label<String> iteractionListLabelCandidate;
     @Inject
@@ -1328,7 +1342,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             initTabContactInfo();
             initTabComments();
             initTabPositions();
+            updateCandidateNavigationActiveState();
         });
+        updateCandidateNavigationActiveState();
 
     }
 
@@ -3328,7 +3344,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
      * class is restored first and the state-specific h2/h2-red class is added separately.
      */
     void updateFullNameStyle(boolean blocked) {
-        fullNameField.setStyleName("job-candidate-profile-name");
+        fullNameField.setStyleName("job-candidate-profile-name edit-sidebar-title");
         fullNameField.addStyleName(blocked ? "h2-red" : "h2");
     }
 
@@ -4304,11 +4320,35 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         TabSheet.Tab tab = tabSheetSocialNetworks.getTab(tabId);
         if (tab != null) {
             tabSheetSocialNetworks.setSelectedTab(tab);
+            updateCandidateNavigationActiveState();
         }
     }
 
-    // Обработчики кнопок боковой навигации.
-    // Каждая кнопка вызывает selectCandidateTab с ID своей вкладки.
+    /**
+     * Keeps the shared label-navigation active state in sync with the selected CUBA tab.
+     * The method only changes presentation classes; tab selection, loaders and validation
+     * remain controlled by the existing screen lifecycle.
+     */
+    private void updateCandidateNavigationActiveState() {
+        TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
+        String selectedTabId = selectedTab == null ? null : selectedTab.getName();
+
+        Map<String, Button> navigationByTabId = new LinkedHashMap<>();
+        navigationByTabId.put("tabMain", candidateNavMain);
+        navigationByTabId.put("tabPositions", candidateNavPositions);
+        navigationByTabId.put("tabIteraction", candidateNavIteraction);
+        navigationByTabId.put("tabResume", candidateNavResume);
+        navigationByTabId.put("tabContactInfo", candidateNavContactInfo);
+        navigationByTabId.put("commentsTab", candidateNavComments);
+        navigationByTabId.put("tabHistory", candidateNavHistory);
+
+        navigationByTabId.forEach((tabId, button) -> {
+            button.removeStyleName("label-nav-item-active");
+            if (Objects.equals(tabId, selectedTabId)) {
+                button.addStyleName("label-nav-item-active");
+            }
+        });
+    }
 
     public void candidateNavMain() {
         selectCandidateTab("tabMain");
