@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/window.xsd"
-        class="com.haulmont.cuba.gui.app.security.user.edit.UserEditor"
+        class="com.company.hunttech.web.screens.extuser.ExtUserEditor"
         caption="msg://extUserEdit.caption"
         messagesPack="com.company.hunttech.web.screens.extuser"
         datasource="userDs"
@@ -260,7 +260,12 @@
             </tabSheet>
         </split>
         <hbox id="bottomActionsBox" width="100%" spacing="true" align="BOTTOM_RIGHT">
-            <button id="changePasswordBtn" caption="msg://msgChangePassword" icon="KEY" stylename="friendly"/>
+            <!-- Штатный диалог CUBA меняет пароль отдельно от сохранения остальных данных пользователя. -->
+            <button id="changePasswordBtn"
+                    caption="msg://msgChangePassword"
+                    icon="KEY"
+                    stylename="friendly"
+                    invoke="changePassword"/>
             <label value="" expand="true"/>
             <fragment id="windowActions" screen="editWindowActions"/>
         </hbox>
