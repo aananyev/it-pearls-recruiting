@@ -6,6 +6,7 @@
 
 | Документ | Краткое описание |
 | --- | --- |
+| [AccountingDocumentsHermesBot.md](AccountingDocumentsHermesBot.md) | Внешний бухгалтерский Telegram-бот, работающий в Hermes и использующий AI API Hermes |
 | [AccountingDocumentsTelegramBot.md](AccountingDocumentsTelegramBot.md) | Telegram-бот бухгалтерской первички и чеков авансового отчета |
 | [AccountingDocumentsTelegramBot_MVP_Plan.md](AccountingDocumentsTelegramBot_MVP_Plan.md) | MVP-план минимально необходимой реализации бухгалтерского Telegram-бота |
 
@@ -21,5 +22,6 @@
 
 | Дата | Изменение |
 | --- | --- |
+| 2026-07-29 | Зафиксирован внешний Hermes-бот для бухгалтерских документов |
 | 2026-07-29 | Добавлен MVP-план бухгалтерского Telegram-бота |
 | 2026-07-29 | Создан раздел документации служебных Telegram-ботов HRM HuntTech |
