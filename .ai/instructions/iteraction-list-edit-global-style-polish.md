@@ -7,7 +7,7 @@ PROJECT: HRM HuntTech
 - Repository: `aananyev/it-pearls-recruiting`
 - Branch: `agent/iteraction-list-edit-visual-fixes`
 - Base: `master`
-- PR: указать номер после создания PR.
+- PR: `#96` — `https://github.com/aananyev/it-pearls-recruiting/pull/96`.
 - Проверять только точный HEAD SHA из PR.
 - Режим: проверка без изменения функционального кода и документации.
 - Несовпадение branch HEAD, PR HEAD или переданного SHA -> `HEAD_MISMATCH`, проверку остановить.
