@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service(InteractionService.NAME)
 public class InteractionServiceBean implements InteractionService {
@@ -46,16 +47,36 @@ public class InteractionServiceBean implements InteractionService {
                 .parameter("endDate", endDate)
                 .list();
 
-        List<Iteraction> retIteraction = new ArrayList<>();
-
-        if (maxCount > list.size())
-            maxCount = list.size();
-
-        for (int i = 0; i < maxCount; i++) {
-            retIteraction.add(list.get(i).getValue("iteractionType"));
+        int resultSize = Math.min(maxCount, list.size());
+        List<UUID> interactionIds = new ArrayList<>(resultSize);
+        for (int i = 0; i < resultSize; i++) {
+            Iteraction interaction = list.get(i).getValue("iteractionType");
+            if (interaction != null) {
+                interactionIds.add(interaction.getId());
+            }
+        }
+        if (interactionIds.isEmpty()) {
+            return Collections.emptyList();
         }
 
-        return retIteraction;
+        // loadValues returns only lightweight entity references. Reloading the
+        // narrow picker view makes the button caption available without
+        // changing the frequency ranking or the exact object selected by UI.
+        Map<UUID, Iteraction> interactionsById = dataManager.load(Iteraction.class)
+                .ids(interactionIds)
+                .view("iteraction-picker-view")
+                .list()
+                .stream()
+                .collect(Collectors.toMap(Iteraction::getId, interaction -> interaction));
+
+        List<Iteraction> result = new ArrayList<>(interactionIds.size());
+        for (UUID interactionId : interactionIds) {
+            Iteraction interaction = interactionsById.get(interactionId);
+            if (interaction != null) {
+                result.add(interaction);
+            }
+        }
+        return result;
     }
 
     private static final String QUERY_LAST_BY_CANDIDATE =

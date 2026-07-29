@@ -304,7 +304,7 @@
     }
 
     .iteraction-list-popular-buttons {
-      min-height: 40px;
+      min-height: 64px;
       table-layout: fixed;
     }
 
@@ -320,8 +320,8 @@
       box-sizing: border-box;
       width: 100% !important;
       min-width: 0 !important;
-      height: 40px !important;
-      padding: 0 10px !important;
+      height: 64px !important;
+      padding: 6px 10px !important;
       color: mix($v-selection-color, $v-font-color, 78%) !important;
       font-size: 13px !important;
       font-weight: 600 !important;
@@ -343,6 +343,7 @@
     .iteraction-list-popular-button .v-button-caption {
       display: block !important;
       width: 100%;
+      max-height: 48px;
       overflow: hidden;
       color: inherit !important;
       line-height: 16px;
@@ -363,7 +364,7 @@
 
     .iteraction-list-popular-button.v-disabled,
     .iteraction-list-popular-button[disabled] {
-      color: mix($v-font-color, $v-panel-background-color, 58%) !important;
+      color: mix($v-font-color, $v-panel-background-color, 82%) !important;
       background: mix($v-app-background-color, $v-panel-background-color, 72%) !important;
       border-color: rgba($v-font-color, 0.16) !important;
       opacity: 1 !important;
