@@ -581,11 +581,16 @@
     }
 
     .iteraction-list-popular-button .v-button-caption {
-      display: block;
+      display: block !important;
+      width: 100%;
       overflow: hidden;
+      color: inherit !important;
       line-height: 16px;
+      text-align: center;
       text-overflow: ellipsis;
       white-space: normal;
+      visibility: visible !important;
+      opacity: 1 !important;
     }
 
     .iteraction-list-footer {

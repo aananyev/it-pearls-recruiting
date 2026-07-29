@@ -117,6 +117,7 @@ public class IteractionListMostPopularInteractionTest {
         assertTrue(scss.contains("height: 40px !important"));
         assertTrue(scss.contains(".iteraction-list-popular-button .v-button-caption"));
         assertTrue(scss.contains("white-space: normal"));
+        assertTrue(scss.contains("visibility: visible !important"));
     }
 
     private String controller() throws IOException {
