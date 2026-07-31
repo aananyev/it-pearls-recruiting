@@ -37,8 +37,8 @@ public class JobCandidateEditLayoutContractTest {
                 "id=\"candidatePic\"",
                 "id=\"fullNameField\"",
                 "id=\"personPositionLabel\"",
-                "id=\"candidateNavigation\"",
                 "id=\"candidateProfileSummary\"",
+                "id=\"candidateNavigation\"",
                 "id=\"candidateProfileContacts\"",
                 "id=\"candidateSidebarSpacer\"",
                 "id=\"candidateProfileFooter\"");
@@ -76,6 +76,35 @@ public class JobCandidateEditLayoutContractTest {
             assertTrue(theme, scss.contains("overflow-x: auto"));
             assertTrue(theme, scss.contains(".job-candidate-social-actions"));
             assertTrue(theme, scss.contains("width: 220px !important"));
+        }
+    }
+
+    @Test
+    public void jobCandidateEditorScssIsIdenticalAcrossAllThemes() throws IOException {
+        String canon = readProjectFile(
+                "modules/web/themes/hover/com.company.hunttech/job-candidate-editor.scss");
+        for (String theme : THEMES) {
+            String scss = readProjectFile(
+                    "modules/web/themes/" + theme + "/com.company.hunttech/job-candidate-editor.scss");
+            assertTrue("job-candidate-editor.scss не идентичен в теме " + theme, canon.equals(scss));
+        }
+    }
+
+    @Test
+    public void everyThemeAppliesJobCandidateThemeOutsideStarMixin() throws IOException {
+        for (String theme : THEMES) {
+            String ext = readProjectFile(
+                    "modules/web/themes/" + theme + "/com.company.hunttech/" + theme + "-ext.scss");
+            String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");
+
+            // Артефакт прошлого рефакторинга: include, застрявший внутри @mixin star
+            // (mixin star нигде не вызывается — стили формы не применялись).
+            assertTrue(!ext.contains("job-candidate-editor-theme;content"));
+
+            // Общий screen-specific mixin применяется ровно один раз — либо в ext,
+            // либо в styles.scss темы (эталон hunttech-modern).
+            assertTrue(theme, ext.contains("job-candidate-editor-theme")
+                    || styles.contains("job-candidate-editor-theme"));
         }
     }
 

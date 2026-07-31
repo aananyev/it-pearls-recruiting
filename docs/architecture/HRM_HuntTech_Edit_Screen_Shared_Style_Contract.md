@@ -113,6 +113,10 @@ label-navigation
 
 Имена `settings-section-navigation`, `user-ai-profile-navigation`, `ai-settings-navigation`, `candidate-cv-navigation`, `iteraction-list-navigation` и аналогичные считаются legacy-stylename. Они не используются в новых формах и подлежат поэкранной миграции отдельными задачами.
 
+**Визуальный эталон label-навигации — форма `IteractionListEdit` (правило от 31.07.2026):** геометрия пунктов и заголовка — только общие классы `label-nav-*` из shared mixin (34px, padding 7×10px, font 13px/600). Фирменный тёмный sidebar дополняется эталонной цветовой адаптацией active/hover из `iteraction-list-visual-alignment.scss`: hover — белый текст на `rgba(255,255,255,.08)`, active — жёлтый `#ffb11b` на `rgba(255,177,27,.12)` с жёлтой левой границей. Локальные правила других форм обязаны повторять этот эталон 1:1 (те же цвета и геометрия); иные переопределения цвета/геометрии/active-state запрещены и фиксируются в UI-спецификации экрана как отклонение.
+
+**Точное вертикальное центрирование маркера (правило от 31.07.2026):** маркер активного пункта — это `border-left` кнопки `label-nav-item`, растянутый на всю её высоту. Для гарантированного совпадения центра текста с центром маркера `.v-button-label-nav-item .v-button-wrap` в shared mixin использует `display: flex; align-items: center` БЕЗ `min-height`/фиксированной высоты (высота wrap = высоте текста, центрирование по content-box кнопки при симметричном вертикальном padding). Локальные wrap-правила с принудительной высотой (`min-height: 22px` и т.п.) запрещены — они сдвигают текст относительно маркера.
+
 ### 3.2. Утверждённый набор классов
 
 | Stylename | Назначение | Обязательный контракт |
@@ -588,6 +592,9 @@ Hermes подтверждает:
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-31 | Высота пунктов label-навигации уменьшена на 30% (правило): min-height 38px → 27px, вертикальный padding 8px → 3px у эталона и JobCandidateEdit; shared: 34px → 24px, padding 7px → 3px. Центрирование маркера flex'ом сохранено. |
+| 2026-07-31 | Утверждено точное вертикальное центрирование маркера label-навигации: `.v-button-label-nav-item .v-button-wrap` — `display: flex; align-items: center` без min-height (раздел 3.1). Из ExtSettingsWindow убран `min-height: 22px` wrap (сдвигал текст относительно маркера). |
+| 2026-07-31 | Утверждён визуальный эталон label-навигации — форма `IteractionListEdit` (раздел 3.1): пункты рендерятся только shared `label-nav-*`, локальные переопределения цвета/геометрии/active-state в screen-specific SCSS запрещены. У JobCandidateEdit локальные nav-правила удалены, навигация приведена к эталону. |
 | 2026-07-29 | Зафиксированы все regression-уроки IteractionListEdit: порядок sidebar, одинаковые `OvalFallbackImage 96 × 96`, заполнение fallback, `50/50` GridLayout, caption-zone, типографика Suggestion/Lookup picker, provider-пиктограммы, checkbox, составной DateField и запрет наложения result/comment |
 | 2026-07-28 | Контракт `edit-form-control` дополнен одинаковой типографикой Suggestion/Lookup picker-полей, областью `20 × 20px` и резервом `40px` для provider-пиктограмм, а также правилом совместного выравнивания checkbox и label |
 | 2026-07-28 | Добавлены обязательный preflight для нейросети, полный каркас новой Edit-формы, правила sidebar, типовых элементов, состояний и безопасного поэкранного рефакторинга; SCSS-архитектура синхронизирована с фактическими семью theme-local partial |

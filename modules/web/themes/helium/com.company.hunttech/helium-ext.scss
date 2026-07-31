@@ -280,8 +280,7 @@
     box-shadow: 0 0 0 3px green, 0 0 13px #333; /* Параметры теней */
 }
 
-@mixin star{
-    @include job-candidate-editor-theme;content: '&#x2605';}
+@mixin star{content: '&#x2605';}
 @mixin star_fill{content: '&#x2606';}
 
 .rating_star_1 {
@@ -522,6 +521,7 @@ rating_battery_yellow_3:before {
 }
 
 @mixin com_company_hunttech-helium-ext {
+    @include job-candidate-editor-theme;
 
 .rating_box {
         font_size: x-large;

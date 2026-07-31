@@ -115,8 +115,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private Notifications notifications;
     @Inject
-    private Label<String> createdUpdatedLabel;
-    @Inject
     private LinkButton telegrammGroupLinkButton;
     @Inject
     private Label<String> candidateRatingLabel;
@@ -569,36 +567,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    private void setCreatedUpdatedLabel() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        StringBuilder sb = new StringBuilder();
-
-        if (!PersistenceHelper.isNew(getEditedEntity())) {
-            sb.append("Создано: ")
-                    .append(getEditedEntity().getCreatedBy())
-                    .append(" (")
-                    .append(simpleDateFormat.format(getEditedEntity().getCreateTs()))
-                    .append(") ");
-
-            if (getEditedEntity().getUpdatedBy() != null) {
-                sb.append("/ Изменено: ")
-                        .append(getEditedEntity().getUpdatedBy())
-                        .append(" (")
-                        .append(simpleDateFormat.format(getEditedEntity().getUpdateTs()))
-                        .append(") ");
-            }
-
-/*            String retStr = "Создано: " + getEditedEntity().getCreatedBy()
-                    + " (" + simpleDateFormat.format(getEditedEntity().getCreateTs()) + ") "
-                    + (getEditedEntity().getUpdatedBy() != null ?
-                    ("/ Изменено: " + getEditedEntity().getUpdatedBy() + " ("
-                            + simpleDateFormat.format(getEditedEntity().getUpdateTs()) + ") ") : ""); */
-
-            createdUpdatedLabel.setValue(sb.toString());
-        }
-    }
-
-
     private void setLabelTitle() {
         String BEFORE = "";
         String AFTER = "&nbsp";
@@ -759,7 +727,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setSaveRecordOfViewCandidate();
 
         setLabelTitle();
-        setCreatedUpdatedLabel();
         setRatingLabel(getEditedEntity());
 
         setLinkButtonEmail();

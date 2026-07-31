@@ -245,45 +245,8 @@
                     </vbox>
                 </vbox>
 
-                <!-- Sidebar navigation: кнопки переключения вкладок по Edit-контракту идут сразу после имени. -->
-                <vbox id="candidateNavigation"
-                      width="100%"
-                      spacing="false"
-                      stylename="job-candidate-navigation label-navigation">
-                    <label value="Разделы формы"
-                           width="100%"
-                           stylename="label-nav-title"/>
-                    <button id="candidateNavMain" invoke="candidateNavMain"
-                            caption="Основное"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item label-nav-item-active"/>
-                    <button id="candidateNavPositions" invoke="candidateNavPositions"
-                            caption="Позиции и вакансии"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <button id="candidateNavIteraction" invoke="candidateNavIteraction"
-                            caption="Взаимодействия"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <button id="candidateNavResume" invoke="candidateNavResume"
-                            caption="Резюме и файлы"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <button id="candidateNavContactInfo" invoke="candidateNavContactInfo"
-                            caption="Контакты"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <button id="candidateNavComments" invoke="candidateNavComments"
-                            caption="Комментарии"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                    <button id="candidateNavHistory" invoke="candidateNavHistory"
-                            caption="История"
-                            width="100%"
-                            stylename="borderless job-candidate-nav-item label-nav-item"/>
-                </vbox>
-
-                <!-- Summary: status + rating + key info -->
+                <!-- Summary: статус + рейтинг + карточка + ключевая информация. По Edit-контракту
+                     сводка идёт сразу после identity (ФИО + должность), до label-навигации. -->
                 <vbox id="candidateProfileSummary"
                       width="100%"
                       spacing="true"
@@ -352,6 +315,44 @@
                             </row>
                         </rows>
                     </grid>
+                </vbox>
+
+                <!-- Sidebar navigation: кнопки переключения вкладок по Edit-контракту идут после сводки (рейтинг/карточка). -->
+                <vbox id="candidateNavigation"
+                      width="100%"
+                      spacing="false"
+                      stylename="job-candidate-navigation label-navigation">
+                    <label value="Разделы формы"
+                           width="100%"
+                           stylename="label-nav-title"/>
+                    <button id="candidateNavMain" invoke="candidateNavMain"
+                            caption="Основное"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item label-nav-item-active"/>
+                    <button id="candidateNavPositions" invoke="candidateNavPositions"
+                            caption="Позиции и вакансии"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <button id="candidateNavIteraction" invoke="candidateNavIteraction"
+                            caption="Взаимодействия"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <button id="candidateNavResume" invoke="candidateNavResume"
+                            caption="Резюме и файлы"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <button id="candidateNavContactInfo" invoke="candidateNavContactInfo"
+                            caption="Контакты"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <button id="candidateNavComments" invoke="candidateNavComments"
+                            caption="Комментарии"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <button id="candidateNavHistory" invoke="candidateNavHistory"
+                            caption="История"
+                            width="100%"
+                            stylename="borderless job-candidate-nav-item label-nav-item"/>
                 </vbox>
 
                 <!-- Contacts -->
@@ -482,24 +483,13 @@
                   expand="tabSheetSocialNetworks"
                   stylename="job-candidate-workspace edit-workspace">
 
-                <!-- Верхняя панель: служебная информация слева, меню «Еще» справа. -->
+                <!-- Верхняя панель: меню «Еще» справа. -->
                 <hbox id="jobCandidateTopBar"
                       width="100%"
                       spacing="true"
-                      expand="jobCandidateAuditBox"
+                      expand="moreActionsPopUpButton"
                       align="MIDDLE_LEFT"
                       stylename="job-candidate-top-bar edit-toolbar">
-                    <hbox id="jobCandidateAuditBox"
-                          width="100%"
-                          spacing="true"
-                          expand="createdUpdatedLabel"
-                          align="MIDDLE_LEFT"
-                          stylename="job-candidate-audit-box edit-toolbar-description">
-                        <label id="createdUpdatedLabel"
-                               width="100%"
-                               align="MIDDLE_LEFT"
-                               stylename="job-candidate-audit-label"/>
-                    </hbox>
                     <popupButton id="moreActionsPopUpButton"
                                  caption="Еще"
                                  align="MIDDLE_RIGHT"
