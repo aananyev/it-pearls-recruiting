@@ -4,6 +4,7 @@
 
 | Документ | Краткое описание |
 | -------- | ---------------- |
+| [AccountingBotEntities.md](accounting-bot/AccountingBotEntities.md) | Бухгалтерский Telegram-бот — сущности документов, чеков, писем, получателей и аудита |
 | [City.md](city/City.md) | City — город |
 | [Company.md](company/Company.md) | Company — компания |
 | [CompanyDepartament.md](company-departament/CompanyDepartament.md) | CompanyDepartament — департамент компании |
@@ -19,6 +20,7 @@
 | [OpenPosition_Spec.md](open-position/OpenPosition_Spec.md) | OpenPosition — архитектурная спецификация |
 | [OpenPositionComment.md](open-position-comment/OpenPositionComment.md) | OpenPositionComment — комментарий к вакансии |
 | [OpenPositionNews.md](open-position-news/OpenPositionNews.md) | OpenPositionNews — новости по вакансии |
+| [OutstaffingRates.md](outstaffing-rates/OutstaffingRates.md) | OutstaffingRates — рейты по аутстафу (шкала, маржинальность, аудит) |
 | [Person.md](person/Person.md) | Person — сотрудник / контактное лицо |
 | [Position.md](position/Position.md) | Position — должность |
 | [Project.md](project/Project.md) | Project — проект |

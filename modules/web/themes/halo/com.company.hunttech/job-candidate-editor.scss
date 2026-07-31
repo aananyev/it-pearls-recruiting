@@ -46,6 +46,8 @@
     .job-candidate-form-grid,
     .job-candidate-form-row,
     .job-candidate-table,
+    .job-candidate-position-column,
+    .job-candidate-social-actions,
     .job-candidate-bottom-bar {
       box-sizing: border-box;
     }
@@ -59,6 +61,9 @@
     /* Левая профильная панель */
     .v-slot-job-candidate-sidebar,
     .job-candidate-sidebar {
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
       background-color: #172638 !important;
       background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%) !important;
     }
@@ -426,27 +431,38 @@
     }
 
     .job-candidate-tabs > .v-tabsheet-tabcontainer {
-      padding: 0 20px;
+      padding: 0 12px;
       background: #fff !important;
       border-bottom: 1px solid #dfe5ec;
+      overflow: hidden;
     }
 
     .job-candidate-tabs .v-tabsheet-tabs,
     .job-candidate-tabs .v-tabsheet-tabitem,
     .job-candidate-tabs .v-tabsheet-tabitem-selected {
       height: 48px;
+      max-width: 112px;
       background: transparent !important;
       border: 0 !important;
       box-shadow: none !important;
     }
 
+    .job-candidate-tabs .v-tabsheet-tabitemcell {
+      max-width: 112px;
+    }
+
     .job-candidate-tabs .v-caption {
+      box-sizing: border-box;
       height: 48px;
-      padding: 0 16px;
+      max-width: 112px;
+      padding: 0 6px;
       color: #26384c !important;
-      font-size: 16px !important;
+      font-size: 13px !important;
       font-weight: 600;
       line-height: 48px;
+      white-space: nowrap !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
       background: transparent !important;
       border: 0 !important;
     }
@@ -709,6 +725,34 @@
     .job-candidate-table .v-grid-row-selected,
     .job-candidate-table .v-table-row-selected {
       background: #dcecff !important;
+    }
+
+    .job-candidate-position-column {
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      overflow: hidden;
+    }
+
+    .job-candidate-position-column .job-candidate-table {
+      min-height: 0 !important;
+      overflow-x: auto;
+    }
+
+    .job-candidate-social-actions {
+      width: 220px !important;
+      min-width: 220px !important;
+      max-width: 220px !important;
+    }
+
+    .job-candidate-social-actions .v-button {
+      width: 100% !important;
+      min-height: 36px;
+      padding-left: 10px;
+      padding-right: 10px;
+      font-size: 13px !important;
+      white-space: normal !important;
     }
 
     /* Нижняя панель действий */

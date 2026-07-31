@@ -9,6 +9,8 @@
 | Изменить CompanyEdit | `docs/screens/company/` | [hunttech_Company.edit_Spec.md](../screens/company/hunttech_Company.edit_Spec.md), [company-edit.md](../screens/company/company-edit.md) |
 | Найти UI-компоненты | `docs/screens/components/` | [FallbackImage.md](../screens/components/FallbackImage.md), [OvalImage.md](../screens/components/OvalImage.md), [OvaFallbackImage.md](../screens/components/OvaFallbackImage.md) |
 | Проверить бизнес-правила | `docs/business-rules/` | [job-candidate-company-selection.md](../business-rules/job-candidate-company-selection.md), [user-settings-photo-sync.md](../business-rules/user-settings-photo-sync.md) |
+| Спроектировать или изменить Telegram-бота | `docs/bots/` | [AccountingDocumentsTelegramBot.md](../bots/AccountingDocumentsTelegramBot.md), [AccountingDocumentsTelegramBot_MVP_Plan.md](../bots/AccountingDocumentsTelegramBot_MVP_Plan.md), [bots README](../bots/README.md) |
+| Подготовить миграцию бухгалтерского Telegram-бота | `docs/database/migrations/` | [accounting-bot-preseed-migration-2026-07-29.md](../database/migrations/accounting-bot-preseed-migration-2026-07-29.md), [AccountingDocumentsTelegramBot.md](../bots/AccountingDocumentsTelegramBot.md) |
 | Проверить структуру БД | `docs/database/` | [schema/db-schema-diff-report.md](../database/schema/db-schema-diff-report.md), [database README](../database/README.md) |
 | Поднять локальную среду | `docs/operations/local-development/` | [local-database.md](../operations/local-development/local-database.md) |
 | Выполнить production deployment | `deployment/production-deployment/` и `docs/operations/` | [production-deployment-runbook.md](../../deployment/production-deployment/runbooks/production-deployment-runbook.md), [operations README](../operations/README.md) |

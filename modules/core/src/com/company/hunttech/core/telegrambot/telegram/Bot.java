@@ -91,6 +91,9 @@ public final class Bot extends TelegramLongPollingCommandBot {
     @Override
     public void processNonCommandUpdate(Update update) {
         Message msg = update.getMessage();
+        if (msg == null) {
+            return;
+        }
         Long chatId = msg.getChatId();
         String userName = Utils.getUserName(msg);
 
