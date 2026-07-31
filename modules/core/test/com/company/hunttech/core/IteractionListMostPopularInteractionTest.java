@@ -43,7 +43,9 @@ public class IteractionListMostPopularInteractionTest {
         assertTrue(service.contains("e.recrutier = :user"));
         assertTrue(service.contains("group by e.iteractionType"));
         assertTrue(service.contains("order by count(e.iteractionType) desc"));
-        assertTrue(service.contains("if (maxCount > list.size())"));
+        assertTrue(service.contains(".view(\"iteraction-picker-view\")"));
+        assertTrue(service.contains("Collectors.toMap(Iteraction::getId"));
+        assertTrue(service.contains("Math.min(maxCount, list.size())"));
         assertFalse(service.contains("Calendar.YEAR"));
     }
 
@@ -114,10 +116,12 @@ public class IteractionListMostPopularInteractionTest {
                         + "iteraction-list-reference-finish.scss");
 
         assertTrue(scss.contains("width: 20% !important"));
-        assertTrue(scss.contains("height: 40px !important"));
+        assertTrue(scss.contains("height: 64px !important"));
+        assertTrue(scss.contains("max-height: 48px"));
         assertTrue(scss.contains(".iteraction-list-popular-button .v-button-caption"));
         assertTrue(scss.contains("white-space: normal"));
         assertTrue(scss.contains("visibility: visible !important"));
+        assertTrue(scss.contains("$v-font-color, $v-panel-background-color, 82%"));
     }
 
     private String controller() throws IOException {
