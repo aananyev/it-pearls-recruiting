@@ -95,8 +95,20 @@ public class MainScreenBackgroundContractTest {
     public void mainContainerStretchesTheOnlyBackgroundImageToFullArea() throws IOException {
         String controller = source(
                 "modules/web/src/com/company/hunttech/web/screens/mainscreen/HrmMainScreen.java");
+        String descriptor = source(
+                "modules/web/src/com/company/hunttech/web/screens/mainscreen/ext-main-screen.xml");
 
-        // Фон заполняет mainVBox целиком при любом соотношении сторон дисплея, без обрезки и пустых полос.
+        // Фон заполняет полноразмерный mainVBox при любом соотношении сторон дисплея.
+        assertTrue(descriptor.contains("<cssLayout id=\"horizontalWrap\"\n"
+                + "                   width=\"100%\"\n"
+                + "                   height=\"100%\">"));
+        assertTrue(descriptor.contains("<vbox id=\"mainVBox\"\n"
+                + "                          expand=\"mainDashboard\"\n"
+                + "                          spacing=\"true\"\n"
+                + "                          width=\"100%\"\n"
+                + "                          height=\"100%\">"));
+        assertTrue(descriptor.contains("width=\"100%\"\n"
+                + "                                             height=\"100%\">"));
         assertTrue(controller.contains("vbox.addStyleName(currentBackgroundStyleName)"));
         assertTrue(controller.contains("dashboard.addStyleName(\"hrm-dashboard-transparent\")"));
         assertTrue(controller.contains("page.getStyles().add(css)"));

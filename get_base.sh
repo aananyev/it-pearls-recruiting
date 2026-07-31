@@ -469,6 +469,7 @@ install_to_local_pgdata() {
         if ! cp -a "$postgre_temp_database"/. "$PGDATA"/ >>"$LOG" 2>&1; then
             die "Не удалось скопировать backup в $PGDATA (см. $LOG)."
         fi
+        info "  (установите pv: brew install pv — для прогресс-бара при копировании)"
     fi
 
     if ! is_complete_pgdata "$PGDATA"; then
@@ -584,7 +585,14 @@ sync_file_storage() {
     info "Копирование fileStorage с сервера (rsync) ..."
     info "  source: root@${db_server}:${REMOTE_FILE_STORAGE_DIR}/"
     info "  target: ${LOCAL_FILE_STORAGE_DIR}/"
-    if ! rsync -avrltD --stats --ignore-existing \
+
+    # rsync --info=progress2 (rsync ≥3.1) показывает единый прогресс-бар
+    local rsync_opts="-avrltD --stats --ignore-existing"
+    if rsync --version | grep -q "version 3\.[1-9]"; then
+        rsync_opts="$rsync_opts --info=progress2"
+    fi
+
+    if ! rsync $rsync_opts \
         "root@${db_server}:${REMOTE_FILE_STORAGE_DIR}/" "${LOCAL_FILE_STORAGE_DIR}/" >>"$LOG" 2>&1; then
         die "Не удалось скопировать fileStorage (нужен SSH-доступ root@${db_server})."
     fi

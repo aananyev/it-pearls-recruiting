@@ -24,4 +24,8 @@
     <include file="260727-2-completeUserAiProfileColumns.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Создает таблицы и базовые справочники бухгалтерского Telegram-бота. -->
+    <include file="260729-1-addAccountingBotEntities.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

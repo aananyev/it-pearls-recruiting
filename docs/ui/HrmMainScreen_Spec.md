@@ -12,7 +12,7 @@
 
 Системные фоны поставляются как статические JPG-файлы активной темы. Пользовательский фон загружается через `SettingsWindow`, хранится в FileStorage и имеет приоритет над системным каталогом.
 
-Прямой URL вида `/hrm/dispatch/download?f=...` не используется для пользовательского фона: в этом сценарии браузер не получает файл, сохранённый через `FileLoader`. Пользовательский файл читается в память и публикуется как штатный `StreamResource` Vaadin.
+Прямой URL вида `/hrm/dispatch/download?f=...` не используется для пользовательского фона: в этом сценарии браузер не получает файл, сохранённый через `FileLoader`. Пользовательский файл читается в память и передаётся в CSS как `data:` URI.
 
 Недоступность физического файла при сохранённом `FileDescriptor` не должна блокировать вход. Экран временно использует системный фон, не удаляя metadata; после восстановления FileStorage пользовательский фон снова становится доступен.
 
@@ -40,15 +40,15 @@ SettingsWindow → Интерфейс → Фон главного экрана
 | Открытие главного экрана | Пользовательский descriptor отсутствует | Выбирается случайный системный `ThemeResource` активной темы |
 | Открытие главного экрана | Descriptor не имеет префикс `hrm-main-background-` | Legacy-файл не считается пользовательским фоном |
 | Разрешение пользовательского фона | Файл доступен в FileStorage | Поток читается через `readAllBytes()`, создаётся `StreamResource` |
-| Регистрация пользовательского фона | Получен `StreamResource` | Вызывается `registerBackgroundResource()`, ресурс закрепляется скрытым `Image` в Vaadin connector tree |
-| Формирование URL | `ResourceReference` вернул `app://APP...` | Префикс `app://APP` заменяется на текущий servlet context path, поэтому CSS получает путь вида `/hrm/connector/...` |
+| Регистрация пользовательского фона | Получен `StreamResource` | Вызывается `registerBackgroundResource()`, поток читается и кодируется в `data:` URI |
+| Формирование URL | Фон системный | CSS получает путь вида `VAADIN/themes/{activeTheme}/backgrounds/{n}.jpg` |
 | Чтение FileStorage | `FileStorageException` или `IOException` | Исключение перехватывается, применяется системный фон |
 | Сохранение SettingsWindow | Commit успешен | Публикуется UI-scoped событие и фон обновляется |
 | Смена системного варианта | Предыдущий индекс известен | Немедленное повторение варианта исключается |
 
 ## Каталог системных фонов
 
-Для каждой поддерживаемой темы хранится ровно десять файлов `1920 × 1080`:
+Для каждой поддерживаемой темы хранится ровно десять почти широкоформатных JPG-файлов:
 
 ```text
 modules/web/themes/{theme}/backgrounds/
@@ -129,21 +129,23 @@ FileLoader.openStream(descriptor)
 
 `registerBackgroundResource()`:
 
-1. удаляет предыдущий holder, если он остался в connector tree;
-2. создаёт `Image` с пользовательским ресурсом;
-3. устанавливает размер holder `0 × 0` и скрывает его;
-4. добавляет holder в `mainVBox`;
-5. получает URL через `ResourceReference.create(resource, holder, "src").getURL()`;
-6. заменяет `app://APP` на `VaadinServlet.getCurrent().getServletContext().getContextPath()`;
-7. отклоняет пустой URL как ошибку регистрации.
+1. получает `StreamSource` из пользовательского `StreamResource`;
+2. читает поток в `byte[]`;
+3. проверяет, что данные не пустые;
+4. выбирает MIME-тип ресурса, с fallback на `image/jpeg`;
+5. возвращает `data:{mime};base64,{bytes}` для прямого применения в CSS.
 
-Скрытый `Image` является владельцем `StreamResource`. Его нельзя удалять до использования URL браузером, иначе connector resource key перестанет обслуживаться.
-
-Connector URL обязан включать web-контекст приложения. Для локального контекста HRM HuntTech корректный путь начинается с `/hrm/connector/`; путь `/connector/` без `/hrm` адресует корень Tomcat и не обслуживается приложением.
+Vaadin connector URL для пользовательского фона больше не используется. Поэтому исправление полноэкранного покрытия не должно возвращать hidden `Image`, `ResourceReference`, `/connector/...` или `/dispatch/download?f=...`.
 
 ## Применение CSS
 
 Фон назначается только контейнеру `mainVBox`. `mainDashboard` получает локальный прозрачный стиль.
+
+Геометрия fullscreen-контейнера задаётся в `ext-main-screen.xml`:
+
+- `horizontalWrap` → `width="100%"`, `height="100%"`;
+- `mainVBox` → `width="100%"`, `height="100%"`;
+- `mainDashboard` → `width="100%"`, `height="100%"`.
 
 Используются свойства:
 
@@ -161,6 +163,8 @@ background-size: 100% 100%;
 - при несовпадении пропорций допускается геометрическое растягивание;
 - логика одинакова для системного и пользовательского ресурса.
 
+`background-size` растягивает изображение только внутри DOM-элемента. Поэтому отсутствие пустых участков на широком или высоком мониторе обеспечивается не изменением бизнес-логики, а тем, что `mainVBox` и его ближайшая рабочая обёртка занимают всю доступную область главного экрана.
+
 ## Runtime-маркеры
 
 | Элемент | Маркер | Назначение |
@@ -177,11 +181,12 @@ background-size: 100% 100%;
 - назначение MIME-типа;
 - перехват ошибок FileStorage и системный fallback;
 - вызов `registerBackgroundResource()`;
-- регистрацию через `ResourceReference` и `backgroundResourceHolder`;
-- импорт `VaadinServlet` и динамический servlet context path;
-- запрет преобразования `app://APP` в пустую строку;
+- запрет `ResourceReference`, `backgroundResourceHolder`, `VaadinServlet` и `app://APP`;
+- применение `data:` URI вместо connector URL;
 - отсутствие `ExternalResource` в `HrmMainScreen`;
 - неизменность системного `ThemeResource` и каталога тем.
+
+`MainScreenBackgroundContractTest.mainContainerStretchesTheOnlyBackgroundImageToFullArea()` дополнительно фиксирует `width="100%"` и `height="100%"` для `horizontalWrap`, `mainVBox` и `mainDashboard`, чтобы фон покрывал рабочую область на экранах с разным соотношением сторон.
 
 `HrmMainScreenIntegrationTest` не изменяется этой задачей и продолжает проверять root screen, `mainVBox`, dashboard, DOM-маркеры и UI-scoped обновление.
 
@@ -200,8 +205,9 @@ Hermes проверяет точный HEAD PR:
 - `clean assemble` с `BUILD SUCCESSFUL`;
 - clean local deploy;
 - `http://localhost:8080/hrm/` → HTTP 200;
-- пользовательский connector URL начинается с `/hrm/connector/`, возвращает HTTP 200 и корректный `Content-Type`;
+- пользовательский фон применяется через `data:` URI без connector URL;
 - URL не начинается с `/connector/`, не содержит `/dispatch/download?f=` и необработанный `app://APP`;
+- `mainVBox` в браузере покрывает рабочую область главного экрана при широком и высоком viewport;
 - системные фоны семи тем продолжают работать;
 - недоступный файл включает системный fallback без удаления descriptor;
 - Tomcat critical errors отсутствуют; P1=0; P2=0.
@@ -210,8 +216,9 @@ Hermes проверяет точный HEAD PR:
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-29 | Fullscreen-геометрия `horizontalWrap`, `mainVBox` и `mainDashboard` закреплена в XML и контрактном тесте, чтобы фон главного экрана покрывал рабочую область на мониторах с разным соотношением сторон |
 | 2026-07-27 | Connector URL пользовательского `StreamResource` дополнен динамическим servlet context path через `VaadinServlet`, чтобы браузер обращался к `/hrm/connector/...`, а не к корневому `/connector/...` |
-| 2026-07-27 | Пользовательский фон закреплён как `StreamResource` с байтами FileStorage, MIME-типом и Vaadin connector URL через `registerBackgroundResource()`; системные `ThemeResource` не изменены |
+| 2026-07-27 | Пользовательский фон закреплён как `StreamResource` с байтами FileStorage, MIME-типом и `data:` URI через `registerBackgroundResource()`; системные `ThemeResource` не изменены |
 | 2026-07-26 | Пользовательский фон временно переводился на прямой FileStorage dispatch URL; ошибка чтения файла включала системный fallback без удаления descriptor |
 | 2026-07-26 | Фон переведён с `cover` на точное растягивание `100% × 100%` |
 | 2026-07-26 | Системные фоны вынесены в каталоги семи тем: 7 × 10 JPG |
