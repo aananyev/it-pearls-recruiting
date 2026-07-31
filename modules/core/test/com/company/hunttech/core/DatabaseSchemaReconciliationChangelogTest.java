@@ -25,6 +25,8 @@ public class DatabaseSchemaReconciliationChangelogTest {
             "modules/core/db/changelog/260727-2-completeUserAiProfileColumns.xml";
     private static final String ACCOUNTING_BOT_CHANGELOG =
             "modules/core/db/changelog/260729-1-addAccountingBotEntities.xml";
+    private static final String OUTSTAFFING_RATES_SQL =
+            "modules/core/db/update/postgres/26/260731-1-addOutstaffingRatesMarginColumns.sql";
     private static final String CHANGELOG_MASTER =
             "modules/core/db/changelog/db.changelog-master.xml";
     private static final String CUBA_UPDATE_SQL =
@@ -134,7 +136,8 @@ public class DatabaseSchemaReconciliationChangelogTest {
         String migrations = (readProjectFile(CHANGELOG)
                 + readProjectFile(PROFILE_COMPLETION_CHANGELOG)
                 + readProjectFile(ACCOUNTING_BOT_CHANGELOG)
-                + readProjectFile(CUBA_UPDATE_SQL)).toLowerCase(Locale.ROOT);
+                + readProjectFile(CUBA_UPDATE_SQL)
+                + readProjectFile(OUTSTAFFING_RATES_SQL)).toLowerCase(Locale.ROOT);
 
         // Допустимы additive DDL, rename и точечное заполнение обязательных значений.
         assertFalse(migrations.contains("<droptable"));
@@ -145,6 +148,37 @@ public class DatabaseSchemaReconciliationChangelogTest {
         assertFalse(migrations.contains("delete from"));
         assertFalse(migrations.contains("truncate"));
         assertFalse(migrations.contains("hunttech_user_ai_profile_parameters"));
+    }
+
+    @Test
+    public void outstaffingRatesMigrationIsIdempotentAndCoversMarginColumnsAuditTriggers()
+            throws IOException {
+        String sql = readProjectFile(OUTSTAFFING_RATES_SQL);
+
+        // 4 колонки маржинальности добавляются идемпотентно
+        for (String column : new String[]{"MARGIN_TK", "MARGIN_IE", "NET_PROFIT_TK", "NET_PROFIT_IE"}) {
+            assertTrue("Нет колонки " + column + " в миграции рейтов",
+                    sql.contains("ADD COLUMN IF NOT EXISTS " + column));
+        }
+
+        // Аудит-таблица + индекс создаются идемпотентно
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS HUNTTECH_OUTSTAFFING_RATES_HISTORY"));
+        assertTrue(sql.contains("CREATE INDEX IF NOT EXISTS idx_orr_history_on_rate_id"));
+
+        // Триггеры и функции пересоздаются идемпотентно
+        assertTrue(sql.contains("CREATE OR REPLACE FUNCTION fn_outstaffing_margin_recalc"));
+        assertTrue(sql.contains("CREATE OR REPLACE FUNCTION fn_outstaffing_rates_audit"));
+        for (String trigger : new String[]{"trg_orr_margin_recalc", "trg_orr_audit_insert", "trg_orr_audit_update"}) {
+            assertTrue("Нет триггера " + trigger + " в миграции рейтов",
+                    sql.contains("DROP TRIGGER IF EXISTS " + trigger)
+                            && sql.contains("CREATE TRIGGER " + trigger));
+        }
+
+        // Аудит-триггер UPDATE пишет только при реальном изменении бизнес-полей
+        assertTrue(sql.contains("IS DISTINCT FROM NEW."));
+
+        // updateDb сам регистрирует скрипт в SYS_DB_CHANGELOG
+        assertFalse(sql.contains("INSERT INTO SYS_DB_CHANGELOG"));
     }
 
     private static Set<String> extractEntityColumnNames(String entity) {
