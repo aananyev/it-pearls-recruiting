@@ -1246,6 +1246,30 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
+    public void onCardAuditInfoClick() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+        JobCandidate candidate = getEditedEntity();
+        StringBuilder sb = new StringBuilder("Автор карточки: ");
+        if (candidate.getCreatedBy() != null) {
+            sb.append(candidate.getCreatedBy());
+        } else {
+            sb.append("—");
+        }
+        if (candidate.getCreateTs() != null) {
+            sb.append(" (").append(simpleDateFormat.format(candidate.getCreateTs())).append(")");
+        }
+        if (candidate.getUpdatedBy() != null) {
+            sb.append("\nПоследние изменения: ").append(candidate.getUpdatedBy());
+            if (candidate.getUpdateTs() != null) {
+                sb.append(" (").append(simpleDateFormat.format(candidate.getUpdateTs())).append(")");
+            }
+        }
+        notifications.create()
+                .withCaption("Информация о карточке")
+                .withDescription(sb.toString())
+                .show();
+    }
+
     public void onButtonSubscribeClick() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             dialogs.createOptionDialog()

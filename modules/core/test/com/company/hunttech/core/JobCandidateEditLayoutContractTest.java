@@ -58,6 +58,31 @@ public class JobCandidateEditLayoutContractTest {
         assertTrue(xml.contains("id=\"tabCommentsVbox\" spacing=\"true\" width=\"100%\" height=\"100%\""));
         assertTrue(xml.contains("id=\"jobCandidateBottomBar\""));
         assertTrue(section(xml, "id=\"jobCandidateBottomBar\"", "</hbox>").contains("width=\"100%\""));
+        assertTrue(xml.contains("id=\"cardAuditInfoButton\""));
+        assertTrue(xml.contains("invoke=\"onCardAuditInfoClick\""));
+    }
+
+    @Test
+    public void mainTabStacksPersonalAndProfessionalDataVertically() throws IOException {
+        String xml = readProjectFile(XML);
+
+        // Контент вкладки «Основное» — вертикальный vbox, карточки друг над другом.
+        assertTrue(xml.contains("<vbox id=\"jobCandidateMainSectionContent\""));
+        assertTrue("Контейнер вкладки «Основное» должен быть vbox, а не hbox",
+                !xml.contains("<hbox id=\"jobCandidateMainSectionContent\""));
+
+        assertOrdered(xml,
+                "id=\"jobCandidateMainSectionContent\"",
+                "id=\"personalDataBlock\"",
+                "id=\"professionalDataBlock\"");
+
+        // Класс half-card (горизонтальная пара) в пределах вкладки «Основное» удалён
+        // (во вкладке «Контакты» он используется контактными карточками легально).
+        String mainTab = section(xml,
+                "id=\"jobCandidateMainSectionContent\"",
+                "<!-- TAB: Контакты -->");
+        assertTrue("Вертикальная раскладка «Основного» не использует half-card",
+                !mainTab.contains("job-candidate-half-card"));
     }
 
     @Test

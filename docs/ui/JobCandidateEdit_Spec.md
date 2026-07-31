@@ -113,6 +113,10 @@ jobCandidateMainLayout
 
 - ширина — 312 px; Vaadin slot-обёртка sidebar имеет тот же фиксированный размер,
   чтобы workspace не начинался под левой панелью;
+- `job-candidate-sidebar` использует `box-sizing: border-box` — ширина 312 px включает
+  внутренние отступы (24/20/18 px), поэтому левый блок не выходит за границы экрана;
+- sidebar-карточки (`job-candidate-sidebar-card`) также `box-sizing: border-box` и имеют
+  видимую рамку `rgba(255,255,255,.35)` на тёмном фоне;
 - тёмный фон задаётся самому `jobCandidateSidebar` и его Vaadin slot-обёртке;
 - фотография отображается единым `OvaFallbackImage` размером 176×176 и не искажается;
 - при отсутствии фотографии или бинарного файла показывается `icons/no-programmer.jpeg`;
@@ -127,6 +131,8 @@ jobCandidateMainLayout
 - `candidateNavigation` использует общие классы `label-navigation`, `label-nav-title`,
   `label-nav-item`, `label-nav-item-active`; локальный `job-candidate-nav-item` оставлен
   только для цветовой адаптации sidebar;
+- шрифт пунктов `label-nav-item` — 12px, совпадает с подписями полей формы
+  («Город», «Компания» — `.v-label-small`);
 - внутренние sidebar-блоки и Vaadin slots имеют `min-width: 0`/`max-width: 100%`, поэтому
   карточки, кнопки и длинные подписи не выходят за границы панели;
 - горизонтальные вкладки ограничены `max-width: 112px` и используют `text-overflow: ellipsis`;
@@ -175,8 +181,8 @@ Accordion-слой не удаляет и не подменяет штатную
 
 ### Вкладка «Основное»
 
-- `personalDataBlock` и `professionalDataBlock` занимают по 50% доступной ширины;
-- родительский `jobCandidateMainSectionContent` использует flex-компоновку;
+- `personalDataBlock` и `professionalDataBlock` размещаются один над другим (вертикальная раскладка): родительский `jobCandidateMainSectionContent` — `vbox`, каждая карточка занимает 100% доступной ширины;
+- мёртвый класс `job-candidate-half-card` (горизонтальная пара) из вкладки удалён;
 - промежуток между блоками — 16 px;
 - внутренний `GridLayout` принудительно растягивается на 100%;
 - колонка подписей имеет ширину 118 px; при ширине окна до 1366 px она компактно уменьшается до 96 px. Правило применяется к фактическим Vaadin `HBox` slots внутри `GridLayout`, поэтому длинные подписи не распадаются на слоги;
@@ -184,7 +190,12 @@ Accordion-слой не удаляет и не подменяет штатную
 - поля `firstNameField`, `middleNameField`, `secondNameField`, `personPositionField` и `currentCompanyField` занимают всю доступную ширину;
 - поля ввода получили общий `edit-form-control` совместно с существующими локальными стилями;
 - шрифт `SuggestionField` ФИО установлен 16 px — такой же, как у `jobCityCandidateField` и остальных полей;
-- высота полей — 38 px;
+- высота полей — 38 px (включая `.c-suggestionfield` ФИО: добавлен в правило высоты
+  `.job-candidate-form-grid`/`.job-candidate-form-row`, селектор-потомок shared
+  `.edit-form-control .c-suggestionfield` на самом input не срабатывал);
+- ширина строк ввода строго одинакова: колонка подписей в строках-контейнерах
+  фиксирована на 112px, поле занимает `calc(100% - 112px)` — «Имя», «Отчество»,
+  «Фамилия» (и «Должность», «Компания») одной ширины при любой длине подписи;
 - component ID, properties, actions, queries и search executors не изменяются.
 
 ### Вкладка «Контакты»
@@ -286,6 +297,15 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-07-31 | Полное inline-документирование XML-дескриптора `job-candidate-edit.xml` по правилу xml-screen-documentation.mdc: смысловые комментарии перед каждым открывающим элементом (window, data/instance/view/loader/query/condition, layout-контейнеры, вкладки, поля, таблицы, actions, кнопки). Структура XML не изменялась (проверено: теги/атрибуты/CDATA идентичны, добавлены только комментарии); сохранены незакоммиченные правки рабочей копии (кнопка `cardAuditInfoButton` в меню «Еще», `jobCandidateMainSectionContent` переведён на vbox). Контрактный тест и ScreenViewIntegrityTest — зелёные. |
+| 2026-07-31 | Причины 2–4 выхода tabsheet за границы экрана (адаптивность на разных мониторах, по «Правилам компоновки экранов» CUBA): добавлены `box-sizing: border-box` + `width: 100%` для `.v-tabsheet-tabcontainer` и `.v-tabsheet-content` (padding 24/36px больше не расширяет их за 100%); `.job-candidate-tabs` получил `overflow: hidden` (перекрыт базовый `overflow: visible`); в media ≤1366px max-width вкладок 112px → 96px (7 вкладок = 672px влезают в узкий workspace). Во всех 7 темах. |
+| 2026-07-31 | Причина 1 переполнения правого блока JobCandidateEdit: убран жёсткий `min-width` у `.job-candidate-editor` (база 1180px, media ≤1366px — 1024px) во всех 7 темах. Ранее при вьюпорте уже 1024px редактор принудительно растягивался шире экрана, и tabsheet с родительским workspace выходили за правую границу (горизонтальный скролл страницы). Контент по-прежнему ограничен `overflow: hidden` workspace. |
+| 2026-07-31 | Ширина полей «Имя», «Отчество», «Фамилия» и остальных строк `job-candidate-form-grid` зафиксирована: колонка подписей в строках-контейнерах получила фиксированные 112px (`.v-horizontallayout > .v-expand > .v-slot-small`), поле — `calc(100% - 112px)` (`.v-slot-edit-form-control`), во всех 7 темах. Ранее на широких экранах (>1366px) подписи имели natural width, и поля ФИО различались по ширине. |
+| 2026-07-31 | Высота полей «Имя», «Фамилия», «Отчество» (SuggestionField, `.c-suggestionfield`) приведена к высоте полей «Должность»/«Компания»: добавлены `.c-suggestionfield`/`.c-suggestion-field` в правило `height: 38px` формы (`.job-candidate-form-grid`/`.job-candidate-form-row`) во всех 7 темах. Ранее селектор-потомок `.edit-form-control .c-suggestionfield` не срабатывал на самом элементе input, и поля ФИО оставались 28px из базовой темы. |
+| 2026-07-31 | Левая панель JobCandidateEdit: добавлен `box-sizing: border-box` для `job-candidate-sidebar` (ширина 312px теперь включает padding — блок не выходит за границы экрана) и для sidebar-карточек; рамки карточек усилены с `rgba(255,255,255,.18)` до `.35` для читаемости границ на тёмном фоне. Во всех 7 темах. |
+| 2026-07-31 | Пункты label-навигации JobCandidateEdit приведены к размеру подписей полей формы: `font-size` 9px → 12px (совпадает с `.v-label-small` подписей «Город»/«Компания») во всех 7 темах; min-height, padding и line-height не менялись; идентичность 7 SCSS-файлов сохранена. |
+| 2026-07-31 | Вкладка «Основное» JobCandidateEdit переведена на вертикальную раскладку: `jobCandidateMainSectionContent` изменён с `hbox` на `vbox`, карточки «Персональные данные» и «Профессиональные данные» размещаются одна над другой на всю ширину; удалён мёртвый класс `job-candidate-half-card`. В контракт-тест добавлена проверка вертикального порядка блоков. |
+| 2026-07-31 | В меню «Еще» JobCandidateEdit добавлен пункт «Создано/Изменено» (`cardAuditInfoButton`, invoke `onCardAuditInfoClick`): уведомление с автором карточки (createdBy + createTs) и последним редактором (updatedBy + updateTs), формат даты dd.MM.yyyy HH:mm. В контракт-тест добавлены проверки кнопки. |
 | 2026-07-31 | Удалён служебный элемент «Создано/Изменено» (дата + автор) из верхней панели JobCandidateEdit: XML-блок `jobCandidateAuditBox`/`createdUpdatedLabel` удалён, `expand` панели переключён на `moreActionsPopUpButton`; из контроллера удалены поле `createdUpdatedLabel`, метод `setCreatedUpdatedLabel()` и его вызов. |
 | 2026-07-31 | Label-навигация JobCandidateEdit уменьшена целиком ещё на 30% (все визуальные параметры ×0.7): пункты — min-height 27→19px, padding 2×8px, шрифт 13→9px, line-height 20→14px; заголовок — padding 3px, шрифт 11→8px, line-height 12→8px; контейнер — padding 6×2px. |
 | 2026-07-31 | Контейнер label-навигации JobCandidateEdit уплотнён на 30%: padding-top 12px → 8px, padding-bottom 3px; заголовок «Разделы формы» — padding 6px → 4px, line-height 16px → 12px. Пункты не менялись. |

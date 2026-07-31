@@ -1,108 +1,157 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Корневой элемент экрана редактирования кандидата: подключает контроллер JobCandidateEdit,
+     пакет сообщений и иконку пользователя; капшн берётся из editorCaption. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         class="com.company.hunttech.web.screens.jobcandidate.JobCandidateEdit"
         caption="msg://editorCaption"
         messagesPack="com.company.hunttech.web.screens.jobcandidate"
         icon="USER">
+    <!-- Секция данных экрана: контейнеры кандидата, справочников и вспомогательных выборок. -->
     <data>
+        <!-- Главный контейнер редактируемого кандидата: локальные поля + вложенные связи,
+             необходимые форме (город, текущая компания, фото, должность, позиции, взаимодействия,
+             соцсети и резюме). -->
         <instance id="jobCandidateDc"
                   class="com.company.hunttech.entity.JobCandidate">
+            <!-- View контейнера: _local + точечные вложенные свойства; коллекции подгружаются
+                 пакетно (fetch="BATCH"), чтобы избежать N+1 при рендере списков. -->
             <view extends="_local">
+                <!-- Город проживания кандидата — локальные поля справочника. -->
                 <property name="cityOfResidence" view="_local"/>
+                <!-- Текущая компания с группой компаний: пакетная загрузка для карточки и форм. -->
                 <property name="currentCompany" fetch="BATCH" view="_local">
                     <property name="companyGroup" view="_local"/>
                 </property>
+                <!-- Фотография кандидата (file descriptor) — отображается овальным аватаром. -->
                 <property name="fileImageFace" view="_local"/>
+                <!-- Список позиций кандидата — пакетная загрузка вложенного списка позиций. -->
                 <property name="positionList" fetch="BATCH" view="_local">
                     <property name="positionList" view="_local"/>
                 </property>
+                <!-- Должность кандидата (справочник Position). -->
                 <property name="personPosition" view="_local"/>
+                <!-- Взаимодействия кандидата: пакетно, с вакансией (расширенный view с projectName)
+                     и типом взаимодействия (sign-поля для индикации отправки клиенту/закрытия дела). -->
                 <property name="iteractionList" fetch="BATCH" view="_minimal">
                     <property name="vacancy" view="openPosition-edit-view">
+                        <!-- Вложенное свойство projectName в выборке контейнера. -->
                         <property name="projectName" view="_local"/>
                     </property>
+                    <!-- Вложенное свойство iteractionType в выборке контейнера. -->
                     <property name="iteractionType" view="iteraction-list-type-view">
+                        <!-- Вложенное свойство signSendToClient в выборке контейнера. -->
                         <property name="signSendToClient"/>
+                        <!-- Вложенное свойство signEndCase в выборке контейнера. -->
                         <property name="signEndCase"/>
                     </property>
                 </property>
+                <!-- Соцсети кандидата — пакетно, минимальный view для таблицы контактов. -->
                 <property name="socialNetwork" fetch="BATCH" view="_minimal"/>
+                <!-- Резюме кандидата: пакетно, с вакансией (projectName с проектом/департаментом/логотипом). -->
                 <property name="candidateCv" fetch="BATCH" view="_minimal">
                     <property name="toVacancy" view="openPosition-edit-view">
                         <property name="projectName" view="_local">
+                            <!-- Вложенное свойство projectDescription в выборке контейнера. -->
                             <property name="projectDescription"/>
+                            <!-- Вложенное свойство projectLogo в выборке контейнера. -->
                             <property name="projectLogo" view="_minimal"/>
+                            <!-- Вложенное свойство projectDepartment в выборке контейнера. -->
                             <property name="projectDepartment" view="_minimal"/>
                         </property>
                     </property>
                 </property>
             </view>
+            <!-- Загрузчик кандидата: мягкое удаление включено (показываем и удалённые при явном запросе),
+                 динамические атрибуты не используются. -->
             <loader id="jobCandidateDl"
                     softDeletion="true"
                     dynamicAttributes="false"/>
+            <!-- Коллекция резюме кандидата (навигация по property candidateCv контейнера). -->
             <collection id="jobCandidateCandidateCvsDc"
                         property="candidateCv"/>
+            <!-- Коллекция соцсетей кандидата для таблицы «Социальные сети». -->
             <collection id="jobCandidateSocialNetworksDc"
                         property="socialNetwork"/>
+            <!-- Коллекция взаимодействий кандидата для таблицы вкладки «Взаимодействия». -->
             <collection id="jobCandidateIteractionDc"
                         property="iteractionList"/>
         </instance>
+        <!-- KeyValue-коллекция «последние проекты»: вакансия + дата последнего взаимодействия,
+             сгруппированные по вакансии (история рассмотрения во вкладке «Позиции и вакансии»). -->
         <keyValueCollection id="lastProjectDc">
+            <!-- Загрузчик последних проектов: агрегатный запрос по взаимодействиям. -->
             <loader id="lastProjectDl">
                 <query>
+                    <!-- Выбираем вакансию и максимальную дату взаимодействия, исключая служебную
+                         вакансию 'Default'; сортировка по дате свежих сверху. -->
                     <![CDATA[select e.vacancy, max(e.dateIteraction)
                     from hunttech_IteractionList e
                     where not e.vacancy.vacansyName like 'Default'
                     group by e.vacancy
                     order by max(e.dateIteraction) desc]]>
+                    <!-- Условие ограничивает выборку взаимодействиями текущего кандидата. -->
                     <condition>
                         <and>
                             <c:jpql>
+                                <!-- JPQL-условие: взаимодействия текущего кандидата. -->
                                 <c:where>e.candidate = :candidate</c:where>
                             </c:jpql>
                         </and>
                     </condition>
                 </query>
             </loader>
+            <!-- Типизация колонок KeyValue-коллекции: vacancy — сущность OpenPosition, max — дата. -->
             <properties>
                 <property name="vacancy"
                           class="com.company.hunttech.entity.OpenPosition"/>
+                <!-- Колонка max — максимальная дата взаимодействия. -->
                 <property datatype="date"
                           name="max"/>
             </properties>
         </keyValueCollection>
+        <!-- Открытые вакансии: вариант picker-поля вакансии во вкладке «Комментарии» (кэшируется). -->
         <collection id="openPositionDc"
                     class="com.company.hunttech.entity.OpenPosition">
             <view extends="openPosition-picker-view"/>
+            <!-- Загрузчик данных openPositionDl. -->
             <loader id="openPositionDl" cacheable="true">
                 <query>
+                    <!-- Только открытые вакансии, отсортированные по названию. -->
                     <![CDATA[select e from hunttech_OpenPosition e
                     where e.openClose = false or e.openClose is null
                     order by e.vacansyName]]>
                 </query>
             </loader>
         </collection>
+        <!-- Подходящие вакансии: таблица вкладки «Позиции и вакансии» (кэшируется). -->
         <collection id="suggestOpenPositionDc"
                     class="com.company.hunttech.entity.OpenPosition">
             <!-- Поля ограничены данными таблицы и её tooltip; тяжёлые связи не загружаются. -->
             <view extends="_local">
                 <property name="positionType" view="_local"/>
                 <property name="projectName" view="_local">
+                    <!-- Вложенное свойство projectOwner в выборке контейнера. -->
                     <property name="projectOwner" view="_local"/>
                 </property>
+                <!-- Вложенное свойство owner в выборке контейнера. -->
                 <property name="owner" view="_local"/>
             </view>
+            <!-- Загрузчик данных suggestOpenPositionDl. -->
             <loader id="suggestOpenPositionDl" cacheable="true">
                 <query>
+                    <!-- Открытые вакансии; фильтр по типу позиции задаётся контроллером
+                         через параметры positionType / positionTypes. -->
                     <![CDATA[select e from hunttech_OpenPosition e
                     where e.openClose = false or e.openClose is null
                     order by e.vacansyName]]>
                     <condition>
+                        <!-- Либо конкретный тип позиции, либо список типов (для массового подбора). -->
                         <or>
                             <c:jpql>
                                 <c:where>e.positionType = :positionType</c:where>
                             </c:jpql>
+                            <!-- JPQL-условие выборки. -->
                             <c:jpql>
                                 <c:where>e.positionType in :positionTypes</c:where>
                             </c:jpql>
@@ -111,48 +160,67 @@
                 </query>
             </loader>
         </collection>
+        <!-- Справочник должностей для поля «Должность» (кэш; исключены служебные записи). -->
         <collection id="personPositionsDc"
                     class="com.company.hunttech.entity.Position">
             <view extends="position-view"/>
+            <!-- Загрузчик данных personPositionsLc. -->
             <loader id="personPositionsLc" cacheable="true">
                 <query>
+                    <!-- Все должности, кроме помеченных «(не использовать)», по алфавиту. -->
                     <![CDATA[select e from hunttech_Position e
                             where e.positionRuName not like '%(не использовать)%'
                             order by e.positionRuName]]>
                 </query>
             </loader>
         </collection>
+        <!-- Справочник компаний для поля «Компания» (кэш, по названию). -->
         <collection id="currentCompaniesDc"
                     class="com.company.hunttech.entity.Company">
             <view extends="company-picker-view"/>
+            <!-- Загрузчик данных currentCompaniesLc. -->
             <loader id="currentCompaniesLc" cacheable="true">
                 <query><![CDATA[select e from hunttech_Company e order by e.comanyName]]></query>
             </loader>
         </collection>
+        <!-- Справочник городов для поля «Город» (кэш, по русскому названию). -->
         <collection id="citiesDc" class="com.company.hunttech.entity.City">
             <view extends="city-picker-view"/>
             <loader id="citiesDl" cacheable="true">
+                <!-- Запрос справочника городов (все, по алфавиту). -->
                 <query><![CDATA[select e from hunttech_City e order by e.cityRuName]]></query>
             </loader>
         </collection>
+        <!-- Комментарии кандидата: взаимодействия с заполненным комментарием для вкладки «Комментарии». -->
         <collection id="interactionCommentDc"
                     class="com.company.hunttech.entity.IteractionList">
             <view extends="_minimal">
+                <!-- Вложенное свойство dateIteraction в выборке контейнера. -->
                 <property name="dateIteraction"/>
+                <!-- Вложенное свойство comment в выборке контейнера. -->
                 <property name="comment"/>
+                <!-- Вложенное свойство recrutierName в выборке контейнера. -->
                 <property name="recrutierName"/>
+                <!-- Вложенное свойство recrutier в выборке контейнера. -->
                 <property name="recrutier" view="extUser-picker-view"/>
+                <!-- Вложенное свойство vacancy в выборке контейнера. -->
                 <property name="vacancy" view="_minimal">
+                    <!-- Вложенное свойство vacansyName в выборке контейнера. -->
                     <property name="vacansyName"/>
                 </property>
             </view>
+            <!-- Загрузчик данных interactionCommentDl. -->
             <loader id="interactionCommentDl" cacheable="true">
                 <query>
+                    <!-- Только взаимодействия с непустым комментарием, новые сверху. -->
                     <![CDATA[select e from hunttech_IteractionList e
                     where e.comment is not null and e.comment not like ''
                     order by e.deteIteraction desc]]>
+                    <!-- Контейнер условий запроса. -->
                     <condition>
+                        <!-- Логическое И над условиями. -->
                         <and>
+                            <!-- JPQL-условие выборки. -->
                             <c:jpql>
                                 <c:where>e.candidate = :candidate</c:where>
                             </c:jpql>
@@ -163,14 +231,17 @@
         </collection>
     </data>
 
+    <!-- Режим диалога: фиксированный размер окна формы 1200×750. -->
     <dialogMode height="750" width="1200"/>
 
+    <!-- Корневой layout экрана: растягивает главный hbox на всю доступную область. -->
     <layout stylename="job-candidate-editor edit-screen-layout"
             expand="jobCandidateMainLayout"
             spacing="false"
             width="100%"
             height="100%">
 
+        <!-- Главный горизонтальный контейнер: слева профильный sidebar, справа рабочая область. -->
         <hbox id="jobCandidateMainLayout"
               width="100%"
               height="100%"
@@ -179,6 +250,7 @@
               stylename="job-candidate-main-layout edit-screen-layout">
 
             <!-- ===== SIDEBAR ===== -->
+            <!-- Левая профильная панель 312px: фото, ФИО, сводка, навигация, контакты, действия. -->
             <vbox id="jobCandidateSidebar"
                   width="312px"
                   height="100%"
@@ -187,14 +259,17 @@
                   stylename="job-candidate-sidebar edit-sidebar">
 
                 <!-- Profile Header: photo + name + position -->
+                <!-- Шапка профиля: фотография с зоной загрузки, ФИО и должность кандидата. -->
                 <vbox id="candidateProfileHeader"
                       width="100%"
                       spacing="true"
                       align="TOP_CENTER"
                       stylename="job-candidate-profile-header edit-sidebar-visual">
+                    <!-- Контейнер фотографии и зоны drag&drop загрузки нового фото. -->
                     <vbox id="dropZone"
                           spacing="true"
                           align="TOP_CENTER">
+                        <!-- Обёртка изображения-аватара. -->
                         <vbox id="picVBox"
                               align="TOP_CENTER"
                               spacing="true">
@@ -203,6 +278,8 @@
                               Keeping the fallback in the same component prevents layout shifts and
                               removes the need to synchronize visibility of two parallel Image instances.
                             -->
+                            <!-- Фотография кандидата: кастомный компонент с fallback-картинкой,
+                                 176×176, овальная обрезка, масштабирование по контейнеру. -->
                             <ovaFallbackImage id="candidatePic"
                                               dataContainer="jobCandidateDc"
                                               property="fileImageFace"
@@ -224,6 +301,8 @@
                             </image>
                             -->
                         </vbox>
+                        <!-- Загрузчик фотографии: мгновенная запись в fileStorage, привязка
+                             к свойству fileImageFace, кнопка очистки и зона dropZone. -->
                         <upload id="fileImageFaceUpload"
                                 fileStoragePutMode="IMMEDIATE"
                                 dataContainer="jobCandidateDc"
@@ -233,11 +312,14 @@
                                 showClearButton="true"
                                 property="fileImageFace"/>
                     </vbox>
+                    <!-- Блок идентичности: ФИО и должность (обновляются контроллером). -->
                     <vbox width="100%" spacing="false" stylename="edit-sidebar-identity">
+                        <!-- ФИО кандидата (заполняется из fullName при загрузке и изменении). -->
                         <label id="fullNameField"
                                width="100%"
                                stylename="job-candidate-profile-name edit-sidebar-title"
                                align="MIDDLE_CENTER"/>
+                        <!-- Должность кандидата под ФИО. -->
                         <label id="personPositionLabel"
                                width="100%"
                                stylename="job-candidate-profile-position edit-sidebar-subtitle"
@@ -247,40 +329,49 @@
 
                 <!-- Summary: статус + рейтинг + карточка + ключевая информация. По Edit-контракту
                      сводка идёт сразу после identity (ФИО + должность), до label-навигации. -->
+                <!-- Сводная карточка: рейтинг, процент заполнения, город, компания, резюме. -->
                 <vbox id="candidateProfileSummary"
                       width="100%"
                       spacing="true"
                       stylename="job-candidate-profile-summary job-candidate-sidebar-card edit-sidebar-summary">
+                    <!-- Блок «Рейтинг» и «Карточка» со значениями, заполняемыми контроллером. -->
                     <vbox id="statusRatingRow"
                           width="100%"
                           spacing="false"
                           stylename="job-candidate-status">
+                        <!-- Строка «Рейтинг»: подпись и звёздный рейтинг кандидата. -->
                         <hbox width="100%" spacing="false">
                             <label value="Рейтинг"
                                    box.expandRatio="1"
                                    stylename="h3"/>
+                            <!-- Значение рейтинга (заполняется контроллером). -->
                             <label id="candidateRatingLabel"
                                    box.expandRatio="2"
                                    stylename="h3"/>
                         </hbox>
+                        <!-- Строка «Карточка»: процент заполнения профиля. -->
                         <hbox width="100%" spacing="false">
                             <label value="Карточка"
                                    box.expandRatio="1"
                                    stylename="h3"/>
+                            <!-- Процент заполнения карточки (заполняется контроллером). -->
                             <label id="labelQualityPercent"
                                    stylename="h3"/>
                         </hbox>
                     </vbox>
+                    <!-- Сетка ключевой информации: город, компания, резюме. -->
                     <grid id="profileInfoGrid" spacing="true" width="100%"
                           stylename="job-candidate-info-grid job-candidate-sidebar-grid">
                         <columns count="2"/>
                         <rows>
                             <row>
+                                <!-- Строка «Город»: подпись и значение города проживания. -->
                                 <hbox spacing="false"
                                       width="100%">
                                     <label value="Город"
                                            stylename="small"
                                            box.expandRatio="1"/>
+                                    <!-- Значение города проживания (свойство cityOfResidence). -->
                                     <label id="cityOfCandidate"
                                            box.expandRatio="2"
                                            stylename="small"
@@ -289,11 +380,13 @@
                                 </hbox>
                             </row>
                             <row>
+                                <!-- Строка «Компания»: текущая компания кандидата. -->
                                 <hbox spacing="false"
                                       width="100%">
                                     <label value="Компания"
                                            stylename="small"
                                            box.expandRatio="1"/>
+                                    <!-- Текущая компания кандидата (свойство currentCompany). -->
                                     <label id="currentCompanyLabel"
                                            box.expandRatio="2"
                                            stylename="small"
@@ -302,11 +395,13 @@
                                 </hbox>
                             </row>
                             <row>
+                                <!-- Строка «Резюме»: количество/ссылка на резюме (заполняется контроллером). -->
                                 <hbox spacing="false"
                                       width="100%">
                                     <label value="Резюме"
                                            stylename="small"
                                            box.expandRatio="1"/>
+                                    <!-- Ссылка на резюме (заполняется контроллером). -->
                                     <label id="labelCV"
                                            align="MIDDLE_LEFT"
                                            stylename="small"
@@ -318,37 +413,46 @@
                 </vbox>
 
                 <!-- Sidebar navigation: кнопки переключения вкладок по Edit-контракту идут после сводки (рейтинг/карточка). -->
+                <!-- Вертикальная label-навигация по разделам формы (переключение вкладок tabsheet). -->
                 <vbox id="candidateNavigation"
                       width="100%"
                       spacing="false"
                       stylename="job-candidate-navigation label-navigation">
+                    <!-- Заголовок блока навигации по разделам формы. -->
                     <label value="Разделы формы"
                            width="100%"
                            stylename="label-nav-title"/>
+                    <!-- Переход на вкладку «Основное» (активна по умолчанию). -->
                     <button id="candidateNavMain" invoke="candidateNavMain"
                             caption="Основное"
                             width="100%"
                             stylename="borderless job-candidate-nav-item label-nav-item label-nav-item-active"/>
+                    <!-- Переход на вкладку «Позиции и вакансии». -->
                     <button id="candidateNavPositions" invoke="candidateNavPositions"
                             caption="Позиции и вакансии"
                             width="100%"
                             stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <!-- Переход на вкладку «Взаимодействия». -->
                     <button id="candidateNavIteraction" invoke="candidateNavIteraction"
                             caption="Взаимодействия"
                             width="100%"
                             stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <!-- Переход на вкладку «Резюме и файлы». -->
                     <button id="candidateNavResume" invoke="candidateNavResume"
                             caption="Резюме и файлы"
                             width="100%"
                             stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <!-- Переход на вкладку «Контакты». -->
                     <button id="candidateNavContactInfo" invoke="candidateNavContactInfo"
                             caption="Контакты"
                             width="100%"
                             stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <!-- Переход на вкладку «Комментарии». -->
                     <button id="candidateNavComments" invoke="candidateNavComments"
                             caption="Комментарии"
                             width="100%"
                             stylename="borderless job-candidate-nav-item label-nav-item"/>
+                    <!-- Переход на вкладку «История». -->
                     <button id="candidateNavHistory" invoke="candidateNavHistory"
                             caption="История"
                             width="100%"
@@ -356,18 +460,22 @@
                 </vbox>
 
                 <!-- Contacts -->
+                <!-- Карточка контактов в sidebar: Email, Телефон, Telegram (ссылки заполняются контроллером). -->
                 <vbox id="candidateProfileContacts"
                       width="100%"
                       spacing="true"
                       stylename="job-candidate-profile-contacts job-candidate-sidebar-card edit-sidebar-summary">
+                    <!-- Элемент grid. -->
                     <grid spacing="true" width="100%">
                         <columns count="2"/>
                         <rows>
                             <row>
+                                <!-- Строка Email: подпись и кликабельная ссылка mailto. -->
                                 <hbox spacing="false" width="100%">
                                     <label value="Email"
                                            stylename="small"
                                            box.expandRatio="1"/>
+                                    <!-- Ссылка mailto на email кандидата (заполняется контроллером). -->
                                     <linkButton id="emailLinkButton"
                                                 box.expandRatio="2"
                                                 align="MIDDLE_LEFT"
@@ -375,11 +483,13 @@
                                 </hbox>
                             </row>
                             <row>
+                                <!-- Строка «Телефон»: номер из jobCandidateDc. -->
                                 <hbox spacing="false"
                                       width="100%">
                                     <label value="Телефон"
                                            stylename="small"
                                            box.expandRatio="1"/>
+                                    <!-- Телефон кандидата (свойство phone). -->
                                     <label id="phoneLabel"
                                            box.expandRatio="2"
                                            stylename="small"
@@ -388,6 +498,7 @@
                                 </hbox>
                             </row>
                             <row>
+                                <!-- Строка Telegram: кликабельная ссылка на профиль. -->
                                 <hbox spacing="false" width="100%">
                                     <label value="Telegram" stylename="small" box.expandRatio="1"/>
                                     <linkButton id="telegrammLinkButton"
@@ -407,20 +518,24 @@
                       stylename="job-candidate-sidebar-spacer edit-sidebar-spacer"/>
 
                 <!-- Quick Actions -->
+                <!-- Быстрые действия внизу sidebar: резюме, взаимодействие, HR-Мастер. -->
                 <vbox id="candidateProfileFooter"
                       width="100%"
                       spacing="true"
                       stylename="job-candidate-profile-footer edit-sidebar-summary">
+                    <!-- Создание резюме кандидата (открывает редактор CV). -->
                     <button id="createCandidateCvButton"
                             caption="Создать резюме"
                             invoke="createCandidateCv"
                             width="100%"
                             stylename="small"/>
+                    <!-- Создание взаимодействия по кандидату. -->
                     <button id="createCandidateIteractionButton"
                             caption="Создать взаимодействие"
                             invoke="createCandidateIteraction"
                             width="100%"
                             stylename="small"/>
+                    <!-- Запуск «HR-Мастера» — подбора вакансий. -->
                     <button id="openPositionMasterBrowseButton"
                             caption="HR-Мастер"
                             invoke="openPositionMasterBrowseStart"
@@ -429,38 +544,52 @@
                 </vbox>
 
                 <!-- Hidden fields for Java -->
+                <!-- Скрытое поле fullName: используется контроллером для синхронизации ФИО. -->
                 <textField id="fullNameTextField"
                            visible="false"
                            dataContainer="jobCandidateDc"
                            property="fullName"/>
+                <!-- Скрытый флаг блокировки кандидата (управляется из меню «Еще»). -->
                 <checkBox id="blockCandidateCheckBox"
                           dataContainer="jobCandidateDc"
                           property="blockCandidate"
                           visible="false"/>
+                <!-- Скрытые поля-помощники для контроллера (телефон/email/skype/telegram и заголовки). -->
                 <label id="mobilePhoneLabel" visible="false"/>
                 <label id="emailLabel" visible="false"/>
                 <label id="skypuLabel" visible="false"/>
+                <!-- Скрытый label telegramLabel (контракт контроллера). -->
                 <label id="telegramLabel" visible="false"/>
+                <!-- Элемент linkButton. -->
                 <linkButton id="skypeLinkButton" visible="false"/>
+                <!-- Элемент linkButton. -->
                 <linkButton id="telegrammGroupLinkButton" visible="false"/>
+                <!-- Скрытый label personPositionTitle (контракт контроллера). -->
                 <label id="personPositionTitle" visible="false"/>
+                <!-- Скрытый label emailTitle (контракт контроллера). -->
                 <label id="emailTitle" visible="false"/>
+                <!-- Скрытый label phoneTitle (контракт контроллера). -->
                 <label id="phoneTitle" visible="false"/>
+                <!-- Скрытый label telegramTitle (контракт контроллера). -->
                 <label id="telegramTitle" visible="false"/>
+                <!-- Скрытый label skypeTitle (контракт контроллера). -->
                 <label id="skypeTitle" visible="false"/>
                 <label id="jobTitleTitle" visible="false"/>
+                <!-- Скрытый контейнер навыков (используется контроллером при проверке навыков). -->
                 <hbox id="skillBox" visible="false"/>
             </vbox>
 
             <!-- Legacy-контейнеры сохраняют XML-контракт @Inject контроллера.
                  Таблицы здесь не дублируются: их рабочие экземпляры находятся
                  во вкладке «Позиции и вакансии» и имеют штатные dataContainer. -->
+            <!-- Legacy-группа «Последние проекты»: скрыта, сохраняет @Inject-контракт контроллера. -->
             <groupBox id="lastProjects"
                       visible="false"
                       width="1px"
                       height="1px"
                       caption="msg://msgLastProject"
                       expand="dictionatysTavlesHBox">
+                <!-- Legacy-сетка словарей: скрыта, заглушка контракта. -->
                 <grid id="dictionatysTavlesHBox"
                       visible="false"
                       width="1px"
@@ -469,6 +598,7 @@
                     <columns count="1"/>
                     <rows>
                         <row>
+                            <!-- Label : значение, заполняемое контроллером. -->
                             <label value=""/>
                         </row>
                     </rows>
@@ -476,6 +606,7 @@
             </groupBox>
 
             <!-- ===== WORKSPACE ===== -->
+            <!-- Правая рабочая область: верхняя панель, вкладки и нижняя панель действий. -->
             <vbox id="jobCandidateWorkspace"
                   width="100%"
                   height="100%"
@@ -484,27 +615,38 @@
                   stylename="job-candidate-workspace edit-workspace">
 
                 <!-- Верхняя панель: меню «Еще» справа. -->
+                <!-- Панель инструментов: кнопка-меню «Еще» с действиями над карточкой. -->
                 <hbox id="jobCandidateTopBar"
                       width="100%"
                       spacing="true"
                       expand="moreActionsPopUpButton"
                       align="MIDDLE_LEFT"
                       stylename="job-candidate-top-bar edit-toolbar">
+                    <!-- Меню «Еще»: блокировка, подписка, аудит-справка. -->
                     <popupButton id="moreActionsPopUpButton"
                                  caption="Еще"
                                  align="MIDDLE_RIGHT"
                                  stylename="job-candidate-more-actions edit-toolbar-actions">
                         <popup>
+                            <!-- Выпадающий список действий карточки. -->
                             <vbox spacing="true">
+                                <!-- Блокировка/разблокировка кандидата. -->
                                 <button id="blockCandidateButton"
                                         caption="msg://msgBlockCandidate"
                                         invoke="blockCandidateButton"
                                         icon="WINDOW_CLOSE_O"
                                         stylename="small"/>
+                                <!-- Подписка на обновления кандидата. -->
                                 <button id="buttonSubscribe"
                                         caption="msg://msgSubscribe"
                                         invoke="onButtonSubscribeClick"
                                         icon="BELL"
+                                        stylename="small"/>
+                                <!-- Информация об авторе карточки и последнем редакторе (аудит-справка). -->
+                                <button id="cardAuditInfoButton"
+                                        caption="Создано/Изменено"
+                                        invoke="onCardAuditInfoClick"
+                                        icon="INFO"
                                         stylename="small"/>
                             </vbox>
                         </popup>
@@ -512,42 +654,52 @@
                 </hbox>
 
                 <!-- TabSheet -->
+                <!-- Основной TabSheet формы: разделы «Основное», «Контакты», «Позиции и вакансии»,
+                     «Взаимодействия», «Резюме и файлы», «Комментарии», «История». -->
                 <tabSheet id="tabSheetSocialNetworks"
                           stylename="framed job-candidate-tabs edit-tabs"
                           width="100%"
                           height="100%">
 
                     <!-- TAB: Основное -->
+                    <!-- Вкладка «Основное»: персональные и профессиональные данные кандидата. -->
                     <tab id="tabMain"
                          caption="Основное"
                          spacing="true"
                          margin="false">
+                        <!-- Аккордеон-секция вкладки «Основное» (заголовок + контент). -->
                         <vbox id="jobCandidateMainSection"
                               width="100%"
                               spacing="true"
                               stylename="job-candidate-accordion-section job-candidate-accordion-open edit-accordion-section">
 
+                            <!-- Заголовок аккордеона с названием раздела. -->
                             <hbox id="jobCandidateMainSectionHeader"
                                   width="100%"
                                   align="MIDDLE_LEFT"
                                   stylename="job-candidate-accordion-header">
+                                <!-- Название раздела в заголовке аккордеона. -->
                                 <label value="Основное"
                                        stylename="job-candidate-accordion-title"/>
                             </hbox>
 
-                            <hbox id="jobCandidateMainSectionContent"
+                            <!-- Вертикальная раскладка контента вкладки: карточки «Персональные данные» и «Профессиональные данные» размещаются одна над другой на всю ширину. -->
+                            <vbox id="jobCandidateMainSectionContent"
                                   width="100%"
                                   spacing="true"
                                   stylename="job-candidate-accordion-content">
 
+                                <!-- Карточка «Персональные данные»: ФИО, дата рождения, город. -->
                                 <vbox id="personalDataBlock"
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
-                                      stylename="job-candidate-card job-candidate-half-card edit-card">
+                                      stylename="job-candidate-card edit-card">
+                                    <!-- Заголовок карточки. -->
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="Персональные данные" stylename="job-candidate-card-title edit-card-title"/>
                                     </hbox>
+                                    <!-- Сетка полей персональных данных (подпись + поле в каждой строке). -->
                                     <grid id="personalDataGrid"
                                           spacing="true"
                                           width="100%"
@@ -557,12 +709,16 @@
                                             <!-- Fixed caption width + one expanded field keeps all three
                                                  SuggestionFields equal without changing lazy initialization. -->
                                             <row>
+                                                <!-- Строка «Имя»: подпись и поле с автодополнением имён. -->
                                                 <hbox spacing="false" width="100%"
                                                       expand="firstNameField"
                                                       stylename="job-candidate-name-row">
+                                                    <!-- Подпись «Имя». -->
                                                     <label value="Имя"
                                                            stylename="small"
                                                            box.expandRatio="1"/>
+                                                    <!-- Поле имени: подсказывает ранее встречавшиеся имена
+                                                         (поиск по firstName из таблицы кандидатов). -->
                                                     <suggestionField id="firstNameField"
                                                                      box.expandRatio="4"
                                                                      dataContainer="jobCandidateDc"
@@ -572,6 +728,7 @@
                                                                      minSearchStringLength="1"
                                                                      editable="true"
                                                                      inputPrompt="msg://msgPressEnter">
+                                                        <!-- Запрос подсказок имён (поиск по firstName). -->
                                                         <query entityClass="com.company.hunttech.entity.JobCandidate"
                                                                escapeValueForLike="false"
                                                                view="_local"
@@ -584,12 +741,15 @@
                                                 </hbox>
                                             </row>
                                             <row>
+                                                <!-- Строка «Отчество»: поле с автодополнением отчеств. -->
                                                 <hbox spacing="false" width="100%"
                                                       expand="middleNameField"
                                                       stylename="job-candidate-name-row">
+                                                    <!-- Подпись «Отчество». -->
                                                     <label value="Отчество"
                                                            box.expandRatio="1"
                                                            stylename="small"/>
+                                                    <!-- Поле «Отчество»: автодополнение (свойство middleName). -->
                                                     <suggestionField id="middleNameField"
                                                                      dataContainer="jobCandidateDc"
                                                                      box.expandRatio="4"
@@ -599,6 +759,7 @@
                                                                      minSearchStringLength="1"
                                                                      editable="true"
                                                                      inputPrompt="msg://msgPressEnter">
+                                                        <!-- Запрос подсказок отчеств (поиск по middleName). -->
                                                         <query entityClass="com.company.hunttech.entity.JobCandidate"
                                                                searchStringFormat="%$searchString%"
                                                                view="_minimal"
@@ -611,9 +772,11 @@
                                                 </hbox>
                                             </row>
                                             <row>
+                                                <!-- Строка «Фамилия»: поле с автодополнением фамилий. -->
                                                 <hbox spacing="false" width="100%"
                                                       expand="secondNameField"
                                                       stylename="job-candidate-name-row">
+                                                    <!-- Подпись «Фамилия». -->
                                                     <label value="Фамилия" stylename="small" box.expandRatio="1"/>
                                                     <suggestionField id="secondNameField"
                                                                      dataContainer="jobCandidateDc"
@@ -624,6 +787,7 @@
                                                                      minSearchStringLength="1"
                                                                      editable="true"
                                                                      inputPrompt="msg://msgPressEnter">
+                                                        <!-- Запрос подсказок фамилий (поиск по secondName). -->
                                                         <query entityClass="com.company.hunttech.entity.JobCandidate"
                                                                escapeValueForLike="true"
                                                                searchStringFormat="%$searchString%">
@@ -635,6 +799,7 @@
                                                 </hbox>
                                             </row>
                                             <row>
+                                                <!-- Строка «Дата рождения»: стандартное поле даты. -->
                                                 <hbox spacing="false" width="100%">
                                                     <label value="Дата рождения" stylename="small" box.expandRatio="1"/>
                                                     <dateField id="birdhDateField"
@@ -646,6 +811,7 @@
                                                 </hbox>
                                             </row>
                                             <row>
+                                                <!-- Строка «Город»: lookup-выбор из справочника городов (обязательное). -->
                                                 <hbox spacing="false" width="100%">
                                                     <label value="Город" stylename="small" box.expandRatio="1"/>
                                                     <lookupPickerField id="jobCityCandidateField"
@@ -656,7 +822,9 @@
                                                                        optionsContainer="citiesDc"
                                                                        property="cityOfResidence"
                                                                        required="true">
+                                                        <!-- Элемент actions. -->
                                                         <actions>
+                                                            <!-- Действие picker_lookup (lookup). -->
                                                             <action id="lookup" type="picker_lookup"/>
                                                         </actions>
                                                     </lookupPickerField>
@@ -666,14 +834,17 @@
                                     </grid>
                                 </vbox>
 
+                                <!-- Карточка «Профессиональные данные»: должность, компания, доп. позиции. -->
                                 <vbox id="professionalDataBlock"
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
-                                      stylename="job-candidate-card job-candidate-half-card edit-card">
+                                      stylename="job-candidate-card edit-card">
+                                    <!-- Заголовок карточки. -->
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="Профессиональные данные" stylename="job-candidate-card-title edit-card-title"/>
                                     </hbox>
+                                    <!-- Сетка полей профессиональных данных. -->
                                     <grid id="professionalDataGrid"
                                           spacing="true"
                                           width="100%"
@@ -681,6 +852,7 @@
                                         <columns count="2"/>
                                         <rows>
                                             <row>
+                                                <!-- Строка «Должность»: lookup-выбор из справочника должностей (обязательное). -->
                                                 <hbox spacing="false" width="100%">
                                                     <label value="Должность" stylename="small" box.expandRatio="1"/>
                                                     <lookupPickerField id="personPositionField"
@@ -691,14 +863,18 @@
                                                                        width="100%"
                                                                        stylename="edit-form-control"
                                                                        required="true">
+                                                        <!-- Элемент actions. -->
                                                         <actions>
+                                                            <!-- Действие picker_lookup (lookup). -->
                                                             <action id="lookup" type="picker_lookup"/>
+                                                            <!-- Действие picker_open (open). -->
                                                             <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                                         </actions>
                                                     </lookupPickerField>
                                                 </hbox>
                                             </row>
                                             <row>
+                                                <!-- Строка «Компания»: поиск компании с подсказками (обязательное). -->
                                                 <hbox spacing="false" width="100%">
                                                     <label value="Компания" stylename="small" box.expandRatio="1"/>
                                                     <suggestionPickerField id="currentCompanyField"
@@ -712,8 +888,11 @@
                                                                            asyncSearchDelayMs="300"
                                                                            inputPrompt="msg://msgPressEnter"
                                                                            required="true">
+                                                        <!-- Элемент actions. -->
                                                         <actions>
+                                                            <!-- Действие picker_lookup (lookup). -->
                                                             <action id="lookup" type="picker_lookup"/>
+                                                            <!-- Действие picker_open (open). -->
                                                             <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                                         </actions>
                                                         <query entityClass="com.company.hunttech.entity.Company"
@@ -728,16 +907,19 @@
                                                 </hbox>
                                             </row>
                                             <row>
+                                                <!-- Строка «Доп. позиции»: кнопка добавления и список выбранных позиций. -->
                                                 <hbox spacing="true" width="100%" expand="positionsLabel">
                                                     <label value="Доп. позиции"
                                                            align="MIDDLE_LEFT"
                                                            stylename="small"/>
+                                                    <!-- Кнопка добавления дополнительных позиций (диалог выбора). -->
                                                     <button id="addPositions"
                                                             caption="..."
                                                             enable="true"
                                                             align="MIDDLE_LEFT"
                                                             description="msg://msgSetPositions"
                                                             invoke="addPositionList"/>
+                                                    <!-- Список выбранных дополнительных позиций (заполняется контроллером). -->
                                                     <label id="positionsLabel"
                                                            width="100%"
                                                            stylename="small"
@@ -747,69 +929,86 @@
                                         </rows>
                                     </grid>
                                 </vbox>
-                            </hbox>
+                            </vbox>
                         </vbox>
                     </tab>
 
                     <!-- TAB: Контакты -->
+                    <!-- Вкладка «Контакты»: контакты, способ связи, соцсети (с вертикальной прокруткой). -->
                     <tab id="tabContactInfo"
                          caption="Контакты"
                          spacing="true"
                          margin="false"
                          expand="tabContactInfoScrollBox">
+                        <!-- Прокручиваемый контейнер вкладки: обязательные размеры 100%×100%
+                             для корректной вертикальной прокрутки содержимого. -->
                         <scrollBox id="tabContactInfoScrollBox"
                                    orientation="vertical"
                                    scrollBars="vertical"
                                    width="100%"
                                    height="100%"
                                    spacing="true">
+                            <!-- Аккордеон-секция «Контакты». -->
                             <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section edit-accordion-section">
+                                <!-- Заголовок секции. -->
                                 <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                     <label value="Контакты" stylename="job-candidate-accordion-title"/>
                                 </hbox>
+                                <!-- Контент секции: карточки контактов и соцсетей. -->
                                 <vbox width="100%" height="AUTO" spacing="true"
                                       stylename="job-candidate-accordion-content">
+                                    <!-- Ряд из двух карточек: основные и дополнительные контакты. -->
                                     <hbox width="100%" spacing="true" stylename="job-candidate-card-row">
                                         <!-- Основные контакты -->
+                                        <!-- Карточка «Основные контакты»: email, телефон, мобильный, Telegram. -->
                                         <vbox id="jobCandidateMainContacts"
                                               width="100%" height="AUTO"
                                               spacing="true"
                                               box.expandRatio="1"
                                               stylename="job-candidate-card job-candidate-half-card job-candidate-contact-card edit-card">
+                                            <!-- Заголовок карточки. -->
                                             <hbox width="100%" align="MIDDLE_LEFT"
                                                   stylename="job-candidate-card-heading">
                                                 <label value="Основные контакты" stylename="job-candidate-card-title edit-card-title"/>
                                             </hbox>
+                                            <!-- Строка Email. -->
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="emailField"
                                                   stylename="job-candidate-form-row">
                                                 <label value="Email" stylename="small" width="100px"/>
+                                                <!-- Поле email: ввод значения email. -->
                                                 <textField id="emailField"
                                                            dataContainer="jobCandidateDc"
                                                            property="email"
                                                            stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox>
+                                            <!-- Строка «Телефон». -->
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT" expand="phoneField"
                                                   stylename="job-candidate-form-row">
                                                 <label value="Телефон" stylename="small" width="100px"/>
+                                                <!-- Поле phone: ввод значения phone. -->
                                                 <textField id="phoneField"
                                                            dataContainer="jobCandidateDc"
                                                            property="phone"
                                                            stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox>
+                                            <!-- Строка «Мобильный». -->
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                                   expand="mobilePhoneField" stylename="job-candidate-form-row">
                                                 <label value="Мобильный" stylename="small" width="100px"/>
+                                                <!-- Поле mobilePhone: ввод значения mobilePhone. -->
                                                 <textField id="mobilePhoneField"
                                                            dataContainer="jobCandidateDc"
                                                            property="mobilePhone"
                                                            stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox>
+                                            <!-- Строка Telegram (username). -->
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                                   expand="telegramNameField" stylename="job-candidate-form-row">
                                                 <label value="Telegram" stylename="small" width="100px"/>
+                                                <!-- Поле telegramName: ввод значения telegramName. -->
                                                 <textField id="telegramNameField"
                                                            dataContainer="jobCandidateDc"
                                                            property="telegramName"
@@ -818,11 +1017,13 @@
                                             </hbox>
                                         </vbox>
                                         <!-- Дополнительные контакты + Приоритет -->
+                                        <!-- Карточка «Дополнительные контакты»: WhatsApp, Viber, Skype. -->
                                         <vbox id="jobCandidateAdditionalContacts"
                                               width="100%" height="AUTO"
                                               spacing="true"
                                               box.expandRatio="1"
                                               stylename="job-candidate-card job-candidate-half-card job-candidate-contact-card edit-card">
+                                            <!-- Заголовок карточки. -->
                                             <hbox width="100%" align="MIDDLE_LEFT"
                                                   stylename="job-candidate-card-heading">
                                                 <label value="Дополнительные контакты"
@@ -840,27 +1041,33 @@
                                                            stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox> -->
+                                            <!-- Строка WhatsApp. -->
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                                   expand="whatsupNameField" stylename="job-candidate-form-row">
                                                 <label value="WhatsApp" stylename="small" width="100px"/>
+                                                <!-- Поле whatsupName: ввод значения whatsupName (WhatsApp). -->
                                                 <textField id="whatsupNameField"
                                                            dataContainer="jobCandidateDc"
                                                            property="whatsupName"
                                                            stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox>
+                                            <!-- Строка Viber. -->
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                                   expand="wiberNameField" stylename="job-candidate-form-row">
                                                 <label value="Viber" stylename="small" width="100px"/>
+                                                <!-- Поле wiberName: ввод значения wiberName (Viber). -->
                                                 <textField id="wiberNameField"
                                                            dataContainer="jobCandidateDc"
                                                            property="wiberName"
                                                            stylename="edit-form-control"
                                                            width="100%"/>
                                             </hbox>
+                                            <!-- Строка Skype. -->
                                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                                   expand="skypeNameField" stylename="job-candidate-form-row">
                                                 <label value="Skype" stylename="small" width="100px"/>
+                                                <!-- Поле skypeName: ввод значения skypeName (Skype). -->
                                                 <textField id="skypeNameField"
                                                            dataContainer="jobCandidateDc"
                                                            property="skypeName"
@@ -873,9 +1080,11 @@
                                 </vbox>
                             </vbox>
 
+                            <!-- Строка «Способ связи»: приоритетный канал коммуникации. -->
                             <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                   expand="priorityCommunicationMethodRadioButton"
                                   stylename="job-candidate-form-row">
+                                <!-- Подпись «Способ связи». -->
                                 <label value="Способ связи" stylename="small" width="AUTO"/>
                                 <radioButtonGroup id="priorityCommunicationMethodRadioButton"
                                                   orientation="horizontal"
@@ -885,15 +1094,18 @@
                                                   property="priorityContact"/>
                             </hbox>
 
+                            <!-- Секция «Социальные сети»: таблица профилей и кнопки обслуживания списка. -->
                             <vbox id="contactSocialNetworksSection"
                                   width="100%"
                                   height="560px"
                                   spacing="true"
                                   expand="contactSocialNetworksContent"
                                   stylename="job-candidate-accordion-section edit-accordion-section">
+                                <!-- Заголовок секции. -->
                                 <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                     <label value="Социальные сети" stylename="job-candidate-accordion-title"/>
                                 </hbox>
+                                <!-- Контент секции: таблица соцсетей и панель кнопок. -->
                                 <vbox id="contactSocialNetworksContent"
                                       width="100%"
                                       height="100%"
@@ -901,12 +1113,15 @@
                                       expand="socialNetworkTableHbox"
                                       stylename="job-candidate-accordion-content">
 
+                                    <!-- Ряд: таблица соцсетей + колонка обслуживающих кнопок. -->
                                     <hbox id="socialNetworkTableHbox"
                                           width="100%"
                                           height="100%"
                                           spacing="true"
                                           stylename="borderless"
                                           expand="socialNetworkTable">
+                                        <!-- Таблица соцсетей кандидата с инлайн-редактированием
+                                             (колонки: логотип, сеть, URL, ссылка на профиль). -->
                                         <dataGrid id="socialNetworkTable"
                                                   height="100%"
                                                   width="100%"
@@ -914,32 +1129,42 @@
                                                   editorEnabled="true"
                                                   dataContainer="jobCandidateSocialNetworksDc">
                                             <columns>
+                                                <!-- Логотип соцсети (рендерится компонентом). -->
                                                 <column id="socialNetworkLogoColumn" width="50px" caption="">
                                                     <componentRenderer/>
                                                 </column>
+                                                <!-- Название соцсети (нередактируемое). -->
                                                 <column id="networkName" editable="false"
                                                         property="socialNetworkURL.socialNetwork" maximumWidth="200px"/>
+                                                <!-- URL профиля (редактируемое). -->
                                                 <column id="networkURLS" editable="true" property="networkURLS"/>
+                                                <!-- Кликабельная ссылка на профиль. -->
                                                 <column id="linkToWeb" caption="msg://msgLinkURL" maximumWidth="150px">
                                                     <componentRenderer/>
                                                 </column>
                                             </columns>
+                                            <!-- Стандартные CRUD-действия таблицы. -->
                                             <actions>
                                                 <action id="create" type="create"/>
                                                 <action id="edit" type="edit"/>
+                                                <!-- Действие remove (remove). -->
                                                 <action id="remove" type="remove"/>
                                             </actions>
                                         </dataGrid>
+                                        <!-- Панель обслуживания списка соцсетей: добавление недостающих и очистка. -->
                                         <vbox spacing="true" width="220px" height="AUTO"
                                               stylename="job-candidate-social-actions">
+                                            <!-- Скрытая кнопка массового добавления (выключена). -->
                                             <button id="addSocialNetworkListsButton" visible="false" enable="false"
                                                     width="100%" caption="msg://msgAddSocialNetworks"
                                                     description="msg://msgAddSocialNetworksDesc"
                                                     invoke="addSocialNetworksListsInvoke"/>
+                                            <!-- Добавить недостающие соцсети из справочника. -->
                                             <button id="addMissingSocialNetworkListsButton" width="100%" enable="true"
                                                     caption="msg://msgAddMissingSocialNetrorkButton"
                                                     description="msg://msgAddMissingSocialNetrorkButtonDesc"
                                                     invoke="addMissingSocialNetworksListsInvoke"/>
+                                            <!-- Удалить пустые (без URL) записи соцсетей. -->
                                             <button id="removeEmptySocialNetworkListsButton" width="100%" enable="true"
                                                     caption="msg://removeEmptySocialNetworkListsButton"
                                                     description="msg://removeEmptySocialNetworkListsButtonDesc"
@@ -953,26 +1178,31 @@
                     </tab>
 
                     <!-- TAB: Позиции и вакансии. Данные загружаются лениво контроллером. -->
+                    <!-- Вкладка «Позиции и вакансии»: история рассмотрения и подходящие вакансии. -->
                     <tab id="tabPositions"
                          caption="Позиции и вакансии"
                          spacing="true"
                          margin="false"
                          expand="tabPositionsSection">
+                        <!-- Аккордеон-секция вкладки. -->
                         <vbox id="tabPositionsSection"
                               width="100%"
                               height="100%"
                               spacing="true"
                               expand="tabPositionsContent"
                               stylename="job-candidate-accordion-section edit-accordion-section">
+                            <!-- Заголовок секции. -->
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Позиции и вакансии" stylename="job-candidate-accordion-title"/>
                             </hbox>
+                            <!-- Контент секции: двухколоночная раскладка. -->
                             <vbox id="tabPositionsContent"
                                   width="100%"
                                   height="100%"
                                   spacing="true"
                                   expand="jobCandidatePositionsLayout"
                                   stylename="job-candidate-accordion-content">
+                                <!-- Ряд двух колонок: история рассмотрения и подходящие вакансии. -->
                                 <hbox id="jobCandidatePositionsLayout"
                                       width="100%"
                                       height="100%"
@@ -980,11 +1210,14 @@
                                       stylename="job-candidate-positions-layout">
 
                                     <!-- Левая колонка: история рассмотрения -->
+                                    <!-- Карточка истории рассмотрения: таблица последних проектов кандидата. -->
                                     <vbox id="jobCandidatePositionHistory"
                                           width="100%" height="100%"
                                           spacing="true"
                                           box.expandRatio="1"
                                           stylename="job-candidate-card job-candidate-position-column edit-card">
+                                        <!-- Таблица последних проектов: №, вакансия, дата, взаимодействия,
+                                             исследователь, рекрутер, кнопка просмотра взаимодействий. -->
                                         <table id="lastProjectTable"
                                                width="100%"
                                                height="100%"
@@ -993,18 +1226,25 @@
                                                contextMenuEnabled="false"
                                                dataContainer="lastProjectDc">
                                             <columns>
+                                                <!-- Порядковый номер (генерируется контроллером). -->
                                                 <column id="number" width="30px" caption="№"
                                                         generator="lastIteractionCount"/>
+                                                <!-- Вакансия (название, с ограничением длины). -->
                                                 <column id="vacancy" width="300px" maxTextLength="40"
                                                         caption="msg://msgVacancy"/>
+                                                <!-- Дата последнего взаимодействия. -->
                                                 <column id="max" width="70px" caption="msg://msgDate"/>
+                                                <!-- Последнее взаимодействие (генерируется контроллером). -->
                                                 <column id="lastInteraction" width="200px" maxTextLength="40"
                                                         caption="msg://msgLastInteraction"
                                                         generator="lastInteractionGeneratorColumn"/>
+                                                <!-- Исследователь по вакансии (генератор). -->
                                                 <column id="researcher" width="100px" caption="msg://msgResearcher"
                                                         generator="whoIsResearcherGeneratorColumn"/>
+                                                <!-- Рекрутер по вакансии (генератор). -->
                                                 <column id="recruter" width="100px" caption="msg://msgRecruter"
                                                         generator="whoIsRecruterGeneratorColumn"/>
+                                                <!-- Кнопка просмотра взаимодействий по вакансии (генератор). -->
                                                 <column id="idViewIteractionsButton" width="100px"
                                                         caption="msg://msgInteractionsView"
                                                         generator="addInteractionsViewButton"/>
@@ -1013,11 +1253,13 @@
                                     </vbox>
 
                                     <!-- Правая колонка: подходящие вакансии -->
+                                    <!-- Карточка подходящих вакансий: таблица открытых вакансий. -->
                                     <vbox id="jobCandidateSuitableVacancies"
                                           width="100%" height="100%"
                                           spacing="true"
                                           box.expandRatio="1"
                                           stylename="job-candidate-card job-candidate-position-column edit-card">
+                                        <!-- Таблица подходящих вакансий (статус отправки + название). -->
                                         <table id="suggestVacancyTable"
                                                contextMenuEnabled="false"
                                                width="100%"
@@ -1026,8 +1268,10 @@
                                                stylename="no-horizontal-lines job-candidate-table"
                                                dataContainer="suggestOpenPositionDc">
                                             <columns>
+                                                <!-- Индикатор статуса (отправлено/нет). -->
                                                 <column id="notSendedIconColumn" caption="msg://msgStatus"
                                                         width="20px"/>
+                                                <!-- Название вакансии с HTML-разметкой в капшне. -->
                                                 <column id="vacansyName" captionAsHtml="true" maxTextLength="60"
                                                         caption="msg://msgSuggestVacansies"/>
                                             </columns>
@@ -1040,20 +1284,24 @@
                         </vbox>
                     </tab>
                     <!-- TAB: Взаимодействия -->
+                    <!-- Вкладка «Взаимодействия»: история взаимодействий с кандидатом. -->
                     <tab id="tabIteraction"
                          caption="Взаимодействия"
                          spacing="true"
                          margin="true"
                          expand="tabIteractionSection">
+                        <!-- Аккордеон-секция вкладки. -->
                         <vbox id="tabIteractionSection"
                               width="100%"
                               height="100%"
                               spacing="true"
                               expand="tabIteractionContent"
                               stylename="job-candidate-accordion-section edit-accordion-section">
+                            <!-- Заголовок секции. -->
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Взаимодействия" stylename="job-candidate-accordion-title"/>
                             </hbox>
+                            <!-- Контент секции: фильтр по вакансии и таблица взаимодействий. -->
                             <vbox id="tabIteractionContent"
                                   width="100%"
                                   height="100%"
@@ -1061,15 +1309,21 @@
                                   expand="jobCandidateIteractionListTable"
                                   stylename="job-candidate-accordion-content">
 
+                                <!-- Фильтр таблицы по вакансии (picker открытых вакансий). -->
                                 <lookupPickerField id="vacancyFilterLookupPickerField"
                                                    caption="msg://msgVacancyFiler"
                                                    visible="true" width="AUTO"
                                                    stylename="edit-form-control">
+                                    <!-- Элемент actions. -->
                                     <actions>
+                                        <!-- Действие picker_lookup (lookup). -->
                                         <action id="lookup" type="picker_lookup"/>
+                                        <!-- Действие picker_open (open). -->
                                         <action id="open" type="picker_open" icon="EDIT_ACTION"/>
                                     </actions>
                                 </lookupPickerField>
+                                <!-- Таблица взаимодействий кандидата: иконка, проект, номер, рейтинг,
+                                     вакансия, статус, тип, комментарий, рекрутер, дата. -->
                                 <dataGrid id="jobCandidateIteractionListTable"
                                           dataContainer="jobCandidateIteractionDc"
                                           stylename="job-candidate-table"
@@ -1078,55 +1332,74 @@
                                           contextMenuEnabled="false"
                                           textSelectionEnabled="false"
                                           reorderingAllowed="true">
+                                    <!-- CRUD-действия таблицы. -->
                                     <actions>
                                         <action id="create" type="create"/>
                                         <action type="edit" id="edit"/>
+                                        <!-- Действие remove (remove). -->
                                         <action id="remove" type="remove"/>
+                                        <!-- Действие refresh (refresh). -->
                                         <action id="refresh" type="refresh"/>
                                     </actions>
+                                    <!-- Панель кнопок таблицы: создание, часто используемые, копирование и др. -->
                                     <buttonsPanel>
                                         <button action="jobCandidateIteractionListTable.create"/>
+                                        <!-- Часто используемые взаимодействия (выпадающий список, включается по контексту). -->
                                         <popupButton id="frequentInteractionPopupButton"
                                                      icon="FILE_TEXT"
                                                      enable="false"
                                                      caption="msg://msgAddPopularIteraction"/>
                                         <button action="jobCandidateIteractionListTable.edit"/>
+                                        <!-- Копирование выбранного взаимодействия. -->
                                         <button id="copyIteractionButton" caption="msg://msgCopy" icon="COPY"/>
                                         <button action="jobCandidateIteractionListTable.remove"/>
+                                        <!-- Описание вакансии проекта (включается по выбору). -->
                                         <button id="openPositionProjectDescriptionButton"
                                                 enable="false"
                                                 caption="msg://msgOpenPositionDescription"/>
                                     </buttonsPanel>
                                     <columns>
+                                        <!-- Иконка типа взаимодействия. -->
                                         <column id="icon" width="48px" caption=""/>
+                                        <!-- Логотип проекта (рендер компонентом). -->
                                         <column id="projectLogoColumn" resizable="true" collapsible="true"
                                                 collapsed="false"
                                                 caption="msg://msgProject" width="70px" minimumWidth="70px">
+                                            <!-- Рендер ячейки кастомным компонентом. -->
                                             <componentRenderer/>
                                         </column>
+                                        <!-- Номер взаимодействия (сортировка по убыванию). -->
                                         <column id="numberIteraction" property="numberIteraction" sort="DESCENDING"
                                                 width="85px" maximumWidth="100px" sortable="true"/>
+                                        <!-- Рейтинг взаимодействия (HTML-значение). -->
                                         <column id="rating" minimumWidth="85px" width="85px" maximumWidth="100px"
                                                 caption="msg://msgRating">
                                             <htmlRenderer nullRepresentation="null"/>
                                         </column>
+                                        <!-- Вакансия взаимодействия. -->
                                         <column id="vacancy" maximumWidth="400px" property="vacancy"/>
+                                        <!-- Признак открытой/закрытой вакансии (иконка). -->
                                         <column id="currentOpenCloseColumn" caption="mainMsg://msgCurrentOpenClose"
                                                 maximumWidth="45px">
                                             <iconRenderer/>
                                         </column>
+                                        <!-- Тип взаимодействия. -->
                                         <column id="iteractionType" maximumWidth="250px" property="iteractionType"/>
+                                        <!-- Признак наличия комментария (иконка). -->
                                         <column id="commentColumn" maximumWidth="80px" width="60px"
                                                 caption="msg://msgIsComment">
                                             <iconRenderer/>
                                         </column>
+                                        <!-- Рекрутер взаимодействия. -->
                                         <column id="recrutier" maximumWidth="150px" property="recrutier"/>
+                                        <!-- Дата взаимодействия (формат dd.MM.yyyy). -->
                                         <column id="dateIteraction" property="dateIteraction" width="80px"
                                                 caption="msg://msgDate">
                                             <formatter format="dd.MM.yyyy"
                                                        class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
                                         </column>
                                     </columns>
+                                    <!-- Счётчик записей таблицы. -->
                                     <rowsCount/>
                                 </dataGrid>
 
@@ -1135,20 +1408,24 @@
                     </tab>
 
                     <!-- TAB: Резюме и файлы -->
+                    <!-- Вкладка «Резюме и файлы»: список резюме кандидата с файлами. -->
                     <tab id="tabResume"
                          caption="Резюме и файлы"
                          spacing="true"
                          margin="true"
                          expand="tabResumeSection">
+                        <!-- Аккордеон-секция вкладки. -->
                         <vbox id="tabResumeSection"
                               width="100%"
                               height="100%"
                               spacing="true"
                               expand="tabResumeContent"
                               stylename="job-candidate-accordion-section edit-accordion-section">
+                            <!-- Заголовок секции. -->
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Резюме и файлы" stylename="job-candidate-accordion-title"/>
                             </hbox>
+                            <!-- Контент секции: кнопка проверки навыков и таблица резюме. -->
                             <vbox id="tabResumeContent"
                                   width="100%"
                                   height="100%"
@@ -1156,12 +1433,16 @@
                                   expand="tabResumeVbox"
                                   stylename="job-candidate-accordion-content">
 
+                                <!-- Вертикальный контейнер вкладки: кнопка над таблицей. -->
                                 <vbox id="tabResumeVbox" spacing="true" width="100%" height="100%"
                                       expand="jobCandidateCandidateCvTable">
+                                    <!-- Панель с кнопкой проверки навыков по описанию вакансии. -->
                                     <hbox spacing="true" width="100%" align="MIDDLE_RIGHT">
                                         <button id="checkSkillFromJD" caption="msg://msgCheckSkills" align="BOTTOM_LEFT"
                                                 enable="false"/>
                                     </hbox>
+                                    <!-- Таблица резюме кандидата: проект, дата поста, вакансия, позиция,
+                                         оригинальный/HRM CV, сопроводительное письмо, автор. -->
                                     <dataGrid id="jobCandidateCandidateCvTable"
                                               width="100%"
                                               descriptionAsHtml="true"
@@ -1170,49 +1451,65 @@
                                               bodyRowHeight="55px"
                                               dataContainer="jobCandidateCandidateCvsDc">
                                         <columns>
+                                            <!-- Логотип проекта (рендер компонентом). -->
                                             <column id="projectLogoColumn" resizable="true" collapsible="true"
                                                     collapsed="false"
                                                     caption="msg://msgProject" width="70px" minimumWidth="70px">
+                                                <!-- Рендер ячейки кастомным компонентом. -->
                                                 <componentRenderer/>
                                             </column>
+                                            <!-- Дата публикации резюме. -->
                                             <column id="datePost" width="100px" maximumWidth="100px" property="datePost"
                                                     caption="msg://msgDatePost"/>
+                                            <!-- Вакансия, на которую подано резюме. -->
                                             <column id="toVacancy" property="toVacancy" caption="msg://msgToVacansy"/>
+                                            <!-- Позиция в резюме (скрыта по умолчанию). -->
                                             <column id="resumePosition" collapsible="true" collapsed="true"
                                                     property="resumePosition" caption="msg://msgToPosition"/>
+                                            <!-- Иконка оригинального файла CV. -->
                                             <column id="iconOriginalCVFile" width="100px" maximumWidth="100px"
                                                     caption="msg://msgOriginalCV">
                                                 <iconRenderer/>
                                             </column>
+                                            <!-- Иконка файла CV HRM HuntTech. -->
                                             <column id="iconHuntTechCVFile" width="100px" maximumWidth="100px"
                                                     caption="msg://msgHuntTechCV">
                                                 <iconRenderer/>
                                             </column>
+                                            <!-- Иконка сопроводительного письма. -->
                                             <column id="letter" width="100px" maximumWidth="100px"
                                                     caption="msg://msgCoverLetter">
                                                 <iconRenderer/>
                                             </column>
+                                            <!-- Ссылка на оригинальный CV (компонент-рендер). -->
                                             <column id="candidateOriginalCVColumn" width="150px"
                                                     caption="msg://msgOriginalCV">
                                                 <componentRenderer/>
                                             </column>
+                                            <!-- Ссылка на CV HRM HuntTech (компонент-рендер). -->
                                             <column id="candidateHuntTechCVColumn" width="150px"
                                                     caption="msg://msgHuntTechCV">
                                                 <componentRenderer/>
                                             </column>
+                                            <!-- Автор резюме. -->
                                             <column id="createdBy" property="createdBy" width="100px"
                                                     caption="msg://msgCreatedBy"/>
                                         </columns>
+                                        <!-- CRUD-действия таблицы. -->
                                         <actions>
                                             <action type="create" id="create"/>
                                             <action id="edit" type="edit"/>
+                                            <!-- Действие remove (remove). -->
                                             <action id="remove" type="remove"/>
                                         </actions>
+                                        <!-- Панель кнопок: создание, копирование, редактирование, удаление, скан контактов. -->
                                         <buttonsPanel>
                                             <button id="addButtonCV" action="jobCandidateCandidateCvTable.create"/>
                                             <button id="copyCVButton" caption="msg://msgCopy" icon="COPY"/>
+                                            <!-- Кнопка editButtonCV: действие jobCandidateCandidateCvTable.edit. -->
                                             <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
                                             <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
+                                            <!-- Скан контактов из CV (включается при выборе резюме). -->
                                             <button id="scanContactsFromCVButton" caption="msg://msgScan" enable="false"
                                                     invoke="scanContactsFromCVs"/>
                                         </buttonsPanel>
@@ -1224,20 +1521,24 @@
                     </tab>
 
                     <!-- TAB: Комментарии -->
+                    <!-- Вкладка «Комментарии»: лента комментариев и отправка нового. -->
                     <tab id="commentsTab"
                          caption="Комментарии"
                          spacing="true"
                          margin="true"
                          expand="tabCommentsSection">
+                        <!-- Аккордеон-секция вкладки. -->
                         <vbox id="tabCommentsSection"
                               width="100%"
                               height="100%"
                               spacing="true"
                               expand="tabCommentsContent"
                               stylename="job-candidate-accordion-section edit-accordion-section">
+                            <!-- Заголовок секции. -->
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="Комментарии" stylename="job-candidate-accordion-title"/>
                             </hbox>
+                            <!-- Контент секции: лента комментариев и панель отправки. -->
                             <vbox id="tabCommentsContent"
                                   width="100%"
                                   height="100%"
@@ -1245,8 +1546,10 @@
                                   expand="tabCommentsVbox"
                                   stylename="job-candidate-accordion-content">
 
+                                <!-- Вертикальный контейнер: лента над панелью отправки. -->
                                 <vbox id="tabCommentsVbox" spacing="true" width="100%" height="100%"
                                       expand="jobCandidateCommentsDataGrid">
+                                    <!-- Лента комментариев: рендер диалога, скрытые служебные колонки. -->
                                     <dataGrid id="jobCandidateCommentsDataGrid"
                                               dataContainer="interactionCommentDc"
                                               bodyRowHeight="80px"
@@ -1258,23 +1561,32 @@
                                               sortable="false"
                                               width="100%" height="100%">
                                         <columns>
+                                            <!-- Комментарий целиком (кастомный компонент-рендер диалога). -->
                                             <column id="commentDialog" sortable="false">
                                                 <componentRenderer/>
                                             </column>
+                                            <!-- Дата (служебная, скрыта; используется для сортировки). -->
                                             <column id="dateIteraction" sortable="true" sort="DESCENDING" width="80px"
                                                     collapsed="true" property="dateIteraction"/>
+                                            <!-- Рекрутер (служебная, скрыта). -->
                                             <column id="recrutier" collapsed="true" width="250px" property="recrutier"/>
+                                            <!-- Текст комментария (служебная, скрыта). -->
                                             <column id="comment" collapsed="true" sortable="false" property="comment"/>
                                         </columns>
                                     </dataGrid>
+                                    <!-- Панель отправки комментария: текст, вакансия, кнопка «Отправить». -->
                                     <groupBox stylename="well" spacing="true" width="100%">
+                                        <!-- Поле ввода текста нового комментария. -->
                                         <textField id="chatMessageTextField" stylename="large edit-form-control" width="100%"/>
+                                        <!-- Ряд: выбор вакансии и кнопка отправки. -->
                                         <hbox width="100%" expand="vacancyPopupPickerField" spacing="true">
+                                            <!-- Вакансия, к которой относится комментарий (из открытых). -->
                                             <lookupPickerField id="vacancyPopupPickerField"
                                                                align="MIDDLE_LEFT"
                                                                stylename="large edit-form-control"
                                                                optionsContainer="openPositionDc"
                                                                width="100%"/>
+                                            <!-- Отправка комментария (включается при заполнении текста). -->
                                             <button id="sendCommentButton"
                                                     caption="msg://msgSendComment"
                                                     stylename="large"
@@ -1292,23 +1604,30 @@
                     </tab>
 
                     <!-- TAB: История -->
+                    <!-- Вкладка «История»: служебная информация о записи кандидата. -->
                     <tab id="tabHistory"
                          caption="История"
                          spacing="true"
                          margin="true">
+                        <!-- Аккордеон-секция вкладки. -->
                         <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section edit-accordion-section">
+                            <!-- Заголовок секции. -->
                             <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
                                 <label value="История" stylename="job-candidate-accordion-title"/>
                             </hbox>
+                            <!-- Контент секции: данные создания записи. -->
                             <vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
 
+                                <!-- Карточка «Данные записи»: автор и дата создания. -->
                                 <groupBox caption="Данные записи"
                                           stylename="light job-candidate-card edit-card"
                                           spacing="true" width="100%">
+                                    <!-- Сетка служебных полей записи. -->
                                     <grid spacing="true" width="100%">
                                         <columns count="2"/>
                                         <rows>
                                             <row>
+                                                <!-- Подпись «Создал» и автор записи. -->
                                                 <label value="Создал" stylename="small"/>
                                                 <label id="historyCreatedByLabel"
                                                        dataContainer="jobCandidateDc"
@@ -1316,6 +1635,7 @@
                                                        stylename="small"/>
                                             </row>
                                             <row>
+                                                <!-- Подпись «Дата создания» и timestamp создания. -->
                                                 <label value="Дата создания" stylename="small"/>
                                                 <label id="historyCreateTsLabel"
                                                        dataContainer="jobCandidateDc"
@@ -1332,17 +1652,22 @@
                 </tabSheet>
 
                 <!-- Нижняя панель основных действий. -->
-                <hbox width="100%" spacing="false">
+                <!-- Обёртка нижней панели действий формы. -->
+                <hbox width="100%"
+                      spacing="false">
+                    <!-- Панель действий: «Сохранить и закрыть» и «Отмена». -->
                     <hbox id="jobCandidateBottomBar"
                           width="100%"
                           spacing="true"
                           align="MIDDLE_RIGHT"
                           stylename="job-candidate-bottom-bar edit-footer-actions">
+                        <!-- Сохранение изменений и закрытие формы. -->
                         <button id="windowCommitAndCloseButton"
                                 action="windowCommitAndClose"
                                 caption="Сохранить и закрыть"
                                 stylename="primary job-candidate-primary-action"
                                 align="MIDDLE_RIGHT"/>
+                        <!-- Отмена изменений и закрытие формы. -->
                         <button action="windowClose"
                                 caption="Отмена"
                                 stylename="default job-candidate-secondary-action"

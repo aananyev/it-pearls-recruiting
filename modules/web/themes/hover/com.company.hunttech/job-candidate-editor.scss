@@ -17,7 +17,6 @@
     position: relative;
     width: 100%;
     height: 100%;
-    min-width: 1180px;
     min-height: 700px;
     color: $v-font-color;
     background: #eef2f6;
@@ -36,6 +35,8 @@
     .edit-toolbar,
     .job-candidate-tabs,
     .edit-tabs,
+    .job-candidate-tabs .v-tabsheet-tabcontainer,
+    .job-candidate-tabs .v-tabsheet-content,
     .job-candidate-accordion-section,
     .edit-accordion-section,
     .job-candidate-accordion-header,
@@ -74,6 +75,7 @@
       max-width: 312px !important;
       height: 100% !important;
       padding: 24px 20px 18px;
+      box-sizing: border-box;
       color: #f8fafc;
       border-right: 1px solid rgba(15, 23, 42, .72);
       box-shadow: 5px 0 20px rgba(15, 23, 42, .16);
@@ -207,9 +209,10 @@
     .job-candidate-sidebar-card {
       width: 100% !important;
       padding: 14px;
+      box-sizing: border-box;
       color: #f8fafc;
       background: rgba(255, 255, 255, .055) !important;
-      border: 1px solid rgba(255, 255, 255, .18) !important;
+      border: 1px solid rgba(255, 255, 255, .35) !important;
       border-radius: 8px;
     }
 
@@ -353,7 +356,7 @@
       height: auto !important;
       padding: 2px 8px !important;
       color: rgba(248, 250, 252, 0.82) !important;
-      font-size: 9px !important;
+      font-size: 12px !important;
       font-weight: 600 !important;
       line-height: 14px !important;
       text-align: left !important;
@@ -462,9 +465,11 @@
       min-height: 0;
       background: #fff !important;
       border: 0 !important;
+      overflow: hidden !important;
     }
 
     .job-candidate-tabs > .v-tabsheet-tabcontainer {
+      width: 100% !important;
       padding: 0 12px;
       background: #fff !important;
       border-bottom: 1px solid #dfe5ec;
@@ -511,6 +516,7 @@
     }
 
     .job-candidate-tabs .v-tabsheet-content {
+      width: 100% !important;
       height: calc(100% - 49px) !important;
       padding: 16px 18px 20px;
       background: #f5f7fa !important;
@@ -672,6 +678,18 @@
       min-width: 0 !important;
     }
 
+    /* Фиксированная колонка подписей в строках-контейнерах: поля ФИО, должности и
+       компании остаются строго одной ширины при любой длине подписи («Имя»/«Отчество»). */
+    .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-small {
+      width: 112px !important;
+      min-width: 112px !important;
+    }
+
+    .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-edit-form-control {
+      width: calc(100% - 112px) !important;
+      min-width: 0 !important;
+    }
+
     .job-candidate-form-grid .v-label,
     .job-candidate-form-row .v-label {
       color: #516174 !important;
@@ -684,11 +702,15 @@
     .job-candidate-form-grid .v-textfield,
     .job-candidate-form-grid .v-filterselect,
     .job-candidate-form-grid .v-filterselect-input,
+    .job-candidate-form-grid .c-suggestionfield,
+    .job-candidate-form-grid .c-suggestion-field,
     .job-candidate-form-grid .v-datefield,
     .job-candidate-form-grid .v-datefield-textfield,
     .job-candidate-form-row .v-textfield,
     .job-candidate-form-row .v-filterselect,
     .job-candidate-form-row .v-filterselect-input,
+    .job-candidate-form-row .c-suggestionfield,
+    .job-candidate-form-row .c-suggestion-field,
     .job-candidate-form-row .v-datefield,
     .job-candidate-form-row .v-datefield-textfield {
       width: 100% !important;
@@ -814,8 +836,6 @@
 
   @media (max-width: 1366px) {
     .job-candidate-editor {
-      min-width: 1024px;
-
       .job-candidate-sidebar {
         width: 286px !important;
         min-width: 286px !important;
@@ -839,6 +859,12 @@
         padding-left: 10px;
         padding-right: 10px;
         font-size: 14px !important;
+        max-width: 96px;
+      }
+
+      .job-candidate-tabs .v-tabsheet-tabitem,
+      .job-candidate-tabs .v-tabsheet-tabitemcell {
+        max-width: 96px;
       }
 
       .job-candidate-form-grid td:first-child {
