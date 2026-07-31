@@ -1,0 +1,119 @@
+/*
+ * Локальная геометрия и фирменная sidebar экранной формы ExtUserEdit.
+ * Общие роли edit-* / label-* задаются edit-screen-shared-styles и не дублируются здесь.
+ */
+@mixin ext-user-editor-theme {
+  .ext-user-editor {
+    box-sizing: border-box;
+    overflow: hidden;
+
+    .edit-sidebar {
+      padding: 16px;
+      color: #f8fafc;
+      background: linear-gradient(180deg, #172638 0%, #132130 54%, #0f1b28 100%);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 4px 0 14px rgba(15, 23, 42, 0.22);
+    }
+
+    .edit-sidebar-visual {
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .edit-sidebar-identity {
+      padding: 2px 0 4px;
+      text-align: center;
+    }
+
+    .edit-sidebar-title {
+      color: #f8fafc !important;
+      font-size: 20px !important;
+      font-weight: 700 !important;
+      line-height: 26px !important;
+      text-align: center;
+    }
+
+    .edit-sidebar-subtitle {
+      color: rgba(248, 250, 252, 0.72) !important;
+      font-size: 13px !important;
+      line-height: 20px !important;
+      text-align: center;
+    }
+
+    .edit-sidebar-summary {
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .edit-sidebar-summary .v-label,
+    .edit-sidebar-hint {
+      color: rgba(248, 250, 252, 0.82) !important;
+      white-space: normal !important;
+    }
+
+    .label-navigation {
+      border-top-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .label-nav-title {
+      color: rgba(248, 250, 252, 0.62) !important;
+    }
+
+    .label-nav-item,
+    .v-button-label-nav-item {
+      color: rgba(248, 250, 252, 0.82) !important;
+    }
+
+    .label-nav-item:hover,
+    .v-button-label-nav-item:hover,
+    .v-button-label-nav-item:focus {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.09) !important;
+    }
+
+    .label-nav-item-active,
+    .v-button-label-nav-item-active {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.12) !important;
+      border-left-color: #ffb11b !important;
+    }
+
+    .dropzone-container,
+    .dropzone-container > .v-verticallayout,
+    .dropzone-container .v-slot {
+      box-sizing: border-box;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .edit-card,
+    .edit-accordion-section {
+      margin-bottom: 10px;
+    }
+
+    .edit-card .v-formlayout,
+    .edit-card .v-formlayout-row,
+    .edit-card .v-formlayout-contentcell,
+    .edit-accordion-section .v-formlayout,
+    .edit-accordion-section .v-formlayout-row,
+    .edit-accordion-section .v-formlayout-contentcell,
+    .edit-tabs .v-tabsheet-content,
+    .edit-tabs .v-tabsheet-content > div {
+      box-sizing: border-box;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .edit-workspace .v-table,
+    .edit-workspace .v-table-table,
+    .edit-workspace .v-scrollable {
+      box-sizing: border-box;
+      min-width: 0;
+      max-width: 100%;
+    }
+  }
+}

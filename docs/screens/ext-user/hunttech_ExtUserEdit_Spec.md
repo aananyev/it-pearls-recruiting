@@ -1,126 +1,92 @@
-# UI Spec: `sec$User.edit` / `hunttech_ExtUserEdit`
+# UI Spec: `sec$User.edit` / `ExtUserEdit`
 
-Cross-link: [ExtUser](../../entities/ext-user/ExtUser.md) · `UserAiConfiguration`
+> Каноническая living-спецификация: [docs/ui/ExtUserEdit_Spec.md](../../ui/ExtUserEdit_Spec.md)  
+> Нормативы: [общий Edit-контракт](../../architecture/HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md) · [UI/UX-концепция](../../architecture/HRM_HuntTech_UI_UX_Design_Concept.md)
 
 ## История изменений
 
 | Дата | Изменение |
-|------|-----------|
-| 2026-07-29 | Исправлена кнопка «Сменить пароль пользователя»: добавлен минимальный `ExtUserEditor`, наследующий штатный `UserEditor`, и вызов стандартного диалога `sec$User.changePassword`; другая логика формы не изменена |
-| 2026-06-29 | Аватар: `fallbackImage` `userPic` с `datasource="userDs"` / `property="officialPhoto"`; удалены `defaultPic` и ручной `refreshAvatar()` / `resolveProfilePhoto()` |
-| 2026-06-29 | Profile panel: `profilePanel`/`dropZone` width/height 100%; `userDs.setItem` после `applyOfficialPhoto` |
-| 2026-06-28 | Fix `userAiConfigsDs`: JPQL `e.user = :ds$userDs` (entity bind вместо `.id` + entity param) |
-| 2026-06-27 | Динамический аватар: приоритет UserSettings.fileImageFace → ExtUser.fileImageFace → placeholder через FileDescriptorImageHelper |
-| 2026-06-27 | Fix NPE: восстановлены `fieldGroupLeft` (passw/confirmPassw) и `fieldGroupRight` для UserEditor |
+|---|---|
+| 2026-07-29 | Legacy-спецификация синхронизирована с каноническим документом: `ExtUserEdit` приведён к общему `edit-*`/`label-*` контракту без изменения бизнес- и CUBA-контрактов. |
+| 2026-07-29 | Восстановлена стандартная смена пароля через `sec$User.changePassword`. |
+| 2026-06-29 | `userPic` привязан к `userDs.officialPhoto`. |
 
----
+## Назначение и бизнес-смысл (What & Why)
 
-## Назначение и Бизнес-смысл (What & Why)
+`ExtUserEdit` — административная форма HRM HuntTech для управления профилем пользователя, ролями, замещениями, почтовыми параметрами и персональными AI-подключениями. Постоянная sidebar удерживает контекст редактируемого пользователя, а правая область организует данные по единому визуальному контракту Edit-экранов.
 
-Экран редактирования пользователя HRM HuntTech (`ExtUser`) объединяет профиль рекрутера/HR, контактные и региональные настройки, параметры исходящей почты и персональные ключи AI-провайдеров. Администратор или сам пользователь (через админ-форму) управляет доступом, ролями, замещениями и интеграцией с LLM без отдельных справочников.
+Визуальная миграция не меняет entity, права, password policy, загрузку, сохранение, роли, замещения и CRUD AI-конфигураций.
 
-## Связи в интерфейсе и Навигация (UI Context & Navigation)
+## UI Context & Navigation
 
-- **Screen id:** `sec$User.edit` (шаблон `ext-user-edit.xml`, legacy-контроллер `ExtUserEditor`)
-- **Browse:** `sec$User.browse` → двойной клик / Edit
-- **Дочерние модали:** `sec$User.changePassword`, `hunttech_UserAiConfiguration.edit`
-- **Меню:** стандартный пункт Security → Users (CUBA)
+- **Screen ID:** `sec$User.edit`.
+- **Вход:** `sec$User.browse` → Create/Edit.
+- **Controller:** `ExtUserEditor extends UserEditor`.
+- **Дочерние окна:** `sec$User.changePassword`, `hunttech_UserAiConfiguration.edit`.
+- **Sidebar navigation:** отдельный `label-navigation` для общей, почтовой и AI-вкладки.
+- **Каноническое техническое описание:** [ExtUserEdit_Spec.md](../../ui/ExtUserEdit_Spec.md).
 
-## Краткий обзор бизнес-логики поведения (Behavior Summary)
+## Behavior Summary
 
-- Открытие → стандартный `UserEditor` загружает `userDs` (`extUser-view`), роли и замещения
-- «Сменить пароль пользователя» для сохранённой учётной записи → открывается штатный модальный экран CUBA `sec$User.changePassword` с параметром `user` → пароль изменяется стандартным сервисом платформы
-- Новый пользователь → кнопка отдельной смены пароля скрыта → пароль задаётся штатными полями `passw` / `confirmPassw` и обрабатывается `UserEditor.preCommit()`
-- AI: Create/Edit → модаль `UserAiConfigurationEdit` с автопривязкой `user`; Remove → `DataManager.remove`
-- Сохранение → стандартный `UserEditor` + `editWindowActions`
-
----
+| Действие | Условие | Результат |
+|---|---|---|
+| открыть экран | пользователь загружен `userDs` | отображается sidebar и workspace, стандартный lifecycle не меняется |
+| сменить вкладку | выбран новый tab | показывается соответствующий navigation-набор |
+| нажать navigation | секция активной вкладки | accordion при необходимости раскрывается, focus переводится к control, данные не меняются |
+| сменить пароль | пользователь сохранён | открывается стандартный `sec$User.changePassword` |
+| сохранить/отменить | завершение работы | выполняются штатные actions `UserEditor` |
 
 ## 1. Точка вызова и контекст
 
-| Параметр | Значение |
-|----------|----------|
-| Legacy controller | `com.company.hunttech.web.screens.extuser.ExtUserEditor` |
-| Базовый редактор | `com.haulmont.cuba.gui.app.security.user.edit.UserEditor` |
-| XML | `modules/web/.../extuser/ext-user-edit.xml` |
-| `web-screens.xml` | `sec$User.edit` |
-
-`ExtUserEditor` не заменяет алгоритм сохранения пользователя. Класс наследует стандартный `UserEditor` и добавляет только запуск штатного диалога смены пароля из нижней панели.
+- XML: `modules/web/src/com/company/hunttech/web/screens/extuser/ext-user-edit.xml`.
+- Java: `modules/web/src/com/company/hunttech/web/screens/extuser/ExtUserEditor.java`.
+- Root stylename: `ext-user-editor`.
+- Общий API: `edit-*`, `label-navigation`, `label-nav-*`.
 
 ## 2. Связь с моделью данных
 
-| Контейнер | Тип | View / Query |
-|-----------|-----|--------------|
-| `userDs` | instance | `extUser-view` |
-| `fieldGroupLeft` | fieldGroup (UserEditor) | `passw`, `confirmPassw` (`custom="true"`) внутри `passwordBox` |
-| `fieldGroupRight` | fieldGroup (UserEditor) | `language`, `timeZone`, `group` (`custom="true"), `active`, … |
-| `rolesDs` | group property | `userRoles` |
-| `substitutionsDs` | collection property | `substitutions` |
-| `userAiConfigsDs` | collectionDatasource | `userAiConfiguration-view`, `e.user = :ds$userDs` |
-
-Критичные nested paths: `userRoles.role.*`, `substitutions.substitutedUser.*`, `fileImageFace` (`extUser-view`, `_local`), AI-таблица: `providerCode`, `defaultModelName`, `isActive` (без `apiKey`).
-
-Аватар: `fallbackImage` `userPic` привязан к `userDs.officialPhoto`; заглушка через `HunttechImageConfig.defaultFallbackImagePath` (`images/hunttech-placeholder.svg`). Upload `officialPhoto`; диалог при наличии `userAvatar`; удаление старых файлов через FileStorageService.
+Сохранены `userDs`, `rolesDs`, `substitutionsDs`, `userAiConfigsDs`, views, JPQL, component ID, datasource/property bindings, validators, actions и `invoke`. Новые entity getters и изменения `views.xml` отсутствуют.
 
 ## 3. Иерархия форм
 
-```
+```text
 sec$User.browse
-  └── sec$User.edit (ExtUserEditor → UserEditor)
-        ├── sec$User.changePassword (стандартный диалог CUBA)
-        └── hunttech_UserAiConfiguration.edit (modal)
+└── sec$User.edit
+    ├── sec$User.changePassword
+    └── hunttech_UserAiConfiguration.edit
 ```
 
 ## 4. Модель поведения
 
-### 4.1 Lifecycle
-- `UserEditor.init()` — создаёт штатные password-поля, actions ролей/замещений и listener сохранения
-- `ExtUserEditor.postInit()` — после стандартной инициализации скрывает `changePasswordBtn` только для новой несохранённой учётной записи
+`ExtUserEditor.postInit()` выполняет только presentation-задачи: применяет `edit-form-control` к созданным стандартным контроллером полям и синхронизирует видимость navigation с вкладкой. Navigation не вызывает `setSelectedTab`, load, refresh, commit и не меняет entity или selection. Почтовая секция раскрывается через `setExpanded(true)` перед focus.
 
-### 4.2 Смена пароля
+## 5. Actions & Buttons Logic
 
-Для существующего пользователя кнопка содержит `invoke="changePassword"`. Метод открывает:
-
-```text
-screen: sec$User.changePassword
-open type: DIALOG
-parameter: user = текущий userDs item
-```
-
-Пароль не вычисляется и не коммитится пользовательским кодом HRM HuntTech. Валидация, password policy, хэширование и запись выполняются стандартной реализацией CUBA Platform.
-
-### 4.3 Валидация/сохранение
-- Новый пользователь: пароль и подтверждение обрабатываются стандартным `UserEditor.preCommit()`
-- Существующий пользователь: смена пароля выполняется отдельным диалогом и не отмечает остальные поля редактора изменёнными
-- Роли, замещения и остальные свойства сохраняются штатным `UserEditor`
-
-## 5. Actions & Buttons
-
-| Элемент | Цепочка |
-|---------|---------|
-| `changePasswordBtn` | `invoke="changePassword"` → `sec$User.changePassword` (`DIALOG`, параметр `user`) |
-| `aiConfigsCreateBtn` | клик → `ScreenBuilders` new `UserAiConfiguration` с `user` |
-| `aiConfigsEditBtn` | клик → edit выбранной строки |
-| `aiConfigsRemoveBtn` | клик → `dataManager.remove` + refresh |
+- `changePasswordBtn` сохраняет `invoke="changePassword"`.
+- navigation-кнопки меняют focus и `label-nav-item-active`.
+- role/substitution actions и AI listeners сохранены.
+- Save/Cancel выполняет `editWindowActions`.
 
 ## 6. Визуальная компоновка
 
+```text
+sidebar.edit-sidebar (270/250 px)
+├── edit-sidebar-visual
+├── edit-sidebar-identity
+├── label-navigation
+└── edit-sidebar-summary
+
+workspace.edit-workspace
+├── edit-toolbar
+├── edit-tabs
+│   ├── edit-card
+│   ├── edit-accordion-section × 5
+│   └── edit-card
+└── edit-footer-actions
 ```
-layout
-└── mainSplit (horizontal, 25%)
-    ├── profilePanel (100%×100%, well): dropZone (TOP_CENTER), fallbackImage userPic + officialPhoto upload, profileLabelsVBox (TOP_CENTER)
-    └── settingsTabSheet
-        ├── generalSettingsTab: passwordBox (только новый пользователь), contacts + regional hbox (50/50 flex), roles/subst split
-        ├── emailSettingsTab: SMTP/POP3/IMAP grid
-        └── aiSettingsTab: aiConfigsTable + buttonsPanel
-└── bottomActionsBox: changePasswordBtn | spacer | editWindowActions fragment
-```
 
-## 7. Регрессионная проверка
+Локальный `ext-user-editor.scss` одинаков во всех семи темах, ограничен `.ext-user-editor` и подключён после общего `edit-screen-shared-styles`. Обоснованные отклонения: сохранены `fallbackImage`, три вкладки и `rolesSubstSplit`; кнопка смены пароля только визуально перенесена в toolbar.
 
-`ExtUserChangePasswordContractTest` фиксирует следующие инварианты:
+---
 
-- XML использует `ExtUserEditor`, наследующий стандартный `UserEditor`;
-- кнопка связана с `invoke="changePassword"`;
-- открывается именно `sec$User.changePassword` с параметром текущего пользователя;
-- пользовательский контроллер не выполняет собственное хэширование, commit пользователя, изменение ролей или замещений.
+Обязательные UI-документы прочитаны. Общие `edit-*` и `label-*` stylename использованы преимущественно. Локальные отклонения перечислены и обоснованы. Бизнес- и CUBA-контракты формы сохранены.
