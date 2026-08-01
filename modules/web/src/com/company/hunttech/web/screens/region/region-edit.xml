@@ -1,74 +1,114 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Edit-экран региона сохраняет исходные loaders, bindings и actions, изменяя только presentation-композицию. -->
+<!-- Edit-экран региона: двухпанельная композиция по общему контракту Edit-экранов HRM HuntTech.
+     Сохраняет исходные loaders, bindings (regionDc, regionCountriesDc) и actions. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
         focusComponent="regionRuNameField"
         messagesPack="com.company.hunttech.web.screens.region"
         icon="TENCENT_WEIBO">
+    <!-- Секция данных: контейнер региона, коллекция городов и справочник стран. -->
     <data>
+        <!-- Корневой контейнер региона с view region-edit-view и composition-коллекцией городов. -->
         <instance id="regionDc" class="com.company.hunttech.entity.Region" view="region-edit-view">
+            <!-- Штатный загрузчик контейнера. -->
             <loader/>
+            <!-- Коллекция городов региона (composition-связь regionOfCity) для таблицы. -->
             <collection id="regionRegionOfCitiesDc" property="regionOfCity"/>
         </instance>
+        <!-- Справочник стран для picker-поля «Страна» (кэшируется, по русскому названию). -->
         <collection id="regionCountriesDc" class="com.company.hunttech.entity.Country" view="country-picker-view">
             <loader id="regionCountriesLc" cacheable="true">
+                <!-- Все страны по алфавиту русских названий. -->
                 <query><![CDATA[select e from hunttech_Country e
 order by e.countryRuName]]></query>
             </loader>
         </collection>
     </data>
+    <!-- Режим диалога: полноэкранный модальный редактор справочника. -->
     <dialogMode height="100%" width="100%" modal="true"/>
+    <!-- Корневой layout формы: локальный namespace region-editor + общий контракт Edit-экранов. -->
     <layout stylename="region-editor" expand="regionMainLayout" spacing="false" width="100%" height="100%">
+        <!-- Двухпанельная композиция: постоянная sidebar слева и рабочая область справа. -->
         <hbox id="regionMainLayout" stylename="edit-screen-layout" expand="regionWorkspace" spacing="false" width="100%" height="100%">
-            <vbox id="regionSidebar" stylename="edit-sidebar" width="280px" height="100%" spacing="true" expand="regionSidebarSpacer">
+            <!-- Левая контекстная панель 270px: идентификация, label-навигация, подсказка. -->
+            <vbox id="regionSidebar" stylename="edit-sidebar" width="270px" height="100%" spacing="true" expand="regionSidebarSpacer">
+                <!-- Блок идентификации: тип записи и название региона из контейнера. -->
                 <vbox id="regionIdentity" stylename="edit-sidebar-identity" width="100%" spacing="true">
+                    <!-- Подпись типа записи. -->
                     <label value="Регион" stylename="edit-sidebar-subtitle" width="100%"/>
+                    <!-- Название региона (свойство regionRuName), живое из regionDc. -->
                     <label id="regionSidebarTitle" dataContainer="regionDc" property="regionRuName" stylename="edit-sidebar-title" width="100%"/>
                 </vbox>
+                <!-- Вертикальная label-навигация по разделам формы (фокус, без изменения данных). -->
                 <vbox id="regionNavigation" stylename="label-navigation" width="100%" spacing="false">
+                    <!-- Заголовок навигационного блока. -->
                     <label value="Разделы" stylename="label-nav-title" width="100%"/>
+                    <!-- Пункт «Основные данные» — активен по умолчанию, фокусирует первое поле. -->
                     <button id="regionMainNav" caption="Основные данные" stylename="borderless label-nav-item label-nav-item-active" width="100%" invoke="focusMainSection"/>
+                    <!-- Пункт «Города» — фокусирует таблицу городов региона. -->
                     <button id="regionCitiesNav" caption="Города" stylename="borderless label-nav-item" width="100%" invoke="focusCitiesSection"/>
                 </vbox>
+                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar. -->
                 <vbox id="regionSidebarSpacer" stylename="edit-sidebar-spacer"/>
+                <!-- Нейтральная подсказка о роли региона в иерархии геоданных. -->
                 <label value="Регион связывает страну и входящие в него города." stylename="edit-sidebar-hint" width="100%"/>
             </vbox>
+            <!-- Правая рабочая область: toolbar, прокручиваемые секции и footer-actions. -->
             <vbox id="regionWorkspace" stylename="edit-workspace" expand="regionWorkspaceScroll" width="100%" height="100%" spacing="false">
+                <!-- Toolbar с заголовком карточки и пояснением. -->
                 <hbox id="regionToolbar" stylename="edit-toolbar" width="100%" spacing="true">
+                    <!-- Текстовый блок toolbar: заголовок и описание. -->
                     <vbox id="regionToolbarText" width="100%" spacing="false">
                         <label value="Карточка региона" stylename="edit-toolbar-title"/>
-                        <label value="Принадлежность стране, код и перечень городов" stylename="edit-toolbar-subtitle"/>
+                        <label value="Принадлежность стране, код и перечень городов" stylename="edit-toolbar-description"/>
                     </vbox>
                 </hbox>
+                <!-- Прокручиваемая область контента рабочей области. -->
                 <scrollBox id="regionWorkspaceScroll" stylename="edit-workspace-scroll" width="100%" height="100%">
+                    <!-- Поток карточек рабочей области. -->
                     <vbox id="regionSections" width="100%" spacing="true">
-                        <groupBox id="regionMainSection" caption="Основные данные" stylename="edit-section-card" width="100%" spacing="true">
+                        <!-- Карточка «Основные данные»: реквизиты региона. -->
+                        <groupBox id="regionMainSection" caption="Основные данные" stylename="edit-card" width="100%" spacing="true">
+                            <!-- Форма региона с полями, привязанными к regionDc. -->
                             <form id="form" dataContainer="regionDc" width="100%">
                                 <column width="100%">
-                                    <textField id="regionRuNameField" property="regionRuName" width="100%"/>
-                                    <lookupPickerField id="regionCountryField" optionsContainer="regionCountriesDc" property="regionCountry" width="100%">
+                                    <!-- Название региона. -->
+                                    <textField id="regionRuNameField" property="regionRuName" caption="mainMsg://msgRegionRuName" width="100%" stylename="edit-form-control"/>
+                                    <!-- Страна региона (picker из кэшируемого справочника стран). -->
+                                    <lookupPickerField id="regionCountryField" optionsContainer="regionCountriesDc" property="regionCountry" caption="mainMsg://msgCountry" width="100%" stylename="edit-form-control">
                                         <actions><action id="lookup" type="picker_lookup"/></actions>
                                     </lookupPickerField>
-                                    <textField id="regionCodeField" property="regionCode" width="100%"/>
+                                    <!-- Код региона. -->
+                                    <textField id="regionCodeField" property="regionCode" caption="mainMsg://msgRegionCode" width="100%" stylename="edit-form-control"/>
                                 </column>
                             </form>
                         </groupBox>
-                        <groupBox id="regionCitiesSection" caption="Города региона" stylename="edit-section-card" width="100%" spacing="true">
+                        <!-- Карточка «Города региона»: composition-таблица городов. -->
+                        <groupBox id="regionCitiesSection" caption="Города региона" stylename="edit-card" width="100%" spacing="true">
+                            <!-- Таблица городов региона (composition-коллекция regionRegionOfCitiesDc). -->
                             <table id="regionRegionOfCityTable" dataContainer="regionRegionOfCitiesDc" height="260px" width="100%">
-                                <columns><column id="cityRuName"/><column id="cityPhoneCode"/></columns>
+                                <!-- Колонка «Название города». -->
+                                <columns><column id="cityRuName" caption="mainMsg://msgCityRuName"/><!-- Колонка «Телефонный код». --><column id="cityPhoneCode" caption="mainMsg://msgCityPhoneCode"/></columns>
+                                <!-- Панель кнопок действий над таблицей городов. -->
                                 <buttonsPanel id="regionCitiesActions">
                                     <button id="button" action="regionRegionOfCityTable.add"/>
                                     <button action="regionRegionOfCityTable.edit"/>
                                     <button action="regionRegionOfCityTable.remove"/>
                                 </buttonsPanel>
+                                <!-- Штатные composition-actions таблицы. -->
                                 <actions><action id="add" type="add"/><action id="edit" type="edit"/><action id="remove" type="remove"/></actions>
                             </table>
                         </groupBox>
                     </vbox>
                 </scrollBox>
+                <!-- Нижняя панель штатных действий: сохранить и отменить. -->
                 <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
+                    <!-- Spacer прижимает кнопки к правому краю. -->
                     <vbox id="regionActionsSpacer" width="100%"/>
-                    <button action="windowCommitAndClose"/><button action="windowClose"/>
+                    <!-- Сохранить и закрыть (штатный action editor-а). -->
+                    <button action="windowCommitAndClose"/>
+                    <!-- Отменить изменения и закрыть. -->
+                    <button action="windowClose"/>
                 </hbox>
             </vbox>
         </hbox>

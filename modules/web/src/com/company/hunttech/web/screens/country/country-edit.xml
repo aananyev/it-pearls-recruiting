@@ -1,127 +1,159 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Edit-экран страны сохраняет исходные data binding и actions, изменяя только визуальную композицию. -->
+<!-- Edit-экран страны: двухпанельная композиция по общему контракту Edit-экранов HRM HuntTech.
+     Сохраняет исходные data binding (countryDc), composition-коллекцию регионов и actions. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
         focusComponent="countryRuNameField"
         messagesPack="com.company.hunttech.web.screens.country"
         icon="SUPPORT">
+    <!-- Секция данных: корневой контейнер страны и коллекция её регионов. -->
     <data>
         <!-- Корневой контейнер страны и composition-коллекция регионов сохраняют исходные views и lifecycle. -->
         <instance id="countryDc"
                   class="com.company.hunttech.entity.Country"
                   view="country-edit-view">
+            <!-- Штатный загрузчик контейнера (без собственного запроса — берёт id из editor). -->
             <loader/>
+            <!-- Коллекция регионов страны (composition-связь countryOfRegion) для таблицы в рабочей области. -->
             <collection id="countryCountryOfRegionsDc"
                         property="countryOfRegion"
                         view="region-country-child-view"/>
         </instance>
     </data>
+    <!-- Режим диалога: полноэкранный модальный редактор справочника. -->
     <dialogMode height="100%" width="100%" modal="true"/>
+    <!-- Корневой layout формы: локальный namespace country-editor + общий контракт Edit-экранов. -->
     <layout stylename="country-editor"
             expand="countryMainLayout"
             spacing="false"
             width="100%"
             height="100%">
-        <!-- Двухпанельная композиция использует общий контракт Edit-экранов HRM HuntTech. -->
+        <!-- Двухпанельная композиция: постоянная sidebar слева и рабочая область справа. -->
         <hbox id="countryMainLayout"
               stylename="edit-screen-layout"
               expand="countryWorkspace"
               spacing="false"
               width="100%"
               height="100%">
+            <!-- Левая контекстная панель 270px: идентификация, label-навигация, подсказка. -->
             <vbox id="countrySidebar"
                   stylename="edit-sidebar"
-                  width="280px"
+                  width="270px"
                   height="100%"
                   spacing="true"
                   expand="countrySidebarSpacer">
+                <!-- Блок идентификации: тип записи и название страны из контейнера. -->
                 <vbox id="countryIdentity"
                       stylename="edit-sidebar-identity"
                       width="100%"
                       spacing="true">
+                    <!-- Подпись типа записи. -->
                     <label value="Страна"
                            stylename="edit-sidebar-subtitle"
                            width="100%"/>
+                    <!-- Название страны (свойство countryRuName), живое из countryDc. -->
                     <label id="countrySidebarTitle"
                            dataContainer="countryDc"
                            property="countryRuName"
                            stylename="edit-sidebar-title"
                            width="100%"/>
                 </vbox>
+                <!-- Вертикальная label-навигация по разделам формы (фокус, без изменения данных). -->
                 <vbox id="countryNavigation"
                       stylename="label-navigation"
                       width="100%"
                       spacing="false">
+                    <!-- Заголовок навигационного блока. -->
                     <label value="Разделы"
                            stylename="label-nav-title"
                            width="100%"/>
+                    <!-- Пункт «Основные данные» — активен по умолчанию, фокусирует первое поле. -->
                     <button id="countryMainNav"
                             caption="Основные данные"
                             stylename="borderless label-nav-item label-nav-item-active"
                             width="100%"
                             invoke="focusMainSection"/>
+                    <!-- Пункт «Регионы» — фокусирует таблицу регионов страны. -->
                     <button id="countryRegionsNav"
                             caption="Регионы"
                             stylename="borderless label-nav-item"
                             width="100%"
                             invoke="focusRegionsSection"/>
                 </vbox>
+                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar. -->
                 <vbox id="countrySidebarSpacer" stylename="edit-sidebar-spacer"/>
+                <!-- Нейтральная подсказка о роли страны в справочниках HRM HuntTech. -->
                 <label value="Страна объединяет регионы и используется в географических справочниках HRM HuntTech."
                        stylename="edit-sidebar-hint"
                        width="100%"/>
             </vbox>
+            <!-- Правая рабочая область: toolbar, прокручиваемые секции и footer-actions. -->
             <vbox id="countryWorkspace"
                   stylename="edit-workspace"
                   expand="countryWorkspaceScroll"
                   width="100%"
                   height="100%"
                   spacing="false">
+                <!-- Toolbar с заголовком карточки и пояснением. -->
                 <hbox id="countryToolbar"
                       stylename="edit-toolbar"
                       width="100%"
                       spacing="true">
+                    <!-- Текстовый блок toolbar: заголовок и описание. -->
                     <vbox id="countryToolbarText" width="100%" spacing="false">
                         <label value="Карточка страны" stylename="edit-toolbar-title"/>
-                        <label value="Основные реквизиты и связанные регионы" stylename="edit-toolbar-subtitle"/>
+                        <label value="Основные реквизиты и связанные регионы" stylename="edit-toolbar-description"/>
                     </vbox>
                 </hbox>
+                <!-- Прокручиваемая область контента рабочей области. -->
                 <scrollBox id="countryWorkspaceScroll"
                            stylename="edit-workspace-scroll"
                            width="100%"
                            height="100%">
+                    <!-- Поток карточек рабочей области. -->
                     <vbox id="countrySections" width="100%" spacing="true">
+                        <!-- Карточка «Основные данные»: реквизиты страны. -->
                         <groupBox id="countryMainSection"
                                   caption="Основные данные"
-                                  stylename="edit-section-card"
+                                  stylename="edit-card"
                                   width="100%"
                                   spacing="true">
+                            <!-- Форма страны с полями, привязанными к countryDc. -->
                             <form id="form" dataContainer="countryDc" width="100%">
                                 <column width="100%">
-                                    <textField id="countryRuNameField" property="countryRuName" caption="msg://msgCountry" width="100%"/>
-                                    <textField id="countryShortNameField" property="countryShortName" caption="msg://msgCountryShortName" width="100%"/>
-                                    <textField id="phoneCodeField" property="phoneCode" caption="msg://msgPhoneCode" width="100%"/>
+                                    <!-- Название страны (обязательное поле формы). -->
+                                    <textField id="countryRuNameField" property="countryRuName" caption="msg://msgCountry" width="100%" stylename="edit-form-control"/>
+                                    <!-- Короткое наименование страны. -->
+                                    <textField id="countryShortNameField" property="countryShortName" caption="msg://msgCountryShortName" width="100%" stylename="edit-form-control"/>
+                                    <!-- Телефонный код страны. -->
+                                    <textField id="phoneCodeField" property="phoneCode" caption="msg://msgPhoneCode" width="100%" stylename="edit-form-control"/>
                                 </column>
                             </form>
                         </groupBox>
+                        <!-- Карточка «Регионы страны»: composition-таблица регионов. -->
                         <groupBox id="countryRegionsSection"
                                   caption="Регионы страны"
-                                  stylename="edit-section-card"
+                                  stylename="edit-card"
                                   width="100%"
                                   spacing="true">
+                            <!-- Таблица регионов страны (composition-коллекция countryCountryOfRegionsDc). -->
                             <table id="countryCountryOfRegionTable"
                                    height="260px"
                                    width="100%"
                                    dataContainer="countryCountryOfRegionsDc">
+                                <!-- Колонка «Название региона». -->
                                 <columns>
-                                    <column id="regionRuName" caption="mainMsg://msgRegion"/>
+                                    <column id="regionRuName" caption="mainMsg://msgRegionRuName"/>
+                                    <!-- Колонка «Код региона». -->
                                     <column id="regionCode" caption="mainMsg://msgRegionCode"/>
                                 </columns>
+                                <!-- Штатные composition-actions таблицы. -->
                                 <actions>
                                     <action id="add" type="add"/>
                                     <action id="edit" type="edit"/>
                                     <action id="remove" type="remove"/>
                                 </actions>
+                                <!-- Панель кнопок действий над таблицей регионов. -->
                                 <buttonsPanel id="countryRegionsActions">
                                     <button action="countryCountryOfRegionTable.add"/>
                                     <button action="countryCountryOfRegionTable.edit"/>
@@ -131,9 +163,13 @@
                         </groupBox>
                     </vbox>
                 </scrollBox>
+                <!-- Нижняя панель штатных действий: сохранить и отменить. -->
                 <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
+                    <!-- Spacer прижимает кнопки к правому краю. -->
                     <vbox id="countryActionsSpacer" width="100%"/>
+                    <!-- Сохранить и закрыть (штатный action editor-а). -->
                     <button action="windowCommitAndClose"/>
+                    <!-- Отменить изменения и закрыть. -->
                     <button action="windowClose"/>
                 </hbox>
             </vbox>

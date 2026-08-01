@@ -9,7 +9,7 @@
 | Обязательный стандарт смыслового документирования создаваемых и изменяемых XML-экранов | [XML_Screen_Documentation_Standard.md](XML_Screen_Documentation_Standard.md) |
 | Общий контракт stylename для sidebar, `label-navigation` и правой части Edit-экранов | [HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md](HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md) |
 | Архитектура ускорения JobCandidateEdit | [JobCandidateEdit_Performance_Architecture.md](JobCandidateEdit_Performance_Architecture.md) |
-| Архитектура вакансии OpenPosition | [../entities/open-position/OpenPosition_Spec.md](../entities/open-position/OpenPosition_Spec.md) |
+| Архитектура вакансии OpenPosition | [OpenPosition_Spec.md](OpenPosition_Spec.md) |
 | Архитектура рейтов по аутстафу | [OutstaffingRates_Spec.md](OutstaffingRates_Spec.md) |
 | AI integration architecture | [../integrations/ai/AI_INTEGRATION.md](../integrations/ai/AI_INTEGRATION.md) |
 | Production migration architecture audits | [../../deployment/database-migration/audit/](../../deployment/database-migration/audit/) |
