@@ -212,6 +212,57 @@ public class OpenPositionEditPreviewLayoutTest {
     }
 
     @Test
+    public void previewProvidesAllInheritedUiComponentsAndListenerTargets() throws IOException {
+        String controller = readProjectFile(LEGACY_CONTROLLER);
+        String descriptor = readProjectFile(PREVIEW_XML);
+
+        // Все UI-компоненты, которые базовый контроллер получает через @Inject,
+        // обязаны присутствовать в параллельном XML; сервисы и data API сюда не входят.
+        java.util.regex.Pattern injectedUi = java.util.regex.Pattern.compile(
+                "@Inject\\s+private\\s+(?:Label<[^>]+>|DateField<[^>]+>|Timer|" +
+                        "LookupPickerField<[^>]+>|TextField<[^>]+>|CheckBox|RichTextArea|" +
+                        "LookupField<[^>]+>|RadioButtonGroup(?:<[^>]+>)?|GroupBoxLayout|" +
+                        "TreeDataGrid<[^>]+>|DataGrid<[^>]+>|ScrollBoxLayout|" +
+                        "OvaFallbackImage|TabSheet|ProcActionsFragment)\\s+(\\w+)\\s*;");
+        java.util.regex.Matcher injectedMatcher = injectedUi.matcher(controller);
+        int injectedCount = 0;
+        while (injectedMatcher.find()) {
+            String componentId = injectedMatcher.group(1);
+            assertTrue("Preview не содержит inherited UI component: " + componentId,
+                    descriptor.contains("id=\"" + componentId + "\""));
+            injectedCount++;
+        }
+        assertTrue("Не найдены inherited UI injections", injectedCount > 40);
+
+        // @Named пути проверяются по каждому segment id: TabSheet.Tab и Accordion.Tab.
+        java.util.regex.Matcher namedMatcher = java.util.regex.Pattern.compile(
+                "@Named\\(\"([^\"]+)\"\\)").matcher(controller);
+        while (namedMatcher.find()) {
+            for (String componentId : namedMatcher.group(1).split("\\.")) {
+                assertTrue("Preview не содержит @Named component: " + componentId,
+                        descriptor.contains("id=\"" + componentId + "\""));
+            }
+        }
+
+        // Любой inherited listener/install должен иметь реальную цель с прежним id.
+        java.util.regex.Matcher subscribeMatcher = java.util.regex.Pattern.compile(
+                "@Subscribe\\(\"([^\"]+)\"\\)").matcher(controller);
+        while (subscribeMatcher.find()) {
+            String componentId = subscribeMatcher.group(1);
+            assertTrue("Preview не содержит @Subscribe target: " + componentId,
+                    descriptor.contains("id=\"" + componentId + "\""));
+        }
+
+        java.util.regex.Matcher installMatcher = java.util.regex.Pattern.compile(
+                "@Install\\(to\\s*=\\s*\"([^\"]+)\"").matcher(controller);
+        while (installMatcher.find()) {
+            String componentId = installMatcher.group(1).split("\\.")[0];
+            assertTrue("Preview не содержит @Install target: " + componentId,
+                    descriptor.contains("id=\"" + componentId + "\""));
+        }
+    }
+
+    @Test
     public void previewIsNotRegisteredInMenuOrBrowseScreens() throws IOException {
         String menu = readProjectFile("modules/web/src/com/company/hunttech/web-menu.xml");
         String browse = readProjectFile(
