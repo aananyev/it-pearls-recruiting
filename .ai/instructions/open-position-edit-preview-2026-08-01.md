@@ -1,6 +1,6 @@
 # Hermes — проверка OpenPositionEditPreview
 
-PROJECT: HRM HuntTech  
+PROJECT: HRM HuntTech
 STATUS: WAITING_FOR_HERMES
 
 ## Git-контракт
