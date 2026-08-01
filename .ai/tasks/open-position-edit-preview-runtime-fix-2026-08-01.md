@@ -107,3 +107,16 @@ Exception Description: An attempt was made to traverse a relationship using indi
    с вызовом только безопасных инициализаций).
 
 Код Hermes самостоятельно не меняет.
+
+## РЕАЛИЗОВАННОЕ ИСПРАВЛЕНИЕ
+
+Исправление подготовлено в preview-контроллере без изменения legacy-файлов:
+
+- `OpenPositionEditPreview.onBeforeShow()` до вызова `super.onBeforeShow(event)` проверяет загрузку `positionType`;
+- для detached editor entity связь догружается через `DataManager` узким view с описаниями позиции;
+- загруженная связь устанавливается в текущий редактируемый экземпляр;
+- новая сущность и уже загруженная связь не создают дополнительного запроса;
+- добавлен `OpenPositionEditPreviewRouteGuardTest`;
+- обновлена `OpenPositionEditPreview_Spec.md` и инструкция повторной проверки.
+
+Точный HEAD повторной проверки указан в актуальном комментарии PR #110. Предыдущий отчёт относится только к SHA `6828aeb70fcc4e49362daf405ee2a1621951083d`.
