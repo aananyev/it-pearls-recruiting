@@ -8,6 +8,7 @@
 |---|---|---|
 | `JobCandidateEdit` | [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md) | Карточка кандидата, вкладки, история вакансий, анализ навыков и защита от OOM |
 | `CandidateCVEdit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) | Подготовка резюме с постоянной live-sidebar кандидата, сопроводительным письмом, деревом навыков, фотографией и файлами без изменения lazy-init |
+| `OpenPositionEditPreview` | [OpenPositionEditPreview_Spec.md](OpenPositionEditPreview_Spec.md) | Изолированный preview новой компоновки вакансии без замены legacy-экрана и изменения бизнес-логики |
 | `ExtUserEdit` | [ExtUserEdit_Spec.md](ExtUserEdit_Spec.md) | Администрирование профиля пользователя, ролей, замещений, email и AI в общем Edit-контракте |
 | `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | Персональные настройки пользователя, интерфейса, email и AI |
 | `ExtSettingsWindowMainBackground` | [ExtSettingsWindowMainBackground_Spec.md](ExtSettingsWindowMainBackground_Spec.md) | Загрузка, очистка и безопасное хранение персонального фона без изменения entity и БД |
@@ -87,6 +88,7 @@ Living-документация экранов, окон, фрагментов �
 |-------|------------|----------|
 | Browse | `hunttech_OpenPosition.browse` | [OpenPositionBrowse_Spec.md](OpenPositionBrowse_Spec.md) |
 | Edit | `hunttech_OpenPosition.edit` | [OpenPositionEdit_Spec.md](OpenPositionEdit_Spec.md) |
+| Preview edit | `hunttech_OpenPosition.editPreview` | [OpenPositionEditPreview_Spec.md](OpenPositionEditPreview_Spec.md) |
 | Detail fragment | `itpearls_OpenPositionDetailScreenFragment` | [itpearls_OpenPositionDetailScreenFragment_Spec.md](itpearls_OpenPositionDetailScreenFragment_Spec.md) |
 
 ### IteractionList
@@ -236,6 +238,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-01 | Добавлена спецификация изолированного `OpenPositionEditPreview` без замены legacy-экрана, menu/browse integration и изменения бизнес-логики. |
 | 2026-07-29 | Добавлена каноническая спецификация `ExtUserEdit`; экран сопоставлен общему `edit-*`/`label-*` UI API и семи темам. |
 | 2026-07-29 | Обновлена спецификация `JobCandidateEdit`: экран приведён к общим `edit-*`/`label-*` stylename и видимой sidebar-навигации с active-state |
 | 2026-07-27 | Добавлено living-дополнение по XML-компоновке `IteractionListEdit`: статус и приоритет перед label-навигацией, первый аккордеон открыт по умолчанию |
