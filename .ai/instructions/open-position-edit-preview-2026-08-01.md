@@ -8,7 +8,7 @@ STATUS: WAITING_FOR_HERMES
 - Repo: `aananyev/it-pearls-recruiting`
 - Branch: `agent/open-position-edit-preview`
 - Base: `master`
-- PR: указан в сообщении передачи
+- PR: `#110`
 - Verified HEAD: указан отдельным комментарием в PR после создания последнего коммита
 - Режим: проверка без изменения функционального кода и документации
 
@@ -28,9 +28,10 @@ STATUS: WAITING_FOR_HERMES
 
 - новый `OpenPositionEditPreview.java`;
 - новый `open-position-edit-preview.xml`;
-- новый `OpenPositionEditPreviewLayoutTest.java`;
+- новые `OpenPositionEditPreviewLayoutTest.java` и `OpenPositionEditPreviewRouteGuardTest.java`;
 - `docs/ui/OpenPositionEditPreview_Spec.md`;
 - индекс `docs/ui/README.md`;
+- диагностические task-файлы Hermes;
 - эта инструкция.
 
 Legacy `OpenPositionEdit.java`, `open-position-edit.xml`, browse-экраны, `web-menu.xml`, entities, services, `views.xml`, JPQL в существующих файлах, Liquibase и theme/SCSS не должны изменяться.
@@ -46,6 +47,7 @@ git diff --check
 
 ./gradlew :app-web:test \
           --tests '*OpenPositionEditPreviewLayoutTest*' \
+          --tests '*OpenPositionEditPreviewRouteGuardTest*' \
           --no-daemon --stacktrace
 
 ./gradlew test \
@@ -61,7 +63,8 @@ git diff --check
 
 Ожидается:
 
-- `OpenPositionEditPreviewLayoutTest` — PASS;
+- `OpenPositionEditPreviewLayoutTest` — 8/8 PASS;
+- `OpenPositionEditPreviewRouteGuardTest` — PASS;
 - `ScreenViewIntegrityTest` — 8/8 PASS;
 - SCSS — PASS по всем темам;
 - `BUILD SUCCESSFUL`.
@@ -94,6 +97,23 @@ http://localhost:8080/hrm/#main/open-position-edit-preview?id=<encoded-open-posi
 
 Для получения корректно закодированного UUID допустимо использовать штатный CUBA `RouteGenerator.getEditorRoute(entity, OpenPositionEditPreview.class)` в отладочной консоли/временном runtime-сценарии без коммита изменений.
 
+## Обязательная регрессия runtime-ошибки
+
+Использовать вакансию, на которой Hermes воспроизвёл ошибку:
+
+```text
+UUID: fffa4236-4d35-8b34-3bf3-baa240aa3722
+Route id: 7zz913ck9nhct3qwxtm90amds2
+URL: http://localhost:8080/hrm/#main/open-position-edit-preview?id=7zz913ck9nhct3qwxtm90amds2
+```
+
+Подтвердить:
+
+1. preview открывается без EclipseLink `ValidationException`;
+2. `positionType` и его описания отображаются;
+3. в Tomcat logs отсутствуют `instantiatingValueholderWithNullSession` и обращения к lazy `positionType` с null Session;
+4. legacy `open-position-edit?id=...` продолжает работать без изменения поведения.
+
 ## Smoke-сценарии
 
 Использовать существующую заполненную вакансию с проектом, компанией, владельцем, зарплатой и связанными данными.
@@ -120,6 +140,7 @@ http://localhost:8080/hrm/#main/open-position-edit-preview?id=<encoded-open-posi
 В Tomcat logs не допускаются новые:
 
 - `Cannot get unfetched attribute`;
+- `instantiatingValueholderWithNullSession`;
 - detached entity errors;
 - `IllegalStateException`;
 - `NullPointerException` в preview-сценариях;
@@ -140,18 +161,20 @@ PROJECT: HRM HuntTech
 STATUS: READY_TO_MERGE
 Repo: aananyev/it-pearls-recruiting
 Branch: agent/open-position-edit-preview
-PR: <number>
+PR: #110
 Base: master
 Verified HEAD: <full SHA>
 HEAD match: PASS
 Conflicts: NONE
 Compile: PASS
-Preview test: PASS
+Preview layout test: 8/8 PASS
+Preview route guard test: PASS
 ScreenViewIntegrityTest: 8/8 PASS
 SCSS: PASS
 Clean assemble: BUILD SUCCESSFUL
 Local deploy: PASS
 HTTP /hrm/: 200
+URL positionType regression: PASS
 Smoke: PASS
 Legacy screen unchanged: PASS
 Tomcat errors: NONE
