@@ -1,12 +1,16 @@
 package com.company.hunttech.web.screens.openposition;
 
 import com.company.hunttech.entity.OpenPosition;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.Route;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.RadioButtonGroup;
 import com.haulmont.cuba.gui.components.TabSheet;
 import com.haulmont.cuba.gui.screen.Screen.AfterShowEvent;
+import com.haulmont.cuba.gui.screen.Screen.BeforeShowEvent;
 import com.haulmont.cuba.gui.screen.EditedEntityContainer;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.Subscribe;
@@ -18,11 +22,12 @@ import javax.inject.Inject;
 /**
  * Изолированный предварительный вариант OpenPositionEdit.
  *
- * <p>Контроллер наследует исходный {@link OpenPositionEdit} без переопределения
- * lifecycle-обработчиков, loaders, validation, save-процесса и бизнес-действий.
- * Собственная логика ограничена переключением вкладок из label-навигации и
- * визуальным состоянием активного пункта. Поэтому preview использует тот же
- * контракт сущности {@link OpenPosition}, но не заменяет legacy-экран.</p>
+ * <p>Контроллер наследует исходный {@link OpenPositionEdit} и делегирует ему
+ * validation, save-процесс, loaders и бизнес-действия. Единственное защитное
+ * переопределение lifecycle до вызова базового {@code onBeforeShow} догружает
+ * {@code positionType} для URL-маршрута, где CUBA восстанавливает detached
+ * экземпляр сущности. Остальная собственная логика ограничена label-навигацией
+ * и её presentation-состоянием, поэтому preview не заменяет legacy-экран.</p>
  */
 @Route("open-position-edit-preview")
 @UiController("hunttech_OpenPosition.editPreview")
@@ -36,6 +41,8 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     private static final String NAV_ACTIVE_STYLE =
             "borderless label-nav-item label-nav-item-active open-position-preview-nav-item";
 
+    @Inject
+    private DataManager dataManager;
     @Inject
     private TabSheet tabSheetOpenPosition;
     @Inject
@@ -64,6 +71,44 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     private Button previewNavComments;
     @Inject
     private RadioButtonGroup<Integer> commandOrPosition;
+
+    /**
+     * Перед штатной инициализацией legacy-контроллера подготавливает lazy-связь
+     * {@code positionType}. Это предотвращает EclipseLink ValidationException
+     * при прямом URL-маршруте, не меняя порядок и содержание базового lifecycle.
+     */
+    @Override
+    @Subscribe
+    public void onBeforeShow(BeforeShowEvent event) {
+        ensureRoutePositionTypeLoaded();
+        super.onBeforeShow(event);
+    }
+
+    /**
+     * Догружает только связь {@code positionType} и её LOB-описания, если CUBA
+     * восстановила editor entity после URL-навигации без активной persistence
+     * session. Значение merge-ится в редактируемый экземпляр до первого getter,
+     * поэтому базовый {@link OpenPositionEdit} продолжает работать без изменений.
+     */
+    private void ensureRoutePositionTypeLoaded() {
+        OpenPosition editedPosition = getEditedEntity();
+        if (PersistenceHelper.isNew(editedPosition)
+                || PersistenceHelper.isLoaded(editedPosition, "positionType")) {
+            return;
+        }
+
+        OpenPosition reloadedPosition = dataManager.load(OpenPosition.class)
+                .id(editedPosition.getId())
+                .view(ViewBuilder.of(OpenPosition.class)
+                        .add("positionType", positionType -> positionType
+                                .add("positionRuName")
+                                .add("positionEnName")
+                                .add("standartDescription")
+                                .add("whoIsThisGuy"))
+                        .build())
+                .one();
+        editedPosition.setPositionType(reloadedPosition.getPositionType());
+    }
 
     /**
      * После завершения штатной инициализации базового editor синхронизирует
