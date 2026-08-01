@@ -6,7 +6,7 @@ import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.RadioButtonGroup;
 import com.haulmont.cuba.gui.components.TabSheet;
-import com.haulmont.cuba.gui.screen.AfterShowEvent;
+import com.haulmont.cuba.gui.screen.Screen.AfterShowEvent;
 import com.haulmont.cuba.gui.screen.EditedEntityContainer;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.Subscribe;
