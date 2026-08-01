@@ -6,14 +6,18 @@
         messagesPack="com.company.hunttech.web.screens.openposition"
         icon="COMPASS">
     <data>
+        <!-- Редактируемый экземпляр позиции; view openPosition-edit-view без LOB — тяжёлые тексты догружаются lazy по вкладкам. -->
         <instance id="openPositionDc"
                   class="com.company.hunttech.entity.OpenPosition">
             <view extends="openPosition-edit-view"/>
+            <!-- Загрузчик позиции по id из browse/lookup. -->
             <loader id="openPositionDl"/>
         </instance>
+        <!-- Коллекция трудовых соглашений позиции (многие-ко-многим через join openPositions) — вкладка «Трудовые соглашения». -->
         <collection id="laborAgreementDc"
                     class="com.company.hunttech.entity.LaborAgreement"
                     view="laborAgreement-openPosition-tab-view">
+            <!-- Загрузчик соглашений: select e from hunttech_LaborAgreement e join e.openPositions op where op = :openPosition. -->
             <loader id="laborAgreementDl">
                 <query><![CDATA[select e from hunttech_LaborAgreement e
                         join e.openPositions op]]>
@@ -25,9 +29,11 @@
                 </query>
             </loader>
         </collection>
+        <!-- Коллекция комментариев-рейтингов позиции (OpenPositionComment) — вкладка «Комментарии», сортировка по dateComment desc. -->
         <collection id="commentsOpenPositionDc"
                     class="com.company.hunttech.entity.OpenPositionComment"
                     view="openPositionComment-edit-view">
+            <!-- Загрузчик комментариев по openPosition с сортировкой от свежих к старым. -->
             <loader id="commentsOpenPositionDl">
                 <query><![CDATA[select e from hunttech_OpenPositionComment e
                         order by e.dateComment desc]]>
@@ -39,9 +45,11 @@
                 </query>
             </loader>
         </collection>
+        <!-- Коллекция файлов позиции (SomeFilesOpenPosition) — вкладка «Файлы». -->
         <collection id="someFilesesDc"
                     class="com.company.hunttech.entity.SomeFilesOpenPosition"
                     view="someFilesOpenPosition-edit-view">
+            <!-- Загрузчик файлов позиции по openPosition. -->
             <loader id="someFilesesDl">
                 <query><![CDATA[select e from hunttech_SomeFilesOpenPosition e]]>
                     <condition>
@@ -52,9 +60,11 @@
                 </query>
             </loader>
         </collection>
+        <!-- Коллекция навыков позиции (дерево SkillTree) — вкладка «Навыки», сортировка по skillName. -->
         <collection id="openPositionSkillsListsDc"
                     class="com.company.hunttech.entity.SkillTree"
                     view="skillTree-openPosition-tab-view">
+            <!-- Загрузчик навыков позиции по openPosition. -->
             <loader id="openPositionSkillsListsDl">
                 <query><![CDATA[select e from hunttech_SkillTree e
                         order by e.skillName]]>
@@ -66,9 +76,11 @@
                 </query>
             </loader>
         </collection>
+        <!-- Вложения BPM-процесса согласования позиции (bpm$ProcAttachment), кэшируемый loader по procInstance.entity.entityId. -->
         <collection id="procAttachmentsDc"
                     class="com.haulmont.bpm.entity.ProcAttachment"
                     view="procAttachment-browse">
+            <!-- Загрузчик вложений процесса согласования по entityId позиции; cacheable — процесс редко меняется. -->
             <loader id="procAttachmentsDl" cacheable="true">
                 <query><![CDATA[select e from bpm$ProcAttachment e
                                 order by e.createTs]]>
@@ -80,9 +92,11 @@
                 </query>
             </loader>
         </collection>
+        <!-- Справочник родительских позиций: незакрытые вакансии с commandCandidate != 0 (кэшируется) — options для parentOpenPositionField. -->
         <collection id="openPositionParentDc"
                     class="com.company.hunttech.entity.OpenPosition">
             <view extends="openPosition-picker-view"/>
+            <!-- Загрузчик родительских позиций: openClose=false и commandCandidate != 0, сортировка по vacansyName. -->
             <loader id="openPositionParentDl" cacheable="true">
                 <query>
                     <![CDATA[select e from hunttech_OpenPosition e
@@ -91,9 +105,11 @@
                 </query>
             </loader>
         </collection>
+        <!-- Справочник типов позиций (Position) без служебных «(не использовать)» — options для positionTypeField. -->
         <collection id="positionTypesDc"
                     class="com.company.hunttech.entity.Position">
             <view extends="position-picker-view"/>
+            <!-- Загрузчик типов позиций: исключены записи с «(не использовать)», сортировка по positionRuName; cacheable. -->
             <loader id="positionTypesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from hunttech_Position e
@@ -102,9 +118,11 @@
                 </query>
             </loader>
         </collection>
+        <!-- Коллекция новостей позиции (OpenPositionNews) — вкладка «Новости», фильтр по позиции и признаку приоритетности. -->
         <collection id="openPositionNewsDc"
                     class="com.company.hunttech.entity.OpenPositionNews">
             <view extends="openPositionNews-edit-view"/>
+            <!-- Загрузчик новостей: по openPosition и priorityNews, сортировка по dateNews desc; cacheable. -->
             <loader id="openPositionNewsLc" cacheable="true">
                 <query>
                     <![CDATA[select e from hunttech_OpenPositionNews e
@@ -122,6 +140,7 @@
                 </query>
             </loader>
         </collection>
+        <!-- Справочник проектов для picker-поля проекта: незакрытые проекты с глубоким view (логотип, департамент, компания, владелец). -->
         <collection id="projectNamesDc"
                     class="com.company.hunttech.entity.Project">
             <view extends="project-picker-view">
@@ -138,6 +157,7 @@
                     <property name="fileImageFace" view="_local"/>
                 </property>
             </view>
+            <!-- Загрузчик проектов: projectIsClosed = false, без проектов, у которых уже есть открытые позиции (кроме текущей); cacheable. -->
             <loader id="projectNamesLc" cacheable="true">
                 <query>
                     <![CDATA[select e from hunttech_Project e
@@ -168,14 +188,17 @@
                 </query>
             </loader>
         </collection>
+        <!-- Справочник компаний для picker-поля компании. -->
         <collection id="companyNamesDc"
                     class="com.company.hunttech.entity.Company">
             <view extends="company-picker-view"/>
+            <!-- Загрузчик компаний по comanyName. -->
             <loader id="companyNamesLc">
                 <query><![CDATA[select e from hunttech_Company e
                         order by e.comanyName]]></query>
             </loader>
         </collection>
+        <!-- Справочник департаментов компании (CompanyDepartament) с городом — options для companyDepartamentField. -->
         <collection id="companyDepartamentsDc"
                     class="com.company.hunttech.entity.CompanyDepartament">
             <view extends="companyDepartament-picker-view">
@@ -183,6 +206,7 @@
                     <property name="cityOfCompany" view="_local"/>
                 </property>
             </view>
+            <!-- Загрузчик департаментов: без «(не использовать)», фильтр по выбранной компании, сортировка по departamentRuName. -->
             <loader id="companyDepartamentsLc">
                 <query>
                     <![CDATA[select e from hunttech_CompanyDepartament e
@@ -198,18 +222,22 @@
                 </query>
             </loader>
         </collection>
+        <!-- Справочник городов для picker-поля города и массового добавления. -->
         <collection id="citiesDc"
                     class="com.company.hunttech.entity.City"
                     view="city-picker-view">
+            <!-- Загрузчик городов по cityRuName; cacheable. -->
             <loader id="citiesDl" cacheable="true">
                 <query><![CDATA[select e
                 from hunttech_City e
                 order by e.cityRuName]]></query>
             </loader>
         </collection>
+        <!-- Справочник грейдов (Grade) для gradeLookupPickerField; cacheable. -->
         <collection id="gradeDc"
                     class="com.company.hunttech.entity.Grade"
                     view="grade-picker-view">
+            <!-- Загрузчик грейдов по gradeName; cacheable. -->
             <loader id="gradeDl" cacheable="true">
                 <query><![CDATA[select e from hunttech_Grade e order by e.gradeName]]></query>
             </loader>
@@ -226,27 +254,35 @@
                    dataContainer="openPositionDc"
                    property="lastOpenDate"
                    visible="false"/>
-        <groupBox spacing="false"
+        <!-- Группа «Команда / Вакансия»: тип (команда или вакансия) и родительская позиция. -->
+        <groupBox id="positionHeaderGroupBox"
+                  spacing="false"
                   collapsable="true"
                   collapsed="false"
                   width="100%"
                   caption="msg://msgTitle">
-                <hbox spacing="true"
+                <hbox id="positionHeaderHBox"
+                      spacing="true"
                       expand="labelOpenPosition"
                       width="100%">
+                    <!-- Метка «Черновик» (h2) — видима, когда позиция в статусе черновика. -->
                     <label id="signDraftLabel"
                            value=""
                            width="AUTO"
                            stylename="h2"/>
+                    <!-- Название позиции в заголовке (перенос строки). -->
                     <label id="labelOpenPosition"
                            width="AUTO"
                            stylename="table-wordwrap"/>
+                    <!-- Итоговая комиссия рекрутера в шапке (HTML). -->
                     <label id="labelTopComissionRecrutier"
                            stylename="h4"
                            htmlEnabled="true"/>
+                    <!-- Итоговая комиссия ресурсера в шапке (HTML). -->
                     <label id="labelTopComissionResearcher"
                            stylename="h4"
                            htmlEnabled="true"/>
+                    <!-- Логотип проекта (70x70, fallback no-company.png). -->
                     <ovaFallbackImage id="projectLogoImage"
                            width="70px"
                            height="70px"
@@ -255,6 +291,7 @@
                            stylename="widget-border"
                            scaleMode="SCALE_DOWN"
                            fallbackThemePath="icons/no-company.png"/>
+                    <!-- Аватар владельца проекта (70x70, овальный, fallback no-programmer.jpeg). -->
                     <ovaFallbackImage id="projectOwnerImage"
                            width="70px"
                            height="70px"
@@ -265,28 +302,35 @@
                            ovalWidth="70px"
                            fallbackThemePath="icons/no-programmer.jpeg"/>
                 </hbox>
+            <!-- Предупреждение об автоматическом закрытии вакансии (обратный отсчёт от closingDate). -->
             <label id="closedVacancyInfoLabel"
                    width="AUTO"
                    icon="WARNING"/>
         </groupBox>
+        <!-- Контейнер tabSheet, растягивающийся на всю высоту формы. -->
         <vbox id="tabSheetGroupBox"
               expand="tabSheetOpenPosition">
+            <!-- Вкладки формы позиции: основные данные, трудовые соглашения, оплата, описание должности, файлы, тестовое, памятка, шаблон письма, навыки, новости, согласование, комментарии. -->
             <tabSheet id="tabSheetOpenPosition"
                       stylename="framed">
+                <!-- Вкладка «О вакансии»: идентификаторы, проект/компания/город, настройки команды, зарплата, количество позиций, описания (аккордеон) и чекбоксы потребности. -->
                 <tab id="tabOpenPosition"
                      caption="msg://msgNamePosition"
                      margin="true,true,true,true"
                      spacing="true"
                      icon="USERS">
-                    <scrollBox orientation="vertical"
+                    <scrollBox id="mainTabScrollBox"
+                               orientation="vertical"
                                spacing="false"
                                height="100%"
                                width="100%">
-                        <vbox spacing="false" expand="vacancyNameHBox">
+                        <vbox id="citiesLabelHBox" spacing="false" expand="vacancyNameHBox">
+                            <!-- Ряд: ID вакансии, название, грейд и кнопка генерации названия. -->
                             <hbox id="vacancyNameHBox"
                                   spacing="true"
                                   width="100%"
                                   expand="vacansyNameField">
+                                <!-- Внутренний ID вакансии (vacansyID). -->
                                 <textField id="vacansyIDTextField"
                                            dataContainer="openPositionDc"
                                            property="vacansyID"
@@ -294,6 +338,7 @@
                                            stylename="large"
                                            width="100%"
                                            caption="msg://msgVacansyID"/>
+                                <!-- Название вакансии (обязательное поле, крупный стиль). -->
                                 <textField id="vacansyNameField"
                                            dataContainer="openPositionDc"
                                            property="vacansyName"
@@ -302,6 +347,7 @@
                                            box.expandRatio="8"
                                            width="100%"
                                            required="true"/>
+                                <!-- Грейд позиции (options из gradeDc). -->
                                 <lookupPickerField id="gradeLookupPickerField"
                                                    dataContainer="openPositionDc"
                                                    property="grade"
@@ -315,6 +361,7 @@
                                                 type="picker_lookup"/>
                                     </actions>
                                 </lookupPickerField>
+                                <!-- Автогенерация названия вакансии по типу позиции (generateNameFieldButton). -->
                                 <button id="generateVacancyNameFieldButton"
                                         caption="msg://msgGenerateName"
                                         description="msg://msgGenerateNameDesc"
@@ -323,12 +370,15 @@
                                         stylename="large"
                                         invoke="generateNameFieldButton"/>
                             </hbox>
-                            <hbox/>
+                            <!-- Пустой разделитель между рядом названия и блоком настроек команды. -->
+                            <hbox id="vacancyTitleSpacerHBox"/>
+                            <!-- Блок «Настройки вакансии»: дата закрытия, черновик, открытость, внутренний проект, приоритет и комментарий приоритета. -->
                             <hbox id="hboxProject1"
                                   spacing="true"
                                   align="MIDDLE_LEFT"
                                   expand=""
                                   width="100%">
+                                <!-- Группа «Настройки вакансии»: дата автозакрытия, статусы и приоритет позиции. -->
                                 <groupBox id="commandFieldHBox"
                                           collapsable="true"
                                           collapsed="false"
@@ -336,24 +386,29 @@
                                           stylename="light"
                                           caption="msg://msgCommanSetup"
                                           align="MIDDLE_RIGHT">
-                                    <hbox spacing="true"
+                                    <hbox id="closingDateFieldsHBox"
+                                          spacing="true"
                                           align="MIDDLE_LEFT"
                                           height="AUTO"
                                           width="100%">
-                                        <hbox spacing="true"
+                                        <hbox id="closingDateSignFieldsHBox"
+                                              spacing="true"
                                               width="100%"
                                               height="100%">
+                                            <!-- Дата автоматического закрытия вакансии: после неё кандидаты не принимаются. -->
                                             <dateField id="closingDateDateField"
                                                        dataContainer="openPositionDc"
                                                        property="closingDate"
                                                        caption="msg://msgClosingDate"
                                                        description="msg://msgClosingDateDesc"/>
+                                            <!-- Признак черновика (signDraft): позиция не публикуется. -->
                                             <checkBox id="signDraftCheckBox"
                                                       dataContainer="openPositionDc"
                                                       property="signDraft"
                                                       width="AUTO"
                                                       caption="msg://msgSignDraft"
                                                       align="MIDDLE_LEFT"/>
+                                            <!-- Признак открытости позиции (openClose) — скрыт, управляется кнопками в browse. -->
                                             <checkBox id="openClosePositionCheckBox"
                                                       dataContainer="openPositionDc"
                                                       property="openClose"
@@ -361,6 +416,7 @@
                                                       width="AUTO"
                                                       caption="mainMsg://msgPositionClose"
                                                       align="MIDDLE_LEFT"/>
+                                            <!-- Признак внутреннего проекта (internalProject) — скрыт, выставляется программно. -->
                                             <checkBox id="internalProjectCheckBox"
                                                       dataContainer="openPositionDc"
                                                       property="internalProject"
@@ -369,10 +425,12 @@
                                                       width="AUTO"
                                                       align="MIDDLE_LEFT"/>
                                         </hbox>
-                                        <hbox spacing="true"
+                                        <hbox id="priorityFieldsHBox"
+                                              spacing="true"
                                               width="100%"
                                               expand="commentPriority"
                                               height="AUTO">
+                                            <!-- Приоритет позиции (обязательный): влияет на сортировку и срочные списки. -->
                                             <lookupField id="priorityField"
                                                          dataContainer="openPositionDc"
                                                          property="priority"
@@ -381,6 +439,7 @@
                                                          nullOptionVisible="false"
                                                          align="BOTTOM_LEFT"
                                                          width="AUTO"/>
+                                            <!-- Комментарий к приоритету позиции. -->
                                             <textField id="commentPriority"
                                                        dataContainer="openPositionDc"
                                                        property="priorityComment"
@@ -390,15 +449,19 @@
                                     </hbox>
                                 </groupBox>
                             </hbox>
-                            <groupBox spacing="true"
+                            <!-- Группа «Тип проекта»: тип позиции, формат работы, проект/компания/департамент, город и добавление городов. -->
+                            <groupBox id="commandOrVacancyGroupBox"
+                                      spacing="true"
                                       collapsable="true"
                                       collapsed="false"
                                       caption="msg://msgCommandOrVacancy"
                                       stylename="light"
                                       width="100%">
-                                <hbox spacing="true"
+                                <hbox id="commandOrVacancyHBox"
+                                      spacing="true"
                                       width="100%">
-                                    <hbox width="100%" colspan="1">
+                                    <hbox id="commandOrPositionCellHBox" width="100%" colspan="1">
+                                        <!-- Тип записи: команда разработчиков или отдельная вакансия (commandCandidate, обязательный). -->
                                         <radioButtonGroup id="commandOrPosition"
                                                           width="50%"
                                                           orientation="horizontal"
@@ -409,7 +472,8 @@
                                                           align="BOTTOM_LEFT"
                                                           caption="msg://msgCommandOrPosition"/>
                                     </hbox>
-                                    <hbox width="100%" colspan="1">
+                                    <hbox id="parentPositionCellHBox" width="100%" colspan="1">
+                                        <!-- Родительская позиция (для дочерних вакансий команды); options — открытые позиции с commandCandidate != 0. -->
                                         <lookupPickerField id="parentOpenPositionField"
                                                            dataContainer="openPositionDc"
                                                            property="parentOpenPosition"
@@ -420,14 +484,18 @@
                                     </hbox>
                                 </hbox>
                             </groupBox>
-                            <groupBox spacing="false"
+                            <!-- Группа «Количество персонала»: штатные единицы и признак «более 10». -->
+                            <groupBox id="projectTypeGroupBox"
+                                      spacing="false"
                                       stylename="light"
                                       caption="msg://msgTypeOfProject"
                                       collapsed="false"
                                       collapsable="true">
+                                <!-- Ряд: тип позиции + формат удалённой работы с комментарием. -->
                                 <hbox id="hboxVacansy"
                                       spacing="true"
                                       width="100%">
+                                    <!-- Тип позиции (Position, обязательный); при выборе подставляется описание и названия. -->
                                     <lookupPickerField id="positionTypeField"
                                                        optionsContainer="positionTypesDc"
                                                        dataContainer="openPositionDc"
@@ -441,8 +509,9 @@
                                                     type="picker_lookup"/>
                                         </actions>
                                     </lookupPickerField>
-                                    <hbox spacing="true"
+                                    <hbox id="remoteWorkFieldsHBox" spacing="true"
                                           width="100%">
+                                        <!-- Формат удалённой работы (remoteWork, обязательный). -->
                                         <lookupField id="remoteWorkField"
                                                      dataContainer="openPositionDc"
                                                      property="remoteWork"
@@ -452,6 +521,7 @@
                                                      caption="msg://msgRemoteWork"
                                                      width="100%">
                                         </lookupField>
+                                        <!-- Комментарий к формату удалённой работы. -->
                                         <textField id="remoteWorkCommentField"
                                                    dataContainer="openPositionDc"
                                                    property="remoteComment"
@@ -461,10 +531,12 @@
                                                    width="100%"/>
                                     </hbox>
                                 </hbox>
+                                <!-- Ряд: проект + департамент компании. -->
                                 <hbox id="hboxProject"
                                       spacing="true"
                                       width="100%">
-                                    <vbox spacing="true">
+                                    <vbox id="projectFieldsVBox" spacing="true">
+                                        <!-- Проект позиции (обязательный); при выборе подставляются компания, департамент, позиция и описания. -->
                                         <lookupPickerField id="projectNameField"
                                                            optionsContainer="projectNamesDc"
                                                            dataContainer="openPositionDc"
@@ -480,13 +552,16 @@
                                                         type="picker_open" icon="EDIT_ACTION"/>
                                             </actions>
                                         </lookupPickerField>
-                                        <hbox spacing="true">
+                                        <hbox id="projectFilterCheckBoxesHBox" spacing="true">
+                                            <!-- Фильтр списка проектов: только незакрытые. -->
                                             <checkBox id="onlyOpenProjectCheckBox"
                                                       caption="msg://msgOnlyOpenedProject"/>
+                                            <!-- Фильтр списка проектов: с учётом наличия открытых позиций. -->
                                             <checkBox id="withOpenPositionCheckBox"
                                                       caption="msg://msgWithOpenPosition"/>
                                         </hbox>
                                     </vbox>
+                                    <!-- Департамент компании (обязательный, options зависят от выбранной компании). -->
                                     <lookupPickerField id="companyDepartamentField"
                                                        optionsContainer="companyDepartamentsDc"
                                                        caption="msg://msgDepartment"
@@ -501,9 +576,11 @@
                                         </actions>
                                     </lookupPickerField>
                                 </hbox>
+                                <!-- Ряд: компания + город позиции и кнопка массового добавления городов. -->
                                 <hbox id="hboxCompany"
                                       spacing="true"
                                       width="100%">
+                                    <!-- Компания позиции (обязательная); при выборе обновляется список департаментов. -->
                                     <lookupPickerField id="companyNameField"
                                                        optionsContainer="companyNamesDc"
                                                        caption="msg://msgCompanyName"
@@ -517,9 +594,11 @@
                                                     type="picker_open" icon="EDIT_ACTION"/>
                                         </actions>
                                     </lookupPickerField>
-                                    <hbox spacing="true"
+                                    <hbox id="cityFieldsHBox"
+                                          spacing="true"
                                           expand="cityOpenPositionField"
                                           width="100%">
+                                        <!-- Основной город позиции (cityPosition, обязательный). -->
                                         <lookupPickerField id="cityOpenPositionField"
                                                            dataContainer="openPositionDc"
                                                            optionsContainer="citiesDc"
@@ -534,6 +613,7 @@
                                                         type="picker_lookup"/>
                                             </actions>
                                         </lookupPickerField>
+                                        <!-- Массовое добавление городов позиции: открывает окно выбора городов по стране (addListCity). -->
                                         <button id="addCity"
                                                 caption="msg://msgAddCity"
                                                 width="AUTO"
@@ -543,24 +623,28 @@
                                                 invoke="addListCity"/>
                                     </hbox>
                                 </hbox>
-                                <hbox align="TOP_RIGHT"
+                                <hbox id="citiesLabelHBox" align="TOP_RIGHT"
                                       spacing="true"
                                       width="50%"
                                       expand="citiesLabel">
+                                    <!-- Сводка добавленных городов позиции. -->
                                     <label id="citiesLabel"
                                            stylename="h4"
                                            width="AUTO"
                                            align="MIDDLE_RIGHT"/>
                                 </hbox>
                             </groupBox>
-                            <groupBox caption="msg://msgCountOfPersonel"
+                            <!-- Группа «Зарплата»: вилка зарплаты, зарплата ИП, запрос зарплаты у кандидата и комментарий. -->
+                            <groupBox id="personnelCountGroupBox"
+                                      caption="msg://msgCountOfPersonel"
                                       collapsable="true"
                                       collapsed="false"
                                       stylename="light"
                                       spacing="false">
-                                <hbox align="TOP_RIGHT"
+                                <hbox id="numberPositionHBox" align="TOP_RIGHT"
                                       spacing="true"
                                       width="100%">
+                                    <!-- Количество позиций (штатных единиц, обязательное). -->
                                     <textField id="numberPositionField"
                                                dataContainer="openPositionDc"
                                                property="numberPosition"
@@ -568,6 +652,7 @@
                                                align="BOTTOM_LEFT"
                                                caption="msg://msgNumberOpenPosition"
                                                width="100%"/>
+                                    <!-- Признак «более 10 позиций» (more10NumberPosition). -->
                                     <checkBox id="more10NumberPositionField"
                                               dataContainer="openPositionDc"
                                               property="more10NumberPosition"
@@ -576,29 +661,36 @@
                                               width="100%"/>
                                 </hbox>
                             </groupBox>
-                            <groupBox spacing="false"
+                            <!-- Группа вкладки соглашений: регистрация для работы, стоимость аутстафа и таблица соглашений. -->
+                            <groupBox id="salaryGroupBox"
+                                      spacing="false"
                                       caption="msg://msgSalary"
                                       stylename="light"
                                       collapsed="false"
                                       collapsable="true">
+                                <!-- Ряд: минимальная, максимальная зарплата и зарплата для ИП. -->
                                 <hbox id="hboxSalary"
                                       spacing="true"
                                       width="100%">
+                                    <!-- Минимальная зарплата (с валидатором). -->
                                     <textField id="openPositionFieldSalaryMin"
                                                dataContainer="openPositionDc"
                                                property="salaryMin"
                                                caption="mainMsg://msgSalaryMin"
                                                width="100%"/>
+                                    <!-- Максимальная зарплата (с валидатором: не меньше минимальной). -->
                                     <textField id="openPositionFieldSalaryMax"
                                                dataContainer="openPositionDc"
                                                property="salaryMax"
                                                caption="msg://msgSalaryMax"
                                                width="100%"/>
+                                    <!-- Зарплата исполнителя (ИП). -->
                                     <textField id="openPositionFieldSalaryIE"
                                                dataContainer="openPositionDc"
                                                property="salaryIE"
                                                caption="msg://msgSalaryIE"
                                                width="100%"/>
+                                    <!-- Запрашивать зарплатные ожидания у кандидата. -->
                                     <checkBox id="salaryCandidateRequestCheckBox"
                                               dataContainer="openPositionDc"
                                               align="BOTTOM_LEFT"
@@ -606,16 +698,19 @@
                                               caption="msg://msgSalaryCandidateRequest"
                                               width="AUTO"/>
                                 </hbox>
+                                <!-- Ряд: комментарий к зарплате и жёсткий лимит. -->
                                 <hbox id="space2Box"
                                       width="100%"
                                       height="100%"
                                       expand="salaryCommentTextFiels"
                                       spacing="true">
+                                    <!-- Комментарий к зарплате (видимый кандидатам). -->
                                     <textField id="salaryCommentTextFiels"
                                                dataContainer="openPositionDc"
                                                property="salaryComment"
                                                width="100%"
                                                caption="msg://msgSalaryComment"/>
+                                    <!-- Жёсткий лимит зарплаты (salaryFixLimit): вилка не обсуждается. -->
                                     <checkBox id="salaryStrongLimitCheckBox"
                                               align="BOTTOM_RIGHT"
                                               dataContainer="openPositionDc"
@@ -626,17 +721,20 @@
                         </vbox>
                     </scrollBox>
                 </tab>
+                <!-- Вкладка «Трудовые соглашения»: редактируемая таблица соглашений позиции и параметры регистрации/аутстафа. -->
                 <tab id="laborAgreementTab"
                      caption="msg://msgLaborAgreementTab"
                      margin="tue,true,true,true"
                      spacing="true"
                      icon="CUBES">
-                    <groupBox spacing="true"
+                    <groupBox id="laborAgreementGroupBox"
+                              spacing="true"
                               stylename="light"
                               width="100%"
                               height="100%"
                               expand="laborAgreementDataGrid">
-                        <hbox spacing="true">
+                        <hbox id="outstaffParamsHBox" spacing="true">
+                            <!-- Тип регистрации для работы (обязательный). -->
                             <lookupField id="registrationForWorkField"
                                          dataContainer="openPositionDc"
                                          property="registrationForWork"
@@ -645,12 +743,14 @@
                                          required="true"
                                          align="BOTTOM_LEFT"
                                          width="AUTO"/>
+                            <!-- Стоимость аутстафа (decimal). -->
                             <textField id="outstaffingCostTextField"
                                        datatype="decimal"
                                        dataContainer="openPositionDc"
                                        property="outstaffingCost"
                                        caption="msg://msgOutstaffingCost"
                                        description="msg://msgOutstaffingCostDescription"/>
+                            <!-- Подстановка зарплаты из рейтов аутстафа (setSalaryFieldButtonInvoke). -->
                             <button id="setSalaryFieldButton"
                                     align="BOTTOM_LEFT"
                                     width="AUTO"
@@ -658,6 +758,7 @@
                                     description="msg://msgSetSalaryDesc"
                                     invoke="setSalaryFieldButtonInvoke"/>
                         </hbox>
+                        <!-- Редактируемая таблица трудовых соглашений позиции (создание/редактирование/удаление строк). -->
                         <dataGrid id="laborAgreementDataGrid"
                                   width="100%"
                                   editorEnabled="true"
@@ -668,18 +769,22 @@
                                 <action id="remove" type="remove"/>
                             </actions>
                             <columns>
+                                <!-- Колонка «возможно» соглашения. -->
                                 <column id="perhaps"
                                         maximumWidth="100px"
                                         minimumWidth="50px"
                                         property="perhaps"
                                         editable="true"/>
+                                <!-- Компания соглашения. -->
                                 <column id="company"
                                         property="company"/>
+                                <!-- Тип трудового соглашения. -->
                                 <column id="laborAgreementType"
                                         property="laborAgreementType"/>
                             </columns>
                             <rowsCount autoLoad="true"/>
-                            <buttonsPanel id="buttonsPanel"
+                            <!-- Панель действий таблицы соглашений: создать/редактировать/удалить. -->
+                            <buttonsPanel id="laborAgreementButtonsPanel"
                                           alwaysVisible="true">
                                 <button id="createBtn"
                                         action="laborAgreementDataGrid.create"/>
@@ -691,25 +796,31 @@
                         </dataGrid>
                     </groupBox>
                 </tab>
+                <!-- Вкладка «Оплата» (скрыта до открытия): схемы оплаты ресурсера, рекрутера и детали комиссий. -->
                 <tab id="tabPayments"
                      caption="msg://msgPayments"
                      margin="tue,true,true,true"
                      spacing="true"
                      visible="false"
                      icon="BULK_EDIT_ACTION">
+                    <!-- Итоговая схема оплаты ресурсера (горизонтальная). -->
                     <groupBox id="groupBoxPaymentsResearcher"
                               orientation="horizontal"
                               spacing="true"
                               caption="msg://msgResearcherPayment">
+                        <!-- Итоговая зарплата/комиссия ресурсера (HTML). -->
                         <label id="labelResearcherSalary"
                                htmlEnabled="true"/>
                     </groupBox>
+                    <!-- Итоговая схема оплаты рекрутера. -->
                     <groupBox id="groupBoxPaymentsRecrutier"
                               spacing="true"
                               caption="msg://msgRecrutierSalary">
+                        <!-- Итоговая зарплата/комиссия рекрутера (HTML). -->
                         <label id="labelRecrutierSalary"
                                htmlEnabled="true"/>
                     </groupBox>
+                    <!-- Детали оплаты: тип комиссии компании, НДФЛ, проценты/суммы ресурсера и рекрутера (свёрнут). -->
                     <groupBox id="groupBoxPaymentsDetail"
                               orientation="horizontal"
                               collapsable="true"
@@ -717,51 +828,63 @@
                               spacing="true"
                               caption="msg://msgPaymentsDetail"
                               width="100%">
-                        <hbox spacing="true"
+                        <hbox id="paymentsColumnsHBox"
+                              spacing="true"
                               width="100%"
                               height="100%">
-                            <vbox spacing="true"
+                            <vbox id="companyPaymentsVBox"
+                                  spacing="true"
                                   height="100%"
                                   width="33%">
+                                <!-- Тип комиссии компании (процент/сумма). -->
                                 <radioButtonGroup id="radioButtonGroupPaymentsType"
                                                   dataContainer="openPositionDc"
                                                   property="typeCompanyComission"
                                                   caption="msg://msgPaymentType"/>
+                                <!-- Учитывать НДФЛ в расчётах (useTaxNDFL). -->
                                 <checkBox id="checkBoxUseNDFL"
                                           caption="msg://msgUseNDFL"
                                           dataContainer="openPositionDc"
                                           property="useTaxNDFL"/>
-                                <vbox spacing="true"
+                                <vbox id="companyPercentFieldsVBox" spacing="true"
                                       align="BOTTOM_LEFT">
+                                    <!-- Процент или сумма комиссии компании. -->
                                     <textField id="textFieldPercentOrSum"
                                                align="BOTTOM_LEFT"
                                                caption="msg://msgPercentOrSum"
                                                dataContainer="openPositionDc"
                                                property="percentComissionOfCompany"/>
+                                    <!-- Итоговая комиссия компании (расчётное поле). -->
                                     <textField id="textFieldCompanyPayment" caption="msg://msgCompanyComission"
                                                align="BOTTOM_LEFT"/>
                                 </vbox>
                             </vbox>
-                            <vbox spacing="true" height="100%" width="33%">
+                            <vbox id="researcherPaymentsVBox" spacing="true" height="100%" width="33%">
+                                <!-- Схема оплаты ресурсера (typeSalaryOfRecrutier). -->
                                 <radioButtonGroup id="radioButtonGroupResearcherSalary"
                                                   caption="msg://msgResearcherSalary"
                                                   dataContainer="openPositionDc" property="typeSalaryOfRecrutier"/>
-                                <vbox spacing="true" align="BOTTOM_LEFT" width="100%">
+                                <vbox id="researcherPercentFieldsVBox" spacing="true" align="BOTTOM_LEFT" width="100%">
+                                    <!-- Процент/сумма комиссии ресурсера. -->
                                     <textField id="textFieldResearcherSalaryPercentOrSum"
                                                caption="msg://msgResearcherComission" align="BOTTOM_LEFT"
                                                dataContainer="openPositionDc" property="percentSalaryOfResearcher"/>
+                                    <!-- Итоговая выплата ресурсеру (расчётное поле). -->
                                     <textField id="textFieldResearcherSalary" align="BOTTOM_LEFT"
                                                caption="msg://msgResearcherSalary"/>
                                 </vbox>
                             </vbox>
-                            <vbox spacing="true" height="100%">
+                            <vbox id="recrutierPaymentsVBox" spacing="true" height="100%">
+                                <!-- Схема оплаты рекрутера (typeSalaryOfResearcher). -->
                                 <radioButtonGroup
                                         id="radioButtonGroupRecrutierSalary" caption="msg://msgRecrutierSalary"
                                         dataContainer="openPositionDc" property="typeSalaryOfResearcher"/>
-                                <vbox spacing="true" width="100%">
+                                <vbox id="recrutierPercentFieldsVBox" spacing="true" width="100%">
+                                    <!-- Процент/сумма комиссии рекрутера. -->
                                     <textField id="textFieldRecrutierPercentOrSum" align="BOTTOM_LEFT"
                                                caption="msg://msgRecrutierComission" dataContainer="openPositionDc"
                                                property="percentSalaryOfRecrutier"/>
+                                    <!-- Итоговая выплата рекрутеру (расчётное поле). -->
                                     <textField id="textFieldRecrutierSalary" align="BOTTOM_LEFT"
                                                caption="msg://msgRecrutierSalary"/>
                                 </vbox>
@@ -769,21 +892,25 @@
                         </hbox>
                     </groupBox>
                 </tab>
+                <!-- Вкладка «Описание должности»: опыт, аккордеон описаний (RU/EN/стандартное/«кто этот парень») и короткое описание. -->
                 <tab caption="mainMsg://msgJobDescription"
                      margin="true,true,true,true"
                      expand="jobDescriptionVBox"
                      spacing="true"
                      id="tabJobDescription"
                      icon="DRIVERS_LICENSE">
+                    <!-- Прокрутка вкладки описания должности. -->
                     <scrollBox id="jobDescriptionVBox"
                                box.expandRatio="1"
                                spacing="true">
+                        <!-- Группа «Опыт работы»: опыт коммерческой разработки и командный опыт (свёрнута). -->
                         <groupBox id="workExperienceGroupBox"
                                   collapsable="true"
                                   collapsed="true"
                                   caption="msg://msgWorkExperience"
                                   spacing="true"
                                   width="100%">
+                            <!-- Опыт коммерческой разработки (обязательный). -->
                             <radioButtonGroup id="workExperienceRadioButton"
                                               orientation="horizontal"
                                               required="true"
@@ -791,6 +918,7 @@
                                               dataContainer="openPositionDc"
                                               property="workExperience"
                                               caption="msg://msgWorkExperience"/>
+                            <!-- Командный опыт (скрыт, заполняется программно). -->
                             <radioButtonGroup id="commanExperienceRadioButton"
                                               orientation="horizontal"
                                               description="msg://msgCommandExperience"
@@ -799,12 +927,15 @@
                                               property="commandExperience"
                                               caption="msg://msgCommandExperience"/>
                         </groupBox>
-                        <hbox spacing="true"
+                        <hbox id="descriptionsAccordionHBox" spacing="true"
                               width="100%">
+                            <!-- Аккордеон описаний позиции: русское, английское, стандартное и «кто этот парень». -->
                             <accordion id="openPositionAccordion"
                                        height="100%">
+                                <!-- Русскоязычное описание позиции (comment). -->
                                 <tab id="openPositionRuTabAccordion"
                                      caption="msg://msgRuComment">
+                                    <!-- Редактор русского описания (обязательный). -->
                                     <richTextArea id="openPositionRichTextArea"
                                                   dataContainer="openPositionDc"
                                                   property="comment"
@@ -813,8 +944,10 @@
                                                   height="300px"
                                                   required="true"/>
                                 </tab>
+                                <!-- Англоязычное описание позиции (commentEn). -->
                                 <tab id="openPositionEnTabAccordion"
                                      caption="msg://msgEnComment">
+                                    <!-- Редактор английского описания. -->
                                     <richTextArea id="openPositionEnRichTextArea"
                                                   dataContainer="openPositionDc"
                                                   property="commentEn"
@@ -823,16 +956,20 @@
                                                   height="300px"
                                                   required="false"/>
                                 </tab>
+                                <!-- Стандартное описание (генерируется из шаблона, только чтение). -->
                                 <tab id="openPositionStandartDescriptionAccorden"
                                      caption="msg://msgStandartDescription">
+                                    <!-- Просмотр стандартного описания (editable=false). -->
                                     <richTextArea id="openPositionStandartDescriptionRichTextArea"
                                                   width="100%"
                                                   box.expandRatio="1"
                                                   height="300px"
                                                   editable="false"/>
                                 </tab>
+                                <!-- Блок «Кто этот парень» (генерируется, только чтение). -->
                                 <tab id="openPositionWhoIsThisGuyAccorden"
                                      caption="msg://msgWhoIsThisGuy">
+                                    <!-- Просмотр сгенерированного описания «кто этот парень». -->
                                     <richTextArea id="openPositionWhoIsThisGuyRichTextArea"
                                                   width="100%"
                                                   box.expandRatio="1"
@@ -841,15 +978,17 @@
                                 </tab>
                             </accordion>
                         </hbox>
-                        <hbox width="100%"
+                        <hbox id="shortDescriptionHBox" width="100%"
                               spacing="true"
                               expand="shortDescriptionTextArea">
+                            <!-- Короткое описание позиции (до 250 символов). -->
                             <textField id="shortDescriptionTextArea"
                                        dataContainer="openPositionDc"
                                        caption="msg://msgShortCaption"
                                        property="shortDescription"
                                        maxLength="250"
                                        width="100%"/>
+                            <!-- Сканирование описания должности: извлечение короткого описания и навыков (addShortDescription). -->
                             <button id="scanJDButton"
                                     caption="msg://msgScanJD"
                                     align="BOTTOM_RIGHT"
@@ -858,16 +997,19 @@
                         </hbox>
                     </scrollBox>
                 </tab>
+                <!-- Вкладка «Файлы»: таблица файлов позиции. -->
                 <tab id="tabFiles"
                      icon="FILE_O"
                      caption="mainMsg://msgFiles"
                      margin="true,true,true,true"
                      spacing="true"
                      expand="someFilesVbox">
+                    <!-- Контейнер таблицы файлов позиции. -->
                     <vbox id="someFilesVbox"
                           spacing="true"
                           expand="someFilesTable"
                           width="100%">
+                        <!-- Таблица файлов позиции: описание, тип файла, размер, владелец. -->
                         <table id="someFilesTable"
                                height="300px"
                                width="100%"
@@ -878,10 +1020,11 @@
                                 <column id="fileDescriptor.size"/>
                                 <column id="fileOwner.name" caption="mainMsg://msgOwner"/>
                             </columns>
-                            <buttonsPanel>
-                                <button action="someFilesTable.create"/>
-                                <button action="someFilesTable.edit"/>
-                                <button action="someFilesTable.remove"/>
+                            <!-- Панель действий таблицы файлов: добавить/редактировать/удалить. -->
+                            <buttonsPanel id="someFilesButtonsPanel">
+                                <button id="someFilesCreateBtn" action="someFilesTable.create"/>
+                                <button id="someFilesEditBtn" action="someFilesTable.edit"/>
+                                <button id="someFilesRemoveBtn" action="someFilesTable.remove"/>
                             </buttonsPanel>
                             <actions>
                                 <action id="add" type="add"/>
@@ -892,21 +1035,25 @@
                         </table>
                     </vbox>
                 </tab>
+                <!-- Вкладка «Тестовое задание»: признак необходимости и редактор задания. -->
                 <tab id="tabExercise"
                      caption="msg://msgExercise"
                      margin="true,true,true,true"
                      spacing="true"
                      expand="exerciseVbox"
                      icon="ADJUST">
+                    <!-- Контейнер вкладки тестового задания. -->
                     <vbox id="exerciseVbox"
                           height="100%"
                           width="100%"
                           spacing="true"
                           expand="exerciseRichTextArea">
+                        <!-- Признак «нужно тестовое задание» (needExercise). -->
                         <checkBox id="needExerciseCheckBox"
                                   dataContainer="openPositionDc"
                                   property="needExercise"
                                   caption="msg://msgNeedExercice"/>
+                        <!-- Редактор тестового задания (lazy-загрузка при первом открытии вкладки). -->
                         <richTextArea id="exerciseRichTextArea"
                                       dataContainer="openPositionDc"
                                       property="exercise"
@@ -914,21 +1061,25 @@
                                       width="100%"/>
                     </vbox>
                 </tab>
+                <!-- Вкладка «Памятка к собеседованию»: признак и редактор памятки. -->
                 <tab id="tabMemoForInterview"
                      caption="msg://msgMemoForInterview"
                      margin="true,true,true,true"
                      spacing="true"
                      expand="memoVbox"
                      icon="ADJUST">
+                    <!-- Контейнер вкладки памятки. -->
                     <vbox id="memoVbox"
                           height="100%"
                           width="100%"
                           spacing="true"
                           expand="memoForInterviewRichTextArea">
+                        <!-- Признак «нужна памятка к собеседованию». -->
                         <checkBox id="needMemoCheckBox"
                                   dataContainer="openPositionDc"
                                   property="needMemoForInterview"
                                   caption="msg://msgNeedMemoForInterview"/>
+                        <!-- Редактор памятки к собеседованию (lazy). -->
                         <richTextArea id="memoForInterviewRichTextArea"
                                       dataContainer="openPositionDc"
                                       property="memoForInterview"
@@ -936,21 +1087,25 @@
                                       width="100%"/>
                     </vbox>
                 </tab>
+                <!-- Вкладка «Шаблон сопроводительного письма»: признак и редактор шаблона. -->
                 <tab id="tabTemplateLetter"
                      caption="msg://msgTemplateLetter"
                      margin="true,true,true,true"
                      spacing="true"
                      expand="templateLetterBox"
                      icon="font-icon:MAIL_FORWARD">
+                    <!-- Контейнер вкладки шаблона письма. -->
                     <vbox id="templateLetterBox"
                           width="100%"
                           height="100%"
                           spacing="true"
                           expand="templateLetterRichTextArea">
+                        <!-- Признак «нужно сопроводительное письмо» (needLetter). -->
                         <checkBox id="needLetterCheckBox"
                                   dataContainer="openPositionDc"
                                   property="needLetter"
                                   caption="msg://msgNeedLetter"/>
+                        <!-- Редактор шаблона сопроводительного письма (lazy). -->
                         <richTextArea id="templateLetterRichTextArea"
                                       dataContainer="openPositionDc"
                                       property="templateLetter"
@@ -959,37 +1114,46 @@
                                       required="false"/>
                     </vbox>
                 </tab>
+                <!-- Вкладка «Навыки»: дерево навыков позиции и кнопка пересканирования описания. -->
                 <tab id="tabSkills"
                      caption="msg://msgSkilsPosition"
                      margin="true,true,true,true"
                      spacing="true"
                      expand="skillsBox"
                      icon="FILTER">
+                    <!-- Контейнер вкладки навыков. -->
                     <vbox id="skillsBox"
                           width="100%"
                           spacing="true"
                           expand="openPositionSkillsListTable">
+                        <!-- Пересканирование описания должности и пересборка дерева навыков (rescanJobDescription). -->
                         <button id="rescanSkills"
                                 caption="msg://msgRescanJobDescription"
                                 align="BOTTOM_LEFT"
                                 invoke="rescanJobDescription"/>
+                        <!-- Дерево навыков позиции (иерархия по skillTree, колонка-иерархия skillName). -->
                         <treeDataGrid id="openPositionSkillsListTable"
                                       width="100%"
                                       hierarchyColumn="skillName"
                                       dataContainer="openPositionSkillsListsDc"
                                       hierarchyProperty="skillTree">
                             <columns>
+                                <!-- Логотип навыка (кастомный рендер). -->
                                 <column id="fileImageLogo"
                                         property="fileImageLogo"
                                         maximumWidth="120px"
                                         caption="msg://msgSkillLogo">
                                     <componentRenderer/>
                                 </column>
+                                <!-- Название навыка. -->
                                 <column id="skillName" property="skillName" caption="msg://msgSkill"/>
+                                <!-- Специализация навыка. -->
                                 <column id="specialisation" property="specialisation"
                                         caption="msg://msgSpecialisation"/>
+                                <!-- Ссылка на wiki-страницу навыка. -->
                                 <column id="wikiPage" property="wikiPage" maximumWidth="250px"
                                         caption="msg://msgWikiPage"/>
+                                <!-- Признак «комментарий» навыка (иконка). -->
                                 <column id="isComment" caption="msg://msgIsComment" maximumWidth="120px">
                                     <iconRenderer/>
                                 </column>
@@ -1011,17 +1175,20 @@
                         </treeDataGrid>
                     </vbox>
                 </tab>
+                <!-- Вкладка «Новости»: лента новостей позиции. -->
                 <tab id="tabOpenPositionNews"
                      caption="msg://msgOpenPositionNews"
                      margin="true,true,true,true"
                      spacing="true"
                      expand="openPostitonNewsBrowseBox"
                      icon="NEWSPAPER_O">
+                    <!-- Контейнер новостей позиции. -->
                     <vbox id="openPostitonNewsBrowseBox"
                           expand="openPostionNewsDataGrid"
                           width="100%"
                           spacing="true"
                           height="100%">
+                        <!-- Таблица новостей позиции: дата, тема, кандидат, автор. -->
                         <dataGrid id="openPostionNewsDataGrid"
                                   dataContainer="openPositionNewsDc"
                                   width="100%"
@@ -1036,41 +1203,49 @@
                                 <column id="candidates" property="candidates"/>
                                 <column id="author" property="author" width="250px"/>
                             </columns>
-                            <buttonsPanel>
+                            <buttonsPanel id="openPositionNewsButtonsPanel">
+                                <!-- Создание новости позиции (addOpenPositionNewsButton). -->
                                 <button id="addOpenPositionNewsButton"
                                         caption="mainMsg://msgAdd"
                                         invoke="addOpenPositionNewsButton"/>
+                                <!-- Удаление выбранной новости. -->
                                 <button id="removeOpenPositionNewsButton"
                                         action="openPostionNewsDataGrid.remove"/>
                             </buttonsPanel>
                         </dataGrid>
+                        <!-- Фильтр «только приоритетные новости» (priorityNews). -->
                         <checkBox id="priorityNewsCheckBox"
                                   width="AUTO"
                                   caption="msg://msgPriorityNewsCheckBox"/>
                     </vbox>
                 </tab>
+                <!-- Вкладка «Согласование»: BPM-процесс согласования позиции. -->
                 <tab id="tabApproval"
                      caption="msg://msgOpenPositionApprovall"
                      margin="true,true,true,true"
                      spacing="true"
                      expand="procActionsBox"
                      icon="NEWSPAPER_O">
+                    <!-- Группа BPM-согласования: действия процесса и вложения. -->
                     <groupBox id="procActionsBox"
                               caption="msg://msgOpenPositionProcessApproval"
                               spacing="true"
                               width="AUTO"
                               orientation="vertical">
+                        <!-- Штатный фрагмент BPM CUBA: кнопки согласования и история процесса. -->
                         <fragment id="procActionsFragment"
                                   screen="bpm_ProcActionsFragment"/>
                     </groupBox>
 
                 </tab>
+                <!-- Вкладка «Комментарии»: лента комментариев-рейтингов позиции. -->
                 <tab id="commentsTab"
                      caption="msg://msgComments"
                      margin="true,true,true,true"
                      spacing="true"
                      expand="commentsScrollBox"
                      icon="STAR_O">
+                    <!-- Прокручиваемая лента комментариев позиции. -->
                     <scrollBox id="commentsScrollBox"
                                spacing="true"
                                width="100%"
@@ -1078,8 +1253,11 @@
                 </tab>
             </tabSheet>
         </vbox>
+        <!-- Нижняя панель формы: владелец позиции и действия (подписка, сохранить и закрыть, закрыть). -->
         <vbox id="forExpand" spacing="false" align="BOTTOM_RIGHT" expand="statusHBox">
+            <!-- Строка владельца позиции. -->
             <hbox id="statusHBox" width="100%">
+                <!-- Владелец позиции (только чтение, borderless). -->
                 <textField id="ownerTextField"
                            width="AUTO"
                            dataContainer="openPositionDc"
@@ -1089,15 +1267,19 @@
                            align="BOTTOM_LEFT"
                            enable="false"/>
             </hbox>
+            <!-- Действия формы: подписка на позицию, сохранить и закрыть, закрыть без сохранения. -->
             <hbox id="editActions"
                   spacing="true"
                   align="BOTTOM_RIGHT">
-                <button invoke="subscribePosition"
+                <!-- Подписка текущего рекрутёра на позицию (subscribePosition). -->
+                <button id="subscribePositionButton" invoke="subscribePosition"
                         caption="msg://msgSubscribe"
                         icon="BELL"/>
+                <!-- Сохранить позицию и закрыть форму. -->
                 <button id="windowCommitAndCloseButton"
                         action="windowCommitAndClose"/>
-                <button action="windowClose"/>
+                <!-- Закрыть форму без сохранения. -->
+                <button id="windowCloseButton" action="windowClose"/>
             </hbox>
         </vbox>
     </layout>

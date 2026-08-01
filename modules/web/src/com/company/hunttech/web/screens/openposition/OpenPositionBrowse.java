@@ -48,6 +48,30 @@ import java.util.concurrent.atomic.AtomicReference;
 @UiDescriptor("open-position-browse.xml")
 @LookupComponent("openPositionsTable")
 @LoadDataBeforeShow
+/**
+ * Контроллер справочника вакансий HRM HuntTech ({@code hunttech_OpenPosition.browse}).
+ *
+ * <p>Экран показывает иерархический список позиций (дерево по {@code parentOpenPosition}) с
+ * богатым набором кастомных колонок: логотипы проекта и компании, «светофор» приоритета,
+ * средний рейтинг из комментариев, города, вилка зарплаты, опыт, индикаторы наличия
+ * описания/тестового/памятки/шаблона письма, статистика взаимодействий и popup-действия строки.
+ * Почти все колонки рендерятся генераторами, поэтому после загрузки коллекции контроллер
+ * строит пакетные кэши (BATCH + JPQL по id): признаки наличия LOB-контента, агрегаты
+ * (активные рекрутёры, отправленные CV, средний рейтинг), подписчики, дочерние позиции,
+ * статистика взаимодействий — чтобы избежать N+1 при рендере строк.</p>
+ *
+ * <p>Бизнес-функции экрана: фильтрация (12 условий JPQL: приоритет, новизна, подписки
+ * рекрутёра, статусы открыта/черновик/пауза, внутренние проекты, рейтинг, remoteWork,
+ * тип позиции), лента срочных вакансий, подписка рекрутёра на позицию, открытие/закрытие
+ * позиции (с проверкой незакрытых дочерних позиций), выставление рейтинга-комментария,
+ * печатная форма «Памятка для кандидата», подбор кандидатов и просмотр деталей строки.</p>
+ *
+ * <p>Наследники: {@link OpenPositionRecruitingBrowse} (рекрутинг),
+ * {@link OpenPositionOutstaffBrowse} (аутстаф), {@link ProdOpenPositionBrowse} (прод-обёртка).</p>
+ *
+ * @see OpenPositionEdit
+ * @see OpenPositionServiceBean
+ */
 public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     @Inject
@@ -152,6 +176,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private FileLoader fileLoader;
 
     @Install(to = "openPositionsTable.projectLogoColumn", subject = "columnGenerator")
+    /** Генератор колонки «логотип проекта»: изображение проекта с HTML-подсказкой. */
     private Object openPositionsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
         retBox.setWidthFull();
@@ -203,6 +228,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.companyLogoColumn", subject = "columnGenerator")
+    /** Генератор колонки «логотип компании»: изображение компании проекта. */
     private Object openPositionsTableCompanyLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
         retBox.setWidthFull();
@@ -319,6 +345,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private final Map<UUID, String> lazyCompanyDescriptionCache = new HashMap<>();
 
     @Subscribe(id = "openPositionsDl", target = Target.DATA_LOADER)
+    /** После загрузки коллекции: пересчёт всех кэшей browse (наличие LOB, агрегаты, подписчики, дети, статистика). */
     private void onOpenPositionsDlPostLoad(CollectionLoader.PostLoadEvent<OpenPosition> event) {
         List<OpenPosition> positions = event.getLoadedEntities();
         clearLazyLobTextCaches();
@@ -329,6 +356,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         refreshBrowseInteractionStatsCaches(positions);
     }
 
+    /** Очистка кэшей текстов LOB-полей при обновлении коллекции. */
     private void clearLazyLobTextCaches() {
         lazyCommentTextCache.clear();
         lazyExerciseTextCache.clear();
@@ -338,6 +366,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         lazyCompanyDescriptionCache.clear();
     }
 
+    /** Пакетный запрос признаков наличия LOB-контента (comment, exercise, memo, templateLetter) по id позиций. */
     private void refreshBrowseLobExistsCaches(List<OpenPosition> positions) {
         List<UUID> ids = new ArrayList<>();
         for (OpenPosition position : positions) {
@@ -422,6 +451,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         positionRuNameCache = ruNames;
     }
 
+    /** Выполнение JPQL-запроса, возвращающего id (UUID), с дополнительным параметром. */
     private List<UUID> loadIdsByQuery(String query, List<UUID> ids) {
         if (ids.isEmpty()) {
             return Collections.emptyList();
@@ -441,6 +471,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .list();
     }
 
+    /** Преобразование коллекции id с признаком в Map<UUID, Boolean> для кэша. */
     private static Map<UUID, Boolean> toExistsCache(Collection<UUID> idsWithFlag) {
         Map<UUID, Boolean> cache = new HashMap<>();
         for (UUID id : idsWithFlag) {
@@ -451,6 +482,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return cache;
     }
 
+    /** Безопасное приведение Number к BigDecimal (null → 0). */
     private static BigDecimal toNumberToBigDecimal(Number value) {
         if (value == null) {
             return null;
@@ -461,6 +493,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return BigDecimal.valueOf(value.doubleValue());
     }
 
+    /** Безопасное приведение Number к Integer (null → 0). */
     private static Integer toNumberToInt(Number value) {
         if (value == null) {
             return null;
@@ -468,6 +501,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return value.intValue();
     }
 
+    /** Пакетный пересчёт агрегатов: активные рекрутёры, отправленные CV, средний рейтинг по комментариям. */
     private void refreshBrowseAggregateCaches(List<OpenPosition> positions) {
         List<UUID> ids = new ArrayList<>();
         for (OpenPosition position : positions) {
@@ -525,6 +559,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         avgRatingByPosition = avgRatings;
     }
 
+    /** Сбор id всех позиций коллекции для пакетных запросов. */
     private List<UUID> collectPositionIds(List<OpenPosition> positions) {
         List<UUID> ids = new ArrayList<>();
         for (OpenPosition position : positions) {
@@ -535,6 +570,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return ids;
     }
 
+    /** Загрузка подписок RecrutiesTasks для позиций (активные, с рекрутерами) в кэш. */
     private void refreshBrowseSubscribersCache(List<OpenPosition> positions) {
         List<UUID> ids = collectPositionIds(positions);
         if (ids.isEmpty()) {
@@ -556,6 +592,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         subscribersByPosition = subscribers;
     }
 
+    /** Определение позиций, у которых есть дочерние (для колонки «папка»). */
     private void refreshPositionsWithChildrenCache(List<OpenPosition> positions) {
         List<UUID> ids = collectPositionIds(positions);
         if (ids.isEmpty()) {
@@ -565,6 +602,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         positionsWithChildren = new HashSet<>(loadIdsByQuery(QUERY_CHILD_POSITIONS_BY_PARENTS, ids));
     }
 
+    /** Загрузка статистики взаимодействий (по типам) для колонки idStatistics. */
     private void refreshBrowseInteractionStatsCaches(List<OpenPosition> positions) {
         List<UUID> ids = collectPositionIds(positions);
         if (ids.isEmpty()) {
@@ -622,6 +660,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         interactionStatsDescriptionCache = descriptionCache;
     }
 
+    /** Агрегация строк статистики взаимодействий в текстовые значения ячейки и подсказки. */
     private void loadInteractionStatsRows(Map<UUID, List<KeyValueEntity>> rowsByPosition,
                                           List<UUID> ids, Date startDate, Date endDate, String query) {
         for (KeyValueEntity row : dataManager.loadValues(query)
@@ -637,6 +676,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Возврат активных подписок позиции из кэша подписчиков. */
     private List<RecrutiesTasks> getSubscribersForPosition(OpenPosition openPosition) {
         if (openPosition == null || openPosition.getId() == null) {
             return Collections.emptyList();
@@ -644,6 +684,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return subscribersByPosition.getOrDefault(openPosition.getId(), Collections.emptyList());
     }
 
+    /** Догрузка типа позиции, если он не загружен в view (lazy через dataManager). */
     private Position ensurePositionTypeLoaded(Position position) {
         if (position == null || position.getId() == null) {
             return position;
@@ -655,6 +696,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return dataManager.reload(position, "position-picker-view");
     }
 
+    /** Английское название типа позиции (с кэшем). */
     private String getPositionEnName(Position position) {
         if (position == null || position.getId() == null) {
             return null;
@@ -666,6 +708,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return ensurePositionTypeLoaded(position).getPositionEnName();
     }
 
+    /** Русское название типа позиции (с кэшем). */
     private String getPositionRuName(Position position) {
         if (position == null || position.getId() == null) {
             return null;
@@ -677,6 +720,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return ensurePositionTypeLoaded(position).getPositionRuName();
     }
 
+    /** Форматирование текста ячейки «тип позиции» (RU/EN через слэш). */
     private String formatPositionTypeColumnText(Position position) {
         String notName = messageBundle.getMessage("msgNotNamePosition");
         if (position == null) {
@@ -690,6 +734,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return notName + " / " + (ruName != null ? ruName : notName);
     }
 
+    /** Форматирование подсказки колонки «тип позиции». */
     private String formatPositionTypeDescription(Position position) {
         if (position == null) {
             return "";
@@ -702,6 +747,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return enName != null ? ruName + "/" + enName : ruName;
     }
 
+    /** Сборка текста шаблона письма из шаблонов позиции, проекта и департамента. */
     private String buildTemplateLetterText(String openPositionLetter, String projectLetter, String departmentLetter) {
         StringBuilder sb = new StringBuilder();
         if (openPositionLetter != null && !openPositionLetter.isEmpty()) {
@@ -721,6 +767,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return sb.toString();
     }
 
+    /** Есть ли описание (comment) у позиции — по кэшу признаков. */
     private boolean hasComment(OpenPosition openPosition) {
         if (openPosition == null || openPosition.getId() == null) {
             return false;
@@ -728,6 +775,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return commentExistsCache.getOrDefault(openPosition.getId(), false);
     }
 
+    /** Есть ли положительный комментарий-рейтинг у позиции. */
     private boolean hasPositiveComment(OpenPosition openPosition) {
         if (openPosition == null || openPosition.getId() == null) {
             return false;
@@ -735,6 +783,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return commentPositiveCache.getOrDefault(openPosition.getId(), false);
     }
 
+    /** Есть ли тестовое задание у позиции. */
     private boolean hasExerciseText(OpenPosition openPosition) {
         if (openPosition == null || openPosition.getId() == null) {
             return false;
@@ -742,6 +791,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return exerciseExistsCache.getOrDefault(openPosition.getId(), false);
     }
 
+    /** Есть ли памятка к собеседованию у позиции. */
     private boolean hasMemoForInterview(OpenPosition openPosition) {
         if (openPosition == null || openPosition.getId() == null) {
             return false;
@@ -749,6 +799,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return memoExistsCache.getOrDefault(openPosition.getId(), false);
     }
 
+    /** Есть ли шаблон сопроводительного письма у позиции. */
     private boolean hasTemplateLetter(OpenPosition openPosition) {
         if (openPosition == null || openPosition.getId() == null) {
             return false;
@@ -756,6 +807,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return templateLetterExistsCache.getOrDefault(openPosition.getId(), false);
     }
 
+    /** Ленивая загрузка текста описания позиции (с кэшем по id). */
     private String getLazyCommentText(OpenPosition openPosition) {
         if (openPosition == null || openPosition.getId() == null) {
             return null;
@@ -772,6 +824,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return lazyCommentTextCache.get(id);
     }
 
+    /** Ленивая загрузка текста тестового задания. */
     private String getLazyExerciseText(OpenPosition openPosition) {
         if (openPosition == null || openPosition.getId() == null) {
             return null;
@@ -788,6 +841,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return lazyExerciseTextCache.get(id);
     }
 
+    /** Ленивая загрузка текста памятки к собеседованию. */
     private String getLazyMemoText(OpenPosition openPosition) {
         if (openPosition == null || openPosition.getId() == null) {
             return null;
@@ -804,6 +858,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return lazyMemoTextCache.get(id);
     }
 
+    /** Ленивая загрузка текста шаблона письма. */
     private String getLazyTemplateLetterText(OpenPosition openPosition) {
         if (openPosition == null || openPosition.getId() == null) {
             return "";
@@ -830,6 +885,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return cached != null ? cached : "";
     }
 
+    /** Ленивая загрузка описания проекта для подсказок (с кэшем). */
     private String getLazyProjectDescription(UUID projectId) {
         if (projectId == null) {
             return null;
@@ -845,6 +901,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return lazyProjectDescriptionCache.get(projectId);
     }
 
+    /** Ленивая загрузка описания компании для подсказок. */
     private String getLazyCompanyDescription(UUID companyId) {
         if (companyId == null) {
             return null;
@@ -860,6 +917,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return lazyCompanyDescriptionCache.get(companyId);
     }
 
+    /** Догрузка позиции с LOB-полями описаний (comment, exercise, memo, templateLetter) через dataManager. */
     private OpenPosition loadOpenPositionWithDescriptionLobs(OpenPosition openPosition) {
         if (openPosition == null || openPosition.getId() == null) {
             return openPosition;
@@ -980,6 +1038,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private PopupButton reportsPopupButton;
 
     @Subscribe
+    /** Инициализация экрана: карты options (remoteWork, приоритеты, опыт), список пользователей, фильтры и подписка на PostLoad загрузчика. */
     protected void onInit(InitEvent event) {
         initRemoteWorkMap();
 
@@ -998,6 +1057,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "subscribeRadioButtonGroup", subject = "optionDescriptionProvider")
+    /** Подсказка варианта подписки (свои/все). */
     private String subscribeRadioButtonGroupOptionDescriptionProvider(Object object) {
 //        String retStr = "";
         StringBuilder sb = new StringBuilder();
@@ -1044,6 +1104,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return sb.toString();
     }
 
+    /** Инициализация чекбокса «только открытые позиции»: значение по умолчанию и видимость по роли. */
     private void initCheckBoxOnlyOpenedPosition() {
         Map<String, Integer> onlyOpenedPositionMap = new LinkedHashMap<>();
 
@@ -1073,6 +1134,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsTable.repaint();
     }
 
+    /** Программная установка параметров фильтра browse (подписки, статусы, даты) из UI-элементов. */
     private void setOpenPositionBrowseFilter() {
         reportsPopupButton.setEnabled(openPositionsTable.getSingleSelected() != null);
         buttonSubscribe.setEnabled(openPositionsTable.getSingleSelected() != null);
@@ -1151,6 +1213,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsDl.load();
     }
 
+    /** Настройка видимости кнопки групповой подписки по роли. */
     private void initGroupSubscribeButton() {
         if (userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
                 userSession.getUser().getGroup().getName().equals(HUNTING_GROUP)) {
@@ -1160,6 +1223,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Первичная инициализация генераторов таблицы (детали, подписка на изменение выбора). */
     private void initTableGenerator() {
         openPositionsTable.setItemClickAction(new BaseAction("itemClickAction")
                 .withHandler(actionPerformedEvent ->
@@ -1167,6 +1231,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     }
 
+    /** Иконка приоритета (светофор) по числовому коду. */
     protected String getPriorityIcon(int priority) {
         String icon = null;
 
@@ -1200,6 +1265,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "notLowerRatingLookupField", subject = "optionIconProvider")
+    /** Иконка варианта фильтра «не ниже рейтинга». */
     private String notLowerRatingLookupFieldOptionIconProvider(Object object) {
         String icon = null;
 
@@ -1233,6 +1299,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "remoteWorkLookupField", subject = "optionIconProvider")
+    /** Иконка варианта фильтра формата работы. */
     private String remoteWorkLookupFieldOptionIconProvider(Object object) {
         String returnIcon = "";
 
@@ -1259,6 +1326,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
 
     @Install(to = "openPositionsTable.remoteWork", subject = "descriptionProvider")
+    /** Подсказка колонки формата работы. */
     private String openPositionsTableRemoteWorkDescriptionProvider(OpenPosition openPosition) {
 //        String retStr = String.valueOf(remoteWork.get(openPosition.getRemoteWork()));
         StringBuilder sb = new StringBuilder(String
@@ -1299,6 +1367,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Заполнение карты remoteWork (код → подпись) для опций и колонки. */
     private void initRemoteWorkMap() {
         remoteWork.put(messageBundle.getMessage("msgUndefined"), -1);
         remoteWork.put(messageBundle.getMessage("msgWorkInOffice"), 0);
@@ -1307,11 +1376,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.remoteWork", subject = "columnGenerator")
+    /** Генератор колонки «формат работы»: иконка +/- по коду remoteWork. */
     private Object openPositionsTableRemoteWorkColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retHbox = setPlusMinusIcon(setRemoteWorkIcon(event));
         return retHbox;
     }
 
+    /** HBox с иконкой «плюс/минус» для формата работы. */
     private HBoxLayout setPlusMinusIcon(Icons.Icon setRemoteWorkIcon) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
         Label label = uiComponents.create(Label.class);
@@ -1331,6 +1402,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retHBox;
     }
 
+    /** Выбор иконки формата удалённой работы по коду. */
     private Icons.Icon setRemoteWorkIcon(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String returnIcon = "";
 
@@ -1356,6 +1428,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.testExserice", subject = "columnGenerator")
+    /** Генератор колонки «тестовое задание»: иконка наличия exercise. */
     private Object openPositionsTableTestExsericeColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String returnIcon = "";
 
@@ -1371,6 +1444,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.testExserice", subject = "descriptionProvider")
+    /** Подсказка колонки тестового задания. */
     private String openPositionsTableTestExsericeDescriptionProvider(OpenPosition openPosition) {
         String exercise = getLazyExerciseText(openPosition);
         if (exercise != null)
@@ -1380,12 +1454,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.description", subject = "columnGenerator")
+    /** Генератор колонки «описание»: иконка наличия comment. */
     private Object openPositionsTableDescriptionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String returnIcon = hasPositiveComment(event.getItem()) ? "FILE_TEXT" : "FILE";
         return setPlusMinusIcon(CubaIcon.valueOf(returnIcon));
     }
 
     @Install(to = "openPositionsTable.description", subject = "descriptionProvider")
+    /** Подсказка колонки описания. */
     private String openPositionsTableDescriptionDescriptionProvider(OpenPosition openPosition) {
         String comment = getLazyCommentText(openPosition);
         if (comment != null) {
@@ -1402,6 +1478,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     final static String open_position_pic_center_large_red = "open-position-pic-center-large-red";
 
     @Install(to = "openPositionsTable.description", subject = "styleProvider")
+    /** Стиль ячейки описания. */
     private String openPositionsTableDescriptionStyleProvider(OpenPosition openPosition) {
         if (hasPositiveComment(openPosition)) {
             return open_position_pic_center_large_green;
@@ -1410,6 +1487,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.testExserice", subject = "styleProvider")
+    /** Стиль ячейки тестового задания. */
     private String openPositionsTableTestExsericeStyleProvider(OpenPosition openPosition) {
         if (openPosition.getNeedExercise() != null) {
             if (openPosition.getNeedExercise()) {
@@ -1423,11 +1501,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
 
     @Install(to = "openPositionsTable.icon", subject = "styleProvider")
+    /** Стиль ячейки приоритета. */
     private String openPositionsTableIconStyleProvider(OpenPosition openPosition) {
         return "open-position-pic-center";
     }
 
     @Install(to = "openPositionsTable.remoteWork", subject = "styleProvider")
+    /** Стиль ячейки формата работы. */
     private String openPositionsTableRemoteWorkStyleProvider(OpenPosition openPosition) {
         String style = "";
 
@@ -1453,11 +1533,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.numberPosition", subject = "styleProvider")
+    /** Стиль ячейки количества позиций. */
     private String openPositionsTableNumberPositionStyleProvider(OpenPosition openPosition) {
         return "open-position-pic-center";
     }
 
     @Install(to = "openPositionsTable.icon", subject = "columnGenerator")
+    /** Генератор колонки «приоритет»: иконка-светофор по приоритету. */
     private Object openPositionsTableIconColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
         retHBox.setWidthFull();
@@ -1480,6 +1562,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.vacansyName", subject = "descriptionProvider")
+    /** Подсказка названия вакансии. */
     private String openPositionsTableVacansyNameDescriptionProvider(OpenPosition openPosition) {
         String returnData = "";
         StringBuilder sb = new StringBuilder();
@@ -1529,6 +1612,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.projectName", subject = "descriptionProvider")
+    /** Подсказка колонки проекта. */
     private String openPositionsTableProjectNameDescriptionProvider(OpenPosition openPosition) {
         String a = "";
         if (openPosition.getProjectName() != null && openPosition.getProjectName().getId() != null) {
@@ -1563,6 +1647,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     private Fragments fragments;
 
     @Install(to = "openPositionsTable", subject = "detailsGenerator")
+    /** Генератор детальной панели строки: фрагмент деталей позиции под выбранной строкой. */
     protected Component openPositionsTableDetailsGenerator(OpenPosition entity) {
 
         OpenPositionDetailScreenFragment openPositionDetailScreenFragment =
@@ -1577,6 +1662,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return mainLayout;
     }
 
+    /** Сборка панели деталей из OpenPositionDetailScreenFragment с кнопками действий. */
     protected GroupBoxLayout detailsGenerator(OpenPosition entity, OpenPositionDetailScreenFragment openPositionDetailScreenFragment) {
         GroupBoxLayout mainLayout = uiComponents.create(GroupBoxLayout.class);
         mainLayout.setSpacing(true);
@@ -1648,6 +1734,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return mainLayout;
     }
 
+    /** Кнопка «Письмо в GigaChat» в деталях позиции. */
     private Component createGigaChatLetterButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.class);
         retButton.setIcon(CubaIcon.MAGIC.source());
@@ -1663,6 +1750,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     }
 
+    /** Кнопка просмотра комментариев позиции. */
     private Component createViewCommentButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.class);
         retButton.setIcon(CubaIcon.STAR.source());
@@ -1676,12 +1764,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retButton;
     }
 
+    /** Открытие окна просмотра/добавления комментариев позиции. */
     public void openPositionCommentViewInvoke() {
         Screen screen = screens.create(OpenPositionCommentsView.class);
         ((OpenPositionCommentsView) screen).setOpenPosition(openPositionsTable.getSingleSelected());
         screen.show();
     }
 
+    /** Кнопка добавления комментария-рейтинга позиции. */
     private Component createCommentButton(OpenPosition entity) {
         PopupButton retButton = uiComponents.create(PopupButton.class);
         retButton.setIcon(CubaIcon.COMMENT.source());
@@ -1700,6 +1790,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retButton;
     }
 
+    /** Кнопка списка отправленных кандидатов по позиции. */
     private Component createSendedCandidatesButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.class);
         retButton.setIcon(CubaIcon.USER_CIRCLE.source());
@@ -1727,6 +1818,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     // TODO: закрыть все остальные Details
+    /** Закрытие всех открытых детальных панелей строк, кроме активной. */
     private void closeAllAnoterDetailsScreenFragments() {
         for (OpenPosition op : openPositionsTable.getItems().getItems(0,
                 openPositionsDc.getItems().size())) {
@@ -1734,6 +1826,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Кнопка быстрого просмотра описания позиции (QuickViewOpenPositionDescription). */
     private Component createViewDescriptionButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.NAME);
         retButton.setIcon(CubaIcon.STREET_VIEW.iconName());
@@ -1792,6 +1885,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retButton;
     }
 
+    /** Кнопка «Подобрать кандидатов» (Suggestjobcandidate). */
     private Component findSuitableButton(OpenPosition entity) {
 
         if (getSubscubeOpenPosition(entity)) {
@@ -1829,6 +1923,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Проверка: подписан ли текущий пользователь на позицию. */
     private boolean getSubscubeOpenPosition(OpenPosition entity) {
         if (dataManager.load(RecrutiesTasks.class)
                 .query(QUERY_GET_SUBSCRIBER)
@@ -1843,6 +1938,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Кнопка открытия/закрытия позиции в деталях. */
     private Component createOpenCloseButton(OpenPosition entity) {
         Button retButton = uiComponents.create(Button.NAME);
 
@@ -1863,6 +1959,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retButton;
     }
 
+    /** Обработчик popup-кнопки открытия/закрытия: выбор действия закрытия с проверкой дочерних позиций. */
     private void openCloseButtonClickListener(OpenPosition entity, PopupButton retButton) {
         if (!openCloseChildVacancy(entity)) {
             entity.setOpenClose(!entity.getOpenClose());
@@ -1884,6 +1981,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Закрытие/открытие позиции: проверка дочерних, комментарий, уведомления подписчиков. */
     private void openCloseVacancy(OpenPosition entity) {
         if (entity.getOpenClose() || entity.getOpenClose() == null) {
 
@@ -1985,6 +2083,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Рекурсивное закрытие/открытие дочерних позиций вместе с родительской. */
     private Boolean openCloseChildVacancy(OpenPosition event) {
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
                 .query(QUERY_SELECT_COMMAND)
@@ -2032,11 +2131,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.salaryMinMax", subject = "columnGenerator")
+    /** Генератор колонки «зарплата»: вилка мин/макс. */
     private Object openPositionsTableSalaryMinMaxColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retObject = setComponentsToOpenPositionsTable(event, getSalaryMinMaxStr(event));
         return retObject;
     }
 
+    /** Форматирование строки вилки зарплаты с учётом значений и лимитов. */
     private String getSalaryMinMaxStr(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
 //        String retStr = "";
         StringBuilder sb = new StringBuilder();
@@ -2057,6 +2158,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 //        return retStr;
     }
 
+    /** Форматирование отдельного значения зарплаты (тыс. руб.). */
     private String getSalaryString(OpenPosition openPosition) {
         BigDecimal salaryMin = openPosition.getSalaryMin().divide(BigDecimal.valueOf(1000));
         BigDecimal salaryMax = openPosition.getSalaryMax().divide(BigDecimal.valueOf(1000));
@@ -2103,6 +2205,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return sb.toString();
     }
 
+    /** Заголовок подсказки зарплаты (с подписью «вилка»/лимиты). */
     private String getSalaryStringCaption(OpenPosition openPosition) {
         BigDecimal salaryMin = openPosition.getSalaryMin().divide(BigDecimal.valueOf(1000));
         BigDecimal salaryMax = openPosition.getSalaryMax().divide(BigDecimal.valueOf(1000));
@@ -2127,6 +2230,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.salaryMinMax", subject = "descriptionProvider")
+    /** Подсказка колонки зарплаты. */
     private String openPositionsTableSalaryMinMaxDescriptionProvider(OpenPosition openPosition) {
         StringBuilder sb = new StringBuilder();
 
@@ -2159,6 +2263,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.salaryMinMax", subject = "styleProvider")
+    /** Стиль ячейки зарплаты. */
     private String openPositionsTableSalaryMinMaxStyleProvider(OpenPosition openPosition) {
         String retStr = "";
 
@@ -2177,11 +2282,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.cityPositionList", subject = "columnGenerator")
+    /** Генератор колонки «города»: список городов позиции. */
     private Object openPositionsTableCityPositionListColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retObject = setComponentsToOpenPositionsTable(event, getCityPositions(event));
         return retObject;
     }
 
+    /** Сборка строки городов из коллекции cities позиции. */
     private String getCityPositions(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String mainCity = "";
         StringBuilder sb = new StringBuilder();
@@ -2200,6 +2307,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     Boolean flagPriority = true;
 
+    /** Поле-индикатор приоритета в деталях позиции. */
     private Component createPriorityField(OpenPosition openPosition) {
         LookupField retField = uiComponents.create(LookupField.NAME);
 
@@ -2285,6 +2393,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retField;
     }
 
+    /** Установка closingDate через неделю (для срочных позиций). */
     private void setClosingWeek(OpenPosition openPosition) {
         if (openPosition.getClosingDate() == null) {
             dialogs.createOptionDialog()
@@ -2314,6 +2423,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Заголовок деталей позиции (название и статус). */
     private Component createTitleFragment(OpenPosition entity) {
         Label<String> titleLabel = uiComponents.create(Label.NAME);
         titleLabel.addStyleName("h4");
@@ -2326,6 +2436,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return titleLabel;
     }
 
+    /** Кнопка редактирования позиции в деталях. */
     private Component createEditButton(OpenPosition entity) {
         Button editButton = uiComponents.create(Button.class);
         editButton.setCaption("Изменить");
@@ -2344,6 +2455,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return editButton;
     }
 
+    /** Кнопка закрытия деталей строки. */
     private Component createCloseButton(OpenPosition entity) {
         Button closeButton = uiComponents.create(Button.class);
         closeButton.setIcon("icons/close.png");
@@ -2361,6 +2473,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
 
     @Install(to = "openPositionsTable", subject = "rowStyleProvider")
+    /** Стиль строки таблицы: подсветка по приоритету, статусу и срочности. */
     private String openPositionsTableRowStyleProvider(OpenPosition openPosition) {
         int s = openPosition.getId() != null
                 ? activeRecruitersCountByPosition.getOrDefault(openPosition.getId(), 0)
@@ -2398,11 +2511,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Subscribe
+    /** После показа: установка активного чекбокса «только открытые» и сброс urgent-ленты. */
     public void onAfterShow1(AfterShowEvent event) {
         initCheckBoxOnlyOpenedPosition();
     }
 
     @Subscribe
+    /** Перед показом: инициализация чекбоксов статусов, фильтров и подписки-группы. */
     public void onBeforeShow(BeforeShowEvent event) {
         checkBoxOnlyOpenedPosition.setValue(true); // только открытые позиции
         buttonExcel.setEnabled(getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER));
@@ -2423,11 +2538,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Subscribe
+    /** После показа: донастройка кнопок открытия/закрытия и панелей. */
     public void onAfterShow2(AfterShowEvent event) {
         initOpenCloseButton();
         setButtonsEnableDisable();
     }
 
+    /** Подключение действий popup-кнопки открытия/закрытия позиции (закомментированные действия XML). */
     private void initOpenCloseButton() {
         openCloseButton.addAction(new BaseAction("closeOpenPositionAction")
                 .withCaption(messageBundle.getMessage("msgOpenClose"))
@@ -2484,6 +2601,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
     }
 
+    /** Управление доступностью кнопок действий в зависимости от выбора строки и роли. */
     private void setButtonsEnableDisable() {
         buttonSubscribe.setEnabled(false);
         reportsPopupButton.setEnabled(false);
@@ -2533,6 +2651,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Subscribe("remoteWorkLookupField")
+    /** Смена фильтра формата работы → перезагрузка коллекции. */
     public void onRemoteWorkLookupFieldValueChange(HasValue.ValueChangeEvent event) {
         if ((int) event.getValue() >= 0) {
             openPositionsDl.setParameter("remoteWork", remoteWorkLookupField.getValue());
@@ -2544,6 +2663,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Subscribe("notLowerRatingLookupField")
+    /** Смена фильтра минимального приоритета (второй обработчик) → перезагрузка коллекции. */
     public void onNotLowerRatingLookupFieldValueChange1(HasValue.ValueChangeEvent event) {
         removeUrgentlyLists();
 
@@ -2565,12 +2685,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsDl.load();
     }
 
+    /** Очистка ленты срочных позиций. */
     private void removeUrgentlyLists() {
         for (Component component : urgentlyHBox.getComponents()) {
             urgentlyHBox.remove(component);
         }
     }
 
+    /** Заполнение ленты срочных позиций по заданному приоритету. */
     private void setUrgentlyPositios(int priority) {
 
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
@@ -2693,6 +2815,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Заполнение карты приоритетов для опций фильтра. */
     private void setMapOfPriority() {
         priorityMap.put("None", PRIORITY_NONE);
         priorityMap.put("Draft", PRIORITY_DRAFT);
@@ -2703,15 +2826,18 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         priorityMap.put("Critical", PRIORITY_CRITICAL);
     }
 
+    /** Применение фильтра «не ниже рейтинга» к загрузчику. */
     private void setStatusNotLower() {
         notLowerRatingLookupField.setOptionsMap(priorityMap);
     }
 
+    /** Применение фильтра формата работы к загрузчику. */
     private void setStatusRemoteWork() {
         remoteWorkLookupField.setOptionsMap(remoteWork);
     }
 
     @Subscribe("notLowerRatingLookupField")
+    /** Смена фильтра минимального приоритета → перезагрузка коллекции. */
     public void onNotLowerRatingLookupFieldValueChange(HasValue.ValueChangeEvent event) {
         if (notLowerRatingLookupField.getValue() != null) {
             openPositionsDl.setParameter("rating", notLowerRatingLookupField.getValue());
@@ -2722,10 +2848,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsDl.load();
     }
 
+    /** Применение фильтра «не на паузе» (priority > paused). */
     private void setOpenPositionNotPaused() {
         checkBoxOnlyNotPaused.setValue(true);
     }
 
+    /** Применение фильтра внутренних проектов. */
     private void setInternalProjectFilter() {
         if (!getRoleService.isUserRoles(userSession.getUser(), StandartRoles.RESEARCHER)) {
             openPositionsDl.removeParameter("subscriber");
@@ -2736,6 +2864,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsDl.load();
     }
 
+    /** Применение фильтра подписок текущего рекрутёра. */
     private void setSubcribersFilter() {
         if (checkBoxOnlyMySubscribe.getValue()) {
             openPositionsDl.setParameter("subscriber", userSession.getUser());
@@ -2753,11 +2882,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Subscribe("checkBoxOnlyMySubscribe")
+    /** Смена чекбокса «только мои подписки» → перезагрузка коллекции. */
     public void onCheckBoxOnlyMySubscribeValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         setSubcribersFilter();
     }
 
     @Subscribe("checkBoxOnlyNotPaused")
+    /** Смена чекбокса «не на паузе» → перезагрузка коллекции. */
     public void onCheckBoxOnlyNotPausedValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (checkBoxOnlyNotPaused.getValue()) {
             openPositionsDl.setParameter("paused", 0);
@@ -2770,6 +2901,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
 
 
     @Subscribe("checkBoxOnlyOpenedPosition")
+    /** Смена чекбокса «только открытые» → перезагрузка коллекции. */
     public void onCheckBoxOnlyOpenedPositionValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (checkBoxOnlyOpenedPosition.getValue()) {
             openPositionsDl.setParameter("openClosePos", false);
@@ -2780,6 +2912,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         openPositionsDl.load();
     }
 
+    /** Иконка статуса позиции (открыта/закрыта/черновик). */
     private String getIcon(OpenPosition openPosition) {
         String icon = null;
 
@@ -2816,6 +2949,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return icon;
     }
 
+    /** Подписка текущего рекрутёра на выбранную позицию (RecrutiesTasks). */
     public void subscribePosition() {
         Screen opScreen = screenBuilders
                 .editor(RecrutiesTasks.class, this)
@@ -2834,10 +2968,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         opScreen.show();
     }
 
+    /** Групповая подписка всех рекрутеров на позицию (скрытое действие). */
     public void groupSubscribe() {
         screens.create(RecrutiesTasksGroupSubscribeBrowse.class).show();
     }
 
+    /** Сброс фильтра срочных позиций: скрытие ленты и очистка параметра. */
     public void clearUrgentFilter() {
         if (notLowerRatingLookupField.getValue() != null) {
             openPositionsDl.setParameter("rating", (int) notLowerRatingLookupField.getValue());
@@ -2850,11 +2986,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.positionType", subject = "descriptionProvider")
+    /** Подсказка колонки типа позиции. */
     private String openPositionsTablePositionTypeDescriptionProvider(OpenPosition openPosition) {
         return formatPositionTypeDescription(openPosition.getPositionType());
     }
 
     @Install(to = "openPositionsTable.cityPositionList", subject = "descriptionProvider")
+    /** Подсказка колонки городов. */
     private String openPositionsTableCityPositionListDescriptionProvider(OpenPosition openPosition) {
         StringBuilder sb = new StringBuilder();
 
@@ -2875,11 +3013,13 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Subscribe("openPositionsTable")
+    /** Закрытие редактора строки: пересчёт кэшей. */
     public void onOpenPositionsTableEditorClose(DataGrid.EditorCloseEvent event) {
         openPositionsDl.load();
     }
 
     @Install(to = "openPositionsTable.queryQuestion", subject = "columnGenerator")
+    /** Генератор колонки «шаблон письма»: количество писем/признак. */
     private Object openPositionsTableQueryQuestionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String returnIcon = "";
 
@@ -2901,20 +3041,24 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return setPlusMinusIcon(CubaIcon.valueOf(returnIcon));
     }
 
+    /** Подсчёт количества шаблонов письма по позиции. */
     private int getQueryQuestion(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         return hasTemplateLetter(event.getItem()) ? 1 : 0;
     }
 
+    /** Текст шаблона сопроводительного письма позиции. */
     private String getTemplateLetter(OpenPosition openPosition) {
         return getLazyTemplateLetterText(openPosition);
     }
 
     @Install(to = "openPositionsTable.queryQuestion", subject = "descriptionProvider")
+    /** Подсказка колонки шаблона письма. */
     private String openPositionsTableQueryQuestionDescriptionProvider(OpenPosition openPosition) {
         return getTemplateLetter(openPosition);
     }
 
     @Install(to = "openPositionsTable.queryQuestion", subject = "styleProvider")
+    /** Стиль ячейки шаблона письма. */
     private String openPositionsTableQueryQuestionStyleProvider(OpenPosition openPosition) {
         if (hasTemplateLetter(openPosition)) {
             return open_position_pic_center_large_green;
@@ -2924,6 +3068,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Subscribe("openPositionsTable")
+    /** Выбор строки: обновление кнопок и urgent-ленты. */
     public void onOpenPositionsTableSelection(DataGrid.SelectionEvent<OpenPosition> event) {
         if (openPositionsTable.getSingleSelected() != null) {
             suggestCandidateButton.setEnabled(true);
@@ -2932,6 +3077,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Открытие экрана подбора кандидатов по выбранной позиции (скрытое действие). */
     public void suggestCandidateButton() {
         Suggestjobcandidate suggestjobcandidate = screens.create(Suggestjobcandidate.class);
         suggestjobcandidate.setOpenPosition(openPositionsTable.getSingleSelected());
@@ -2940,6 +3086,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "descriptionProvider")
+    /** Подсказка колонки памятки. */
     private String openPositionsTableMemoForCandidateColumnDescriptionProvider(OpenPosition openPosition) {
         String memo = getLazyMemoText(openPosition);
         if (memo != null)
@@ -2949,6 +3096,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "styleProvider")
+    /** Стиль ячейки памятки. */
     private String openPositionsTableMemoForCandidateColumnStyleProvider(OpenPosition openPosition) {
         if (hasMemoForInterview(openPosition)) {
             return open_position_pic_center_large_green;
@@ -2957,6 +3105,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "columnGenerator")
+    /** Генератор колонки «последнее открытие/закрытие»: иконка и дата. */
     private Object openPositionsTableLastOpenCloseColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retObject = uiComponents.create(HBoxLayout.class);
         Label label = uiComponents.create(Label.class);
@@ -2981,6 +3130,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "styleProvider")
+    /** Стиль ячейки последнего открытия/закрытия. */
     private String openPositionsTableLastOpenCloseColumnStyleProvider(OpenPosition openPosition) {
         Date lastDate = openPosition.getLastOpenDate() != null
                 ? openPosition.getLastOpenDate() : openPosition.getCreateTs();
@@ -3007,6 +3157,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.lastOpenCloseColumn", subject = "descriptionProvider")
+    /** Подсказка колонки последнего открытия/закрытия. */
     private String openPositionsTableLastOpenCloseColumnDescriptionProvider(OpenPosition openPosition) {
         if (openPosition.getLastOpenDate() != null) {
             Date date = new Date();
@@ -3030,6 +3181,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.memoForCandidateColumn", subject = "columnGenerator")
+    /** Генератор колонки «памятка для кандидата»: иконка наличия. */
     private Object openPositionsTableMemoForCandidateColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String returnIcon = hasMemoForInterview(event.getItem())
                 ? CubaIcon.PLUS_CIRCLE.iconName()
@@ -3040,12 +3192,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     Integer montOfStat = 3;
 
     @Install(to = "openPositionsTable.idStatistics", subject = "columnGenerator")
+    /** Генератор колонки «статистика»: счётчики взаимодействий. */
     private Object openPositionsTableIdStatisticsColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retObject = setComponentsToOpenPositionsTable(event, getIDStatistics(event));
         return retObject;
     }
 
 
+    /** Сборка строки статистики взаимодействий с учётом детей/родителей. */
     private String getIDStatistics(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         if (event.getItem().getId() == null) {
             return "";
@@ -3054,6 +3208,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.idStatistics", subject = "descriptionProvider")
+    /** Подсказка колонки статистики. */
     private String openPositionsTableIdStatisticsDescriptionProvider(OpenPosition openPosition) {
         if (openPosition.getId() == null) {
             return "";
@@ -3069,6 +3224,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     String clarification_required = "<font color=blue>???</font>";
 
     @Install(to = "openPositionsTable.numberPosition", subject = "columnGenerator")
+    /** Генератор колонки «количество позиций». */
     private Object openPositionsTableNumberPositionColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
 
         String labelStr = "";
@@ -3116,6 +3272,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.numberPosition", subject = "descriptionProvider")
+    /** Подсказка колонки количества позиций. */
     private String openPositionsTableNumberPositionDescriptionProvider(OpenPosition openPosition) {
         if (openPosition.getMore10NumberPosition() != null) {
             if (openPosition.getMore10NumberPosition()) {
@@ -3136,6 +3293,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.owner", subject = "descriptionProvider")
+    /** Подсказка колонки владельца. */
     private String openPositionsTableOwnerDescriptionProvider(OpenPosition openPosition) {
         if (openPosition.getOwner() != null) {
             return (openPosition.getOwner().getName() != null ?
@@ -3146,12 +3304,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.owner", subject = "columnGenerator")
+    /** Генератор колонки «владелец»: имя владельца позиции. */
     private Object openPositionsTableOwnerColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retObject = setComponentsToOpenPositionsTable(event, whoOwner(event));
 
         return retObject;
     }
 
+    /** Имя владельца позиции (ExtUser) для колонки. */
     private String whoOwner(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String userName = null;
         String a, b, c, e;
@@ -3177,17 +3337,20 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Subscribe("signDraftCheckBox")
+    /** Смена чекбокса «черновики» → перезагрузка коллекции. */
     public void onSignDraftCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         openPositionsDl.setParameter("signDraft", (event.getValue() != null ? event.getValue() : false));
     }
 
     @Install(to = "openPositionsTable.workExperience", subject = "columnGenerator")
+    /** Генератор колонки «опыт работы». */
     private Object openPositionsTableWorkExperienceColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retObject = setComponentsToOpenPositionsTable(event, getWorkExperience(event));
 
         return retObject;
     }
 
+    /** Строка требуемого опыта из mapWorkExperience. */
     private String getWorkExperience(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         Set<Map.Entry<String, Integer>> entrySet = mapWorkExperience.entrySet();
         Integer desiredObject = event.getItem().getWorkExperience();
@@ -3212,10 +3375,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Subscribe
+    /** После показа: включение кнопок действий по текущей роли. */
     public void onAfterShow(AfterShowEvent event) {
         checkBoxOnlyMySubscribe.setValue(true);
     }
 
+    /** Формирование и открытие печатной формы «Памятка для кандидата» по выбранной позиции. */
     public void getMemoForCandidate() {
         Map<String, Object> reportParams = new HashMap<>();
         reportParams.put("openPosition", openPositionsTable.getSingleSelected());
@@ -3229,6 +3394,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.folder", subject = "columnGenerator")
+    /** Генератор колонки «папка»: иконка для позиций с дочерними. */
     private Object openPositionsTableFolderColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         String retStr = "QUESTION_CIRCLE";
         String styleRetLabel = "open-position-pic-center-x-large-gray";
@@ -3325,6 +3491,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retHbox;
     }
 
+    /** Текст обратного отсчёта до автоматического закрытия. */
     private String getTimerClosingVacancyValue(Date closingDate) {
         StringBuilder sb = new StringBuilder();
 
@@ -3357,6 +3524,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return "";
     }
 
+    /** Индикатор скорого закрытия вакансии (светофор по closingDate). */
     private Component setSignClosingVecency(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setWidth(width_20px);
@@ -3380,6 +3548,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retLabel;
     }
 
+    /** Индикатор наличия комментариев рекрутеров. */
     private Label setSignRecrutersComment(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setWidth(width_20px);
@@ -3402,6 +3571,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retLabel;
     }
 
+    /** Индикатор наличия памятки. */
     private Label setSignMemo(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setWidth(width_20px);
@@ -3424,6 +3594,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retLabel;
     }
 
+    /** Индикатор наличия тестового задания. */
     private Label setSignTestCase(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setWidth(width_20px);
@@ -3446,6 +3617,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retLabel;
     }
 
+    /** Индикатор необходимости сопроводительного письма. */
     private Label setSignNeetLetter(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setWidth(width_20px);
@@ -3468,6 +3640,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retLabel;
     }
 
+    /** Индикатор наличия описания. */
     private Label setSignComment(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setWidth(width_20px);
@@ -3490,6 +3663,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retLabel;
     }
 
+    /** Индикатор наличия вложений. */
     private Label setSignAttachments(DataGrid.ColumnGeneratorEvent<OpenPosition> events) {
         Label retLabel = uiComponents.create(Label.class);
         retLabel.setWidth(width_20px);
@@ -3513,18 +3687,21 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.positionType", subject = "columnGenerator")
+    /** Генератор колонки «тип позиции». */
     private Object openPositionsTablePositionTypeColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         Position positionType = event.getItem().getPositionType();
         return setComponentsToOpenPositionsTable(event, formatPositionTypeColumnText(positionType));
     }
 
     @Install(to = "openPositionsTable.projectName", subject = "columnGenerator")
+    /** Генератор колонки «проект». */
     private Object openPositionsTableProjectNameColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         String projectTitle = event.getItem().getProjectName() != null
                 ? event.getItem().getProjectName().getProjectName() : "";
         return setComponentsToOpenPositionsTable(event, projectTitle);
     }
 
+    /** Сборка набора индикаторов-подписей в ячейке таблицы. */
     private HBoxLayout setComponentsToOpenPositionsTable(DataGrid.ColumnGeneratorEvent<OpenPosition> event,
                                                          String dataStr) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
@@ -3547,6 +3724,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.vacansyName", subject = "columnGenerator")
+    /** Генератор колонки «название вакансии»: HTML с именем, проектом и владельцем. */
     private Object openPositionsTableVacansyNameColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
         retHBox.setWidthFull();
@@ -3615,6 +3793,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retHBox;
     }
 
+    /** Аватар владельца проекта для HTML-ячеек. */
     private Image setProjectOwnerImage(Person projectOwner) {
         StringBuilder sb = new StringBuilder();
 
@@ -3660,6 +3839,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retImage;
     }
 
+    /** Настройка fallback-изображения владельца проекта. */
     private FallbackImage configureProjectOwnerFallbackImage(Person projectOwner) {
         FallbackImage fallbackImage = uiComponents.create(FallbackImage.NAME);
         fallbackImage.setFallbackThemePath(images_hunttech_placeholder_svg);
@@ -3679,6 +3859,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return fallbackImage;
     }
 
+    /** HTML-подсказка владельца проекта (должность, город, компания). */
     private String buildProjectOwnerDescription(Person projectOwner) {
         if (projectOwner == null) {
             return "";
@@ -3706,6 +3887,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return description.toString();
     }
 
+    /** Действие «Закрыть/Открыть» из popup-кнопки панели (invoke). */
     public void openCloseButtonInvoke(Action.ActionPerformedEvent e) {
         if (openPositionsTable.getSingleSelected() != null) {
             if (((PopupButton) e.getComponent()).getAction("closeOpenPositionAction").getCaption()
@@ -3737,6 +3919,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         }
     }
 
+    /** Снятие кандидатов из рассмотрения при закрытии позиции. */
     private void removeCandidatesWithConsideration() {
         OpenPosition closeVacancy = openPositionsTable.getSingleSelected();
 
@@ -3869,6 +4052,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.lastCVSend", subject = "columnGenerator")
+    /** Генератор колонки «последняя отправка CV»: дата по последней подписке. */
     private Object openPositionsTableLastCVSendColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> columnGeneratorEvent) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
 
@@ -3921,36 +4105,43 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.projectName", subject = "styleProvider")
+    /** Стиль ячейки проекта. */
     private String openPositionsTableProjectNameStyleProvider(OpenPosition openPosition) {
         return style_table_wordwrap;
     }
 
     @Install(to = "openPositionsTable.vacansyName", subject = "styleProvider")
+    /** Стиль ячейки названия вакансии. */
     private String openPositionsTableVacansyNameStyleProvider(OpenPosition openPosition) {
         return style_table_wordwrap;
     }
 
     @Install(to = "openPositionsTable.cityPositionList", subject = "styleProvider")
+    /** Стиль ячейки городов. */
     private String openPositionsTableCityPositionListStyleProvider(OpenPosition openPosition) {
         return style_table_wordwrap;
     }
 
     @Install(to = "openPositionsTable.workExperience", subject = "styleProvider")
+    /** Стиль ячейки опыта. */
     private String openPositionsTableWorkExperienceStyleProvider(OpenPosition openPosition) {
         return style_table_wordwrap;
     }
 
     @Install(to = "openPositionsTable.owner", subject = "styleProvider")
+    /** Стиль ячейки владельца. */
     private String openPositionsTableOwnerStyleProvider(OpenPosition openPosition) {
         return style_table_wordwrap;
     }
 
     @Install(to = "openPositionsTable.positionType", subject = "styleProvider")
+    /** Стиль ячейки типа позиции. */
     private String openPositionsTablePositionTypeStyleProvider(OpenPosition openPosition) {
         return style_table_wordwrap;
     }
 
 
+    /** Блок подписчиков-рекрутеров позиции в деталях. */
     private HBoxLayout setSubscribersRecruters(OpenPosition openPosition) {
         HBoxLayout recrutersHBox = uiComponents.create(HBoxLayout.class);
 
@@ -3976,6 +4167,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.candidateSendedColumn", subject = "columnGenerator")
+    /** Генератор колонки «отправлено кандидатов»: количество отправленных CV. */
     private Object openPositionsTableCandidateSendedColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout hBoxLayout = uiComponents.create(HBoxLayout.class);
 
@@ -3996,6 +4188,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return hBoxLayout;
     }
 
+    /** Ячейка с выравниванием по центру и стилем. */
     private HBoxLayout setCenteredCell(String value, String style) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
 
@@ -4020,10 +4213,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.vacansyID", subject = "columnGenerator")
+    /** Генератор колонки «ID вакансии». */
     private Object openPositionsTableVacansyIDColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         return setCenteredCell(event.getItem().getVacansyID(), "label_table_black");
     }
 
+    /** Открытие окна выставления рейтинга-комментария позиции. */
     public void setRatingComment() {
         screenBuilders.editor(OpenPositionComment.class, this)
                 .withScreenClass(OpenPositionCommentEdit.class)
@@ -4054,10 +4249,12 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
     }
 
     @Install(to = "openPositionsTable.rating", subject = "columnGenerator")
+    /** Генератор колонки «рейтинг»: средний рейтинг позиции. */
     private Object openPositionsTableRatingColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         return avgRating(event.getItem());
     }
 
+    /** Расчёт среднего рейтинга позиции из комментариев. */
     private Object avgRating(OpenPosition openPosition) {
         BigDecimal avgRating = openPosition.getId() != null
                 ? avgRatingByPosition.get(openPosition.getId())
@@ -4088,12 +4285,14 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retBox;
     }
 
+    /** Действие «Закрыть с комментарием» из popup-кнопки панели. */
     public void openCloseButtonWithCommentInvoke(Action.ActionPerformedEvent e) {
         setRatingComment();
         openCloseButtonInvoke(e);
     }
 
     @Install(to = "openPositionsTable.openPositionActionButtonColumn", subject = "columnGenerator")
+    /** Генератор колонки действий строки: popup-меню (открыть/закрыть, комментарии, отчёты, подписка, подбор). */
     private Object openPositionsTableOpenPositionActionButtonColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
         retHBox.setWidthFull();
@@ -4121,6 +4320,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         return retHBox;
     }
 
+    /** Инициализация popup-меню действий строки (заголовок, разделители, пункты). */
     private void initActionButton(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         initActionButtonJobCandidateSimpleBrowse(actionPopupButton, event);
 
@@ -4137,6 +4337,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
         initActionButtonComments(actionPopupButton, event);
     }
 
+    /** Добавление пункта «Комментарии» в popup-меню строки. */
     private void initActionButtonComments(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         actionPopupButton.addAction(new BaseAction("openPositionCommentAction")
                 .withIcon(CubaIcon.STAR_O.source())
@@ -4153,6 +4354,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 }));
     }
 
+    /** Добавление пункта «Отчёты» (памятка для кандидата) в popup-меню строки. */
     private void initActionButtonReports(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         actionPopupButton.addAction(new BaseAction("msgReport")
                 .withIcon(CubaIcon.FILE_TEXT.source())
@@ -4162,6 +4364,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 }));
     }
 
+    /** Добавление пункта «Подписка» в popup-меню строки. */
     private void initActionButtonSubscribe(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         actionPopupButton.addAction(new BaseAction("subscribePositionAction")
                 .withIcon(CubaIcon.BOLT.source())
@@ -4181,6 +4384,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 }));
     }
 
+    /** Добавление разделителя после заданного действия. */
     private void initActionButtonSeparator(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         actionPopupButton.addAction(new BaseAction("separator1Action")
                 .withCaption(separator));
@@ -4192,6 +4396,7 @@ public class OpenPositionBrowse extends StandardLookup<OpenPosition> {
                 .withCaption(separator));
     }
 
+    /** Добавление пункта «Кандидаты» (JobCandidateSimpleBrowse) в popup-меню строки. */
     private void initActionButtonJobCandidateSimpleBrowse(PopupButton actionPopupButton, DataGrid.ColumnGeneratorEvent<OpenPosition> event) {
         actionPopupButton.addAction(new BaseAction("jobCandidateSimpleAction")
                 .withCaption(messageBundle.getMessage("msgJobCandidateSimpleBrowse"))

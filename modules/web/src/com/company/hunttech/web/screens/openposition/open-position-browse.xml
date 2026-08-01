@@ -5,6 +5,7 @@
         focusComponent="openPositionsTable"
         messagesPack="com.company.hunttech.web.screens.openposition" icon="COMPASS">
     <data readOnly="true">
+        <!-- Коллекция позиций (openPosition-browse-view) с BATCH-загрузкой projectName, positionType, owner, комментариев, файлов и городов — все вложенные пути, читаемые Java-генераторами таблицы (view integrity). -->
         <collection id="openPositionsDc"
                     class="com.company.hunttech.entity.OpenPosition">
             <view extends="openPosition-browse-view">
@@ -21,7 +22,9 @@
                 <property name="someFiles" fetch="BATCH" view="_minimal"/>
                 <property name="cities" fetch="BATCH" view="city-picker-view"/>
             </view>
+            <!-- Загрузчик позиций с лимитом 40 строк; параметры условий задаются фильтром и программно в контроллере (подписки, приоритет, статусы). -->
             <loader id="openPositionsDl" maxResults="40">
+            <!-- Загрузчик позиций с лимитом 40 строк; параметры условий задаются фильтром и программно в контроллере (подписки, приоритет, статусы). -->
                 <query>
                     <![CDATA[select e from hunttech_OpenPosition e
                                       order by e.vacansyName]]>
@@ -96,30 +99,37 @@
                 width="1000"/>
     <layout expand="openPositionsTable"
             spacing="true">
+        <!-- Панель срочных вакансий: горизонтальная лента кнопок позиций с критическим приоритетом (QUERY_URGENTLY_POSITIONS). -->
         <groupBox id="urgentlyPositons"
                   collapsable="true"
                   spacing="true"
                   caption="msg://msgUrgentlyPositios"
                   description="msg://msgUrgentlyPositios">
-            <hbox spacing="true"
+            <!-- Контейнер кнопки сброса и ленты срочных позиций. -->
+            <hbox id="urgentlyPositionsHBox"
+                  spacing="true"
                   height="100%">
+                <!-- Сброс срочной фильтрации — возврат к полному списку вакансий. -->
                 <button id="clearUrgentPos"
                         caption="msg://msgClear"
                         align="MIDDLE_LEFT"
                         height="AUTO"
                         description="msg://msgClearDescription"
                         invoke="clearUrgentFilter"/>
+                <!-- Горизонтальная прокрутка ленты срочных позиций. -->
                 <scrollBox id="urgentlyBox"
                            height="100%"
                            orientation="horizontal"
                            contentMaxHeight="100%"
                            contentMaxWidth="100%">
+                    <!-- Лента кнопок срочных позиций; наполняется в setUrgentlyPositios по приоритету. -->
                     <hbox id="urgentlyHBox"
                           height="100%"/>
                 </scrollBox>
             </hbox>
         </groupBox>
-        <filter id="filter"
+        <!-- Фильтр таблицы вакансий (скрыт по умолчанию, collapsable): применяется к openPositionsTable через openPositionsDl; из набора свойств исключены LOB и служебные поля. -->
+        <filter id="vacancyFilter"
                 collapsable="true"
                 collapsed="true"
                 applyTo="openPositionsTable"
@@ -147,10 +157,12 @@
                 @between({E}.lastOpenDate, now-3, now, day)
             </custom>
         </filter>
+        <!-- Переключатель варианта подписки (все подписчики / собственные) — управляется программно из контроллера. -->
         <radioButtonGroup id="subscribeRadioButtonGroup"
                           width="AUTO"
                           align="MIDDLE_LEFT"
                           orientation="horizontal"/>
+        <!-- Иерархическая таблица позиций (дерево по parentOpenPosition), строки 60px, single-selection, без редактирования; большинство колонок — кастомные генераторы и popup-действия строки. -->
         <treeDataGrid id="openPositionsTable"
                       contextHelpTextHtmlEnabled="true"
                       descriptionAsHtml="true"
@@ -166,14 +178,21 @@
                       reorderingAllowed="true"
                       dataContainer="openPositionsDc">
             <actions>
+                <!-- Создание новой позиции (стандартное действие CUBA). -->
                 <action id="create" type="create"/>
+                <!-- Создание новой позиции (стандартное действие CUBA). -->
                 <action id="edit" type="edit"/>
+                <!-- Редактирование выбранной позиции (стандартное действие CUBA). -->
                 <action id="remove" type="remove"/>
+                <!-- Удаление выбранной позиции (стандартное действие CUBA). -->
                 <action id="excel" type="excel" visible="false"/>
+                <!-- Выгрузка списка в Excel — скрыта, активируется по ролям. -->
                 <action id="list" type="listPrintForm"/>
+                <!-- Печатная форма списка: формирует «Памятку для кандидата» (getMemoForCandidate). -->
             </actions>
             <columns
                     exclude="remoteWork,commandCandidate,salaryMax,cityPosition,numberPosition,workExperience,commandExperience,comment,shortDescription,templateLetter,needLetter,exercise,needExercise,skillsList,candidates,paymentsType,typeCompanyComission,typeSalaryOfResearcher,typeSalaryOfRecrutier,useTaxNDFL,internalProject,percentComissionOfCompany,percentSalaryOfResearcher,percentSalaryOfRecrutier,parentOpenPosition">
+                <!-- Признак наличия дочерних позиций — иконка папки (folder generator). -->
                 <column id="folder"
                         maximumWidth="100px"
                         resizable="true"
@@ -183,6 +202,7 @@
                         caption="msg://msgFolder">
                     <componentRenderer/>
                 </column>
+                <!-- Иконка приоритета «светофор»: красный/жёлтый/зелёный по приоритету позиции. -->
                 <column id="icon"
                         resizable="true"
                         collapsible="true"
@@ -190,12 +210,14 @@
                         width="70px"
                         minimumWidth="35px"
                         caption="msg://msgPriority"/>
+                <!-- Средний рейтинг позиции, рассчитанный из комментариев (avgRating). -->
                 <column id="rating"
                         minimumWidth="85px"
                         maximumWidth="85px"
                         caption="msg://msgRating">
                     <componentRenderer/>
                 </column>
+                <!-- Логотип компании проекта с HTML-подсказкой (lazy-описание компании). -->
                 <column id="companyLogoColumn"
                         resizable="true"
                         collapsible="true"
@@ -205,6 +227,7 @@
                         minimumWidth="70px">
                     <componentRenderer/>
                 </column>
+                <!-- Логотип проекта с HTML-подсказкой. -->
                 <column id="projectLogoColumn"
                         resizable="true"
                         collapsible="true"
@@ -214,6 +237,7 @@
                         minimumWidth="70px">
                     <componentRenderer/>
                 </column>
+                <!-- Иконка последнего открытия/закрытия позиции (lastOpenDate). -->
                 <column id="lastOpenCloseColumn"
                         collapsible="true"
                         collapsed="true"
@@ -224,6 +248,7 @@
                         minimumWidth="55px">
                     <componentRenderer/>
                 </column>
+                <!-- Внутренний ID вакансии (vacansyID). -->
                 <column id="vacansyID"
                         collapsible="true"
                         property="vacansyID"
@@ -232,6 +257,7 @@
                         caption="msg://msgID">
                     <componentRenderer/>
                 </column>
+                <!-- Название вакансии: HTML-рендер с именем, проектом и владельцем в подсказке. -->
                 <column id="vacansyName"
                         collapsible="false"
                         property="vacansyName"
@@ -239,6 +265,7 @@
                         caption="msg://msgVacancy">
                     <componentRenderer/>
                 </column>
+                <!-- Тип позиции (название должности RU/EN с lazy-догрузкой). -->
                 <column id="positionType"
                         collapsible="true"
                         collapsed="true"
@@ -248,6 +275,7 @@
                         caption="msg://msgPositionType">
                     <componentRenderer/>
                 </column>
+                <!-- Проект позиции. -->
                 <column id="projectName"
                         collapsible="true"
                         collapsed="true"
@@ -257,6 +285,7 @@
                         caption="msg://msgProjectName">
                     <componentRenderer/>
                 </column>
+                <!-- Список городов позиции из коллекции cities. -->
                 <column id="cityPositionList"
                         collapsed="true"
                         collapsible="true"
@@ -265,17 +294,20 @@
                         width="120px">
                     <componentRenderer/>
                 </column>
+                <!-- Требуемый опыт работы (иконки и текст из mapWorkExperience). -->
                 <column id="workExperience"
                         width="65px"
                         caption="msg://msgWorkExperience">
                     <componentRenderer/>
                 </column>
+                <!-- Вилка зарплаты «мин/макс» с подсказкой и стилем по значению. -->
                 <column id="salaryMinMax"
                         resizable="true"
                         width="120px"
                         caption="msg://msgSalaryMinMax">
                     <componentRenderer/>
                 </column>
+                <!-- Количество позиций (штатных единиц). -->
                 <column id="numberPosition"
                         width="65px"
                         maximumWidth="85px"
@@ -283,6 +315,7 @@
                         caption="msg://msgNumberOpenPosition">
                     <componentRenderer/>
                 </column>
+                <!-- Наличие описания вакансии (иконка по comment). -->
                 <column id="description"
                         sortable="false"
                         resizable="true"
@@ -293,6 +326,7 @@
                         caption="msg://msgCVDescription">
                     <componentRenderer/>
                 </column>
+                <!-- Наличие тестового задания (иконка по exercise). -->
                 <column id="testExserice"
                         collapsed="true"
                         sortable="false"
@@ -303,6 +337,7 @@
                         minimumWidth="45px">
                     <componentRenderer/>
                 </column>
+                <!-- Формат удалённой работы (иконка +/- и подсказка). -->
                 <column id="remoteWork"
                         property="remoteWork"
                         sortable="false"
@@ -314,6 +349,7 @@
                         caption="msg://msgRemoteWork">
                     <componentRenderer/>
                 </column>
+                <!-- Наличие шаблона сопроводительного письма (иконка). -->
                 <column id="queryQuestion"
                         collapsed="true"
                         sortable="false"
@@ -324,6 +360,7 @@
                         minimumWidth="45px">
                     <componentRenderer/>
                 </column>
+                <!-- Наличие памятки для кандидата (иконка). -->
                 <column id="memoForCandidateColumn"
                         collapsed="true"
                         collapsible="true"
@@ -334,6 +371,7 @@
                         minimumWidth="45px">
                     <componentRenderer/>
                 </column>
+                <!-- Дата последней отправки резюме кандидату/по позиции. -->
                 <column id="lastCVSend"
                         resizable="true"
                         collapsed="false"
@@ -343,6 +381,7 @@
                         caption="msg://mshLastCVSend">
                     <componentRenderer/>
                 </column>
+                <!-- Статистика взаимодействий по позиции: счётчики по типам с учётом родительских и дочерних позиций. -->
                 <column id="idStatistics"
                         collapsible="true"
                         collapsed="true"
@@ -352,6 +391,7 @@
                         caption="msg://msgStat">
                     <componentRenderer/>
                 </column>
+                <!-- Владелец позиции (рекрутёр, ExtUser). -->
                 <column id="owner"
                         collapsed="true"
                         collapsible="true"
@@ -359,6 +399,7 @@
                         width="120px">
                     <componentRenderer/>
                 </column>
+                <!-- Количество отправленных кандидатов по позиции. -->
                 <column id="candidateSendedColumn"
                         collapsed="true"
                         collapsible="true"
@@ -367,6 +408,7 @@
                         resizable="true">
                     <componentRenderer/>
                 </column>
+                <!-- Колонка popup-действий строки: открыть/закрыть, комментарий, отчёты, подписка, подбор кандидатов. -->
                 <column id="openPositionActionButtonColumn"
                         collapsed="false"
                         collapsible="true"
@@ -377,14 +419,19 @@
                 </column>
             </columns>
             <rowsCount autoLoad="true"/>
-            <buttonsPanel id="buttonsPanel"
+            <!-- Панель действий таблицы: CRUD, открыть/закрыть, подписка, отчёты, рейтинг-комментарий. -->
+            <buttonsPanel id="openPositionButtonsPanel"
                           alwaysVisible="true">
+                <!-- Кнопка «Создать» (действие openPositionsTable.create). -->
                 <button id="createBtn"
                         action="openPositionsTable.create"/>
+                <!-- Кнопка «Редактировать» (действие openPositionsTable.edit). -->
                 <button id="editBtn"
                         action="openPositionsTable.edit"/>
+                <!-- Кнопка «Удалить» (действие openPositionsTable.remove). -->
                 <button id="removeBtn"
                         action="openPositionsTable.remove"/>
+                <!-- Pop-up открытия/закрытия позиции; действия закомментированы и подключаются в контроллере (initOpenCloseButton) с проверкой дочерних позиций. -->
                 <popupButton id="openCloseButton"
                              showActionIcons="true"
                              caption="msg://msgOpenClose"
@@ -401,34 +448,40 @@
                                 invoke="openCloseButtonWithCommentInvoke"/>
                     </actions>
                 </popupButton> -->
+                <!-- Подписка текущего рекрутёра на выбранную позицию (subscribePosition). -->
                 <button id="buttonSubscribe"
                         caption="msg://mshSubscibe"
                         invoke="subscribePosition"
                         enable="false"
                         icon="BELL"/>
+                <!-- Групповая подписка всех подписчиков (скрыта). -->
                 <button id="groupSubscribe"
                         caption="msg://msgGroupSubscribe"
                         visible="false"
                         enable="false"
                         invoke="groupSubscribe"
                         icon="BELL_O"/>
+                <!-- Выгрузка в Excel (скрыта). -->
                 <button id="buttonExcel"
                         action="openPositionsTable.excel"
                         icon="EXCEL_ACTION"
                         enable="false"
                         visible="false"/>
+                <!-- Подбор кандидатов по позиции (скрыт). -->
                 <button id="suggestCandidateButton"
                         caption="msg://msgSuggestCandidates"
                         icon="EYE"
                         enable="false"
                         visible="false"
                         invoke="suggestCandidateButton"/>
+                <!-- Pop-up отчётов: печатная форма «Памятка для кандидата» (скрыт). -->
                 <popupButton id="reportsPopupButton"
                              icon="FILE_TEXT"
                              visible="false"
                              enable="false"
                              caption="msg://msgReports">
                     <actions>
+                        <!-- Формирование памятки для кандидата (getMemoForCandidate). -->
                         <action id="listPrintFormAction"
                                 enable="true"
                                 invoke="getMemoForCandidate"
@@ -436,6 +489,7 @@
                                 caption="msg://msgGetMemoForCandidate"/>
                     </actions>
                 </popupButton>
+                <!-- Pop-up комментария-рейтинга: выставить рейтинг позиции или просмотреть существующие комментарии. -->
                 <popupButton id="setRatingButton"
                              caption="msg://msgOpenPositionComment"
                              showActionIcons="true"
@@ -443,11 +497,13 @@
                              icon="font-icon:COMMENT"
                              enable="false">
                     <actions>
+                        <!-- Выставление рейтинга позиции с комментарием (setRatingComment). -->
                         <action id="setRatingComment"
                                 caption="msg://msgOpenPositionComment"
                                 icon="STAR_O"
                                 invoke="setRatingComment"
                                 description="msg://msgSetRating"/>
+                        <!-- Просмотр комментариев и рейтинга позиции (openPositionCommentViewInvoke). -->
                         <action id="viewRatingComment"
                                 icon="VIEW_ACTION"
                                 invoke="openPositionCommentViewInvoke"
@@ -456,40 +512,50 @@
                 </popupButton>
             </buttonsPanel>
         </treeDataGrid>
-        <hbox spacing="true"
+        <!-- Ряд фильтр-переключателей под таблицей: чекбоксы статусов слева, фильтры приоритета и формата работы справа. -->
+        <hbox id="vacancyFilterCheckBoxesHBox"
+              spacing="true"
               align="MIDDLE_LEFT"
               width="100%">
+            <!-- Группа чекбоксов статуса: только открытые, черновики, не на паузе, только мои подписки. -->
             <hbox id="checkBoxsHBox"
                   align="MIDDLE_LEFT"
                   spacing="true"
                   width="AUTO">
+                <!-- Показывать только открытые позиции (openClose = false). -->
                 <checkBox id="checkBoxOnlyOpenedPosition"
                           align="MIDDLE_LEFT"
                           description="msg://msgOnlyOpenedVacansy"
                           caption="msg://msgOnlyOpenedVacansy"/>
+                <!-- Включать черновики (signDraft) в список. -->
                 <checkBox id="signDraftCheckBox"
                           align="MIDDLE_LEFT"
                           description="msg://msgSignDraft"
                           caption="msg://msgSignDraft"/>
+                <!-- Скрыть приостановленные позиции (priority > paused). -->
                 <checkBox id="checkBoxOnlyNotPaused"
                           align="MIDDLE_LEFT"
                           description="msg://msgOnlyNotPaused"
                           caption="msg://msgOnlyNotPaused"/>
+                <!-- Показывать только позиции, на которые подписан текущий рекрутёр (скрыт по умолчанию). -->
                 <checkBox id="checkBoxOnlyMySubscribe"
                           align="MIDDLE_LEFT"
                           visible="false"
                           description="msg://msgOnlyMySubscribe"
                           caption="msg://msgOnlyMySubscribe"/>
             </hbox>
+            <!-- Правая группа фильтров: минимальный приоритет и формат удалённой работы. -->
             <hbox id="notLowerRatingForm"
                   align="MIDDLE_RIGHT"
                   spacing="true"
                   width="AUTO">
+                <!-- Фильтр «не ниже рейтинга»: позиции с приоритетом не ниже выбранного. -->
                 <lookupField id="notLowerRatingLookupField"
                              align="MIDDLE_RIGHT"
                              nullOptionVisible="false"
                              caption="msg://msgPriorityPosition"
                              description="msg://msgStatusNotLower"/>
+                <!-- Фильтр по формату удалённой работы (remoteWork). -->
                 <lookupField id="remoteWorkLookupField"
                              caption="msg://msgRemoteWork"
                              nullOptionVisible="false"
@@ -497,12 +563,13 @@
                              description="msg://msgRemoteWork"/>
             </hbox>
         </hbox>
+        <!-- Действия lookup-режима (выбор/отмена); видны только при открытии окна в режиме подбора. -->
         <hbox id="lookupActions"
               spacing="true"
               visible="false"
               align="TOP_RIGHT">
-            <button action="lookupSelectAction"/>
-            <button action="lookupCancelAction"/>
+            <button id="lookupSelectButton" action="lookupSelectAction"/>
+            <button id="lookupCancelButton" action="lookupCancelAction"/>
         </hbox>
     </layout>
 </window>

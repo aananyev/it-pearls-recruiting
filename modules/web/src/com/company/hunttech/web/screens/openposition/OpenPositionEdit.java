@@ -44,6 +44,30 @@ import java.util.Calendar;
 @UiDescriptor("open-position-edit.xml")
 @EditedEntityContainer("openPositionDc")
 @LoadDataBeforeShow
+/**
+ * Контроллер формы редактирования позиции (вакансии) HRM HuntTech
+ * ({@code hunttech_OpenPosition.edit}).
+ *
+ * <p>Форма содержит 12 вкладок: «О вакансии» (идентификаторы, проект/компания/город,
+ * настройки команды, приоритет, зарплата, количество персонала, аккордеон описаний),
+ * «Трудовые соглашения», «Оплата» (схемы комиссий ресурсера/рекрутера), «Описание
+ * должности» (опыт, RU/EN/стандартное описание, «кто этот парень»), «Файлы»,
+ * «Тестовое задание», «Памятка к собеседованию», «Шаблон письма», «Навыки»,
+ * «Новости», «Согласование» (BPM) и «Комментарии».</p>
+ *
+ * <p>Тяжёлые LOB-поля (comment, commentEn, exercise, templateLetter, memoForInterview)
+ * и коллекции вкладок не входят в edit-view: они догружаются lazy при первом открытии
+ * вкладки (флаги {@code *Loaded}), чтобы не тянуть большие тексты при открытии формы.</p>
+ *
+ * <p>Перед коммитом контроллер проверяет уникальность {@code vacansyID}, собирает списки
+ * подписчиков и формирует уведомления (email/Telegram) об открытии/закрытии позиции;
+ * после коммита синхронизирует статус дочерних вакансий ({@code openCloseChildVacancy}).
+ * Зарплатные вилки проходят валидацию (мин ≤ макс), комиссии пересчитываются при изменении
+ * схем оплаты; таймер {@code closedVacancyTimer} обеспечивает автозакрытие по closingDate.</p>
+ *
+ * @see OpenPositionBrowse
+ * @see OpenPositionServiceBean
+ */
 public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private Label<String> closedVacancyInfoLabel;
@@ -61,15 +85,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private TextManipulationService textManipulationService;
 
     @Subscribe("closedVacancyTimer")
+    /** Тик таймера (60 с): обновление обратного отсчёта и автозакрытие вакансии при наступлении closingDate. */
     public void onClosedVacancyTimerTimerAction(Timer.TimerActionEvent event) {
         updateClosingVacancyLabel();
     }
 
     @Subscribe("closingDateDateField")
+    /** Изменение даты закрытия → пересчёт метки обратного отсчёта. */
     public void onClosingDateDateFieldValueChange(HasValue.ValueChangeEvent<Date> event) {
         initClosedVacancyTimerFacet();
     }
 
+    /** Обновление предупреждения о скором автоматическом закрытии вакансии. */
     private void updateClosingVacancyLabel() {
         closedVacancyInfoLabel.setValue(new StringBuilder()
                 .append(messageBundle.getMessage("msgClosingVacancyAfter"))
@@ -78,6 +105,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .toString());
     }
 
+    /** Текст обратного отсчёта до автоматического закрытия («Вакансия будет закрыта автоматически через N»). */
     private String getTimerClosingVacancyValue(Date closingDate) {
         StringBuilder sb = new StringBuilder();
 
@@ -348,6 +376,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private boolean screenFullyLoaded;
     private boolean skillsRescanned;
 
+    /** Блокировка авто-загрузки коллекций до установки параметра позиции. */
     private <E extends Entity> void preventAutoLoadUntilParameterSet(CollectionLoader<E> loader,
                                                                      String parameterName) {
         loader.addPreLoadListener(e -> {
@@ -358,6 +387,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe
+    /** Перед показом формы: инициализация полей типа позиции, проекта, таймера, новостей, блокировок, иконок и BPM-процесса. */
     public void onBeforeShow(BeforeShowEvent event) {
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
@@ -392,6 +422,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("tabSheetOpenPosition")
+    /** Переключение вкладки → lazy-загрузка LOB/коллекций вкладки при первом открытии. */
     public void onTabSheetOpenPositionSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
         if (event.getSelectedTab() == null || PersistenceHelper.isNew(getEditedEntity())) {
             return;
@@ -428,6 +459,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Lazy-загрузка LOB-описаний основной вкладки (RU/EN описания типа позиции). */
     private void loadMainTabLobs() {
         OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
                 .add("comment")
@@ -437,6 +469,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         getEditedEntity().setCommentEn(reloaded.getCommentEn());
     }
 
+    /** Догрузка описаний типа позиции, если они ещё не загружены. */
     private void ensurePositionLobsLoaded() {
         Position position = getEditedEntity().getPositionType();
         if (position == null || position.getId() == null) {
@@ -448,12 +481,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setPositionTypeOnEntity(loadPositionWithDescriptionLobs(position.getId()));
     }
 
+    /** Проверка: загружены ли описания типа позиции (RU/EN, «кто этот парень»). */
     private boolean positionTypeDescriptionLobsLoaded(Position position) {
         return position != null
                 && PersistenceHelper.isLoaded(position, "standartDescription")
                 && PersistenceHelper.isLoaded(position, "whoIsThisGuy");
     }
 
+    /** Перезагрузка позиции с LOB-полями описаний через dataManager. */
     private Position loadPositionWithDescriptionLobs(UUID positionId) {
         return dataManager.load(Position.class)
                 .id(positionId)
@@ -466,6 +501,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .one();
     }
 
+    /** Установка выбранного типа позиции на редактируемую сущность. */
     private void setPositionTypeOnEntity(Position position) {
         Position current = getEditedEntity().getPositionType();
         if (current != null && position != null && Objects.equals(current.getId(), position.getId())) {
@@ -481,6 +517,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Применение описаний выбранного типа позиции к UI-полям (описания, «кто этот парень», навыки). */
     private void applyPositionTypeDescriptionUi(Position position) {
         if (position == null) {
             return;
@@ -503,6 +540,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Lazy-загрузка текста тестового задания при первом открытии вкладки. */
     private void loadExerciseLob() {
         OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
                 .add("exercise")
@@ -510,6 +548,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         getEditedEntity().setExercise(reloaded.getExercise());
     }
 
+    /** Lazy-загрузка памятки к собеседованию при первом открытии вкладки. */
     private void loadMemoForInterviewLob() {
         OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
                 .add("memoForInterview")
@@ -517,6 +556,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         getEditedEntity().setMemoForInterview(reloaded.getMemoForInterview());
     }
 
+    /** Lazy-загрузка шаблона сопроводительного письма при первом открытии вкладки. */
     private void loadTemplateLetterLob() {
         OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
                 .add("templateLetter")
@@ -524,17 +564,20 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         getEditedEntity().setTemplateLetter(reloaded.getTemplateLetter());
     }
 
+    /** Lazy-загрузка дерева навыков позиции при первом открытии вкладки. */
     private void loadSkillsList() {
         openPositionSkillsListsDl.setParameter("openPosition", getEditedEntity());
         openPositionSkillsListsDl.load();
         skillTrees = new ArrayList<>(openPositionSkillsListsDc.getItems());
     }
 
+    /** Lazy-загрузка таблицы файлов позиции при первом открытии вкладки. */
     private void loadSomeFiles() {
         someFilesesDl.setParameter("openPosition", getEditedEntity());
         someFilesesDl.load();
     }
 
+    /** Lazy-загрузка комментариев позиции при первом открытии вкладки. */
     private void loadCommentsTab() {
         commentsOpenPositionDl.setParameter("openPosition", getEditedEntity());
         commentsOpenPositionDl.load();
@@ -543,11 +586,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setCommentOpenPositionScrollIteractionList(getEditedEntity(), commentsScrollBox);
     }
 
+    /** Lazy-загрузка трудовых соглашений при первом открытии вкладки. */
     private void loadLaborAgreement() {
         laborAgreementDl.setParameter("openPosition", getEditedEntity());
         laborAgreementDl.load();
     }
 
+    /** Инициализация полей описаний типа позиции (RU/EN, стандартное, «кто этот парень»). */
     private void initPositionTypeDescriptionFields() {
         Position position = getEditedEntity().getPositionType();
         if (position == null) {
@@ -561,6 +606,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Гарантия загрузки комментариев перед отрисовкой ленты. */
     private void ensureOpenPositionCommentsLoaded() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             return;
@@ -571,6 +617,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Настройка таймера автозакрытия: запуск при заданной closingDate. */
     private void initClosedVacancyTimerFacet() {
         if (closingDateDateField.getValue() != null) {
             updateClosingVacancyLabel();
@@ -581,6 +628,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Инициализация picker-поля проекта: установка текущего проекта и фильтров. */
     private void initProjectNameField() {
         projectNameField.setOptionImageProvider(this::projectFielsImageProvider);
         companyDepartamentField.setOptionImageProvider(this::companyDepartamentFieldImageProvider);
@@ -588,6 +636,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         withOpenPositionCheckBox.setValue(true);
     }
 
+    /** Иконка опции компании (логотип). */
     private Resource companyNameFieldImageProvider(Company company) {
         Image retImage = uiComponents.create(Image.class);
         retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
@@ -601,6 +650,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Иконка опции департамента (логотип компании). */
     private Resource companyDepartamentFieldImageProvider(CompanyDepartament companyDepartament) {
         Image retImage = uiComponents.create(Image.class);
         retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
@@ -614,6 +664,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Иконка опции проекта (логотип проекта). */
     protected Resource projectFielsImageProvider(Project project) {
         Image retImage = uiComponents.create(Image.class);
         retImage.setScaleMode(Image.ScaleMode.SCALE_DOWN);
@@ -627,6 +678,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Отрисовка одной строки комментария в ленте (с автором, рейтингом и ответом). */
     private void setCommentOpenPositionScrollIteractionList(OpenPosition editedEntity, ScrollBoxLayout commentsScrollBox) {
         final String QUERY_OPEN_POSITION_INTERACTIONS =
                 "select e from hunttech_IteractionList e " +
@@ -649,6 +701,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Отрисовка всей ленты комментариев позиции. */
     public void setCommentsOpenPositionScroll(ScrollBoxLayout commentsScrollBox) {
         for (OpenPositionComment openPositionComment : commentsOpenPositionDc.getItems()) {
             if (openPositionComment.getComment() != null) {
@@ -658,6 +711,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Перенос изменений таблицы соглашений на сущность перед коммитом. */
     private void syncLaborAgreementToEntity() {
         if (!laborAgreementLoaded) {
             return;
@@ -666,6 +720,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         getEditedEntity().setLaborAgreement(new ArrayList<>(laborAgreementDc.getItems()));
     }
 
+    /** Гарантия наличия коллекции соглашений на сущности. */
     private void ensureLaborAgreementLoadedOnEntity() {
         if (!PersistenceHelper.isLoaded(getEditedEntity(), "laborAgreement")) {
             OpenPosition reloaded = dataManager.reload(getEditedEntity(),
@@ -676,6 +731,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Перенос изменений таблицы навыков на сущность. */
     private void syncSkillsListToEntity() {
         List<SkillTree> items = null;
         if (skillsLoaded) {
@@ -690,6 +746,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         getEditedEntity().setSkillsList(items);
     }
 
+    /** Гарантия наличия коллекции навыков на сущности. */
     private void ensureSkillsListLoadedOnEntity() {
         if (!PersistenceHelper.isLoaded(getEditedEntity(), "skillsList")) {
             OpenPosition reloaded = dataManager.reload(getEditedEntity(),
@@ -701,12 +758,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Install(to = "someFilesTable.create", subject = "newEntitySupplier")
+    /** Создание новой записи файла позиции (с привязкой к позиции и текущему пользователю). */
     private SomeFilesOpenPosition someFilesTableCreateEntitySupplier() {
         SomeFilesOpenPosition file = metadata.create(SomeFilesOpenPosition.class);
         file.setOpenPosition(getEditedEntity());
         return file;
     }
 
+    /** Применение фильтров списка проектов (только открытые / с открытыми позициями). */
     private void setProjectClosedFilter() {
         if (onlyOpenProjectCheckBox.getValue()) {
             projectNamesLc.removeParameter("projectClosed");
@@ -719,11 +778,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("onlyOpenProjectCheckBox")
+    /** Смена чекбокса «только открытые проекты» → перезагрузка списка проектов. */
     public void onOnlyOpenProjectCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         setProjectClosedFilter();
     }
 
     @Subscribe("withOpenPositionCheckBox")
+    /** Смена чекбокса «с открытыми позициями» → перезагрузка списка проектов. */
     public void onWithOpenPositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (event.getValue()) {
             projectNamesLc.setParameter("withOpenPosition", true);
@@ -735,6 +796,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         projectNamesLc.load();
     }
 
+    /** Создание контейнера строки комментария (автор, дата, текст, рейтинг, ответ). */
     private VBoxLayout getCommentBox(IteractionList iteractionList) {
         VBoxLayout retBox = uiComponents.create(VBoxLayout.class);
         retBox.setWidthFull();
@@ -1027,6 +1089,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
 
+    /** Ответ на комментарий: вставка reply-строки в ленту. */
     private void replyButtonInvoke(Button.ClickEvent e, String replyStr) {
         createComment(replyStr);
 
@@ -1037,6 +1100,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
 
+    /** Создание комментария-рейтинга позиции и обновление ленты. */
     private void createComment(String commentStr) {
 
         OpenPositionComment comment = metadata.create(OpenPositionComment.class);
@@ -1063,6 +1127,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Привязка созданного комментария к позиции. */
     private void setCommentToVacancy() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             String defComment = "<i>" +
@@ -1074,6 +1139,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Подготовка статуса открытия/закрытия позиции перед сохранением. */
     private void setOpenCloseStart() {
         if (getEditedEntity().getOpenClose() != null) {
             openCloseStartStatus = getEditedEntity().getOpenClose();
@@ -1085,6 +1151,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Install(to = "openPostionNewsDataGrid", subject = "detailsGenerator")
+    /** Генератор детальной панели строки новости (дата, тема, автор, кандидат, текст). */
     private Component openPostionNewsDataGridDetailsGenerator(OpenPositionNews entity) {
         VBoxLayout mainLayout = uiComponents.create(VBoxLayout.NAME);
         mainLayout.setWidth("100%");
@@ -1112,6 +1179,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return mainLayout;
     }
 
+    /** Содержимое деталей новости. */
     private Component getContent(OpenPositionNews entity) {
         Label<String> content = uiComponents.create(Label.TYPE_STRING);
         content.setHtmlEnabled(true);
@@ -1128,6 +1196,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return content;
     }
 
+    /** Кнопка закрытия детальной панели новости. */
     private Component createCloseButton(OpenPositionNews entity) {
         Button closeButton = uiComponents.create(Button.class);
         closeButton.setIcon("icons/close.png");
@@ -1139,6 +1208,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return closeButton;
     }
 
+    /** Заполнение таблицы новостей позиции (обычные и приоритетные). */
     private void setOpenPositionNews(BeforeShowEvent event) {
         if (getEditedEntity() != null) {
             openPositionNewsLc.setParameter("openPosition", getEditedEntity());
@@ -1149,6 +1219,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         openPositionNewsLc.load();
     }
 
+    /** Блокировка вкладки «Стандартное описание» до генерации. */
     private void standartDescriptionDisable(BeforeShowEvent event) {
         if (getEditedEntity().getPositionType() != null) {
             if (getEditedEntity().getPositionType().getStandartDescription() == null) {
@@ -1161,6 +1232,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Блокировка вкладки «Кто этот парень» до генерации. */
     private void whiIsThisGuyDisable(BeforeShowEvent event) {
         if (getEditedEntity().getPositionType() != null) {
             if (getEditedEntity().getPositionType().getWhoIsThisGuy() == null) {
@@ -1174,6 +1246,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
 
+    /** Установка признака внутреннего проекта (по выбранному проекту). */
     private void setInternalProject() {
         if (getRoleService.isUserRoles(userSession.getUser(), MANAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
@@ -1183,6 +1256,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Инициализация радио-группы командного опыта. */
     private void setCommandExperienceRadioButton() {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("Нет требований", 0);
@@ -1195,6 +1269,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         commanExperienceRadioButton.setOptionsMap(map);
     }
 
+    /** Инициализация радио-группы опыта коммерческой разработки. */
     private void setWorkExperienceRadioButton() {
         Map<String, Integer> map = new LinkedHashMap<>();
         map.put("Нет требований", 0);
@@ -1210,6 +1285,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     Boolean onNeedExercise;
 
     @Subscribe("needExerciseCheckBox")
+    /** Смена чекбокса «нужно тестовое» → блокировка/разблокировка редактора. */
     public void onNeedExerciseCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (needExerciseCheckBox.getValue() != null) {
             exerciseRichTextArea.setEditable(needExerciseCheckBox.getValue());
@@ -1241,6 +1317,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     BigDecimal startSalaryMinValue;
 
     @Subscribe("openPositionFieldSalaryMin")
+    /** Изменение минимальной зарплаты → валидация вилки. */
     public void onOpenPositionFieldSalaryMinValueChange1(HasValue.ValueChangeEvent<BigDecimal> event) {
         if (openPositionFieldSalaryMin.getValue() != null) {
             if (startSalaryMinValue != null) {
@@ -1268,6 +1345,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Boolean flagMinGreaterMax = false;
 
     @Install(to = "openPositionFieldSalaryMax", subject = "validator")
+    /** Валидация максимальной зарплаты: не меньше минимальной. */
     private void openPositionFieldSalaryMaxValidator(BigDecimal bigDecimal) {
         if (!flagMinGreaterMax) {
             if (openPositionFieldSalaryMin.getValue() != null) {
@@ -1282,6 +1360,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Install(to = "openPositionFieldSalaryMin", subject = "validator")
+    /** Валидация минимальной зарплаты: не больше максимальной. */
     private void openPositionFieldSalaryMinValidator(BigDecimal bigDecimal) {
         if (!flagMinGreaterMax) {
             if (openPositionFieldSalaryMin.getValue() != null) {
@@ -1298,6 +1377,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     BigDecimal startSalaryMaxValue;
 
     @Subscribe("openPositionFieldSalaryMax")
+    /** Изменение максимальной зарплаты → валидация вилки. */
     public void onOpenPositionFieldSalaryMaxValueChange1(HasValue.ValueChangeEvent<BigDecimal> event) {
         if (openPositionFieldSalaryMax.getValue() != null) {
             if (startSalaryMaxValue != null) {
@@ -1327,6 +1407,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     String openPositionText;
 
     @Subscribe("openPositionRichTextArea")
+    /** Изменение русского описания → пересборка стандартного описания (после полной загрузки экрана). */
     public void onOpenPositionRichTextAreaValueChange1(HasValue.ValueChangeEvent<String> event) {
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             if (openPositionRichTextArea.getValue() != null) {
@@ -1347,6 +1428,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     String startLetterText;
 
     @Subscribe("templateLetterRichTextArea")
+    /** Изменение шаблона сопроводительного письма. */
     public void onTemplateLetterRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
         if (templateLetterRichTextArea.getValue() != null) {
             if (startLetterText != null) {
@@ -1364,15 +1446,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
 
+    /** Блокировка пары взаимосвязанных полей. */
     private void setDisableTwoField() {
     }
 
     @Subscribe("vacansyNameField")
+    /** Изменение названия вакансии. */
     public void onVacansyNameFieldValueChange(HasValue.ValueChangeEvent<String> event) {
         setTopLabel();
     }
 
     @Subscribe("openPositionFieldSalaryMin")
+    /** Изменение минимальной зарплаты → пересчёт комиссий. */
     public void onOpenPositionFieldSalaryMinValueChange(HasValue.ValueChangeEvent<BigDecimal> event) {
         setCalculateCompanyPercentField();
         calculateResearcherSalary();
@@ -1380,18 +1465,21 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("openPositionFieldSalaryMax")
+    /** Изменение максимальной зарплаты → пересчёт комиссий. */
     public void onOpenPositionFieldSalaryMaxValueChange(HasValue.ValueChangeEvent<BigDecimal> event) {
         setCalculateCompanyPercentField();
         calculateResearcherSalary();
         calculateRecrutierSalary();
     }
 
+    /** Подстановка департамента компании из выбранного проекта. */
     private void setCompanyDepartmentFromProject() {
         if (projectNameField.getValue() != null) {
             companyDepartamentField.setValue(projectNameField.getValue().getProjectDepartment());
         }
     }
 
+    /** Подстановка компании из выбранного департамента. */
     private void setCompanyNameFromDepartment() {
         if (companyDepartamentField.getValue() != null) {
             companyNameField.setValue(companyDepartamentField.getValue().getCompanyName());
@@ -1399,6 +1487,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("companyDepartamentField")
+    /** Смена департамента → подстановка компании. */
     public void onCompanyDepartamentFieldValueChange(HasValue.ValueChangeEvent<CompanyDepartament> event) {
         // сократить список проектов
         if (projectNameField.getValue() == null) {
@@ -1419,6 +1508,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setTopLabel();
     }
 
+    /** Очистка связанной таблицы персонала. */
     private void setPersonTableEmpty() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
 //            personTable.setVisible(false);
@@ -1432,6 +1522,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Подстановка города компании в поле «город позиции». */
     private void setCityNameOfCompany() {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             if (companyNameField.getValue() != null && cityOpenPositionField.getValue() == null) {
@@ -1446,6 +1537,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("companyNameField")
+    /** Смена компании → обновление списка департаментов и города. */
     public void onCompanyNameFieldValueChange(HasValue.ValueChangeEvent<Company> event) {
         // сократить список департаментов
         if (companyNameField.getValue() != null) {
@@ -1461,6 +1553,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("commandOrPosition")
+    /** Смена типа «команда/вакансия» → блокировки и перезагрузка родительских позиций. */
     public void onCommandOrPositionValueChange(HasValue.ValueChangeEvent event) {
         switch ((int) commandOrPosition.getValue()) {
             case 0: // вакансия
@@ -1483,6 +1576,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("parentOpenPositionField")
+    /** Смена родительской позиции → подстановка проекта и описаний. */
     public void onParentOpenPositionFieldValueChange(HasValue.ValueChangeEvent<OpenPosition> event) {
         try {
             if (projectNameField.getValue() == null
@@ -1495,6 +1589,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe
+    /** После коммита: Telegram-уведомление об изменении позиции. */
     public void onAfterCommitChanges(AfterCommitChangesEvent event) {
 
         if (!openClosePositionCheckBox.getValue().equals(openCloseStartStatus)) {
@@ -1550,6 +1645,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe
+    /** Перед коммитом: подготовка статусов и коллекций. */
     public void onBeforeCommitChanges4(BeforeCommitChangesEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             StringBuilder sb = new StringBuilder()
@@ -1577,6 +1673,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Отправка Telegram-уведомления об изменении позиции (текст из OpenPositionServiceBean). */
     private void notifyTelegramOpenPositionChange(String message) {
         TelegramSendResult result = telegramService.sendMessageToChatResult(
                 applicationSetupService.getTelegramChatOpenPosition(), message);
@@ -1592,6 +1689,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("priorityNewsCheckBox")
+    /** Смена чекбокса «приоритетные новости» → перезагрузка новостей. */
     public void onPriorityNewsCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (event.getValue()) {
             openPositionNewsLc.setParameter("priorityNews", true);
@@ -1604,6 +1702,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
 
     @Subscribe("openClosePositionCheckBox")
+    /** Смена чекбокса открытости → блокировка/разблокировка полей. */
     public void onOpenClosePositionCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         openCloseCurrentStatus = openClosePositionCheckBox.getValue();
 
@@ -1616,6 +1715,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Блокировка/разблокировка полей формы по статусу позиции (открыта/закрыта/черновик). */
     private void disableEnableFields(HasValue.ValueChangeEvent<Boolean> event) {
         if (getEditedEntity().getOpenClose()) {
             cityOpenPositionField.setEditable(false);
@@ -1639,11 +1739,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe
+    /** После коммита: синхронизация статуса дочерних позиций. */
     public void onAfterCommitChanges1(AfterCommitChangesEvent event) {
         openCloseChildVacancy(event);
 
     }
 
+    /** Закрытие/открытие дочерних позиций вместе с родительской. */
     private void openCloseChildVacancy(AfterCommitChangesEvent event) {
         List<OpenPosition> openPositions = dataManager.load(OpenPosition.class)
                 .query(QUERY_SELECT_COMMAND)
@@ -1674,6 +1776,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe
+    /** После показа: загрузка LOB основной вкладки, логотипов, новостей, настроек и approval-процесса. */
     public void onAfterShow(AfterShowEvent event) {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             getEditedEntity().setOpenClose(false);
@@ -1699,6 +1802,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         initClosedVacancyTimerFacet();
     }
 
+    /** Форматирование ключевых компетенций для отображения. */
     private String showKeyCompetition(String value) {
         if (skillTrees == null) {
             return value;
@@ -1715,11 +1819,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return value;
     }
 
+    /** Отправка уведомления о позиции (email/Telegram). */
     private void sendMessage() {
         events.publish(new UiNotificationEvent(this, "Открыта новая позиция: " +
                 getEditedEntity().getVacansyName()));
     }
 
+    /** Формирование текста уведомления об открытии/закрытии. */
     private Boolean sendOpenCloseMessage() {
         OpenPosition openPosition = getEditedEntity();
         r = false;
@@ -1763,6 +1869,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("memoForInterviewRichTextArea")
+    /** Изменение памятки к собеседованию. */
     public void onMemoForInterviewRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
         if (event.getValue() != null && !event.getValue().equals("")) {
             needMemoCheckBox.setValue(true);
@@ -1772,6 +1879,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe
+    /** Перед коммитом: проверка дубля vacansyID и сборка уведомлений. */
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         syncLaborAgreementToEntity();
         syncSkillsListToEntity();
@@ -1815,6 +1923,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Проверка уникальности vacansyID; при дубле — диалог подтверждения продолжения. */
     private boolean checkDuplicatePositionId() {
         String vacancyID = vacansyIDTextField.getValue();
         if (vacancyID == null) {
@@ -1835,6 +1944,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .one() > 0;
     }
 
+    /** Публикация события изменения позиции для подписчиков. */
     private void publishEventMessage(BeforeCommitChangesEvent event) {
         if (getEditedEntity().getOpenClose() == null) {
             getEditedEntity().setOpenClose(false);
@@ -1860,22 +1970,26 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe
+    /** Перед коммитом: формирование сообщений открытия/закрытия. */
     public void onBeforeCommitChanges3(BeforeCommitChangesEvent event) {
         publishEventMessage(event);
 
     }
 
+    /** Формирование и рассылка уведомления о закрытии позиции. */
     private void sendClosePositionMessage() {
         events.publish(new UiNotificationEvent(this, "Закрыта вакансия: " +
                 getEditedEntity().getVacansyName()));
     }
 
+    /** Формирование и рассылка уведомления об открытии позиции. */
     private void sendOpenPositionMessage() {
         events.publish(new UiNotificationEvent(this, "Открыта новая вакансия: " +
                 getEditedEntity().getVacansyName()));
     }
 
     @Subscribe
+    /** Перед коммитом: сборка списков подписчиков и комментариев. */
     public void onBeforeCommitChanges1(BeforeCommitChangesEvent event) {
         if (openClosePositionCheckBox.getValue() == null)
             openClosePositionCheckBox.setValue(false);
@@ -1888,6 +2002,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Проверка дублей позиции (вспомогательная проверка перед коммитом). */
     private OpenPosition checkDublicateOpenPosition(BeforeCommitChangesEvent event) {
         // StringIndexOutOfBoundsException: begin 0, end -1, length 2
         List<OpenPosition> openPositions = new ArrayList<>();
@@ -1922,6 +2037,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Сбор email всех подписчиков позиции для рассылки. */
     private String getAllSubscibers() {
         LoadContext<User> loadContext = LoadContext.create(User.class)
                 .setQuery(LoadContext.createQuery("select e from sec$User e"));
@@ -1938,6 +2054,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return maillist;
     }
 
+    /** Email-список подписчиков сущности (по активным подпискам и ролям). */
     private String getSubscriberMaillist(Entity entity) {
         List<RecrutiesTasks> listResearchers = dataManager.load(RecrutiesTasks.class)
                 .query("select e " +
@@ -1965,6 +2082,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return maillist;
     }
 
+    /** Email-список всех рекрутеров. */
     private String getRecrutiersMaillist() {
         return "alan@hunttech.ru";
     }
@@ -1973,6 +2091,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     Integer startPriorityStatus;
 
     @Subscribe("priorityField")
+    /** Смена приоритета → авто-установка даты закрытия через неделю. */
     public void onPriorityFieldValueChange(HasValue.ValueChangeEvent<Integer> event) {
         if (event.getValue().equals(OpenPositionPriority.LOW.getId())) {
             setClosingWeek();
@@ -2006,6 +2125,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Установка closingDate = сегодня + 7 дней. */
     private void setClosingWeek() {
         if (closingDateDateField.getValue() == null) {
             dialogs.createOptionDialog()
@@ -2032,6 +2152,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     Map<String, Integer> priorityMap = new LinkedHashMap<>();
 
+    /** Инициализация радио-групп оплаты (ресурсер/рекрутер). */
     private void setRadioButtons() {
         Map<String, Integer> rwMap = new LinkedHashMap<>();
         String a = messageBundle.getMessage("mainmsgAllVariants");
@@ -2083,6 +2204,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         remoteWorkField.setOptionsMap(remoteWork);
     }
 
+    /** Скрытие/показ полей в зависимости от статуса позиции. */
     private void setHiddeField() {
         // скрыть менеджерские пункты
         if (isUserRoles(userSession.getUser(), MANAGER) || isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
@@ -2106,6 +2228,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("radioButtonGroupPaymentsType")
+    /** Смена типа комиссии компании → пересчёт. */
     public void onRadioButtonGroupPaymentsTypeValueChange(HasValue.ValueChangeEvent<Integer> event) {
 
         switch ((int) radioButtonGroupPaymentsType.getValue()) {
@@ -2136,6 +2259,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("checkBoxUseNDFL")
+    /** Смена флага НДФЛ → пересчёт комиссий. */
     public void onCheckBoxUseNDFLValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         setCalculateCompanyPercentField();
         calculateResearcherSalary();
@@ -2144,12 +2268,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
 
     @Subscribe("textFieldPercentOrSum")
+    /** Смена процента/суммы комиссии компании → пересчёт. */
     public void onTextFieldPercentOrSumValueChange(HasValue.ValueChangeEvent<String> event) {
         setCalculateCompanyPercentField();
         calculateResearcherSalary();
         calculateRecrutierSalary();
     }
 
+    /** Настройка расчётного поля комиссии компании. */
     protected void setCalculateCompanyPercentField() {
         if (textFieldPercentOrSum.getValue() != null) {
             textFieldCompanyPayment.setValue(calculateComission(textFieldPercentOrSum.getValue(),
@@ -2165,6 +2291,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     protected BigDecimal minCompanyComission = new BigDecimal(BigInteger.ZERO);
     protected BigDecimal maxCompanyComission = new BigDecimal(BigInteger.ZERO);
 
+    /** Расчёт комиссий (компания, ресурсер, рекрутер) по текущим параметрам. */
     protected String calculateComission(String percent, Integer type, boolean ndflFlag, BigDecimal
             minSalary, BigDecimal maxSalary) {
 
@@ -2222,6 +2349,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("radioButtonGroupResearcherSalary")
+    /** Смена схемы оплаты ресурсера → пересчёт. */
     public void onRadioButtonGroupResearcherSalaryValueChange(HasValue.ValueChangeEvent event) {
         calculateResearcherSalary();
 
@@ -2229,12 +2357,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("radioButtonGroupRecrutierSalary")
+    /** Смена схемы оплаты рекрутера → пересчёт. */
     public void onRadioButtonGroupRecrutierSalaryValueChange(HasValue.ValueChangeEvent event) {
         calculateRecrutierSalary();
 
         setRecrutierSalaryLabel();
     }
 
+    /** Расчёт выплаты ресурсеру. */
     protected void calculateResearcherSalary() {
         BigDecimal hungred = new BigDecimal(100);
         BigDecimal minSalary = new BigDecimal(String.valueOf(minCompanyComission));
@@ -2310,6 +2440,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Расчёт выплаты рекрутеру. */
     protected void calculateRecrutierSalary() {
         BigDecimal hungred = new BigDecimal(100);
         BigDecimal minSalary = new BigDecimal(String.valueOf(minCompanyComission));
@@ -2386,16 +2517,19 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("textFieldRecrutierPercentOrSum")
+    /** Смена процента/суммы рекрутера → пересчёт. */
     public void onTextFieldRecrutierPercentOrSumValueChange(HasValue.ValueChangeEvent<String> event) {
         calculateRecrutierSalary();
     }
 
     @Subscribe("textFieldResearcherSalaryPercentOrSum")
+    /** Смена процента/суммы ресурсера → пересчёт. */
     public void onTextFieldResearcherSalaryPercentOrSumValueChange(HasValue.ValueChangeEvent<String> event) {
         calculateResearcherSalary();
     }
 
     @Subscribe("textFieldRecrutierSalary")
+    /** Смена суммы рекрутера → пересчёт. */
     public void onTextFieldRecrutierSalaryValueChange(HasValue.ValueChangeEvent<String> event) {
         // calculateRecrutierSalary();
 
@@ -2403,12 +2537,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("textFieldResearcherSalary")
+    /** Смена суммы ресурсера → пересчёт. */
     public void onTextFieldResearcherSalaryValueChange(HasValue.ValueChangeEvent<String> event) {
         // calculateResearcherSalary();
 
         // setResearcherSalaryLabel();
     }
 
+    /** Обновление итоговой подписи оплаты ресурсера. */
     private void setResearcherSalaryLabel() {
         if (radioButtonGroupResearcherSalary.getValue() != null) {
             if ((int) radioButtonGroupResearcherSalary.getValue() == 0) {
@@ -2433,6 +2569,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Обновление итоговой подписи оплаты рекрутера. */
     private void setRecrutierSalaryLabel() {
         if (radioButtonGroupRecrutierSalary.getValue() != null) {
             if ((int) radioButtonGroupRecrutierSalary.getValue() == 0) {
@@ -2454,6 +2591,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe
+    /** Перед показом: дополнительные настройки полей и иконок. */
     public void onBeforeShow1(BeforeShowEvent event) {
         // показываем или нет все строки ввода в оплаты
         if (radioButtonGroupPaymentsType.getValue() == null) {
@@ -2484,6 +2622,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setInitApprovalProcess();
     }
 
+    /** Иконка вкладки «Файлы» с признаком наличия файлов. */
     private void setIconSomeFileTab() {
         if (!filesLoaded && !PersistenceHelper.isNew(getEditedEntity())) {
             tabFiles.setIconFromSet(CubaIcon.FILE_O);
@@ -2496,6 +2635,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Загрузка логотипа проекта и аватара владельца при открытии формы. */
     private void initProjectImagesOnOpen() {
         Project project = getEditedEntity().getProjectName();
         if (project == null) {
@@ -2507,6 +2647,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         updateProjectOwnerImage(project.getProjectOwner());
     }
 
+    /** Обновление изображения логотипа проекта в шапке. */
     private void updateProjectLogoImage(FileDescriptor projectLogo) {
         projectLogoImage.setValueSource(null);
         if (FileDescriptorImageHelper.fileExists(fileLoader, projectLogo)) {
@@ -2516,6 +2657,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Обновление изображения владельца проекта в шапке. */
     private void updateProjectOwnerImage(Person projectOwner) {
         projectOwnerImage.setDescription(buildProjectOwnerDescription(projectOwner));
         projectOwnerImage.setValueSource(null);
@@ -2527,6 +2669,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** HTML-подсказка владельца проекта (должность, город, компания, департамент). */
     private String buildProjectOwnerDescription(Person projectOwner) {
         if (projectOwner == null) {
             return "";
@@ -2555,10 +2698,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe(id = "someFilesesDc", target = Target.DATA_CONTAINER)
+    /** Смена коллекции файлов → обновление иконки вкладки. */
     public void onSomeFilesesDcCollectionChange(CollectionContainer.CollectionChangeEvent<SomeFilesOpenPosition> event) {
         setIconSomeFileTab();
     }
 
+    /** Инициализация BPM-процесса согласования позиции. */
     private void setInitApprovalProcess() {
         UUID entityId = getEditedEntity().getId();
         procAttachmentsDl.setParameter("entityId", entityId);
@@ -2568,6 +2713,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .init(PROCESS_CODE, getEditedEntity());
     }
 
+    /** Формирование шапки формы: название, комиссии, статус и логотипы. */
     private void setTopLabel() {
         try {
             if (vacansyNameField.getValue() != null && projectNameField.getValue() != null) {
@@ -2622,16 +2768,19 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("labelRecrutierSalary")
+    /** Изменение метки комиссии рекрутера. */
     public void onLabelRecrutierSalaryValueChange(HasValue.ValueChangeEvent<String> event) {
         setTopLabel();
     }
 
     @Subscribe("labelResearcherSalary")
+    /** Изменение метки комиссии ресурсера. */
     public void onLabelResearcherSalaryValueChange(HasValue.ValueChangeEvent<String> event) {
         setTopLabel();
     }
 
     @Subscribe
+    /** Инициализация экрана: карты options и начальные настройки. */
     public void onInit(InitEvent event) {
         preventAutoLoadUntilParameterSet(laborAgreementDl, "openPosition");
         preventAutoLoadUntilParameterSet(commentsOpenPositionDl, "openPosition");
@@ -2647,12 +2796,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setOpenPositionNewsDetailsGenerator();
     }
 
+    /** Настройка генератора деталей строк новостей. */
     private void setOpenPositionNewsDetailsGenerator() {
         openPostionNewsDataGrid.setItemClickAction(new BaseAction("itemClickAction")
                 .withHandler(actionPerformedEvent -> openPostionNewsDataGrid
                         .setDetailsVisible(openPostionNewsDataGrid.getSingleSelected(), true)));
     }
 
+    /** Настройка радио-группы «команда/вакансия». */
     private void setGroupCommandRadioButtin() {
         Map<String, Integer> map = new LinkedHashMap<>();
 
@@ -2663,6 +2814,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("projectNameField")
+    /** Смена проекта → подстановка компании, департамента, позиции и описаний. */
     public void onProjectNameFieldValueChange1(HasValue.ValueChangeEvent<Project> event) {
         if (event.getValue() != null) {
             if (event.getValue().getProjectIsClosed()) {
@@ -2680,12 +2832,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Настройка кнопки групповой подписки по роли. */
     private void setGroupSubscribeButton() {
 //        groupSubscribe.setVisible(userSession.getUser().getGroup().getName().equals(MANAGEMENT_GROUP) ||
 //                userSession.getUser().getGroup().getName().equals(HUNTING_GROUP));
     }
 
     @Install(to = "registrationForWorkField", subject = "optionIconProvider")
+    /** Иконка опции регистрации для работы. */
     private String registrationForWorkFieldOptionImageProvider(Integer integer) {
         String returnIcon = "";
 
@@ -2707,6 +2861,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Install(to = "registrationForWorkField", subject = "optionStyleProvider")
+    /** Стиль опции регистрации для работы. */
     private String registrationForWorkFieldOptionStyleProvider(Integer integer) {
         String returnIcon = "";
 
@@ -2728,6 +2883,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Install(to = "remoteWorkField", subject = "optionIconProvider")
+    /** Иконка опции формата удалённой работы. */
     private String remoteWorkFieldOptionIconProvider(Integer integer) {
         String returnIcon = "";
 
@@ -2750,6 +2906,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Install(to = "priorityField", subject = "optionIconProvider")
+    /** Иконка опции приоритета. */
     private String priorityFieldOptionIconProvider(Integer integer) {
 
         String icon = null;
@@ -2779,10 +2936,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe(target = Target.DATA_CONTEXT)
+    /** Обработчик изменения значения (общий). */
     public void onChange(DataContext.ChangeEvent event) {
         entityIsChanged = true;
     }
 
+    /** Подписка текущего рекрутёра на позицию (RecrutiesTasks). */
     public void subscribePosition() {
         Screen opScreen = screenBuilders
                 .editor(RecrutiesTasks.class, this)
@@ -2800,6 +2959,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         opScreen.show();
     }
 
+    /** Проверка наличия у пользователя заданной роли. */
     public Boolean isUserRoles(User user, String role) {
         Collection<String> s = userSessionSource.getUserSession().getRoles();
         Boolean c = false;
@@ -2814,6 +2974,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("positionTypeField")
+    /** Смена типа позиции → подстановка описаний и названия. */
     public void onPositionTypeFieldValueChange(HasValue.ValueChangeEvent<Position> event) {
         if (vacansyNameField.getValue() == null || vacansyNameField.getValue().equals("")) {
             vacansyNameField.setValue(generatePositionName());
@@ -2827,6 +2988,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("projectNameField")
+    /** Смена проекта → пересборка названия вакансии. */
     public void onProjectNameFieldValueChange(HasValue.ValueChangeEvent<Project> event) {
         vacansyNameField.setValue(generatePositionNameInProject());
 
@@ -2836,6 +2998,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         updateProjectOwnerImage(project != null ? project.getProjectOwner() : null);
     }
 
+    /** Генерация названия вакансии с учётом проекта. */
     private String generatePositionNameInProject() {
         String retValue = vacansyNameField.getValue();
 
@@ -2852,6 +3015,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return retValue;
     }
 
+    /** Генерация названия вакансии с учётом города. */
     private String generatePositionNameCity() {
         String retValue = vacansyNameField.getValue();
 
@@ -2871,10 +3035,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("cityOpenPositionField")
+    /** Смена города → генерация названия вакансии. */
     public void onCityOpenPositionFieldValueChange(HasValue.ValueChangeEvent<City> event) {
         vacansyNameField.setValue(generatePositionNameCity());
     }
 
+    /** Полная генерация названия вакансии по типу/проекту/городу. */
     protected String generatePositionName() {
         String retPosName = "";
 
@@ -2906,6 +3072,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return retPosName;
     }
 
+    /** Переключение статуса открытости позиции. */
     public void openClosePosition() {
         String message = "";
 
@@ -2927,6 +3094,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .show();
     }
 
+    /** Открытие окна массового выбора городов позиции (SelectCitiesLocation). */
     public void addListCity() {
         SelectCitiesLocation selectCitiesLocation = screens.create(SelectCitiesLocation.class);
 
@@ -2946,6 +3114,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe
+    /** Перед коммитом: подготовка городов и подписей. */
     public void onBeforeCommitChanges2(BeforeCommitChangesEvent event) {
         if (shortDescriptionTextArea.getValue() != null) {
             if (shortDescriptionTextArea.getValue().length() > 250) {
@@ -2959,6 +3128,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Обновление сводной подписи списка городов. */
     private void changeCityListsLabel() {
         String outStr = "";
         String description = "";
@@ -2987,6 +3157,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
      * on the edited entity — only {@link #skillTrees} and {@link #openPositionSkillsListsDc}.
      * Entity sync happens in {@link #syncSkillsListToEntity()} on commit.
      */
+    /** Пересканирование описания должности → пересборка дерева навыков. */
     public void rescanJobDescription() {
         if (openPositionRichTextArea.getValue() == null) {
             return;
@@ -3002,6 +3173,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Перезагрузка коллекции навыков для вкладки. */
     private List<SkillTree> reloadSkillsForOpenPositionTab(List<SkillTree> skills) {
         if (skills == null || skills.isEmpty()) {
             return skills;
@@ -3013,6 +3185,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("openPositionRichTextArea")
+    /** Изменение описания → пересборка навыков (после загрузки). */
     public void onOpenPositionRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
         if (!screenFullyLoaded) {
             return;
@@ -3023,6 +3196,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Рендер логотипа навыка в таблице навыков. */
     private void skillImageColumnRenderer() {
         openPositionSkillsListTable.addGeneratedColumn("fileImageLogo", entity -> {
             Image image = uiComponents.create(Image.NAME);
@@ -3037,6 +3211,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Install(to = "openPositionSkillsListTable.isComment", subject = "columnGenerator")
+    /** Генератор колонки «комментарий» навыка. */
     private Object openPositionSkillsListTableIsCommentColumnGenerator(DataGrid.ColumnGeneratorEvent<SkillTree> event) {
         if (event.getItem().getComment() != null && !event.getItem().equals("")) {
             return CubaIcon.PLUS_CIRCLE;
@@ -3046,6 +3221,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Install(to = "openPositionSkillsListTable.isComment", subject = "styleProvider")
+    /** Стиль колонки «комментарий» навыка. */
     private String openPositionSkillsListTableIsCommentStyleProvider(SkillTree skillTree) {
         if (skillTree.getComment() != null && !skillTree.equals("")) {
             return "pic-center-large-green";
@@ -3055,10 +3231,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Install(to = "openPositionSkillsListTable", subject = "rowDescriptionProvider")
+    /** Подсказка строки таблицы навыков. */
     private String openPositionSkillsListTableRowDescriptionProvider(SkillTree skillTree) {
         return skillTree.getComment() != null ? Jsoup.parse(skillTree.getComment()).wholeText() : "";
     }
 
+    /** Извлечение короткого описания и навыков из описания должности (сканирование). */
     public void addShortDescription() {
         if (openPositionRichTextArea.getValue() != null) {
             List<SkillTree> skillTrees = pdfParserService
@@ -3078,6 +3256,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("positionTypeField")
+    /** Смена типа позиции (второй обработчик) → обновление названия и описаний. */
     public void onPositionTypeFieldValueChange1(HasValue.ValueChangeEvent<Position> event) {
         if (applyingPositionTypeFromHandler) {
             return;
@@ -3097,6 +3276,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("more10NumberPositionField")
+    /** Смена чекбокса «более 10 позиций». */
     public void onMore10NumberPositionFieldValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (event.getValue() != null) {
             if (event.getValue()) {
@@ -3108,6 +3288,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     }
 
+    /** Создание новости позиции (OpenPositionNews). */
     public void addOpenPositionNewsButton() {
         screenBuilders.editor(OpenPositionNews.class, this)
                 .newEntity()
@@ -3119,6 +3300,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("signDraftCheckBox")
+    /** Смена чекбокса «черновик» → блокировка полей. */
     public void onSignDraftCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (event.getValue() != null) {
             if (event.getValue()) {
@@ -3138,6 +3320,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("salaryCandidateRequestCheckBox")
+    /** Смена чекбокса «запрос зарплаты у кандидата». */
     public void onSalaryCandidateRequestCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (event.getValue()) {
             openPositionFieldSalaryMin.setEnabled(false);
@@ -3151,6 +3334,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("gradeLookupPickerField")
+    /** Смена грейда → генерация названия вакансии. */
     public void onGradeLookupPickerFieldValueChange(HasValue.ValueChangeEvent<Grade> event) {
         boolean flag = false;
 
@@ -3179,6 +3363,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Обработчик кнопки автогенерации названия вакансии. */
     public void generateNameFieldButton() {
         if (vacansyNameField.getValue() == null) {
             vacansyNameField.setValue(generateVacancyName());
@@ -3193,6 +3378,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
+    /** Генерация названия вакансии по типу позиции и проекту. */
     private String generateVacancyName() {
 //        String retStr = "";
         StringBuilder sb = new StringBuilder();
@@ -3285,6 +3471,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return sb.toString();
     }
 
+    /** Подстановка зарплаты из рейтов аутстафа (OutstaffingRates). */
     public void setSalaryFieldButtonInvoke() {
         OutstaffingRates outstaffingRates = null;
 

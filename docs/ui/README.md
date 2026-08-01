@@ -85,8 +85,8 @@ Living-документация экранов, окон, фрагментов �
 
 | Форма | Controller | Документ |
 |-------|------------|----------|
-| Browse | `itpearls_OpenPosition.browse` | [itpearls_OpenPosition.browse_Spec.md](itpearls_OpenPosition.browse_Spec.md) |
-| Edit | `itpearls_OpenPosition.edit` | [itpearls_OpenPosition.edit_Spec.md](itpearls_OpenPosition.edit_Spec.md) |
+| Browse | `hunttech_OpenPosition.browse` | [OpenPositionBrowse_Spec.md](OpenPositionBrowse_Spec.md) |
+| Edit | `hunttech_OpenPosition.edit` | [OpenPositionEdit_Spec.md](OpenPositionEdit_Spec.md) |
 | Detail fragment | `itpearls_OpenPositionDetailScreenFragment` | [itpearls_OpenPositionDetailScreenFragment_Spec.md](itpearls_OpenPositionDetailScreenFragment_Spec.md) |
 
 ### IteractionList
