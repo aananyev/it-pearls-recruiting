@@ -34,7 +34,7 @@ HrmMainScreen / прямой route
 
 ## Behavior Summary
 
-- открытие preview по маршруту с `id` → CUBA создаёт editor и загружает `OpenPosition` через `openPositionDl` → отображается новая компоновка той же сущности;
+- открытие preview по маршруту с `id` → CUBA восстанавливает editor entity → preview проверяет загрузку lazy-связи `positionType` и при необходимости догружает её узким view → затем полностью выполняется штатный `OpenPositionEdit.onBeforeShow`;
 - открытие legacy `hunttech_OpenPosition.edit` → используются прежние контроллер и XML → preview не участвует в вызове;
 - выбор пункта label-навигации → меняется выбранная вкладка `tabSheetOpenPosition` → entity, loader-параметры, validation и save lifecycle не изменяются;
 - выбор вкладки TabSheet → выполняется существующий обработчик `OpenPositionEdit` → тяжёлые LOB и коллекции загружаются по прежним правилам;
@@ -81,13 +81,24 @@ Preview использует те же компоненты данных, views,
 - `gradeDc` / `gradeDl`;
 - `closedVacancyTimer`.
 
-Data View Integrity не расширяется новыми getters: sidebar читает только свойства, уже присутствующие в `openPosition-edit-view` и используемые legacy-экраном. Все редактируемые компоненты сохраняют исходные `dataContainer`, `property`, `optionsContainer`, `required`, action ID и `invoke`.
+Data View Integrity основного XML не изменяется. Для прямой URL-навигации контроллер preview выполняет отдельную узкую догрузку только `OpenPosition.positionType` и полей `Position.positionRuName`, `positionEnName`, `standartDescription`, `whoIsThisGuy`. Это необходимо до первого getter унаследованного lifecycle, потому что route может восстановить detached `OpenPosition` с неинициализированным EclipseLink value holder.
+
+Догруженная связь устанавливается в текущий редактируемый экземпляр до вызова `super.onBeforeShow(event)`. Отдельный DataContext, альтернативная сущность или изменение значения `positionType` не создаются: в форму переносится то же значение связи из БД.
+
+Все редактируемые компоненты сохраняют исходные `dataContainer`, `property`, `optionsContainer`, `required`, action ID и `invoke`.
 
 ## 3. Иерархия и взаимосвязь форм (Form Hierarchy)
 
-`OpenPositionEditPreview` наследует `OpenPositionEdit`, чтобы не копировать и не расходиться с бизнес-логикой контроллера. Подкласс не переопределяет lifecycle, загрузку, validation, сохранение, генераторы таблиц, сервисные вызовы или обработчики изменений данных.
+`OpenPositionEditPreview` наследует `OpenPositionEdit`, чтобы не копировать и не расходиться с бизнес-логикой контроллера. Preview переопределяет только `onBeforeShow(BeforeShowEvent)` как технический guard URL-навигации:
 
-Собственная Java-логика ограничена:
+1. проверяет `PersistenceHelper.isLoaded(openPosition, "positionType")`;
+2. для существующей detached-сущности догружает `positionType` узким view через `DataManager`;
+3. устанавливает загруженную связь в редактируемый экземпляр;
+4. вызывает `super.onBeforeShow(event)` без изменения порядка и содержания legacy-инициализации.
+
+После этой подготовки validation, сохранение, загрузка LOB, генераторы таблиц, сервисные вызовы и все бизнес-обработчики выполняются базовым `OpenPositionEdit`.
+
+Остальная собственная Java-логика ограничена:
 
 1. переключением существующих вкладок из label-навигации;
 2. назначением active-стиля выбранному пункту;
@@ -116,7 +127,23 @@ Data View Integrity не расширяется новыми getters: sidebar ч
 
 `tabPayments` по-прежнему скрыта для одиночной вакансии и показывается legacy-обработчиком для карточки команды. Preview не меняет это условие.
 
-### 4.2. Progressive loading
+### 4.2. Защита URL lifecycle
+
+При прямом route CUBA может передать editor detached `OpenPosition`, у которого `positionType` представлен неинициализированным lazy value holder без persistence session. Прямой вызов `getPositionType()` в `OpenPositionEdit.ensurePositionLobsLoaded()` в таком состоянии приводит к EclipseLink `ValidationException`.
+
+Preview предотвращает ошибку до входа в базовый lifecycle:
+
+```text
+OpenPositionEditPreview.onBeforeShow
+├── PersistenceHelper.isLoaded(positionType)
+├── при необходимости DataManager.load(OpenPosition + positionType LOB)
+├── editedPosition.setPositionType(reloadedPosition.getPositionType())
+└── super.onBeforeShow(event)
+```
+
+Guard не выполняется для новой сущности и не создаёт дополнительный запрос, если связь уже загружена. Legacy-экран не изменяется.
+
+### 4.3. Progressive loading
 
 Обработчик `OpenPositionEdit.onTabSheetOpenPositionSelectedTabChange()` остаётся источником истины для ленивой загрузки:
 
@@ -132,7 +159,7 @@ Data View Integrity не расширяется новыми getters: sidebar ч
 
 Navigation-пункты вызывают `TabSheet.setSelectedTab()` и тем самым проходят через тот же listener, а не запускают loaders напрямую.
 
-### 4.3. Accordion
+### 4.4. Accordion
 
 Большие смысловые блоки и таблицы оформлены стандартным `GroupBoxLayout` с `collapsable="true"`. Сворачивание не выгружает данные, не сбрасывает значения и не запускает запросы. Это presentation-операция.
 
@@ -215,18 +242,21 @@ Hermes проверяет точный HEAD PR:
 
 1. XML parsing и компиляцию web-модуля;
 2. `OpenPositionEditPreviewLayoutTest`;
-3. `ScreenViewIntegrityTest` — 8/8 PASS;
-4. сборку SCSS всех тем без изменения их файлов;
-5. `clean assemble` — BUILD SUCCESSFUL;
-6. local deploy и HTTP `/hrm/` = 200;
-7. открытие preview по route под администратором;
-8. все 12 вкладок, accordion-секции и label-навигацию;
-9. сохранение и отмену;
-10. отсутствие unfetched/detached/RPC/runtime ошибок;
-11. неизменность legacy editor и его вызовов.
+3. `OpenPositionEditPreviewRouteGuardTest`;
+4. `ScreenViewIntegrityTest` — 8/8 PASS;
+5. сборку SCSS всех тем без изменения их файлов;
+6. `clean assemble` — BUILD SUCCESSFUL;
+7. local deploy и HTTP `/hrm/` = 200;
+8. открытие preview по route под администратором;
+9. отсутствие `ValidationException` на lazy `positionType`;
+10. все 12 вкладок, accordion-секции и label-навигацию;
+11. сохранение и отмену;
+12. отсутствие unfetched/detached/RPC/runtime ошибок;
+13. неизменность legacy editor и его вызовов.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-01 | Добавлена preview-специфичная защита URL lifecycle: lazy-связь `positionType` догружается узким view до вызова унаследованного `OpenPositionEdit.onBeforeShow`; legacy-экран не изменён. |
 | 2026-08-01 | Создан изолированный preview новой двухпанельной компоновки OpenPositionEdit без замены legacy-экрана и изменения бизнес-логики. |
