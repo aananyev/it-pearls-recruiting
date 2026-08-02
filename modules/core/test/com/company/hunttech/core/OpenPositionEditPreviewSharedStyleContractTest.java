@@ -17,8 +17,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Защищает применение общего edit-* / label-* UI API к OpenPositionEditPreview.
- * Тест фиксирует presentation-контракт и не проверяет бизнес-логику вакансии.
+ * Защищает применение общего edit-* / label-* UI API и локальной responsive-
+ * компоновки к OpenPositionEditPreview. Тест фиксирует presentation-контракт
+ * и не проверяет бизнес-логику вакансии.
  */
 public class OpenPositionEditPreviewSharedStyleContractTest {
 
@@ -125,6 +126,75 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
     }
 
     @Test
+    public void layoutPolishUsesExistingComponentsAndResponsiveRows() throws IOException {
+        String descriptor = readProjectFile(PREVIEW_XML);
+        String controller = readProjectFile(PREVIEW_CONTROLLER);
+        String scss = readProjectFile(
+                "modules/web/themes/halo/com.company.hunttech/" + LOCAL_STYLE);
+
+        List<String> protectedComponentIds = Arrays.asList(
+                "identityStatusAccordion",
+                "commandFieldHBox",
+                "commandVacancyAccordion",
+                "projectLocationAccordion",
+                "positionCountAccordion",
+                "salaryAccordion",
+                "vacancyNameHBox",
+                "hboxProject1",
+                "hboxVacansy",
+                "hboxProject",
+                "hboxCompany",
+                "hboxSalary",
+                "space2Box",
+                "windowCommitAndCloseButton",
+                "windowCloseButton"
+        );
+        for (String componentId : protectedComponentIds) {
+            assertTrue("В XML отсутствует существующий компонент " + componentId,
+                    descriptor.contains("id=\"" + componentId + "\""));
+            assertTrue("Presentation-контроллер не использует компонент " + componentId,
+                    controller.contains(componentId));
+        }
+
+        List<String> layoutRoles = Arrays.asList(
+                "open-position-preview-identity-card",
+                "open-position-preview-title-clamp",
+                "open-position-preview-workspace-polished",
+                "open-position-preview-main-scroll",
+                "open-position-preview-primary-section",
+                "open-position-preview-subsection",
+                "open-position-preview-field-row",
+                "open-position-preview-row-title",
+                "open-position-preview-row-three",
+                "open-position-preview-row-position",
+                "open-position-preview-row-half",
+                "open-position-preview-row-salary",
+                "open-position-preview-row-wide",
+                "open-position-preview-footer",
+                "open-position-preview-primary-action",
+                "open-position-preview-secondary-action"
+        );
+        for (String role : layoutRoles) {
+            assertTrue("Контроллер не назначает layout-role " + role,
+                    controller.contains(role));
+            assertTrue("SCSS не содержит layout-role " + role,
+                    scss.contains("." + role));
+        }
+
+        assertTrue(controller.contains("projectLogoImage.setWidth(\"112px\")"));
+        assertTrue(controller.contains("projectLogoImage.setHeight(\"112px\")"));
+        assertTrue(controller.contains("vacancyTitleSpacerHBox.setVisible(false)"));
+        assertTrue(controller.contains("labelOpenPosition.setDescription(title)"));
+
+        assertTrue(scss.contains("display: flex !important;"));
+        assertTrue(scss.contains("justify-content: flex-end;"));
+        assertTrue(scss.contains("-webkit-line-clamp: 7;"));
+        assertTrue(scss.contains("@media (max-width: 1100px)"));
+        assertTrue(scss.contains("@media (max-width: 820px)"));
+        assertTrue(scss.contains("max-width: 1480px !important;"));
+    }
+
+    @Test
     public void sharedAndLocalScssAreIdenticalAndConnectedInAllThemes() throws IOException {
         String referenceSharedScss = null;
         String referenceLocalScss = null;
@@ -173,6 +243,8 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
         assertTrue(referenceLocalScss.contains("#ffb11b"));
         assertTrue(referenceLocalScss.contains(".label-nav-item-active"));
         assertTrue(referenceLocalScss.contains(".edit-accordion-section .v-panel-content"));
+        assertTrue(referenceLocalScss.contains(".open-position-preview-field-row"));
+        assertTrue(referenceLocalScss.contains(".open-position-preview-footer"));
         assertFalse(referenceLocalScss.contains("\n  .v-label {"));
         assertFalse(referenceLocalScss.contains("\n  .v-button {"));
         assertFalse(referenceLocalScss.contains("\n  .v-table {"));
@@ -184,9 +256,12 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
         String legacyController = readProjectFile(LEGACY_CONTROLLER);
 
         assertTrue(previewController.contains("applySharedEditScreenContract"));
+        assertTrue(previewController.contains("applyPreviewLayoutPolish"));
         assertFalse(legacyController.contains("applySharedEditScreenContract"));
+        assertFalse(legacyController.contains("applyPreviewLayoutPolish"));
         assertFalse(legacyController.contains("edit-footer-actions"));
         assertFalse(legacyController.contains("edit-accordion-section"));
+        assertFalse(legacyController.contains("open-position-preview-field-row"));
     }
 
     private String readProjectFile(String relativePath) throws IOException {
