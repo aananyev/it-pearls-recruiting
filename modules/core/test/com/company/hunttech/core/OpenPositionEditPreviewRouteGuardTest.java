@@ -37,8 +37,12 @@ public class OpenPositionEditPreviewRouteGuardTest {
         assertTrue(previewController.contains("dataManager.load(OpenPosition.class)"));
         assertTrue(previewController.contains(
                 ".add(\"positionType\", positionType -> positionType"));
+        // сеттер на detached entity с lazy positionType триггерит старый valueholder
+        // (ValidationException null Session) — заменяем item контейнера целиком
         assertTrue(previewController.contains(
-                "editedPosition.setPositionType(reloadedPosition.getPositionType())"));
+                "getEditedEntityContainer().setItem(reloadedPosition)"));
+        assertFalse(previewController.contains(
+                "setPositionType(reloadedPosition.getPositionType()"));
 
         assertOrdered(previewController,
                 "ensureRoutePositionTypeLoaded();",

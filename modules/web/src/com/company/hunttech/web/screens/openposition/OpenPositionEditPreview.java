@@ -87,8 +87,11 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     /**
      * Догружает только связь {@code positionType} и её LOB-описания, если CUBA
      * восстановила editor entity после URL-навигации без активной persistence
-     * session. Значение merge-ится в редактируемый экземпляр до первого getter,
-     * поэтому базовый {@link OpenPositionEdit} продолжает работать без изменений.
+     * session. Экземпляр в контейнере заменяется reload-нутым целиком: прямой
+     * сеттер {@code setPositionType} на detached entity с неинициализированной
+     * lazy-связью сам провоцирует инстанцирование старого valueholder
+     * (EclipseLink ValidationException «null Session»). Базовый
+     * {@link OpenPositionEdit} продолжает работать без изменений.
      */
     private void ensureRoutePositionTypeLoaded() {
         OpenPosition editedPosition = getEditedEntity();
@@ -100,14 +103,41 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
         OpenPosition reloadedPosition = dataManager.load(OpenPosition.class)
                 .id(editedPosition.getId())
                 .view(ViewBuilder.of(OpenPosition.class)
+                        // полный состав openPosition-edit-view (полная версия,
+                        // строка 232 views.xml): все поля формы, иначе setItem
+                        // вскрывает следующую lazy-связь (grade и др.)
+                        .add("vacansyID").add("vacansyName").add("openClose")
+                        .add("signDraft").add("priority").add("rating")
+                        .add("lastOpenDate").add("closingDate").add("remoteWork")
+                        .add("registrationForWork").add("remoteComment")
+                        .add("needExercise").add("needLetter").add("needMemoForInterview")
+                        .add("salaryMin").add("salaryMax").add("salaryIE")
+                        .add("salaryFixLimit").add("salaryCandidateRequest")
+                        .add("salaryComment").add("outstaffingCost")
+                        .add("numberPosition").add("more10NumberPosition")
+                        .add("workExperience").add("commandCandidate")
+                        .add("commandExperience").add("internalProject")
+                        .add("shortDescription").add("rawDescription")
+                        .add("interviewChecklist").add("searchMap").add("interviewPlan")
+                        .add("paymentsType").add("typeCompanyComission")
+                        .add("typeSalaryOfResearcher").add("typeSalaryOfRecrutier")
+                        .add("useTaxNDFL").add("percentComissionOfCompany")
+                        .add("percentSalaryOfResearcher").add("percentSalaryOfRecrutier")
+                        .add("priorityComment")
+                        .add("grade", "grade-picker-view")
+                        .add("cityPosition", "city-picker-view")
+                        .add("cities", "city-picker-view")
                         .add("positionType", positionType -> positionType
                                 .add("positionRuName")
                                 .add("positionEnName")
                                 .add("standartDescription")
                                 .add("whoIsThisGuy"))
+                        .add("projectName", "project-edit-view")
+                        .add("parentOpenPosition", "openPosition-parent-picker-view")
+                        .add("owner", "extUser-picker-view")
                         .build())
                 .one();
-        editedPosition.setPositionType(reloadedPosition.getPositionType());
+        getEditedEntityContainer().setItem(reloadedPosition);
     }
 
     /**
