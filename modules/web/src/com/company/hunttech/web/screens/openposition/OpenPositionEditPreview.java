@@ -4,6 +4,8 @@ import com.company.hunttech.entity.OpenPosition;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.ViewBuilder;
+import com.company.hunttech.web.StandartRegistrationForWork;
+import com.haulmont.cuba.gui.screen.MessageBundle;
 import com.haulmont.cuba.gui.Route;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Component;
@@ -27,8 +29,10 @@ import com.haulmont.cuba.gui.screen.Screen.AfterShowEvent;
 import com.haulmont.cuba.gui.screen.Screen.BeforeShowEvent;
 import com.haulmont.cuba.gui.screen.Screen.InitEvent;
 import com.haulmont.cuba.gui.screen.EditedEntityContainer;
+import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.Target;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 
@@ -99,6 +103,22 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     private Label<String> labelTopComissionResearcher;
     @Inject
     private Label<String> citiesLabel;
+    @Inject
+    private Label<String> summaryVacansyIDLabel;
+    @Inject
+    private Label<String> summaryPositionTypeLabel;
+    @Inject
+    private Label<String> summaryGradeLabel;
+    @Inject
+    private Label<String> summaryProjectNameLabel;
+    @Inject
+    private Label<String> summaryCityPositionLabel;
+    @Inject
+    private Label<String> summaryNumberPositionLabel;
+    @Inject
+    private Label<String> summaryRegistrationForWorkLabel;
+    @Inject
+    private MessageBundle messageBundle;
     @Inject
     private TextField<String> ownerTextField;
     @Inject
@@ -408,6 +428,63 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
             updateNavigationState(tabSheetOpenPosition.getSelectedTab().getName());
         }
         updateSidebarTitleTooltip();
+        refreshSummary();
+    }
+
+    /**
+     * Синхронизирует сводку «Ключевые параметры» в sidebar с текущими
+     * значениями редактируемой вакансии: обновляется при показе экрана и при
+     * каждом изменении атрибута — сводка всегда совпадает с вкладкой
+     * «Основное» (грейд, проект, город и т.д.).
+     */
+    private void refreshSummary() {
+        OpenPosition op = getEditedEntity();
+        summaryVacansyIDLabel.setValue(op.getVacansyID() != null ? op.getVacansyID() : "");
+        summaryPositionTypeLabel.setValue(instanceName(op.getPositionType()));
+        summaryGradeLabel.setValue(instanceName(op.getGrade()));
+        summaryProjectNameLabel.setValue(instanceName(op.getProjectName()));
+        summaryCityPositionLabel.setValue(instanceName(op.getCityPosition()));
+        summaryNumberPositionLabel.setValue(op.getNumberPosition() != null
+                ? String.valueOf(op.getNumberPosition()) : "");
+        summaryRegistrationForWorkLabel.setValue(registrationForWorkName(op.getRegistrationForWork()));
+    }
+
+    /**
+     * Возвращает человекочитаемое имя типа оформления кандидата по коду
+     * {@link StandartRegistrationForWork}; для неизвестного кода — пустая
+     * строка (сводка не показывает «null»).
+     */
+    private String registrationForWorkName(Integer code) {
+        if (code == null) {
+            return "";
+        }
+        if (StandartRegistrationForWork.OUTSTAFING.equals(code)) {
+            return messageBundle.getMessage("mainmsgOutstaffing");
+        }
+        if (StandartRegistrationForWork.RECRUITING.equals(code)) {
+            return messageBundle.getMessage("mainmsgRecruiting");
+        }
+        if (StandartRegistrationForWork.ALL.equals(code)) {
+            return messageBundle.getMessage("mainmsgAllVariants");
+        }
+        return "";
+    }
+
+    /**
+     * Возвращает instanceName сущности (как у property-биндинга CUBA),
+     * либо пустую строку для {@code null} — сводка не показывает «null».
+     */
+    private String instanceName(Object entity) {
+        return entity != null ? entity.toString() : "";
+    }
+
+    /**
+     * Любое изменение полей вакансии во вкладке «Основное» немедленно
+     * отражается в сводке sidebar.
+     */
+    @Subscribe(id = "openPositionDc", target = Target.DATA_CONTAINER)
+    protected void onPreviewItemPropertyChanged(InstanceContainer.ItemPropertyChangeEvent<OpenPosition> event) {
+        refreshSummary();
     }
 
     /**

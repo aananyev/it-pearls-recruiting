@@ -153,7 +153,6 @@ public class OpenPositionEditPreviewLayoutTest {
                 "exerciseAccordion",
                 "memoAccordion",
                 "templateLetterAccordion",
-                "skillsTableAccordion",
                 "newsTableAccordion",
                 "procActionsBox",
                 "commentsAccordion"
@@ -166,9 +165,19 @@ public class OpenPositionEditPreviewLayoutTest {
 
         assertNestedInAccordion(descriptor, "laborAgreementDataGrid", "laborAgreementTableAccordion");
         assertNestedInAccordion(descriptor, "someFilesTable", "filesTableAccordion");
-        assertNestedInAccordion(descriptor, "openPositionSkillsListTable", "skillsTableAccordion");
         assertNestedInAccordion(descriptor, "openPostionNewsDataGrid", "newsTableAccordion");
         assertNestedInAccordion(descriptor, "commentsScrollBox", "commentsAccordion");
+
+        // Блок «Требуемые Навыки» восстановлен как в legacy: плоская структура
+        // (без аккордеон-обёртки) — skillsBox с expand на дерево навыков.
+        int skillsBox = descriptor.indexOf("id=\"skillsBox\"");
+        int skillsTree = descriptor.indexOf("id=\"openPositionSkillsListTable\"");
+        assertTrue("Не найден skillsBox", skillsBox >= 0);
+        assertTrue("Дерево навыков должно следовать за skillsBox", skillsTree > skillsBox);
+        assertTrue("skillsBox должен растягивать дерево навыков (expand)",
+                descriptor.contains("expand=\"openPositionSkillsListTable\""));
+        assertTrue("Блок навыков не должен иметь аккордеон-обёртку",
+                !descriptor.substring(skillsBox, skillsTree).contains("groupBox"));
     }
 
     @Test

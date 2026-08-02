@@ -146,7 +146,7 @@
 | `openPosition-candidate` | `_local` | Кандидаты на вакансии | `grade`, `projectName`, `candidates`, `positionType` |
 | `openPosition-view` | `_local` | Legacy / сервисы | Полный `_local` + `skillsList`, `openPositionComments`, `projectName` |
 | `openPosition-rtasks-view` | `_local` | RecrutiesTasks | — |
-| `someFilesOpenPosition-edit-view` | `_minimal` | Вкладка Files в Edit | `fileDescriptor`, `fileOwner`, `fileType`, … |
+| `someFilesOpenPosition-edit-view` | `_minimal` | Вкладка Files в Edit | `fileDescriptor` (nested: `name`, `size`), `fileOwner`, `fileType`, … |
 | `laborAgreement-openPosition-tab-view` | `_minimal` | Вкладка Labor Agreement | `perhaps`, `company`, `laborAgreementType` |
 
 **Исключения LOB из browse/edit views:** `comment`, `commentEn`, `templateLetter`, `exercise`, `memoForInterview` — загружаются lazy в `OpenPositionEdit` и через batch exists в `OpenPositionBrowse`.

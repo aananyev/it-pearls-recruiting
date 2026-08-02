@@ -57,7 +57,7 @@
       text-align: center;
       background: rgba(255, 255, 255, 0.055);
       border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 9px;
+      border-radius: 8px;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
     }
 
@@ -82,6 +82,15 @@
       border: 3px solid rgba(255, 255, 255, 0.92);
       box-shadow: 0 7px 20px rgba(0, 0, 0, 0.24);
     }
+    .open-position-preview-logo-box {
+      overflow: visible;
+    }
+
+    .open-position-preview-logo {
+      position: relative;
+      z-index: 1;
+    }
+
 
     .open-position-preview-owner-image,
     .open-position-preview-owner-image img,
@@ -174,7 +183,7 @@
       color: #f8fafc;
       background: rgba(255, 255, 255, 0.055);
       border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 7px;
+      border-radius: 8px;
     }
 
     .edit-sidebar-summary .v-gridlayout,
@@ -272,49 +281,65 @@
       line-height: 18px !important;
     }
 
-    .edit-tabs > .v-tabsheet-tabcontainer,
-    .edit-tabs .v-tabsheet-tabs,
-    .edit-tabs .v-tabsheet-tabitem,
-    .edit-tabs .v-tabsheet-tabitem-selected,
-    .edit-tabs .v-caption {
-      min-height: 40px !important;
-      height: 40px !important;
+.job-candidate-tabs > .v-tabsheet-tabcontainer {
+      width: 100% !important;
+      padding: 0 12px;
+      background: #fff !important;
+      border-bottom: 1px solid #dfe5ec;
+      overflow: hidden;
     }
 
-    .edit-tabs .v-tabsheet-tabcontainer {
-      background: $v-panel-background-color;
-      border-bottom: 1px solid rgba($v-font-color, 0.13);
+    .job-candidate-tabs .v-tabsheet-tabs,
+    .job-candidate-tabs .v-tabsheet-tabitem,
+    .job-candidate-tabs .v-tabsheet-tabitem-selected {
+      height: 48px;
+      max-width: 112px;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
     }
 
-    .edit-tabs .v-tabsheet-tabitem {
-      padding: 0 3px;
-      background: transparent;
-      border-right: 1px solid rgba($v-font-color, 0.08);
+    .job-candidate-tabs .v-tabsheet-tabitemcell {
+      max-width: 112px;
     }
 
-    .edit-tabs .v-tabsheet-tabitem .v-caption {
+    .job-candidate-tabs .v-caption {
       box-sizing: border-box;
-      max-width: 190px;
-      padding: 0 9px !important;
-      font-size: 12px !important;
-      font-weight: 600 !important;
-      line-height: 40px !important;
+      height: 48px;
+      max-width: 112px;
+      padding: 0 6px;
+      color: #26384c !important;
+      font-size: 13px !important;
+      font-weight: 600;
+      line-height: 48px;
       white-space: nowrap !important;
       overflow: hidden;
       text-overflow: ellipsis;
+      background: transparent !important;
+      border: 0 !important;
     }
 
-    .edit-tabs .v-tabsheet-tabitem-selected {
-      background: mix($v-selection-color, $v-panel-background-color, 7%);
-      box-shadow: inset 0 -3px 0 $v-selection-color;
+    .job-candidate-tabs .v-tabsheet-tabitem:hover .v-caption {
+      color: #1264b5 !important;
     }
 
-    .edit-tabs .v-tabsheet-content,
-    .edit-tabs .v-tabsheet-content > div {
-      box-sizing: border-box;
+    .job-candidate-tabs .v-tabsheet-tabitem-selected .v-caption {
+      color: #0b63b6 !important;
+      border-bottom: 3px solid #0b63b6 !important;
+    }
+
+    .job-candidate-tabs .v-tabsheet-content {
+      width: 100% !important;
+      height: calc(100% - 49px) !important;
+      padding: 16px 18px 20px;
+      background: #f5f7fa !important;
+      overflow: auto;
+    }
+
+    .job-candidate-tabs .v-tabsheet-tabsheetpanel {
+      width: 100% !important;
+      height: 100% !important;
       min-width: 0;
-      max-width: 100%;
-      background: transparent;
     }
 
     .open-position-preview-main-scroll,
@@ -341,7 +366,7 @@
       margin-bottom: 12px;
       background: $v-panel-background-color;
       border-color: rgba($v-font-color, 0.13);
-      border-radius: 9px;
+      border-radius: 8px;
       box-shadow: 0 3px 12px rgba(15, 23, 42, 0.055);
     }
 
@@ -350,7 +375,7 @@
       padding: 10px 15px;
       color: mix($v-font-color, $v-panel-background-color, 90%) !important;
       font-size: 15px !important;
-      font-weight: 700 !important;
+      font-weight: 600 !important;
       line-height: 22px !important;
       background: mix($v-app-background-color, $v-panel-background-color, 58%);
       border-bottom: 1px solid rgba($v-font-color, 0.12);
@@ -581,6 +606,10 @@
         max-width: 92px !important;
         max-height: 92px !important;
       }
+      .open-position-preview-logo-box {
+        overflow: visible;
+      }
+
 
       .edit-sidebar-title,
       .edit-sidebar-title.v-label,
@@ -597,11 +626,15 @@
         padding: 9px 16px;
       }
 
-      .edit-tabs .v-tabsheet-tabitem .v-caption {
-        max-width: 150px;
-        padding-left: 7px !important;
-        padding-right: 7px !important;
-        font-size: 11px !important;
+.job-candidate-tabs .v-caption {
+        padding-left: 10px;
+        padding-right: 10px;
+        font-size: 14px !important;
+        max-width: 96px;
+      }
+.job-candidate-tabs .v-tabsheet-tabitem,
+      .job-candidate-tabs .v-tabsheet-tabitemcell {
+        max-width: 96px;
       }
 
       .open-position-preview-main-scroll,
@@ -662,6 +695,78 @@
       .open-position-preview-footer > .v-slot > .v-button {
         min-width: 104px;
       }
+    }
+
+    /*
+     * Modern UX polish (только presentation, без изменения XML/Java):
+     * - единый визуальный ритм: радиусы карточек 8px, лёгкие тени уровня карточки;
+     * - плавные переходы hover/focus для интерактивных элементов;
+     * - focus-контуры 2px (доступность, $v-selection-color);
+     * - фирменная акцентная кромка identity-карточки;
+     * - тонкие theme-aware scrollbar рабочей области.
+     */
+    .open-position-preview-identity-card,
+    .edit-sidebar-visual {
+      border-top: 2px solid rgba(255, 177, 27, 0.55);
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .open-position-preview-summary-card,
+    .edit-sidebar-summary {
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.16);
+    }
+
+    .edit-sidebar .v-button,
+    .edit-footer-actions .v-button,
+    .open-position-preview-navigation .v-button,
+    .label-nav-item,
+    .v-button-label-nav-item,
+    .edit-accordion-section .v-panel-caption,
+    .edit-form-control .v-textfield,
+    .edit-form-control .v-textarea,
+    .edit-form-control .v-filterselect,
+    .edit-form-control .v-datefield {
+      transition: background-color 0.15s ease, color 0.15s ease,
+                  border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .edit-form-control .v-textfield:focus,
+    .edit-form-control .v-textarea:focus,
+    .edit-form-control .v-filterselect:focus,
+    .edit-form-control .v-datefield:focus {
+      outline: 2px solid rgba($v-selection-color, 0.38) !important;
+      outline-offset: -1px;
+      box-shadow: none !important;
+    }
+
+    .edit-footer-actions .v-button:focus,
+    .edit-sidebar .v-button:focus,
+    .open-position-preview-navigation .v-button:focus {
+      outline: 2px solid rgba($v-selection-color, 0.45);
+      outline-offset: 1px;
+    }
+
+    .edit-accordion-section .v-panel-caption {
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .edit-accordion-section .v-panel-caption:hover {
+      background: mix($v-app-background-color, $v-panel-background-color, 50%);
+    }
+
+    .edit-workspace-scroll,
+    .open-position-preview-main-scroll,
+    .edit-accordion-section .v-panel-content,
+    .job-candidate-tabs .v-tabsheet-content {
+      scrollbar-width: thin;
+      scrollbar-color: rgba($v-font-color, 0.25) transparent;
+    }
+
+    .edit-toolbar,
+    .open-position-preview-toolbar {
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05), inset 0 -2px 0 rgba($v-selection-color, 0.14);
     }
   }
 }

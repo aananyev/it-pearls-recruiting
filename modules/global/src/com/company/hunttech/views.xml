@@ -313,7 +313,10 @@
         <property name="fileDescription"/>
         <property name="fileLink"/>
         <property name="fileComment"/>
-        <property name="fileDescriptor" view="_minimal"/>
+        <property name="fileDescriptor">
+            <property name="name"/>
+            <property name="size"/>
+        </property>
         <property name="fileOwner" view="extUser-picker-view"/>
         <property name="fileType" view="_minimal"/>
         <property name="openPosition" view="openPosition-picker-view"/>
