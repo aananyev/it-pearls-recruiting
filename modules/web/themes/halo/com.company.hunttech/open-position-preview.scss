@@ -1,7 +1,8 @@
 /*
  * OpenPositionEditPreview — локальная фирменная адаптация общего edit-* UI API.
  * Геометрия и типовые роли задаются edit-screen-shared-styles; здесь находятся
- * только sidebar HRM HuntTech и screen-specific containment без глобальных Vaadin-селекторов.
+ * только sidebar HRM HuntTech, responsive-компоновка и containment внутри
+ * локального корневого класса без глобальных Vaadin-селекторов.
  */
 @mixin open-position-preview-theme {
   .open-position-preview {
@@ -9,7 +10,7 @@
     width: 100%;
     height: 100%;
     color: $v-font-color;
-    background: mix($v-app-background-color, $v-panel-background-color, 82%);
+    background: mix($v-app-background-color, $v-panel-background-color, 86%);
     overflow: hidden;
 
     .open-position-preview-main,
@@ -18,18 +19,25 @@
     .edit-workspace,
     .edit-tabs,
     .edit-accordion-section,
-    .edit-footer-actions {
+    .edit-footer-actions,
+    .open-position-preview-field-row {
       box-sizing: border-box;
       min-width: 0;
     }
 
+    /*
+     * Sidebar. Заголовок вакансии остаётся полным в tooltip, но визуально
+     * ограничен, чтобы навигация и сводка не уходили за нижнюю границу экрана.
+     */
     .edit-sidebar {
-      padding: 18px 16px 14px;
+      padding: 14px 14px 12px;
       color: #f8fafc;
       background-color: #172638 !important;
       background-image: linear-gradient(180deg, #172638 0%, #132130 56%, #0f1b28 100%) !important;
       border-right: 1px solid rgba(15, 23, 42, 0.72);
       box-shadow: 5px 0 18px rgba(15, 23, 42, 0.20);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
     }
 
     .edit-sidebar > .v-slot {
@@ -40,48 +48,129 @@
     }
 
     .edit-sidebar > .v-spacing {
-      height: 12px !important;
+      height: 9px !important;
     }
 
+    .open-position-preview-identity-card,
     .edit-sidebar-visual {
-      padding: 12px 10px 10px;
+      padding: 10px 10px 9px;
       text-align: center;
       background: rgba(255, 255, 255, 0.055);
       border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 8px;
+      border-radius: 9px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
     }
 
-    .edit-sidebar-visual img {
-      max-width: 100%;
-      border-radius: 50%;
+    .open-position-preview-logo,
+    .open-position-preview-logo img,
+    .open-position-preview-logo .v-image-element {
+      width: 112px !important;
+      height: 112px !important;
+      min-width: 112px !important;
+      min-height: 112px !important;
+      max-width: 112px !important;
+      max-height: 112px !important;
+      border-radius: 50% !important;
+      object-fit: contain !important;
       background: #ffffff;
+    }
+
+    .open-position-preview-logo {
+      display: block;
+      margin: 0 auto;
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.92);
       box-shadow: 0 7px 20px rgba(0, 0, 0, 0.24);
     }
 
+    .open-position-preview-owner-image,
+    .open-position-preview-owner-image img,
+    .open-position-preview-owner-image .v-image-element {
+      width: 48px !important;
+      height: 48px !important;
+      min-width: 48px !important;
+      min-height: 48px !important;
+      max-width: 48px !important;
+      max-height: 48px !important;
+      border-radius: 50% !important;
+      object-fit: cover !important;
+    }
+
     .edit-sidebar-identity {
-      padding: 8px 2px 2px;
+      padding: 7px 2px 1px;
       text-align: center;
     }
 
     .edit-sidebar-title,
-    .edit-sidebar-title.v-label {
+    .edit-sidebar-title.v-label,
+    .open-position-preview-title-clamp {
+      display: -webkit-box !important;
+      max-height: 150px !important;
+      overflow: hidden !important;
       color: #ffb11b !important;
-      font-size: 18px !important;
+      font-size: 15px !important;
       font-weight: 700 !important;
-      line-height: 24px !important;
-      text-align: center !important;
+      line-height: 20px !important;
+      text-align: left !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 7;
     }
 
     .edit-sidebar-subtitle,
-    .edit-sidebar-subtitle.v-label {
+    .edit-sidebar-subtitle.v-label,
+    .open-position-preview-status-line {
       color: rgba(248, 250, 252, 0.72) !important;
-      font-size: 12px !important;
-      line-height: 18px !important;
-      text-align: center !important;
+      font-size: 11px !important;
+      line-height: 17px !important;
+      text-align: left !important;
+      white-space: normal !important;
     }
 
+    .open-position-preview-navigation,
+    .label-navigation {
+      padding: 7px 0 3px;
+      border-top-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .label-nav-title,
+    .v-label-label-nav-title {
+      padding: 4px 9px !important;
+      color: rgba(248, 250, 252, 0.58) !important;
+      font-size: 9px !important;
+      line-height: 13px !important;
+      letter-spacing: 0.65px;
+    }
+
+    .label-nav-item,
+    .v-button-label-nav-item {
+      min-height: 23px !important;
+      padding: 2px 9px !important;
+      color: rgba(248, 250, 252, 0.82) !important;
+      font-size: 12px !important;
+      line-height: 18px !important;
+      border-radius: 0 5px 5px 0 !important;
+    }
+
+    .label-nav-item:hover,
+    .v-button-label-nav-item:hover,
+    .v-button-label-nav-item:focus {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .label-nav-item-active,
+    .v-button-label-nav-item-active {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.12) !important;
+      border-left-color: #ffb11b !important;
+    }
+
+    .open-position-preview-summary-card,
     .edit-sidebar-summary {
-      padding: 10px 12px;
+      padding: 9px 10px;
       color: #f8fafc;
       background: rgba(255, 255, 255, 0.055);
       border: 1px solid rgba(255, 255, 255, 0.14);
@@ -99,60 +188,33 @@
 
     .edit-sidebar-summary .v-gridlayout-slot {
       min-width: 0 !important;
-      padding-top: 3px;
-      padding-bottom: 3px;
+      padding-top: 2px;
+      padding-bottom: 2px;
     }
 
     .edit-sidebar-summary .v-label,
     .edit-sidebar-hint,
     .edit-sidebar-hint.v-label {
       color: rgba(248, 250, 252, 0.82) !important;
-      font-size: 12px !important;
-      line-height: 17px !important;
+      font-size: 11px !important;
+      line-height: 16px !important;
       white-space: normal !important;
       overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .edit-sidebar-warning,
     .edit-sidebar-warning.v-label {
       box-sizing: border-box;
       width: 100% !important;
-      padding: 7px 9px;
+      padding: 6px 8px;
       color: #ffd27a !important;
-      font-size: 12px !important;
-      line-height: 17px !important;
+      font-size: 11px !important;
+      line-height: 16px !important;
       white-space: normal !important;
       background: rgba(255, 177, 27, 0.10);
       border: 1px solid rgba(255, 177, 27, 0.28);
       border-radius: 6px;
-    }
-
-    .label-navigation {
-      border-top-color: rgba(255, 255, 255, 0.14);
-    }
-
-    .label-nav-title,
-    .v-label-label-nav-title {
-      color: rgba(248, 250, 252, 0.62) !important;
-    }
-
-    .label-nav-item,
-    .v-button-label-nav-item {
-      color: rgba(248, 250, 252, 0.82) !important;
-    }
-
-    .label-nav-item:hover,
-    .v-button-label-nav-item:hover,
-    .v-button-label-nav-item:focus {
-      color: #ffffff !important;
-      background: rgba(255, 255, 255, 0.08) !important;
-    }
-
-    .label-nav-item-active,
-    .v-button-label-nav-item-active {
-      color: #ffb11b !important;
-      background: rgba(255, 177, 27, 0.12) !important;
-      border-left-color: #ffb11b !important;
     }
 
     .edit-sidebar .edit-form-control .v-textfield,
@@ -176,18 +238,75 @@
       border-color: rgba(255, 177, 27, 0.42) !important;
     }
 
-    .edit-workspace {
-      background: mix($v-app-background-color, $v-panel-background-color, 82%);
+    /*
+     * Workspace: единая вертикальная иерархия toolbar → компактные tabs →
+     * scroll-content → закреплённый footer.
+     */
+    .edit-workspace,
+    .open-position-preview-workspace-polished {
+      background: mix($v-app-background-color, $v-panel-background-color, 86%);
+      overflow: hidden;
     }
 
-    .edit-toolbar {
+    .edit-toolbar,
+    .open-position-preview-toolbar {
       position: relative;
       z-index: 2;
+      min-height: 64px;
+      padding: 11px 20px;
+      background: $v-panel-background-color;
+      border-bottom: 1px solid rgba($v-font-color, 0.13);
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+    }
+
+    .edit-toolbar-title,
+    .edit-toolbar-title.v-label {
+      font-size: 20px !important;
+      line-height: 27px !important;
+    }
+
+    .edit-toolbar-description,
+    .edit-toolbar-description.v-label {
+      color: mix($v-font-color, $v-panel-background-color, 58%) !important;
+      font-size: 12px !important;
+      line-height: 18px !important;
+    }
+
+    .edit-tabs > .v-tabsheet-tabcontainer,
+    .edit-tabs .v-tabsheet-tabs,
+    .edit-tabs .v-tabsheet-tabitem,
+    .edit-tabs .v-tabsheet-tabitem-selected,
+    .edit-tabs .v-caption {
+      min-height: 40px !important;
+      height: 40px !important;
     }
 
     .edit-tabs .v-tabsheet-tabcontainer {
       background: $v-panel-background-color;
-      border-bottom: 1px solid rgba($v-font-color, 0.14);
+      border-bottom: 1px solid rgba($v-font-color, 0.13);
+    }
+
+    .edit-tabs .v-tabsheet-tabitem {
+      padding: 0 3px;
+      background: transparent;
+      border-right: 1px solid rgba($v-font-color, 0.08);
+    }
+
+    .edit-tabs .v-tabsheet-tabitem .v-caption {
+      box-sizing: border-box;
+      max-width: 190px;
+      padding: 0 9px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      line-height: 40px !important;
+      white-space: nowrap !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .edit-tabs .v-tabsheet-tabitem-selected {
+      background: mix($v-selection-color, $v-panel-background-color, 7%);
+      box-shadow: inset 0 -3px 0 $v-selection-color;
     }
 
     .edit-tabs .v-tabsheet-content,
@@ -198,12 +317,189 @@
       background: transparent;
     }
 
+    .open-position-preview-main-scroll,
+    .edit-workspace-scroll {
+      box-sizing: border-box;
+      padding: 14px 16px 22px;
+      overflow-x: hidden !important;
+      background: transparent;
+    }
+
+    .edit-workspace-content {
+      box-sizing: border-box;
+      width: 100% !important;
+      max-width: 1480px !important;
+      height: auto !important;
+      margin: 0 auto;
+    }
+
+    /*
+     * Accordion-карточки. Основные разделы визуально отделяются, вложенная
+     * настройка команды остаётся вторичным блоком внутри первой карточки.
+     */
     .edit-accordion-section {
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      background: $v-panel-background-color;
+      border-color: rgba($v-font-color, 0.13);
+      border-radius: 9px;
+      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.055);
+    }
+
+    .edit-accordion-section .v-panel-caption {
+      min-height: 44px;
+      padding: 10px 15px;
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 22px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 58%);
+      border-bottom: 1px solid rgba($v-font-color, 0.12);
     }
 
     .edit-accordion-section .v-panel-content {
-      padding: 16px 18px 18px;
+      box-sizing: border-box;
+      padding: 17px 18px 19px;
+      background: $v-panel-background-color;
+    }
+
+    .open-position-preview-primary-section {
+      border-left: 3px solid rgba($v-selection-color, 0.52);
+    }
+
+    .open-position-preview-subsection {
+      margin: 6px 0 2px;
+      background: mix($v-app-background-color, $v-panel-background-color, 45%);
+      border-color: rgba($v-font-color, 0.10);
+      border-radius: 7px;
+      box-shadow: none;
+    }
+
+    .open-position-preview-subsection .v-panel-caption {
+      min-height: 38px;
+      padding: 8px 12px;
+      font-size: 13px !important;
+      line-height: 20px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 52%);
+    }
+
+    .open-position-preview-subsection .v-panel-content {
+      padding: 13px 14px 15px;
+      background: mix($v-app-background-color, $v-panel-background-color, 32%);
+    }
+
+    /*
+     * Existing HBox rows are converted into a local responsive grid. Inline
+     * widths from the legacy XML are contained within the row and no longer
+     * create the wide empty gaps or clipped controls visible in the baseline.
+     */
+    .open-position-preview-field-row {
+      display: flex !important;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 14px;
+      width: 100% !important;
+      height: auto !important;
+      margin: 0 0 12px;
+    }
+
+    .open-position-preview-field-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .open-position-preview-field-row > .v-slot {
+      box-sizing: border-box;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      flex: 1 1 240px;
+    }
+
+    .open-position-preview-field-row > .v-slot > * {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .open-position-preview-row-title > .v-slot:nth-child(1) {
+      flex: 0 1 150px;
+    }
+
+    .open-position-preview-row-title > .v-slot:nth-child(2) {
+      flex: 3 1 440px;
+    }
+
+    .open-position-preview-row-title > .v-slot:nth-child(3) {
+      flex: 0 1 190px;
+    }
+
+    .open-position-preview-row-title > .v-slot:nth-child(4) {
+      flex: 0 0 auto;
+      min-width: 150px !important;
+    }
+
+    .open-position-preview-row-three > .v-slot {
+      flex: 1 1 260px;
+    }
+
+    .open-position-preview-row-position > .v-slot:nth-child(1) {
+      flex: 2 1 420px;
+    }
+
+    .open-position-preview-row-position > .v-slot:nth-child(2),
+    .open-position-preview-row-position > .v-slot:nth-child(3) {
+      flex: 1 1 210px;
+    }
+
+    .open-position-preview-row-half > .v-slot {
+      flex: 1 1 420px;
+    }
+
+    .open-position-preview-row-salary > .v-slot {
+      flex: 1 1 190px;
+    }
+
+    .open-position-preview-row-wide > .v-slot:first-child {
+      flex: 1 1 640px;
+    }
+
+    .open-position-preview-row-wide > .v-slot:last-child {
+      flex: 0 1 260px;
+    }
+
+    .open-position-preview-field-row .v-caption {
+      box-sizing: border-box;
+      max-width: 100%;
+      margin-bottom: 5px;
+      color: mix($v-font-color, $v-panel-background-color, 74%);
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      line-height: 17px !important;
+      white-space: normal !important;
+    }
+
+    .open-position-preview-field-row .v-checkbox {
+      box-sizing: border-box;
+      min-height: 38px;
+      padding-top: 9px;
+      white-space: normal;
+    }
+
+    .open-position-preview-field-row .v-checkbox label {
+      white-space: normal;
+    }
+
+    .edit-form-control,
+    .edit-form-control .v-filterselect,
+    .edit-form-control .c-pickerfield-layout,
+    .edit-form-control .v-textfield,
+    .edit-form-control .v-textarea,
+    .edit-form-control .v-datefield {
+      max-width: 100% !important;
     }
 
     .edit-accordion-section .v-formlayout,
@@ -219,20 +515,152 @@
       max-width: 100%;
     }
 
-    .edit-footer-actions {
-      position: relative;
-      z-index: 2;
-      box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.05);
+    /*
+     * Footer. Vaadin HorizontalLayout получает flex only inside the preview
+     * namespace; actions группируются справа и не растягиваются по всей ширине.
+     */
+    .edit-footer-actions,
+    .open-position-preview-footer {
+      display: flex !important;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      min-height: 62px;
+      padding: 10px 18px;
+      background: $v-panel-background-color;
+      border-top: 1px solid rgba($v-font-color, 0.13);
+      box-shadow: 0 -3px 10px rgba(15, 23, 42, 0.055);
+    }
+
+    .open-position-preview-footer > .v-slot {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      width: auto !important;
+      height: auto !important;
+      flex: 0 0 auto;
+    }
+
+    .open-position-preview-footer > .v-slot > .v-button {
+      width: auto !important;
+      min-width: 118px;
+      height: 38px !important;
+      padding: 0 16px !important;
+    }
+
+    .open-position-preview-primary-action {
+      color: #ffffff !important;
+      background: $v-selection-color !important;
+      border-color: $v-selection-color !important;
+      box-shadow: none !important;
+    }
+
+    .open-position-preview-primary-action:hover,
+    .open-position-preview-primary-action:focus {
+      background: darken($v-selection-color, 5%) !important;
+      border-color: darken($v-selection-color, 5%) !important;
+    }
+
+    .open-position-preview-secondary-action {
+      background: $v-panel-background-color !important;
+      box-shadow: none !important;
     }
 
     @media (max-width: 1366px) {
       .edit-sidebar {
-        padding: 14px 12px 12px;
+        padding: 11px 10px 10px;
       }
 
-      .edit-sidebar-visual {
-        padding-left: 6px;
-        padding-right: 6px;
+      .open-position-preview-logo,
+      .open-position-preview-logo img,
+      .open-position-preview-logo .v-image-element {
+        width: 92px !important;
+        height: 92px !important;
+        min-width: 92px !important;
+        min-height: 92px !important;
+        max-width: 92px !important;
+        max-height: 92px !important;
+      }
+
+      .edit-sidebar-title,
+      .edit-sidebar-title.v-label,
+      .open-position-preview-title-clamp {
+        max-height: 120px !important;
+        font-size: 14px !important;
+        line-height: 19px !important;
+        -webkit-line-clamp: 6;
+      }
+
+      .edit-toolbar,
+      .open-position-preview-toolbar {
+        min-height: 58px;
+        padding: 9px 16px;
+      }
+
+      .edit-tabs .v-tabsheet-tabitem .v-caption {
+        max-width: 150px;
+        padding-left: 7px !important;
+        padding-right: 7px !important;
+        font-size: 11px !important;
+      }
+
+      .open-position-preview-main-scroll,
+      .edit-workspace-scroll {
+        padding: 11px 12px 18px;
+      }
+
+      .edit-accordion-section .v-panel-content {
+        padding: 14px 14px 16px;
+      }
+
+      .open-position-preview-field-row {
+        gap: 11px;
+      }
+
+      .open-position-preview-row-title > .v-slot:nth-child(1) {
+        flex-basis: 130px;
+      }
+
+      .open-position-preview-row-title > .v-slot:nth-child(2) {
+        flex-basis: 360px;
+      }
+
+      .open-position-preview-row-title > .v-slot:nth-child(3) {
+        flex-basis: 160px;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .open-position-preview-field-row > .v-slot,
+      .open-position-preview-row-position > .v-slot,
+      .open-position-preview-row-half > .v-slot,
+      .open-position-preview-row-salary > .v-slot {
+        flex: 1 1 calc(50% - 8px);
+      }
+
+      .open-position-preview-row-title > .v-slot:nth-child(2),
+      .open-position-preview-row-wide > .v-slot:first-child {
+        flex: 1 1 100%;
+      }
+
+      .open-position-preview-row-title > .v-slot:nth-child(4) {
+        min-width: 118px !important;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .open-position-preview-field-row > .v-slot,
+      .open-position-preview-row-title > .v-slot,
+      .open-position-preview-row-position > .v-slot,
+      .open-position-preview-row-half > .v-slot,
+      .open-position-preview-row-salary > .v-slot,
+      .open-position-preview-row-wide > .v-slot {
+        flex: 1 1 100% !important;
+        min-width: 0 !important;
+      }
+
+      .open-position-preview-footer > .v-slot > .v-button {
+        min-width: 104px;
       }
     }
   }

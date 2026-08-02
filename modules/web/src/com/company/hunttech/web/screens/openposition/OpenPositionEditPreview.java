@@ -42,7 +42,8 @@ import javax.inject.Inject;
  * lifecycle до вызова базового {@code onBeforeShow} догружает {@code positionType}
  * для URL-маршрута, где CUBA восстанавливает detached-экземпляр сущности.
  * Остальная собственная логика ограничена presentation-слоем: применением общего
- * UI-контракта Edit-экранов, label-навигацией и её active-state.</p>
+ * UI-контракта Edit-экранов, компоновкой существующих компонентов, label-навигацией
+ * и её active-state.</p>
  */
 @Route("open-position-edit-preview")
 @UiController("hunttech_OpenPosition.editPreview")
@@ -57,6 +58,8 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     private static final String FORM_CONTROL_STYLE = "edit-form-control";
     private static final String WORKSPACE_SCROLL_STYLE = "edit-workspace-scroll";
     private static final String WORKSPACE_CONTENT_STYLE = "edit-workspace-content";
+    private static final String FIELD_ROW_STYLE = "open-position-preview-field-row";
+    private static final String PRIMARY_SECTION_STYLE = "open-position-preview-primary-section";
 
     @Inject
     private DataManager dataManager;
@@ -65,9 +68,29 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     @Inject
     private VBoxLayout openPositionPreviewSidebar;
     @Inject
+    private VBoxLayout openPositionPreviewIdentity;
+    @Inject
+    private VBoxLayout openPositionPreviewNavigation;
+    @Inject
+    private VBoxLayout openPositionPreviewSummary;
+    @Inject
+    private VBoxLayout openPositionPreviewSidebarSpacer;
+    @Inject
     private VBoxLayout openPositionPreviewWorkspace;
     @Inject
+    private HBoxLayout openPositionPreviewToolbar;
+    @Inject
+    private ScrollBoxLayout mainTabScrollBox;
+    @Inject
     private HBoxLayout editActions;
+    @Inject
+    private Component projectLogoImage;
+    @Inject
+    private Component projectOwnerImage;
+    @Inject
+    private Label<String> labelOpenPosition;
+    @Inject
+    private Label<String> signDraftLabel;
     @Inject
     private Label<String> closedVacancyInfoLabel;
     @Inject
@@ -78,6 +101,10 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     private Label<String> citiesLabel;
     @Inject
     private TextField<String> ownerTextField;
+    @Inject
+    private Button windowCommitAndCloseButton;
+    @Inject
+    private Button windowCloseButton;
     @Inject
     private Button previewNavMain;
     @Inject
@@ -105,14 +132,46 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     @Inject
     private RadioButtonGroup<Integer> commandOrPosition;
 
+    @Inject
+    private GroupBoxLayout identityStatusAccordion;
+    @Inject
+    private GroupBoxLayout commandFieldHBox;
+    @Inject
+    private GroupBoxLayout commandVacancyAccordion;
+    @Inject
+    private GroupBoxLayout projectLocationAccordion;
+    @Inject
+    private GroupBoxLayout positionCountAccordion;
+    @Inject
+    private GroupBoxLayout salaryAccordion;
+
+    @Inject
+    private HBoxLayout vacancyNameHBox;
+    @Inject
+    private HBoxLayout vacancyTitleSpacerHBox;
+    @Inject
+    private HBoxLayout hboxProject1;
+    @Inject
+    private HBoxLayout hboxVacansy;
+    @Inject
+    private HBoxLayout hboxProject;
+    @Inject
+    private HBoxLayout hboxCompany;
+    @Inject
+    private HBoxLayout hboxSalary;
+    @Inject
+    private HBoxLayout space2Box;
+
     /**
-     * После создания XML-компонентов назначает общие edit-* / label-* роли.
-     * Метод меняет только stylename, panel-представление и контрактную ширину
-     * sidebar; data binding, required, editable, loaders и actions не затрагиваются.
+     * После создания XML-компонентов назначает общие edit-* / label-* роли и
+     * локальные layout-классы. Метод меняет только stylename, размеры визуальных
+     * образов, panel-представление и пустой spacer; data binding, required,
+     * editable, loaders, listeners и actions не затрагиваются.
      */
     @Subscribe
     protected void onPreviewInit(InitEvent event) {
         applySharedEditScreenContract();
+        applyPreviewLayoutPolish();
     }
 
     /**
@@ -203,6 +262,92 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     }
 
     /**
+     * Улучшает визуальную иерархию без перестановки бизнес-полей: сокращает
+     * перегруженный профиль вакансии, закрепляет семантические роли основных
+     * секций и переводит существующие HBox-строки в локальную responsive-сетку.
+     */
+    private void applyPreviewLayoutPolish() {
+        addStyles(openPositionPreviewSidebar,
+                "open-position-preview-sidebar-compact");
+        addStyles(openPositionPreviewIdentity,
+                "open-position-preview-identity-card");
+        addStyles(openPositionPreviewNavigation,
+                "open-position-preview-navigation");
+        addStyles(openPositionPreviewSummary,
+                "open-position-preview-summary-card");
+        addStyles(openPositionPreviewSidebarSpacer,
+                "open-position-preview-sidebar-flex");
+        addStyles(openPositionPreviewWorkspace,
+                "open-position-preview-workspace-polished");
+        addStyles(openPositionPreviewToolbar,
+                "open-position-preview-toolbar");
+        addStyles(tabSheetOpenPosition,
+                "open-position-preview-tabs");
+        addStyles(mainTabScrollBox,
+                "open-position-preview-main-scroll");
+        addStyles(editActions,
+                "open-position-preview-footer");
+
+        projectLogoImage.setWidth("112px");
+        projectLogoImage.setHeight("112px");
+        projectLogoImage.addStyleName("open-position-preview-logo");
+        projectOwnerImage.setWidth("48px");
+        projectOwnerImage.setHeight("48px");
+        projectOwnerImage.addStyleName("open-position-preview-owner-image");
+
+        addStyles(labelOpenPosition,
+                "open-position-preview-title-clamp");
+        addStyles(signDraftLabel,
+                "open-position-preview-status-line");
+        addStyles(windowCommitAndCloseButton,
+                "open-position-preview-primary-action");
+        addStyles(windowCloseButton,
+                "open-position-preview-secondary-action");
+
+        addPrimarySection(identityStatusAccordion);
+        addStyles(commandFieldHBox,
+                "open-position-preview-subsection");
+        addPrimarySection(commandVacancyAccordion);
+        addPrimarySection(projectLocationAccordion);
+        addPrimarySection(positionCountAccordion);
+        addPrimarySection(salaryAccordion);
+
+        addFieldRow(vacancyNameHBox,
+                "open-position-preview-row-title");
+        addFieldRow(hboxProject1,
+                "open-position-preview-row-three");
+        addFieldRow(hboxVacansy,
+                "open-position-preview-row-position");
+        addFieldRow(hboxProject,
+                "open-position-preview-row-half");
+        addFieldRow(hboxCompany,
+                "open-position-preview-row-half");
+        addFieldRow(hboxSalary,
+                "open-position-preview-row-salary");
+        addFieldRow(space2Box,
+                "open-position-preview-row-wide");
+
+        // Пустой legacy-spacer создавал заметный разрыв между реквизитами и
+        // настройками команды; его скрытие не меняет данные или события формы.
+        vacancyTitleSpacerHBox.setVisible(false);
+    }
+
+    private void addPrimarySection(GroupBoxLayout section) {
+        section.addStyleName(PRIMARY_SECTION_STYLE);
+    }
+
+    private void addFieldRow(HBoxLayout row, String specificStyle) {
+        row.addStyleName(FIELD_ROW_STYLE);
+        row.addStyleName(specificStyle);
+    }
+
+    private void addStyles(Component component, String... styleNames) {
+        for (String styleName : styleNames) {
+            component.addStyleName(styleName);
+        }
+    }
+
+    /**
      * Проходит по фактическому дереву компонентов CUBA и нормализует только
      * визуальные роли. GroupBoxLayout становится общей accordion-секцией,
      * ScrollBoxLayout получает общий scroll-контракт, а типовые поля —
@@ -261,6 +406,18 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
         updatePaymentsNavigationVisibility(commandOrPosition.getValue());
         if (tabSheetOpenPosition.getSelectedTab() != null) {
             updateNavigationState(tabSheetOpenPosition.getSelectedTab().getName());
+        }
+        updateSidebarTitleTooltip();
+    }
+
+    /**
+     * Полное название вакансии остаётся доступным как tooltip, хотя CSS
+     * ограничивает его высоту в sidebar для сохранения навигации на экране.
+     */
+    private void updateSidebarTitleTooltip() {
+        String title = labelOpenPosition.getValue();
+        if (title != null && !title.trim().isEmpty()) {
+            labelOpenPosition.setDescription(title);
         }
     }
 
