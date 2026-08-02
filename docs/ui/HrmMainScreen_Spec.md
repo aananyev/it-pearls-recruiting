@@ -1,20 +1,16 @@
-# HrmMainScreen — тематический фон главного экрана
+# HrmMainScreen — главный dashboard и тематический фон
 
 > Экран HRM HuntTech: `hrmMainScreen`.  
 > Контроллер: `com.company.hunttech.web.screens.mainscreen.HrmMainScreen`.  
-> Сервис выбора ресурса: `MainScreenBackgroundService`.  
 > Базовый экран: `ExtMainScreen`.  
+> Dashboard: persistent dashboard с кодом `recruiting-dashboard`.  
 > XML: `hrm-main-screen.xml`, наследует `ext-main-screen.xml`.
 
 ## Назначение и бизнес-смысл (What & Why)
 
-Главный экран является основной рабочей областью HRM HuntTech. Фон персонализирует интерфейс, но не должен влиять на меню, dashboard, widgets, уведомления, резервы, favicon и загрузку бизнес-данных.
+Главный экран является основной рабочей областью HRM HuntTech. Он объединяет стандартное меню CUBA Platform, `WorkArea`, персональный dashboard рекрутера и тематический фон. Dashboard должен визуально соответствовать общему контракту Edit-форм: использовать ту же геометрию карточек, типографику заголовков, высоту управляющих элементов и состояния focus/hover, но не переносить тёмную sidebar Edit-форм в рабочую область главного экрана.
 
-Системные фоны поставляются как статические JPG-файлы активной темы. Пользовательский фон загружается через `SettingsWindow`, хранится в FileStorage и имеет приоритет над системным каталогом.
-
-Прямой URL вида `/hrm/dispatch/download?f=...` не используется для пользовательского фона: в этом сценарии браузер не получает файл, сохранённый через `FileLoader`. Пользовательский файл читается в память и передаётся в CSS как `data:` URI.
-
-Недоступность физического файла при сохранённом `FileDescriptor` не должна блокировать вход. Экран временно использует системный фон, не удаляя metadata; после восстановления FileStorage пользовательский фон снова становится доступен.
+Фон персонализирует интерфейс, но не должен влиять на меню, widgets, уведомления, резервы, favicon и загрузку бизнес-данных. Dashboard остаётся прозрачным относительно фонового слоя, а читаемость обеспечивают theme-aware поверхности отдельных виджетов.
 
 ## UI Context & Navigation
 
@@ -25,129 +21,74 @@
 - `@UiDescriptor("hrm-main-screen.xml")`;
 - legacy-регистрация `hrmMainScreen` в `web-screens.xml` отсутствует.
 
+`ext-main-screen.xml` сохраняет стандартную `WorkArea` и в `initialLayout` размещает `mainDashboard` с кодом `recruiting-dashboard`. Открытие browse/edit-экранов из меню или виджета выполняется стандартными механизмами CUBA и не меняется визуальной задачей.
+
 Путь настройки персонального изображения:
 
 ```text
 SettingsWindow → Интерфейс → Фон главного экрана
 ```
 
-После успешного сохранения `SettingsWindow` публикует `MainScreenBackgroundChangedEvent`. Текущая UI-сессия обновляет фон без повторного входа.
-
 ## Behavior Summary
 
 | Действие | Условие | Результат |
 |---|---|---|
 | Открытие главного экрана | Пользовательский descriptor отсутствует | Выбирается случайный системный `ThemeResource` активной темы |
-| Открытие главного экрана | Descriptor не имеет префикс `hrm-main-background-` | Legacy-файл не считается пользовательским фоном |
-| Разрешение пользовательского фона | Файл доступен в FileStorage | Поток читается через `readAllBytes()`, создаётся `StreamResource` |
-| Регистрация пользовательского фона | Получен `StreamResource` | Вызывается `registerBackgroundResource()`, поток читается и кодируется в `data:` URI |
-| Формирование URL | Фон системный | CSS получает путь вида `VAADIN/themes/{activeTheme}/backgrounds/{n}.jpg` |
-| Чтение FileStorage | `FileStorageException` или `IOException` | Исключение перехватывается, применяется системный фон |
-| Сохранение SettingsWindow | Commit успешен | Публикуется UI-scoped событие и фон обновляется |
-| Смена системного варианта | Предыдущий индекс известен | Немедленное повторение варианта исключается |
+| Открытие главного экрана | Существует пользовательский фон | Файл читается из FileStorage и применяется как `data:` URI |
+| Создание dashboard | Найден persistent dashboard `recruiting-dashboard` | Dashboard отображает сохранённую модель и существующие widgets |
+| Применение темы | Активна одна из семи тем | Подключается идентичный `recruiter-dashboard-shared-styles.scss` с theme-aware цветами |
+| Отображение widget | Корень использует `widget-border` или `widget-border-line` | Поверхность получает геометрию `edit-card` без изменения fragment lifecycle |
+| Уменьшение viewport | Ширина не более 1366 px | Сокращаются внешние и внутренние отступы, глобальный horizontal scroll не создаётся |
+| Обновление dashboard | Срабатывает существующий timer/update event | Данные обновляются прежним кодом; SCSS не запускает loaders или service calls |
+| Сохранение SettingsWindow | Commit успешен | Публикуется UI-scoped событие, фон обновляется без повторного входа |
 
-## Каталог системных фонов
+## 1. Точка вызова и контекст
 
-Для каждой поддерживаемой темы хранится ровно десять почти широкоформатных JPG-файлов:
+- Root screen: `hrmMainScreen`.
+- Наследование Java: `HrmMainScreen → ExtMainScreen → MainScreen`.
+- Наследование XML: `hrm-main-screen.xml → ext-main-screen.xml → main-screen.xml`.
+- Начальный dashboard: `mainDashboard`, code `recruiting-dashboard`, `timerDelay="60"`.
+- Поддерживаемые темы: `halo`, `havana`, `helium`, `hover`, `hunttech-modern`, `hunttech-modern-light`, `hunttech-modern-dark`.
 
-```text
-modules/web/themes/{theme}/backgrounds/
-├── 1.jpg
-├── 2.jpg
-├── ...
-└── 10.jpg
-```
+## 2. Связь с моделью данных
 
-Поддерживаемые темы:
+Визуальный контракт не добавляет data containers, loaders, JPQL, views, entity или сервисы. Фактический состав dashboard и параметры widgets продолжают определяться persistent model в таблицах Dashboard Add-on.
 
-```text
-halo
-havana
-helium
-hover
-hunttech-modern
-hunttech-modern-light
-hunttech-modern-dark
-```
+Не изменяются:
 
-Сервис возвращает системный ресурс без участия FileStorage:
+- код `recruiting-dashboard`;
+- dashboard parameters;
+- frame IDs существующих widgets;
+- `timerDelay`;
+- права доступа;
+- запросы и lifecycle `ScreenFragment`;
+- бизнес-действия внутри widgets.
 
-```java
-new ThemeResource("backgrounds/" + (variant + 1) + ".jpg")
-```
-
-URL разрешается относительно активной темы:
+## 3. Иерархия и взаимосвязь форм
 
 ```text
-VAADIN/themes/{activeTheme}/backgrounds/{1..10}.jpg
+HrmMainScreen
+└── ExtMainScreen
+    └── WorkArea
+        └── initialLayout
+            └── mainVBox
+                └── mainDashboard (recruiting-dashboard)
+                    └── существующие Dashboard Add-on widgets
 ```
 
-Исправление пользовательского фона не меняет `ThemeResource`, имена файлов, каталоги тем, алгоритм выбора и session-антиповтор.
+Переход из widget в `OpenPositionEdit`, `JobCandidateEdit`, browse взаимодействий или другой существующий экран остаётся ответственностью конкретного fragment. Главный экран не заменяет рабочие формы и не меняет их CUBA-контракты.
 
-## Пользовательский фон
+## 4. Модель поведения и интерактивность
 
-Цепочка хранения:
+### 4.1. Фон
+
+Системные фоны находятся в каталогах:
 
 ```text
-Upload
-→ MainScreenBackgroundImageProcessor
-→ FileStorage
-→ UserSettings.fileImageFace
+modules/web/themes/{theme}/backgrounds/{1..10}.jpg
 ```
 
-Контракт пользовательского файла:
-
-- имя начинается с `hrm-main-background-`;
-- файл имеет приоритет над системным ресурсом;
-- загрузка ограничена `15 МБ` через `fileSizeLimit="15728640"`;
-- PNG получает MIME `image/png`;
-- JPG/JPEG получает MIME `image/jpeg`;
-- WebP получает MIME `image/webp`;
-- неизвестное расширение получает `application/octet-stream`;
-- недоступный descriptor не удаляется автоматически;
-- временные файлы при Cancel очищаются существующей логикой SettingsWindow.
-
-`MainScreenBackgroundService.createCustomResource()` выполняет:
-
-```text
-FileLoader.openStream(descriptor)
-→ InputStream.readAllBytes()
-→ byte[]
-→ new StreamResource(() -> new ByteArrayInputStream(bytes), fileName)
-→ setMIMEType(...)
-→ setCacheTime(-1)
-```
-
-`ExternalResource` и `FileDescriptorImageHelper.buildDispatchDownloadUrl()` для пользовательского фона не применяются.
-
-## Регистрация StreamResource
-
-`HrmMainScreen.buildBackgroundUrl()` поддерживает два типа ресурса:
-
-1. `ThemeResource` — формируется статический путь активной темы;
-2. `StreamResource` — вызывается `registerBackgroundResource()`.
-
-`registerBackgroundResource()`:
-
-1. получает `StreamSource` из пользовательского `StreamResource`;
-2. читает поток в `byte[]`;
-3. проверяет, что данные не пустые;
-4. выбирает MIME-тип ресурса, с fallback на `image/jpeg`;
-5. возвращает `data:{mime};base64,{bytes}` для прямого применения в CSS.
-
-Vaadin connector URL для пользовательского фона больше не используется. Поэтому исправление полноэкранного покрытия не должно возвращать hidden `Image`, `ResourceReference`, `/connector/...` или `/dispatch/download?f=...`.
-
-## Применение CSS
-
-Фон назначается только контейнеру `mainVBox`. `mainDashboard` получает локальный прозрачный стиль.
-
-Геометрия fullscreen-контейнера задаётся в `ext-main-screen.xml`:
-
-- `horizontalWrap` → `width="100%"`, `height="100%"`;
-- `mainVBox` → `width="100%"`, `height="100%"`;
-- `mainDashboard` → `width="100%"`, `height="100%"`.
-
-Используются свойства:
+Пользовательский фон загружается через `SettingsWindow`, хранится в FileStorage и имеет приоритет. `HrmMainScreen` применяет:
 
 ```css
 background-position: center center;
@@ -155,15 +96,91 @@ background-repeat: no-repeat;
 background-size: 100% 100%;
 ```
 
-Контракт `100% 100%` означает:
+`horizontalWrap`, `mainVBox` и `mainDashboard` занимают 100% доступной ширины и высоты. `mainDashboard` получает runtime-класс `hrm-dashboard-transparent`, поэтому фоновое изображение остаётся видимым между карточками.
 
-- рабочая область заполняется полностью;
-- пустые полосы отсутствуют;
-- изображение не обрезается;
-- при несовпадении пропорций допускается геометрическое растягивание;
-- логика одинакова для системного и пользовательского ресурса.
+### 4.2. Обновление
 
-`background-size` растягивает изображение только внутри DOM-элемента. Поэтому отсутствие пустых участков на широком или высоком мониторе обеспечивается не изменением бизнес-логики, а тем, что `mainVBox` и его ближайшая рабочая обёртка занимают всю доступную область главного экрана.
+- `AfterShowEvent` вызывает первичное применение фона;
+- `MainScreenBackgroundChangedEvent` обновляет фон после успешного сохранения SettingsWindow;
+- `timerDelay="60"` сохраняет существующий контракт обновления dashboard;
+- SCSS не меняет частоту обновления и не выполняет серверных операций.
+
+## 5. Логика управляющих элементов
+
+В этой задаче не добавляются новые кнопки, фильтры или actions. Существующие управляющие компоненты внутри widgets получают только визуальные параметры:
+
+- высота текстовых и date/filter controls — 38 px;
+- радиус — 5 px;
+- theme-aware border;
+- заметный keyboard focus с акцентом HRM HuntTech `#ffb11b`;
+- кнопки link/borderless не преобразуются в крупные toolbar-кнопки.
+
+## 6. Визуальная компоновка элементов
+
+## Визуальный контракт персонального dashboard
+
+### 6.1. Корневые стили
+
+`mainDashboard` получает:
+
+```xml
+stylename="edit-workspace recruiter-dashboard-root"
+```
+
+- `edit-workspace` связывает главный экран с общим UI API Edit-форм;
+- `recruiter-dashboard-root` ограничивает все dashboard-specific селекторы;
+- глобальные переопределения `.v-label`, `.v-button`, `.v-table`, `.v-panel` запрещены;
+- тёмная `edit-sidebar` на главном экране не создаётся.
+
+### 6.2. Соответствие общему Edit-контракту
+
+| Dashboard role | Источник общего контракта | Результат |
+|---|---|---|
+| `widget-border`, `widget-border-line` | `edit-card` | panel background, border 1 px, radius 8 px, padding 16×20 px, лёгкая тень |
+| `widget-table-header` | `edit-card-title` | 15 px, 700, line-height 22 px, перенос длинного текста |
+| вложенные `Panel` | `edit-accordion-section` | radius 8 px, caption 17 px, min-height 50 px |
+| filter/date/text controls | `edit-form-control` | высота 38 px, radius 5 px, локальный focus ring |
+| таблицы и DataGrid | общая поверхность workspace | theme-aware header, спокойные zebra rows, явный hover/selected |
+| responsive root | правила Edit-форм до 1366 px | уменьшенные отступы без горизонтальной прокрутки страницы |
+
+### 6.3. Theme-aware реализация
+
+Файл `recruiter-dashboard-shared-styles.scss` хранится синхронной копией во всех семи темах. Геометрия, размеры, порядок правил и responsive-breakpoints идентичны. Различия цвета и контраста формируются только через переменные активной темы:
+
+- `$v-font-color`;
+- `$v-panel-background-color`;
+- `$v-app-background-color`;
+- `$v-selection-color`.
+
+Фирменный акцент `#ffb11b` используется для focus, hover/selected emphasis и критически важных визуальных маркеров, но не заменяет текстовое описание статуса.
+
+### 6.4. Responsive
+
+При ширине до 1366 px:
+
+- padding dashboard уменьшается с 16 до 10 px;
+- padding карточки уменьшается до 12×14 px;
+- заголовок виджета уменьшается до 14 px;
+- текст строк таблицы может уменьшаться до 12 px;
+- высота controls остаётся 38 px;
+- horizontal scroll всего главного экрана запрещён.
+
+При ширине до 1280 px padding root уменьшается до 8 px, карточки — до 10×12 px. Перекомпоновка самих widgets остаётся ответственностью responsive layout persistent dashboard и не имитируется CSS-перестановкой DOM.
+
+### 6.5. Состояния
+
+- hover не изменяет размеры и не вызывает layout shift;
+- selected использует фон с прозрачным `#ffb11b`, а не только цвет текста;
+- focus отображает outline/ring и доступен с клавиатуры;
+- disabled/read-only сохраняют нативную семантику CUBA;
+- пустые/error/loading states конкретного widget не подменяются общим SCSS.
+
+### 6.6. Осознанные отклонения от Edit-форм
+
+1. Sidebar отсутствует, поскольку dashboard является обзорной рабочей поверхностью, а не формой редактирования одной сущности.
+2. Корень dashboard остаётся прозрачным для сохранения тематического фона.
+3. Карточные поверхности применяются к widgets, а не к единой правой workspace-карточке.
+4. Persistent model и responsive layout Dashboard Add-on не изменяются CSS-задачей.
 
 ## Runtime-маркеры
 
@@ -171,56 +188,55 @@ background-size: 100% 100%;
 |---|---|---|
 | `mainVBox` | `data-hrm-main-background="applied"` | подтверждает выполнение background lifecycle |
 | `mainVBox` | `data-hrm-main-controller="HrmMainScreen"` | подтверждает фактический root controller |
+| `mainDashboard` | `recruiter-dashboard-root` | ограничивает visual contract главного dashboard |
 
 ## Автоматические проверки
 
-`MainScreenBackgroundContractTest.customBackgroundUsesDirectDispatchUrlAndFallsBackOnStorageFailure()` сохраняет legacy-имя метода, но проверяет актуальный контракт:
+`MainScreenBackgroundContractTest` продолжает проверять:
 
-- `readAllBytes()` и `ByteArrayInputStream`;
-- создание `StreamResource`;
-- назначение MIME-типа;
-- перехват ошибок FileStorage и системный fallback;
-- вызов `registerBackgroundResource()`;
-- запрет `ResourceReference`, `backgroundResourceHolder`, `VaadinServlet` и `app://APP`;
-- применение `data:` URI вместо connector URL;
-- отсутствие `ExternalResource` в `HrmMainScreen`;
-- неизменность системного `ThemeResource` и каталога тем.
+- конфигурацию root screen;
+- 7 × 10 тематических JPG;
+- `StreamResource` и `data:` URI пользовательского фона;
+- fullscreen-геометрию;
+- UI-scoped refresh;
+- отсутствие legacy connector/background layer.
 
-`MainScreenBackgroundContractTest.mainContainerStretchesTheOnlyBackgroundImageToFullArea()` дополнительно фиксирует `width="100%"` и `height="100%"` для `horizontalWrap`, `mainVBox` и `mainDashboard`, чтобы фон покрывал рабочую область на экранах с разным соотношением сторон.
+`MainScreenDashboardSharedStyleContractTest` проверяет:
 
-`HrmMainScreenIntegrationTest` не изменяется этой задачей и продолжает проверять root screen, `mainVBox`, dashboard, DOM-маркеры и UI-scoped обновление.
+- сохранение `recruiting-dashboard` и `timerDelay="60"`;
+- наличие `edit-workspace recruiter-dashboard-root`;
+- идентичность SCSS partial во всех семи темах;
+- import/include mixin в каждом `styles.scss`;
+- геометрию 8 px / 38 px / лёгкую тень;
+- responsive breakpoint 1366 px;
+- отсутствие неограниченных глобальных Vaadin-селекторов;
+- синхронизацию настоящей UI-спецификации.
 
 ## Проверка Hermes
 
 Hermes проверяет точный HEAD PR:
 
-- совпадение branch HEAD и PR HEAD;
-- отсутствие конфликтов;
+- branch HEAD = PR HEAD;
+- `base=master`, conflicts `NONE`;
 - `git diff --check`;
-- compile web/core tests;
+- профильный `MainScreenDashboardSharedStyleContractTest`;
 - `MainScreenBackgroundContractTest`;
-- `HrmMainScreenIntegrationTest`;
 - `ScreenViewIntegrityTest 8/8`;
-- сборку SCSS семи тем;
-- `clean assemble` с `BUILD SUCCESSFUL`;
+- `:app-web:buildScssThemes` для всех семи тем;
+- `clean assemble` → `BUILD SUCCESSFUL`;
 - clean local deploy;
 - `http://localhost:8080/hrm/` → HTTP 200;
-- пользовательский фон применяется через `data:` URI без connector URL;
-- URL не начинается с `/connector/`, не содержит `/dispatch/download?f=` и необработанный `app://APP`;
-- `mainVBox` в браузере покрывает рабочую область главного экрана при широком и высоком viewport;
-- системные фоны семи тем продолжают работать;
-- недоступный файл включает системный fallback без удаления descriptor;
-- Tomcat critical errors отсутствуют; P1=0; P2=0.
+- browser smoke в семи темах на 1366×768, 1920×1080, 1920×1200 и ultrawide;
+- фон виден между карточками;
+- widgets, таблицы, фильтры и действия работают без регрессии;
+- global horizontal scroll отсутствует;
+- Tomcat critical errors `NONE`, P1=0, P2=0.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
-| 2026-07-29 | Fullscreen-геометрия `horizontalWrap`, `mainVBox` и `mainDashboard` закреплена в XML и контрактном тесте, чтобы фон главного экрана покрывал рабочую область на мониторах с разным соотношением сторон |
-| 2026-07-27 | Connector URL пользовательского `StreamResource` дополнен динамическим servlet context path через `VaadinServlet`, чтобы браузер обращался к `/hrm/connector/...`, а не к корневому `/connector/...` |
-| 2026-07-27 | Пользовательский фон закреплён как `StreamResource` с байтами FileStorage, MIME-типом и `data:` URI через `registerBackgroundResource()`; системные `ThemeResource` не изменены |
-| 2026-07-26 | Пользовательский фон временно переводился на прямой FileStorage dispatch URL; ошибка чтения файла включала системный fallback без удаления descriptor |
-| 2026-07-26 | Фон переведён с `cover` на точное растягивание `100% × 100%` |
-| 2026-07-26 | Системные фоны вынесены в каталоги семи тем: 7 × 10 JPG |
-| 2026-07-26 | Добавлены UI-scoped refresh, антиповтор системного варианта и screen-level integration test |
-| 2026-07-26 | Синхронизированы `mainScreenId`; удалена несовместимая legacy-регистрация |
+| 2026-08-02 | `recruiting-dashboard` приведён к общему визуальному контракту Edit-форм через `edit-workspace recruiter-dashboard-root`; добавлен идентичный shared SCSS для семи тем без изменения persistent model, widgets и бизнес-логики |
+| 2026-07-29 | Fullscreen-геометрия `horizontalWrap`, `mainVBox` и `mainDashboard` закреплена в XML и контрактном тесте |
+| 2026-07-27 | Пользовательский фон закреплён как `StreamResource` с MIME и `data:` URI; системные `ThemeResource` не изменены |
+| 2026-07-26 | Фон переведён на точное растягивание `100% × 100%`; системные фоны вынесены в каталоги семи тем |
