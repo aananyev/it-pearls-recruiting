@@ -6,11 +6,26 @@ import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.Route;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.ComponentContainer;
+import com.haulmont.cuba.gui.components.DateField;
+import com.haulmont.cuba.gui.components.GroupBoxLayout;
+import com.haulmont.cuba.gui.components.HBoxLayout;
 import com.haulmont.cuba.gui.components.HasValue;
+import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.components.LookupField;
+import com.haulmont.cuba.gui.components.LookupPickerField;
 import com.haulmont.cuba.gui.components.RadioButtonGroup;
+import com.haulmont.cuba.gui.components.RichTextArea;
+import com.haulmont.cuba.gui.components.ScrollBoxLayout;
+import com.haulmont.cuba.gui.components.SuggestionPickerField;
 import com.haulmont.cuba.gui.components.TabSheet;
+import com.haulmont.cuba.gui.components.TextArea;
+import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.screen.Screen.AfterShowEvent;
 import com.haulmont.cuba.gui.screen.Screen.BeforeShowEvent;
+import com.haulmont.cuba.gui.screen.Screen.InitEvent;
 import com.haulmont.cuba.gui.screen.EditedEntityContainer;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.Subscribe;
@@ -23,11 +38,11 @@ import javax.inject.Inject;
  * Изолированный предварительный вариант OpenPositionEdit.
  *
  * <p>Контроллер наследует исходный {@link OpenPositionEdit} и делегирует ему
- * validation, save-процесс, loaders и бизнес-действия. Единственное защитное
- * переопределение lifecycle до вызова базового {@code onBeforeShow} догружает
- * {@code positionType} для URL-маршрута, где CUBA восстанавливает detached
- * экземпляр сущности. Остальная собственная логика ограничена label-навигацией
- * и её presentation-состоянием, поэтому preview не заменяет legacy-экран.</p>
+ * validation, save-процесс, loaders и бизнес-действия. Защитное переопределение
+ * lifecycle до вызова базового {@code onBeforeShow} догружает {@code positionType}
+ * для URL-маршрута, где CUBA восстанавливает detached-экземпляр сущности.
+ * Остальная собственная логика ограничена presentation-слоем: применением общего
+ * UI-контракта Edit-экранов, label-навигацией и её active-state.</p>
  */
 @Route("open-position-edit-preview")
 @UiController("hunttech_OpenPosition.editPreview")
@@ -36,15 +51,33 @@ import javax.inject.Inject;
 @LoadDataBeforeShow
 public class OpenPositionEditPreview extends OpenPositionEdit {
 
-    private static final String NAV_STYLE =
-            "borderless label-nav-item open-position-preview-nav-item";
-    private static final String NAV_ACTIVE_STYLE =
-            "borderless label-nav-item label-nav-item-active open-position-preview-nav-item";
+    private static final String BASE_NAV_STYLE = "label-nav-item";
+    private static final String ACTIVE_NAV_STYLE = "label-nav-item-active";
+    private static final String ACCORDION_STYLE = "edit-accordion-section";
+    private static final String FORM_CONTROL_STYLE = "edit-form-control";
+    private static final String WORKSPACE_SCROLL_STYLE = "edit-workspace-scroll";
+    private static final String WORKSPACE_CONTENT_STYLE = "edit-workspace-content";
 
     @Inject
     private DataManager dataManager;
     @Inject
     private TabSheet tabSheetOpenPosition;
+    @Inject
+    private VBoxLayout openPositionPreviewSidebar;
+    @Inject
+    private VBoxLayout openPositionPreviewWorkspace;
+    @Inject
+    private HBoxLayout editActions;
+    @Inject
+    private Label<String> closedVacancyInfoLabel;
+    @Inject
+    private Label<String> labelTopComissionRecrutier;
+    @Inject
+    private Label<String> labelTopComissionResearcher;
+    @Inject
+    private Label<String> citiesLabel;
+    @Inject
+    private TextField<String> ownerTextField;
     @Inject
     private Button previewNavMain;
     @Inject
@@ -73,6 +106,16 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     private RadioButtonGroup<Integer> commandOrPosition;
 
     /**
+     * После создания XML-компонентов назначает общие edit-* / label-* роли.
+     * Метод меняет только stylename, panel-представление и контрактную ширину
+     * sidebar; data binding, required, editable, loaders и actions не затрагиваются.
+     */
+    @Subscribe
+    protected void onPreviewInit(InitEvent event) {
+        applySharedEditScreenContract();
+    }
+
+    /**
      * Перед штатной инициализацией legacy-контроллера подготавливает lazy-связь
      * {@code positionType}. Это предотвращает EclipseLink ValidationException
      * при прямом URL-маршруте, не меняя порядок и содержание базового lifecycle.
@@ -89,9 +132,7 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
      * восстановила editor entity после URL-навигации без активной persistence
      * session. Экземпляр в контейнере заменяется reload-нутым целиком: прямой
      * сеттер {@code setPositionType} на detached entity с неинициализированной
-     * lazy-связью сам провоцирует инстанцирование старого valueholder
-     * (EclipseLink ValidationException «null Session»). Базовый
-     * {@link OpenPositionEdit} продолжает работать без изменений.
+     * lazy-связью сам провоцирует инстанцирование старого valueholder.
      */
     private void ensureRoutePositionTypeLoaded() {
         OpenPosition editedPosition = getEditedEntity();
@@ -103,9 +144,8 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
         OpenPosition reloadedPosition = dataManager.load(OpenPosition.class)
                 .id(editedPosition.getId())
                 .view(ViewBuilder.of(OpenPosition.class)
-                        // полный состав openPosition-edit-view (полная версия,
-                        // строка 232 views.xml): все поля формы, иначе setItem
-                        // вскрывает следующую lazy-связь (grade и др.)
+                        // Полный состав openPosition-edit-view: setItem не должен
+                        // вскрывать следующую незагруженную lazy-связь формы.
                         .add("vacansyID").add("vacansyName").add("openClose")
                         .add("signDraft").add("priority").add("rating")
                         .add("lastOpenDate").add("closingDate").add("remoteWork")
@@ -141,6 +181,77 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     }
 
     /**
+     * Применяет общий UI API HRM HuntTech поверх уже утверждённой компоновки.
+     * Shared SCSS подключён во всех семи темах, поэтому здесь не создаются
+     * копии CSS и не изменяются theme-файлы других экранов.
+     */
+    private void applySharedEditScreenContract() {
+        openPositionPreviewSidebar.setWidth("270px");
+        openPositionPreviewSidebar.addStyleName("edit-sidebar");
+        openPositionPreviewWorkspace.addStyleName("edit-workspace");
+
+        closedVacancyInfoLabel.addStyleName("edit-sidebar-warning");
+        labelTopComissionRecrutier.addStyleName("edit-sidebar-hint");
+        labelTopComissionResearcher.addStyleName("edit-sidebar-hint");
+        citiesLabel.addStyleName("edit-help");
+        ownerTextField.addStyleName(FORM_CONTROL_STYLE);
+
+        editActions.removeStyleName("edit-actions");
+        editActions.addStyleName("edit-footer-actions");
+
+        applySharedWorkspaceStyles(openPositionPreviewWorkspace);
+    }
+
+    /**
+     * Проходит по фактическому дереву компонентов CUBA и нормализует только
+     * визуальные роли. GroupBoxLayout становится общей accordion-секцией,
+     * ScrollBoxLayout получает общий scroll-контракт, а типовые поля —
+     * непосредственный {@code edit-form-control}, требуемый UI-контрактом.
+     */
+    private void applySharedWorkspaceStyles(Component component) {
+        if (isSharedFormControl(component)) {
+            component.addStyleName(FORM_CONTROL_STYLE);
+        }
+
+        if (component instanceof GroupBoxLayout) {
+            GroupBoxLayout section = (GroupBoxLayout) component;
+            section.removeStyleName("light");
+            section.removeStyleName("edit-card");
+            section.addStyleName(ACCORDION_STYLE);
+            section.setShowAsPanel(true);
+        }
+
+        if (component instanceof ScrollBoxLayout) {
+            component.addStyleName(WORKSPACE_SCROLL_STYLE);
+            for (Component child : ((ScrollBoxLayout) component).getOwnComponents()) {
+                if (child instanceof VBoxLayout) {
+                    child.addStyleName(WORKSPACE_CONTENT_STYLE);
+                }
+            }
+        }
+
+        if (component instanceof ComponentContainer) {
+            for (Component child : ((ComponentContainer) component).getOwnComponents()) {
+                applySharedWorkspaceStyles(child);
+            }
+        }
+    }
+
+    /**
+     * Ограничивает общий field-style типовыми компонентами из контракта и не
+     * меняет геометрию CheckBox, RadioButtonGroup, таблиц и action-кнопок.
+     */
+    private boolean isSharedFormControl(Component component) {
+        return component instanceof TextField
+                || component instanceof TextArea
+                || component instanceof LookupField
+                || component instanceof LookupPickerField
+                || component instanceof SuggestionPickerField
+                || component instanceof DateField
+                || component instanceof RichTextArea;
+    }
+
+    /**
      * После завершения штатной инициализации базового editor синхронизирует
      * presentation-состояние навигации. Вкладка оплат остаётся доступной только
      * для карточки команды — ровно по условию legacy OpenPositionEdit.
@@ -163,9 +274,9 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     }
 
     /**
-     * Синхронизирует active-состояние label-навигации с реальной выбранной
-     * вкладкой. Метод не влияет на загрузчики: штатный listener базового
-     * OpenPositionEdit по-прежнему выполняет ленивую загрузку содержимого.
+     * Синхронизирует active-state label-навигации с реальной выбранной вкладкой.
+     * Метод не влияет на загрузчики: штатный listener базового OpenPositionEdit
+     * по-прежнему выполняет ленивую загрузку содержимого.
      */
     @Subscribe("tabSheetOpenPosition")
     protected void onPreviewTabChanged(TabSheet.SelectedTabChangeEvent event) {
@@ -228,25 +339,33 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
     }
 
     private void updateNavigationState(String activeTabId) {
-        setNavigationStyle(previewNavMain, "tabOpenPosition".equals(activeTabId));
-        setNavigationStyle(previewNavLaborAgreement, "laborAgreementTab".equals(activeTabId));
-        setNavigationStyle(previewNavPayments, "tabPayments".equals(activeTabId));
-        setNavigationStyle(previewNavDescription, "tabJobDescription".equals(activeTabId));
-        setNavigationStyle(previewNavFiles, "tabFiles".equals(activeTabId));
-        setNavigationStyle(previewNavExercise, "tabExercise".equals(activeTabId));
-        setNavigationStyle(previewNavMemo, "tabMemoForInterview".equals(activeTabId));
-        setNavigationStyle(previewNavTemplateLetter, "tabTemplateLetter".equals(activeTabId));
-        setNavigationStyle(previewNavSkills, "tabSkills".equals(activeTabId));
-        setNavigationStyle(previewNavNews, "tabOpenPositionNews".equals(activeTabId));
-        setNavigationStyle(previewNavApproval, "tabApproval".equals(activeTabId));
-        setNavigationStyle(previewNavComments, "commentsTab".equals(activeTabId));
+        setNavigationActive(previewNavMain, "tabOpenPosition".equals(activeTabId));
+        setNavigationActive(previewNavLaborAgreement, "laborAgreementTab".equals(activeTabId));
+        setNavigationActive(previewNavPayments, "tabPayments".equals(activeTabId));
+        setNavigationActive(previewNavDescription, "tabJobDescription".equals(activeTabId));
+        setNavigationActive(previewNavFiles, "tabFiles".equals(activeTabId));
+        setNavigationActive(previewNavExercise, "tabExercise".equals(activeTabId));
+        setNavigationActive(previewNavMemo, "tabMemoForInterview".equals(activeTabId));
+        setNavigationActive(previewNavTemplateLetter, "tabTemplateLetter".equals(activeTabId));
+        setNavigationActive(previewNavSkills, "tabSkills".equals(activeTabId));
+        setNavigationActive(previewNavNews, "tabOpenPositionNews".equals(activeTabId));
+        setNavigationActive(previewNavApproval, "tabApproval".equals(activeTabId));
+        setNavigationActive(previewNavComments, "commentsTab".equals(activeTabId));
     }
 
     private void updatePaymentsNavigationVisibility(Integer commandCandidate) {
         previewNavPayments.setVisible(Integer.valueOf(1).equals(commandCandidate));
     }
 
-    private void setNavigationStyle(Button button, boolean active) {
-        button.setStyleName(active ? NAV_ACTIVE_STYLE : NAV_STYLE);
+    /**
+     * Базовый label-nav-item остаётся на компоненте постоянно; изменяется только
+     * общий state-класс label-nav-item-active, как требует UI-контракт.
+     */
+    private void setNavigationActive(Button button, boolean active) {
+        button.addStyleName(BASE_NAV_STYLE);
+        button.removeStyleName(ACTIVE_NAV_STYLE);
+        if (active) {
+            button.addStyleName(ACTIVE_NAV_STYLE);
+        }
     }
 }
