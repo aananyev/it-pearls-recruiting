@@ -74,7 +74,7 @@ Preview использует те же data components, views, loader ID и JPQL
 - `openPositionNewsDc` / `openPositionNewsLc`;
 - `projectNamesDc` / `projectNamesLc`;
 - `companyNamesDc` / `companyNamesLc`;
-- `companyDepartamentsDc` / `companyDepartamentsDl`;
+- `companyDepartamentsDc` / `companyDepartamentsLc`;
 - `citiesDc` / `citiesDl`;
 - `gradeDc` / `gradeDl`;
 - `closedVacancyTimer`.
