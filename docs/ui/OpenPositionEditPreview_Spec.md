@@ -10,7 +10,9 @@
 
 Текущий этап дополнительно устраняет выявленные визуальные дефекты runtime-компоновки:
 
+- наезд `OvaFallbackImage` на название вакансии при пересчёте высоты Vaadin-layout;
 - чрезмерную высоту карточки названия вакансии в sidebar;
+- невидимые или обрезанные значения и большие вертикальные интервалы в summary GridLayout;
 - уход label-навигации и сводки ниже видимой области;
 - широкие пустые разрывы между связанными полями;
 - обрезание правых controls из-за legacy-процентных ширин;
@@ -42,8 +44,11 @@ HrmMainScreen / прямой route
 └── OpenPositionEditPreview
     ├── edit-sidebar
     │   ├── compact identity-card
+    │   │   ├── fixed logo visual-stage
+    │   │   └── clamped title + tooltip
     │   ├── label-navigation
-    │   ├── summary / warning / owner
+    │   ├── compact two-column summary
+    │   ├── warning / owner
     │   └── sidebar spacer
     └── edit-workspace
         ├── edit-toolbar
@@ -59,8 +64,10 @@ HrmMainScreen / прямой route
 
 - открытие preview по route → CUBA восстанавливает editor entity → preview при необходимости перезагружает существующую `OpenPosition` с полным edit-view и загруженным `positionType` → выполняется штатный `OpenPositionEdit.onBeforeShow`;
 - создание XML-компонентов → preview назначает только общие `edit-*`, `label-*` и локальные `open-position-preview-*` stylename → bindings, validators, editable и required не меняются;
+- logo visual-stage → резервирует высоту под существующий `projectLogoImage` → название вакансии всегда начинается ниже изображения;
+- длинное название вакансии → визуально ограничивается четырьмя строками, на низком viewport — тремя → полный текст остаётся доступным в tooltip;
+- summary GridLayout → локально отображается как компактная сетка `caption/value` → порядок компонентов и значения `refreshSummary()` не меняются;
 - применение layout-polish → существующие HBox-компоненты получают responsive-роли → поля не переставляются между бизнес-разделами и не получают новые значения;
-- длинное название вакансии → визуально ограничивается по высоте → полный текст остаётся доступным в tooltip;
 - пустой `vacancyTitleSpacerHBox` → скрывается как чисто визуальный legacy-spacer → события и данные не меняются;
 - пункт label-навигации → выбирается существующая вкладка `tabSheetOpenPosition` → lazy-loading продолжает выполнять базовый контроллер;
 - изменение активной вкладки → сохраняется `label-nav-item`, добавляется или удаляется только `label-nav-item-active`;
@@ -127,7 +134,7 @@ Preview использует те же data components, views, loader ID и JPQL
 
 `tabPayments` остаётся скрытой для одиночной вакансии и показывается существующей логикой для карточки команды.
 
-Tab bar остаётся частью `TabSheet`: вкладки не заменяются собственным роутером и не удаляются. Локальный CSS уменьшает высоту до 40 px, ограничивает ширину caption и использует штатные overflow-кнопки CUBA, когда все 12 вкладок не помещаются.
+Tab bar остаётся частью `TabSheet`: вкладки не заменяются собственным роутером и не удаляются. Локальный CSS ограничивает ширину caption и использует штатные overflow-кнопки CUBA, когда все 12 вкладок не помещаются.
 
 ## 4. Общий UI API Edit-экранов
 
@@ -158,12 +165,16 @@ Tab bar остаётся частью `TabSheet`: вкладки не замен
 
 Runtime-polish:
 
-- основной логотип — `112 × 112px`, до `1366px` — `92 × 92px`;
-- изображение владельца — `48 × 48px`;
-- название — 15 px / 20 px, максимум семь визуальных строк;
+- отдельный `open-position-preview-logo-box` резервирует `112px` высоты, до `1366px` или высоты viewport `820px` — `94px`;
+- основной логотип — `96 × 96px`, в компактном режиме — `82 × 82px`;
+- изображение владельца сохраняет существующий размер и видимость;
+- название — 14 px / 19 px, максимум четыре визуальные строки; в компактном режиме — три строки;
 - полный текст названия сохраняется в `description` компонента;
+- название центрировано и располагается отдельным slot ниже logo-stage;
 - навигация использует компактный вертикальный ритм;
-- summary и warning используют уменьшенную типографику, но сохраняют читаемость.
+- summary GridLayout преобразуется только CSS-слоем в две колонки `72px + minmax(0,1fr)`, в компактном режиме `66px + minmax(0,1fr)`;
+- значения summary ограничиваются двумя строками, captions имеют вторичную типографику;
+- warning и owner остаются отдельными существующими компонентами.
 
 ### 4.2. Label-навигация
 
@@ -253,29 +264,23 @@ Footer получает локальный flex-контракт только в
 theme base
 → edit-screen-shared-styles
 → open-position-preview
+→ open-position-preview-sidebar-usability
 ```
 
-Shared mixin задаёт общую геометрию и типовые роли. Screen-specific partial содержит только:
+Shared mixin задаёт общую геометрию и типовые роли. `open-position-preview` содержит основной screen-specific дизайн. `open-position-preview-sidebar-usability` — узкий corrective layer только для identity/summary sidebar по фактическому runtime-скриншоту.
 
-- фирменную sidebar;
-- цветовую адаптацию label-навигации;
-- compact tab bar;
-- responsive-сетку существующих HBox;
-- безопасное containment таблиц, grid/form layout;
-- внутренний padding accordion-content;
-- локальную группировку footer actions.
-
-Неограниченные `.v-label`, `.v-button`, `.v-table`, `.v-panel` и другие глобальные селекторы отсутствуют.
+Неограниченные `.v-label`, `.v-button`, `.v-table`, `.v-panel` и другие глобальные селекторы отсутствуют: все правила находятся внутри `.open-position-preview`.
 
 ## 5. Поддержка семи тем
 
-Идентичный локальный partial расположен в:
+Идентичные локальные partial расположены в:
 
 ```text
 modules/web/themes/<theme>/com.company.hunttech/open-position-preview.scss
+modules/web/themes/<theme>/com.company.hunttech/open-position-preview-sidebar-usability.scss
 ```
 
-Он подключён после `edit-screen-shared-styles` в темах:
+Они подключены после `edit-screen-shared-styles` в темах:
 
 - `halo`;
 - `havana`;
@@ -310,6 +315,7 @@ Presentation-стили не запускают loaders и не меняют ф�
 Запрещены и отсутствуют:
 
 - изменение legacy `OpenPositionEdit` и его XML;
+- изменение preview Java/XML, data contract и lifecycle;
 - изменение вызовов legacy editor;
 - menu item или browse action для preview;
 - изменение сущностей, БД и Liquibase;
@@ -327,43 +333,43 @@ Hermes проверяет точный HEAD PR:
 
 1. `git diff --check`;
 2. разрешённый diff;
-3. compile web и test source;
-4. `OpenPositionEditPreviewLayoutTest`;
-5. `OpenPositionEditPreviewRouteGuardTest`;
-6. `OpenPositionEditPreviewSharedStyleContractTest` — 6/6 PASS;
+3. `OpenPositionEditPreviewSidebarUsabilityContractTest` — PASS;
+4. `OpenPositionEditPreviewLayoutTest` — PASS;
+5. `OpenPositionEditPreviewRouteGuardTest` — PASS;
+6. `OpenPositionEditPreviewSharedStyleContractTest` — PASS;
 7. `ScreenViewIntegrityTest` — 8/8 PASS;
-8. идентичность shared и local SCSS семи тем;
-9. порядок import/include после shared mixin;
+8. идентичность corrective SCSS семи тем;
+9. порядок import/include после `open-position-preview`;
 10. `buildScssThemes` — PASS;
 11. `clean assemble` — `BUILD SUCCESSFUL`;
 12. local deploy и HTTP `/hrm/` = 200;
 13. открытие preview по route без detached/lazy/RPC ошибок;
 14. visual smoke всех 12 вкладок в семи темах;
-15. visual smoke viewport 1920×1080, 1600×900, 1366×768, 1280×800;
-16. sidebar: компактный title, доступные navigation и summary;
-17. main tab: отсутствие широких пустых разрывов и обрезанных правых controls;
-18. tabs: высота 40 px, overflow-кнопки работают;
-19. footer: actions сгруппированы справа;
-20. сохранение, отмена и повторное открытие;
-21. legacy editor и его вызовы не изменены.
+15. visual smoke viewport 1920×1080, 1600×900, 1366×768, 1280×800 и высоты 768/820 px;
+16. logo и title не пересекаются при первом открытии и после переключения темы;
+17. полный title доступен через tooltip;
+18. summary показывает caption и value для всех строк без обрезания по правой границе;
+19. navigation и summary доступны в sidebar scroll;
+20. legacy editor и его вызовы не изменены.
 
 ## История изменений
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-02 | По runtime-скриншоту добавлен corrective layer `open-position-preview-sidebar-usability`: отдельный visual-stage 112/94px исключает наезд `OvaFallbackImage` на title; логотип 96/82px; title 4/3 строки с tooltip; summary GridLayout преобразован в компактную сетку caption/value. Изменены только локальные SCSS семи тем и их import/include, Java/XML и бизнес-логика не затронуты. |
 | 2026-08-02 | Родительские box-контейнеры вкладок растянуты на всю ширину: в `projectLocationAccordion` (вкладка «Основное») двухколоночная legacy-раскладка перестроена в одноколоночную — vbox «Проект» 50%→100% с переносом `companyDepartamentField` внутрь (50%→100%), hbox «Компания/Город» 50%→100% с `expand="cityOpenPositionField"`; добавлены смысловые inline-комментарии. Остальные контейнеры вкладок уже были 100%; вне зоны: sidebar (312px), 3-колонка выплат (33% ×3), пустой спейсер `vacancyTitleSpacerHBox`. |
-| 2026-08-02 | Логотип sidebar поднят по паттерну JobCandidateEdit: `openPositionPreviewLogoBox` выравнивание `MIDDLE_CENTER` → `TOP_CENTER` (прижат к верху identity-карточки, как фото в `job-candidate-profile-header`); убрана фикс. высота бокса (118px / media 98px) — высота определяется логотипом, наезд на название исключён (7 тем, sha256 `6ee6049c`). |
-| 2026-08-02 | Всем 7 RichTextArea гарантированы `width="100%" height="100%"`; 4 редактора вкладки «Описание вакансии» (`openPositionRichTextArea`, `openPositionEnRichTextArea`, `openPositionStandartDescriptionRichTextArea`, `openPositionWhoIsThisGuyRichTextArea`) обёрнуты в vbox `width="100%" height="100%"` внутри табов аккордеона — родительские контейнеры растягиваются на всю вкладку (exercise/memo/template уже имели 100%-родителей). |
-| 2026-08-02 | View `someFilesOpenPosition-edit-view`: `fileDescriptor` расширен с `_minimal` до nested `name`+`size` — устранён `IllegalStateException: Cannot get unfetched attribute [size]` при рендере колонки `fileDescriptor.size` вкладки «Файлы» (preview и legacy). |
-| 2026-08-02 | Исправлен ClassCastException String→Position при открытии preview: summary-лейблы (`summaryVacansyIDLabel` и др.) освобождены от XML-биндинга `dataContainer`/`property` — значения задаёт только `refreshSummary()` (иначе `setValue(String)` писался в valueSource и кастовался в FK-свойство `grade`/`positionType`). |
-| 2026-08-02 | Modern UX polish (по концепции HRM_HuntTech_UI_UX_Design_Concept, только presentation): радиусы карточек унифицированы 8px; фирменная акцентная кромка identity-карточки (rgba #ffb11b); лёгкие тени уровня карточки; плавные переходы 0.15s для навигации/кнопок/полей/заголовков аккордеонов; focus-контуры 2px `$v-selection-color` для полей и кнопок (доступность); hover-фон заголовков аккордеонов; тонкие theme-aware scrollbar рабочей области; нижний акцент toolbar. Применено во всех 7 темах (sha256 `839a64d3`). |
-| 2026-08-02 | Tabsheet preview приведён точно к стилям JobCandidateEdit: класс `tabSheetOpenPosition` → `framed job-candidate-tabs edit-tabs` (как `job-candidate-edit.xml`; убран `compact-tabbar`); локальные переопределения `.edit-tabs` (40px, max-width 190px) в `open-position-preview.scss` заменены эталонным блоком `.job-candidate-tabs` из `job-candidate-editor.scss` (48px, max-width 112px, цвета #26384c/#0b63b6, hover #1264b5, content `calc(100% - 49px)` + #f5f7fa + padding 16/18/20, tabcontainer padding 0 12px + #dfe5ec) и media-правилами (96px, padding 10px, font-size 14px) во всех 7 темах (sha256 идентичны `472bac49`). |
-| 2026-08-02 | Блок «Требуемые Навыки» восстановлен по структуре legacy-экрана: убрана аккордеон-обёртка `skillsTableAccordion`, `skillsBox` получил `expand="openPositionSkillsListTable"`, кнопке `rescanSkills` возвращён `align="BOTTOM_LEFT"`; PreviewLayoutTest обновлён (проверка плоской структуры вместо вложенности в groupBox). |
-| 2026-08-02 | RichTextArea-область вкладки «Описание вакансии» растянута на оставшуюся часть экрана: vbox вкладки получил `height="100%"` и `expand="descriptionTextsAccordion"`, groupBox `descriptionTextsAccordion` — `height="100%"`, accordion `openPositionAccordion` — `height="100%"` (было фиксированное 360px). Остальные вкладки (Тестовое задание, Памятка, Шаблон) уже были растянуты. |
-| 2026-08-02 | В сводку «Ключевые параметры» добавлена строка «Оформление» (`summaryRegistrationForWorkLabel`): тип оформления кандидата из кода `registrationForWork` через `StandartRegistrationForWork` (Аутстаффинг / В штат заказчику / Все варианты), обновляется в `refreshSummary()` вместе с остальной сводкой. |
-| 2026-08-02 | Вкладка `tabOpenPosition` переименована «Проект» → «Основное» (новый ключ `msgPositionMainTab`; legacy-экран сохраняет «Проект»); сводка «Ключевые параметры» в sidebar получает id и обновляется программно (`refreshSummary()` при AfterShow и `ItemPropertyChangeEvent` контейнера `openPositionDc`) — ID/Должность/Грейд/Проект/Город/Позиции всегда совпадают с данными вкладки; блок логотипа `openPositionPreviewLogoBox` получил фиксированную высоту (118/98px) — логотип больше не наезжает на наименование вакансии. |
-| 2026-08-02 | Улучшена runtime-компоновка: компактная identity-card, ограничение длинного названия с tooltip, responsive-сетка существующих HBox, компактные tabs, усиленная иерархия accordion и сгруппированный footer; бизнес-структура и XML-контракт не изменены. |
-| 2026-08-02 | Добавлен локальный `open-position-preview.scss` во все семь тем: фирменная dark-sidebar, жёлтый active-state, theme-aware workspace, panel-accordion containment и footer; partial подключён строго после shared mixin. |
-| 2026-08-02 | К preview применён общий `edit-*` / `label-*` UI API: sidebar 270/250 px, shared toolbar/tabs/scroll, panel-accordion, типовые `edit-form-control`, общий footer без изменения бизнес-логики. |
+| 2026-08-02 | Логотип sidebar поднят по паттерну JobCandidateEdit: `openPositionPreviewLogoBox` выравнивание `MIDDLE_CENTER` → `TOP_CENTER`; убрана фиксированная высота бокса. Runtime-скриншот показал, что custom `OvaFallbackImage` всё равно требует отдельного corrective visual-stage; это уточнение реализовано следующей строкой истории выше. |
+| 2026-08-02 | Всем 7 RichTextArea гарантированы `width="100%" height="100%"`; 4 редактора вкладки «Описание вакансии» обёрнуты в полноразмерные контейнеры. |
+| 2026-08-02 | View `someFilesOpenPosition-edit-view`: `fileDescriptor` расширен до nested `name`+`size` — устранён `IllegalStateException` вкладки «Файлы». |
+| 2026-08-02 | Исправлен ClassCastException String→Position при открытии preview: summary-лейблы освобождены от XML-биндинга, значения задаёт `refreshSummary()`. |
+| 2026-08-02 | Modern UX polish: унифицированы радиусы, focus-контуры, hover, scrollbar и toolbar accent во всех семи темах. |
+| 2026-08-02 | Tabsheet preview приведён к стилям JobCandidateEdit через `job-candidate-tabs`. |
+| 2026-08-02 | Блок «Требуемые Навыки» восстановлен по структуре legacy-экрана. |
+| 2026-08-02 | RichTextArea-область вкладки «Описание вакансии» растянута на оставшуюся часть экрана. |
+| 2026-08-02 | В сводку «Ключевые параметры» добавлена строка «Оформление». |
+| 2026-08-02 | Вкладка `tabOpenPosition` переименована «Проект» → «Основное» только в preview; сводка обновляется программно. |
+| 2026-08-02 | Улучшена runtime-компоновка: compact identity, responsive HBox, tabs, accordion и footer без изменения бизнес-структуры. |
+| 2026-08-02 | Добавлен локальный `open-position-preview.scss` во все семь тем. |
+| 2026-08-02 | К preview применён общий `edit-*` / `label-*` UI API. |
 | 2026-08-01 | Защита URL lifecycle переведена на загрузку полного edit-набора и замену item контейнера до legacy `onBeforeShow`. |
 | 2026-08-01 | Создан изолированный preview новой двухпанельной компоновки без замены legacy-экрана и изменения бизнес-логики. |

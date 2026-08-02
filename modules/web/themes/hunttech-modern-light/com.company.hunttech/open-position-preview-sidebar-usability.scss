@@ -1,0 +1,240 @@
+/*
+ * OpenPositionEditPreview — локальная коррекция sidebar по runtime-скриншоту.
+ *
+ * Слой подключается после open-position-preview и исправляет только геометрию
+ * уже существующих компонентов: резервирует высоту под OvaFallbackImage,
+ * отделяет название вакансии от логотипа и уплотняет summary GridLayout.
+ * Data binding, component ID, loaders, actions и бизнес-логика не затрагиваются.
+ */
+@mixin open-position-preview-sidebar-usability-theme {
+  .open-position-preview {
+    /*
+     * OvaFallbackImage имеет собственную реализацию размера. Явный visual-stage
+     * не даёт следующему slot подняться под изображение при пересчёте Vaadin.
+     */
+    .open-position-preview-identity-card,
+    .edit-sidebar-visual {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      min-height: 0 !important;
+      padding: 10px 12px 11px;
+    }
+
+    .open-position-preview-identity-card > .v-slot,
+    .edit-sidebar-visual > .v-slot {
+      box-sizing: border-box;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    .open-position-preview-logo-box {
+      box-sizing: border-box;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 112px !important;
+      min-height: 112px !important;
+      max-height: 112px !important;
+      margin: 0 0 8px !important;
+      overflow: visible !important;
+    }
+
+    .open-position-preview-logo-box > .v-slot {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      margin: 0 !important;
+      flex: 0 0 auto;
+    }
+
+    .open-position-preview-logo,
+    .open-position-preview-logo img,
+    .open-position-preview-logo .v-image-element {
+      width: 96px !important;
+      height: 96px !important;
+      min-width: 96px !important;
+      min-height: 96px !important;
+      max-width: 96px !important;
+      max-height: 96px !important;
+    }
+
+    .open-position-preview-logo {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      float: none !important;
+      margin: 0 auto !important;
+    }
+
+    .edit-sidebar-identity {
+      box-sizing: border-box;
+      position: relative;
+      z-index: 2;
+      width: 100% !important;
+      min-width: 0 !important;
+      padding: 0 2px 2px !important;
+      clear: both;
+    }
+
+    .edit-sidebar-title,
+    .edit-sidebar-title.v-label,
+    .open-position-preview-title-clamp {
+      display: -webkit-box !important;
+      width: 100% !important;
+      max-height: 76px !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+      font-size: 14px !important;
+      line-height: 19px !important;
+      text-align: center !important;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+    }
+
+    .edit-sidebar-subtitle,
+    .edit-sidebar-subtitle.v-label,
+    .open-position-preview-status-line {
+      width: 100% !important;
+      padding-top: 4px;
+      text-align: center !important;
+    }
+
+    /*
+     * GridLayout сводки переводится в компактный CSS-grid. DOM-порядок CUBA
+     * остаётся прежним: caption/value идут попарно, bindings не меняются.
+     */
+    .open-position-preview-summary-card,
+    .edit-sidebar-summary {
+      padding: 8px 10px;
+    }
+
+    .open-position-preview-summary-card .v-gridlayout,
+    .open-position-preview-summary-card .v-gridlayout > div,
+    .edit-sidebar-summary .v-gridlayout,
+    .edit-sidebar-summary .v-gridlayout > div {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+    }
+
+    .open-position-preview-summary-card .v-gridlayout > div,
+    .edit-sidebar-summary .v-gridlayout > div {
+      position: relative !important;
+      display: grid !important;
+      grid-template-columns: 72px minmax(0, 1fr);
+      grid-auto-rows: minmax(18px, auto);
+      column-gap: 8px;
+      row-gap: 5px;
+    }
+
+    .open-position-preview-summary-card .v-gridlayout-slot,
+    .edit-sidebar-summary .v-gridlayout-slot {
+      box-sizing: border-box;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+    }
+
+    .open-position-preview-summary-card .v-gridlayout-slot > *,
+    .edit-sidebar-summary .v-gridlayout-slot > * {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .open-position-preview-summary-card .v-gridlayout-slot:nth-child(odd) .v-label,
+    .edit-sidebar-summary .v-gridlayout-slot:nth-child(odd) .v-label {
+      color: rgba(248, 250, 252, 0.58) !important;
+      font-size: 10px !important;
+      font-weight: 600 !important;
+      line-height: 15px !important;
+    }
+
+    .open-position-preview-summary-card .v-gridlayout-slot:nth-child(even) .v-label,
+    .edit-sidebar-summary .v-gridlayout-slot:nth-child(even) .v-label {
+      display: -webkit-box !important;
+      max-height: 32px !important;
+      overflow: hidden !important;
+      color: #f8fafc !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      line-height: 16px !important;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .open-position-preview-navigation,
+    .label-navigation {
+      margin-top: 1px;
+    }
+
+    .open-position-preview-sidebar-flex {
+      min-height: 8px !important;
+    }
+
+    @media (max-width: 1366px), (max-height: 820px) {
+      .open-position-preview-logo-box {
+        height: 94px !important;
+        min-height: 94px !important;
+        max-height: 94px !important;
+        margin-bottom: 6px !important;
+      }
+
+      .open-position-preview-logo,
+      .open-position-preview-logo img,
+      .open-position-preview-logo .v-image-element {
+        width: 82px !important;
+        height: 82px !important;
+        min-width: 82px !important;
+        min-height: 82px !important;
+        max-width: 82px !important;
+        max-height: 82px !important;
+      }
+
+      .edit-sidebar-title,
+      .edit-sidebar-title.v-label,
+      .open-position-preview-title-clamp {
+        max-height: 57px !important;
+        font-size: 13px !important;
+        line-height: 19px !important;
+        -webkit-line-clamp: 3;
+      }
+
+      .label-nav-item,
+      .v-button-label-nav-item {
+        min-height: 21px !important;
+        padding-top: 1px !important;
+        padding-bottom: 1px !important;
+        line-height: 17px !important;
+      }
+
+      .open-position-preview-summary-card .v-gridlayout > div,
+      .edit-sidebar-summary .v-gridlayout > div {
+        grid-template-columns: 66px minmax(0, 1fr);
+        row-gap: 3px;
+      }
+    }
+  }
+}
