@@ -1,20 +1,28 @@
+<!-- Главный экран HRM HuntTech расширяет стандартный CUBA MainScreen и сохраняет его меню, WorkArea и lifecycle. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         extends="/com/haulmont/cuba/web/app/main/main-screen.xml"
         xmlns:dashboard="http://schemas.haulmont.com/cubadshb/ui-component.xsd">
+    <!-- Корневая компоновка добавляет только полноразмерную рабочую область персонального dashboard. -->
     <layout>
+        <!-- Полноразмерный контейнер связывает WorkArea с фоном HrmMainScreen без горизонтальной прокрутки. -->
         <cssLayout id="horizontalWrap"
                    width="100%"
                    height="100%">
+            <!-- Стандартная WorkArea CUBA принимает открываемые browse/edit-экраны и начальный dashboard. -->
             <workArea id="workArea">
+                <!-- Начальная компоновка отображается до открытия пользователем рабочего экрана из меню. -->
                 <initialLayout>
+                    <!-- Контейнер фона сохраняет существующую полноэкранную геометрию и раскрывает dashboard. -->
                     <vbox id="mainVBox"
                           expand="mainDashboard"
                           spacing="true"
                           width="100%"
                           height="100%">
+                        <!-- Persistent dashboard получает общий workspace-класс Edit-контракта и локальный CSS namespace главного экрана. -->
                         <dashboard:dashboard id="mainDashboard"
                                              code="recruiting-dashboard"
                                              timerDelay="60"
+                                             stylename="edit-workspace recruiter-dashboard-root"
                                              width="100%"
                                              height="100%">
                         </dashboard:dashboard>

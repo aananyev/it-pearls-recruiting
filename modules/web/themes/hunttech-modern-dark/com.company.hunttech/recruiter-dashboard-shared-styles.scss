@@ -1,0 +1,249 @@
+/*
+ * Локальная адаптация персонального dashboard HRM HuntTech к общему
+ * визуальному контракту Edit-форм.
+ *
+ * Селекторы ограничены корнем recruiter-dashboard-root: стили не меняют
+ * глобальные Vaadin-компоненты, Edit-экраны и служебный Dashboard Editor.
+ */
+@mixin recruiter-dashboard-shared-styles {
+  $recruiter-dashboard-accent: #ffb11b;
+  $recruiter-dashboard-border: rgba($v-font-color, 0.15);
+  $recruiter-dashboard-subtle-border: rgba($v-font-color, 0.10);
+  $recruiter-dashboard-muted: mix($v-font-color, $v-panel-background-color, 62%);
+
+  .recruiter-dashboard-root,
+  .v-slot-recruiter-dashboard-root {
+    box-sizing: border-box;
+    min-width: 0 !important;
+  }
+
+  .recruiter-dashboard-root {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 16px;
+    background: transparent !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  // Legacy widget surfaces receive the same geometry as edit-card.
+  .recruiter-dashboard-root .widget-border,
+  .recruiter-dashboard-root .widget-border-line,
+  .recruiter-dashboard-root .v-slot-widget-border,
+  .recruiter-dashboard-root .v-slot-widget-border-line {
+    box-sizing: border-box;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .recruiter-dashboard-root .widget-border,
+  .recruiter-dashboard-root .widget-border-line {
+    width: 100% !important;
+    padding: 16px 20px !important;
+    color: $v-font-color;
+    background: $v-panel-background-color !important;
+    border: 1px solid $recruiter-dashboard-border !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+    overflow: hidden;
+  }
+
+  // Заголовок виджета повторяет edit-card-title и не задаёт фиксированную высоту.
+  .recruiter-dashboard-root .widget-table-header,
+  .recruiter-dashboard-root .v-label-widget-table-header {
+    box-sizing: border-box;
+    display: block;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: auto !important;
+    padding: 0 0 12px !important;
+    color: mix($v-font-color, $v-panel-background-color, 88%) !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 22px !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    background: transparent !important;
+    border-bottom: 1px solid $recruiter-dashboard-subtle-border;
+  }
+
+  .recruiter-dashboard-root .widget-table-value,
+  .recruiter-dashboard-root .last_status_widget {
+    color: $recruiter-dashboard-muted !important;
+    background: transparent !important;
+    font-style: normal;
+  }
+
+  // Таблицы остаются функционально неизменными, меняется только presentation layer.
+  .recruiter-dashboard-root .v-table,
+  .recruiter-dashboard-root .v-grid {
+    box-sizing: border-box;
+    width: 100% !important;
+    min-width: 0 !important;
+    color: $v-font-color;
+    background: $v-panel-background-color;
+    border: 1px solid $recruiter-dashboard-subtle-border;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .recruiter-dashboard-root .v-table-header-wrap,
+  .recruiter-dashboard-root .v-grid-header {
+    color: mix($v-font-color, $v-panel-background-color, 78%);
+    font-size: 12px;
+    font-weight: 700;
+    background: mix($v-app-background-color, $v-panel-background-color, 68%);
+    border-bottom: 1px solid $recruiter-dashboard-border;
+  }
+
+  .recruiter-dashboard-root .v-table-row,
+  .recruiter-dashboard-root .v-table-row-odd,
+  .recruiter-dashboard-root .v-grid-row,
+  .recruiter-dashboard-root .v-grid-row-stripe {
+    color: $v-font-color;
+    background: $v-panel-background-color;
+  }
+
+  .recruiter-dashboard-root .v-table-row-odd,
+  .recruiter-dashboard-root .v-grid-row-stripe {
+    background: mix($v-app-background-color, $v-panel-background-color, 34%);
+  }
+
+  .recruiter-dashboard-root .v-table-row:hover,
+  .recruiter-dashboard-root .v-table-row-odd:hover,
+  .recruiter-dashboard-root .v-grid-row:hover {
+    background: rgba($recruiter-dashboard-accent, 0.08) !important;
+  }
+
+  .recruiter-dashboard-root .v-table-row.v-selected,
+  .recruiter-dashboard-root .v-table-row-odd.v-selected,
+  .recruiter-dashboard-root .v-grid-row-selected {
+    color: mix($v-font-color, $v-panel-background-color, 96%) !important;
+    background: rgba($recruiter-dashboard-accent, 0.14) !important;
+  }
+
+  // Поля фильтров и действий используют контрактную высоту Edit-форм.
+  .recruiter-dashboard-root .v-textfield,
+  .recruiter-dashboard-root .v-filterselect,
+  .recruiter-dashboard-root .v-filterselect-input,
+  .recruiter-dashboard-root .v-datefield,
+  .recruiter-dashboard-root .v-datefield-textfield,
+  .recruiter-dashboard-root .c-pickerfield,
+  .recruiter-dashboard-root .c-pickerfield-layout,
+  .recruiter-dashboard-root .c-suggestionfield {
+    box-sizing: border-box;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .recruiter-dashboard-root .v-textfield,
+  .recruiter-dashboard-root .v-filterselect-input,
+  .recruiter-dashboard-root .v-datefield-textfield,
+  .recruiter-dashboard-root .c-suggestionfield {
+    min-height: 38px !important;
+    height: 38px !important;
+    padding: 0 10px !important;
+    color: $v-font-color !important;
+    font-family: inherit !important;
+    font-size: 14px !important;
+    line-height: 38px !important;
+    background: $v-panel-background-color !important;
+    border: 1px solid rgba($v-font-color, 0.20) !important;
+    border-radius: 5px !important;
+    box-shadow: none !important;
+  }
+
+  .recruiter-dashboard-root .v-textfield:focus,
+  .recruiter-dashboard-root .v-filterselect-focus .v-filterselect-input,
+  .recruiter-dashboard-root .v-datefield-focus .v-datefield-textfield,
+  .recruiter-dashboard-root .c-suggestionfield:focus {
+    border-color: $recruiter-dashboard-accent !important;
+    box-shadow: 0 0 0 2px rgba($recruiter-dashboard-accent, 0.18) !important;
+  }
+
+  .recruiter-dashboard-root .v-button:not(.v-button-link):not(.v-button-borderless),
+  .recruiter-dashboard-root .v-filterselect-button {
+    box-sizing: border-box;
+    min-height: 38px !important;
+    border-radius: 5px !important;
+  }
+
+  .recruiter-dashboard-root .v-button:focus {
+    box-shadow: 0 0 0 2px rgba($recruiter-dashboard-accent, 0.18) !important;
+  }
+
+  // Панели внутри виджетов повторяют геометрию edit-accordion-section.
+  .recruiter-dashboard-root .v-panel {
+    box-sizing: border-box;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    background: $v-panel-background-color;
+    border: 1px solid $recruiter-dashboard-border;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+    overflow: hidden;
+  }
+
+  .recruiter-dashboard-root .v-panel-caption {
+    box-sizing: border-box;
+    min-height: 50px;
+    padding: 12px 16px;
+    color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    line-height: 24px !important;
+    background: mix($v-app-background-color, $v-panel-background-color, 68%);
+    border-bottom: 1px solid $recruiter-dashboard-border;
+  }
+
+  .recruiter-dashboard-root .v-panel-content {
+    box-sizing: border-box;
+    min-width: 0 !important;
+    background: $v-panel-background-color;
+    border: 0 !important;
+  }
+
+  // Клавиатурный focus виден и не полагается только на цвет строки.
+  .recruiter-dashboard-root a:focus,
+  .recruiter-dashboard-root .v-button:focus,
+  .recruiter-dashboard-root .v-table-focus,
+  .recruiter-dashboard-root .v-grid:focus {
+    outline: 2px solid rgba($recruiter-dashboard-accent, 0.72);
+    outline-offset: 1px;
+  }
+
+  @media (max-width: 1366px) {
+    .recruiter-dashboard-root {
+      padding: 10px;
+    }
+
+    .recruiter-dashboard-root .widget-border,
+    .recruiter-dashboard-root .widget-border-line {
+      padding: 12px 14px !important;
+    }
+
+    .recruiter-dashboard-root .widget-table-header,
+    .recruiter-dashboard-root .v-label-widget-table-header {
+      padding-bottom: 10px !important;
+      font-size: 14px !important;
+      line-height: 20px !important;
+    }
+
+    .recruiter-dashboard-root .v-table-cell-content,
+    .recruiter-dashboard-root .v-grid-cell {
+      font-size: 12px;
+    }
+  }
+
+  @media (max-width: 1280px) {
+    .recruiter-dashboard-root {
+      padding: 8px;
+    }
+
+    .recruiter-dashboard-root .widget-border,
+    .recruiter-dashboard-root .widget-border-line {
+      padding: 10px 12px !important;
+      border-radius: 7px !important;
+    }
+  }
+}
