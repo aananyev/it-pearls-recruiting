@@ -93,14 +93,21 @@ public class JobCandidateEditLayoutContractTest {
 
             assertTrue(theme, scss.contains(".job-candidate-tabs > .v-tabsheet-tabcontainer"));
             assertTrue(theme, scss.contains(".v-slot-job-candidate-sidebar"));
-            assertTrue(theme, scss.contains("max-width: 112px"));
-            assertTrue(theme, scss.contains("font-size: 13px !important"));
+            assertTrue(theme, scss.contains("min-height: 38px !important"));
+            assertTrue(theme, scss.contains("max-width: none !important"));
+            assertTrue(theme, scss.contains("font-size: 12px !important"));
             assertTrue(theme, scss.contains("white-space: nowrap !important"));
-            assertTrue(theme, scss.contains("text-overflow: ellipsis"));
+            assertTrue(theme, scss.contains("text-overflow: clip !important"));
             assertTrue(theme, scss.contains(".job-candidate-position-column"));
-            assertTrue(theme, scss.contains("overflow-x: auto"));
+            assertTrue(theme, scss.contains("overflow-x: auto !important"));
             assertTrue(theme, scss.contains(".job-candidate-social-actions"));
             assertTrue(theme, scss.contains("width: 220px !important"));
+            assertTrue(theme, scss.contains(".c-fileupload-container"));
+            assertTrue(theme, scss.contains(".c-fileupload-clear"));
+            assertTrue(theme, scss.contains("width: 96px !important"));
+            assertTrue(theme, scss.contains(".job-candidate-bottom-bar > .v-expand"));
+            assertTrue(theme, scss.contains("justify-content: flex-end"));
+            assertTrue(theme, scss.contains("flex: 0 0 auto !important"));
         }
     }
 

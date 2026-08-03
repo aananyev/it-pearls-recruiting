@@ -32,17 +32,20 @@
 
     .v-slot-candidate-cv-sidebar,
     .candidate-cv-sidebar {
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
       background-color: #172638 !important;
       background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%) !important;
     }
 
     .candidate-cv-sidebar {
       box-sizing: border-box;
-      width: 296px !important;
-      min-width: 296px !important;
-      max-width: 296px !important;
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
       height: 100% !important;
-      padding: 20px 18px 16px;
+      padding: 24px 20px 18px;
       color: #f8fafc;
       border-right: 1px solid rgba(15, 23, 42, 0.72);
       box-shadow: 5px 0 20px rgba(15, 23, 42, 0.16);
@@ -56,7 +59,7 @@
     }
 
     .candidate-cv-sidebar > .v-spacing {
-      height: 14px !important;
+      height: 15px !important;
     }
 
     .candidate-cv-profile-header,
@@ -179,8 +182,8 @@
       box-sizing: border-box;
       width: 100% !important;
       height: auto !important;
-      min-height: 34px !important;
-      padding: 7px 10px !important;
+      min-height: 38px !important;
+      padding: 8px 10px !important;
       color: rgba(248, 250, 252, 0.82) !important;
       font-size: 13px !important;
       font-weight: 500 !important;
@@ -260,12 +263,15 @@
       padding: 0 20px;
       background: $v-panel-background-color !important;
       border-bottom: 1px solid rgba($v-font-color, 0.16) !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
     }
 
     .candidate-cv-tabs .v-tabsheet-tabs,
     .candidate-cv-tabs .v-tabsheet-tabitem,
     .candidate-cv-tabs .v-tabsheet-tabitem-selected {
       height: 48px;
+      max-width: none !important;
       background: transparent !important;
       border: 0 !important;
       box-shadow: none !important;
@@ -274,11 +280,16 @@
     .candidate-cv-tabs .v-caption {
       box-sizing: border-box;
       height: 48px;
+      width: auto !important;
+      max-width: none !important;
       padding: 0 16px !important;
       color: mix($v-font-color, $v-panel-background-color, 82%) !important;
       font-size: 15px !important;
       font-weight: 600 !important;
       line-height: 48px !important;
+      white-space: nowrap !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
       background: transparent !important;
       border: 0 !important;
       border-bottom: 3px solid transparent !important;
@@ -368,9 +379,15 @@
 
     .candidate-cv-main-card .v-textfield,
     .candidate-cv-main-card .v-filterselect,
+    .candidate-cv-main-card .v-filterselect-input,
+    .candidate-cv-main-card .c-pickerfield,
+    .candidate-cv-main-card .c-pickerfield-layout,
+    .candidate-cv-main-card .c-suggestionfield,
     .candidate-cv-document-card .v-textfield,
     .candidate-cv-footer .v-datefield-textfield {
       box-sizing: border-box;
+      width: 100% !important;
+      max-width: 100% !important;
       min-height: 38px;
       font-size: 15px;
     }
@@ -506,6 +523,8 @@
     }
 
     .candidate-cv-photo-dropzone .v-upload .v-button {
+      box-sizing: border-box;
+      width: 100% !important;
       min-height: 36px;
       padding: 0 14px;
       color: #f8fafc !important;

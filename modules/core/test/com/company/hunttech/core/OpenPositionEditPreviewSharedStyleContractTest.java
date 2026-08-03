@@ -239,9 +239,16 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
         assertTrue(referenceSharedScss.contains("@media (max-width: 1366px)"));
 
         assertTrue(referenceLocalScss.contains(".open-position-preview"));
+        assertTrue(referenceLocalScss.contains(".v-slot-edit-sidebar"));
+        assertTrue(referenceLocalScss.contains("width: 312px !important"));
         assertTrue(referenceLocalScss.contains("#172638"));
         assertTrue(referenceLocalScss.contains("#ffb11b"));
         assertTrue(referenceLocalScss.contains(".label-nav-item-active"));
+        assertTrue(referenceLocalScss.contains("min-height: 38px !important"));
+        assertTrue(referenceLocalScss.contains(".edit-tabs > .v-tabsheet-tabcontainer"));
+        assertTrue(referenceLocalScss.contains("overflow-x: auto !important"));
+        assertTrue(referenceLocalScss.contains("max-width: none !important"));
+        assertTrue(referenceLocalScss.contains("text-overflow: clip !important"));
         assertTrue(referenceLocalScss.contains(".edit-accordion-section .v-panel-content"));
         assertTrue(referenceLocalScss.contains(".open-position-preview-field-row"));
         assertTrue(referenceLocalScss.contains(".open-position-preview-footer"));

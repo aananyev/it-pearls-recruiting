@@ -271,8 +271,10 @@ layout stylename="job-candidate-editor"
 `fullNameField`, `personPositionLabel` под ней. Профиль расположен вне содержимого lazy-вкладок.
 Vaadin slot `v-slot-job-candidate-sidebar` фиксируется теми же 312px, что и sidebar:
 на viewport `1280×720` workspace начинается после sidebar без перекрытия.
-Captions вкладок ограничены `max-width: 112px` и используют ellipsis, поэтому длинные
-названия вкладок не расширяют tabcontainer за правую границу формы.
+Captions вкладок больше не обрезаются через ellipsis: локальный SCSS снимает
+`max-width`, сохраняет `nowrap` и оставляет штатную горизонтальную прокрутку
+tabcontainer. Названия вкладок видны полностью и не расширяют рабочую область
+за правую границу формы.
 
 **Required поля (XML):** `firstName`, `currentCompany`, `personPosition`, `cityOfResidence`, контакты на вкладке Contact Info, `priorityContact`.
 
@@ -501,6 +503,7 @@ git checkout e246a7bc -- modules/web/themes/*/com.company.hunttech/job-candidate
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-03 | Левая панель JobCandidateEdit синхронизирована с эталоном `IteractionListEdit`: пункты label-навигации 38px/13px, tab captions видны полностью без ellipsis, `Загрузить`/`Очистить` под фото одинаковые 96×36px, основные footer-actions сгруппированы внизу справа. Бизнес-логика, actions, loaders и bindings не менялись. |
 | 2026-07-29 | По визуальной проверке во внутреннем браузере на `1280×720` устранено перекрытие sidebar/workspace: Vaadin slot sidebar зафиксирован на 312px во всех темах, вкладки ограничены `112px` с ellipsis, чтобы длинные captions не выходили за границы формы. |
 | 2026-07-29 | Компоновка уточнена по контракту Edit-форм: `candidateNavigation` стоит сразу после профиля, sidebar зафиксирован как 312px, actions сохранения описаны в нижней панели, вкладки и табличные контейнеры защищены от переполнения без изменения loaders/actions/bindings. |
 | 2026-07-29 | `JobCandidateEdit` приведён к общему контракту Edit-форм: добавлены `edit-*`/`label-*` stylename, показана sidebar-навигация, синхронизирован `label-nav-item-active`, сохранён `edit-sidebar-title` при runtime-блокировке кандидата и усилена защита sidebar от переполнения. |

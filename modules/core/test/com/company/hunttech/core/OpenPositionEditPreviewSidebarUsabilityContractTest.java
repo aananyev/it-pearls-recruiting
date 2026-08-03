@@ -80,6 +80,11 @@ public class OpenPositionEditPreviewSidebarUsabilityContractTest {
         assertTrue(reference.contains("height: 94px !important"));
         assertTrue(reference.contains("width: 82px !important"));
         assertTrue(reference.contains("-webkit-line-clamp: 3"));
+        assertTrue(reference.contains(".label-nav-title,"));
+        assertTrue(reference.contains("font-size: 11px !important"));
+        assertTrue(reference.contains(".label-nav-item,"));
+        assertTrue(reference.contains("min-height: 38px !important"));
+        assertFalse(reference.contains("min-height: 21px !important"));
     }
 
     @Test

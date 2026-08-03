@@ -53,7 +53,7 @@ public class CandidateCVEditVisualContractTest {
          */
         assertEquals("59a4f65ab467b8e2b0a636d17d476644d4395e2e",
                 gitBlobSha1(readProjectBytes(ENTITY)));
-        assertEquals("0d58fe4281cc8b66676e789acd187e7e59fd7000",
+        assertEquals("e433bb937d3b817a8f985c1feec178a691ce85ce",
                 gitBlobSha1(readProjectBytes(VIEWS)));
     }
 
@@ -299,6 +299,8 @@ public class CandidateCVEditVisualContractTest {
     public void localScssIsConnectedToAllSupportedThemes() throws IOException {
         String xml = readProjectFile(SCREEN_XML);
         assertTrue(xml.contains("stylename=\"candidate-cv-editor\""));
+        assertTrue(xml.contains("id=\"candidateCvSidebar\""));
+        assertTrue(xml.contains("width=\"312px\""));
 
         Pattern forbiddenTopLevelSelector = Pattern.compile(
                 "(?m)^\\.(v-button|v-label|v-table|v-grid|v-tabsheet|v-textfield|v-richtextarea)\\b");
@@ -312,9 +314,18 @@ public class CandidateCVEditVisualContractTest {
 
             assertTrue(theme, scss.contains("@mixin candidate-cv-editor-theme"));
             assertTrue(theme, scss.contains(".candidate-cv-editor {"));
+            assertTrue(theme, scss.contains(".v-slot-candidate-cv-sidebar"));
+            assertTrue(theme, scss.contains("width: 312px !important"));
             assertTrue(theme, scss.contains(".candidate-cv-navigation {"));
             assertTrue(theme, scss.contains(".candidate-cv-nav-item.v-button"));
+            assertTrue(theme, scss.contains("min-height: 38px !important"));
             assertTrue(theme, scss.contains(".candidate-cv-nav-item-active.v-button"));
+            assertTrue(theme, scss.contains(".candidate-cv-tabs > .v-tabsheet-tabcontainer"));
+            assertTrue(theme, scss.contains("overflow-x: auto !important"));
+            assertTrue(theme, scss.contains("text-overflow: clip !important"));
+            assertTrue(theme, scss.contains(".candidate-cv-photo-dropzone .v-upload .v-button"));
+            assertTrue(theme, scss.contains(".candidate-cv-main-card .v-filterselect-input"));
+            assertTrue(theme, scss.contains(".candidate-cv-main-card .c-pickerfield-layout"));
             assertFalse(theme, scss.contains(".job-candidate-editor"));
             assertFalse(theme, scss.contains(".ext-settings-window"));
             assertFalse(theme, forbiddenTopLevelSelector.matcher(scss).find());

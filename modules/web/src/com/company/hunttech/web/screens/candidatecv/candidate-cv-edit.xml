@@ -97,7 +97,7 @@
                  Все отображаемые значения привязаны к candidateCVDc, поэтому изменения picker-полей
                  сразу отражаются в sidebar без копирования данных и дополнительных loader. -->
             <vbox id="candidateCvSidebar"
-                  width="296px"
+                  width="312px"
                   height="100%"
                   spacing="true"
                   expand="candidateCvSidebarSpacer"

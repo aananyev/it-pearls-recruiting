@@ -30,6 +30,9 @@
      * ограничен, чтобы навигация и сводка не уходили за нижнюю границу экрана.
      */
     .edit-sidebar {
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
       padding: 14px 14px 12px;
       color: #f8fafc;
       background-color: #172638 !important;
@@ -45,6 +48,12 @@
       width: 100% !important;
       min-width: 0 !important;
       max-width: 100% !important;
+    }
+
+    .v-slot-edit-sidebar {
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
     }
 
     .edit-sidebar > .v-spacing {
@@ -146,19 +155,19 @@
 
     .label-nav-title,
     .v-label-label-nav-title {
-      padding: 4px 9px !important;
+      padding: 6px 10px 8px !important;
       color: rgba(248, 250, 252, 0.58) !important;
-      font-size: 9px !important;
-      line-height: 13px !important;
-      letter-spacing: 0.65px;
+      font-size: 11px !important;
+      line-height: 16px !important;
+      letter-spacing: 0.5px;
     }
 
     .label-nav-item,
     .v-button-label-nav-item {
-      min-height: 23px !important;
-      padding: 2px 9px !important;
+      min-height: 38px !important;
+      padding: 8px 10px !important;
       color: rgba(248, 250, 252, 0.82) !important;
-      font-size: 12px !important;
+      font-size: 13px !important;
       line-height: 18px !important;
       border-radius: 0 5px 5px 0 !important;
     }
@@ -234,6 +243,9 @@
     }
 
     .edit-sidebar .v-button-small {
+      box-sizing: border-box;
+      min-height: 38px !important;
+      padding: 0 14px !important;
       color: #f8fafc !important;
       background: rgba(255, 255, 255, 0.07) !important;
       border-color: rgba(255, 255, 255, 0.24) !important;
@@ -289,32 +301,52 @@
       overflow: hidden;
     }
 
+    .edit-tabs > .v-tabsheet-tabcontainer {
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+    }
+
+    .edit-tabs .v-tabsheet-tabitem,
+    .edit-tabs .v-tabsheet-tabitem-selected,
+    .edit-tabs .v-tabsheet-tabitemcell,
+    .edit-tabs .v-caption {
+      width: auto !important;
+      max-width: none !important;
+    }
+
+    .edit-tabs .v-caption {
+      white-space: nowrap !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+    }
+
     .job-candidate-tabs .v-tabsheet-tabs,
     .job-candidate-tabs .v-tabsheet-tabitem,
     .job-candidate-tabs .v-tabsheet-tabitem-selected {
       height: 48px;
-      max-width: 112px;
+      max-width: none !important;
       background: transparent !important;
       border: 0 !important;
       box-shadow: none !important;
     }
 
     .job-candidate-tabs .v-tabsheet-tabitemcell {
-      max-width: 112px;
+      max-width: none !important;
     }
 
     .job-candidate-tabs .v-caption {
       box-sizing: border-box;
       height: 48px;
-      max-width: 112px;
-      padding: 0 6px;
+      width: auto !important;
+      max-width: none !important;
+      padding: 0 10px;
       color: #26384c !important;
-      font-size: 13px !important;
+      font-size: 12px !important;
       font-weight: 600;
       line-height: 48px;
       white-space: nowrap !important;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      overflow: visible !important;
+      text-overflow: clip !important;
       background: transparent !important;
       border: 0 !important;
     }
@@ -593,7 +625,16 @@
 
     @media (max-width: 1366px) {
       .edit-sidebar {
+        width: 312px !important;
+        min-width: 312px !important;
+        max-width: 312px !important;
         padding: 11px 10px 10px;
+      }
+
+      .v-slot-edit-sidebar {
+        width: 312px !important;
+        min-width: 312px !important;
+        max-width: 312px !important;
       }
 
       .open-position-preview-logo,

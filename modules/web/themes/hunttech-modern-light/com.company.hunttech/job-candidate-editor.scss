@@ -125,6 +125,14 @@
         text-align: center;
       }
 
+      .c-fileupload-container {
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        width: 100% !important;
+      }
+
       .v-upload .v-button {
         min-height: 36px;
         padding: 0 14px;
@@ -136,7 +144,36 @@
         box-shadow: none !important;
       }
 
+      .c-fileupload .v-button,
+      .c-fileupload-clear {
+        box-sizing: border-box;
+        width: 96px !important;
+        min-width: 96px !important;
+        max-width: 96px !important;
+        min-height: 36px !important;
+        padding: 0 14px !important;
+        color: #f8fafc !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        text-align: center !important;
+        background: rgba(255, 255, 255, .06) !important;
+        border: 1px solid rgba(255, 255, 255, .34) !important;
+        border-radius: 5px !important;
+        box-shadow: none !important;
+      }
+
+      .c-fileupload input {
+        width: 96px !important;
+        height: 36px !important;
+      }
+
       .v-upload .v-button:hover {
+        background: rgba(255, 255, 255, .14) !important;
+        border-color: rgba(255, 255, 255, .58) !important;
+      }
+
+      .c-fileupload .v-button:hover,
+      .c-fileupload-clear:hover {
         background: rgba(255, 255, 255, .14) !important;
         border-color: rgba(255, 255, 255, .58) !important;
       }
@@ -332,13 +369,11 @@
       border-top: 1px solid rgba(255, 255, 255, .16);
     }
 
-    /* Заголовок «Разделы формы» компактнее: отступы 3px, шрифт 8px, line-height 8px
-       (шапка навигации уменьшена на 30% целиком). */
+    /* Заголовок «Разделы формы» возвращён к читаемому ритму IteractionListEdit. */
     .job-candidate-navigation .label-nav-title {
-      padding-top: 3px;
-      padding-bottom: 3px;
-      font-size: 8px !important;
-      line-height: 8px !important;
+      padding: 6px 10px 8px !important;
+      font-size: 11px !important;
+      line-height: 16px !important;
     }
 
     /* Эталон label-навигации — IteractionListEdit (iteraction-list-visual-alignment.scss:112–144, вариант A):
@@ -352,13 +387,13 @@
       display: block;
       width: 100% !important;
       min-width: 0 !important;
-      min-height: 19px !important;
+      min-height: 38px !important;
       height: auto !important;
-      padding: 2px 8px !important;
+      padding: 8px 10px !important;
       color: rgba(248, 250, 252, 0.82) !important;
-      font-size: 12px !important;
+      font-size: 13px !important;
       font-weight: 600 !important;
-      line-height: 14px !important;
+      line-height: 18px !important;
       text-align: left !important;
       white-space: normal !important;
       background: transparent !important;
@@ -405,9 +440,10 @@
       width: 100% !important;
       min-height: 38px;
       color: #f8fafc !important;
-      font-size: 15px;
-      background: transparent !important;
-      border: 1px solid rgba(255, 255, 255, .50) !important;
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, .06) !important;
+      border: 1px solid rgba(255, 255, 255, .34) !important;
       border-radius: 5px;
       box-shadow: none !important;
     }
@@ -473,35 +509,37 @@
       padding: 0 12px;
       background: #fff !important;
       border-bottom: 1px solid #dfe5ec;
-      overflow: hidden;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
     }
 
     .job-candidate-tabs .v-tabsheet-tabs,
     .job-candidate-tabs .v-tabsheet-tabitem,
     .job-candidate-tabs .v-tabsheet-tabitem-selected {
       height: 48px;
-      max-width: 112px;
+      max-width: none !important;
       background: transparent !important;
       border: 0 !important;
       box-shadow: none !important;
     }
 
     .job-candidate-tabs .v-tabsheet-tabitemcell {
-      max-width: 112px;
+      max-width: none !important;
     }
 
     .job-candidate-tabs .v-caption {
       box-sizing: border-box;
       height: 48px;
-      max-width: 112px;
-      padding: 0 6px;
+      width: auto !important;
+      max-width: none !important;
+      padding: 0 10px;
       color: #26384c !important;
-      font-size: 13px !important;
+      font-size: 12px !important;
       font-weight: 600;
       line-height: 48px;
       white-space: nowrap !important;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      overflow: visible !important;
+      text-overflow: clip !important;
       background: transparent !important;
       border: 0 !important;
     }
@@ -810,6 +848,23 @@
       background: rgba(255, 255, 255, .98) !important;
       border-top: 1px solid #dfe5ec;
       box-shadow: 0 -3px 14px rgba(15, 23, 42, .05);
+    }
+
+    .job-candidate-bottom-bar > .v-expand {
+      display: flex !important;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      width: 100% !important;
+    }
+
+    .job-candidate-bottom-bar > .v-expand > .v-slot {
+      flex: 0 0 auto !important;
+      width: auto !important;
+    }
+
+    .job-candidate-bottom-bar > .v-expand > .v-spacing {
+      display: none !important;
     }
 
     .job-candidate-bottom-bar .v-button {
