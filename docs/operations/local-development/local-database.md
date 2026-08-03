@@ -120,6 +120,20 @@ psql -h localhost -p 5432 -U cuba -d HuntTech -c "SELECT version();"
 
 Скрипт `get_base.sh` загружает base backup с удалённого сервера в локальный каталог PostgreSQL 11. Используйте только при необходимости полной копии данных.
 
+Ключи скрипта (2026-08-03):
+
+| Ключ | Действие |
+|------|----------|
+| (без ключей) | Полная загрузка: база + fileStorage |
+| `--db-only` | Только база (PostgreSQL base backup), без fileStorage |
+| `--files-only` | Только файлы fileStorage (rsync, новые/изменённые), база не трогается |
+| `--check` | Проверка подключения к удалённому серверу (PostgreSQL 5432 + SSH root@), без загрузки данных |
+| `restart-db` (`-r`) | Перезапуск локальной PostgreSQL 11 (pg_ctl stop/start + проверка primary) |
+| `check-db` (`-l`) | Проверка локальной PostgreSQL: статус, версия, recovery, список БД, размер кластера |
+| `help` (`-h`) | Справка по функционалу и ключам |
+
+Локальный `fileStorage` — симлинк на `/opt/app_home/fileStorage`; rsync докачивает только новые и изменённые файлы (без `--ignore-existing`).
+
 **Важно:** после base backup PostgreSQL может оказаться в режиме recovery (`pg_is_in_recovery() = true`), и миграции `./gradlew updateDb` не выполнятся (read-only). Для разработки с миграциями создайте чистую базу:
 
 ```bash
@@ -143,4 +157,6 @@ psql -h localhost -p 5432 -U cuba -d HuntTech -c "SELECT version();"
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-03 | Миграция прода (hr.hunttech.ru/hunttech): применены 10 чанжсетов 26/ (перф-индексы, ИИ-профиль, AI-настройки, reconcile схемы, маржинальность рейтов); согласован `sys_db_changelog` (префикс `70-IT-Pearls/` → `70-hunttech_recruiting/`, 756 записей); исправлен баг в `260727-2-reconcileProductionSchema.sql` (висячий символ `^` в конце файла ломал psql) |
+| 2026-08-03 | get_base.sh: добавлены ключи `help`, `restart-db` (перезапуск локальной PG), `check-db` (проверка локальной PG); ранее — `--db-only`, `--files-only`, `--check`; фикс validate fileStorage (BSD find + симлинк); rsync без `--ignore-existing` |
 | 2026-07-23 | Штатный локальный запуск дополнен обязательным `updateDb` до deploy, чтобы исключить ошибки отсутствующих колонок при загрузке экранов |

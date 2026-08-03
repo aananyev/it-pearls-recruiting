@@ -82,6 +82,23 @@ banner() {
     echo "*******************************************************"
 }
 
+usage() {
+    cat <<EOF
+Использование: $0 [ключ]
+
+Ключи:
+  (без ключей)          Полная загрузка: база + fileStorage
+  --db-only, -d         Загрузить только базу (PostgreSQL base backup), без fileStorage
+  --files-only, -f      Загрузить только файлы fileStorage (rsync), без базы
+  --check, -c, --test   Проверить подключение к удалённому серверу (PostgreSQL + SSH), без загрузки
+  restart-db, -r        Перезапустить локальную PostgreSQL 11
+  check-db, -l          Проверить локальную PostgreSQL 11 (статус, версия, recovery, БД)
+  help, -h, --help      Показать эту справку
+
+По умолчанию (без ключей): полная загрузка — база + fileStorage.
+EOF
+}
+
 # Лог WAL/репликации на удалённом сервере (диагностика перед basebackup).
 log_remote_replication_settings() {
     info "Запрос конфигурации репликации с сервера..."
@@ -146,7 +163,9 @@ diagnose_psql_failure() {
 }
 
 # --- проверки перед стартом ---
+# $1 = 1 — проверять PostgreSQL (psql-соединение, ~/.pgpass); 0 — только инструменты.
 preflight_checks() {
+    local check_pg="${1:-1}"
     local missing=0
 
     for bin in pg_basebackup pg_ctl psql; do
@@ -161,35 +180,135 @@ preflight_checks() {
         missing=1
     fi
 
-    if [ ! -f "$HOME/.pgpass" ]; then
-        fail "Не найден ~/.pgpass — добавьте строку для пользователя replica:"
-        info "  hr.hunttech.ru:5432:*:replica:<пароль>"
-        info "  chmod 600 ~/.pgpass"
-        missing=1
-    elif [ "$(stat -f '%OLp' "$HOME/.pgpass" 2>/dev/null || stat -c '%a' "$HOME/.pgpass" 2>/dev/null)" != "600" ]; then
-        fail "Неверные права на ~/.pgpass (нужно 600): chmod 600 ~/.pgpass"
-        missing=1
+    if [ "$check_pg" -eq 1 ]; then
+        if [ ! -f "$HOME/.pgpass" ]; then
+            fail "Не найден ~/.pgpass — добавьте строку для пользователя replica:"
+            info "  hr.hunttech.ru:5432:*:replica:<пароль>"
+            info "  chmod 600 ~/.pgpass"
+            missing=1
+        elif [ "$(stat -f '%OLp' "$HOME/.pgpass" 2>/dev/null || stat -c '%a' "$HOME/.pgpass" 2>/dev/null)" != "600" ]; then
+            fail "Неверные права на ~/.pgpass (нужно 600): chmod 600 ~/.pgpass"
+            missing=1
+        fi
     fi
 
     info "Проверка клиента: $("$PG_BASEBACKUP" --version)"
     info "Режим SSL: PGSSLMODE=$PGSSLMODE"
     info "Локальный fileStorage: $LOCAL_FILE_STORAGE_DIR"
 
-    info_n "Проверка соединения с $db_server ... "
-    if ! "$PSQL" -h "$db_server" -U "$db_user" -d postgres -tAc "SELECT version();" >>"$LOG" 2>&1; then
-        echo
-        fail "Не удалось подключиться к $db_server."
-        diagnose_psql_failure
-        log_remote_replication_settings
-        missing=1
-    else
-        ok
-        log_remote_replication_settings
+    if [ "$check_pg" -eq 1 ]; then
+        info_n "Проверка соединения с $db_server ... "
+        if ! "$PSQL" -h "$db_server" -U "$db_user" -d postgres -tAc "SELECT version();" >>"$LOG" 2>&1; then
+            echo
+            fail "Не удалось подключиться к $db_server."
+            diagnose_psql_failure
+            log_remote_replication_settings
+            missing=1
+        else
+            ok
+            log_remote_replication_settings
+        fi
     fi
 
     if [ "$missing" -ne 0 ]; then
         die "Предварительные проверки не пройдены."
     fi
+}
+
+# Проверка SSH-доступа к серверу и доступности удалённого каталога fileStorage.
+check_ssh_connection() {
+    info_n "Проверка SSH root@${db_server} ... "
+    if ! ssh -o BatchMode=yes -o ConnectTimeout=10 "root@${db_server}" \
+            "test -d '${REMOTE_FILE_STORAGE_DIR}' && echo SSH_OK" >>"$LOG" 2>&1; then
+        echo
+        fail "SSH-доступ root@${db_server} недоступен (проверьте ключ в ~/.ssh и known_hosts)."
+        show_log_tail 10
+        return 1
+    fi
+    ok
+    return 0
+}
+
+# Перезапуск локальной PostgreSQL 11 (без загрузки данных с сервера).
+restart_local_pg() {
+    info "Перезапуск локальной PostgreSQL 11 ($PGDATA) ..."
+
+    # Если postgres держит launchd (KeepAlive) — выгружаем сервис, иначе
+    # launchd перезапустит процесс во время остановки (см. скилл get-base-sh).
+    if launchctl list 2>/dev/null | grep -qi postgres; then
+        info_n "Выгрузка launchd-сервиса postgres ... "
+        launchctl bootout "gui/$(id -u)/com.itpearls.postgresql11" 2>>"$LOG" || true
+        launchctl bootout "gui/$(id -u)/com.HuntTech.postgresql11" 2>>"$LOG" || true
+        sleep 1
+        ok
+    fi
+
+    info_n "Остановка PostgreSQL ... "
+    "$PG_CTL" stop -D "$PGDATA" -m fast >>"$LOG" 2>&1 || true
+    sleep 1
+    ok
+
+    info_n "Запуск PostgreSQL ... "
+    if ! "$PG_CTL" start -D "$PGDATA" >>"$LOG" 2>&1; then
+        die "Не удалось запустить PostgreSQL (см. $LOG)."
+    fi
+    ok
+
+    info_n "Проверка готовности (pg_isready) ... "
+    if "$PG11_BIN/pg_isready" -h 127.0.0.1 -p 5432; then
+        ok
+    else
+        fail "pg_isready не отвечает на 127.0.0.1:5432 — см. $LOG"
+        return 1
+    fi
+
+    # Если после перезапуска кластер ушёл в recovery — это read-only, для
+    # разработки непригодно (миграции updateDb не выполнятся).
+    local in_recovery
+    in_recovery=$("$PSQL" -h 127.0.0.1 -U cuba -d postgres -tAc "SELECT pg_is_in_recovery();" 2>>"$LOG" || echo "error")
+    if [ "$in_recovery" = "t" ]; then
+        fail "ВНИМАНИЕ: кластер в режиме recovery (read-only). Удалите recovery.conf/standby.signal и перезапустите."
+        return 1
+    fi
+    info "PostgreSQL 11 перезапущен: 127.0.0.1:5432 (режим primary)"
+    return 0
+}
+
+# Проверка состояния локальной PostgreSQL 11 (без загрузки данных с сервера).
+check_local_pg() {
+    info "Проверка локальной PostgreSQL 11 ($PGDATA) ..."
+
+    if ! "$PG11_BIN/pg_isready" -h 127.0.0.1 -p 5432; then
+        die "Локальный PostgreSQL не запущен. Запустите: $0 restart-db"
+    fi
+
+    info_n "Версия сервера: "
+    "$PSQL" -h 127.0.0.1 -U cuba -d postgres -tAc "SELECT version();" 2>>"$LOG" || echo "недоступно (psql -U cuba)"
+
+    info_n "Запущен с: "
+    "$PSQL" -h 127.0.0.1 -U cuba -d postgres -tAc "SELECT pg_postmaster_start_time();" 2>>"$LOG" || true
+
+    info_n "Режим recovery (read-only): "
+    local in_recovery
+    in_recovery=$("$PSQL" -h 127.0.0.1 -U cuba -d postgres -tAc "SELECT pg_is_in_recovery();" 2>>"$LOG" || echo "error")
+    if [ "$in_recovery" = "t" ]; then
+        fail "да — кластер в recovery (read-only), миграции не выполнятся."
+        return 1
+    elif [ "$in_recovery" = "f" ]; then
+        echo "нет (primary)"
+    else
+        echo "не удалось проверить"
+    fi
+
+    info "Базы данных:"
+    "$PSQL" -h 127.0.0.1 -U cuba -d postgres -tAc "SELECT datname FROM pg_database ORDER BY 1;" 2>>"$LOG" \
+        | sed 's/^/  - /' || true
+
+    info_n "Размер кластера: "
+    du -sh "$PGDATA" 2>/dev/null | awk '{print $1}' || echo "?"
+
+    info "${GREEN}Локальная PostgreSQL в порядке.${NC}"
+    return 0
 }
 
 # PGDATA задан и существует как каталог (перед rm/cp/pg_ctl)
@@ -586,8 +705,10 @@ sync_file_storage() {
     info "  source: root@${db_server}:${REMOTE_FILE_STORAGE_DIR}/"
     info "  target: ${LOCAL_FILE_STORAGE_DIR}/"
 
-    # rsync --info=progress2 (rsync ≥3.1) показывает единый прогресс-бар
-    local rsync_opts="-avrltD --stats --ignore-existing"
+    # rsync --info=progress2 (rsync ≥3.1) показывает единый прогресс-бар.
+    # БЕЗ --ignore-existing: rsync передаёт только новые и изменённые файлы
+    # (сравнение по размеру и mtime), неизменённые пропускает автоматически.
+    local rsync_opts="-avrltD --stats"
     if rsync --version | grep -q "version 3\.[1-9]"; then
         rsync_opts="$rsync_opts --info=progress2"
     fi
@@ -639,8 +760,11 @@ configure_local_file_storage() {
 }
 
 validate_local_file_storage() {
+    # BSD find (macOS) НЕ следует симлинку при стартовой точке: если
+    # LOCAL_FILE_STORAGE_DIR — симлинк (например, на /opt/app_home/fileStorage),
+    # find без -L вернёт 0 файлов и скрипт ложно упадёт с «fileStorage пуст».
     local file_count
-    file_count=$(find "$LOCAL_FILE_STORAGE_DIR" -type f | wc -l | tr -d ' ')
+    file_count=$(find -L "$LOCAL_FILE_STORAGE_DIR" -type f 2>/dev/null | wc -l | tr -d ' ')
     if [ "$file_count" -eq 0 ]; then
         die "После rsync локальный fileStorage пуст: $LOCAL_FILE_STORAGE_DIR"
     fi
@@ -649,11 +773,84 @@ validate_local_file_storage() {
 
 # --- main ---
 SKIP_DOWNLOAD=0
+MODE_DB=1
+MODE_FILES=1
+MODE_CHECK=0
+MODE_RESTART_DB=0
+MODE_CHECK_DB=0
+
+# Разбор аргументов командной строки
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --db-only|-d)                 MODE_FILES=0 ;;
+        --files-only|-f)              MODE_DB=0 ;;
+        --check|-c|--test)            MODE_CHECK=1 ;;
+        restart-db|--restart-db|-r)   MODE_RESTART_DB=1 ;;
+        check-db|--check-db|-l)       MODE_CHECK_DB=1 ;;
+        help|--help|-h)               usage; exit 0 ;;
+        *)
+            fail "Неизвестный аргумент: $1"
+            usage
+            exit 1
+            ;;
+    esac
+    shift
+done
+
 banner
 info "Основная площадка: ${GREEN}${db_server}${NC}"
 : >"$LOG"
 
-preflight_checks
+# Режим restart-db: перезапуск локальной PostgreSQL, без загрузки данных
+if [ "$MODE_RESTART_DB" -eq 1 ]; then
+    info "Режим: перезапуск локальной PostgreSQL (--restart-db)"
+    restart_local_pg || exit 1
+    exit 0
+fi
+
+# Режим check-db: проверка локальной PostgreSQL, без загрузки данных
+if [ "$MODE_CHECK_DB" -eq 1 ]; then
+    info "Режим: проверка локальной PostgreSQL (--check-db)"
+    check_local_pg || exit 1
+    exit 0
+fi
+
+# Режим --check: только проверка подключения, без загрузки данных
+if [ "$MODE_CHECK" -eq 1 ]; then
+    info "Режим: проверка подключения (данные не загружаются)"
+    preflight_checks 1
+    check_ssh_connection || exit 1
+    info "${GREEN}Все проверки пройдены: PostgreSQL ($db_server:5432) и SSH (root@${db_server}) доступны.${NC}"
+    exit 0
+fi
+
+# Режим --files-only: только fileStorage, база не трогается
+if [ "$MODE_FILES" -eq 1 ] && [ "$MODE_DB" -eq 0 ]; then
+    info "Режим: только fileStorage (--files-only)"
+    preflight_checks 0
+    check_ssh_connection || exit 1
+    sync_file_storage
+    info "${GREEN}Готово. Локальный fileStorage: $LOCAL_FILE_STORAGE_DIR${NC}"
+    exit 0
+fi
+
+# Режим --db-only: только база, без fileStorage
+if [ "$MODE_DB" -eq 1 ] && [ "$MODE_FILES" -eq 0 ]; then
+    info "Режим: только база (--db-only)"
+    preflight_checks 1
+    prepare_temp_directory
+    download_basebackup
+    install_to_local_pgdata
+    archive_fresh_backup
+    archive_and_start
+    info "${GREEN}Готово. Локальная PostgreSQL: $PGDATA${NC}"
+    info "Проверка: ./start-postgres11.sh status"
+    exit 0
+fi
+
+# Полный режим (по умолчанию): база + fileStorage
+info "Режим: полная загрузка (база + fileStorage)"
+preflight_checks 1
 prepare_temp_directory
 download_basebackup
 install_to_local_pgdata
