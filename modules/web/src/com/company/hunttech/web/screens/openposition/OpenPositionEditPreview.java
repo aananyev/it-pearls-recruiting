@@ -265,7 +265,7 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
      * копии CSS и не изменяются theme-файлы других экранов.
      */
     private void applySharedEditScreenContract() {
-        openPositionPreviewSidebar.setWidth("270px");
+        openPositionPreviewSidebar.setWidth("312px");
         openPositionPreviewSidebar.addStyleName("edit-sidebar");
         openPositionPreviewWorkspace.addStyleName("edit-workspace");
 
@@ -303,16 +303,20 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
                 "open-position-preview-toolbar");
         addStyles(tabSheetOpenPosition,
                 "open-position-preview-tabs");
+        // Legacy-обработчик сохраняет доступ к tabPayments, но в утверждённой
+        // компоновке его header скрыт, поскольку поля показаны в договорах.
+        tabSheetOpenPosition.getTab("tabPayments")
+                .setStyleName("open-position-preview-payments-tab");
         addStyles(mainTabScrollBox,
                 "open-position-preview-main-scroll");
         addStyles(editActions,
                 "open-position-preview-footer");
 
-        projectLogoImage.setWidth("112px");
-        projectLogoImage.setHeight("112px");
+        projectLogoImage.setWidth("150px");
+        projectLogoImage.setHeight("150px");
         projectLogoImage.addStyleName("open-position-preview-logo");
-        projectOwnerImage.setWidth("48px");
-        projectOwnerImage.setHeight("48px");
+        projectOwnerImage.setWidth("70px");
+        projectOwnerImage.setHeight("70px");
         projectOwnerImage.addStyleName("open-position-preview-owner-image");
 
         addStyles(labelOpenPosition,

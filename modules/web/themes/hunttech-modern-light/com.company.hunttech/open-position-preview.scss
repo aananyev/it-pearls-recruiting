@@ -33,7 +33,7 @@
       width: 312px !important;
       min-width: 312px !important;
       max-width: 312px !important;
-      padding: 14px 14px 12px;
+      padding: 24px 20px 18px;
       color: #f8fafc;
       background-color: #172638 !important;
       background-image: linear-gradient(180deg, #172638 0%, #132130 56%, #0f1b28 100%) !important;
@@ -73,12 +73,12 @@
     .open-position-preview-logo,
     .open-position-preview-logo img,
     .open-position-preview-logo .v-image-element {
-      width: 112px !important;
-      height: 112px !important;
-      min-width: 112px !important;
-      min-height: 112px !important;
-      max-width: 112px !important;
-      max-height: 112px !important;
+      width: 150px !important;
+      height: 150px !important;
+      min-width: 150px !important;
+      min-height: 150px !important;
+      max-width: 150px !important;
+      max-height: 150px !important;
       border-radius: 50% !important;
       object-fit: contain !important;
       background: #ffffff;
@@ -104,12 +104,12 @@
     .open-position-preview-owner-image,
     .open-position-preview-owner-image img,
     .open-position-preview-owner-image .v-image-element {
-      width: 48px !important;
-      height: 48px !important;
-      min-width: 48px !important;
-      min-height: 48px !important;
-      max-width: 48px !important;
-      max-height: 48px !important;
+      width: 70px !important;
+      height: 70px !important;
+      min-width: 70px !important;
+      min-height: 70px !important;
+      max-width: 70px !important;
+      max-height: 70px !important;
       border-radius: 50% !important;
       object-fit: cover !important;
     }
@@ -184,6 +184,11 @@
       color: #ffb11b !important;
       background: rgba(255, 177, 27, 0.12) !important;
       border-left-color: #ffb11b !important;
+    }
+
+    .open-position-preview-payments-navigation,
+    .v-slot-open-position-preview-payments-navigation {
+      display: none !important;
     }
 
     .open-position-preview-summary-card,
@@ -273,8 +278,8 @@
     .open-position-preview-toolbar {
       position: relative;
       z-index: 2;
-      min-height: 64px;
-      padding: 11px 20px;
+      min-height: 58px;
+      padding: 10px 22px;
       background: $v-panel-background-color;
       border-bottom: 1px solid rgba($v-font-color, 0.13);
       box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
@@ -293,11 +298,11 @@
       line-height: 18px !important;
     }
 
-.job-candidate-tabs > .v-tabsheet-tabcontainer {
+    .job-candidate-tabs > .v-tabsheet-tabcontainer {
       width: 100% !important;
       padding: 0 12px;
-      background: #fff !important;
-      border-bottom: 1px solid #dfe5ec;
+      background: $v-panel-background-color !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.15);
       overflow: hidden;
     }
 
@@ -320,6 +325,12 @@
       text-overflow: clip !important;
     }
 
+    // Третий технический tab сохраняет inherited @Named path, но не участвует
+    // в утверждённой навигации: платёжные поля находятся в договорном разделе.
+    .edit-tabs .v-tabsheet-tabitemcell-open-position-preview-payments-tab {
+      display: none !important;
+    }
+
     .job-candidate-tabs .v-tabsheet-tabs,
     .job-candidate-tabs .v-tabsheet-tabitem,
     .job-candidate-tabs .v-tabsheet-tabitem-selected {
@@ -340,7 +351,7 @@
       width: auto !important;
       max-width: none !important;
       padding: 0 10px;
-      color: #26384c !important;
+      color: mix($v-font-color, $v-panel-background-color, 86%) !important;
       font-size: 12px !important;
       font-weight: 600;
       line-height: 48px;
@@ -352,19 +363,19 @@
     }
 
     .job-candidate-tabs .v-tabsheet-tabitem:hover .v-caption {
-      color: #1264b5 !important;
+      color: $v-selection-color !important;
     }
 
     .job-candidate-tabs .v-tabsheet-tabitem-selected .v-caption {
-      color: #0b63b6 !important;
-      border-bottom: 3px solid #0b63b6 !important;
+      color: $v-selection-color !important;
+      border-bottom: 3px solid $v-selection-color !important;
     }
 
     .job-candidate-tabs .v-tabsheet-content {
       width: 100% !important;
       height: calc(100% - 49px) !important;
       padding: 16px 18px 20px;
-      background: #f5f7fa !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 86%) !important;
       overflow: auto;
     }
 
@@ -442,6 +453,40 @@
     .open-position-preview-subsection .v-panel-content {
       padding: 13px 14px 15px;
       background: mix($v-app-background-color, $v-panel-background-color, 32%);
+    }
+
+    .open-position-preview-payment-fields,
+    .open-position-preview-payment-row {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+    }
+
+    .open-position-preview-payment-row {
+      display: flex !important;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .open-position-preview-payment-row > .v-slot {
+      box-sizing: border-box;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      flex: 1 1 0;
+    }
+
+    .open-position-preview-payment-row > .v-slot > *,
+    .open-position-preview-payment-fields > .v-slot > .edit-form-control {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
     }
 
     /*
@@ -637,21 +682,6 @@
         max-width: 312px !important;
       }
 
-      .open-position-preview-logo,
-      .open-position-preview-logo img,
-      .open-position-preview-logo .v-image-element {
-        width: 92px !important;
-        height: 92px !important;
-        min-width: 92px !important;
-        min-height: 92px !important;
-        max-width: 92px !important;
-        max-height: 92px !important;
-      }
-      .open-position-preview-logo-box {
-        overflow: visible;
-      }
-
-
       .edit-sidebar-title,
       .edit-sidebar-title.v-label,
       .open-position-preview-title-clamp {
@@ -667,15 +697,15 @@
         padding: 9px 16px;
       }
 
-.job-candidate-tabs .v-caption {
+      .job-candidate-tabs .v-caption {
         padding-left: 10px;
         padding-right: 10px;
-        font-size: 14px !important;
-        max-width: 96px;
+        font-size: 12px !important;
+        max-width: none !important;
       }
-.job-candidate-tabs .v-tabsheet-tabitem,
+      .job-candidate-tabs .v-tabsheet-tabitem,
       .job-candidate-tabs .v-tabsheet-tabitemcell {
-        max-width: 96px;
+        max-width: none !important;
       }
 
       .open-position-preview-main-scroll,
@@ -735,6 +765,16 @@
 
       .open-position-preview-footer > .v-slot > .v-button {
         min-width: 104px;
+      }
+
+      .open-position-preview-payment-row {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .open-position-preview-payment-row > .v-slot {
+        width: 100% !important;
+        flex: 1 1 auto;
       }
     }
 

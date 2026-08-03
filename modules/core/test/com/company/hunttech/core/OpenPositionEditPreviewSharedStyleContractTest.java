@@ -90,7 +90,7 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
                     controller.contains(role));
         }
 
-        assertTrue(controller.contains("openPositionPreviewSidebar.setWidth(\"270px\")"));
+        assertTrue(controller.contains("openPositionPreviewSidebar.setWidth(\"312px\")"));
         assertTrue(controller.contains("section.setShowAsPanel(true)"));
         assertTrue(controller.contains("section.removeStyleName(\"light\")"));
         assertTrue(controller.contains("section.removeStyleName(\"edit-card\")"));
@@ -181,8 +181,14 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
                     scss.contains("." + role));
         }
 
-        assertTrue(controller.contains("projectLogoImage.setWidth(\"112px\")"));
-        assertTrue(controller.contains("projectLogoImage.setHeight(\"112px\")"));
+        assertTrue(controller.contains("projectLogoImage.setWidth(\"150px\")"));
+        assertTrue(controller.contains("projectLogoImage.setHeight(\"150px\")"));
+        assertTrue(controller.contains("getTab(\"tabPayments\")"));
+        assertTrue(controller.contains("setStyleName(\"open-position-preview-payments-tab\")"));
+        assertTrue(scss.contains(".open-position-preview-payments-navigation"));
+        assertTrue(scss.contains(".open-position-preview-payment-row"));
+        assertTrue(scss.contains(
+                ".v-tabsheet-tabitemcell-open-position-preview-payments-tab"));
         assertTrue(controller.contains("vacancyTitleSpacerHBox.setVisible(false)"));
         assertTrue(controller.contains("labelOpenPosition.setDescription(title)"));
 

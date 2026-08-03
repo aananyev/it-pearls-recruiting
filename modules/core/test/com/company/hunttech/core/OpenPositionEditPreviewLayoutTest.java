@@ -74,7 +74,7 @@ public class OpenPositionEditPreviewLayoutTest {
     }
 
     @Test
-    public void allLegacyTabsKeepOrderIdentifiersAndVisibilityContract() throws IOException {
+    public void legacyTabIdentifiersRemainAvailableAndPaymentsStayInsideAgreements() throws IOException {
         String descriptor = readProjectFile(PREVIEW_XML);
         int previous = -1;
         for (String tabId : TAB_IDS) {
@@ -91,6 +91,23 @@ public class OpenPositionEditPreviewLayoutTest {
         assertTrue(paymentsTab.contains("visible=\"false\""));
         assertTrue(descriptor.contains("property=\"commandCandidate\""));
         assertTrue(descriptor.contains("id=\"previewNavPayments\""));
+        assertTrue(startTag(descriptor, "previewNavPayments").contains("visible=\"false\""));
+        assertTrue(startTag(descriptor, "previewNavPayments")
+                .contains("open-position-preview-payments-navigation"));
+
+        int agreementsTab = descriptor.indexOf("<tab id=\"laborAgreementTab\"");
+        int companyPayments = descriptor.indexOf("id=\"groupBoxPaymentsDetail\"");
+        int researcherPayments = descriptor.indexOf("id=\"groupBoxPaymentsResearcher\"");
+        int recruiterPayments = descriptor.indexOf("id=\"groupBoxPaymentsRecrutier\"");
+        int hiddenPaymentsTab = descriptor.indexOf("<tab id=\"tabPayments\"");
+        assertTrue("Оплата компании должна находиться в трудовых договорах",
+                companyPayments > agreementsTab && companyPayments < hiddenPaymentsTab);
+        assertTrue("Оплата ресерчерам должна следовать за оплатой компании",
+                researcherPayments > companyPayments && researcherPayments < hiddenPaymentsTab);
+        assertTrue("Оплата рекрутерам должна следовать за оплатой ресерчерам",
+                recruiterPayments > researcherPayments && recruiterPayments < hiddenPaymentsTab);
+        assertFalse("Техническая вкладка оплат должна оставаться пустой",
+                paymentsTab.contains("groupBoxPayments"));
     }
 
     @Test

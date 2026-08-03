@@ -2,7 +2,7 @@
 
 ## Назначение и бизнес-смысл (What & Why)
 
-`OpenPositionEditPreview` — параллельный экран визуальной проверки новой компоновки карточки вакансии HRM HuntTech до замены действующего `OpenPositionEdit`. В текущем этапе полируется левая часть этой новой компоновки; legacy `OpenPositionEdit` не подменяется preview-экраном.
+`OpenPositionEditPreview` — параллельный экран визуальной проверки новой компоновки карточки вакансии HRM HuntTech до замены действующего `OpenPositionEdit`. Текущая форма реализует утверждённый рендер в стиле `JobCandidateEdit`: профиль вакансии расположен в sidebar шириной 312px, а основная работа выполняется в едином workspace с общей навигацией, accordion-секциями и постоянным footer. Legacy `OpenPositionEdit` не подменяется preview-экраном.
 
 Экран сохраняет существующую модель вакансии и полный бизнес-контракт legacy-редактора: реквизиты, команда или одиночная вакансия, проект, заказчик, локация, количество позиций, зарплата, трудовые договоры, оплаты, описания, файлы, тестовое задание, памятка интервью, шаблон письма, навыки, новости, согласование и комментарии.
 
@@ -18,6 +18,7 @@
 - обрезание правых controls из-за legacy-процентных ширин;
 - перегруженную высоту tab bar;
 - слабую визуальную иерархию основных и вложенных accordion-секций;
+- разрыв единого сценария оформления вакансии между вкладками договоров и оплаты;
 - разнесённые по ширине кнопки завершения.
 
 Архитектура сохраняет место для будущих AI-помощников анализа вакансии и поиска кандидатов. В текущем этапе AI-компоненты и новые бизнес-сценарии отсутствуют.
@@ -52,7 +53,7 @@ HrmMainScreen / прямой route
     │   └── sidebar spacer
     └── edit-workspace
         ├── edit-toolbar
-        ├── compact edit-tabs
+        ├── edit-tabs (11 видимых разделов)
         │   └── edit-workspace-scroll / edit-workspace-content
         │       ├── primary accordion sections
         │       ├── nested subsection
@@ -72,7 +73,8 @@ HrmMainScreen / прямой route
 - пункт label-навигации → выбирается существующая вкладка `tabSheetOpenPosition` → lazy-loading продолжает выполнять базовый контроллер;
 - изменение активной вкладки → сохраняется `label-nav-item`, добавляется или удаляется только `label-nav-item-active`;
 - раскрытие GroupBox → меняется только presentation-state → значения и DataContext сохраняются;
-- изменение `commandCandidate` → legacy-контроллер управляет вкладкой «Оплаты» → preview синхронизирует только соответствующий navigation-пункт;
+- открытие «Трудовых договоров» → в одном scroll-контейнере доступны параметры оформления, таблица договоров и три секции оплаты → существующие bindings и расчёты остаются прежними;
+- изменение `commandCandidate` → legacy-контроллер продолжает управлять доступностью платёжных компонентов → отдельный пункт и tab оплаты скрыты локальным presentation-слоем;
 - смена темы → сохраняются геометрия, dark-sidebar и responsive-сетка → рабочая область и controls адаптируются через theme variables;
 - сохранение и закрытие → выполняется `windowCommitAndClose` с прежними проверками и сервисами;
 - отмена → выполняется `windowClose` без сохранения;
@@ -117,22 +119,21 @@ Preview использует те же data components, views, loader ID и JPQL
 
 ## 3. Вкладки
 
-Сохраняются порядок и ID 12 вкладок:
+Пользователю доступны 11 вкладок:
 
 1. `tabOpenPosition`;
 2. `laborAgreementTab`;
-3. `tabPayments`;
-4. `tabJobDescription`;
-5. `tabFiles`;
-6. `tabExercise`;
-7. `tabMemoForInterview`;
-8. `tabTemplateLetter`;
-9. `tabSkills`;
-10. `tabOpenPositionNews`;
-11. `tabApproval`;
-12. `commentsTab`.
+3. `tabJobDescription`;
+4. `tabFiles`;
+5. `tabExercise`;
+6. `tabMemoForInterview`;
+7. `tabTemplateLetter`;
+8. `tabSkills`;
+9. `tabOpenPositionNews`;
+10. `tabApproval`;
+11. `commentsTab`.
 
-`tabPayments` остаётся скрытой для одиночной вакансии и показывается существующей логикой для карточки команды.
+`tabPayments` сохраняется пустой и скрытой только как техническая цель inherited `@Named("tabSheetOpenPosition.tabPayments")`. Пункт `previewNavPayments` также сохраняет прежние ID и invoke, но скрыт. Все прежние платёжные компоненты находятся после таблицы договоров внутри `laborAgreementTab` в порядке: «Оплата компании» → «Оплата ресерчерам» → «Оплата рекрутерам».
 
 Tab bar остаётся частью `TabSheet`: вкладки не заменяются собственным роутером и не удаляются. Локальный CSS не обрезает captions через ellipsis; при нехватке места используется горизонтальный overflow tabcontainer CUBA, поэтому заголовки видны полностью и не расширяют workspace за границу формы.
 
@@ -166,8 +167,8 @@ Tab bar остаётся частью `TabSheet`: вкладки не замен
 
 Runtime-polish:
 
-- отдельный `open-position-preview-logo-box` резервирует `112px` высоты, до `1366px` или высоты viewport `820px` — `94px`;
-- основной логотип — `96 × 96px`, в компактном режиме — `82 × 82px`;
+- отдельный `open-position-preview-logo-box` резервирует `166px` высоты, до `1366px` или высоты viewport `820px` — `126px`;
+- основной логотип — `150 × 150px`, в компактном режиме — `112 × 112px`;
 - изображение владельца сохраняет существующий размер и видимость;
 - название — 14 px / 19 px, максимум четыре визуальные строки; в компактном режиме — три строки;
 - полный текст названия сохраняется в `description` компонента;
@@ -323,7 +324,7 @@ Presentation-стили не запускают loaders и не меняют ф�
 - изменение сущностей, БД и Liquibase;
 - изменение `views.xml`, сервисов и JPQL;
 - изменение shared SCSS и SCSS других экранов;
-- перемещение полей между вкладками или смысловыми блоками;
+- перемещение полей вне согласованного объединения договоров и оплаты;
 - изменение captions, component ID, `dataContainer`, `property`, actions и `invoke`;
 - AI-анализ и поиск кандидатов;
 - production deploy;
@@ -346,7 +347,7 @@ Hermes проверяет точный HEAD PR:
 11. `clean assemble` — `BUILD SUCCESSFUL`;
 12. local deploy и HTTP `/hrm/` = 200;
 13. открытие preview по route без detached/lazy/RPC ошибок;
-14. visual smoke всех 12 вкладок в семи темах;
+14. visual smoke 11 видимых вкладок в семи темах и отсутствие отдельной вкладки оплаты;
 15. visual smoke viewport 1920×1080, 1600×900, 1366×768, 1280×800 и высоты 768/820 px;
 16. logo и title не пересекаются при первом открытии и после переключения темы;
 17. полный title доступен через tooltip;
@@ -358,6 +359,7 @@ Hermes проверяет точный HEAD PR:
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-03 | Реализован утверждённый рендер формы: sidebar и логотип приведены к геометрии `JobCandidateEdit` 312/150px; отдельная вкладка оплаты скрыта, а существующие платёжные компоненты с прежними ID и bindings перенесены в «Трудовые договоры» тремя accordion-секциями; tab captions, theme-aware workspace и responsive-поля синхронизированы во всех семи темах. Бизнес-логика, loaders, JPQL, services и production не менялись. |
 | 2026-08-03 | Левая часть OpenPositionEditPreview приведена к визуальному эталону `IteractionListEdit`: sidebar и его Vaadin slot закреплены на 312px, label-навигация 38px/13px больше не сжимается в компактном viewport, tab captions видны полностью без ellipsis через локальный horizontal overflow. Legacy `OpenPositionEdit`, Java/XML, data bindings, loaders и бизнес-логика не менялись. |
 | 2026-08-02 | По runtime-скриншоту добавлен corrective layer `open-position-preview-sidebar-usability`: отдельный visual-stage 112/94px исключает наезд `OvaFallbackImage` на title; логотип 96/82px; title 4/3 строки с tooltip; summary GridLayout преобразован в компактную сетку caption/value. Изменены только локальные SCSS семи тем и их import/include, Java/XML и бизнес-логика не затронуты. |
 | 2026-08-02 | Родительские box-контейнеры вкладок растянуты на всю ширину: в `projectLocationAccordion` (вкладка «Основное») двухколоночная legacy-раскладка перестроена в одноколоночную — vbox «Проект» 50%→100% с переносом `companyDepartamentField` внутрь (50%→100%), hbox «Компания/Город» 50%→100% с `expand="cityOpenPositionField"`; добавлены смысловые inline-комментарии. Остальные контейнеры вкладок уже были 100%; вне зоны: sidebar (312px), 3-колонка выплат (33% ×3), пустой спейсер `vacancyTitleSpacerHBox`. |

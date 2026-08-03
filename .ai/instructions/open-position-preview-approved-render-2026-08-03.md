@@ -1,0 +1,58 @@
+# Hermes verification — утверждённый рендер OpenPositionEditPreview
+
+Проект: HRM HuntTech
+Ветка: `agent/open-position-preview-render`
+Base: `master`
+Статус PR: `WAITING_FOR_HERMES`
+
+Проверять только точный HEAD, указанный в PR. Перед сборкой подтвердить совпадение
+HEAD ветки, HEAD PR и проверяемого SHA, `base=master`, а также отсутствие конфликтов.
+При несовпадении остановить проверку со статусом `HEAD_MISMATCH`.
+
+## Область проверки
+
+- `OpenPositionEditPreview` реализует утверждённую двухпанельную компоновку в стиле
+  `JobCandidateEdit` и общего контракта Edit-экранов.
+- Sidebar имеет ширину 312px, основной визуальный образ 150px.
+- Отдельные пункт навигации и tab оплаты не отображаются.
+- Все прежние платёжные поля находятся в `laborAgreementTab` после таблицы договоров:
+  «Оплата компании», «Оплата ресерчерам», «Оплата рекрутерам».
+- Component ID, bindings, actions, invoke, loaders, JPQL и legacy-бизнес-логика сохранены.
+- Локальные SCSS идентичны во всех семи темах CUBA Platform.
+
+Legacy `OpenPositionEdit`, серверы, services, entities, Liquibase, БД и production
+не изменялись.
+
+## Команды
+
+```bash
+git diff --check
+./gradlew :app-core:test \
+  --tests 'com.company.hunttech.core.OpenPositionEditPreviewLayoutTest' \
+  --tests 'com.company.hunttech.core.OpenPositionEditPreviewSharedStyleContractTest' \
+  --tests 'com.company.hunttech.core.OpenPositionEditPreviewSidebarUsabilityContractTest' \
+  --no-daemon --stacktrace
+./gradlew :app-core:test \
+  --tests 'com.company.hunttech.core.ScreenViewIntegrityTest' \
+  --no-daemon --stacktrace
+./gradlew :app-web:buildScssThemes --no-daemon --stacktrace
+./gradlew clean assemble --no-daemon --stacktrace
+```
+
+## Visual smoke
+
+Локально под пользователем `alan`:
+
+1. открыть `http://localhost:8080/hrm/` и подтвердить HTTP 200;
+2. открыть `OpenPositionEditPreview` для существующей вакансии и новой карточки;
+3. проверить sidebar 312px, отсутствие пересечения logo/title, полную видимость
+   подписей боковой и верхней навигации;
+4. проверить отсутствие отдельной вкладки оплаты для одиночной и командной вакансии;
+5. открыть «Трудовые договоры» и проверить параметры оформления, таблицу договоров,
+   три платёжные accordion-секции и все прежние поля;
+6. проверить одинаковую ширину и высоту controls, отсутствие наложений и горизонтального
+   выхода на 1920×1080, 1600×900, 1366×768 и 1280×800;
+7. проверить footer: «Отмена» и «Сохранить и закрыть» находятся внизу справа;
+8. повторить smoke в семи темах и проверить отсутствие новых critical Tomcat errors.
+
+Ожидаемый результат: `STATUS: READY_TO_MERGE`. Merge не выполнять, production не трогать.
