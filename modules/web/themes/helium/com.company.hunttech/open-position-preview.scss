@@ -854,6 +854,67 @@
       flex: 1 1 190px;
     }
 
+    /* Project block: keep type/remote on one line and move the comment below. */
+    .open-position-preview-project-section {
+      overflow: visible;
+    }
+
+.open-position-preview-project-section .open-position-preview-field-row > .v-expand > .v-slot {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.open-position-preview-project-section .v-slot {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+div.open-position-preview .open-position-preview-project-section div.v-slot,
+div.open-position-preview .open-position-preview-project-section div.v-slot.v-slot-edit-form-control {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+div.open-position-preview .open-position-preview-project-section .v-slot[style*="margin-left: -10px"],
+div.open-position-preview .open-position-preview-project-section .v-slot[style*="margin-left: -93px"] {
+  margin: 0 !important;
+}
+
+div.open-position-preview .open-position-preview-project-section .v-expand > .v-slot {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+    .open-position-preview-project-section .open-position-preview-field-row .v-slot > .v-widget {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .open-position-preview-project-type-row,
+    .open-position-preview-project-type-row > .v-expand {
+      min-height: 193px !important;
+    }
+
+    .open-position-preview-project-type-row > .v-expand > .v-slot:nth-child(1) {
+      flex: 2 1 420px;
+    }
+
+    .open-position-preview-project-type-row > .v-expand > .v-slot:nth-child(3),
+    .open-position-preview-project-type-row > .v-expand > .v-slot:nth-child(5) {
+      flex: 1 1 220px;
+    }
+
+    .open-position-preview-project-name-row > .v-expand > .v-slot,
+    .open-position-preview-project-company-row > .v-expand > .v-slot {
+      flex: 1 1 100%;
+    }
+
+    .open-position-preview-project-section .v-caption {
+      align-items: center;
+    }
+
     .open-position-preview-row-half > .v-expand > .v-slot {
       flex: 1 1 360px;
     }

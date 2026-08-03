@@ -95,6 +95,10 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
         assertTrue(controller.contains("section.removeStyleName(\"light\")"));
         assertTrue(controller.contains("section.removeStyleName(\"edit-card\")"));
         assertTrue(controller.contains("applySharedWorkspaceStyles(openPositionPreviewWorkspace)"));
+        assertTrue(controller.contains("open-position-preview-project-section"));
+        assertTrue(controller.contains("open-position-preview-project-type-row"));
+        assertTrue(controller.contains("open-position-preview-project-name-row"));
+        assertTrue(controller.contains("open-position-preview-project-company-row"));
     }
 
     @Test
@@ -201,6 +205,8 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
         assertTrue(scss.contains(".open-position-preview-group-tab.edit-accordion-section"));
         assertTrue(scss.contains("margin-left: 0 !important;"));
         assertTrue(scss.contains("min-height: 193px !important;"));
+        assertTrue(scss.contains(".open-position-preview-project-section"));
+        assertTrue(scss.contains(".open-position-preview-project-type-row"));
         assertTrue(scss.contains("width: 264px !important"));
         assertTrue(scss.contains("-webkit-line-clamp: 7;"));
         assertFalse(scss.contains("@media"));

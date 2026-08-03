@@ -332,7 +332,8 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
         addStyles(commandFieldHBox,
                 "open-position-preview-subsection");
         addPrimarySection(commandVacancyAccordion);
-        addPrimarySection(projectLocationAccordion);
+        addStyles(projectLocationAccordion,
+                "open-position-preview-project-section");
         addPrimarySection(positionCountAccordion);
         addPrimarySection(salaryAccordion);
 
@@ -342,10 +343,16 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
                 "open-position-preview-row-three");
         addFieldRow(hboxVacansy,
                 "open-position-preview-row-position");
+        addStyles(hboxVacansy,
+                "open-position-preview-project-type-row");
         addFieldRow(hboxProject,
                 "open-position-preview-row-half");
+        addStyles(hboxProject,
+                "open-position-preview-project-name-row");
         addFieldRow(hboxCompany,
                 "open-position-preview-row-half");
+        addStyles(hboxCompany,
+                "open-position-preview-project-company-row");
         addFieldRow(hboxSalary,
                 "open-position-preview-row-salary");
         addFieldRow(space2Box,
