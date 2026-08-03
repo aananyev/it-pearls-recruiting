@@ -256,7 +256,7 @@
                     <lookupPickerField id="parentOpenPositionField" dataContainer="openPositionDc" property="parentOpenPosition" width="50%" caption="msg://msgCommand" optionsContainer="openPositionParentDc"/>
                   </hbox>
                 </groupBox>
-                <groupBox id="projectLocationAccordion" caption="msg://msgTypeOfProject" collapsable="true" collapsed="false" stylename="light edit-card" width="100%" spacing="true">
+                <groupBox id="projectLocationAccordion" caption="msg://msgTypeOfProject" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-project-section" width="100%" spacing="true">
                   <hbox id="hboxVacansy" spacing="true" width="100%">
                     <lookupPickerField id="positionTypeField" optionsContainer="positionTypesDc" dataContainer="openPositionDc" nullOptionVisible="false" property="positionType" caption="msg://msgPositionType" width="50%" required="true">
                       <actions>
@@ -332,16 +332,16 @@
           <!-- 2. ТРУДОВЫЕ ДОГОВОРЫ -->
           <tab id="laborAgreementTab" caption="msg://msgLaborAgreementTab" margin="true" spacing="true" icon="CUBES">
             <scrollBox orientation="vertical" width="100%" height="100%">
-              <vbox width="100%" spacing="true" margin="true">
-                <groupBox id="laborAgreementParametersAccordion" caption="Параметры оформления" collapsable="true" collapsed="false" stylename="light edit-card" width="100%">
+              <vbox width="100%" spacing="true" margin="true" stylename="open-position-preview-labor-tab-content">
+                <groupBox id="laborAgreementParametersAccordion" caption="Параметры оформления" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-labor-parameters" width="100%">
                   <hbox spacing="true" width="100%">
                     <lookupField id="registrationForWorkField" dataContainer="openPositionDc" property="registrationForWork" caption="msg://msgRegistrationForWork" nullOptionVisible="false" required="true" width="40%"/>
                     <textField id="outstaffingCostTextField" datatype="decimal" dataContainer="openPositionDc" property="outstaffingCost" caption="msg://msgOutstaffingCost" description="msg://msgOutstaffingCostDescription" width="40%"/>
                     <button id="setSalaryFieldButton" align="BOTTOM_LEFT" caption="msg://msgSetSalary" description="msg://msgSetSalaryDesc" invoke="setSalaryFieldButtonInvoke"/>
                   </hbox>
                 </groupBox>
-                <groupBox id="laborAgreementTableAccordion" caption="msg://msgLaborAgreementTab" collapsable="true" collapsed="false" stylename="light edit-card" width="100%" height="430px" expand="laborAgreementDataGrid">
-                  <dataGrid id="laborAgreementDataGrid" width="100%" height="100%" editorEnabled="true" dataContainer="laborAgreementDc">
+                <groupBox id="laborAgreementTableAccordion" caption="msg://msgLaborAgreementTab" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-table-section" width="100%" height="430px" expand="laborAgreementDataGrid">
+                  <dataGrid id="laborAgreementDataGrid" width="100%" height="100%" editorEnabled="true" dataContainer="laborAgreementDc" stylename="open-position-preview-table-variant5">
                     <actions>
                       <action id="create" type="create"/>
                       <action id="edit" type="edit"/>
@@ -402,40 +402,40 @@
           <!-- 3. ОПИСАНИЕ ВАКАНСИИ -->
           <tab id="tabJobDescription" caption="mainMsg://msgJobDescription" margin="true" spacing="true" icon="DRIVERS_LICENSE">
             <scrollBox id="jobDescriptionVBox" width="100%" height="100%">
-              <vbox width="100%" height="100%" spacing="true" margin="true" expand="descriptionTextsAccordion">
-                <groupBox id="workExperienceGroupBox" collapsable="true" collapsed="false" caption="msg://msgWorkExperience" stylename="light edit-card" spacing="true" width="100%">
+              <vbox width="100%" height="100%" spacing="true" margin="true" expand="descriptionTextsAccordion" stylename="open-position-preview-description-tab-content">
+                <groupBox id="workExperienceGroupBox" collapsable="true" collapsed="false" caption="msg://msgWorkExperience" stylename="light edit-card open-position-preview-description-experience" spacing="true" width="100%">
                   <radioButtonGroup id="workExperienceRadioButton" orientation="horizontal" required="true" description="msg://msgWorkExperience" dataContainer="openPositionDc" property="workExperience" caption="msg://msgWorkExperience"/>
                   <radioButtonGroup id="commanExperienceRadioButton" orientation="horizontal" description="msg://msgCommandExperience" dataContainer="openPositionDc" visible="false" property="commandExperience" caption="msg://msgCommandExperience"/>
                 </groupBox>
-                <groupBox id="descriptionTextsAccordion" caption="Тексты описания" collapsable="true" collapsed="false" stylename="light edit-card" width="100%" height="100%">
+                <groupBox id="descriptionTextsAccordion" caption="Тексты описания" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-richtext-section" width="100%" height="100%">
                   <accordion id="openPositionAccordion" width="100%" height="100%">
                     <tab id="openPositionRuTabAccordion" caption="msg://msgRuComment">
                       <!-- Растягивает редактор описания на всю вкладку аккордеона. -->
                       <vbox width="100%" height="100%">
-                        <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="100%" required="true"/>
+                        <richTextArea id="openPositionRichTextArea" dataContainer="openPositionDc" property="comment" width="100%" height="100%" required="true" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
                     <tab id="openPositionEnTabAccordion" caption="msg://msgEnComment">
                       <!-- Растягивает англ. редактор описания на всю вкладку аккордеона. -->
                       <vbox width="100%" height="100%">
-                        <richTextArea id="openPositionEnRichTextArea" dataContainer="openPositionDc" property="commentEn" width="100%" height="100%"/>
+                        <richTextArea id="openPositionEnRichTextArea" dataContainer="openPositionDc" property="commentEn" width="100%" height="100%" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
                     <tab id="openPositionStandartDescriptionAccorden" caption="msg://msgStandartDescription">
                       <!-- Растягивает стандартное описание на всю вкладку аккордеона. -->
                       <vbox width="100%" height="100%">
-                        <richTextArea id="openPositionStandartDescriptionRichTextArea" width="100%" height="100%" editable="false"/>
+                        <richTextArea id="openPositionStandartDescriptionRichTextArea" width="100%" height="100%" editable="false" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
                     <tab id="openPositionWhoIsThisGuyAccorden" caption="msg://msgWhoIsThisGuy">
                       <!-- Растягивает описание «Кто этот человек» на всю вкладку аккордеона. -->
                       <vbox width="100%" height="100%">
-                        <richTextArea id="openPositionWhoIsThisGuyRichTextArea" width="100%" height="100%" editable="false"/>
+                        <richTextArea id="openPositionWhoIsThisGuyRichTextArea" width="100%" height="100%" editable="false" stylename="open-position-preview-richtext-variant5"/>
                       </vbox>
                     </tab>
                   </accordion>
                 </groupBox>
-                <groupBox id="shortDescriptionAccordion" caption="msg://msgShortCaption" collapsable="true" collapsed="false" stylename="light edit-card" width="100%">
+                <groupBox id="shortDescriptionAccordion" caption="msg://msgShortCaption" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-description-short" width="100%">
                   <hbox width="100%" spacing="true" expand="shortDescriptionTextArea">
                     <textField id="shortDescriptionTextArea" dataContainer="openPositionDc" property="shortDescription" maxLength="250" width="100%"/>
                     <button id="scanJDButton" caption="msg://msgScanJD" align="BOTTOM_RIGHT" description="msg://msgScanJDAndPut" invoke="addShortDescription"/>
