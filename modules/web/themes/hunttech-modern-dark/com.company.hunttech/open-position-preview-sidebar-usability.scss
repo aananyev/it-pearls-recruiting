@@ -40,10 +40,10 @@
       justify-content: center !important;
       width: 100% !important;
       min-width: 0 !important;
-      height: 166px !important;
-      min-height: 166px !important;
-      max-height: 166px !important;
-      margin: 0 0 8px !important;
+      height: 96px !important;
+      min-height: 96px !important;
+      max-height: 96px !important;
+      margin: 0 0 4px !important;
       overflow: visible !important;
     }
 
@@ -62,12 +62,12 @@
     .open-position-preview-logo,
     .open-position-preview-logo img,
     .open-position-preview-logo .v-image-element {
-      width: 150px !important;
-      height: 150px !important;
-      min-width: 150px !important;
-      min-height: 150px !important;
-      max-width: 150px !important;
-      max-height: 150px !important;
+      width: 88px !important;
+      height: 88px !important;
+      min-width: 88px !important;
+      min-height: 88px !important;
+      max-width: 88px !important;
+      max-height: 88px !important;
     }
 
     .open-position-preview-logo {
@@ -93,14 +93,14 @@
     .open-position-preview-title-clamp {
       display: -webkit-box !important;
       width: 100% !important;
-      max-height: 76px !important;
+      max-height: 38px !important;
       margin: 0 !important;
       overflow: hidden !important;
       font-size: 14px !important;
       line-height: 19px !important;
       text-align: center !important;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 4;
+      -webkit-line-clamp: 2;
     }
 
     .edit-sidebar-subtitle,
@@ -136,10 +136,10 @@
     .edit-sidebar-summary .v-gridlayout > div {
       position: relative !important;
       display: grid !important;
-      grid-template-columns: 72px minmax(0, 1fr);
+      grid-template-columns: 66px minmax(0, 1fr);
       grid-auto-rows: minmax(18px, auto);
       column-gap: 8px;
-      row-gap: 5px;
+      row-gap: 3px;
     }
 
     .open-position-preview-summary-card .v-gridlayout-slot,
@@ -195,13 +195,13 @@
       padding: 6px 10px 8px !important;
       font-size: 11px !important;
       line-height: 16px !important;
-      letter-spacing: 0.5px;
+      letter-spacing: 0;
     }
 
     .label-nav-item,
     .v-button-label-nav-item {
-      min-height: 38px !important;
-      padding: 8px 10px !important;
+      min-height: 32px !important;
+      padding: 6px 10px !important;
       font-size: 13px !important;
       line-height: 18px !important;
     }
@@ -210,46 +210,5 @@
       min-height: 8px !important;
     }
 
-    @media (max-width: 1366px), (max-height: 820px) {
-      .open-position-preview-logo-box {
-        height: 126px !important;
-        min-height: 126px !important;
-        max-height: 126px !important;
-        margin-bottom: 6px !important;
-      }
-
-      .open-position-preview-logo,
-      .open-position-preview-logo img,
-      .open-position-preview-logo .v-image-element {
-        width: 112px !important;
-        height: 112px !important;
-        min-width: 112px !important;
-        min-height: 112px !important;
-        max-width: 112px !important;
-        max-height: 112px !important;
-      }
-
-      .edit-sidebar-title,
-      .edit-sidebar-title.v-label,
-      .open-position-preview-title-clamp {
-        max-height: 57px !important;
-        font-size: 13px !important;
-        line-height: 19px !important;
-        -webkit-line-clamp: 3;
-      }
-
-      .label-nav-item,
-      .v-button-label-nav-item {
-        min-height: 38px !important;
-        padding: 8px 10px !important;
-        line-height: 18px !important;
-      }
-
-      .open-position-preview-summary-card .v-gridlayout > div,
-      .edit-sidebar-summary .v-gridlayout > div {
-        grid-template-columns: 66px minmax(0, 1fr);
-        row-gap: 3px;
-      }
-    }
   }
 }

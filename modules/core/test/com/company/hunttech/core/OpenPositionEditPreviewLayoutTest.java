@@ -125,7 +125,11 @@ public class OpenPositionEditPreviewLayoutTest {
                 "id=\"openPositionPreviewToolbar\"",
                 "id=\"tabSheetOpenPosition\"",
                 "id=\"editActions\"");
-        assertTrue(descriptor.contains("width=\"312px\""));
+        assertTrue(descriptor.contains("id=\"openPositionPreviewSidebar\"")
+                && descriptor.contains("width=\"264px\""));
+        assertTrue(descriptor.contains("id=\"projectLogoImage\" width=\"88px\""));
+        assertTrue(descriptor.contains("caption=\"Сохранить и закрыть\""));
+        assertTrue(descriptor.contains("caption=\"Отмена\""));
         assertEquals(12, count(descriptor, "open-position-preview-nav-item"));
         assertEquals(12, count(descriptor, "invoke=\"previewOpen"));
 
