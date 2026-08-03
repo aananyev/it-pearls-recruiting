@@ -30,10 +30,10 @@
      * ограничен, чтобы навигация и сводка не уходили за нижнюю границу экрана.
      */
     .edit-sidebar {
-      width: 312px !important;
-      min-width: 312px !important;
-      max-width: 312px !important;
-      padding: 24px 20px 18px;
+      width: 264px !important;
+      min-width: 264px !important;
+      max-width: 264px !important;
+      padding: 11px 10px 10px;
       color: #f8fafc;
       background-color: #172638 !important;
       background-image: linear-gradient(180deg, #172638 0%, #132130 56%, #0f1b28 100%) !important;
@@ -51,9 +51,9 @@
     }
 
     .v-slot-edit-sidebar {
-      width: 312px !important;
-      min-width: 312px !important;
-      max-width: 312px !important;
+      width: 264px !important;
+      min-width: 264px !important;
+      max-width: 264px !important;
     }
 
     .edit-sidebar > .v-spacing {
@@ -73,12 +73,12 @@
     .open-position-preview-logo,
     .open-position-preview-logo img,
     .open-position-preview-logo .v-image-element {
-      width: 150px !important;
-      height: 150px !important;
-      min-width: 150px !important;
-      min-height: 150px !important;
-      max-width: 150px !important;
-      max-height: 150px !important;
+      width: 88px !important;
+      height: 88px !important;
+      min-width: 88px !important;
+      min-height: 88px !important;
+      max-width: 88px !important;
+      max-height: 88px !important;
       border-radius: 50% !important;
       object-fit: contain !important;
       background: #ffffff;
@@ -159,7 +159,7 @@
       color: rgba(248, 250, 252, 0.58) !important;
       font-size: 11px !important;
       line-height: 16px !important;
-      letter-spacing: 0.5px;
+      letter-spacing: 0;
     }
 
     .label-nav-item,
@@ -474,6 +474,8 @@
       position: relative !important;
       top: auto !important;
       left: auto !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
       width: auto !important;
       min-width: 0 !important;
       max-width: 100% !important;
@@ -513,6 +515,8 @@
       position: relative !important;
       top: auto !important;
       left: auto !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
       width: auto !important;
       min-width: 0 !important;
       max-width: 100% !important;
@@ -668,116 +672,6 @@
       box-shadow: none !important;
     }
 
-    @media (max-width: 1366px) {
-      .edit-sidebar {
-        width: 312px !important;
-        min-width: 312px !important;
-        max-width: 312px !important;
-        padding: 11px 10px 10px;
-      }
-
-      .v-slot-edit-sidebar {
-        width: 312px !important;
-        min-width: 312px !important;
-        max-width: 312px !important;
-      }
-
-      .edit-sidebar-title,
-      .edit-sidebar-title.v-label,
-      .open-position-preview-title-clamp {
-        max-height: 120px !important;
-        font-size: 14px !important;
-        line-height: 19px !important;
-        -webkit-line-clamp: 6;
-      }
-
-      .edit-toolbar,
-      .open-position-preview-toolbar {
-        min-height: 58px;
-        padding: 9px 16px;
-      }
-
-      .job-candidate-tabs .v-caption {
-        padding-left: 10px;
-        padding-right: 10px;
-        font-size: 12px !important;
-        max-width: none !important;
-      }
-      .job-candidate-tabs .v-tabsheet-tabitem,
-      .job-candidate-tabs .v-tabsheet-tabitemcell {
-        max-width: none !important;
-      }
-
-      .open-position-preview-main-scroll,
-      .edit-workspace-scroll {
-        padding: 11px 12px 18px;
-      }
-
-      .edit-accordion-section .v-panel-content {
-        padding: 14px 14px 16px;
-      }
-
-      .open-position-preview-field-row {
-        gap: 11px;
-      }
-
-      .open-position-preview-row-title > .v-slot:nth-child(1) {
-        flex-basis: 130px;
-      }
-
-      .open-position-preview-row-title > .v-slot:nth-child(2) {
-        flex-basis: 360px;
-      }
-
-      .open-position-preview-row-title > .v-slot:nth-child(3) {
-        flex-basis: 160px;
-      }
-    }
-
-    @media (max-width: 1100px) {
-      .open-position-preview-field-row > .v-slot,
-      .open-position-preview-row-position > .v-slot,
-      .open-position-preview-row-half > .v-slot,
-      .open-position-preview-row-salary > .v-slot {
-        flex: 1 1 calc(50% - 8px);
-      }
-
-      .open-position-preview-row-title > .v-slot:nth-child(2),
-      .open-position-preview-row-wide > .v-slot:first-child {
-        flex: 1 1 100%;
-      }
-
-      .open-position-preview-row-title > .v-slot:nth-child(4) {
-        min-width: 118px !important;
-      }
-    }
-
-    @media (max-width: 820px) {
-      .open-position-preview-field-row > .v-slot,
-      .open-position-preview-row-title > .v-slot,
-      .open-position-preview-row-position > .v-slot,
-      .open-position-preview-row-half > .v-slot,
-      .open-position-preview-row-salary > .v-slot,
-      .open-position-preview-row-wide > .v-slot {
-        flex: 1 1 100% !important;
-        min-width: 0 !important;
-      }
-
-      .open-position-preview-footer > .v-slot > .v-button {
-        min-width: 104px;
-      }
-
-      .open-position-preview-payment-row {
-        align-items: stretch;
-        flex-direction: column;
-      }
-
-      .open-position-preview-payment-row > .v-slot {
-        width: 100% !important;
-        flex: 1 1 auto;
-      }
-    }
-
     /*
      * Modern UX polish (только presentation, без изменения XML/Java):
      * - единый визуальный ритм: радиусы карточек 8px, лёгкие тени уровня карточки;
@@ -848,6 +742,232 @@
     .edit-toolbar,
     .open-position-preview-toolbar {
       box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05), inset 0 -2px 0 rgba($v-selection-color, 0.14);
+    }
+
+    /*
+     * Runtime alignment layer. CUBA HBoxLayout renders business components
+     * inside v-expand, therefore both form rows and footer align this wrapper
+     * instead of relying on the absolute coordinates generated by Vaadin.
+     */
+    .edit-sidebar {
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+    }
+
+    .open-position-preview-tab-content {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: 100% !important;
+      padding: 14px 16px 18px;
+    }
+
+    .open-position-preview-tab-content.edit-accordion-section {
+      width: calc(100% - 32px) !important;
+      height: calc(100% - 28px) !important;
+      margin: 14px 16px !important;
+      padding: 0;
+    }
+
+    .v-verticallayout.open-position-preview-group-tab {
+      padding-top: 58px;
+    }
+
+    .open-position-preview-group-tab.edit-accordion-section {
+      height: calc(100% - 72px) !important;
+      margin: 58px 16px 14px !important;
+    }
+
+    .open-position-preview-field-row > .v-expand {
+      box-sizing: border-box;
+      position: relative !important;
+      display: flex !important;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 11px;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      padding: 0 !important;
+    }
+
+    .open-position-preview-field-row > .v-expand > .v-spacing,
+    .open-position-preview-footer > .v-expand > .v-spacing {
+      display: none !important;
+    }
+
+    .open-position-preview-field-row > .v-expand > .v-slot {
+      box-sizing: border-box;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      flex: 1 1 240px;
+    }
+
+    .open-position-preview-field-row > .v-expand > .v-slot > * {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .open-position-preview-row-title > .v-expand > .v-slot:nth-child(1) {
+      flex: 0 1 130px;
+    }
+
+    .open-position-preview-row-title > .v-expand > .v-slot:nth-child(3) {
+      flex: 3 1 420px;
+    }
+
+    .open-position-preview-row-title > .v-expand > .v-slot:nth-child(5) {
+      flex: 1 1 320px;
+    }
+
+    .open-position-preview-row-title > .v-expand > .v-slot:nth-child(7) {
+      min-width: 180px !important;
+      flex: 1 1 240px;
+    }
+
+    .open-position-preview-row-title,
+    .open-position-preview-row-title > .v-expand {
+      min-height: 193px !important;
+    }
+
+    .open-position-preview-row-three > .v-expand > .v-slot {
+      flex: 1 1 240px;
+    }
+
+    .open-position-preview-row-position > .v-expand > .v-slot:nth-child(1) {
+      flex: 2 1 380px;
+    }
+
+    .open-position-preview-row-position > .v-expand > .v-slot:nth-child(3),
+    .open-position-preview-row-position > .v-expand > .v-slot:nth-child(5) {
+      flex: 1 1 190px;
+    }
+
+    .open-position-preview-row-half > .v-expand > .v-slot {
+      flex: 1 1 360px;
+    }
+
+    .open-position-preview-row-salary > .v-expand > .v-slot {
+      flex: 1 1 170px;
+    }
+
+    .open-position-preview-row-wide > .v-expand > .v-slot:first-child {
+      flex: 1 1 520px;
+    }
+
+    .open-position-preview-row-wide > .v-expand > .v-slot:last-child {
+      flex: 0 1 230px;
+    }
+
+    .open-position-preview-table-view .v-table,
+    .open-position-preview-table-view .v-grid,
+    .open-position-preview-table-view .c-treegrid,
+    .edit-accordion-section .v-table,
+    .edit-accordion-section .v-grid,
+    .edit-accordion-section .c-treegrid {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      border: 1px solid rgba($v-font-color, 0.15);
+      border-radius: 6px;
+      background: $v-panel-background-color;
+      overflow: hidden;
+    }
+
+    .open-position-preview-table-view .v-table-header-wrap,
+    .open-position-preview-table-view .v-grid-header,
+    .edit-accordion-section .v-table-header-wrap,
+    .edit-accordion-section .v-grid-header {
+      background: mix($v-app-background-color, $v-panel-background-color, 52%);
+      border-bottom-color: rgba($v-font-color, 0.14);
+    }
+
+    .open-position-preview-table-view .v-table-header-cell,
+    .open-position-preview-table-view .v-grid-header .v-grid-cell,
+    .edit-accordion-section .v-table-header-cell,
+    .edit-accordion-section .v-grid-header .v-grid-cell {
+      min-height: 40px;
+      color: mix($v-font-color, $v-panel-background-color, 82%);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .open-position-preview-tab-content .v-richtextarea,
+    .edit-accordion-section .v-richtextarea {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .open-position-preview-tab-content .v-button,
+    .edit-accordion-section .v-button {
+      min-height: 38px;
+      border-radius: 5px;
+      letter-spacing: 0;
+    }
+
+    .open-position-preview-footer > .v-expand {
+      box-sizing: border-box;
+      position: relative !important;
+      display: flex !important;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 0 !important;
+    }
+
+    .open-position-preview-footer > .v-expand > .v-slot {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      width: auto !important;
+      height: auto !important;
+      flex: 0 0 auto !important;
+    }
+
+    .open-position-preview-footer > .v-expand > .v-slot > .v-button {
+      width: auto !important;
+      min-width: 118px;
+      height: 40px !important;
+      padding: 0 18px !important;
+    }
+
+    .open-position-preview-footer .open-position-preview-primary-action {
+      min-width: 184px;
+      font-weight: 700;
+    }
+
+    .open-position-preview-row-three > .v-expand > .v-slot,
+    .open-position-preview-row-position > .v-expand > .v-slot,
+    .open-position-preview-row-half > .v-expand > .v-slot,
+    .open-position-preview-row-salary > .v-expand > .v-slot {
+      flex: 1 1 calc(50% - 6px);
+    }
+
+    .edit-footer-actions,
+    .open-position-preview-footer {
+      min-height: 58px;
+      padding: 9px 14px;
     }
   }
 }

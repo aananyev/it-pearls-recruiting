@@ -2,7 +2,7 @@
 
 ## Назначение и бизнес-смысл (What & Why)
 
-`OpenPositionEditPreview` — параллельный экран визуальной проверки новой компоновки карточки вакансии HRM HuntTech до замены действующего `OpenPositionEdit`. Текущая форма реализует утверждённый рендер в стиле `JobCandidateEdit`: профиль вакансии расположен в sidebar шириной 312px, а основная работа выполняется в едином workspace с общей навигацией, accordion-секциями и постоянным footer. Legacy `OpenPositionEdit` не подменяется preview-экраном.
+`OpenPositionEditPreview` — параллельный экран визуальной проверки новой компоновки карточки вакансии HRM HuntTech до замены действующего `OpenPositionEdit`. Текущая форма реализует утверждённый рендер в стиле `JobCandidateEdit`: профиль вакансии расположен в sidebar шириной 264px, а основная работа выполняется в едином workspace с общей навигацией, accordion-секциями и постоянным footer. Legacy `OpenPositionEdit` не подменяется preview-экраном.
 
 Экран сохраняет существующую модель вакансии и полный бизнес-контракт legacy-редактора: реквизиты, команда или одиночная вакансия, проект, заказчик, локация, количество позиций, зарплата, трудовые договоры, оплаты, описания, файлы, тестовое задание, памятка интервью, шаблон письма, навыки, новости, согласование и комментарии.
 
@@ -100,7 +100,7 @@ Preview использует те же data components, views, loader ID и JPQL
 - `gradeDc` / `gradeDl`;
 - `closedVacancyTimer`.
 
-Все существующие `dataContainer`, `property`, `optionsContainer`, `required`, action ID, `invoke`, validators, captions и component ID сохраняются.
+Все существующие `dataContainer`, `property`, `optionsContainer`, `required`, action ID, `invoke`, validators и component ID сохраняются. Подписи двух штатных footer-actions уточнены только presentation-слоем до «Сохранить и закрыть» и «Отмена»; сами actions не заменены.
 
 `OpenPositionEdit.java`, `open-position-edit.xml`, browse-экраны, меню, entities, services, `views.xml`, существующий JPQL и Liquibase не изменяются.
 
@@ -155,9 +155,9 @@ Tab bar остаётся частью `TabSheet`: вкладки не замен
 
 Ширина sidebar в preview закреплена локально:
 
-- базовая и компактная — `312px`;
-- та же ширина задана Vaadin slot-обёртке `.v-slot-edit-sidebar`, поэтому workspace
-  начинается строго после левой панели и не заезжает под неё.
+- базовая для desktop-экрана — `264px`, чтобы после системного меню HRM HuntTech workspace сохранял полезную ширину;
+- соответствующая ширина всегда задана Vaadin slot-обёртке `.v-slot-edit-sidebar`, поэтому workspace начинается строго после левой панели и не заезжает под неё;
+- sidebar прокручивается по вертикали внутри собственных границ: навигация, сводка и подписка не пересекаются с footer формы.
 
 Локальный partial оформляет sidebar в фирменной палитре HRM HuntTech:
 
@@ -167,14 +167,14 @@ Tab bar остаётся частью `TabSheet`: вкладки не замен
 
 Runtime-polish:
 
-- отдельный `open-position-preview-logo-box` резервирует `166px` высоты, до `1366px` или высоты viewport `820px` — `126px`;
-- основной логотип — `150 × 150px`, в компактном режиме — `112 × 112px`;
+- отдельный `open-position-preview-logo-box` резервирует `96px` высоты;
+- основной логотип — `88 × 88px`;
 - изображение владельца сохраняет существующий размер и видимость;
-- название — 14 px / 19 px, максимум четыре визуальные строки; в компактном режиме — три строки;
+- название — 14 px / 19 px, максимум две визуальные строки;
 - полный текст названия сохраняется в `description` компонента;
 - название центрировано и располагается отдельным slot ниже logo-stage;
 - навигация использует ритм эталона `IteractionListEdit`: заголовок 11px/16px,
-  пункты 38px/13px с вертикальным центрированием текста;
+  пункты 32px/13px с вертикальным центрированием текста;
 - summary GridLayout преобразуется только CSS-слоем в две колонки `72px + minmax(0,1fr)`, в компактном режиме `66px + minmax(0,1fr)`;
 - значения summary ограничиваются двумя строками, captions имеют вторичную типографику;
 - warning и owner остаются отдельными существующими компонентами.
@@ -210,7 +210,7 @@ Hover: белый текст на `rgba(255,255,255,.08)`. Active-state: `#ffb11
 
 Workspace ограничивает горизонтальное переполнение. Содержимое вкладки имеет внутренние отступы и максимальную рабочую ширину `1480px`, центрированную внутри доступной области.
 
-Footer получает локальный flex-контракт только внутри `.open-position-preview`: штатные `windowCommitAndClose` и `windowClose` группируются справа и не растягиваются по ширине. Action ID, порядок вызовов и обработчики остаются прежними.
+Footer получает локальный flex-контракт только внутри `.open-position-preview`: штатные `windowCommitAndClose` и `windowClose` группируются справа внутри реального Vaadin-контейнера `.v-expand`, имеют одинаковую высоту 40px и не растягиваются по ширине. Основная кнопка подписана «Сохранить и закрыть», вторичная — «Отмена». Action ID, порядок вызовов и обработчики остаются прежними.
 
 ### 4.4. Accordion и поля
 
@@ -251,13 +251,16 @@ Footer получает локальный flex-контракт только в
 
 Общие правила:
 
-- slot получает `min-width: 0`;
+- slot и фактический внутренний Vaadin-контейнер `.v-expand` получают `min-width: 0`;
+- служебные inline `margin-left` у slot сбрасываются внутри namespace preview, чтобы координаты Vaadin не уводили поля под sidebar после перехода на flex;
 - дочерний control остаётся `width: 100%`;
 - inline-процентные ширины legacy XML локально ограничиваются flex-basis;
-- при ширине до `1100px` строка переходит в две колонки;
-- при ширине до `820px` — в одну колонку;
+- широкие строки переходят на новую строку по фактической доступной ширине workspace через `flex-wrap`; первая секция использует устойчивые пары `ID + Вакансия` и `Грейд + Генерировать` с зарезервированной высотой двух рядов;
+- layout не зависит от вложенных `@media`: старый Sass-компилятор CUBA 7.3 не выводит их стабильно внутри theme mixin;
 - action-кнопки не перекрывают picker и text controls;
 - checkbox переносится вместе с label и не выходит за карточку.
+
+Вкладки, корневым содержимым которых является `GroupBox`, получают локальный класс `open-position-preview-group-tab`. Он резервирует 44px, используемые CUBA для отрицательного смещения caption, поэтому заголовки «Файлы вакансии», «Тестовое задание», «Новости», «Согласование» и «Комментарии» не заходят под полосу tabs. Табличные и RichTextArea-вкладки без GroupBox сохраняют стандартный компактный отступ.
 
 ### 4.6. Порядок CSS-слоёв
 
@@ -318,14 +321,14 @@ Presentation-стили не запускают loaders и не меняют ф�
 Запрещены и отсутствуют:
 
 - изменение legacy `OpenPositionEdit` и его XML;
-- изменение preview Java/XML, data contract и lifecycle;
+- изменение data contract и lifecycle preview;
 - изменение вызовов legacy editor;
 - menu item или browse action для preview;
 - изменение сущностей, БД и Liquibase;
 - изменение `views.xml`, сервисов и JPQL;
 - изменение shared SCSS и SCSS других экранов;
 - перемещение полей вне согласованного объединения договоров и оплаты;
-- изменение captions, component ID, `dataContainer`, `property`, actions и `invoke`;
+- изменение component ID, `dataContainer`, `property`, actions и `invoke`;
 - AI-анализ и поиск кандидатов;
 - production deploy;
 - merge без прямой команды Алексея.
@@ -359,6 +362,7 @@ Hermes проверяет точный HEAD PR:
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-03 | По фактической проверке на порту 8081 под `alan` улучшены обе части формы: sidebar 264px с логотипом 88px и внутренним scroll, служебные смещения Vaadin slot сброшены внутри namespace, первая секция собрана в две устойчивые строки без наложений, footer-actions собраны справа и подписаны «Сохранить и закрыть» / «Отмена», а GroupBox-вкладки резервируют место под caption и не заходят под tabs. Таблицы и RichTextArea получили единые локальные отступы, границы и размеры. Вложенные `@media` удалены из screen mixin из-за некорректного вывода старым CUBA Sass-компилятором; адаптация выполняется по доступной ширине flex-контейнера. Business bindings, actions, loaders, services и production не менялись. |
 | 2026-08-03 | Реализован утверждённый рендер формы: sidebar и логотип приведены к геометрии `JobCandidateEdit` 312/150px; отдельная вкладка оплаты скрыта, а существующие платёжные компоненты с прежними ID и bindings перенесены в «Трудовые договоры» тремя accordion-секциями; tab captions, theme-aware workspace и responsive-поля синхронизированы во всех семи темах. Бизнес-логика, loaders, JPQL, services и production не менялись. |
 | 2026-08-03 | Левая часть OpenPositionEditPreview приведена к визуальному эталону `IteractionListEdit`: sidebar и его Vaadin slot закреплены на 312px, label-навигация 38px/13px больше не сжимается в компактном viewport, tab captions видны полностью без ellipsis через локальный horizontal overflow. Legacy `OpenPositionEdit`, Java/XML, data bindings, loaders и бизнес-логика не менялись. |
 | 2026-08-02 | По runtime-скриншоту добавлен corrective layer `open-position-preview-sidebar-usability`: отдельный visual-stage 112/94px исключает наезд `OvaFallbackImage` на title; логотип 96/82px; title 4/3 строки с tooltip; summary GridLayout преобразован в компактную сетку caption/value. Изменены только локальные SCSS семи тем и их import/include, Java/XML и бизнес-логика не затронуты. |

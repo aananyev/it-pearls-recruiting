@@ -139,10 +139,10 @@
     <!-- Двухпанельная композиция повторяет подтверждённый контракт JobCandidateEdit. -->
     <hbox id="openPositionPreviewMainLayout" stylename="open-position-preview-main edit-screen-layout" width="100%" height="100%" spacing="false" expand="openPositionPreviewWorkspace">
       <!-- SIDEBAR: визуальный образ → название → label-навигация → детализация. -->
-      <vbox id="openPositionPreviewSidebar" stylename="open-position-preview-sidebar edit-sidebar" width="312px" height="100%" spacing="true" expand="openPositionPreviewSidebarSpacer">
+      <vbox id="openPositionPreviewSidebar" stylename="open-position-preview-sidebar edit-sidebar" width="264px" height="100%" spacing="true" expand="openPositionPreviewSidebarSpacer">
         <vbox id="openPositionPreviewIdentity" width="100%" spacing="true" align="TOP_CENTER" stylename="edit-sidebar-visual">
-          <hbox id="openPositionPreviewLogoBox" width="100%" spacing="true" align="TOP_CENTER" stylename="open-position-preview-logo-box">
-            <ovaFallbackImage id="projectLogoImage" width="150px" height="150px" ovalWidth="150px" ovalHeight="150px" visible="true" align="MIDDLE_CENTER" scaleMode="SCALE_DOWN" fallbackThemePath="icons/no-company.png"/>
+          <hbox id="openPositionPreviewLogoBox" width="100%" height="96px" spacing="true" align="TOP_CENTER" stylename="open-position-preview-logo-box">
+            <ovaFallbackImage id="projectLogoImage" width="88px" height="88px" ovalWidth="88px" ovalHeight="88px" visible="true" align="MIDDLE_CENTER" scaleMode="SCALE_DOWN" fallbackThemePath="icons/no-company.png"/>
             <ovaFallbackImage id="projectOwnerImage" width="70px" height="70px" ovalWidth="70px" ovalHeight="70px" visible="false" align="BOTTOM_RIGHT" scaleMode="SCALE_DOWN" fallbackThemePath="icons/no-programmer.jpeg"/>
           </hbox>
           <vbox width="100%" spacing="false" stylename="edit-sidebar-identity">
@@ -446,7 +446,7 @@
           </tab>
           <!-- 4. ФАЙЛЫ -->
           <tab id="tabFiles" icon="FILE_O" caption="mainMsg://msgFiles" margin="true" spacing="true">
-            <vbox id="someFilesVbox" width="100%" height="100%" spacing="true">
+            <vbox id="someFilesVbox" width="100%" height="100%" spacing="true" stylename="open-position-preview-tab-content open-position-preview-group-tab">
               <groupBox id="filesTableAccordion" caption="Файлы вакансии" collapsable="true" collapsed="false" stylename="light edit-card" width="100%" height="100%" expand="someFilesTable">
                 <table id="someFilesTable" height="100%" width="100%" dataContainer="someFilesesDc">
                   <columns>
@@ -472,7 +472,7 @@
           </tab>
           <!-- 5. ТЕСТОВОЕ ЗАДАНИЕ -->
           <tab id="tabExercise" caption="msg://msgExercise" margin="true" spacing="true" icon="ADJUST">
-            <groupBox id="exerciseAccordion" caption="msg://msgExercise" collapsable="true" collapsed="false" stylename="light edit-card" width="100%" height="100%" expand="exerciseVbox">
+            <groupBox id="exerciseAccordion" caption="msg://msgExercise" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-tab-content open-position-preview-group-tab" width="100%" height="100%" expand="exerciseVbox">
               <vbox id="exerciseVbox" width="100%" height="100%" spacing="true" expand="exerciseRichTextArea">
                 <checkBox id="needExerciseCheckBox" dataContainer="openPositionDc" property="needExercise" caption="msg://msgNeedExercice"/>
                 <richTextArea id="exerciseRichTextArea" dataContainer="openPositionDc" property="exercise" height="100%" width="100%"/>
@@ -481,7 +481,7 @@
           </tab>
           <!-- 6. ПАМЯТКА ИНТЕРВЬЮ -->
           <tab id="tabMemoForInterview" caption="msg://msgMemoForInterview" margin="true" spacing="true" icon="ADJUST">
-            <groupBox id="memoAccordion" caption="msg://msgMemoForInterview" collapsable="true" collapsed="false" stylename="light edit-card" width="100%" height="100%" expand="memoVbox">
+            <groupBox id="memoAccordion" caption="msg://msgMemoForInterview" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-tab-content open-position-preview-group-tab" width="100%" height="100%" expand="memoVbox">
               <vbox id="memoVbox" width="100%" height="100%" spacing="true" expand="memoForInterviewRichTextArea">
                 <checkBox id="needMemoCheckBox" dataContainer="openPositionDc" property="needMemoForInterview" caption="msg://msgNeedMemoForInterview"/>
                 <richTextArea id="memoForInterviewRichTextArea" dataContainer="openPositionDc" property="memoForInterview" height="100%" width="100%"/>
@@ -490,7 +490,7 @@
           </tab>
           <!-- 7. ШАБЛОН ПИСЬМА -->
           <tab id="tabTemplateLetter" caption="msg://msgTemplateLetter" margin="true" spacing="true" icon="font-icon:MAIL_FORWARD">
-            <groupBox id="templateLetterAccordion" caption="msg://msgTemplateLetter" collapsable="true" collapsed="false" stylename="light edit-card" width="100%" height="100%" expand="templateLetterBox">
+            <groupBox id="templateLetterAccordion" caption="msg://msgTemplateLetter" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-tab-content open-position-preview-group-tab" width="100%" height="100%" expand="templateLetterBox">
               <vbox id="templateLetterBox" width="100%" height="100%" spacing="true" expand="templateLetterRichTextArea">
                 <checkBox id="needLetterCheckBox" dataContainer="openPositionDc" property="needLetter" caption="msg://msgNeedLetter"/>
                 <richTextArea id="templateLetterRichTextArea" dataContainer="openPositionDc" property="templateLetter" width="100%" height="100%"/>
@@ -500,7 +500,7 @@
           <!-- 8. НАВЫКИ -->
           <tab id="tabSkills" caption="msg://msgSkilsPosition" margin="true" spacing="true" icon="FILTER">
             <!-- Восстановлена плоская структура legacy-экрана: кнопка пересканирования и дерево навыков без аккордеон-обёртки. -->
-            <vbox id="skillsBox" width="100%" height="100%" spacing="true" expand="openPositionSkillsListTable">
+            <vbox id="skillsBox" width="100%" height="100%" spacing="true" expand="openPositionSkillsListTable" stylename="open-position-preview-tab-content open-position-preview-table-view">
               <!-- Пересканирование описания должности и пересборка дерева навыков (rescanJobDescription). -->
               <button id="rescanSkills" caption="msg://msgRescanJobDescription" align="BOTTOM_LEFT" invoke="rescanJobDescription"/>
               <!-- Дерево навыков позиции (иерархия по skillTree, колонка-иерархия skillName). -->
@@ -522,7 +522,7 @@
           </tab>
           <!-- 9. НОВОСТИ -->
           <tab id="tabOpenPositionNews" caption="msg://msgOpenPositionNews" margin="true" spacing="true" icon="NEWSPAPER_O">
-            <vbox id="openPostitonNewsBrowseBox" width="100%" height="100%" spacing="true">
+            <vbox id="openPostitonNewsBrowseBox" width="100%" height="100%" spacing="true" stylename="open-position-preview-tab-content open-position-preview-table-view open-position-preview-group-tab">
               <groupBox id="newsTableAccordion" caption="msg://msgOpenPositionNews" collapsable="true" collapsed="false" stylename="light edit-card" width="100%" height="100%" expand="openPostionNewsDataGrid">
                 <dataGrid id="openPostionNewsDataGrid" dataContainer="openPositionNewsDc" width="100%" height="100%">
                   <actions>
@@ -546,21 +546,21 @@
           </tab>
           <!-- 10. СОГЛАСОВАНИЕ -->
           <tab id="tabApproval" caption="msg://msgOpenPositionApprovall" margin="true" spacing="true" icon="NEWSPAPER_O">
-            <groupBox id="procActionsBox" caption="msg://msgOpenPositionProcessApproval" collapsable="true" collapsed="false" stylename="light edit-card" width="100%" height="100%">
+            <groupBox id="procActionsBox" caption="msg://msgOpenPositionProcessApproval" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-tab-content open-position-preview-group-tab" width="100%" height="100%">
               <fragment id="procActionsFragment" screen="bpm_ProcActionsFragment"/>
             </groupBox>
           </tab>
           <!-- 11. КОММЕНТАРИИ -->
           <tab id="commentsTab" caption="msg://msgComments" margin="true" spacing="true" icon="STAR_O">
-            <groupBox id="commentsAccordion" caption="msg://msgComments" collapsable="true" collapsed="false" stylename="light edit-card" width="100%" height="100%" expand="commentsScrollBox">
+            <groupBox id="commentsAccordion" caption="msg://msgComments" collapsable="true" collapsed="false" stylename="light edit-card open-position-preview-tab-content open-position-preview-group-tab" width="100%" height="100%" expand="commentsScrollBox">
               <scrollBox id="commentsScrollBox" spacing="true" width="100%" height="100%"/>
             </groupBox>
           </tab>
         </tabSheet>
         <!-- Штатные actions сохранены без изменения. -->
         <hbox id="editActions" width="100%" spacing="true" align="MIDDLE_RIGHT" stylename="edit-actions">
-          <button id="windowCommitAndCloseButton" action="windowCommitAndClose"/>
-          <button id="windowCloseButton" action="windowClose"/>
+          <button id="windowCommitAndCloseButton" action="windowCommitAndClose" caption="Сохранить и закрыть"/>
+          <button id="windowCloseButton" action="windowClose" caption="Отмена"/>
         </hbox>
       </vbox>
     </hbox>

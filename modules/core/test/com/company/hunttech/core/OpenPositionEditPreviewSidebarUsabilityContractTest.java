@@ -72,19 +72,15 @@ public class OpenPositionEditPreviewSidebarUsabilityContractTest {
         assertNotNull(reference);
         assertTrue(reference.contains("@mixin open-position-preview-sidebar-usability-theme"));
         assertTrue(reference.contains(".open-position-preview-logo-box"));
-        assertTrue(reference.contains("height: 166px !important"));
-        assertTrue(reference.contains("width: 150px !important"));
-        assertTrue(reference.contains("width: 150px !important"));
-        assertTrue(reference.contains("-webkit-line-clamp: 4"));
-        assertTrue(reference.contains("grid-template-columns: 72px minmax(0, 1fr)"));
-        assertTrue(reference.contains("@media (max-width: 1366px), (max-height: 820px)"));
-        assertTrue(reference.contains("height: 126px !important"));
-        assertTrue(reference.contains("width: 112px !important"));
-        assertTrue(reference.contains("-webkit-line-clamp: 3"));
+        assertTrue(reference.contains("height: 96px !important"));
+        assertTrue(reference.contains("width: 88px !important"));
+        assertTrue(reference.contains("-webkit-line-clamp: 2"));
+        assertTrue(reference.contains("grid-template-columns: 66px minmax(0, 1fr)"));
         assertTrue(reference.contains(".label-nav-title,"));
         assertTrue(reference.contains("font-size: 11px !important"));
         assertTrue(reference.contains(".label-nav-item,"));
-        assertTrue(reference.contains("min-height: 38px !important"));
+        assertTrue(reference.contains("min-height: 32px !important"));
+        assertFalse(reference.contains("@media"));
         assertFalse(reference.contains("min-height: 21px !important"));
     }
 

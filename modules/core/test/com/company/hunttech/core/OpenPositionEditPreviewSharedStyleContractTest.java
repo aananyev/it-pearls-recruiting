@@ -90,7 +90,7 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
                     controller.contains(role));
         }
 
-        assertTrue(controller.contains("openPositionPreviewSidebar.setWidth(\"312px\")"));
+        assertTrue(controller.contains("openPositionPreviewSidebar.setWidth(\"264px\")"));
         assertTrue(controller.contains("section.setShowAsPanel(true)"));
         assertTrue(controller.contains("section.removeStyleName(\"light\")"));
         assertTrue(controller.contains("section.removeStyleName(\"edit-card\")"));
@@ -181,8 +181,8 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
                     scss.contains("." + role));
         }
 
-        assertTrue(controller.contains("projectLogoImage.setWidth(\"150px\")"));
-        assertTrue(controller.contains("projectLogoImage.setHeight(\"150px\")"));
+        assertTrue(controller.contains("projectLogoImage.setWidth(\"88px\")"));
+        assertTrue(controller.contains("projectLogoImage.setHeight(\"88px\")"));
         assertTrue(controller.contains("getTab(\"tabPayments\")"));
         assertTrue(controller.contains("setStyleName(\"open-position-preview-payments-tab\")"));
         assertTrue(scss.contains(".open-position-preview-payments-navigation"));
@@ -194,9 +194,16 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
 
         assertTrue(scss.contains("display: flex !important;"));
         assertTrue(scss.contains("justify-content: flex-end;"));
+        assertTrue(scss.contains(".open-position-preview-field-row > .v-expand"));
+        assertTrue(scss.contains(".open-position-preview-footer > .v-expand"));
+        assertTrue(scss.contains(".open-position-preview-tab-content"));
+        assertTrue(descriptor.contains("open-position-preview-group-tab"));
+        assertTrue(scss.contains(".open-position-preview-group-tab.edit-accordion-section"));
+        assertTrue(scss.contains("margin-left: 0 !important;"));
+        assertTrue(scss.contains("min-height: 193px !important;"));
+        assertTrue(scss.contains("width: 264px !important"));
         assertTrue(scss.contains("-webkit-line-clamp: 7;"));
-        assertTrue(scss.contains("@media (max-width: 1100px)"));
-        assertTrue(scss.contains("@media (max-width: 820px)"));
+        assertFalse(scss.contains("@media"));
         assertTrue(scss.contains("max-width: 1480px !important;"));
     }
 
@@ -246,7 +253,7 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
 
         assertTrue(referenceLocalScss.contains(".open-position-preview"));
         assertTrue(referenceLocalScss.contains(".v-slot-edit-sidebar"));
-        assertTrue(referenceLocalScss.contains("width: 312px !important"));
+        assertTrue(referenceLocalScss.contains("width: 264px !important"));
         assertTrue(referenceLocalScss.contains("#172638"));
         assertTrue(referenceLocalScss.contains("#ffb11b"));
         assertTrue(referenceLocalScss.contains(".label-nav-item-active"));

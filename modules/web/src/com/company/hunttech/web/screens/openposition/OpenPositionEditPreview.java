@@ -265,7 +265,7 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
      * копии CSS и не изменяются theme-файлы других экранов.
      */
     private void applySharedEditScreenContract() {
-        openPositionPreviewSidebar.setWidth("312px");
+        openPositionPreviewSidebar.setWidth("264px");
         openPositionPreviewSidebar.addStyleName("edit-sidebar");
         openPositionPreviewWorkspace.addStyleName("edit-workspace");
 
@@ -312,8 +312,8 @@ public class OpenPositionEditPreview extends OpenPositionEdit {
         addStyles(editActions,
                 "open-position-preview-footer");
 
-        projectLogoImage.setWidth("150px");
-        projectLogoImage.setHeight("150px");
+        projectLogoImage.setWidth("88px");
+        projectLogoImage.setHeight("88px");
         projectLogoImage.addStyleName("open-position-preview-logo");
         projectOwnerImage.setWidth("70px");
         projectOwnerImage.setHeight("70px");
