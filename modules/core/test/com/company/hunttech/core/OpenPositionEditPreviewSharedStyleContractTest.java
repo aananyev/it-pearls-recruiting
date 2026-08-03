@@ -99,6 +99,17 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
         assertTrue(controller.contains("open-position-preview-project-type-row"));
         assertTrue(controller.contains("open-position-preview-project-name-row"));
         assertTrue(controller.contains("open-position-preview-project-company-row"));
+
+        List<String> editVariantRoles = Arrays.asList(
+                "open-position-preview-table-variant5",
+                "open-position-preview-richtext-variant5",
+                "open-position-preview-table-section",
+                "open-position-preview-richtext-section"
+        );
+        for (String role : editVariantRoles) {
+            assertTrue("В XML отсутствует presentation-role " + role,
+                    descriptor.contains(role));
+        }
     }
 
     @Test
@@ -207,6 +218,10 @@ public class OpenPositionEditPreviewSharedStyleContractTest {
         assertTrue(scss.contains("min-height: 193px !important;"));
         assertTrue(scss.contains(".open-position-preview-project-section"));
         assertTrue(scss.contains(".open-position-preview-project-type-row"));
+        assertTrue(scss.contains(".open-position-preview-table-variant5"));
+        assertTrue(scss.contains(".open-position-preview-richtext-variant5"));
+        assertTrue(scss.contains(".open-position-preview-table-section"));
+        assertTrue(scss.contains(".open-position-preview-richtext-section"));
         assertTrue(scss.contains("width: 264px !important"));
         assertTrue(scss.contains("-webkit-line-clamp: 7;"));
         assertFalse(scss.contains("@media"));

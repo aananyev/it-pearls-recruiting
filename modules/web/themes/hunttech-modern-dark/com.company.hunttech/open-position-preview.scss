@@ -1030,5 +1030,171 @@ div.open-position-preview .open-position-preview-project-section .v-expand > .v-
       min-height: 58px;
       padding: 9px 14px;
     }
+
+    /*
+     * Variant 5: dense edit-table and RichTextArea surfaces. The selectors
+     * stay inside the preview namespace so CUBA table and editor styles on
+     * other screens remain unchanged.
+     */
+    .open-position-preview-labor-tab-content,
+    .open-position-preview-description-tab-content {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .open-position-preview-labor-parameters .v-expand,
+    .open-position-preview-labor-parameters .v-slot {
+      min-width: 0;
+    }
+
+    .open-position-preview-labor-parameters .v-button {
+      min-width: 150px;
+      align-self: flex-end;
+    }
+
+    .open-position-preview-table-section {
+      min-height: 360px;
+    }
+
+    .open-position-preview-table-variant5,
+    .open-position-preview-table-variant5.v-grid,
+    .open-position-preview-table-variant5.v-table {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      min-height: 320px !important;
+      height: 100% !important;
+      border: 1px solid rgba($v-font-color, 0.16);
+      border-radius: 6px;
+      background: $v-panel-background-color;
+      overflow: hidden;
+    }
+
+    .open-position-preview-table-variant5 > .v-grid,
+    .open-position-preview-table-variant5 > .v-table,
+    .open-position-preview-table-variant5 .v-grid {
+      box-sizing: border-box;
+      flex: 1 1 auto;
+      min-height: 260px !important;
+      height: auto !important;
+    }
+
+    .open-position-preview-table-variant5 .v-grid-header,
+    .open-position-preview-table-variant5 .v-table-header-wrap {
+      min-height: 42px;
+      background: mix($v-app-background-color, $v-panel-background-color, 58%);
+      border-bottom: 1px solid rgba($v-font-color, 0.14);
+    }
+
+    .open-position-preview-table-variant5 .v-grid-header .v-grid-cell,
+    .open-position-preview-table-variant5 .v-table-header-cell {
+      box-sizing: border-box;
+      min-height: 42px;
+      padding: 0 12px;
+      color: mix($v-font-color, $v-panel-background-color, 82%);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 18px;
+    }
+
+    .open-position-preview-table-variant5 .v-grid-row,
+    .open-position-preview-table-variant5 .v-table-row {
+      min-height: 42px;
+      border-bottom: 1px solid rgba($v-font-color, 0.08);
+      transition: background-color 0.15s ease;
+    }
+
+    .open-position-preview-table-variant5 .v-grid-row:hover,
+    .open-position-preview-table-variant5 .v-table-row:hover {
+      background: rgba($v-selection-color, 0.07);
+    }
+
+    .open-position-preview-table-variant5 .v-grid-cell,
+    .open-position-preview-table-variant5 .v-table-cell-content {
+      box-sizing: border-box;
+      min-width: 0;
+      padding: 0 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .open-position-preview-table-variant5 .v-grid-editor-cells,
+    .open-position-preview-table-variant5 .v-grid-editor-cell,
+    .open-position-preview-table-variant5 .v-textfield,
+    .open-position-preview-table-variant5 .v-filterselect {
+      box-sizing: border-box;
+      min-height: 34px;
+      max-width: 100% !important;
+      border-radius: 4px;
+    }
+
+    .open-position-preview-table-variant5 .v-buttons-panel,
+    .open-position-preview-table-variant5 .v-grid-footer {
+      box-sizing: border-box;
+      min-height: 48px;
+      padding: 6px 8px;
+      border-top: 1px solid rgba($v-font-color, 0.12);
+      background: mix($v-app-background-color, $v-panel-background-color, 42%);
+    }
+
+    .open-position-preview-table-variant5 .v-buttons-panel .v-button {
+      min-width: 34px;
+      min-height: 34px;
+      margin: 0 3px 0 0;
+      border-radius: 4px;
+    }
+
+    .open-position-preview-description-tab-content > .v-expand,
+    .open-position-preview-richtext-section > .v-expand,
+    .open-position-preview-richtext-section .v-tabsheet-content,
+    .open-position-preview-richtext-section .v-tabsheet-tabcontainer {
+      min-height: 0;
+    }
+
+    .open-position-preview-richtext-section {
+      min-height: 360px;
+    }
+
+    .open-position-preview-richtext-variant5,
+    .open-position-preview-richtext-variant5.v-richtextarea {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      min-height: 260px;
+      border: 1px solid rgba($v-font-color, 0.16);
+      border-radius: 6px;
+      background: $v-panel-background-color;
+      overflow: hidden;
+    }
+
+    .open-position-preview-richtext-variant5 .v-richtextarea-toolbar {
+      min-height: 42px;
+      padding: 5px 8px;
+      border-bottom: 1px solid rgba($v-font-color, 0.13);
+      background: mix($v-app-background-color, $v-panel-background-color, 58%);
+    }
+
+    .open-position-preview-richtext-variant5 .v-richtextarea-content,
+    .open-position-preview-richtext-variant5 iframe {
+      box-sizing: border-box;
+      min-height: 220px;
+      max-width: 100%;
+      background: $v-panel-background-color;
+    }
+
+    .open-position-preview-richtext-variant5 .v-button {
+      min-width: 32px;
+      min-height: 32px;
+      margin: 0 2px;
+      border-radius: 4px;
+    }
+
+    .open-position-preview-description-short .v-textfield {
+      min-height: 38px;
+    }
   }
 }
