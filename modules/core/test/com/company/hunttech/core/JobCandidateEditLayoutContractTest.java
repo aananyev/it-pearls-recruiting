@@ -171,9 +171,17 @@ public class JobCandidateEditLayoutContractTest {
         String xml = readProjectFile(XML);
         String comments = section(xml, "id=\"commentsTab\"", "<!-- TAB: История -->");
 
-        assertTrue(comments.contains("id=\"jobCandidateCommentsDataGrid\""));
+        assertTrue("Лента комментариев — scrollBox + vbox (авто-высота пузырей)",
+                comments.contains("id=\"jobCandidateCommentsScroll\""));
+        assertTrue(comments.contains("id=\"jobCandidateCommentsContainer\""));
+        assertTrue("dataGrid удалён: Vaadin Grid не поддерживает авто-высоту строк — "
+                        + "пузыри разной высоты перекрывались (rowHeight 30px)",
+                !comments.contains("<dataGrid"));
         assertTrue("Высота строки комментариев должна быть автоматической (по содержимому пузыря), "
                         + "а не фиксированной 80px", !comments.contains("bodyRowHeight"));
+        assertTrue("JPQL ленты не должен содержать опечатку deteIteraction — она даёт "
+                        + "JPQLException и пустую ленту (поле называется dateIteraction)",
+                !comments.contains("deteIteraction"));
         assertTrue(comments.contains("inputPrompt=\"msg://msgInputComment\""));
     }
 
@@ -188,6 +196,37 @@ public class JobCandidateEditLayoutContractTest {
             assertTrue(theme, scss.contains(".tailOtherMessage {"));
             assertTrue(theme, scss.contains("max-width: 520px"));
             assertTrue(theme, scss.contains(".table-wordwrap {"));
+        }
+    }
+
+    @Test
+    public void additionalPositionsUseHorizontalFlowLayout() throws IOException {
+        String xml = readProjectFile(XML);
+        String grid = section(xml, "id=\"professionalDataGrid\"", "</grid>");
+
+        // Список доп. позиций — горизонтальный flow-контейнер (cssLayout), а не Label:
+        // значения выводятся в строку справа от кнопки «…» и переносятся по позициям,
+        // а не по словам внутри одного Label (вертикальный столбик).
+        assertTrue("Контейнер доп. позиций должен быть cssLayout (горизонтальный flow)",
+                grid.contains("<cssLayout id=\"positionsLabel\""));
+        assertTrue(grid.contains("width=\"100%\""));
+        assertTrue(grid.contains("stylename=\"job-candidate-positions\""));
+        assertTrue("Label доп. позиций должен быть заменён на cssLayout",
+                !grid.contains("<label id=\"positionsLabel\""));
+    }
+
+    @Test
+    public void everyThemeStylesPositionsFlowLocally() throws IOException {
+        for (String theme : THEMES) {
+            String scss = readProjectFile("modules/web/themes/" + theme
+                    + "/com.company.hunttech/job-candidate-editor.scss");
+
+            // Локальность: селектор ограничен namespace формы, не глобальный .v-label.
+            assertTrue(theme, scss.contains(".job-candidate-positions {"));
+            assertTrue(theme, scss.contains("display: flex"));
+            assertTrue(theme, scss.contains("flex-wrap: wrap"));
+            assertTrue(theme, scss.contains(".job-candidate-positions .v-label"));
+            assertTrue(theme, scss.contains("white-space: nowrap"));
         }
     }
 

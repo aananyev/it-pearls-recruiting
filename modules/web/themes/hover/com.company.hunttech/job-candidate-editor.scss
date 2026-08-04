@@ -1037,6 +1037,23 @@
     }
   }
 
+  /* Доп. позиции: горизонтальный flow-контейнер с переносом по позициям
+     (элементы прижаты к кнопке, перенос между позициями, не по словам). */
+  .job-candidate-positions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    min-height: 38px;
+  }
+
+  /* nowrap: перенос строк происходит между чипами (flex-wrap), а не по словам внутри
+     чипа; !important + префикс формы — против правил карточки (.job-candidate-card .v-label
+     и .job-candidate-form-grid .v-label) с white-space: normal!important. */
+  .job-candidate-editor .job-candidate-positions .v-label {
+    white-space: nowrap !important;
+  }
+
   @media (max-width: 1100px) {
     .job-candidate-editor {
       .v-slot-job-candidate-sidebar,

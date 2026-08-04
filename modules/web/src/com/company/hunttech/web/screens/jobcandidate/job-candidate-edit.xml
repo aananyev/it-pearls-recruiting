@@ -233,10 +233,12 @@
             <!-- Загрузчик данных interactionCommentDl. -->
             <loader id="interactionCommentDl" cacheable="true">
                 <query>
-                    <!-- Только взаимодействия с непустым комментарием, новые сверху. -->
+                    <!-- Только взаимодействия с непустым комментарием, новые сверху.
+                         Поле сортировки — dateIteraction (опечатка deteIteraction давала
+                         JPQLException "cannot be resolved" и ленту без комментариев). -->
                     <![CDATA[select e from hunttech_IteractionList e
                     where e.comment is not null and e.comment not like ''
-                    order by e.deteIteraction desc]]>
+                    order by e.dateIteraction desc]]>
                     <!-- Контейнер условий запроса. -->
                     <condition>
                         <!-- Логическое И над условиями. -->
@@ -945,11 +947,12 @@
                                                             align="MIDDLE_LEFT"
                                                             description="msg://msgSetPositions"
                                                             invoke="addPositionList"/>
-                                                    <!-- Список выбранных дополнительных позиций (заполняется контроллером). -->
-                                                    <label id="positionsLabel"
-                                                           width="100%"
-                                                           stylename="small"
-                                                           align="MIDDLE_LEFT"/>
+                                                    <!-- Список выбранных дополнительных позиций: горизонтальный flow-контейнер
+                                                         (flex-wrap) — каждая позиция отдельным элементом, перенос по позициям,
+                                                         а не по словам внутри одного Label (заполняется контроллером). -->
+                                                    <cssLayout id="positionsLabel"
+                                                               width="100%"
+                                                               stylename="job-candidate-positions"/>
                                                 </hbox>
                                             </row>
                                         </rows>
@@ -1578,32 +1581,21 @@
 
                                 <!-- Вертикальный контейнер: лента над панелью отправки. -->
                                 <vbox id="tabCommentsVbox" spacing="true" width="100%" height="100%"
-                                      expand="jobCandidateCommentsDataGrid">
-                                    <!-- Лента комментариев: рендер диалога, скрытые служебные колонки;
-                                         высота строки автоматическая — по содержимому пузыря. -->
-                                    <dataGrid id="jobCandidateCommentsDataGrid"
-                                              dataContainer="interactionCommentDc"
-                                              headerVisible="false"
-                                              reorderingAllowed="false"
-                                              textSelectionEnabled="false"
-                                              selectionMode="NONE"
-                                              stylename="no-horizontal-lines no-stripes no-vertical-lines borderless job-candidate-table"
-                                              sortable="false"
-                                              width="100%" height="100%">
-                                        <columns>
-                                            <!-- Комментарий целиком (кастомный компонент-рендер диалога). -->
-                                            <column id="commentDialog" sortable="false">
-                                                <componentRenderer/>
-                                            </column>
-                                            <!-- Дата (служебная, скрыта; используется для сортировки). -->
-                                            <column id="dateIteraction" sortable="true" sort="DESCENDING" width="80px"
-                                                    collapsed="true" property="dateIteraction"/>
-                                            <!-- Рекрутер (служебная, скрыта). -->
-                                            <column id="recrutier" collapsed="true" width="250px" property="recrutier"/>
-                                            <!-- Текст комментария (служебная, скрыта). -->
-                                            <column id="comment" collapsed="true" sortable="false" property="comment"/>
-                                        </columns>
-                                    </dataGrid>
+                                      expand="jobCandidateCommentsScroll">
+                                    <!-- Лента комментариев: вертикальный список пузырей с высотой по содержимому.
+                                         dataGrid (Vaadin Grid) не поддерживает авто-высоту строк — кастомные пузыри
+                                         разной высоты перекрывали соседние строки (фиксированная rowHeight 30px),
+                                         поэтому лента выведена в scrollBox + vbox и заполняется контроллером. -->
+                                    <scrollBox id="jobCandidateCommentsScroll"
+                                               orientation="vertical"
+                                               scrollBars="vertical"
+                                               width="100%"
+                                               height="100%">
+                                        <!-- Контейнер пузырей комментариев (заполняется в renderComments()). -->
+                                        <vbox id="jobCandidateCommentsContainer"
+                                              width="100%"
+                                              spacing="true"/>
+                                    </scrollBox>
                                     <!-- Панель отправки комментария: текст, вакансия, кнопка «Отправить». -->
                                     <groupBox stylename="job-candidate-card edit-card" spacing="true" width="100%">
                                         <!-- Поле ввода текста нового комментария (Enter — подтверждение отправки). -->
