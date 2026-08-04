@@ -90,4 +90,5 @@ normal, hover, selected, focused, focus-visible, active, editable, disabled, rea
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-04 | Восстановлен базовый слой темы (@import "../halo/halo" + @include halo) — компоновка главного экрана (sidebar, фон) вернулась к рабочему виду; вариант 3 сохранён |
 | 2026-08-04 | Создание документа: вариант 3 (тёплый светло-серый) для DataGrid, Table, TreeTable, TextArea, RichTextArea в hunttech-modern-light |
