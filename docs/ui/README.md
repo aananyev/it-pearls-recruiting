@@ -18,6 +18,7 @@
 | `IteractionListEdit` | [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) · [XML-компоновка](IteractionListEdit_XmlLayout_2026-07-27.md) | Бизнес-логика взаимодействия, контекстная sidebar, аккордеоны и сохранённые CUBA-контракты |
 | `OutstaffingRatesBrowse` | [OutstaffingRatesBrowse_Spec.md](OutstaffingRatesBrowse_Spec.md) | Рейты по аутстафу — список ступеней шкалы (lookup, CRUD) |
 | `OutstaffingRatesEdit` | [OutstaffingRatesEdit_Spec.md](OutstaffingRatesEdit_Spec.md) | Рейты по аутстафу — форма ступени (commit → триггеры маржинальности и аудита) |
+| Table & Text Components | [HRM_HuntTech_Table_And_Text_Components_Style_Spec.md](HRM_HuntTech_Table_And_Text_Components_Style_Spec.md) | Единый дизайн DataGrid, Table, TreeTable, TextArea, RichTextArea во всех темах (токены `$hrm-*`, mixin, варианты Halo=1 / modern-light=3 / modern-dark=5) |
 
 ## Правила актуализации
 

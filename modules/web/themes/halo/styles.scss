@@ -7,6 +7,8 @@
 @import "com.company.hunttech/main-screen-background-settings";
 @import "com.company.hunttech/ext-settings-about-sidebar-fix";
 @import "com.company.hunttech/edit-screen-shared-styles";
+@import "com.company.hunttech/halo-table-text-tokens";
+@import "com.company.hunttech/table-text-components";
 @import "com.company.hunttech/job-candidate-editor.scss";
 @import "com.company.hunttech/open-position-preview";
 @import "com.company.hunttech/open-position-preview-sidebar-usability";
@@ -34,6 +36,7 @@
   @include main-screen-background-settings;
   @include ext-settings-about-sidebar-fix;
   @include edit-screen-shared-styles;
+  @include hrm-table-text-components;
   @include job-candidate-editor-theme;
   @include open-position-preview-theme;
   @include open-position-preview-sidebar-usability-theme;

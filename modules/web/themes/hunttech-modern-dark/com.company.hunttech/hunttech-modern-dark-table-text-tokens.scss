@@ -1,0 +1,29 @@
+/* HuntTech Modern Dark — вариант 5: тёмная нейтральная поверхность, светлый текст, акцентная граница selected */
+/* Токены табличных и текстовых компонентов HRM HuntTech. */
+/* Переопределяются в mixin hrm-table-text-components (table-text-components.scss). */
+
+$hrm-table-bg: #232a33;
+$hrm-table-text: #dde4ec;
+$hrm-table-border: #39434f;
+$hrm-table-header-bg: #2b333d;
+$hrm-table-header-text: #aeb9c6;
+$hrm-table-divider: #333d48;
+$hrm-table-hover: rgba(255,255,255,0.055);
+$hrm-table-selected: rgba(92,157,255,0.18);
+$hrm-table-selected-border: #5c9dff;
+$hrm-table-focus: #6aa8ff;
+$hrm-table-zebra: rgba(255,255,255,0.02);
+$hrm-table-sort: #6aa8ff;
+$hrm-table-resize: #4a5664;
+$hrm-editor-bg: #232a33;
+$hrm-editor-text: #dde4ec;
+$hrm-editor-border: #46525f;
+$hrm-editor-focus: #6aa8ff;
+$hrm-editor-invalid: #ff6b5e;
+$hrm-editor-disabled-bg: #1e242b;
+$hrm-editor-readonly-bg: #262e38;
+$hrm-editor-placeholder: rgba(221,228,236,0.38);
+$hrm-scrollbar-track: #2b333d;
+$hrm-scrollbar-thumb: #4a5664;
+$hrm-rich-toolbar-bg: #2b333d;
+$hrm-rich-toolbar-border: #39434f;

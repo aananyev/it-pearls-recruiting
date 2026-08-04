@@ -1,0 +1,29 @@
+/* Havana — классическая панельная: нейтральный серо-голубой, сдержанный акцент #3d6285 */
+/* Токены табличных и текстовых компонентов HRM HuntTech. */
+/* Переопределяются в mixin hrm-table-text-components (table-text-components.scss). */
+
+$hrm-table-bg: #ffffff;
+$hrm-table-text: #2a2e33;
+$hrm-table-border: #d9dee4;
+$hrm-table-header-bg: #eef1f5;
+$hrm-table-header-text: #4a5560;
+$hrm-table-divider: #e2e6eb;
+$hrm-table-hover: rgba(70,100,130,0.06);
+$hrm-table-selected: rgba(70,100,130,0.13);
+$hrm-table-selected-border: #8aa2b8;
+$hrm-table-focus: #3d6285;
+$hrm-table-zebra: rgba(100,120,140,0.03);
+$hrm-table-sort: #3d6285;
+$hrm-table-resize: #a8b4c0;
+$hrm-editor-bg: #ffffff;
+$hrm-editor-text: #2a2e33;
+$hrm-editor-border: #c3cbd4;
+$hrm-editor-focus: #3d6285;
+$hrm-editor-invalid: #b33a3a;
+$hrm-editor-disabled-bg: #f3f5f7;
+$hrm-editor-readonly-bg: #f8f9fa;
+$hrm-editor-placeholder: rgba(42,46,51,0.40);
+$hrm-scrollbar-track: #eef1f4;
+$hrm-scrollbar-thumb: #b9c1c9;
+$hrm-rich-toolbar-bg: #f3f6f8;
+$hrm-rich-toolbar-border: #d9dee4;
