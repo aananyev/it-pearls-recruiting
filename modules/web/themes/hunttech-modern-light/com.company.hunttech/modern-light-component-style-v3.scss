@@ -29,7 +29,9 @@ $ml3-scroll-thumb: #c9c2b4;
 $ml3-scroll-thumb-hover: #b3ab9a;
 $ml3-resize: #cfc8ba;
 
-.hunttech-modern-light {
+/* Файл импортируется ВНУТРЬ корневого селектора .hunttech-modern-light { } в styles.scss,
+   поэтому здесь НЕ объявляется собственный корневой селектор (иначе получится двойной
+   префикс .hunttech-modern-light .hunttech-modern-light, не совпадающий с DOM). */
   $bg: $ml3-app-bg;
 
   /* ── DataGrid (.v-grid) ─────────────────────────────── */
@@ -438,4 +440,66 @@ $ml3-resize: #cfc8ba;
       border-radius: 5px;
     }
   }
-}
+
+  /* ── Overrides vs hunttech-modern-light-ext ──────────── */
+  /* Повышенная специфичность (!important) требуется из-за штатных селекторов
+     ext-файла темы с !important (строки .v-grid* / .v-table*). Вариант 3
+     задаёт тёплую палитру поверх них. */
+  .v-grid {
+    border: 1px solid $ml3-border !important;
+    border-radius: 6px !important;
+    background: $ml3-surface !important;
+  }
+  .v-grid-header .v-grid-cell {
+    background: $ml3-header-bg !important;
+    color: $ml3-header-text !important;
+    font-weight: 600 !important;
+    border-bottom: 1px solid $ml3-border !important;
+  }
+  .v-grid-row {
+    border-bottom: 1px solid $ml3-divider !important;
+  }
+  .v-grid-row:hover {
+    background: $ml3-hover !important;
+  }
+  .v-grid-row-selected {
+    background: $ml3-selected !important;
+    box-shadow: inset 0 0 0 1px $ml3-accent !important;
+  }
+  .v-grid-row-selected:hover {
+    background: $ml3-selected-hover !important;
+  }
+  .v-table {
+    border: 1px solid $ml3-border !important;
+    background: $ml3-surface !important;
+  }
+  .v-table-header-wrap {
+    border-bottom: 1px solid $ml3-border !important;
+    background: $ml3-header-bg !important;
+  }
+  .v-table-caption-container {
+    color: $ml3-header-text !important;
+    font-weight: 600 !important;
+    padding: 0 12px !important;
+  }
+  .v-table-cell-content {
+    padding: 0 12px !important;
+  }
+  .v-table-row,
+  .v-table-row-odd {
+    background: #ffffff !important;
+    border-bottom: 1px solid $ml3-divider !important;
+  }
+  .v-table-row-odd {
+    background: $ml3-zebra !important;
+  }
+  .v-table-row:hover {
+    background: $ml3-hover !important;
+  }
+  .v-table-row-selected {
+    background: $ml3-selected !important;
+    box-shadow: inset 0 0 0 1px $ml3-accent !important;
+  }
+  .v-table-row-selected:hover {
+    background: $ml3-selected-hover !important;
+  }
