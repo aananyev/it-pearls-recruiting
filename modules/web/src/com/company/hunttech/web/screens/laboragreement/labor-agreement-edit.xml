@@ -226,6 +226,7 @@
                               expand="commentField"
                               stylename="light">
                         <richTextArea id="commentField"
+                                      stylename="ht-halo-precision-richtextarea"
                                       width="100%"
                                       height="100%"
                                       dataContainer="laborAgreementDc"
@@ -240,6 +241,7 @@
                  caption="msg://msgAgreementText"
                  expand="agreementTextRichTextArea">
                 <richTextArea id="agreementTextRichTextArea"
+                              stylename="ht-halo-precision-richtextarea"
                               dataContainer="laborAgreementDc"
                               property="agreementText"
                               width="100%"
@@ -313,6 +315,7 @@
                       expand="someFilesTable"
                       width="100%">
                     <table id="someFilesTable"
+                           stylename="ht-halo-precision-table"
                            height="300px"
                            width="100%"
                            dataContainer="someFilesAgreementDc">

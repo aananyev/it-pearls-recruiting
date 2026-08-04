@@ -25,6 +25,7 @@
                         excludeProperties="textEmailToSend,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,addField,calendarItemStyle,calendarItemDescription,widgetChackJobCandidates,checkTrace,notificationBeforeAfterDay,notificationPeriodType,notificationWhenSend"/>
         </filter>
         <treeDataGrid id="iteractionTreeTable"
+                      stylename="ht-halo-precision-treetable"
                    height="200px"
                    width="100%"
                    dataContainer="iteractionsTreeDc"

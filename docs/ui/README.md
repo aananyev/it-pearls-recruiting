@@ -18,6 +18,7 @@
 | `IteractionListEdit` | [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) · [XML-компоновка](IteractionListEdit_XmlLayout_2026-07-27.md) | Бизнес-логика взаимодействия, контекстная sidebar, аккордеоны и сохранённые CUBA-контракты |
 | `OutstaffingRatesBrowse` | [OutstaffingRatesBrowse_Spec.md](OutstaffingRatesBrowse_Spec.md) | Рейты по аутстафу — список ступеней шкалы (lookup, CRUD) |
 | `OutstaffingRatesEdit` | [OutstaffingRatesEdit_Spec.md](OutstaffingRatesEdit_Spec.md) | Рейты по аутстафу — форма ступени (commit → триггеры маржинальности и аудита) |
+| Halo Precision Components | [HaloPrecisionComponents_Spec.md](HaloPrecisionComponents_Spec.md) | Точное воспроизведение варианта 1 (светлый голубой) для Halo: namespace `ht-halo-precision-*`, метрики из референсов halo_variant1_*.png |
 
 ## Правила актуализации
 
