@@ -233,6 +233,12 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 | [FallbackImage_Component.md](FallbackImage_Component.md) | `fallbackImage` — image с theme-fallback при пустом FileDescriptor |
 | [ExtSettingsWindowAvatar_Spec.md](ExtSettingsWindowAvatar_Spec.md) | `OvaFallbackImage` для фотографии пользователя во вкладке «Обо мне» |
 
+### Стили компонентов тем (варианты дизайна)
+
+| Документ | Описание |
+|----------|----------|
+| [HRM_HuntTech_Modern_Dark_Component_Style_Spec.md](HRM_HuntTech_Modern_Dark_Component_Style_Spec.md) | Вариант 5 (современный тёмный): DataGrid, Table, TreeTable, TextArea, RichTextArea в hunttech-modern-dark |
+
 ---
 
 ## История изменений
