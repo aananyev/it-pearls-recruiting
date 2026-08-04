@@ -376,8 +376,8 @@
       line-height: 16px !important;
     }
 
-    /* Эталон label-навигации — IteractionListEdit (iteraction-list-visual-alignment.scss:112–144, вариант A):
-       полная геометрия пункта (min-height 38px, height auto, padding 8×10px, скругление справа)
+    /* Эталон label-навигации — IteractionListEdit (iteraction-list-visual-alignment.scss:112–161):
+       полная геометрия пункта (min-height 27px, height auto, padding 3×10px, скругление справа)
        + hover (белый на белом .08) + active (жёлтый #ffb11b с заливкой и левой границей). */
     .label-nav-item,
     .job-candidate-nav-item,
@@ -387,13 +387,13 @@
       display: block;
       width: 100% !important;
       min-width: 0 !important;
-      min-height: 38px !important;
+      min-height: 27px !important;
       height: auto !important;
-      padding: 8px 10px !important;
+      padding: 3px 10px !important;
       color: rgba(248, 250, 252, 0.82) !important;
       font-size: 13px !important;
       font-weight: 600 !important;
-      line-height: 18px !important;
+      line-height: 20px !important;
       text-align: left !important;
       white-space: normal !important;
       background: transparent !important;
@@ -402,6 +402,17 @@
       border-radius: 0 5px 5px 0 !important;
       box-shadow: none !important;
       opacity: 1 !important;
+    }
+
+    /* Фикс высоты пункта 46px → 27px (приёмка 2026-08-03):
+       базовая halo-кнопка (.halo .v-button:before) вставляет пустой inline-block
+       псевдоэлемент; из-за блочного .v-button-wrap/.v-button-caption он образует
+       второй line box (20px) и растягивает кнопку до 46px. Скрываем его —
+       высота пункта = 20px + 6px padding = 26px → min-height 27px. */
+    .label-nav-item:before,
+    .job-candidate-nav-item:before,
+    .v-button-label-nav-item:before {
+      display: none !important;
     }
 
     .label-nav-item .v-button-caption,
@@ -470,19 +481,6 @@
       border-bottom: 1px solid #dfe5ec;
     }
 
-    .job-candidate-audit-box,
-    .job-candidate-audit-label {
-      width: 100% !important;
-      min-width: 0;
-    }
-
-    .job-candidate-audit-label {
-      color: #718096 !important;
-      font-size: 13px !important;
-      line-height: 20px !important;
-      white-space: normal !important;
-    }
-
     .job-candidate-more-actions .v-button {
       min-width: 82px;
       height: 38px;
@@ -534,7 +532,7 @@
       max-width: none !important;
       padding: 0 10px;
       color: #26384c !important;
-      font-size: 12px !important;
+      font-size: 14px !important;
       font-weight: 600;
       line-height: 48px;
       white-space: nowrap !important;
@@ -549,8 +547,8 @@
     }
 
     .job-candidate-tabs .v-tabsheet-tabitem-selected .v-caption {
-      color: #0b63b6 !important;
-      border-bottom: 3px solid #0b63b6 !important;
+      color: $v-selection-color !important;
+      border-bottom: 3px solid $v-selection-color !important;
     }
 
     .job-candidate-tabs .v-tabsheet-content {
@@ -593,16 +591,6 @@
       box-shadow: 0 2px 7px rgba(15, 23, 42, .04);
     }
 
-    .job-candidate-accordion-header:before {
-      content: "\25BC";
-      display: inline-block;
-      margin-right: 10px;
-      color: #0b63b6;
-      font-family: Arial, "Segoe UI Symbol", sans-serif;
-      font-size: 13px;
-      line-height: 20px;
-    }
-
     .job-candidate-accordion-title,
     .job-candidate-card-title {
       color: #1f3146 !important;
@@ -619,14 +607,12 @@
       border-radius: 0 0 8px 8px;
     }
 
-    .job-candidate-accordion-open .job-candidate-accordion-content,
     .job-candidate-card-row {
       display: flex !important;
       gap: 16px;
       align-items: flex-start;
     }
 
-    .job-candidate-accordion-open .job-candidate-accordion-content > .v-slot,
     .job-candidate-card-row > .v-slot {
       width: calc(50% - 8px) !important;
       min-width: 0 !important;
@@ -728,10 +714,30 @@
       min-width: 0 !important;
     }
 
+    /* Required-поля (Имя/Фамилия) CUBA оборачивает в v-has-caption с пустым
+       caption-слотом справа (20px) — поля ФИО получались разной ширины.
+       Убираем обёртку и растягиваем input на весь слот: ФИО строго одной ширины. */
+    .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-edit-form-control > .v-has-caption.v-caption-on-right {
+      display: block !important;
+      width: 100% !important;
+      padding-right: 0 !important;
+    }
+
+    .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-edit-form-control > .v-has-caption.v-caption-on-right > .v-caption {
+      display: none !important;
+    }
+
+    .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-edit-form-control > .v-has-caption.v-caption-on-right > .c-suggestionfield,
+    .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-edit-form-control > .v-has-caption.v-caption-on-right > .c-pickerfield,
+    .job-candidate-form-grid .v-horizontallayout > .v-expand > .v-slot-edit-form-control > .v-has-caption.v-caption-on-right > .v-datefield {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
     .job-candidate-form-grid .v-label,
     .job-candidate-form-row .v-label {
       color: #516174 !important;
-      font-size: 16px !important;
+      font-size: 15px !important;
       line-height: 38px !important;
       white-space: normal !important;
       overflow-wrap: anywhere;
@@ -754,7 +760,7 @@
       width: 100% !important;
       min-width: 0 !important;
       height: 38px !important;
-      font-size: 16px !important;
+      font-size: 15px !important;
       line-height: 38px !important;
     }
 
@@ -765,13 +771,13 @@
     }
 
     .job-candidate-form-row > .v-slot:first-child {
-      width: 150px !important;
-      min-width: 150px !important;
+      width: 100px !important;
+      min-width: 100px !important;
       padding-right: 12px;
     }
 
     .job-candidate-form-row > .v-slot:last-child {
-      width: calc(100% - 150px) !important;
+      width: calc(100% - 100px) !important;
       min-width: 0 !important;
       flex: 1 1 auto !important;
     }
@@ -791,6 +797,20 @@
       border: 1px solid #dce3eb;
       border-radius: 7px;
       overflow: hidden;
+    }
+
+    /* Секция «Социальные сети» на height:AUTO — dataGrid не рендерит id на
+       корневом div (#socialNetworkTable не матчит), поэтому высота задаётся
+       слоту таблицы и самой сетке: иначе v-grid схлопывается до 0–2px
+       (возврат таблицы по замечанию пользователя, 2026-08-03). */
+    .v-slot-job-candidate-table,
+    .c-data-grid-composition {
+      min-height: 320px !important;
+      height: auto !important;
+    }
+
+    .v-slot-job-candidate-table .v-grid {
+      min-height: 320px !important;
     }
 
     .job-candidate-table .v-grid-header,
@@ -891,10 +911,14 @@
 
   @media (max-width: 1366px) {
     .job-candidate-editor {
+      .v-slot-job-candidate-sidebar,
       .job-candidate-sidebar {
-        width: 286px !important;
-        min-width: 286px !important;
-        max-width: 286px !important;
+        width: 296px !important;
+        min-width: 296px !important;
+        max-width: 296px !important;
+      }
+
+      .job-candidate-sidebar {
         padding-left: 16px;
         padding-right: 16px;
       }
@@ -937,8 +961,19 @@
       }
 
       .job-candidate-form-row > .v-slot:first-child {
-        width: 128px !important;
-        min-width: 128px !important;
+        width: 100px !important;
+        min-width: 100px !important;
+      }
+    }
+  }
+
+  @media (max-width: 1100px) {
+    .job-candidate-editor {
+      .v-slot-job-candidate-sidebar,
+      .job-candidate-sidebar {
+        width: 284px !important;
+        min-width: 284px !important;
+        max-width: 284px !important;
       }
     }
   }

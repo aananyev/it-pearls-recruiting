@@ -1,5 +1,3 @@
-@import "job-candidate-editor.scss";
-
 /* Define your theme modifications inside next mixin */
 
 @mixin date_iteraction_button($color) {
@@ -521,7 +519,6 @@ rating_battery_yellow_3:before {
 }
 
 @mixin com_company_hunttech-havana-ext {
-    @include job-candidate-editor-theme;
 
 .rating_box {
         font_size: x-large;

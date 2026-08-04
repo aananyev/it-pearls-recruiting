@@ -476,7 +476,6 @@ private Component jobCandidatesTableFileImageFaceColumnGenerator(...) {
 | `tabPositions` | Позиции и вакансии | История рассмотрения (lastProjectTable) + Подходящие вакансии (suggestVacancyTable). Данные грузятся фоновой задачей при первом открытии вкладки |
 | `tabIteraction` | Взаимодействия | DataGrid `IteractionList`, фильтр вакансии |
 | `tabResume` | Резюме и файлы | DataGrid `CandidateCV` + генераторы project logo/иконок |
-| `tabSocialNetworks` | Социальные сети | DataGrid `SocialNetworkURLs` |
 | `commentsTab` | Комментарии | Лента комментариев + отправка |
 | `tabHistory` | История | createdBy/updatedBy — системная информация |
 
@@ -610,8 +609,10 @@ priorityMap.put("Other", 9);
 
 | Path в Java | View в `job-candidate-edit.xml` | Статус |
 |-------------|----------------------------------|--------|
-| `vacancy.vacansyName`, `openClose`, `projectName.projectLogo` | `openPosition-iteraction-list-picker-view` | OK |
-| `vacancy.projectName.projectDescription` | не в picker-view | **риск** — `openPositionDescription()` |
+| `vacancy.vacansyName`, `openClose` | `openPosition-edit-view` | OK |
+| `vacancy.projectName.projectLogo` | inline `projectName view="_minimal"` + `projectLogo view="_local"` | OK (2026-08-04) |
+| `vacancy.projectName.projectDescription` | inline `projectName view="_minimal"` + `projectDescription` | OK (2026-08-04) — ранее **риск** `openPositionDescription()` |
+| `vacancy.projectName.projectDepartment.companyName.workingConditions/companyDescription` | inline `projectDepartment view="companyDepartament-picker-view"` → `companyName view="company-picker-view"` → скаляры | OK (2026-08-04) |
 | `iteractionType.pic`, `iterationName` | `iteraction-list-type-view` | OK |
 | `iteractionType.signSendToClient`, `signEndCase`, `signOurInterview*` | не в `iteraction-list-type-view` | **риск** — suggest/lastProject generators |
 | `rating`, `comment`, `addDate/String/Integer`, `currentOpenClose` | `_local` на `IteractionList` | OK |
@@ -787,6 +788,9 @@ Pack: `com.company.hunttech.web.screens.jobcandidate` — 200+ ключей, п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-04 | JobCandidateEdit, вкладка «Контакты»: подписям строк ввода в карточках «Основные контакты» (Email, Телефон, Мобильный, Telegram) и «Дополнительные контакты» (WhatsApp, Viber, Skype) возвращён явный `width="100px"` в XML — все 7 строк ввода одной длины и с одинаковым отступом поля. Presentation-only. |
+| 2026-08-04 | **View integrity fix** `jobCandidate-edit.xml`: `projectName view="_local"` не подхватывал FK `projectLogo`/`projectDepartment→companyName` → `IllegalStateException` в генераторах колонок логотипа и `openPositionDescription()`. Inline-переопределения переведены на `_minimal` + явные nested-поля (`candidateCv.toVacancy`, `iteractionList.vacancy`, `suggestOpenPositionDc.projectName`+`projectOwner`). §4.10 актуализирован. |
+| 2026-08-03 | JobCandidateEdit: presentation-only редизайн компоновки (22 файла) по дизайн-ревью `.team/JobCandidateEdit/design-notes.md` — label-навигация по эталону `IteractionListEdit` (27px/3px/20px), toolbar с заголовком/описанием, подписи на `msg://`-ключах (+24), секция соцсетей `height="AUTO"`, удалены мёртвые stylename, порядок SCSS-слоёв по контракту 6.4. Entity, views, loaders, JPQL, actions и бизнес-логика не менялись. |
 | 2026-07-13 | **TODO[tabPositions]:** Вкладка «Позиции и вакансии» отключена (visible=false, код закомментирован). |
 | 2026-07-04 | JobCandidate performance pack: batch cache производных колонок browse, lazy comments tab в edit, узкий duplicate-check view, индексы `260704-3`, focused perf tests |
 | 2026-06-30 | JobCandidateEdit: удалены `laborAgreement` из view и `jobCandidateLaborAgreementDc` — fix QueryException при Edit из Browse |

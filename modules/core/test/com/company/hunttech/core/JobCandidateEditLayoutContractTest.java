@@ -76,8 +76,8 @@ public class JobCandidateEditLayoutContractTest {
                 "id=\"personalDataBlock\"",
                 "id=\"professionalDataBlock\"");
 
-        // Класс half-card (горизонтальная пара) в пределах вкладки «Основное» удалён
-        // (во вкладке «Контакты» он используется контактными карточками легально).
+        // Класс half-card (горизонтальная пара) удалён из формы целиком — мёртвый stylename
+        // (P2-10 дизайн-ревью 2026-08-03); карточки «Контактов» держатся на job-candidate-card-row.
         String mainTab = section(xml,
                 "id=\"jobCandidateMainSectionContent\"",
                 "<!-- TAB: Контакты -->");
@@ -93,9 +93,9 @@ public class JobCandidateEditLayoutContractTest {
 
             assertTrue(theme, scss.contains(".job-candidate-tabs > .v-tabsheet-tabcontainer"));
             assertTrue(theme, scss.contains(".v-slot-job-candidate-sidebar"));
-            assertTrue(theme, scss.contains("min-height: 38px !important"));
+            assertTrue(theme, scss.contains("min-height: 27px !important"));
             assertTrue(theme, scss.contains("max-width: none !important"));
-            assertTrue(theme, scss.contains("font-size: 12px !important"));
+            assertTrue(theme, scss.contains("font-size: 14px !important"));
             assertTrue(theme, scss.contains("white-space: nowrap !important"));
             assertTrue(theme, scss.contains("text-overflow: clip !important"));
             assertTrue(theme, scss.contains(".job-candidate-position-column"));
