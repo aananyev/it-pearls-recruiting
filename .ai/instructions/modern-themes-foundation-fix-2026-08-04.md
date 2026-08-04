@@ -2,14 +2,14 @@
 
 ## Контекст
 
-Проект: **HRM HuntTech**  
-Репозиторий: `aananyev/it-pearls-recruiting`  
-Ветка: `agent/modern-themes-foundation-fix`  
-Base: `master`  
+Проект: **HRM HuntTech**
+Репозиторий: `aananyev/it-pearls-recruiting`
+Ветка: `agent/modern-themes-foundation-fix`
+Base: `master`
 PR и точный `VERIFIED HEAD` берутся из актуального описания PR. Новый коммит после
 начала проверки аннулирует отчёт.
 
-Режим: **проверка без изменения функционального кода, XML, SCSS и docs**.  
+Режим: **проверка без изменения функционального кода, XML, SCSS и docs**.
 Merge запрещён. Production запрещён.
 
 ## Preflight
