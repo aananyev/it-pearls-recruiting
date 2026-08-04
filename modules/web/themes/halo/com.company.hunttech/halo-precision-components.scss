@@ -1,0 +1,363 @@
+/* Halo Precision — точное воспроизведение варианта 1 (светлый голубой)
+   для DataGrid, Table, TreeTable (TreeDataGrid), TextArea и RichTextArea.
+   Стили применяются ТОЛЬКО к компонентам с явно назначенными stylename:
+   ht-halo-precision-datagrid / -table / -treetable / -textarea / -richtextarea.
+   Источник значений: docs/ui/HaloPrecisionComponents_Spec.md (референсы halo_variant1_*.png). */
+
+/* ── DataGrid ───────────────────────────────────────────── */
+.ht-halo-precision-datagrid {
+  background: #ffffff;
+  border: 1px solid #dde1e8;
+  border-radius: 6px;
+  color: #4c4e54;
+
+  .v-grid-header .v-grid-cell {
+    background: #f9f9fa;
+    color: #50525a;
+    font-weight: 600;
+    font-size: 12px;
+    border-bottom: 1px solid #e3e5ec;
+    border-right: 1px solid #e9ebef;
+    padding: 0 12px;
+    line-height: 40px;
+  }
+  .v-grid-header .v-grid-cell:last-child {
+    border-right: none;
+  }
+  .v-grid-sort-indicator {
+    color: #417be1;
+  }
+  .v-grid-column-resize-handle {
+    background: #c9d4e0;
+  }
+  .v-grid-row {
+    background: #ffffff;
+    border-bottom: 1px solid #e7eaee;
+    color: #4c4e54;
+  }
+  .v-grid-row-stripe {
+    background: #fbfbfb;
+  }
+  .v-grid-row:hover {
+    background: #f3f8fd;
+  }
+  .v-grid-row-selected {
+    background: #b1cff2;
+    box-shadow: inset 0 0 0 1px #7fa8d0;
+  }
+  .v-grid-row-selected:hover {
+    background: #a9c8ee;
+  }
+  .v-grid-row-focused {
+    box-shadow: inset 0 0 0 2px #417be1;
+  }
+  .v-grid-cell-focused {
+    box-shadow: inset 0 0 0 2px #417be1;
+  }
+  .v-grid-cell {
+    padding: 0 12px;
+    line-height: 38px;
+  }
+  .v-grid-cell-content {
+    line-height: 38px;
+  }
+  .v-grid-editor-cells {
+    background: #ffffff;
+  }
+  .v-grid-editor-cell {
+    padding: 4px 8px;
+  }
+  .v-grid-footer .v-grid-cell {
+    background: #f9f9f9;
+    border-top: 1px solid #e3e5ec;
+    color: #676a75;
+    font-weight: 600;
+  }
+  .v-grid-empty {
+    color: #676a75;
+  }
+  .v-grid-scroller-vertical,
+  .v-grid-scroller-horizontal {
+    background: #f9f9fa;
+  }
+  .v-grid-scroller-vertical::-webkit-scrollbar,
+  .v-grid-scroller-horizontal::-webkit-scrollbar,
+  .v-grid-body::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .v-grid-scroller-vertical::-webkit-scrollbar-track,
+  .v-grid-scroller-horizontal::-webkit-scrollbar-track,
+  .v-grid-body::-webkit-scrollbar-track {
+    background: #f2f3f6;
+  }
+  .v-grid-scroller-vertical::-webkit-scrollbar-thumb,
+  .v-grid-scroller-horizontal::-webkit-scrollbar-thumb,
+  .v-grid-body::-webkit-scrollbar-thumb {
+    background: #c9d0da;
+    border-radius: 5px;
+  }
+  .v-grid-scroller-vertical::-webkit-scrollbar-thumb:hover,
+  .v-grid-scroller-horizontal::-webkit-scrollbar-thumb:hover,
+  .v-grid-body::-webkit-scrollbar-thumb:hover {
+    background: #aeb8c6;
+  }
+}
+
+/* ── Table (Vaadin Table) ───────────────────────────────── */
+.ht-halo-precision-table {
+  background: #ffffff;
+  border: 1px solid #dde1e8;
+  border-radius: 6px;
+  color: #4c4e54;
+
+  .v-table-header-wrap {
+    background: #f9f9fa;
+    border-bottom: 1px solid #e3e5ec;
+  }
+  .v-table-caption-container {
+    color: #50525a;
+    font-weight: 600;
+    font-size: 12px;
+    padding: 0 12px;
+    line-height: 40px;
+  }
+  .v-table-resizer {
+    border-right: 1px solid #e9ebef;
+  }
+  .v-table-sort-indicator {
+    color: #417be1;
+  }
+  .v-table-body {
+    background: #ffffff;
+  }
+  .v-table-row,
+  .v-table-row-odd {
+    background: #ffffff;
+    border-bottom: 1px solid #e7eaee;
+  }
+  .v-table-row-odd {
+    background: #fbfbfb;
+  }
+  .v-table-row:hover {
+    background: #f3f8fd;
+  }
+  .v-table-row-selected {
+    background: #b1cff2;
+    box-shadow: inset 0 0 0 1px #7fa8d0;
+  }
+  .v-table-row-selected:hover {
+    background: #a9c8ee;
+  }
+  .v-table-cell-content {
+    padding: 0 12px;
+    line-height: 38px;
+  }
+  .v-table-focus-slot-left,
+  .v-table-focus-slot-right {
+    box-shadow: inset 0 0 0 2px #417be1;
+  }
+  .v-table-footer-wrap {
+    background: #f9f9f9;
+    border-top: 1px solid #e3e5ec;
+    color: #676a75;
+  }
+  .v-table-footer-container {
+    font-weight: 600;
+  }
+  .v-table-body::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .v-table-body::-webkit-scrollbar-track {
+    background: #f2f3f6;
+  }
+  .v-table-body::-webkit-scrollbar-thumb {
+    background: #c9d0da;
+    border-radius: 5px;
+  }
+  .v-table-body::-webkit-scrollbar-thumb:hover {
+    background: #aeb8c6;
+  }
+}
+
+/* ── TreeTable (TreeDataGrid / Vaadin TreeGrid) ─────────── */
+.ht-halo-precision-treetable {
+  background: #ffffff;
+  border: 1px solid #dde1e8;
+  border-radius: 6px;
+  color: #4c4e54;
+
+  .v-treegrid-header .v-treegrid-cell {
+    background: #f9f9fa;
+    color: #50525a;
+    font-weight: 600;
+    font-size: 12px;
+    border-bottom: 1px solid #e3e5ec;
+    border-right: 1px solid #e9ebef;
+    padding: 0 12px;
+    line-height: 40px;
+  }
+  .v-treegrid-header .v-treegrid-cell:last-child {
+    border-right: none;
+  }
+  .v-treegrid-sort-indicator {
+    color: #417be1;
+  }
+  .v-treegrid-row {
+    background: #ffffff;
+    border-bottom: 1px solid #e7eaee;
+  }
+  .v-treegrid-row-stripe {
+    background: #fbfbfb;
+  }
+  .v-treegrid-row:hover {
+    background: #f3f8fd;
+  }
+  .v-treegrid-row-selected {
+    background: #b1cff2;
+    box-shadow: inset 0 0 0 1px #7fa8d0;
+  }
+  .v-treegrid-row-focused {
+    box-shadow: inset 0 0 0 2px #417be1;
+  }
+  .v-treegrid-cell {
+    padding: 0 12px;
+    line-height: 38px;
+  }
+  .v-treegrid-cell-content {
+    line-height: 38px;
+  }
+  .v-treegrid-expander {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    color: #676a75;
+  }
+  .v-treegrid-expander:hover {
+    color: #417be1;
+  }
+  .v-treegrid-cell-focused {
+    box-shadow: inset 0 0 0 2px #417be1;
+  }
+  .v-treegrid-scroller-vertical::-webkit-scrollbar,
+  .v-treegrid-scroller-horizontal::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .v-treegrid-scroller-vertical::-webkit-scrollbar-track,
+  .v-treegrid-scroller-horizontal::-webkit-scrollbar-track {
+    background: #f2f3f6;
+  }
+  .v-treegrid-scroller-vertical::-webkit-scrollbar-thumb,
+  .v-treegrid-scroller-horizontal::-webkit-scrollbar-thumb {
+    background: #c9d0da;
+    border-radius: 5px;
+  }
+}
+
+/* ── TextArea ───────────────────────────────────────────── */
+.ht-halo-precision-textarea.v-textarea {
+  background: #ffffff;
+  border: 1px solid #d1e2fa;
+  border-radius: 6px;
+  color: #4c4e54;
+  min-height: 120px;
+
+  textarea {
+    background: transparent;
+    color: #4c4e54;
+    padding: 8px 10px;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  textarea::placeholder {
+    color: #9aa3ad;
+  }
+  &:hover {
+    border-color: #a9c8ee;
+  }
+  &:focus,
+  &:focus-within {
+    border-color: #4085e7;
+    box-shadow: 0 0 0 2px rgba(64, 133, 231, 0.25);
+  }
+  &.v-textarea-error {
+    border-color: #d9534f;
+    box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.2);
+  }
+  &.v-readonly {
+    background: #fbfbfc;
+    border-color: #e3e5eb;
+  }
+  &.v-disabled {
+    background: #f9f9fa;
+    opacity: 0.6;
+  }
+  textarea::-webkit-scrollbar {
+    width: 10px;
+  }
+  textarea::-webkit-scrollbar-track {
+    background: #f2f3f6;
+  }
+  textarea::-webkit-scrollbar-thumb {
+    background: #c9d0da;
+    border-radius: 5px;
+  }
+}
+
+/* ── RichTextArea ───────────────────────────────────────── */
+.ht-halo-precision-richtextarea.v-richtextarea {
+  background: #ffffff;
+  border: 1px solid #e3e5eb;
+  border-radius: 6px;
+  color: #4c4e54;
+  overflow: hidden;
+
+  .gwt-RichTextToolbar {
+    background: #fcfcfd;
+    border-bottom: 1px solid #eceef1;
+    padding: 4px 6px;
+    min-height: 36px;
+  }
+  .gwt-RichTextToolbar .gwt-PushButton,
+  .gwt-RichTextToolbar .gwt-ToggleButton {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: #50525a;
+    min-width: 26px;
+    min-height: 26px;
+    padding: 2px 4px;
+    cursor: pointer;
+    line-height: 26px;
+    text-align: center;
+  }
+  .gwt-RichTextToolbar .gwt-PushButton:hover,
+  .gwt-RichTextToolbar .gwt-ToggleButton:hover {
+    background: #f3f8fd;
+    border-color: #d1e2fa;
+    color: #417be1;
+  }
+  .gwt-RichTextToolbar .gwt-ToggleButton-down {
+    background: #b1cff2;
+    border-color: #7fa8d0;
+    color: #2c4f7c;
+  }
+  .gwt-RichTextArea {
+    background: #ffffff;
+    color: #4c4e54;
+    padding: 8px 10px;
+  }
+  &.v-richtextarea-readonly {
+    background: #fbfbfc;
+  }
+  &.v-richtextarea-error {
+    border-color: #d9534f;
+    box-shadow: 0 0 0 2px rgba(217, 83, 79, 0.2);
+  }
+  &.v-disabled {
+    background: #f9f9fa;
+    opacity: 0.6;
+  }
+}
