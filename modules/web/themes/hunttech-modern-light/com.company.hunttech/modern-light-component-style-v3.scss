@@ -1,0 +1,441 @@
+/* hunttech-modern-light — вариант 3 (тёплый светло-серый деловой интерфейс).
+   Локальная стилизация DataGrid, Table, TreeTable, TextArea и RichTextArea.
+   Все селекторы вложены в корневой селектор темы (импорт внутри .hunttech-modern-light),
+   поэтому затрагивают только эту тему и перебивают штатные правила CUBA/Vaadin.
+   Другие темы не изменяются. */
+
+/* Токены варианта 3 */
+$ml3-app-bg: #f3f1ec;            /* тёплый светло-серый фон рабочей области */
+$ml3-surface: #fdfcf8;           /* молочно-белая поверхность компонента */
+$ml3-surface-2: #f4f1eb;         /* вторичная тёплая поверхность (footer, secondary) */
+$ml3-header-bg: #ece9e2;         /* тёплый нейтральный серый header */
+$ml3-header-text: #3a3731;       /* графитовый текст */
+$ml3-text: #3a3731;              /* основной текст */
+$ml3-text-2: #6f6a60;            /* вторичный текст */
+$ml3-border: #d9d4ca;            /* мягкая серо-бежевая граница */
+$ml3-divider: #e6e2d9;           /* светлый divider */
+$ml3-hover: #f2efe8;             /* лёгкий тёплый hover */
+$ml3-selected: #e3dccb;          /* выраженный серо-бежевый selected */
+$ml3-selected-hover: #ddd4c0;    /* selected под курсором */
+$ml3-accent: #c1211f;            /* фирменный акцент HRM HuntTech */
+$ml3-focus: rgba(193, 33, 31, 0.55); /* контрастный, не кислотный focus ring */
+$ml3-invalid: #b3261e;           /* спокойный красный */
+$ml3-readonly-bg: #f7f4ee;       /* нейтральная светлая read-only поверхность */
+$ml3-disabled-bg: #f0ede6;       /* приглушённая disabled поверхность */
+$ml3-disabled-text: rgba(58, 55, 49, 0.45);
+$ml3-zebra: #faf8f3;             /* очень слабая зебра */
+$ml3-scroll-track: #efece4;
+$ml3-scroll-thumb: #c9c2b4;
+$ml3-scroll-thumb-hover: #b3ab9a;
+$ml3-resize: #cfc8ba;
+
+.hunttech-modern-light {
+  $bg: $ml3-app-bg;
+
+  /* ── DataGrid (.v-grid) ─────────────────────────────── */
+  .v-grid {
+    background: $ml3-surface;
+    border: 1px solid $ml3-border;
+    border-radius: 6px;
+    color: $ml3-text;
+  }
+  .v-grid-header .v-grid-cell {
+    background: $ml3-header-bg;
+    color: $ml3-header-text;
+    font-weight: 600;
+    border-bottom: 1px solid $ml3-border;
+    border-right: 1px solid $ml3-divider;
+    padding: 0 12px;
+    line-height: 34px;
+  }
+  .v-grid-header .v-grid-cell:last-child {
+    border-right: none;
+  }
+  .v-grid-sort-indicator {
+    color: $ml3-accent;
+  }
+  .v-grid-column-resize-handle {
+    background: $ml3-resize;
+  }
+  .v-grid-row {
+    background: #ffffff;
+    border-bottom: 1px solid $ml3-divider;
+    color: $ml3-text;
+  }
+  .v-grid-row-stripe {
+    background: $ml3-zebra;
+  }
+  .v-grid-row:hover {
+    background: $ml3-hover;
+  }
+  .v-grid-row-selected {
+    background: $ml3-selected;
+    box-shadow: inset 0 0 0 1px $ml3-accent;
+  }
+  .v-grid-row-selected:hover {
+    background: $ml3-selected-hover;
+  }
+  .v-grid-row-focused {
+    box-shadow: inset 0 0 0 2px $ml3-focus;
+  }
+  .v-grid-cell {
+    padding: 0 12px;
+    line-height: 34px;
+  }
+  .v-grid-cell-focused {
+    box-shadow: inset 0 0 0 2px $ml3-focus;
+  }
+  .v-grid-editor-cells {
+    background: #ffffff;
+  }
+  .v-grid-editor-cell {
+    padding: 4px 8px;
+  }
+  .v-grid-footer .v-grid-cell {
+    background: $ml3-surface-2;
+    border-top: 1px solid $ml3-border;
+    color: $ml3-text-2;
+    font-weight: 600;
+  }
+  .v-grid-empty {
+    color: $ml3-text-2;
+  }
+  .v-grid-scroller-vertical,
+  .v-grid-scroller-horizontal {
+    background: $ml3-surface;
+  }
+  .v-grid-scroller-vertical::-webkit-scrollbar,
+  .v-grid-scroller-horizontal::-webkit-scrollbar,
+  .v-grid-body::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .v-grid-scroller-vertical::-webkit-scrollbar-track,
+  .v-grid-scroller-horizontal::-webkit-scrollbar-track,
+  .v-grid-body::-webkit-scrollbar-track {
+    background: $ml3-scroll-track;
+  }
+  .v-grid-scroller-vertical::-webkit-scrollbar-thumb,
+  .v-grid-scroller-horizontal::-webkit-scrollbar-thumb,
+  .v-grid-body::-webkit-scrollbar-thumb {
+    background: $ml3-scroll-thumb;
+    border-radius: 5px;
+  }
+  .v-grid-scroller-vertical::-webkit-scrollbar-thumb:hover,
+  .v-grid-scroller-horizontal::-webkit-scrollbar-thumb:hover,
+  .v-grid-body::-webkit-scrollbar-thumb:hover {
+    background: $ml3-scroll-thumb-hover;
+  }
+
+  /* ── Table (Vaadin Table) ───────────────────────────── */
+  .v-table {
+    background: $ml3-surface;
+    border: 1px solid $ml3-border;
+    border-radius: 6px;
+    color: $ml3-text;
+  }
+  .v-table-header-wrap {
+    background: $ml3-header-bg;
+    border-bottom: 1px solid $ml3-border;
+  }
+  .v-table-caption-container {
+    color: $ml3-header-text;
+    font-weight: 600;
+    padding: 0 12px;
+    line-height: 34px;
+  }
+  .v-table-resizer {
+    border-right: 1px solid $ml3-divider;
+  }
+  .v-table-sort-indicator {
+    color: $ml3-accent;
+  }
+  .v-table-body {
+    background: #ffffff;
+  }
+  .v-table-row,
+  .v-table-row-odd {
+    background: #ffffff;
+    border-bottom: 1px solid $ml3-divider;
+  }
+  .v-table-row-odd {
+    background: $ml3-zebra;
+  }
+  .v-table-row:hover {
+    background: $ml3-hover;
+  }
+  .v-table-row-selected {
+    background: $ml3-selected;
+    box-shadow: inset 0 0 0 1px $ml3-accent;
+  }
+  .v-table-row-selected:hover {
+    background: $ml3-selected-hover;
+  }
+  .v-table-cell-content {
+    padding: 0 12px;
+    line-height: 34px;
+  }
+  .v-table-focus-slot-left,
+  .v-table-focus-slot-right {
+    box-shadow: inset 0 0 0 2px $ml3-focus;
+  }
+  .v-table-footer-wrap {
+    background: $ml3-surface-2;
+    border-top: 1px solid $ml3-border;
+    color: $ml3-text-2;
+  }
+  .v-table-footer-container {
+    font-weight: 600;
+  }
+  .v-table-body::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .v-table-body::-webkit-scrollbar-track {
+    background: $ml3-scroll-track;
+  }
+  .v-table-body::-webkit-scrollbar-thumb {
+    background: $ml3-scroll-thumb;
+    border-radius: 5px;
+  }
+  .v-table-body::-webkit-scrollbar-thumb:hover {
+    background: $ml3-scroll-thumb-hover;
+  }
+
+  /* ── TreeTable ──────────────────────────────────────── */
+  /* TreeDataGrid (.v-treegrid) — фактический рендер <treeDataGrid> в проекте */
+  .v-treegrid {
+    background: $ml3-surface;
+    border: 1px solid $ml3-border;
+    border-radius: 6px;
+    color: $ml3-text;
+  }
+  .v-treegrid-header .v-treegrid-cell {
+    background: $ml3-header-bg;
+    color: $ml3-header-text;
+    font-weight: 600;
+    border-bottom: 1px solid $ml3-border;
+    border-right: 1px solid $ml3-divider;
+    padding: 0 12px;
+    line-height: 34px;
+  }
+  .v-treegrid-header .v-treegrid-cell:last-child {
+    border-right: none;
+  }
+  .v-treegrid-sort-indicator {
+    color: $ml3-accent;
+  }
+  .v-treegrid-row {
+    background: #ffffff;
+    border-bottom: 1px solid $ml3-divider;
+  }
+  .v-treegrid-row-stripe {
+    background: $ml3-zebra;
+  }
+  .v-treegrid-row:hover {
+    background: $ml3-hover;
+  }
+  .v-treegrid-row-selected {
+    background: $ml3-selected;
+    box-shadow: inset 0 0 0 1px $ml3-accent;
+  }
+  .v-treegrid-row-focused {
+    box-shadow: inset 0 0 0 2px $ml3-focus;
+  }
+  .v-treegrid-cell {
+    padding: 0 12px;
+    line-height: 34px;
+  }
+  .v-treegrid-cell-content {
+    line-height: 34px;
+  }
+  .v-treegrid-expander {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    color: $ml3-text-2;
+  }
+  .v-treegrid-expander:hover {
+    color: $ml3-accent;
+  }
+  .v-treegrid-cell-focused {
+    box-shadow: inset 0 0 0 2px $ml3-focus;
+  }
+  .v-treegrid-scroller-vertical::-webkit-scrollbar,
+  .v-treegrid-scroller-horizontal::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .v-treegrid-scroller-vertical::-webkit-scrollbar-track,
+  .v-treegrid-scroller-horizontal::-webkit-scrollbar-track {
+    background: $ml3-scroll-track;
+  }
+  .v-treegrid-scroller-vertical::-webkit-scrollbar-thumb,
+  .v-treegrid-scroller-horizontal::-webkit-scrollbar-thumb {
+    background: $ml3-scroll-thumb;
+    border-radius: 5px;
+  }
+  /* CUBA TreeTable (<treeTable>) — Vaadin Tree (.v-tree), если используется */
+  .v-tree {
+    background: $ml3-surface;
+    border: 1px solid $ml3-border;
+    border-radius: 6px;
+    color: $ml3-text;
+  }
+  .v-tree-node-caption {
+    line-height: 30px;
+    padding: 0 8px;
+    border-radius: 4px;
+  }
+  .v-tree-node-caption:hover {
+    background: $ml3-hover;
+  }
+  .v-tree-node-selected > .v-tree-node-caption {
+    background: $ml3-selected;
+    box-shadow: inset 0 0 0 1px $ml3-accent;
+    color: $ml3-text;
+  }
+  .v-tree-node-focused > .v-tree-node-caption {
+    box-shadow: inset 0 0 0 2px $ml3-focus;
+  }
+  .v-tree-node-children {
+    border-left: 1px solid $ml3-divider;
+  }
+  .v-tree-expander {
+    color: $ml3-text-2;
+  }
+  .v-tree-expander:hover {
+    color: $ml3-accent;
+  }
+  .v-tree::-webkit-scrollbar {
+    width: 10px;
+  }
+  .v-tree::-webkit-scrollbar-track {
+    background: $ml3-scroll-track;
+  }
+  .v-tree::-webkit-scrollbar-thumb {
+    background: $ml3-scroll-thumb;
+    border-radius: 5px;
+  }
+
+  /* ── TextArea ───────────────────────────────────────── */
+  .v-textarea {
+    background: $ml3-surface;
+    border: 1px solid $ml3-border;
+    border-radius: 6px;
+    color: $ml3-text;
+    min-height: 120px;
+
+    textarea {
+      background: transparent;
+      color: $ml3-text;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    textarea::placeholder {
+      color: $ml3-text-2;
+    }
+    &:hover {
+      border-color: darken($ml3-border, 6%);
+    }
+    &:focus,
+    &:focus-within {
+      border-color: $ml3-invalid;
+      box-shadow: 0 0 0 2px $ml3-focus;
+    }
+    &.v-textarea-error {
+      border-color: $ml3-invalid;
+      box-shadow: 0 0 0 2px rgba(179, 38, 30, 0.25);
+    }
+    &.v-readonly {
+      background: $ml3-readonly-bg;
+      border-color: $ml3-divider;
+      color: $ml3-text;
+    }
+    &.v-disabled {
+      background: $ml3-disabled-bg;
+      color: $ml3-disabled-text;
+      opacity: 0.75;
+    }
+    textarea::-webkit-scrollbar {
+      width: 10px;
+    }
+    textarea::-webkit-scrollbar-track {
+      background: $ml3-scroll-track;
+    }
+    textarea::-webkit-scrollbar-thumb {
+      background: $ml3-scroll-thumb;
+      border-radius: 5px;
+    }
+    textarea::-webkit-scrollbar-thumb:hover {
+      background: $ml3-scroll-thumb-hover;
+    }
+  }
+
+  /* ── RichTextArea ───────────────────────────────────── */
+  .v-richtextarea {
+    background: $ml3-surface;
+    border: 1px solid $ml3-border;
+    border-radius: 6px;
+    color: $ml3-text;
+    overflow: hidden;
+
+    .gwt-RichTextToolbar {
+      background: $ml3-header-bg;
+      border-bottom: 1px solid $ml3-border;
+      padding: 4px 6px;
+      min-height: 36px;
+    }
+    .gwt-RichTextToolbar .gwt-PushButton,
+    .gwt-RichTextToolbar .gwt-ToggleButton {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: $ml3-header-text;
+      min-width: 28px;
+      min-height: 28px;
+      padding: 2px 4px;
+      cursor: pointer;
+      line-height: 28px;
+      text-align: center;
+    }
+    .gwt-RichTextToolbar .gwt-PushButton:hover,
+    .gwt-RichTextToolbar .gwt-ToggleButton:hover {
+      background: $ml3-hover;
+      border-color: $ml3-border;
+      color: $ml3-accent;
+    }
+    .gwt-RichTextToolbar .gwt-ToggleButton-down {
+      background: $ml3-selected;
+      border-color: $ml3-accent;
+      color: $ml3-text;
+    }
+    .gwt-RichTextArea {
+      background: $ml3-surface;
+      color: $ml3-text;
+      padding: 10px 12px;
+    }
+    &.v-richtextarea-readonly {
+      background: $ml3-readonly-bg;
+    }
+    &.v-richtextarea-error {
+      border-color: $ml3-invalid;
+      box-shadow: 0 0 0 2px rgba(179, 38, 30, 0.25);
+    }
+    &.v-disabled {
+      background: $ml3-disabled-bg;
+      opacity: 0.75;
+    }
+    .gwt-RichTextArea::-webkit-scrollbar {
+      width: 10px;
+    }
+    .gwt-RichTextArea::-webkit-scrollbar-track {
+      background: $ml3-scroll-track;
+    }
+    .gwt-RichTextArea::-webkit-scrollbar-thumb {
+      background: $ml3-scroll-thumb;
+      border-radius: 5px;
+    }
+  }
+}
