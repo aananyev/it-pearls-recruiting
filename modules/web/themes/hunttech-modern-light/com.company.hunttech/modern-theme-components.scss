@@ -1,0 +1,484 @@
+/*
+ * HRM HuntTech Modern — системный визуальный слой CUBA/Vaadin.
+ *
+ * Селекторы намеренно находятся внутри mixin темы. Они применяются только
+ * под корневым классом конкретной темы и не меняют Halo, Hover и другие темы.
+ * Геометрию специализированных экранов задают подключаемые локальные partial.
+ */
+@mixin modern-theme-components {
+
+  /* Базовая поверхность приложения и предсказуемая модель размеров. */
+  .v-app,
+  .v-ui,
+  .v-window,
+  .v-panel,
+  .v-groupbox,
+  .v-table,
+  .v-grid {
+    color: $ht-text;
+    font-family: $v-font-family;
+  }
+
+  .v-app,
+  .v-ui {
+    background: $ht-app-background;
+    font-size: $v-font-size;
+    line-height: 1.45;
+  }
+
+  .v-slot,
+  .v-layout,
+  .v-csslayout {
+    box-sizing: border-box;
+  }
+
+  /*
+   * Верхнее меню. Ограничение изображения защищает main screen от гигантского
+   * логотипа при смене темы и до завершения расчёта размеров Vaadin.
+   */
+  .c-app-menubar,
+  .cuba-menubar {
+    background: $ht-menu-background !important;
+    border-color: $ht-menu-background !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06),
+                0 4px 16px $ht-shadow;
+  }
+
+  .c-app-menubar .v-menubar-menuitem,
+  .cuba-menubar .v-menubar-menuitem {
+    color: rgba($ht-menu-text, 0.82) !important;
+    padding: 0 14px !important;
+    font-weight: 500;
+    transition: color 120ms ease, background-color 120ms ease;
+  }
+
+  .c-app-menubar .v-menubar-menuitem:hover,
+  .c-app-menubar .v-menubar-menuitem-selected,
+  .cuba-menubar .v-menubar-menuitem:hover,
+  .cuba-menubar .v-menubar-menuitem-selected {
+    color: $ht-menu-text !important;
+    background: rgba($ht-menu-text, 0.09) !important;
+  }
+
+  .c-app-menubar .v-image,
+  .c-app-menubar img,
+  .cuba-menubar .v-image,
+  .cuba-menubar img,
+  .c-app-icon {
+    width: auto !important;
+    max-width: 180px;
+    height: auto !important;
+    max-height: 32px;
+    object-fit: contain;
+  }
+
+  /* Поля ввода: единая поверхность, контраст и явный keyboard focus. */
+  .v-textfield,
+  .v-textarea,
+  .v-filterselect,
+  .v-filterselect-input,
+  .v-datefield-textfield,
+  .v-datefield-calendarpanel,
+  .v-richtextarea {
+    box-sizing: border-box;
+    color: $ht-text !important;
+    background: $ht-control-background !important;
+    border-color: $ht-border-strong !important;
+    border-radius: $v-textfield-border-radius !important;
+  }
+
+  .v-textfield,
+  .v-textarea,
+  .v-filterselect-input,
+  .v-datefield-textfield {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    font-size: 14px !important;
+    transition: border-color 120ms ease, box-shadow 120ms ease,
+                background-color 120ms ease;
+  }
+
+  .v-textfield:hover,
+  .v-textarea:hover,
+  .v-filterselect:hover,
+  .v-datefield:hover .v-datefield-textfield {
+    border-color: $ht-accent !important;
+  }
+
+  .v-textfield:focus,
+  .v-textarea:focus,
+  .v-filterselect-focus,
+  .v-datefield-focus .v-datefield-textfield {
+    border-color: $ht-accent !important;
+    box-shadow: 0 0 0 3px $ht-focus-ring !important;
+    outline: none;
+  }
+
+  .v-textfield-prompt,
+  .v-textarea-prompt,
+  .v-filterselect-prompt {
+    color: $ht-text-disabled !important;
+  }
+
+  .v-readonly,
+  .v-disabled,
+  input[disabled],
+  textarea[disabled] {
+    color: $ht-text-disabled !important;
+    opacity: 0.78;
+  }
+
+  .v-readonly .v-textfield,
+  .v-readonly .v-textarea,
+  .v-readonly .v-filterselect,
+  .v-disabled .v-textfield,
+  .v-disabled .v-textarea,
+  .v-disabled .v-filterselect {
+    background: $ht-surface-muted !important;
+    border-color: $ht-border !important;
+    box-shadow: none !important;
+  }
+
+  .v-filterselect-button,
+  .v-datefield-button {
+    color: $ht-text-secondary !important;
+    background: $ht-surface-muted !important;
+    border-color: $ht-border-strong !important;
+  }
+
+  .v-filterselect-button:hover,
+  .v-datefield-button:hover {
+    color: $ht-accent !important;
+    background: $ht-surface-hover !important;
+  }
+
+  /* Кнопки: спокойная secondary-поверхность и красный корпоративный primary. */
+  .v-button {
+    min-height: $v-unit-size;
+    color: $ht-text !important;
+    background: $ht-surface-raised !important;
+    border: 1px solid $ht-border-strong !important;
+    border-radius: $v-border-radius !important;
+    box-shadow: 0 1px 2px $ht-shadow;
+    font-weight: 600 !important;
+    transition: background-color 120ms ease, border-color 120ms ease,
+                color 120ms ease, box-shadow 120ms ease,
+                transform 80ms ease;
+  }
+
+  .v-button:hover {
+    color: $ht-accent !important;
+    background: $ht-surface-hover !important;
+    border-color: $ht-accent !important;
+    box-shadow: 0 3px 10px $ht-shadow;
+  }
+
+  .v-button:focus {
+    border-color: $ht-accent !important;
+    box-shadow: 0 0 0 3px $ht-focus-ring !important;
+    outline: none;
+  }
+
+  .v-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px $ht-shadow;
+  }
+
+  .v-button-primary,
+  .v-button-friendly {
+    color: $ht-on-accent !important;
+    background: $ht-accent !important;
+    border-color: $ht-accent !important;
+    box-shadow: 0 2px 8px rgba($ht-accent, 0.28);
+  }
+
+  .v-button-primary:hover,
+  .v-button-friendly:hover {
+    color: $ht-on-accent !important;
+    background: $ht-accent-hover !important;
+    border-color: $ht-accent-hover !important;
+    box-shadow: 0 4px 14px rgba($ht-accent, 0.34);
+  }
+
+  .v-button-danger {
+    color: $ht-on-accent !important;
+    background: $ht-danger !important;
+    border-color: $ht-danger !important;
+  }
+
+  .v-button-link,
+  .v-button-borderless {
+    color: $ht-accent !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .v-button-link:hover,
+  .v-button-borderless:hover {
+    color: $ht-accent-hover !important;
+    background: $ht-accent-soft !important;
+    border-color: transparent !important;
+  }
+
+  .v-button.v-disabled,
+  .v-button[disabled] {
+    color: $ht-text-disabled !important;
+    background: $ht-surface-muted !important;
+    border-color: $ht-border !important;
+    box-shadow: none !important;
+    transform: none;
+  }
+
+  /* Table и DataGrid: плотные строки, устойчивые hover/selection и читаемый header. */
+  .v-table,
+  .v-grid {
+    overflow: hidden;
+    background: $ht-surface-raised !important;
+    border: 1px solid $ht-border !important;
+    border-radius: $v-border-radius;
+    box-shadow: 0 1px 3px $ht-shadow;
+  }
+
+  .v-table-header-wrap,
+  .v-table-header,
+  .v-grid-header .v-grid-cell {
+    color: $ht-text-secondary !important;
+    background: $ht-surface-muted !important;
+    border-color: $ht-border !important;
+  }
+
+  .v-table-caption-container,
+  .v-grid-header .v-grid-cell {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
+  .v-table-cell-content,
+  .v-grid-cell {
+    color: $ht-text;
+    border-color: $ht-border !important;
+  }
+
+  .v-table-row,
+  .v-table-row-odd,
+  .v-grid-row {
+    background: $ht-surface-raised !important;
+  }
+
+  .v-table-row-odd,
+  .v-grid-row-stripe > td {
+    background: $ht-surface-muted !important;
+  }
+
+  .v-table-row:hover,
+  .v-table-row-odd:hover,
+  .v-grid-row:hover > td {
+    background: $ht-surface-hover !important;
+  }
+
+  .v-table-row-selected,
+  .v-table-row-selected:hover,
+  .v-grid-row-selected > td,
+  .v-grid-row-selected:hover > td {
+    color: $ht-text !important;
+    background: $ht-accent-soft !important;
+    border-color: rgba($ht-accent, 0.32) !important;
+  }
+
+  .v-table-empty,
+  .v-grid-empty-state {
+    color: $ht-text-secondary !important;
+    background: $ht-surface-raised !important;
+  }
+
+  /* Карточки, панели и окна. */
+  .v-panel,
+  .v-groupbox {
+    background: $ht-surface-raised !important;
+    border: 1px solid $ht-border !important;
+    border-radius: $v-border-radius !important;
+    box-shadow: 0 2px 8px $ht-shadow;
+  }
+
+  .v-panel-caption,
+  .v-groupbox-caption {
+    color: $ht-text !important;
+    background: $ht-surface-raised !important;
+    border-color: $ht-border !important;
+    font-weight: 700 !important;
+  }
+
+  .v-groupbox-content {
+    background: $ht-surface-raised !important;
+  }
+
+  .v-window,
+  .v-popupview-popup,
+  .v-contextmenu,
+  .v-menubar-popup {
+    color: $ht-text !important;
+    background: $ht-surface-raised !important;
+    border: 1px solid $ht-border !important;
+    border-radius: $v-border-radius !important;
+    box-shadow: 0 16px 42px $ht-shadow-strong !important;
+  }
+
+  .v-window-header,
+  .v-window-contents,
+  .v-window-footer {
+    color: $ht-text !important;
+    background: $ht-surface-raised !important;
+    border-color: $ht-border !important;
+  }
+
+  .v-window-closebox,
+  .v-window-maximizebox,
+  .v-window-restorebox {
+    color: $ht-text-secondary !important;
+  }
+
+  .v-window-closebox:hover,
+  .v-window-maximizebox:hover,
+  .v-window-restorebox:hover {
+    color: $ht-accent !important;
+  }
+
+  /* Вкладки: выраженное активное состояние без тяжёлого boxed-дизайна. */
+  .v-tabsheet-tabcontainer {
+    background: $ht-surface-raised !important;
+    border-bottom: 1px solid $ht-border !important;
+  }
+
+  .v-tabsheet-tabitem .v-caption {
+    color: $ht-text-secondary !important;
+    background: transparent !important;
+    border-bottom: 3px solid transparent !important;
+    font-weight: 600 !important;
+    transition: color 120ms ease, border-color 120ms ease,
+                background-color 120ms ease;
+  }
+
+  .v-tabsheet-tabitem:hover .v-caption {
+    color: $ht-text !important;
+    background: $ht-surface-hover !important;
+  }
+
+  .v-tabsheet-tabitem-selected .v-caption {
+    color: $ht-accent !important;
+    background: transparent !important;
+    border-bottom-color: $ht-accent !important;
+    box-shadow: none !important;
+  }
+
+  .v-tabsheet-content,
+  .v-tabsheet-tabsheetpanel {
+    color: $ht-text;
+    background: $ht-app-background !important;
+    border-color: $ht-border !important;
+  }
+
+  /* Текст, ссылки, меню и уведомления. */
+  .v-label {
+    color: $ht-text;
+  }
+
+  .v-label.h1,
+  .v-label.h2,
+  .v-label.h3 {
+    color: $ht-text !important;
+    font-weight: 700;
+  }
+
+  .v-label.small,
+  .v-captiontext {
+    color: $ht-text-secondary;
+  }
+
+  .v-link a,
+  .v-button-link .v-button-caption {
+    color: $ht-accent !important;
+    text-decoration: none;
+  }
+
+  .v-link a:hover {
+    color: $ht-accent-hover !important;
+    text-decoration: underline;
+  }
+
+  .v-contextmenu .gwt-MenuItem,
+  .v-menubar-popup .v-menubar-menuitem {
+    color: $ht-text !important;
+    background: transparent !important;
+  }
+
+  .v-contextmenu .gwt-MenuItem-selected,
+  .v-menubar-popup .v-menubar-menuitem-selected {
+    color: $ht-text !important;
+    background: $ht-accent-soft !important;
+  }
+
+  .v-Notification {
+    color: $ht-text !important;
+    background: $ht-surface-raised !important;
+    border: 1px solid $ht-border !important;
+    border-radius: $v-border-radius !important;
+    box-shadow: 0 12px 34px $ht-shadow-strong !important;
+  }
+
+  .v-Notification.error {
+    border-left: 4px solid $ht-danger !important;
+  }
+
+  .v-Notification.warning {
+    border-left: 4px solid $ht-warning !important;
+  }
+
+  .v-Notification.tray {
+    border-left: 4px solid $ht-info !important;
+  }
+
+  .v-loading-indicator,
+  .v-loading-indicator-delay,
+  .v-loading-indicator-wait {
+    background-color: $ht-accent !important;
+  }
+
+  /* Скроллбары не должны теряться ни на светлой, ни на тёмной поверхности. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: $ht-app-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: $ht-border-strong;
+    border: 2px solid $ht-app-background;
+    border-radius: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: $ht-text-secondary;
+  }
+
+  /* Единый круглый контейнер изображений HRM HuntTech. */
+  .v-image.ht-oval-image,
+  .ht-oval-image {
+    display: inline-block;
+    overflow: hidden !important;
+    border-radius: 50% !important;
+
+    img,
+    .v-image-element {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      border-radius: 50% !important;
+    }
+  }
+}

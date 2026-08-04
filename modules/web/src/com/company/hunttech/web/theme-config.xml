@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <theme-config xmlns="http://schemas.haulmont.com/cuba/theme-config.xsd">
-    <!-- HuntTech Modern Light: светлая плотная тема для рабочих экранов рекрутинга. -->
-    <theme id="hunttech-modern-light" name="Hunttech Modern (Light)"/>
-    <!-- HuntTech Modern Dark: тёмная тема для работы в условиях низкой освещённости. -->
-    <theme id="hunttech-modern-dark" name="Hunttech Modern (Dark)"/>
+    <!-- Пользовательские темы HRM HuntTech наследуют стандартный визуальный контракт Halo. -->
+    <theme id="hunttech-modern-light" name="HRM HuntTech Modern (Светлая)"/>
+    <theme id="hunttech-modern-dark" name="HRM HuntTech Modern (Тёмная)"/>
 </theme-config>

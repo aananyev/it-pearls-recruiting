@@ -1,32 +1,89 @@
-/* hunttech-modern-dark defaults — светлая тема с акцентом hunttech.ru */
+/*
+ * HRM HuntTech Modern Dark — переменные темы CUBA Platform 7.3.
+ *
+ * Файл загружается до ../halo/halo. Тёмная палитра задаётся на уровне
+ * переменных Vaadin/Halo, а не постфактум набором частичных override.
+ * Это сохраняет контраст стандартных CUBA-компонентов и addon-экранов.
+ */
 
-$ht-red: #c1211f;
-$ht-black: #000000;
-$ht-dark: #333333;
-$ht-gray: #f5f5f5;
-$ht-white: #ffffff;
-$ht-muted: rgba(0,0,0,0.6);
-$ht-border-subtle: rgba(0,0,0,0.1);
-$ht-shadow: rgba(0,0,0,0.08);
+/* Семантическая палитра тёмной темы. */
+$ht-accent: #ef5652;
+$ht-accent-hover: #ff6b67;
+$ht-accent-soft: #3a2021;
+$ht-on-accent: #ffffff;
 
-/* CUBA theme variable overrides */
-$cuba-menubar-background-color: $ht-black;
-$cuba-menubar-border-color: $ht-black;
-$cuba-menubar-menuitem-text-color: $ht-white;
-$cuba-menubar-text-color: $ht-white;
+$ht-app-background: #0f1217;
+$ht-surface: #171b22;
+$ht-surface-raised: #1d232c;
+$ht-surface-muted: #202731;
+$ht-surface-hover: #28313d;
+$ht-control-background: #131820;
 
-$v-app-background-color: #f7f8fa;
-$v-background-color: $ht-white;
-$v-panel-background-color: $ht-white;
-$v-font-color: $ht-dark;
+$ht-text: #f2f4f7;
+$ht-text-secondary: #b1bac8;
+$ht-text-disabled: #768092;
+
+$ht-border: #303846;
+$ht-border-strong: #465163;
+$ht-menu-background: #090b0f;
+$ht-menu-text: #f8fafc;
+
+$ht-success: #45b97c;
+$ht-warning: #f3b562;
+$ht-danger: #ff6b67;
+$ht-info: #64b5f6;
+
+$ht-shadow: rgba(0, 0, 0, 0.28);
+$ht-shadow-strong: rgba(0, 0, 0, 0.46);
+$ht-focus-ring: rgba(239, 86, 82, 0.26);
+
+/*
+ * Legacy-алиасы сохраняются для существующих partial-файлов темы.
+ * Они не являются публичным API для новых компонентов.
+ */
+$ht-red: $ht-accent;
+$ht-black: $ht-menu-background;
+$ht-dark: $ht-text;
+$ht-gray: $ht-surface-muted;
+$ht-white: $ht-surface-raised;
+$ht-muted: $ht-text-secondary;
+$ht-border-subtle: $ht-border;
+
+/* Базовые переменные Vaadin/Halo. */
+$v-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        'Helvetica Neue', Arial, sans-serif;
 $v-font-size: 13px;
-$v-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-$v-unit-size: 30px;
+$v-font-weight: 400;
+$v-font-color: $ht-text;
+
+$v-app-loading-screen-background-color: $ht-app-background;
+$v-app-background-color: $ht-app-background;
+$v-background-color: $ht-surface;
+$v-panel-background-color: $ht-surface-raised;
+
+$v-focus-color: $ht-accent;
+$v-selection-color: $ht-accent;
+$v-selection-item-selection-color: $ht-accent;
+
+$v-gradient: none;
+$v-unit-size: 34px;
+$v-roundness: 6px;
 $v-border-radius: 6px;
-$v-border: 1px solid $ht-border-subtle;
-$v-selection-color: $ht-red;
-$v-selection-item-selection-color: $ht-red;
-$v-table-row-height: 34px;
-$v-table-header-font-size: 11px;
-$v-textfield-border: 1px solid $ht-border-subtle;
+$v-border: 1px solid $ht-border;
+
+$v-table-row-height: 36px;
+$v-table-header-font-size: 12px;
+$v-grid-cell-padding-horizontal: 10px;
+$v-grid-cell-padding-vertical: 7px;
+
+$v-textfield-border: 1px solid $ht-border-strong;
 $v-textfield-border-radius: 6px;
+
+/* Верхнее меню CUBA. */
+$cuba-menubar-background-color: $ht-menu-background;
+$cuba-menubar-border-color: $ht-menu-background;
+$cuba-menubar-menuitem-text-color: $ht-menu-text;
+$cuba-menubar-text-color: $ht-menu-text;
+$cuba-app-menubar-padding-top: 4px;
+$cuba-app-menubar-padding-bottom: 4px;
+$cuba-menubar-submenu-padding: 3px;

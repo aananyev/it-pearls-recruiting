@@ -6,6 +6,7 @@
 | ---------- | ------ |
 | Запрет legacy-сущностей `itpearls_*` и единый runtime namespace `hunttech_*` | [Entity_Namespace_Migration_itpearls_to_hunttech.md](Entity_Namespace_Migration_itpearls_to_hunttech.md) |
 | Основная обязательная концепция UI/UX для всех будущих редизайнов HRM HuntTech | [HRM_HuntTech_UI_UX_Design_Concept.md](HRM_HuntTech_UI_UX_Design_Concept.md) |
+| Контракт наследования Halo, палитр и системных компонентов тем `hunttech-modern-light` / `hunttech-modern-dark` | [HRM_HuntTech_Modern_Themes_Contract.md](HRM_HuntTech_Modern_Themes_Contract.md) |
 | Обязательный стандарт смыслового документирования создаваемых и изменяемых XML-экранов | [XML_Screen_Documentation_Standard.md](XML_Screen_Documentation_Standard.md) |
 | Общий контракт stylename для sidebar, `label-navigation` и правой части Edit-экранов | [HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md](HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md) |
 | Архитектура ускорения JobCandidateEdit | [JobCandidateEdit_Performance_Architecture.md](JobCandidateEdit_Performance_Architecture.md) |
@@ -18,6 +19,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-04 | Добавлен контракт системного слоя и палитр тем `hunttech-modern-light` / `hunttech-modern-dark` |
 | 2026-07-31 | Добавлена архитектурная спецификация рейтов по аутстафу [OutstaffingRates_Spec.md](OutstaffingRates_Spec.md) |
 | 2026-07-29 | Общий контракт Edit-экранов дополнен точными regression-правилами, полученными при доведении IteractionListEdit |
 | 2026-07-28 | Контракт Edit-экранов дополнен обязательным preflight для нейросети, правилами типовой формы, sidebar, состояний и поэкранного рефакторинга |
