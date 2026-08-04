@@ -3662,7 +3662,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         retBox.setWidthFull();
         retBox.setSpacing(false);
         retBox.setMargin(false);
-        retBox.setHeight("100px");
 
         HBoxLayout innerBox = uiComponents.create(HBoxLayout.class);
         innerBox.setMargin(true);
@@ -3697,7 +3696,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
             Label date = uiComponents.create(Label.class);
             date.setValue(event.getItem().getDateIteraction() != null ?
-                    event.getItem().getDateIteraction() : "");
+                    new SimpleDateFormat("dd.MM.yyyy HH:mm").format(event.getItem().getDateIteraction()) : "");
             date.setAlignment(Component.Alignment.BOTTOM_RIGHT);
             date.setStyleName("tailDate");
 

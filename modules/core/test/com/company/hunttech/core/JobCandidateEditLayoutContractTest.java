@@ -140,6 +140,57 @@ public class JobCandidateEditLayoutContractTest {
         }
     }
 
+    @Test
+    public void allTabsUseConsistentMargin() throws IOException {
+        String xml = readProjectFile(XML);
+        String tabs = section(xml, "<tabSheet id=\"tabSheetSocialNetworks\"", "</tabSheet>");
+        assertTrue("Все вкладки должны иметь margin=\"false\" — единый отступ контента "
+                        + "через SCSS .v-tabsheet-content (иначе accordion-заголовки в разных вкладках смещены)",
+                !tabs.contains("margin=\"true\""));
+    }
+
+    @Test
+    public void mainTabRowsShareExpandedFieldPattern() throws IOException {
+        String xml = readProjectFile(XML);
+
+        // Каждая строка ввода вкладки «Основное» использует hbox expand + width=100% поля:
+        // колонка подписей (112/96px) и поле calc(100% - подпись) применяются ко ВСЕМ строкам,
+        // а не только к полям ФИО (иначе «Дата рождения»/«Город»/«Должность»/«Компания»
+        // имеют natural width подписей и поля иной ширины).
+        assertTrue(xml.contains("expand=\"birdhDateField\""));
+        assertTrue(xml.contains("expand=\"jobCityCandidateField\""));
+        assertTrue(xml.contains("expand=\"personPositionField\""));
+        assertTrue(xml.contains("expand=\"currentCompanyField\""));
+
+        String dateRow = section(xml, "id=\"birdhDateField\"", "</hbox>");
+        assertTrue(dateRow.contains("width=\"100%\""));
+    }
+
+    @Test
+    public void commentsTabKeepsCleanChatLayout() throws IOException {
+        String xml = readProjectFile(XML);
+        String comments = section(xml, "id=\"commentsTab\"", "<!-- TAB: История -->");
+
+        assertTrue(comments.contains("id=\"jobCandidateCommentsDataGrid\""));
+        assertTrue("Высота строки комментариев должна быть автоматической (по содержимому пузыря), "
+                        + "а не фиксированной 80px", !comments.contains("bodyRowHeight"));
+        assertTrue(comments.contains("inputPrompt=\"msg://msgInputComment\""));
+    }
+
+    @Test
+    public void everyThemeStylesCommentBubbles() throws IOException {
+        for (String theme : THEMES) {
+            String scss = readProjectFile("modules/web/themes/" + theme
+                    + "/com.company.hunttech/job-candidate-editor.scss");
+
+            assertTrue(theme, scss.contains(".toolTip {"));
+            assertTrue(theme, scss.contains(".tailMyMessage {"));
+            assertTrue(theme, scss.contains(".tailOtherMessage {"));
+            assertTrue(theme, scss.contains("max-width: 520px"));
+            assertTrue(theme, scss.contains(".table-wordwrap {"));
+        }
+    }
+
     private String section(String text, String startMarker, String endMarker) {
         int start = text.indexOf(startMarker);
         assertTrue("Не найден начальный маркер: " + startMarker, start >= 0);
