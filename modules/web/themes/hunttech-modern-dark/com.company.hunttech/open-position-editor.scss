@@ -795,6 +795,13 @@
       margin: 0 4px 0 0;
     }
 
+    /* Поля ввода текста формы: шрифт ввода как у picker-полей (Грейд) — 15px Verdana. */
+    .open-position-editor .v-textfield,
+    .open-position-editor .v-textarea textarea,
+    .open-position-editor .v-datefield input {
+      font-size: 15px !important;
+    }
+
     /* Вложенные HBox секции «Проект, Компания, Тип»: на узких viewport строка
      * чекбоксов фильтров проектов переполнялась и наезжала на поле департамента.
      * flex-wrap переносит слоты на новую строку только при нехватке ширины;
@@ -1159,7 +1166,7 @@
       background: transparent !important;
       border: 0 !important;
       box-shadow: none !important;
-      font-size: 12px !important;
+      font-size: 15px !important;
     }
 
     .open-position-editor-footer-actions {
@@ -1305,3 +1312,4 @@
     }
   }
 }
+
