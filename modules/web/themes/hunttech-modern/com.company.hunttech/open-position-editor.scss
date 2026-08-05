@@ -1110,5 +1110,41 @@
       scrollbar-width: thin;
       scrollbar-color: rgba($v-font-color, 0.25) transparent;
     }
+
+    /* Поля-фильтрселекты с иконками выбранной опции (optionIconProvider: «Приоритет
+       вакансии», «Удалёнка», «Регистрация для работы»). CUBA ставит stylename
+       edit-form-control на сам .v-filterselect, поэтому shared-селектор
+       `.edit-form-control .v-filterselect > .v-icon` (предок) не матчится, и иконка
+       остаётся в вало-позиции (absolute, left:0) поверх текста при padding 10px.
+       Здесь дублируется контракт shared (иконка 20px по центру слева, input с
+       отступом 40px) для случая edit-form-control.v-filterselect; !important — чтобы
+       перебить shared `padding: 0 10px !important` и вало-позиционирование. */
+    .edit-form-control.v-filterselect > .v-icon {
+      position: absolute !important;
+      top: 50% !important;
+      left: 8px !important;
+      width: 20px !important;
+      height: 20px !important;
+      margin: 0 !important;
+      transform: translateY(-50%);
+      object-fit: contain;
+      color: #34424f;
+      font-size: 20px !important;
+      line-height: 20px !important;
+      text-align: center;
+    }
+    .edit-form-control.v-filterselect > .v-icon + .v-filterselect-input {
+      padding-left: 40px !important;
+    }
+
+    /* Поле «Приоритет вакансии» (priorityField) в узкой строке «Настройки вакансии»
+       (Дата закрытия | Приоритет | Комментарий): автоширина сжимается до ~112px,
+       и текст выбранной опции с иконкой (отступ 40px) уходит под кнопку фильтра.
+       Фиксируем ширину 150px (flex: 0 0 150px) — иконка и текст читаются на всех
+       viewport. Локальный класс добавлен в stylename поля (XML). */
+    .open-position-editor-priority-field {
+      flex: 0 0 150px !important;
+      min-width: 150px !important;
+    }
   }
 }

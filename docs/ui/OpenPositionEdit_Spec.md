@@ -168,6 +168,16 @@ layout (edit-screen-layout open-position-editor, dialogMode 1400×900)
 
 **Sidebar-навигация** (`openPositionEditorNavigation`): активный пункт синхронизирован с открытой вкладкой (вердикт арбитра `00-arbitration-sidebar-active.md`): на вкладке «Проект» активен `openPositionEditorNavIdentifiers` («Идентификаторы»), на остальных вкладках активный пункт снимается; базовый `label-nav-item` не изменяется; управление — `addStyleName/removeStyleName("label-nav-item-active")` в `onTabSheetOpenPositionSelectedTabChange` (пункты остаются визуальными указателями без `invoke`).
 
+**Иконки опций полей** (`optionIconProvider`/`optionStyleProvider`): «Приоритет вакансии»
+(`priorityField`), «Удалёнка» (`remoteWorkField`), «Регистрация для работы»
+(`registrationForWorkField`) показывают иконку выбранной опции слева от текста.
+Локальное правило `.open-position-editor .edit-form-control.v-filterselect > .v-icon`
+(20px, по центру слева) + `padding-left: 40px` у `input` — иконка не наезжает на текст
+(shared-селектор `.edit-form-control .v-filterselect` не матчится, т.к. stylename стоит
+на самом `.v-filterselect`). `priorityField` дополнительно получил локальный класс
+`open-position-editor-priority-field` (`flex: 0 0 150px`) — узкая строка «Настройки
+вакансии» не сжимает поле, текст опции читается на всех viewport.
+
 ### 6.3. Вкладка «Трудовой договор» (laborAgreementTab)
 
 `laborAgreementGroupBox` (edit-accordion-section): параметры оформления `outstaffParamsHBox` (`registrationForWorkField`, `outstaffingCostTextField`, `setSalaryFieldButton`) и
@@ -192,7 +202,7 @@ layout (edit-screen-layout open-position-editor, dialogMode 1400×900)
 footer, primary/secondary actions. Локальные классы: `open-position-editor` (root), `-logo-box`, `-title-clamp`, `-tabs`, `-field-row` (+row-варианты), `-cards-row`, `-subsection`,
 `-primary-section`, `-group-tab`, `-summary-grid`, `-summary-caption/value`, `-payment-section`, `-payments-columns`, `-labor-tab-content`, `-labor-params`, `-table-variant5`,
 `-richtext-variant5`, `-comments-scroll`, `-footer`, `-footer-actions`, `-owner-row`, `-primary-action`, `-secondary-action`, `-spacer`, `-tab-content`, `-table-view`, `-project-section`,
-`-richtext-section`, `-row-remote`.
+`-richtext-section`, `-row-remote`, `-priority-field` (фикс. ширина 150px для поля приоритета с иконкой).
 - Порядок слоёв в каждой теме: `theme base → edit-screen-shared-styles → open-position-editor`.
 
 ### 6.6. Последовательность заполнения
@@ -300,6 +310,7 @@ other screens: UNCHANGED
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-05 | Исправлен наезд пиктограмм опций на текст в picker-полях OpenPositionEdit («Приоритет вакансии», «Удалёнка», «Регистрация для работы»): локальное правило `.edit-form-control.v-filterselect > .v-icon` (иконка 20px по центру слева) + `padding-left: 40px` у input (shared-селектор не матчился, т.к. stylename стоит на самом `.v-filterselect`); полю `priorityField` добавлен локальный класс `open-position-editor-priority-field` (`flex: 0 0 150px`) — текст опции читается на 1920/1440/1366/1280, light/dark |
 | 2026-08-05 | Скорректирована визуальная компоновка вкладки «Проект» OpenPositionEdit: синхронизирована label-навигация (вердикт арбитра `00-arbitration-sidebar-active.md` — 6 `@Named` + `label-nav-item-active` в `onTabSheetOpenPositionSelectedTabChange`), устранено переполнение Tab, восстановлены горизонтальные строки ID/Вакансия и Грейд/«Генерировать» (`gradeActionRowHBox`), блоки ID/«Команда разработчиков» и «Количество персонала»/«Заработная плата» размещены вертикально (`open-position-editor-cards-row` → column); бизнес-логика не изменялась. |
 | 2026-08-05 | Выполнен визуальный редизайн формы по UI-контракту: двухпанельная компоновка `edit-screen-layout` + sidebar/workspace, label-навигация (эталон IteractionListEdit, пункты без invoke), карточки `edit-accordion-section`, responsive-строки полей, варианты таблиц/редакторов variant5, footer с primary/secondary actions; диалог увеличен до 1400×900 (арбитр 9-1); платёжные секции перенесены во вкладку «Трудовой договор» (арбитр 9-2), `tabPayments` остаётся скрытой; добавлены 7 идентичных partial `open-position-editor.scss` и их подключение в 7 темах; добавлены визуальные msg-ключи и контрактный тест `OpenPositionEditLayoutContractTest`. Бизнес-логика, сущности, справочники и другие формы не изменялись. |
 | 2026-08-01 | Создание Spec; полное inline-документирование XML (168 комментариев), бизнес-id всем элементам (buttonsPanel→laborAgreement/someFiles/openPositionNewsButtonsPanel, id для всех hbox/vbox/groupBox-контейнеров и кнопок), javadoc-покрытие контроллера (163 метода + класс). |

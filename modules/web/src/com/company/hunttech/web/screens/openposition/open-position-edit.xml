@@ -584,7 +584,7 @@
                                                          required="true"
                                                          nullOptionVisible="false"
                                                          align="BOTTOM_LEFT"
-                                                         stylename="edit-form-control"
+                                                         stylename="edit-form-control open-position-editor-priority-field"
                                                          width="AUTO"/>
                                             <!-- Комментарий к приоритету позиции. -->
                                             <textField id="commentPriority"
