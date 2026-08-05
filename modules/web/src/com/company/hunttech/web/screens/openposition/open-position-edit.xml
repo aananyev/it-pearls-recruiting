@@ -572,9 +572,10 @@
                                           spacing="true"
                                           width="100%"
                                           stylename="edit-accordion-section open-position-editor-subsection open-position-editor-vacancy-section">
-                                    <!-- Строка ввода: внутренний ID вакансии (ограничен ~130px) + название вакансии (растягивается). -->
+                                    <!-- Строка 1: внутренний ID вакансии (ограничен), название (растягивается),
+                                         грейд позиции и автогенерация названия (кнопка «Генерировать»). -->
                                     <hbox id="vacancyNameHBox"
-                                          spacing="true"
+                                          spacing="false"
                                           width="100%"
                                           expand="vacansyNameField"
                                           stylename="open-position-editor-field-row open-position-editor-row-title">
@@ -592,44 +593,35 @@
                                                    property="vacansyName"
                                                    caption="msg://msgVacansy"
                                                    stylename="edit-form-control"
-                                                   box.expandRatio="8"
+                                                   box.expandRatio="5"
                                                    width="100%"
                                                    required="true"/>
+                                        <!-- Грейд позиции (options из gradeDc). -->
+                                        <lookupPickerField id="gradeLookupPickerField"
+                                                           dataContainer="openPositionDc"
+                                                           property="grade"
+                                                           stylename="edit-form-control"
+                                                           box.expandRatio="2"
+                                                           optionsContainer="gradeDc"
+                                                           width="100%"
+                                                           caption="msg://msgGrade">
+                                            <actions>
+                                                <action id="lookup"
+                                                        type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                        <!-- Автогенерация названия вакансии по типу позиции (generateNameFieldButton). -->
+                                        <button id="generateVacancyNameFieldButton"
+                                                caption="msg://msgGenerateName"
+                                                description="msg://msgGenerateNameDesc"
+                                                width="AUTO"
+                                                align="BOTTOM_RIGHT"
+                                                invoke="generateNameFieldButton"/>
                                     </hbox>
+                                    <!-- Пустой legacy-спейсер между строкой 1 и настройками (контрактный id; скрыт через SCSS). -->
+                                    <hbox id="vacancyTitleSpacerHBox"
+                                          stylename="open-position-editor-spacer"/>
                                 </groupBox>
-                                <!-- Строка 2: грейд (растягивается) + автогенерация названия (компактная кнопка).
-                                     Визуальный контейнер без Java-привязок; id/dataContainer/property/optionsContainer
-                                     и invoke кнопки сохраняются (требование E контракта). -->
-                                <hbox id="gradeActionRowHBox"
-                                      spacing="true"
-                                      width="100%"
-                                      expand="gradeLookupPickerField"
-                                      stylename="open-position-editor-field-row open-position-editor-row-grade">
-                                    <!-- Грейд позиции (options из gradeDc). -->
-                                    <lookupPickerField id="gradeLookupPickerField"
-                                                       dataContainer="openPositionDc"
-                                                       property="grade"
-                                                       stylename="edit-form-control"
-                                                       box.expandRatio="1"
-                                                       optionsContainer="gradeDc"
-                                                       width="100%"
-                                                       caption="msg://msgGrade">
-                                        <actions>
-                                            <action id="lookup"
-                                                    type="picker_lookup"/>
-                                        </actions>
-                                    </lookupPickerField>
-                                    <!-- Автогенерация названия вакансии по типу позиции (generateNameFieldButton). -->
-                                    <button id="generateVacancyNameFieldButton"
-                                            caption="msg://msgGenerateName"
-                                            description="msg://msgGenerateNameDesc"
-                                            width="AUTO"
-                                            align="BOTTOM_RIGHT"
-                                            invoke="generateNameFieldButton"/>
-                                </hbox>
-                                <!-- Пустой legacy-спейсер между рядом названия и настройками (скрыт визуально через SCSS). -->
-                                <hbox id="vacancyTitleSpacerHBox"
-                                      stylename="open-position-editor-spacer"/>
                                 <!-- Вложенная секция «Настройки вакансии»: дата автозакрытия, статусы и приоритет позиции. -->
                                 <groupBox id="commandFieldHBox"
                                           collapsable="true"
@@ -639,15 +631,17 @@
                                           stylename="edit-accordion-section open-position-editor-subsection"
                                           caption="msg://msgCommanSetup"
                                           width="100%">
+                                    <!-- Строка 2: дата закрытия, приоритет, признак черновика и эксклюзивная вакансия в ряд. -->
                                     <hbox id="closingDateFieldsHBox"
                                           spacing="true"
                                           align="MIDDLE_LEFT"
                                           height="AUTO"
                                           width="100%">
                                         <hbox id="closingDateSignFieldsHBox"
-                                              spacing="true"
+                                              spacing="false"
                                               width="100%"
-                                              height="100%">
+                                              height="100%"
+                                              stylename="open-position-editor-field-row open-position-editor-row-flags">
                                             <!-- Дата автоматического закрытия вакансии: после неё кандидаты не принимаются. -->
                                             <dateField id="closingDateDateField"
                                                        dataContainer="openPositionDc"
@@ -655,12 +649,6 @@
                                                        caption="msg://msgClosingDate"
                                                        description="msg://msgClosingDateDesc"
                                                        stylename="edit-form-control"/>
-                                        </hbox>
-                                        <hbox id="priorityFieldsHBox"
-                                              spacing="true"
-                                              width="100%"
-                                              expand="commentPriority"
-                                              height="AUTO">
                                             <!-- Приоритет позиции (обязательный): влияет на сортировку и срочные списки. -->
                                             <lookupField id="priorityField"
                                                          dataContainer="openPositionDc"
@@ -671,46 +659,45 @@
                                                          align="BOTTOM_LEFT"
                                                          stylename="edit-form-control open-position-editor-priority-field"
                                                          width="AUTO"/>
-                                            <!-- Комментарий к приоритету позиции. -->
-                                            <textField id="commentPriority"
-                                                       dataContainer="openPositionDc"
-                                                       property="priorityComment"
-                                                       align="BOTTOM_LEFT"
-                                                       stylename="edit-form-control"
-                                                       width="100%"/>
+                                            <!-- Признак черновика (signDraft): позиция не публикуется. -->
+                                            <checkBox id="signDraftCheckBox"
+                                                      dataContainer="openPositionDc"
+                                                      property="signDraft"
+                                                      width="AUTO"
+                                                      caption="msg://msgSignDraft"
+                                                      align="MIDDLE_LEFT"/>
+                                            <!-- Признак эксклюзивной вакансии (internalProject): показывается рекрутёру
+                                                 в ряду признаков; выставляется вручную или программно. -->
+                                            <checkBox id="internalProjectCheckBox"
+                                                      dataContainer="openPositionDc"
+                                                      property="internalProject"
+                                                      caption="msg://msgExclusiveVacancy"
+                                                      width="AUTO"
+                                                      align="MIDDLE_LEFT"/>
+                                            <!-- Признак открытости позиции (openClose) — скрыт, управляется кнопками в browse. -->
+                                            <checkBox id="openClosePositionCheckBox"
+                                                      dataContainer="openPositionDc"
+                                                      property="openClose"
+                                                      visible="false"
+                                                      width="AUTO"
+                                                      caption="mainMsg://msgPositionClose"
+                                                      align="MIDDLE_LEFT"/>
                                         </hbox>
                                     </hbox>
-                                    <!-- Отдельная строка признаков на всю ширину: на узких viewport длинные
-                                         подписи чекбоксов не ужимались и наезжали друг на друга и на приоритет. -->
-                                    <hbox id="closingDateCheckBoxesHBox"
+                                    <!-- Строка 3: комментарий к приоритету/позиции на всю ширину. -->
+                                    <hbox id="priorityFieldsHBox"
                                           spacing="true"
                                           width="100%"
-                                          height="AUTO"
-                                          align="MIDDLE_LEFT"
-                                          stylename="open-position-editor-field-row open-position-editor-checkboxes-row">
-                                        <!-- Признак черновика (signDraft): позиция не публикуется. -->
-                                        <checkBox id="signDraftCheckBox"
-                                                  dataContainer="openPositionDc"
-                                                  property="signDraft"
-                                                  width="AUTO"
-                                                  caption="msg://msgSignDraft"
-                                                  align="MIDDLE_LEFT"/>
-                                        <!-- Признак открытости позиции (openClose) — скрыт, управляется кнопками в browse. -->
-                                        <checkBox id="openClosePositionCheckBox"
-                                                  dataContainer="openPositionDc"
-                                                  property="openClose"
-                                                  visible="false"
-                                                  width="AUTO"
-                                                  caption="mainMsg://msgPositionClose"
-                                                  align="MIDDLE_LEFT"/>
-                                        <!-- Признак внутреннего проекта (internalProject) — скрыт, выставляется программно. -->
-                                        <checkBox id="internalProjectCheckBox"
-                                                  dataContainer="openPositionDc"
-                                                  property="internalProject"
-                                                  caption="msg://msgExclusiveVacancy"
-                                                  visible="false"
-                                                  width="AUTO"
-                                                  align="MIDDLE_LEFT"/>
+                                          expand="commentPriority"
+                                          height="AUTO">
+                                        <!-- Комментарий к приоритету позиции. -->
+                                        <textField id="commentPriority"
+                                                   dataContainer="openPositionDc"
+                                                   property="priorityComment"
+                                                   caption="msg://msgOpenPositionComment"
+                                                   align="BOTTOM_LEFT"
+                                                   stylename="edit-form-control"
+                                                   width="100%"/>
                                     </hbox>
                                 </groupBox>
                             </groupBox>

@@ -671,14 +671,30 @@
      * v-expand либо как обёртку .v-expand с внутренним .v-slot — правила
      * покрывают обе формы DOM, конфликт невозможен (применяется одна ветка).
      */
-    .open-position-editor-row-title > .v-slot:nth-child(1),
-    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(1) {
-      flex: 0 1 130px;
+    .open-position-editor-row-title {
+      flex-wrap: nowrap;
     }
 
-    .open-position-editor-row-title > .v-expand,
-    .open-position-editor-row-title > .v-expand > .v-slot {
-      flex: 3 1 420px;
+    /* Строка 1 блока «Вакансия»: ID (фиксирован) + название (растягивается) + грейд
+     * (средний) + кнопка «Генерировать» (компактная) — все в один ряд без переноса. */
+    .open-position-editor-row-title > .v-slot:nth-child(1),
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(1) {
+      flex: 0 1 100px;
+    }
+
+    .open-position-editor-row-title > .v-slot:nth-child(2),
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(2) {
+      flex: 5 1 160px;
+    }
+
+    .open-position-editor-row-title > .v-slot:nth-child(3),
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(3) {
+      flex: 2 1 120px;
+    }
+
+    .open-position-editor-row-title > .v-slot:nth-child(4),
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(4) {
+      flex: 0 0 auto;
     }
 
     /* Строка 2 титульного блока (E): грейд растягивается, кнопка «Генерировать» — компактная
@@ -711,6 +727,12 @@
 
     .open-position-editor-row-remote > .v-slot {
       flex: 1 1 180px;
+    }
+
+    /* Строка 2 блока «Вакансия»: дата закрытия + приоритет + чекбоксы (черновик/эксклюзивная);
+     * flex-wrap переносит чекбоксы на вторую линию на узких viewport (1366), на широких — в ряд. */
+    .open-position-editor-row-flags > .v-slot {
+      flex: 1 1 160px;
     }
 
     .open-position-editor-row-half > .v-slot {
