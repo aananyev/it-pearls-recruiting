@@ -176,6 +176,13 @@
           <button id="openPositionEditorNavProject" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavPersonnel" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavSalary" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <!-- Скрытые label информационной карточки sidebar (контракт @Inject из основного XML). -->
+          <label id="infoPositionLabel" width="100%" visible="false"/>
+          <label id="infoProjectLabel" width="100%" visible="false"/>
+          <label id="infoOwnerLabel" width="100%" visible="false"/>
+          <label id="infoCityLabel" width="100%" visible="false"/>
+          <label id="infoSalaryMaxTcLabel" width="100%" visible="false"/>
+          <label id="infoSalaryMaxIeLabel" width="100%" visible="false"/>
         </vbox>
         <!-- Ключевые параметры используют только уже загруженные свойства edit-view. -->
         <vbox id="openPositionPreviewSummary" width="100%" spacing="true" stylename="edit-sidebar-summary">

@@ -72,6 +72,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private Label<String> closedVacancyInfoLabel;
     @Inject
+    private Label<String> infoPositionLabel;
+    @Inject
+    private Label<String> infoProjectLabel;
+    @Inject
+    private Label<String> infoOwnerLabel;
+    @Inject
+    private Label<String> infoCityLabel;
+    @Inject
+    private Label<String> infoSalaryMaxTcLabel;
+    @Inject
+    private Label<String> infoSalaryMaxIeLabel;
+    @Inject
     private DateField<Date> closingDateDateField;
     @Inject
     private MessageBundle messageBundle;
@@ -426,6 +438,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setCommandExperienceRadioButton();
         setCommentToVacancy();
         changeCityListsLabel();
+        refreshSidebarInfoCard();
+        // Информационная карточка sidebar следует за изменениями атрибутов edited-объекта
+        // (должность/проект/город/зарплата) — presentation-only, без бизнес-логики.
+        openPositionDc.addItemPropertyChangeListener(e -> refreshSidebarInfoCard());
         standartDescriptionDisable(event);
         whiIsThisGuyDisable(event);
         initPositionTypeDescriptionFields();
@@ -3212,6 +3228,33 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             citiesLabel.setValue(outStr);
             citiesLabel.setDescription(description);
         }
+    }
+
+    /** Заполнение информационной карточки sidebar («Информация»): должность, проект, владелец
+     *  проекта, город и зарплатное предложение МАХ по ТК/ИП. Presentation-only: значения
+     *  берутся из edited-объекта, никакой бизнес-логики; вызывается при показе формы и при
+     *  изменении любого атрибута контейнера openPositionDc. */
+    private void refreshSidebarInfoCard() {
+        OpenPosition pos = getEditedEntity();
+        infoPositionLabel.setValue("<b>Должность:</b> " + esc(pos.getVacansyName()));
+        Project project = pos.getProjectName();
+        infoProjectLabel.setValue("<b>Проект:</b> " + (project != null ? esc(project.getProjectName()) : ""));
+        Person owner = project != null ? project.getProjectOwner() : null;
+        infoOwnerLabel.setValue("<b>Владелец проекта:</b> " + (owner != null
+                ? esc((owner.getFirstName() == null ? "" : owner.getFirstName() + " ")
+                        + (owner.getSecondName() == null ? "" : owner.getSecondName()))
+                : ""));
+        infoCityLabel.setValue("<b>Город:</b> " + (pos.getCityPosition() != null
+                ? esc(pos.getCityPosition().getCityRuName()) : ""));
+        infoSalaryMaxTcLabel.setValue("<b>Зарплата МАХ (ТК):</b> " + (pos.getSalaryMax() != null
+                ? esc(pos.getSalaryMax().toPlainString()) : ""));
+        infoSalaryMaxIeLabel.setValue("<b>Зарплата МАХ (ИП):</b> " + (pos.getSalaryIE() != null
+                ? esc(pos.getSalaryIE().toPlainString()) : ""));
+    }
+
+    /** Экранирование HTML-спецсимволов для значения label (защита от разметки в названиях). */
+    private String esc(String s) {
+        return s == null ? "" : s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
     /**

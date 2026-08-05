@@ -375,6 +375,51 @@
                     width="100%"
                     stylename="borderless label-nav-item"/>
         </vbox>
+        <!-- Информационная карточка позиции: ключевые параметры текущей вакансии в рамке —
+             должность, проект, владелец проекта, город и зарплатное предложение МАХ (ТК/ИП);
+             значения формирует refreshSidebarInfoCard() (presentation-only, из edited-объекта). -->
+        <groupBox id="openPositionEditorInfoCard"
+                  caption="msg://msgSidebarInfoCard"
+                  showAsPanel="true"
+                  stylename="edit-accordion-section open-position-editor-info-card"
+                  width="100%"
+                  spacing="true">
+            <!-- Вертикальный список параметров: подпись + значение (HTML-строка, обновляется из данных формы). -->
+            <vbox id="openPositionEditorInfoCardVBox"
+                  width="100%"
+                  spacing="true">
+                <!-- Наименование должности (название вакансии). -->
+                <label id="infoPositionLabel"
+                       width="100%"
+                       htmlEnabled="true"
+                       stylename="open-position-editor-summary-value"/>
+                <!-- Проект позиции (наименование проекта). -->
+                <label id="infoProjectLabel"
+                       width="100%"
+                       htmlEnabled="true"
+                       stylename="open-position-editor-summary-value"/>
+                <!-- Владелец проекта (имя владельца из projectName.projectOwner). -->
+                <label id="infoOwnerLabel"
+                       width="100%"
+                       htmlEnabled="true"
+                       stylename="open-position-editor-summary-value"/>
+                <!-- Город позиции. -->
+                <label id="infoCityLabel"
+                       width="100%"
+                       htmlEnabled="true"
+                       stylename="open-position-editor-summary-value"/>
+                <!-- Зарплатное предложение МАХ по ТК (salaryMax). -->
+                <label id="infoSalaryMaxTcLabel"
+                       width="100%"
+                       htmlEnabled="true"
+                       stylename="open-position-editor-summary-value"/>
+                <!-- Зарплатное предложение МАХ по ИП (salaryIE). -->
+                <label id="infoSalaryMaxIeLabel"
+                       width="100%"
+                       htmlEnabled="true"
+                       stylename="open-position-editor-summary-value"/>
+            </vbox>
+        </groupBox>
         <!-- Контекст вакансии: города и итоговые комиссии (значения формирует Java, без новых бизнес-значений). -->
         <vbox id="openPositionEditorSummary"
               width="100%"
