@@ -5,6 +5,7 @@ import com.company.hunttech.core.*;
 import com.company.hunttech.entity.*;
 import com.company.hunttech.service.GetRoleService;
 import com.company.hunttech.web.StandartRegistrationForWork;
+import com.company.hunttech.web.StandartPriorityVacancy;
 import com.company.hunttech.web.screens.position.PositionEdit;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.hunttech.hrm.gui.components.OvaFallbackImage;
@@ -83,6 +84,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Label<String> infoSalaryMaxTcLabel;
     @Inject
     private Label<String> infoSalaryMaxIeLabel;
+    @Inject
+    private Label<String> currentPriorityLabel;
+    @Inject
+    private Image trafficLighterImage;
+    @Inject
+    private Label<String> remoteWorkSidebarLabel;
     @Inject
     private DateField<Date> closingDateDateField;
     @Inject
@@ -3250,6 +3257,73 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 ? esc(pos.getSalaryMax().toPlainString()) : ""));
         infoSalaryMaxIeLabel.setValue("<b>Зарплата МАХ (ИП):</b> " + (pos.getSalaryIE() != null
                 ? esc(pos.getSalaryIE().toPlainString()) : ""));
+        refreshSidebarPriority();
+    }
+
+    /** Заполнение блока срочности sidebar (копия IteractionListEdit): приоритет вакансии со
+     *  светофором (иконки StandartPriorityVacancy) и формат работы (удалённая/офисная/гибрид).
+     *  Presentation-only; вызывается из refreshSidebarInfoCard() (onBeforeShow + listener). */
+    private void refreshSidebarPriority() {
+        OpenPosition pos = getEditedEntity();
+        Integer priority = pos.getPriority();
+        String priorityStr = "";
+        String icon = null;
+        if (priority != null) {
+            switch (priority) {
+                case -1:
+                    priorityStr = StandartPriorityVacancy.DRAFT_STR;
+                    icon = StandartPriorityVacancy.DRAFT_ICON;
+                    break;
+                case 0:
+                    priorityStr = StandartPriorityVacancy.PAUSED_STR;
+                    icon = StandartPriorityVacancy.PAUSED_ICON;
+                    break;
+                case 1:
+                    priorityStr = StandartPriorityVacancy.LOW_STR;
+                    icon = StandartPriorityVacancy.LOW_ICON;
+                    break;
+                case 2:
+                    priorityStr = StandartPriorityVacancy.NORMAL_STR;
+                    icon = StandartPriorityVacancy.NORMAL_ICON;
+                    break;
+                case 3:
+                    priorityStr = StandartPriorityVacancy.HIGH_STR;
+                    icon = StandartPriorityVacancy.HIGH_ICON;
+                    break;
+                case 4:
+                    priorityStr = StandartPriorityVacancy.CRITICAL_STR;
+                    icon = StandartPriorityVacancy.CRITICAL_ICON;
+                    break;
+                default:
+                    icon = null;
+            }
+        }
+        if (!priorityStr.isEmpty()) {
+            currentPriorityLabel.setValue(priorityStr);
+            trafficLighterImage.setSource(ThemeResource.class).setPath(icon);
+        } else {
+            currentPriorityLabel.setValue("");
+            trafficLighterImage.setSource((Resource) null);
+        }
+
+        Integer remote = pos.getRemoteWork();
+        String remoteStr = "";
+        if (remote != null) {
+            switch (remote) {
+                case 0:
+                    remoteStr = "Офис";
+                    break;
+                case 1:
+                    remoteStr = "Удаленная работа";
+                    break;
+                case 2:
+                    remoteStr = "Гибрид (50/50)";
+                    break;
+                default:
+                    remoteStr = "";
+            }
+        }
+        remoteWorkSidebarLabel.setValue(remoteStr);
     }
 
     /** Экранирование HTML-спецсимволов для значения label (защита от разметки в названиях). */

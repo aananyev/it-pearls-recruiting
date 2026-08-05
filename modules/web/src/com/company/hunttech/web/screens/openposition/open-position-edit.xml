@@ -324,6 +324,50 @@
                        align="MIDDLE_CENTER"
                        stylename="edit-sidebar-subtitle"/>
             </vbox>
+            <!-- Блок срочности вакансии (копия IteractionListEdit): приоритет со светофором
+                 и формат работы (удалённая/офисная/гибрид); значения формирует refreshSidebarPriority(). -->
+            <vbox id="vacancyPrioritySummary"
+                  width="100%"
+                  height="AUTO"
+                  spacing="false"
+                  stylename="open-position-editor-priority-summary">
+                <!-- Подпись блока: приоритет вакансии. -->
+                <label id="priorityCaptionLabel"
+                       value="msg://msgPriority"
+                       width="100%"
+                       stylename="open-position-editor-summary-caption"/>
+                <!-- Строка значения: светофор приоритета + текстовое название (по образцу IteractionListEdit). -->
+                <hbox id="vacancyPriorityValueBox"
+                      width="100%"
+                      height="AUTO"
+                      spacing="true"
+                      align="MIDDLE_LEFT"
+                      expand="currentPriorityLabel"
+                      stylename="open-position-editor-priority-value-row">
+                    <!-- Индикатор приоритета (иконка-светофор; источник ставит refreshSidebarPriority()). -->
+                    <image id="trafficLighterImage"
+                           width="AUTO"
+                           height="AUTO"
+                           align="MIDDLE_LEFT"
+                           stylename="open-position-editor-priority-image"/>
+                    <!-- Человекочитаемое значение приоритета (Draft/Paused/Low/Normal/High/Critical). -->
+                    <label id="currentPriorityLabel"
+                           width="100%"
+                           height="AUTO"
+                           align="MIDDLE_LEFT"
+                           stylename="open-position-editor-priority-value"/>
+                </hbox>
+                <!-- Второй элемент блока: формат работы (удалённая/офисная/гибрид). -->
+                <label id="remoteWorkCaptionLabel"
+                       value="msg://msgRemoteWorkSidebar"
+                       width="100%"
+                       stylename="open-position-editor-summary-caption"/>
+                <!-- Значение формата работы: Офис / Удаленная работа / Гибрид (50/50). -->
+                <label id="remoteWorkSidebarLabel"
+                       width="100%"
+                       height="AUTO"
+                       stylename="open-position-editor-priority-value"/>
+            </vbox>
         </vbox>
         <!-- Label-навигация разделов активной вкладки «О вакансии»: визуальные указатели секций.
              Кнопки без invoke (Java READ_ONLY) — только presentation, по §3.5 общего контракта. -->

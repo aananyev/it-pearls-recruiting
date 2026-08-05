@@ -287,6 +287,40 @@
       -webkit-line-clamp: 2;
     }
 
+    /* Блок срочности вакансии (копия IteractionListEdit): подблок под наименованием —
+       светофор приоритета + значение и формат работы (удалённая/офисная/гибрид). */
+    .open-position-editor-priority-summary {
+      width: 100% !important;
+      min-width: 0;
+      padding-top: 2px;
+    }
+
+    .open-position-editor-priority-value-row {
+      width: 100% !important;
+      min-width: 0;
+    }
+
+    .open-position-editor-priority-value-row > .v-slot {
+      min-width: 0 !important;
+    }
+
+    .open-position-editor-priority-image {
+      max-width: 20px;
+      max-height: 26px;
+    }
+
+    .open-position-editor-priority-value,
+    .open-position-editor-priority-value.v-label {
+      display: block;
+      width: 100% !important;
+      min-width: 0;
+      color: #f8fafc !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      line-height: 17px !important;
+      white-space: normal !important;
+    }
+
     .edit-sidebar-warning,
     .edit-sidebar-warning.v-label {
       box-sizing: border-box;
