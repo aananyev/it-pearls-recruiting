@@ -2,6 +2,13 @@
 
 Дата: 2026-08-04 · Theme: hunttech-modern-dark · Variant: 5
 
+## Повторное подтверждение 2026-08-04 (после merge PR #121 в master, деплой ветки ad767d33)
+
+- DataGrid «Кандидаты»: header 41px/#26303b, текст #e8edf3; строки 40px/#1c232c, текст 13px #e8edf3; selected — янтарная линия #FFB11B (подтверждён ранее)
+- Table «Иконки признаков»: строки **38px** (#1c232c, текст 13px #e8edf3) — REWORK Iteration 01 ЗАКРЫТ (было 33px)
+- Table caption: 40px/11px w600, текст #e8edf3
+- Тема alan переключена на hunttech-modern-dark (2 id), браузерный кеш очищен (max-age=3600), замеры на свежем CSS
+
 ```
 REFERENCE ASSETS: 5/5 OPENED
 VERIFIED HEAD: (см. technical-verification.md)
