@@ -1048,6 +1048,7 @@
                           stylename="open-position-editor-labor-tab-content edit-workspace-content">
                         <!-- Секция трудовых соглашений: параметры оформления и редактируемая таблица. -->
                         <groupBox id="laborAgreementGroupBox"
+                                  caption="msg://msgLaborAgreement"
                                   spacing="true"
                                   showAsPanel="true"
                                   stylename="edit-accordion-section"

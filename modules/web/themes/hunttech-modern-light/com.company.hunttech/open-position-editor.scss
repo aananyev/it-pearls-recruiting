@@ -484,11 +484,12 @@
     .edit-accordion-section .v-panel-caption {
       min-height: 44px;
       padding: 10px 15px;
-      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
-      font-size: 15px !important;
-      font-weight: 600 !important;
+      color: mix($v-font-color, $v-panel-background-color, 92%) !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
       line-height: 22px !important;
       background: mix($v-app-background-color, $v-panel-background-color, 58%);
+      border-left: 3px solid $v-selection-color;
       border-bottom: 1px solid rgba($v-font-color, 0.12);
       cursor: pointer;
       transition: background-color 0.15s ease;
@@ -505,7 +506,7 @@
     }
 
     .open-position-editor-primary-section {
-      border-left: 3px solid rgba($v-selection-color, 0.52);
+      border-left: none;
     }
 
     /* Вложенный уровень иерархии: «Настройки вакансии» внутри карточки идентификаторов. */
@@ -519,10 +520,12 @@
 
     .open-position-editor-subsection .v-panel-caption {
       min-height: 38px;
-      padding: 8px 12px;
+      padding: 8px 12px 8px 10px;
       font-size: 13px !important;
+      font-weight: 600 !important;
       line-height: 20px !important;
       background: mix($v-app-background-color, $v-panel-background-color, 52%);
+      border-left: 3px solid rgba($v-selection-color, 0.55);
     }
 
     .open-position-editor-subsection .v-panel-content {
