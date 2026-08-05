@@ -6,7 +6,6 @@
         focusComponent="cityRuNameField"
         messagesPack="com.company.hunttech.web.screens.city"
         icon="BANK">
-    <!-- Секция данных: контейнер города и справочник регионов. -->
     <data>
         <!-- Корневой контейнер города с view city-edit-view. -->
         <instance id="cityDc" class="com.company.hunttech.entity.City" view="city-edit-view">
@@ -20,7 +19,6 @@
         </collection>
     </data>
     <dialogMode height="100%" width="100%" modal="true"/>
-    <!-- Корневой layout формы: локальный namespace city-editor + общий контракт Edit-экранов. -->
     <layout stylename="city-editor" expand="cityMainLayout" spacing="false" width="100%" height="100%">
         <hbox id="cityMainLayout" stylename="edit-screen-layout" expand="cityWorkspace" spacing="false" width="100%" height="100%">
             <!-- Левая контекстная панель: идентификация, label-навигация, сводка и подсказка. -->
@@ -32,7 +30,7 @@
                 <!-- Label-навигация повторяет фактическую информационную архитектуру правой области. -->
                 <vbox id="cityNavigation" stylename="label-navigation" width="100%" spacing="false">
                     <label value="Разделы" stylename="label-nav-title" width="100%"/>
-                    <button id="cityIdentityNav" caption="Наименование" stylename="borderless label-nav-item label-nav-item-active" width="100%" invoke="focusIdentitySection"/>
+                    <button id="cityIdentityNav" caption="Наименование" stylename="borderless label-nav-item label-nav-item-active" width="100%" invoke="focusMainSection"/>
                     <button id="cityRegionNav" caption="Регион и связь" stylename="borderless label-nav-item" width="100%" invoke="focusRegionSection"/>
                 </vbox>
                 <vbox id="citySidebarSummary" stylename="edit-sidebar-summary" width="100%" spacing="true">
