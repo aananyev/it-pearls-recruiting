@@ -902,14 +902,18 @@
       align-self: flex-end;
     }
 
-    /* Резерв 44px под отрицательное смещение caption GroupBox-вкладок (дефект CUBA). */
-    .v-verticallayout.open-position-editor-group-tab {
-      padding-top: 58px;
+    /* Vaadin выносит шапку GroupBox над рамкой (inline margin-top:-44px), из-за чего
+     * в вертикальном потоке карточек шапка перекрывает низ предыдущего блока.
+     * Шапка возвращается внутрь панели — наезды исключаются. */
+    .open-position-editor .edit-accordion-section > .v-panel-captionwrap {
+      margin-top: 0 !important;
     }
 
+    /* Вынос caption отменён общим правилом, поэтому резерв group-tab сокращён до
+     * обычного отступа (шапка внутри панели). */
     .open-position-editor-group-tab.edit-accordion-section {
-      height: calc(100% - 72px) !important;
-      margin: 58px 16px 14px !important;
+      height: calc(100% - 28px) !important;
+      margin: 14px 16px 14px !important;
     }
 
     .open-position-editor-spacer,
