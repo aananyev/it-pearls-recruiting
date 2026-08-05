@@ -1,7 +1,9 @@
 package com.company.hunttech.web.screens.city;
 
 import com.company.hunttech.entity.City;
+import com.company.hunttech.entity.Region;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.LookupPickerField;
 import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.screen.EditedEntityContainer;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
@@ -23,7 +25,7 @@ public class CityEdit extends StandardEditor<City> {
     private TextField<String> cityRuNameField;
 
     @Inject
-    private TextField<String> cityRegionField;
+    private LookupPickerField<Region> cityRegionField;
 
     @Inject
     private Button cityIdentityNav;
