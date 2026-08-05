@@ -362,6 +362,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private OvaFallbackImage projectOwnerImage;
     @Inject
     private TabSheet tabSheetOpenPosition;
+    @Named("openPositionEditorNavIdentifiers")
+    private Button openPositionEditorNavIdentifiers;
+    @Named("openPositionEditorNavSettings")
+    private Button openPositionEditorNavSettings;
+    @Named("openPositionEditorNavTeam")
+    private Button openPositionEditorNavTeam;
+    @Named("openPositionEditorNavProject")
+    private Button openPositionEditorNavProject;
+    @Named("openPositionEditorNavPersonnel")
+    private Button openPositionEditorNavPersonnel;
+    @Named("openPositionEditorNavSalary")
+    private Button openPositionEditorNavSalary;
 
     private boolean mainTabLobsLoaded;
     private boolean exerciseLoaded;
@@ -424,6 +436,21 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe("tabSheetOpenPosition")
     /** Переключение вкладки → lazy-загрузка LOB/коллекций вкладки при первом открытии. */
     public void onTabSheetOpenPositionSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
+        // Визуальная синхронизация label-навигации sidebar с открытой вкладкой (вердикт арбитра A):
+        // пункт «Идентификаторы» активен только на вкладке «Проект» (tabOpenPosition); на остальных
+        // вкладках активный пункт снимается со всех шести кнопок. Базовый label-nav-item не трогается.
+        if (event.getSelectedTab() != null) {
+            String activeTabName = event.getSelectedTab().getName();
+            openPositionEditorNavIdentifiers.removeStyleName("label-nav-item-active");
+            openPositionEditorNavSettings.removeStyleName("label-nav-item-active");
+            openPositionEditorNavTeam.removeStyleName("label-nav-item-active");
+            openPositionEditorNavProject.removeStyleName("label-nav-item-active");
+            openPositionEditorNavPersonnel.removeStyleName("label-nav-item-active");
+            openPositionEditorNavSalary.removeStyleName("label-nav-item-active");
+            if ("tabOpenPosition".equals(activeTabName)) {
+                openPositionEditorNavIdentifiers.addStyleName("label-nav-item-active");
+            }
+        }
         if (event.getSelectedTab() == null || PersistenceHelper.isNew(getEditedEntity())) {
             return;
         }
