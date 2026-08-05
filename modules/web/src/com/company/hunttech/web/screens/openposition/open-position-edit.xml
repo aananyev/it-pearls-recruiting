@@ -368,9 +368,10 @@
                     caption="msg://msgCommandOrVacancy"
                     width="100%"
                     stylename="borderless label-nav-item"/>
-            <!-- Пункт «Заработная плата» (секция salaryGroupBox). -->
+            <!-- Пункт «Зарплатное предложение» — отдельная label-навигация блока salaryGroupBox
+                 (клик подсвечивает пункт и переводит фокус в поле минимальной зарплаты). -->
             <button id="openPositionEditorNavSalary"
-                    caption="msg://msgSalary"
+                    caption="msg://msgSalaryProposal"
                     width="100%"
                     stylename="borderless label-nav-item"/>
         </vbox>
@@ -869,20 +870,20 @@
                               spacing="true"
                               width="100%"
                               stylename="open-position-editor-cards-row">
-                            <!-- Карточка «Заработная плата»: вилка зарплаты, зарплата ИП, запрос ожиданий и комментарий. -->
+                            <!-- Карточка «Зарплатное предложение»: вилка, зарплата ИП, чекбоксы ожиданий и комментарий. -->
                             <groupBox id="salaryGroupBox"
                                       spacing="false"
-                                      caption="msg://msgSalary"
+                                      caption="msg://msgSalaryProposal"
                                       showAsPanel="true"
                                       stylename="edit-accordion-section"
                                       collapsed="false"
                                       collapsable="true"
                                       width="100%">
-                                <!-- Ряд: минимальная, максимальная зарплата, зарплата для ИП и запрос ожиданий. -->
-                                <hbox id="hboxSalary"
+                                <!-- Строка 1: минимальная и максимальная зарплата (в одну линию). -->
+                                <hbox id="salaryMinMaxHBox"
                                       spacing="true"
                                       width="100%"
-                                      stylename="open-position-editor-field-row open-position-editor-row-salary">
+                                      stylename="open-position-editor-field-row open-position-editor-row-half">
                                     <!-- Минимальная зарплата (с валидатором). -->
                                     <textField id="openPositionFieldSalaryMin"
                                                dataContainer="openPositionDc"
@@ -897,6 +898,12 @@
                                                caption="msg://msgSalaryMax"
                                                stylename="edit-form-control"
                                                width="100%"/>
+                                </hbox>
+                                <!-- Строка 2: зарплата исполнителя (ИП). -->
+                                <hbox id="salaryIEHBox"
+                                      spacing="true"
+                                      width="100%"
+                                      stylename="open-position-editor-field-row open-position-editor-row-half">
                                     <!-- Зарплата исполнителя (ИП). -->
                                     <textField id="openPositionFieldSalaryIE"
                                                dataContainer="openPositionDc"
@@ -904,6 +911,12 @@
                                                caption="msg://msgSalaryIE"
                                                stylename="edit-form-control"
                                                width="100%"/>
+                                </hbox>
+                                <!-- Строка 3: чекбоксы запроса ожиданий кандидата и фиксированного лимита. -->
+                                <hbox id="salaryCheckBoxesRow"
+                                      spacing="true"
+                                      width="100%"
+                                      stylename="open-position-editor-field-row open-position-editor-checkboxes-row">
                                     <!-- Запрашивать зарплатные ожидания у кандидата. -->
                                     <checkBox id="salaryCandidateRequestCheckBox"
                                               dataContainer="openPositionDc"
@@ -911,9 +924,15 @@
                                               property="salaryCandidateRequest"
                                               caption="msg://msgSalaryCandidateRequest"
                                               width="AUTO"/>
+                                    <!-- Жёсткий лимит зарплаты (salaryFixLimit): вилка не обсуждается. -->
+                                    <checkBox id="salaryStrongLimitCheckBox"
+                                              align="BOTTOM_RIGHT"
+                                              dataContainer="openPositionDc"
+                                              property="salaryFixLimit"
+                                              caption="msg://msgSalaryStrongLimit"/>
                                 </hbox>
-                                <!-- Ряд: комментарий к зарплате и жёсткий лимит. -->
-                                <hbox id="space2Box"
+                                <!-- Строка 4: комментарий к зарплате (видимый кандидатам), на всю ширину. -->
+                                <hbox id="salaryCommentRow"
                                       width="100%"
                                       height="100%"
                                       expand="salaryCommentTextFiels"
@@ -926,12 +945,6 @@
                                                stylename="edit-form-control"
                                                width="100%"
                                                caption="msg://msgSalaryComment"/>
-                                    <!-- Жёсткий лимит зарплаты (salaryFixLimit): вилка не обсуждается. -->
-                                    <checkBox id="salaryStrongLimitCheckBox"
-                                              align="BOTTOM_RIGHT"
-                                              dataContainer="openPositionDc"
-                                              property="salaryFixLimit"
-                                              caption="msg://msgSalaryStrongLimit"/>
                                 </hbox>
                             </groupBox>
                         </hbox>

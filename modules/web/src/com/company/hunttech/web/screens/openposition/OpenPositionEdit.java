@@ -512,6 +512,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         positionTypeField.focus();
     }
 
+    @Subscribe("openPositionEditorNavSalary")
+    /** Отдельная label-навигация блока «Зарплатное предложение» (salaryGroupBox): клик
+     *  подсвечивает пункт и переводит фокус в поле минимальной зарплаты (штатная прокрутка ScrollBox). */
+    public void onOpenPositionEditorNavSalaryClick(Button.ClickEvent event) {
+        resetNavigationActiveStyles();
+        openPositionEditorNavSalary.addStyleName("label-nav-item-active");
+        openPositionFieldSalaryMin.focus();
+    }
+
     /** Lazy-загрузка LOB-описаний основной вкладки (RU/EN описания типа позиции). */
     private void loadMainTabLobs() {
         OpenPosition reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(OpenPosition.class)
