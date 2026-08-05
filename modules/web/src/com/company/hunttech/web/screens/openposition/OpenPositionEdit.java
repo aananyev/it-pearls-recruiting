@@ -364,6 +364,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private TabSheet tabSheetOpenPosition;
     @Named("openPositionEditorNavIdentifiers")
     private Button openPositionEditorNavIdentifiers;
+    @Named("openPositionEditorNavVacancy")
+    private Button openPositionEditorNavVacancy;
     @Named("openPositionEditorNavSettings")
     private Button openPositionEditorNavSettings;
     @Named("openPositionEditorNavTeam")
@@ -438,15 +440,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onTabSheetOpenPositionSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
         // Визуальная синхронизация label-навигации sidebar с открытой вкладкой (вердикт арбитра A):
         // пункт «Идентификаторы» активен только на вкладке «Проект» (tabOpenPosition); на остальных
-        // вкладках активный пункт снимается со всех шести кнопок. Базовый label-nav-item не трогается.
+        // вкладках активный пункт снимается со всех кнопок. Базовый label-nav-item не трогается.
         if (event.getSelectedTab() != null) {
             String activeTabName = event.getSelectedTab().getName();
-            openPositionEditorNavIdentifiers.removeStyleName("label-nav-item-active");
-            openPositionEditorNavSettings.removeStyleName("label-nav-item-active");
-            openPositionEditorNavTeam.removeStyleName("label-nav-item-active");
-            openPositionEditorNavProject.removeStyleName("label-nav-item-active");
-            openPositionEditorNavPersonnel.removeStyleName("label-nav-item-active");
-            openPositionEditorNavSalary.removeStyleName("label-nav-item-active");
+            resetNavigationActiveStyles();
             if ("tabOpenPosition".equals(activeTabName)) {
                 openPositionEditorNavIdentifiers.addStyleName("label-nav-item-active");
             }
@@ -484,6 +481,35 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             loadLaborAgreement();
             laborAgreementLoaded = true;
         }
+    }
+
+    /** Снимает подсветку label-nav-item-active со всех пунктов навигации sidebar. */
+    private void resetNavigationActiveStyles() {
+        openPositionEditorNavIdentifiers.removeStyleName("label-nav-item-active");
+        openPositionEditorNavVacancy.removeStyleName("label-nav-item-active");
+        openPositionEditorNavSettings.removeStyleName("label-nav-item-active");
+        openPositionEditorNavTeam.removeStyleName("label-nav-item-active");
+        openPositionEditorNavProject.removeStyleName("label-nav-item-active");
+        openPositionEditorNavPersonnel.removeStyleName("label-nav-item-active");
+        openPositionEditorNavSalary.removeStyleName("label-nav-item-active");
+    }
+
+    @Subscribe("openPositionEditorNavVacancy")
+    /** Отдельная label-навигация блока «Вакансия» (ID + название в одну линию): клик
+     *  подсвечивает пункт и переводит фокус в первое поле блока (штатная прокрутка ScrollBox). */
+    public void onOpenPositionEditorNavVacancyClick(Button.ClickEvent event) {
+        resetNavigationActiveStyles();
+        openPositionEditorNavVacancy.addStyleName("label-nav-item-active");
+        vacansyIDTextField.focus();
+    }
+
+    @Subscribe("openPositionEditorNavProject")
+    /** Отдельная label-навигация блока «Параметры вакансии» (projectTypeGroupBox): клик
+     *  подсвечивает пункт и переводит фокус в поле должности (штатная прокрутка ScrollBox). */
+    public void onOpenPositionEditorNavProjectClick(Button.ClickEvent event) {
+        resetNavigationActiveStyles();
+        openPositionEditorNavProject.addStyleName("label-nav-item-active");
+        positionTypeField.focus();
     }
 
     /** Lazy-загрузка LOB-описаний основной вкладки (RU/EN описания типа позиции). */

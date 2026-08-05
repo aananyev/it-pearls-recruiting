@@ -719,6 +719,51 @@
       white-space: normal;
     }
 
+    /* Вложенные HBox секции «Проект, Компания, Тип»: на узких viewport строка
+     * чекбоксов фильтров проектов переполнялась и наезжала на поле департамента.
+     * flex-wrap переносит слоты на новую строку только при нехватке ширины;
+     * на широких экранах раскладка не меняется. */
+    .open-position-editor-project-section .v-horizontallayout .v-horizontallayout {
+      display: flex !important;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      width: 100% !important;
+    }
+
+    /* CUBA 7.3 оборачивает слоты HBox в единственный v-expand — flex-wrap задаётся
+     * именно ему, иначе слоты остаются inline-block и не переносятся. */
+    .open-position-editor-project-section .v-horizontallayout .v-horizontallayout > .v-expand {
+      display: flex !important;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .open-position-editor-project-section .v-horizontallayout .v-horizontallayout > .v-expand > .v-slot {
+      box-sizing: border-box;
+      width: auto !important;
+      min-width: 0 !important;
+      flex: 0 1 auto;
+    }
+
+    .open-position-editor-project-section .v-horizontallayout .v-horizontallayout > .v-expand > .v-spacing {
+      display: none !important;
+    }
+
+    /* Строка признаков «Черновик вакансии» / «Эксклюзивная вакансия»: чекбоксы
+     * не сжимаются, поэтому строка использует field-row flex (перенос при нехватке
+     * ширины вместо наезда на соседние поля). */
+    .open-position-editor-checkboxes-row .v-checkbox {
+      box-sizing: border-box;
+      min-height: 38px;
+      padding-top: 9px;
+      white-space: normal;
+    }
+
     /* Поля: единый контракт 38px, включая picker и suggestion (прямые селекторы). */
     .edit-form-control,
     .edit-form-control .v-filterselect,
@@ -1041,9 +1086,33 @@
       display: flex !important;
       align-items: center;
       justify-content: flex-end;
+      flex-wrap: wrap !important;
       gap: 10px;
       width: 100% !important;
       min-width: 0 !important;
+    }
+
+    /* Группа OK/Отмена (commitActions) всегда остаётся вместе: при нехватке
+     * ширины переносится целиком на нижнюю строку, а не разъезжается влево
+     * (на узких viewport «Подписаться» вылезала за левый край footer). */
+    .open-position-editor-commit-actions {
+      display: flex !important;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap !important;
+      gap: 10px;
+      width: auto !important;
+      min-width: 0 !important;
+      flex: 0 1 auto;
+    }
+
+    .open-position-editor-commit-actions > .v-slot {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      width: auto !important;
+      height: auto !important;
+      flex: 0 0 auto;
     }
 
     .open-position-editor-footer-actions > .v-slot {
@@ -1053,6 +1122,14 @@
       width: auto !important;
       height: auto !important;
       flex: 0 0 auto;
+    }
+
+    /* Слот группы OK/Отмена: разрешаем сжатие, чтобы на очень узких viewport
+     * группа не вылезала за левый край footer, а переносила внутренние кнопки. */
+    .open-position-editor-footer-actions > .v-slot:last-child {
+      flex: 0 1 auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
     }
 
     .open-position-editor-footer-actions > .v-slot > .v-button,

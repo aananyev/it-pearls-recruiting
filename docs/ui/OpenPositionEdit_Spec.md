@@ -113,7 +113,7 @@ cacheable), `companyNamesDc`, `companyDepartamentsDc`, `citiesDc` (cacheable), `
 `signDraftCheckBox` → черновик.
 - Таблицы: `laborAgreementDataGrid` (create/edit/remove, inline-редактирование), `someFilesTable` (add/create/edit/remove), `openPostionNewsDataGrid` (create/remove),
 `openPositionSkillsListTable` (только просмотр, actions закомментированы).
-- Пункты label-навигации sidebar — borderless-кнопки **без invoke** (визуальные указатели секций вкладки «О вакансии»); новых действий и Java-обработчиков не создано.
+- Пункты label-навигации sidebar — borderless-кнопки **без invoke** (визуальные указатели секций вкладки «О вакансии»); новых действий и Java-обработчиков не создано. **Исключение — пункт «Вакансия»** (`openPositionEditorNavVacancy`): клик-обработчик `onOpenPositionEditorNavVacancyClick` (подсветка + фокус в `vacansyIDTextField`) — единственная рабочая навигация, добавлена для блока `vacancyInputGroupBox` (арбитраж A).
 
 ## 6. Визуальная компоновка элементов (Visual Layout Schema)
 
@@ -130,7 +130,7 @@ layout (edit-screen-layout open-position-editor, dialogMode 1400×900)
 │   │       └── signDraftLabel (edit-sidebar-subtitle)
 │   ├── vbox openPositionEditorNavigation (label-navigation)
 │   │   ├── openPositionEditorNavActiveSectionsLabel (label-nav-title «Разделы активной вкладки»)
-│   │   └── 6 пунктов borderless label-nav-item (без invoke; первый — label-nav-item-active)
+│   │   └── 7 пунктов borderless label-nav-item (6 — визуальные указатели без invoke; «Вакансия» — рабочая навигация с кликом; первый — label-nav-item-active)
 │   ├── vbox openPositionEditorSummary (edit-sidebar-summary + open-position-editor-summary-grid)
 │   │   ├── openPositionEditorContextLabel (label-nav-title «Контекст вакансии»)
 │   │   ├── citiesLabel · labelTopComissionRecrutier · labelTopComissionResearcher
@@ -144,10 +144,11 @@ layout (edit-screen-layout open-position-editor, dialogMode 1400×900)
     ├── tabSheet tabSheetOpenPosition (framed edit-tabs open-position-editor-tabs) — 12 вкладок
     └── vbox forExpand (edit-footer-actions open-position-editor-footer)
         ├── hbox statusHBox (open-position-editor-owner-row) → ownerTextField (borderless)
-        └── hbox editActions (open-position-editor-footer-actions)
+        └── hbox editActions (open-position-editor-footer-actions, flex-wrap: wrap)
             ├── subscribePositionButton (open-position-editor-secondary-action)
-            ├── windowCommitAndCloseButton (open-position-editor-primary-action)
-            └── windowCloseButton (open-position-editor-secondary-action)
+            └── hbox commitActions (open-position-editor-commit-actions) — группа завершения
+                ├── windowCommitAndCloseButton (open-position-editor-primary-action)
+                └── windowCloseButton (open-position-editor-secondary-action)
 ```
 
 ### 6.2. Вкладка «Проект» (tabOpenPosition)
@@ -155,18 +156,23 @@ layout (edit-screen-layout open-position-editor, dialogMode 1400×900)
 Поток карточек в scrollBox `mainTabScrollBox` (вертикальный поток, все секции — на всю ширину контента, `open-position-editor-cards-row` → `flex-direction: column`):
 
 - **Блок «Идентификаторы и статус»** (`openPositionEditorIdentifiersCard`, сверху):
-  - **Строка 1** (`vacancyNameHBox`, `row-title`): внутренний ID `vacansyIDTextField` (ограничен ~130px) + название `vacansyNameField` (растягивается, required);
+  - **Блок «Вакансия»** (`vacancyInputGroupBox`, `open-position-editor-subsection` + `open-position-editor-vacancy-section`, caption «Вакансия»): единая область ввода — строка `vacancyNameHBox` (`row-title`): внутренний ID `vacansyIDTextField` (ограничен ~130px) + название `vacansyNameField` (растягивается, required) в одну линию;
   - **Строка 2** (`gradeActionRowHBox`, `row-grade`, визуальный контейнер без Java-привязок): грейд `gradeLookupPickerField` (растягивается) + кнопка `generateVacancyNameFieldButton` «Генерировать» (компактная, `flex: 0 0 auto`, `width=AUTO`, `invoke` сохранён);
-  - скрытый спейсер `vacancyTitleSpacerHBox` + вложенная секция `commandFieldHBox` «Настройки вакансии» как `open-position-editor-subsection`.
+  - скрытый спейсер `vacancyTitleSpacerHBox` + вложенная секция `commandFieldHBox` «Настройки вакансии» как `open-position-editor-subsection`: строка `closingDateFieldsHBox` (дата `closingDateDateField` + `priorityFieldsHBox`: приоритет `priorityField` и комментарий `commentPriority`) и **отдельная строка признаков** `closingDateCheckBoxesHBox` (`open-position-editor-checkboxes-row`, на всю ширину): `signDraftCheckBox` «Черновик вакансии», скрытые `openClosePositionCheckBox` и `internalProjectCheckBox` «Эксклюзивная вакансия» — на узких viewport подписи чекбоксов не ужимались и наезжали друг на друга и на приоритет, строка вынесена из общего ряда, перенос — `field-row` flex-wrap.
+- **Блок «Параметры вакансии»** (`projectTypeGroupBox`, полная ширина, caption «Параметры вакансии» — ключ `msgVacancyParams`; бывшая секция «Проект, Компания, Тип должности») — единый блок параметров, строки сверху вниз:
+  - **Должность** на всю ширину — `positionTypeField` (`vacancyParamsPositionRow`);
+  - **Удалёнка + Комментарий** в одну линию — `remoteWorkFieldsHBox`: `remoteWorkField` «Удалёнка» + `remoteWorkCommentField` «Комментарий»;
+  - **Проект** на всю ширину — `projectFieldsVBox` (`vacancyParamsProjectRow`): `projectNameField` + фильтры `projectFilterCheckBoxesHBox` (`onlyOpenProjectCheckBox`/`withOpenPositionCheckBox` под полем);
+  - **Компания + Департамент** в одну линию — `vacancyParamsCompanyRow`: `companyNameField` + `companyDepartamentField`;
+  - **Город + «Добавить»** в одну линию — `vacancyParamsCityRow` → `cityFieldsHBox`: `cityOpenPositionField` + кнопка `addCity`;
+  - **Количество персонала** — вложенная секция `personnelCountGroupBox` (`open-position-editor-subsection`): `numberPositionHBox` (`numberPositionField` + `more10NumberPositionField`).
 - **Блок «Команда / Вакансия»** (`commandOrVacancyGroupBox`, ниже): `commandOrPosition` (radio 50%) + `parentOpenPositionField`; ячейки `commandOrPositionCellHBox`/`parentPositionCellHBox` — `open-position-editor-field-row` (внутренний wrap, защита от переполнения).
-- **Полная ширина**: `projectTypeGroupBox` «Проект, Компания, Тип должности» (ряды `hboxVacansy` / `hboxProject` / `hboxCompany`; `citiesLabel` перенесён в sidebar).
-- **Блок «Количество персонала»** (`personnelCountGroupBox`, сверху): `numberPositionHBox` (`numberPositionField` + `more10NumberPositionField`).
 - **Блок «Заработная плата»** (`salaryGroupBox`, ниже): `hboxSalary` (`row-salary`: `salaryMin`/`salaryMax`/`salaryIE`/`salaryCandidateRequestCheckBox`) + `space2Box` (`row-wide`: `salaryCommentTextFiels` + `salaryStrongLimitCheckBox`).
 
 Каждая секция: `edit-accordion-section` + `showAsPanel="true"`, `collapsable/collapsed` сохранены. Поля — `edit-form-control`; строки — `open-position-editor-field-row` с вариантами
 (`row-title`, `row-grade`, `row-position`, `row-half`, `row-salary`, `row-wide`).
 
-**Sidebar-навигация** (`openPositionEditorNavigation`): активный пункт синхронизирован с открытой вкладкой (вердикт арбитра `00-arbitration-sidebar-active.md`): на вкладке «Проект» активен `openPositionEditorNavIdentifiers` («Идентификаторы»), на остальных вкладках активный пункт снимается; базовый `label-nav-item` не изменяется; управление — `addStyleName/removeStyleName("label-nav-item-active")` в `onTabSheetOpenPositionSelectedTabChange` (пункты остаются визуальными указателями без `invoke`). Кнопки навигации — flex-контейнеры (`display: flex; align-items: center` в shared `edit-screen-shared-styles.scss`): текст пункта центрируется внутри подсветки (раньше из-за `display: block` у Vaadin-кнопки текст выпадал ниже подсветки).
+**Sidebar-навигация** (`openPositionEditorNavigation`): активный пункт синхронизирован с открытой вкладкой (вердикт арбитра `00-arbitration-sidebar-active.md`): на вкладке «Проект» активен `openPositionEditorNavIdentifiers` («Идентификаторы»), на остальных вкладках активный пункт снимается; базовый `label-nav-item` не изменяется; управление — `addStyleName/removeStyleName("label-nav-item-active")` в `onTabSheetOpenPositionSelectedTabChange` (пять пунктов остаются визуальными указателями без `invoke`). **Рабочая label-навигация** (клик снимает подсветку со всех пунктов, подсвечивает выбранный и переводит фокус в первое поле секции — штатная прокрутка ScrollBox; паттерн `selectSection` из эталона IteractionListEdit): «Вакансия» (`openPositionEditorNavVacancy` → `vacansyIDTextField`) и «Параметры вакансии» (`openPositionEditorNavProject` → `positionTypeField`, пункт переименован с «Проект и локация»). Кнопки навигации — flex-контейнеры (`display: flex; align-items: center` в shared `edit-screen-shared-styles.scss`): текст пункта центрируется внутри подсветки (раньше из-за `display: block` у Vaadin-кнопки текст выпадал ниже подсветки).
 
 **Иконки опций полей** (`optionIconProvider`/`optionStyleProvider`): «Приоритет вакансии»
 (`priorityField`), «Удалёнка» (`remoteWorkField`), «Регистрация для работы»
@@ -202,6 +208,7 @@ layout (edit-screen-layout open-position-editor, dialogMode 1400×900)
 footer, primary/secondary actions. Локальные классы: `open-position-editor` (root), `-logo-box`, `-title-clamp`, `-tabs`, `-field-row` (+row-варианты), `-cards-row`, `-subsection`,
 `-primary-section`, `-group-tab`, `-summary-grid`, `-summary-caption/value`, `-payment-section`, `-payments-columns`, `-labor-tab-content`, `-labor-params`, `-table-variant5`,
 `-richtext-variant5`, `-comments-scroll`, `-footer`, `-footer-actions`, `-owner-row`, `-primary-action`, `-secondary-action`, `-spacer`, `-tab-content`, `-table-view`, `-project-section`,
+`-commit-actions` (группа OK/Отмена в footer), `-checkboxes-row` (строка признаков «Черновик»/«Эксклюзивная»),
 `-richtext-section`, `-row-remote`, `-priority-field` (фикс. ширина 150px для поля приоритета с иконкой).
 - Порядок слоёв в каждой теме: `theme base → edit-screen-shared-styles → open-position-editor`.
 
@@ -236,7 +243,7 @@ footer, primary/secondary actions. Локальные классы: `open-positi
 | `citiesLabel` | label | — (значение: Java) | sidebar summary | id, value-контракт Java |
 | `labelTopComissionRecrutier` / `labelTopComissionResearcher` | label | — (значение: Java) | sidebar summary | id, htmlEnabled, value-контракт Java |
 | `closedVacancyInfoLabel` | label | — (значение: Java-таймер) | sidebar warning | id, icon, value-контракт Java |
-| `vacansyIDTextField` / `vacansyNameField` / `gradeLookupPickerField` | textField / lookupPickerField | `vacansyID` / `vacansyName` / `grade` | карточка «Идентификаторы и статус» | id, dataContainer, property, required |
+| `vacansyIDTextField` / `vacansyNameField` / `gradeLookupPickerField` | textField / lookupPickerField | `vacansyID` / `vacansyName` / `grade` | блок «Вакансия» (`vacancyInputGroupBox`) / карточка «Идентификаторы и статус» | id, dataContainer, property, required |
 | `commandFieldHBox` | groupBox | — | subsection «Настройки вакансии» | id, caption, collapsable/collapsed |
 | `commandOrPosition` / `parentOpenPositionField` | radioButtonGroup / lookupPickerField | `commandCandidate` / `parentOpenPosition` | карточка «Команда / Вакансия» | id, dataContainer, property, required, options |
 | `positionTypeField` | lookupPickerField | `positionType` | projectTypeGroupBox (focusComponent) | id, dataContainer, property, options, required |
@@ -310,6 +317,8 @@ other screens: UNCHANGED
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-06 | Поля «ID» (`vacansyIDTextField`) и «Вакансия» (`vacansyNameField`) объединены в единый блок ввода `vacancyInputGroupBox` (subsection `open-position-editor-vacancy-section`, caption «Вакансия») с расположением в одну линию (строка `vacancyNameHBox`, ID ~130px + название на расширение); добавлена отдельная label-навигация: пункт `openPositionEditorNavVacancy` (mainMsg-ключ `openPositionEditorNavVacancy=Вакансия`) — клик снимает подсветку со всех пунктов, подсвечивает «Вакансия» и фокусирует `vacansyIDTextField` (штатная прокрутка ScrollBox; рефакторинг: общий `resetNavigationActiveStyles()` вместо дублирующих removeStyleName); в preview-XML добавлена скрытая кнопка для контракта @Named; business-id, bindings и required не изменялись |
+| 2026-08-06 | Секция «Проект, Компания, Тип должности» перестроена в единый блок **«Параметры вакансии»** (`projectTypeGroupBox`, caption `msgVacancyParams`): Должность на всю ширину (`vacancyParamsPositionRow` → `positionTypeField`), «Удалёнка» + «Комментарий» в линию (`remoteWorkFieldsHBox`), «Проект» на всю ширину (`vacancyParamsProjectRow` → `projectFieldsVBox` + фильтры), «Компания» + «Департамент» в линию (`vacancyParamsCompanyRow`), «Город» + «Добавить» в линию (`vacancyParamsCityRow` → `cityFieldsHBox`), «Количество персонала» — вложенная секция `personnelCountGroupBox` (перенесена из cardsRow2, добавлен `open-position-editor-subsection`; cardsRow2 теперь только «Заработная плата»); отдельная label-навигация: пункт `openPositionEditorNavProject` переименован в «Параметры вакансии» (значение ключа `openPositionEditorNavProject`), переставлен после «Настройки вакансии», клик → подсветка + фокус в `positionTypeField` (`onOpenPositionEditorNavProjectClick`); новые msg-ключи `msgVacancyParams`; business-id, bindings, required, invoke и фильтры проектов сохранены; preview-XML не изменялся |
 | 2026-08-05 | Исправлено смещение текста пунктов label-навигации sidebar OpenPositionEdit: текст выпадал ниже подсветки (из-за `display: block` у Vaadin-кнопки); кнопки `.v-button-label-nav-item` стали flex-контейнерами (`display: flex; align-items: center`, wrap `flex: 1`) в shared `edit-screen-shared-styles.scss` (7 тем синхронно) — текст центрируется внутри подсветки; проверено на 1440/1366 в halo и hunttech-modern-dark, сценарий переключения вкладок работает |
 | 2026-08-05 | Исправлен наезд пиктограмм опций на текст в picker-полях OpenPositionEdit («Приоритет вакансии», «Удалёнка», «Регистрация для работы»): локальное правило `.edit-form-control.v-filterselect > .v-icon` (иконка 20px по центру слева) + `padding-left: 40px` у input (shared-селектор не матчился, т.к. stylename стоит на самом `.v-filterselect`); полю `priorityField` добавлен локальный класс `open-position-editor-priority-field` (`flex: 0 0 150px`) — текст опции читается на 1920/1440/1366/1280, light/dark |
 | 2026-08-05 | Скорректирована визуальная компоновка вкладки «Проект» OpenPositionEdit: синхронизирована label-навигация (вердикт арбитра `00-arbitration-sidebar-active.md` — 6 `@Named` + `label-nav-item-active` в `onTabSheetOpenPositionSelectedTabChange`), устранено переполнение Tab, восстановлены горизонтальные строки ID/Вакансия и Грейд/«Генерировать» (`gradeActionRowHBox`), блоки ID/«Команда разработчиков» и «Количество персонала»/«Заработная плата» размещены вертикально (`open-position-editor-cards-row` → column); бизнес-логика не изменялась. |
