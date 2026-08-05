@@ -45,7 +45,10 @@
 - **DEVOPS:** DEVOPS VERIFICATION: PASS — деплой, HTTP 200, widgetset 200, логи чистые, P1: 0, P2: 0.
 
 ## Итог
-**STATUS: READY_TO_MERGE** (draft PR #120, base=master; merge не выполнялся, production не затронут).
+**STATUS: MERGED_AND_DEPLOYED** (draft PR #120, base=master; merge не выполнялся, production не затронут).
 
 ## История
 - 2026-08-04: исправление двух визуальных дефектов JobCandidateEdit, полный цикл проверок, Chrome-приёмка, draft PR #120, отчёт.
+
+Merge: PERFORMED 2026-08-04 (команда Алексея «давай 120й принимай») — merge-коммит 8b198823, push master, deploy OK (hrm 200)
+Production: NOT CHANGED (локальный деплой)
