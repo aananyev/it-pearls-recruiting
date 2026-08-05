@@ -39,7 +39,7 @@
                             invoke="selectIconButtonInvoke"/>
                 </hbox>
                 <colorPicker id="iconColorColorPicker" property="iconColor" width="AUTO"/>
-                <textArea id="titleDescription" property="titleDescription" width="100%"/>
+                <textArea id="titleDescription" property="titleDescription" width="100%" stylename="ht-halo-precision-textarea"/>
             </column>
         </form>
         <hbox id="editActions" spacing="true">

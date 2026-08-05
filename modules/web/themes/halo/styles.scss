@@ -28,6 +28,11 @@
   // include auto-generated app components SCSS
   @include app_components;
 
+  // Halo Precision: namespace-стили таблиц и областей ввода (вариант 1).
+  // Импортируется внутри .halo, чтобы селекторы получили префикс .halo
+  // и перебивали штатные правила CUBA/Vaadin с той же вложенностью.
+  @import "com.company.hunttech/halo-precision-components";
+
   @include com_company_hunttech-halo-ext;
   @include user-ai-profile;
   @include settings-window-sections;
