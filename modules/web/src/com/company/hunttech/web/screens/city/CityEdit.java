@@ -34,6 +34,14 @@ public class CityEdit extends StandardEditor<City> {
     private Button cityRegionNav;
 
     /**
+     * Сохраняет presentation-контракт прежней версии экрана и переводит
+     * пользователя к первому логическому разделу формы.
+     */
+    public void focusMainSection() {
+        focusIdentitySection();
+    }
+
+    /**
      * Переводит фокус к наименованию города и отражает выбранный раздел только
      * в presentation-состоянии label-навигации, не изменяя entity и lifecycle editor-а.
      */
