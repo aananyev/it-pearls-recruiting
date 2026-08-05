@@ -140,6 +140,96 @@ public class JobCandidateEditLayoutContractTest {
         }
     }
 
+    @Test
+    public void allTabsUseConsistentMargin() throws IOException {
+        String xml = readProjectFile(XML);
+        String tabs = section(xml, "<tabSheet id=\"tabSheetSocialNetworks\"", "</tabSheet>");
+        assertTrue("Все вкладки должны иметь margin=\"false\" — единый отступ контента "
+                        + "через SCSS .v-tabsheet-content (иначе accordion-заголовки в разных вкладках смещены)",
+                !tabs.contains("margin=\"true\""));
+    }
+
+    @Test
+    public void mainTabRowsShareExpandedFieldPattern() throws IOException {
+        String xml = readProjectFile(XML);
+
+        // Каждая строка ввода вкладки «Основное» использует hbox expand + width=100% поля:
+        // колонка подписей (112/96px) и поле calc(100% - подпись) применяются ко ВСЕМ строкам,
+        // а не только к полям ФИО (иначе «Дата рождения»/«Город»/«Должность»/«Компания»
+        // имеют natural width подписей и поля иной ширины).
+        assertTrue(xml.contains("expand=\"birdhDateField\""));
+        assertTrue(xml.contains("expand=\"jobCityCandidateField\""));
+        assertTrue(xml.contains("expand=\"personPositionField\""));
+        assertTrue(xml.contains("expand=\"currentCompanyField\""));
+
+        String dateRow = section(xml, "id=\"birdhDateField\"", "</hbox>");
+        assertTrue(dateRow.contains("width=\"100%\""));
+    }
+
+    @Test
+    public void commentsTabKeepsCleanChatLayout() throws IOException {
+        String xml = readProjectFile(XML);
+        String comments = section(xml, "id=\"commentsTab\"", "<!-- TAB: История -->");
+
+        assertTrue("Лента комментариев — scrollBox + vbox (авто-высота пузырей)",
+                comments.contains("id=\"jobCandidateCommentsScroll\""));
+        assertTrue(comments.contains("id=\"jobCandidateCommentsContainer\""));
+        assertTrue("dataGrid удалён: Vaadin Grid не поддерживает авто-высоту строк — "
+                        + "пузыри разной высоты перекрывались (rowHeight 30px)",
+                !comments.contains("<dataGrid"));
+        assertTrue("Высота строки комментариев должна быть автоматической (по содержимому пузыря), "
+                        + "а не фиксированной 80px", !comments.contains("bodyRowHeight"));
+        assertTrue("JPQL ленты не должен содержать опечатку deteIteraction — она даёт "
+                        + "JPQLException и пустую ленту (поле называется dateIteraction)",
+                !comments.contains("deteIteraction"));
+        assertTrue(comments.contains("inputPrompt=\"msg://msgInputComment\""));
+    }
+
+    @Test
+    public void everyThemeStylesCommentBubbles() throws IOException {
+        for (String theme : THEMES) {
+            String scss = readProjectFile("modules/web/themes/" + theme
+                    + "/com.company.hunttech/job-candidate-editor.scss");
+
+            assertTrue(theme, scss.contains(".toolTip {"));
+            assertTrue(theme, scss.contains(".tailMyMessage {"));
+            assertTrue(theme, scss.contains(".tailOtherMessage {"));
+            assertTrue(theme, scss.contains("max-width: 520px"));
+            assertTrue(theme, scss.contains(".table-wordwrap {"));
+        }
+    }
+
+    @Test
+    public void additionalPositionsUseHorizontalFlowLayout() throws IOException {
+        String xml = readProjectFile(XML);
+        String grid = section(xml, "id=\"professionalDataGrid\"", "</grid>");
+
+        // Список доп. позиций — горизонтальный flow-контейнер (cssLayout), а не Label:
+        // значения выводятся в строку справа от кнопки «…» и переносятся по позициям,
+        // а не по словам внутри одного Label (вертикальный столбик).
+        assertTrue("Контейнер доп. позиций должен быть cssLayout (горизонтальный flow)",
+                grid.contains("<cssLayout id=\"positionsLabel\""));
+        assertTrue(grid.contains("width=\"100%\""));
+        assertTrue(grid.contains("stylename=\"job-candidate-positions\""));
+        assertTrue("Label доп. позиций должен быть заменён на cssLayout",
+                !grid.contains("<label id=\"positionsLabel\""));
+    }
+
+    @Test
+    public void everyThemeStylesPositionsFlowLocally() throws IOException {
+        for (String theme : THEMES) {
+            String scss = readProjectFile("modules/web/themes/" + theme
+                    + "/com.company.hunttech/job-candidate-editor.scss");
+
+            // Локальность: селектор ограничен namespace формы, не глобальный .v-label.
+            assertTrue(theme, scss.contains(".job-candidate-positions {"));
+            assertTrue(theme, scss.contains("display: flex"));
+            assertTrue(theme, scss.contains("flex-wrap: wrap"));
+            assertTrue(theme, scss.contains(".job-candidate-positions .v-label"));
+            assertTrue(theme, scss.contains("white-space: nowrap"));
+        }
+    }
+
     private String section(String text, String startMarker, String endMarker) {
         int start = text.indexOf(startMarker);
         assertTrue("Не найден начальный маркер: " + startMarker, start >= 0);

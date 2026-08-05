@@ -907,6 +907,76 @@
       border: 1px solid #cbd5e1 !important;
       box-shadow: none !important;
     }
+
+    /* Вкладка «Комментарии»: карточки-пузыри чата (локальное переопределение legacy tail*;
+       в modern-темах эти классы не определены вовсе, поэтому вид задаётся здесь, во всех 7 темах). */
+    .toolTip {
+      max-width: 520px;
+      margin-left: 0;
+      padding: 8px 12px;
+      background: #ffffff !important;
+      border: 1px solid #dfe5ec !important;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, .08);
+    }
+
+    .tailMyMessage {
+      background-color: #fff0d9 !important;
+    }
+
+    .tailOtherMessage {
+      background-color: #eef2ff !important;
+    }
+
+    .tailName {
+      font-size: 13px !important;
+      font-weight: 700 !important;
+      color: #1f3146 !important;
+      line-height: 18px !important;
+    }
+
+    .tailVacancy {
+      font-size: 12px !important;
+      font-style: italic !important;
+      color: #64748b !important;
+      line-height: 16px !important;
+    }
+
+    .tailDate {
+      font-size: 11px !important;
+      color: #94a3b8 !important;
+      line-height: 14px !important;
+    }
+
+    .table-wordwrap {
+      white-space: pre-wrap !important;
+      word-wrap: break-word !important;
+      overflow-wrap: anywhere !important;
+      line-height: 150% !important;
+      color: #26384c !important;
+      font-size: 14px !important;
+    }
+
+    .circle-50px {
+      flex: 0 0 auto !important;
+      border: 2px solid #ffffff !important;
+      box-shadow: 0 1px 4px rgba(15, 23, 42, .18);
+    }
+
+    .toolTip .v-button {
+      min-height: 0 !important;
+      padding: 0 !important;
+      color: #1264b5 !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .toolTip .v-button:hover {
+      color: #0a4d92 !important;
+    }
   }
 
   @media (max-width: 1366px) {
@@ -965,6 +1035,23 @@
         min-width: 100px !important;
       }
     }
+  }
+
+  /* Доп. позиции: горизонтальный flow-контейнер с переносом по позициям
+     (элементы прижаты к кнопке, перенос между позициями, не по словам). */
+  .job-candidate-positions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    min-height: 38px;
+  }
+
+  /* nowrap: перенос строк происходит между чипами (flex-wrap), а не по словам внутри
+     чипа; !important + префикс формы — против правил карточки (.job-candidate-card .v-label
+     и .job-candidate-form-grid .v-label) с white-space: normal!important. */
+  .job-candidate-editor .job-candidate-positions .v-label {
+    white-space: nowrap !important;
   }
 
   @media (max-width: 1100px) {

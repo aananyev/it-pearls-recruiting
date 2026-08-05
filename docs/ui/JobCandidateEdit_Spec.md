@@ -181,6 +181,9 @@ SCSS-контракт повторён для `halo`, `havana`, `helium`, `hover
   локально переведены на flex, поэтому «Сохранить и закрыть» и «Отмена» сгруппированы
   внизу справа, а не распределены по ширине footer;
 - внутренние контейнеры вкладок «Резюме» и «Комментарии» имеют width 100%, чтобы таблицы не сжимались до intrinsic width;
+- все вкладки используют `margin="false"` — отступы контента задаёт единый SCSS
+  `.v-tabsheet-content` (padding 16px 18px 20px), поэтому accordion-заголовки секций
+  и карточки в каждой вкладке стоят на одинаковом расстоянии от краёв;
 - колонка действий соцсетей фиксирована на 220 px, а таблица занимает оставшуюся ширину;
 - табличные карточки вкладки «Позиции и вакансии» получают `min-width: 0` и локальную горизонтальную прокрутку таблицы, если набор колонок шире доступной области;
 - фон и границы одинаково определены для Halo, Hover, Havana, Helium и modern-тем.
@@ -212,6 +215,11 @@ Accordion-слой не удаляет и не подменяет штатную
   «Имя», «Отчество», «Фамилия» (и «Должность», «Компания») одной ширины при любой длине
   подписи; мёртвый stylename `job-candidate-name-row` из XML удалён — геометрию строк
   дают общие правила `.job-candidate-form-grid`;
+- **все строки ввода** вкладки «Основное» (Имя, Отчество, Фамилия, Дата рождения, Город,
+  Должность, Компания) используют единый паттерн `hbox expand="<fieldId>"` + поле
+  `width="100%"`: фиксированная колонка подписей и `calc(100% − подпись)` применяются ко
+  всем полям, а не только к полям ФИО (ранее строки без `expand` имели natural width
+  подписей и поля иной ширины);
 - component ID, properties, actions, queries и search executors не изменяются.
 
 ### Вкладка «Контакты»
@@ -229,6 +237,35 @@ Accordion-слой не удаляет и не подменяет штатную
 - `radioButtonGroup` сохраняет прежнюю бизнес-логику и привязку `priorityContact`;
 - пара «Способ связи» (label + `radioButtonGroup`) выровнена по вертикали: обоим элементам
   добавлен `align="MIDDLE_LEFT"` — подпись центрирована относительно радиокнопок.
+
+### Вкладка «Комментарии»
+
+- лента комментариев — чат из пузырей: свой комментарий (автор = текущий пользователь)
+  выравнивается вправо и заливается тёплым `#fff0d9`, чужой — влево и заливается `#eef2ff`;
+- лента построена как `scrollBox` (`jobCandidateCommentsScroll`) + `vbox`
+  (`jobCandidateCommentsContainer`), заполняемый контроллером `renderComments()` из
+  контейнера `interactionCommentDc` (метод `buildCommentComponent(IteractionList)`).
+  Ранее пузыри рендерились в `dataGrid` с фиксированной высотой строки 30px (Vaadin Grid
+  не поддерживает авто-высоту строк) — карточки высотой 116–137px перекрывали друг друга
+  (замеры: интервалы −107/−86px), текст и кнопка «Ответить» уходили под соседние пузыри.
+  Теперь высота каждого пузыря — по содержимому (проверено: интервалы +10px на
+  1920×1080/1440×900/1366×768), длинные комментарии не обрезаются;
+- загрузка ленты — `interactionCommentDl` (`order by e.dateIteraction desc`); исправлена
+  legacy-опечатка JPQL `e.deteIteraction` (коммит rebranding `7f93cfa5`) — запрос падал
+  с `JPQLException "cannot be resolved"`, лента была пустой;
+- пузырь ограничен `max-width: 520px`; текст переносится (`white-space: pre-wrap`,
+  `overflow-wrap: anywhere`); имя рекрутера — жирное, вакансия — курсивом, дата — мелкая
+  серая в формате `dd.MM.yyyy HH:mm`;
+- аватар рекрутера — круг 50px с белой рамкой (у своих — справа, у чужих — слева);
+- кнопка «Ответить» стилизована как ссылка (без рамки и заливки);
+- поле ввода нового комментария получило `inputPrompt="msg://msgInputComment"`;
+- локальный слой чата определён во всех 7 темах: legacy-классы `tail*` в modern-темах
+  отсутствовали вовсе, теперь вид единый; заодно исправлен инвалидный legacy-CSS
+  `background-color: ffb259`/`c4c6ff` (без `#`) в halo/havana/helium/hover-ext.scss —
+  фон пузырей не применялся;
+- панель отправки (текст + вакансия + «Послать сообщение») — карточка `edit-card`;
+- ответ через диалог «Ответить» формирует комментарий вида `( ) Re: <текст>` —
+  бизнес-логика не менялась.
 
 ---
 
@@ -328,6 +365,8 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-04 | **Исправление двух визуальных дефектов (браузер-верификация, Chrome 3 viewport):** 1) вкладка «Комментарии» — лента переведена с `dataGrid` на `scrollBox` + `vbox` (Java: `renderComments()`/`buildCommentComponent()` вместо column-generator): Vaadin Grid не поддерживает авто-высоту строк (rowHeight 30px), пузыри высотой 116–137px перекрывались (интервалы −107/−86px); теперь высота по содержимому, интервалы +10px, дата `dd.MM.yyyy HH:mm`, кнопка «Ответить» видима. Исправлена legacy-опечатка JPQL `order by e.deteIteraction` → `dateIteraction` (JPQLException «cannot be resolved» — лента была пустой); 2) вкладка «Основное», блок «Доп. позиции»: `positionsLabel` переведён с `Label` на `CssLayout` — Vaadin-label в expand получал ширину 112px вместо ~700px, названия позиций переносились в столбик и строка раздувалась до 152px; теперь горизонтальный flow (flex-wrap) с чипом на каждую позицию, строка 38px, при нехватке ширины перенос по позициям. SCSS ×7 тем: блок `.job-candidate-positions` (flex, gap, `nowrap !important` против правил карточки). Контрактный тест дополнен (scrollBox-лента, отсутствие dataGrid/bodyRowHeight/`deteIteraction`, cssLayout позиций). View integrity: все атрибуты генераторов задекларированы в `interactionCommentDc` — валидно. Бизнес-логика создания/ответа на комментарии не менялась. |
+| 2026-08-04 | **Финальная полировка JobCandidateEdit (presentation-only):** 1) строки ввода вкладки «Основное» выровнены — всем строкам (Дата рождения, Город, Должность, Компания) добавлен `expand` на hbox, полю даты — `width="100%"`: колонка подписей 112/96px и `calc(100% − подпись)` теперь применяются ко всем полям, а не только к ФИО; 2) `margin` всех 7 вкладок унифицирован на `false` (Взаимодействия/Резюме/Комментарии/История были `true`) — accordion-заголовки секций в каждой вкладке стоят на одинаковом отступе; 3) вкладка «Комментарии»: убрана фиксированная высота строки `bodyRowHeight="80px"` (высота по содержимому пузыря), Java-рендер больше не задаёт `setHeight("100px")`, дата форматируется `dd.MM.yyyy HH:mm`, поле ввода получило `inputPrompt="msg://msgInputComment"`; 4) SCSS ×7 тем — локальный слой чата (пузыри `.toolTip`/`.tailMyMessage`/`.tailOtherMessage`, `max-width: 520px`, типографика имени/вакансии/даты, перенос текста `pre-wrap`, кнопка «Ответить» как ссылка); в modern-темах legacy-классы `tail*` не были определены вовсе — теперь вид чата единый во всех темах; 5) фикс инвалидного legacy-CSS: `background-color: ffb259`/`c4c6ff` без `#` в halo/havana/helium/hover-ext.scss (фон пузырей не применялся). Контрактный тест дополнен ассертами (margin вкладок, expand строк, чат-layout, comment-стили тем). Бизнес-логика, bindings, loaders и views не менялись. |
 | 2026-08-03 | **Фиксы приёмки (браузер-верификация, theme halo):** 1) навигация 46px→27px — базовая halo-кнопка `.v-button:before` вставляла фантомный inline-block (второй line box); скрыт `:before { display:none !important }` у `label-nav-item`/`job-candidate-nav-item`/`v-button-label-nav-item` (7 тем); 2) поля ФИО выровнены — у required-полей (Имя/Фамилия) CUBA добавлял пустой caption-слот 20px справа (`v-caption-on-right`); обёртка переведена в `display:block`, слот скрыт, поле растянуто на слот (все три поля одной ширины); 3) возвращена таблица «Социальные сети» — после `height="AUTO"` секции dataGrid схлопывался до 0px, т.к. `#socialNetworkTable` не рендерит id на корневом div; высота задана через `.v-slot-job-candidate-table`/`.c-data-grid-composition` + `.v-grid` (`min-height: 320px !important`). Presentation-only, bindings/логика не менялись. |
 | 2026-08-04 | Вкладка «Контакты»: подписям строк ввода в карточках «Основные контакты» (Email, Телефон, Мобильный, Telegram) и «Дополнительные контакты» (WhatsApp, Viber, Skype) возвращён явный `width="100px"` в XML — все 7 строк ввода одной длины и с одинаковым отступом поля независимо от SCSS-каскада. Presentation-only, bindings/логика не менялись. |
 | 2026-08-04 | **View integrity fix (IllegalStateException `projectLogo`)**: inline-override `projectName view="_local"` в `jobCandidateDc` не загружал FK `projectLogo` (`@ManyToOne` FileDescriptor) и `projectDepartment→companyName` — генераторы колонок логотипа (`jobCandidateCandidateCvTableProjectLogoColumnColumnGenerator`, `jobCandidateIteractionListTableProjectLogoColumnColumnGenerator`) и `openPositionDescription()` падали на detached Project. Исправлено: `projectName view="_minimal"` + явные nested-поля (`projectName`, `projectDescription`, `projectLogo view="_local"`, `projectDepartment view="companyDepartament-picker-view"` → `companyName` → `workingConditions`/`companyDescription`) для `candidateCv.toVacancy` и `iteractionList.vacancy`; `suggestOpenPositionDc.projectName` — `_minimal` + `projectOwner view="person-owner-view"` (descriptionProvider). View расширен только в экранном XML, бизнес-логика не менялась. |

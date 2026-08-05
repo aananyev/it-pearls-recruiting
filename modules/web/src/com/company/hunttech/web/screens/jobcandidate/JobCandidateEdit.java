@@ -137,7 +137,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     @Inject
     private SuggestionField<String> middleNameField;
     @Inject
-    private Label<String> positionsLabel;
+    private CssLayout positionsLabel;
     @Inject
     private SuggestionPickerField<Company> currentCompanyField;
     @Inject
@@ -269,9 +269,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Button sendCommentButton;
     private TextField<String> chatMessageTextField;
     private LookupPickerField<OpenPosition> vacancyPopupPickerField;
-    private DataGrid<IteractionList> jobCandidateCommentsDataGrid;
+    private VBoxLayout jobCandidateCommentsContainer;
     @Inject
     private CollectionLoader<IteractionList> interactionCommentDl;
+    @Inject
+    private CollectionContainer<IteractionList> interactionCommentDc;
     private CollectionContainer<OpenPosition> suggestOpenPositionDc;
     @Inject
     private GridLayout dictionatysTavlesHBox;
@@ -823,6 +825,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         interactionCommentDl.setParameter("candidate", getEditedEntity());
         interactionCommentDl.setParameter("comment", null);
         interactionCommentDl.load();
+        renderComments();
     }
 
     /**
@@ -1352,8 +1355,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 this::jobCandidateCandidateCvTableCandidateOriginalCvColumnGenerator);
         configureComponentRenderer("jobCandidateCandidateCvTable", "candidateHuntTechCVColumn",
                 this::jobCandidateCandidateCvTableCandidateHuntTechCvColumnGenerator);
-        configureComponentRenderer("jobCandidateCommentsDataGrid", "commentDialog",
-                this::jobCandidateCommentsDataGridCommentDialogColumnGenerator);
     }
 
     @SuppressWarnings("unchecked")
@@ -1718,14 +1719,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             sendCommentButton = (Button) getWindow().getComponentNN("sendCommentButton");
             vacancyPopupPickerField = (LookupPickerField<OpenPosition>) getWindow()
                     .getComponentNN("vacancyPopupPickerField");
-            jobCandidateCommentsDataGrid = (DataGrid<IteractionList>) getWindow()
-                    .getComponentNN("jobCandidateCommentsDataGrid");
+            jobCandidateCommentsContainer = (VBoxLayout) getWindow()
+                    .getComponentNN("jobCandidateCommentsContainer");
 
             chatMessageTextField.addValueChangeListener(this::onChatMessageTextFieldValueChange);
             chatMessageTextField.addEnterPressListener(this::onChatMessageTextFieldEnterPress);
             vacancyPopupPickerField.setOptionIconProvider(this::vacancyPopupPickerFieldOptionIconProvider);
-            jobCandidateCommentsDataGrid.getColumn("comment")
-                    .setStyleProvider(this::jobCandidateCommentsDataGridCommentStyleProvider);
 
             commentsTabInitialized = true;
             ensureOpenPositionLoaded();
@@ -1884,7 +1883,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             }
 
             if (positionsLabel == null) {
-                positionsLabel = (Label<String>) getWindow().getComponent("positionsLabel");
+                positionsLabel = (CssLayout) getWindow().getComponent("positionsLabel");
             }
             if (positionsLabel != null) {
                 setPositionsLabel();
@@ -2519,30 +2518,30 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setPositionsLabel() {
-//        String outStr = "";
-//        String description = "";
-        StringBuilder sb = new StringBuilder();
+        positionsLabel.removeAll();
         StringBuilder sbDesc = new StringBuilder();
 
         if (getEditedEntity().getPositionList() != null) {
             for (JobCandidatePositionLists s : getEditedEntity().getPositionList()) {
-                if (!sb.toString().equals("")) {
-                    sb.append(",");
-//                   outStr = outStr + ",";
-                    sbDesc.append("\n");
-//                    description = description + "\n";
+                String name = s.getPositionList().getPositionRuName();
+                if (name == null) {
+                    continue;
                 }
+                // Каждая позиция — отдельный элемент flow-контейнера: перенос строк
+                // происходит между позициями, а не по словам внутри одного Label.
+                Label<String> positionChip = uiComponents.create(Label.class);
+                positionChip.setValue(name);
+                positionChip.setStyleName("job-candidate-position");
+                positionsLabel.add(positionChip);
 
-                sb.append(s.getPositionList().getPositionRuName());
-//                outStr = outStr + s.getPositionList().getPositionRuName();
-                sbDesc.append(s.getPositionList().getPositionRuName());
-//                description = description + s.getPositionList().getPositionRuName();
+                if (sbDesc.length() > 0) {
+                    sbDesc.append("\n");
+                }
+                sbDesc.append(name);
             }
-
         }
 
-        if (!sb.toString().equals("")) {
-            positionsLabel.setValue(sb.toString());
+        if (sbDesc.length() > 0) {
             positionsLabel.setDescription(sbDesc.toString());
         }
     }
@@ -3653,16 +3652,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return "table-wordwrap";
     }
 
-    private String jobCandidateCommentsDataGridCommentStyleProvider(IteractionList iteractionList) {
-        return "table-wordwrap";
-    }
-
-    private Component jobCandidateCommentsDataGridCommentDialogColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
+    private Component buildCommentComponent(IteractionList item) {
         VBoxLayout retBox = uiComponents.create(VBoxLayout.class);
         retBox.setWidthFull();
         retBox.setSpacing(false);
         retBox.setMargin(false);
-        retBox.setHeight("100px");
 
         HBoxLayout innerBox = uiComponents.create(HBoxLayout.class);
         innerBox.setMargin(true);
@@ -3674,38 +3668,38 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         outerBox.setWidthAuto();
         outerBox.setSpacing(false);
 
-        if (event.getItem().getComment() != null
-                && !event.getItem().getComment().equals("")) {
+        if (item.getComment() != null
+                && !item.getComment().equals("")) {
             Label name = uiComponents.create(Label.class);
-            if (event.getItem().getRecrutier() != null) {
-                name.setValue(event.getItem().getRecrutier().getName() != null
-                        ? event.getItem().getRecrutier().getName() :
-                        (event.getItem().getRecrutierName() != null ? event.getItem().getRecrutierName() : ""));
+            if (item.getRecrutier() != null) {
+                name.setValue(item.getRecrutier().getName() != null
+                        ? item.getRecrutier().getName() :
+                        (item.getRecrutierName() != null ? item.getRecrutierName() : ""));
             }
             name.setStyleName("tailName");
 
             Label vacancy = uiComponents.create(Label.class);
-            vacancy.setValue(event.getItem().getVacancy() != null &&
-                    !event.getItem().getVacancy().getVacansyName().equals("Default")
-                    ? event.getItem().getVacancy().getVacansyName() : "");
+            vacancy.setValue(item.getVacancy() != null &&
+                    !item.getVacancy().getVacansyName().equals("Default")
+                    ? item.getVacancy().getVacansyName() : "");
             vacancy.setStyleName("tailVacancy");
 
             Label text = uiComponents.create(Label.class);
-            text.setValue(event.getItem().getComment() != null ?
-                    event.getItem().getComment().replaceAll("\n\n", "\n") : "");
+            text.setValue(item.getComment() != null ?
+                    item.getComment().replaceAll("\n\n", "\n") : "");
             text.addStyleName("table-wordwrap");
 
             Label date = uiComponents.create(Label.class);
-            date.setValue(event.getItem().getDateIteraction() != null ?
-                    event.getItem().getDateIteraction() : "");
+            date.setValue(item.getDateIteraction() != null ?
+                    new SimpleDateFormat("dd.MM.yyyy HH:mm").format(item.getDateIteraction()) : "");
             date.setAlignment(Component.Alignment.BOTTOM_RIGHT);
             date.setStyleName("tailDate");
 
             Image image = uiComponents.create(Image.class);
 
-            if (event.getItem().getRecrutier() != null) {
+            if (item.getRecrutier() != null) {
                 FileDescriptorImageHelper.setUserProfilePhoto(image, fileLoader,
-                        (ExtUser) event.getItem().getRecrutier());
+                        (ExtUser) item.getRecrutier());
             } else {
                 image.setSource(ThemeResource.class)
                         .setPath("icons/no-programmer.jpeg");
@@ -3746,7 +3740,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                         .show();
             });
 
-            if (userSession.getUser().getLogin().equals(event.getItem().getCreatedBy())) {
+            if (userSession.getUser().getLogin().equals(item.getCreatedBy())) {
                 outerBox.setAlignment(Component.Alignment.MIDDLE_RIGHT);
                 date.setAlignment(Component.Alignment.MIDDLE_RIGHT);
                 vacancy.setAlignment(Component.Alignment.MIDDLE_RIGHT);
@@ -3773,12 +3767,12 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             outerBox.add(date);
             outerBox.add(replyButton);
 
-            if (!userSession.getUser().getLogin().equals(event.getItem().getCreatedBy())) {
+            if (!userSession.getUser().getLogin().equals(item.getCreatedBy())) {
                 innerBox.add(image);
             }
 
             innerBox.add(outerBox);
-            if (userSession.getUser().getLogin().equals(event.getItem().getCreatedBy())) {
+            if (userSession.getUser().getLogin().equals(item.getCreatedBy())) {
                 innerBox.add(image);
             }
 
@@ -3786,6 +3780,22 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
 
         return retBox;
+    }
+
+    /**
+     * Перерисовывает ленту комментариев из контейнера interactionCommentDc
+     * (порядок — как в loader: order by deteIteraction desc). dataGrid не
+     * поддерживает авто-высоту строк, поэтому пузыри рендерятся вертикально
+     * в scrollBox и не перекрывают друг друга.
+     */
+    private void renderComments() {
+        if (jobCandidateCommentsContainer == null || interactionCommentDc == null) {
+            return;
+        }
+        jobCandidateCommentsContainer.removeAll();
+        for (IteractionList comment : interactionCommentDc.getItems()) {
+            jobCandidateCommentsContainer.add(buildCommentComponent(comment));
+        }
     }
 
     private void replyButtonInvoke(Button.ClickEvent e, String replyStr) {
@@ -3876,7 +3886,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             jobCandidateDc.getItem().getIteractionList().add(comment);
             reloadInteractions();
             chatMessageTextField.setValue(null);
-            jobCandidateCommentsDataGrid.setSelected(comment);
+            // Новый комментарий уходит наверх ленты: renderComments() рисует контейнер
+            // в порядке interactionCommentDl (order by deteIteraction desc).
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withCaption(messageBundle.getMessage("msgError"))
@@ -3903,8 +3914,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             interactionCommentDl.load();
             jobCandidateDl.load();
         }
-        if (jobCandidateCommentsDataGrid != null) {
-            jobCandidateCommentsDataGrid.repaint();
+        if (jobCandidateCommentsContainer != null) {
+            renderComments();
         }
         if (jobCandidateIteractionListTable != null) {
             jobCandidateIteractionListTable.repaint();

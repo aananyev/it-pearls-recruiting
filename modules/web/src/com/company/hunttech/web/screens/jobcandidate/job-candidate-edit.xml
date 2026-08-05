@@ -233,10 +233,12 @@
             <!-- Загрузчик данных interactionCommentDl. -->
             <loader id="interactionCommentDl" cacheable="true">
                 <query>
-                    <!-- Только взаимодействия с непустым комментарием, новые сверху. -->
+                    <!-- Только взаимодействия с непустым комментарием, новые сверху.
+                         Поле сортировки — dateIteraction (опечатка deteIteraction давала
+                         JPQLException "cannot be resolved" и ленту без комментариев). -->
                     <![CDATA[select e from hunttech_IteractionList e
                     where e.comment is not null and e.comment not like ''
-                    order by e.deteIteraction desc]]>
+                    order by e.dateIteraction desc]]>
                     <!-- Контейнер условий запроса. -->
                     <condition>
                         <!-- Логическое И над условиями. -->
@@ -826,18 +828,19 @@
                                             </row>
                                             <row>
                                                 <!-- Строка «Дата рождения»: стандартное поле даты. -->
-                                                <hbox spacing="false" width="100%">
+                                                <hbox spacing="false" width="100%" expand="birdhDateField">
                                                     <label value="msg://msgBirthDate" stylename="small" box.expandRatio="1"/>
                                                     <dateField id="birdhDateField"
                                                                box.expandRatio="4"
                                                                dataContainer="jobCandidateDc"
                                                                property="birdhDate"
-                                                               stylename="edit-form-control"/>
+                                                               stylename="edit-form-control"
+                                                               width="100%"/>
                                                 </hbox>
                                             </row>
                                             <row>
                                                 <!-- Строка «Город»: lookup-выбор из справочника городов (обязательное). -->
-                                                <hbox spacing="false" width="100%">
+                                                <hbox spacing="false" width="100%" expand="jobCityCandidateField">
                                                     <label value="mainMsg://msgCity" stylename="small" box.expandRatio="1"/>
                                                     <lookupPickerField id="jobCityCandidateField"
                                                                        box.expandRatio="4"
@@ -878,7 +881,7 @@
                                         <rows>
                                             <row>
                                                 <!-- Строка «Должность»: lookup-выбор из справочника должностей (обязательное). -->
-                                                <hbox spacing="false" width="100%">
+                                                <hbox spacing="false" width="100%" expand="personPositionField">
                                                     <label value="msg://msgPersonPosition" stylename="small" box.expandRatio="1"/>
                                                     <lookupPickerField id="personPositionField"
                                                                        box.expandRatio="3"
@@ -900,7 +903,7 @@
                                             </row>
                                             <row>
                                                 <!-- Строка «Компания»: поиск компании с подсказками (обязательное). -->
-                                                <hbox spacing="false" width="100%">
+                                                <hbox spacing="false" width="100%" expand="currentCompanyField">
                                                     <label value="msg://msgCompany" stylename="small" box.expandRatio="1"/>
                                                     <suggestionPickerField id="currentCompanyField"
                                                                            box.expandRatio="3"
@@ -944,11 +947,12 @@
                                                             align="MIDDLE_LEFT"
                                                             description="msg://msgSetPositions"
                                                             invoke="addPositionList"/>
-                                                    <!-- Список выбранных дополнительных позиций (заполняется контроллером). -->
-                                                    <label id="positionsLabel"
-                                                           width="100%"
-                                                           stylename="small"
-                                                           align="MIDDLE_LEFT"/>
+                                                    <!-- Список выбранных дополнительных позиций: горизонтальный flow-контейнер
+                                                         (flex-wrap) — каждая позиция отдельным элементом, перенос по позициям,
+                                                         а не по словам внутри одного Label (заполняется контроллером). -->
+                                                    <cssLayout id="positionsLabel"
+                                                               width="100%"
+                                                               stylename="job-candidate-positions"/>
                                                 </hbox>
                                             </row>
                                         </rows>
@@ -1317,7 +1321,7 @@
                     <tab id="tabIteraction"
                          caption="msg://msgCandidateIteraction"
                          spacing="true"
-                         margin="true"
+                         margin="false"
                          expand="tabIteractionSection">
                         <!-- Аккордеон-секция вкладки. -->
                         <vbox id="tabIteractionSection"
@@ -1441,7 +1445,7 @@
                     <tab id="tabResume"
                          caption="msg://msgTabResume"
                          spacing="true"
-                         margin="true"
+                         margin="false"
                          expand="tabResumeSection">
                         <!-- Аккордеон-секция вкладки. -->
                         <vbox id="tabResumeSection"
@@ -1554,7 +1558,7 @@
                     <tab id="commentsTab"
                          caption="msg://msgComments"
                          spacing="true"
-                         margin="true"
+                         margin="false"
                          expand="tabCommentsSection">
                         <!-- Аккордеон-секция вкладки. -->
                         <vbox id="tabCommentsSection"
@@ -1577,36 +1581,28 @@
 
                                 <!-- Вертикальный контейнер: лента над панелью отправки. -->
                                 <vbox id="tabCommentsVbox" spacing="true" width="100%" height="100%"
-                                      expand="jobCandidateCommentsDataGrid">
-                                    <!-- Лента комментариев: рендер диалога, скрытые служебные колонки. -->
-                                    <dataGrid id="jobCandidateCommentsDataGrid"
-                                              dataContainer="interactionCommentDc"
-                                              bodyRowHeight="80px"
-                                              headerVisible="false"
-                                              reorderingAllowed="false"
-                                              textSelectionEnabled="false"
-                                              selectionMode="NONE"
-                                              stylename="no-horizontal-lines no-stripes no-vertical-lines borderless job-candidate-table"
-                                              sortable="false"
-                                              width="100%" height="100%">
-                                        <columns>
-                                            <!-- Комментарий целиком (кастомный компонент-рендер диалога). -->
-                                            <column id="commentDialog" sortable="false">
-                                                <componentRenderer/>
-                                            </column>
-                                            <!-- Дата (служебная, скрыта; используется для сортировки). -->
-                                            <column id="dateIteraction" sortable="true" sort="DESCENDING" width="80px"
-                                                    collapsed="true" property="dateIteraction"/>
-                                            <!-- Рекрутер (служебная, скрыта). -->
-                                            <column id="recrutier" collapsed="true" width="250px" property="recrutier"/>
-                                            <!-- Текст комментария (служебная, скрыта). -->
-                                            <column id="comment" collapsed="true" sortable="false" property="comment"/>
-                                        </columns>
-                                    </dataGrid>
+                                      expand="jobCandidateCommentsScroll">
+                                    <!-- Лента комментариев: вертикальный список пузырей с высотой по содержимому.
+                                         dataGrid (Vaadin Grid) не поддерживает авто-высоту строк — кастомные пузыри
+                                         разной высоты перекрывали соседние строки (фиксированная rowHeight 30px),
+                                         поэтому лента выведена в scrollBox + vbox и заполняется контроллером. -->
+                                    <scrollBox id="jobCandidateCommentsScroll"
+                                               orientation="vertical"
+                                               scrollBars="vertical"
+                                               width="100%"
+                                               height="100%">
+                                        <!-- Контейнер пузырей комментариев (заполняется в renderComments()). -->
+                                        <vbox id="jobCandidateCommentsContainer"
+                                              width="100%"
+                                              spacing="true"/>
+                                    </scrollBox>
                                     <!-- Панель отправки комментария: текст, вакансия, кнопка «Отправить». -->
                                     <groupBox stylename="job-candidate-card edit-card" spacing="true" width="100%">
-                                        <!-- Поле ввода текста нового комментария. -->
-                                        <textField id="chatMessageTextField" stylename="edit-form-control" width="100%"/>
+                                        <!-- Поле ввода текста нового комментария (Enter — подтверждение отправки). -->
+                                        <textField id="chatMessageTextField"
+                                                   stylename="edit-form-control"
+                                                   width="100%"
+                                                   inputPrompt="msg://msgInputComment"/>
                                         <!-- Ряд: выбор вакансии и кнопка отправки. -->
                                         <hbox width="100%" expand="vacancyPopupPickerField" spacing="true">
                                             <!-- Вакансия, к которой относится комментарий (из открытых). -->
@@ -1637,7 +1633,7 @@
                     <tab id="tabHistory"
                          caption="msg://msgTabHistory"
                          spacing="true"
-                         margin="true">
+                         margin="false">
                         <!-- Аккордеон-секция вкладки. -->
                         <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section edit-accordion-section">
                             <!-- Заголовок секции. -->
@@ -1651,8 +1647,9 @@
                                 <groupBox caption="msg://msgRecordData"
                                           stylename="light job-candidate-card edit-card"
                                           spacing="true" width="100%">
-                                    <!-- Сетка служебных полей записи. -->
-                                    <grid spacing="true" width="100%">
+                                    <!-- Сетка служебных полей записи (подписи выровнены с колонкой
+                                         подписей формы через общий класс job-candidate-form-grid). -->
+                                    <grid spacing="true" width="100%" stylename="job-candidate-form-grid">
                                         <columns count="2"/>
                                         <rows>
                                             <row>
