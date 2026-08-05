@@ -778,6 +778,23 @@
       white-space: normal;
     }
 
+    /* Чекбоксы формы: подпись по типографике подписей полей (как caption Грейда —
+     * w600, lh 17px), галочка выровнена по вертикали с текстом подписи. */
+    .open-position-editor .v-checkbox label {
+      font-weight: 600 !important;
+      line-height: 17px !important;
+    }
+
+    .open-position-editor .v-checkbox {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .open-position-editor .v-checkbox input {
+      position: static !important;
+      margin: 0 4px 0 0;
+    }
+
     /* Вложенные HBox секции «Проект, Компания, Тип»: на узких viewport строка
      * чекбоксов фильтров проектов переполнялась и наезжала на поле департамента.
      * flex-wrap переносит слоты на новую строку только при нехватке ширины;
