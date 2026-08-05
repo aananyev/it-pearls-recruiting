@@ -1,15 +1,11 @@
 @import "hunttech-modern-dark-defaults";
 @import "com.company.hunttech/hunttech-modern-dark-defaults";
-
-/*
- * Пользовательская тема CUBA не наследует Halo автоматически.
- * Импорт и @include halo обязательны: без них браузер получает только
- * локальные partial-файлы и отображает сырой HTML/Vaadin DOM.
- */
+/* Пользовательская тема CUBA не наследует Halo автоматически: импорт и
+   @include halo обязательны, иначе главный экран рендерится сырым HTML
+   (меню теряет layout, логотип растягивается). */
 @import "../halo/halo";
 @import "app-components";
 @import "com.company.hunttech/hunttech-modern-dark-ext";
-@import "com.company.hunttech/modern-theme-components";
 @import "com.company.hunttech/chat-style.css";
 @import "com.company.hunttech/user-ai-profile";
 @import "com.company.hunttech/settings-window-sections";
@@ -28,15 +24,15 @@
 @import "com.company.hunttech/candidate-cv-editor";
 @import "com.company.hunttech/iteraction-list-reference-finish";
 @import "com.company.hunttech/iteraction-list-visual-alignment";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 .hunttech-modern-dark {
-  // Сначала восстанавливается полный визуальный контракт стандартной темы CUBA.
+  // Восстановление полного визуального контракта стандартной темы CUBA.
   @include halo;
 
-  // Затем подключаются сгенерированные компоненты и локальные слои HRM HuntTech.
   @include app_components;
+
   @include com_company_hunttech-hunttech-modern-dark-ext;
-  @include modern-theme-components;
   @include user-ai-profile;
   @include settings-window-sections;
   @include main-screen-background-settings;
@@ -54,4 +50,9 @@
   @include candidate-cv-editor-theme;
   @include iteraction-list-reference-finish-theme;
   @include iteraction-list-visual-alignment-theme;
+
+  // Вариант 5 (современный тёмный): табличные и текстовые компоненты.
+  // Импорт в конце корневого селектора — после всех include, чтобы при
+  // равной специфичности перебивать существующие правила ext-файла темы.
+  @import "com.company.hunttech/modern-dark-component-style-v5";
 }

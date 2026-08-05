@@ -1,0 +1,504 @@
+/* hunttech-modern-dark — вариант 5 (современный тёмный).
+   Локальная стилизация DataGrid, Table, TreeTable, TextArea и RichTextArea.
+   Файл импортируется ВНУТРЬ корневого селектора .hunttech-modern-dark { } в styles.scss,
+   поэтому собственный корневой селектор здесь НЕ объявляется (иначе двойной префикс).
+   Палитра и геометрия — по референсам 01..05_hunttech-modern-dark_v5_*.png (1600x1000). */
+
+/* Токены варианта 5 */
+$md5-app-bg: #151a20;
+$md5-surface: #1c232c;
+$md5-surface-2: #232c37;
+$md5-elevated: #2a3440;
+$md5-header: #26303b;
+$md5-text: #e8edf3;
+$md5-text-2: #aeb7c2;
+$md5-border: #33404d;
+$md5-divider: #2f3944;
+$md5-hover: #222c37;
+$md5-selected: #2a3440;
+$md5-accent: #ffb11b;
+$md5-focus: #7ea7d8;
+$md5-invalid: #e26b63;
+$md5-readonly-bg: #232c37;
+$md5-disabled-bg: #1a2129;
+$md5-disabled-text: rgba(232, 237, 243, 0.4);
+$md5-zebra: #1c232c; /* в референсе зебры нет — строки однородны */
+$md5-scroll-track: #151a20;
+$md5-scroll-thumb: #33404d;
+$md5-scroll-thumb-hover: #3d4b5a;
+
+/* ── DataGrid (.v-grid) ───────────────────────────────── */
+  .v-grid {
+  background: $md5-surface;
+  border: 1px solid $md5-border;
+  border-radius: 6px;
+  color: $md5-text;
+}
+  .v-grid-header .v-grid-cell {
+  background: $md5-header;
+  color: $md5-text;
+  font-weight: 600;
+  border-bottom: 1px solid $md5-border;
+  border-right: 1px solid $md5-divider;
+  padding: 0 12px;
+  line-height: 40px;
+}
+  .v-grid-header .v-grid-cell:last-child {
+  border-right: none;
+}
+  .v-grid-sort-indicator {
+  color: $md5-focus;
+}
+  .v-grid-column-resize-handle {
+  background: $md5-scroll-thumb-hover;
+}
+  .v-grid-row {
+  background: $md5-surface;
+  border-bottom: 1px solid $md5-divider;
+  color: $md5-text;
+}
+  .v-grid-row-stripe {
+  background: $md5-zebra;
+}
+  .v-grid-row:hover {
+  background: $md5-hover;
+}
+  .v-grid-row-selected {
+  background: $md5-selected;
+  /* Левая янтарная акцентная линия 6px — по референсу 01 */
+  box-shadow: inset 6px 0 0 $md5-accent;
+}
+  .v-grid-row-selected:hover {
+  background: #2e3a47;
+}
+  .v-grid-row-focused {
+  box-shadow: inset 0 0 0 2px $md5-focus;
+}
+  .v-grid-cell {
+  padding: 0 12px;
+  line-height: 38px;
+}
+  .v-grid-cell-content {
+  line-height: 38px;
+}
+  .v-grid-cell-focused {
+  box-shadow: inset 0 0 0 2px $md5-focus;
+}
+  .v-grid-editor-cells {
+  background: $md5-surface;
+}
+  .v-grid-editor-cell {
+  padding: 4px 8px;
+}
+  .v-grid-footer .v-grid-cell {
+  background: $md5-surface-2;
+  border-top: 1px solid $md5-border;
+  color: $md5-text-2;
+  font-weight: 600;
+}
+  .v-grid-empty {
+  color: $md5-text-2;
+}
+  .v-grid-scroller-vertical,
+  .v-grid-scroller-horizontal {
+  background: $md5-surface;
+}
+  .v-grid-scroller-vertical::-webkit-scrollbar,
+  .v-grid-scroller-horizontal::-webkit-scrollbar,
+  .v-grid-body::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+  .v-grid-scroller-vertical::-webkit-scrollbar-track,
+  .v-grid-scroller-horizontal::-webkit-scrollbar-track,
+  .v-grid-body::-webkit-scrollbar-track {
+  background: $md5-scroll-track;
+}
+  .v-grid-scroller-vertical::-webkit-scrollbar-thumb,
+  .v-grid-scroller-horizontal::-webkit-scrollbar-thumb,
+  .v-grid-body::-webkit-scrollbar-thumb {
+  background: $md5-scroll-thumb;
+  border-radius: 5px;
+}
+  .v-grid-scroller-vertical::-webkit-scrollbar-thumb:hover,
+  .v-grid-scroller-horizontal::-webkit-scrollbar-thumb:hover,
+  .v-grid-body::-webkit-scrollbar-thumb:hover {
+  background: $md5-scroll-thumb-hover;
+}
+
+/* ── Table (Vaadin Table) ──────────────────────────────── */
+  .v-table {
+  background: $md5-surface;
+  border: 1px solid $md5-border;
+  border-radius: 6px;
+  color: $md5-text;
+}
+  .v-table-header-wrap {
+  background: $md5-header;
+  border-bottom: 1px solid $md5-border;
+}
+  .v-table-caption-container {
+  color: $md5-text;
+  font-weight: 600;
+  padding: 0 12px;
+  line-height: 40px;
+}
+  .v-table-resizer {
+  border-right: 1px solid $md5-divider;
+}
+  .v-table-sort-indicator {
+  color: $md5-focus;
+}
+  .v-table-body {
+  background: $md5-surface;
+}
+  .v-table-row,
+  .v-table-row-odd {
+  background: $md5-surface;
+  border-bottom: 1px solid $md5-divider;
+}
+  .v-table-row-odd {
+  background: $md5-zebra;
+}
+  .v-table-row:hover {
+  background: $md5-hover;
+}
+  .v-table-row-selected {
+  background: $md5-selected;
+  box-shadow: inset 6px 0 0 $md5-accent;
+}
+  .v-table-row-selected:hover {
+  background: #2e3a47;
+}
+  .v-table-cell-content {
+  padding: 0 12px;
+  line-height: 38px;
+}
+  .v-table-focus-slot-left,
+  .v-table-focus-slot-right {
+  box-shadow: inset 0 0 0 2px $md5-focus;
+}
+  .v-table-footer-wrap {
+  background: $md5-surface-2;
+  border-top: 1px solid $md5-border;
+  color: $md5-text-2;
+}
+  .v-table-footer-container {
+  font-weight: 600;
+}
+  .v-table-body::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+  .v-table-body::-webkit-scrollbar-track {
+  background: $md5-scroll-track;
+}
+  .v-table-body::-webkit-scrollbar-thumb {
+  background: $md5-scroll-thumb;
+  border-radius: 5px;
+}
+  .v-table-body::-webkit-scrollbar-thumb:hover {
+  background: $md5-scroll-thumb-hover;
+}
+
+/* ── TreeTable ─────────────────────────────────────────── */
+/* TreeDataGrid (.v-treegrid) — рендер <treeDataGrid> в проекте */
+  .v-treegrid {
+  background: $md5-surface;
+  border: 1px solid $md5-border;
+  border-radius: 6px;
+  color: $md5-text;
+}
+  .v-treegrid-header .v-treegrid-cell {
+  background: $md5-header;
+  color: $md5-text;
+  font-weight: 600;
+  border-bottom: 1px solid $md5-border;
+  border-right: 1px solid $md5-divider;
+  padding: 0 12px;
+  line-height: 40px;
+}
+  .v-treegrid-header .v-treegrid-cell:last-child {
+  border-right: none;
+}
+  .v-treegrid-sort-indicator {
+  color: $md5-focus;
+}
+  .v-treegrid-row {
+  background: $md5-surface;
+  border-bottom: 1px solid $md5-divider;
+}
+  .v-treegrid-row-stripe {
+  background: $md5-zebra;
+}
+  .v-treegrid-row:hover {
+  background: $md5-hover;
+}
+  .v-treegrid-row-selected {
+  background: $md5-selected;
+  box-shadow: inset 6px 0 0 $md5-accent;
+}
+  .v-treegrid-row-selected:hover {
+  background: #2e3a47;
+}
+  .v-treegrid-row-focused {
+  box-shadow: inset 0 0 0 2px $md5-focus;
+}
+  .v-treegrid-cell {
+  padding: 0 12px;
+  line-height: 38px;
+}
+  .v-treegrid-cell-content {
+  line-height: 38px;
+}
+  .v-treegrid-expander {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  color: $md5-text-2;
+}
+  .v-treegrid-expander:hover {
+  color: $md5-focus;
+}
+  .v-treegrid-cell-focused {
+  box-shadow: inset 0 0 0 2px $md5-focus;
+}
+  .v-treegrid-scroller-vertical::-webkit-scrollbar,
+  .v-treegrid-scroller-horizontal::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+  .v-treegrid-scroller-vertical::-webkit-scrollbar-track,
+  .v-treegrid-scroller-horizontal::-webkit-scrollbar-track {
+  background: $md5-scroll-track;
+}
+  .v-treegrid-scroller-vertical::-webkit-scrollbar-thumb,
+  .v-treegrid-scroller-horizontal::-webkit-scrollbar-thumb {
+  background: $md5-scroll-thumb;
+  border-radius: 5px;
+}
+/* CUBA TreeTable (<treeTable>) — Vaadin Tree (.v-tree) */
+  .v-tree {
+  background: $md5-surface;
+  border: 1px solid $md5-border;
+  border-radius: 6px;
+  color: $md5-text;
+}
+  .v-tree-node-caption {
+  line-height: 34px;
+  padding: 0 8px;
+  border-radius: 4px;
+}
+  .v-tree-node-caption:hover {
+  background: $md5-hover;
+}
+  .v-tree-node-selected > .v-tree-node-caption {
+  background: $md5-selected;
+  box-shadow: inset 6px 0 0 $md5-accent;
+  color: $md5-text;
+}
+  .v-tree-node-focused > .v-tree-node-caption {
+  box-shadow: inset 0 0 0 2px $md5-focus;
+}
+  .v-tree-node-children {
+  border-left: 1px solid $md5-divider;
+}
+  .v-tree-expander {
+  color: $md5-text-2;
+}
+  .v-tree-expander:hover {
+  color: $md5-focus;
+}
+  .v-tree::-webkit-scrollbar {
+  width: 10px;
+}
+  .v-tree::-webkit-scrollbar-track {
+  background: $md5-scroll-track;
+}
+  .v-tree::-webkit-scrollbar-thumb {
+  background: $md5-scroll-thumb;
+  border-radius: 5px;
+}
+
+/* ── TextArea ──────────────────────────────────────────── */
+/* Vaadin 8.4 рендерит TextArea как <textarea class="v-textarea"> — без обёртки */
+  .v-textarea {
+  background: $md5-surface;
+  border: 1px solid $md5-border;
+  border-radius: 6px;
+  color: $md5-text;
+  min-height: 120px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  resize: both;
+  overflow: auto;
+  &::placeholder {
+    color: $md5-text-2;
+  }
+  &:hover {
+    border-color: $md5-scroll-thumb-hover;
+  }
+  &:focus,
+  &:focus-within {
+    border-color: $md5-focus;
+    box-shadow: 0 0 0 2px rgba(126, 167, 216, 0.35);
+  }
+  &.v-textarea-error {
+    border-color: $md5-invalid;
+    box-shadow: 0 0 0 2px rgba(226, 107, 99, 0.25);
+  }
+  &.v-readonly {
+    background: $md5-readonly-bg;
+    border-color: $md5-divider;
+    color: $md5-text;
+  }
+  &.v-disabled {
+    background: $md5-disabled-bg;
+    color: $md5-disabled-text;
+    opacity: 0.8;
+  }
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background: $md5-scroll-track;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $md5-scroll-thumb;
+    border-radius: 5px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: $md5-scroll-thumb-hover;
+  }
+}
+
+/* ── RichTextArea ──────────────────────────────────────── */
+  .v-richtextarea {
+  background: $md5-surface;
+  border: 1px solid $md5-border;
+  border-radius: 6px;
+  color: $md5-text;
+  overflow: hidden;
+
+  .gwt-RichTextToolbar {
+    background: $md5-surface-2;
+    border-bottom: 1px solid $md5-border;
+    padding: 4px 6px;
+    min-height: 40px;
+  }
+  .gwt-RichTextToolbar .gwt-PushButton,
+  .gwt-RichTextToolbar .gwt-ToggleButton {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: $md5-text;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 2px 4px;
+    cursor: pointer;
+    line-height: 28px;
+    text-align: center;
+  }
+  .gwt-RichTextToolbar .gwt-PushButton:hover,
+  .gwt-RichTextToolbar .gwt-ToggleButton:hover {
+    background: $md5-hover;
+    border-color: $md5-border;
+    color: $md5-text;
+  }
+  .gwt-RichTextToolbar .gwt-ToggleButton-down {
+    background: $md5-elevated;
+    border-color: $md5-focus;
+    color: $md5-text;
+  }
+  .gwt-RichTextArea {
+    background: $md5-surface;
+    color: $md5-text;
+    padding: 10px 12px;
+  }
+  &.v-richtextarea-readonly {
+    background: $md5-readonly-bg;
+  }
+  &.v-richtextarea-error {
+    border-color: $md5-invalid;
+    box-shadow: 0 0 0 2px rgba(226, 107, 99, 0.25);
+  }
+  &.v-disabled {
+    background: $md5-disabled-bg;
+    opacity: 0.8;
+  }
+  .gwt-RichTextArea::-webkit-scrollbar {
+    width: 10px;
+  }
+  .gwt-RichTextArea::-webkit-scrollbar-track {
+    background: $md5-scroll-track;
+  }
+  .gwt-RichTextArea::-webkit-scrollbar-thumb {
+    background: $md5-scroll-thumb;
+    border-radius: 5px;
+  }
+}
+
+/* ── Overrides vs hunttech-modern-dark-ext ─────────────── */
+/* Повышенная специфичность (!important) требуется из-за штатных селекторов
+   ext-файла темы с !important (строки .v-grid* / .v-table*). Вариант 5
+   задаёт тёмную референсную палитру поверх них. */
+  .v-grid {
+  border: 1px solid $md5-border !important;
+  border-radius: 6px !important;
+  background: $md5-surface !important;
+}
+  .v-grid-header .v-grid-cell {
+  background: $md5-header !important;
+  color: $md5-text !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid $md5-border !important;
+}
+  .v-grid-row {
+  border-bottom: 1px solid $md5-divider !important;
+}
+  .v-grid-row:hover {
+  background: $md5-hover !important;
+}
+  .v-grid-row-selected {
+  background: $md5-selected !important;
+  box-shadow: inset 6px 0 0 $md5-accent !important;
+}
+  .v-grid-row-selected:hover {
+  background: #2e3a47 !important;
+}
+  .v-table {
+  border: 1px solid $md5-border !important;
+  background: $md5-surface !important;
+}
+  .v-table-header-wrap {
+  border-bottom: 1px solid $md5-border !important;
+  background: $md5-header !important;
+}
+  .v-table-caption-container {
+  color: $md5-text !important;
+  font-weight: 600 !important;
+  padding: 0 12px !important;
+}
+  .v-table-cell-content {
+  padding: 0 12px !important;
+  line-height: 38px !important;
+}
+  .v-table-row,
+  .v-table-row-odd {
+  background: $md5-surface !important;
+  border-bottom: 1px solid $md5-divider !important;
+}
+  .v-table-row-odd {
+  background: $md5-zebra !important;
+}
+  .v-table-row:hover {
+  background: $md5-hover !important;
+}
+  .v-table-row-selected {
+  background: $md5-selected !important;
+  box-shadow: inset 6px 0 0 $md5-accent !important;
+}
+  .v-table-row-selected:hover {
+  background: #2e3a47 !important;
+}
