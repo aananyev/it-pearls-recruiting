@@ -2178,7 +2178,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe("priorityField")
     /** Смена приоритета → авто-установка даты закрытия через неделю. */
     public void onPriorityFieldValueChange(HasValue.ValueChangeEvent<Integer> event) {
-        if (event.getValue().equals(OpenPositionPriority.LOW.getId())) {
+        // event.getValue() может быть null (onSignDraftCheckBoxValueChange снимает
+        // «черновик» через priorityField.setValue(null)) — защита от NPE.
+        if (event.getValue() != null && event.getValue().equals(OpenPositionPriority.LOW.getId())) {
             setClosingWeek();
         }
 
