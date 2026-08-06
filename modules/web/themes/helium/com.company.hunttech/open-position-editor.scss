@@ -1,0 +1,1372 @@
+/*
+ * OpenPositionEdit — локальная фирменная адаптация общего edit-* UI API.
+ *
+ * Геометрия и типовые роли задаются edit-screen-shared-styles; здесь находятся
+ * только тёмная sidebar HRM HuntTech, эталонная label-навигация IteractionListEdit,
+ * responsive-компоновка карточек/полей, варианты таблиц и RichTextArea, footer и
+ * containment внутри локального корневого класса без глобальных Vaadin-селекторов.
+ * Все селекторы ограничены namespace .open-position-editor.
+ */
+@mixin open-position-editor-theme {
+  .open-position-editor {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    color: $v-font-color;
+    background: mix($v-app-background-color, $v-panel-background-color, 86%);
+    overflow: hidden;
+
+    .edit-screen-layout,
+    .open-position-editor,
+    .edit-sidebar,
+    .edit-workspace,
+    .edit-tabs,
+    .edit-accordion-section,
+    .edit-form-control,
+    .open-position-editor-field-row,
+    .open-position-editor-cards-row {
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    /*
+     * Sidebar HRM HuntTech. Ширина 270px (250px при viewport до 1366px)
+     * задаётся shared-слоем edit-screen-shared-styles и локально не
+     * переопределяется (решение арбитра 9-3).
+     */
+    .edit-sidebar {
+      padding: 11px 10px 10px;
+      color: #f8fafc;
+      background-color: #172638 !important;
+      background-image: linear-gradient(180deg, #172638 0%, #132130 56%, #0f1b28 100%) !important;
+      border-right: 1px solid rgba(15, 23, 42, 0.72);
+      box-shadow: 5px 0 18px rgba(15, 23, 42, 0.20);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+    }
+
+    .edit-sidebar > .v-slot {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .edit-sidebar > .v-spacing {
+      height: 9px !important;
+    }
+
+    /*
+     * Visual-stage: OvaFallbackImage имеет собственную реализацию размера,
+     * поэтому явная область 96px не даёт названию подняться под логотип.
+     */
+    .edit-sidebar-visual {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      min-height: 0 !important;
+      padding: 10px 12px 11px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .edit-sidebar-visual > .v-slot {
+      box-sizing: border-box;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+    }
+
+    .open-position-editor-logo-box {
+      box-sizing: border-box;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 96px !important;
+      min-height: 96px !important;
+      max-height: 96px !important;
+      margin: 0 0 4px !important;
+      overflow: visible !important;
+    }
+
+    .open-position-editor-logo-box > .v-slot {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      margin: 0 !important;
+      flex: 0 0 auto;
+    }
+
+    .open-position-editor-logo-box .v-image,
+    .open-position-editor-logo-box .v-image img,
+    .open-position-editor-logo-box .v-image-element {
+      box-sizing: border-box;
+      width: 88px !important;
+      height: 88px !important;
+      min-width: 88px !important;
+      min-height: 88px !important;
+      max-width: 88px !important;
+      max-height: 88px !important;
+      border-radius: 50% !important;
+      object-fit: contain !important;
+      background: #ffffff;
+    }
+
+    .open-position-editor-logo-box .v-image {
+      display: block;
+      margin: 0 auto;
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.92);
+      box-shadow: 0 7px 20px rgba(0, 0, 0, 0.24);
+    }
+
+    .edit-sidebar-identity {
+      box-sizing: border-box;
+      position: relative;
+      z-index: 2;
+      width: 100% !important;
+      min-width: 0 !important;
+      padding: 7px 2px 1px !important;
+      text-align: left;
+    }
+
+    /*
+     * Название вакансии: clamp до трёх строк, полный текст остаётся
+     * в значении компонента (значение формирует Java, не меняется).
+     */
+    .edit-sidebar-title,
+    .edit-sidebar-title.v-label,
+    .open-position-editor-title-clamp {
+      display: -webkit-box !important;
+      width: 100% !important;
+      max-height: 57px !important;
+      margin: 0 !important;
+      overflow: hidden !important;
+      color: #ffb11b !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 19px !important;
+      text-align: left !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+    }
+
+    .edit-sidebar-subtitle,
+    .edit-sidebar-subtitle.v-label {
+      width: 100% !important;
+      padding-top: 4px;
+      color: rgba(248, 250, 252, 0.72) !important;
+      font-size: 11px !important;
+      line-height: 17px !important;
+      text-align: left !important;
+      white-space: normal !important;
+    }
+
+    /*
+     * Label-навигация: эталон IteractionListEdit 1:1 — общие классы label-nav-*,
+     * локально только тёмная палитра sidebar (цвета и геометрия эталона).
+     */
+    .label-navigation {
+      padding: 7px 0 3px;
+      border-top-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .label-nav-title,
+    .v-label-label-nav-title {
+      padding: 6px 10px 8px !important;
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 11px !important;
+      line-height: 16px !important;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: normal !important;
+      opacity: 1 !important;
+    }
+
+    .label-nav-item,
+    .v-button-label-nav-item,
+    .v-label-label-nav-item {
+      min-height: 27px !important;
+      padding: 3px 10px !important;
+      color: rgba(248, 250, 252, 0.82) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
+      text-align: left !important;
+      white-space: normal !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-left: 3px solid transparent !important;
+      border-radius: 0 5px 5px 0 !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+    }
+
+    .label-nav-item .v-button-caption,
+    .v-button-label-nav-item .v-button-caption {
+      display: block;
+      width: 100%;
+      color: inherit !important;
+      text-align: left !important;
+      white-space: normal !important;
+    }
+
+    .label-nav-item:hover,
+    .label-nav-item:focus,
+    .v-button-label-nav-item:hover,
+    .v-button-label-nav-item:focus {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .label-nav-item-active,
+    .v-button-label-nav-item-active,
+    .v-label-label-nav-item-active {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.12) !important;
+      border-left-color: #ffb11b !important;
+    }
+
+    /*
+     * Сводка «Контекст вакансии»: компактная карточка с вторичной
+     * типографикой captions и акцентными значениями.
+     */
+    .edit-sidebar-summary {
+      padding: 9px 10px;
+      color: #f8fafc;
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+    }
+
+    .open-position-editor-summary-grid .v-label {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .open-position-editor-summary-caption,
+    .open-position-editor-summary-caption.v-label {
+      /* Sidebar-подписи по эталону IteractionListEdit (sidebar-caption):
+       * 12px/600, rgba(248,250,252,0.62), line-height 18px, letter-spacing 0.04em. */
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      line-height: 18px !important;
+      letter-spacing: 0.04em;
+      padding-top: 2px;
+    }
+
+    .open-position-editor-summary-value,
+    .open-position-editor-summary-value.v-label {
+      display: -webkit-box !important;
+      max-height: 32px !important;
+      overflow: hidden !important;
+      color: #f8fafc !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      line-height: 16px !important;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    /* Блок срочности вакансии (копия IteractionListEdit): подблок под наименованием —
+       светофор приоритета + значение и формат работы (удалённая/офисная/гибрид). */
+    .open-position-editor-priority-summary {
+      width: 100% !important;
+      min-width: 0;
+      padding-top: 2px;
+    }
+
+    .open-position-editor-priority-value-row {
+      width: 100% !important;
+      min-width: 0;
+    }
+
+    .open-position-editor-priority-value-row > .v-slot {
+      min-width: 0 !important;
+    }
+
+    .open-position-editor-priority-image {
+      max-width: 20px;
+      max-height: 26px;
+    }
+
+    .open-position-editor-priority-value,
+    .open-position-editor-priority-value.v-label {
+      display: block;
+      width: 100% !important;
+      min-width: 0;
+      color: #f8fafc !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      line-height: 17px !important;
+      white-space: normal !important;
+    }
+
+    .edit-sidebar-warning,
+    .edit-sidebar-warning.v-label {
+      box-sizing: border-box;
+      width: 100% !important;
+      padding: 6px 8px;
+      color: #ffd27a !important;
+      font-size: 11px !important;
+      line-height: 16px !important;
+      white-space: normal !important;
+      background: rgba(255, 177, 27, 0.10);
+      border: 1px solid rgba(255, 177, 27, 0.28);
+      border-radius: 6px;
+    }
+
+    .edit-sidebar .v-button {
+      transition: background-color 0.15s ease, color 0.15s ease,
+                  border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    /* Workspace: единая вертикальная иерархия toolbar → tabs → scroll → footer. */
+    .edit-workspace {
+      background: mix($v-app-background-color, $v-panel-background-color, 86%);
+      overflow: hidden;
+    }
+
+    .edit-toolbar {
+      position: relative;
+      z-index: 2;
+      min-height: 58px;
+      padding: 10px 22px;
+      background: $v-panel-background-color;
+      border-bottom: 1px solid rgba($v-font-color, 0.13);
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05), inset 0 -2px 0 rgba($v-selection-color, 0.14);
+    }
+
+    .edit-toolbar-title,
+    .edit-toolbar-title.v-label {
+      font-size: 20px !important;
+      line-height: 27px !important;
+    }
+
+    .edit-toolbar-description,
+    .edit-toolbar-description.v-label {
+      color: mix($v-font-color, $v-panel-background-color, 58%) !important;
+      font-size: 12px !important;
+      line-height: 18px !important;
+    }
+
+    /*
+     * Tab bar: 12 вкладок, строка 48px, горизонтальный overflow tabcontainer,
+     * captions без ellipsis (эталон preview).
+     */
+    .open-position-editor-tabs > .v-tabsheet-tabcontainer {
+      width: 100% !important;
+      padding: 0 12px;
+      background: $v-panel-background-color !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.15);
+      overflow: hidden;
+    }
+
+    .edit-tabs > .v-tabsheet-tabcontainer {
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+    }
+
+    .edit-tabs .v-tabsheet-tabitem,
+    .edit-tabs .v-tabsheet-tabitem-selected,
+    .edit-tabs .v-tabsheet-tabitemcell,
+    .edit-tabs .v-caption {
+      width: auto !important;
+      max-width: none !important;
+    }
+
+    .edit-tabs .v-caption {
+      white-space: nowrap !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+    }
+
+    .open-position-editor-tabs .v-tabsheet-tabs,
+    .open-position-editor-tabs .v-tabsheet-tabitem,
+    .open-position-editor-tabs .v-tabsheet-tabitem-selected {
+      height: 48px;
+      max-width: none !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .open-position-editor-tabs .v-tabsheet-tabitemcell {
+      max-width: none !important;
+    }
+
+    .open-position-editor-tabs .v-caption {
+      box-sizing: border-box;
+      height: 48px;
+      width: auto !important;
+      max-width: none !important;
+      padding: 0 10px;
+      color: mix($v-font-color, $v-panel-background-color, 86%) !important;
+      font-size: 12px !important;
+      font-weight: 600;
+      line-height: 48px;
+      white-space: nowrap !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+      background: transparent !important;
+      border: 0 !important;
+    }
+
+    .open-position-editor-tabs .v-tabsheet-tabitem:hover .v-caption {
+      color: $v-selection-color !important;
+    }
+
+    .open-position-editor-tabs .v-tabsheet-tabitem-selected .v-caption {
+      color: $v-selection-color !important;
+      border-bottom: 3px solid $v-selection-color !important;
+    }
+
+    .open-position-editor-tabs .v-tabsheet-content {
+      width: 100% !important;
+      height: calc(100% - 49px) !important;
+      padding: 14px 16px 18px;
+      background: mix($v-app-background-color, $v-panel-background-color, 86%) !important;
+      overflow: auto;
+    }
+
+    .open-position-editor-tabs .v-tabsheet-tabsheetpanel {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0;
+    }
+
+    .edit-workspace-scroll {
+      box-sizing: border-box;
+      padding: 14px 16px 22px;
+      overflow-x: hidden !important;
+      background: transparent;
+    }
+
+    .edit-workspace-content {
+      box-sizing: border-box;
+      width: 100% !important;
+      max-width: 1480px !important;
+      height: auto !important;
+      margin: 0 auto;
+    }
+
+    /*
+     * Accordion-карточки: радиус 8px, caption 44px, внутренний padding
+     * 17–19px, лёгкая тень уровня карточки.
+     */
+    .edit-accordion-section {
+      margin-bottom: 12px;
+      background: $v-panel-background-color;
+      border-color: rgba($v-font-color, 0.13);
+      border-radius: 8px;
+      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.055);
+    }
+
+    .edit-accordion-section .v-panel-caption {
+      min-height: 44px;
+      padding: 10px 15px;
+      /* Заголовки секций по эталону IteractionListEdit (flat-section-title):
+       * mix 90%, 16px/700, line-height 23px. */
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      line-height: 23px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 58%);
+      border-left: 3px solid $v-selection-color;
+      border-bottom: 1px solid rgba($v-font-color, 0.12);
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .edit-accordion-section .v-panel-caption:hover {
+      background: mix($v-app-background-color, $v-panel-background-color, 50%);
+    }
+
+    .edit-accordion-section .v-panel-content {
+      box-sizing: border-box;
+      padding: 17px 18px 19px;
+      background: $v-panel-background-color;
+    }
+
+    .open-position-editor-primary-section {
+      border-left: none;
+    }
+
+    /* Вложенный уровень иерархии: «Настройки вакансии» внутри карточки идентификаторов. */
+    .open-position-editor-subsection {
+      margin: 6px 0 2px;
+      background: mix($v-app-background-color, $v-panel-background-color, 45%);
+      border-color: rgba($v-font-color, 0.10);
+      border-radius: 7px;
+      box-shadow: none;
+    }
+
+    .open-position-editor-subsection .v-panel-caption {
+      min-height: 38px;
+      padding: 8px 12px 8px 10px;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 52%);
+      border-left: 3px solid rgba($v-selection-color, 0.55);
+    }
+
+    .open-position-editor-subsection .v-panel-content {
+      padding: 13px 14px 15px;
+      background: mix($v-app-background-color, $v-panel-background-color, 32%);
+    }
+
+    /* Ряды карточек: вертикальный поток карточек на всю ширину вкладки (требования B/D
+     * контракта: «Идентификаторы и статус» над «Командой / Вакансией», «Количество
+     * персонала» над «Заработной платой»). CUBA 7.3 рендерит детей HBox внутри
+     * обёртки v-expand, поэтому селекторы покрывают обе формы DOM. */
+    .open-position-editor-cards-row {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch;
+      flex-wrap: nowrap;
+      gap: 14px;
+      width: 100% !important;
+      height: auto !important;
+      margin: 0 0 12px;
+    }
+
+    /* Обёртка expand: в вертикальный поток, слотам — полная ширина. */
+    .open-position-editor-cards-row > .v-expand {
+      display: flex !important;
+      flex-direction: column !important;
+      flex-wrap: nowrap;
+      width: 100% !important;
+      min-width: 0 !important;
+      gap: 14px;
+    }
+
+    .open-position-editor-cards-row > .v-spacing,
+    .open-position-editor-cards-row > .v-expand > .v-spacing {
+      display: none !important;
+    }
+
+    .open-position-editor-cards-row > .v-slot,
+    .open-position-editor-cards-row > .v-expand > .v-slot {
+      box-sizing: border-box;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      flex: 0 0 auto;
+    }
+
+    .open-position-editor-cards-row > .v-slot > *,
+    .open-position-editor-cards-row > .v-expand > .v-slot > * {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    /*
+     * Responsive-строки полей: существующие HBox переводятся в flex с wrap.
+     * Инлайн-ширины legacy XML содержатся внутри строки и не создают разрывов.
+     */
+    .open-position-editor-field-row {
+      display: flex !important;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 14px;
+      width: 100% !important;
+      height: auto !important;
+      margin: 0 0 12px;
+    }
+
+    .open-position-editor-field-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .open-position-editor-field-row > .v-spacing {
+      display: none !important;
+    }
+
+    .open-position-editor-field-row > .v-slot {
+      box-sizing: border-box;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      flex: 1 1 240px;
+    }
+
+    .open-position-editor-field-row > .v-slot > * {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .open-position-editor-field-row > .v-expand {
+      box-sizing: border-box;
+      position: relative !important;
+      display: flex !important;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 11px;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      padding: 0 !important;
+    }
+
+    .open-position-editor-field-row > .v-expand > .v-spacing {
+      display: none !important;
+    }
+
+    .open-position-editor-field-row > .v-expand > .v-slot {
+      box-sizing: border-box;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      flex: 1 1 240px;
+    }
+
+    .open-position-editor-field-row > .v-expand > .v-slot > * {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    /*
+     * Варианты строк: титульный ряд, позиция+удалёнка, половинные, зарплата,
+     * широкая. CUBA 7.3 может рендерить expand-ребёнка как v-slot с классом
+     * v-expand либо как обёртку .v-expand с внутренним .v-slot — правила
+     * покрывают обе формы DOM, конфликт невозможен (применяется одна ветка).
+     */
+    .open-position-editor-row-title {
+      flex-wrap: nowrap;
+    }
+
+    /* Строка 1 блока «Вакансия»: ID (фиксирован) + название (растягивается) + грейд
+     * (средний) + кнопка «Генерировать» (компактная) — все в один ряд без переноса. */
+    .open-position-editor-row-title > .v-slot:nth-child(1),
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(1) {
+      flex: 0 1 100px;
+    }
+
+    .open-position-editor-row-title > .v-slot:nth-child(2),
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(2) {
+      flex: 5 1 160px;
+    }
+
+    .open-position-editor-row-title > .v-slot:nth-child(3),
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(3) {
+      flex: 2 1 120px;
+    }
+
+    .open-position-editor-row-title > .v-slot:nth-child(4),
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(4) {
+      flex: 0 0 auto;
+    }
+
+    /* Строка 2 титульного блока (E): грейд растягивается, кнопка «Генерировать» — компактная
+     * (flex 0 0 auto, ширина по содержимому; переопределяет width:100% общего правила строк).
+     * CUBA 7.3 рендерит детей HBox внутри обёртки v-expand — селекторы покрывают обе формы DOM. */
+    .open-position-editor-row-grade > .v-expand,
+    .open-position-editor-row-grade > .v-expand > .v-slot {
+      flex: 3 1 420px;
+    }
+
+    .open-position-editor-row-grade > .v-slot:last-child,
+    .open-position-editor-row-grade > .v-expand > .v-slot:last-child {
+      min-width: 0 !important;
+      flex: 0 0 auto !important;
+    }
+
+    .open-position-editor-row-grade > .v-slot:last-child > *,
+    .open-position-editor-row-grade > .v-expand > .v-slot:last-child > * {
+      width: auto !important;
+      min-width: 0 !important;
+    }
+
+    .open-position-editor-row-position > .v-slot:nth-child(1) {
+      flex: 2 1 380px;
+    }
+
+    .open-position-editor-row-position > .v-slot:nth-child(3) {
+      flex: 2 1 420px;
+    }
+
+    .open-position-editor-row-remote > .v-slot {
+      flex: 1 1 180px;
+    }
+
+    /* Строка 2 блока «Вакансия»: дата закрытия + приоритет + чекбоксы (черновик/эксклюзивная);
+     * flex-wrap переносит чекбоксы на вторую линию на узких viewport (1366), на широких — в ряд. */
+    .open-position-editor-row-flags > .v-slot {
+      flex: 1 1 160px;
+    }
+
+    .open-position-editor-row-half > .v-slot {
+      flex: 1 1 420px;
+    }
+
+    .open-position-editor-row-salary > .v-slot {
+      flex: 1 1 170px;
+    }
+
+    .open-position-editor-row-wide > .v-slot:first-child,
+    .open-position-editor-row-wide > .v-expand,
+    .open-position-editor-row-wide > .v-expand > .v-slot {
+      flex: 1 1 520px;
+    }
+
+    .open-position-editor-row-wide > .v-slot:last-child {
+      flex: 0 1 230px;
+    }
+
+    .open-position-editor-field-row .v-caption {
+      box-sizing: border-box;
+      max-width: 100%;
+      margin-bottom: 5px;
+      /* Подписи полей по эталону IteractionListEdit (контракт Edit-экранов):
+       * mix 72%, 13px/600, line-height = 13px x 1.35 = 17.55px. */
+      color: mix($v-font-color, $v-panel-background-color, 72%);
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 17.55px !important;
+      white-space: normal !important;
+    }
+
+    .open-position-editor-field-row .v-checkbox {
+      box-sizing: border-box;
+      min-height: 38px;
+      padding-top: 9px;
+      white-space: normal;
+    }
+
+    .open-position-editor-field-row .v-checkbox label {
+      white-space: normal;
+    }
+
+    /* Чекбоксы формы: подпись по типографике подписей полей (как caption Грейда —
+     * w600, lh 17px). Виден один стилизованный квадратик темы (label::before —
+     * рамка, label::after — галочка), на 50% крупнее тематического (20px вместо
+     * 13px), отцентрованный по вертикали текста подписи (label position:relative
+     * + padding-left 28px = 20px квадратик + 8px зазор до текста; ::before/::after
+     * absolute left:0, top:50%, translateY(-50%)). Нативный input скрыт и убран
+     * из потока (absolute + clip), иначе — либо дубль квадратиков (static), либо
+     * сдвиг подписи и квадратик у верха строки (opacity без absolute). */
+    .open-position-editor .v-checkbox label {
+      font-weight: 600 !important;
+      line-height: 17px !important;
+      /* Шрифт подписи не зависит от состояния чекбокса: legacy-логика
+       * OpenPositionEdit ставит чекбоксу «Черновик вакансии» стиль h2-gray
+       * (font-size 18px bold gray) при включённом черновике — фиксируем 12px. */
+      font-size: 12px !important;
+    }
+
+    .open-position-editor .v-checkbox {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .open-position-editor .v-checkbox input {
+      position: absolute !important;
+      clip: rect(0, 0, 0, 0) !important;
+      margin: 0 !important;
+    }
+
+    .open-position-editor .v-checkbox label {
+      position: relative;
+      /* 20px квадратик + 8px зазор до текста подписи (было 13px + 4px). */
+      padding-left: 28px;
+    }
+
+    .open-position-editor .v-checkbox label::before,
+    .open-position-editor .v-checkbox label::after {
+      position: absolute !important;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      /* Стилизованная галочка на 50% крупнее тематической (13px → 20px). */
+      width: 20px !important;
+      height: 20px !important;
+    }
+
+    .open-position-editor .v-checkbox label::after {
+      font-size: 15px !important;
+      line-height: 20px !important;
+      text-align: center !important;
+    }
+
+    /* Подписи radio-кнопок формы: та же типографика, что у чекбоксов (как caption Грейда). */
+    .open-position-editor .v-radiobutton label {
+      font-weight: 600 !important;
+      line-height: 17px !important;
+    }
+
+    /* Поля ввода текста формы: шрифт ввода как у picker-полей (Грейд) — 15px Verdana. */
+    .open-position-editor .v-textfield,
+    .open-position-editor .v-textarea textarea,
+    .open-position-editor .v-datefield input {
+      font-size: 15px !important;
+    }
+
+    /* Вложенные HBox секции «Проект, Компания, Тип»: на узких viewport строка
+     * чекбоксов фильтров проектов переполнялась и наезжала на поле департамента.
+     * flex-wrap переносит слоты на новую строку только при нехватке ширины;
+     * на широких экранах раскладка не меняется. */
+    .open-position-editor-project-section .v-horizontallayout .v-horizontallayout {
+      display: flex !important;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      width: 100% !important;
+    }
+
+    /* CUBA 7.3 оборачивает слоты HBox в единственный v-expand — flex-wrap задаётся
+     * именно ему, иначе слоты остаются inline-block и не переносятся. */
+    .open-position-editor-project-section .v-horizontallayout .v-horizontallayout > .v-expand {
+      display: flex !important;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .open-position-editor-project-section .v-horizontallayout .v-horizontallayout > .v-expand > .v-slot {
+      box-sizing: border-box;
+      width: auto !important;
+      min-width: 0 !important;
+      flex: 0 1 auto;
+    }
+
+    .open-position-editor-project-section .v-horizontallayout .v-horizontallayout > .v-expand > .v-spacing {
+      display: none !important;
+    }
+
+    /* Строка признаков «Черновик вакансии» / «Эксклюзивная вакансия»: чекбоксы
+     * не сжимаются, поэтому строка использует field-row flex (перенос при нехватке
+     * ширины вместо наезда на соседние поля). */
+    .open-position-editor-checkboxes-row .v-checkbox {
+      box-sizing: border-box;
+      min-height: 38px;
+      padding-top: 9px;
+      white-space: normal;
+    }
+
+    /* Поля: единый контракт 38px, включая picker и suggestion (прямые селекторы). */
+    .edit-form-control,
+    .edit-form-control .v-filterselect,
+    .edit-form-control .c-pickerfield-layout,
+    .edit-form-control .v-textfield,
+    .edit-form-control .v-textarea,
+    .edit-form-control .v-datefield {
+      box-sizing: border-box;
+      max-width: 100% !important;
+    }
+
+    .open-position-editor .c-suggestionfield,
+    .open-position-editor .v-filterselect-input,
+    .open-position-editor .v-textfield,
+    .open-position-editor .v-datefield-textfield {
+      height: 38px !important;
+      min-height: 38px !important;
+    }
+
+    .edit-form-control .v-textfield:focus,
+    .edit-form-control .v-textarea:focus,
+    .edit-form-control .v-filterselect:focus,
+    .edit-form-control .v-datefield:focus {
+      outline: 2px solid rgba($v-selection-color, 0.38) !important;
+      outline-offset: -1px;
+      box-shadow: none !important;
+    }
+
+    /* Платёжные секции: три колонки с переносом внутри секции деталей. */
+    .open-position-editor-payment-section .v-panel-content {
+      padding: 15px 16px 17px;
+    }
+
+    .open-position-editor-payments-columns {
+      display: flex !important;
+      flex-wrap: wrap;
+      gap: 14px;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+    }
+
+    .open-position-editor-payments-columns > .v-slot {
+      box-sizing: border-box;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: auto !important;
+      flex: 1 1 240px;
+    }
+
+    .open-position-editor-payments-columns > .v-slot > * {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    /* Вкладка «Трудовой договор»: параметры оформления и таблица соглашений. */
+    .open-position-editor-labor-tab-content {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .open-position-editor-labor-params .v-expand,
+    .open-position-editor-labor-params .v-slot {
+      min-width: 0;
+    }
+
+    .open-position-editor-labor-params .v-button {
+      min-width: 150px;
+      align-self: flex-end;
+    }
+
+    /* Vaadin выносит шапку GroupBox над рамкой (inline margin-top:-44px), из-за чего
+     * в вертикальном потоке карточек шапка перекрывает низ предыдущего блока.
+     * Шапка возвращается внутрь панели — наезды исключаются. */
+    .open-position-editor .edit-accordion-section > .v-panel-captionwrap {
+      margin-top: 0 !important;
+    }
+
+    /* Вынос caption отменён общим правилом, поэтому резерв group-tab сокращён до
+     * обычного отступа (шапка внутри панели). */
+    .open-position-editor-group-tab.edit-accordion-section {
+      height: calc(100% - 28px) !important;
+      margin: 14px 16px 14px !important;
+    }
+
+    .open-position-editor-spacer,
+    .v-slot-open-position-editor-spacer {
+      display: none !important;
+    }
+
+    /* Пустой legacy-спейсер скрыт визуально, компонент сохранён (инвариант XML). */
+    .open-position-editor-tab-content {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      height: 100% !important;
+    }
+
+    .open-position-editor-table-view .v-table,
+    .open-position-editor-table-view .v-grid,
+    .open-position-editor-table-view .c-treegrid,
+    .edit-accordion-section .v-table,
+    .edit-accordion-section .v-grid,
+    .edit-accordion-section .c-treegrid {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      border: 1px solid rgba($v-font-color, 0.15);
+      border-radius: 6px;
+      background: $v-panel-background-color;
+      overflow: hidden;
+    }
+
+    .open-position-editor-table-view .v-table-header-wrap,
+    .open-position-editor-table-view .v-grid-header,
+    .edit-accordion-section .v-table-header-wrap,
+    .edit-accordion-section .v-grid-header {
+      background: mix($v-app-background-color, $v-panel-background-color, 52%);
+      border-bottom-color: rgba($v-font-color, 0.14);
+    }
+
+    .open-position-editor-table-view .v-table-header-cell,
+    .open-position-editor-table-view .v-grid-header .v-grid-cell,
+    .edit-accordion-section .v-table-header-cell,
+    .edit-accordion-section .v-grid-header .v-grid-cell {
+      min-height: 40px;
+      color: mix($v-font-color, $v-panel-background-color, 82%);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    /*
+     * Variant 5: плотные theme-aware таблицы. Селекторы ограничены namespace,
+     * стили таблиц других экранов не затрагиваются.
+     */
+    .open-position-editor-table-variant5,
+    .open-position-editor-table-variant5.v-grid,
+    .open-position-editor-table-variant5.v-table {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      min-height: 320px !important;
+      height: 100% !important;
+      border: 1px solid rgba($v-font-color, 0.16);
+      border-radius: 6px;
+      background: $v-panel-background-color;
+      overflow: hidden;
+    }
+
+    .open-position-editor-table-variant5 > .v-grid,
+    .open-position-editor-table-variant5 > .v-table,
+    .open-position-editor-table-variant5 .v-grid {
+      box-sizing: border-box;
+      flex: 1 1 auto;
+      min-height: 260px !important;
+      height: auto !important;
+    }
+
+    .open-position-editor-table-variant5 .v-grid-header,
+    .open-position-editor-table-variant5 .v-table-header-wrap {
+      min-height: 42px;
+      background: mix($v-app-background-color, $v-panel-background-color, 58%);
+      border-bottom: 1px solid rgba($v-font-color, 0.14);
+    }
+
+    .open-position-editor-table-variant5 .v-grid-header .v-grid-cell,
+    .open-position-editor-table-variant5 .v-table-header-cell {
+      box-sizing: border-box;
+      min-height: 42px;
+      padding: 0 12px;
+      color: mix($v-font-color, $v-panel-background-color, 82%);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 18px;
+    }
+
+    .open-position-editor-table-variant5 .v-grid-row,
+    .open-position-editor-table-variant5 .v-table-row {
+      min-height: 42px;
+      border-bottom: 1px solid rgba($v-font-color, 0.08);
+      transition: background-color 0.15s ease;
+    }
+
+    .open-position-editor-table-variant5 .v-grid-row:hover,
+    .open-position-editor-table-variant5 .v-table-row:hover {
+      background: rgba($v-selection-color, 0.07);
+    }
+
+    .open-position-editor-table-variant5 .v-grid-cell,
+    .open-position-editor-table-variant5 .v-table-cell-content {
+      box-sizing: border-box;
+      min-width: 0;
+      padding: 0 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .open-position-editor-table-variant5 .v-grid-editor-cells,
+    .open-position-editor-table-variant5 .v-grid-editor-cell,
+    .open-position-editor-table-variant5 .v-textfield,
+    .open-position-editor-table-variant5 .v-filterselect {
+      box-sizing: border-box;
+      min-height: 34px;
+      max-width: 100% !important;
+      border-radius: 4px;
+    }
+
+    .open-position-editor-table-variant5 .v-buttons-panel,
+    .open-position-editor-table-variant5 .v-grid-footer {
+      box-sizing: border-box;
+      min-height: 48px;
+      padding: 6px 8px;
+      border-top: 1px solid rgba($v-font-color, 0.12);
+      background: mix($v-app-background-color, $v-panel-background-color, 42%);
+    }
+
+    .open-position-editor-table-variant5 .v-buttons-panel .v-button {
+      min-width: 34px;
+      min-height: 34px;
+      margin: 0 3px 0 0;
+      border-radius: 4px;
+    }
+
+    /* Variant 5: единая поверхность RichTextArea (toolbar 42px, content min-height 220px). */
+    .open-position-editor-richtext-section > .v-expand,
+    .open-position-editor-richtext-section .v-tabsheet-content,
+    .open-position-editor-richtext-section .v-tabsheet-tabcontainer {
+      min-height: 0;
+    }
+
+    .open-position-editor-richtext-section {
+      min-height: 360px;
+    }
+
+    .open-position-editor-richtext-variant5,
+    .open-position-editor-richtext-variant5.v-richtextarea {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      min-height: 260px;
+      border: 1px solid rgba($v-font-color, 0.16);
+      border-radius: 6px;
+      background: $v-panel-background-color;
+      overflow: hidden;
+    }
+
+    .open-position-editor-richtext-variant5 .v-richtextarea-toolbar {
+      min-height: 42px;
+      padding: 5px 8px;
+      border-bottom: 1px solid rgba($v-font-color, 0.13);
+      background: mix($v-app-background-color, $v-panel-background-color, 58%);
+    }
+
+    .open-position-editor-richtext-variant5 .v-richtextarea-content,
+    .open-position-editor-richtext-variant5 iframe {
+      box-sizing: border-box;
+      min-height: 220px;
+      max-width: 100%;
+      background: $v-panel-background-color;
+    }
+
+    .open-position-editor-richtext-variant5 .v-button {
+      min-width: 32px;
+      min-height: 32px;
+      margin: 0 2px;
+      border-radius: 4px;
+    }
+
+    /* Лента комментариев. */
+    .open-position-editor-comments-scroll {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      padding: 4px 2px;
+    }
+
+    /*
+     * Footer: существующие actions группируются справа, кнопки одинаковой
+     * высоты 40px, главное действие выделено акцентом темы.
+     */
+    .open-position-editor-footer {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      justify-content: flex-end !important;
+      min-height: 58px;
+      padding: 9px 14px;
+      background: $v-panel-background-color;
+      border-top: 1px solid rgba($v-font-color, 0.13);
+      box-shadow: 0 -3px 10px rgba(15, 23, 42, 0.055);
+    }
+
+    .open-position-editor-owner-row {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      padding: 2px 4px 6px;
+    }
+
+    .open-position-editor-owner-row .v-textfield,
+    .open-position-editor-owner-row .v-textfield.borderless {
+      color: mix($v-font-color, $v-panel-background-color, 62%) !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      font-size: 15px !important;
+    }
+
+    .open-position-editor-footer-actions {
+      display: flex !important;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap !important;
+      gap: 10px;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    /* Группа OK/Отмена (commitActions) всегда остаётся вместе: при нехватке
+     * ширины переносится целиком на нижнюю строку, а не разъезжается влево
+     * (на узких viewport «Подписаться» вылезала за левый край footer). */
+    .open-position-editor-commit-actions {
+      display: flex !important;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap !important;
+      gap: 10px;
+      width: auto !important;
+      min-width: 0 !important;
+      flex: 0 1 auto;
+    }
+
+    .open-position-editor-commit-actions > .v-slot {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      width: auto !important;
+      height: auto !important;
+      flex: 0 0 auto;
+    }
+
+    .open-position-editor-footer-actions > .v-slot {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      width: auto !important;
+      height: auto !important;
+      flex: 0 0 auto;
+    }
+
+    /* Слот группы OK/Отмена: разрешаем сжатие, чтобы на очень узких viewport
+     * группа не вылезала за левый край footer, а переносила внутренние кнопки. */
+    .open-position-editor-footer-actions > .v-slot:last-child {
+      flex: 0 1 auto !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .open-position-editor-footer-actions > .v-slot > .v-button,
+    .open-position-editor-footer-actions > .v-button {
+      width: auto !important;
+      min-width: 118px;
+      height: 40px !important;
+      padding: 0 18px !important;
+    }
+
+    .open-position-editor-primary-action {
+      color: #ffffff !important;
+      background: $v-selection-color !important;
+      border-color: $v-selection-color !important;
+      box-shadow: none !important;
+      min-width: 184px !important;
+      font-weight: 700;
+    }
+
+    .open-position-editor-primary-action:hover,
+    .open-position-editor-primary-action:focus {
+      background: darken($v-selection-color, 5%) !important;
+      border-color: darken($v-selection-color, 5%) !important;
+    }
+
+    .open-position-editor-secondary-action {
+      background: $v-panel-background-color !important;
+      box-shadow: none !important;
+    }
+
+    .open-position-editor-footer .v-button:focus,
+    .open-position-editor-footer-actions .v-button:focus {
+      outline: 2px solid rgba($v-selection-color, 0.45);
+      outline-offset: 1px;
+    }
+
+    /* Плавные переходы и тонкие theme-aware scrollbar. */
+    .edit-sidebar .v-button,
+    .open-position-editor-footer-actions .v-button,
+    .label-nav-item,
+    .v-button-label-nav-item,
+    .edit-accordion-section .v-panel-caption,
+    .edit-form-control .v-textfield,
+    .edit-form-control .v-textarea,
+    .edit-form-control .v-filterselect,
+    .edit-form-control .v-datefield {
+      transition: background-color 0.15s ease, color 0.15s ease,
+                  border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .edit-workspace-scroll,
+    .open-position-editor-tabs .v-tabsheet-content,
+    .edit-accordion-section .v-panel-content,
+    .open-position-editor-comments-scroll {
+      scrollbar-width: thin;
+      scrollbar-color: rgba($v-font-color, 0.25) transparent;
+    }
+
+    /* Поля-фильтрселекты с иконками выбранной опции (optionIconProvider: «Приоритет
+       вакансии», «Удалёнка», «Регистрация для работы»). CUBA ставит stylename
+       edit-form-control на сам .v-filterselect, поэтому shared-селектор
+       `.edit-form-control .v-filterselect > .v-icon` (предок) не матчится, и иконка
+       остаётся в вало-позиции (absolute, left:0) поверх текста при padding 10px.
+       Здесь дублируется контракт shared (иконка 20px по центру слева, input с
+       отступом 40px) для случая edit-form-control.v-filterselect; !important — чтобы
+       перебить shared `padding: 0 10px !important` и вало-позиционирование. */
+    .edit-form-control.v-filterselect > .v-icon {
+      position: absolute !important;
+      top: 50% !important;
+      left: 8px !important;
+      width: 20px !important;
+      height: 20px !important;
+      margin: 0 !important;
+      transform: translateY(-50%);
+      object-fit: contain;
+      color: #34424f;
+      font-size: 20px !important;
+      line-height: 20px !important;
+      text-align: center;
+    }
+    .edit-form-control.v-filterselect > .v-icon + .v-filterselect-input {
+      padding-left: 40px !important;
+    }
+
+    /* Поле «Приоритет вакансии» (priorityField) в узкой строке «Настройки вакансии»
+       (Дата закрытия | Приоритет | Комментарий): автоширина сжимается до ~112px,
+       и текст выбранной опции с иконкой (отступ 40px) уходит под кнопку фильтра.
+       Фиксируем ширину 150px (flex: 0 0 150px) — иконка и текст читаются на всех
+       viewport. Локальный класс добавлен в stylename поля (XML). */
+    .open-position-editor-priority-field {
+      flex: 0 0 150px !important;
+      min-width: 150px !important;
+    }
+
+    /* Инфокарточка «Информация» (openPositionEditorInfoCard): фон = фон sidebar —
+       прозрачный, сквозь карточку виден тот же градиент .edit-sidebar; рамка,
+       радиус и тень карточки (edit-accordion-section) сохраняются. */
+    .edit-sidebar .open-position-editor-info-card,
+    .edit-sidebar .open-position-editor-info-card .v-panel-captionwrap,
+    .edit-sidebar .open-position-editor-info-card .v-panel-caption,
+    .edit-sidebar .open-position-editor-info-card .v-panel-content {
+      background: transparent;
+    }
+  }
+}
+

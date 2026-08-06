@@ -1,0 +1,61 @@
+component_id;xml_type;property;data_container;source_parent;target_parent;allowed_visual_change;java_references
+tabOpenPosition;tab;-;-;tabSheetOpenPosition;SAME (tabSheetOpenPosition);margin,spacing (сохранить как есть);нет ссылок по id (инвариант первой вкладки)
+mainTabScrollBox;scrollBox;-;-;tabOpenPosition;SAME (tabOpenPosition);stylename,width,height;нет ссылок в Java
+citiesLabelHBox;vbox;-;-;mainTabScrollBox;SAME (mainTabScrollBox);stylename,width,spacing;нет ссылок в Java (id legacy)
+openPositionEditorCardsRow1;hbox;-;-;citiesLabelHBox;SAME (citiesLabelHBox) — вертикализация через CSS (flex-direction: column);stylename,width,spacing,flex-direction (SCSS);нет ссылок в Java
+openPositionEditorIdentifiersCard;groupBox;-;-;openPositionEditorCardsRow1;SAME (openPositionEditorCardsRow1, колонка) — карточка 100% сверху;stylename,width,spacing,margin;нет ссылок в Java | тест: edit-accordion-section+showAsPanel+collapsable/collapsed сохранить
+commandOrVacancyGroupBox;groupBox;-;-;openPositionEditorCardsRow1;SAME (openPositionEditorCardsRow1, колонка) — карточка 100% ниже (требование B);stylename,width,spacing,margin;нет ссылок в Java | тест: edit-accordion-section+showAsPanel+collapsable сохранить
+vacancyNameHBox;hbox;-;-;openPositionEditorIdentifiersCard;SAME (openPositionEditorIdentifiersCard) — строка 1: ID+Вакансия (требование E);stylename (row-title),expand,spacing,width;нет ссылок в Java
+gradeActionRowHBox;hbox;-;-;НЕТ (новый визуальный контейнер);openPositionEditorIdentifiersCard — строка 2: Грейд+кнопка (требование E);stylename (field-row row-grade),expand=gradeLookupPickerField,spacing,width;нет ссылок в Java (новый id)
+vacancyTitleSpacerHBox;hbox;-;-;openPositionEditorIdentifiersCard;SAME (openPositionEditorIdentifiersCard);stylename (open-position-editor-spacer, display:none — сохранить);нет ссылок в Java
+commandFieldHBox;groupBox;-;-;openPositionEditorIdentifiersCard;SAME (openPositionEditorIdentifiersCard);stylename,width,spacing;нет ссылок в Java | тест: edit-accordion-section+showAsPanel+collapsable сохранить
+vacansyIDTextField;textField;vacansyID;openPositionDc;vacancyNameHBox;SAME (vacancyNameHBox) — ID ограничен ~130px (flex 0 1 130px);stylename,width,box.expandRatio,align;@Inject TextField (338) | getValue (1928) | тест: edit-form-control сохранить
+vacansyNameField;textField;vacansyName;openPositionDc;vacancyNameHBox (expand);SAME (vacancyNameHBox, expand) — Вакансия растягивается;stylename,width,box.expandRatio,expand;@Inject TextField (159) | @Subscribe("vacansyNameField") (1453) | чтения (1620-1653) | required сохранить | тест: edit-form-control
+gradeLookupPickerField;lookupPickerField;grade;openPositionDc (optionsContainer=gradeDc);vacancyNameHBox;gradeActionRowHBox (expand) — Грейд растягивается (требование E);stylename,width,box.expandRatio,reparent,expand;@Inject LookupPickerField (332) | @Subscribe("gradeLookupPickerField") (3336) | чтения (3386-3389) | тест: edit-form-control
+generateVacancyNameFieldButton;button;-;-;vacancyNameHBox;gradeActionRowHBox — компактная кнопка (flex 0 0 auto, width AUTO) (требование E);stylename,width,align,reparent;id в Java не используется | invoke="generateNameFieldButton" (метод 3367) СОХРАНИТЬ
+commandOrVacancyHBox;hbox;-;-;commandOrVacancyGroupBox;SAME (commandOrVacancyGroupBox);stylename (при необходимости wrap-страховка),width,spacing;нет ссылок в Java
+commandOrPositionCellHBox;hbox;-;-;commandOrVacancyHBox;SAME (commandOrVacancyHBox);stylename,width,spacing;нет ссылок в Java
+commandOrPosition;radioButtonGroup;commandCandidate;openPositionDc;commandOrPositionCellHBox;SAME (commandOrPositionCellHBox);stylename,width,align;@Inject RadioButtonGroup (250) | @Subscribe("commandOrPosition") (1555) | setOptionsMap (2813) | чтение (401) | required сохранить
+parentPositionCellHBox;hbox;-;-;commandOrVacancyHBox;SAME (commandOrVacancyHBox);stylename,width,spacing;нет ссылок в Java
+parentOpenPositionField;lookupPickerField;parentOpenPosition;openPositionDc (optionsContainer=openPositionParentDc);parentPositionCellHBox;SAME (parentPositionCellHBox);stylename,width,align;@Inject LookupPickerField (252) | @Subscribe("parentOpenPositionField") (1578) | setEditable (401,1560,1568) | тест: edit-form-control
+projectTypeGroupBox;groupBox;-;-;citiesLabelHBox;SAME (citiesLabelHBox) — уже 100% ширины, без изменений;stylename,width,spacing;нет ссылок в Java | тест: edit-accordion-section+showAsPanel+collapsable сохранить
+positionTypeField;lookupPickerField;positionType;openPositionDc (optionsContainer=positionTypesDc);hboxVacansy;SAME (hboxVacansy);stylename,width;@Inject (151) | @Subscribe/чтения (1621-1622, 1725, 1734, 2021) | required сохранить
+remoteWorkFieldsHBox;hbox;-;-;hboxVacansy;SAME (hboxVacansy);stylename,width,spacing;нет ссылок в Java
+remoteWorkField;lookupField;remoteWork;openPositionDc;remoteWorkFieldsHBox;SAME (remoteWorkFieldsHBox);stylename,width;@Inject (228) | чтения (2025, 2204) | @Install optionIconProvider (2885) | required сохранить
+remoteWorkCommentField;textField;remoteComment;openPositionDc;remoteWorkFieldsHBox;SAME (remoteWorkFieldsHBox);stylename,width;нет ссылок в Java (id) | тест: edit-form-control
+projectFieldsVBox;vbox;-;-;hboxProject;SAME (hboxProject);stylename,width,spacing;нет ссылок в Java
+projectNameField;lookupPickerField;projectName;openPositionDc (optionsContainer=projectNamesDc);projectFieldsVBox;SAME (projectFieldsVBox);stylename,width;@Inject (157) | setOptionImageProvider (633) | @Subscribe/чтения (1477-1493, 1582) | required сохранить
+projectFilterCheckBoxesHBox;hbox;-;-;projectFieldsVBox;SAME (projectFieldsVBox);stylename,width,spacing;нет ссылок в Java
+onlyOpenProjectCheckBox;checkBox;-;-;projectFilterCheckBoxesHBox;SAME (projectFilterCheckBoxesHBox);stylename,width;@Inject (356) | @Subscribe (780) | чтения (770, 791)
+withOpenPositionCheckBox;checkBox;-;-;projectFilterCheckBoxesHBox;SAME (projectFilterCheckBoxesHBox);stylename,width;@Inject (358) | @Subscribe (786) | setValue (636, 772)
+companyDepartamentField;lookupPickerField;-;-;hboxProject;SAME (hboxProject);stylename,width;@Inject (145) | setOptionImageProvider (634) | чтения (1478, 1484-1485) | required сохранить | тест: edit-form-control
+hboxCompany;hbox;-;-;projectTypeGroupBox;SAME (projectTypeGroupBox);stylename,width,spacing;нет ссылок в Java
+companyNameField;lookupPickerField;-;-;hboxCompany;SAME (hboxCompany);stylename,width;@Inject (147) | setOptionImageProvider (635) | @Subscribe (1539) | чтения (1485, 1528) | required сохранить
+cityFieldsHBox;hbox;-;-;hboxCompany;SAME (hboxCompany) — существующее поведение expand (город+кнопка) не менять;stylename,expand,width,spacing;нет ссылок в Java
+cityOpenPositionField;lookupPickerField;cityPosition;openPositionDc (optionsContainer=citiesDc);cityFieldsHBox (expand);SAME (cityFieldsHBox, expand);stylename,width;@Inject (143) | чтения (1528-1532, 1721, 1730, 2023) | required сохранить
+addCity;button;-;-;cityFieldsHBox;SAME (cityFieldsHBox);stylename,width,align;id в Java не используется | invoke="addListCity" СОХРАНИТЬ
+openPositionEditorCardsRow2;hbox;-;-;citiesLabelHBox;SAME (citiesLabelHBox) — вертикализация через CSS (flex-direction: column) (требование D);stylename,width,spacing,flex-direction (SCSS);нет ссылок в Java
+personnelCountGroupBox;groupBox;-;-;openPositionEditorCardsRow2;SAME (openPositionEditorCardsRow2, колонка) — карточка 100% сверху (требование D);stylename,width,spacing;нет ссылок в Java | тест: edit-accordion-section+showAsPanel+collapsable сохранить
+numberPositionHBox;hbox;-;-;personnelCountGroupBox;SAME (personnelCountGroupBox);stylename,width,spacing,align;нет ссылок в Java
+numberPositionField;textField;numberPosition;openPositionDc;numberPositionHBox;SAME (numberPositionHBox);stylename,width,align;@Inject (149) | setCaption ("Количество персонала"/"Количество команд") (1565,1573) | setEditable (1724,1733) | setRequired(false) (3283) | required в XML сохранить | тест: edit-form-control
+more10NumberPositionField;checkBox;more10NumberPosition;openPositionDc;numberPositionHBox;SAME (numberPositionHBox);stylename,width,align;@Subscribe("more10NumberPositionField") (3278)
+salaryGroupBox;groupBox;-;-;openPositionEditorCardsRow2;SAME (openPositionEditorCardsRow2, колонка) — карточка 100% ниже (требование D);stylename,width,spacing;нет ссылок в Java | тест: edit-accordion-section+showAsPanel+collapsable сохранить
+hboxSalary;hbox;-;-;salaryGroupBox;SAME (salaryGroupBox);stylename (row-salary),width,spacing;нет ссылок в Java
+openPositionFieldSalaryMin;textField;salaryMin;openPositionDc;hboxSalary;SAME (hboxSalary);stylename,width;@Inject (206) | @Subscribe (1319) | чтения (1322-1336) | тест: edit-form-control
+openPositionFieldSalaryMax;textField;salaryMax;openPositionDc;hboxSalary;SAME (hboxSalary);stylename,width;@Inject (208) | @Install validator (1347) | @Subscribe/чтения (1352-1367) | тест: edit-form-control
+openPositionFieldSalaryIE;textField;salaryIE;openPositionDc;hboxSalary;SAME (hboxSalary);stylename,width;@Inject (336) | setEnabled (3328,3332) | setValue (3507) | тест: edit-form-control
+salaryCandidateRequestCheckBox;checkBox;salaryCandidateRequest;openPositionDc;hboxSalary;SAME (hboxSalary);stylename,width,align;@Subscribe("salaryCandidateRequestCheckBox") (3322)
+space2Box;hbox;-;-;salaryGroupBox;SAME (salaryGroupBox);stylename (row-wide),expand,width,spacing,height;нет ссылок в Java
+salaryCommentTextFiels;textField;salaryComment;openPositionDc;space2Box (expand);SAME (space2Box, expand);stylename,width;@Inject (342) | чтение (1661) | setValue (3508) | тест: edit-form-control
+salaryStrongLimitCheckBox;checkBox;salaryFixLimit;openPositionDc;space2Box;SAME (space2Box);stylename,width,align;нет ссылок в Java
+openPositionEditorNavigation;vbox;-;-;openPositionSidebar;SAME (openPositionSidebar);stylename,width,spacing;нет ссылок в Java
+openPositionEditorNavActiveSectionsLabel;label;-;-;openPositionEditorNavigation;SAME (openPositionEditorNavigation);stylename,width;нет ссылок в Java
+openPositionEditorNavIdentifiers;button;-;-;openPositionEditorNavigation;SAME (openPositionEditorNavigation) — ТРЕБУЕТ АРБИТРАЖА (A): снять статический label-nav-item-active возможно только с Java-синхронизацией;stylename (label-nav-item label-nav-item-active — управление Java по §3.4),width;нет ссылок в Java | ARBITRATION_REQUIRED
+openPositionEditorNavSettings;button;-;-;openPositionEditorNavigation;SAME (openPositionEditorNavigation);stylename (label-nav-item),width;нет ссылок в Java
+openPositionEditorNavTeam;button;-;-;openPositionEditorNavigation;SAME (openPositionEditorNavigation);stylename (label-nav-item),width;нет ссылок в Java
+openPositionEditorNavProject;button;-;-;openPositionEditorNavigation;SAME (openPositionEditorNavigation);stylename (label-nav-item),width;нет ссылок в Java
+openPositionEditorNavPersonnel;button;-;-;openPositionEditorNavigation;SAME (openPositionEditorNavigation);stylename (label-nav-item),width;нет ссылок в Java
+openPositionEditorNavSalary;button;-;-;openPositionEditorNavigation;SAME (openPositionEditorNavigation);stylename (label-nav-item),width;нет ссылок в Java
+openPositionSidebar;vbox;-;-;openPositionMainLayout;SAME (openPositionMainLayout);stylename,width (270px из shared, не переопределять);нет ссылок в Java
+openPositionWorkspace;vbox;-;-;openPositionMainLayout;SAME (openPositionMainLayout);stylename,width,expand;нет ссылок в Java
+tabSheetOpenPosition;tabSheet;-;-;openPositionWorkspace;SAME (openPositionWorkspace);stylename,width,height;@Inject TabSheet (364) | @Subscribe("tabSheetOpenPosition") SelectedTabChange (424-460) — lazy-load, НЕ менять

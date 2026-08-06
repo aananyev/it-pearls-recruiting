@@ -165,6 +165,28 @@
           <button id="previewNavNews" caption="Новости" width="100%" invoke="previewOpenNews" stylename="borderless label-nav-item open-position-preview-nav-item"/>
           <button id="previewNavApproval" caption="Согласование" width="100%" invoke="previewOpenApproval" stylename="borderless label-nav-item open-position-preview-nav-item"/>
           <button id="previewNavComments" caption="Комментарии" width="100%" invoke="previewOpenComments" stylename="borderless label-nav-item open-position-preview-nav-item"/>
+          <!-- Скрытые пункты навигации вкладки «Вакансия»: контрактный тест
+               previewProvidesAllInheritedUiComponentsAndListenerTargets требует,
+               чтобы каждый @Named базового контроллера присутствовал в этом XML;
+               в витрине они не участвуют (visible=false). -->
+          <button id="openPositionEditorNavIdentifiers" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavVacancy" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavSettings" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavTeam" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavProject" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavPersonnel" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavSalary" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <!-- Скрытые label информационной карточки sidebar (контракт @Inject из основного XML). -->
+          <label id="infoPositionLabel" width="100%" visible="false"/>
+          <label id="infoProjectLabel" width="100%" visible="false"/>
+          <label id="infoOwnerLabel" width="100%" visible="false"/>
+          <label id="infoCityLabel" width="100%" visible="false"/>
+          <label id="infoSalaryMaxTcLabel" width="100%" visible="false"/>
+          <label id="infoSalaryMaxIeLabel" width="100%" visible="false"/>
+          <!-- Скрытые компоненты блока срочности sidebar (контракт @Inject из основного XML). -->
+          <image id="trafficLighterImage" width="AUTO" visible="false"/>
+          <label id="currentPriorityLabel" width="100%" visible="false"/>
+          <label id="remoteWorkSidebarLabel" width="100%" visible="false"/>
         </vbox>
         <!-- Ключевые параметры используют только уже загруженные свойства edit-view. -->
         <vbox id="openPositionPreviewSummary" width="100%" spacing="true" stylename="edit-sidebar-summary">
@@ -229,7 +251,7 @@
                   <hbox id="vacancyNameHBox" spacing="true" width="100%" expand="vacansyNameField">
                     <textField id="vacansyIDTextField" dataContainer="openPositionDc" property="vacansyID" box.expandRatio="1" width="100%" caption="msg://msgVacansyID"/>
                     <textField id="vacansyNameField" dataContainer="openPositionDc" property="vacansyName" caption="msg://msgVacansy" box.expandRatio="6" width="100%" required="true"/>
-                    <lookupPickerField id="gradeLookupPickerField" dataContainer="openPositionDc" property="grade" box.expandRatio="2" optionsContainer="gradeDc" width="100%" caption="msg://msgGrade">
+                    <lookupPickerField id="gradeLookupPickerField" dataContainer="openPositionDc" property="grade" optionsContainer="gradeDc" width="AUTO" caption="msg://msgGrade">
                       <actions>
                         <action id="lookup" type="picker_lookup"/>
                       </actions>

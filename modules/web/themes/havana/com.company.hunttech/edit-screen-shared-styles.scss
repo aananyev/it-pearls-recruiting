@@ -114,6 +114,11 @@
   }
 
   .v-button-label-nav-item {
+    /* flex-контейнер: при display:block у Vaadin-кнопки текст (wrap) выпадает
+       вниз из кнопки (подсветка видна строкой выше текста); flex + align-items
+       центрирует текст внутри подсветки. */
+    display: flex !important;
+    align-items: center;
     background: transparent !important;
     border-top: 0 !important;
     border-right: 0 !important;
@@ -125,6 +130,7 @@
   .v-button-label-nav-item .v-button-wrap {
     display: flex;
     align-items: center;
+    flex: 1;
     width: 100%;
     color: inherit !important;
     text-align: left !important;

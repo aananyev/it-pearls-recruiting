@@ -5,6 +5,7 @@ import com.company.hunttech.core.*;
 import com.company.hunttech.entity.*;
 import com.company.hunttech.service.GetRoleService;
 import com.company.hunttech.web.StandartRegistrationForWork;
+import com.company.hunttech.web.StandartPriorityVacancy;
 import com.company.hunttech.web.screens.position.PositionEdit;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.hunttech.hrm.gui.components.OvaFallbackImage;
@@ -71,6 +72,24 @@ import java.util.Calendar;
 public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private Label<String> closedVacancyInfoLabel;
+    @Inject
+    private Label<String> infoPositionLabel;
+    @Inject
+    private Label<String> infoProjectLabel;
+    @Inject
+    private Label<String> infoOwnerLabel;
+    @Inject
+    private Label<String> infoCityLabel;
+    @Inject
+    private Label<String> infoSalaryMaxTcLabel;
+    @Inject
+    private Label<String> infoSalaryMaxIeLabel;
+    @Inject
+    private Label<String> currentPriorityLabel;
+    @Inject
+    private Image trafficLighterImage;
+    @Inject
+    private Label<String> remoteWorkSidebarLabel;
     @Inject
     private DateField<Date> closingDateDateField;
     @Inject
@@ -362,6 +381,20 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private OvaFallbackImage projectOwnerImage;
     @Inject
     private TabSheet tabSheetOpenPosition;
+    @Named("openPositionEditorNavIdentifiers")
+    private Button openPositionEditorNavIdentifiers;
+    @Named("openPositionEditorNavVacancy")
+    private Button openPositionEditorNavVacancy;
+    @Named("openPositionEditorNavSettings")
+    private Button openPositionEditorNavSettings;
+    @Named("openPositionEditorNavTeam")
+    private Button openPositionEditorNavTeam;
+    @Named("openPositionEditorNavProject")
+    private Button openPositionEditorNavProject;
+    @Named("openPositionEditorNavPersonnel")
+    private Button openPositionEditorNavPersonnel;
+    @Named("openPositionEditorNavSalary")
+    private Button openPositionEditorNavSalary;
 
     private boolean mainTabLobsLoaded;
     private boolean exerciseLoaded;
@@ -412,6 +445,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setCommandExperienceRadioButton();
         setCommentToVacancy();
         changeCityListsLabel();
+        refreshSidebarInfoCard();
+        // Информационная карточка sidebar следует за изменениями атрибутов edited-объекта
+        // (должность/проект/город/зарплата) — presentation-only, без бизнес-логики.
+        openPositionDc.addItemPropertyChangeListener(e -> refreshSidebarInfoCard());
         standartDescriptionDisable(event);
         whiIsThisGuyDisable(event);
         initPositionTypeDescriptionFields();
@@ -424,6 +461,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe("tabSheetOpenPosition")
     /** Переключение вкладки → lazy-загрузка LOB/коллекций вкладки при первом открытии. */
     public void onTabSheetOpenPositionSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
+        // Визуальная синхронизация label-навигации sidebar с открытой вкладкой (вердикт арбитра A):
+        // пункт «Идентификаторы» активен только на вкладке «Проект» (tabOpenPosition); на остальных
+        // вкладках активный пункт снимается со всех кнопок. Базовый label-nav-item не трогается.
+        if (event.getSelectedTab() != null) {
+            String activeTabName = event.getSelectedTab().getName();
+            resetNavigationActiveStyles();
+            if ("tabOpenPosition".equals(activeTabName)) {
+                openPositionEditorNavIdentifiers.addStyleName("label-nav-item-active");
+            }
+        }
         if (event.getSelectedTab() == null || PersistenceHelper.isNew(getEditedEntity())) {
             return;
         }
@@ -457,6 +504,44 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             loadLaborAgreement();
             laborAgreementLoaded = true;
         }
+    }
+
+    /** Снимает подсветку label-nav-item-active со всех пунктов навигации sidebar. */
+    private void resetNavigationActiveStyles() {
+        openPositionEditorNavIdentifiers.removeStyleName("label-nav-item-active");
+        openPositionEditorNavVacancy.removeStyleName("label-nav-item-active");
+        openPositionEditorNavSettings.removeStyleName("label-nav-item-active");
+        openPositionEditorNavTeam.removeStyleName("label-nav-item-active");
+        openPositionEditorNavProject.removeStyleName("label-nav-item-active");
+        openPositionEditorNavPersonnel.removeStyleName("label-nav-item-active");
+        openPositionEditorNavSalary.removeStyleName("label-nav-item-active");
+    }
+
+    @Subscribe("openPositionEditorNavVacancy")
+    /** Отдельная label-навигация блока «Вакансия» (ID + название в одну линию): клик
+     *  подсвечивает пункт и переводит фокус в первое поле блока (штатная прокрутка ScrollBox). */
+    public void onOpenPositionEditorNavVacancyClick(Button.ClickEvent event) {
+        resetNavigationActiveStyles();
+        openPositionEditorNavVacancy.addStyleName("label-nav-item-active");
+        vacansyIDTextField.focus();
+    }
+
+    @Subscribe("openPositionEditorNavProject")
+    /** Отдельная label-навигация блока «Параметры вакансии» (projectTypeGroupBox): клик
+     *  подсвечивает пункт и переводит фокус в поле должности (штатная прокрутка ScrollBox). */
+    public void onOpenPositionEditorNavProjectClick(Button.ClickEvent event) {
+        resetNavigationActiveStyles();
+        openPositionEditorNavProject.addStyleName("label-nav-item-active");
+        positionTypeField.focus();
+    }
+
+    @Subscribe("openPositionEditorNavSalary")
+    /** Отдельная label-навигация блока «Зарплатное предложение» (salaryGroupBox): клик
+     *  подсвечивает пункт и переводит фокус в поле минимальной зарплаты (штатная прокрутка ScrollBox). */
+    public void onOpenPositionEditorNavSalaryClick(Button.ClickEvent event) {
+        resetNavigationActiveStyles();
+        openPositionEditorNavSalary.addStyleName("label-nav-item-active");
+        openPositionFieldSalaryMin.focus();
     }
 
     /** Lazy-загрузка LOB-описаний основной вкладки (RU/EN описания типа позиции). */
@@ -2093,7 +2178,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe("priorityField")
     /** Смена приоритета → авто-установка даты закрытия через неделю. */
     public void onPriorityFieldValueChange(HasValue.ValueChangeEvent<Integer> event) {
-        if (event.getValue().equals(OpenPositionPriority.LOW.getId())) {
+        // event.getValue() может быть null (onSignDraftCheckBoxValueChange снимает
+        // «черновик» через priorityField.setValue(null)) — защита от NPE.
+        if (event.getValue() != null && event.getValue().equals(OpenPositionPriority.LOW.getId())) {
             setClosingWeek();
         }
 
@@ -3150,6 +3237,100 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             citiesLabel.setValue(outStr);
             citiesLabel.setDescription(description);
         }
+    }
+
+    /** Заполнение информационной карточки sidebar («Информация»): должность, проект, владелец
+     *  проекта, город и зарплатное предложение МАХ по ТК/ИП. Presentation-only: значения
+     *  берутся из edited-объекта, никакой бизнес-логики; вызывается при показе формы и при
+     *  изменении любого атрибута контейнера openPositionDc. */
+    private void refreshSidebarInfoCard() {
+        OpenPosition pos = getEditedEntity();
+        infoPositionLabel.setValue("<b>Должность:</b> " + esc(pos.getVacansyName()));
+        Project project = pos.getProjectName();
+        infoProjectLabel.setValue("<b>Проект:</b> " + (project != null ? esc(project.getProjectName()) : ""));
+        Person owner = project != null ? project.getProjectOwner() : null;
+        infoOwnerLabel.setValue("<b>Владелец проекта:</b> " + (owner != null
+                ? esc((owner.getFirstName() == null ? "" : owner.getFirstName() + " ")
+                        + (owner.getSecondName() == null ? "" : owner.getSecondName()))
+                : ""));
+        infoCityLabel.setValue("<b>Город:</b> " + (pos.getCityPosition() != null
+                ? esc(pos.getCityPosition().getCityRuName()) : ""));
+        infoSalaryMaxTcLabel.setValue("<b>Зарплата МАХ (ТК):</b> " + (pos.getSalaryMax() != null
+                ? esc(pos.getSalaryMax().toPlainString()) : ""));
+        infoSalaryMaxIeLabel.setValue("<b>Зарплата МАХ (ИП):</b> " + (pos.getSalaryIE() != null
+                ? esc(pos.getSalaryIE().toPlainString()) : ""));
+        refreshSidebarPriority();
+    }
+
+    /** Заполнение блока срочности sidebar (копия IteractionListEdit): приоритет вакансии со
+     *  светофором (иконки StandartPriorityVacancy) и формат работы (удалённая/офисная/гибрид).
+     *  Presentation-only; вызывается из refreshSidebarInfoCard() (onBeforeShow + listener). */
+    private void refreshSidebarPriority() {
+        OpenPosition pos = getEditedEntity();
+        Integer priority = pos.getPriority();
+        String priorityStr = "";
+        String icon = null;
+        if (priority != null) {
+            switch (priority) {
+                case -1:
+                    priorityStr = StandartPriorityVacancy.DRAFT_STR;
+                    icon = StandartPriorityVacancy.DRAFT_ICON;
+                    break;
+                case 0:
+                    priorityStr = StandartPriorityVacancy.PAUSED_STR;
+                    icon = StandartPriorityVacancy.PAUSED_ICON;
+                    break;
+                case 1:
+                    priorityStr = StandartPriorityVacancy.LOW_STR;
+                    icon = StandartPriorityVacancy.LOW_ICON;
+                    break;
+                case 2:
+                    priorityStr = StandartPriorityVacancy.NORMAL_STR;
+                    icon = StandartPriorityVacancy.NORMAL_ICON;
+                    break;
+                case 3:
+                    priorityStr = StandartPriorityVacancy.HIGH_STR;
+                    icon = StandartPriorityVacancy.HIGH_ICON;
+                    break;
+                case 4:
+                    priorityStr = StandartPriorityVacancy.CRITICAL_STR;
+                    icon = StandartPriorityVacancy.CRITICAL_ICON;
+                    break;
+                default:
+                    icon = null;
+            }
+        }
+        if (!priorityStr.isEmpty()) {
+            currentPriorityLabel.setValue(priorityStr);
+            trafficLighterImage.setSource(ThemeResource.class).setPath(icon);
+        } else {
+            currentPriorityLabel.setValue("");
+            trafficLighterImage.setSource((Resource) null);
+        }
+
+        Integer remote = pos.getRemoteWork();
+        String remoteStr = "";
+        if (remote != null) {
+            switch (remote) {
+                case 0:
+                    remoteStr = "Офис";
+                    break;
+                case 1:
+                    remoteStr = "Удаленная работа";
+                    break;
+                case 2:
+                    remoteStr = "Гибрид (50/50)";
+                    break;
+                default:
+                    remoteStr = "";
+            }
+        }
+        remoteWorkSidebarLabel.setValue(remoteStr);
+    }
+
+    /** Экранирование HTML-спецсимволов для значения label (защита от разметки в названиях). */
+    private String esc(String s) {
+        return s == null ? "" : s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
     /**
