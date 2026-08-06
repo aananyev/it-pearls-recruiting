@@ -391,7 +391,7 @@
                     caption="mainMsg://openPositionEditorNavVacancy"
                     width="100%"
                     stylename="borderless label-nav-item"/>
-            <!-- Пункт «Настройки вакансии» (секция commandFieldHBox). -->
+            <!-- Пункт «Настройки вакансии» (строки даты/приоритета/признаков карточки). -->
             <button id="openPositionEditorNavSettings"
                     caption="msg://msgCommanSetup"
                     width="100%"
@@ -532,14 +532,14 @@
                   stylename="framed edit-tabs open-position-editor-tabs"
                   width="100%"
                   height="100%">
-            <!-- Вкладка «О вакансии»: идентификаторы, настройки, команда/вакансия, проект и локация,
+            <!-- Вкладка «Вакансия»: идентификаторы, настройки, команда/вакансия, проект и локация,
                  количество персонала и заработная плата. -->
             <tab id="tabOpenPosition"
-                 caption="msg://msgNamePosition"
+                 caption="msg://msgVacansy"
                  margin="true,true,true,true"
                  spacing="true"
                  icon="USERS">
-                <!-- Прокрутка содержимого вкладки «О вакансии». -->
+                <!-- Прокрутка содержимого вкладки «Вакансия». -->
                 <scrollBox id="mainTabScrollBox"
                            orientation="vertical"
                            spacing="false"
@@ -548,12 +548,12 @@
                            stylename="edit-workspace-scroll">
                     <!-- Поток карточек вкладки: ряды секций с flex-wrap по доступной ширине. -->
                     <vbox id="citiesLabelHBox" spacing="false" stylename="edit-workspace-content">
-                        <!-- Ряд карточек 1: «Идентификаторы и статус» + «Команда / Вакансия» (две колонки, flex-wrap). -->
+                        <!-- Ряд карточек 1: «Вакансия» + «Команда / Вакансия» (две колонки, flex-wrap). -->
                         <hbox id="openPositionEditorCardsRow1"
                               spacing="true"
                               width="100%"
                               stylename="open-position-editor-cards-row">
-                            <!-- Карточка «Идентификаторы и статус»: ряд идентификаторов и вложенные настройки вакансии. -->
+                            <!-- Карточка «Вакансия»: идентификаторы и настройки вакансии — строки напрямую, без вложенных блоков. -->
                             <groupBox id="openPositionEditorIdentifiersCard"
                                       caption="mainMsg://openPositionEditorIdentifiersCard"
                                       collapsable="true"
@@ -562,18 +562,9 @@
                                       spacing="true"
                                       width="100%"
                                       stylename="edit-accordion-section open-position-editor-primary-section">
-                                <!-- Блок «Вакансия»: единая область ввода — внутренний ID вакансии и название
-                                     расположены в одну линию; подпись блока «Вакансия» (caption msgVacansy). -->
-                                <groupBox id="vacancyInputGroupBox"
-                                          caption="msg://msgVacansy"
-                                          collapsable="true"
-                                          collapsed="false"
-                                          showAsPanel="true"
-                                          spacing="true"
-                                          width="100%"
-                                          stylename="edit-accordion-section open-position-editor-subsection open-position-editor-vacancy-section">
-                                    <!-- Строка 1: внутренний ID вакансии (ограничен), название (растягивается),
-                                         грейд позиции и автогенерация названия (кнопка «Генерировать»). -->
+                                <!-- Строка 1 карточки: внутренний ID вакансии (ограничен), название (растягивается),
+                                     грейд позиции (ширина по содержимому, width AUTO) и автогенерация названия
+                                     (кнопка «Генерировать») — элементы блока «Вакансия» без обёртки groupBox. -->
                                     <hbox id="vacancyNameHBox"
                                           spacing="false"
                                           width="100%"
@@ -601,9 +592,8 @@
                                                            dataContainer="openPositionDc"
                                                            property="grade"
                                                            stylename="edit-form-control"
-                                                           box.expandRatio="2"
                                                            optionsContainer="gradeDc"
-                                                           width="100%"
+                                                           width="AUTO"
                                                            caption="msg://msgGrade">
                                             <actions>
                                                 <action id="lookup"
@@ -621,17 +611,8 @@
                                     <!-- Пустой legacy-спейсер между строкой 1 и настройками (контрактный id; скрыт через SCSS). -->
                                     <hbox id="vacancyTitleSpacerHBox"
                                           stylename="open-position-editor-spacer"/>
-                                </groupBox>
-                                <!-- Вложенная секция «Настройки вакансии»: дата автозакрытия, статусы и приоритет позиции. -->
-                                <groupBox id="commandFieldHBox"
-                                          collapsable="true"
-                                          collapsed="false"
-                                          spacing="true"
-                                          showAsPanel="true"
-                                          stylename="edit-accordion-section open-position-editor-subsection"
-                                          caption="msg://msgCommanSetup"
-                                          width="100%">
-                                    <!-- Строка 2: дата закрытия, приоритет, признак черновика и эксклюзивная вакансия в ряд. -->
+                                    <!-- Строка 2 карточки: дата автозакрытия, приоритет, признак черновика и эксклюзивная
+                                         вакансия в ряд — элементы блока «Настройки вакансии» без обёртки groupBox. -->
                                     <hbox id="closingDateFieldsHBox"
                                           spacing="true"
                                           align="MIDDLE_LEFT"
@@ -699,7 +680,6 @@
                                                    stylename="edit-form-control"
                                                    width="100%"/>
                                     </hbox>
-                                </groupBox>
                             </groupBox>
                             <!-- Карточка «Команда / Вакансия»: тип записи и родительская позиция (пара 50/50). -->
                             <groupBox id="commandOrVacancyGroupBox"
