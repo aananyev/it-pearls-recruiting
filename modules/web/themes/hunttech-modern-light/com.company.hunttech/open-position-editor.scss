@@ -780,14 +780,19 @@
 
     /* Чекбоксы формы: подпись по типографике подписей полей (как caption Грейда —
      * w600, lh 17px). Виден один стилизованный квадратик темы (label::before —
-     * рамка, label::after — галочка), отцентрованный по вертикали текста подписи:
-     * label position:relative + padding-left 17px, ::before/::after absolute
-     * left:0, top:50%, translateY(-50%). Нативный input скрыт и убран из потока
-     * (absolute + clip), иначе — либо дубль квадратиков (static), либо сдвиг
-     * подписи и квадратик у верха строки (opacity без absolute). */
+     * рамка, label::after — галочка), на 50% крупнее тематического (20px вместо
+     * 13px), отцентрованный по вертикали текста подписи (label position:relative
+     * + padding-left 28px = 20px квадратик + 8px зазор до текста; ::before/::after
+     * absolute left:0, top:50%, translateY(-50%)). Нативный input скрыт и убран
+     * из потока (absolute + clip), иначе — либо дубль квадратиков (static), либо
+     * сдвиг подписи и квадратик у верха строки (opacity без absolute). */
     .open-position-editor .v-checkbox label {
       font-weight: 600 !important;
       line-height: 17px !important;
+      /* Шрифт подписи не зависит от состояния чекбокса: legacy-логика
+       * OpenPositionEdit ставит чекбоксу «Черновик вакансии» стиль h2-gray
+       * (font-size 18px bold gray) при включённом черновике — фиксируем 12px. */
+      font-size: 12px !important;
     }
 
     .open-position-editor .v-checkbox {
@@ -803,7 +808,8 @@
 
     .open-position-editor .v-checkbox label {
       position: relative;
-      padding-left: 17px;
+      /* 20px квадратик + 8px зазор до текста подписи (было 13px + 4px). */
+      padding-left: 28px;
     }
 
     .open-position-editor .v-checkbox label::before,
@@ -812,6 +818,15 @@
       left: 0;
       top: 50%;
       transform: translateY(-50%);
+      /* Стилизованная галочка на 50% крупнее тематической (13px → 20px). */
+      width: 20px !important;
+      height: 20px !important;
+    }
+
+    .open-position-editor .v-checkbox label::after {
+      font-size: 15px !important;
+      line-height: 20px !important;
+      text-align: center !important;
     }
 
     /* Подписи radio-кнопок формы: та же типографика, что у чекбоксов (как caption Грейда). */
