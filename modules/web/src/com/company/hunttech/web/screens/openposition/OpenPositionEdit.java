@@ -381,12 +381,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private OvaFallbackImage projectOwnerImage;
     @Inject
     private TabSheet tabSheetOpenPosition;
-    @Named("openPositionEditorNavIdentifiers")
-    private Button openPositionEditorNavIdentifiers;
     @Named("openPositionEditorNavVacancy")
     private Button openPositionEditorNavVacancy;
-    @Named("openPositionEditorNavSettings")
-    private Button openPositionEditorNavSettings;
     @Named("openPositionEditorNavTeam")
     private Button openPositionEditorNavTeam;
     @Named("openPositionEditorNavProject")
@@ -462,13 +458,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     /** Переключение вкладки → lazy-загрузка LOB/коллекций вкладки при первом открытии. */
     public void onTabSheetOpenPositionSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
         // Визуальная синхронизация label-навигации sidebar с открытой вкладкой (вердикт арбитра A):
-        // пункт «Идентификаторы» активен только на вкладке «Проект» (tabOpenPosition); на остальных
-        // вкладках активный пункт снимается со всех кнопок. Базовый label-nav-item не трогается.
+        // пункт «Вакансия» активен на вкладке «Вакансия» (tabOpenPosition, первый оставшийся пункт);
+        // на остальных вкладках активный пункт снимается со всех кнопок. Базовый label-nav-item не трогается.
         if (event.getSelectedTab() != null) {
             String activeTabName = event.getSelectedTab().getName();
             resetNavigationActiveStyles();
             if ("tabOpenPosition".equals(activeTabName)) {
-                openPositionEditorNavIdentifiers.addStyleName("label-nav-item-active");
+                openPositionEditorNavVacancy.addStyleName("label-nav-item-active");
             }
         }
         if (event.getSelectedTab() == null || PersistenceHelper.isNew(getEditedEntity())) {
@@ -508,9 +504,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     /** Снимает подсветку label-nav-item-active со всех пунктов навигации sidebar. */
     private void resetNavigationActiveStyles() {
-        openPositionEditorNavIdentifiers.removeStyleName("label-nav-item-active");
         openPositionEditorNavVacancy.removeStyleName("label-nav-item-active");
-        openPositionEditorNavSettings.removeStyleName("label-nav-item-active");
         openPositionEditorNavTeam.removeStyleName("label-nav-item-active");
         openPositionEditorNavProject.removeStyleName("label-nav-item-active");
         openPositionEditorNavPersonnel.removeStyleName("label-nav-item-active");
@@ -518,8 +512,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("openPositionEditorNavVacancy")
-    /** Отдельная label-навигация блока «Вакансия» (ID + название в одну линию): клик
-     *  подсвечивает пункт и переводит фокус в первое поле блока (штатная прокрутка ScrollBox). */
+    /** label-навигация карточки «Вакансия» (название + кнопка «Генерировать»): клик
+     *  подсвечивает пункт и переводит фокус в ID — начало карточки (штатная прокрутка ScrollBox). */
     public void onOpenPositionEditorNavVacancyClick(Button.ClickEvent event) {
         resetNavigationActiveStyles();
         openPositionEditorNavVacancy.addStyleName("label-nav-item-active");
@@ -527,8 +521,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("openPositionEditorNavProject")
-    /** Отдельная label-навигация блока «Параметры вакансии» (projectTypeGroupBox): клик
-     *  подсвечивает пункт и переводит фокус в поле должности (штатная прокрутка ScrollBox). */
+    /** label-навигация строк параметров карточки «Вакансия» (должность, проект, компания,
+     *  департамент, город): клик подсвечивает пункт и переводит фокус в поле должности
+     *  (штатная прокрутка ScrollBox). */
     public void onOpenPositionEditorNavProjectClick(Button.ClickEvent event) {
         resetNavigationActiveStyles();
         openPositionEditorNavProject.addStyleName("label-nav-item-active");
@@ -1331,14 +1326,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
 
-    /** Установка признака внутреннего проекта (по выбранному проекту). */
+    /** Установка признака внутреннего проекта (по выбранному проекту).
+     *  Видимость чекбокса отключена по требованию заказчика (скрыт в XML);
+     *  признак по-прежнему выставляется логикой проекта. */
     private void setInternalProject() {
-        if (getRoleService.isUserRoles(userSession.getUser(), MANAGER) ||
-                getRoleService.isUserRoles(userSession.getUser(), ADMINISTRATOR)) {
-            internalProjectCheckBox.setVisible(true);
-        } else {
-            internalProjectCheckBox.setVisible(false);
-        }
     }
 
     /** Инициализация радио-группы командного опыта. */

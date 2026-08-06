@@ -169,10 +169,8 @@
                previewProvidesAllInheritedUiComponentsAndListenerTargets требует,
                чтобы каждый @Named базового контроллера присутствовал в этом XML;
                в витрине они не участвуют (visible=false). -->
-          <button id="openPositionEditorNavIdentifiers" width="100%" visible="false" stylename="borderless label-nav-item"/>
-          <button id="openPositionEditorNavVacancy" width="100%" visible="false" stylename="borderless label-nav-item"/>
-          <button id="openPositionEditorNavSettings" width="100%" visible="false" stylename="borderless label-nav-item"/>
-          <button id="openPositionEditorNavTeam" width="100%" visible="false" stylename="borderless label-nav-item"/>
+                    <button id="openPositionEditorNavVacancy" width="100%" visible="false" stylename="borderless label-nav-item"/>
+                    <button id="openPositionEditorNavTeam" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavProject" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavPersonnel" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavSalary" width="100%" visible="false" stylename="borderless label-nav-item"/>
@@ -249,14 +247,14 @@
               <vbox width="100%" spacing="true" margin="true">
                 <groupBox id="identityStatusAccordion" caption="Реквизиты и статус" collapsable="true" collapsed="false" stylename="light edit-card" width="100%" spacing="true">
                   <hbox id="vacancyNameHBox" spacing="true" width="100%" expand="vacansyNameField">
-                    <textField id="vacansyIDTextField" dataContainer="openPositionDc" property="vacansyID" box.expandRatio="1" width="100%" caption="msg://msgVacansyID"/>
-                    <textField id="vacansyNameField" dataContainer="openPositionDc" property="vacansyName" caption="msg://msgVacansy" box.expandRatio="6" width="100%" required="true"/>
+                    <textField id="vacansyIDTextField" dataContainer="openPositionDc" property="vacansyID" width="AUTO" caption="msg://msgVacansyID"/>
+                    <textField id="vacansyNameField" dataContainer="openPositionDc" property="vacansyName" caption="msg://msgVacansy" width="100%" required="true"/>
                     <lookupPickerField id="gradeLookupPickerField" dataContainer="openPositionDc" property="grade" optionsContainer="gradeDc" width="AUTO" caption="msg://msgGrade">
                       <actions>
                         <action id="lookup" type="picker_lookup"/>
                       </actions>
                     </lookupPickerField>
-                    <button id="generateVacancyNameFieldButton" caption="msg://msgGenerateName" description="msg://msgGenerateNameDesc" align="BOTTOM_RIGHT" invoke="generateNameFieldButton"/>
+                    <button id="generateVacancyNameFieldButton" caption="msg://msgGenerateName" description="msg://msgGenerateNameDesc" width="AUTO" align="BOTTOM_RIGHT" invoke="generateNameFieldButton"/>
                   </hbox>
                   <hbox id="vacancyTitleSpacerHBox"/>
                   <groupBox id="commandFieldHBox" collapsable="true" collapsed="false" spacing="true" stylename="light" caption="msg://msgCommanSetup" width="100%">
@@ -266,7 +264,7 @@
                       <textField id="commentPriority" dataContainer="openPositionDc" property="priorityComment" width="100%"/>
                     </hbox>
                     <hbox spacing="true" width="100%">
-                      <checkBox id="signDraftCheckBox" dataContainer="openPositionDc" property="signDraft" caption="msg://msgSignDraft"/>
+                      <checkBox id="signDraftCheckBox" dataContainer="openPositionDc" property="signDraft" visible="false" caption="msg://msgSignDraft"/>
                       <checkBox id="openClosePositionCheckBox" dataContainer="openPositionDc" property="openClose" visible="false" caption="mainMsg://msgPositionClose"/>
                       <checkBox id="internalProjectCheckBox" dataContainer="openPositionDc" property="internalProject" caption="msg://msgExclusiveVacancy" visible="false"/>
                     </hbox>

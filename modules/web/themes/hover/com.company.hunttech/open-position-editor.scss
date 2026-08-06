@@ -189,9 +189,10 @@
 
     .label-nav-title,
     .v-label-label-nav-title {
-      padding: 6px 10px 8px !important;
+      padding: 4px 10px 5px !important;
       color: rgba(248, 250, 252, 0.62) !important;
       font-size: 11px !important;
+      font-weight: 700 !important;
       line-height: 16px !important;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -202,12 +203,12 @@
     .label-nav-item,
     .v-button-label-nav-item,
     .v-label-label-nav-item {
-      min-height: 27px !important;
-      padding: 3px 10px !important;
+      min-height: 34px !important;
+      padding: 6px 10px !important;
       color: rgba(248, 250, 252, 0.82) !important;
       font-size: 13px !important;
       font-weight: 600 !important;
-      line-height: 20px !important;
+      line-height: 17px !important;
       text-align: left !important;
       white-space: normal !important;
       background: transparent !important;
@@ -417,7 +418,7 @@
       max-width: none !important;
     }
 
-    .open-position-editor-tabs .v-caption {
+    .open-position-editor-tabs .v-tabsheet-tabitem .v-caption {
       box-sizing: border-box;
       height: 48px;
       width: auto !important;
@@ -683,25 +684,15 @@
       flex-wrap: nowrap;
     }
 
-    /* Строка 1 блока «Вакансия»: ID (фиксирован) + название (растягивается) + грейд
-     * (средний) + кнопка «Генерировать» (компактная) — все в один ряд без переноса. */
+    /* Строка названия: «Вакансия» (растягивается) + кнопка «Генерировать» (компактная,
+     * по содержимому) — в один ряд без переноса. */
     .open-position-editor-row-title > .v-slot:nth-child(1),
     .open-position-editor-row-title > .v-expand > .v-slot:nth-child(1) {
-      flex: 0 1 100px;
+      flex: 5 1 160px;
     }
 
     .open-position-editor-row-title > .v-slot:nth-child(2),
     .open-position-editor-row-title > .v-expand > .v-slot:nth-child(2) {
-      flex: 5 1 160px;
-    }
-
-    .open-position-editor-row-title > .v-slot:nth-child(3),
-    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(3) {
-      flex: 2 1 120px;
-    }
-
-    .open-position-editor-row-title > .v-slot:nth-child(4),
-    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(4) {
       flex: 0 0 auto;
     }
 
@@ -764,13 +755,12 @@
     .open-position-editor-field-row .v-caption {
       box-sizing: border-box;
       max-width: 100%;
-      margin-bottom: 5px;
       /* Подписи полей по эталону IteractionListEdit (контракт Edit-экранов):
-       * mix 72%, 13px/600, line-height = 13px x 1.35 = 17.55px. */
+       * mix 72%, 13px/600. Нижний отступ и явный line-height убраны —
+       * лейбл прижат к элементу ввода (дефолт Halo 1.55), как в эталоне. */
       color: mix($v-font-color, $v-panel-background-color, 72%);
       font-size: 13px !important;
       font-weight: 600 !important;
-      line-height: 17.55px !important;
       white-space: normal !important;
     }
 
@@ -1266,8 +1256,9 @@
       max-width: 100% !important;
     }
 
-    .open-position-editor-footer-actions > .v-slot > .v-button,
-    .open-position-editor-footer-actions > .v-button {
+    /* Все кнопки footer (включая вложенные в commitActions) — единая высота 40px,
+     * иначе ОК/Отмена наследуют базовую высоту Halo и съезжают по вертикали. */
+    .open-position-editor-footer-actions .v-button {
       width: auto !important;
       min-width: 118px;
       height: 40px !important;

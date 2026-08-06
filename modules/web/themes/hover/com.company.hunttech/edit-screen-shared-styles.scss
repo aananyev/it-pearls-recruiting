@@ -216,11 +216,14 @@
     height: 100% !important;
   }
 
+  /* Высота вкладок (48px) — только для подписей самих вкладок; суженный селектор
+   * не даёт min-height подписям полей внутри .edit-tabs (иначе лейбл 48px и
+   * большой зазор лейбл → поле, расходится с эталоном IteractionListEdit). */
   .edit-tabs > .v-tabsheet-tabcontainer,
   .edit-tabs .v-tabsheet-tabs,
   .edit-tabs .v-tabsheet-tabitem,
   .edit-tabs .v-tabsheet-tabitem-selected,
-  .edit-tabs .v-caption {
+  .edit-tabs .v-tabsheet-tabitem .v-caption {
     min-height: 48px;
   }
 
