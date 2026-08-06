@@ -779,9 +779,12 @@
     }
 
     /* Чекбоксы формы: подпись по типографике подписей полей (как caption Грейда —
-     * w600, lh 17px), галочка выровнена по вертикали с текстом подписи; нативный
-     * input скрыт (opacity 0) — виден только стилизованный квадратик темы
-     * (label::before/::after), иначе дублируются два квадратика с галочкой. */
+     * w600, lh 17px). Виден один стилизованный квадратик темы (label::before —
+     * рамка, label::after — галочка), отцентрованный по вертикали текста подписи:
+     * label position:relative + padding-left 17px, ::before/::after absolute
+     * left:0, top:50%, translateY(-50%). Нативный input скрыт и убран из потока
+     * (absolute + clip), иначе — либо дубль квадратиков (static), либо сдвиг
+     * подписи и квадратик у верха строки (opacity без absolute). */
     .open-position-editor .v-checkbox label {
       font-weight: 600 !important;
       line-height: 17px !important;
@@ -793,9 +796,22 @@
     }
 
     .open-position-editor .v-checkbox input {
-      position: static !important;
-      margin: 0 4px 0 0;
-      opacity: 0 !important;
+      position: absolute !important;
+      clip: rect(0, 0, 0, 0) !important;
+      margin: 0 !important;
+    }
+
+    .open-position-editor .v-checkbox label {
+      position: relative;
+      padding-left: 17px;
+    }
+
+    .open-position-editor .v-checkbox label::before,
+    .open-position-editor .v-checkbox label::after {
+      position: absolute !important;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     /* Подписи radio-кнопок формы: та же типографика, что у чекбоксов (как caption Грейда). */
