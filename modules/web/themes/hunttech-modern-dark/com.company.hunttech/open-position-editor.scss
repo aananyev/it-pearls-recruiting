@@ -1316,6 +1316,16 @@
       flex: 0 0 150px !important;
       min-width: 150px !important;
     }
+
+    /* Инфокарточка «Информация» (openPositionEditorInfoCard): фон = фон sidebar —
+       прозрачный, сквозь карточку виден тот же градиент .edit-sidebar; рамка,
+       радиус и тень карточки (edit-accordion-section) сохраняются. */
+    .edit-sidebar .open-position-editor-info-card,
+    .edit-sidebar .open-position-editor-info-card .v-panel-captionwrap,
+    .edit-sidebar .open-position-editor-info-card .v-panel-caption,
+    .edit-sidebar .open-position-editor-info-card .v-panel-content {
+      background: transparent;
+    }
   }
 }
 

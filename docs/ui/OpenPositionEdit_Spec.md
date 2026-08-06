@@ -138,7 +138,8 @@ layout (edit-screen-layout open-position-editor, dialogMode 1400×900)
 │   ├── vbox openPositionEditorNavigation (label-navigation)
 │   │   ├── openPositionEditorNavActiveSectionsLabel (label-nav-title «Разделы активной вкладки»)
 │   │   └── 7 пунктов borderless label-nav-item (5 — визуальные указатели без invoke; «Вакансия»/«Параметры вакансии»/«Зарплатное предложение» — рабочие label-навигации с кликом; первый — label-nav-item-active)
-│   ├── groupBox openPositionEditorInfoCard («Информация», edit-accordion-section + open-position-editor-info-card)
+│   ├── groupBox openPositionEditorInfoCard («Информация», edit-accordion-section + open-position-editor-info-card;
+│   │   фон карточки, caption и content — transparent, сквозь неё виден фон sidebar .edit-sidebar (#172638 градиент))
 │   │   └── vbox openPositionEditorInfoCardVBox — 6 HTML-label: infoPositionLabel («Должность» → vacansyName),
 │   │       infoProjectLabel («Проект» → projectName), infoOwnerLabel («Владелец проекта» → projectOwner),
 │   │       infoCityLabel («Город» → cityPosition), infoSalaryMaxTcLabel («Зарплата МАХ (ТК)» → salaryMax),
@@ -330,6 +331,7 @@ other screens: UNCHANGED
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-06 | Фон инфокарточки «Информация» в sidebar (`openPositionEditorInfoCard`) сделан точно как фон sidebar: `background: transparent` у карточки и её `v-panel-captionwrap`/`v-panel-caption`/`v-panel-content` (селекторы `.edit-sidebar .open-position-editor-info-card…` в `open-position-editor.scss` всех 7 тем) — сквозь карточку виден тот же градиент `.edit-sidebar` (#172638→#132130→#0f1b28); рамка/радиус/тень `edit-accordion-section` сохранены. Браузерная проверка: computed sidebar `#172638`, карточка `rgba(0,0,0,0)` (transparent), все 6 полей на месте и заполнены (Должность/Проект/Владелец/Город/МАХ ТК/МАХ ИП); канонический прогон 16/16 |
 | 2026-08-06 | Подписи radio-кнопок формы OpenPositionEdit приведены к типографике подписей чекбоксов: `.open-position-editor .v-radiobutton label` — font-weight 600 (было 400), line-height 17px (было 12.5px), размер 12px совпадал; браузерная проверка: «Команда»/«Вакансия» (commandOrPosition) = 12px w600 lh17px, идентично чекбоксам |
 | 2026-08-06 | Шрифт ввода всех текстовых полей формы OpenPositionEdit приведён к шрифту picker-поля «Грейд» (15px Verdana w400): `.open-position-editor .v-textfield`, `.v-textarea textarea`, `.v-datefield input` — 15px !important; поля владельца проекта (`.open-position-editor-owner-row .v-textfield` / `.borderless`) переведены с 12px на 15px прямо в их правиле (иначе специфичность с `.halo`-префиксом перекрывала); браузерная проверка: textfield/filterselect/datefield/owner-row — все 15px |
 | 2026-08-06 | Чекбоксы формы OpenPositionEdit выровнены по вертикали и приведены к типографике подписей полей: подписи всех `.v-checkbox` получили шрифт как у caption Грейда (12px, w600, line-height 17px); галочка выровнена по центру подписи — `.open-position-editor .v-checkbox` переведён в inline-flex с align-items:center, у input сброшен absolute-positioning темы (`position: static !important`, margin 0 4px 0 0); проверено в браузере: delta=0 у всех чекбоксов (включая фильтры проектов и salary) |
