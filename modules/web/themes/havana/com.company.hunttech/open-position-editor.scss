@@ -795,6 +795,12 @@
       margin: 0 4px 0 0;
     }
 
+    /* Подписи radio-кнопок формы: та же типографика, что у чекбоксов (как caption Грейда). */
+    .open-position-editor .v-radiobutton label {
+      font-weight: 600 !important;
+      line-height: 17px !important;
+    }
+
     /* Поля ввода текста формы: шрифт ввода как у picker-полей (Грейд) — 15px Verdana. */
     .open-position-editor .v-textfield,
     .open-position-editor .v-textarea textarea,
