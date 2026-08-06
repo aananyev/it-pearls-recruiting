@@ -267,10 +267,13 @@
 
     .open-position-editor-summary-caption,
     .open-position-editor-summary-caption.v-label {
-      color: rgba(248, 250, 252, 0.58) !important;
-      font-size: 10px !important;
+      /* Sidebar-подписи по эталону IteractionListEdit (sidebar-caption):
+       * 12px/600, rgba(248,250,252,0.62), line-height 18px, letter-spacing 0.04em. */
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 12px !important;
       font-weight: 600 !important;
-      line-height: 15px !important;
+      line-height: 18px !important;
+      letter-spacing: 0.04em;
       padding-top: 2px;
     }
 
@@ -484,10 +487,12 @@
     .edit-accordion-section .v-panel-caption {
       min-height: 44px;
       padding: 10px 15px;
-      color: mix($v-font-color, $v-panel-background-color, 92%) !important;
+      /* Заголовки секций по эталону IteractionListEdit (flat-section-title):
+       * mix 90%, 16px/700, line-height 23px. */
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
       font-size: 16px !important;
       font-weight: 700 !important;
-      line-height: 22px !important;
+      line-height: 23px !important;
       background: mix($v-app-background-color, $v-panel-background-color, 58%);
       border-left: 3px solid $v-selection-color;
       border-bottom: 1px solid rgba($v-font-color, 0.12);
@@ -760,10 +765,12 @@
       box-sizing: border-box;
       max-width: 100%;
       margin-bottom: 5px;
-      color: mix($v-font-color, $v-panel-background-color, 74%);
-      font-size: 12px !important;
+      /* Подписи полей по эталону IteractionListEdit (контракт Edit-экранов):
+       * mix 72%, 13px/600, line-height = 13px x 1.35 = 17.55px. */
+      color: mix($v-font-color, $v-panel-background-color, 72%);
+      font-size: 13px !important;
       font-weight: 600 !important;
-      line-height: 17px !important;
+      line-height: 17.55px !important;
       white-space: normal !important;
     }
 
