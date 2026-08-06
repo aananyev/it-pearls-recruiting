@@ -779,7 +779,9 @@
     }
 
     /* Чекбоксы формы: подпись по типографике подписей полей (как caption Грейда —
-     * w600, lh 17px), галочка выровнена по вертикали с текстом подписи. */
+     * w600, lh 17px), галочка выровнена по вертикали с текстом подписи; нативный
+     * input скрыт (opacity 0) — виден только стилизованный квадратик темы
+     * (label::before/::after), иначе дублируются два квадратика с галочкой. */
     .open-position-editor .v-checkbox label {
       font-weight: 600 !important;
       line-height: 17px !important;
@@ -793,6 +795,7 @@
     .open-position-editor .v-checkbox input {
       position: static !important;
       margin: 0 4px 0 0;
+      opacity: 0 !important;
     }
 
     /* Подписи radio-кнопок формы: та же типографика, что у чекбоксов (как caption Грейда). */
