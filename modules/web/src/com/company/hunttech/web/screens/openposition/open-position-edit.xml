@@ -272,37 +272,38 @@
           spacing="true"
           expand="openPositionSidebarSpacer"
           stylename="edit-sidebar">
-        <!-- Визуальный образ позиции: логотип проекта и парный аватар владельца. -->
+        <!-- Визуальный образ позиции: логотип проекта и аватар владельца одинакового размера рядом. -->
         <vbox id="openPositionSidebarVisual"
               width="100%"
               spacing="true"
               align="TOP_CENTER"
               stylename="edit-sidebar-visual">
-            <!-- Резерв 96px под изображения: логотип 88×88 (основной) и аватар владельца 70×70 (парный). -->
+            <!-- Горизонтальный контейнер показывает логотип проекта и аватар владельца одинакового
+                 размера (96×96) рядом друг с другом по центру — эталон IteractionListEdit. -->
             <hbox id="openPositionEditorLogoBox"
                   width="100%"
-                  height="96px"
+                  height="AUTO"
                   spacing="true"
-                  align="TOP_CENTER"
+                  align="MIDDLE_CENTER"
                   stylename="open-position-editor-logo-box">
-                <!-- Логотип проекта вакансии (88×88, fallback no-company.png). -->
+                <!-- Логотип проекта вакансии (96×96, fallback no-company.png). -->
                 <ovaFallbackImage id="projectLogoImage"
-                                  width="88px"
-                                  height="88px"
-                                  ovalWidth="88px"
-                                  ovalHeight="88px"
+                                  width="96px"
+                                  height="96px"
+                                  ovalWidth="96px"
+                                  ovalHeight="96px"
                                   visible="true"
                                   align="MIDDLE_CENTER"
                                   scaleMode="SCALE_DOWN"
                                   fallbackThemePath="icons/no-company.png"/>
-                <!-- Аватар владельца проекта (70×70, парный с логотипом, fallback no-programmer.jpeg). -->
+                <!-- Аватар владельца проекта (96×96, парный с логотипом, fallback no-programmer.jpeg). -->
                 <ovaFallbackImage id="projectOwnerImage"
-                                  width="70px"
-                                  height="70px"
-                                  ovalWidth="70px"
-                                  ovalHeight="70px"
+                                  width="96px"
+                                  height="96px"
+                                  ovalWidth="96px"
+                                  ovalHeight="96px"
                                   visible="true"
-                                  align="BOTTOM_RIGHT"
+                                  align="MIDDLE_CENTER"
                                   scaleMode="SCALE_DOWN"
                                   fallbackThemePath="icons/no-programmer.jpeg"/>
             </hbox>
@@ -380,30 +381,33 @@
                    value="mainMsg://openPositionEditorNavActiveSections"
                    width="100%"
                    stylename="label-nav-title"/>
-            <!-- Пункт «Вакансия» — label-навигация карточки «Вакансия» (название + кнопка «Генерировать»):
-                 клик подсвечивает пункт и переводит фокус в ID (начало карточки). -->
+                        <!-- Пункт «Наименование» — label-навигация блока «Наименование» (ID, грейд, название, «Генерировать»):
+                 клик подсвечивает пункт и переводит фокус в ID (начало блока). -->
+            <button id="openPositionEditorNavName"
+                    caption="mainMsg://msgName"
+                    width="100%"
+                    stylename="borderless label-nav-item"/>
+            <!-- Пункт «Параметры вакансии» — label-навигация блока openPositionParamsGroupBox
+                 (приоритет, удалёнка, дата закрытия, комментарий): клик подсвечивает пункт
+                 и переводит фокус в поле приоритета (начало блока). -->
+            <button id="openPositionEditorNavParams"
+                    caption="msg://msgVacancyParams"
+                width="100%"
+                stylename="borderless label-nav-item"/>
+            <!-- Пункт «Вакансия» — label-навигация карточки «Вакансия» (приоритет, должность, проект,
+                 компания, департамент, город): клик подсвечивает пункт и переводит фокус
+                 в поле приоритета (начало карточки). -->
             <button id="openPositionEditorNavVacancy"
                     caption="mainMsg://openPositionEditorNavVacancy"
                     width="100%"
                     stylename="borderless label-nav-item"/>
-            <!-- Пункт «Параметры вакансии» — label-навигация строк параметров карточки «Вакансия»
-                 (должность, проект, компания, департамент, город): клик подсвечивает пункт
-                 и переводит фокус в поле должности. -->
-            <button id="openPositionEditorNavProject"
-                    caption="mainMsg://openPositionEditorNavProject"
-                    width="100%"
-                    stylename="borderless label-nav-item"/>
-            <!-- Пункт «Количество персонала» (плоская строка numberPositionHBox блока «Команда / Вакансия»). -->
-            <button id="openPositionEditorNavPersonnel"
-                    caption="msg://msgCountOfPersonel"
-                    width="100%"
-                    stylename="borderless label-nav-item"/>
-            <!-- Пункт «Команда / Вакансия» (секция commandOrVacancyGroupBox). -->
+            <!-- Пункт «Команда» — label-навигация блока «Команда / Вакансия» (commandOrVacancyGroupBox):
+                 клик подсвечивает пункт и переводит фокус в radio «Команда/Вакансия». -->
             <button id="openPositionEditorNavTeam"
-                    caption="msg://msgCommandOrVacancy"
+                    caption="msg://msgCommand"
                     width="100%"
                     stylename="borderless label-nav-item"/>
-            <!-- Пункт «Зарплатное предложение» — отдельная label-навигация блока salaryGroupBox
+            <!-- Пункт «Зарплатное предложение» — label-навигация блока salaryGroupBox
                  (клик подсвечивает пункт и переводит фокус в поле минимальной зарплаты). -->
             <button id="openPositionEditorNavSalary"
                     caption="msg://msgSalaryProposal"
@@ -539,7 +543,116 @@
                            stylename="edit-workspace-scroll">
                     <!-- Поток карточек вкладки: ряды секций с flex-wrap по доступной ширине. -->
                     <vbox id="citiesLabelHBox" spacing="false" stylename="edit-workspace-content">
-                        <!-- Ряд карточек 1: «Вакансия» + «Команда / Вакансия» (две колонки, flex-wrap). -->
+                        <!-- Блок «Наименование»: ID, название вакансии и автогенерация названия — самый верх вкладки «Вакансия». -->
+                        <groupBox id="openPositionNameGroupBox"
+                                  caption="mainMsg://msgName"
+                                  collapsable="true"
+                                  collapsed="false"
+                                  showAsPanel="true"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="edit-accordion-section">
+                            <!-- Строка наименования: ID (по содержимому), название вакансии (растягивается
+                                 на всё свободное место), кнопка «Генерировать» (по содержимому). -->
+                            <hbox id="openPositionNameRow"
+                                  spacing="true"
+                                  width="100%"
+                                  stylename="open-position-editor-field-row open-position-editor-row-title">
+                                 <!-- Внутренний ID вакансии (vacansyID) — 1/10 ширины строки. -->
+                                <textField id="vacansyIDTextField"
+                                            dataContainer="openPositionDc"
+                                            property="vacansyID"
+                                            stylename="edit-form-control"
+                                            width="110px"
+                                            caption="msg://msgVacansyID"/>
+                                 <!-- Грейд позиции (options из gradeDc) — 1/10 ширины строки. -->
+                                <lookupPickerField id="gradeLookupPickerField"
+                                            dataContainer="openPositionDc"
+                                            property="grade"
+                                            stylename="edit-form-control"
+                                            optionsContainer="gradeDc"
+                                            width="110px"
+                                            caption="msg://msgGrade">
+                                    <actions>
+                                        <action id="lookup"
+                                        type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                                 <!-- Название вакансии (обязательное поле) — 7/10 ширины строки. -->
+                                <textField id="vacansyNameField"
+                                            dataContainer="openPositionDc"
+                                            property="vacansyName"
+                                            caption="msg://msgVacansy"
+                                            stylename="edit-form-control"
+                                            width="100%"
+                                            box.expandRatio="1"
+                                            required="true"/>
+                                 <!-- Автогенерация названия вакансии по типу позиции (generateNameFieldButton) — 1/10 ширины. -->
+                                <button id="generateVacancyNameFieldButton"
+                                            caption="msg://msgGenerateName"
+                                            description="msg://msgGenerateNameDesc"
+                                            width="110px"
+                                            align="BOTTOM_RIGHT"
+                                            invoke="generateNameFieldButton"/>
+                                </hbox>
+                        </groupBox>
+                        <!-- Блок «Параметры вакансии»: приоритет, формат удалённой работы, дата закрытия и комментарий к приоритету. -->
+                        <groupBox id="openPositionParamsGroupBox"
+                  caption="msg://msgVacancyParams"
+                  collapsable="true"
+                  collapsed="false"
+                  showAsPanel="true"
+                  spacing="true"
+                  width="100%"
+                  stylename="edit-accordion-section">
+<hbox id="vacancyTopRow"
+                              spacing="true"
+                              width="100%"
+                              stylename="open-position-editor-field-row open-position-editor-row-half">
+<!-- Приоритет позиции (обязательный): влияет на сортировку и срочные списки. -->
+                            <lookupField id="priorityField"
+                                         dataContainer="openPositionDc"
+                                         property="priority"
+                                         caption="msg://msgPriorityPosition"
+                                         required="true"
+                                         nullOptionVisible="false"
+                                         align="BOTTOM_LEFT"
+                                         stylename="edit-form-control open-position-editor-priority-field"
+                                         width="AUTO"/>
+<!-- Формат удалённой работы (remoteWork, обязательный). -->
+                            <lookupField id="remoteWorkField"
+                                         dataContainer="openPositionDc"
+                                         property="remoteWork"
+                                         nullOptionVisible="false"
+                                         required="true"
+                                         align="MIDDLE_LEFT"
+                                         caption="msg://msgRemoteWork"
+                                         stylename="edit-form-control"
+                                         width="AUTO"/>
+<!-- Дата автоматического закрытия вакансии: после неё кандидаты не принимаются. -->
+                            <dateField id="closingDateDateField"
+                                       dataContainer="openPositionDc"
+                                       property="closingDate"
+                                       caption="msg://msgClosingDate"
+                                       description="msg://msgClosingDateDesc"
+                                       stylename="edit-form-control"/>
+                        </hbox>
+<hbox id="priorityFieldsHBox"
+                              spacing="true"
+                              width="100%"
+                              expand="commentPriority"
+                              height="AUTO">
+                            <!-- Комментарий к приоритету позиции. -->
+                            <textField id="commentPriority"
+                                       dataContainer="openPositionDc"
+                                       property="priorityComment"
+                                       caption="msg://msgOpenPositionComment"
+                                       align="BOTTOM_LEFT"
+                                       stylename="edit-form-control"
+                                       width="100%"/>
+                        </hbox>
+                        </groupBox>
+<!-- Ряд карточек 1: «Вакансия» + «Команда / Вакансия» (две колонки, flex-wrap). -->
                         <hbox id="openPositionEditorCardsRow1"
                               spacing="true"
                               width="100%"
@@ -553,58 +666,6 @@
                                       spacing="true"
                                       width="100%"
                                       stylename="edit-accordion-section open-position-editor-primary-section">
-<hbox id="vacancyTopRow"
-                                      spacing="true"
-                                      width="100%"
-                                      stylename="open-position-editor-field-row open-position-editor-row-half">
-<!-- Внутренний ID вакансии (vacansyID). -->
-                                    <textField id="vacansyIDTextField"
-                                               dataContainer="openPositionDc"
-                                               property="vacansyID"
-                                               stylename="edit-form-control"
-                                               width="AUTO"
-                                               caption="msg://msgVacansyID"/>
-<!-- Грейд позиции (options из gradeDc; ширина по содержимому). -->
-                                    <lookupPickerField id="gradeLookupPickerField"
-                                                       dataContainer="openPositionDc"
-                                                       property="grade"
-                                                       stylename="edit-form-control"
-                                                       optionsContainer="gradeDc"
-                                                       width="AUTO"
-                                                       caption="msg://msgGrade">
-                                        <actions>
-                                            <action id="lookup"
-                                                    type="picker_lookup"/>
-                                        </actions>
-                                    </lookupPickerField>
-<!-- Приоритет позиции (обязательный): влияет на сортировку и срочные списки. -->
-                                    <lookupField id="priorityField"
-                                                 dataContainer="openPositionDc"
-                                                 property="priority"
-                                                 caption="msg://msgPriorityPosition"
-                                                 required="true"
-                                                 nullOptionVisible="false"
-                                                 align="BOTTOM_LEFT"
-                                                 stylename="edit-form-control open-position-editor-priority-field"
-                                                 width="AUTO"/>
-<!-- Формат удалённой работы (remoteWork, обязательный). -->
-                                    <lookupField id="remoteWorkField"
-                                                 dataContainer="openPositionDc"
-                                                 property="remoteWork"
-                                                 nullOptionVisible="false"
-                                                 required="true"
-                                                 align="MIDDLE_LEFT"
-                                                 caption="msg://msgRemoteWork"
-                                                 stylename="edit-form-control"
-                                                 width="AUTO"/>
-<!-- Дата автоматического закрытия вакансии: после неё кандидаты не принимаются. -->
-                                    <dateField id="closingDateDateField"
-                                               dataContainer="openPositionDc"
-                                               property="closingDate"
-                                               caption="msg://msgClosingDate"
-                                               description="msg://msgClosingDateDesc"
-                                               stylename="edit-form-control"/>
-                                </hbox>
 <hbox id="vacancyMainRow"
                                       spacing="true"
                                       width="100%"
@@ -732,27 +793,6 @@
                                                stylename="edit-form-control"
                                                width="100%"/>
                                 </hbox>
-<hbox id="vacancyNameHBox"
-                                      spacing="false"
-                                      width="100%"
-                                      expand="vacansyNameField"
-                                      stylename="open-position-editor-field-row open-position-editor-row-title">
-                                    <!-- Название вакансии (обязательное поле). -->
-                                    <textField id="vacansyNameField"
-                                               dataContainer="openPositionDc"
-                                               property="vacansyName"
-                                               caption="msg://msgVacansy"
-                                               stylename="edit-form-control"
-                                               width="100%"
-                                               required="true"/>
-                                    <!-- Автогенерация названия вакансии по типу позиции (generateNameFieldButton). -->
-                                    <button id="generateVacancyNameFieldButton"
-                                            caption="msg://msgGenerateName"
-                                            description="msg://msgGenerateNameDesc"
-                                            width="AUTO"
-                                            align="BOTTOM_RIGHT"
-                                            invoke="generateNameFieldButton"/>
-                                </hbox>
 <hbox id="vacancyFlagsRow"
                                       spacing="true"
                                       width="100%"
@@ -786,24 +826,12 @@
 <hbox id="projectFilterCheckBoxesHBox" spacing="true">
                                     <!-- Фильтр списка проектов: только незакрытые. -->
                                     <checkBox id="onlyOpenProjectCheckBox"
+                                              visible="false"
                                               caption="msg://msgOnlyOpenedProject"/>
                                     <!-- Фильтр списка проектов: с учётом наличия открытых позиций. -->
                                     <checkBox id="withOpenPositionCheckBox"
+                                              visible="false"
                                               caption="msg://msgWithOpenPosition"/>
-                                </hbox>
-<hbox id="priorityFieldsHBox"
-                                      spacing="true"
-                                      width="100%"
-                                      expand="commentPriority"
-                                      height="AUTO">
-                                    <!-- Комментарий к приоритету позиции. -->
-                                    <textField id="commentPriority"
-                                               dataContainer="openPositionDc"
-                                               property="priorityComment"
-                                               caption="msg://msgOpenPositionComment"
-                                               align="BOTTOM_LEFT"
-                                               stylename="edit-form-control"
-                                               width="100%"/>
                                 </hbox>
 <hbox id="vacancyTitleSpacerHBox"
                                       stylename="open-position-editor-spacer"/>

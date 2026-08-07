@@ -65,12 +65,16 @@
       flex-direction: column !important;
       align-items: stretch !important;
       min-height: 0 !important;
-      padding: 10px 12px 11px;
+      padding: 6px 12px 4px;
       text-align: center;
       background: rgba(255, 255, 255, 0.055);
       border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: 8px;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .edit-sidebar-visual .v-spacing {
+      height: 4px !important;
     }
 
     .edit-sidebar-visual > .v-slot {
@@ -91,10 +95,10 @@
       justify-content: center !important;
       width: 100% !important;
       min-width: 0 !important;
-      height: 96px !important;
-      min-height: 96px !important;
-      max-height: 96px !important;
-      margin: 0 0 4px !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      margin: 0 !important;
       overflow: visible !important;
     }
 
@@ -114,12 +118,12 @@
     .open-position-editor-logo-box .v-image img,
     .open-position-editor-logo-box .v-image-element {
       box-sizing: border-box;
-      width: 88px !important;
-      height: 88px !important;
-      min-width: 88px !important;
-      min-height: 88px !important;
-      max-width: 88px !important;
-      max-height: 88px !important;
+      width: 96px !important;
+      height: 96px !important;
+      min-width: 96px !important;
+      min-height: 96px !important;
+      max-width: 96px !important;
+      max-height: 96px !important;
       border-radius: 50% !important;
       object-fit: contain !important;
       background: #ffffff;
@@ -139,7 +143,7 @@
       z-index: 2;
       width: 100% !important;
       min-width: 0 !important;
-      padding: 7px 2px 1px !important;
+      padding: 3px 2px 0 !important;
       text-align: left;
     }
 
@@ -189,7 +193,7 @@
 
     .label-nav-title,
     .v-label-label-nav-title {
-      padding: 4px 10px 5px !important;
+      padding: 6px 10px 8px !important;
       color: rgba(248, 250, 252, 0.62) !important;
       font-size: 11px !important;
       font-weight: 700 !important;
@@ -203,12 +207,12 @@
     .label-nav-item,
     .v-button-label-nav-item,
     .v-label-label-nav-item {
-      min-height: 34px !important;
-      padding: 6px 10px !important;
+      min-height: 27px !important;
+      padding: 3px 10px !important;
       color: rgba(248, 250, 252, 0.82) !important;
       font-size: 13px !important;
       font-weight: 600 !important;
-      line-height: 17px !important;
+      line-height: 20px !important;
       text-align: left !important;
       white-space: normal !important;
       background: transparent !important;
@@ -249,7 +253,7 @@
      * типографикой captions и акцентными значениями.
      */
     .edit-sidebar-summary {
-      padding: 9px 10px;
+      padding: 3px 10px 2px;
       color: #f8fafc;
       background: rgba(255, 255, 255, 0.055);
       border: 1px solid rgba(255, 255, 255, 0.14);
@@ -328,6 +332,8 @@
     .edit-sidebar-warning,
     .edit-sidebar-warning.v-label {
       box-sizing: border-box;
+      padding: 3px 8px !important;
+      line-height: 14px !important;
       width: 100% !important;
       padding: 6px 8px;
       color: #ffd27a !important;
@@ -407,11 +413,52 @@
     .open-position-editor-tabs .v-tabsheet-tabs,
     .open-position-editor-tabs .v-tabsheet-tabitem,
     .open-position-editor-tabs .v-tabsheet-tabitem-selected {
-      height: 48px;
+      min-height: 48px;
       max-width: none !important;
       background: transparent !important;
       border: 0 !important;
       box-shadow: none !important;
+    }
+
+    /* Вкладки переносятся на новую строку при нехватке ширины (12 вкладок на
+     * узких разрешениях) — полоса не выходит за правый край экрана, все
+     * вкладки остаются доступными без скролла. Контент вкладки растягивается
+     * на остаток высоты вместо жёсткого calc(100% - 49px). */
+    .open-position-editor-tabs {
+      display: flex !important;
+      flex-direction: column !important;
+      max-width: 100% !important;
+    }
+
+    .open-position-editor-tabs .v-tabsheet-tabcontainer {
+      overflow: visible !important;
+      max-width: 100% !important;
+      flex: 0 0 auto;
+    }
+
+    .open-position-editor-tabs .v-tabsheet-tabs {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      white-space: normal !important;
+      height: auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+
+    .open-position-editor-tabs .v-tabsheet-content {
+      height: auto !important;
+      min-height: 0 !important;
+      flex: 1 1 auto !important;
+    }
+
+    /* Контент вкладки сжимается вместе с окном (flex min-width: auto растягивает
+     * вложенные лэйауты за правый край на узких разрешениях). */
+    .open-position-editor-tabs .v-tabsheet-tabsheetpanel,
+    .open-position-editor-tabs .v-tabsheet-content > .v-scrollable,
+    .open-position-editor-tabs .v-tabsheet-content .v-verticallayout,
+    .edit-workspace-scroll {
+      min-width: 0 !important;
+      max-width: 100% !important;
     }
 
     .open-position-editor-tabs .v-tabsheet-tabitemcell {
@@ -446,7 +493,7 @@
 
     .open-position-editor-tabs .v-tabsheet-content {
       width: 100% !important;
-      height: calc(100% - 49px) !important;
+      height: auto !important;
       padding: 14px 16px 18px;
       background: mix($v-app-background-color, $v-panel-background-color, 86%) !important;
       overflow: auto;
@@ -684,31 +731,38 @@
       flex-wrap: nowrap;
     }
 
-    /* Строка 1 блока «Вакансия»: ID (фиксирован) + название (растягивается) + грейд
-     * (средний) + кнопка «Генерировать» (компактная) — все в один ряд без переноса. */
+    /* Строка наименования: ID (1), грейд (3) и кнопка «Генерировать» (7) — фиксированная
+     * ширина 110px (не растягиваются); название вакансии (5) занимает всё свободное место.
+     * CUBA рендерит слоты с v-spacing между ними, поэтому позиции слотов — 1, 3, 5, 7;
+     * оба варианта DOM (слоты прямо в строке либо внутри .v-expand) покрыты. */
     .open-position-editor-row-title > .v-slot:nth-child(1),
-    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(1) {
-      flex: 0 1 100px;
-    }
-
-    .open-position-editor-row-title > .v-slot:nth-child(2),
-    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(2) {
-      flex: 5 1 160px;
-    }
-
     .open-position-editor-row-title > .v-slot:nth-child(3),
-    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(3) {
-      flex: 2 1 120px;
+    .open-position-editor-row-title > .v-slot:nth-child(7),
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(1),
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(3),
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(7) {
+      flex: 0 0 auto !important;
     }
 
-    .open-position-editor-row-title > .v-slot:nth-child(4),
-    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(4) {
-      flex: 0 0 auto;
+    .open-position-editor-row-title > .v-slot:nth-child(1) > *,
+    .open-position-editor-row-title > .v-slot:nth-child(3) > *,
+    .open-position-editor-row-title > .v-slot:nth-child(7) > *,
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(1) > *,
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(3) > *,
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(7) > * {
+      width: 110px !important;
     }
 
-    /* Строка 2 титульного блока (E): грейд растягивается, кнопка «Генерировать» — компактная
-     * (flex 0 0 auto, ширина по содержимому; переопределяет width:100% общего правила строк).
-     * CUBA 7.3 рендерит детей HBox внутри обёртки v-expand — селекторы покрывают обе формы DOM. */
+    .open-position-editor-row-title > .v-slot:nth-child(5),
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(5) {
+      flex: 1 1 0 !important;
+    }
+
+    .open-position-editor-row-title > .v-slot:nth-child(5) > *,
+    .open-position-editor-row-title > .v-expand > .v-slot:nth-child(5) > * {
+      width: 100% !important;
+    }
+
     .open-position-editor-row-grade > .v-expand,
     .open-position-editor-row-grade > .v-expand > .v-slot {
       flex: 3 1 420px;
@@ -1233,7 +1287,7 @@
       display: flex !important;
       align-items: center;
       justify-content: flex-end;
-      flex-wrap: wrap !important;
+      flex-wrap: nowrap !important;
       gap: 10px;
       width: auto !important;
       min-width: 0 !important;
@@ -1270,9 +1324,9 @@
      * иначе ОК/Отмена наследуют базовую высоту Halo и съезжают по вертикали. */
     .open-position-editor-footer-actions .v-button {
       width: auto !important;
-      min-width: 118px;
+      min-width: 110px;
       height: 40px !important;
-      padding: 0 18px !important;
+      padding: 0 14px !important;
     }
 
     .open-position-editor-primary-action {
@@ -1362,11 +1416,95 @@
     /* Инфокарточка «Информация» (openPositionEditorInfoCard): фон = фон sidebar —
        прозрачный, сквозь карточку виден тот же градиент .edit-sidebar; рамка,
        радиус и тень карточки (edit-accordion-section) сохраняются. */
+    /* Тонкий скроллбар sidebar (запас под заполненный контент: контекст вакансии,
+     * комиссии, длинные названия) — незаметный, не спорит с тёмным фоном. */
+    .edit-sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .edit-sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 3px;
+    }
+
+    .edit-sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
     .edit-sidebar .open-position-editor-info-card,
     .edit-sidebar .open-position-editor-info-card .v-panel-captionwrap,
     .edit-sidebar .open-position-editor-info-card .v-panel-caption,
     .edit-sidebar .open-position-editor-info-card .v-panel-content {
       background: transparent;
+    }
+
+    /* Инфокарточка: компактный caption и content — больше места под
+     * «Контекст вакансии» и предупреждение внизу sidebar. */
+    .edit-sidebar .open-position-editor-info-card {
+      margin-bottom: 2px !important;
+    }
+
+    .edit-sidebar .open-position-editor-info-card .v-panel-caption {
+      padding: 6px 15px 5px !important;
+      line-height: 20px !important;
+    }
+
+    .edit-sidebar .open-position-editor-info-card .v-panel-content {
+      padding: 10px 18px 8px !important;
+    }
+
+    /* Поля информационной карточки — компактный шаг строк (эталон IteractionListEdit
+     * vacancy-card): без вертикальных margin, межстрочный 20px; интервалы vbox
+     * (v-spacing) ужаты с 10px до 4px. */
+    .edit-sidebar .open-position-editor-info-card .v-label {
+      margin: 0 !important;
+      line-height: 18px !important;
+    }
+
+    .edit-sidebar .open-position-editor-info-card .v-spacing {
+      height: 4px !important;
+    }
+
+    /* Компактный режим для низких окон (≤800px высоты): ужимаем вертикальные
+     * зазоры и межстрочные интервалы sidebar, чтобы весь контент (включая
+     * предупреждение внизу) помещался без прокрутки. */
+    @media (max-height: 800px) {
+      .open-position-editor .edit-sidebar-visual.edit-sidebar-visual {
+        padding: 4px 12px 2px !important;
+      }
+
+      .open-position-editor .edit-sidebar-visual .v-spacing {
+        height: 2px !important;
+      }
+
+      .open-position-editor .edit-sidebar .open-position-editor-info-card .v-label.v-label {
+        line-height: 16px !important;
+      }
+
+      .open-position-editor .edit-sidebar .open-position-editor-info-card .v-spacing.v-spacing {
+        height: 3px !important;
+      }
+
+      .open-position-editor .edit-sidebar .open-position-editor-info-card .v-panel-content.v-panel-content {
+        padding: 8px 18px 6px !important;
+      }
+
+      .open-position-editor .edit-sidebar-summary.edit-sidebar-summary {
+        padding: 2px 10px 1px !important;
+      }
+
+      .open-position-editor .label-nav-title.label-nav-title {
+        padding: 5px 10px 6px !important;
+      }
+
+      .open-position-editor .label-nav-item.label-nav-item {
+        padding: 2px 10px !important;
+        min-height: 25px !important;
+      }
+
+      .open-position-editor .edit-sidebar-warning.edit-sidebar-warning {
+        padding: 2px 8px !important;
+      }
     }
   }
 }
