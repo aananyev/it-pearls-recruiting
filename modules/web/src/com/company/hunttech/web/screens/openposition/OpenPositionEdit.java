@@ -2819,24 +2819,18 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     /** Формирование шапки формы: название, комиссии, статус и логотипы. */
     private void setTopLabel() {
         try {
+            // Название должности под логотипами (по NamePattern «Ru / En»),
+            // обновляется независимо от компании/проекта.
+            Position positionType = positionTypeField.getValue();
+            labelOpenPosition.setValue(positionType != null ? positionType.getInstanceName() : "");
+            labelOpenPosition.addStyleName("h3");
+
             if (vacansyNameField.getValue() != null && projectNameField.getValue() != null) {
                 if (projectNameField.getValue() != null) {
                     if (projectNameField.getValue().getProjectDepartment() != null) {
                         if (projectNameField.getValue().getProjectDepartment().getCompanyName() != null) {
                             if (projectNameField.getValue().getProjectDepartment().getCompanyName() != null) {
-                                if (projectNameField.getValue().getProjectDepartment().getCompanyName().getComanyName() != null) {
-                                    String comanyName = projectNameField.getValue().getProjectDepartment().getCompanyName().getComanyName();
-
-                                    labelOpenPosition.setValue(vacansyNameField.getValue() +
-                                            " (" +
-                                            (comanyName != null ? comanyName : "") +
-                                            " : " +
-                                            projectNameField.getValue().getProjectName() +
-                                            ")");
-                                    labelOpenPosition.addStyleName("h3");
-                                }
-
-                                // а еще вывести комиссию
+                            // а еще вывести комиссию
                                 if (getRoleService.isUserRoles(userSession.getUser(), RESEARCHER)) {
                                     labelTopComissionResearcher.setValue(labelResearcherSalary.getValue());
                                     labelTopComissionResearcher.setVisible(true);
@@ -3088,6 +3082,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 }
             }
         }
+        // Название должности в sidebar обновляем сразу после выбора (title под логотипами).
+        setTopLabel();
     }
 
     @Subscribe("projectNameField")
@@ -3465,11 +3461,13 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         UUID positionId = event.getValue().getId();
         if (current != null && positionId.equals(current.getId()) && positionTypeDescriptionLobsLoaded(current)) {
             applyPositionTypeDescriptionUi(current);
+            setTopLabel();
             return;
         }
         Position reloaded = loadPositionWithDescriptionLobs(positionId);
         setPositionTypeOnEntity(reloaded);
         applyPositionTypeDescriptionUi(reloaded);
+        setTopLabel();
     }
 
     @Subscribe("more10NumberPositionField")
