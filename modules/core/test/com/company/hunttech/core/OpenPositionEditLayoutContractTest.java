@@ -514,6 +514,56 @@ public class OpenPositionEditLayoutContractTest {
         assertFalse(scss.contains("job-candidate-"));
     }
 
+    @Test
+    public void sidebarSectionTitlesMatchInfoCardCaptionStyle() throws IOException {
+        String descriptor = readProjectFile(EDIT_XML);
+
+        // Оба заголовка секций sidebar несут класс open-position-editor-section-title
+        // поверх базового label-nav-title.
+        String navSectionsLabel = startTag(descriptor, "openPositionEditorNavActiveSectionsLabel");
+        String contextLabel = startTag(descriptor, "openPositionEditorContextLabel");
+        assertTrue("«Разделы активной вкладки» не получил класс open-position-editor-section-title",
+                navSectionsLabel.contains("label-nav-title open-position-editor-section-title"));
+        assertTrue("«Контекст вакансии» не получил класс open-position-editor-section-title",
+                contextLabel.contains("label-nav-title open-position-editor-section-title"));
+
+        // Стиль заголовка секции = caption инфокарточки «Информация» (1:1) во всех 7 темах.
+        String caption = "    .edit-sidebar .open-position-editor-info-card .v-panel-caption {";
+        String sectionTitle = "    .edit-sidebar .open-position-editor-section-title {";
+        for (String theme : THEMES) {
+            String scss = readProjectFile(themeScssPath(theme));
+            assertTrue("В теме " + theme + " нет caption инфокарточки",
+                    scss.contains(caption));
+            assertTrue("В теме " + theme + " нет класса open-position-editor-section-title",
+                    scss.contains(sectionTitle));
+            String sectionBlock = section(scss, sectionTitle, "    }\n\n    .edit-sidebar .open-position-editor-info-card .v-panel-content {");
+            String captionBlock = section(scss, caption, "    }\n\n    .edit-sidebar .open-position-editor-info-card .v-panel-content {");
+            for (String value : Arrays.asList(
+                    "min-height: 36px !important;",
+                    "padding: 7px 11px !important;",
+                    "color: #ffb11b !important;",
+                    "font-size: 15px !important;",
+                    "font-weight: 700 !important;",
+                    "line-height: 21px !important;",
+                    "background: rgba(255, 255, 255, 0.045) !important;",
+                    "border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;")) {
+                assertTrue("В теме " + theme + " секционный заголовок расходится с caption «Информация»: " + value,
+                        sectionBlock.contains(value) && captionBlock.contains(value));
+            }
+            // Две горизонтальные inset-линии полосы заголовка (белая сверху, светлая снизу) —
+            // как у caption «Информации» (там это вало-дефолт v-panel-caption, поэтому
+            // в SCSS-caption их нет; у секционных заголовков задаём явно).
+            assertTrue("В теме " + theme + " нет белой inset-линии сверху",
+                    sectionBlock.contains("rgba(255, 255, 255, 1) 0 1px 0 0 inset"));
+            assertTrue("В теме " + theme + " нет светлой inset-линии снизу",
+                    sectionBlock.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset"));
+        }
+    }
+
+    private String themeScssPath(String theme) {
+        return "modules/web/themes/" + theme + "/com.company.hunttech/" + LOCAL_STYLE;
+    }
+
     private String section(String text, String start, String end) {
         int s = text.indexOf(start);
         assertTrue("Не найден маркер " + start, s >= 0);

@@ -376,11 +376,12 @@
               width="100%"
               spacing="false"
               stylename="label-navigation">
-            <!-- Заголовок навигационного набора «РАЗДЕЛЫ АКТИВНОЙ ВКЛАДКИ» (статический). -->
+            <!-- Заголовок навигационного набора «РАЗДЕЛЫ АКТИВНОЙ ВКЛАДКИ»: стиль карточки
+                 «Информация» (полоса с фоном и разделителем снизу), статический. -->
             <label id="openPositionEditorNavActiveSectionsLabel"
                    value="mainMsg://openPositionEditorNavActiveSections"
                    width="100%"
-                   stylename="label-nav-title"/>
+                   stylename="label-nav-title open-position-editor-section-title"/>
                         <!-- Пункт «Наименование» — label-навигация блока «Наименование» (ID, грейд, название, «Генерировать»):
                  клик подсвечивает пункт и переводит фокус в ID (начало блока). -->
             <button id="openPositionEditorNavName"
@@ -464,11 +465,12 @@
               width="100%"
               spacing="true"
               stylename="edit-sidebar-summary open-position-editor-summary-grid">
-            <!-- Заголовок блока «КОНТЕКСТ ВАКАНСИИ» (статический визуальный заголовок). -->
+            <!-- Заголовок блока «КОНТЕКСТ ВАКАНСИИ»: стиль карточки «Информация»
+                 (полоса с фоном и разделителем снизу), статический визуальный заголовок. -->
             <label id="openPositionEditorContextLabel"
                    value="mainMsg://openPositionEditorNavContext"
                    width="100%"
-                   stylename="label-nav-title"/>
+                   stylename="label-nav-title open-position-editor-section-title"/>
             <!-- Сводка городов позиции (значение формирует changeCityListsLabel()). -->
             <label id="citiesLabel"
                    width="100%"

@@ -440,10 +440,11 @@
                       width="100%"
                       spacing="false"
                       stylename="job-candidate-navigation label-navigation">
-                    <!-- Заголовок блока навигации по разделам формы. -->
+                    <!-- Заголовок «Разделы формы» навигации: полоса-заголовок с двумя
+                         горизонтальными inset-линиями (контракт §4.1), класс job-candidate-section-title. -->
                     <label value="msg://msgFormSections"
                            width="100%"
-                           stylename="label-nav-title"/>
+                           stylename="label-nav-title job-candidate-section-title"/>
                     <!-- Переход на вкладку «Основное» (активна по умолчанию). -->
                     <button id="candidateNavMain" invoke="candidateNavMain"
                             caption="msg://msgTabMain"

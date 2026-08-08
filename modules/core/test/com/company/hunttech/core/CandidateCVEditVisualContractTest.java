@@ -336,6 +336,63 @@ public class CandidateCVEditVisualContractTest {
         }
     }
 
+    @Test
+    public void sectionTitlesHaveTwoInsetLinesLikeInfoCaption() throws IOException {
+        String xml = readProjectFile(SCREEN_XML);
+
+        // Оба заголовка разделов sidebar несут свои локальные классы полосы.
+        assertTrue(xml.contains("stylename=\"candidate-cv-navigation-title\""));
+        assertTrue(xml.contains("stylename=\"candidate-cv-sidebar-card-title\""));
+
+        String scss = readProjectFile(
+                "modules/web/themes/halo/com.company.hunttech/candidate-cv-editor.scss");
+        String navigationBlock = section(scss,
+                ".candidate-cv-navigation-title,",
+                ".candidate-cv-tab-navigation {");
+        String cardTitleBlock = section(scss,
+                ".candidate-cv-sidebar-card-title,",
+                ".candidate-cv-sidebar-info-row {");
+
+        // Полоса заголовка навигации повторяет caption инфокарточки (контракт §4.1):
+        // две горизонтальные inset-линии (белая сверху, светлая снизу) + разделитель снизу.
+        assertTrue(navigationBlock.contains("min-height: 36px !important;"));
+        assertTrue(navigationBlock.contains("padding: 7px 11px !important;"));
+        assertTrue(navigationBlock.contains("color: #ffb11b !important;"));
+        assertTrue(navigationBlock.contains("font-size: 15px !important;"));
+        assertTrue(navigationBlock.contains("font-weight: 700 !important;"));
+        assertTrue(navigationBlock.contains("line-height: 21px !important;"));
+        assertTrue(navigationBlock.contains("text-transform: none !important;"));
+        assertTrue(navigationBlock.contains("background: rgba(255, 255, 255, 0.045) !important;"));
+        assertTrue(navigationBlock.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;"));
+        assertTrue(navigationBlock.contains("box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,"));
+        assertTrue(navigationBlock.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset;"));
+
+        // Полоса заголовка «Резюме для вакансии» растягивается на карточку (padding 14px)
+        // и несёт те же две inset-линии.
+        assertTrue(cardTitleBlock.contains("min-height: 36px !important;"));
+        assertTrue(cardTitleBlock.contains("padding: 7px 11px !important;"));
+        assertTrue(cardTitleBlock.contains("margin: -14px -14px 12px !important;"));
+        assertTrue(cardTitleBlock.contains("border-radius: 8px 8px 0 0 !important;"));
+        assertTrue(cardTitleBlock.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;"));
+        assertTrue(cardTitleBlock.contains("box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,"));
+        assertTrue(cardTitleBlock.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset;"));
+
+        // SCSS обязан оставаться идентичным во всех 7 темах.
+        for (String theme : THEMES) {
+            String themeScss = readProjectFile(
+                    "modules/web/themes/" + theme + "/com.company.hunttech/candidate-cv-editor.scss");
+            assertEquals("candidate-cv-editor.scss должен быть идентичен: " + theme, scss, themeScss);
+        }
+    }
+
+    private String section(String text, String startMarker, String endMarker) {
+        int start = text.indexOf(startMarker);
+        assertTrue("Не найден начальный маркер: " + startMarker, start >= 0);
+        int end = text.indexOf(endMarker, start);
+        assertTrue("Не найден конечный маркер: " + endMarker, end > start);
+        return text.substring(start, end);
+    }
+
     private void assertComponentBinding(String xml, String componentId, String property) {
         int idPosition = xml.indexOf("id=\"" + componentId + "\"");
         assertTrue("Не найден компонент sidebar: " + componentId, idPosition >= 0);

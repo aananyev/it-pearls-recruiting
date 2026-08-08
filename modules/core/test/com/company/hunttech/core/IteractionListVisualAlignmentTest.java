@@ -144,6 +144,64 @@ public class IteractionListVisualAlignmentTest {
         assertFalse(partial.contains("\n  .v-panel {"));
     }
 
+    @Test
+    public void sectionTitlesHaveTwoInsetLinesLikeInfoCaption() throws IOException {
+        String descriptor = descriptor();
+
+        // Оба заголовка разделов sidebar несут свои локальные классы полосы.
+        assertTrue(descriptor.contains(
+                "stylename=\"label-nav-title iteraction-list-navigation-title\""));
+        assertTrue(descriptor.contains("iteraction-list-sidebar-card-title"));
+        assertTrue(descriptor.contains("value=\"mainMsg://msgVacancy\""));
+
+        String visual = readProjectFile(
+                "modules/web/themes/halo/com.company.hunttech/iteraction-list-visual-alignment.scss");
+        String navigationBlock = section(visual,
+                "iteraction-list-navigation .iteraction-list-navigation-title",
+                ".label-nav-item,");
+
+        // Полоса заголовка «Разделы формы» повторяет caption инфокарточки (контракт §4.1):
+        // две горизонтальные inset-линии (белая сверху, светлая снизу) + разделитель снизу.
+        assertTrue(navigationBlock.contains("min-height: 36px !important;"));
+        assertTrue(navigationBlock.contains("padding: 7px 11px !important;"));
+        assertTrue(navigationBlock.contains("color: #ffb11b !important;"));
+        assertTrue(navigationBlock.contains("font-size: 15px !important;"));
+        assertTrue(navigationBlock.contains("font-weight: 700 !important;"));
+        assertTrue(navigationBlock.contains("line-height: 21px !important;"));
+        assertTrue(navigationBlock.contains("text-transform: none !important;"));
+        assertTrue(navigationBlock.contains("background: rgba(255, 255, 255, 0.045) !important;"));
+        assertTrue(navigationBlock.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;"));
+        assertTrue(navigationBlock.contains("box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,"));
+        assertTrue(navigationBlock.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset;"));
+
+        String accordion = readProjectFile(
+                "modules/web/themes/halo/com.company.hunttech/iteraction-list-accordion-navigation.scss");
+        String cardTitleBlock = section(accordion,
+                "iteraction-list-sidebar-card-title,",
+                "iteraction-list-service-fields {");
+
+        // Полоса заголовка «Вакансия» растягивается на карточку и несёт те же две inset-линии.
+        assertTrue(cardTitleBlock.contains("min-height: 36px !important;"));
+        assertTrue(cardTitleBlock.contains("padding: 7px 11px !important;"));
+        assertTrue(cardTitleBlock.contains("margin: -14px -14px 12px !important;"));
+        assertTrue(cardTitleBlock.contains("border-radius: 8px 8px 0 0 !important;"));
+        assertTrue(cardTitleBlock.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;"));
+        assertTrue(cardTitleBlock.contains("box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,"));
+        assertTrue(cardTitleBlock.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset;"));
+
+        // Оба partial'а обязаны оставаться идентичными во всех 7 темах.
+        for (String theme : THEMES) {
+            String themeVisual = readProjectFile(
+                    "modules/web/themes/" + theme + "/com.company.hunttech/"
+                            + "iteraction-list-visual-alignment.scss");
+            String themeAccordion = readProjectFile(
+                    "modules/web/themes/" + theme + "/com.company.hunttech/"
+                            + "iteraction-list-accordion-navigation.scss");
+            assertEquals("visual-alignment должен быть идентичен: " + theme, visual, themeVisual);
+            assertEquals("accordion-navigation должен быть идентичен: " + theme, accordion, themeAccordion);
+        }
+    }
+
     private String descriptor() throws IOException {
         return readProjectFile(
                 "modules/web/src/com/company/hunttech/web/screens/iteractionlist/"

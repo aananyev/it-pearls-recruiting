@@ -166,6 +166,8 @@
                       width="100%"
                       spacing="false"
                       stylename="candidate-cv-navigation">
+                    <!-- Заголовок навигации «Разделы»: полоса-заголовок с двумя
+                         горизонтальными inset-линиями (контракт §4.1). -->
                     <label width="100%"
                            value="msg://candidateCvNavigationTitle"
                            stylename="candidate-cv-navigation-title"/>
@@ -216,6 +218,8 @@
                       width="100%"
                       spacing="true"
                       stylename="candidate-cv-sidebar-card">
+                    <!-- Заголовок «Резюме для вакансии»: полоса-заголовок, растянутая
+                         на карточку, с двумя горизонтальными inset-линиями (контракт §4.1). -->
                     <label value="Резюме для вакансии"
                            stylename="candidate-cv-sidebar-card-title"/>
                     <vbox width="100%"

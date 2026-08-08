@@ -282,7 +282,8 @@
                       height="AUTO"
                       spacing="false"
                       stylename="label-navigation iteraction-list-navigation">
-                    <!-- Заголовок «Разделы формы» остаётся первым компонентом и не удаляется controller-ом. -->
+                    <!-- Заголовок «Разделы формы» остаётся первым компонентом и не удаляется controller-ом;
+                         стиль — полоса-заголовок с двумя горизонтальными inset-линиями (контракт §4.1). -->
                     <label id="iteractionListNavigationTitle"
                            width="100%"
                            height="AUTO"
@@ -316,7 +317,8 @@
                       height="AUTO"
                       spacing="true"
                       stylename="iteraction-list-sidebar-card iteraction-list-vacancy-card edit-sidebar-summary">
-                    <!-- Заголовок визуально отделяет vacancy context от служебных данных взаимодействия. -->
+                    <!-- Заголовок «Вакансия» визуально отделяет vacancy context от служебных данных
+                         взаимодействия; стиль — полоса-заголовок с двумя inset-линиями (контракт §4.1). -->
                     <label value="mainMsg://msgVacancy"
                            width="100%"
                            height="AUTO"

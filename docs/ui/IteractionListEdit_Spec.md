@@ -219,6 +219,10 @@ Controller всегда создаёт ровно пять визуальных 
 | `projectLabel` | проект |
 | `closingDateVacancyLabel` | дата закрытия и просрочка |
 | `outstaffingCostHBox` | видим при непустом `outstaffingCost` |
+| `iteractionListNavigationTitle` | заголовок «Разделы формы» навигации (полоса-заголовок) |
+| vacancy-карточка `iteraction-list-sidebar-card-title` | заголовок «Вакансия» (полоса-заголовок) |
+
+Заголовки содержательных секций sidebar — «Разделы формы» (`iteraction-list-navigation-title`) и «Вакансия» (`iteraction-list-sidebar-card-title`) — оформлены как полоса-заголовок по контракту `HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md` §4.1: две горизонтальные inset-линии (белая сверху `rgba(255,255,255,1) 0 1px 0 0 inset`, светлая снизу `rgba(244,244,244,1) 0 -1px 0 0 inset`), разделитель снизу `border-bottom: 1px solid rgba(255,255,255,.14)`, полоса `rgba(255,255,255,.045)`, текст `#ffb11b` 15px/700, `min-height: 36px`, `padding: 7px 11px`; заголовок «Вакансия» растянут на ширину карточки (`margin: -14px -14px 12px`, верхние углы скруглены). SCSS-правила: `iteraction-list-visual-alignment.scss` (навигация) и `iteraction-list-accordion-navigation.scss` (карточка), идентичны во всех 7 темах.
 
 ## 5. Data containers, loaders и views
 
@@ -636,6 +640,7 @@ Runtime:
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-08 | Заголовкам разделов sidebar «Разделы формы» (`iteractionListNavigationTitle`, класс `iteraction-list-navigation-title`) и «Вакансия» (`iteraction-list-sidebar-card-title`) добавлены две горизонтальные inset-линии полосы (белая сверху, светлая снизу) + разделитель `border-bottom`, как у заголовков секций OpenPositionEdit / caption инфокарточки — контракт §4.1; SCSS: `iteraction-list-visual-alignment.scss` и `iteraction-list-accordion-navigation.scss` во всех 7 темах; добавлен контрактный тест `IteractionListVisualAlignmentTest.sectionTitlesHaveTwoInsetLinesLikeInfoCaption`. |
 | 2026-07-29 | Реальный visual smoke под `okozhevnikova` выявил вертикальное переполнение длинных caption: высота quick-action увеличена до `64px`, caption ограничен тремя строками внутри кнопки. |
 | 2026-07-29 | Усилен контраст disabled-подписей `Нет данных` в семи темах, чтобы пустая позиция не выглядела бесконтентной. |
 | 2026-07-29 | Реальная локальная проверка выявила пустые captions: после агрегирующего запроса сервис догружает только `iteraction-picker-view`, сохраняя порядок рейтинга и обработчик quick action. |

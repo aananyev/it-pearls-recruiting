@@ -110,12 +110,26 @@
       border-radius: 8px;
     }
 
+    /* Заголовок «Резюме для вакансии»: полоса-заголовок, растянутая на карточку,
+     * с двумя горизонтальными inset-линиями (контракт §4.1). */
     .candidate-cv-sidebar-card-title,
     .candidate-cv-sidebar-card-title.v-label {
+      display: block;
+      width: 100% !important;
+      box-sizing: border-box;
+      min-height: 36px !important;
+      padding: 7px 11px !important;
+      margin: -14px -14px 12px !important;
       color: #ffb11b !important;
       font-size: 15px !important;
       font-weight: 700 !important;
       line-height: 21px !important;
+      letter-spacing: normal !important;
+      background: rgba(255, 255, 255, 0.045) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+      box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
+                  rgba(244, 244, 244, 1) 0 -1px 0 0 inset;
+      border-radius: 8px 8px 0 0 !important;
       white-space: normal !important;
     }
 
@@ -160,16 +174,25 @@
       border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
     }
 
+    /* Заголовок раздела навигации: полоса-заголовок с двумя горизонтальными
+     * inset-линиями (контракт HRM_HuntTech_Edit_Screen_Shared_Style_Contract §4.1). */
     .candidate-cv-navigation-title,
     .candidate-cv-navigation-title.v-label {
       display: block;
       width: 100% !important;
-      padding: 6px 10px 8px;
-      color: rgba(248, 250, 252, 0.58) !important;
-      font-size: 11px !important;
+      box-sizing: border-box;
+      min-height: 36px !important;
+      padding: 7px 11px !important;
+      color: #ffb11b !important;
+      font-size: 15px !important;
       font-weight: 700 !important;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+      line-height: 21px !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+      background: rgba(255, 255, 255, 0.045) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+      box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
+                  rgba(244, 244, 244, 1) 0 -1px 0 0 inset;
       white-space: normal !important;
     }
 

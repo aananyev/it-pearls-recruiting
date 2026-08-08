@@ -216,6 +216,37 @@ public class JobCandidateEditLayoutContractTest {
     }
 
     @Test
+    public void navigationSectionTitleHasTwoInsetLines() throws IOException {
+        String xml = readProjectFile(XML);
+        // Заголовок «Разделы формы» несёт локальный класс полосы поверх label-nav-title.
+        assertTrue(xml.contains(
+                "stylename=\"label-nav-title job-candidate-section-title\""));
+        assertTrue(xml.contains("id=\"candidateNavigation\""));
+        assertTrue(xml.contains("stylename=\"job-candidate-navigation label-navigation\""));
+
+        for (String theme : THEMES) {
+            String scss = readProjectFile("modules/web/themes/" + theme
+                    + "/com.company.hunttech/job-candidate-editor.scss");
+            String block = section(scss,
+                    ".job-candidate-navigation .job-candidate-section-title {",
+                    ".label-nav-item,");
+
+            // Полоса-заголовок по контракту §4.1: две inset-линии + разделитель снизу.
+            assertTrue(theme, block.contains("min-height: 36px !important;"));
+            assertTrue(theme, block.contains("padding: 7px 11px !important;"));
+            assertTrue(theme, block.contains("color: #ffb11b !important;"));
+            assertTrue(theme, block.contains("font-size: 15px !important;"));
+            assertTrue(theme, block.contains("font-weight: 700 !important;"));
+            assertTrue(theme, block.contains("line-height: 21px !important;"));
+            assertTrue(theme, block.contains("text-transform: none !important;"));
+            assertTrue(theme, block.contains("background: rgba(255, 255, 255, 0.045) !important;"));
+            assertTrue(theme, block.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;"));
+            assertTrue(theme, block.contains("box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,"));
+            assertTrue(theme, block.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset;"));
+        }
+    }
+
+    @Test
     public void everyThemeStylesPositionsFlowLocally() throws IOException {
         for (String theme : THEMES) {
             String scss = readProjectFile("modules/web/themes/" + theme

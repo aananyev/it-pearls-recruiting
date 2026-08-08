@@ -226,6 +226,10 @@
 
 `syncSidebarSectionNavigation()` управляет только visibility контейнеров. Навигация не вызывает `tabSheet.setSelectedTab()`, не меняет `cvTextInitialized`/`skillTabInitialized`, не запускает loaders и не изменяет значения entity.
 
+### 4.2.1. Заголовки разделов sidebar (полоса-заголовок)
+
+Заголовки «Разделы вкладки» (`candidate-cv-navigation-title`) и «Резюме для вакансии» (`candidate-cv-sidebar-card-title`) оформлены как полоса-заголовок по контракту `HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md` §4.1: две горизонтальные inset-линии (белая сверху `rgba(255,255,255,1) 0 1px 0 0 inset`, светлая снизу `rgba(244,244,244,1) 0 -1px 0 0 inset`), разделитель снизу `border-bottom: 1px solid rgba(255,255,255,.14)`, полоса `rgba(255,255,255,.045)`, текст `#ffb11b` 15px/700, `min-height: 36px`, `padding: 7px 11px`; заголовок карточки растянут на её ширину (`margin: -14px -14px 12px`, верхние углы скруглены `8px 8px 0 0`). Правило: `candidate-cv-editor.scss`, идентично во всех 7 темах.
+
 ### 4.3. Visibility
 
 Контроллер динамически показывает или скрывает:
@@ -542,6 +546,7 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-08 | Заголовкам разделов sidebar «Разделы вкладки» (`candidate-cv-navigation-title`) и «Резюме для вакансии» (`candidate-cv-sidebar-card-title`) добавлены две горизонтальные inset-линии полосы (белая сверху, светлая снизу) + разделитель `border-bottom`, как у заголовков секций OpenPositionEdit/IteractionListEdit — контракт §4.1; SCSS `candidate-cv-editor.scss` во всех 7 темах; добавлен контрактный тест `CandidateCVEditVisualContractTest.sectionTitlesHaveTwoInsetLinesLikeInfoCaption`. |
 | 2026-08-03 | Левая панель CandidateCVEdit доведена до общего Edit-контракта: sidebar расширен до 312px во всех семи темах, пункты навигации выровнены до 38px, tab captions видны полностью без ellipsis, input/picker/upload controls растягиваются одной шириной и используют единый визуальный стиль. Бизнес-логика, Java, loaders, bindings и actions не менялись. |
 | 2026-07-26 | Исправлена незавершённая label-навигация: все пункты статически объявлены в XML, закреплён порядок sidebar «образ → наименование → навигация → детализация → прочее», добавлены invoke-handler и контрактные проверки |
 | 2026-07-26 | `candidatePic` переведён на единый `OvaFallbackImage` 176×176 px с `icons/no-programmer.jpeg`; удалены `candidateFaceDefaultImage`, `setCandidatePicImage()` и ручное переключение visibility; обновлены оба контрактных теста фотографии |
