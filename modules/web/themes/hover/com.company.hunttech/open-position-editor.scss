@@ -501,8 +501,8 @@
       width: auto !important;
       max-width: none !important;
       padding: 0 10px;
-      color: mix($v-font-color, $v-panel-background-color, 86%) !important;
-      font-size: 12px !important;
+      color: #26384c !important;
+      font-size: 14px !important;
       font-weight: 600;
       line-height: 48px;
       white-space: nowrap !important;
@@ -513,7 +513,7 @@
     }
 
     .open-position-editor-tabs .v-tabsheet-tabitem:hover .v-caption {
-      color: $v-selection-color !important;
+      color: #1264b5 !important;
     }
 
     .open-position-editor-tabs .v-tabsheet-tabitem-selected .v-caption {
