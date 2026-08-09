@@ -325,54 +325,92 @@
                        align="MIDDLE_CENTER"
                        stylename="edit-sidebar-subtitle"/>
             </vbox>
-            <!-- Блок срочности вакансии (копия IteractionListEdit): приоритет со светофором
-                 и формат работы (удалённая/офисная/гибрид); значения формирует refreshSidebarPriority(). -->
-            <vbox id="vacancyPrioritySummary"
+            <!-- Блок срочности вакансии (эталон IteractionListEdit): пара ячеек 50/50 —
+                 «Статус вакансии» (черновик/открыта/закрыта) и «Приоритет» со светофором;
+                 ниже — строка формата работы (удалённая/офисная/гибрид);
+                 значения формирует refreshSidebarStatus()/refreshSidebarPriority(). -->
+            <hbox id="vacancyStateSummary"
                   width="100%"
                   height="AUTO"
-                  spacing="false"
-                  stylename="open-position-editor-priority-summary">
-                <!-- Подпись блока: приоритет вакансии. -->
-                <label id="priorityCaptionLabel"
-                       value="msg://msgPriority"
-                       width="100%"
-                       stylename="open-position-editor-summary-caption"/>
-                <!-- Строка значения: светофор приоритета + текстовое название (по образцу IteractionListEdit). -->
-                <hbox id="vacancyPriorityValueBox"
-                      width="100%"
+                  spacing="true"
+                  align="TOP_LEFT"
+                  stylename="open-position-editor-vacancy-state-summary edit-sidebar-summary">
+                <!-- Левая ячейка: состояние открытия вакансии (черновик/открыта/закрыта). -->
+                <vbox id="vacancyStatusSummary"
+                      width="50%"
                       height="AUTO"
-                      spacing="true"
-                      align="MIDDLE_LEFT"
-                      expand="currentPriorityLabel"
-                      stylename="open-position-editor-priority-value-row">
-                    <!-- Индикатор приоритета (иконка-светофор; источник ставит refreshSidebarPriority()). -->
-                    <image id="trafficLighterImage"
-                           width="AUTO"
-                           height="AUTO"
-                           align="MIDDLE_LEFT"
-                           stylename="open-position-editor-priority-image"/>
-                    <!-- Человекочитаемое значение приоритета (Draft/Paused/Low/Normal/High/Critical). -->
-                    <label id="currentPriorityLabel"
+                      spacing="false"
+                      stylename="open-position-editor-vacancy-state-cell open-position-editor-sidebar-info-row">
+                    <!-- Caption объясняет, что следующее значение относится к статусу вакансии. -->
+                    <label id="vacancyStatusCaptionLabel"
+                           value="msg://msgStatusOfVacansy"
                            width="100%"
-                           height="AUTO"
-                           align="MIDDLE_LEFT"
-                           stylename="open-position-editor-priority-value"/>
-                </hbox>
-                <!-- Второй элемент блока: формат работы (удалённая/офисная/гибрид). -->
-                <label id="remoteWorkCaptionLabel"
-                       value="msg://msgRemoteWorkSidebar"
-                       width="100%"
-                       stylename="open-position-editor-summary-caption"/>
-                <!-- Значение формата работы: Офис / Удаленная работа / Гибрид (50/50). -->
-                <label id="remoteWorkSidebarLabel"
-                       width="100%"
-                       height="AUTO"
-                       stylename="open-position-editor-priority-value"/>
-            </vbox>
+                           stylename="open-position-editor-sidebar-caption"/>
+                    <!-- Строка значения: текст статуса с цветовой индикацией (Java ставит h3-gray/h3-green/h3-red). -->
+                    <hbox id="vacancyStatusValueBox"
+                          width="100%"
+                          height="AUTO"
+                          spacing="true"
+                          align="MIDDLE_LEFT"
+                          expand="statusOfVacansyLabel"
+                          stylename="open-position-editor-sidebar-value-row">
+                        <!-- Label получает вычисленный controller-ом текст «ЧЕРНОВИК»/«ОТКРЫТА»/«ЗАКРЫТА». -->
+                        <label id="statusOfVacansyLabel"
+                               width="100%"
+                               height="AUTO"
+                               align="MIDDLE_LEFT"
+                               stylename="open-position-editor-sidebar-value open-position-editor-status-value"/>
+                    </hbox>
+                </vbox>
+                <!-- Правая ячейка: текущий приоритет вакансии и его визуальный индикатор. -->
+                <vbox id="vacancyPrioritySummary"
+                      width="50%"
+                      height="AUTO"
+                      spacing="false"
+                      stylename="open-position-editor-vacancy-state-cell open-position-editor-sidebar-info-row">
+                    <!-- Caption объясняет, что следующая строка содержит приоритет вакансии. -->
+                    <label id="priorityCaptionLabel"
+                           value="msg://msgPriority"
+                           width="100%"
+                           stylename="open-position-editor-sidebar-caption"/>
+                    <!-- Строка значения объединяет светофор приоритета и его текстовое название. -->
+                    <hbox id="vacancyPriorityValueBox"
+                          width="100%"
+                          height="AUTO"
+                          spacing="true"
+                          align="MIDDLE_LEFT"
+                          expand="currentPriorityLabel"
+                          stylename="open-position-editor-sidebar-value-row">
+                        <!-- Image отображает назначенный controller-ом графический индикатор приоритета. -->
+                        <image id="trafficLighterImage"
+                               width="AUTO"
+                               height="AUTO"
+                               align="MIDDLE_LEFT"
+                               stylename="open-position-editor-priority-image"/>
+                        <!-- Label выводит человекочитаемое значение приоритета вакансии. -->
+                        <label id="currentPriorityLabel"
+                               width="100%"
+                               height="AUTO"
+                               align="MIDDLE_LEFT"
+                               stylename="open-position-editor-sidebar-value"/>
+                    </hbox>
+                </vbox>
+            </hbox>
+            <!-- Нижняя строка блока срочности: формат работы (удалённая/офисная/гибрид). -->
+            <label id="remoteWorkCaptionLabel"
+                   value="msg://msgRemoteWorkSidebar"
+                   width="100%"
+                   stylename="open-position-editor-sidebar-caption"/>
+            <!-- Значение формата работы: Офис / Удаленная работа / Гибрид (50/50). -->
+            <label id="remoteWorkSidebarLabel"
+                   width="100%"
+                   height="AUTO"
+                   stylename="open-position-editor-sidebar-value"/>
         </vbox>
-        <!-- Label-навигация разделов активной вкладки: набор пунктов переключается по выбранной
-             вкладке (Java syncSidebarNavigation, контейнеры-наборы ниже). Кнопки без invoke
-             (Java READ_ONLY) — только presentation, по §3.5 общего контракта. -->
+        <!-- Label-навигация разделов активной вкладки: контейнер целиком скрывается на вкладках
+             с единственным блоком ввода (см. Java syncSidebarNavigation, TABS_WITH_SIDEBAR_NAVIGATION);
+             на вкладках с двумя и более блоками показывается набор пунктов активной вкладки.
+             Кнопки без invoke (Java READ_ONLY) — только presentation, по §3.5 общего контракта. -->
         <vbox id="openPositionEditorNavigation"
               width="100%"
               spacing="false"
@@ -469,7 +507,9 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
-            <!-- Набор вкладки «Файлы» (tabFiles): единственный раздел — таблица файлов позиции. -->
+            <!-- Набор вкладки «Файлы» (tabFiles): единственный раздел — таблица файлов позиции;
+                 набор никогда не показывается (вкладка с одним блоком ввода — навигация скрыта),
+                 сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
             <vbox id="openPositionFilesTabNavigation"
                   width="100%"
                   spacing="false"
@@ -481,7 +521,9 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
-            <!-- Набор вкладки «Тестовое задание» (tabExercise): единый раздел — признак и редактор задания. -->
+            <!-- Набор вкладки «Тестовое задание» (tabExercise): единый раздел — признак и редактор
+                 задания; набор никогда не показывается (вкладка с одним блоком ввода), сохранён
+                 для структуры набора и Java-контракта (@Named/@Subscribe). -->
             <vbox id="openPositionExerciseTabNavigation"
                   width="100%"
                   spacing="false"
@@ -493,7 +535,9 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
-            <!-- Набор вкладки «Памятка кандидату» (tabMemoForInterview): единый раздел — признак и редактор памятки. -->
+            <!-- Набор вкладки «Памятка кандидату» (tabMemoForInterview): единый раздел — признак
+                 и редактор памятки; набор никогда не показывается (вкладка с одним блоком ввода),
+                 сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
             <vbox id="openPositionMemoTabNavigation"
                   width="100%"
                   spacing="false"
@@ -505,7 +549,9 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
-            <!-- Набор вкладки «Шаблон сопроводительного письма» (tabTemplateLetter): единый раздел. -->
+            <!-- Набор вкладки «Шаблон сопроводительного письма» (tabTemplateLetter): единый раздел;
+                 набор никогда не показывается (вкладка с одним блоком ввода), сохранён для
+                 структуры набора и Java-контракта (@Named/@Subscribe). -->
             <vbox id="openPositionTemplateLetterTabNavigation"
                   width="100%"
                   spacing="false"
@@ -517,7 +563,9 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
-            <!-- Набор вкладки «Требуемые Навыки» (tabSkills): единый раздел — дерево навыков позиции. -->
+            <!-- Набор вкладки «Требуемые Навыки» (tabSkills): единый раздел — дерево навыков
+                 позиции; набор никогда не показывается (вкладка с одним блоком ввода), сохранён
+                 для структуры набора и Java-контракта (@Named/@Subscribe). -->
             <vbox id="openPositionSkillsTabNavigation"
                   width="100%"
                   spacing="false"
@@ -530,7 +578,9 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
-            <!-- Набор вкладки «Новости» (tabOpenPositionNews): единый раздел — таблица новостей позиции. -->
+            <!-- Набор вкладки «Новости» (tabOpenPositionNews): единый раздел — таблица новостей
+                 позиции; набор никогда не показывается (вкладка с одним блоком ввода), сохранён
+                 для структуры набора и Java-контракта (@Named/@Subscribe). -->
             <vbox id="openPositionNewsTabNavigation"
                   width="100%"
                   spacing="false"
@@ -542,7 +592,9 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
-            <!-- Набор вкладки «Согласование» (tabApproval): единый раздел — BPM-процесс согласования. -->
+            <!-- Набор вкладки «Согласование» (tabApproval): единый раздел — BPM-процесс согласования;
+                 набор никогда не показывается (вкладка с одним блоком ввода), сохранён для
+                 структуры набора и Java-контракта (@Named/@Subscribe). -->
             <vbox id="openPositionApprovalTabNavigation"
                   width="100%"
                   spacing="false"
@@ -554,7 +606,9 @@
                         width="100%"
                         stylename="borderless label-nav-item"/>
             </vbox>
-            <!-- Набор вкладки «Комментарии» (commentsTab): единый раздел — лента комментариев-рейтингов. -->
+            <!-- Набор вкладки «Комментарии» (commentsTab): единый раздел — лента
+                 комментариев-рейтингов; набор никогда не показывается (вкладка с одним блоком
+                 ввода), сохранён для структуры набора и Java-контракта (@Named/@Subscribe). -->
             <vbox id="openPositionCommentsTabNavigation"
                   width="100%"
                   spacing="false"
@@ -627,6 +681,24 @@
             <label id="citiesLabel"
                    width="100%"
                    stylename="open-position-editor-summary-caption"/>
+            <!-- Грейд позиции: контекст уровня вакансии (значение формирует refreshSidebarInfoCard(),
+                 presentation-only, из edited-объекта; в рабочей области — поле gradeField). -->
+            <label id="contextGradeLabel"
+                   width="100%"
+                   htmlEnabled="true"
+                   stylename="open-position-editor-summary-value"/>
+            <!-- Оформление: тип регистрации для работы — аутстаффинг/рекрутинг/все варианты
+                 (значение формирует refreshSidebarInfoCard() из registrationForWork). -->
+            <label id="contextRegistrationLabel"
+                   width="100%"
+                   htmlEnabled="true"
+                   stylename="open-position-editor-summary-value"/>
+            <!-- Статус вакансии: черновик (signDraft) / открыта-закрыта (openClose);
+                 значение формирует refreshSidebarInfoCard(), presentation-only. -->
+            <label id="contextStatusLabel"
+                   width="100%"
+                   htmlEnabled="true"
+                   stylename="open-position-editor-summary-value"/>
             <!-- Итоговая комиссия рекрутера (HTML; значение формирует setTopLabel()). -->
             <label id="labelTopComissionRecrutier"
                    width="100%"

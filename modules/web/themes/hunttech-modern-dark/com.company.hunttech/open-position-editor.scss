@@ -316,20 +316,42 @@
       -webkit-line-clamp: 2;
     }
 
-    /* Блок срочности вакансии (копия IteractionListEdit): подблок под наименованием —
-       светофор приоритета + значение и формат работы (удалённая/офисная/гибрид). */
-    .open-position-editor-priority-summary {
-      width: 100% !important;
-      min-width: 0;
-      padding-top: 0;
+    /* Блок срочности вакансии (эталон IteractionListEdit): горизонтальная пара ячеек 50/50 —
+       «Статус вакансии» и «Приоритет» с общими рамками выделения (фон + border + radius). */
+
+    .open-position-editor-sidebar-caption,
+    .open-position-editor-sidebar-caption.v-label {
+      /* Sidebar-подписи 1:1 с iteraction-list-sidebar-caption эталона:
+       10.5px/700 uppercase, rgba(248,250,252,0.62), line-height 15px, letter-spacing 0.04em. */
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
+      line-height: 15px !important;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
 
-    .open-position-editor-priority-value-row {
+    .open-position-editor-sidebar-value,
+    .open-position-editor-sidebar-value.v-label {
+      /* Sidebar-значения 1:1 с iteraction-list-sidebar-value эталона: 13px/500 #f8fafc. */
+      display: block;
+      width: 100% !important;
+      min-width: 0;
+      color: #f8fafc !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      line-height: 18px !important;
+      white-space: normal !important;
+      overflow-wrap: break-word;
+      word-break: normal;
+    }
+
+    .open-position-editor-sidebar-value-row {
       width: 100% !important;
       min-width: 0;
     }
 
-    .open-position-editor-priority-value-row > .v-slot {
+    .open-position-editor-sidebar-value-row > .v-slot {
       min-width: 0 !important;
     }
 
@@ -338,24 +360,84 @@
       max-height: 26px;
     }
 
-    .open-position-editor-priority-value,
-    .open-position-editor-priority-value.v-label {
-      display: inline-block;
+    // Статус вакансии и приоритет — одна горизонтальная пара 50/50 (эталон IteractionListEdit).
+    .open-position-editor-vacancy-state-summary {
+      box-sizing: border-box;
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: stretch !important;
+      gap: 8px;
       width: 100% !important;
-      min-width: 0;
-      vertical-align: middle;
-      color: #f8fafc !important;
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 8px 0 4px !important;
+    }
+
+    .open-position-editor-vacancy-state-summary > .v-slot {
+      box-sizing: border-box;
+      display: block !important;
+      flex: 1 1 0 !important;
+      width: calc(50% - 4px) !important;
+      min-width: 0 !important;
+      max-width: calc(50% - 4px) !important;
+      height: auto !important;
+      float: none !important;
+    }
+
+    .open-position-editor-vacancy-state-summary > .v-spacing {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    // Рамка выделения ячейки пары: фон, border и радиус — 1:1 с iteraction-list-vacancy-state-cell.
+    .open-position-editor-vacancy-state-cell,
+    .open-position-editor-vacancy-state-summary .open-position-editor-sidebar-info-row {
+      box-sizing: border-box;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 8px 9px !important;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      border-radius: 6px;
+    }
+
+    .open-position-editor-vacancy-state-cell > .v-slot,
+    .open-position-editor-vacancy-state-cell .open-position-editor-sidebar-value-row {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+    }
+
+    .open-position-editor-vacancy-state-cell .open-position-editor-sidebar-caption {
+      min-height: 18px;
+      margin-bottom: 4px;
       font-size: 11px !important;
-      font-weight: 600 !important;
       line-height: 15px !important;
       white-space: normal !important;
     }
 
-    /* Значение приоритета в hbox-строке (светофор + текст): inline-block,
-     * чтобы не выпадать на baseline и не наезжать на следующую подпись
-     * (референс: iteraction-list-sidebar-value в hbox эталона). */
-    .open-position-editor-priority-value-row .open-position-editor-priority-value,
-    .open-position-editor-priority-value-row .v-label-open-position-editor-priority-value {
+    .open-position-editor-vacancy-state-cell .open-position-editor-sidebar-value,
+    .open-position-editor-vacancy-state-cell .open-position-editor-status-value {
+      width: 100% !important;
+      min-width: 0 !important;
+      font-size: 13px !important;
+      line-height: 18px !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+
+    /* Значение в hbox-строке (светофор + текст): inline-block, чтобы не выпадать
+     * на baseline и не наезжать на следующую подпись (референс: фикс приоритета
+     * OpenPositionEdit 2026-08-08 + iteraction-list-sidebar-value в hbox эталона). */
+    .open-position-editor-sidebar-value-row .open-position-editor-sidebar-value,
+    .open-position-editor-sidebar-value-row .v-label-open-position-editor-sidebar-value {
       display: inline-block !important;
       vertical-align: middle !important;
       line-height: 21px !important;
@@ -450,9 +532,9 @@
       box-shadow: none !important;
     }
 
-    /* Вкладки переносятся на новую строку при нехватке ширины (12 вкладок на
-     * узких разрешениях) — полоса не выходит за правый край экрана, все
-     * вкладки остаются доступными без скролла. Контент вкладки растягивается
+    /* Вкладки — в одну строку (стандартная реализация Vaadin TabSheet):
+     * заголовки не переносятся, при нехватке ширины полоса прокручивается
+     * горизонтально (overflow-x на tabcontainer); контент вкладки растягивается
      * на остаток высоты вместо жёсткого calc(100% - 49px). */
     .open-position-editor-tabs {
       display: flex !important;
@@ -461,18 +543,19 @@
     }
 
     .open-position-editor-tabs .v-tabsheet-tabcontainer {
-      overflow: visible !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
       max-width: 100% !important;
       flex: 0 0 auto;
     }
 
     .open-position-editor-tabs .v-tabsheet-tabs {
       display: flex !important;
-      flex-wrap: wrap !important;
-      white-space: normal !important;
+      flex-wrap: nowrap !important;
+      white-space: nowrap !important;
       height: auto !important;
-      width: 100% !important;
-      max-width: 100% !important;
+      width: auto !important;
+      max-width: none !important;
     }
 
     .open-position-editor-tabs .v-tabsheet-content {
@@ -493,6 +576,12 @@
 
     .open-position-editor-tabs .v-tabsheet-tabitemcell {
       max-width: none !important;
+      flex-shrink: 0 !important;
+    }
+
+    .open-position-editor-tabs .v-tabsheet-tabitem,
+    .open-position-editor-tabs .v-tabsheet-tabitem-selected {
+      flex-shrink: 0 !important;
     }
 
     .open-position-editor-tabs .v-tabsheet-tabitem .v-caption {

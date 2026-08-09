@@ -559,6 +559,158 @@ public class OpenPositionEditLayoutContractTest {
     }
 
     @Test
+    public void sidebarVacancyContextContainsGradeRegistrationStatus() throws IOException {
+        String descriptor = readProjectFile(EDIT_XML);
+
+        // Блок «Контекст вакансии» (openPositionEditorSummary) содержит сводку городов,
+        // затем три контекстные строки (грейд, оформление, статус) и итоговые комиссии —
+        // все строки используют единый стиль open-position-editor-summary-value.
+        String grade = startTag(descriptor, "contextGradeLabel");
+        String registration = startTag(descriptor, "contextRegistrationLabel");
+        String status = startTag(descriptor, "contextStatusLabel");
+        for (String tag : Arrays.asList(grade, registration, status)) {
+            assertTrue("Контекстная строка не имеет htmlEnabled",
+                    tag.contains("htmlEnabled=\"true\""));
+            assertTrue("Контекстная строка не использует open-position-editor-summary-value",
+                    tag.contains("open-position-editor-summary-value"));
+        }
+
+        // Порядок в блоке: города → грейд → оформление → статус → комиссия рекрутера.
+        int cities = descriptor.indexOf("id=\"citiesLabel\"");
+        int gradeIdx = descriptor.indexOf("id=\"contextGradeLabel\"");
+        int registrationIdx = descriptor.indexOf("id=\"contextRegistrationLabel\"");
+        int statusIdx = descriptor.indexOf("id=\"contextStatusLabel\"");
+        int recruiterIdx = descriptor.indexOf("id=\"labelTopComissionRecrutier\"");
+        assertTrue("Порядок строк «Контекста вакансии» нарушен",
+                cities >= 0 && cities < gradeIdx && gradeIdx < registrationIdx
+                        && registrationIdx < statusIdx && statusIdx < recruiterIdx);
+    }
+
+    @Test
+    public void vacancyStatePairMirrorsIteractionListEdit() throws IOException {
+        String descriptor = readProjectFile(EDIT_XML);
+
+        // Пара «Статус вакансии» + «Приоритет» — горизонтальная пара 50/50 (эталон
+        // IteractionListEdit vacancyStateSummary): hbox с двумя ячейками width=50%.
+        // Конец пары — маркер следующей строки (remoteWorkCaptionLabel), т.к. внутри
+        // ячеек есть вложенные hbox-строки значений с собственными </hbox>.
+        String pair = section(descriptor, "id=\"vacancyStateSummary\"", "id=\"remoteWorkCaptionLabel\"");
+        assertTrue("Пара не использует open-position-editor-vacancy-state-summary",
+                startTag(descriptor, "vacancyStateSummary")
+                        .contains("open-position-editor-vacancy-state-summary"));
+        assertTrue("Пара не позиционирована как 50/50 (hbox + spacing)",
+                startTag(descriptor, "vacancyStateSummary").contains("spacing=\"true\""));
+        assertTrue("Левая ячейка vacancyStatusSummary отсутствует в паре",
+                pair.contains("id=\"vacancyStatusSummary\""));
+        assertTrue("Правая ячейка vacancyPrioritySummary отсутствует в паре",
+                pair.contains("id=\"vacancyPrioritySummary\""));
+        assertTrue("Порядок ячеек нарушен (статус → приоритет)",
+                pair.indexOf("id=\"vacancyStatusSummary\"") < pair.indexOf("id=\"vacancyPrioritySummary\""));
+        for (String cellId : new String[]{"vacancyStatusSummary", "vacancyPrioritySummary"}) {
+            String tag = startTag(descriptor, cellId);
+            assertTrue("Ячейка " + cellId + " не имеет ширину 50%",
+                    tag.contains("width=\"50%\""));
+            assertTrue("Ячейка " + cellId + " не имеет рамку-класс vacancy-state-cell",
+                    tag.contains("open-position-editor-vacancy-state-cell"));
+            assertTrue("Ячейка " + cellId + " не несёт sidebar-info-row",
+                    tag.contains("open-position-editor-sidebar-info-row"));
+        }
+
+        // Левая ячейка: caption «Статус вакансии» + statusOfVacansyLabel (значение из Java).
+        String statusCell = section(descriptor, "id=\"vacancyStatusSummary\"", "</vbox>");
+        assertTrue("Caption статуса не использует msgStatusOfVacansy",
+                statusCell.contains("value=\"msg://msgStatusOfVacansy\""));
+        assertTrue("Caption статуса не использует sidebar-caption",
+                section(statusCell, "value=\"msg://msgStatusOfVacansy\"", "/>")
+                        .contains("open-position-editor-sidebar-caption"));
+        assertTrue("statusOfVacansyLabel отсутствует в ячейке статуса",
+                statusCell.contains("id=\"statusOfVacansyLabel\""));
+        String statusLabelTag = startTag(descriptor, "statusOfVacansyLabel");
+        assertTrue("statusOfVacansyLabel не несёт sidebar-value/status-value",
+                statusLabelTag.contains("open-position-editor-sidebar-value")
+                        && statusLabelTag.contains("open-position-editor-status-value"));
+        assertTrue("Строка значения статуса не имеет vacancyStatusValueBox",
+                statusCell.contains("id=\"vacancyStatusValueBox\""));
+        assertTrue("Строка значения статуса не имеет sidebar-value-row",
+                section(statusCell, "id=\"vacancyStatusValueBox\"", "</hbox>")
+                        .contains("open-position-editor-sidebar-value-row"));
+
+        // Правая ячейка: caption «Приоритет» + светофор + currentPriorityLabel.
+        String priorityCell = section(descriptor, "id=\"vacancyPrioritySummary\"", "</vbox>");
+        assertTrue("Caption приоритета не использует msgPriority",
+                priorityCell.contains("value=\"msg://msgPriority\""));
+        assertTrue("Светофор trafficLighterImage отсутствует в ячейке приоритета",
+                priorityCell.contains("id=\"trafficLighterImage\""));
+        assertTrue("currentPriorityLabel отсутствует в ячейке приоритета",
+                priorityCell.contains("id=\"currentPriorityLabel\""));
+        assertTrue("currentPriorityLabel не несёт sidebar-value",
+                startTag(descriptor, "currentPriorityLabel")
+                        .contains("open-position-editor-sidebar-value"));
+
+        // Формат работы — отдельная строка под парой (не внутри ячейки).
+        String remoteCaptionTag = startTag(descriptor, "remoteWorkCaptionLabel");
+        assertTrue("Подпись формата работы не использует sidebar-caption",
+                remoteCaptionTag.contains("open-position-editor-sidebar-caption"));
+        assertTrue("Подпись формата работы не использует msgRemoteWorkSidebar",
+                remoteCaptionTag.contains("value=\"msg://msgRemoteWorkSidebar\""));
+        String remoteValueTag = startTag(descriptor, "remoteWorkSidebarLabel");
+        assertTrue("Значение формата работы не использует sidebar-value",
+                remoteValueTag.contains("open-position-editor-sidebar-value"));
+        assertTrue("Удалёнка не должна находиться внутри пары",
+                pair.indexOf("id=\"remoteWorkSidebarLabel\"") < 0);
+        assertTrue("Старые классы блока приоритета должны быть удалены из XML",
+                !descriptor.contains("open-position-editor-priority-summary")
+                        && !descriptor.contains("open-position-editor-priority-value-row")
+                        && !descriptor.contains("open-position-editor-priority-value\""));
+    }
+
+    @Test
+    public void vacancyStatePairScssCarriesHighlightFramesInAllThemes() throws IOException {
+        String summary = "    .open-position-editor-vacancy-state-summary {";
+        String cell = "    .open-position-editor-vacancy-state-cell,";
+        String caption = "    .open-position-editor-sidebar-caption,";
+        String value = "    .open-position-editor-sidebar-value,";
+        String valueRow = "    .open-position-editor-sidebar-value-row {";
+        for (String theme : THEMES) {
+            String scss = readProjectFile(themeScssPath(theme));
+            assertTrue("В теме " + theme + " нет класса пары vacancy-state-summary",
+                    scss.contains(summary));
+            assertTrue("В теме " + theme + " нет класса рамки vacancy-state-cell",
+                    scss.contains(cell));
+            assertTrue("В теме " + theme + " нет sidebar-caption",
+                    scss.contains(caption));
+            assertTrue("В теме " + theme + " нет sidebar-value",
+                    scss.contains(value));
+            assertTrue("В теме " + theme + " нет sidebar-value-row",
+                    scss.contains(valueRow));
+
+            // Рамка выделения ячейки — 1:1 с iteraction-list-vacancy-state-cell эталона.
+            String cellBlock = section(scss, cell,
+                    "    .open-position-editor-vacancy-state-cell > .v-slot,");
+            for (String rule : Arrays.asList(
+                    "background: rgba(255, 255, 255, 0.05);",
+                    "border: 1px solid rgba(255, 255, 255, 0.12) !important;",
+                    "border-radius: 6px;",
+                    "padding: 8px 9px !important;")) {
+                assertTrue("В теме " + theme + " рамка ячейки не содержит " + rule,
+                        cellBlock.contains(rule));
+            }
+            // Стили caption/value в ячейке — как у эталона (11px caption, 13px value).
+            String captionInCell = section(scss,
+                    "    .open-position-editor-vacancy-state-cell .open-position-editor-sidebar-caption {",
+                    "    .open-position-editor-vacancy-state-cell .open-position-editor-sidebar-value,");
+            assertTrue("В теме " + theme + " caption ячейки не 11px",
+                    captionInCell.contains("font-size: 11px !important;"));
+            String valueInCell = section(scss,
+                    "    .open-position-editor-vacancy-state-cell .open-position-editor-sidebar-value,",
+                    "    /* Значение в hbox-строке");
+            assertTrue("В теме " + theme + " value ячейки не 13px",
+                    valueInCell.contains("font-size: 13px !important;")
+                            && valueInCell.contains("line-height: 18px !important;"));
+        }
+    }
+
+    @Test
     public void tabsCaptionsMatchJobCandidateEditFont() throws IOException {
         // Шрифт заголовков вкладок — 1:1 с эталоном JobCandidateEdit (font 14/600,
         // цвет #26384c, hover #1264b5, selected = $v-selection-color) во всех 7 темах.
@@ -591,15 +743,17 @@ public class OpenPositionEditLayoutContractTest {
         // Label-навигация sidebar — наборы по вкладкам tabSheetOpenPosition: контейнер
         // openPositionEditorNavigation содержит заголовок и 11 вложенных vbox-наборов
         // openPosition*TabNavigation; все кроме вкладки по умолчанию скрыты; каждая кнопка
-        // набора — borderless label-nav-item. Java: syncSidebarNavigation переключает
-        // видимость каждого набора по имени вкладки.
+        // набора — borderless label-nav-item. Java: syncSidebarNavigation показывает набор
+        // только для вкладок с двумя и более блоками ввода (TABS_WITH_SIDEBAR_NAVIGATION),
+        // одноблочные наборы всегда setVisible(false), контейнер скрывается целиком.
         String descriptor = readProjectFile(EDIT_XML);
         String controller = readProjectFile(EDIT_CONTROLLER);
 
-        List<String> navigationSets = Arrays.asList(
+        List<String> multiBlockSets = Arrays.asList(
                 "openPositionMainTabNavigation",
                 "openPositionLaborTabNavigation",
-                "openPositionJobDescriptionTabNavigation",
+                "openPositionJobDescriptionTabNavigation");
+        List<String> singleBlockSets = Arrays.asList(
                 "openPositionFilesTabNavigation",
                 "openPositionExerciseTabNavigation",
                 "openPositionMemoTabNavigation",
@@ -608,7 +762,16 @@ public class OpenPositionEditLayoutContractTest {
                 "openPositionNewsTabNavigation",
                 "openPositionApprovalTabNavigation",
                 "openPositionCommentsTabNavigation");
-        for (String setId : navigationSets) {
+
+        // Контейнер навигации: существует в XML, Java управляет его видимостью целиком.
+        assertTrue("XML: контейнер openPositionEditorNavigation отсутствует",
+                descriptor.contains("id=\"openPositionEditorNavigation\""));
+        assertTrue("Java: syncSidebarNavigation не переключает контейнер openPositionEditorNavigation",
+                controller.contains("openPositionEditorNavigation.setVisible("));
+        assertTrue("Java: не задекларирован TABS_WITH_SIDEBAR_NAVIGATION (вкладки с 2+ блоками)",
+                controller.contains("TABS_WITH_SIDEBAR_NAVIGATION"));
+
+        for (String setId : multiBlockSets) {
             assertTrue("XML: набор навигации " + setId + " отсутствует", descriptor.contains("id=\"" + setId + "\""));
             assertTrue("Java: syncSidebarNavigation не переключает набор " + setId,
                     controller.contains(setId + ".setVisible("));
@@ -617,6 +780,15 @@ public class OpenPositionEditLayoutContractTest {
                 assertTrue("XML: набор " + setId + " должен быть скрыт по умолчанию (visible=\"false\")",
                         block.contains("visible=\"false\""));
             }
+        }
+        for (String setId : singleBlockSets) {
+            assertTrue("XML: набор навигации " + setId + " отсутствует", descriptor.contains("id=\"" + setId + "\""));
+            // Одноблочные вкладки: набор никогда не показывается (контейнер скрыт целиком).
+            assertTrue("Java: набор " + setId + " должен быть всегда setVisible(false)",
+                    controller.contains(setId + ".setVisible(false)"));
+            String block = section(descriptor, "<vbox id=\"" + setId + "\"", "</vbox>");
+            assertTrue("XML: набор " + setId + " должен быть скрыт по умолчанию (visible=\"false\")",
+                    block.contains("visible=\"false\""));
         }
 
         // Все навигационные кнопки (18) — borderless label-nav-item и имеют Java-поле.

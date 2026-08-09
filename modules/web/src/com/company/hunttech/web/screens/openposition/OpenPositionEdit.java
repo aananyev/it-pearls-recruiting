@@ -85,6 +85,14 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private Label<String> infoSalaryMaxIeLabel;
     @Inject
+    private Label<String> contextGradeLabel;
+    @Inject
+    private Label<String> contextRegistrationLabel;
+    @Inject
+    private Label<String> contextStatusLabel;
+    @Inject
+    private Label<String> statusOfVacansyLabel;
+    @Inject
     private Label<String> currentPriorityLabel;
     @Inject
     private Image trafficLighterImage;
@@ -416,6 +424,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private VBoxLayout openPositionApprovalTabNavigation;
     @Inject
     private VBoxLayout openPositionCommentsTabNavigation;
+    /* Контейнер label-навигации sidebar (заголовок «Разделы активной вкладки» + наборы пунктов):
+       скрывается целиком, если активная вкладка содержит единственный блок ввода. */
+    @Inject
+    private VBoxLayout openPositionEditorNavigation;
     /* Пункты наборов навигации вкладок «Трудовой договор», «Описание должности», «Файлы»,
        «Тестовое задание», «Памятка», «Шаблон письма», «Навыки», «Новости», «Согласование»,
        «Комментарии» — клик подсвечивает пункт и фокусирует первый элемент блока (для
@@ -597,22 +609,36 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
-    /** Показывает в sidebar только набор навигации активной вкладки и подсвечивает его первый пункт. */
+    /** Вкладки, в контенте которых два и более блока ввода: только для них в sidebar
+     *  показывается label-навигация. Вкладки с единственным блоком ввода навигацию не имеют. */
+    private static final Set<String> TABS_WITH_SIDEBAR_NAVIGATION = new HashSet<>(Arrays.asList(
+            "tabOpenPosition",     // 5 блоков: наименование, параметры, карточка вакансии, команда, зарплата
+            "laborAgreementTab",   // 2 блока: трудовые соглашения, детали оплаты
+            "tabJobDescription")); // 3 блока: опыт, аккордеон описаний, короткое описание
+
+    /** Показывает label-навигацию sidebar только для вкладок с двумя и более блоками ввода:
+     *  контейнер openPositionEditorNavigation (заголовок + наборы пунктов) скрыт целиком на
+     *  одноблочных вкладках; на много-блочных показывается набор активной вкладки и подсвечивается
+     *  его первый пункт. */
     private void syncSidebarNavigation() {
         TabSheet.Tab selectedTab = tabSheetOpenPosition.getSelectedTab();
         String selectedTabName = selectedTab == null ? "tabOpenPosition" : selectedTab.getName();
 
+        openPositionEditorNavigation.setVisible(TABS_WITH_SIDEBAR_NAVIGATION.contains(selectedTabName));
+
         openPositionMainTabNavigation.setVisible("tabOpenPosition".equals(selectedTabName));
         openPositionLaborTabNavigation.setVisible("laborAgreementTab".equals(selectedTabName));
         openPositionJobDescriptionTabNavigation.setVisible("tabJobDescription".equals(selectedTabName));
-        openPositionFilesTabNavigation.setVisible("tabFiles".equals(selectedTabName));
-        openPositionExerciseTabNavigation.setVisible("tabExercise".equals(selectedTabName));
-        openPositionMemoTabNavigation.setVisible("tabMemoForInterview".equals(selectedTabName));
-        openPositionTemplateLetterTabNavigation.setVisible("tabTemplateLetter".equals(selectedTabName));
-        openPositionSkillsTabNavigation.setVisible("tabSkills".equals(selectedTabName));
-        openPositionNewsTabNavigation.setVisible("tabOpenPositionNews".equals(selectedTabName));
-        openPositionApprovalTabNavigation.setVisible("tabApproval".equals(selectedTabName));
-        openPositionCommentsTabNavigation.setVisible("commentsTab".equals(selectedTabName));
+        // Наборы одноблочных вкладок («Файлы», «Тестовое задание», «Памятка», «Шаблон письма»,
+        // «Навыки», «Новости», «Согласование», «Комментарии») в sidebar не показываются никогда.
+        openPositionFilesTabNavigation.setVisible(false);
+        openPositionExerciseTabNavigation.setVisible(false);
+        openPositionMemoTabNavigation.setVisible(false);
+        openPositionTemplateLetterTabNavigation.setVisible(false);
+        openPositionSkillsTabNavigation.setVisible(false);
+        openPositionNewsTabNavigation.setVisible(false);
+        openPositionApprovalTabNavigation.setVisible(false);
+        openPositionCommentsTabNavigation.setVisible(false);
 
         resetNavigationActiveStyles();
         if ("tabOpenPosition".equals(selectedTabName)) {
@@ -621,22 +647,6 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             activateNavigationItem(openPositionLaborTabNavigation, openPositionEditorNavLaborAgreement);
         } else if ("tabJobDescription".equals(selectedTabName)) {
             activateNavigationItem(openPositionJobDescriptionTabNavigation, openPositionEditorNavWorkExperience);
-        } else if ("tabFiles".equals(selectedTabName)) {
-            activateNavigationItem(openPositionFilesTabNavigation, openPositionEditorNavFiles);
-        } else if ("tabExercise".equals(selectedTabName)) {
-            activateNavigationItem(openPositionExerciseTabNavigation, openPositionEditorNavExercise);
-        } else if ("tabMemoForInterview".equals(selectedTabName)) {
-            activateNavigationItem(openPositionMemoTabNavigation, openPositionEditorNavMemo);
-        } else if ("tabTemplateLetter".equals(selectedTabName)) {
-            activateNavigationItem(openPositionTemplateLetterTabNavigation, openPositionEditorNavTemplateLetter);
-        } else if ("tabSkills".equals(selectedTabName)) {
-            activateNavigationItem(openPositionSkillsTabNavigation, openPositionEditorNavSkills);
-        } else if ("tabOpenPositionNews".equals(selectedTabName)) {
-            activateNavigationItem(openPositionNewsTabNavigation, openPositionEditorNavNews);
-        } else if ("tabApproval".equals(selectedTabName)) {
-            activateNavigationItem(openPositionApprovalTabNavigation, openPositionEditorNavApproval);
-        } else if ("commentsTab".equals(selectedTabName)) {
-            activateNavigationItem(openPositionCommentsTabNavigation, openPositionEditorNavComments);
         }
     }
 
@@ -3502,7 +3512,30 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 ? esc(pos.getSalaryMax().toPlainString()) : ""));
         infoSalaryMaxIeLabel.setValue("<b>Зарплата МАХ (ИП):</b> " + (pos.getSalaryIE() != null
                 ? esc(pos.getSalaryIE().toPlainString()) : ""));
+        contextGradeLabel.setValue("<b>Грейд:</b> " + (pos.getGrade() != null
+                ? esc(pos.getGrade().getGradeName()) : ""));
+        contextRegistrationLabel.setValue("<b>Оформление:</b> " + registrationForWorkName(pos.getRegistrationForWork()));
+        contextStatusLabel.setValue("<b>Статус:</b> " + vacancyStatusName(pos));
+        refreshSidebarStatus();
         refreshSidebarPriority();
+    }
+
+    /** Заполнение ячейки «Статус вакансии» sidebar (эталон IteractionListEdit): черновик
+     *  (signDraft) имеет приоритет, иначе — открыта/закрыта (openClose); цветовая индикация
+     *  классами h3-gray/h3-green/h3-red как в эталоне. Presentation-only; вызывается из
+     *  refreshSidebarInfoCard() (onBeforeShow + listener). */
+    private void refreshSidebarStatus() {
+        OpenPosition pos = getEditedEntity();
+        if (Boolean.TRUE.equals(pos.getSignDraft())) {
+            statusOfVacansyLabel.setValue("ЧЕРНОВИК");
+            statusOfVacansyLabel.setStyleName("h3-gray");
+        } else if (Boolean.TRUE.equals(pos.getOpenClose())) {
+            statusOfVacansyLabel.setValue("ЗАКРЫТА");
+            statusOfVacansyLabel.setStyleName("h3-red");
+        } else {
+            statusOfVacansyLabel.setValue("ОТКРЫТА");
+            statusOfVacansyLabel.setStyleName("h3-green");
+        }
     }
 
     /** Заполнение блока срочности sidebar (копия IteractionListEdit): приоритет вакансии со
@@ -3574,6 +3607,36 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     /** Экранирование HTML-спецсимволов для значения label (защита от разметки в названиях). */
     private String esc(String s) {
         return s == null ? "" : s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
+    /** Человекочитаемое имя типа оформления для работы по коду StandartRegistrationForWork
+     *  (аутстаффинг/рекрутинг/все варианты); для null и неизвестного кода — пустая строка,
+     *  чтобы блок «Контекст вакансии» не показывал «null». Presentation-only. */
+    private String registrationForWorkName(Integer code) {
+        if (code == null) {
+            return "";
+        }
+        if (StandartRegistrationForWork.OUTSTAFING.equals(code)) {
+            return messageBundle.getMessage("mainmsgOutstaffing");
+        }
+        if (StandartRegistrationForWork.RECRUITING.equals(code)) {
+            return messageBundle.getMessage("mainmsgRecruiting");
+        }
+        if (StandartRegistrationForWork.ALL.equals(code)) {
+            return messageBundle.getMessage("mainmsgAllVariants");
+        }
+        return "";
+    }
+
+    /** Статус вакансии для блока «Контекст вакансии»: черновик (signDraft) имеет приоритет,
+     *  иначе — открыта/закрыта (openClose). Presentation-only, без бизнес-логики. */
+    private String vacancyStatusName(OpenPosition pos) {
+        if (Boolean.TRUE.equals(pos.getSignDraft())) {
+            return "Черновик";
+        }
+        return Boolean.TRUE.equals(pos.getOpenClose())
+                ? messageBundle.getMessage("msgOpenBy")
+                : messageBundle.getMessage("msgOpecnClosePosition");
     }
 
     /**

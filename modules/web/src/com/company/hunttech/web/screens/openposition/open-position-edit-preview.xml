@@ -206,6 +206,9 @@
           <vbox id="openPositionNewsTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionApprovalTabNavigation" width="100%" visible="false"/>
           <vbox id="openPositionCommentsTabNavigation" width="100%" visible="false"/>
+          <!-- Контейнер label-навигации базового контроллера (контракт @Inject OpenPositionEdit);
+               витрина использует собственный набор openPositionPreviewNavigation. -->
+          <vbox id="openPositionEditorNavigation" width="100%" visible="false"/>
           <!-- Скрытые label информационной карточки sidebar (контракт @Inject из основного XML). -->
           <label id="infoPositionLabel" width="100%" visible="false"/>
           <label id="infoProjectLabel" width="100%" visible="false"/>
@@ -216,6 +219,7 @@
           <!-- Скрытые компоненты блока срочности sidebar (контракт @Inject из основного XML). -->
           <image id="trafficLighterImage" width="AUTO" visible="false"/>
           <label id="currentPriorityLabel" width="100%" visible="false"/>
+          <label id="statusOfVacansyLabel" width="100%" visible="false"/>
           <label id="remoteWorkSidebarLabel" width="100%" visible="false"/>
         </vbox>
         <!-- Ключевые параметры используют только уже загруженные свойства edit-view. -->
@@ -256,6 +260,9 @@
           <label id="closedVacancyInfoLabel" width="100%" height="AUTO" icon="WARNING" stylename="small"/>
           <label id="labelTopComissionRecrutier" htmlEnabled="true" stylename="small"/>
           <label id="labelTopComissionResearcher" htmlEnabled="true" stylename="small"/>
+          <label id="contextGradeLabel" width="100%" htmlEnabled="true" visible="false"/>
+          <label id="contextRegistrationLabel" width="100%" htmlEnabled="true" visible="false"/>
+          <label id="contextStatusLabel" width="100%" htmlEnabled="true" visible="false"/>
         </vbox>
         <vbox id="openPositionPreviewSidebarSpacer" width="100%" height="100%" stylename="edit-sidebar-spacer"/>
         <vbox width="100%" spacing="true" stylename="edit-sidebar-summary">
