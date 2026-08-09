@@ -292,8 +292,8 @@
     }
 
     // Пять частых взаимодействий расположены перед первым аккордеоном.
-    // Кнопки остаются равными, но используют стандартную геометрию 40 px,
-    // theme-aware поверхность и гарантированно видимый caption.
+    // Кнопки равны по ширине (5 × 20%) и восстанавливают исторический
+    // зелёный стиль быстрых кнопок 2024 года с белой подписью.
     .iteraction-list-popular-host,
     .iteraction-list-popular-host > .v-slot,
     .iteraction-list-popular-buttons,
@@ -322,12 +322,12 @@
       min-width: 0 !important;
       height: 64px !important;
       padding: 6px 10px !important;
-      color: mix($v-selection-color, $v-font-color, 78%) !important;
+      color: #ffffff !important;
       font-size: 13px !important;
       font-weight: 600 !important;
-      background: mix($v-selection-color, $v-panel-background-color, 8%) !important;
-      border: 1px solid rgba($v-selection-color, 0.48) !important;
-      border-radius: 8px !important;
+      background: #008000 !important;
+      border: 1px solid rgba(81, 255, 0, 0.55) !important;
+      border-radius: 10px !important;
       box-shadow: none !important;
       white-space: normal !important;
     }
@@ -356,10 +356,10 @@
 
     .iteraction-list-popular-button:hover,
     .iteraction-list-popular-button:focus {
-      color: $v-selection-color !important;
-      background: mix($v-selection-color, $v-panel-background-color, 14%) !important;
-      border-color: $v-selection-color !important;
-      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.18) !important;
+      color: #ffffff !important;
+      background: #006400 !important;
+      border-color: #51ff00 !important;
+      box-shadow: 0 0 0 2px rgba(81, 255, 0, 0.28) !important;
     }
 
     .iteraction-list-popular-button.v-disabled,

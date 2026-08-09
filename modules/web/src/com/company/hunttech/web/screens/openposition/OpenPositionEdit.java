@@ -93,6 +93,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private Label<String> statusOfVacansyLabel;
     @Inject
+    /* Кнопка «Закрыть/Открыть вакансию» под парой «Статус вакансии»+«Приоритет»: toggle OPEN_CLOSE
+       (визуал — footer-кнопки JobCandidateEdit); надпись переключает refreshOpenCloseButton. */
+    private Button openClosePositionButton;
+    @Inject
     private Label<String> currentPriorityLabel;
     @Inject
     private Image trafficLighterImage;
@@ -3518,6 +3522,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         contextStatusLabel.setValue("<b>Статус:</b> " + vacancyStatusName(pos));
         refreshSidebarStatus();
         refreshSidebarPriority();
+        refreshOpenCloseButton();
     }
 
     /** Заполнение ячейки «Статус вакансии» sidebar (эталон IteractionListEdit): черновик
@@ -3602,6 +3607,26 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
         }
         remoteWorkSidebarLabel.setValue(remoteStr);
+    }
+
+    /** Надпись кнопки «Закрыть/Открыть вакансию» по состоянию OPEN_CLOSE: открыта (false/none) →
+     *  «Закрыть вакансию», закрыта (true) → «Открыть вакансию». Presentation-only; вызывается из
+     *  refreshSidebarInfoCard() (onBeforeShow + listener) и после toggle в openClosePositionToggle(). */
+    private void refreshOpenCloseButton() {
+        boolean closed = Boolean.TRUE.equals(getEditedEntity().getOpenClose());
+        openClosePositionButton.setCaption(messageBundle.getMessage(closed ? "msgOpenVacancy" : "msgCloseVacancy"));
+    }
+
+    /** Toggle закрытия/открытия вакансии (invoke кнопки sidebar под парой «Статус вакансии»+«Приоритет»):
+     *  инвертирует OPEN_CLOSE, синхронизирует чекбокс «Закрыта» (его ValueChange выполняет блокировку
+     *  полей disableEnableFields) и обновляет sidebar. Нотификацию всем пользователям (UiNotificationEvent)
+     *  и новости выполняет существующий onBeforeCommitChanges3 → publishEventMessage при сохранении формы. */
+    public void openClosePositionToggle() {
+        boolean newStatus = !Boolean.TRUE.equals(getEditedEntity().getOpenClose());
+        getEditedEntity().setOpenClose(newStatus);
+        openClosePositionCheckBox.setValue(newStatus);
+        refreshSidebarStatus();
+        refreshOpenCloseButton();
     }
 
     /** Экранирование HTML-спецсимволов для значения label (защита от разметки в названиях). */

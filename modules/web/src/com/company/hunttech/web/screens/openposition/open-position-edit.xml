@@ -396,6 +396,15 @@
                     </hbox>
                 </vbox>
             </hbox>
+            <!-- Закрытие/открытие вакансии: toggle OPEN_CLOSE — открыта (false/none) → «Закрыть вакансию»,
+                 закрыта (true) → «Открыть вакансию» (надпись меняет Java refreshOpenCloseButton);
+                 нотификация всем пользователям — UiNotificationEvent при сохранении (publishEventMessage);
+                 визуал — копия кнопок footer sidebar JobCandidateEdit («Создать взаимодействие»). -->
+            <button id="openClosePositionButton"
+                    caption="msg://msgCloseVacancy"
+                    invoke="openClosePositionToggle"
+                    width="100%"
+                    stylename="small open-position-editor-open-close-button"/>
             <!-- Нижняя строка блока срочности: формат работы (удалённая/офисная/гибрид). -->
             <label id="remoteWorkCaptionLabel"
                    value="msg://msgRemoteWorkSidebar"

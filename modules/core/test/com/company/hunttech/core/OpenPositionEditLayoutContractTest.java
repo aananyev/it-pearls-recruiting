@@ -711,6 +711,81 @@ public class OpenPositionEditLayoutContractTest {
     }
 
     @Test
+    public void vacancyCloseButtonSitsUnderStatusPriorityPair() throws IOException {
+        String descriptor = readProjectFile(EDIT_XML);
+
+        // Кнопка «Закрыть/Открыть вакансию» расположена сразу под парой (до строки формата работы),
+        // как просил владелец: под блоком «Статус вакансии»+«Приоритет».
+        assertTrue("Кнопка открытия/закрытия отсутствует",
+                descriptor.contains("id=\"openClosePositionButton\""));
+        assertTrue("Порядок нарушен: кнопка должна идти после пары",
+                descriptor.indexOf("id=\"vacancyStateSummary\"")
+                        < descriptor.indexOf("id=\"openClosePositionButton\""));
+        assertTrue("Порядок нарушен: кнопка должна идти до строки формата работы",
+                descriptor.indexOf("id=\"openClosePositionButton\"")
+                        < descriptor.indexOf("id=\"remoteWorkCaptionLabel\""));
+
+        String tag = startTag(descriptor, "openClosePositionButton");
+        assertTrue("Кнопка не имеет caption msgCloseVacancy (открыта → «Закрыть вакансию»)",
+                tag.contains("caption=\"msg://msgCloseVacancy\""));
+        assertTrue("Кнопка не имеет invoke openClosePositionToggle",
+                tag.contains("invoke=\"openClosePositionToggle\""));
+        assertTrue("Кнопка не растянута на 100% ширины",
+                tag.contains("width=\"100%\""));
+        assertTrue("Кнопка не использует базовый класс small (как footer JobCandidateEdit)",
+                tag.contains("stylename=\"small open-position-editor-open-close-button\""));
+
+        // Preview-контракт: инжектируемая кнопка обязана быть в preview как скрытая заглушка.
+        String preview = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/openposition/open-position-edit-preview.xml");
+        assertTrue("Preview не содержит скрытую заглушку openClosePositionButton",
+                preview.contains("id=\"openClosePositionButton\"")
+                        && preview.contains("visible=\"false\""));
+
+        // Java-контракт: toggle инвертирует OPEN_CLOSE, надпись переключается по состоянию.
+        String controller = readProjectFile(EDIT_CONTROLLER);
+        assertTrue("Контроллер не содержит toggle openClosePositionToggle",
+                controller.contains("public void openClosePositionToggle()"));
+        assertTrue("Контроллер не содержит refreshOpenCloseButton",
+                controller.contains("private void refreshOpenCloseButton()"));
+        assertTrue("Контроллер не переключает надпись msgOpenVacancy/msgCloseVacancy",
+                controller.contains("closed ? \"msgOpenVacancy\" : \"msgCloseVacancy\""));
+    }
+
+    @Test
+    public void vacancyCloseButtonScssCarriesJobCandidateFooterLookInAllThemes() throws IOException {
+        // Визуал кнопки — 1:1 с footer-кнопками JobCandidateEdit
+        // (job-candidate-profile-footer .v-button): 100%, min-height 38px, 14/600,
+        // фон rgba(255,255,255,.06), border rgba(255,255,255,.34), radius 5px, hover .10.
+        String button = "    .open-position-editor-open-close-button {";
+        for (String theme : THEMES) {
+            String scss = readProjectFile(themeScssPath(theme));
+            assertTrue("В теме " + theme + " нет класса кнопки open-close-button",
+                    scss.contains(button));
+            String block = section(scss, button,
+                    "    .open-position-editor-open-close-button:hover {");
+            for (String rule : Arrays.asList(
+                    "width: 100% !important;",
+                    "min-height: 38px;",
+                    "color: #f8fafc !important;",
+                    "font-size: 14px;",
+                    "font-weight: 600;",
+                    "background: rgba(255, 255, 255, .06) !important;",
+                    "border: 1px solid rgba(255, 255, 255, .34) !important;",
+                    "border-radius: 5px;",
+                    "box-shadow: none !important;")) {
+                assertTrue("В теме " + theme + " кнопка не содержит " + rule,
+                        block.contains(rule));
+            }
+            String hover = section(scss,
+                    "    .open-position-editor-open-close-button:hover {",
+                    "    }");
+            assertTrue("В теме " + theme + " hover кнопки не .10",
+                    hover.contains("background: rgba(255, 255, 255, .10) !important;"));
+        }
+    }
+
+    @Test
     public void tabsCaptionsMatchJobCandidateEditFont() throws IOException {
         // Шрифт заголовков вкладок — 1:1 с эталоном JobCandidateEdit (font 14/600,
         // цвет #26384c, hover #1264b5, selected = $v-selection-color) во всех 7 темах.

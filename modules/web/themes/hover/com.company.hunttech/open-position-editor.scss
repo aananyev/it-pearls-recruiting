@@ -360,6 +360,24 @@
       max-height: 26px;
     }
 
+    /* Кнопка «Закрыть/Открыть вакансию» под парой «Статус вакансии»+«Приоритет»: точная копия
+       визуала footer-кнопок sidebar формы JobCandidateEdit («Создать взаимодействие»). */
+    .open-position-editor-open-close-button {
+      width: 100% !important;
+      min-height: 38px;
+      color: #f8fafc !important;
+      font-size: 14px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, .06) !important;
+      border: 1px solid rgba(255, 255, 255, .34) !important;
+      border-radius: 5px;
+      box-shadow: none !important;
+    }
+
+    .open-position-editor-open-close-button:hover {
+      background: rgba(255, 255, 255, .10) !important;
+    }
+
     // Статус вакансии и приоритет — одна горизонтальная пара 50/50 (эталон IteractionListEdit).
     .open-position-editor-vacancy-state-summary {
       box-sizing: border-box;

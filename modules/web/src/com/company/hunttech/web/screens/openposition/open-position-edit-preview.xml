@@ -220,6 +220,7 @@
           <image id="trafficLighterImage" width="AUTO" visible="false"/>
           <label id="currentPriorityLabel" width="100%" visible="false"/>
           <label id="statusOfVacansyLabel" width="100%" visible="false"/>
+          <button id="openClosePositionButton" caption="Закрыть вакансию" width="100%" visible="false"/>
           <label id="remoteWorkSidebarLabel" width="100%" visible="false"/>
         </vbox>
         <!-- Ключевые параметры используют только уже загруженные свойства edit-view. -->
