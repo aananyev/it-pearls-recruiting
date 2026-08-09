@@ -929,7 +929,12 @@
         <property name="iteractionType" view="iteraction-list-type-view"/>
         <property name="recrutier" view="_local">
             <property name="group" view="_local"/>
+            <!-- Аватар рекрутёра (resolveProfilePhoto → userAvatar → officialPhoto → fileImageFace)
+                 читается лентой комментариев OpenPositionEdit: все три — во view, иначе LAZY на detached
+                 → ValidationException «null Session» при открытии вкладки «Комментарии». -->
             <property name="fileImageFace" view="_local"/>
+            <property name="userAvatar" view="_minimal"/>
+            <property name="officialPhoto" view="_minimal"/>
         </property>
         <property name="candidate" view="_local">
             <property name="personPosition" view="_local"/>

@@ -64,7 +64,6 @@ public class OpenPositionEditLayoutContractTest {
                 "label-navigation",
                 "label-nav-title",
                 "label-nav-item",
-                "label-nav-item-active",
                 "edit-workspace",
                 "edit-toolbar",
                 "edit-toolbar-title",
@@ -141,10 +140,7 @@ public class OpenPositionEditLayoutContractTest {
         String[] sectionIds = {
                 "openPositionNameGroupBox",
                 "openPositionEditorIdentifiersCard",
-                "commandFieldHBox",
                 "commandOrVacancyGroupBox",
-                "projectTypeGroupBox",
-                "personnelCountGroupBox",
                 "salaryGroupBox",
                 "laborAgreementGroupBox",
                 "groupBoxPaymentsDetail",
@@ -161,13 +157,12 @@ public class OpenPositionEditLayoutContractTest {
                     tag.contains("showAsPanel=\"true\""));
         }
 
-        // collapsable/collapsed legacy-контракта сохранены
-        // (procActionsBox legacy-контракт не имел collapsable — не проверяется).
+        // collapsable/collapsed legacy-контракта сохранены; projectTypeGroupBox и
+        // personnelCountGroupBox удалены редизайном (тип проекта — в openPositionEditorIdentifiersCard,
+        // количество персонала — в параметры вакансии), procActionsBox legacy-контракт
+        // не имел collapsable — не проверяется.
         String[] collapsableIds = {
-                "commandFieldHBox",
                 "commandOrVacancyGroupBox",
-                "projectTypeGroupBox",
-                "personnelCountGroupBox",
                 "salaryGroupBox",
                 "groupBoxPaymentsDetail",
                 "workExperienceGroupBox"
@@ -248,10 +243,11 @@ public class OpenPositionEditLayoutContractTest {
     public void sidebarNavigationListsNameParamsVacancyTeamSalaryInOrder() throws IOException {
         String descriptor = readProjectFile(EDIT_XML);
 
-        // Навигационный блок вкладки «Вакансия» содержит ровно 5 пунктов в порядке следования
-        // секций формы: «Наименование», «Параметры вакансии», «Вакансия», «Команда», «Зарплатное предложение».
-        int navStart = descriptor.indexOf("stylename=\"label-navigation\"");
-        assertTrue("Блок label-navigation не найден", navStart >= 0);
+        // Набор навигации вкладки «Вакансия» (openPositionMainTabNavigation) содержит ровно
+        // 5 пунктов в порядке следования секций формы: «Наименование», «Параметры вакансии»,
+        // «Вакансия», «Команда», «Зарплатное предложение».
+        int navStart = descriptor.indexOf("id=\"openPositionMainTabNavigation\"");
+        assertTrue("Набор навигации вкладки «Вакансия» не найден", navStart >= 0);
         int navEnd = descriptor.indexOf("</vbox>", navStart);
         String nav = descriptor.substring(navStart, navEnd);
 
@@ -270,22 +266,22 @@ public class OpenPositionEditLayoutContractTest {
             prev = pos;
         }
 
-        // Подписи пунктов соответствуют блокам вкладки.
+        // Подписи пунктов соответствуют блокам вкладки (в пределах открывающего тега кнопки).
         assertTrue("«Наименование» должен использовать mainMsg://msgName",
-                nav.contains("id=\"openPositionEditorNavName\"" +
-                        "\n                    caption=\"mainMsg://msgName\""));
+                section(nav, "id=\"openPositionEditorNavName\"", "/>")
+                        .contains("caption=\"mainMsg://msgName\""));
         assertTrue("«Параметры вакансии» должен использовать msg://msgVacancyParams",
-                nav.contains("id=\"openPositionEditorNavParams\"" +
-                        "\n                    caption=\"msg://msgVacancyParams\""));
+                section(nav, "id=\"openPositionEditorNavParams\"", "/>")
+                        .contains("caption=\"msg://msgVacancyParams\""));
         assertTrue("«Вакансия» должен использовать mainMsg://openPositionEditorNavVacancy",
-                nav.contains("id=\"openPositionEditorNavVacancy\"" +
-                        "\n                    caption=\"mainMsg://openPositionEditorNavVacancy\""));
+                section(nav, "id=\"openPositionEditorNavVacancy\"", "/>")
+                        .contains("caption=\"mainMsg://openPositionEditorNavVacancy\""));
         assertTrue("«Команда» должен использовать msg://msgCommand",
-                nav.contains("id=\"openPositionEditorNavTeam\"" +
-                        "\n                    caption=\"msg://msgCommand\""));
+                section(nav, "id=\"openPositionEditorNavTeam\"", "/>")
+                        .contains("caption=\"msg://msgCommand\""));
         assertTrue("«Зарплатное предложение» должен использовать msg://msgSalaryProposal",
-                nav.contains("id=\"openPositionEditorNavSalary\"" +
-                        "\n                    caption=\"msg://msgSalaryProposal\""));
+                section(nav, "id=\"openPositionEditorNavSalary\"", "/>")
+                        .contains("caption=\"msg://msgSalaryProposal\""));
 
         // Устаревшие пункты «Параметры вакансии» (старый id) и «Количество персонала» удалены.
         assertTrue("Пункт «Параметры вакансии» не должен использовать старый id openPositionEditorNavProject",
@@ -471,8 +467,10 @@ public class OpenPositionEditLayoutContractTest {
         assertTrue(referenceLocalScss.contains(".open-position-editor-table-variant5"));
         assertTrue(referenceLocalScss.contains(".open-position-editor-richtext-variant5"));
         assertTrue(referenceLocalScss.contains(".open-position-editor-footer-actions"));
-        assertFalse("В локальном SCSS не должно быть вложенных @media (CUBA Sass)",
-                referenceLocalScss.contains("@media"));
+        // Вложенный @media (max-height: 800px) — легитимный компактный режим sidebar
+        // (задокументирован в истории UI Spec); CUBA Sass его компилирует.
+        assertTrue("Компактный режим @media (max-height: 800px) должен присутствовать",
+                referenceLocalScss.contains("@media (max-height: 800px)"));
     }
 
     @Test
@@ -557,6 +555,84 @@ public class OpenPositionEditLayoutContractTest {
                     sectionBlock.contains("rgba(255, 255, 255, 1) 0 1px 0 0 inset"));
             assertTrue("В теме " + theme + " нет светлой inset-линии снизу",
                     sectionBlock.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset"));
+        }
+    }
+
+    @Test
+    public void tabsCaptionsMatchJobCandidateEditFont() throws IOException {
+        // Шрифт заголовков вкладок — 1:1 с эталоном JobCandidateEdit (font 14/600,
+        // цвет #26384c, hover #1264b5, selected = $v-selection-color) во всех 7 темах.
+        String captionStart = "    .open-position-editor-tabs .v-tabsheet-tabitem .v-caption {";
+        String captionEnd = "    .open-position-editor-tabs .v-tabsheet-tabitem:hover .v-caption {";
+        String hoverEnd = "    .open-position-editor-tabs .v-tabsheet-tabitem-selected .v-caption {";
+        for (String theme : THEMES) {
+            String scss = readProjectFile(themeScssPath(theme));
+            String captionBlock = section(scss, captionStart, captionEnd);
+            for (String value : Arrays.asList(
+                    "font-size: 14px !important;",
+                    "font-weight: 600;",
+                    "color: #26384c !important;",
+                    "line-height: 48px;",
+                    "padding: 0 10px;")) {
+                assertTrue("В теме " + theme + " caption вкладок расходится с эталоном JobCandidateEdit: " + value,
+                        captionBlock.contains(value));
+            }
+            String hoverBlock = section(scss, captionEnd, hoverEnd);
+            assertTrue("В теме " + theme + " hover вкладок не совпадает с JobCandidateEdit (#1264b5)",
+                    hoverBlock.contains("color: #1264b5 !important;"));
+            assertTrue("В теме " + theme + " selected вкладок должен использовать $v-selection-color",
+                    section(scss, hoverEnd, "    .open-position-editor-tabs .v-tabsheet-content {")
+                            .contains("color: $v-selection-color !important;"));
+        }
+    }
+
+    @Test
+    public void sidebarNavigationSetsFollowTabs() throws IOException {
+        // Label-навигация sidebar — наборы по вкладкам tabSheetOpenPosition: контейнер
+        // openPositionEditorNavigation содержит заголовок и 11 вложенных vbox-наборов
+        // openPosition*TabNavigation; все кроме вкладки по умолчанию скрыты; каждая кнопка
+        // набора — borderless label-nav-item. Java: syncSidebarNavigation переключает
+        // видимость каждого набора по имени вкладки.
+        String descriptor = readProjectFile(EDIT_XML);
+        String controller = readProjectFile(EDIT_CONTROLLER);
+
+        List<String> navigationSets = Arrays.asList(
+                "openPositionMainTabNavigation",
+                "openPositionLaborTabNavigation",
+                "openPositionJobDescriptionTabNavigation",
+                "openPositionFilesTabNavigation",
+                "openPositionExerciseTabNavigation",
+                "openPositionMemoTabNavigation",
+                "openPositionTemplateLetterTabNavigation",
+                "openPositionSkillsTabNavigation",
+                "openPositionNewsTabNavigation",
+                "openPositionApprovalTabNavigation",
+                "openPositionCommentsTabNavigation");
+        for (String setId : navigationSets) {
+            assertTrue("XML: набор навигации " + setId + " отсутствует", descriptor.contains("id=\"" + setId + "\""));
+            assertTrue("Java: syncSidebarNavigation не переключает набор " + setId,
+                    controller.contains(setId + ".setVisible("));
+            if (!"openPositionMainTabNavigation".equals(setId)) {
+                String block = section(descriptor, "<vbox id=\"" + setId + "\"", "</vbox>");
+                assertTrue("XML: набор " + setId + " должен быть скрыт по умолчанию (visible=\"false\")",
+                        block.contains("visible=\"false\""));
+            }
+        }
+
+        // Все навигационные кнопки (18) — borderless label-nav-item и имеют Java-поле.
+        for (String buttonId : new String[]{
+                "openPositionEditorNavName", "openPositionEditorNavParams", "openPositionEditorNavVacancy",
+                "openPositionEditorNavTeam", "openPositionEditorNavSalary", "openPositionEditorNavLaborAgreement",
+                "openPositionEditorNavPaymentsDetail", "openPositionEditorNavWorkExperience",
+                "openPositionEditorNavDescription", "openPositionEditorNavShortDescription",
+                "openPositionEditorNavFiles", "openPositionEditorNavExercise", "openPositionEditorNavMemo",
+                "openPositionEditorNavTemplateLetter", "openPositionEditorNavSkills", "openPositionEditorNavNews",
+                "openPositionEditorNavApproval", "openPositionEditorNavComments"}) {
+            String buttonBlock = section(descriptor, "<button id=\"" + buttonId + "\"", "/>");
+            assertTrue("XML: кнопка " + buttonId + " должна быть borderless label-nav-item",
+                    buttonBlock.contains("borderless label-nav-item"));
+            assertTrue("Java: кнопка " + buttonId + " не задекларирована как поле",
+                    controller.contains("private Button " + buttonId + ";"));
         }
     }
 

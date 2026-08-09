@@ -370,8 +370,9 @@
                        stylename="open-position-editor-priority-value"/>
             </vbox>
         </vbox>
-        <!-- Label-навигация разделов активной вкладки «О вакансии»: визуальные указатели секций.
-             Кнопки без invoke (Java READ_ONLY) — только presentation, по §3.5 общего контракта. -->
+        <!-- Label-навигация разделов активной вкладки: набор пунктов переключается по выбранной
+             вкладке (Java syncSidebarNavigation, контейнеры-наборы ниже). Кнопки без invoke
+             (Java READ_ONLY) — только presentation, по §3.5 общего контракта. -->
         <vbox id="openPositionEditorNavigation"
               width="100%"
               spacing="false"
@@ -382,38 +383,189 @@
                    value="mainMsg://openPositionEditorNavActiveSections"
                    width="100%"
                    stylename="label-nav-title open-position-editor-section-title"/>
-                        <!-- Пункт «Наименование» — label-навигация блока «Наименование» (ID, грейд, название, «Генерировать»):
-                 клик подсвечивает пункт и переводит фокус в ID (начало блока). -->
-            <button id="openPositionEditorNavName"
-                    caption="mainMsg://msgName"
-                    width="100%"
-                    stylename="borderless label-nav-item"/>
-            <!-- Пункт «Параметры вакансии» — label-навигация блока openPositionParamsGroupBox
-                 (приоритет, удалёнка, дата закрытия, комментарий): клик подсвечивает пункт
-                 и переводит фокус в поле приоритета (начало блока). -->
-            <button id="openPositionEditorNavParams"
-                    caption="msg://msgVacancyParams"
-                width="100%"
-                stylename="borderless label-nav-item"/>
-            <!-- Пункт «Вакансия» — label-навигация карточки «Вакансия» (приоритет, должность, проект,
-                 компания, департамент, город): клик подсвечивает пункт и переводит фокус
-                 в поле приоритета (начало карточки). -->
-            <button id="openPositionEditorNavVacancy"
-                    caption="mainMsg://openPositionEditorNavVacancy"
-                    width="100%"
-                    stylename="borderless label-nav-item"/>
-            <!-- Пункт «Команда» — label-навигация блока «Команда / Вакансия» (commandOrVacancyGroupBox):
-                 клик подсвечивает пункт и переводит фокус в radio «Команда/Вакансия». -->
-            <button id="openPositionEditorNavTeam"
-                    caption="msg://msgCommand"
-                    width="100%"
-                    stylename="borderless label-nav-item"/>
-            <!-- Пункт «Зарплатное предложение» — label-навигация блока salaryGroupBox
-                 (клик подсвечивает пункт и переводит фокус в поле минимальной зарплаты). -->
-            <button id="openPositionEditorNavSalary"
-                    caption="msg://msgSalaryProposal"
-                    width="100%"
-                    stylename="borderless label-nav-item"/>
+            <!-- Набор пунктов вкладки «Вакансия» (tabOpenPosition): пять разделов основной
+                 вкладки; виден по умолчанию, показывается при переключении на вкладку. -->
+            <vbox id="openPositionMainTabNavigation"
+                  width="100%"
+                  spacing="false">
+                <!-- Пункт «Наименование» — label-навигация блока «Наименование» (ID, грейд, название, «Генерировать»):
+                     клик подсвечивает пункт и переводит фокус в ID (начало блока). -->
+                <button id="openPositionEditorNavName"
+                        caption="mainMsg://msgName"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+                <!-- Пункт «Параметры вакансии» — label-навигация блока openPositionParamsGroupBox
+                     (приоритет, удалёнка, дата закрытия, комментарий): клик подсвечивает пункт
+                     и переводит фокус в поле приоритета (начало блока). -->
+                <button id="openPositionEditorNavParams"
+                        caption="msg://msgVacancyParams"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+                <!-- Пункт «Вакансия» — label-навигация карточки «Вакансия» (приоритет, должность, проект,
+                     компания, департамент, город): клик подсвечивает пункт и переводит фокус
+                     в поле должности (начало карточки). -->
+                <button id="openPositionEditorNavVacancy"
+                        caption="mainMsg://openPositionEditorNavVacancy"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+                <!-- Пункт «Команда» — label-навигация блока «Команда / Вакансия» (commandOrVacancyGroupBox):
+                     клик подсвечивает пункт и переводит фокус в radio «Команда/Вакансия». -->
+                <button id="openPositionEditorNavTeam"
+                        caption="msg://msgCommand"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+                <!-- Пункт «Зарплатное предложение» — label-навигация блока salaryGroupBox
+                     (клик подсвечивает пункт и переводит фокус в поле минимальной зарплаты). -->
+                <button id="openPositionEditorNavSalary"
+                        caption="msg://msgSalaryProposal"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
+            <!-- Набор пунктов вкладки «Трудовой договор» (laborAgreementTab): секция соглашений
+                 и детали оплаты; секции «Оплата ресерчерам/рекрутерам» содержат только label
+                 (без полей ввода) и в навигацию не включены. -->
+            <vbox id="openPositionLaborTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Трудовой договор» — label-навигация секции laborAgreementGroupBox
+                     (тип регистрации, стоимость аутстафа, таблица соглашений): клик подсвечивает
+                     пункт и переводит фокус в тип регистрации (начало секции). -->
+                <button id="openPositionEditorNavLaborAgreement"
+                        caption="msg://msgLaborAgreement"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+                <!-- Пункт «Детали оплаты» — label-навигация секции groupBoxPaymentsDetail
+                     (тип комиссии, НДФЛ, проценты/суммы): клик подсвечивает пункт и переводит
+                     фокус в тип комиссии компании (начало секции). -->
+                <button id="openPositionEditorNavPaymentsDetail"
+                        caption="msg://openPositionEditorNavPaymentsDetail"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
+            <!-- Набор пунктов вкладки «Описание должности» (tabJobDescription): опыт работы,
+                 аккордеон описаний и короткое описание. -->
+            <vbox id="openPositionJobDescriptionTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Опыт работы» — label-навигация секции workExperienceGroupBox: клик
+                     подсвечивает пункт и переводит фокус в радио выбора опыта (начало секции). -->
+                <button id="openPositionEditorNavWorkExperience"
+                        caption="msg://openPositionEditorNavWorkExperience"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+                <!-- Пункт «Описание должности» — label-навигация аккордеона описаний
+                     (descriptionsAccordionHBox): клик подсвечивает пункт и переводит фокус
+                     в русский редактор описания (первый элемент блока). -->
+                <button id="openPositionEditorNavDescription"
+                        caption="mainMsg://msgJobDescription"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+                <!-- Пункт «Краткое описание» — label-навигация ряда shortDescriptionHBox: клик
+                     подсвечивает пункт и переводит фокус в поле короткого описания. -->
+                <button id="openPositionEditorNavShortDescription"
+                        caption="msg://openPositionEditorNavShortDescription"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
+            <!-- Набор вкладки «Файлы» (tabFiles): единственный раздел — таблица файлов позиции. -->
+            <vbox id="openPositionFilesTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Файлы» — label-навигация таблицы someFilesTable: клик подсвечивает
+                     пункт и переводит фокус на таблицу файлов. -->
+                <button id="openPositionEditorNavFiles"
+                        caption="mainMsg://msgFiles"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
+            <!-- Набор вкладки «Тестовое задание» (tabExercise): единый раздел — признак и редактор задания. -->
+            <vbox id="openPositionExerciseTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Тестовое задание» — label-навигация контейнера exerciseVbox: клик
+                     подсвечивает пункт и переводит фокус в признак необходимости (первый элемент). -->
+                <button id="openPositionEditorNavExercise"
+                        caption="msg://msgExercise"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
+            <!-- Набор вкладки «Памятка кандидату» (tabMemoForInterview): единый раздел — признак и редактор памятки. -->
+            <vbox id="openPositionMemoTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Памятка кандидату» — label-навигация контейнера memoVbox: клик
+                     подсвечивает пункт и переводит фокус в признак необходимости (первый элемент). -->
+                <button id="openPositionEditorNavMemo"
+                        caption="msg://msgMemoForInterview"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
+            <!-- Набор вкладки «Шаблон сопроводительного письма» (tabTemplateLetter): единый раздел. -->
+            <vbox id="openPositionTemplateLetterTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Шаблон письма» — label-навигация контейнера templateLetterBox: клик
+                     подсвечивает пункт и переводит фокус в признак необходимости (первый элемент). -->
+                <button id="openPositionEditorNavTemplateLetter"
+                        caption="msg://openPositionEditorNavTemplateLetter"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
+            <!-- Набор вкладки «Требуемые Навыки» (tabSkills): единый раздел — дерево навыков позиции. -->
+            <vbox id="openPositionSkillsTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Требуемые Навыки» — label-навигация дерева openPositionSkillsListTable:
+                     клик подсвечивает пункт и переводит фокус на дерево навыков (основной элемент;
+                     кнопка пересканирования не элемент ввода). -->
+                <button id="openPositionEditorNavSkills"
+                        caption="msg://msgSkilsPosition"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
+            <!-- Набор вкладки «Новости» (tabOpenPositionNews): единый раздел — таблица новостей позиции. -->
+            <vbox id="openPositionNewsTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Новости» — label-навигация таблицы openPostionNewsDataGrid: клик
+                     подсвечивает пункт и переводит фокус на таблицу новостей. -->
+                <button id="openPositionEditorNavNews"
+                        caption="msg://msgOpenPositionNews"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
+            <!-- Набор вкладки «Согласование» (tabApproval): единый раздел — BPM-процесс согласования. -->
+            <vbox id="openPositionApprovalTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Согласование» — label-навигация BPM-блока procActionsBox: блок не содержит
+                     полей ввода (фрагмент процесса), клик только подсвечивает пункт. -->
+                <button id="openPositionEditorNavApproval"
+                        caption="msg://msgOpenPositionApprovall"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
+            <!-- Набор вкладки «Комментарии» (commentsTab): единый раздел — лента комментариев-рейтингов. -->
+            <vbox id="openPositionCommentsTabNavigation"
+                  width="100%"
+                  spacing="false"
+                  visible="false">
+                <!-- Пункт «Комментарии» — label-навигация ленты commentsScrollBox: лента строится
+                     Java из label-элементов, полей ввода нет, клик только подсвечивает пункт. -->
+                <button id="openPositionEditorNavComments"
+                        caption="msg://openPositionEditorNavComments"
+                        width="100%"
+                        stylename="borderless label-nav-item"/>
+            </vbox>
         </vbox>
         <!-- Информационная карточка позиции: ключевые параметры текущей вакансии в рамке —
              должность, проект, владелец проекта, город и зарплатное предложение МАХ (ТК/ИП);

@@ -391,6 +391,67 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private Button openPositionEditorNavTeam;
     @Named("openPositionEditorNavSalary")
     private Button openPositionEditorNavSalary;
+    /* Наборы label-навигации по вкладкам tabSheetOpenPosition: показывается только набор
+       активной вкладки (syncSidebarNavigation); каждый пункт ведёт к первому элементу
+       соответствующего блока ввода вкладки. */
+    @Inject
+    private VBoxLayout openPositionMainTabNavigation;
+    @Inject
+    private VBoxLayout openPositionLaborTabNavigation;
+    @Inject
+    private VBoxLayout openPositionJobDescriptionTabNavigation;
+    @Inject
+    private VBoxLayout openPositionFilesTabNavigation;
+    @Inject
+    private VBoxLayout openPositionExerciseTabNavigation;
+    @Inject
+    private VBoxLayout openPositionMemoTabNavigation;
+    @Inject
+    private VBoxLayout openPositionTemplateLetterTabNavigation;
+    @Inject
+    private VBoxLayout openPositionSkillsTabNavigation;
+    @Inject
+    private VBoxLayout openPositionNewsTabNavigation;
+    @Inject
+    private VBoxLayout openPositionApprovalTabNavigation;
+    @Inject
+    private VBoxLayout openPositionCommentsTabNavigation;
+    /* Пункты наборов навигации вкладок «Трудовой договор», «Описание должности», «Файлы»,
+       «Тестовое задание», «Памятка», «Шаблон письма», «Навыки», «Новости», «Согласование»,
+       «Комментарии» — клик подсвечивает пункт и фокусирует первый элемент блока (для
+       вкладок без полей ввода — только подсветка). */
+    @Inject
+    private Button openPositionEditorNavLaborAgreement;
+    @Inject
+    private Button openPositionEditorNavPaymentsDetail;
+    @Inject
+    private Button openPositionEditorNavWorkExperience;
+    @Inject
+    private Button openPositionEditorNavDescription;
+    @Inject
+    private Button openPositionEditorNavShortDescription;
+    @Inject
+    private Button openPositionEditorNavFiles;
+    @Inject
+    private Button openPositionEditorNavExercise;
+    @Inject
+    private Button openPositionEditorNavMemo;
+    @Inject
+    private Button openPositionEditorNavTemplateLetter;
+    @Inject
+    private Button openPositionEditorNavSkills;
+    @Inject
+    private Button openPositionEditorNavNews;
+    @Inject
+    private Button openPositionEditorNavApproval;
+    @Inject
+    private Button openPositionEditorNavComments;
+    /* Целевые компоненты навигации: таблица файлов и признак сопроводительного письма
+       (используются пунктами наборов «Файлы» и «Шаблон письма»). */
+    @Inject
+    private Table<SomeFilesOpenPosition> someFilesTable;
+    @Inject
+    private CheckBox needLetterCheckBox;
 
     private boolean mainTabLobsLoaded;
     private boolean exerciseLoaded;
@@ -457,16 +518,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe("tabSheetOpenPosition")
     /** Переключение вкладки → lazy-загрузка LOB/коллекций вкладки при первом открытии. */
     public void onTabSheetOpenPositionSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
-        // Визуальная синхронизация label-навигации sidebar с открытой вкладкой (вердикт арбитра A):
-        // пункт «Наименование» активен на вкладке «Вакансия» (tabOpenPosition, первый пункт набора);
-        // на остальных вкладках активный пункт снимается со всех кнопок. Базовый label-nav-item не трогается.
-        if (event.getSelectedTab() != null) {
-            String activeTabName = event.getSelectedTab().getName();
-            resetNavigationActiveStyles();
-            if ("tabOpenPosition".equals(activeTabName)) {
-                openPositionEditorNavName.addStyleName("label-nav-item-active");
-            }
-        }
+        // Визуальная синхронизация label-навигации sidebar с открытой вкладкой: показывается
+        // набор пунктов активной вкладки, подсвечивается первый пункт набора.
+        syncSidebarNavigation();
         if (event.getSelectedTab() == null || PersistenceHelper.isNew(getEditedEntity())) {
             return;
         }
@@ -502,21 +556,95 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
-    /** Снимает подсветку label-nav-item-active со всех пунктов навигации sidebar. */
+    /** Снимает подсветку label-nav-item-active со всех пунктов всех наборов навигации sidebar. */
     private void resetNavigationActiveStyles() {
-        openPositionEditorNavName.removeStyleName("label-nav-item-active");
-        openPositionEditorNavParams.removeStyleName("label-nav-item-active");
-        openPositionEditorNavVacancy.removeStyleName("label-nav-item-active");
-        openPositionEditorNavTeam.removeStyleName("label-nav-item-active");
-        openPositionEditorNavSalary.removeStyleName("label-nav-item-active");
+        for (VBoxLayout navigation : navigationSets()) {
+            for (Component component : navigation.getComponents()) {
+                if (component instanceof Button) {
+                    ((Button) component).removeStyleName("label-nav-item-active");
+                }
+            }
+        }
+    }
+
+    /** Все наборы label-навигации по вкладкам tabSheetOpenPosition (порядок не важен). */
+    private List<VBoxLayout> navigationSets() {
+        return Arrays.asList(
+                openPositionMainTabNavigation,
+                openPositionLaborTabNavigation,
+                openPositionJobDescriptionTabNavigation,
+                openPositionFilesTabNavigation,
+                openPositionExerciseTabNavigation,
+                openPositionMemoTabNavigation,
+                openPositionTemplateLetterTabNavigation,
+                openPositionSkillsTabNavigation,
+                openPositionNewsTabNavigation,
+                openPositionApprovalTabNavigation,
+                openPositionCommentsTabNavigation);
+    }
+
+    /** Подсвечивает выбранный пункт в своём наборе, снимая подсветку с остальных кнопок набора. */
+    private void activateNavigationItem(VBoxLayout navigation, Button selectedButton) {
+        for (Component component : navigation.getComponents()) {
+            if (component instanceof Button) {
+                Button button = (Button) component;
+                if (button == selectedButton) {
+                    button.addStyleName("label-nav-item-active");
+                } else {
+                    button.removeStyleName("label-nav-item-active");
+                }
+            }
+        }
+    }
+
+    /** Показывает в sidebar только набор навигации активной вкладки и подсвечивает его первый пункт. */
+    private void syncSidebarNavigation() {
+        TabSheet.Tab selectedTab = tabSheetOpenPosition.getSelectedTab();
+        String selectedTabName = selectedTab == null ? "tabOpenPosition" : selectedTab.getName();
+
+        openPositionMainTabNavigation.setVisible("tabOpenPosition".equals(selectedTabName));
+        openPositionLaborTabNavigation.setVisible("laborAgreementTab".equals(selectedTabName));
+        openPositionJobDescriptionTabNavigation.setVisible("tabJobDescription".equals(selectedTabName));
+        openPositionFilesTabNavigation.setVisible("tabFiles".equals(selectedTabName));
+        openPositionExerciseTabNavigation.setVisible("tabExercise".equals(selectedTabName));
+        openPositionMemoTabNavigation.setVisible("tabMemoForInterview".equals(selectedTabName));
+        openPositionTemplateLetterTabNavigation.setVisible("tabTemplateLetter".equals(selectedTabName));
+        openPositionSkillsTabNavigation.setVisible("tabSkills".equals(selectedTabName));
+        openPositionNewsTabNavigation.setVisible("tabOpenPositionNews".equals(selectedTabName));
+        openPositionApprovalTabNavigation.setVisible("tabApproval".equals(selectedTabName));
+        openPositionCommentsTabNavigation.setVisible("commentsTab".equals(selectedTabName));
+
+        resetNavigationActiveStyles();
+        if ("tabOpenPosition".equals(selectedTabName)) {
+            activateNavigationItem(openPositionMainTabNavigation, openPositionEditorNavName);
+        } else if ("laborAgreementTab".equals(selectedTabName)) {
+            activateNavigationItem(openPositionLaborTabNavigation, openPositionEditorNavLaborAgreement);
+        } else if ("tabJobDescription".equals(selectedTabName)) {
+            activateNavigationItem(openPositionJobDescriptionTabNavigation, openPositionEditorNavWorkExperience);
+        } else if ("tabFiles".equals(selectedTabName)) {
+            activateNavigationItem(openPositionFilesTabNavigation, openPositionEditorNavFiles);
+        } else if ("tabExercise".equals(selectedTabName)) {
+            activateNavigationItem(openPositionExerciseTabNavigation, openPositionEditorNavExercise);
+        } else if ("tabMemoForInterview".equals(selectedTabName)) {
+            activateNavigationItem(openPositionMemoTabNavigation, openPositionEditorNavMemo);
+        } else if ("tabTemplateLetter".equals(selectedTabName)) {
+            activateNavigationItem(openPositionTemplateLetterTabNavigation, openPositionEditorNavTemplateLetter);
+        } else if ("tabSkills".equals(selectedTabName)) {
+            activateNavigationItem(openPositionSkillsTabNavigation, openPositionEditorNavSkills);
+        } else if ("tabOpenPositionNews".equals(selectedTabName)) {
+            activateNavigationItem(openPositionNewsTabNavigation, openPositionEditorNavNews);
+        } else if ("tabApproval".equals(selectedTabName)) {
+            activateNavigationItem(openPositionApprovalTabNavigation, openPositionEditorNavApproval);
+        } else if ("commentsTab".equals(selectedTabName)) {
+            activateNavigationItem(openPositionCommentsTabNavigation, openPositionEditorNavComments);
+        }
     }
 
     @Subscribe("openPositionEditorNavName")
     /** label-навигация блока «Наименование» (ID, грейд, название, кнопка «Генерировать»): клик
      *  подсвечивает пункт и переводит фокус в ID — начало блока (штатная прокрутка ScrollBox). */
     public void onOpenPositionEditorNavNameClick(Button.ClickEvent event) {
-        resetNavigationActiveStyles();
-        openPositionEditorNavName.addStyleName("label-nav-item-active");
+        activateNavigationItem(openPositionMainTabNavigation, openPositionEditorNavName);
         vacansyIDTextField.focus();
     }
 
@@ -525,8 +653,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
      *  клик подсвечивает пункт и переводит фокус в поле приоритета — начало блока
      *  (штатная прокрутка ScrollBox). */
     public void onOpenPositionEditorNavParamsClick(Button.ClickEvent event) {
-        resetNavigationActiveStyles();
-        openPositionEditorNavParams.addStyleName("label-nav-item-active");
+        activateNavigationItem(openPositionMainTabNavigation, openPositionEditorNavParams);
         priorityField.focus();
     }
 
@@ -536,8 +663,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
      *  приоритет/удалёнка/дата закрытия переехали в блок «Параметры вакансии»;
      *  штатная прокрутка ScrollBox). */
     public void onOpenPositionEditorNavVacancyClick(Button.ClickEvent event) {
-        resetNavigationActiveStyles();
-        openPositionEditorNavVacancy.addStyleName("label-nav-item-active");
+        activateNavigationItem(openPositionMainTabNavigation, openPositionEditorNavVacancy);
         positionTypeField.focus();
     }
 
@@ -545,8 +671,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     /** label-навигация блока «Команда / Вакансия» (commandOrVacancyGroupBox): клик подсвечивает
      *  пункт и переводит фокус в radio «Команда/Вакансия» (начало блока). */
     public void onOpenPositionEditorNavTeamClick(Button.ClickEvent event) {
-        resetNavigationActiveStyles();
-        openPositionEditorNavTeam.addStyleName("label-nav-item-active");
+        activateNavigationItem(openPositionMainTabNavigation, openPositionEditorNavTeam);
         commandOrPosition.focus();
     }
 
@@ -554,9 +679,109 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     /** Отдельная label-навигация блока «Зарплатное предложение» (salaryGroupBox): клик
      *  подсвечивает пункт и переводит фокус в поле минимальной зарплаты (штатная прокрутка ScrollBox). */
     public void onOpenPositionEditorNavSalaryClick(Button.ClickEvent event) {
-        resetNavigationActiveStyles();
-        openPositionEditorNavSalary.addStyleName("label-nav-item-active");
+        activateNavigationItem(openPositionMainTabNavigation, openPositionEditorNavSalary);
         openPositionFieldSalaryMin.focus();
+    }
+
+    @Subscribe("openPositionEditorNavLaborAgreement")
+    /** label-навигация секции трудовых соглашений (laborAgreementGroupBox): клик подсвечивает
+     *  пункт и переводит фокус в тип регистрации — начало секции (штатная прокрутка ScrollBox). */
+    public void onOpenPositionEditorNavLaborAgreementClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionLaborTabNavigation, openPositionEditorNavLaborAgreement);
+        registrationForWorkField.focus();
+    }
+
+    @Subscribe("openPositionEditorNavPaymentsDetail")
+    /** label-навигация секции «Детали оплаты» (groupBoxPaymentsDetail): клик подсвечивает пункт
+     *  и переводит фокус в тип комиссии компании — начало секции (штатная прокрутка ScrollBox). */
+    public void onOpenPositionEditorNavPaymentsDetailClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionLaborTabNavigation, openPositionEditorNavPaymentsDetail);
+        radioButtonGroupPaymentsType.focus();
+    }
+
+    @Subscribe("openPositionEditorNavWorkExperience")
+    /** label-навигация секции «Опыт работы» (workExperienceGroupBox): клик подсвечивает пункт
+     *  и переводит фокус в радио выбора опыта — начало секции (штатная прокрутка ScrollBox). */
+    public void onOpenPositionEditorNavWorkExperienceClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionJobDescriptionTabNavigation, openPositionEditorNavWorkExperience);
+        workExperienceRadioButton.focus();
+    }
+
+    @Subscribe("openPositionEditorNavDescription")
+    /** label-навигация аккордеона описаний должности: клик подсвечивает пункт и переводит фокус
+     *  в русский редактор описания — первый элемент блока (штатная прокрутка ScrollBox). */
+    public void onOpenPositionEditorNavDescriptionClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionJobDescriptionTabNavigation, openPositionEditorNavDescription);
+        openPositionRichTextArea.focus();
+    }
+
+    @Subscribe("openPositionEditorNavShortDescription")
+    /** label-навигация ряда короткого описания (shortDescriptionHBox): клик подсвечивает пункт
+     *  и переводит фокус в поле короткого описания (штатная прокрутка ScrollBox). */
+    public void onOpenPositionEditorNavShortDescriptionClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionJobDescriptionTabNavigation, openPositionEditorNavShortDescription);
+        shortDescriptionTextArea.focus();
+    }
+
+    @Subscribe("openPositionEditorNavFiles")
+    /** label-навигация вкладки «Файлы»: клик подсвечивает пункт и переводит фокус на таблицу файлов. */
+    public void onOpenPositionEditorNavFilesClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionFilesTabNavigation, openPositionEditorNavFiles);
+        someFilesTable.focus();
+    }
+
+    @Subscribe("openPositionEditorNavExercise")
+    /** label-навигация вкладки «Тестовое задание»: клик подсвечивает пункт и переводит фокус
+     *  в признак необходимости задания — первый элемент блока. */
+    public void onOpenPositionEditorNavExerciseClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionExerciseTabNavigation, openPositionEditorNavExercise);
+        needExerciseCheckBox.focus();
+    }
+
+    @Subscribe("openPositionEditorNavMemo")
+    /** label-навигация вкладки «Памятка кандидату»: клик подсвечивает пункт и переводит фокус
+     *  в признак необходимости памятки — первый элемент блока. */
+    public void onOpenPositionEditorNavMemoClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionMemoTabNavigation, openPositionEditorNavMemo);
+        needMemoCheckBox.focus();
+    }
+
+    @Subscribe("openPositionEditorNavTemplateLetter")
+    /** label-навигация вкладки «Шаблон сопроводительного письма»: клик подсвечивает пункт
+     *  и переводит фокус в признак необходимости письма — первый элемент блока. */
+    public void onOpenPositionEditorNavTemplateLetterClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionTemplateLetterTabNavigation, openPositionEditorNavTemplateLetter);
+        needLetterCheckBox.focus();
+    }
+
+    @Subscribe("openPositionEditorNavSkills")
+    /** label-навигация вкладки «Требуемые Навыки»: клик подсвечивает пункт и переводит фокус
+     *  на дерево навыков позиции — основной элемент блока. */
+    public void onOpenPositionEditorNavSkillsClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionSkillsTabNavigation, openPositionEditorNavSkills);
+        openPositionSkillsListTable.focus();
+    }
+
+    @Subscribe("openPositionEditorNavNews")
+    /** label-навигация вкладки «Новости»: клик подсвечивает пункт и переводит фокус
+     *  на таблицу новостей позиции. */
+    public void onOpenPositionEditorNavNewsClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionNewsTabNavigation, openPositionEditorNavNews);
+        openPostionNewsDataGrid.focus();
+    }
+
+    @Subscribe("openPositionEditorNavApproval")
+    /** label-навигация вкладки «Согласование»: BPM-блок не содержит полей ввода (фрагмент
+     *  процесса), клик только подсвечивает пункт без перевода фокуса. */
+    public void onOpenPositionEditorNavApprovalClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionApprovalTabNavigation, openPositionEditorNavApproval);
+    }
+
+    @Subscribe("openPositionEditorNavComments")
+    /** label-навигация вкладки «Комментарии»: лента строится Java из label-элементов, полей
+     *  ввода нет, клик только подсвечивает пункт без перевода фокуса. */
+    public void onOpenPositionEditorNavCommentsClick(Button.ClickEvent event) {
+        activateNavigationItem(openPositionCommentsTabNavigation, openPositionEditorNavComments);
     }
 
     /** Lazy-загрузка LOB-описаний основной вкладки (RU/EN описания типа позиции). */
@@ -932,9 +1157,16 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             starsAndCommentHBox.setSpacing(true);
             Label candidateName = uiComponents.create(Label.class);
             candidateName.addStyleName("table-wordwrap");
-            candidateName.setValue(iteractionList.getCandidate().getFullName()
-                    + " / "
-                    + iteractionList.getCandidate().getPersonPosition().getPositionRuName());
+            // Подпись «кандидат / должность»: должность (personPosition) у кандидата может
+            // отсутствовать (удалённая/старая запись) — null-safe, чтобы лента комментариев
+            // не падала с NPE при открытии вкладки.
+            JobCandidate candidate = iteractionList.getCandidate();
+            String candidateFullName = candidate != null && candidate.getFullName() != null
+                    ? candidate.getFullName() : "";
+            String positionRuName = candidate != null && candidate.getPersonPosition() != null
+                    && candidate.getPersonPosition().getPositionRuName() != null
+                    ? candidate.getPersonPosition().getPositionRuName() : "";
+            candidateName.setValue(candidateFullName + " / " + positionRuName);
 
             Label stars = uiComponents.create(Label.class);
             stars.addStyleName("table-wordwrap");
@@ -1896,11 +2128,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         startVacansyName = vacansyNameField.getValue();
         screenFullyLoaded = true;
         initClosedVacancyTimerFacet();
-        // Визуальная синхронизация label-навигации sidebar при открытии (вердикт арбитра A):
-        // вкладка по умолчанию — «Вакансия» → активный пункт «Наименование» (первый в наборе);
+        // Визуальная синхронизация label-навигации sidebar при открытии: вкладка по умолчанию —
+        // «Вакансия» → показывается набор её разделов с активным первым пунктом «Наименование»;
         // при последующих переключениях состояние обновляет onTabSheetOpenPositionSelectedTabChange.
-        resetNavigationActiveStyles();
-        openPositionEditorNavName.addStyleName("label-nav-item-active");
+        syncSidebarNavigation();
     }
 
     /** Форматирование ключевых компетенций для отображения. */

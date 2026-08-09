@@ -174,6 +174,38 @@
           <button id="openPositionEditorNavProject" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavPersonnel" width="100%" visible="false" stylename="borderless label-nav-item"/>
           <button id="openPositionEditorNavSalary" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <!-- Скрытые пункты попланочной label-навигации: контракт @Inject/@Subscribe базового
+               контроллера OpenPositionEdit (вкладки «Трудовой договор», «Описание должности»,
+               «Файлы», «Тестовое задание», «Памятка», «Шаблон письма», «Навыки», «Новости»,
+               «Согласование», «Комментарии»); в витрине не участвуют (visible=false). -->
+          <button id="openPositionEditorNavName" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavParams" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavLaborAgreement" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavPaymentsDetail" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavWorkExperience" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavDescription" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavShortDescription" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavFiles" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavExercise" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavMemo" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavTemplateLetter" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavSkills" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavNews" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavApproval" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <button id="openPositionEditorNavComments" width="100%" visible="false" stylename="borderless label-nav-item"/>
+          <!-- Скрытые наборы label-навигации вкладок (контракт @Inject VBoxLayout базового
+               контроллера); в витрине sidebar использует собственный набор openPositionPreviewNavigation. -->
+          <vbox id="openPositionMainTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionLaborTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionJobDescriptionTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionFilesTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionExerciseTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionMemoTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionTemplateLetterTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionSkillsTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionNewsTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionApprovalTabNavigation" width="100%" visible="false"/>
+          <vbox id="openPositionCommentsTabNavigation" width="100%" visible="false"/>
           <!-- Скрытые label информационной карточки sidebar (контракт @Inject из основного XML). -->
           <label id="infoPositionLabel" width="100%" visible="false"/>
           <label id="infoProjectLabel" width="100%" visible="false"/>

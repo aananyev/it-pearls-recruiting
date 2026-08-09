@@ -59,6 +59,13 @@
 | `openPosition-iteraction-list-picker-view` | FK vacancy в IteractionList |
 | `openPosition-view` | legacy |
 
+Лента комментариев OpenPositionEdit читает feedback-итерации `hunttech_IteractionList` через view
+`iteractionList-view` (JPQL `e.vacancy = :openPosition and e.iteractionType.signFeedback = true`);
+для `recrutier` во view задекларированы `userAvatar`/`officialPhoto` (view `_minimal`) и
+`fileImageFace` (`_local`) — их читает `ExtUser.resolveProfilePhoto()` при отрисовке аватара автора;
+без них LAZY-доступ к `userAvatar` на detached-рекрутере давал ValidationException «null Session»
+(UNFETCHED ATTRIBUTE ACCESS) при первом открытии вкладки «Комментарии».
+
 ---
 
 ## 5. Экраны
@@ -83,7 +90,7 @@
 
 | Момент | Цепочка |
 |--------|---------|
-| Вкладки | Lazy LOB/collections при первом выборе |
+| Вкладки | Lazy LOB/collections при первом выборе; label-навигация sidebar — набор пунктов активной вкладки (`syncSidebarNavigation`, 11 наборов `openPosition*TabNavigation`), клик по пункту фокусирует первый элемент блока ввода; вкладка «Комментарии» — лента из `commentsOpenPositionDc` + feedback-итераций (`iteractionList-view`), подпись «кандидат / должность» null-safe |
 | Сохранение | sync skills + laborAgreement; дубликат имени/vacansyID; shortDescription ≤ 250 |
 | После save | OpenPositionNews; Telegram (ошибка не блокирует) |
 
@@ -116,6 +123,8 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-09 | OpenPositionEdit, вкладка «Комментарии»: исправлен UNFETCHED ATTRIBUTE ACCESS — в `iteractionList-view` (views.xml) для `recrutier` добавлены `userAvatar`/`officialPhoto` (view `_minimal`), которые читает `ExtUser.resolveProfilePhoto()` при отрисовке аватара (LAZY на detached давал ValidationException «null Session», лента feedback-итераций не отрисовывалась); подпись «кандидат / должность» в `getCommentBox(IteractionList)` стала null-safe (NULL `personPosition` → пустая должность вместо NPE); CDP-верификация ленты PASS |
+| 2026-08-09 | OpenPositionEdit: label-навигация sidebar стала попланочной — 11 наборов пунктов по вкладкам `tabSheetOpenPosition` (`openPositionMainTabNavigation`, `openPositionLaborTabNavigation`, `openPositionJobDescriptionTabNavigation`, `openPositionFilesTabNavigation`, `openPositionExerciseTabNavigation`, `openPositionMemoTabNavigation`, `openPositionTemplateLetterTabNavigation`, `openPositionSkillsTabNavigation`, `openPositionNewsTabNavigation`, `openPositionApprovalTabNavigation`, `openPositionCommentsTabNavigation`); `syncSidebarNavigation()` показывает набор активной вкладки и подсвечивает первый пункт; клики фокусируют первый элемент ввода секции (18 пунктов; «Согласование»/«Комментарии» — без фокуса, блоки без полей ввода); секции «Оплата ресерчерам/рекрутерам» (label-only) не включены; контрактный тест `sidebarNavigationSetsFollowTabs` + актуализация UI Spec |
 | 2026-06-29 | OpenPositionEdit: `projectNamesDc` — nested `projectDepartment.companyName.cityOfCompany` в view loader; исправлен unfetched `cityOfCompany` при смене Project |
 | 2026-06-26 | OpenPositionBrowse: `maxResults=40`; batch subscribers (`QUERY_SUBSCRIBERS_BY_POSITIONS` + `SUBSCRIBERS_TASKS_VIEW`), interaction stats (`QUERY_COUNT_ITERACTIONS_BY_POSITIONS`), parent-folder (`QUERY_CHILD_POSITIONS_BY_PARENTS`); `fetch="BATCH"` в browse XML |
 | 2026-06-26 | Deep modernization: поведение browse/edit простым языком; Behavior Summary переписан |

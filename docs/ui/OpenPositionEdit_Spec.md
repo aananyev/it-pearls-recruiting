@@ -58,6 +58,14 @@ views, loaders, JPQL, actions, invoke, required/visible/enabled и Java-конт
 - Сущность: `OpenPosition`; контейнер `openPositionDc` (instance, view `openPosition-edit-view` — все поля вкладок кроме LOB).
 - Коллекции вкладок: `laborAgreementDc` (LaborAgreement через join openPositions), `commentsOpenPositionDc` (OpenPositionComment, dateComment desc), `someFilesesDc` (SomeFilesOpenPosition),
 `openPositionSkillsListsDc` (SkillTree, skillName), `procAttachmentsDc` (bpm$ProcAttachment, cacheable), `openPositionNewsDc` (OpenPositionNews + priorityNews, cacheable).
+- Лента комментариев (вкладка «Комментарии») строится из двух источников: `commentsOpenPositionDc`
+  (OpenPositionComment, view `openPositionComment-edit-view`) и feedback-итераций
+  `hunttech_IteractionList` (JPQL `e.vacancy = :openPosition and e.iteractionType.signFeedback = true`,
+  view `iteractionList-view`). В `iteractionList-view` для `recrutier` задекларированы
+  `userAvatar`/`officialPhoto` (view `_minimal`) и `fileImageFace` (`_local`) — их читает
+  `ExtUser.resolveProfilePhoto()` при отрисовке аватара автора; без них LAZY-доступ к `userAvatar`
+  на detached-сущности давал ValidationException «null Session» (UNFETCHED ATTRIBUTE ACCESS)
+  при первом открытии вкладки.
 - Options-контейнеры: `openPositionParentDc` (родительские позиции, cacheable), `positionTypesDc` (Position без «(не использовать)», cacheable), `projectNamesDc` (Project не закрытые,
 cacheable), `companyNamesDc`, `companyDepartamentsDc`, `citiesDc` (cacheable), `gradeDc` (cacheable).
 - Facets: `timer closedVacancyTimer` (delay 60000, autostart=false, repeating) — автозакрытие по `closingDate`.
@@ -76,8 +84,9 @@ cacheable), `companyNamesDc`, `companyDepartamentsDc`, `citiesDc` (cacheable), `
 ### 4.1 Lifecycle
 
 - `onInit` → карты options; `onBeforeShow` (×2) → инициализация типа позиции, проекта, таймера, новостей, блокировок, иконок файлов, approval-процесса, подписки-группы.
-- `onAfterShow` → lazy-загрузка LOB основной вкладки, логотипы проекта/владельца (`initProjectImagesOnOpen`), `setTopLabel` (шапка: комиссии, статус), `setOpenPositionNews`.
-- `onTabSheetOpenPositionSelectedTabChange` → lazy-загрузка вкладки при первом открытии (флаги `mainTabLobsLoaded`, `exerciseLoaded`, `memoLoaded`, `templateLetterLoaded`, `skillsLoaded`,
+- `onAfterShow` → lazy-загрузка LOB основной вкладки, логотипы проекта/владельца (`initProjectImagesOnOpen`), `setTopLabel` (шапка: комиссии, статус), `setOpenPositionNews`,
+`syncSidebarNavigation` (показ набора label-навигации вкладки по умолчанию «Вакансия» с активным первым пунктом).
+- `onTabSheetOpenPositionSelectedTabChange` → `syncSidebarNavigation` (переключение набора label-навигации sidebar под активную вкладку) + lazy-загрузка вкладки при первом открытии (флаги `mainTabLobsLoaded`, `exerciseLoaded`, `memoLoaded`, `templateLetterLoaded`, `skillsLoaded`,
 `filesLoaded`, `commentsTabLoaded`, `laborAgreementLoaded`).
 - `closedVacancyTimer` → тик каждые 60 с: обновление обратного отсчёта, автозакрытие.
 
@@ -88,6 +97,12 @@ cacheable), `companyNamesDc`, `companyDepartamentsDc`, `citiesDc` (cacheable), `
 - Пересчёт комиссий: `calculateComission` (компания/ресурсер/рекрутер), `calculateResearcherSalary`/`calculateRecrutierSalary`, итоговые подписи
 `setResearcherSalaryLabel`/`setRecrutierSalaryLabel`, HTML-шапка `setTopLabel`.
 - Генераторы: `openPostionNewsDataGridDetailsGenerator` (детали новости), `skillImageColumnRenderer`, `openPositionSkillsListTableIsCommentColumnGenerator`.
+- Лента комментариев: `loadCommentsTab` (при первом открытии вкладки, флаг `commentsTabLoaded`) →
+  `setCommentsOpenPositionScroll` (OpenPositionComment) + `setCommentOpenPositionScrollIteractionList`
+  (feedback-итерации, JPQL по `iteractionType.signFeedback = true`); каждая запись — через
+  `getCommentBox(...)`: аватар автора (`setUserProfilePhoto` → `ExtUser.resolveProfilePhoto()`),
+  подпись «кандидат / должность» (null-safe: при отсутствии `personPosition` у кандидата должность
+  подставляется пустой строкой), рейтинг-звёзды, дата, кнопка «Ответить» (`replyButtonInvoke` → `createComment`).
 - Сканирование описания: `addShortDescription` (короткое описание) и `rescanJobDescription`/`reloadSkillsForOpenPositionTab` (пересборка навыков).
 
 ### 4.3 Валидация/сохранение
@@ -113,7 +128,7 @@ cacheable), `companyNamesDc`, `companyDepartamentsDc`, `citiesDc` (cacheable), `
 `signDraftCheckBox` → черновик.
 - Таблицы: `laborAgreementDataGrid` (create/edit/remove, inline-редактирование), `someFilesTable` (add/create/edit/remove), `openPostionNewsDataGrid` (create/remove),
 `openPositionSkillsListTable` (только просмотр, actions закомментированы).
-- Пункты label-навигации sidebar — borderless-кнопки **с рабочими клик-обработчиками** (4 пункта: «Наименование», «Вакансия», «Команда», «Зарплатное предложение»); каждый клик подсвечивает пункт (`label-nav-item-active`) и переводит фокус в первое поле соответствующей секции (штатная прокрутка ScrollBox).
+- Пункты label-навигации sidebar — borderless-кнопки **с рабочими клик-обработчиками**: в каждом наборе свой перечень пунктов (18 кнопок в 11 наборах по вкладкам `tabSheetOpenPosition`); каждый клик подсвечивает пункт (`label-nav-item-active`) и переводит фокус в первый элемент ввода соответствующей секции (штатная прокрутка ScrollBox). Наборы: «Вакансия» (5: Наименование, Параметры вакансии, Вакансия, Команда, Зарплатное предложение), «Трудовой договор» (2: Трудовой договор, Детали оплаты — секции «Оплата ресерчерам/рекрутерам» без полей ввода не включены), «Описание должности» (3: Опыт работы, Описание должности, Краткое описание), «Файлы», «Тестовое задание», «Памятка кандидату», «Шаблон письма», «Требуемые Навыки», «Новости» (по 1), «Согласование» и «Комментарии» (по 1, без перевода фокуса — блоки без полей ввода: BPM-фрагмент и лента label-элементов).
 
 ## 6. Визуальная компоновка элементов (Visual Layout Schema)
 
@@ -225,6 +240,7 @@ footer, primary/secondary actions. Локальные классы: `open-positi
 `-richtext-section`, `-row-remote`, `-priority-field` (фикс. ширина 150px для поля приоритета с иконкой),
 `-section-title` (заголовки секций sidebar «Разделы активной вкладки» и «Контекст вакансии» — стиль caption «Информация»: две inset-линии полосы — белая сверху `rgba(255,255,255,1) 0 1px 0 0 inset`, светлая снизу `rgba(244,244,244,1) 0 -1px 0 0 inset` — + border-bottom).
 - Порядок слоёв в каждой теме: `theme base → edit-screen-shared-styles → open-position-editor`.
+- Шрифт заголовков вкладок `tabSheetOpenPosition` — 1:1 с эталоном JobCandidateEdit (`.job-candidate-tabs`): caption 14px/600, цвет `#26384c`, line-height 48px, padding 0 10px; hover `#1264b5`; selected — `$v-selection-color` + border-bottom 3px. Правило `.open-position-editor-tabs .v-tabsheet-tabitem .v-caption` во всех 7 темах (CDP-контроль 2026-08-08, тема halo: невыбранные вкладки rgb(38,56,76) = #26384c, 14px/600).
 
 ### 6.6. Последовательность заполнения
 
@@ -332,6 +348,9 @@ other screens: UNCHANGED
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-09 | Исправлен UNFETCHED ATTRIBUTE ACCESS при открытии вкладки «Комментарии»: `iteractionList-view` (views.xml) дополнен для `recrutier` атрибутами `userAvatar`/`officialPhoto` (view `_minimal`) — `ExtUser.resolveProfilePhoto()` читал LAZY-связь `userAvatar` на detached-рекрутере и падал с ValidationException «null Session», из-за чего лента feedback-итераций не отрисовывалась. Дополнительно подпись «кандидат / должность» в `getCommentBox(IteractionList)` стала null-safe (при NULL `personPosition` у кандидата должность — пустая строка вместо NPE). Верифицировано CDP (тема halo): лента отображает и OpenPositionComment, и feedback-комментарии (Мешков, Ребров, Холуев, Пряников) без ошибок; `compileJava`/`deploy`/`restart` PASS, в catalina.out нет ValidationException/IllegalStateException |
+| 2026-08-09 | Label-навигация sidebar стала **попланочной**: единый набор пунктов заменён на 11 наборов по вкладкам `tabSheetOpenPosition` (контейнеры `openPosition*TabNavigation` внутри `openPositionEditorNavigation`); `syncSidebarNavigation()` показывает набор активной вкладки и подсвечивает первый пункт, клики подсвечивают пункт и фокусируют первый элемент ввода секции. Состав: «Вакансия» 5 пунктов (как было), «Трудовой договор» 2 (соглашения → `registrationForWorkField`, детали оплаты → `radioButtonGroupPaymentsType`), «Описание должности» 3 (опыт → `workExperienceRadioButton`, описание → `openPositionRichTextArea`, короткое → `shortDescriptionTextArea`), «Файлы» → `someFilesTable`, «Тестовое задание» → `needExerciseCheckBox`, «Памятка кандидату» → `needMemoCheckBox`, «Шаблон письма» → `needLetterCheckBox`, «Требуемые Навыки» → `openPositionSkillsListTable`, «Новости» → `openPostionNewsDataGrid`, «Согласование» и «Комментарии» — только подсветка (блоки без полей ввода). Новые keys `openPositionEditorNavPaymentsDetail/WorkExperience/ShortDescription/TemplateLetter/Comments`; секции «Оплата ресерчерам/рекрутерам» (label-only) в навигацию не включены. Java: поля наборов/кнопок, `activateNavigationItem`, `resetNavigationActiveStyles` по всем наборам; компиляция PASS; XML-комментарии актуализированы |
+| 2026-08-08 | Шрифт заголовков вкладок TabSheet OpenPositionEdit приведён 1:1 к эталону JobCandidateEdit (`.job-candidate-tabs`): `font-size` 12px → **14px**, цвет `mix($v-font-color,$v-panel-background-color,86%)` → **#26384c**, hover `$v-selection-color` → **#1264b5** (font-weight 600, line-height 48px, padding 0 10px совпадали — сохранены) в `.open-position-editor-tabs .v-tabsheet-tabitem .v-caption` во всех 7 темах (файлы идентичны, md5=1); `buildScssThemes` + deploy/restart PASS; CDP-контроль (тема halo): невыбранные вкладки rgb(38,56,76) = #26384c 14px/600, выбранная — `$v-selection-color` (halo #4d7ab2) + border-bottom 3px; контрактный тест дополнен `tabsCaptionsMatchJobCandidateEditFont`; Java и бизнес-логика не менялись |
 | 2026-08-08 | Заголовкам секций sidebar «Разделы активной вкладки» и «Контекст вакансии» добавлены **две горизонтальные inset-линии полосы**, как у caption инфокарточки «Информация» (вало-дефолт `v-panel-caption`): `box-shadow: rgba(255,255,255,1) 0 1px 0 0 inset, rgba(244,244,244,1) 0 -1px 0 0 inset` (белая сверху, светлая снизу) в `.edit-sidebar .open-position-editor-section-title` во всех 7 темах; вместе с `border-bottom rgba(255,255,255,.14)` полоса заголовка выделяется двумя линиями как блок «Информация». CDP-контроль (тема halo): computed box-shadow трёх заголовков идентичны 1:1 (`rgb(255,255,255) 0px 1px 0px 0px inset, rgb(244,244,244) 0px -1px 0px 0px inset`); скриншот `/tmp/openposition_sidebar_lines.png`. Контракт `HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md` §4.1 дополнен правилом оформления заголовков секций; контрактный тест дополнен проверкой inset-линий. Java и бизнес-логика не менялись; buildScssThemes + deploy/restart PASS |
 | 2026-08-08 | Заголовки секций sidebar «Разделы активной вкладки» (`openPositionEditorNavActiveSectionsLabel`) и «Контекст вакансии» (`openPositionEditorContextLabel`) приведены к стилю заголовка карточки «Информация»: добавлен класс `open-position-editor-section-title` (stylename `label-nav-title open-position-editor-section-title` в XML), SCSS-правило `.edit-sidebar .open-position-editor-section-title` во всех 7 темах повторяет caption инфокарточки 1:1 — `#ffb11b` 15px/700, line-height 21px, min-height 36px, padding 7px 11px, фон-полоса rgba(255,255,255,.045), border-bottom rgba(255,255,255,.14), letter-spacing normal; в `@media (max-height:800px)` добавлен override `.open-position-editor .edit-sidebar .open-position-editor-section-title` (padding не ужимается, как у label-nav-title). CDP-контроль (тема halo): computed-стили трёх заголовков идентичны 1:1 (color rgb(255,177,27), bg rgba(255,255,255,.043), 15px/700, min-height 36px, padding 7px 11px, border-bottom 1px rgba(255,255,255,.14)). Java и бизнес-логика не менялись; buildScssThemes + deploy/restart PASS; 7 тем идентичны |
 | 2026-08-08 | Footer OpenPositionEdit переведён на **одну строку** как в IteractionListEdit (CDP-контроль, 1440×812 и 1366×768): кнопки «Подписаться на вакансию»/«ОК»/«Отмена» вылезали за нижний край экрана (footer bottom=818 > 812, двухстрочная компоновка). Причины: (1) `forExpand` (vbox) держал две строки — `statusHBox` (владелец позиции) и `editActions` (кнопки); (2) `flex-wrap: wrap` на actions переносил «Подписаться» на отдельную строку; (3) контент вкладки переполнял workspace (762px > 747px), выталкивая footer вниз. Фикс (SCSS, XML не менялся): `.open-position-editor-footer` — `position:absolute` к низу workspace (прижат всегда, как эталон), `flex-direction:row` (владелец слева, кнопки справа), padding 5px 14px, min-height 50px; `.open-position-editor-owner-row` — `flex:0 1 auto`, `width:auto`, `white-space:nowrap`; `.open-position-editor-footer-actions` — `flex:1 1 auto`, `flex-wrap:nowrap`, `min-width:0` на слотах. Результат CDP: 1440×812 — кнопки y=758..798 (запас 14px, footer bottom=803 в границах workspace); 1366×768 — кнопки y=714..754 (запас 14px, footer bottom=759 < 768). Все 7 тем идентичны (md5=1) |
