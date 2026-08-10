@@ -98,7 +98,7 @@
     </collection>
     <collection id="companyNamesDc" class="com.company.hunttech.entity.Company">
       <view extends="company-picker-view"/>
-      <loader id="companyNamesLc">
+      <loader id="companyNamesLc" cacheable="true">
         <query><![CDATA[select e from hunttech_Company e
                         order by e.comanyName]]></query>
       </loader>

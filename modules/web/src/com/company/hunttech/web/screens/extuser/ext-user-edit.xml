@@ -25,16 +25,16 @@
     </dsContext>
     <!-- Диалог остаётся крупным и изменяемым по размеру для таблиц ролей и замещений. -->
     <dialogMode height="850" width="theme://cuba.gui.dialogSize.width.xlarge" resizable="true"/>
-    <!-- Локальный root namespace ограничивает ExtUserEdit и сохраняет footer отдельно от рабочей области. -->
-    <layout expand="mainSplit" spacing="true" stylename="ext-user-editor">
+    <!-- Локальный root namespace ограничивает ExtUserEdit; корневой vbox занимает всю высоту окна и отдаёт её двухпанельной композиции (footer живёт внутри рабочей области — эталон OpenPositionEdit, чтобы sidebar тянулся на полный экран). -->
+    <layout expand="mainSplit" spacing="false" width="100%" height="100%" stylename="ext-user-editor">
         <!-- Общая двухпанельная композиция фиксирует sidebar и отдаёт оставшуюся ширину workspace. -->
         <hbox id="mainSplit" width="100%" height="100%" expand="userWorkspace" stylename="edit-screen-layout">
-            <!-- Постоянная sidebar показывает профиль, контекст и navigation активной вкладки. -->
-            <vbox id="profilePanel" width="270px" height="100%" spacing="true" margin="true" expand="profilePanelSpacer" stylename="edit-sidebar">
+            <!-- Постоянная sidebar показывает профиль, контекст и navigation активной вкладки; растянута на всю высоту окна (без margin — эталон OpenPositionEdit) и прокручивается вертикально при переполнении. -->
+            <vbox id="profilePanel" width="270px" height="100%" spacing="true" expand="profilePanelSpacer" stylename="edit-sidebar">
                 <!-- Визуальный блок сохраняет upload/drop-zone и стабильный размер фотографии пользователя. -->
                 <vbox id="dropZone" spacing="true" width="100%" align="TOP_CENTER" stylename="dropzone-container edit-sidebar-visual">
-                    <!-- Профильное изображение остаётся привязанным к userDs.officialPhoto. -->
-                    <fallbackImage id="userPic" width="180px" height="180px" align="MIDDLE_CENTER" scaleMode="SCALE_DOWN" datasource="userDs" property="officialPhoto"/>
+                    <!-- OvaFallbackImage читает userDs.officialPhoto и показывает fallback при отсутствии файла (эталон IteractionListEdit). -->
+                    <ovaFallbackImage id="userPic" width="180px" height="180px" ovalWidth="180px" ovalHeight="180px" align="MIDDLE_CENTER" scaleMode="SCALE_DOWN" datasource="userDs" property="officialPhoto" fallbackThemePath="icons/no-programmer.jpeg" stylename="ext-user-editor-avatar"/>
                     <!-- Upload сохраняет прежние datasource/property и immediate file-storage contract. -->
                     <upload id="officialPhotoUpload" fileStoragePutMode="IMMEDIATE" datasource="userDs" align="BOTTOM_CENTER" showFileName="false" dropZone="dropZone" showClearButton="true" property="officialPhoto"/>
                 </vbox>
@@ -45,40 +45,16 @@
                     <!-- Login сохраняется как вторичный постоянный контекст пользователя. -->
                     <label id="loginLabel" stylename="large edit-sidebar-subtitle" align="MIDDLE_CENTER" width="100%"/>
                 </vbox>
-                <!-- Навигация вкладки «Общие настройки» фокусирует существующие секции без изменения контракта. -->
-                <vbox id="generalUserNavigation" width="100%" spacing="false" stylename="label-navigation">
-                    <!-- Заголовок объясняет назначение вертикального индекса текущей вкладки. -->
-                    <label value="msg://msgNavigationTitle" width="100%" stylename="label-nav-title"/>
-                    <!-- Первый пункт активен при открытии общей вкладки и переводит focus к контактным полям. -->
-                    <button id="generalContactsNav" caption="msg://msgContacts" width="100%" stylename="borderless label-nav-item label-nav-item-active" invoke="focusGeneralContactsSection"/>
-                    <!-- Пункт переводит focus к региональным и системным настройкам пользователя. -->
-                    <button id="generalRegionalNav" caption="msg://msgRegional" width="100%" stylename="borderless label-nav-item" invoke="focusGeneralRegionalSection"/>
-                    <!-- Пункт переводит focus к существующей таблице ролей. -->
-                    <button id="generalRolesNav" caption="msg://roles" width="100%" stylename="borderless label-nav-item" invoke="focusRolesSection"/>
-                    <!-- Пункт переводит focus к существующей таблице замещений. -->
-                    <button id="generalSubstitutionsNav" caption="msg://substUsers" width="100%" stylename="borderless label-nav-item" invoke="focusSubstitutionsSection"/>
-                </vbox>
-                <!-- Навигация почтовой вкладки повторяет вертикальный порядок accordion-секций. -->
-                <vbox id="emailUserNavigation" width="100%" spacing="false" visible="false" stylename="label-navigation">
-                    <!-- Заголовок отделяет почтовый navigation-набор от identity пользователя. -->
-                    <label value="msg://msgNavigationTitle" width="100%" stylename="label-nav-title"/>
-                    <!-- Пункт фокусирует серверные адреса SMTP, POP3 и IMAP. -->
-                    <button id="emailServersNav" caption="msg://msgMailServers" width="100%" stylename="borderless label-nav-item label-nav-item-active" invoke="focusMailServersSection"/>
-                    <!-- Пункт фокусирует настройки портов почтовых протоколов. -->
-                    <button id="emailPortsNav" caption="msg://msgMailPorts" width="100%" stylename="borderless label-nav-item" invoke="focusMailPortsSection"/>
-                    <!-- Пункт фокусирует признаки обязательности пароля. -->
-                    <button id="emailPasswordRequiredNav" caption="msg://msgMailAuthentication" width="100%" stylename="borderless label-nav-item" invoke="focusMailAuthenticationSection"/>
-                    <!-- Пункт фокусирует имена учётных записей почтовых протоколов. -->
-                    <button id="emailUsersNav" caption="msg://msgMailAccounts" width="100%" stylename="borderless label-nav-item" invoke="focusMailAccountsSection"/>
-                    <!-- Пункт фокусирует password-поля почтовых протоколов. -->
-                    <button id="emailPasswordsNav" caption="msg://msgMailPasswords" width="100%" stylename="borderless label-nav-item" invoke="focusMailPasswordsSection"/>
-                </vbox>
-                <!-- Навигация AI-вкладки содержит единственную существующую рабочую секцию конфигураций. -->
-                <vbox id="aiUserNavigation" width="100%" spacing="false" visible="false" stylename="label-navigation">
-                    <!-- Заголовок отделяет AI navigation-набор от identity пользователя. -->
-                    <label value="msg://msgNavigationTitle" width="100%" stylename="label-nav-title"/>
-                    <!-- Пункт фокусирует таблицу персональных AI-подключений. -->
-                    <button id="aiConfigurationsNav" caption="msg://msgAiConfigurations" width="100%" stylename="borderless label-nav-item label-nav-item-active" invoke="focusAiConfigurationsSection"/>
+                <!-- Единая label-навигация повторяет вкладки правого tabsheet; пункт переключает вкладку, активный = текущая вкладка. -->
+                <vbox id="tabNavigation" width="100%" spacing="false" stylename="label-navigation">
+                    <!-- Заголовок объясняет назначение вертикального индекса вкладок и оформлен полосой-заголовком контракта §4.1. -->
+                    <label value="msg://msgNavigationTitle" width="100%" stylename="label-nav-title ext-user-editor-navigation-title"/>
+                    <!-- Пункт открывает вкладку «Общие настройки» правой части экрана. -->
+                    <button id="generalTabNav" caption="msg://msgGeneralSettings" width="100%" stylename="borderless label-nav-item label-nav-item-active"/>
+                    <!-- Пункт открывает вкладку «Настройки почты» правой части экрана. -->
+                    <button id="emailTabNav" caption="msg://msgEmailSettings" width="100%" stylename="borderless label-nav-item"/>
+                    <!-- Пункт открывает вкладку «Персональный ИИ» правой части экрана. -->
+                    <button id="aiTabNav" caption="msg://msgAiSettings" width="100%" stylename="borderless label-nav-item"/>
                 </vbox>
                 <!-- Сводка располагается после navigation и показывает существующий статус учётной записи. -->
                 <vbox id="profileSummaryBox" width="100%" spacing="false" stylename="edit-sidebar-summary">
@@ -87,8 +63,8 @@
                     <!-- Сохраняется существующая подпись профильного контекста без добавления нового действия. -->
                     <label value="msg://msgProfile" width="100%" stylename="edit-sidebar-hint"/>
                 </vbox>
-                <!-- Spacer удерживает navigation и summary в первом viewport, не меняя размеры workspace. -->
-                <label id="profilePanelSpacer" stylename="edit-sidebar-spacer"/>
+                <!-- Spacer удерживает navigation и summary в первом viewport; vbox на 100% высоты принимает на себя переполнение sidebar (эталон OpenPositionEdit) и не меняет размеры workspace. -->
+                <vbox id="profilePanelSpacer" width="100%" height="100%" stylename="edit-sidebar-spacer"/>
             </vbox>
             <!-- Правая рабочая область объединяет toolbar, существующие вкладки и их неизменённые bindings. -->
             <vbox id="userWorkspace" width="100%" height="100%" expand="settingsTabSheet" stylename="edit-workspace">
@@ -103,16 +79,16 @@
                     </vbox>
                     <!-- Actions-контейнер сохраняет единственное существующее действие смены пароля. -->
                     <hbox id="userToolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions">
-                        <!-- Штатный диалог CUBA меняет пароль отдельно от сохранения остальных данных пользователя. -->
-                        <button id="changePasswordBtn" caption="msg://msgChangePassword" icon="KEY" stylename="friendly" invoke="changePassword"/>
+                        <!-- Штатный диалог CUBA меняет пароль отдельно от сохранения остальных данных пользователя; кнопка оформлена как primary-action эталона IteractionListEdit. -->
+                        <button id="changePasswordBtn" caption="msg://msgChangePassword" icon="KEY" stylename="ext-user-editor-primary-action" invoke="changePassword"/>
                     </hbox>
                 </hbox>
-                <!-- TabSheet сохраняет три существующих бизнес-контекста и получает общий edit-tabs contract. -->
-                <tabSheet id="settingsTabSheet" width="100%" height="100%" stylename="framed edit-tabs">
-                    <!-- Общая вкладка сохраняет password, контактные, региональные, role и substitution controls. -->
-                    <tab id="generalSettingsTab" caption="msg://msgGeneralSettings" margin="true" spacing="true" expand="rolesSubstSplit">
-                        <!-- Прокручиваемый верхний блок содержит формы пользователя. -->
-                        <scrollBox id="generalScrollBox" width="100%" spacing="true">
+                <!-- TabSheet сохраняет три существующих бизнес-контекста; заголовки вкладок получают точный стиль эталона IteractionListEdit (без вало-framed-рендера табов: только нижняя полоса-акцент #ffb11b). -->
+                <tabSheet id="settingsTabSheet" width="100%" height="100%" stylename="edit-tabs">
+                    <!-- Общая вкладка объединяет поля пользователя и нижний split ролей/замещений в единой вертикальной прокрутке (паттерн email-вкладки). -->
+                    <tab id="generalSettingsTab" caption="msg://msgGeneralSettings" margin="true" spacing="true" expand="generalScrollBox">
+                        <!-- Единый вертикальный scrollBox занимает всю вкладку и прокручивает элементы ввода на малых разрешениях (политика скролла CUBA по умолчанию VERTICAL). -->
+                        <scrollBox id="generalScrollBox" width="100%" height="100%" spacing="true">
                             <!-- Password-card видна только для нового пользователя по штатному lifecycle UserEditor. -->
                             <vbox id="passwordBox" spacing="true" visible="false" width="100%" margin="true,true,true,true" stylename="edit-card">
                                 <!-- Legacy FieldGroup обязателен для программно создаваемых passwField/confirmPasswField. -->
@@ -128,8 +104,8 @@
                             </vbox>
                             <!-- Две равные карточки сохраняют существующее разделение контактов и системных параметров. -->
                             <hbox id="contactsRegionalRow" spacing="true" width="100%">
-                                <!-- Карточка контактов сохраняет все bindings userDs и email validator. -->
-                                <groupBox id="contactsCard" flat="true" spacing="true" width="100%" flex="1" stylename="edit-card">
+                                <!-- Карточка контактов сохраняет все bindings userDs и email validator; showAsPanel приводит рендер к v-panel-контракту §5.2. -->
+                                <groupBox id="contactsCard" flat="true" spacing="true" width="100%" flex="1" showAsPanel="true" stylename="edit-card">
                                     <!-- Заголовок карточки обозначает контактную идентификацию пользователя. -->
                                     <label value="msg://msgContacts" stylename="h3 edit-card-title"/>
                                     <!-- FieldGroup сохраняет исходные component IDs и получает общий control contract. -->
@@ -154,8 +130,8 @@
                                         </column>
                                     </fieldGroup>
                                 </groupBox>
-                                <!-- Карточка региональных и системных параметров сохраняет custom fields UserEditor. -->
-                                <groupBox id="regionalCard" flat="true" spacing="true" width="100%" flex="1" stylename="edit-card">
+                                <!-- Карточка региональных и системных параметров сохраняет custom fields UserEditor; showAsPanel приводит рендер к v-panel-контракту §5.2. -->
+                                <groupBox id="regionalCard" flat="true" spacing="true" width="100%" flex="1" showAsPanel="true" stylename="edit-card">
                                     <!-- Заголовок карточки обозначает региональные и системные параметры. -->
                                     <label value="msg://msgRegional" stylename="h3 edit-card-title"/>
                                     <!-- FieldGroup обязателен для custom language, timeZone и group controls UserEditor. -->
@@ -182,9 +158,8 @@
                                     </fieldGroup>
                                 </groupBox>
                             </hbox>
-                        </scrollBox>
-                        <!-- Нижний split сохраняет параллельную работу с ролями и замещениями пользователя. -->
-                        <split id="rolesSubstSplit" orientation="horizontal" pos="50" width="100%" height="100%" expand="substPanel" margin="true,false,false,false">
+                            <!-- Нижний split сохраняет параллельную работу с ролями и замещениями пользователя; фиксированная высота удерживает таблицы внутри вертикальной прокрутки вкладки. -->
+                            <split id="rolesSubstSplit" orientation="horizontal" pos="50" width="100%" height="300px" expand="substPanel" margin="true,false,false,false">
                             <!-- Карточка ролей сохраняет стандартные add/edit/remove actions UserEditor. -->
                             <vbox id="rolesPanel" expand="rolesTable" spacing="true" margin="false,true,false,false" height="100%" width="100%" stylename="edit-card">
                                 <!-- Заголовок карточки обозначает набор назначенных ролей. -->
@@ -266,6 +241,7 @@
                                 </table>
                             </vbox>
                         </split>
+                        </scrollBox>
                     </tab>
                     <!-- Почтовая вкладка преобразует прежнюю широкую grid в вертикальные accordion-секции без изменения bindings. -->
                     <tab id="emailSettingsTab" caption="msg://msgEmailSettings" margin="true" spacing="true" expand="emailScrollBox">
@@ -392,14 +368,17 @@
                         </vbox>
                     </tab>
                 </tabSheet>
+                <!-- Footer удерживает штатные save/cancel actions вне прокручиваемого содержимого вкладок и прижимает их к правому нижнему углу (структура эталона IteractionListEdit: expand-спейсер + группа действий AUTO); расположен внутри рабочей области, как в OpenPositionEdit, чтобы sidebar оставался на всю высоту окна. -->
+                <hbox id="bottomActionsBox" width="100%" height="AUTO" spacing="true" expand="bottomActionsSpacer" align="MIDDLE_RIGHT" stylename="edit-footer-actions">
+                    <!-- Спейсер занимает всю свободную ширину footer и выталкивает группу действий к правому краю. -->
+                    <vbox id="bottomActionsSpacer" width="100%" height="1px"/>
+                    <!-- Группа действий компактно удерживает стандартный фрагмент ОК/Отмена у правого края footer. -->
+                    <hbox id="bottomActionsGroup" width="AUTO" height="AUTO" spacing="true" align="MIDDLE_RIGHT">
+                        <!-- Стандартный fragment выполняет прежние commit/cancel actions UserEditor. -->
+                        <fragment id="windowActions" screen="editWindowActions"/>
+                    </hbox>
+                </hbox>
             </vbox>
-        </hbox>
-        <!-- Footer визуально отделяет штатные save/cancel actions от прокручиваемого workspace. -->
-        <hbox id="bottomActionsBox" width="100%" spacing="true" align="BOTTOM_RIGHT" stylename="edit-footer-actions">
-            <!-- Spacer сохраняет штатные действия выровненными справа. -->
-            <label value="" expand="true"/>
-            <!-- Стандартный fragment выполняет прежние commit/cancel actions UserEditor. -->
-            <fragment id="windowActions" screen="editWindowActions"/>
         </hbox>
     </layout>
 </window>

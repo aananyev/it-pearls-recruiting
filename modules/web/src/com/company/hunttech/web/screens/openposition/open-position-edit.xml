@@ -109,8 +109,8 @@
         <collection id="positionTypesDc"
                     class="com.company.hunttech.entity.Position">
             <view extends="position-picker-view"/>
-            <!-- Загрузчик типов позиций: исключены записи с «(не использовать)», сортировка по positionRuName; cacheable. -->
-            <loader id="positionTypesLc" cacheable="true">
+            <!-- Загрузчик типов позиций: исключены записи с «(не использовать)», сортировка по positionRuName. cacheable отключён: entity cache при выборке списка делает точечный find() по ID для каждой строки (N+1-цикл, замерено ~188 SELECT на открытие формы); обычный запрос списка — 1 SELECT. -->
+            <loader id="positionTypesLc">
                 <query>
                     <![CDATA[select e from hunttech_Position e
                     where e.positionRuName not like '%(не использовать)%'
@@ -192,7 +192,7 @@
         <collection id="companyNamesDc"
                     class="com.company.hunttech.entity.Company">
             <view extends="company-picker-view"/>
-            <!-- Загрузчик компаний по comanyName. -->
+            <!-- Загрузчик компаний по comanyName. cacheable отключён: справочник большой (~5 660 записей), entity cache при выборке делает точечный find() по ID для каждой строки списка (замерено ~5 658 SELECT на открытие формы = 7-9 с); обычный запрос списка — 1 SELECT. -->
             <loader id="companyNamesLc">
                 <query><![CDATA[select e from hunttech_Company e
                         order by e.comanyName]]></query>
@@ -226,8 +226,8 @@
         <collection id="citiesDc"
                     class="com.company.hunttech.entity.City"
                     view="city-picker-view">
-            <!-- Загрузчик городов по cityRuName; cacheable. -->
-            <loader id="citiesDl" cacheable="true">
+            <!-- Загрузчик городов по cityRuName. cacheable отключён: entity cache при выборке списка делает точечный find() по ID для каждой строки (замерено ~93 SELECT на открытие формы); обычный запрос списка — 1 SELECT. -->
+            <loader id="citiesDl">
                 <query><![CDATA[select e
                 from hunttech_City e
                 order by e.cityRuName]]></query>
@@ -800,13 +800,13 @@
                                             stylename="edit-form-control"
                                             width="110px"
                                             caption="msg://msgVacansyID"/>
-                                 <!-- Грейд позиции (options из gradeDc) — 1/10 ширины строки. -->
+                                 <!-- Грейд позиции (options из gradeDc) — 1/10 ширины строки, расширен на 30% (110→143px). -->
                                 <lookupPickerField id="gradeLookupPickerField"
                                             dataContainer="openPositionDc"
                                             property="grade"
                                             stylename="edit-form-control"
                                             optionsContainer="gradeDc"
-                                            width="110px"
+                                            width="143px"
                                             caption="msg://msgGrade">
                                     <actions>
                                         <action id="lookup"

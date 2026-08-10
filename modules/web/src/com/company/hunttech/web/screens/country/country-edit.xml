@@ -63,9 +63,9 @@
                       stylename="label-navigation"
                       width="100%"
                       spacing="false">
-                    <!-- Заголовок навигационного блока. -->
+                    <!-- Заголовок навигационного блока: полоса-заголовок с двумя inset-линиями (контракт §4.1). -->
                     <label value="Разделы"
-                           stylename="label-nav-title"
+                           stylename="label-nav-title geolocation-navigation-title"
                            width="100%"/>
                     <!-- Пункт «Основные данные» — активен по умолчанию, фокусирует первое поле. -->
                     <button id="countryMainNav"
@@ -116,6 +116,7 @@
                         <groupBox id="countryMainSection"
                                   caption="Основные данные"
                                   stylename="edit-card"
+                                  showAsPanel="true"
                                   width="100%"
                                   spacing="true">
                             <!-- Форма страны с полями, привязанными к countryDc. -->
@@ -134,6 +135,7 @@
                         <groupBox id="countryRegionsSection"
                                   caption="Регионы страны"
                                   stylename="edit-card"
+                                  showAsPanel="true"
                                   width="100%"
                                   spacing="true">
                             <!-- Таблица регионов страны (composition-коллекция countryCountryOfRegionsDc). -->

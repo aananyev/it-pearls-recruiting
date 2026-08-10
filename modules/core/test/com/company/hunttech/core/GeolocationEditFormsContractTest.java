@@ -59,6 +59,15 @@ public class GeolocationEditFormsContractTest {
                     !xml.contains("edit-toolbar-subtitle"));
             assertTrue(form, xml.contains("stylename=\"edit-card\""));
             assertTrue(form, xml.contains("stylename=\"edit-toolbar-description\""));
+            // Карточки groupBox рендерятся как Vaadin Panel (v-panel-caption), иначе
+            // CUBA-рендер c-groupbox-caption не матчит SCSS-правила контракта
+            // (эталон: showAsPanel у всех edit-card).
+            assertTrue(form + ": edit-card без showAsPanel (заголовок карточки не стилизуется)",
+                    xml.contains("showAsPanel=\"true\""));
+            // Полоса-заголовок навигации «Разделы» (контракт §4.1): класс секции
+            // поверх label-nav-title — две горизонтальные inset-линии.
+            assertTrue(form + ": нет полосы-заголовка geolocation-navigation-title",
+                    xml.contains("label-nav-title geolocation-navigation-title"));
         }
     }
 
@@ -196,8 +205,19 @@ public class GeolocationEditFormsContractTest {
         assertTrue("Нет канонического active #ffb11b", canon.contains("#ffb11b"));
         assertTrue("Нет канонического hover rgba(255,255,255,0.08)",
                 canon.contains("rgba(255, 255, 255, 0.08)"));
-        assertTrue("Нет активного фона rgba(255,177,27,0.12)",
+        assertTrue("Нет канонического активного фона rgba(255,177,27,0.12)",
                 canon.contains("rgba(255, 177, 27, 0.12)"));
+        // Полоса-заголовок навигации «Разделы» (контракт §4.1): две inset-линии.
+        assertTrue("Нет правила полосы-заголовка .geolocation-navigation-title",
+                canon.contains(".geolocation-navigation-title"));
+        assertTrue("Нет inset-линий полосы-заголовка (box-shadow)",
+                canon.contains("rgba(255, 255, 255, 1) 0 1px 0 0 inset"));
+        assertTrue("Нет разделителя полосы-заголовка (border-bottom)",
+                canon.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14)"));
+        assertTrue("Нет цвета полосы-заголовка #ffb11b 15px/700",
+                canon.contains("color: #ffb11b !important;"));
+        assertTrue("Нет min-height 36px полосы-заголовка",
+                canon.contains("min-height: 36px !important;"));
 
         // Правая рабочая область по эталону IteractionListEdit.
         assertTrue("Нет карточек .edit-card с радиусом 8px", canon.contains("border-radius: 8px"));

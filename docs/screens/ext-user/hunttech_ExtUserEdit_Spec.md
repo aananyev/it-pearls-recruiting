@@ -7,6 +7,7 @@
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-10 | Sidebar приведён к эталону OpenPositionEdit (растянут на всю высоту окна с вертикальной прокруткой): root layout `spacing="false"` + `width/height="100%"`, у `profilePanel` убран `margin="true"`, `profilePanelSpacer` — vbox `100%×100%`, footer перенесён внутрь `userWorkspace`. См. канонический `docs/ui/ExtUserEdit_Spec.md`. |
 | 2026-07-29 | Legacy-спецификация синхронизирована с каноническим документом: `ExtUserEdit` приведён к общему `edit-*`/`label-*` контракту без изменения бизнес- и CUBA-контрактов. |
 | 2026-07-29 | Восстановлена стандартная смена пароля через `sec$User.changePassword`. |
 | 2026-06-29 | `userPic` привязан к `userDs.officialPhoto`. |

@@ -26,8 +26,8 @@
 - общая композиция: `edit-screen-layout`, `edit-sidebar` (270px), `edit-workspace`, `edit-workspace-scroll`;
 - toolbar: `edit-toolbar`, `edit-toolbar-title`, `edit-toolbar-description`;
 - sidebar: `edit-sidebar-identity`, `edit-sidebar-title`, `edit-sidebar-subtitle`, `edit-sidebar-summary`, `edit-sidebar-hint`;
-- navigation: `label-navigation`, `label-nav-title`, `label-nav-item`, `label-nav-item-active`;
-- контент: `edit-card` (карточки разделов «Основные данные» и дочерней коллекции);
+- navigation: `label-navigation`, `label-nav-title geolocation-navigation-title` (полоса-заголовок «Разделы» с двумя inset-линиями, контракт §4.1), `label-nav-item`, `label-nav-item-active`;
+- контент: `edit-card` (карточки разделов «Основные данные» и дочерней коллекции, `showAsPanel="true"` — рендер Vaadin Panel, чтобы заголовок `.v-panel-caption` получал контрактный стиль);
 - поля: `edit-form-control` на каждом `TextField`/`LookupPickerField` с caption;
 - таблицы: captions колонок через mainMsg-ключи `msgRegionRuName`/`msgRegionCode`/`msgCityRuName`/`msgCityPhoneCode`;
 - действия: `edit-footer-actions`;
@@ -41,6 +41,7 @@
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-09 | Заголовок «Разделы» навигации оформлен полосой-заголовком с двумя горизонтальными inset-линиями (контракт §4.1, класс `geolocation-navigation-title` поверх `label-nav-title`, #ffb11b 15px/700, min-height 36px); карточки получили `showAsPanel="true"` — заголовок `.v-panel-caption` 17px/700/min-height 50px с фоном mix(68%) и разделителем (до этого CUBA-рендер `c-groupbox-caption` не матчил SCSS-правила, заголовок оставался вало-дефолтом 11px/400); проверки добавлены в `GeolocationEditFormsContractTest`. |
 | 2026-07-31 | Правая рабочая область гео-форм приведена к эталону IteractionListEdit: карточки `.edit-card` (groupBox) — фон, рамка, радиус 8px, заголовок `.v-groupbox-caption`/`.v-panel-caption` 17px/700, поля 38px с рамкой и focus-кольцом `$v-selection-color`, подписи 13px/600, кнопки 38px/radius 5px; проверки добавлены в контрактный тест. |
 | 2026-07-31 | Локальный SCSS-слой `geolocation-edit-forms.scss` во всех 7 темах: фирменная тёмная sidebar и каноническая label-навигация (эталон IteractionListEdit); подключение import+include в styles.scss каждой темы; проверка идентичности и канонических цветов в контрактном тесте. |
 | 2026-07-31 | Второй проход контракта: sidebar 280px→270px; мёртвые классы `edit-section-card`/`edit-toolbar-subtitle` заменены на общие `edit-card`/`edit-toolbar-description`; всем полям добавлен `stylename="edit-form-control"` и captions (регион/город); колонки таблиц получили mainMsg-captions; добавлены ключи `msgRegionRuName`, `msgCityRuName`, `msgCityPhoneCode`, `msgCityRegion` в web messages; создан `GeolocationEditFormsContractTest`; XML-дескрипторы полностью inline-документированы. |

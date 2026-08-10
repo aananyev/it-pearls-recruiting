@@ -56,9 +56,11 @@ import java.util.Calendar;
  * «Тестовое задание», «Памятка к собеседованию», «Шаблон письма», «Навыки»,
  * «Новости», «Согласование» (BPM) и «Комментарии».</p>
  *
- * <p>Тяжёлые LOB-поля (comment, commentEn, exercise, templateLetter, memoForInterview)
- * и коллекции вкладок не входят в edit-view: они догружаются lazy при первом открытии
- * вкладки (флаги {@code *Loaded}), чтобы не тянуть большие тексты при открытии формы.</p>
+ * <p>Тяжёлые LOB-поля (comment, commentEn, exercise, templateLetter, memoForInterview,
+ * LOB-описания типа позиции) и коллекции вкладок не входят в edit-view: они догружаются
+ * lazy при первом открытии вкладки (флаги {@code *Loaded}), чтобы не тянуть большие тексты
+ * при открытии формы. Описания RU/EN (comment/commentEn) и LOB-описания типа позиции
+ * догружаются только на вкладке «Описание должности» (loadJobDescriptionTab).</p>
  *
  * <p>Перед коммитом контроллер проверяет уникальность {@code vacansyID}, собирает списки
  * подписчиков и формирует уведомления (email/Telegram) об открытии/закрытии позиции;
@@ -469,7 +471,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private CheckBox needLetterCheckBox;
 
-    private boolean mainTabLobsLoaded;
+    private boolean jobDescriptionLobsLoaded;
     private boolean exerciseLoaded;
     private boolean memoLoaded;
     private boolean templateLetterLoaded;
@@ -477,6 +479,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private boolean filesLoaded;
     private boolean commentsTabLoaded;
     private boolean laborAgreementLoaded;
+    private boolean newsTabLoaded;
+    private boolean approvalLoaded;
     private boolean applyingPositionTypeFromHandler;
     /** false until onAfterShow completes — blocks RichTextArea ValueChange during @LoadDataBeforeShow bind */
     private boolean screenFullyLoaded;
@@ -497,9 +501,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     public void onBeforeShow(BeforeShowEvent event) {
 
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            loadMainTabLobs();
-            ensurePositionLobsLoaded();
-            mainTabLobsLoaded = true;
+            // LOB-описания (comment/commentEn и LOB-описания типа позиции) намеренно НЕ грузятся
+            // при открытии формы: они нужны только на не-стартовой вкладке «Описание должности»
+            // и догружаются lazy при первом её открытии (см. loadJobDescriptionTab).
         }
 
         beforeEdit = getEditedEntity();
@@ -525,7 +529,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         standartDescriptionDisable(event);
         whiIsThisGuyDisable(event);
         initPositionTypeDescriptionFields();
-        setOpenPositionNews(event);
+        // Новости позиции догружаются lazy при первом открытии вкладки «Новости»
+        // (см. loadOpenPositionNewsTab) — не блокируем открытие формы.
         setOpenCloseStart();
 
         initProjectNameField();
@@ -537,38 +542,57 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         // Визуальная синхронизация label-навигации sidebar с открытой вкладкой: показывается
         // набор пунктов активной вкладки, подсвечивается первый пункт набора.
         syncSidebarNavigation();
-        if (event.getSelectedTab() == null || PersistenceHelper.isNew(getEditedEntity())) {
+        if (event.getSelectedTab() == null) {
             return;
         }
         String tabName = event.getSelectedTab().getName();
-        if ("tabExercise".equals(tabName) && !exerciseLoaded) {
-            loadExerciseLob();
-            exerciseLoaded = true;
+
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            if ("tabJobDescription".equals(tabName) && !jobDescriptionLobsLoaded) {
+                loadJobDescriptionTab();
+                jobDescriptionLobsLoaded = true;
+            }
+            if ("tabExercise".equals(tabName) && !exerciseLoaded) {
+                loadExerciseLob();
+                exerciseLoaded = true;
+            }
+            if ("tabMemoForInterview".equals(tabName) && !memoLoaded) {
+                loadMemoForInterviewLob();
+                memoLoaded = true;
+            }
+            if ("tabTemplateLetter".equals(tabName) && !templateLetterLoaded) {
+                loadTemplateLetterLob();
+                templateLetterLoaded = true;
+            }
+            if ("tabSkills".equals(tabName) && !skillsLoaded) {
+                loadSkillsList();
+                skillsLoaded = true;
+            }
+            if ("tabFiles".equals(tabName) && !filesLoaded) {
+                loadSomeFiles();
+                filesLoaded = true;
+                setIconSomeFileTab();
+            }
+            if ("commentsTab".equals(tabName) && !commentsTabLoaded) {
+                loadCommentsTab();
+                commentsTabLoaded = true;
+            }
+            if ("laborAgreementTab".equals(tabName) && !laborAgreementLoaded) {
+                loadLaborAgreement();
+                laborAgreementLoaded = true;
+            }
+            if ("tabOpenPositionNews".equals(tabName) && !newsTabLoaded) {
+                loadOpenPositionNewsTab();
+                newsTabLoaded = true;
+            }
         }
-        if ("tabMemoForInterview".equals(tabName) && !memoLoaded) {
-            loadMemoForInterviewLob();
-            memoLoaded = true;
-        }
-        if ("tabTemplateLetter".equals(tabName) && !templateLetterLoaded) {
-            loadTemplateLetterLob();
-            templateLetterLoaded = true;
-        }
-        if ("tabSkills".equals(tabName) && !skillsLoaded) {
-            loadSkillsList();
-            skillsLoaded = true;
-        }
-        if ("tabFiles".equals(tabName) && !filesLoaded) {
-            loadSomeFiles();
-            filesLoaded = true;
-            setIconSomeFileTab();
-        }
-        if ("commentsTab".equals(tabName) && !commentsTabLoaded) {
-            loadCommentsTab();
-            commentsTabLoaded = true;
-        }
-        if ("laborAgreementTab".equals(tabName) && !laborAgreementLoaded) {
-            loadLaborAgreement();
-            laborAgreementLoaded = true;
+
+        // BPM-инициализация вкладки «Согласование» выполняется и для новых позиций
+        // (фрагмент действий процесса показывает стартовое состояние), поэтому вызов
+        // не ограничен guard'ом на сохранённую сущность.
+        if ("tabApproval".equals(tabName) && !approvalLoaded) {
+            approvalLoaded = true;
+            ensureApprovalProcessLoaded();
         }
     }
 
@@ -806,6 +830,19 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                 .build());
         getEditedEntity().setComment(reloaded.getComment());
         getEditedEntity().setCommentEn(reloaded.getCommentEn());
+    }
+
+    /** Lazy-загрузка вкладки «Описание должности»: RU/EN описания позиции и LOB-описания
+     *  типа позиции (стандартное описание, «кто этот парень») при первом открытии вкладки.
+     *  База {@link #openPositionText} устанавливается после догрузки, чтобы первое ручное
+     *  изменение описания фиксировалось в новостях позиции (см. onOpenPositionRichTextAreaValueChange1). */
+    private void loadJobDescriptionTab() {
+        loadMainTabLobs();
+        ensurePositionLobsLoaded();
+        initPositionTypeDescriptionFields();
+        if (getEditedEntity().getComment() != null) {
+            openPositionText = Jsoup.parse(getEditedEntity().getComment()).wholeText();
+        }
     }
 
     /** Догрузка описаний типа позиции, если они ещё не загружены. */
@@ -1066,7 +1103,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     ViewBuilder.of(OpenPosition.class)
                             .add("laborAgreement", "laborAgreement-openPosition-tab-view")
                             .build());
-            dataContext.merge(reloaded);
+            // Переносим на редактируемую сущность ТОЛЬКО коллекцию соглашений, не сливая весь
+            // объект через dataContext.merge: merge копировал на неё состояние из БД и затирал
+            // несохранённые изменения формы (openClose и др.), а также порождал лишний UPDATE
+            // с одним version при каждом коммите.
+            getEditedEntity().setLaborAgreement(new ArrayList<>(reloaded.getLaborAgreement()));
         }
     }
 
@@ -1092,7 +1133,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     ViewBuilder.of(OpenPosition.class)
                             .add("skillsList", "skillTree-openPosition-tab-view")
                             .build());
-            dataContext.merge(reloaded);
+            // Аналогично ensureLaborAgreementLoadedOnEntity: переносим только коллекцию навыков,
+            // без dataContext.merge (merge затирал несохранённые изменения формы и генерировал
+            // лишние SELECT файлов и UPDATE version-only при каждом коммите).
+            getEditedEntity().setSkillsList(new ArrayList<>(reloaded.getSkillsList()));
         }
     }
 
@@ -1554,8 +1598,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         return closeButton;
     }
 
-    /** Заполнение таблицы новостей позиции (обычные и приоритетные). */
-    private void setOpenPositionNews(BeforeShowEvent event) {
+    /** Lazy-загрузка новостей позиции при первом открытии вкладки «Новости» (ранее грузились в onBeforeShow). */
+    private void loadOpenPositionNewsTab() {
         if (getEditedEntity() != null) {
             openPositionNewsLc.setParameter("openPosition", getEditedEntity());
         } else {
@@ -2126,8 +2170,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
         if (openPositionRichTextArea.getValue() != null &&
                 !openPositionRichTextArea.getValue().trim().equals("")) {
-            rescanJobDescription();
-
+            // rescanJobDescription намеренно не вызывается при открытии: навыки вкладки
+            // загружаются lazy (loadSkillsList), а пересборка выполняется при фактическом
+            // изменении описания (onOpenPositionRichTextAreaValueChange) и при открытии
+            // вкладки «Описание должности» (loadJobDescriptionTab). Это убирает парсинг
+            // всего текста и 2-3 запроса к SKILL_TREE при каждом открытии формы.
             openPositionRichTextArea.setValue(showKeyCompetition(openPositionRichTextArea.getValue()));
         }
 
@@ -2337,8 +2384,11 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Subscribe
     /** Перед коммитом: сборка списков подписчиков и комментариев. */
     public void onBeforeCommitChanges1(BeforeCommitChangesEvent event) {
+        // Синхронизация чекбокса из фактического состояния сущности, если binding ещё не
+        // применился: прежний жёсткий false при null затирал openClose=true у закрытых
+        // вакансий при любом сохранении (вакансия молча открывалась).
         if (openClosePositionCheckBox.getValue() == null)
-            openClosePositionCheckBox.setValue(false);
+            openClosePositionCheckBox.setValue(Boolean.TRUE.equals(getEditedEntity().getOpenClose()));
 
         if (internalProjectCheckBox.getValue() == null)
             internalProjectCheckBox.setValue(false);
@@ -2965,9 +3015,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             openPositionRichTextArea.setValue(showKeyCompetition(openPositionRichTextArea.getValue()));
         }
 
-        openClosePositionCheckBox.setValue(openClosePositionCheckBox.getValue() == null ? false : true);
+        // Чекбокс «Закрыта» связан с контейнером (property="openClose"), но на момент
+        // BeforeShow binding может быть ещё не применён (getValue()==null). Синхронизируем
+        // его из фактического состояния сущности: прежний код сетает false при null и
+        // затирал openClose=true у закрытых вакансий (кнопка показывала «Закрыть вакансию»
+        // вместо «Открыть вакансию» при повторном входе).
+        if (openClosePositionCheckBox.getValue() == null) {
+            openClosePositionCheckBox.setValue(Boolean.TRUE.equals(getEditedEntity().getOpenClose()));
+        }
 
-        setInitApprovalProcess();
+        // BPM-процесс «Согласование» инициализируется lazy при первом открытии вкладки
+        // «Согласование» (см. ensureApprovalProcessLoaded) — не блокируем открытие формы.
     }
 
     /** Иконка вкладки «Файлы» с признаком наличия файлов. */
@@ -3051,8 +3109,9 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         setIconSomeFileTab();
     }
 
-    /** Инициализация BPM-процесса согласования позиции. */
-    private void setInitApprovalProcess() {
+    /** Lazy-инициализация вкладки «Согласование» при первом открытии: вложения BPM-процесса
+     *  и фрагмент действий процесса (ранее выполнялись в onBeforeShow1 при каждом открытии формы). */
+    private void ensureApprovalProcessLoaded() {
         UUID entityId = getEditedEntity().getId();
         procAttachmentsDl.setParameter("entityId", entityId);
         procAttachmentsDl.load();
@@ -3129,6 +3188,15 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         preventAutoLoadUntilParameterSet(someFilesesDl, "openPosition");
         preventAutoLoadUntilParameterSet(openPositionSkillsListsDl, "openPosition");
         preventAutoLoadUntilParameterSet(procAttachmentsDl, "entityId");
+        // Коллекции вкладок и фильтруемые справочники, параметр которых на момент автозагрузки
+        // не установлен: условие JPQL с незаданным параметром игнорируется, и SQL выбрал бы ВСЕ
+        // строки таблицы (все новости всех позиций / все проекты / все департаменты всех компаний).
+        // Данные догружаются тем же кодом, что и раньше: новости — при первом открытии вкладки
+        // (loadOpenPositionNewsTab), проекты — в initProjectNameField (withOpenPositionCheckBox=true),
+        // департаменты — при выборе компании (onCompanyNameFieldValueChange).
+        preventAutoLoadUntilParameterSet(openPositionNewsLc, "openPosition");
+        preventAutoLoadUntilParameterSet(projectNamesLc, "withOpenPosition");
+        preventAutoLoadUntilParameterSet(companyDepartamentsLc, "company");
 
         setRadioButtons();
         setGroupSubscribeButton();
@@ -3848,8 +3916,17 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     }
 
     @Subscribe("gradeLookupPickerField")
-    /** Смена грейда → генерация названия вакансии. */
+    /** Смена грейда пользователем → актуализация префикса названия вакансии.
+        Событие привязки компонента при открытии формы (isUserOriginated=false)
+        игнорируется: название должно оставаться как сохранено в сущности (vacansyName). */
     public void onGradeLookupPickerFieldValueChange(HasValue.ValueChangeEvent<Grade> event) {
+        // При открытии формы событие приходит от привязки значения грейда к контейнеру,
+        // а не от пользователя: в этот момент gradeDc может быть ещё не загружен, а
+        // vacansyNameField не привязан — перегенерация дала бы «<Грейд> null» в поле названия.
+        if (!event.isUserOriginated()) {
+            return;
+        }
+
         boolean flag = false;
 
         for (Grade grade : gradeDc.getItems()) {
@@ -3873,7 +3950,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
 
         if (!flag) {
-            vacansyNameField.setValue(event.getValue().getGradeName() + " " + vacansyNameField.getValue());
+            // Защита от «<Грейд> null» при пустом названии: ставим только грейд, а полное
+            // название пользователь введёт или сгенерирует кнопкой «Генерировать».
+            String currentName = vacansyNameField.getValue();
+            vacansyNameField.setValue(currentName == null || currentName.isEmpty()
+                    ? event.getValue().getGradeName()
+                    : event.getValue().getGradeName() + " " + currentName);
         }
     }
 

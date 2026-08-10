@@ -7,12 +7,48 @@
     box-sizing: border-box;
     overflow: hidden;
 
+    // Заголовок «Разделы» label-навигации: полоса-заголовок с двумя горизонтальными
+    // inset-линиями (белая сверху, светлая снизу) — контракт §4.1, эталон
+    // IteractionListEdit/OpenPositionEdit. Класс поверх общего label-nav-title.
+    .label-navigation .ext-user-editor-navigation-title,
+    .label-navigation .v-label-ext-user-editor-navigation-title {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-height: 36px !important;
+      height: auto !important;
+      padding: 7px 11px !important;
+      color: #ffb11b !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 21px !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+      background: rgba(255, 255, 255, 0.045) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+      box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
+                  rgba(244, 244, 244, 1) 0 -1px 0 0 inset;
+      white-space: normal !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    // Подписи полей FieldGroup — контрактные 13px/600 (эталон IteractionListEdit,
+    // mix($v-font-color, $v-panel-background-color, 72%)), scoped на форму.
+    .v-caption .v-captiontext {
+      color: mix($v-font-color, $v-panel-background-color, 72%) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 17.55px !important;
+    }
+
     .edit-sidebar {
-      padding: 16px;
+      padding: 14px 12px;
       color: #f8fafc;
-      background: linear-gradient(180deg, #172638 0%, #132130 54%, #0f1b28 100%);
-      border-right: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 4px 0 14px rgba(15, 23, 42, 0.22);
+      background-color: #172638 !important;
+      background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%) !important;
+      border-right: 1px solid rgba(15, 23, 42, 0.78);
+      box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18);
     }
 
     .edit-sidebar-visual {
@@ -56,7 +92,7 @@
     }
 
     .label-navigation {
-      border-top-color: rgba(255, 255, 255, 0.14);
+      border-top-color: rgba(255, 255, 255, 0.16);
     }
 
     .label-nav-title {
@@ -68,11 +104,12 @@
       color: rgba(248, 250, 252, 0.82) !important;
     }
 
+    // Hover пунктов — эталон IteractionListEdit: белый текст на полупрозрачном белом.
     .label-nav-item:hover,
     .v-button-label-nav-item:hover,
     .v-button-label-nav-item:focus {
-      color: #ffb11b !important;
-      background: rgba(255, 177, 27, 0.09) !important;
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
     }
 
     .label-nav-item-active,
@@ -82,12 +119,80 @@
       border-left-color: #ffb11b !important;
     }
 
+    // OvaFallbackImage пользователя: круглый аватар 180×180, fallback-иллюстрация
+    // подрезается по светлым полям файла (эталон IteractionListEdit, размер 180px).
+    .ext-user-editor-avatar,
+    .ext-user-editor-avatar img,
+    .ext-user-editor-avatar .v-image-element {
+      box-sizing: border-box;
+      width: 180px !important;
+      height: 180px !important;
+      min-width: 180px !important;
+      min-height: 180px !important;
+      max-width: 180px !important;
+      max-height: 180px !important;
+      border-radius: 50% !important;
+      object-fit: contain !important;
+    }
+
+    .ext-user-editor-avatar[src*="/icons/no-programmer.jpeg"],
+    .ext-user-editor-avatar img[src*="/icons/no-programmer.jpeg"],
+    .ext-user-editor-avatar .v-image-element[src*="/icons/no-programmer.jpeg"] {
+      object-view-box: inset(8%);
+      object-fit: cover !important;
+    }
+
     .dropzone-container,
     .dropzone-container > .v-verticallayout,
     .dropzone-container .v-slot {
       box-sizing: border-box;
       min-width: 0;
       max-width: 100%;
+    }
+
+    // Кнопки формы — единая геометрия по эталону IteractionListEdit:
+    // min-height 38px, без тени, hover с лёгким затемнением, focus-ring.
+    .v-button {
+      min-height: 38px;
+      border-radius: $v-border-radius;
+      box-shadow: none !important;
+    }
+
+    .v-button:hover {
+      filter: brightness(0.98);
+    }
+
+    .v-button:focus {
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
+      outline: 0;
+    }
+
+    // Text-кнопки footer и toolbar — компактный padding и 14px (эталон IteractionListEdit).
+    .edit-footer-actions .v-button,
+    .edit-toolbar-actions .v-button {
+      padding: 0 16px;
+      font-size: 14px;
+    }
+
+    // Акцентная кнопка смены пароля — как iteraction-list-primary-action.
+    .ext-user-editor-primary-action {
+      color: #ffffff !important;
+      background: $v-selection-color !important;
+      border-color: $v-selection-color !important;
+    }
+
+    // Кнопка «ОК» footer-фрагмента editWindowActions получает класс c-primary-action —
+    // оформляем её как iteraction-list-primary-action (акцентная, белый текст).
+    .edit-footer-actions .c-primary-action {
+      color: #ffffff !important;
+      background: $v-selection-color !important;
+      border-color: $v-selection-color !important;
+    }
+
+    // Кнопка «Отмена» footer-фрагмента — вторичная, как
+    // iteraction-list-secondary-action (прозрачный фон, рамка остаётся).
+    .edit-footer-actions .v-button:not(.c-primary-action) {
+      background: transparent !important;
     }
 
     .edit-card,
@@ -114,6 +219,74 @@
       box-sizing: border-box;
       min-width: 0;
       max-width: 100%;
+    }
+
+    // Заголовки вкладок TabSheet — точная копия финального слоя эталона
+    // IteractionListEdit (iteraction-list-reference-finish.scss): таб-полоса
+    // 48px, подписи 15px/600 через переменные темы Halo, выбранная вкладка —
+    // нижняя полоса-акцент #ffb11b. Без вало-framed-рендера (framed убран из XML).
+    .edit-tabs {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0;
+      background: $v-panel-background-color !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .edit-tabs > .v-tabsheet-tabcontainer {
+      padding: 0 20px;
+      background: $v-panel-background-color !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.16) !important;
+    }
+
+    .edit-tabs .v-tabsheet-tabs,
+    .edit-tabs .v-tabsheet-tabitem,
+    .edit-tabs .v-tabsheet-tabitem-selected {
+      height: 48px;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .edit-tabs .v-caption {
+      box-sizing: border-box;
+      height: 48px;
+      padding: 0 16px !important;
+      color: mix($v-font-color, $v-panel-background-color, 82%) !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      line-height: 48px !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-bottom: 3px solid transparent !important;
+    }
+
+    .edit-tabs .v-tabsheet-tabitem:hover .v-caption,
+    .edit-tabs .v-tabsheet-tabitem-selected .v-caption {
+      color: #ffb11b !important;
+    }
+
+    .edit-tabs .v-tabsheet-tabitem-selected .v-caption {
+      border-bottom-color: #ffb11b !important;
+    }
+
+    // Подписи самих вкладок (captiontext) — перекрывают общее полевое правило
+    // 13px/600: в эталоне заголовки вкладок 15px/600, цвет наследуют от .v-caption.
+    .edit-tabs .v-tabsheet-tabitem .v-caption .v-captiontext {
+      color: inherit !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      line-height: 48px !important;
+    }
+
+    .edit-tabs > .v-tabsheet-content {
+      box-sizing: border-box;
+      height: calc(100% - 49px) !important;
+      padding: 14px 16px 18px;
+      background: mix($v-app-background-color, $v-panel-background-color, 82%) !important;
+      border: 0 !important;
+      overflow: hidden;
     }
   }
 }

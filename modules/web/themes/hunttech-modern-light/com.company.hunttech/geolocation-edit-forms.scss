@@ -116,6 +116,32 @@
       opacity: 1 !important;
     }
 
+    // Заголовок «Разделы» навигации: полоса-заголовок с двумя горизонтальными
+    // inset-линиями (белая сверху, светлая снизу) — как заголовки секций
+    // IteractionListEdit/OpenPositionEdit, контракт §4.1.
+    .label-navigation .geolocation-navigation-title,
+    .label-navigation .v-label-geolocation-navigation-title {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-height: 36px !important;
+      height: auto !important;
+      padding: 7px 11px !important;
+      color: #ffb11b !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 21px !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+      background: rgba(255, 255, 255, 0.045) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+      box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
+                  rgba(244, 244, 244, 1) 0 -1px 0 0 inset;
+      white-space: normal !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
     .label-nav-item,
     .v-button-label-nav-item,
     .v-label-label-nav-item {

@@ -79,8 +79,8 @@
         <collection id="usersDc"
                     class="com.haulmont.cuba.security.entity.User"
                     view="_minimal">
-            <!-- Кэшируемый loader исключает неактивных пользователей из выбора рекрутёра. -->
-            <loader id="usersDl" cacheable="true">
+            <!-- Не кэшируемый loader исключает неактивных пользователей из выбора рекрутёра (без query cache: удаление пользователей при горячем кэше давало null-элемент и IllegalArgumentException «entity is null»). -->
+            <loader id="usersDl">
                 <!-- JPQL сортирует активных пользователей по отображаемому имени. -->
                 <query>
                     <![CDATA[select e from sec$User e where e.active = true order by e.name]]>

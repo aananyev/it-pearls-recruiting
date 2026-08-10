@@ -41,8 +41,8 @@ order by e.countryRuName]]></query>
                 </vbox>
                 <!-- Вертикальная label-навигация по разделам формы (фокус, без изменения данных). -->
                 <vbox id="regionNavigation" stylename="label-navigation" width="100%" spacing="false">
-                    <!-- Заголовок навигационного блока. -->
-                    <label value="Разделы" stylename="label-nav-title" width="100%"/>
+                    <!-- Заголовок навигационного блока: полоса-заголовок с двумя inset-линиями (контракт §4.1). -->
+                    <label value="Разделы" stylename="label-nav-title geolocation-navigation-title" width="100%"/>
                     <!-- Пункт «Основные данные» — активен по умолчанию, фокусирует первое поле. -->
                     <button id="regionMainNav" caption="Основные данные" stylename="borderless label-nav-item label-nav-item-active" width="100%" invoke="focusMainSection"/>
                     <!-- Пункт «Города» — фокусирует таблицу городов региона. -->
@@ -68,7 +68,7 @@ order by e.countryRuName]]></query>
                     <!-- Поток карточек рабочей области. -->
                     <vbox id="regionSections" width="100%" spacing="true">
                         <!-- Карточка «Основные данные»: реквизиты региона. -->
-                        <groupBox id="regionMainSection" caption="Основные данные" stylename="edit-card" width="100%" spacing="true">
+                        <groupBox id="regionMainSection" caption="Основные данные" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
                             <!-- Форма региона с полями, привязанными к regionDc. -->
                             <form id="form" dataContainer="regionDc" width="100%">
                                 <column width="100%">
@@ -84,7 +84,7 @@ order by e.countryRuName]]></query>
                             </form>
                         </groupBox>
                         <!-- Карточка «Города региона»: composition-таблица городов. -->
-                        <groupBox id="regionCitiesSection" caption="Города региона" stylename="edit-card" width="100%" spacing="true">
+                        <groupBox id="regionCitiesSection" caption="Города региона" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
                             <!-- Таблица городов региона (composition-коллекция regionRegionOfCitiesDc). -->
                             <table id="regionRegionOfCityTable" dataContainer="regionRegionOfCitiesDc" height="260px" width="100%">
                                 <!-- Колонка «Название города». -->

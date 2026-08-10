@@ -190,8 +190,8 @@ public class OpenPositionEditLayoutContractTest {
                 nameGroup < cardsRow);
 
         // Одна строка: ID + Грейд + Вакансия + кнопка «Генерировать». ID, Грейд и кнопка —
-        // фиксированная одинаковая ширина 110px (как поле ID), Вакансия растягивается
-        // на свободное место через box.expandRatio; expand на hbox не используется.
+        // фиксированной ширины (ID и «Генерировать» — 110px, Грейд — 143px = 110 + 30%),
+        // Вакансия растягивается на свободное место через box.expandRatio; expand на hbox не используется.
         String row = section(descriptor,
                 "id=\"openPositionNameRow\"", "</hbox>");
         assertTrue("Строка наименования не должна полагаться на expand (растяжение через expandRatio)",
@@ -211,8 +211,8 @@ public class OpenPositionEditLayoutContractTest {
         assertTrue("ID не должен иметь box.expandRatio (фиксированная ширина)",
                 !idTag.contains("box.expandRatio"));
         String gradeTag = startTag(descriptor, "gradeLookupPickerField");
-        assertTrue("Грейд должен иметь ту же ширину 110px, что и ID",
-                gradeTag.contains("width=\"110px\""));
+        assertTrue("Грейд должен иметь ширину 143px (110px + 30%)",
+                gradeTag.contains("width=\"143px\""));
         assertTrue("Грейд не должен иметь box.expandRatio (фиксированная ширина)",
                 !gradeTag.contains("box.expandRatio"));
         assertTrue("Грейд должен сохранить optionsContainer", gradeTag.contains("optionsContainer=\"gradeDc\""));
