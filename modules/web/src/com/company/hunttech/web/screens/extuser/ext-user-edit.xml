@@ -56,12 +56,20 @@
                     <!-- Пункт открывает вкладку «Персональный ИИ» правой части экрана. -->
                     <button id="aiTabNav" caption="msg://msgAiSettings" width="100%" stylename="borderless label-nav-item"/>
                 </vbox>
-                <!-- Сводка располагается после navigation и показывает существующий статус учётной записи. -->
+                <!-- Сводка «Профиль» располагается после navigation и показывает статус учётной записи и основную информацию из вкладки «Общие настройки» (Email, Должность). -->
                 <vbox id="profileSummaryBox" width="100%" spacing="false" stylename="edit-sidebar-summary">
-                    <!-- Статус отражает active пользователя. -->
-                    <label id="statusLabel" align="MIDDLE_CENTER" width="100%"/>
-                    <!-- Сохраняется существующая подпись профильного контекста без добавления нового действия. -->
-                    <label value="msg://msgProfile" width="100%" stylename="edit-sidebar-hint"/>
+                    <!-- Заголовок «Профиль» — полоса-заголовок контракта §4.1, 1:1 с заголовком «Разделы»: две inset-линии, жёлтый текст 15px/700; растянут на ширину карточки отрицательными margin. -->
+                    <label value="msg://msgProfile" width="100%" stylename="label-nav-title ext-user-editor-profile-title"/>
+                    <!-- Статус отражает active пользователя; значение заполняет ExtUserEditor (msgStatusActive/msgStatusBlocked). -->
+                    <label id="statusLabel" width="100%" stylename="ext-user-editor-profile-status"/>
+                    <!-- Подпись контактных данных пользователя (карточка «Контакты» вкладки «Общие настройки»). -->
+                    <label value="msg://msgEmail" width="100%" stylename="ext-user-editor-profile-caption"/>
+                    <!-- Email пользователя из userDs.email; заполняется ExtUserEditor в refreshProfileLabels. -->
+                    <label id="emailLabel" width="100%" stylename="ext-user-editor-profile-value"/>
+                    <!-- Подпись должности пользователя (карточка «Региональные настройки» вкладки «Общие настройки»). -->
+                    <label value="msg://msgPosition" width="100%" stylename="ext-user-editor-profile-caption"/>
+                    <!-- Должность пользователя из userDs.position; заполняется ExtUserEditor в refreshProfileLabels. -->
+                    <label id="positionLabel" width="100%" stylename="ext-user-editor-profile-value"/>
                 </vbox>
                 <!-- Spacer удерживает navigation и summary в первом viewport; vbox на 100% высоты принимает на себя переполнение sidebar (эталон OpenPositionEdit) и не меняет размеры workspace. -->
                 <vbox id="profilePanelSpacer" width="100%" height="100%" stylename="edit-sidebar-spacer"/>

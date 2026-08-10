@@ -7,9 +7,11 @@ import com.haulmont.cuba.gui.app.security.user.edit.UserEditor;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.FieldGroup;
+import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.TabSheet;
 import com.haulmont.cuba.gui.components.Window;
 import com.haulmont.cuba.security.entity.User;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -38,6 +40,17 @@ public class ExtUserEditor extends UserEditor {
     private Button emailTabNav;
     @Inject
     private Button aiTabNav;
+
+    @Inject
+    private Label<String> fioLabel;
+    @Inject
+    private Label<String> loginLabel;
+    @Inject
+    private Label<String> statusLabel;
+    @Inject
+    private Label<String> emailLabel;
+    @Inject
+    private Label<String> positionLabel;
 
     @Inject
     private FieldGroup contactsFieldGroup;
@@ -82,6 +95,11 @@ public class ExtUserEditor extends UserEditor {
         settingsTabSheet.addSelectedTabChangeListener(
                 event -> updateActiveNavigation(event.getSelectedTab()));
         updateActiveNavigation(settingsTabSheet.getSelectedTab());
+
+        // Sidebar-лейблы профиля (ФИО, login, статус, Email, должность) заполняются из userDs;
+        // при смене item (открытие другого пользователя, переcommit) значения обновляются повторно.
+        userDs.addItemChangeListener(e -> refreshProfileLabels());
+        refreshProfileLabels();
     }
 
     /**
@@ -154,5 +172,55 @@ public class ExtUserEditor extends UserEditor {
 
     private List<Button> navigationButtons() {
         return Arrays.asList(generalTabNav, emailTabNav, aiTabNav);
+    }
+
+    /**
+     * Заполняет sidebar-лейблы профиля из текущего пользователя userDs.
+     * Presentation-only: значения копируются в Label, entity не модифицируется.
+     */
+    private void refreshProfileLabels() {
+        User user = getItem();
+        if (user == null) {
+            fioLabel.setValue("");
+            loginLabel.setValue("");
+            statusLabel.setValue("");
+            emailLabel.setValue("");
+            positionLabel.setValue("");
+            return;
+        }
+        fioLabel.setValue(buildFio(user));
+        loginLabel.setValue(user.getLogin() != null ? user.getLogin() : "");
+        boolean active = Boolean.TRUE.equals(user.getActive());
+        statusLabel.setValue(active ? getMessage("msgStatusActive") : getMessage("msgStatusBlocked"));
+        emailLabel.setValue(user.getEmail() != null ? user.getEmail() : "");
+        positionLabel.setValue(user.getPosition() != null ? user.getPosition() : "");
+    }
+
+    /**
+     * Собирает человекочитаемое ФИО: name, либо lastName + firstName + middleName,
+     * либо login как запасной идентификатор (порядок как у legacy ExtUserEdit).
+     */
+    private String buildFio(User user) {
+        String name = StringUtils.trimToEmpty(user.getName());
+        if (StringUtils.isNotBlank(name)) {
+            return name;
+        }
+        StringBuilder sb = new StringBuilder();
+        if (StringUtils.isNotBlank(user.getLastName())) {
+            sb.append(user.getLastName());
+        }
+        if (StringUtils.isNotBlank(user.getFirstName())) {
+            if (sb.length() > 0) {
+                sb.append(' ');
+            }
+            sb.append(user.getFirstName());
+        }
+        if (StringUtils.isNotBlank(user.getMiddleName())) {
+            if (sb.length() > 0) {
+                sb.append(' ');
+            }
+            sb.append(user.getMiddleName());
+        }
+        return sb.length() > 0 ? sb.toString() : user.getLogin();
     }
 }

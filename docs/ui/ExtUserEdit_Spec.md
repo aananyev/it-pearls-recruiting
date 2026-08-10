@@ -8,6 +8,7 @@
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-10 | Блок «Профиль» sidebar получил заголовок-полосу 1:1 с заголовком «Разделы» (контракт §4.1: две inset-линии, `#ffb11b` 15px/700, min-height 36px; растянут на ширину карточки `margin: -10px -10px 12px`) и основную информацию из вкладки «Общие настройки»: статус (`msgStatusActive`/`msgStatusBlocked`), Email (`userDs.email`), должность (`userDs.position`) — подписи `ext-user-editor-profile-caption`/значения `-value` по эталону sidebar-caption/value. `ExtUserEditor` заполняет sidebar-лейблы (ФИО, login, статус, Email, должность) в `refreshProfileLabels()` из `userDs` (protected из `UserEditor`) при `postInit` и по `ItemChangeListener`; presentation-only, entity/datasource не мутируются. Добавлены `msgEmail`/`msgPosition` в messages (ru/en), стили `ext-user-editor-profile-*` во все 7 тем (sha256 идентичны). Селекторы — с удвоенным классом `edit-sidebar-summary .v-label.ext-user-editor-profile-*` (специфичность `(0,5,0)` против общего `.edit-sidebar-summary .v-label` `(0,4,0)` — иначе его `color`/`white-space` перекрывают полосу; проверено CDP). Контракт-тест расширен до 14 тестов (`profileBlockShowsMainUserInfoFromGeneralSettings`), `assertFalse(setValue)` заменён на проверку «setValue только presentation-лейблам». CDP-верификация (2026-08-10): полоса «Профиль» computed-стили 1:1 с «Разделы» (`#ffb11b`, 15px/700, min-height 36px, две inset-линии), лейблы заполнены (ФИО/login/статус/Email). |
 | 2026-08-10 | Sidebar приведён к эталону OpenPositionEdit: растянут на всю высоту окна с вертикальной прокруткой. Root layout получил `width/height="100%"` и `spacing="false"`; у `profilePanel` убран `margin="true"`; `profilePanelSpacer` заменён с label на vbox `100%×100%`; footer `bottomActionsBox` перенесён из корневого layout внутрь `userWorkspace` (как в OpenPositionEdit). Причина: раньше footer + spacing корня съедали высоту `mainSplit`, sidebar обрывался на 678px вместо полных 747px (CDP-замер до/после). После фикса: sidebar top=56/bottom=803 — вся высота окна, `overflowY: auto`, `scrollHeight > clientHeight` (скролл активен). Контракт-тест `ExtUserEditSharedStyleContractTest` 13/13 PASS (footer-структура проверяется по файлу и не зависит от вложенности). |
 | 2026-08-10 | Вкладка «Общие настройки» получила вертикальный скроллинг: `generalScrollBox` переведён с AUTO-высоты на `height="100%"` + `expand="generalScrollBox"` (единая прокрутка всей вкладки, паттерн email-вкладки); `rolesSubstSplit` перенесён внутрь scrollBox с фиксированной высотой `300px`. Причина: CDP-замеры на 1366×768/1280×720/1024×640 показали обрезку нижних полей ввода (`overflow: hidden` вкладки) и схлопывание split до 0px (scrollBox без height забирал весь expand). После фикса на всех разрешениях `overflowY: auto`, полоса прокрутки активна, split 300px виден и достижим прокруткой; на fullscreen 1440×812 все 16 полей ввода видны без прокрутки. Контракт-тест расширен до 13 тестов (`generalSettingsTabScrollsVertically`). |
 | 2026-08-10 | Заголовки вкладок `settingsTabSheet` приведены 1:1 к эталону IteractionListEdit копированием финального слоя `iteraction-list-reference-finish.scss` (`.edit-tabs`): таб-полоса 48px, подписи 15px/600 через переменные темы Halo, прозрачный фон табов, выбранная вкладка — нижняя полоса-акцент `#ffb11b` 3px, hover `#ffb11b`, tabcontainer `padding: 0 20px` + `border-bottom: rgba($v-font-color,.16)`, content `calc(100% - 49px)`. Из stylename убран `framed` (вало-framed-рендер табов ломал эталонный стиль). Footer перестроен по структуре эталона (expand-спейсер `bottomActionsSpacer` + группа `bottomActionsGroup` AUTO/MIDDLE_RIGHT): кнопки ОК/Отмена прижаты в правый нижний угол экрана. Проверено CDP: вкладки 48px/15px/600, selected/hover `#ffb11b` + полоса 3px; footer right=29/bottom=20. Контракт-тест расширен до 12 тестов (tabsheet-эталон, footer-геометрия). |
@@ -30,14 +31,15 @@
 - **Контроллер:** `ExtUserEditor extends UserEditor`.
 - **Дочерние окна:** `sec$User.changePassword`, `hunttech_UserAiConfiguration.edit`.
 - **Вкладки:** общие настройки, email, персональный ИИ.
-- **Sidebar:** visual → identity → navigation (вкладки правой части) → summary.
+- **Sidebar:** visual → identity → navigation (вкладки правой части) → summary «Профиль» (полоса-заголовок §4.1 + статус, Email, должность).
 - **Navigation:** единый набор из трёх пунктов, повторяющих вкладки правого tabsheet; клик по пункту переключает соответствующую вкладку.
 
 ## Behavior Summary
 
 | Действие | Условие | Результат |
 |---|---|---|
-| открыть сохранённого пользователя | `userDs` valid | стандартный `UserEditor` загружает пользователя, роли и замещения; отображается общий layout |
+| открыть сохранённого пользователя | `userDs` valid | стандартный `UserEditor` загружает пользователя, роли и замещения; отображается общий layout; sidebar заполняется: ФИО, login, статус, Email, должность |
+| сменить item пользователя | `userDs` item change | sidebar-лейблы обновляются (`refreshProfileLabels`); данные не меняются |
 | открыть нового пользователя | `PersistenceHelper.isNew` | кнопка отдельной смены пароля скрыта; используются штатные `passw`/`confirmPassw` |
 | сменить вкладку (клик по tab правой части) | выбран новый tab | активным становится пункт навигации текущей вкладки; данные не меняются |
 | нажать navigation-пункт | пункт соответствует вкладке | `setSelectedTab` переключает вкладку правой части; `label-nav-item-active` переносится на выбранный пункт; entity/modified-state не меняются |
@@ -80,7 +82,7 @@ sec$User.browse
 
 1. `UserEditor.init()` создаёт штатные actions и custom controls.
 2. `UserEditor.postInit()` применяет платформенные ограничения.
-3. `ExtUserEditor.postInit()` скрывает password-dialog для новой сущности, назначает созданным полям `edit-form-control` и синхронизирует navigation активной вкладки.
+3. `ExtUserEditor.postInit()` скрывает password-dialog для новой сущности, назначает созданным полям `edit-form-control`, синхронизирует navigation активной вкладки и заполняет sidebar-лейблы профиля (`refreshProfileLabels`) из `userDs` (protected поле `UserEditor`); при смене item обновление повторяется по `userDs.addItemChangeListener`.
 4. Commit/cancel полностью остаются в базовом редакторе.
 
 ### Presentation-навигация
@@ -115,7 +117,7 @@ layout.ext-user-editor (width/height 100%, spacing=false)
     │   ├── dropZone.edit-sidebar-visual (OvaFallbackImage 180×180 + upload)
     │   ├── profileLabelsVBox.edit-sidebar-identity
     │   ├── tabNavigation.label-navigation (заголовок — полоса-заголовок §4.1; 3 пункта = вкладки)
-    │   ├── profileSummaryBox.edit-sidebar-summary
+    │   ├── profileSummaryBox.edit-sidebar-summary («Профиль»: полоса-заголовок §4.1 + статус, Email, должность)
     │   └── profilePanelSpacer.edit-sidebar-spacer (vbox 100%×100%)
     └── userWorkspace.edit-workspace
         ├── userToolbar.edit-toolbar
@@ -133,7 +135,7 @@ layout.ext-user-editor (width/height 100%, spacing=false)
 
 | Роль | Stylename |
 |---|---|
-| root/sidebar | `edit-screen-layout`, `edit-sidebar`, `edit-sidebar-visual`, `edit-sidebar-identity`, `edit-sidebar-title`, `edit-sidebar-subtitle`, `edit-sidebar-summary`, `edit-sidebar-hint`, `edit-sidebar-spacer` |
+| root/sidebar | `edit-screen-layout`, `edit-sidebar`, `edit-sidebar-visual`, `edit-sidebar-identity`, `edit-sidebar-title`, `edit-sidebar-subtitle`, `edit-sidebar-summary`, `ext-user-editor-profile-title`/`-status`/`-caption`/`-value`, `edit-sidebar-spacer` |
 | navigation | `label-navigation`, `label-nav-title` (+ `ext-user-editor-navigation-title` — полоса §4.1), `label-nav-item`, `label-nav-item-active` |
 | workspace | `edit-workspace`, `edit-toolbar`, `edit-toolbar-title`, `edit-toolbar-description`, `edit-toolbar-actions`, `edit-tabs` |
 | buttons | `ext-user-editor-primary-action` (акцентная), `c-primary-action` (ОК footer-фрагмента), вторичная — `:not(.c-primary-action)` в footer; единая геометрия `.v-button` (38px, без тени, hover/focus) |
@@ -151,7 +153,7 @@ layout.ext-user-editor (width/height 100%, spacing=false)
 
 ### Локальный SCSS
 
-`ext-user-editor.scss` синхронно присутствует в семи темах и подключается после `edit-screen-shared-styles`. Он ограничен `.ext-user-editor` и задаёт уникальную тёмную sidebar с палитрой IteractionListEdit (градиент `#172638→#132130→#0f1b28`), полосу-заголовок «Разделы» (две inset-линии, `#ffb11b` 15px/700, min-height 36px), hover пунктов по эталону (белый текст на `rgba(255,255,255,.08)`), активный пункт `#ffb11b` на `rgba(255,177,27,.12)` с `border-left-color: #ffb11b`, круглый аватар `ext-user-editor-avatar` (180×180, `border-radius: 50%`, fallback `object-view-box: inset(8%)`), контрактные подписи полей 13px/600, защиту внутренних Vaadin-контейнеров от переполнения и заголовки вкладок `.edit-tabs` — точную копию финального слоя эталона `iteraction-list-reference-finish.scss` (полоса 48px, подписи 15px/600 через `$v-*`-переменные, selected/hover `#ffb11b` + нижняя полоса 3px, tabcontainer `padding: 0 20px`, content `calc(100% - 49px)`). Общие размеры cards/controls/toolbar/footer не копируются.
+`ext-user-editor.scss` синхронно присутствует в семи темах и подключается после `edit-screen-shared-styles`. Он ограничен `.ext-user-editor` и задаёт уникальную тёмную sidebar с палитрой IteractionListEdit (градиент `#172638→#132130→#0f1b28`), полосы-заголовки «Разделы» и «Профиль» (контракт §4.1: две inset-линии, `#ffb11b` 15px/700, min-height 36px; у «Профиль» растяжение на ширину карточки `margin: -10px -10px 12px`), статус/подписи/значения блока «Профиль» (`ext-user-editor-profile-status` 13px/600, `-caption` 10.5px/700 uppercase `rgba(248,250,252,.62)`, `-value` 13px/500 `#f8fafc` — 1:1 с sidebar-caption/value эталона; все селекторы — `edit-sidebar-summary .v-label.ext-user-editor-profile-*`, чтобы специфичность `(0,5,0)` побеждала общий `.edit-sidebar-summary .v-label` `(0,4,0)`), hover пунктов по эталону (белый текст на `rgba(255,255,255,.08)`), активный пункт `#ffb11b` на `rgba(255,177,27,.12)` с `border-left-color: #ffb11b`, круглый аватар `ext-user-editor-avatar` (180×180, `border-radius: 50%`, fallback `object-view-box: inset(8%)`), контрактные подписи полей 13px/600, защиту внутренних Vaadin-контейнеров от переполнения и заголовки вкладок `.edit-tabs` — точную копию финального слоя эталона `iteraction-list-reference-finish.scss` (полоса 48px, подписи 15px/600 через `$v-*`-переменные, selected/hover `#ffb11b` + нижняя полоса 3px, tabcontainer `padding: 0 20px`, content `calc(100% - 49px)`). Общие размеры cards/controls/toolbar/footer не копируются.
 
 ### Обоснованные отклонения
 
@@ -163,7 +165,7 @@ layout.ext-user-editor (width/height 100%, spacing=false)
 
 ## 7. Проверки
 
-`ExtUserEditSharedStyleContractTest` (13 тестов) защищает общий stylename API, XML bindings/actions, navigation по вкладкам (presentation-only), `OvaFallbackImage` и fallback-иконку в семи темах, пять accordion-секций, XML comments, одинаковый локальный SCSS семи тем, копию заголовков вкладок эталона IteractionListEdit (`.edit-tabs`, без `framed`, полоса 48px/15px/600, `#ffb11b`, content `calc(100% - 49px)`), footer-структуру правого нижнего угла (`bottomActionsSpacer` expand + `bottomActionsGroup` AUTO) и вертикальный скроллинг вкладки «Общие настройки» (`generalScrollBox` height=100% + expand, `rolesSubstSplit` внутри с высотой 300px). Sidebar-геометрия эталона OpenPositionEdit дополнительно проверена CDP (2026-08-10): `.edit-sidebar` занимает всю высоту root (top=56/bottom=803 при 812px окна), `overflowY: auto`, `scrollHeight > clientHeight` — вертикальный скролл активен. Дополнительно сохраняется `ExtUserChangePasswordContractTest`; Hermes выполняет `ScreenViewIntegrityTest 8/8`, SCSS build, clean assemble, local deploy, HTTP 200 и browser smoke.
+`ExtUserEditSharedStyleContractTest` (14 тестов) защищает общий stylename API, XML bindings/actions, navigation по вкладкам (presentation-only), `OvaFallbackImage` и fallback-иконку в семи темах, пять accordion-секций, XML comments, одинаковый локальный SCSS семи тем, копию заголовков вкладок эталона IteractionListEdit (`.edit-tabs`, без `framed`, полоса 48px/15px/600, `#ffb11b`, content `calc(100% - 49px)`), footer-структуру правого нижнего угла (`bottomActionsSpacer` expand + `bottomActionsGroup` AUTO), вертикальный скроллинг вкладки «Общие настройки» (`generalScrollBox` height=100% + expand, `rolesSubstSplit` внутри с высотой 300px) и блок «Профиль» (`profileBlockShowsMainUserInfoFromGeneralSettings`: полоса-заголовок §4.1, лейблы статус/Email/должность, заполнение из `userDs`, messages ru/en). Sidebar-геометрия эталона OpenPositionEdit дополнительно проверена CDP (2026-08-10): `.edit-sidebar` занимает всю высоту root (top=56/bottom=803 при 812px окна), `overflowY: auto`, `scrollHeight > clientHeight` — вертикальный скролл активен. Дополнительно сохраняется `ExtUserChangePasswordContractTest`; Hermes выполняет `ScreenViewIntegrityTest 8/8`, SCSS build, clean assemble, local deploy, HTTP 200 и browser smoke.
 
 ---
 

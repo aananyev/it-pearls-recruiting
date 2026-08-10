@@ -41,7 +41,10 @@ public class ExtUserEditSharedStyleContractTest {
                 "edit-sidebar-title",
                 "edit-sidebar-subtitle",
                 "edit-sidebar-summary",
-                "edit-sidebar-hint",
+                "ext-user-editor-profile-title",
+                "ext-user-editor-profile-status",
+                "ext-user-editor-profile-caption",
+                "ext-user-editor-profile-value",
                 "edit-sidebar-spacer",
                 "label-navigation",
                 "label-nav-title",
@@ -83,6 +86,12 @@ public class ExtUserEditSharedStyleContractTest {
         int titleCount = countOccurrences(descriptor,
                 "stylename=\"label-nav-title ext-user-editor-navigation-title\"");
         assertEquals(1, titleCount);
+
+        // Полоса-заголовок «Профиль» — тот же паттерн (label-nav-title + локальный класс секции),
+        // 1:1 с заголовком «Разделы» (контракт §4.1).
+        int profileTitleCount = countOccurrences(descriptor,
+                "stylename=\"label-nav-title ext-user-editor-profile-title\"");
+        assertEquals(1, profileTitleCount);
 
         // groupBox-карточки обязаны рендериться как v-panel (showAsPanel) — контракт §5.2.
         assertCardIsPanel(descriptor, "contactsCard");
@@ -136,6 +145,50 @@ public class ExtUserEditSharedStyleContractTest {
     }
 
     @Test
+    public void profileBlockShowsMainUserInfoFromGeneralSettings() throws IOException {
+        String descriptor = readProjectFile(DESCRIPTOR);
+        String controller = readProjectFile(CONTROLLER);
+        String scss = readProjectFile(
+                "modules/web/themes/hover/com.company.hunttech/ext-user-editor.scss");
+        String messagesRu = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/extuser/messages_ru.properties");
+        String messagesEn = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/extuser/messages.properties");
+
+        // Лейблы основной информации пользователя присутствуют в блоке «Профиль».
+        assertTrue(descriptor.contains("id=\"statusLabel\""));
+        assertTrue(descriptor.contains("id=\"emailLabel\""));
+        assertTrue(descriptor.contains("id=\"positionLabel\""));
+        assertTrue(descriptor.contains("msg://msgEmail"));
+        assertTrue(descriptor.contains("msg://msgPosition"));
+
+        // Полоса-заголовок «Профиль» — та же секция §4.1, что у «Разделы» (две inset-линии).
+        assertTrue(scss.contains(".ext-user-editor-profile-title"));
+        assertTrue(scss.contains("min-height: 36px !important"));
+        assertTrue(scss.contains("color: #ffb11b !important"));
+        assertTrue(scss.contains("font-size: 15px !important"));
+        assertTrue(scss.contains("rgba(255, 255, 255, 1) 0 1px 0 0 inset"));
+
+        // Стили статуса, подписей и значений блока «Профиль».
+        assertTrue(scss.contains(".ext-user-editor-profile-status"));
+        assertTrue(scss.contains(".ext-user-editor-profile-caption"));
+        assertTrue(scss.contains(".ext-user-editor-profile-value"));
+
+        // Контроллер заполняет sidebar из userDs (presentation-only, см. refreshProfileLabels).
+        assertTrue(controller.contains("userDs.addItemChangeListener"));
+        assertTrue(controller.contains("refreshProfileLabels"));
+        assertTrue(controller.contains("fioLabel.setValue(buildFio(user))"));
+        assertTrue(controller.contains("emailLabel.setValue(user.getEmail()"));
+        assertTrue(controller.contains("positionLabel.setValue(user.getPosition()"));
+
+        // Подписи совпадают с капшенами полей вкладки «Общие настройки» (User.email/User.position).
+        assertTrue(messagesRu.contains("msgEmail=Email"));
+        assertTrue(messagesRu.contains("msgPosition=Должность"));
+        assertTrue(messagesEn.contains("msgEmail=Email"));
+        assertTrue(messagesEn.contains("msgPosition=Position"));
+    }
+
+    @Test
     public void navigationSwitchesTabsAndKeepsDataUntouched() throws IOException {
         String controller = readProjectFile(CONTROLLER);
 
@@ -146,6 +199,13 @@ public class ExtUserEditSharedStyleContractTest {
         assertTrue(controller.contains("addStyleName(ACTIVE_NAV_STYLE)"));
         assertTrue(controller.contains("fieldComponent.addStyleName(\"edit-form-control\")"));
 
+        // Sidebar-заполнение — только presentation-лейблы; entity и datasource не мутируются.
+        assertTrue(controller.contains("statusLabel.setValue("));
+        assertTrue(controller.contains("emailLabel.setValue("));
+        assertTrue(controller.contains("positionLabel.setValue("));
+        assertFalse(controller.contains("userDs.setItem("));
+        assertFalse(controller.contains("getItem().set"));
+
         assertFalse(controller.contains("section.setExpanded(true)"));
         assertFalse(controller.contains("target.focus()"));
         assertFalse(controller.contains("dataManager"));
@@ -154,7 +214,6 @@ public class ExtUserEditSharedStyleContractTest {
         assertFalse(controller.contains("dataManager.commit"));
         assertFalse(controller.contains("rolesDs"));
         assertFalse(controller.contains("substitutionsDs"));
-        assertFalse(controller.contains("setValue("));
     }
 
     @Test

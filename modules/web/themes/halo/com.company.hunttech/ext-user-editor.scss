@@ -33,6 +33,78 @@
       opacity: 1 !important;
     }
 
+    // Заголовок «Профиль» блока edit-sidebar-summary: полоса-заголовок 1:1
+    // с «Разделы» (контракт §4.1, две inset-линии). Растянут на ширину карточки
+    // отрицательными margin = padding карточки (10px), как заголовки карточек эталона.
+    // Специфичность выше, чем у общего `.edit-sidebar-summary .v-label` (тоже 4 класса
+    // в compiled CSS) — иначе его color/white-space перекрывают полосу.
+    .edit-sidebar-summary .v-label.ext-user-editor-profile-title,
+    .edit-sidebar-summary .v-label.v-label-ext-user-editor-profile-title {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-height: 36px !important;
+      height: auto !important;
+      margin: -10px -10px 12px !important;
+      padding: 7px 11px !important;
+      color: #ffb11b !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 21px !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+      background: rgba(255, 255, 255, 0.045) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+      box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
+                  rgba(244, 244, 244, 1) 0 -1px 0 0 inset;
+      white-space: normal !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    // Статус учётной записи в блоке «Профиль»: акцентное значение 13px/600
+    // (специфичность выше `.edit-sidebar-summary .v-label`).
+    .edit-sidebar-summary .v-label.ext-user-editor-profile-status,
+    .edit-sidebar-summary .v-label.v-label-ext-user-editor-profile-status {
+      display: block;
+      width: 100% !important;
+      color: #f8fafc !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
+      white-space: normal !important;
+    }
+
+    // Подписи полей профиля (Email, Должность) — как sidebar-caption эталона
+    // IteractionListEdit: 10.5px/700 uppercase, полупрозрачный белый.
+    .edit-sidebar-summary .v-label.ext-user-editor-profile-caption,
+    .edit-sidebar-summary .v-label.v-label-ext-user-editor-profile-caption {
+      display: block;
+      width: 100% !important;
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
+      line-height: 15px !important;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    // Значения полей профиля — как sidebar-value эталона: 13px/500 #f8fafc.
+    .edit-sidebar-summary .v-label.ext-user-editor-profile-value,
+    .edit-sidebar-summary .v-label.v-label-ext-user-editor-profile-value {
+      display: block;
+      width: 100% !important;
+      min-width: 0;
+      color: #f8fafc !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      line-height: 18px !important;
+      white-space: normal !important;
+      overflow-wrap: break-word;
+      word-break: normal;
+    }
+
     // Подписи полей FieldGroup — контрактные 13px/600 (эталон IteractionListEdit,
     // mix($v-font-color, $v-panel-background-color, 72%)), scoped на форму.
     .v-caption .v-captiontext {
