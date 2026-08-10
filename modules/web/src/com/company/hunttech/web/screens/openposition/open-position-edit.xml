@@ -9,7 +9,16 @@
         <!-- Редактируемый экземпляр позиции; view openPosition-edit-view без LOB — тяжёлые тексты догружаются lazy по вкладкам. -->
         <instance id="openPositionDc"
                   class="com.company.hunttech.entity.OpenPosition">
-            <view extends="openPosition-edit-view"/>
+            <!-- Локальное расширение view экрана: коллекции laborAgreement/skillsList декларируются
+                 здесь, а не в общем openPosition-edit-view (тот используется как nested view
+                 в job-candidate-edit.xml — коллекции там вызвали бы перераздувание графа).
+                 Атрибуты обязаны быть в fetch group контейнера: syncLaborAgreementToEntity/
+                 syncSkillsListToEntity вызывают woven-сеттеры, которые читают getter для
+                 change detection и падают на detached-сущности без view (IllegalStateException). -->
+            <view extends="openPosition-edit-view">
+                <property name="laborAgreement" view="laborAgreement-openPosition-tab-view"/>
+                <property name="skillsList" view="skillTree-openPosition-tab-view"/>
+            </view>
             <!-- Загрузчик позиции по id из browse/lookup. -->
             <loader id="openPositionDl"/>
         </instance>

@@ -20,7 +20,13 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -39,8 +45,13 @@ import static org.junit.Assert.fail;
  * 3) LOB-поля (comment, commentEn, exercise, memoForInterview, templateLetter)
  *    отсутствуют в edit-view — контроллер догружает их через {@code reload(ViewBuilder)}
  *    (loadMainTabLobs/loadExerciseLob/loadMemoForInterviewLob/loadTemplateLetterLob);
- * 4) коллекции laborAgreement/skillsList догружаются reload + dataContext.merge
- *    (ensureLaborAgreementLoadedOnEntity/ensureSkillsListLoadedOnEntity);
+ * 4) коллекции laborAgreement/skillsList НЕ входят в общий openPosition-edit-view
+ *    (он используется как nested view в job-candidate-edit.xml); они декларированы
+ *    inline-свойствами в view контейнера openPositionDc XML-дескрипторов
+ *    (open-position-edit.xml / open-position-edit-preview.xml), поэтому
+ *    syncLaborAgreementToEntity/syncSkillsListToEntity вызывают сеттеры безопасно —
+ *    woven-сеттер коллекции читает getter для change detection и падает
+ *    IllegalStateException, если атрибут отсутствует во fetch group (регрессия 2026-08-11);
  * 5) commit detached-объекта после изменения полей.
  *
  * Редизайн 2026-08-05 перемещал компоненты между визуальными контейнерами — bindings
@@ -195,7 +206,7 @@ public class OpenPositionEditDetachedObjectTest {
     }
 
     @Test
-    public void laborAgreementAndSkillsReloadMergePatternWorks() {
+    public void collectionsDeclaredInlineInScreenViewsNotInSharedEditView() throws Exception {
         OpenPosition position = createPositionWithReferences();
 
         OpenPosition detached = dataManager.load(OpenPosition.class)
@@ -203,29 +214,51 @@ public class OpenPositionEditDetachedObjectTest {
                 .view("openPosition-edit-view")
                 .one();
 
-        // Коллекции laborAgreement/skillsList не входят в edit-view (статическая
-        // проверка состава view; контроллер догружает их reload + merge).
+        // Коллекции laborAgreement/skillsList НЕ входят в общий openPosition-edit-view:
+        // он используется как nested view в job-candidate-edit.xml (iteractionList.vacancy,
+        // candidateCv.toVacancy) — коллекции там раздули бы граф. Декларация — только
+        // inline в view контейнера экранов OpenPositionEdit/Preview.
         View editView = AppBeans.get(ViewRepository.class)
                 .getView(OpenPosition.class, "openPosition-edit-view");
-        assertFalse("laborAgreement не должен входить в edit-view",
+        assertFalse("laborAgreement не должен входить в общий edit-view (nested в JobCandidateEdit)",
                 editView.containsProperty("laborAgreement"));
-        assertFalse("skillsList не должен входить в edit-view",
+        assertFalse("skillsList не должен входить в общий edit-view (nested в JobCandidateEdit)",
                 editView.containsProperty("skillsList"));
 
-        // Паттерн ensureLaborAgreementLoadedOnEntity(): reload + merge (в тесте без
-        // DataContext — проверяем, что reload с tab-view выполняется без ошибок).
+        // Контракт экранов: inline view контейнера openPositionDc декларирует обе коллекции,
+        // иначе syncLaborAgreementToEntity/syncSkillsListToEntity падают IllegalStateException
+        // (woven-сеттер читает getter для change detection на detached-сущности).
+        String editXml = readProjectFile("modules/web/src/com/company/hunttech/web/screens/openposition/open-position-edit.xml");
+        String previewXml = readProjectFile("modules/web/src/com/company/hunttech/web/screens/openposition/open-position-edit-preview.xml");
+        for (String xml : new String[]{editXml, previewXml}) {
+            int viewStart = xml.indexOf("<view extends=\"openPosition-edit-view\">");
+            assertTrue("XML экрана обязан иметь inline view, расширяющий openPosition-edit-view",
+                    viewStart >= 0);
+            String inlineView = xml.substring(viewStart,
+                    xml.indexOf("</view>", viewStart));
+            assertTrue("inline view обязан декларировать laborAgreement",
+                    inlineView.contains("<property name=\"laborAgreement\" view=\"laborAgreement-openPosition-tab-view\"/>"));
+            assertTrue("inline view обязан декларировать skillsList",
+                    inlineView.contains("<property name=\"skillsList\" view=\"skillTree-openPosition-tab-view\"/>"));
+        }
+
+        // Коллекции загружаются reload с tab-view (паттерн lazy-вкладок) — без ошибок.
         OpenPosition withLabor = dataManager.reload(detached, ViewBuilder.of(OpenPosition.class)
                 .add("laborAgreement", "laborAgreement-openPosition-tab-view")
                 .build());
         assertNotNull("laborAgreement обязан быть загружен после reload",
                 withLabor.getLaborAgreement());
 
-        // Паттерн ensureSkillsListLoadedOnEntity().
         OpenPosition withSkills = dataManager.reload(detached, ViewBuilder.of(OpenPosition.class)
                 .add("skillsList", "skillTree-openPosition-tab-view")
                 .build());
         assertNotNull("skillsList обязан быть загружен после reload",
                 withSkills.getSkillsList());
+
+        // Сеттер коллекции на detached-сущности, загруженной с tab-view, не должен бросать
+        // (это ровно операция syncLaborAgreementToEntity/syncSkillsListToEntity перед коммитом).
+        withLabor.setLaborAgreement(new ArrayList<>(withLabor.getLaborAgreement()));
+        withSkills.setSkillsList(new ArrayList<>(withSkills.getSkillsList()));
     }
 
     @Test
@@ -327,5 +360,21 @@ public class OpenPositionEditDetachedObjectTest {
         position.setExercise(exercise);
         position.setMemoForInterview(memo);
         position.setTemplateLetter(letter);
+    }
+
+    private String readProjectFile(String relativePath) throws IOException {
+        return new String(
+                Files.readAllBytes(projectRoot().resolve(relativePath)),
+                StandardCharsets.UTF_8
+        );
+    }
+
+    private Path projectRoot() {
+        Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
+        while (root != null && !Files.exists(root.resolve("build.gradle"))) {
+            root = root.getParent();
+        }
+        assertNotNull("Не найден корень проекта HRM HuntTech", root);
+        return root;
     }
 }

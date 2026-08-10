@@ -1087,31 +1087,21 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         }
     }
 
-    /** Перенос изменений таблицы соглашений на сущность перед коммитом. */
+    /** Перенос изменений таблицы соглашений на сущность перед коммитом.
+     *  Коллекция laborAgreement декларирована в fetch group контейнера openPositionDc
+     *  (inline view в open-position-edit.xml / open-position-edit-preview.xml), поэтому
+     *  прямой сеттер безопасен: woven-сеттер читает getter для change detection, а он
+     *  не бросает только если атрибут присутствует во view контейнера. */
     private void syncLaborAgreementToEntity() {
         if (!laborAgreementLoaded) {
             return;
         }
-        ensureLaborAgreementLoadedOnEntity();
         getEditedEntity().setLaborAgreement(new ArrayList<>(laborAgreementDc.getItems()));
     }
 
-    /** Гарантия наличия коллекции соглашений на сущности. */
-    private void ensureLaborAgreementLoadedOnEntity() {
-        if (!PersistenceHelper.isLoaded(getEditedEntity(), "laborAgreement")) {
-            OpenPosition reloaded = dataManager.reload(getEditedEntity(),
-                    ViewBuilder.of(OpenPosition.class)
-                            .add("laborAgreement", "laborAgreement-openPosition-tab-view")
-                            .build());
-            // Переносим на редактируемую сущность ТОЛЬКО коллекцию соглашений, не сливая весь
-            // объект через dataContext.merge: merge копировал на неё состояние из БД и затирал
-            // несохранённые изменения формы (openClose и др.), а также порождал лишний UPDATE
-            // с одним version при каждом коммите.
-            getEditedEntity().setLaborAgreement(new ArrayList<>(reloaded.getLaborAgreement()));
-        }
-    }
-
-    /** Перенос изменений таблицы навыков на сущность. */
+    /** Перенос изменений таблицы навыков на сущность.
+     *  Коллекция skillsList декларирована в fetch group контейнера openPositionDc
+     *  (inline view в XML экрана) — прямой сеттер безопасен (см. syncLaborAgreementToEntity). */
     private void syncSkillsListToEntity() {
         List<SkillTree> items = null;
         if (skillsLoaded) {
@@ -1122,22 +1112,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (items == null) {
             return;
         }
-        ensureSkillsListLoadedOnEntity();
         getEditedEntity().setSkillsList(items);
-    }
-
-    /** Гарантия наличия коллекции навыков на сущности. */
-    private void ensureSkillsListLoadedOnEntity() {
-        if (!PersistenceHelper.isLoaded(getEditedEntity(), "skillsList")) {
-            OpenPosition reloaded = dataManager.reload(getEditedEntity(),
-                    ViewBuilder.of(OpenPosition.class)
-                            .add("skillsList", "skillTree-openPosition-tab-view")
-                            .build());
-            // Аналогично ensureLaborAgreementLoadedOnEntity: переносим только коллекцию навыков,
-            // без dataContext.merge (merge затирал несохранённые изменения формы и генерировал
-            // лишние SELECT файлов и UPDATE version-only при каждом коммите).
-            getEditedEntity().setSkillsList(new ArrayList<>(reloaded.getSkillsList()));
-        }
     }
 
     @Install(to = "someFilesTable.create", subject = "newEntitySupplier")

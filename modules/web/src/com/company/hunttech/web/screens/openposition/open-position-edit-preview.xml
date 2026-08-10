@@ -11,7 +11,13 @@
     -->
   <data>
     <instance id="openPositionDc" class="com.company.hunttech.entity.OpenPosition">
-      <view extends="openPosition-edit-view"/>
+      <!-- Preview повторяет inline-расширение legacy OpenPositionEdit: коллекции
+           laborAgreement/skillsList обязаны быть в fetch group контейнера (woven-сеттеры
+           sync-методов читают getter для change detection на detached-сущности). -->
+      <view extends="openPosition-edit-view">
+        <property name="laborAgreement" view="laborAgreement-openPosition-tab-view"/>
+        <property name="skillsList" view="skillTree-openPosition-tab-view"/>
+      </view>
       <loader id="openPositionDl"/>
     </instance>
     <collection id="laborAgreementDc" class="com.company.hunttech.entity.LaborAgreement" view="laborAgreement-openPosition-tab-view">
