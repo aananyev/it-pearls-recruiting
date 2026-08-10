@@ -124,6 +124,38 @@
         <property name="positionType" view="position-picker-view"/>
         <property name="createTs"/>
     </view>
+    <!-- Публичный view для REST API (сайт hunttech.ru, внешние приложения, отчёты/проверки).
+         ТОЛЬКО публичные поля; внутренние финансовые/рабочие НЕ включены (контракт 2026-08-07). -->
+    <view entity="hunttech_OpenPosition" name="openPosition-public-view" extends="_minimal">
+        <property name="openClose"/>
+        <property name="vacansyName"/>
+        <property name="vacansyID"/>
+        <property name="shortDescription"/>
+        <property name="comment"/>
+        <property name="salaryMin"/>
+        <property name="salaryMax"/>
+        <property name="remoteWork"/>
+        <property name="remoteComment"/>
+        <property name="workExperience"/>
+        <property name="commandCandidate"/>
+        <property name="closingDate"/>
+        <property name="signDraft"/>
+        <property name="internalProject"/>
+        <property name="grade" view="grade-picker-view"/>
+        <property name="cityPosition" view="city-picker-view"/>
+        <property name="positionType" view="position-picker-view"/>
+        <property name="projectName" view="project-picker-view"/>
+        <property name="skillsList" view="_minimal"/>
+    </view>
+    <!-- Внутренний view для REST-отчётов/проверок (агент ChatGPT): те же публичные поля + комментарии.
+         Финансовые поля (outstaffingCost, percent*, typeCompanyComission, useTaxNDFL, salaryIE,
+         memoForInterview, rawDescription, searchMap, interviewPlan/Checklist, openPositionComments, someFiles)
+         НЕ включены намеренно. -->
+    <view entity="hunttech_OpenPosition" name="openPosition-report-view" extends="openPosition-public-view">
+        <property name="comment"/>
+        <property name="createTs"/>
+        <property name="updateTs"/>
+    </view>
     <view entity="hunttech_Grade" name="grade-browse-view" extends="_minimal">
         <property name="gradeName"/>
     </view>

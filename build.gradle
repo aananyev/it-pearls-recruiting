@@ -41,7 +41,7 @@ configurations.all {
 cuba {
     artifact {
         group = 'com.company.hunttech'
-        version = '0.17'
+        version = '0.18'
         isSnapshot = true
     }
     tomcat {
@@ -60,6 +60,20 @@ dependencies {
     appComponent("com.haulmont.charts:charts-global:$cubaVersion")
     appComponent("com.haulmont.reports:reports-global:$cubaVersion")
     appComponent("com.haulmont.bpm:bpm-global:$cubaVersion")
+    // REST API v2 addon: официальный исходник cuba-platform/restapi, собран локально под 7.3-SNAPSHOT
+    // (артефакт com.haulmont.cuba:cuba-rest:7.3-SNAPSHOT в work-репозитории отсутствует — см. .hermes/plans/2026-08-10_091339-hrm-rest-api-access.md)
+    appComponent("com.haulmont.addon.restapi:restapi-global:$cubaVersion")
+}
+
+repositories {
+    // Локальная копия аддона restapi (собран из cuba-platform/restapi v7.2.7 под 7.3-SNAPSHOT),
+    // чтобы сборка не зависела от ~/.m2 конкретной машины
+    maven { url 'file:libs/cuba-rest-addon' }
+}
+
+repositories {
+    // Локально собранный аддон REST API (com.haulmont.addon.restapi:restapi-*)
+    mavenLocal()
 }
 
 def postgres = 'org.postgresql:postgresql:42.2.9'

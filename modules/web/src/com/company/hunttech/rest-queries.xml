@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<queries xmlns="http://schemas.haulmont.com/cuba/rest-queries.xsd">
+
+    <!-- Сайт hunttech.ru / внешние приложения: открытые для публикации вакансии.
+         ВАЖНО: open_close = true означает ЗАКРЫТА; открытые = false или NULL. -->
+    <query entity="hunttech_OpenPosition" name="openPositionPublic" view="openPosition-public-view">
+        <jpql><![CDATA[
+            select e from hunttech_OpenPosition e
+            where (e.openClose is null or e.openClose = false)
+              and (e.signDraft is null or e.signDraft = false)
+              and e.internalProject = false
+            order by e.vacansyName
+        ]]></jpql>
+    </query>
+
+    <!-- Внутренние отчёты/проверки (агент ChatGPT): все вакансии со статусами, без финансовых полей -->
+    <query entity="hunttech_OpenPosition" name="openPositionAll" view="openPosition-report-view">
+        <jpql><![CDATA[
+            select e from hunttech_OpenPosition e
+            order by e.vacansyName
+        ]]></jpql>
+    </query>
+
+    <!-- Справочники для сайта/приложений/отчётов -->
+    <query entity="hunttech_City" name="cityAll" view="_minimal">
+        <jpql><![CDATA[ select c from hunttech_City c order by c.cityRuName ]]></jpql>
+    </query>
+    <query entity="hunttech_Position" name="positionAll" view="_minimal">
+        <jpql><![CDATA[ select p from hunttech_Position p order by p.positionRuName ]]></jpql>
+    </query>
+    <query entity="hunttech_Project" name="projectAll" view="_minimal">
+        <jpql><![CDATA[ select p from hunttech_Project p order by p.projectName ]]></jpql>
+    </query>
+    <query entity="hunttech_Grade" name="gradeAll" view="_minimal">
+        <jpql><![CDATA[ select g from hunttech_Grade g order by g.gradeName ]]></jpql>
+    </query>
+
+</queries>

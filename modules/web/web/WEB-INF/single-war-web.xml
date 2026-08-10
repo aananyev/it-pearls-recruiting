@@ -33,7 +33,7 @@
         <param-name>appComponents</param-name>
         <param-value>com.haulmont.cuba com.haulmont.fts com.haulmont.reports com.haulmont.addon.globalevents
             com.haulmont.charts com.haulmont.bpm com.haulmont.addon.emailtemplates de.diedavids.cuba.dataimport
-            com.haulmont.addon.dashboard com.haulmont.addon.helium
+            com.haulmont.addon.dashboard com.haulmont.addon.helium com.haulmont.addon.restapi
         </param-value>
     </context-param>
 

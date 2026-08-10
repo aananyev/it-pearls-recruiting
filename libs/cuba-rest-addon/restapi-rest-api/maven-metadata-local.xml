@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.haulmont.addon.restapi</groupId>
+  <artifactId>restapi-rest-api</artifactId>
+  <versioning>
+    <versions>
+      <version>7.3-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20260810052921</lastUpdated>
+  </versioning>
+</metadata>
