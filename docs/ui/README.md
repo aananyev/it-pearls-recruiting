@@ -18,6 +18,7 @@
 | `IteractionListEdit` | [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) · [XML-компоновка](IteractionListEdit_XmlLayout_2026-07-27.md) | Бизнес-логика взаимодействия, контекстная sidebar, аккордеоны и сохранённые CUBA-контракты |
 | `OutstaffingRatesBrowse` | [OutstaffingRatesBrowse_Spec.md](OutstaffingRatesBrowse_Spec.md) | Рейты по аутстафу — список ступеней шкалы (lookup, CRUD) |
 | `OutstaffingRatesEdit` | [OutstaffingRatesEdit_Spec.md](OutstaffingRatesEdit_Spec.md) | Рейты по аутстафу — форма ступени (commit → триггеры маржинальности и аудита) |
+| `PositionEdit` | [PositionEdit_Spec.md](PositionEdit_Spec.md) | Справочник должностей — ru/en-наименования + LOB-описания (inline view контейнера, фикс UNFETCHED 2026-08-11) |
 | Halo Precision Components | [HaloPrecisionComponents_Spec.md](HaloPrecisionComponents_Spec.md) | Точное воспроизведение варианта 1 (светлый голубой) для Halo: namespace `ht-halo-precision-*`, метрики из референсов halo_variant1_*.png |
 | Modern Light Components (вариант 3) | [HRM_HuntTech_Modern_Light_Component_Style_Spec.md](HRM_HuntTech_Modern_Light_Component_Style_Spec.md) | Тёплый светло-серый деловой интерфейс hunttech-modern-light: DataGrid, Table, TreeTable, TextArea, RichTextArea |
 

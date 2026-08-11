@@ -4,9 +4,16 @@
         focusComponent="positionRuNameField"
         messagesPack="com.company.hunttech.web.screens.position" icon="OPENID">
     <data>
+        <!-- Редактируемая должность: общий view position-edit-view (без LOB) расширен inline
+             LOB-полями standartDescription/whoIsThisGuy — форма содержит два richTextArea,
+             привязанных к ним; расширение локально для экрана и не влияет на другие потребители
+             position-edit-view (в т.ч. тесты и picker-цепочки OpenPosition). -->
         <instance id="positionDc"
-                  class="com.company.hunttech.entity.Position"
-                  view="position-edit-view">
+                  class="com.company.hunttech.entity.Position">
+            <view extends="position-edit-view">
+                <property name="standartDescription"/>
+                <property name="whoIsThisGuy"/>
+            </view>
             <loader/>
         </instance>
     </data>

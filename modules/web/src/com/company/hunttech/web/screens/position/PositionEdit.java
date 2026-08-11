@@ -1,8 +1,5 @@
 package com.company.hunttech.web.screens.position;
 
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.PersistenceHelper;
-import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.TextField;
@@ -23,19 +20,9 @@ public class PositionEdit extends StandardEditor<Position> {
     private TextField<String> positionEnNameField;
     @Inject
     private TextField<String> positionRuNameField;
-    @Inject
-    private DataManager dataManager;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if (!PersistenceHelper.isNew(getEditedEntity())) {
-            Position reloaded = dataManager.reload(getEditedEntity(), ViewBuilder.of(Position.class)
-                    .add("standartDescription")
-                    .add("whoIsThisGuy")
-                    .build());
-            getEditedEntity().setStandartDescription(reloaded.getStandartDescription());
-            getEditedEntity().setWhoIsThisGuy(reloaded.getWhoIsThisGuy());
-        }
         setLabel();
     }
 

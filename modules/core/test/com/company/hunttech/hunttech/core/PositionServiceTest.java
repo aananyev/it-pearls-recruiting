@@ -8,7 +8,9 @@ import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
+import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.View;
+import com.haulmont.cuba.core.global.ViewBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -104,6 +106,36 @@ public class PositionServiceTest {
                         .setParameter("id", id))
                 .setView(View.LOCAL));
         assertTrue(active.isEmpty());
+    }
+
+    @Test
+    public void testEditViewLoadsLobFields() {
+        Position position = createTestPosition();
+        UUID id = position.getId();
+
+        // Моделируем загрузку edit-формы: position-edit-view расширен inline LOB-полями
+        // (как в position-edit.xml). До фикса 2026-08-11 reload+setter на detached падал
+        // IllegalStateException: Cannot get unfetched attribute [standartDescription].
+        View view = ViewBuilder.of(Position.class)
+                .add("positionRuName")
+                .add("positionEnName")
+                .add("standartDescription")
+                .add("whoIsThisGuy")
+                .build();
+        Position loaded = dataManager.load(Position.class).id(id).view(view).one();
+
+        assertTrue(PersistenceHelper.isLoaded(loaded, "standartDescription"));
+        assertTrue(PersistenceHelper.isLoaded(loaded, "whoIsThisGuy"));
+
+        // Сеттеры LOB-полей на detached не должны бросать IllegalStateException
+        // (woven-сеттер вызывает getter для change detection — атрибут обязан быть в fetch group).
+        loaded.setStandartDescription("<p>Обновлённое стандартное описание</p>");
+        loaded.setWhoIsThisGuy("<p>Обновлённое описание должности</p>");
+        dataManager.commit(loaded);
+
+        Position reloaded = dataManager.load(Position.class).id(id).view(view).one();
+        assertTrue(reloaded.getStandartDescription().contains("стандартное описание"));
+        assertTrue(reloaded.getWhoIsThisGuy().toLowerCase().contains("обновлённое описание"));
     }
 
     private Position createTestPosition() {
