@@ -114,29 +114,6 @@ order by e.number]]>
                            stylename="iteraction-profile-subtitle edit-sidebar-subtitle"/>
                 </vbox>
 
-                <!-- Служебная карточка следует сразу за профилем и не смешивается с навигацией формы. -->
-                <vbox id="iteractionServiceCard"
-                      width="100%"
-                      height="AUTO"
-                      spacing="false"
-                      stylename="iteraction-service-card edit-sidebar-summary">
-                    <!-- Внутренний контейнер ограничивает служебные поля шириной карточки. -->
-                    <vbox id="iteractionServiceFields"
-                          width="100%"
-                          height="AUTO"
-                          spacing="true"
-                          stylename="iteraction-service-fields">
-                        <!-- Поле номера показывает порядковый номер типа взаимодействия, который задаёт администратор. -->
-                        <textField id="numberField"
-                                   stylename="iteraction-service-field"
-                                   dataContainer="iteractionDc"
-                                   property="number"
-                                   caption="msg://msgNumber"
-                                   width="100%"
-                                   align="MIDDLE_LEFT"/>
-                    </vbox>
-                </vbox>
-
                 <!-- Контейнер label-навигации хранит заголовок и кнопки перехода к восьми вкладкам формы. -->
                 <vbox id="iteractionNavigation"
                       width="100%"
@@ -260,25 +237,36 @@ order by e.number]]>
                                           dataContainer="iteractionDc"
                                           property="mandatoryIteraction"
                                           caption="msg://msgMandatory"/>
-                                <!-- LookupPickerField выбирает корневой элемент дерева взаимодействий. -->
-                                <lookupPickerField id="iteractionTreeField"
-                                                   dataContainer="iteractionDc"
-                                                   optionsContainer="iteractionsTreeDc"
-                                                   property="iteractionTree"
-                                                   caption="msg://msgIterationTree"
-                                                   width="100%"
-                                                   stylename="edit-form-control">
-                                    <!-- Стандартные picker-actions выбирают элемент из списка и открывают его editor. -->
-                                    <!-- Стандартные picker-actions выбирают и открывают корневой тип взаимодействия. -->
-                                    <actions>
-                                        <!-- Picker-lookup открывает выбор корневого типа. -->
-                                        <action id="lookup" type="picker_lookup"/>
-                                        <!-- Picker-open открывает выбранный корневой тип. -->
-                                        <action id="open" type="picker_open"/>
-                                        <!-- Picker-clear сбрасывает выбранный корневой тип. -->
-                                        <action id="clear" type="picker_clear"/>
-                                    </actions>
-                                </lookupPickerField>
+                                <!-- HBox размещает номер типа и корневой элемент дерева на одной строке (номер вернулся из sidebar во вкладку «Тип взаимодействия»). -->
+                                <hbox spacing="true" width="100%">
+                                    <!-- TextField хранит порядковый номер типа взаимодействия, задаваемый администратором. -->
+                                    <textField id="numberField"
+                                               dataContainer="iteractionDc"
+                                               property="number"
+                                               caption="msg://msgNumber"
+                                               width="100%"
+                                               box.expandRatio="1"
+                                               stylename="edit-form-control"/>
+                                    <!-- LookupPickerField выбирает корневой элемент дерева взаимодействий. -->
+                                    <lookupPickerField id="iteractionTreeField"
+                                                       dataContainer="iteractionDc"
+                                                       optionsContainer="iteractionsTreeDc"
+                                                       property="iteractionTree"
+                                                       caption="msg://msgIterationTree"
+                                                       width="100%"
+                                                       box.expandRatio="2"
+                                                       stylename="edit-form-control">
+                                        <!-- Стандартные picker-actions выбирают и открывают корневой тип взаимодействия. -->
+                                        <actions>
+                                            <!-- Picker-lookup открывает выбор корневого типа. -->
+                                            <action id="lookup" type="picker_lookup"/>
+                                            <!-- Picker-open открывает выбранный корневой тип. -->
+                                            <action id="open" type="picker_open"/>
+                                            <!-- Picker-clear сбрасывает выбранный корневой тип. -->
+                                            <action id="clear" type="picker_clear"/>
+                                        </actions>
+                                    </lookupPickerField>
+                                </hbox>
                                 <!-- TextField хранит наименование типа взаимодействия, видимое пользователям. -->
                                 <textField id="iterationNameField"
                                            property="iterationName"
@@ -780,10 +768,11 @@ order by e.number]]>
                                       dataContainer="iteractionDc"
                                       property="widgetChackJobCandidates"
                                       caption="msg://msgCheckJobCandidateWidget"/>
-                            <!-- Карточка виджетов содержит аккордеон с настройками паузы и графика. -->
+                            <!-- Карточка виджетов (заголовок как у остальных вкладок) содержит аккордеон настроек. -->
                             <groupBox id="widgetSetupGroupBox"
                                       stylename="edit-card"
                                       width="100%"
+                                      caption="msg://msgWidgetsSetup"
                                       expand="widgetSetupAccordion"
                                       showAsPanel="true">
                                 <!-- Аккордеон раскрывает настройки виджетов по одному блоку за раз. -->

@@ -56,7 +56,6 @@ public class IteractionEditLayoutContractTest {
                 "edit-sidebar-identity",
                 "edit-sidebar-title",
                 "edit-sidebar-subtitle",
-                "edit-sidebar-summary",
                 "edit-sidebar-spacer",
                 "label-navigation",
                 "label-nav-title",
@@ -172,10 +171,17 @@ public class IteractionEditLayoutContractTest {
         assertTrue(scss.contains("border-bottom-color: #ffb11b !important"));
         assertTrue(scss.contains("height: calc(100% - 49px) !important"));
 
-        // Заголовки карточек-панелей — 17px/700/50px (те же значения, что у edit-accordion-section).
-        assertTrue(scss.contains(".iteraction-editor .edit-card .v-panel-caption"));
+        // Заголовки карточек-панелей — 17px/700/50px (те же значения, что у edit-accordion-section);
+        // селектор вложен в блок .iteraction-editor без повторного префикса (иначе scoping даёт дубль).
+        assertTrue(scss.contains(".edit-card .v-panel-caption"));
         assertTrue(scss.contains("min-height: 50px"));
         assertTrue(scss.contains("font-size: 17px !important"));
+
+        // Подписи полей — 13px/600, чекбоксы — 14px (1:1 с эталоном).
+        assertTrue(scss.contains(".edit-card .v-caption .v-captiontext"));
+        assertTrue(scss.contains("font-size: 13px !important"));
+        assertTrue(scss.contains(".edit-card .v-checkbox label"));
+        assertTrue(scss.contains("font-size: 14px !important"));
 
         // Глобальных вало-селекторов быть не должно.
         assertFalse(scss.contains("\n  .v-button"));
@@ -193,8 +199,10 @@ public class IteractionEditLayoutContractTest {
         assertTrue(controller.contains("addClickListener"));
         assertTrue(controller.contains("removeStyleName(ACTIVE_NAV_STYLE)"));
         assertTrue(controller.contains("addStyleName(ACTIVE_NAV_STYLE)"));
-        assertTrue(controller.contains("TABS_WITH_SIDEBAR_NAVIGATION"));
-        assertTrue(controller.contains("updateNavigationVisibility("));
+        // Навигация видна на всех вкладках: скрывающих механизмов быть не должно.
+        assertFalse(controller.contains("TABS_WITH_SIDEBAR_NAVIGATION"));
+        assertFalse(controller.contains("updateNavigationVisibility("));
+        assertFalse(controller.contains("iteractionNavigation.setVisible("));
 
         // Навигация не трогает данные: ни одного loader/сервиса/commit в методах навигации.
         int navStart = controller.indexOf("private void initTabNavigation");
@@ -293,16 +301,19 @@ public class IteractionEditLayoutContractTest {
                     descriptor.contains(contract));
         }
 
-        // Поле номера осталось редактируемым бизнес-полем в sidebar (не readonly).
+        // Поле номера — редактируемое бизнес-поле вкладки «Тип взаимодействия» (не readonly,
+        // не служебное поле sidebar; возвращено из sidebar во вкладку 1, 11.08.2026).
         int numberStart = descriptor.indexOf("id=\"numberField\"");
         assertTrue(numberStart >= 0);
         String numberFragment = descriptor.substring(numberStart,
                 Math.min(descriptor.length(), numberStart + 200));
         assertFalse(numberFragment.contains("readonly=\"true\""));
+        assertTrue("Номер обязан быть во вкладке tabType, а не в sidebar",
+                descriptor.indexOf("id=\"numberField\"") > descriptor.indexOf("id=\"tabType\""));
     }
 
     @Test
-    public void serviceCardAndWarningStayInSidebar() throws IOException {
+    public void warningStaysInSidebar() throws IOException {
         String descriptor = readProjectFile(DESCRIPTOR);
 
         int sidebarStart = descriptor.indexOf("<vbox id=\"iteractionSidebar\"");
@@ -310,12 +321,11 @@ public class IteractionEditLayoutContractTest {
         assertTrue(sidebarStart >= 0 && sidebarEnd > sidebarStart);
         String sidebar = descriptor.substring(sidebarStart, sidebarEnd);
 
-        assertTrue("Служебная карточка номера обязана быть в sidebar",
+        assertFalse("Поле номера не должно оставаться в sidebar",
                 sidebar.contains("id=\"numberField\""));
         assertTrue("Предупреждение администратора обязано быть в sidebar",
                 sidebar.contains("id=\"labelWarning\""));
         assertTrue(sidebar.contains("iteraction-editor-warning"));
-        assertTrue(sidebar.contains("iteraction-service-card"));
     }
 
     @Test

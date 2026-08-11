@@ -48,7 +48,7 @@ Cross-links: [docs/entities/iteraction/Iteraction.md](../entities/iteraction/Ite
 
 JPQL: `select e from hunttech_Iteraction e where e.iteractionTree is null order by e.number` (корни) и `select e from hunttech_Iteraction e where e.iteractionTree is not null order by e.iterationName` (дочерние).
 
-Основные bindings: `mandatoryIteraction`, `iteractionTree`, `iterationName`, `number` (sidebar), `pic`, `checkTrace`, `staffInteractionStatus`, `workStatus`, `outstaffingSign`, `signStartProject`, `signEndProject`, `textEmailToSend` (LOB, lazy reload), `addType`/`callForm`/`callDialog` и др. — по `property=` в XML.
+Основные bindings: `mandatoryIteraction`, `iteractionTree`, `iterationName`, `number`, `pic`, `checkTrace`, `staffInteractionStatus`, `workStatus`, `outstaffingSign`, `signStartProject`, `signEndProject`, `textEmailToSend` (LOB, lazy reload), `addType`/`callForm`/`callDialog` и др. — по `property=` в XML.
 
 ## 3. Иерархия и взаимосвязь форм (Form Hierarchy)
 
@@ -77,7 +77,7 @@ IteractionTreeBrowse (дерево типов)
 - `checkBoxCalendar` → делает обязательным `textFieldCalendarItemStyle`.
 - Включение отправки уведомлений → показываются группы «когда/кому/период»; выбор периода «N дней до/после» показывает поле `dayBeforeAfterTextField`.
 - Radio-переключения вкладок «Кнопка» и «Дополнительное поле» включают/отключают зависимые поля и переключают видимость `textEmailHBox`.
-- Sidebar-навигация: клик по пункту → `tabSheet.setSelectedTab(...)`, активный пункт получает `label-nav-item-active`; на вкладках с единственным блоком ввода контейнер `label-navigation` скрывается (правило 3.6 контракта). Это presentation-only — данные и lifecycle не затрагиваются.
+- Sidebar-навигация: клик по пункту → `tabSheet.setSelectedTab(...)`, активный пункт получает `label-nav-item-active`; контейнер `label-navigation` виден на **всех** 8 вкладках (решение 2026-08-11 — правило 3.6 контракта о скрытии на одноблочных вкладках не применяется). Это presentation-only — данные и lifecycle не затрагиваются.
 
 ### 4.3 Валидация и сохранение
 
@@ -102,7 +102,6 @@ window iteraction-editor (100%×100%)
       ├─ vbox iteractionSidebar (edit-sidebar, 270px, тёмная #172638→#0f1b28)
       │   ├─ visual: иконка REFRESH_ACTION в круге 96px (iteraction-editor-icon-preview)
       │   ├─ identity: labelItercationName (18px/700 белый) + подзаголовок «Тип взаимодействия» (12px)
-      │   ├─ summary: карточка номера (iteraction-service-card) с numberField (36px, тёмный)
       │   ├─ label-navigation: заголовок-полоса «Разделы формы» (36px, #ffb11b, inset-линии) + 8 пунктов (27px/13px/600, active #ffb11b)
       │   ├─ labelWarning (iteraction-editor-warning, янтарный блок)
       │   └─ spacer
@@ -110,7 +109,7 @@ window iteraction-editor (100%×100%)
           ├─ toolbar (edit-toolbar): «Редактировать взаимодействие» (19px/700) + описание (12px)
           ├─ tabSheet (iteraction-tabs edit-tabs): 8 вкладок, 48px/15px/600, активная — нижняя полоса #ffb11b
           │   └─ контент: карточки-панели (groupBox showAsPanel + edit-card, заголовки 17px/700/50px)
-          │       · tabType: Основные параметры (mandatory, дерево, наименование) + Пиктограмма
+          │       · tabType: Основные параметры (номер + дерево в одной строке, mandatory, наименование) + Пиктограмма
           │       · tabSigns: 4 карточки признаков попарно
           │       · outstaffingTab: чекбокс + 2 карточки (статус штата, признаки проекта)
           │       · tabIcons: карточка «Кнопка» (call-кнопка/форма/диалог)
@@ -127,4 +126,7 @@ window iteraction-editor (100%×100%)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-11 | Поле «Номер» (`numberField`) возвращено из sidebar во вкладку 1 «Тип взаимодействия» — строка «номер + корневой элемент дерева» в карточке «Основные параметры» (как до рефакторинга). Служебная карточка `iteraction-service-card` из sidebar удалена (пуста) |
+| 2026-08-11 | Label-навигация теперь видна на **всех** 8 вкладках: убрано скрытие контейнера на одноблочных вкладках «Кнопка», «Всплывающие сообщения», «Настройки виджетов» (правило 3.6 не применяется); активный пункт подсвечивается на каждой вкладке. CDP-подтверждение: navVisible=true + корректный активный пункт на вкладках 4/5/7 |
+| 2026-08-11 | CDP-верификация соответствия эталону IteractionListEdit (тема halo, 1440×812): sidebar 312px/#172638, полоса-заголовок 15px/700/36px + inset-линии, навигация активный 13px/600 #ffb11b / неактивные rgba(248,250,252,.82), поля ввода 15px/38px, подписи полей 13px/600 rgb(108,118,128), чекбоксы 14px — идентичны эталону; активный пункт навигации переключается по всем 8 вкладкам (по одному), скрытие навигации на одноблочных вкладках «Кнопка»/«Уведомления»/«Виджеты» (правило 3.6) подтверждено; карточка «Настройки виджетов» получила заголовок 17px/700/50 |
 | 2026-08-11 | Полный визуальный рефакторинг по эталону IteractionListEdit: sidebar + workspace, label-навигация по 8 вкладкам (presentation-only Java), карточки-панели (`showAsPanel` + `edit-card`), toolbar/footer по общему Edit-контракту, локальный `iteraction-editor.scss` × 7 тем, контрактный тест `IteractionEditLayoutContractTest` (11/11). Бизнес-логика и поведение элементов не изменялись |
