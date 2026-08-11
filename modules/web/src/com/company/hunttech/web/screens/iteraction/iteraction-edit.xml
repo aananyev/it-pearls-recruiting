@@ -1,25 +1,38 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Корневой экран объявляет editor типа взаимодействия и подключает пакет локализованных сообщений. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
         focusComponent="iterationNameField"
-        messagesPack="com.company.hunttech.web.screens.iteraction" icon="REFRESH_ACTION">
+        messagesPack="com.company.hunttech.web.screens.iteraction"
+        icon="REFRESH_ACTION">
+    <!-- Раздел данных связывает визуальные компоненты с редактируемой сущностью и справочниками. -->
     <data>
+        <!-- Контейнер редактируемого типа взаимодействия хранит текущий экземпляр Iteraction и полный edit-view. -->
         <instance id="iteractionDc"
                   class="com.company.hunttech.entity.Iteraction"
                   view="iteraction-edit-view">
+            <!-- Loader загружает или создаёт экземпляр, который редактирует экран. -->
             <loader id="iteractionDl"/>
         </instance>
+        <!-- Коллекция рабочих статусов поставляет варианты для picker-поля вкладки «Аутстаффинг». -->
         <collection id="workStatusDc"
                     class="com.company.hunttech.entity.EmployeeWorkStatus"
                     view="employeeWorkStatus-view">
+            <!-- Кэшируемый loader загружает статусы по названию; загрузка отложена до открытия вкладки. -->
             <loader id="workStatusDl" cacheable="true">
-                <query><![CDATA[select e from hunttech_EmployeeWorkStatus e order by e.workStatusName]]></query>
+                <!-- JPQL выбирает статусы по названию (кэш справочника). -->
+                <query>
+                    <![CDATA[select e from hunttech_EmployeeWorkStatus e order by e.workStatusName]]>
+                </query>
             </loader>
         </collection>
+        <!-- Коллекция корневых типов поставляет варианты для поля «Элемент верхнего уровня». -->
         <collection id="iteractionsTreeDc"
                     class="com.company.hunttech.entity.Iteraction"
                     view="iteraction-picker-view">
+            <!-- Кэшируемый loader выбирает только корневые элементы дерева взаимодействий. -->
             <loader id="iteractionsTreeDl" cacheable="true">
+                <!-- JPQL выбирает корни дерева (без родителя), упорядоченные по номеру. -->
                 <query>
                     <![CDATA[select e from hunttech_Iteraction e
 where e.iteractionTree is null
@@ -27,524 +40,845 @@ order by e.number]]>
                 </query>
             </loader>
         </collection>
+        <!-- Коллекция дочерних типов поставляет варианты twin-column вкладки «Проверка цепочки». -->
         <collection id="iteractionElementsDc"
                     class="com.company.hunttech.entity.Iteraction"
                     view="iteraction-picker-view">
+            <!-- Кэшируемый loader выбирает элементы дерева; загрузка отложена до открытия вкладки. -->
             <loader id="iteractionElementDl" cacheable="true">
+                <!-- JPQL выбирает дочерние типы (с родителем) по имени для twin-column проверки цепочки. -->
                 <query>
                     <![CDATA[select e from hunttech_Iteraction e where e.iteractionTree is not null order by e.iterationName]]>
                 </query>
             </loader>
         </collection>
     </data>
-    <dialogMode height="700"
-                width="920"/>
-    <layout expand="tabSheet" spacing="true">
-        <vbox id="headerVBox"
-              spacing="true"
+
+    <!-- Диалоговый режим разворачивает editor на всю доступную область браузера, как эталон IteractionListEdit. -->
+    <dialogMode height="100%"
+                modal="true"
+                width="100%"/>
+
+    <!-- Корневой layout задаёт локальный CSS namespace и передаёт высоту двухпанельной компоновке. -->
+    <layout stylename="iteraction-editor"
+            expand="iteractionMainLayout"
+            spacing="false"
+            width="100%"
+            height="100%">
+        <!-- Главный HBox делит экран на постоянную sidebar и расширяемую рабочую область. -->
+        <hbox id="iteractionMainLayout"
+              stylename="iteraction-main-layout edit-screen-layout"
               width="100%"
-              margin="false,true,false,true"
-              stylename="iteraction-edit-header">
-            <label id="labelItercationName" stylename="h1"/>
-            <label id="labelWarning"
-                   icon="WARNING"
-                   description="msg://msgWarning"
-                   stylename="h2-red"/>
-        </vbox>
-        <tabSheet id="tabSheet"
-                  stylename="framed"
-                  width="100%">
-            <tab caption="msg://msgIteracionType"
-                 spacing="true"
-                 margin="true,true,true,true"
-                 id="tabType">
-                <vbox spacing="true" width="100%">
-                    <groupBox caption="msg://msgMainSettings"
-                              stylename="light"
-                              spacing="true"
-                              width="100%">
-                        <checkBox id="iteractionCheckBoxMandatory"
-                                  dataContainer="iteractionDc"
-                                  property="mandatoryIteraction"
-                                  caption="msg://msgMandatory"/>
-                        <hbox spacing="true" width="100%">
-                            <textField id="numberField"
-                                       property="number"
-                                       caption="msg://msgNumber"
-                                       width="100%"
-                                       box.expandRatio="1"
-                                       dataContainer="iteractionDc"/>
-                            <lookupPickerField id="iteractionTreeField"
-                                               dataContainer="iteractionDc"
-                                               optionsContainer="iteractionsTreeDc"
-                                               property="iteractionTree"
-                                               caption="msg://msgIterationTree"
-                                               width="100%"
-                                               box.expandRatio="2"/>
-                        </hbox>
-                        <textField id="iterationNameField"
-                                   property="iterationName"
-                                   caption="mainMsg://msgItercationType"
-                                   width="100%"
-                                   dataContainer="iteractionDc"/>
-                    </groupBox>
-                    <groupBox caption="msg://msgPic"
-                              stylename="light"
-                              spacing="true"
-                              width="100%">
-                        <hbox spacing="true"
-                              width="100%"
-                              align="MIDDLE_LEFT">
-                            <textField id="iteractionFieldPic"
-                                       dataContainer="iteractionDc"
-                                       property="pic"
-                                       width="100%"
-                                       box.expandRatio="1"
-                                       description="msg://msgPic"
-                                       caption="msg://msgPic"/>
-                            <image id="embeddedPict"
-                                   align="MIDDLE_CENTER"
-                                   stylename="iteraction-edit-icon-preview"/>
-                        </hbox>
-                    </groupBox>
+              height="100%"
+              spacing="false"
+              expand="iteractionWorkspace">
+
+            <!-- Sidebar удерживает контекст типа взаимодействия, навигацию и служебные сведения при прокрутке формы. -->
+            <vbox id="iteractionSidebar"
+                  stylename="iteraction-sidebar edit-sidebar"
+                  width="270px"
+                  height="100%"
+                  spacing="true"
+                  expand="iteractionSidebarSpacer">
+                <!-- Профильный блок объединяет пиктограмму, наименование типа и его назначение. -->
+                <vbox id="iteractionProfileBox"
+                      width="100%"
+                      height="AUTO"
+                      spacing="true"
+                      stylename="iteraction-profile-box edit-sidebar-identity">
+                    <!-- Горизонтальный контейнер центрирует пиктограмму типа взаимодействия. -->
+                    <hbox id="iteractionIdentityImages"
+                          width="100%"
+                          height="AUTO"
+                          spacing="true"
+                          align="MIDDLE_CENTER"
+                          stylename="iteraction-identity-images edit-sidebar-visual">
+                        <!-- Статическая иконка типа в круге sidebar; реальная пиктограмма живёт в карточке «Пиктограмма». -->
+                        <label icon="REFRESH_ACTION"
+                               width="96px"
+                               height="96px"
+                               align="MIDDLE_CENTER"
+                               stylename="iteraction-editor-icon-preview"/>
+                    </hbox>
+                    <!-- Label наименования идентифицирует тип взаимодействия, для которого открыта форма. -->
+                    <label id="labelItercationName"
+                           width="100%"
+                           height="AUTO"
+                           align="MIDDLE_CENTER"
+                           stylename="iteraction-profile-title edit-sidebar-title"/>
+                    <!-- Подзаголовок поясняет, что форма редактирует справочный тип взаимодействия. -->
+                    <label value="msg://msgIteracionType"
+                           width="100%"
+                           height="AUTO"
+                           align="MIDDLE_CENTER"
+                           stylename="iteraction-profile-subtitle edit-sidebar-subtitle"/>
                 </vbox>
-            </tab>
-            <tab id="tabSigns"
-                 spacing="true"
-                 margin="true,true,true,true"
-                 caption="msg://msgSings">
-                <hbox spacing="true" width="100%">
-                    <vbox spacing="true"
+
+                <!-- Служебная карточка следует сразу за профилем и не смешивается с навигацией формы. -->
+                <vbox id="iteractionServiceCard"
+                      width="100%"
+                      height="AUTO"
+                      spacing="false"
+                      stylename="iteraction-service-card edit-sidebar-summary">
+                    <!-- Внутренний контейнер ограничивает служебные поля шириной карточки. -->
+                    <vbox id="iteractionServiceFields"
                           width="100%"
-                          box.expandRatio="1">
-                        <groupBox caption="msg://msgSignsProcess"
-                                  stylename="light"
-                                  spacing="true"
-                                  width="100%">
-                            <vbox id="signsVBox"
-                                  spacing="true"
-                                  width="100%">
-                                <checkBox id="signEndProcessVacancyClosedCheckBox"
-                                          dataContainer="iteractionDc"
-                                          property="signEndProcessVacancyClosed"
-                                          caption="msg://msgSignEndProcessVacancyClosed"/>
-                                <checkBox id="signStartCaseCheckBox"
-                                          caption="msg://mshSignStartCase"
-                                          dataContainer="iteractionDc"
-                                          property="signStartCase"/>
-                                <checkBox id="signEndCaseCheckBox"
-                                          caption="msg://mshSignEndCase"
-                                          dataContainer="iteractionDc"
-                                          property="signEndCase"/>
-                                <checkBox id="statisticsCheckBox"
-                                          dataContainer="iteractionDc"
-                                          property="statistics"
-                                          caption="msg://msgStatistics"/>
-                                <checkBox id="signCommentCheckBox"
-                                          caption="msg://mshSignComment"
-                                          dataContainer="iteractionDc"
-                                          property="signComment"/>
-                            </vbox>
-                        </groupBox>
-                        <groupBox caption="msg://msgSignsOther"
-                                  stylename="light"
-                                  spacing="true"
-                                  width="100%">
-                            <checkBox id="signPriorityNews"
-                                      caption="msg://msgPriorityNews"
-                                      dataContainer="iteractionDc"
-                                      property="signPriorityNews"/>
-                            <checkBox id="signViewOnlyManagersCheckBox"
-                                      caption="msg://msgSignViewOnlyManagers"
-                                      dataContainer="iteractionDc"
-                                      property="signViewOnlyManager"/>
-                        </groupBox>
+                          height="AUTO"
+                          spacing="true"
+                          stylename="iteraction-service-fields">
+                        <!-- Поле номера показывает порядковый номер типа взаимодействия, который задаёт администратор. -->
+                        <textField id="numberField"
+                                   stylename="iteraction-service-field"
+                                   dataContainer="iteractionDc"
+                                   property="number"
+                                   caption="msg://msgNumber"
+                                   width="100%"
+                                   align="MIDDLE_LEFT"/>
                     </vbox>
-                    <vbox spacing="true"
+                </vbox>
+
+                <!-- Контейнер label-навигации хранит заголовок и кнопки перехода к восьми вкладкам формы. -->
+                <vbox id="iteractionNavigation"
+                      width="100%"
+                      height="AUTO"
+                      spacing="false"
+                      stylename="label-navigation iteraction-navigation">
+                    <!-- Заголовок «Разделы формы» — полоса-заголовок с inset-линиями (контракт §4.1). -->
+                    <label id="iteractionNavigationTitle"
+                           width="100%"
+                           height="AUTO"
+                           value="msg://msgNavigationTitle"
+                           stylename="label-nav-title iteraction-navigation-title"/>
+                    <!-- Пункт переключает вкладку «Тип взаимодействия»; активное состояние ставит controller (без статичного active в XML). -->
+                    <button id="typeTabNav"
+                            caption="msg://msgNavType"
+                            width="100%"
+                            stylename="borderless label-nav-item iteraction-nav-item"/>
+                    <!-- Пункт переключает вкладку «Признаки» процесса, интервью и резерва. -->
+                    <button id="signsTabNav"
+                            caption="msg://msgNavSigns"
+                            width="100%"
+                            stylename="borderless label-nav-item iteraction-nav-item"/>
+                    <!-- Пункт переключает вкладку «Аутстаффинг» со статусами убытия/зачисления в штат. -->
+                    <button id="outstaffingNav"
+                            caption="msg://msgNavOutstaffing"
+                            width="100%"
+                            stylename="borderless label-nav-item iteraction-nav-item"/>
+                    <!-- Пункт переключает вкладку «Кнопка действия» с настройками вызова. -->
+                    <button id="iconsTabNav"
+                            caption="msg://msgNavIcons"
+                            width="100%"
+                            stylename="borderless label-nav-item iteraction-nav-item"/>
+                    <!-- Пункт переключает вкладку «Уведомления» с параметрами оповещений. -->
+                    <button id="notificationsNav"
+                            caption="msg://msgNavNotifications"
+                            width="100%"
+                            stylename="borderless label-nav-item iteraction-nav-item"/>
+                    <!-- Пункт переключает вкладку «Дополнительно» с полями, календарём и email. -->
+                    <button id="setupNav"
+                            caption="msg://msgNavSetup"
+                            width="100%"
+                            stylename="borderless label-nav-item iteraction-nav-item"/>
+                    <!-- Пункт переключает вкладку «Виджеты» с настройками виджетов контроля. -->
+                    <button id="widgetsNav"
+                            caption="msg://msgNavWidgets"
+                            width="100%"
+                            stylename="borderless label-nav-item iteraction-nav-item"/>
+                    <!-- Пункт переключает вкладку «Проверка цепочки» с типом отслеживания и twin-column. -->
+                    <button id="checkTraceNav"
+                            caption="msg://msgNavCheckTrace"
+                            width="100%"
+                            stylename="borderless label-nav-item iteraction-nav-item"/>
+                </vbox>
+
+                <!-- Предупреждение о том, что форму заполняет только администратор, остаётся заметным внизу навигации. -->
+                <label id="labelWarning"
+                       width="100%"
+                       height="AUTO"
+                       stylename="iteraction-editor-warning edit-sidebar-warning"/>
+
+                <!-- Spacer забирает оставшуюся высоту sidebar и удерживает информационные блоки сверху. -->
+                <vbox id="iteractionSidebarSpacer"
+                      width="100%"
+                      height="100%"
+                      stylename="iteraction-sidebar-spacer edit-sidebar-spacer"/>
+            </vbox>
+
+            <!-- Рабочая область содержит toolbar, прокручиваемые вкладки и постоянный footer. -->
+            <vbox id="iteractionWorkspace"
+                  stylename="iteraction-workspace edit-workspace"
+                  width="100%"
+                  height="100%"
+                  spacing="false"
+                  expand="tabSheet">
+                <!-- Toolbar показывает назначение editor и контекст редактируемого типа взаимодействия. -->
+                <hbox id="iteractionToolbarBox"
+                      stylename="iteraction-toolbar edit-toolbar"
+                      width="100%"
+                      height="AUTO"
+                      spacing="true"
+                      expand="iteractionToolbarTitleBox"
+                      align="MIDDLE_LEFT">
+                    <!-- Контейнер заголовков вертикально объединяет основное название и поясняющую строку. -->
+                    <vbox id="iteractionToolbarTitleBox"
                           width="100%"
-                          box.expandRatio="1">
-                        <groupBox caption="msg://msgSignsInterview"
-                                  stylename="light"
-                                  spacing="true"
-                                  width="100%">
-                            <checkBox id="signEmailSendCheckBox"
-                                      dataContainer="iteractionDc"
-                                      property="signEmailSend"
-                                      caption="msg://msgSignEmailSend"/>
-                            <checkBox id="signFeedbackCheckBox"
-                                      caption="msg://msgSignFeedBack"
-                                      dataContainer="iteractionDc"
-                                      property="signFeedback"/>
-                            <checkBox id="signOurInterviewAssignedCheckBox"
-                                      caption="msg://msgOurInterviewAssigned"
-                                      dataContainer="iteractionDc"
-                                      property="signOurInterviewAssigned"/>
-                            <checkBox id="signOurInterviewCheckBox"
-                                      caption="msg://msgSignOurInterview"
-                                      dataContainer="iteractionDc"
-                                      property="signOurInterview"/>
-                            <checkBox id="signClientInterviewCheckBox"
-                                      caption="msg://msgSignClientInterview"
-                                      dataContainer="iteractionDc"
-                                      property="signClientInterview"/>
-                            <checkBox id="signSentToClientCheckBox"
-                                      caption="msg://msgSignSendToClient"
-                                      dataContainer="iteractionDc"
-                                      property="signSendToClient"/>
-                        </groupBox>
-                        <groupBox caption="msg://msgSignsReserve"
-                                  stylename="light"
-                                  spacing="true"
-                                  width="100%">
-                            <checkBox id="signPersonalReserveCheckBox"
-                                      dataContainer="iteractionDc"
-                                      property="signPersonalReserve"
-                                      caption="msg://msgSignPersonalReserve"/>
-                            <checkBox id="signPersonalReserveDeleteCheckBox"
-                                      dataContainer="iteractionDc"
-                                      property="signPersonalReserveDelete"
-                                      caption="msg://msgSignPersonalReserveDelete"/>
-                            <checkBox id="signPersonalReservePutCheckBox"
-                                      dataContainer="iteractionDc"
-                                      property="signPersonalReservePut"
-                                      caption="msg://msgSignPersonalReservePut"/>
-                            <checkBox id="signPersonalReserveRemove"
-                                      dataContainer="iteractionDc"
-                                      property="signPersonalReserveRemove"
-                                      caption="msg://msgPersonalReserveRemove"/>
-                        </groupBox>
+                          height="AUTO"
+                          spacing="false"
+                          stylename="iteraction-toolbar-title-box">
+                        <!-- Основной заголовок сообщает, что пользователь редактирует тип взаимодействия. -->
+                        <label value="msg://editorCaption"
+                               width="100%"
+                               height="AUTO"
+                               stylename="iteraction-toolbar-title edit-toolbar-title"/>
+                        <!-- Контекстная строка уточняет назначение экрана. -->
+                        <label value="msg://msgToolbarDescription"
+                               width="100%"
+                               height="AUTO"
+                               stylename="iteraction-toolbar-description edit-toolbar-description"/>
                     </vbox>
                 </hbox>
-            </tab>
-            <tab id="outstaffingTab"
-                 name="outstaffingTab"
-                 spacing="true"
-                 icon="CUBES"
-                 margin="true,true,true,true"
-                 caption="msg://mshOutstaffingTab">
-                <vbox spacing="true" width="100%">
-                    <checkBox id="outstaffingSign"
-                              dataContainer="iteractionDc"
-                              property="outstaffingSign"
-                              caption="msg://msgOutstaffingSign"/>
-                    <groupBox orientation="horizontal"
-                              width="100%"
-                              spacing="true"
-                              stylename="light">
-                        <vbox spacing="true"
-                              stylename="card"
-                              margin="true"
-                              width="100%"
-                              box.expandRatio="1">
-                            <radioButtonGroup id="staffInteractionStatusRadioButtonsGroup"
-                                              dataContainer="iteractionDc"
-                                              caption="msg://msgStaffStatus"
-                                              property="staffInteractionStatus"
-                                              optionsEnum="com.company.hunttech.entity.StaffInteractionStatus"/>
-                            <lookupPickerField id="workStatusPickerField"
-                                               dataContainer="iteractionDc"
-                                               property="workStatus"
-                                               width="100%"
-                                               optionsContainer="workStatusDc"
-                                               caption="msg://msgChangingWorkingStatus">
-                                <actions>
-                                    <action id="lookup" type="picker_lookup"/>
-                                    <action id="open" type="picker_open"/>
-                                    <action id="clear" type="picker_clear"/>
-                                </actions>
-                            </lookupPickerField>
-                        </vbox>
-                        <vbox spacing="true"
-                              stylename="card"
-                              margin="true"
-                              width="100%"
-                              box.expandRatio="1">
-                            <checkBox id="signStartProject"
-                                      caption="msg://msgSignStartProject"
-                                      dataContainer="iteractionDc"
-                                      property="signStartProject"/>
-                            <checkBox id="signEndProject"
-                                      caption="msg://msgSignEndProject"
-                                      dataContainer="iteractionDc"
-                                      property="signEndProject"/>
-                        </vbox>
-                    </groupBox>
-                </vbox>
-            </tab>
-            <tab caption="msg://Tab"
-                 spacing="true"
-                 margin="true,true,true,true"
-                 id="tabIcons">
-                <groupBox caption="msg://msgButtonSettings"
-                          stylename="light"
-                          spacing="true"
-                          width="100%">
-                    <hbox id="callDialogHbox"
-                          spacing="true"
-                          width="100%">
-                        <checkBox id="checkBoxCallDialog"
-                                  caption="msg://msgAlignButton"
-                                  dataContainer="iteractionDc"
-                                  property="callForm"/>
-                        <checkBox id="findToDicCheckBox"
-                                  caption="msg://msgFindToDic"
-                                  dataContainer="iteractionDc"
-                                  property="findToDic"/>
-                    </hbox>
-                    <hbox spacing="true" width="100%">
-                        <textField id="textFieldCallButtonText"
-                                   dataContainer="iteractionDc"
-                                   property="callButtonText"
-                                   caption="msg://msgCallButtonText"
-                                   width="100%"
-                                   box.expandRatio="1"/>
-                        <textField id="textFieldCallForm"
-                                   dataContainer="iteractionDc"
-                                   property="callClass"
-                                   caption="msg://msgCallClass"
-                                   width="100%"
-                                   box.expandRatio="1"/>
-                    </hbox>
-                </groupBox>
-            </tab>
-            <tab id="tabNotifictions"
-                 margin="true,true,true,true"
-                 caption="msg://msgNotifications"
-                 expand="notificationGroupBox"
-                 spacing="true">
-                <groupBox id="notificationGroupBox"
-                          stylename="light"
+
+                <!-- TabSheet группирует восемь смысловых вкладок настроек типа взаимодействия. -->
+                <tabSheet id="tabSheet"
+                          stylename="iteraction-tabs edit-tabs"
                           width="100%"
-                          height="100%"
-                          spacing="true">
-                    <vbox id="notificationVBox"
-                          spacing="true"
-                          width="100%"
-                          height="100%"
-                          expand="notificationSetupHBox">
-                        <checkBox id="notificationNeedSendCheckBox"
-                                  caption="msg://msgNotificationNeedSend"
-                                  dataContainer="iteractionDc"
-                                  property="notificationNeedSend"/>
-                        <hbox id="notificationSetupHBox"
-                              width="100%"
-                              spacing="true">
-                            <groupBox caption="msg://msgWhenSendMessage"
-                                      stylename="light"
+                          height="100%">
+                    <!-- Вкладка «Тип взаимодействия» задаёт основные параметры и пиктограмму. -->
+                    <tab id="tabType"
+                         caption="msg://msgIteracionType"
+                         spacing="true">
+                        <!-- VBox группирует карточки вкладки «Тип взаимодействия» вертикально. -->
+                        <vbox spacing="true" width="100%">
+                            <!-- Карточка основных параметров хранит обязательность, элемент дерева и наименование. -->
+                            <groupBox id="typeMainSettingsGroupBox" caption="msg://msgMainSettings"
+                                      stylename="edit-card"
                                       spacing="true"
                                       width="100%"
-                                      box.expandRatio="1">
-                                <radioButtonGroup id="whenSendMessageRadioButton"
-                                                  description="msg://msgWhenSendMessageDescription"
-                                                  dataContainer="iteractionDc"
-                                                  property="notificationWhenSend"/>
-                            </groupBox>
-                            <groupBox caption="msg://msgMessageRecipient"
-                                      stylename="light"
-                                      spacing="true"
-                                      width="100%"
-                                      box.expandRatio="1">
-                                <radioButtonGroup id="radioButtonTypeNotifications"
-                                                  enable="false"
-                                                  description="msg://msgMessageRecipientDescription"
-                                                  dataContainer="iteractionDc"
-                                                  property="notificationType"/>
-                                <textField id="lookupFieldEmails"
-                                           caseConversion="LOWER"
-                                           width="100%"/>
-                            </groupBox>
-                            <groupBox caption="msg://msgNotificationPeriod"
-                                      stylename="light"
-                                      spacing="true"
-                                      width="100%"
-                                      box.expandRatio="1">
-                                <radioButtonGroup id="notificationPeriodRadioButton"
-                                                  enable="false"
-                                                  dataContainer="iteractionDc"
-                                                  property="notificationPeriodType"
-                                                  description="msg://msgNotificationPeriodDescription"/>
-                                <textField id="dayBeforeAfterTextField"
-                                           enable="false"
+                                      showAsPanel="true">
+                                <!-- Чекбокс блокирует изменение записи; при включении controller делает поля недоступными. -->
+                                <checkBox id="iteractionCheckBoxMandatory"
+                                          dataContainer="iteractionDc"
+                                          property="mandatoryIteraction"
+                                          caption="msg://msgMandatory"/>
+                                <!-- LookupPickerField выбирает корневой элемент дерева взаимодействий. -->
+                                <lookupPickerField id="iteractionTreeField"
+                                                   dataContainer="iteractionDc"
+                                                   optionsContainer="iteractionsTreeDc"
+                                                   property="iteractionTree"
+                                                   caption="msg://msgIterationTree"
+                                                   width="100%"
+                                                   stylename="edit-form-control">
+                                    <!-- Стандартные picker-actions выбирают элемент из списка и открывают его editor. -->
+                                    <!-- Стандартные picker-actions выбирают и открывают корневой тип взаимодействия. -->
+                                    <actions>
+                                        <!-- Picker-lookup открывает выбор корневого типа. -->
+                                        <action id="lookup" type="picker_lookup"/>
+                                        <!-- Picker-open открывает выбранный корневой тип. -->
+                                        <action id="open" type="picker_open"/>
+                                        <!-- Picker-clear сбрасывает выбранный корневой тип. -->
+                                        <action id="clear" type="picker_clear"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <!-- TextField хранит наименование типа взаимодействия, видимое пользователям. -->
+                                <textField id="iterationNameField"
+                                           property="iterationName"
+                                           caption="mainMsg://msgItercationType"
                                            width="100%"
                                            dataContainer="iteractionDc"
-                                           property="notificationBeforeAfterDay"/>
+                                           stylename="edit-form-control"/>
                             </groupBox>
-                        </hbox>
-                    </vbox>
-                </groupBox>
-            </tab>
-            <tab caption="msg://msgSetupFiels"
-                 spacing="true"
-                 margin="true,true,true,true"
-                 id="tabSetup"
-                 name="tabSetup">
-                <vbox spacing="true" width="100%">
-                    <hbox width="100%" spacing="true">
-                        <groupBox caption="msg://msgAdditionalField"
-                                  stylename="light"
-                                  spacing="true"
+                            <!-- Карточка пиктограммы хранит путь к иконке и её предпросмотр. -->
+                            <groupBox id="picGroupBox" caption="msg://msgPic"
+                                      stylename="edit-card"
+                                      spacing="true"
+                                      width="100%"
+                                      showAsPanel="true">
+                                <!-- HBox располагает текстовое поле пути к иконке и предпросмотр изображения. -->
+                                <hbox spacing="true"
+                                      width="100%"
+                                      align="MIDDLE_LEFT">
+                                    <!-- TextField хранит путь к файлу пиктограммы; controller обновляет предпросмотр. -->
+                                    <textField id="iteractionFieldPic"
+                                               dataContainer="iteractionDc"
+                                               property="pic"
+                                               width="100%"
+                                               box.expandRatio="1"
+                                               description="msg://msgPic"
+                                               caption="msg://msgPic"
+                                               stylename="edit-form-control"/>
+                                    <!-- Превью-изображение дублирует пиктограмму рядом с путём; id инъецируется controller-ом. -->
+                                    <image id="embeddedPict"
+                                           align="MIDDLE_CENTER"
+                                           stylename="iteraction-edit-icon-preview"/>
+                                </hbox>
+                            </groupBox>
+                        </vbox>
+                    </tab>
+                    <!-- Вкладка «Признаки» группирует флаги процесса, интервью, резерва и прочие признаки. -->
+                    <tab id="tabSigns"
+                         caption="msg://msgSings"
+                         spacing="true">
+                        <!-- HBox делит признаки на две вертикальные колонки карточек. -->
+                        <hbox spacing="true" width="100%">
+                            <!-- Левая колонка содержит карточки процесса и прочих признаков. -->
+                            <vbox spacing="true"
                                   width="100%"
                                   box.expandRatio="1">
-                            <checkBox id="checkBoxFlag"
-                                      caption="msg://msgAdd"
-                                      dataContainer="iteractionDc"
-                                      property="addFlag"/>
-                            <hbox spacing="true" width="100%">
-                                <radioButtonGroup id="radioButtonAddType"
-                                                  caption="msg://msgRadioButton"
-                                                  width="100%"
-                                                  box.expandRatio="1"
-                                                  enable="false"
+                                <!-- Карточка процесса и статистики хранит флаги начала/конца и статистики. -->
+                                <groupBox id="processStatisticsGroupBox" caption="msg://msgSignsProcess"
+                                          stylename="edit-card"
+                                          spacing="true"
+                                          width="100%"
+                                          showAsPanel="true">
+                                    <!-- VBox вкладки «Признаки» располагает четыре карточки признаков попарно. -->
+                                    <vbox id="signsVBox"
+                                          spacing="true"
+                                          width="100%">
+                                        <!-- Признак «конец процесса, вакансия закрыта» уникален для одного типа. -->
+                                        <checkBox id="signEndProcessVacancyClosedCheckBox"
                                                   dataContainer="iteractionDc"
-                                                  property="addType"/>
-                                <checkBox id="checkBoxSetDefaultDateTime"
-                                          caption="msg://msgSetDefaultDateTime"
-                                          dataContainer="iteractionDc"
-                                          property="setDateTime"/>
-                            </hbox>
-                            <textField id="textFieldCaption"
-                                       caption="msg://msgCaption"
-                                       dataContainer="iteractionDc"
-                                       property="addCaption"
-                                       width="100%"/>
-                        </groupBox>
-                        <groupBox caption="msg://msgCalendarSettings"
-                                  stylename="light"
-                                  spacing="true"
+                                                  property="signEndProcessVacancyClosed"
+                                                  caption="msg://msgSignEndProcessVacancyClosed"/>
+                                        <!-- Признак начала процесса с кандидатом (предложение работы). -->
+                                        <checkBox id="signStartCaseCheckBox"
+                                                  caption="msg://mshSignStartCase"
+                                                  dataContainer="iteractionDc"
+                                                  property="signStartCase"/>
+                                        <!-- Признак конца процесса с кандидатом по вакансии. -->
+                                        <checkBox id="signEndCaseCheckBox"
+                                                  caption="msg://mshSignEndCase"
+                                                  dataContainer="iteractionDc"
+                                                  property="signEndCase"/>
+                                        <!-- Признак попадания взаимодействия в статистику. -->
+                                        <checkBox id="statisticsCheckBox"
+                                                  dataContainer="iteractionDc"
+                                                  property="statistics"
+                                                  caption="msg://msgStatistics"/>
+                                        <!-- Признак обязательного комментария; может быть только у одного типа. -->
+                                        <checkBox id="signCommentCheckBox"
+                                                  caption="msg://mshSignComment"
+                                                  dataContainer="iteractionDc"
+                                                  property="signComment"/>
+                                    </vbox>
+                                </groupBox>
+                                <!-- Карточка прочих признаков хранит новости и видимость только менеджерам. -->
+                                <groupBox id="otherSignsGroupBox" caption="msg://msgSignsOther"
+                                          stylename="edit-card"
+                                          spacing="true"
+                                          width="100%"
+                                          showAsPanel="true">
+                                    <!-- Признак приоритетных сообщений в ленте новостей. -->
+                                    <checkBox id="signPriorityNews"
+                                              caption="msg://msgPriorityNews"
+                                              dataContainer="iteractionDc"
+                                              property="signPriorityNews"/>
+                                    <!-- Признак видимости взаимодействия только менеджерам. -->
+                                    <checkBox id="signViewOnlyManagersCheckBox"
+                                              caption="msg://msgSignViewOnlyManagers"
+                                              dataContainer="iteractionDc"
+                                              property="signViewOnlyManager"/>
+                                </groupBox>
+                            </vbox>
+                            <!-- Правая колонка содержит карточки интервью и кадрового резерва. -->
+                            <vbox spacing="true"
                                   width="100%"
                                   box.expandRatio="1">
-                            <checkBox id="checkBoxCalendar"
-                                      caption="msg://msgUseCalendar"
+                                <!-- Карточка интервью и коммуникации хранит признаки email, интервью и откликов. -->
+                                <groupBox id="interviewGroupBox" caption="msg://msgSignsInterview"
+                                          stylename="edit-card"
+                                          spacing="true"
+                                          width="100%"
+                                          showAsPanel="true">
+                                    <!-- Признак взаимодействия для отправки email кандидату. -->
+                                    <checkBox id="signEmailSendCheckBox"
+                                              dataContainer="iteractionDc"
+                                              property="signEmailSend"
+                                              caption="msg://msgSignEmailSend"/>
+                                    <!-- Признак обратной связи по кандидату. -->
+                                    <checkBox id="signFeedbackCheckBox"
+                                              caption="msg://msgSignFeedBack"
+                                              dataContainer="iteractionDc"
+                                              property="signFeedback"/>
+                                    <!-- Признак назначенного интервью на нашей стороне (ресёрчер). -->
+                                    <checkBox id="signOurInterviewAssignedCheckBox"
+                                              caption="msg://msgOurInterviewAssigned"
+                                              dataContainer="iteractionDc"
+                                              property="signOurInterviewAssigned"/>
+                                    <!-- Признак проведённого интервью на нашей стороне (рекрутер). -->
+                                    <checkBox id="signOurInterviewCheckBox"
+                                              caption="msg://msgSignOurInterview"
+                                              dataContainer="iteractionDc"
+                                              property="signOurInterview"/>
+                                    <!-- Признак собеседования на стороне заказчика. -->
+                                    <checkBox id="signClientInterviewCheckBox"
+                                              caption="msg://msgSignClientInterview"
+                                              dataContainer="iteractionDc"
+                                              property="signClientInterview"/>
+                                    <!-- Признак отправки резюме заказчику. -->
+                                    <checkBox id="signSentToClientCheckBox"
+                                              caption="msg://msgSignSendToClient"
+                                              dataContainer="iteractionDc"
+                                              property="signSendToClient"/>
+                                </groupBox>
+                                <!-- Карточка кадрового резерва хранит уникальные признаки работы с резервом. -->
+                                <groupBox id="reserveGroupBox" caption="msg://msgSignsReserve"
+                                          stylename="edit-card"
+                                          spacing="true"
+                                          width="100%"
+                                          showAsPanel="true">
+                                    <!-- Признак работы с кадровым резервом. -->
+                                    <checkBox id="signPersonalReserveCheckBox"
+                                              dataContainer="iteractionDc"
+                                              property="signPersonalReserve"
+                                              caption="msg://msgSignPersonalReserve"/>
+                                    <!-- Признак удаления из кадрового резерва. -->
+                                    <checkBox id="signPersonalReserveDeleteCheckBox"
+                                              dataContainer="iteractionDc"
+                                              property="signPersonalReserveDelete"
+                                              caption="msg://msgSignPersonalReserveDelete"/>
+                                    <!-- Уникальный признак размещения в кадровый резерв. -->
+                                    <checkBox id="signPersonalReservePutCheckBox"
+                                              dataContainer="iteractionDc"
+                                              property="signPersonalReservePut"
+                                              caption="msg://msgSignPersonalReservePut"/>
+                                    <!-- Уникальный признак удаления из кадрового резерва. -->
+                                    <checkBox id="signPersonalReserveRemove"
+                                              dataContainer="iteractionDc"
+                                              property="signPersonalReserveRemove"
+                                              caption="msg://msgPersonalReserveRemove"/>
+                                </groupBox>
+                            </vbox>
+                        </hbox>
+                    </tab>
+                    <!-- Вкладка «Аутстаффинг» настраивает статусы убытия/зачисления в штат и признаки проекта. -->
+                    <tab id="outstaffingTab"
+                         name="outstaffingTab"
+                         spacing="true"
+                         icon="CUBES"
+                         caption="msg://mshOutstaffingTab">
+                        <!-- VBox вкладки «Аутстаффинг» группирует чекбокс и карточки статусов. -->
+                        <vbox spacing="true" width="100%">
+                            <!-- Чекбокс включает аутстаффинговый режим взаимодействия. -->
+                            <checkBox id="outstaffingSign"
                                       dataContainer="iteractionDc"
-                                      property="calendarItem"/>
-                            <textField id="textFieldCalendarItemStyle"
-                                       caseConversion="LOWER"
-                                       width="100%"
-                                       caption="msg://msgCalendarItemStyle"
-                                       dataContainer="iteractionDc"
-                                       property="calendarItemStyle"/>
-                            <textField id="calendarItemDescriptionTextField"
-                                       width="100%"
-                                       caption="msg://msgCalendarItemDescription"
-                                       dataContainer="iteractionDc"
-                                       property="calendarItemDescription"/>
+                                      property="outstaffingSign"
+                                      caption="msg://msgOutstaffingSign"/>
+                            <!-- HBox располагает статусы штата и признаки проекта двумя карточками. -->
+                            <hbox spacing="true"
+                                  width="100%">
+                                <!-- Карточка статуса штата хранит radio-статус и picker рабочего статуса. -->
+                                <vbox spacing="true"
+                                      stylename="edit-card iteraction-outstaffing-card"
+                                      margin="true"
+                                      width="100%"
+                                      box.expandRatio="1">
+                                    <!-- RadioButtonGroup выбирает статус убытия/зачисления в штат. -->
+                                    <radioButtonGroup id="staffInteractionStatusRadioButtons"
+                                                      dataContainer="iteractionDc"
+                                                      caption="msg://msgStaffStatus"
+                                                      property="staffInteractionStatus"
+                                                      optionsEnum="com.company.hunttech.entity.StaffInteractionStatus"/>
+                                    <!-- LookupPickerField выбирает рабочий статус, на который переводится сотрудник. -->
+                                    <lookupPickerField id="workStatusPickerField"
+                                                       dataContainer="iteractionDc"
+                                                       property="workStatus"
+                                                       width="100%"
+                                                       optionsContainer="workStatusDc"
+                                                       caption="msg://msgChangingWorkingStatus"
+                                                       stylename="edit-form-control">
+                                        <!-- Стандартные picker-actions выбирают и открывают справочник статусов. -->
+                                        <actions>
+                                            <!-- Picker-lookup открывает справочник рабочих статусов. -->
+                                            <action id="lookup" type="picker_lookup"/>
+                                            <!-- Picker-open открывает выбранный статус. -->
+                                            <action id="open" type="picker_open"/>
+                                            <!-- Picker-clear сбрасывает выбранный статус. -->
+                                            <action id="clear" type="picker_clear"/>
+                                        </actions>
+                                    </lookupPickerField>
+                                </vbox>
+                                <!-- Карточка признаков проекта хранит флаги вывода кандидата на проект и из проекта. -->
+                                <vbox spacing="true"
+                                      stylename="edit-card iteraction-outstaffing-card"
+                                      margin="true"
+                                      width="100%"
+                                      box.expandRatio="1">
+                                    <!-- Признак вывода кандидата на проект. -->
+                                    <checkBox id="signStartProject"
+                                              caption="msg://msgSignStartProject"
+                                              dataContainer="iteractionDc"
+                                              property="signStartProject"/>
+                                    <!-- Признак вывода кандидата из проекта. -->
+                                    <checkBox id="signEndProject"
+                                              caption="msg://msgSignEndProject"
+                                              dataContainer="iteractionDc"
+                                              property="signEndProject"/>
+                                </vbox>
+                            </hbox>
+                        </vbox>
+                    </tab>
+                    <!-- Вкладка «Кнопка действия» настраивает отображение кнопки вызова и класс формы. -->
+                    <tab id="tabIcons"
+                         caption="msg://Tab"
+                         spacing="true">
+                        <!-- Карточка настроек кнопки хранит флаги и текстовые параметры вызова. -->
+                        <groupBox id="buttonSettingsGroupBox" caption="msg://msgButtonSettings"
+                                  stylename="edit-card"
+                                  spacing="true"
+                                  width="100%"
+                                  showAsPanel="true">
+                            <!-- HBox располагает флаги показа кнопки и поиска в справочниках. -->
+                            <hbox id="callDialogHbox"
+                                  spacing="true"
+                                  width="100%">
+                                <!-- Чекбокс включает показ кнопки действия на форме взаимодействия. -->
+                                <checkBox id="checkBoxCallDialog"
+                                          caption="msg://msgAlignButton"
+                                          dataContainer="iteractionDc"
+                                          property="callForm"/>
+                                <!-- Чекбокс включает поиск в справочниках при вызове действия. -->
+                                <checkBox id="findToDicCheckBox"
+                                          caption="msg://msgFindToDic"
+                                          dataContainer="iteractionDc"
+                                          property="findToDic"/>
+                            </hbox>
+                            <!-- HBox располагает тексты кнопки создания и класса формы вызова. -->
+                            <hbox spacing="true" width="100%">
+                                <!-- TextField хранит подпись кнопки создания взаимодействия. -->
+                                <textField id="textFieldCallButtonText"
+                                           dataContainer="iteractionDc"
+                                           property="callButtonText"
+                                           caption="msg://msgCallButtonText"
+                                           width="100%"
+                                           box.expandRatio="1"
+                                           stylename="edit-form-control"/>
+                                <!-- TextField хранит класс формы, открываемой кнопкой действия. -->
+                                <textField id="textFieldCallForm"
+                                           dataContainer="iteractionDc"
+                                           property="callClass"
+                                           caption="msg://msgCallClass"
+                                           width="100%"
+                                           box.expandRatio="1"
+                                           stylename="edit-form-control"/>
+                            </hbox>
                         </groupBox>
-                    </hbox>
-                    <groupBox caption="msg://msgEmailSettings"
-                              stylename="light"
-                              width="100%"
-                              spacing="true"
-                              expand="textEmailHBox">
-                        <hbox spacing="true">
-                            <checkBox id="neetToSendEmailCheckBox"
-                                      dataContainer="iteractionDc"
-                                      caption="msg://msgNeedSendEmail"
-                                      property="needSendLetter"/>
-                            <checkBox id="neetSendMemoCheckBox"
-                                      dataContainer="iteractionDc"
-                                      property="needSendMemo"
-                                      caption="msg://msgNeedSendMemo"/>
-                        </hbox>
-                        <hbox id="textEmailHBox"
-                              expand="textEmailToSendRichTextArea"
-                              width="100%"
-                              height="250px"
-                              spacing="true">
-                            <richTextArea id="textEmailToSendRichTextArea"
-                                          height="100%"
-                                          width="100%"
-                                          box.expandRatio="8"
+                    </tab>
+                    <!-- Вкладка «Уведомления» настраивает оповещения о создании и наступлении даты взаимодействия. -->
+                    <tab id="tabNotifictions"
+                         caption="msg://msgNotifications"
+                         expand="notificationGroupBox"
+                         spacing="true">
+                        <!-- Карточка уведомлений хранит флаг отправки и три колонки параметров оповещения. -->
+                        <groupBox id="notificationGroupBox"
+                                  stylename="edit-card"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  showAsPanel="true">
+                            <!-- VBox располагает флаг и колонки параметров; expand заполняет высоту карточки. -->
+                            <vbox id="notificationVBox"
+                                  spacing="true"
+                                  width="100%"
+                                  height="100%"
+                                  expand="notificationSetupHBox">
+                                <!-- Чекбокс включает отправку оповещения; controller управляет доступностью параметров. -->
+                                <checkBox id="notificationNeedSendCheckBox"
+                                          caption="msg://msgNotificationNeedSend"
                                           dataContainer="iteractionDc"
-                                          property="textEmailToSend"/>
-                            <richTextArea id="commentKeysRichTextArea"
-                                          box.expandRatio="2"
-                                          stylename="borderless"
+                                          property="notificationNeedSend"/>
+                                <!-- HBox группирует три колонки параметров оповещения. -->
+                                <hbox id="notificationSetupHBox"
+                                      width="100%"
+                                      spacing="true">
+                                    <!-- Подкарточка «Когда посылать сообщение» хранит момент отправки. -->
+                                    <groupBox id="whenSendGroupBox" caption="msg://msgWhenSendMessage"
+                                              stylename="edit-card iteraction-editor-subcard"
+                                              spacing="true"
+                                              width="100%"
+                                              box.expandRatio="1"
+                                              showAsPanel="true">
+                                        <!-- RadioButtonGroup выбирает момент оповещения; controller заполняет options. -->
+                                        <radioButtonGroup id="whenSendMessageRadioButton"
+                                                          description="msg://msgWhenSendMessageDescription"
+                                                          dataContainer="iteractionDc"
+                                                          property="notificationWhenSend"/>
+                                    </groupBox>
+                                    <!-- Подкарточка «Получатель сообщения» хранит аудиторию и адреса. -->
+                                    <groupBox id="notificationTypeGroupBox" caption="msg://msgMessageRecipient"
+                                              stylename="edit-card iteraction-editor-subcard"
+                                              spacing="true"
+                                              width="100%"
+                                              box.expandRatio="1"
+                                              showAsPanel="true">
+                                        <!-- RadioButtonGroup выбирает аудиторию получателей; включается controller-ом. -->
+                                        <radioButtonGroup id="radioButtonTypeNotifications"
+                                                          enable="false"
+                                                          description="msg://msgMessageRecipientDescription"
+                                                          dataContainer="iteractionDc"
+                                                          property="notificationType"/>
+                                        <!-- TextField хранит список адресов при варианте «Определённым адресам». -->
+                                        <textField id="lookupFieldEmails"
+                                                   caseConversion="LOWER"
+                                                   width="100%"
+                                                   stylename="edit-form-control"/>
+                                    </groupBox>
+                                    <!-- Подкарточка «Период оповещения» хранит период и смещение в днях. -->
+                                    <groupBox id="notificationPeriodGroupBox" caption="msg://msgNotificationPeriod"
+                                              stylename="edit-card iteraction-editor-subcard"
+                                              spacing="true"
+                                              width="100%"
+                                              box.expandRatio="1"
+                                              showAsPanel="true">
+                                        <!-- RadioButtonGroup выбирает период; включается controller-ом по моменту отправки. -->
+                                        <radioButtonGroup id="notificationPeriodRadioButton"
+                                                          enable="false"
+                                                          dataContainer="iteractionDc"
+                                                          property="notificationPeriodType"
+                                                          description="msg://msgNotificationPeriodDescription"/>
+                                        <!-- TextField хранит число дней до и после даты взаимодействия. -->
+                                        <textField id="dayBeforeAfterTextField"
+                                                   enable="false"
+                                                   width="100%"
+                                                   dataContainer="iteractionDc"
+                                                   property="notificationBeforeAfterDay"
+                                                   stylename="edit-form-control"/>
+                                    </groupBox>
+                                </hbox>
+                            </vbox>
+                        </groupBox>
+                    </tab>
+                    <!-- Вкладка «Дополнительно» настраивает дополнительное поле, календарь и email-шаблоны. -->
+                    <tab id="tabSetup"
+                         caption="msg://msgSetupFiels"
+                         spacing="true"
+                         name="tabSetup">
+                        <!-- VBox вкладки «Дополнительно» группирует три карточки настроек. -->
+                        <vbox spacing="true" width="100%">
+                            <!-- HBox располагает карточки дополнительного поля и календаря двумя колонками. -->
+                            <hbox width="100%" spacing="true">
+                                <!-- Карточка дополнительного поля настраивает флаг, тип и подпись add-поля. -->
+                                <groupBox id="additionalFieldGroupBox" caption="msg://msgAdditionalField"
+                                          stylename="edit-card"
+                                          spacing="true"
                                           width="100%"
-                                          height="100%"
-                                          editable="false"/>
-                        </hbox>
-                    </groupBox>
-                </vbox>
-            </tab>
-            <tab id="setupWidgets"
-                 spacing="true"
-                 margin="true,true,true,true"
-                 caption="msg://msgWidgetsSetup"
-                 expand="widgetSetupVBox">
-                <vbox id="widgetSetupVBox"
-                      spacing="true"
-                      width="100%"
-                      expand="widgetSetupGroupBox">
-                    <checkBox id="myJobCandidatesWingetCheckBox"
-                              dataContainer="iteractionDc"
-                              property="widgetChackJobCandidates"
-                              caption="msg://msgCheckJobCandidateWidget"/>
-                    <groupBox id="widgetSetupGroupBox"
-                              stylename="light"
-                              width="100%"
-                              expand="widgetSetupAccordion">
-                        <accordion id="widgetSetupAccordion" height="100%">
-                            <tab id="widgetPausedTab"
-                                 margin="true"
-                                 spacing="true"
-                                 caption="msg://msgWidgetPaused">
-                            </tab>
-                            <tab id="widgetGraph"
-                                 margin="true"
-                                 spacing="true"
-                                 caption="msg://msgGraph">
-                            </tab>
-                        </accordion>
-                    </groupBox>
-                </vbox>
-            </tab>
-            <tab id="checkTrace"
-                 name="checkTrace"
-                 margin="true,true,true,true"
-                 caption="msg://msgCheckTrace"
-                 spacing="true"
-                 expand="traceHBox">
-                <vbox id="traceHBox"
-                      width="100%"
-                      expand="checkTraceTwinGroupBox"
-                      height="100%"
-                      spacing="true">
-                    <groupBox id="checkTraceOption"
-                              expand="typeTraceRadioButtons"
+                                          box.expandRatio="1"
+                                          showAsPanel="true">
+                                    <!-- Чекбокс включает дополнительное поле; controller переключает связанные поля. -->
+                                    <checkBox id="checkBoxFlag"
+                                              caption="msg://msgAdd"
+                                              dataContainer="iteractionDc"
+                                              property="addFlag"/>
+                                    <!-- HBox располагает тип действия и флаг установки даты по умолчанию. -->
+                                    <hbox spacing="true" width="100%">
+                                        <!-- RadioButtonGroup выбирает тип дополнительного значения (Data/String/Integer). -->
+                                        <radioButtonGroup id="radioButtonAddType"
+                                                          caption="msg://msgRadioButton"
+                                                          width="100%"
+                                                          box.expandRatio="1"
+                                                          enable="false"
+                                                          dataContainer="iteractionDc"
+                                                          property="addType"/>
+                                        <!-- Чекбокс автозаполнения даты и времени при создании. -->
+                                        <checkBox id="checkBoxSetDefaultDateTime"
+                                                  caption="msg://msgSetDefaultDateTime"
+                                                  dataContainer="iteractionDc"
+                                                  property="setDateTime"/>
+                                    </hbox>
+                                    <!-- TextField хранит подпись дополнительного поля. -->
+                                    <textField id="textFieldCaption"
+                                               caption="msg://msgCaption"
+                                               dataContainer="iteractionDc"
+                                               property="addCaption"
+                                               width="100%"
+                                               stylename="edit-form-control"/>
+                                </groupBox>
+                                <!-- Карточка календаря настраивает использование и оформление события календаря. -->
+                                <groupBox id="calendarGroupBox" caption="msg://msgCalendarSettings"
+                                          stylename="edit-card"
+                                          spacing="true"
+                                          width="100%"
+                                          box.expandRatio="1"
+                                          showAsPanel="true">
+                                    <!-- Чекбокс включает использование в календаре; controller делает стиль обязательным. -->
+                                    <checkBox id="checkBoxCalendar"
+                                              caption="msg://msgUseCalendar"
+                                              dataContainer="iteractionDc"
+                                              property="calendarItem"/>
+                                    <!-- TextField хранит цвет события в календаре. -->
+                                    <textField id="textFieldCalendarItemStyle"
+                                               caseConversion="LOWER"
+                                               width="100%"
+                                               caption="msg://msgCalendarItemStyle"
+                                               dataContainer="iteractionDc"
+                                               property="calendarItemStyle"
+                                               stylename="edit-form-control"/>
+                                    <!-- TextField хранит подсказку события в календаре. -->
+                                    <textField id="calendarItemDescriptionTextField"
+                                               width="100%"
+                                               caption="msg://msgCalendarItemDescription"
+                                               dataContainer="iteractionDc"
+                                               property="calendarItemDescription"
+                                               stylename="edit-form-control"/>
+                                </groupBox>
+                            </hbox>
+                            <!-- Карточка «Email и памятки» хранит флаги отправки и редакторы шаблонов. -->
+                            <groupBox id="emailSettingsGroupBox" caption="msg://msgEmailSettings"
+                                      stylename="edit-card"
+                                      width="100%"
+                                      spacing="true"
+                                      expand="textEmailHBox"
+                                      showAsPanel="true">
+                                <!-- HBox располагает флаги отправки email и памятки кандидату. -->
+                                <hbox spacing="true">
+                                    <!-- Чекбокс включает отправку email кандидату; controller управляет редактором. -->
+                                    <checkBox id="neetToSendEmailCheckBox"
+                                              dataContainer="iteractionDc"
+                                              caption="msg://msgNeedSendEmail"
+                                              property="needSendLetter"/>
+                                    <!-- Чекбокс включает отправку памятки кандидату. -->
+                                    <checkBox id="neetSendMemoCheckBox"
+                                              dataContainer="iteractionDc"
+                                              property="needSendMemo"
+                                              caption="msg://msgNeedSendMemo"/>
+                                </hbox>
+                                <!-- HBox редакторов заполняет доступную высоту карточки двумя rich-text областями. -->
+                                <hbox id="textEmailHBox"
+                                      expand="textEmailToSendRichTextArea"
+                                      width="100%"
+                                      height="250px"
+                                      spacing="true">
+                                    <!-- RichTextArea хранит шаблон email; controller догружает LOB при открытии вкладки. -->
+                                    <richTextArea id="textEmailToSendRichTextArea"
+                                                  height="100%"
+                                                  width="100%"
+                                                  box.expandRatio="8"
+                                                  dataContainer="iteractionDc"
+                                                  property="textEmailToSend"/>
+                                    <!-- RichTextArea показывает доступные ключи шаблона; заполняется controller-ом. -->
+                                    <richTextArea id="commentKeysRichTextArea"
+                                                  box.expandRatio="2"
+                                                  stylename="borderless"
+                                                  width="100%"
+                                                  height="100%"
+                                                  editable="false"/>
+                                </hbox>
+                            </groupBox>
+                        </vbox>
+                    </tab>
+                    <!-- Вкладка «Виджеты» настраивает виджет контроля кандидатов и виджеты паузы и графика. -->
+                    <tab id="setupWidgets"
+                         caption="msg://msgWidgetsSetup"
+                         expand="widgetSetupVBox"
+                         spacing="true">
+                        <!-- VBox располагает флаг виджета и карточку с аккордеоном виджетов. -->
+                        <vbox id="widgetSetupVBox"
                               spacing="true"
-                              captionAsHtml="true"
-                              caption="msg://msgTypeOptions"
                               width="100%"
-                              stylename="light">
-                        <radioButtonGroup id="typeTraceRadioButtons"
-                                          dataContainer="iteractionDc"
-                                          width="100%"
-                                          property="checkTrace"/>
-                    </groupBox>
-                    <groupBox id="checkTraceTwinGroupBox"
-                              expand="checkTraceTwinColumn"
-                              caption="msg://msgTraceTwinColumn"
+                              expand="widgetSetupGroupBox">
+                            <!-- Чекбокс включает виджет контроля кандидатов. -->
+                            <checkBox id="myJobCandidatesWingetCheckBox"
+                                      dataContainer="iteractionDc"
+                                      property="widgetChackJobCandidates"
+                                      caption="msg://msgCheckJobCandidateWidget"/>
+                            <!-- Карточка виджетов содержит аккордеон с настройками паузы и графика. -->
+                            <groupBox id="widgetSetupGroupBox"
+                                      stylename="edit-card"
+                                      width="100%"
+                                      expand="widgetSetupAccordion"
+                                      showAsPanel="true">
+                                <!-- Аккордеон раскрывает настройки виджетов по одному блоку за раз. -->
+                                <accordion id="widgetSetupAccordion" height="100%">
+                                    <!-- Вкладка аккордеона с настройками виджета «Пауза». -->
+                                    <tab id="widgetPausedTab"
+                                         margin="true"
+                                         spacing="true"
+                                         caption="msg://msgWidgetPaused">
+                                    </tab>
+                                    <!-- Вкладка аккордеона с настройками виджета «График». -->
+                                    <tab id="widgetGraph"
+                                         margin="true"
+                                         spacing="true"
+                                         caption="msg://msgGraph">
+                                    </tab>
+                                </accordion>
+                            </groupBox>
+                        </vbox>
+                    </tab>
+                    <!-- Вкладка «Проверка цепочки» настраивает тип отслеживания и следующее взаимодействие. -->
+                    <tab id="checkTrace"
+                         name="checkTrace"
+                         caption="msg://msgCheckTrace"
+                         spacing="true"
+                         expand="traceHBox">
+                        <!-- VBox занимает высоту вкладки и располагает обе карточки проверки. -->
+                        <vbox id="traceHBox"
+                              width="100%"
+                              expand="checkTraceTwinGroupBox"
                               height="100%"
-                              width="100%"
-                              spacing="true"
-                              stylename="light">
-                        <twinColumn id="checkTraceTwinColumn"
-                                    addAllBtnEnabled="true"
-                                    width="100%"
-                                    columns="20"
-                                    height="100%"
-                                    reorderable="true"
-                                    optionsContainer="iteractionElementsDc"/>
-                    </groupBox>
-                </vbox>
-            </tab>
-        </tabSheet>
-        <hbox id="editActions"
-              width="100%"
-              spacing="true"
-              align="BOTTOM_RIGHT">
-            <button action="windowCommitAndClose"/>
-            <button action="windowClose"/>
+                              spacing="true">
+                            <!-- Карточка типа отслеживания хранит radio-выбор режима проверки цепочки. -->
+                            <groupBox id="checkTraceOption"
+                                      expand="typeTraceRadioButtons"
+                                      spacing="true"
+                                      captionAsHtml="true"
+                                      caption="msg://msgTypeOptions"
+                                      width="100%"
+                                      showAsPanel="true"
+                                      stylename="edit-card">
+                                <!-- RadioButtonGroup выбирает тип отслеживания; controller управляет twin-column. -->
+                                <radioButtonGroup id="typeTraceRadioButtons"
+                                                  dataContainer="iteractionDc"
+                                                  width="100%"
+                                                  property="checkTrace"/>
+                            </groupBox>
+                            <!-- Карточка следующего взаимодействия хранит twin-column выбора дочерних типов. -->
+                            <groupBox id="checkTraceTwinGroupBox"
+                                      expand="checkTraceTwinColumn"
+                                      caption="msg://msgTraceTwinColumn"
+                                      height="100%"
+                                      width="100%"
+                                      spacing="true"
+                                      showAsPanel="true"
+                                      stylename="edit-card">
+                                <!-- TwinColumn выбирает дочерние типы для проверки цепочки взаимодействий. -->
+                                <twinColumn id="checkTraceTwinColumn"
+                                            addAllBtnEnabled="true"
+                                            width="100%"
+                                            columns="20"
+                                            height="100%"
+                                            reorderable="true"
+                                            optionsContainer="iteractionElementsDc"/>
+                            </groupBox>
+                        </vbox>
+                    </tab>
+                </tabSheet>
+
+                <!-- Footer удерживает сохранение и отмену вне прокручиваемого содержимого. -->
+                <hbox id="editActions"
+                      stylename="iteraction-footer edit-footer-actions"
+                      width="100%"
+                      height="AUTO"
+                      spacing="true"
+                      expand="editActionsSpacer"
+                      align="MIDDLE_RIGHT">
+                    <!-- Spacer выталкивает группу действий к правому краю footer. -->
+                    <vbox id="editActionsSpacer" width="100%" height="1px"/>
+                    <!-- Группа действий объединяет стандартные editor-команды. -->
+                    <hbox id="editActionsGroup"
+                          width="AUTO"
+                          height="AUTO"
+                          spacing="true"
+                          align="MIDDLE_RIGHT"
+                          stylename="iteraction-footer-actions">
+                        <!-- Стандартная action сохраняет тип взаимодействия и закрывает editor. -->
+                        <button action="windowCommitAndClose"
+                                stylename="iteraction-primary-action"/>
+                        <!-- Стандартная action закрывает editor без подтверждённого сохранения изменений. -->
+                        <button action="windowClose"
+                                stylename="iteraction-secondary-action"/>
+                    </hbox>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>

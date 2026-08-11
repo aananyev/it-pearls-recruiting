@@ -1,0 +1,420 @@
+/*
+ * IteractionEdit — локальный визуальный слой HRM HuntTech.
+ *
+ * Компоновка повторяет эталон IteractionListEdit и максимально опирается на
+ * общий визуальный API edit-экранов (edit-screen-shared-styles.scss):
+ * edit-sidebar/edit-toolbar/edit-tabs/edit-form-control/edit-card/edit-footer-actions.
+ * Здесь остаются только локальные отличия формы: тёмная sidebar с профилем,
+ * label-навигация на тёмном фоне, панели-карточки (showAsPanel), предупреждение
+ * и акцент вкладок #ffb11b. Правила не меняют CUBA- и бизнес-контракты формы.
+ */
+@mixin iteraction-editor-theme {
+  .iteraction-editor {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    color: $v-font-color;
+    background: mix($v-app-background-color, $v-panel-background-color, 82%);
+    overflow: hidden;
+
+    .iteraction-main-layout,
+    .iteraction-sidebar,
+    .iteraction-workspace,
+    .iteraction-toolbar,
+    .iteraction-footer {
+      box-sizing: border-box;
+    }
+
+    .iteraction-main-layout {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    // Фирменная тёмная sidebar HRM HuntTech 1:1 с эталоном IteractionListEdit.
+    // Ширину (270px / 250px <=1366px) даёт общий слой edit-sidebar.
+    .v-slot-iteraction-sidebar,
+    .iteraction-sidebar {
+      background-color: #172638 !important;
+      background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%) !important;
+    }
+
+    .iteraction-sidebar {
+      height: 100% !important;
+      padding: 14px 12px;
+      color: #f8fafc !important;
+      border-right: 1px solid rgba(15, 23, 42, 0.78);
+      box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18);
+      overflow-x: hidden;
+      overflow-y: auto;
+
+      > .v-slot {
+        width: 100% !important;
+        min-width: 0;
+      }
+    }
+
+    // Профиль: иконка типа в круге 96×96, наименование и подзаголовок (эталон 18/12px).
+    .iteraction-identity-images {
+      min-height: 104px;
+      padding: 2px 0 8px;
+    }
+
+    .iteraction-editor-icon-preview,
+    .iteraction-editor-icon-preview .v-icon {
+      box-sizing: border-box;
+      width: 96px !important;
+      height: 96px !important;
+      min-width: 96px !important;
+      min-height: 96px !important;
+      max-width: 96px !important;
+      max-height: 96px !important;
+    }
+
+    .iteraction-editor-icon-preview {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #f8fafc !important;
+      background: rgba(255, 255, 255, 0.10) !important;
+      border: 3px solid rgba(255, 255, 255, 0.90) !important;
+      border-radius: 50% !important;
+      box-shadow: 0 7px 18px rgba(0, 0, 0, 0.26);
+    }
+
+    .iteraction-editor-icon-preview .v-icon {
+      font-size: 42px;
+      line-height: 42px;
+      text-align: center;
+    }
+
+    .iteraction-profile-title,
+    .iteraction-profile-title.v-label {
+      color: #f8fafc !important;
+      font-size: 18px !important;
+      line-height: 24px !important;
+      font-weight: 700 !important;
+    }
+
+    .iteraction-profile-subtitle,
+    .iteraction-profile-subtitle.v-label {
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 12px !important;
+      line-height: 17px !important;
+      font-weight: 600 !important;
+    }
+
+    // Служебная карточка номера — тёмная панель 1:1 с контекст-карточкой эталона.
+    .iteraction-service-card {
+      width: 100% !important;
+      color: #f8fafc !important;
+      background: rgba(255, 255, 255, 0.055) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      border-radius: 8px !important;
+      box-shadow: none !important;
+      overflow: hidden;
+    }
+
+    .iteraction-service-fields {
+      width: 100% !important;
+      padding: 2px 0 8px;
+    }
+
+    .iteraction-service-fields > .v-slot,
+    .iteraction-service-field {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .iteraction-service-fields .v-caption {
+      min-height: 0;
+      padding: 0 0 4px !important;
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
+      line-height: 15px !important;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: transparent !important;
+      border: 0 !important;
+    }
+
+    .iteraction-service-card .v-textfield {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 36px;
+      color: #f8fafc !important;
+      font-size: 14px !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      border-color: rgba(255, 255, 255, 0.24) !important;
+      border-radius: 6px;
+      box-shadow: none !important;
+    }
+
+    // label-навигация на тёмной sidebar: общая геометрия пунктов (edit-слой),
+    // цвета и полоса-заголовок — эталонные (белый hover, #ffb11b active).
+    .label-navigation,
+    .iteraction-navigation,
+    .v-slot-label-navigation,
+    .v-slot-iteraction-navigation {
+      display: block !important;
+      height: auto !important;
+      visibility: visible !important;
+    }
+
+    .iteraction-navigation {
+      padding: 10px 0 4px !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
+      overflow: visible !important;
+    }
+
+    // Заголовок «Разделы формы»: полоса-заголовок с двумя inset-линиями (контракт §4.1).
+    .iteraction-navigation .iteraction-navigation-title,
+    .iteraction-navigation .v-label-iteraction-navigation-title {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-height: 36px !important;
+      height: auto !important;
+      padding: 7px 11px !important;
+      color: #ffb11b !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 21px !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+      background: rgba(255, 255, 255, 0.045) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+      box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
+                  rgba(244, 244, 244, 1) 0 -1px 0 0 inset;
+      white-space: normal !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    .label-nav-item,
+    .iteraction-nav-item,
+    .v-button-label-nav-item,
+    .v-button-iteraction-nav-item {
+      min-height: 27px !important;
+      height: auto !important;
+      padding: 3px 10px !important;
+      color: rgba(248, 250, 252, 0.82) !important;
+      border-radius: 0 5px 5px 0 !important;
+      opacity: 1 !important;
+    }
+
+    .label-nav-item:hover,
+    .label-nav-item:focus,
+    .iteraction-nav-item:hover,
+    .iteraction-nav-item:focus {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .label-nav-item-active,
+    .iteraction-nav-item-active,
+    .v-button-label-nav-item-active,
+    .v-button-iteraction-nav-item-active {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.12) !important;
+      border-left-color: #ffb11b !important;
+    }
+
+    // Предупреждение «заполняет только администратор» — заметный, но не кнопочный блок.
+    .iteraction-editor-warning,
+    .iteraction-editor-warning.v-label {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      padding: 8px 10px;
+      color: #ffcf66 !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      line-height: 17px !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+      background: rgba(255, 177, 27, 0.10) !important;
+      border: 1px solid rgba(255, 177, 27, 0.24);
+      border-radius: 7px;
+    }
+
+    .iteraction-sidebar-spacer {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    // Карточки groupBox рендерятся как v-panel (showAsPanel): заголовок 17px/700/50px
+    // (те же значения, что у общего edit-accordion-section).
+    .iteraction-editor .edit-card .v-panel-caption {
+      box-sizing: border-box;
+      display: block !important;
+      min-height: 50px;
+      padding: 12px 16px;
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
+      line-height: 24px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 68%);
+      border-bottom: 1px solid rgba($v-font-color, 0.15);
+    }
+
+    .iteraction-editor .edit-card .v-panel-content {
+      box-sizing: border-box;
+      height: auto !important;
+      min-height: 0 !important;
+      padding: 14px 16px 16px !important;
+      background: $v-panel-background-color;
+      border: 0 !important;
+      overflow: visible !important;
+    }
+
+    // Вложенные подкарточки (колонки уведомлений) — компактный заголовок 15px/42px.
+    .iteraction-editor .iteraction-editor-subcard .v-panel-caption {
+      min-height: 42px;
+      padding: 9px 14px;
+      font-size: 15px !important;
+      line-height: 23px !important;
+    }
+
+    .iteraction-editor .iteraction-editor-subcard .v-panel-content {
+      padding: 12px 14px 14px !important;
+    }
+
+    // Подписи полей и фокус в карточках — общий вид Edit-экранов HRM HuntTech.
+    .iteraction-editor .edit-card .v-caption .v-captiontext {
+      color: mix($v-font-color, $v-panel-background-color, 72%) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+    }
+
+    .iteraction-editor .edit-card .v-textfield:focus,
+    .iteraction-editor .edit-card .v-filterselect-focus,
+    .iteraction-editor .edit-card .v-datefield-focus .v-datefield-textfield {
+      border-color: $v-selection-color !important;
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
+      outline: 0;
+    }
+
+    .iteraction-editor .edit-card .v-filterselect-button,
+    .iteraction-editor .edit-card .c-pickerfield-layout .v-button {
+      min-width: 38px;
+      min-height: 38px;
+    }
+
+    // Акцент вкладок — фирменный #ffb11b (эталон IteractionListEdit): 48px/15px/600,
+    // нижняя полоса у выбранной вкладки.
+    .iteraction-tabs {
+      background: $v-panel-background-color !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .iteraction-tabs > .v-tabsheet-tabcontainer {
+      padding: 0 20px;
+      background: $v-panel-background-color !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.16) !important;
+    }
+
+    .iteraction-tabs .v-tabsheet-tabs,
+    .iteraction-tabs .v-tabsheet-tabitem,
+    .iteraction-tabs .v-tabsheet-tabitem-selected {
+      height: 48px;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .iteraction-tabs .v-caption {
+      box-sizing: border-box;
+      height: 48px;
+      padding: 0 16px !important;
+      color: mix($v-font-color, $v-panel-background-color, 82%) !important;
+      font-size: 15px !important;
+      font-weight: 600 !important;
+      line-height: 48px !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-bottom: 3px solid transparent !important;
+    }
+
+    .iteraction-tabs .v-tabsheet-tabitem:hover .v-caption,
+    .iteraction-tabs .v-tabsheet-tabitem-selected .v-caption {
+      color: #ffb11b !important;
+    }
+
+    .iteraction-tabs .v-tabsheet-tabitem-selected .v-caption {
+      border-bottom-color: #ffb11b !important;
+    }
+
+    .iteraction-tabs > .v-tabsheet-content {
+      box-sizing: border-box;
+      height: calc(100% - 49px) !important;
+      padding: 14px 16px 18px;
+      background: mix($v-app-background-color, $v-panel-background-color, 82%) !important;
+      border: 0 !important;
+      overflow: hidden;
+    }
+
+    .iteraction-tabs .v-tabsheet-tabsheetpanel {
+      width: 100% !important;
+      height: 100% !important;
+      min-width: 0;
+      background: transparent !important;
+      border: 0 !important;
+    }
+
+    // Кнопки footer: первичное действие — акцентная кнопка, вторичные — прозрачные.
+    .iteraction-footer .v-button {
+      min-height: 38px;
+      padding: 0 16px;
+      font-size: 14px;
+      border-radius: 4px;
+      box-shadow: none !important;
+    }
+
+    .iteraction-footer .v-button:focus {
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
+      outline: 0;
+    }
+
+    .iteraction-footer .c-primary-action,
+    .iteraction-primary-action {
+      color: #ffffff !important;
+      background: $v-selection-color !important;
+      border-color: $v-selection-color !important;
+    }
+
+    .iteraction-footer .v-button:not(.c-primary-action),
+    .iteraction-secondary-action {
+      background: transparent !important;
+    }
+
+    .iteraction-footer-actions {
+      width: auto !important;
+      white-space: nowrap;
+    }
+
+    .iteraction-footer-actions > .v-slot {
+      width: auto !important;
+    }
+
+    @media (max-width: 1366px) {
+      .iteraction-sidebar {
+        padding-right: 10px;
+        padding-left: 10px;
+      }
+
+      .iteraction-tabs > .v-tabsheet-content {
+        padding-right: 12px;
+        padding-left: 12px;
+      }
+    }
+  }
+}

@@ -334,6 +334,26 @@
                        align="MIDDLE_CENTER"
                        stylename="edit-sidebar-subtitle"/>
             </vbox>
+            <!-- Средний рейтинг вакансии (эталон JobCandidateEdit statusRatingRow): подпись
+                 и звёзды 1:1 с блоком «Рейтинг» в sidebar JobCandidateEdit; среднее
+                 арифметическое rating взаимодействий IteractionList по текущей позиции
+                 считает refreshSidebarRating() (JPQL avg, округление до целого).
+                 Компоновка вертикальная (капшн + звёзды), как у остальных блоков sidebar:
+                 длинная подпись не влезает в одну строку со звёздами (наезд на 19px). -->
+            <vbox id="openPositionRatingBox"
+                  width="100%"
+                  spacing="false"
+                  stylename="open-position-editor-status">
+                <!-- Подпись блока — капшн sidebar (10.5px uppercase), на всю ширину. -->
+                <label id="openPositionRatingCaptionLabel"
+                       value="msg://msgAvgRating"
+                       width="100%"
+                       stylename="open-position-editor-sidebar-caption"/>
+                <!-- Значение рейтинга: label пустой, звёзды рисует CSS :before по классу
+                     open-position-rating-* (устанавливает refreshSidebarRating()). -->
+                <label id="openPositionRatingLabel"
+                       stylename="h3"/>
+            </vbox>
             <!-- Блок срочности вакансии (эталон IteractionListEdit): пара ячеек 50/50 —
                  «Статус вакансии» (черновик/открыта/закрыта) и «Приоритет» со светофором;
                  ниже — строка формата работы (удалённая/офисная/гибрид);

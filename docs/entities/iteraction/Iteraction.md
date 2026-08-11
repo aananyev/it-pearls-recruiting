@@ -224,7 +224,11 @@ erDiagram
 ### 5.3 IteractionEdit
 
 - **View:** `iteraction-edit-view`
-- **Вкладки:** тип взаимодействия, кнопка, доп. поле, календарь, email, уведомления, виджеты, проверка цепочки, аутстаффинг
+- **Компоновка (эталон IteractionListEdit, 2026-08-11):** sidebar + workspace по общему Edit-контракту
+  - **Sidebar:** иконка типа в круге, наименование (`labelItercationName`), номер (`numberField`), label-навигация по 8 вкладкам, предупреждение администратора (`labelWarning`)
+  - **Workspace:** toolbar (заголовок + описание), TabSheet `edit-tabs` (8 вкладок), footer с ОК/Отмена справа-внизу
+  - **Карточки:** groupBox-секции как v-panel (`showAsPanel="true"` + `edit-card`); вкладки с единственным блоком ввода скрывают навигацию (правило 3.6)
+- **Вкладки:** тип взаимодействия, признаки, аутстаффинг, кнопка, уведомления, доп. настройки, виджеты, проверка цепочки
 - **Lazy loaders (по первому открытию вкладки):**
 
 | Вкладка (id) | Что загружается |
@@ -235,6 +239,8 @@ erDiagram
 
 - **Справочные loaders (cacheable):** корни дерева (`iteractionTree is null`), дочерние элементы, workStatus
 - **UI-логика:** блокировка полей при `mandatoryIteraction`, взаимоисключение `addFlag` / `callForm`, preview пиктограммы
+- **Навигация (presentation-only, Java):** клики по пунктам sidebar переключают TabSheet (`switchToTab`), активный пункт подсвечивается `label-nav-item-active`; данные и lifecycle не затрагиваются
+- **Локальный стиль:** `iteraction-editor.scss` (7 тем, идентичные копии) поверх `edit-screen-shared-styles.scss`
 
 ### 5.4 IteractionRequirementBrowse
 
@@ -362,7 +368,7 @@ rg "view=\".*iteraction" modules/ --glob '*.xml'
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
+| 2026-08-11 | Рефакторинг `IteractionEdit` по эталону `IteractionListEdit`: sidebar+workspace, label-навигация по вкладкам (presentation-only Java), карточки-панели, toolbar/footer по общему Edit-контракту; `iteraction-editor.scss` × 7 тем; контрактный тест `IteractionEditLayoutContractTest` |
 | 2026-06-22 | Аудит Edit unfetched FK: `IteractionEdit` — обращения только к полям `iteraction-edit-view`; LOB lazy reload — OK |
 | 2026-06-22 | Исправление `iteraction-browse-view`: поля `iteractionTree` (number, iterationName) для группировки GroupTable |
 | 2026-06-22 | Оптимизация: specialized views (browse/tree-browse/edit/picker), lazy LOB `textEmailToSend` и вкладки checkTrace/outstaffingTab, cacheable loaders, документация |

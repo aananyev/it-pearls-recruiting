@@ -786,6 +786,117 @@ public class OpenPositionEditLayoutContractTest {
     }
 
     @Test
+    public void sidebarRatingBlockMirrorsJobCandidateEdit() throws IOException {
+        String descriptor = readProjectFile(EDIT_XML);
+        String controller = readProjectFile(EDIT_CONTROLLER);
+
+        // Блок «Средний рейтинг вакансии» в sidebar — рейтинг 1:1 с statusRatingRow
+        // JobCandidateEdit: vbox openPositionRatingBox (полоса open-position-editor-status)
+        // с подписью-капшном сверху и звёздами (h3, :before open-position-rating-*)
+        // отдельной строкой. Вертикальная компоновка выбрана потому, что длинная подпись
+        // «Средний рейтинг вакансии» не влезает в одну строку со звёздами в sidebar 257px
+        // (наезд v-expand 86px на слот звёзд при expandRatio 1/2).
+        String ratingBox = section(descriptor, "id=\"openPositionRatingBox\"", "id=\"vacancyStateSummary\"");
+        assertTrue("Блок рейтинга не использует open-position-editor-status",
+                startTag(descriptor, "openPositionRatingBox")
+                        .contains("open-position-editor-status"));
+        assertTrue("Подпись openPositionRatingCaptionLabel отсутствует в блоке рейтинга",
+                ratingBox.contains("id=\"openPositionRatingCaptionLabel\""));
+        assertTrue("Значение openPositionRatingLabel отсутствует в блоке рейтинга",
+                ratingBox.contains("id=\"openPositionRatingLabel\""));
+        assertFalse("Горизонтальная строка openPositionRatingRow не должна использоваться " +
+                        "(длинная подпись наезжает на звёзды при expandRatio 1/2)",
+                ratingBox.contains("openPositionRatingRow"));
+        String captionTag = startTag(descriptor, "openPositionRatingCaptionLabel");
+        assertTrue("Подпись не использует msgAvgRating", captionTag.contains("value=\"msg://msgAvgRating\""));
+        assertTrue("Подпись не использует капшн sidebar (open-position-editor-sidebar-caption)",
+                captionTag.contains("stylename=\"open-position-editor-sidebar-caption\""));
+        assertTrue("Подпись не растянута на всю ширину", captionTag.contains("width=\"100%\""));
+        String valueTag = startTag(descriptor, "openPositionRatingLabel");
+        assertTrue("Значение рейтинга не использует класс h3", valueTag.contains("stylename=\"h3\""));
+
+        // Расположение: сразу после identity (под Images logo box), до пары «Статус+Приоритет».
+        assertTrue("Рейтинг должен идти после openPositionSidebarIdentity",
+                descriptor.indexOf("id=\"openPositionSidebarIdentity\"")
+                        < descriptor.indexOf("id=\"openPositionRatingBox\""));
+        assertTrue("Рейтинг должен идти после openPositionEditorLogoBox (под Images)",
+                descriptor.indexOf("id=\"openPositionEditorLogoBox\"")
+                        < descriptor.indexOf("id=\"openPositionRatingBox\""));
+        assertTrue("Рейтинг должен предшествовать паре vacancyStateSummary",
+                descriptor.indexOf("id=\"openPositionRatingBox\"")
+                        < descriptor.indexOf("id=\"vacancyStateSummary\""));
+
+        // Java-контракт: refreshSidebarRating считает среднее rating IteractionList
+        // по текущей вакансии (avg(e.rating + 1), как в JobCandidateEdit).
+        assertTrue("Контроллер не содержит refreshSidebarRating",
+                controller.contains("private void refreshSidebarRating()"));
+        assertTrue("Контроллер не вызывает refreshSidebarRating из refreshSidebarInfoCard",
+                controller.contains("refreshSidebarStatus();\n        refreshSidebarPriority();\n        refreshOpenCloseButton();\n        refreshSidebarRating();"));
+        assertTrue("Контроллер не считает среднее по e.vacancy.id",
+                controller.contains("e.vacancy.id = :openPositionId"));
+        assertTrue("Контроллер не округляет среднее (Math.round)",
+                controller.contains("(int) Math.round(avg)"));
+        assertTrue("Контроллер не использует класс open-position-rating-blue-5",
+                controller.contains("open-position-rating-blue-5"));
+
+        // Preview-контракт: инжектируемый label обязан быть в preview как скрытая заглушка.
+        String preview = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/openposition/open-position-edit-preview.xml");
+        assertTrue("Preview не содержит скрытую заглушку openPositionRatingLabel",
+                preview.contains("id=\"openPositionRatingLabel\"")
+                        && preview.contains("visible=\"false\""));
+    }
+
+    @Test
+    public void sidebarRatingScssMirrorsJobCandidateStatusInAllThemes() throws IOException {
+        // Звёзды рейтинга — 1:1 с блоком «Рейтинг» JobCandidateEdit: контейнер
+        // open-position-editor-status (полоса с нижним разделителем), label #ffb11b 19px/700
+        // line-height 30px, звёзды через :before по классам open-position-rating-*.
+        String status = "    .open-position-editor-status {";
+        String ratingRed = "    .open-position-editor-status .open-position-rating-red-1:before {";
+        for (String theme : THEMES) {
+            String scss = readProjectFile(themeScssPath(theme));
+            assertTrue("В теме " + theme + " нет контейнера open-position-editor-status",
+                    scss.contains(status));
+            assertTrue("В теме " + theme + " нет класса красной звезды :before",
+                    scss.contains(ratingRed));
+            String statusBlock = section(scss, status,
+                    "    /* Явный список rating-классов исключает дорогой substring selector. */");
+            for (String rule : Arrays.asList(
+                    "width: 100% !important;",
+                    "min-height: 44px;",
+                    "padding: 2px 0 10px;",
+                    "border-bottom: 1px solid rgba(255, 255, 255, .16);")) {
+                assertTrue("В теме " + theme + " контейнер рейтинга не содержит " + rule,
+                        statusBlock.contains(rule));
+            }
+            String starBlock = section(scss,
+                    "    /* Явный список rating-классов исключает дорогой substring selector. */",
+                    "    .open-position-editor-status .open-position-rating-red-1:before {");
+            for (String rule : Arrays.asList(
+                    "color: #ffb11b !important;",
+                    "font-size: 19px !important;",
+                    "font-weight: 700;",
+                    "line-height: 30px !important;",
+                    "white-space: nowrap !important;")) {
+                assertTrue("В теме " + theme + " звёзды не содержат " + rule,
+                        starBlock.contains(rule));
+            }
+            // 5 классов звёзд + пустой класс: content из ★/☆ как в JobCandidateEdit.
+            for (String starRule : Arrays.asList(
+                    "\\2605\\2606\\2606\\2606\\2606",
+                    "\\2605\\2605\\2606\\2606\\2606",
+                    "\\2605\\2605\\2605\\2606\\2606",
+                    "\\2605\\2605\\2605\\2605\\2606",
+                    "\\2605\\2605\\2605\\2605\\2605",
+                    "\\2606\\2606\\2606\\2606\\2606")) {
+                assertTrue("В теме " + theme + " нет звёздного content " + starRule,
+                        scss.contains(starRule));
+            }
+        }
+    }
+
+    @Test
     public void tabsCaptionsMatchJobCandidateEditFont() throws IOException {
         // Шрифт заголовков вкладок — 1:1 с эталоном JobCandidateEdit (font 14/600,
         // цвет #26384c, hover #1264b5, selected = $v-selection-color) во всех 7 темах.

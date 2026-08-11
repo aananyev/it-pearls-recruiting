@@ -461,6 +461,88 @@
       line-height: 21px !important;
     }
 
+    /* Средний рейтинг вакансии в sidebar (эталон JobCandidateEdit statusRatingRow):
+       строка «Рейтинг» с подписью и звёздами; label значения пустой — звёзды рисует
+       CSS :before по классам open-position-rating-* (Java refreshSidebarRating). */
+    .open-position-editor-status {
+      width: 100% !important;
+      min-height: 44px;
+      padding: 2px 0 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, .16);
+      /* Подпись и звёзды блока рейтинга — по центру sidebar по горизонтали. */
+      text-align: center;
+    }
+
+    /* Явный список rating-классов исключает дорогой substring selector. */
+    .open-position-editor-status .v-label,
+    .open-position-editor-status .h3,
+    .open-position-editor-status .open-position-rating-red-1,
+    .open-position-editor-status .open-position-rating-orange-2,
+    .open-position-editor-status .open-position-rating-yellow-3,
+    .open-position-editor-status .open-position-rating-green-4,
+    .open-position-editor-status .open-position-rating-blue-5,
+    .open-position-editor-status .open-position-rating-empty {
+      width: auto !important;
+      height: auto !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      color: #ffb11b !important;
+      font-family: Arial, "Segoe UI Symbol", sans-serif !important;
+      font-size: 19px !important;
+      font-weight: 700;
+      line-height: 30px !important;
+      text-align: left !important;
+      white-space: nowrap !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .open-position-editor-status .open-position-rating-red-1:before {
+      content: "\2605\2606\2606\2606\2606  ";
+    }
+
+    .open-position-editor-status .open-position-rating-orange-2:before {
+      content: "\2605\2605\2606\2606\2606  ";
+    }
+
+    .open-position-editor-status .open-position-rating-yellow-3:before {
+      content: "\2605\2605\2605\2606\2606  ";
+    }
+
+    .open-position-editor-status .open-position-rating-green-4:before {
+      content: "\2605\2605\2605\2605\2606  ";
+    }
+
+    .open-position-editor-status .open-position-rating-blue-5:before {
+      content: "\2605\2605\2605\2605\2605  ";
+    }
+
+    .open-position-editor-status .open-position-rating-empty:before {
+      content: "\2606\2606\2606\2606\2606  ";
+    }
+
+    /* Подпись «Средний рейтинг вакансии» — капшн sidebar, как у остальных блоков
+       (open-position-editor-sidebar-caption 10.5px uppercase): перебивает общий
+       rating-стиль .v-label (19px nowrap), чтобы длинный текст не наезжал на звёзды;
+       звёзды занимают отдельную строку под подписью. */
+    .open-position-editor-status .open-position-editor-sidebar-caption,
+    .open-position-editor-status .open-position-editor-sidebar-caption.v-label {
+      width: 100% !important;
+      min-height: 18px;
+      margin-bottom: 4px;
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 10.5px !important;
+      font-weight: 700 !important;
+      line-height: 15px !important;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: normal !important;
+      text-align: center !important;
+    }
+
     .edit-sidebar-warning,
     .edit-sidebar-warning.v-label {
       box-sizing: border-box;

@@ -105,6 +105,10 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     @Inject
     private Label<String> remoteWorkSidebarLabel;
     @Inject
+    /* Label звёздного рейтинга sidebar: пустой, звёзды рисует CSS :before по классу
+       open-position-rating-* (refreshSidebarRating, среднее rating IteractionList). */
+    private Label<String> openPositionRatingLabel;
+    @Inject
     private DateField<Date> closingDateDateField;
     @Inject
     private MessageBundle messageBundle;
@@ -3566,6 +3570,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         refreshSidebarStatus();
         refreshSidebarPriority();
         refreshOpenCloseButton();
+        refreshSidebarRating();
     }
 
     /** Заполнение ячейки «Статус вакансии» sidebar (эталон IteractionListEdit): черновик
@@ -3650,6 +3655,50 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
         }
         remoteWorkSidebarLabel.setValue(remoteStr);
+    }
+
+    /** Заполнение звёздного рейтинга sidebar (эталон JobCandidateEdit setRatingLabel):
+     *  среднее арифметическое rating всех взаимодействий IteractionList по текущей
+     *  вакансии (rating хранится 0–4, на экране звёзды 1–5 — как в JobCandidateEdit
+     *  avg(e.rating + 1)), округление до целого, звёзды классом open-position-rating-*.
+     *  Presentation-only; вызывается из refreshSidebarInfoCard() (onBeforeShow + listener). */
+    private void refreshSidebarRating() {
+        OpenPosition pos = getEditedEntity();
+        if (PersistenceHelper.isNew(pos) || pos.getId() == null) {
+            openPositionRatingLabel.setValue("");
+            openPositionRatingLabel.setStyleName("open-position-rating-empty");
+            return;
+        }
+        Double avg = dataManager.loadValue(
+                "select avg(e.rating + 1) from hunttech_IteractionList e where e.vacancy.id = :openPositionId and e.rating is not null",
+                Double.class)
+                .parameter("openPositionId", pos.getId())
+                .one();
+        int intRating = avg != null ? (int) Math.round(avg) : 0;
+        openPositionRatingLabel.setValue("");
+        if (intRating > 0) {
+            switch (intRating) {
+                case 1:
+                    openPositionRatingLabel.setStyleName("open-position-rating-red-1");
+                    break;
+                case 2:
+                    openPositionRatingLabel.setStyleName("open-position-rating-orange-2");
+                    break;
+                case 3:
+                    openPositionRatingLabel.setStyleName("open-position-rating-yellow-3");
+                    break;
+                case 4:
+                    openPositionRatingLabel.setStyleName("open-position-rating-green-4");
+                    break;
+                case 5:
+                    openPositionRatingLabel.setStyleName("open-position-rating-blue-5");
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            openPositionRatingLabel.setStyleName("open-position-rating-empty");
+        }
     }
 
     /** Надпись кнопки «Закрыть/Открыть вакансию» по состоянию OPEN_CLOSE: открыта (false/none) →

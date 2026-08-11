@@ -59,7 +59,9 @@
     </collection>
     <collection id="positionTypesDc" class="com.company.hunttech.entity.Position">
       <view extends="position-picker-view"/>
-      <loader id="positionTypesLc" cacheable="true">
+      <!-- Загрузчик типов позиций: без cacheable — как в legacy open-position-edit.xml
+           (оптимизация 2026-08-10: entity cache давал точечный find() на каждую строку). -->
+      <loader id="positionTypesLc">
         <query><![CDATA[select e from hunttech_Position e
                     where e.positionRuName not like '%(не использовать)%'
                     order by e.positionRuName]]></query>
@@ -104,7 +106,9 @@
     </collection>
     <collection id="companyNamesDc" class="com.company.hunttech.entity.Company">
       <view extends="company-picker-view"/>
-      <loader id="companyNamesLc" cacheable="true">
+      <!-- Загрузчик компаний: без cacheable — как в legacy open-position-edit.xml
+           (оптимизация 2026-08-10: entity cache давал точечный find() на каждую строку). -->
+      <loader id="companyNamesLc">
         <query><![CDATA[select e from hunttech_Company e
                         order by e.comanyName]]></query>
       </loader>
@@ -124,7 +128,9 @@
       </loader>
     </collection>
     <collection id="citiesDc" class="com.company.hunttech.entity.City" view="city-picker-view">
-      <loader id="citiesDl" cacheable="true">
+      <!-- Загрузчик городов: без cacheable — как в legacy open-position-edit.xml
+           (оптимизация 2026-08-10: entity cache давал точечный find() на каждую строку). -->
+      <loader id="citiesDl">
         <query><![CDATA[select e
                 from hunttech_City e
                 order by e.cityRuName]]></query>
@@ -228,6 +234,8 @@
           <label id="statusOfVacansyLabel" width="100%" visible="false"/>
           <button id="openClosePositionButton" caption="Закрыть вакансию" width="100%" visible="false"/>
           <label id="remoteWorkSidebarLabel" width="100%" visible="false"/>
+          <!-- Скрытый label звёздного рейтинга sidebar (контракт @Inject из основного XML). -->
+          <label id="openPositionRatingLabel" width="100%" visible="false"/>
         </vbox>
         <!-- Ключевые параметры используют только уже загруженные свойства edit-view. -->
         <vbox id="openPositionPreviewSummary" width="100%" spacing="true" stylename="edit-sidebar-summary">

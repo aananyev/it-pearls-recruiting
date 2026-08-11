@@ -25,6 +25,7 @@
 @import "com.company.hunttech/candidate-cv-editor";
 @import "com.company.hunttech/iteraction-list-reference-finish";
 @import "com.company.hunttech/iteraction-list-visual-alignment";
+@import "com.company.hunttech/iteraction-editor";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 .hunttech-modern-light {
@@ -53,6 +54,7 @@
   @include iteraction-list-reference-finish-theme;
   @include iteraction-list-visual-alignment-theme;
 
+  @include iteraction-editor-theme;
   // Вариант 3 (тёплый светло-серый): табличные и текстовые компоненты.
   // Импорт в конце корневого селектора — после всех include, чтобы при
   // равной специфичности перебивать существующие правила ext-файла темы.

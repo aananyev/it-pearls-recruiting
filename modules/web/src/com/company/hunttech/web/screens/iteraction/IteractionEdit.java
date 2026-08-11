@@ -12,8 +12,10 @@ import com.haulmont.cuba.gui.screen.*;
 import com.company.hunttech.entity.Iteraction;
 
 import javax.inject.Inject;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @UiController("hunttech_Iteraction.edit")
@@ -111,6 +113,35 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private boolean textEmailToSendLoaded;
     private boolean workStatusLoaded;
 
+    // Presentation-only sidebar-навигация по вкладкам (контракт §3.1/§3.4/§3.6):
+    // пункты label-навигации переключают TabSheet, данные и lifecycle не затрагиваются.
+    @Inject
+    private TabSheet tabSheet;
+    @Inject
+    private VBoxLayout iteractionNavigation;
+    @Inject
+    private Button typeTabNav;
+    @Inject
+    private Button signsTabNav;
+    @Inject
+    private Button outstaffingNav;
+    @Inject
+    private Button iconsTabNav;
+    @Inject
+    private Button notificationsNav;
+    @Inject
+    private Button setupNav;
+    @Inject
+    private Button widgetsNav;
+    @Inject
+    private Button checkTraceNav;
+
+    private static final String ACTIVE_NAV_STYLE = "label-nav-item-active";
+    // Вкладки с двумя и более блоками ввода показывают sidebar-навигацию;
+    // на вкладках с единственным блоком контейнер label-navigation скрывается целиком (правило 3.6).
+    private static final List<String> TABS_WITH_SIDEBAR_NAVIGATION =
+            Arrays.asList("tabType", "tabSigns", "outstaffingTab", "tabSetup", "checkTrace");
+
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         if (signEndCaseCheckBox.getValue() == null) {
@@ -158,6 +189,7 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         addNotificationPeriod();
         addNotificationWhenSend();
         addCheckTrace();
+        initTabNavigation();
         // @LoadDataBeforeShow should load only the first-tab data; heavy tab dictionaries are loaded on tab activation.
         iteractionElementDl.addPreLoadListener(e -> {
             if (!iteractionElementsLoaded) {
@@ -169,6 +201,83 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
                 e.preventLoad();
             }
         });
+    }
+
+    /**
+     * Строит sidebar-навигацию по вкладкам: клик переключает TabSheet и помечает
+     * активный пункт (presentation-only; loaders, commit и данные не затрагиваются).
+     * На вкладках с единственным блоком ввода контейнер label-navigation скрывается (правило 3.6).
+     */
+    private void initTabNavigation() {
+        typeTabNav.addClickListener(e -> switchToTab("tabType", typeTabNav));
+        signsTabNav.addClickListener(e -> switchToTab("tabSigns", signsTabNav));
+        outstaffingNav.addClickListener(e -> switchToTab("outstaffingTab", outstaffingNav));
+        iconsTabNav.addClickListener(e -> switchToTab("tabIcons", iconsTabNav));
+        notificationsNav.addClickListener(e -> switchToTab("tabNotifictions", notificationsNav));
+        setupNav.addClickListener(e -> switchToTab("tabSetup", setupNav));
+        widgetsNav.addClickListener(e -> switchToTab("setupWidgets", widgetsNav));
+        checkTraceNav.addClickListener(e -> switchToTab("checkTrace", checkTraceNav));
+
+        tabSheet.addSelectedTabChangeListener(event -> {
+            TabSheet.Tab selected = event.getSelectedTab();
+            if (selected != null && selected.getName() != null) {
+                updateActiveNavigation(selected.getName());
+                updateNavigationVisibility(selected.getName());
+            }
+        });
+
+        TabSheet.Tab initialTab = tabSheet.getSelectedTab();
+        String initialName = initialTab != null && initialTab.getName() != null
+                ? initialTab.getName() : "tabType";
+        updateActiveNavigation(initialName);
+        updateNavigationVisibility(initialName);
+    }
+
+    private void switchToTab(String tabName, Button activeButton) {
+        tabSheet.setSelectedTab(tabName);
+        updateActiveNavigation(tabName);
+        updateNavigationVisibility(tabName);
+    }
+
+    private void updateActiveNavigation(String tabName) {
+        for (Button navigationButton : navigationButtons()) {
+            navigationButton.removeStyleName(ACTIVE_NAV_STYLE);
+        }
+        navigationButtonFor(tabName).addStyleName(ACTIVE_NAV_STYLE);
+    }
+
+    private List<Button> navigationButtons() {
+        return Arrays.asList(typeTabNav, signsTabNav, outstaffingNav, iconsTabNav,
+                notificationsNav, setupNav, widgetsNav, checkTraceNav);
+    }
+
+    private Button navigationButtonFor(String tabName) {
+        switch (tabName) {
+            case "tabSigns":
+                return signsTabNav;
+            case "outstaffingTab":
+                return outstaffingNav;
+            case "tabIcons":
+                return iconsTabNav;
+            case "tabNotifictions":
+                return notificationsNav;
+            case "tabSetup":
+                return setupNav;
+            case "setupWidgets":
+                return widgetsNav;
+            case "checkTrace":
+                return checkTraceNav;
+            default:
+                return typeTabNav;
+        }
+    }
+
+    /**
+     * Правило 3.6: на вкладке с единственным блоком ввода контейнер label-navigation
+     * (заголовок и пункты) скрывается целиком; на вкладках с двумя и более блоками — показывается.
+     */
+    private void updateNavigationVisibility(String tabName) {
+        iteractionNavigation.setVisible(TABS_WITH_SIDEBAR_NAVIGATION.contains(tabName));
     }
 
     private void addNotificationWhenSend() {
