@@ -1,37 +1,56 @@
 package com.company.hunttech.web.screens.project;
 
 import com.company.hunttech.UiNotificationEvent;
+import com.company.hunttech.ai.ProjectDescriptionTextExtractor;
 import com.company.hunttech.entity.CompanyDepartament;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.Person;
 import com.company.hunttech.entity.Project;
+import com.company.hunttech.service.ProjectAiService;
+import com.haulmont.cuba.core.app.FileStorageService;
+import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
+import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.Dialogs;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 @UiController("hunttech_Project.edit")
 @UiDescriptor("project-edit.xml")
 @EditedEntityContainer("projectDc")
 @LoadDataBeforeShow
 public class ProjectEdit extends StandardEditor<Project> {
+    private static final Logger log = LoggerFactory.getLogger(ProjectEdit.class);
+    private static final long PROJECT_DESCRIPTION_UPLOAD_LIMIT = 10L * 1024L * 1024L;
+
     @Inject
     private WebOvaFallbackImage projectLogoFileImage;
     @Inject
@@ -85,6 +104,25 @@ public class ProjectEdit extends StandardEditor<Project> {
     private Link chatForCVLink;
     @Inject
     private TabSheet projectTab;
+    @Inject
+    private GroupBoxLayout projectDescriptionCard;
+    @Inject
+    private RichTextArea projectDescriptionRichTextArea;
+    @Inject
+    private FileLoader fileLoader;
+    @Inject
+    private FileStorageService fileStorageService;
+    @Inject
+    private ProjectAiService projectAiService;
+    @Inject
+    private BackgroundWorker backgroundWorker;
+    @Inject
+    private Notifications notifications;
+    @Inject
+    private UiComponents uiComponents;
+
+    private FileUploadField projectDescriptionUpload;
+    private Label<String> projectDescriptionAiStatus;
 
     // Presentation-контракт sidebar: пункты label-навигации «Разделы» = вкладки TabSheet
     // правой части экрана (по явному указанию владельца; навигация видна на всех
@@ -123,6 +161,50 @@ public class ProjectEdit extends StandardEditor<Project> {
                 loadEvent.preventLoad();
             }
         });
+        initProjectDescriptionUpload();
+    }
+
+    /**
+     * Добавляет upload в существующую карточку описания без перестройки XML-контракта
+     * ProjectEdit. Файл — только транспорт: после извлечения текста он удаляется.
+     */
+    private void initProjectDescriptionUpload() {
+        HBoxLayout uploadRow = uiComponents.create(HBoxLayout.class);
+        uploadRow.setId("projectDescriptionUploadRow");
+        uploadRow.setWidthFull();
+        uploadRow.setSpacing(true);
+        uploadRow.setAlignment(Component.Alignment.MIDDLE_LEFT);
+
+        projectDescriptionUpload = uiComponents.create(FileUploadField.class);
+        projectDescriptionUpload.setId("projectDescriptionUpload");
+        projectDescriptionUpload.setMode(FileUploadField.FileStoragePutMode.IMMEDIATE);
+        projectDescriptionUpload.setUploadButtonCaption(
+                messages.getMessage(getClass(), "msgProjectDescriptionUpload"));
+        projectDescriptionUpload.setAccept(".pdf,.docx,.txt");
+        projectDescriptionUpload.setPermittedExtensions(new LinkedHashSet<>(
+                Arrays.asList(".pdf", ".docx", ".txt")));
+        projectDescriptionUpload.setFileSizeLimit(PROJECT_DESCRIPTION_UPLOAD_LIMIT);
+        projectDescriptionUpload.setShowFileName(true);
+        projectDescriptionUpload.setShowClearButton(false);
+        projectDescriptionUpload.setWidth("220px");
+        projectDescriptionUpload.setHeight("36px");
+        projectDescriptionUpload.addFileUploadSucceedListener(
+                event -> onProjectDescriptionUploadSucceeded());
+        projectDescriptionUpload.addFileUploadErrorListener(
+                event -> showProjectDescriptionUploadError());
+
+        projectDescriptionAiStatus = uiComponents.create(Label.TYPE_STRING);
+        projectDescriptionAiStatus.setId("projectDescriptionAiStatus");
+        projectDescriptionAiStatus.setWidthFull();
+        projectDescriptionAiStatus.setValue(
+                messages.getMessage(getClass(), "msgProjectDescriptionUploadHint"));
+        projectDescriptionAiStatus.setStyleName("edit-toolbar-description");
+
+        uploadRow.add(projectDescriptionUpload);
+        uploadRow.add(projectDescriptionAiStatus);
+        uploadRow.expand(projectDescriptionAiStatus);
+        projectDescriptionCard.add(uploadRow, 0);
+        projectDescriptionCard.expand(projectDescriptionRichTextArea);
     }
 
     @Subscribe("projectTab")
@@ -164,6 +246,146 @@ public class ProjectEdit extends StandardEditor<Project> {
         projectOpenPositionsDl.setParameter("project", getEditedEntity());
         openPositionLoaderReady = true;
         projectOpenPositionsDl.load();
+    }
+
+    /**
+     * После upload сначала сохраняем безопасный raw fallback в projectDescription,
+     * затем запускаем AI в BackgroundWorker. Если AI недоступен, пользователь не
+     * теряет извлечённый текст и может продолжить редактирование вручную.
+     */
+    private void onProjectDescriptionUploadSucceeded() {
+        FileDescriptor uploaded = getUploadedProjectDescriptionDescriptor();
+        if (uploaded == null) {
+            showProjectDescriptionUploadError();
+            return;
+        }
+
+        String sourceFileName = uploaded.getName();
+        String sourceText;
+        try (InputStream stream = fileLoader.openStream(uploaded)) {
+            sourceText = ProjectDescriptionTextExtractor.extract(stream, resolveExtension(uploaded));
+        } catch (Exception e) {
+            log.warn("Не удалось извлечь текст описания проекта из файла {}: {}",
+                    sourceFileName, e.getClass().getSimpleName());
+            showProjectDescriptionUploadError();
+            return;
+        } finally {
+            cleanupUploadedProjectDescription(uploaded);
+            projectDescriptionUpload.setValue(null);
+        }
+
+        projectDescriptionRichTextArea.setValue(toSafeRichText(sourceText));
+        projectDescriptionLoaded = true;
+        runProjectDescriptionAi(sourceText, sourceFileName);
+    }
+
+    private FileDescriptor getUploadedProjectDescriptionDescriptor() {
+        FileDescriptor descriptor = projectDescriptionUpload.getFileDescriptor();
+        if (descriptor == null) {
+            Object value = projectDescriptionUpload.getValue();
+            if (value instanceof FileDescriptor) {
+                descriptor = (FileDescriptor) value;
+            }
+        }
+        return descriptor;
+    }
+
+    private String resolveExtension(FileDescriptor descriptor) {
+        if (descriptor.getExtension() != null && !descriptor.getExtension().trim().isEmpty()) {
+            return descriptor.getExtension().trim().toLowerCase(Locale.ROOT);
+        }
+        String name = descriptor.getName();
+        int dot = name == null ? -1 : name.lastIndexOf('.');
+        return dot >= 0 ? name.substring(dot + 1).toLowerCase(Locale.ROOT) : "";
+    }
+
+    private void runProjectDescriptionAi(String sourceText, String sourceFileName) {
+        /*
+         * В background уходит только middleware-вызов: screen не выбирает provider,
+         * model или credential и не содержит prompt. Вся маршрутизация принадлежит
+         * PROJECT_DESCRIPTION_GENERATE в AI Control Plane.
+         */
+        String projectName = getEditedEntity().getProjectName();
+        projectDescriptionUpload.setEnabled(false);
+        projectDescriptionAiStatus.setValue(
+                messages.getMessage(getClass(), "msgProjectDescriptionAiProcessing"));
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption(messages.getMessage(getClass(), "msgProjectDescriptionAiStarted"))
+                .show();
+
+        BackgroundTask<Integer, String> task = new BackgroundTask<Integer, String>(120, this) {
+            @Override
+            public String run(TaskLifeCycle<Integer> taskLifeCycle) {
+                return projectAiService.processUploadedDescription(
+                        projectName, sourceFileName, sourceText);
+            }
+
+            @Override
+            public void done(String processedText) {
+                projectDescriptionUpload.setEnabled(true);
+                projectDescriptionRichTextArea.setValue(toSafeRichText(processedText));
+                projectDescriptionAiStatus.setValue(
+                        messages.getMessage(ProjectEdit.class, "msgProjectDescriptionAiDone"));
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption(messages.getMessage(ProjectEdit.class, "msgProjectDescriptionAiDone"))
+                        .show();
+            }
+
+            @Override
+            public boolean handleException(Exception exception) {
+                // Сообщение внешнего provider не показываем: raw text остаётся в форме,
+                // а UI сообщает только контролируемый результат fallback.
+                log.warn("AI-обработка описания проекта не выполнена: {}",
+                        exception.getClass().getSimpleName());
+                projectDescriptionUpload.setEnabled(true);
+                projectDescriptionAiStatus.setValue(
+                        messages.getMessage(ProjectEdit.class, "msgProjectDescriptionAiFallback"));
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption(messages.getMessage(ProjectEdit.class, "msgProjectDescriptionAiFailed"))
+                        .show();
+                return true;
+            }
+        };
+
+        BackgroundTaskHandler taskHandler = backgroundWorker.handle(task);
+        taskHandler.execute();
+    }
+
+    private void cleanupUploadedProjectDescription(FileDescriptor descriptor) {
+        // Upload-файл — только транспорт для извлечения текста; в Project он не хранится.
+        try {
+            fileStorageService.removeFile(descriptor);
+        } catch (Exception e) {
+            log.warn("Не удалось удалить временный файл описания проекта {} из FileStorage: {}",
+                    descriptor.getId(), e.getClass().getSimpleName());
+        }
+        try {
+            dataManager.remove(descriptor);
+        } catch (RuntimeException e) {
+            // IMMEDIATE FileDescriptor мог уже отсутствовать после очистки FileStorage.
+            log.debug("Временный FileDescriptor {} уже отсутствует: {}",
+                    descriptor.getId(), e.getClass().getSimpleName());
+        }
+    }
+
+    private void showProjectDescriptionUploadError() {
+        if (projectDescriptionAiStatus != null) {
+            projectDescriptionAiStatus.setValue(
+                    messages.getMessage(getClass(), "msgProjectDescriptionAiFallback"));
+        }
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withCaption(messages.getMessage(getClass(), "msgProjectDescriptionUploadFailed"))
+                .show();
+    }
+
+    /** RichTextArea получает только escaped HTML: LLM/файл не могут внедрить markup/script. */
+    private String toSafeRichText(String value) {
+        String text = value == null ? "" : value.replace("\r\n", "\n").replace('\r', '\n');
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("\n", "<br/>");
     }
 
     @Subscribe("checkBoxProjectIsClosed")

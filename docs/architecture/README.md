@@ -4,6 +4,7 @@
 
 | Где искать | Ссылка |
 | ---------- | ------ |
+| AI upload описания проекта через admin-managed `PROJECT_DESCRIPTION_GENERATE` | [HRM_HuntTech_Project_Description_AI_Upload.md](HRM_HuntTech_Project_Description_AI_Upload.md) |
 | Запрет legacy-сущностей `itpearls_*` и единый runtime namespace `hunttech_*` | [Entity_Namespace_Migration_itpearls_to_hunttech.md](Entity_Namespace_Migration_itpearls_to_hunttech.md) |
 | Основная обязательная концепция UI/UX для всех будущих редизайнов HRM HuntTech | [HRM_HuntTech_UI_UX_Design_Concept.md](HRM_HuntTech_UI_UX_Design_Concept.md) |
 | Контракт наследования Halo, палитр и системных компонентов тем `hunttech-modern-light` / `hunttech-modern-dark` | [HRM_HuntTech_Modern_Themes_Contract.md](HRM_HuntTech_Modern_Themes_Contract.md) |
@@ -20,6 +21,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-12 | Добавлена архитектура AI upload описания проекта через `PROJECT_DESCRIPTION_GENERATE` |
 | 2026-08-12 | Добавлена архитектура централизованного управления AI-функциями HRM HuntTech: AI Control Plane, корпоративные и пользовательские credentials, per-function override, resolver/fallback и требования к AI Browse/Edit-формам |
 | 2026-08-04 | Добавлен контракт системного слоя и палитр тем `hunttech-modern-light` / `hunttech-modern-dark` |
 | 2026-07-31 | Добавлена архитектурная спецификация рейтов по аутстафу [OutstaffingRates_Spec.md](OutstaffingRates_Spec.md) |

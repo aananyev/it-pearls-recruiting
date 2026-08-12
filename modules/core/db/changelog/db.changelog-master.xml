@@ -32,4 +32,8 @@
     <include file="260812-1-addAiFunctionControlPlane.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- ProjectEdit upload: административно управляемая AI-функция обработки описания проекта. -->
+    <include file="260812-2-addProjectDescriptionAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
