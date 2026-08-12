@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Edit корпоративного AI-подключения: secret вводится unbound и не показывается после сохранения. -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="providerCodeField"
+        messagesPack="com.company.hunttech.web.screens.adminaiconfiguration">
+    <!-- Edit graph содержит ciphertext для сохранения прежнего значения, но UI к property не привязывается. -->
+    <data>
+        <!-- Системная edited entity корпоративного подключения. -->
+        <instance id="adminConfigurationDc"
+                  class="com.company.hunttech.entity.ai.AdminAiConfiguration"
+                  view="admin-ai-configuration-edit-view">
+            <!-- Standard editor loader. -->
+            <loader/>
+        </instance>
+    </data>
+    <!-- Полноэкранная Edit-форма по общему контракту. -->
+    <dialogMode width="100%" height="100%" modal="true"/>
+    <!-- Root namespace формы. -->
+    <layout stylename="admin-ai-configuration-editor" expand="mainLayout" spacing="false" width="100%" height="100%">
+        <!-- Shared two-panel Edit layout. -->
+        <hbox id="mainLayout" stylename="edit-screen-layout" expand="workspace" spacing="false" width="100%" height="100%">
+            <!-- Sidebar не содержит secret/status internals, только контекст. -->
+            <vbox id="sidebar" stylename="edit-sidebar" width="312px" height="100%" spacing="true" expand="sidebarSpacer">
+                <!-- Identity текущего corporate connection. -->
+                <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
+                    <!-- Название подключения. -->
+                    <label dataContainer="adminConfigurationDc" property="name" stylename="edit-sidebar-title" width="100%"/>
+                    <!-- Тип системной записи. -->
+                    <label value="Корпоративное AI-подключение" stylename="edit-sidebar-subtitle" width="100%"/>
+                </vbox>
+                <!-- Label navigation в обязательном порядке после identity. -->
+                <vbox id="navigation" stylename="label-navigation" width="100%" spacing="false">
+                    <!-- Заголовок списка разделов. -->
+                    <label value="Разделы" stylename="label-nav-title" width="100%"/>
+                    <!-- Provider and state. -->
+                    <button id="mainNav" caption="Основное" stylename="borderless label-nav-item label-nav-item-active" width="100%" invoke="focusMainSection"/>
+                    <!-- Model/endpoint metadata. -->
+                    <button id="connectionNav" caption="Подключение" stylename="borderless label-nav-item" width="100%" invoke="focusConnectionSection"/>
+                    <!-- Secret replacement. -->
+                    <button id="securityNav" caption="Безопасность" stylename="borderless label-nav-item" width="100%" invoke="focusSecuritySection"/>
+                </vbox>
+                <!-- Spacer прижимает security hint вниз. -->
+                <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
+                <!-- Явная подсказка о необратимом отображении secret. -->
+                <label value="Сохранённый API-ключ никогда не показывается. Пустое поле ключа при редактировании означает «оставить прежний»."
+                       stylename="edit-sidebar-hint" width="100%"/>
+            </vbox>
+            <!-- Workspace admin credential editor. -->
+            <vbox id="workspace" stylename="edit-workspace" expand="workspaceScroll" width="100%" height="100%" spacing="false">
+                <!-- Toolbar. -->
+                <hbox id="toolbar" stylename="edit-toolbar" width="100%" spacing="true">
+                    <!-- Заголовок и пояснение. -->
+                    <vbox id="toolbarText" width="100%" spacing="false">
+                        <!-- Заголовок карточки. -->
+                        <label value="Корпоративное AI-подключение" stylename="edit-toolbar-title"/>
+                        <!-- Объяснение роли corporate credential. -->
+                        <label value="Системный provider/model и защищённый API credential" stylename="edit-toolbar-description"/>
+                    </vbox>
+                </hbox>
+                <!-- Scrollable cards. -->
+                <scrollBox id="workspaceScroll" stylename="edit-workspace-scroll" width="100%" height="100%">
+                    <!-- Workspace content. -->
+                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
+                        <!-- Basic metadata. -->
+                        <groupBox id="mainSection" caption="Основное" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
+                            <!-- Human-readable connection name. -->
+                            <textField id="nameField" dataContainer="adminConfigurationDc" property="name" required="true" width="100%" stylename="edit-form-control"/>
+                            <!-- Registry provider code из контролируемого списка. -->
+                            <lookupField id="providerCodeField" dataContainer="adminConfigurationDc" property="providerCode" required="true" width="100%" stylename="edit-form-control"/>
+                            <!-- Active state, который resolver проверяет перед вызовом. -->
+                            <checkBox id="activeField" dataContainer="adminConfigurationDc" property="active"/>
+                            <!-- Priority зарезервирован для выбора/резервирования подключений. -->
+                            <textField id="priorityField" dataContainer="adminConfigurationDc" property="priority" width="100%" stylename="edit-form-control"/>
+                        </groupBox>
+                        <!-- Provider model and optional gateway metadata. -->
+                        <groupBox id="connectionSection" caption="Подключение" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
+                            <!-- Default model применяется, если function-level model не указан. -->
+                            <textField id="defaultModelNameField" dataContainer="adminConfigurationDc" property="defaultModelName" width="100%" stylename="edit-form-control"/>
+                            <!-- Optional base URL metadata; vendor adapter может игнорировать его до отдельной поддержки. -->
+                            <textField id="baseApiUrlField" dataContainer="adminConfigurationDc" property="baseApiUrl" width="100%" stylename="edit-form-control"/>
+                            <!-- Read-only результат последней проверки. -->
+                            <textField id="lastTestStatusField" dataContainer="adminConfigurationDc" property="lastTestStatus" editable="false" width="100%"/>
+                            <!-- Read-only безопасная диагностика без provider message. -->
+                            <textArea id="lastErrorField" dataContainer="adminConfigurationDc" property="lastError" editable="false" width="100%" rows="2"/>
+                        </groupBox>
+                        <!-- Secret input intentionally unbound to entity property. -->
+                        <groupBox id="securitySection" caption="Безопасность" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
+                            <!-- Новый plaintext существует только в компоненте до middleware encryption. -->
+                            <passwordField id="apiKeyInput" caption="Новый API-ключ" secret="true" width="100%"/>
+                            <!-- Пояснение заменяет запрещённую функцию «показать ключ». -->
+                            <label value="Введите значение только для создания или замены ключа. Существующий ключ не загружается в это поле." width="100%"/>
+                        </groupBox>
+                    </vbox>
+                </scrollBox>
+                <!-- Standard editor footer. -->
+                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" align="MIDDLE_RIGHT" width="100%">
+                    <!-- Commit and close. -->
+                    <button action="windowCommitAndClose"/>
+                    <!-- Cancel/close. -->
+                    <button action="windowClose"/>
+                </hbox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>

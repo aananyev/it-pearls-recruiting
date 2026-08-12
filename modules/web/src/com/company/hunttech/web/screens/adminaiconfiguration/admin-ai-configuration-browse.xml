@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Системный Browse корпоративных AI-подключений; API_KEY_ENCRYPTED отсутствует в view и таблице. -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="adminConfigurationsTable"
+        messagesPack="com.company.hunttech.web.screens.adminaiconfiguration">
+    <!-- Safe data graph для административного мониторинга подключений. -->
+    <data>
+        <!-- Browse container загружает только безопасные status/model/provider поля. -->
+        <collection id="adminConfigurationsDc"
+                    class="com.company.hunttech.entity.ai.AdminAiConfiguration"
+                    view="admin-ai-configuration-browse-view">
+            <!-- Loader сортирует активные подключения по приоритету. -->
+            <loader id="adminConfigurationsDl">
+                <!-- Никакого обращения к API_KEY_ENCRYPTED в JPQL нет. -->
+                <query><![CDATA[select e from hunttech_AdminAiConfiguration e order by e.active desc, e.priority desc, e.name]]></query>
+            </loader>
+        </collection>
+    </data>
+    <!-- Административный диалог достаточной ширины для статусов. -->
+    <dialogMode width="1100" height="700"/>
+    <!-- Локальный browse namespace. -->
+    <layout stylename="admin-ai-configuration-browse" expand="adminConfigurationsTable" spacing="true">
+        <!-- Фильтр работает по safe view. -->
+        <filter id="filter" dataLoader="adminConfigurationsDl" applyTo="adminConfigurationsTable">
+            <!-- Стандартные фильтруемые свойства CUBA. -->
+            <properties include=".*" exclude="apiKeyEncrypted"/>
+        </filter>
+        <!-- Toolbar: CRUD + middleware connection test. -->
+        <hbox id="browseActions" spacing="true">
+            <!-- Создание корпоративного подключения. -->
+            <button action="adminConfigurationsTable.create"/>
+            <!-- Редактирование выбранного подключения. -->
+            <button action="adminConfigurationsTable.edit"/>
+            <!-- Удаление только неиспользуемой записи. -->
+            <button action="adminConfigurationsTable.remove"/>
+            <!-- Тест по id выполняется в core без передачи secret в Web Client. -->
+            <button id="testBtn" caption="Проверить подключение" icon="CHECK" invoke="testSelectedConnection"/>
+        </hbox>
+        <!-- Safe DataGrid корпоративных подключений. -->
+        <dataGrid id="adminConfigurationsTable" width="100%" dataContainer="adminConfigurationsDc">
+            <!-- Стандартные CRUD actions. -->
+            <actions>
+                <!-- Create открывает защищённый editor. -->
+                <action id="create" type="create"/>
+                <!-- Edit открывает защищённый editor. -->
+                <action id="edit" type="edit"/>
+                <!-- Remove учитывает FK от AI-функций. -->
+                <action id="remove" type="remove"/>
+            </actions>
+            <!-- Только безопасные операционные сведения. -->
+            <columns>
+                <!-- Имя подключения. -->
+                <column property="name"/>
+                <!-- Provider registry code. -->
+                <column property="providerCode"/>
+                <!-- Default model. -->
+                <column property="defaultModelName"/>
+                <!-- Active state. -->
+                <column property="active"/>
+                <!-- Routing priority metadata. -->
+                <column property="priority"/>
+                <!-- Последний test status. -->
+                <column property="lastTestStatus"/>
+                <!-- Время последнего теста. -->
+                <column property="lastTestAt"/>
+            </columns>
+        </dataGrid>
+        <!-- Скрытые lookup actions сохраняют StandardLookup contract. -->
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <!-- Выбрать запись в lookup mode. -->
+            <button action="lookupSelectAction"/>
+            <!-- Отменить lookup. -->
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

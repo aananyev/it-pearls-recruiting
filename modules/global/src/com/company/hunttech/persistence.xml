@@ -63,6 +63,9 @@
         <class>com.company.hunttech.entity.UserAiConfiguration</class>
         <class>com.company.hunttech.entity.VacancyPromptTemplate</class>
         <class>com.company.hunttech.entity.UserAiProfile</class>
+        <class>com.company.hunttech.entity.ai.AdminAiConfiguration</class>
+        <class>com.company.hunttech.entity.ai.AiFunctionConfiguration</class>
+        <class>com.company.hunttech.entity.ai.UserAiFunctionOverride</class>
         <class>com.company.hunttech.entity.AccountingExpenseCategory</class>
         <class>com.company.hunttech.entity.AccountingRecipient</class>
         <class>com.company.hunttech.entity.AccountingCompanyAlias</class>

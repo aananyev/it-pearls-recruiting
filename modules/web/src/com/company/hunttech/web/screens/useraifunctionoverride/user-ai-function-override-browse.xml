@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Browse персональных per-function override текущего пользователя. -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="overridesTable"
+        messagesPack="com.company.hunttech.web.screens.useraifunctionoverride">
+    <!-- Data section с обязательным :user parameter. -->
+    <data>
+        <!-- Safe override view не содержит API key личного подключения. -->
+        <collection id="overridesDc"
+                    class="com.company.hunttech.entity.ai.UserAiFunctionOverride"
+                    view="user-ai-function-override-browse-view">
+            <!-- Loader запускается контроллером только после установки текущего пользователя. -->
+            <loader id="overridesDl">
+                <!-- Row scope на текущего пользователя является частью screen contract. -->
+                <query><![CDATA[select e from hunttech_UserAiFunctionOverride e where e.user = :user order by e.aiFunction.name]]></query>
+            </loader>
+        </collection>
+    </data>
+    <!-- Компактный browse персональных настроек. -->
+    <dialogMode width="1000" height="650"/>
+    <!-- Local visual namespace. -->
+    <layout stylename="user-ai-function-override-browse" expand="overridesTable" spacing="true">
+        <!-- Toolbar стандартных действий. -->
+        <hbox id="browseActions" spacing="true">
+            <!-- Создать override. -->
+            <button action="overridesTable.create"/>
+            <!-- Редактировать override. -->
+            <button action="overridesTable.edit"/>
+            <!-- Удалить override и вернуться к corporate routing. -->
+            <button action="overridesTable.remove"/>
+        </hbox>
+        <!-- Safe table текущих override. -->
+        <dataGrid id="overridesTable" width="100%" dataContainer="overridesDc">
+            <!-- CRUD actions CUBA. -->
+            <actions>
+                <!-- Create opens UserAiFunctionOverride.edit. -->
+                <action id="create" type="create"/>
+                <!-- Edit selected mapping. -->
+                <action id="edit" type="edit"/>
+                <!-- Remove selected mapping. -->
+                <action id="remove" type="remove"/>
+            </actions>
+            <!-- Колонки показывают только функцию, provider/model и enabled. -->
+            <columns>
+                <!-- Stable function code. -->
+                <column property="aiFunction.code"/>
+                <!-- Human-readable function name. -->
+                <column property="aiFunction.name"/>
+                <!-- Personal provider code without API key. -->
+                <column property="userAiConfiguration.providerCode"/>
+                <!-- Personal default model. -->
+                <column property="userAiConfiguration.defaultModelName"/>
+                <!-- Optional model override. -->
+                <column property="modelName"/>
+                <!-- Whether mapping participates in resolver. -->
+                <column property="enabled"/>
+            </columns>
+        </dataGrid>
+        <!-- StandardLookup compatibility. -->
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <!-- Lookup select. -->
+            <button action="lookupSelectAction"/>
+            <!-- Lookup cancel. -->
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

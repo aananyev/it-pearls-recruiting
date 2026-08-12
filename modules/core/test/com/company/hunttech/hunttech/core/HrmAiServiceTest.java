@@ -4,6 +4,7 @@ import com.company.hunttech.HunttechTestContainer;
 import com.company.hunttech.TestEntityTracker;
 import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.service.HrmAiService;
+import com.company.hunttech.service.HrmAiServiceBean;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.security.entity.User;
@@ -12,13 +13,17 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
- * Проверяет доступность и базовую целостность AI-сервиса.
- * <p>
- * Полноценные тесты testConnection с реальными API-ключами выполняются
- * вручную через UI (кнопка «Тест AI» в окне Мониторинга ключей).
+ * Проверяет доступность и архитектурный контракт vacancy AI-фасада.
+ * Реальные provider calls остаются manual smoke с тестовыми credentials.
  */
 public class HrmAiServiceTest {
 
@@ -44,6 +49,23 @@ public class HrmAiServiceTest {
     @Test
     public void serviceBeanIsResolvable() {
         assertNotNull("HrmAiService должен быть доступен через AppBeans", aiService);
+    }
+
+    @Test
+    public void facadeExposesProviderIndependentControlPlaneApi() throws Exception {
+        assertEquals("STANDARDIZE_VACANCY", HrmAiService.FUNCTION_STANDARDIZE_VACANCY);
+        assertNotNull(HrmAiService.class.getMethod("standardizeVacancyDescription", String.class));
+        assertNotNull(HrmAiService.class.getMethod("generateVacancyArtifact", String.class, String.class));
+        assertNotNull(HrmAiService.class.getMethod("standardizeVacancyDescription", String.class, String.class));
+        assertNotNull(HrmAiService.class.getMethod("generateVacancyArtifact", String.class, String.class, String.class));
+    }
+
+    @Test
+    public void workingFacadeDependsOnExecutionServiceInsteadOfLegacyDataQueries() {
+        Field[] fields = HrmAiServiceBean.class.getDeclaredFields();
+        assertTrue(Arrays.stream(fields).anyMatch(field -> "aiExecutionService".equals(field.getName())));
+        assertFalse(Arrays.stream(fields).anyMatch(field -> "dataManager".equals(field.getName())));
+        assertFalse(Arrays.stream(fields).anyMatch(field -> "userSessionSource".equals(field.getName())));
     }
 
     @Test

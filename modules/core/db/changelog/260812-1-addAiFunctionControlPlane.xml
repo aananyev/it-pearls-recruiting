@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260812-1-createAdminAiConfiguration" author="HRM HuntTech">
+        <createTable tableName="HUNTTECH_ADMIN_AI_CONFIGURATION">
+            <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="VERSION" type="int"><constraints nullable="false"/></column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="NAME" type="varchar(255)"><constraints nullable="false"/></column>
+            <column name="PROVIDER_CODE" type="varchar(64)"><constraints nullable="false"/></column>
+            <column name="API_KEY_ENCRYPTED" type="varchar(4096)"/>
+            <column name="DEFAULT_MODEL_NAME" type="varchar(128)"/>
+            <column name="BASE_API_URL" type="varchar(512)"/>
+            <column name="IS_ACTIVE" type="boolean" defaultValueBoolean="true"/>
+            <column name="PRIORITY_" type="int" defaultValueNumeric="0"/>
+            <column name="LAST_TEST_STATUS" type="varchar(32)"/>
+            <column name="LAST_TEST_AT" type="timestamp"/>
+            <column name="LAST_ERROR" type="varchar(1000)"/>
+        </createTable>
+        <createIndex tableName="HUNTTECH_ADMIN_AI_CONFIGURATION" indexName="IDX_HUNTTECH_ADMIN_AI_CONFIG_PROVIDER">
+            <column name="PROVIDER_CODE"/>
+        </createIndex>
+        <createIndex tableName="HUNTTECH_ADMIN_AI_CONFIGURATION" indexName="IDX_HUNTTECH_ADMIN_AI_CONFIG_ACTIVE">
+            <column name="IS_ACTIVE"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="260812-2-createAiFunctionConfiguration" author="HRM HuntTech">
+        <createTable tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION">
+            <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="VERSION" type="int"><constraints nullable="false"/></column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="CODE" type="varchar(64)"><constraints nullable="false" unique="true"/></column>
+            <column name="NAME" type="varchar(255)"><constraints nullable="false"/></column>
+            <column name="DESCRIPTION" type="varchar(1000)"/>
+            <column name="CAPABILITY" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="SYSTEM_PROMPT" type="clob"/>
+            <column name="PROMPT_TEMPLATE" type="clob"/>
+            <column name="TEMPERATURE" type="double" defaultValueNumeric="0.7"/>
+            <column name="MAX_TOKENS" type="int"/>
+            <column name="ADMIN_CONFIGURATION_ID" type="uuid"/>
+            <column name="ADMIN_MODEL_NAME" type="varchar(128)"/>
+            <column name="EXECUTION_POLICY" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="FALLBACK_POLICY" type="varchar(32)"><constraints nullable="false"/></column>
+            <column name="ALLOW_MODEL_OVERRIDE" type="boolean" defaultValueBoolean="false"/>
+            <column name="IS_ACTIVE" type="boolean" defaultValueBoolean="true"/>
+            <column name="CONFIGURATION_VERSION" type="int" defaultValueNumeric="1"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="HUNTTECH_AI_FUNCTION_CONFIGURATION"
+                                 baseColumnNames="ADMIN_CONFIGURATION_ID"
+                                 constraintName="FK_HUNTTECH_AI_FUNCTION_ON_ADMIN_CONFIG"
+                                 referencedTableName="HUNTTECH_ADMIN_AI_CONFIGURATION"
+                                 referencedColumnNames="ID"/>
+        <createIndex tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION" indexName="IDX_HUNTTECH_AI_FUNCTION_CODE" unique="true">
+            <column name="CODE"/>
+        </createIndex>
+        <createIndex tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION" indexName="IDX_HUNTTECH_AI_FUNCTION_ACTIVE">
+            <column name="IS_ACTIVE"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="260812-3-createUserAiFunctionOverride" author="HRM HuntTech">
+        <createTable tableName="HUNTTECH_USER_AI_FUNCTION_OVERRIDE">
+            <column name="ID" type="uuid"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="VERSION" type="int"><constraints nullable="false"/></column>
+            <column name="CREATE_TS" type="timestamp"/>
+            <column name="CREATED_BY" type="varchar(50)"/>
+            <column name="UPDATE_TS" type="timestamp"/>
+            <column name="UPDATED_BY" type="varchar(50)"/>
+            <column name="DELETE_TS" type="timestamp"/>
+            <column name="DELETED_BY" type="varchar(50)"/>
+            <column name="USER_ID" type="uuid"><constraints nullable="false"/></column>
+            <column name="AI_FUNCTION_ID" type="uuid"><constraints nullable="false"/></column>
+            <column name="USER_AI_CONFIGURATION_ID" type="uuid"><constraints nullable="false"/></column>
+            <column name="MODEL_NAME" type="varchar(128)"/>
+            <column name="ENABLED" type="boolean" defaultValueBoolean="true"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="HUNTTECH_USER_AI_FUNCTION_OVERRIDE" baseColumnNames="USER_ID"
+                                 constraintName="FK_HUNTTECH_USER_AI_OVERRIDE_ON_USER"
+                                 referencedTableName="SEC_USER" referencedColumnNames="ID"/>
+        <addForeignKeyConstraint baseTableName="HUNTTECH_USER_AI_FUNCTION_OVERRIDE" baseColumnNames="AI_FUNCTION_ID"
+                                 constraintName="FK_HUNTTECH_USER_AI_OVERRIDE_ON_FUNCTION"
+                                 referencedTableName="HUNTTECH_AI_FUNCTION_CONFIGURATION" referencedColumnNames="ID"/>
+        <addForeignKeyConstraint baseTableName="HUNTTECH_USER_AI_FUNCTION_OVERRIDE" baseColumnNames="USER_AI_CONFIGURATION_ID"
+                                 constraintName="FK_HUNTTECH_USER_AI_OVERRIDE_ON_CONFIG"
+                                 referencedTableName="HUNTTECH_USER_AI_CONFIGURATION" referencedColumnNames="ID"/>
+        <createIndex tableName="HUNTTECH_USER_AI_FUNCTION_OVERRIDE" indexName="UK_HUNTTECH_USER_AI_OVERRIDE_FUNCTION" unique="true">
+            <column name="USER_ID"/>
+            <column name="AI_FUNCTION_ID"/>
+        </createIndex>
+        <createIndex tableName="HUNTTECH_USER_AI_FUNCTION_OVERRIDE" indexName="IDX_HUNTTECH_USER_AI_OVERRIDE_USER">
+            <column name="USER_ID"/>
+        </createIndex>
+        <createIndex tableName="HUNTTECH_USER_AI_FUNCTION_OVERRIDE" indexName="IDX_HUNTTECH_USER_AI_OVERRIDE_CONFIG">
+            <column name="USER_AI_CONFIGURATION_ID"/>
+        </createIndex>
+    </changeSet>
+
+    <!--
+        Legacy VacancyPromptTemplate сохраняется как совместимый справочник, но runtime
+        больше его не читает. Существующие записи копируются в Control Plane с тем же
+        стабильным CODE, чтобы старые templateCode продолжили работать как functionCode.
+        USER_REQUIRED выбран безопасным стартовым policy: миграция не расходует
+        корпоративный API без явной настройки администратора.
+    -->
+    <changeSet id="260812-4-migrateLegacyVacancyPrompts" author="HRM HuntTech">
+        <sql dbms="postgresql"><![CDATA[
+            INSERT INTO HUNTTECH_AI_FUNCTION_CONFIGURATION (
+                ID, VERSION, CREATE_TS, CREATED_BY, UPDATE_TS, UPDATED_BY,
+                DELETE_TS, DELETED_BY, CODE, NAME, DESCRIPTION, CAPABILITY,
+                SYSTEM_PROMPT, PROMPT_TEMPLATE, TEMPERATURE, EXECUTION_POLICY,
+                FALLBACK_POLICY, ALLOW_MODEL_OVERRIDE, IS_ACTIVE, CONFIGURATION_VERSION
+            )
+            SELECT
+                t.ID, t.VERSION, t.CREATE_TS, t.CREATED_BY, t.UPDATE_TS, t.UPDATED_BY,
+                NULL, NULL, t.CODE, t.NAME,
+                'Мигрировано из legacy VacancyPromptTemplate',
+                CASE WHEN t.CODE = 'STANDARDIZE_VACANCY'
+                     THEN 'TEXT_TRANSFORMATION' ELSE 'TEXT_GENERATION' END,
+                t.SYSTEM_CONTEXT, t.PROMPT_TEXT, t.TEMPERATURE,
+                'USER_REQUIRED', 'NO_FALLBACK', FALSE, TRUE, 1
+            FROM HUNTTECH_VACANCY_PROMPT_TEMPLATE t
+            WHERE t.DELETE_TS IS NULL
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM HUNTTECH_AI_FUNCTION_CONFIGURATION f
+                  WHERE f.CODE = t.CODE
+              );
+        ]]></sql>
+    </changeSet>
+</databaseChangeLog>

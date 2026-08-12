@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<views xmlns="http://schemas.haulmont.com/cuba/view.xsd">
+    <!-- Browse-view корпоративных подключений принципиально не содержит API_KEY_ENCRYPTED. -->
+    <view entity="hunttech_AdminAiConfiguration" name="admin-ai-configuration-browse-view" extends="_minimal">
+        <property name="name"/>
+        <property name="providerCode"/>
+        <property name="defaultModelName"/>
+        <property name="baseApiUrl"/>
+        <property name="active"/>
+        <property name="priority"/>
+        <property name="lastTestStatus"/>
+        <property name="lastTestAt"/>
+        <property name="lastError"/>
+    </view>
+    <!-- Edit-view включает шифротекст только для сохранения существующего значения; UI его не отображает. -->
+    <view entity="hunttech_AdminAiConfiguration" name="admin-ai-configuration-edit-view" extends="admin-ai-configuration-browse-view">
+        <property name="apiKeyEncrypted"/>
+    </view>
+    <!-- Core-only view используется credential/execution services непосредственно перед внешним вызовом. -->
+    <view entity="hunttech_AdminAiConfiguration" name="admin-ai-configuration-secret-view" extends="admin-ai-configuration-edit-view"/>
+
+    <!-- Лёгкий browse-view AI-функции исключает большие prompt LOB. -->
+    <view entity="hunttech_AiFunctionConfiguration" name="ai-function-configuration-browse-view" extends="_minimal">
+        <property name="code"/>
+        <property name="name"/>
+        <property name="description"/>
+        <property name="capability"/>
+        <property name="temperature"/>
+        <property name="maxTokens"/>
+        <property name="adminConfiguration" view="admin-ai-configuration-browse-view"/>
+        <property name="adminModelName"/>
+        <property name="executionPolicy"/>
+        <property name="fallbackPolicy"/>
+        <property name="allowModelOverride"/>
+        <property name="active"/>
+        <property name="configurationVersion"/>
+    </view>
+    <!-- Edit-view догружает prompt LOB только при открытии редактора функции. -->
+    <view entity="hunttech_AiFunctionConfiguration" name="ai-function-configuration-edit-view" extends="ai-function-configuration-browse-view">
+        <property name="systemPrompt"/>
+        <property name="promptTemplate"/>
+    </view>
+    <!-- Core execution view включает шифротекст только по relation к выбранному admin credential. -->
+    <view entity="hunttech_AiFunctionConfiguration" name="ai-function-execution-view" extends="ai-function-configuration-edit-view">
+        <property name="adminConfiguration" view="admin-ai-configuration-secret-view"/>
+    </view>
+
+    <!-- Safe picker пользователя: ключ не загружается в UI override-формы. -->
+    <view entity="hunttech_UserAiConfiguration" name="user-ai-configuration-override-picker-view" extends="_minimal">
+        <property name="user" view="_minimal"/>
+        <property name="providerCode"/>
+        <property name="defaultModelName"/>
+        <property name="isActive"/>
+    </view>
+    <!-- Core-only view добавляет legacy API_KEY для фактического пользовательского вызова. -->
+    <view entity="hunttech_UserAiConfiguration" name="user-ai-configuration-ai-execution-view" extends="user-ai-configuration-override-picker-view">
+        <property name="apiKey"/>
+    </view>
+
+    <!-- Browse/edit override view содержит только безопасные сведения о выбранной функции и личном подключении. -->
+    <view entity="hunttech_UserAiFunctionOverride" name="user-ai-function-override-browse-view" extends="_minimal">
+        <property name="user" view="_minimal"/>
+        <property name="aiFunction" view="ai-function-configuration-browse-view"/>
+        <property name="userAiConfiguration" view="user-ai-configuration-override-picker-view"/>
+        <property name="modelName"/>
+        <property name="enabled"/>
+    </view>
+    <view entity="hunttech_UserAiFunctionOverride" name="user-ai-function-override-edit-view" extends="user-ai-function-override-browse-view"/>
+    <!-- Core execution view заменяет safe user configuration relation на view с API_KEY. -->
+    <view entity="hunttech_UserAiFunctionOverride" name="user-ai-function-override-execution-view" extends="user-ai-function-override-browse-view">
+        <property name="userAiConfiguration" view="user-ai-configuration-ai-execution-view"/>
+    </view>
+</views>

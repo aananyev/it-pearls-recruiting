@@ -9,6 +9,7 @@
 | Контракт наследования Halo, палитр и системных компонентов тем `hunttech-modern-light` / `hunttech-modern-dark` | [HRM_HuntTech_Modern_Themes_Contract.md](HRM_HuntTech_Modern_Themes_Contract.md) |
 | Обязательный стандарт смыслового документирования создаваемых и изменяемых XML-экранов | [XML_Screen_Documentation_Standard.md](XML_Screen_Documentation_Standard.md) |
 | Общий контракт stylename для sidebar, `label-navigation` и правой части Edit-экранов | [HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md](HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md) |
+| Архитектура централизованного управления AI-функциями, credentials, per-function override и fallback | [HRM_HuntTech_AI_Function_Management_Architecture.md](HRM_HuntTech_AI_Function_Management_Architecture.md) |
 | Архитектура ускорения JobCandidateEdit | [JobCandidateEdit_Performance_Architecture.md](JobCandidateEdit_Performance_Architecture.md) |
 | Архитектура вакансии OpenPosition | [OpenPosition_Spec.md](OpenPosition_Spec.md) |
 | Архитектура рейтов по аутстафу | [OutstaffingRates_Spec.md](OutstaffingRates_Spec.md) |
@@ -19,6 +20,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-12 | Добавлена архитектура централизованного управления AI-функциями HRM HuntTech: AI Control Plane, корпоративные и пользовательские credentials, per-function override, resolver/fallback и требования к AI Browse/Edit-формам |
 | 2026-08-04 | Добавлен контракт системного слоя и палитр тем `hunttech-modern-light` / `hunttech-modern-dark` |
 | 2026-07-31 | Добавлена архитектурная спецификация рейтов по аутстафу [OutstaffingRates_Spec.md](OutstaffingRates_Spec.md) |
 | 2026-07-29 | Общий контракт Edit-экранов дополнен точными regression-правилами, полученными при доведении IteractionListEdit |

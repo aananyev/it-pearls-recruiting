@@ -1,3 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <permission-config xmlns="http://schemas.haulmont.com/cuba/permissions.xsd">
+    <!-- Корпоративные AI credentials требуют отдельного explicit grant помимо screen/entity permissions. -->
+    <specific>
+        <category id="hunttech.ai">
+            <permission id="hunttech.ai.manageCorporateCredentials"/>
+        </category>
+    </specific>
 </permission-config>
