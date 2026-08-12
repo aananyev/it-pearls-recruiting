@@ -4,6 +4,7 @@
 
 | Документ | Краткое описание |
 | -------- | ---------------- |
+| [ProjectAiService.md](ProjectAiService.md) | Domain facade AI-обработки описания проекта через AI Control Plane |
 | [AiExecutionService.md](AiExecutionService.md) | Единый resolver/execution layer AI-функций HRM HuntTech |
 | [AiCredentialService.md](AiCredentialService.md) | Защищённое управление корпоративными AI credentials |
 | [HrmAiService.md](HrmAiService.md) | Совместимый vacancy AI-фасад поверх AI Control Plane |
@@ -16,5 +17,6 @@
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-12 | Добавлен `ProjectAiService` для административно управляемой AI-обработки описания проекта |
 | 2026-08-12 | Добавлен `HrmAiService` как compatibility facade над `AiExecutionService` |
 | 2026-08-12 | Добавлены `AiExecutionService` и `AiCredentialService` AI Control Plane |

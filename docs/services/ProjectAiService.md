@@ -1,0 +1,53 @@
+# ProjectAiService
+
+## Назначение и бизнес-смысл (What & Why)
+
+`ProjectAiService` — domain facade между `ProjectEdit` и общим AI Control Plane HRM HuntTech. Он не хранит prompt/provider/model/API key и не разрешает бизнес-экрану выбирать их напрямую. Это позволяет администратору менять качество, стоимость, модель и содержание prompt без выпуска новой версии ProjectEdit.
+
+## UI Context & Navigation
+
+Потребитель сервиса: `ProjectBrowse → ProjectEdit → Описание проекта → Загрузить описание`. Сервис не имеет собственного UI. Административная конфигурация выполняется в «Управление AI» → «Функции AI» для кода `PROJECT_DESCRIPTION_GENERATE` и в связанных корпоративных/пользовательских подключениях.
+
+## Behavior Summary
+
+- upload извлечён → `ProjectEdit` передал `projectName/sourceFileName/sourceText` → сервис вызывает `AiExecutionService`;
+- source text пуст → вызов внешнего AI не выполняется → controlled `DevelopmentException`;
+- source text > 120000 символов → внешний AI не вызывается → controlled error;
+- функция настроена → resolver выбирает credential/model/provider по policy → результат возвращается экрану;
+- prompt/model/policy изменены администратором → сервисный код не меняется → следующий вызов использует новые настройки.
+
+## API
+
+```java
+String processUploadedDescription(String projectName,
+                                  String sourceFileName,
+                                  String sourceText);
+```
+
+Стабильный function code:
+
+```text
+PROJECT_DESCRIPTION_GENERATE
+```
+
+Context:
+
+```text
+projectName
+sourceFileName
+sourceText
+```
+
+## Граница ответственности
+
+`ProjectAiService` отвечает за бизнес-контракт Project AI и валидацию размера контекста. `AiExecutionService` отвечает за prompt rendering, execution policy, user/admin override, fallback и выбор provider. `AIProviderRegistry` отвечает за vendor-specific transport.
+
+## Безопасность
+
+Сервис не принимает API key/model/provider от ProjectEdit и не возвращает credential. Реальные секреты не входят в migration seed, docs или tests.
+
+## История изменений
+
+| Дата | Изменение |
+|---|---|
+| 2026-08-12 | Создан facade `ProjectAiService` для `PROJECT_DESCRIPTION_GENERATE` поверх AI Control Plane |
