@@ -13,6 +13,7 @@ import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.components.*;
+import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
@@ -32,49 +33,17 @@ import java.util.Set;
 @LoadDataBeforeShow
 public class ProjectEdit extends StandardEditor<Project> {
     @Inject
-    private Image projectDefaultLogoFileImage;
-    @Inject
-    private Image projectLogoFileImage;
+    private WebOvaFallbackImage projectLogoFileImage;
     @Inject
     private FileUploadField projectLogoFileUpload;
 
-    @Subscribe("projectLogoFileUpload")
-    public void onProjectLogoFileUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
-        setProjectPicImage();
-
-    }
-
+    // OvaFallbackImage сам читает projectLogo из projectDc и показывает fallback
+    // (icons/no-company.png) при отсутствии файла; загрузка/очистка через upload
+    // (fileStoragePutMode=IMMEDIATE, property=projectLogo) обновляет контейнер —
+    // ручное переключение видимости/источника не требуется.
     @Subscribe
     public void onBeforeShow1(BeforeShowEvent event) {
-        setProjectPicImage();
-    }
-
-
-    private void setProjectPicImage() {
-        if (getEditedEntity().getProjectLogo() == null) {
-            projectDefaultLogoFileImage.setVisible(true);
-            projectLogoFileImage.setVisible(false);
-        } else {
-            projectDefaultLogoFileImage.setVisible(false);
-            projectLogoFileImage.setVisible(true);
-        }
-    }
-
-    @Subscribe("projectLogoFileUpload")
-    public void onProjectLogoFileUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        try {
-            projectLogoFileImage.setVisible(true);
-            projectDefaultLogoFileImage.setVisible(false);
-
-            FileDescriptorResource fileDescriptorResource =
-                    projectLogoFileImage.createResource(FileDescriptorResource.class)
-                            .setFileDescriptor(
-                                    projectLogoFileUpload.getFileDescriptor());
-
-            projectLogoFileImage.setSource(fileDescriptorResource);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
+        // логотип отображается компонентом автоматически
     }
 
 

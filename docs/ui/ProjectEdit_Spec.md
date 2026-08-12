@@ -12,7 +12,7 @@ Cross-links: [docs/entities/project/Project.md](../entities/project/Project.md) 
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Экран открывается из `hunttech_Project.browse` действиями создания и редактирования проекта как полноэкранный модальный диалог. Слева — sidebar: визуальный блок (логотип проекта 96×96 с загрузкой/очисткой), наименование и роль «Проект», label-навигация «Разделы» (пункты = вкладки TabSheet правой части — «Наименование проекта», «Описание проекта», «Вакансии», «Информация в сопроводительном письме»), подсказка. Справа — workspace: toolbar («Проект» + описание назначения), вкладки «Наименование проекта», «Описание проекта», «Вакансии», «Информация в сопроводительном письме» и footer-действия ОК/Отмена. Справочники департаментов, владельцев и родительских проектов выбираются через lookup-компоненты (picker_lookup).
+Экран открывается из `hunttech_Project.browse` действиями создания и редактирования проекта как полноэкранный модальный диалог. Слева — sidebar: визуальный блок (логотип проекта 176×176 с загрузкой/очисткой), наименование и роль «Проект», label-навигация «Разделы» (пункты = вкладки TabSheet правой части — «Наименование проекта», «Описание проекта», «Вакансии», «Информация в сопроводительном письме»), подсказка. Справа — workspace: toolbar («Проект» + описание назначения), вкладки «Наименование проекта», «Описание проекта», «Вакансии», «Информация в сопроводительном письме» и footer-действия ОК/Отмена. Справочники департаментов, владельцев и родительских проектов выбираются через lookup-компоненты (picker_lookup).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -57,7 +57,7 @@ Cross-links: [docs/entities/project/Project.md](../entities/project/Project.md) 
 hunttech_Project.browse
 └─ ProjectEdit (hunttech_Project.edit, модальный 100%×100%)
    ├─ sidebar (edit-sidebar 270px)
-   │  ├─ visual: image projectLogoFileImage (96×96) + projectDefaultLogoFileImage (fallback icons/no-company.png) + upload projectLogoFileUpload (dropZone=sidebar visual)
+   │  ├─ visual: ovaFallbackImage projectLogoFileImage (176×176, ovalWidth/ovalHeight, fallback icons/no-company.png, SCALE_DOWN — эталон JobCandidateEdit) + upload projectLogoFileUpload (dropZone=sidebar visual)
    │  ├─ identity: label projectSidebarTitle (наименование проекта) + subtitle «Проект»
    │  ├─ label-navigation «Разделы»: projectEditorNavMain / projectEditorNavDescription / projectEditorNavVacancy / projectEditorNavTemplate (кнопки-пункты = вкладки TabSheet)
    │  ├─ spacer + hint
@@ -84,7 +84,7 @@ hunttech_Project.browse
 
 ### 4.2 Скрытые вычисления (без явного клика)
 
-- `setProjectPicImage` — переключает видимость превью логотипа и fallback-картинки по наличию `projectLogo`.
+- `onBeforeShow1` — логотип отображается единым `OvaFallbackImage` (сам читает `projectLogo` из `projectDc` и показывает fallback `icons/no-company.png` при отсутствии файла); ручное переключение видимости/источника не требуется (эталон JobCandidateEdit).
 - `setEndDateProject` — при «Проект закрыт» проставляет текущую дату окончания, иначе очищает её.
 - `getOpenedPosition` — запрашивает открытые позиции проекта (`openClose = false`) для диалога подтверждения закрытия.
 - `setButtonsForChats` — активирует/деактивирует ссылки чатов по наличию URL в полях `generalChat`/`chatForCV`.
@@ -104,7 +104,7 @@ hunttech_Project.browse
 - **«Информация в сопроводительном письме» (projectEditorNavTemplate)** → клик → пункт активен, вкладка `tabTemplateLetter` (ленивая загрузка LOB).
 - **«Проект закрыт» (checkBoxProjectIsClosed)** → включили + есть открытые вакансии → диалог подтверждения закрытия вакансий; в любом случае — проставляется/очищается дата окончания и блокируются/разблокируются ключевые поля (наименование, даты, департамент, владелец).
 - **Ссылки чатов (generalChatLink/chatForCVLink)** → ввод URL в поле → ссылка активируется; клик открывает чат в новой вкладке (target=_blank).
-- **Загрузка логотипа (projectLogoFileUpload)** → файл IMMEDIATE сохраняется в `projectLogo`, превью показывает загруженное изображение; «Очистить» возвращает fallback-картинку.
+- **Загрузка логотипа (projectLogoFileUpload)** → файл IMMEDIATE сохраняется в `projectLogo` (dataContainer `projectDc`), `OvaFallbackImage` автоматически показывает загруженное изображение; «Очистить» возвращает fallback `icons/no-company.png`.
 - **Footer**: «Сохранить и закрыть» (windowCommitAndClose, primary) → валидация required + BeforeCommitChanges-обработчики; «Отмена» (windowClose, secondary) → закрытие без сохранения.
 
 ## 6. Визуальная компоновка элементов (Visual Layout Schema)
@@ -113,7 +113,7 @@ hunttech_Project.browse
 layout (project-editor)
 └─ hbox (edit-screen-layout)
    ├─ vbox edit-sidebar (270px; ≤1366px → 250px через shared)
-   │  ├─ edit-sidebar-visual: логотип 96×96 (border-radius 50%, без рамки/тени) + пара кнопок «Загрузить»/«Очистить» 96×36
+   │  ├─ edit-sidebar-visual: ovaFallbackImage 176×176 (border-radius 50%, без рамки/тени) + пара кнопок «Загрузить»/«Очистить» 96×36
    │  ├─ edit-sidebar-identity: title (#ffb11b 18px/700, центрировано) + subtitle (12px/400)
    │  ├─ label-navigation: полоса-заголовок «Разделы» (project-editor-navigation-title — 36px, #ffb11b 15px/700, inset-линии) + пункты 27px/13px/600 (active #ffb11b на rgba(255,177,27,.12), hover rgba(255,255,255,.08))
    │  ├─ edit-sidebar-spacer (100%×100%)
@@ -121,6 +121,7 @@ layout (project-editor)
    └─ vbox edit-workspace
       ├─ edit-toolbar: title 20px/700 + description 12px/18px
       ├─ tabSheet edit-tabs (48px строка): вкладки «Наименование проекта»/«Описание проекта»/«Вакансии»/«Информация в сопроводительном письме»
+      │  └─ Стили вкладок — ОБЩИЕ для Edit-форм (.edit-tabs в edit-screen-shared-styles.scss, эталон OpenPositionEdit): полоса 0 12px на панельном фоне с нижней линией; подпись 48px/14px/600 (#26384c, hover #1264b5, активная — $v-selection-color #4d7ab2 с линией 3px); контент вкладки padding 14px 16px 18px на mix(86%); горизонтальный скролл полосы при нехватке ширины
       │  └─ карточки edit-card (showAsPanel, 7–8px радиус): projectMainCard, projectChatCard, projectDescriptionCard, projectVacancyCard, projectTemplateCard
       └─ edit-footer-actions (62px, верхняя тень): primary project-editor-primary-action (#4d7ab2), secondary project-editor-secondary-action (прозрачная)
 
@@ -138,5 +139,7 @@ SCSS: themes/{7 тем}/com.company.hunttech/project-editor.scss (sha256-иде�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-12 | Логотип sidebar приведён к размеру 176×176 (width/height/ovalWidth/ovalHeight в XML `projectLogoFileImage`) — в точности как `candidatePic` эталона JobCandidateEdit; контракт-тест обновлён (176px). |
+| 2026-08-12 | Стили вкладок TabSheet — в ОБЩИЕ стили тем (эталон OpenPositionEdit): блок .edit-tabs в edit-screen-shared-styles.scss (полоса 0 12px, подпись 48px/14px/600 #26384c, hover #1264b5, активная $v-selection-color с линией 3px, контент 14px 16px 18px mix(86%)); локальный дубль из project-editor.scss убран; контракт-тест + новый тест-метод tabsStylesLiveInSharedThemeStyles (8/8) |
 | 2026-08-12 | Label-навигация «Разделы» переведена на вкладки TabSheet правой части экрана (указание владельца): 4 пункта `projectEditorNavMain`/`projectEditorNavDescription`/`projectEditorNavVacancy`/`projectEditorNavTemplate`; клик по пункту → `projectTab.setSelectedTab(...)`; активный пункт синхронизируется по SelectedTabChange; навигация видна на всех вкладках (правило §3.6 не применяется) |
 | 2026-08-12 | Рефакторинг по контракту Edit-форм: полноэкранный модальный диалог 100%×100%; sidebar 270px (визуал логотипа 96×96 с upload-кнопками 96×36, identity, label-навигация «Разделы» с полосой-заголовком, spacer, hint); workspace с toolbar и tabSheet edit-tabs; пять карточек edit-card (showAsPanel); edit-form-control на всех полях; footer edit-footer-actions с primary/secondary; presentation-only Java: навигация по карточкам вкладки «Проект», видимость навигации по правилу §3.6, динамический title sidebar; SCSS partial project-editor.scss во всех 7 темах; тесты ProjectEditLayoutContractTest (7/7) и ProjectDetachedObjectTest (4/4); Spec перенесён в docs/ui/ProjectEdit_Spec.md |

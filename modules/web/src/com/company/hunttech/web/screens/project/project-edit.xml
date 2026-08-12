@@ -83,29 +83,27 @@
                       width="100%"
                       spacing="true"
                       align="MIDDLE_CENTER">
+                    <!-- Обёртка аватара без фиксированного размера (как picVBox эталона
+                         JobCandidateEdit): размер задаёт сам OvaFallbackImage 176×176. -->
                     <vbox id="projectLogoPicBox"
-                          width="96px"
-                          height="96px"
                           spacing="false"
                           align="MIDDLE_CENTER">
-                        <image id="projectLogoFileImage"
-                               dataContainer="projectDc"
-                               property="projectLogo"
-                               width="96px"
-                               height="96px"
-                               visible="true"
-                               align="MIDDLE_CENTER"
-                               stylename="project-editor-logo-image"
-                               scaleMode="FILL"/>
-                        <image id="projectDefaultLogoFileImage"
-                               width="96px"
-                               height="96px"
-                               visible="false"
-                               align="MIDDLE_CENTER"
-                               stylename="project-editor-logo-image"
-                               scaleMode="FILL">
-                            <theme path="icons/no-company.png"/>
-                        </image>
+                        <!-- OvaFallbackImage логотипа проекта: единый элемент по эталону
+                             JobCandidateEdit — 176×176 (width/height/ovalWidth/ovalHeight),
+                             fallback no-company.png при отсутствии файла, SCALE_DOWN;
+                             загрузка — upload ниже (dataContainer/property projectLogo). -->
+                        <ovaFallbackImage id="projectLogoFileImage"
+                                          dataContainer="projectDc"
+                                          property="projectLogo"
+                                          width="176px"
+                                          height="176px"
+                                          ovalWidth="176px"
+                                          ovalHeight="176px"
+                                          fallbackThemePath="icons/no-company.png"
+                                          visible="true"
+                                          align="MIDDLE_CENTER"
+                                          stylename="project-editor-logo-image"
+                                          scaleMode="SCALE_DOWN"/>
                     </vbox>
                     <upload id="projectLogoFileUpload"
                             fileStoragePutMode="IMMEDIATE"

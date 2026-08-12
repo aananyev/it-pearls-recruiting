@@ -159,10 +159,21 @@ public class ProjectEditLayoutContractTest {
         assertTrue(xml.contains("property=\"templateLetter\""));
         assertTrue(xml.contains("property=\"projectLogo\""));
 
-        // Логотип и upload: превью + fallback + загрузчик в sidebar visual.
-        assertTrue(xml.contains("id=\"projectLogoFileImage\""));
-        assertTrue(xml.contains("id=\"projectDefaultLogoFileImage\""));
-        assertTrue(xml.contains("theme path=\"icons/no-company.png\""));
+        // Логотип: единый OvaFallbackImage по эталону JobCandidateEdit (176×176,
+        // ovalWidth/ovalHeight, fallback no-company.png, SCALE_DOWN) + загрузчик в sidebar.
+        assertTrue("Нет OvaFallbackImage логотипа",
+                xml.contains("<ovaFallbackImage id=\"projectLogoFileImage\""));
+        assertTrue("OvaFallbackImage не 176×176 (width/height/ovalWidth/ovalHeight)",
+                xml.contains("width=\"176px\"") && xml.contains("height=\"176px\"")
+                        && xml.contains("ovalWidth=\"176px\"") && xml.contains("ovalHeight=\"176px\""));
+        assertTrue("Нет fallbackThemePath icons/no-company.png",
+                xml.contains("fallbackThemePath=\"icons/no-company.png\""));
+        assertTrue("scaleMode не SCALE_DOWN (эталон IteractionListEdit)",
+                xml.contains("scaleMode=\"SCALE_DOWN\""));
+        assertTrue("OvaFallbackImage не привязан к projectLogo",
+                xml.contains("property=\"projectLogo\""));
+        assertFalse("Дублирующий fallback-image projectDefaultLogoFileImage остался",
+                xml.contains("projectDefaultLogoFileImage"));
         assertTrue(xml.contains("id=\"projectLogoFileUpload\""));
         assertTrue(xml.contains("fileStoragePutMode=\"IMMEDIATE\""));
         assertTrue(xml.contains("showClearButton=\"true\""));

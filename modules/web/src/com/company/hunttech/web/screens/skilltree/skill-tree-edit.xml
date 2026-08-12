@@ -71,17 +71,17 @@
                       spacing="true"
                       align="MIDDLE_CENTER">
                     <!-- Круглый аватар логотипа навыка: характеристики 1:1 с ovaFallbackImage
-                         candidateImage эталона IteractionListEdit — размер 96×96
+                         candidatePic эталона JobCandidateEdit — размер 176×176
                          (width/height/ovalWidth/ovalHeight), visible, MIDDLE_CENTER,
                          fallback icons/no-programmer.jpeg, SCALE_DOWN; при отсутствии
                          файла показывает fallback-картинку. -->
                     <ovaFallbackImage id="skillPic"
                                       dataContainer="skillTreeDc"
                                       property="fileImageLogo"
-                                      width="96px"
-                                      height="96px"
-                                      ovalWidth="96px"
-                                      ovalHeight="96px"
+                                      width="176px"
+                                      height="176px"
+                                      ovalWidth="176px"
+                                      ovalHeight="176px"
                                       fallbackThemePath="icons/no-programmer.jpeg"
                                       visible="true"
                                       align="MIDDLE_CENTER"

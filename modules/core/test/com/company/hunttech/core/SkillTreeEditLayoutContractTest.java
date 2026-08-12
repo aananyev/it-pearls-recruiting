@@ -169,12 +169,12 @@ public class SkillTreeEditLayoutContractTest {
         assertTrue(xml.contains("property=\"fileImageLogo\""));
         assertTrue(xml.contains("fileStoragePutMode=\"IMMEDIATE\""));
         assertTrue(xml.contains("showClearButton=\"true\""));
-        // Превью логотипа — круглый OvaFallbackImage по эталону IteractionListEdit:
-        // овальная геометрия 96px и fallback-картинка при отсутствии файла.
+        // Превью логотипа — круглый OvaFallbackImage по эталону JobCandidateEdit:
+        // овальная геометрия 176px и fallback-картинка при отсутствии файла.
         assertTrue("skillPic не ovaFallbackImage (круглый аватар)",
                 xml.contains("<ovaFallbackImage id=\"skillPic\""));
         assertTrue("нет ovalWidth/ovalHeight у skillPic",
-                xml.contains("ovalWidth=\"96px\"") && xml.contains("ovalHeight=\"96px\""));
+                xml.contains("ovalWidth=\"176px\"") && xml.contains("ovalHeight=\"176px\""));
         assertTrue("нет fallback-картинки no-programmer.jpeg у skillPic",
                 xml.contains("fallbackThemePath=\"icons/no-programmer.jpeg\""));
         assertTrue("нет локального класса круглого аватара skill-tree-logo-image",
@@ -243,8 +243,8 @@ public class SkillTreeEditLayoutContractTest {
                 canon.contains("rgba(255, 255, 255, 1) 0 1px 0 0 inset"));
         assertTrue("Нет разделителя полосы-заголовка (border-bottom)",
                 canon.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14)"));
-        // Визуальный блок sidebar: круглый аватар 96px по эталону IteractionListEdit —
-        // чистый круг без рамки/тени (в отличие от 176px candidatePic JobCandidateEdit).
+        // Визуальный блок sidebar: круглый аватар 176px по эталону JobCandidateEdit —
+        // чистый круг без рамки/тени (как candidatePic JobCandidateEdit).
         assertTrue("Нет блока .edit-sidebar-visual", canon.contains(".edit-sidebar-visual"));
         assertTrue("Нет круглой геометрии .skill-tree-logo-image",
                 canon.contains(".skill-tree-logo-image"));
