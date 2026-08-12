@@ -35,4 +35,5 @@ void testAdminConnection(UUID configurationId);
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-12 | Зарегистрирован в web-прокси (web-spring.xml, remoteServices) — без этого AdminAiConfigurationBrowse/Edit падали с DevelopmentException; views AI Control Plane добавлены в cuba.viewsConfig (app.properties/web-app.properties) |
 | 2026-08-12 | Создан middleware credential service и AES-GCM secret layer |
