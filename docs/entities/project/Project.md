@@ -46,7 +46,6 @@ Browse без LOB descriptions в основном SELECT; nested `projectOwner`
 ### Индексы производительности
 
 Для PostgreSQL добавлены частичные индексы под фактические запросы Project-экранов и связанных сервисов:
-
 | Индекс | Выражение | Назначение |
 |--------|-----------|------------|
 | `IDX_HUNTTECH_PROJECT_ACTIVE_NAME` | `HUNTTECH_PROJECT (PROJECT_NAME, ID) WHERE DELETE_TS IS NULL AND PROJECT_IS_CLOSED = FALSE` | основной активный список `ProjectBrowse` с сортировкой по имени |
@@ -154,3 +153,4 @@ HSQL получил обычные составные аналоги этих и
 | 2026-06-22 | Аудит Edit unfetched FK: `ProjectEdit` без каскадных обработчиков location; lazy LOB/collections через reload — OK |
 | 2026-06-23 | Оптимизация: project-browse/edit/picker/tree-picker views, lazy LOB и `openPosition` по вкладкам, batch N+1 в `ProjectBrowse`, `ProjectServiceTest`, документация |
 | 2026-07-04 | Оптимизация Project по сценарию Company: стартовые фильтры без повторных load, skip open-position query для нового ProjectEdit, PostgreSQL/HSQL индексы, Project perf-тесты |
+| 2026-08-12 | Автоматическая обработка загружаемого логотипа (`projectLogo`): конвертация в PNG, ресайз до 300px, удаление белого фона, вписывание в круг — кастомный загрузчик `WebProjectLogoFileUploadField` + `ProjectLogoImageProcessingService`; структура сущности не менялась |
