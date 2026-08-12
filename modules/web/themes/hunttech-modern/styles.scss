@@ -23,6 +23,7 @@
 @import "com.company.hunttech/iteraction-list-reference-finish";
 @import "com.company.hunttech/iteraction-list-visual-alignment";
 @import "com.company.hunttech/iteraction-editor";
+@import "com.company.hunttech/project-editor";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 .hunttech-modern {
@@ -49,4 +50,5 @@
   @include iteraction-list-reference-finish-theme;
   @include iteraction-list-visual-alignment-theme;
   @include iteraction-editor-theme;
+  @include project-editor-theme;
 }

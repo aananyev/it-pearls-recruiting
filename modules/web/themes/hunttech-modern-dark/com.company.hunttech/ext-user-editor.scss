@@ -191,18 +191,18 @@
       border-left-color: #ffb11b !important;
     }
 
-    // OvaFallbackImage пользователя: круглый аватар 180×180, fallback-иллюстрация
-    // подрезается по светлым полям файла (эталон IteractionListEdit, размер 180px).
+    // OvaFallbackImage пользователя: круглый аватар 176×176, fallback-иллюстрация
+    // подрезается по светлым полям файла (размер как у candidatePic JobCandidateEdit).
     .ext-user-editor-avatar,
     .ext-user-editor-avatar img,
     .ext-user-editor-avatar .v-image-element {
       box-sizing: border-box;
-      width: 180px !important;
-      height: 180px !important;
-      min-width: 180px !important;
-      min-height: 180px !important;
-      max-width: 180px !important;
-      max-height: 180px !important;
+      width: 176px !important;
+      height: 176px !important;
+      min-width: 176px !important;
+      min-height: 176px !important;
+      max-width: 176px !important;
+      max-height: 176px !important;
       border-radius: 50% !important;
       object-fit: contain !important;
     }
