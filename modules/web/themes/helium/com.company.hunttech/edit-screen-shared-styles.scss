@@ -227,6 +227,98 @@
     min-height: 48px;
   }
 
+  /* Оформление вкладок TabSheet Edit-форм — эталон OpenPositionEdit
+   * (open-position-editor-tabs, перенесено в общие стили тем):
+   * вкладки в одну строку (flex-nowrap) с горизонтальной прокруткой полосы,
+   * активная вкладка — акцентная линия снизу, контент — панельный фон. */
+  .edit-tabs {
+    display: flex !important;
+    flex-direction: column !important;
+    max-width: 100% !important;
+  }
+
+  .edit-tabs .v-tabsheet-tabcontainer {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 12px;
+    background: $v-panel-background-color !important;
+    border-bottom: 1px solid rgba($v-font-color, 0.15);
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    flex: 0 0 auto;
+  }
+
+  .edit-tabs .v-tabsheet-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+    height: auto !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  .edit-tabs .v-tabsheet-tabitemcell {
+    max-width: none !important;
+    flex-shrink: 0 !important;
+  }
+
+  .edit-tabs .v-tabsheet-tabitem,
+  .edit-tabs .v-tabsheet-tabitem-selected {
+    flex-shrink: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .edit-tabs .v-tabsheet-tabitem .v-caption {
+    box-sizing: border-box;
+    height: 48px;
+    width: auto !important;
+    max-width: none !important;
+    padding: 0 10px;
+    color: #26384c !important;
+    font-size: 14px !important;
+    font-weight: 600;
+    line-height: 48px;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    background: transparent !important;
+    border: 0 !important;
+  }
+
+  .edit-tabs .v-tabsheet-tabitem:hover .v-caption {
+    color: #1264b5 !important;
+  }
+
+  .edit-tabs .v-tabsheet-tabitem-selected .v-caption {
+    color: $v-selection-color !important;
+    border-bottom: 3px solid $v-selection-color !important;
+  }
+
+  .edit-tabs .v-tabsheet-content {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+    padding: 14px 16px 18px;
+    background: mix($v-app-background-color, $v-panel-background-color, 86%) !important;
+    overflow: auto;
+  }
+
+  .edit-tabs .v-tabsheet-tabsheetpanel {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0;
+  }
+
+  .edit-tabs .v-tabsheet-tabsheetpanel,
+  .edit-tabs .v-tabsheet-content > .v-scrollable,
+  .edit-tabs .v-tabsheet-content .v-verticallayout {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
   .edit-card,
   .edit-accordion-section {
     width: 100% !important;

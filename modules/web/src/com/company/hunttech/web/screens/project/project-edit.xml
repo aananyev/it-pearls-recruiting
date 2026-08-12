@@ -130,8 +130,9 @@
                            width="100%"
                            value="msg://msgProjectSidebarSubtitle"/>
                 </vbox>
-                <!-- Label-навигация «Разделы»: полоса-заголовок по контракту §4.1 и пункты
-                     карточек вкладки «Проект»; активный пункт управляется контроллером. -->
+                <!-- Label-навигация «Разделы»: пункты = вкладки TabSheet в правой части экрана
+                     (по явному указанию владельца; правило §3.6 не применяется — навигация
+                     видна на всех вкладках); активный пункт управляется контроллером. -->
                 <vbox id="projectEditorSidebarNavigation"
                       stylename="label-navigation"
                       width="100%"
@@ -140,11 +141,19 @@
                            stylename="label-nav-title project-editor-navigation-title"/>
                     <button id="projectEditorNavMain"
                             stylename="label-nav-item label-nav-item-active"
-                            caption="msg://msgProjectMainSection"
+                            caption="msg://msgProjectName"
                             width="100%"/>
-                    <button id="projectEditorNavChats"
+                    <button id="projectEditorNavDescription"
                             stylename="label-nav-item"
-                            caption="msg://msgProjectChatSection"
+                            caption="msg://msgProjectDescription"
+                            width="100%"/>
+                    <button id="projectEditorNavVacancy"
+                            stylename="label-nav-item"
+                            caption="msg://msgTabVacancy"
+                            width="100%"/>
+                    <button id="projectEditorNavTemplate"
+                            stylename="label-nav-item"
+                            caption="msg://msgTemplateLetter"
                             width="100%"/>
                 </vbox>
                 <!-- Spacer отделяет навигацию от нижней подсказки (expand в sidebar). -->

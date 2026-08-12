@@ -12,7 +12,7 @@ Cross-links: [docs/entities/project/Project.md](../entities/project/Project.md) 
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Экран открывается из `hunttech_Project.browse` действиями создания и редактирования проекта как полноэкранный модальный диалог. Слева — sidebar: визуальный блок (логотип проекта 96×96 с загрузкой/очисткой), наименование и роль «Проект», label-навигация «Разделы» (пункты карточек вкладки «Проект» — «Основные данные» и «Чаты»), подсказка. Справа — workspace: toolbar («Проект» + описание назначения), вкладки «Наименование проекта», «Описание проекта», «Вакансии», «Информация в сопроводительном письме» и footer-действия ОК/Отмена. Справочники департаментов, владельцев и родительских проектов выбираются через lookup-компоненты (picker_lookup).
+Экран открывается из `hunttech_Project.browse` действиями создания и редактирования проекта как полноэкранный модальный диалог. Слева — sidebar: визуальный блок (логотип проекта 96×96 с загрузкой/очисткой), наименование и роль «Проект», label-навигация «Разделы» (пункты = вкладки TabSheet правой части — «Наименование проекта», «Описание проекта», «Вакансии», «Информация в сопроводительном письме»), подсказка. Справа — workspace: toolbar («Проект» + описание назначения), вкладки «Наименование проекта», «Описание проекта», «Вакансии», «Информация в сопроводительном письме» и footer-действия ОК/Отмена. Справочники департаментов, владельцев и родительских проектов выбираются через lookup-компоненты (picker_lookup).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -59,7 +59,7 @@ hunttech_Project.browse
    ├─ sidebar (edit-sidebar 270px)
    │  ├─ visual: image projectLogoFileImage (96×96) + projectDefaultLogoFileImage (fallback icons/no-company.png) + upload projectLogoFileUpload (dropZone=sidebar visual)
    │  ├─ identity: label projectSidebarTitle (наименование проекта) + subtitle «Проект»
-   │  ├─ label-navigation «Разделы»: projectEditorNavMain / projectEditorNavChats (кнопки-пункты)
+   │  ├─ label-navigation «Разделы»: projectEditorNavMain / projectEditorNavDescription / projectEditorNavVacancy / projectEditorNavTemplate (кнопки-пункты = вкладки TabSheet)
    │  ├─ spacer + hint
    ├─ workspace (edit-workspace)
    │  ├─ toolbar (edit-toolbar): title «Проект» + description
@@ -80,7 +80,7 @@ hunttech_Project.browse
 - `onBeforeShow` — сохраняет `beforeEdit`-снимок; для новой записи проставляет дату старта; устанавливает дату окончания по признаку «Закрыт»; загружает открытые вакансии проекта (для диалога закрытия); активирует/деактивирует ссылки чатов.
 - `onBeforeShowSidebar` — подставляет наименование проекта в title sidebar (или общий заголовок «Проект» для новой записи).
 - `onProjectTabSelectedTabChange` — ленивая загрузка: первое открытие вкладки «Описание проекта» → reload LOB `projectDescription`; «Информация в сопроводительном письме» → reload LOB `templateLetter`; «Вакансии» → установка параметра `project` и единственная отложенная загрузка коллекции.
-- `onProjectTabSelectedTabChangeNav` — синхронизирует sidebar-навигацию: видимость (правило контракта §3.6 — навигация показана только на вкладке «Проект») и активный пункт.
+- `onProjectTabSelectedTabChangeNav` — синхронизирует sidebar-навигацию: активный пункт (карта `TAB_TO_NAV_BUTTON`: имя вкладки → кнопка). Навигация видна на всех вкладках (указание владельца; правило контракта §3.6 не применяется).
 
 ### 4.2 Скрытые вычисления (без явного клика)
 
@@ -98,8 +98,10 @@ hunttech_Project.browse
 
 ## 5. Логика управляющих элементов (Actions & Buttons Logic)
 
-- **«Основные данные» (projectEditorNavMain)** → клик → пункт становится активным, фокус на `projectNameField`.
-- **«Чаты» (projectEditorNavChats)** → клик → пункт становится активным, фокус на `generalChatTextField`.
+- **«Наименование проекта» (projectEditorNavMain)** → клик → пункт активен, вкладка `tabProject` (`projectTab.setSelectedTab`).
+- **«Описание проекта» (projectEditorNavDescription)** → клик → пункт активен, вкладка `tabProjectDescription` (ленивая загрузка LOB).
+- **«Вакансии» (projectEditorNavVacancy)** → клик → пункт активен, вкладка `tabVacansy` (ленивая загрузка списка).
+- **«Информация в сопроводительном письме» (projectEditorNavTemplate)** → клик → пункт активен, вкладка `tabTemplateLetter` (ленивая загрузка LOB).
 - **«Проект закрыт» (checkBoxProjectIsClosed)** → включили + есть открытые вакансии → диалог подтверждения закрытия вакансий; в любом случае — проставляется/очищается дата окончания и блокируются/разблокируются ключевые поля (наименование, даты, департамент, владелец).
 - **Ссылки чатов (generalChatLink/chatForCVLink)** → ввод URL в поле → ссылка активируется; клик открывает чат в новой вкладке (target=_blank).
 - **Загрузка логотипа (projectLogoFileUpload)** → файл IMMEDIATE сохраняется в `projectLogo`, превью показывает загруженное изображение; «Очистить» возвращает fallback-картинку.
@@ -136,4 +138,5 @@ SCSS: themes/{7 тем}/com.company.hunttech/project-editor.scss (sha256-иде�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-12 | Label-навигация «Разделы» переведена на вкладки TabSheet правой части экрана (указание владельца): 4 пункта `projectEditorNavMain`/`projectEditorNavDescription`/`projectEditorNavVacancy`/`projectEditorNavTemplate`; клик по пункту → `projectTab.setSelectedTab(...)`; активный пункт синхронизируется по SelectedTabChange; навигация видна на всех вкладках (правило §3.6 не применяется) |
 | 2026-08-12 | Рефакторинг по контракту Edit-форм: полноэкранный модальный диалог 100%×100%; sidebar 270px (визуал логотипа 96×96 с upload-кнопками 96×36, identity, label-навигация «Разделы» с полосой-заголовком, spacer, hint); workspace с toolbar и tabSheet edit-tabs; пять карточек edit-card (showAsPanel); edit-form-control на всех полях; footer edit-footer-actions с primary/secondary; presentation-only Java: навигация по карточкам вкладки «Проект», видимость навигации по правилу §3.6, динамический title sidebar; SCSS partial project-editor.scss во всех 7 темах; тесты ProjectEditLayoutContractTest (7/7) и ProjectDetachedObjectTest (4/4); Spec перенесён в docs/ui/ProjectEdit_Spec.md |

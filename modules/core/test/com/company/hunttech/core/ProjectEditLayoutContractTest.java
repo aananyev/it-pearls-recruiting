@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -179,10 +181,32 @@ public class ProjectEditLayoutContractTest {
         assertTrue(xml.contains("id=\"tabTemplateLetter\""));
         assertTrue(xml.contains("id=\"projectTab\""));
 
-        // Навигационные кнопки sidebar и focusComponent окна.
+        // Навигационные кнопки sidebar = 4 вкладки TabSheet (указание владельца),
+        // focusComponent окна.
         assertTrue(xml.contains("id=\"projectEditorNavMain\""));
-        assertTrue(xml.contains("id=\"projectEditorNavChats\""));
+        assertTrue(xml.contains("id=\"projectEditorNavDescription\""));
+        assertTrue(xml.contains("id=\"projectEditorNavVacancy\""));
+        assertTrue(xml.contains("id=\"projectEditorNavTemplate\""));
+        assertTrue(xml.contains("caption=\"msg://msgProjectName\""));
+        assertTrue(xml.contains("caption=\"msg://msgProjectDescription\""));
+        assertTrue(xml.contains("caption=\"msg://msgTabVacancy\""));
+        assertTrue(xml.contains("caption=\"msg://msgTemplateLetter\""));
+        assertFalse("навигация по карточкам вкладки убрана",
+                xml.contains("projectEditorNavChats")
+                        || xml.contains("msgProjectMainSection")
+                        || xml.contains("msgProjectChatSection"));
         assertTrue(xml.contains("focusComponent=\"projectNameField\""));
+
+        // Java: клик по пункту навигации переключает вкладку TabSheet,
+        // активный пункт синхронизируется по SelectedTabChange.
+        String java = readProjectFile(
+                "modules/web/src/com/company/hunttech/web/screens/project/ProjectEdit.java");
+        assertTrue(java.contains("projectTab.setSelectedTab(\"tabProject\")"));
+        assertTrue(java.contains("projectTab.setSelectedTab(\"tabProjectDescription\")"));
+        assertTrue(java.contains("projectTab.setSelectedTab(\"tabVacansy\")"));
+        assertTrue(java.contains("projectTab.setSelectedTab(\"tabTemplateLetter\")"));
+        assertTrue(java.contains("TAB_TO_NAV_BUTTON"));
+        assertFalse(java.contains("projectEditorNavChats"));
     }
 
     @Test
@@ -236,8 +260,10 @@ public class ProjectEditLayoutContractTest {
                 canon.contains(".project-editor-logo-image"));
         assertTrue("Нет border-radius 50% у логотипа",
                 canon.contains("border-radius: 50% !important"));
-        // Вкладки проекта: высота строки 48px (контракт §5.3).
-        assertTrue("Нет высоты табов 48px", canon.contains("min-height: 48px !important"));
+        // Вкладки TabSheet оформляются ОБЩИМИ стилями тем (эталон OpenPositionEdit),
+        // см. tabsStylesLiveInSharedThemeStyles; в локальном partial дубля нет.
+        assertFalse("вкладки не должны дублироваться в project-editor.scss",
+                canon.contains(".edit-tabs .v-tabsheet-tabitemcell"));
 
         for (String theme : THEMES) {
             String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");
@@ -249,6 +275,41 @@ public class ProjectEditLayoutContractTest {
             String local = readProjectFile(
                     "modules/web/themes/" + theme + "/com.company.hunttech/project-editor.scss");
             assertTrue("project-editor.scss не идентичен в теме " + theme, canon.equals(local));
+        }
+    }
+
+    @Test
+    public void tabsStylesLiveInSharedThemeStyles() throws IOException {
+        // Стили вкладок TabSheet — общие для всех Edit-форм (эталон OpenPositionEdit,
+        // перенесены из open-position-editor.scss в edit-screen-shared-styles.scss).
+        String sharedCanon = readProjectFile(
+                "modules/web/themes/halo/com.company.hunttech/edit-screen-shared-styles.scss");
+        assertTrue("Нет flex-столбца .edit-tabs", sharedCanon.contains("flex-direction: column !important"));
+        assertTrue("Нет полосы вкладок (padding 0 12px, панельный фон)",
+                sharedCanon.contains("padding: 0 12px")
+                        && sharedCanon.contains("$v-panel-background-color !important")
+                        && sharedCanon.contains("border-bottom: 1px solid rgba($v-font-color, 0.15)"));
+        assertTrue("Нет nowrap-строки вкладок",
+                sharedCanon.contains("flex-wrap: nowrap !important")
+                        && sharedCanon.contains("white-space: nowrap !important"));
+        assertTrue("Нет подписи вкладки 48px/14px #26384c",
+                sharedCanon.contains("height: 48px")
+                        && sharedCanon.contains("font-size: 14px !important")
+                        && sharedCanon.contains("color: #26384c !important"));
+        assertTrue("Нет hover #1264b5", sharedCanon.contains("color: #1264b5 !important"));
+        assertTrue("Нет акцентной линии активной вкладки (border-bottom 3px)",
+                sharedCanon.contains("border-bottom: 3px solid $v-selection-color !important"));
+        assertTrue("Нет панельного фона контента вкладки",
+                sharedCanon.contains("padding: 14px 16px 18px")
+                        && sharedCanon.contains("mix($v-app-background-color, $v-panel-background-color, 86%) !important"));
+        // Идентичность shared-стилей во всех 7 темах.
+        String sharedHalo = readProjectFile(
+                "modules/web/themes/halo/com.company.hunttech/edit-screen-shared-styles.scss");
+        for (String theme : THEMES) {
+            String s = readProjectFile("modules/web/themes/" + theme
+                    + "/com.company.hunttech/edit-screen-shared-styles.scss");
+            assertEquals(theme + ": edit-screen-shared-styles.scss не идентичен halo",
+                    sharedHalo, s);
         }
     }
 

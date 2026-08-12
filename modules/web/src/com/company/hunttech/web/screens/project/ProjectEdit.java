@@ -21,7 +21,9 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @UiController("hunttech_Project.edit")
@@ -115,21 +117,29 @@ public class ProjectEdit extends StandardEditor<Project> {
     @Inject
     private TabSheet projectTab;
 
-    // Presentation-контракт sidebar (контракт Edit-форм): контейнер label-навигации
-    // и пункты навигации карточек вкладки «Проект»; активное состояние и видимость
-    // управляются presentation-only методами ниже.
-    @Inject
-    private VBoxLayout projectEditorSidebarNavigation;
+    // Presentation-контракт sidebar: пункты label-навигации «Разделы» = вкладки TabSheet
+    // правой части экрана (по явному указанию владельца; навигация видна на всех
+    // вкладках, правило контракта §3.6 не применяется). Активное состояние управляется
+    // presentation-only методами ниже.
     @Inject
     private Label projectSidebarTitle;
     @Inject
     private Button projectEditorNavMain;
     @Inject
-    private Button projectEditorNavChats;
+    private Button projectEditorNavDescription;
+    @Inject
+    private Button projectEditorNavVacancy;
+    @Inject
+    private Button projectEditorNavTemplate;
 
-    /** Вкладки, на которых sidebar-навигация «Разделы» видима (правило контракта §3.6). */
-    private static final Set<String> TABS_WITH_SIDEBAR_NAVIGATION =
-            Collections.singleton("tabProject");
+    /** Соответствие «имя вкладки TabSheet → пункт label-навигации». */
+    private static final Map<String, String> TAB_TO_NAV_BUTTON =
+            Collections.unmodifiableMap(new HashMap<String, String>() {{
+                put("tabProject", "projectEditorNavMain");
+                put("tabProjectDescription", "projectEditorNavDescription");
+                put("tabVacansy", "projectEditorNavVacancy");
+                put("tabTemplateLetter", "projectEditorNavTemplate");
+            }});
 
     private boolean projectDescriptionLoaded;
     private boolean templateLetterLoaded;
@@ -398,42 +408,65 @@ public class ProjectEdit extends StandardEditor<Project> {
     @Subscribe("projectEditorNavMain")
     public void onProjectEditorNavMainClick(Button.ClickEvent event) {
         setNavigationActive(projectEditorNavMain);
-        projectNameField.focus();
+        projectTab.setSelectedTab("tabProject");
     }
 
-    @Subscribe("projectEditorNavChats")
-    public void onProjectEditorNavChatsClick(Button.ClickEvent event) {
-        setNavigationActive(projectEditorNavChats);
-        generalChatTextField.focus();
+    @Subscribe("projectEditorNavDescription")
+    public void onProjectEditorNavDescriptionClick(Button.ClickEvent event) {
+        setNavigationActive(projectEditorNavDescription);
+        projectTab.setSelectedTab("tabProjectDescription");
+    }
+
+    @Subscribe("projectEditorNavVacancy")
+    public void onProjectEditorNavVacancyClick(Button.ClickEvent event) {
+        setNavigationActive(projectEditorNavVacancy);
+        projectTab.setSelectedTab("tabVacansy");
+    }
+
+    @Subscribe("projectEditorNavTemplate")
+    public void onProjectEditorNavTemplateClick(Button.ClickEvent event) {
+        setNavigationActive(projectEditorNavTemplate);
+        projectTab.setSelectedTab("tabTemplateLetter");
     }
 
     @Subscribe("projectTab")
     public void onProjectTabSelectedTabChangeNav(TabSheet.SelectedTabChangeEvent event) {
-        // Отдельный обработчик смены вкладки: синхронизирует видимость и активный
-        // пункт sidebar-навигации; бизнес-логика ленивой загрузки — в основном методе.
-        TabSheet.Tab selected = event.getSelectedTab();
-        updateNavigationVisibility(selected);
-        updateActiveNavigation(selected);
-    }
-
-    private void updateNavigationVisibility(TabSheet.Tab selectedTab) {
-        boolean visible = selectedTab != null
-                && TABS_WITH_SIDEBAR_NAVIGATION.contains(selectedTab.getName());
-        projectEditorSidebarNavigation.setVisible(visible);
+        // Отдельный обработчик смены вкладки: синхронизирует активный пункт
+        // sidebar-навигации; бизнес-логика ленивой загрузки — в основном методе.
+        updateActiveNavigation(event.getSelectedTab());
     }
 
     private void updateActiveNavigation(TabSheet.Tab selectedTab) {
         if (selectedTab == null) {
             return;
         }
-        if ("tabProject".equals(selectedTab.getName())) {
-            setNavigationActive(projectEditorNavMain);
+        String navButtonId = TAB_TO_NAV_BUTTON.get(selectedTab.getName());
+        if (navButtonId == null) {
+            return;
+        }
+        switch (navButtonId) {
+            case "projectEditorNavMain":
+                setNavigationActive(projectEditorNavMain);
+                break;
+            case "projectEditorNavDescription":
+                setNavigationActive(projectEditorNavDescription);
+                break;
+            case "projectEditorNavVacancy":
+                setNavigationActive(projectEditorNavVacancy);
+                break;
+            case "projectEditorNavTemplate":
+                setNavigationActive(projectEditorNavTemplate);
+                break;
+            default:
+                break;
         }
     }
 
     private void resetNavigationActiveStyles() {
         projectEditorNavMain.removeStyleName("label-nav-item-active");
-        projectEditorNavChats.removeStyleName("label-nav-item-active");
+        projectEditorNavDescription.removeStyleName("label-nav-item-active");
+        projectEditorNavVacancy.removeStyleName("label-nav-item-active");
+        projectEditorNavTemplate.removeStyleName("label-nav-item-active");
     }
 
     private void setNavigationActive(Button activeButton) {

@@ -246,11 +246,8 @@
       color: mix($v-font-color, $v-panel-background-color, 60%) !important;
     }
 
-    // Вкладки проекта: каноническая высота строки 48px (контракт §5.3).
-    .edit-tabs .v-tabsheet-tabitemcell,
-    .edit-tabs .v-tabsheet-tabitem {
-      min-height: 48px !important;
-    }
+    // Вкладки TabSheet — общие стили оформления тем (эталон OpenPositionEdit),
+    // см. edit-screen-shared-styles.scss (.edit-tabs): локальный дубль не нужен.
 
     // Нижняя панель действий: отступы 11px 20px, кнопки 14px/600 высотой 40px
     // и верхняя тень — эталон IteractionListEdit.

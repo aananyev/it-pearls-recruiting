@@ -227,7 +227,7 @@ erDiagram
 - **Компоновка (эталон IteractionListEdit, 2026-08-11):** sidebar + workspace по общему Edit-контракту
   - **Sidebar:** иконка типа в круге, наименование (`labelItercationName`), номер (`numberField`), label-навигация по 8 вкладкам, предупреждение администратора (`labelWarning`)
   - **Workspace:** toolbar (заголовок + описание), TabSheet `edit-tabs` (8 вкладок), footer с ОК/Отмена справа-внизу
-  - **Карточки:** groupBox-секции как v-panel (`showAsPanel="true"` + `edit-card`); вкладки с единственным блоком ввода скрывают навигацию (правило 3.6)
+  - **Карточки:** groupBox-секции как v-panel (`showAsPanel="true"` + `edit-card`); label-навигация видна на всех вкладках (решение 2026-08-11)
 - **Вкладки:** тип взаимодействия, признаки, аутстаффинг, кнопка, уведомления, доп. настройки, виджеты, проверка цепочки
 - **Lazy loaders (по первому открытию вкладки):**
 
@@ -368,6 +368,7 @@ rg "view=\".*iteraction" modules/ --glob '*.xml'
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-11 | Label-навигация видна на всех 8 вкладках (убрано скрытие на одноблочных «Кнопка»/«Уведомления»/«Виджеты», правило 3.6 не применяется) |
 | 2026-08-11 | Рефакторинг `IteractionEdit` по эталону `IteractionListEdit`: sidebar+workspace, label-навигация по вкладкам (presentation-only Java), карточки-панели, toolbar/footer по общему Edit-контракту; `iteraction-editor.scss` × 7 тем; контрактный тест `IteractionEditLayoutContractTest` |
 | 2026-06-22 | Аудит Edit unfetched FK: `IteractionEdit` — обращения только к полям `iteraction-edit-view`; LOB lazy reload — OK |
 | 2026-06-22 | Исправление `iteraction-browse-view`: поля `iteractionTree` (number, iterationName) для группировки GroupTable |
