@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Browse-экран централизованных AI-функций: без prompt LOB и без секретных credentials. -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="aiFunctionsTable"
+        messagesPack="com.company.hunttech.web.screens.aifunctionconfiguration">
+    <!-- Data section: лёгкая коллекция AI-функций для администрирования и фильтрации. -->
+    <data>
+        <!-- Browse container использует специальный view без больших prompt LOB. -->
+        <collection id="aiFunctionsDc"
+                    class="com.company.hunttech.entity.ai.AiFunctionConfiguration"
+                    view="ai-function-configuration-browse-view">
+            <!-- Loader сортирует функции по бизнес-названию; секретов в графе нет. -->
+            <loader id="aiFunctionsDl">
+                <!-- JPQL не выполняет joins к секретному полю корпоративного подключения. -->
+                <query><![CDATA[select e from hunttech_AiFunctionConfiguration e order by e.name]]></query>
+            </loader>
+        </collection>
+    </data>
+    <!-- Полноразмерный административный browse для таблицы функций. -->
+    <dialogMode width="1200" height="720"/>
+    <!-- Локальный namespace browse-экрана; глобальные Vaadin-селекторы не используются. -->
+    <layout stylename="ai-function-configuration-browse"
+            expand="aiFunctionsTable"
+            spacing="true">
+        <!-- Фильтр связан только с loader aiFunctionsDl. -->
+        <filter id="filter" dataLoader="aiFunctionsDl" applyTo="aiFunctionsTable">
+            <!-- Стандартный набор доступных фильтруемых свойств CUBA. -->
+            <properties include=".*"/>
+        </filter>
+        <!-- Toolbar штатных CRUD actions StandardLookup. -->
+        <hbox id="browseActions" spacing="true">
+            <!-- Создание новой AI-функции. -->
+            <button action="aiFunctionsTable.create"/>
+            <!-- Редактирование выбранной AI-функции. -->
+            <button action="aiFunctionsTable.edit"/>
+            <!-- Удаление выбранной AI-функции с учётом DB/FK ограничений. -->
+            <button action="aiFunctionsTable.remove"/>
+        </hbox>
+        <!-- Основная таблица не содержит systemPrompt/promptTemplate и API key. -->
+        <dataGrid id="aiFunctionsTable" width="100%" dataContainer="aiFunctionsDc">
+            <!-- Стандартные CRUD actions CUBA. -->
+            <actions>
+                <!-- Create открывает hunttech_AiFunctionConfiguration.edit. -->
+                <action id="create" type="create"/>
+                <!-- Edit открывает редактор текущей строки. -->
+                <action id="edit" type="edit"/>
+                <!-- Remove удаляет только разрешённую пользователю сущность. -->
+                <action id="remove" type="remove"/>
+            </actions>
+            <!-- Колонки отражают routing contract, но не prompt и не секреты. -->
+            <columns>
+                <!-- Стабильный machine code функции. -->
+                <column property="code"/>
+                <!-- Человекочитаемое назначение. -->
+                <column property="name"/>
+                <!-- Техническая capability. -->
+                <column property="capability"/>
+                <!-- Политика admin/user routing. -->
+                <column property="executionPolicy"/>
+                <!-- Разрешённый fallback. -->
+                <column property="fallbackPolicy"/>
+                <!-- Корпоративное подключение отображается только по instance name. -->
+                <column property="adminConfiguration"/>
+                <!-- Модель конкретной функции. -->
+                <column property="adminModelName"/>
+                <!-- Флаг доступности функции. -->
+                <column property="active"/>
+            </columns>
+        </dataGrid>
+        <!-- Lookup actions скрыты при обычном открытии из меню. -->
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <!-- Подтверждение выбора при использовании экрана как lookup. -->
+            <button action="lookupSelectAction"/>
+            <!-- Отмена lookup. -->
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

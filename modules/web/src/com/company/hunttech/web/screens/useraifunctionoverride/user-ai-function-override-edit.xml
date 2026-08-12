@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Edit персонального замещения одной AI-функции по shared Edit contract HRM HuntTech. -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://editorCaption"
+        focusComponent="aiFunctionField"
+        messagesPack="com.company.hunttech.web.screens.useraifunctionoverride">
+    <!-- Data graph не загружает apiKey: execution secret нужен только middleware resolver. -->
+    <data>
+        <!-- Edited override current user. -->
+        <instance id="overrideDc"
+                  class="com.company.hunttech.entity.ai.UserAiFunctionOverride"
+                  view="user-ai-function-override-edit-view">
+            <!-- Standard editor loader. -->
+            <loader/>
+        </instance>
+        <!-- Только активные функции, где администратор разрешил user routing. -->
+        <collection id="functionsDc"
+                    class="com.company.hunttech.entity.ai.AiFunctionConfiguration"
+                    view="ai-function-configuration-browse-view">
+            <!-- Без prompt LOB, потому что пользователю они здесь не нужны. -->
+            <loader id="functionsDl">
+                <!-- ADMIN_ONLY исключён на уровне options loader и повторно валидируется перед commit. -->
+                <query><![CDATA[select e from hunttech_AiFunctionConfiguration e where e.active = true and e.executionPolicy <> 'ADMIN_ONLY' order by e.name]]></query>
+            </loader>
+        </collection>
+        <!-- Только активные личные API configurations текущего пользователя. -->
+        <collection id="userConfigurationsDc"
+                    class="com.company.hunttech.entity.UserAiConfiguration"
+                    view="user-ai-configuration-override-picker-view">
+            <!-- :user устанавливается в BeforeShow до автоматической загрузки данных. -->
+            <loader id="userConfigurationsDl">
+                <!-- Row scope исключает чужие credentials даже из options list. -->
+                <query><![CDATA[select e from hunttech_UserAiConfiguration e where e.user = :user and e.isActive = true order by e.providerCode]]></query>
+            </loader>
+        </collection>
+    </data>
+    <!-- Полноэкранный editor соответствует общему Edit contract. -->
+    <dialogMode width="100%" height="100%" modal="true"/>
+    <!-- Root namespace. -->
+    <layout stylename="user-ai-function-override-editor" expand="mainLayout" spacing="false" width="100%" height="100%">
+        <!-- Sidebar + workspace. -->
+        <hbox id="mainLayout" stylename="edit-screen-layout" expand="workspace" spacing="false" width="100%" height="100%">
+            <!-- Context sidebar. -->
+            <vbox id="sidebar" stylename="edit-sidebar" width="312px" height="100%" spacing="true" expand="sidebarSpacer">
+                <!-- Identity of personal routing record. -->
+                <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
+                    <!-- Static title avoids reading nested attributes before view load. -->
+                    <label value="Моё AI-замещение" stylename="edit-sidebar-title" width="100%"/>
+                    <!-- Scope is intentionally one function. -->
+                    <label value="Одна функция → одно личное подключение" stylename="edit-sidebar-subtitle" width="100%"/>
+                </vbox>
+                <!-- Label navigation. -->
+                <vbox id="navigation" stylename="label-navigation" width="100%" spacing="false">
+                    <!-- Navigation title. -->
+                    <label value="Разделы" stylename="label-nav-title" width="100%"/>
+                    <!-- Function selection. -->
+                    <button id="mainNav" caption="AI-функция" stylename="borderless label-nav-item label-nav-item-active" width="100%" invoke="focusMainSection"/>
+                    <!-- Personal provider/model. -->
+                    <button id="modelNav" caption="Моё подключение" stylename="borderless label-nav-item" width="100%" invoke="focusModelSection"/>
+                </vbox>
+                <!-- Spacer. -->
+                <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
+                <!-- Explain fallback behavior. -->
+                <label value="Если замещение выключено или отсутствует, функция использует корпоративное подключение согласно политике администратора."
+                       stylename="edit-sidebar-hint" width="100%"/>
+            </vbox>
+            <!-- Workspace. -->
+            <vbox id="workspace" stylename="edit-workspace" expand="workspaceScroll" width="100%" height="100%" spacing="false">
+                <!-- Toolbar. -->
+                <hbox id="toolbar" stylename="edit-toolbar" width="100%" spacing="true">
+                    <!-- Title block. -->
+                    <vbox id="toolbarText" width="100%" spacing="false">
+                        <!-- Main title. -->
+                        <label value="Персональное замещение AI-функции" stylename="edit-toolbar-title"/>
+                        <!-- Behavior summary. -->
+                        <label value="Выберите разрешённую функцию и своё активное API-подключение" stylename="edit-toolbar-description"/>
+                    </vbox>
+                </hbox>
+                <!-- Scrollable content. -->
+                <scrollBox id="workspaceScroll" stylename="edit-workspace-scroll" width="100%" height="100%">
+                    <!-- Cards. -->
+                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
+                        <!-- Function policy card. -->
+                        <groupBox id="mainSection" caption="AI-функция" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
+                            <!-- Function picker excludes ADMIN_ONLY. -->
+                            <lookupPickerField id="aiFunctionField" dataContainer="overrideDc" property="aiFunction" optionsContainer="functionsDc" required="true" width="100%"/>
+                            <!-- Enable/disable mapping without deleting it. -->
+                            <checkBox id="enabledField" dataContainer="overrideDc" property="enabled"/>
+                        </groupBox>
+                        <!-- Personal connection card. -->
+                        <groupBox id="modelSection" caption="Моё подключение" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
+                            <!-- User options loader contains only current user's active configs and no API key. -->
+                            <lookupPickerField id="userAiConfigurationField" dataContainer="overrideDc" property="userAiConfiguration" optionsContainer="userConfigurationsDc" required="true" width="100%"/>
+                            <!-- Model override editable only when function explicitly permits it. -->
+                            <textField id="modelNameField" dataContainer="overrideDc" property="modelName" width="100%" stylename="edit-form-control"/>
+                        </groupBox>
+                    </vbox>
+                </scrollBox>
+                <!-- Standard editor footer. -->
+                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" align="MIDDLE_RIGHT" width="100%">
+                    <!-- Commit and close. -->
+                    <button action="windowCommitAndClose"/>
+                    <!-- Close. -->
+                    <button action="windowClose"/>
+                </hbox>
+            </vbox>
+        </hbox>
+    </layout>
+</window>
