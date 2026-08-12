@@ -106,9 +106,12 @@
     <item screen="hunttech_CheckCandidate.browse" icon="CHECK" insertAfter="application-reports" openType="DIALOG"/>
     <menu id="aiAdministration" caption="mainMsg://menu_config.aiAdministration" icon="MAGIC"
           insertAfter="administration">
-        <item screen="hunttech_AiFunctionConfiguration.browse" icon="MAGIC"/>
-        <item screen="hunttech_AdminAiConfiguration.browse" icon="LOCK"/>
-        <item screen="hunttech_UserAiFunctionOverride.browse" icon="SLIDERS"/>
+        <item screen="hunttech_AiFunctionConfiguration.browse"
+              caption="mainMsg://menu_config.hunttech_AiFunctionConfiguration.browse" icon="MAGIC"/>
+        <item screen="hunttech_AdminAiConfiguration.browse"
+              caption="mainMsg://menu_config.hunttech_AdminAiConfiguration.browse" icon="LOCK"/>
+        <item screen="hunttech_UserAiFunctionOverride.browse"
+              caption="mainMsg://menu_config.hunttech_UserAiFunctionOverride.browse" icon="SLIDERS"/>
         <item screen="hunttech_VacancyPromptTemplate.browse"
               caption="mainMsg://menu_config.hunttech_VacancyPromptTemplate.browse" icon="FILE_TEXT_O"/>
         <item screen="hunttech_UserAiConfiguration.browse"

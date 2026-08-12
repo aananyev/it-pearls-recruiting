@@ -45,4 +45,5 @@ Shared Edit: sidebar 312px → workspace → toolbar → three `edit-card` → f
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-12 | Рефакторинг по эталону IteractionListEdit: локальный partial `admin-ai-configuration-editor.scss` (7 тем, sha256-идентичен), тёмная sidebar #172638 312px с padding 14px 16px 12px, border-right и box-shadow (слот — только фон), каноническая label-навигация с полосой-заголовком `admin-ai-configuration-navigation-title` (§4.1, inset-линии), media-тиры 296/284px; edit-form-control на все поля + caption msg-ключами |
 | 2026-08-12 | Создана Edit-форма corporate credential с unbound secret input |

@@ -1,5 +1,7 @@
 # VacancyPromptTemplate Edit (`hunttech_VacancyPromptTemplate.edit`)
 
+> **Актуальная каноническая версия:** [docs/ui/VacancyPromptTemplateEdit_Spec.md](../../ui/VacancyPromptTemplateEdit_Spec.md) — этот файл legacy, поддерживается только баннером и историей.
+>
 > Сущность: [VacancyPromptTemplate.md](../../entities/vacancy-prompt-template/VacancyPromptTemplate.md)
 
 ---
@@ -93,6 +95,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-12 | Рефакторинг по контракту Edit-экранов (sidebar/label-навигация/карточки/footer). Канон: [docs/ui/VacancyPromptTemplateEdit_Spec.md](../../ui/VacancyPromptTemplateEdit_Spec.md). |
 | 2026-06-29 | Добавлены стандартные всплывающие подсказки (description) для полей формы на понятном для пользователей языке. |
 | 2026-06-28 | `systemContextField` / `promptTextField`: отдельные caption и description (`systemContext.*`, `promptText.*`) вместо entity-ключей |
 | 2026-06-28 | Многострочная подсказка `temperatureField`: диапазоны 0.0–0.3 / 0.4–0.7 / 0.8–1.0 с примерами использования (RU/EN) |

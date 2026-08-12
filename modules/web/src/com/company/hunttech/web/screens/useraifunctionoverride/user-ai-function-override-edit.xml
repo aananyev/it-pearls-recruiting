@@ -1,106 +1,119 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Edit персонального замещения одной AI-функции по shared Edit contract HRM HuntTech. -->
+<!-- Edit персонального замещения одной AI-функции по общему контракту Edit-экранов HRM HuntTech.
+     Правки 2026-08-12 — только presentation-слой: caption полей, edit-form-control, полоса-заголовок
+     навигации; data/binding/loaders/JPQL/actions не менялись. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
         focusComponent="aiFunctionField"
         messagesPack="com.company.hunttech.web.screens.useraifunctionoverride">
-    <!-- Data graph не загружает apiKey: execution secret нужен только middleware resolver. -->
+    <!-- Data-graph не загружает apiKey: secret нужен только middleware-resolver, не UI. -->
     <data>
-        <!-- Edited override current user. -->
+        <!-- Edited override текущего пользователя с полным edit-view. -->
         <instance id="overrideDc"
                   class="com.company.hunttech.entity.ai.UserAiFunctionOverride"
                   view="user-ai-function-override-edit-view">
-            <!-- Standard editor loader. -->
+            <!-- Стандартный editor-loader по id открытой записи. -->
             <loader/>
         </instance>
         <!-- Только активные функции, где администратор разрешил user routing. -->
         <collection id="functionsDc"
                     class="com.company.hunttech.entity.ai.AiFunctionConfiguration"
                     view="ai-function-configuration-browse-view">
-            <!-- Без prompt LOB, потому что пользователю они здесь не нужны. -->
+            <!-- Без prompt-LOB: пользователю они в этой форме не нужны. -->
             <loader id="functionsDl">
                 <!-- ADMIN_ONLY исключён на уровне options loader и повторно валидируется перед commit. -->
                 <query><![CDATA[select e from hunttech_AiFunctionConfiguration e where e.active = true and e.executionPolicy <> 'ADMIN_ONLY' order by e.name]]></query>
             </loader>
         </collection>
-        <!-- Только активные личные API configurations текущего пользователя. -->
+        <!-- Только активные личные API-конфигурации текущего пользователя. -->
         <collection id="userConfigurationsDc"
                     class="com.company.hunttech.entity.UserAiConfiguration"
                     view="user-ai-configuration-override-picker-view">
-            <!-- :user устанавливается в BeforeShow до автоматической загрузки данных. -->
+            <!-- Параметр :user устанавливается в BeforeShow до автоматической загрузки данных. -->
             <loader id="userConfigurationsDl">
-                <!-- Row scope исключает чужие credentials даже из options list. -->
+                <!-- Row scope исключает чужие credentials даже из списка options. -->
                 <query><![CDATA[select e from hunttech_UserAiConfiguration e where e.user = :user and e.isActive = true order by e.providerCode]]></query>
             </loader>
         </collection>
     </data>
-    <!-- Полноэкранный editor соответствует общему Edit contract. -->
+    <!-- Полноэкранный модальный editor соответствует общему Edit-контракту. -->
     <dialogMode width="100%" height="100%" modal="true"/>
-    <!-- Root namespace. -->
+    <!-- Корневой layout формы: локальный namespace user-ai-function-override-editor + shared-контракт. -->
     <layout stylename="user-ai-function-override-editor" expand="mainLayout" spacing="false" width="100%" height="100%">
-        <!-- Sidebar + workspace. -->
+        <!-- Двухпанельная композиция: контекстная sidebar и рабочая область. -->
         <hbox id="mainLayout" stylename="edit-screen-layout" expand="workspace" spacing="false" width="100%" height="100%">
-            <!-- Context sidebar. -->
+            <!-- Контекстная sidebar персонального routing-замещения. -->
             <vbox id="sidebar" stylename="edit-sidebar" width="312px" height="100%" spacing="true" expand="sidebarSpacer">
-                <!-- Identity of personal routing record. -->
+                <!-- Identity записи: статичный заголовок и пояснение области действия. -->
                 <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
-                    <!-- Static title avoids reading nested attributes before view load. -->
+                    <!-- Логотип по умолчанию: круглый логотип компании (fallback-изображение, без привязки к данным). -->
+                    <ovaFallbackImage id="userAiFunctionOverrideLogoImage"
+                                      width="96px"
+                                      height="96px"
+                                      ovalWidth="96px"
+                                      ovalHeight="96px"
+                                      visible="true"
+                                      align="MIDDLE_CENTER"
+                                      scaleMode="SCALE_DOWN"
+                                      fallbackThemePath="icons/hunttech-logo.png"/>
+                    <!-- Статичный заголовок избегает чтения вложенных атрибутов до загрузки view. -->
                     <label value="Моё AI-замещение" stylename="edit-sidebar-title" width="100%"/>
-                    <!-- Scope is intentionally one function. -->
+                    <!-- Область действия записи — ровно одна функция. -->
                     <label value="Одна функция → одно личное подключение" stylename="edit-sidebar-subtitle" width="100%"/>
                 </vbox>
-                <!-- Label navigation. -->
+                <!-- Обязательная label-навигация по разделам формы (фокус, без изменения данных). -->
                 <vbox id="navigation" stylename="label-navigation" width="100%" spacing="false">
-                    <!-- Navigation title. -->
-                    <label value="Разделы" stylename="label-nav-title" width="100%"/>
-                    <!-- Function selection. -->
+                    <!-- Заголовок «Разделы»: полоса-заголовок с inset-линиями (контракт §4.1);
+                         локальный класс user-ai-function-override-navigation-title поверх label-nav-title. -->
+                    <label value="Разделы" stylename="label-nav-title user-ai-function-override-navigation-title" width="100%"/>
+                    <!-- Пункт «AI-функция» активен по умолчанию и фокусирует picker функции. -->
                     <button id="mainNav" caption="AI-функция" stylename="borderless label-nav-item label-nav-item-active" width="100%" invoke="focusMainSection"/>
-                    <!-- Personal provider/model. -->
+                    <!-- Пункт «Моё подключение» фокусирует личный provider/model. -->
                     <button id="modelNav" caption="Моё подключение" stylename="borderless label-nav-item" width="100%" invoke="focusModelSection"/>
                 </vbox>
-                <!-- Spacer. -->
+                <!-- Spacer прижимает подсказку к нижней границе sidebar. -->
                 <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
-                <!-- Explain fallback behavior. -->
+                <!-- Пояснение fallback-поведения: данные не меняет. -->
                 <label value="Если замещение выключено или отсутствует, функция использует корпоративное подключение согласно политике администратора."
                        stylename="edit-sidebar-hint" width="100%"/>
             </vbox>
-            <!-- Workspace. -->
+            <!-- Рабочая область: toolbar, прокручиваемые карточки и footer. -->
             <vbox id="workspace" stylename="edit-workspace" expand="workspaceScroll" width="100%" height="100%" spacing="false">
-                <!-- Toolbar. -->
+                <!-- Toolbar с заголовком и сводкой поведения. -->
                 <hbox id="toolbar" stylename="edit-toolbar" width="100%" spacing="true">
-                    <!-- Title block. -->
+                    <!-- Текстовый блок toolbar. -->
                     <vbox id="toolbarText" width="100%" spacing="false">
-                        <!-- Main title. -->
+                        <!-- Заголовок рабочей области. -->
                         <label value="Персональное замещение AI-функции" stylename="edit-toolbar-title"/>
-                        <!-- Behavior summary. -->
+                        <!-- Сводка: разрешённая функция + активное личное подключение. -->
                         <label value="Выберите разрешённую функцию и своё активное API-подключение" stylename="edit-toolbar-description"/>
                     </vbox>
                 </hbox>
-                <!-- Scrollable content. -->
+                <!-- Прокручиваемая область контента. -->
                 <scrollBox id="workspaceScroll" stylename="edit-workspace-scroll" width="100%" height="100%">
-                    <!-- Cards. -->
+                    <!-- Поток карточек рабочей области. -->
                     <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
-                        <!-- Function policy card. -->
+                        <!-- Карточка «AI-функция»: выбор функции и признак включения замещения. -->
                         <groupBox id="mainSection" caption="AI-функция" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <!-- Function picker excludes ADMIN_ONLY. -->
-                            <lookupPickerField id="aiFunctionField" dataContainer="overrideDc" property="aiFunction" optionsContainer="functionsDc" required="true" width="100%"/>
-                            <!-- Enable/disable mapping without deleting it. -->
-                            <checkBox id="enabledField" dataContainer="overrideDc" property="enabled"/>
+                            <!-- Picker функции исключает ADMIN_ONLY на уровне options loader; обязателен. -->
+                            <lookupPickerField id="aiFunctionField" dataContainer="overrideDc" property="aiFunction" optionsContainer="functionsDc" required="true" width="100%" stylename="edit-form-control" caption="msg://overrideAiFunction.caption"/>
+                            <!-- Включение/выключение замещения без удаления записи. -->
+                            <checkBox id="enabledField" dataContainer="overrideDc" property="enabled" caption="msg://overrideEnabled.caption"/>
                         </groupBox>
-                        <!-- Personal connection card. -->
+                        <!-- Карточка «Моё подключение»: личный credential и опциональная модель. -->
                         <groupBox id="modelSection" caption="Моё подключение" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <!-- User options loader contains only current user's active configs and no API key. -->
-                            <lookupPickerField id="userAiConfigurationField" dataContainer="overrideDc" property="userAiConfiguration" optionsContainer="userConfigurationsDc" required="true" width="100%"/>
-                            <!-- Model override editable only when function explicitly permits it. -->
-                            <textField id="modelNameField" dataContainer="overrideDc" property="modelName" width="100%" stylename="edit-form-control"/>
+                            <!-- Options loader содержит только активные конфигурации текущего пользователя и не содержит API key. -->
+                            <lookupPickerField id="userAiConfigurationField" dataContainer="overrideDc" property="userAiConfiguration" optionsContainer="userConfigurationsDc" required="true" width="100%" stylename="edit-form-control" caption="msg://overrideUserAiConfiguration.caption"/>
+                            <!-- Модель редактируется только когда функция явно разрешает override (Java). -->
+                            <textField id="modelNameField" dataContainer="overrideDc" property="modelName" width="100%" stylename="edit-form-control" caption="msg://overrideModelName.caption"/>
                         </groupBox>
                     </vbox>
                 </scrollBox>
-                <!-- Standard editor footer. -->
+                <!-- Нижняя панель штатных editor-actions: сохранить и отменить. -->
                 <hbox id="editActions" stylename="edit-footer-actions" spacing="true" align="MIDDLE_RIGHT" width="100%">
-                    <!-- Commit and close. -->
+                    <!-- Commit и закрытие редактора (invariant проверяется в onBeforeCommitChanges). -->
                     <button action="windowCommitAndClose"/>
-                    <!-- Close. -->
+                    <!-- Закрытие без сохранения. -->
                     <button action="windowClose"/>
                 </hbox>
             </vbox>

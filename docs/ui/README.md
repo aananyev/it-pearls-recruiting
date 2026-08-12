@@ -208,7 +208,7 @@ Living-документация экранов, окон, фрагментов �
 | Форма | Controller | Документ |
 |-------|------------|----------|
 | Шаблоны промптов (browse) | `itpearls_VacancyPromptTemplate.browse` | [itpearls_VacancyPromptTemplate.browse_Spec.md](itpearls_VacancyPromptTemplate.browse_Spec.md) |
-| Шаблон промпта (edit) | `itpearls_VacancyPromptTemplate.edit` | [itpearls_VacancyPromptTemplate.edit_Spec.md](itpearls_VacancyPromptTemplate.edit_Spec.md) |
+| Шаблон промпта (edit) | `hunttech_VacancyPromptTemplate.edit` | [VacancyPromptTemplateEdit_Spec.md](VacancyPromptTemplateEdit_Spec.md) (канон) · [legacy](itpearls_VacancyPromptTemplate.edit_Spec.md) |
 | Мониторинг ключей (browse) | `itpearls_UserAiConfiguration.browse` | [itpearls_UserAiConfiguration.browse_Spec.md](itpearls_UserAiConfiguration.browse_Spec.md) |
 | Профессиональный ИИ-профиль | `ExtSettingsWindow` / вкладка `msgMyInfo` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) · [аватар](ExtSettingsWindowAvatar_Spec.md) |
 
@@ -217,7 +217,7 @@ Living-документация экранов, окон, фрагментов �
 | Форма | Controller | Документ |
 |-------|------------|----------|
 | Edit | `sec$User.edit` / `ExtUserEditor` | [ExtUserEdit_Spec.md](ExtUserEdit_Spec.md) |
-| AI config edit | `itpearls_UserAiConfiguration.edit` | (модаль внутри ExtUser edit) · entity [UserAiConfiguration.md](../entities/UserAiConfiguration.md) |
+| AI config edit | `hunttech_UserAiConfiguration.edit` | [UserAiConfigurationEdit_Spec.md](UserAiConfigurationEdit_Spec.md) · entity [UserAiConfiguration.md](../entities/UserAiConfiguration.md) |
 
 ---
 

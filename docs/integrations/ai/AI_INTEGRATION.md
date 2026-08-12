@@ -14,7 +14,7 @@ AI-интеграция HRM HuntTech строится вокруг стабил�
 Административный контур расположен в меню «Управление AI»:
 
 - «Функции AI» — `AiFunctionConfiguration`;
-- «Корпоративные подключения» — `AdminAiConfiguration`;
+- «Корпоративные AI-подключения» — `AdminAiConfiguration`;
 - «Мои замещения AI-функций» — `UserAiFunctionOverride`;
 - «Шаблоны промптов» — `VacancyPromptTemplate`, legacy compatibility;
 - «Мониторинг ключей пользователей» — `UserAiConfiguration`.
@@ -210,3 +210,4 @@ AI Control Plane использует отдельный `ai-control-plane-views
 |---|---|
 | 2026-08-12 | Vacancy runtime переведён на AI Control Plane; добавлены legacy migration, единый provider catalog и specific permission corporate credentials |
 | 2026-08-12 | Создана модель AI Control Plane: функции, corporate connections, per-function user overrides, resolver и AI UI |
+| 2026-08-12 | Исправлены заголовки пунктов меню «Управление AI»: явные captions для `AiFunctionConfiguration`, `AdminAiConfiguration`, `UserAiFunctionOverride` (вместо сырых ключей `menu-config.*`); ключи `menu_config.*` добавлены в EN/RU messages |

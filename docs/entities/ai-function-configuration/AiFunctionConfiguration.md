@@ -39,4 +39,5 @@ Table: `HUNTTECH_AI_FUNCTION_CONFIGURATION`.
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-12 | Edit-форма приведена к эталону IteractionListEdit (детальный дифф, 30 отличий): footer-паттерн с кнопками в правый нижний угол, primary/secondary кнопки, стили sidebar/toolbar/карточек/чекбоксов/textarea (см. `docs/ui/AiFunctionConfigurationEdit_Spec.md` §6) — логика, entity и views не менялись |
 | 2026-08-12 | Создана сущность AI-функции, views и routing contract |

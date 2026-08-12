@@ -1,0 +1,350 @@
+/*
+ * Edit-форма «Корпоративное AI-подключение» HRM HuntTech (admin-ai-configuration-editorEdit) — локальный визуальный слой
+ * поверх общего контракта Edit-экранов (edit-screen-shared-styles).
+ *
+ * Shared-слой задаёт типовые роли (edit-sidebar, edit-card, edit-form-control,
+ * label-nav-*); этот partial добавляет фирменную тёмную sidebar и каноническую
+ * label-навигацию по эталону IteractionListEdit (контракт §3.1): hover — белый
+ * текст на rgba(255,255,255,.08), active — жёлтый #ffb11b на rgba(255,177,27,.12)
+ * с жёлтой левой границей; полоса-заголовок «Разделы» — с inset-линиями (§4.1).
+ *
+ * Все правила ограничены локальным namespace формы (.admin-ai-configuration-editor) и не затрагивают
+ * глобальные Vaadin-селекторы и другие экраны.
+ */
+@mixin admin-ai-configuration-editor-theme {
+  .admin-ai-configuration-editor {
+    // Фирменная тёмная sidebar: совпадает с эталоном HRM HuntTech.
+    // background-color и background-image задаются раздельно: SCSS-шорткат
+    // background: linear-gradient(...) компилируется в невалидный CSS.
+    .edit-sidebar,
+    .v-slot-edit-sidebar {
+      box-sizing: border-box;
+      background-color: #172638 !important;
+      background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%) !important;
+    }
+
+    // Локальная ширина sidebar должна совпадать с шириной Vaadin slot:
+    // иначе глобальный edit-sidebar (270px) сдвигает workspace влево.
+    .v-slot-edit-sidebar {
+      box-sizing: border-box;
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
+    }
+
+    .edit-sidebar {
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
+      padding: 14px 16px 12px !important;
+      border-right: 1px solid rgba(15, 23, 42, 0.78) !important;
+      box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18) !important;
+    }
+
+    @media (max-width: 1366px) {
+      .edit-sidebar {
+        width: 296px !important;
+        min-width: 296px !important;
+        max-width: 296px !important;
+        padding-right: 14px !important;
+        padding-left: 14px !important;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .edit-sidebar {
+        width: 284px !important;
+        min-width: 284px !important;
+        max-width: 284px !important;
+      }
+    }
+
+    // Тексты идентификации в тёмной sidebar.
+    .edit-sidebar-subtitle,
+    .edit-sidebar-subtitle.v-label {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      line-height: 16px !important;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: normal !important;
+    }
+
+    .edit-sidebar-title,
+    .edit-sidebar-title.v-label {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      color: #ffffff !important;
+      font-size: 19px !important;
+      font-weight: 700 !important;
+      line-height: 26px !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+    }
+
+    .edit-sidebar-hint,
+    .edit-sidebar-hint.v-label {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      color: rgba(248, 250, 252, 0.55) !important;
+      font-size: 12px !important;
+      line-height: 18px !important;
+      white-space: normal !important;
+    }
+
+    // Каноническая label-навигация в тёмной sidebar (эталон IteractionListEdit).
+    .label-navigation {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      padding: 10px 0 4px !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
+    }
+
+    .label-nav-title,
+    .v-label-label-nav-title {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 6px 10px 8px !important;
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      line-height: 16px !important;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: normal !important;
+      opacity: 1 !important;
+    }
+
+    // Заголовок «Разделы» навигации: полоса-заголовок с двумя горизонтальными
+    // inset-линиями (белая сверху, светлая снизу) — контракт §4.1. Класс полосы
+    // локальный (admin-ai-configuration-navigation-title), общий .label-nav-title не меняется (сломает другие формы).
+    .label-navigation .admin-ai-configuration-navigation-title,
+    .label-navigation .v-label-admin-ai-configuration-navigation-title {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-height: 36px !important;
+      height: auto !important;
+      padding: 7px 11px !important;
+      color: #ffb11b !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 21px !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+      background: rgba(255, 255, 255, 0.045) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+      box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
+                  rgba(244, 244, 244, 1) 0 -1px 0 0 inset;
+      white-space: normal !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    .label-nav-item,
+    .v-button-label-nav-item,
+    .v-label-label-nav-item {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 27px !important;
+      height: auto !important;
+      padding: 3px 10px !important;
+      color: rgba(248, 250, 252, 0.82) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
+      text-align: left !important;
+      white-space: normal !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-left: 3px solid transparent !important;
+      border-radius: 0 5px 5px 0 !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+    }
+
+    // Вало-трюк центрирования текста кнопки использует ::before; при
+    // display:flex он выталкивает caption вниз — псевдоэлемент скрываем.
+    .label-nav-item:before,
+    .v-button-label-nav-item:before {
+      display: none !important;
+      content: none !important;
+    }
+
+    .label-nav-item .v-button-caption,
+    .v-button-label-nav-item .v-button-caption {
+      display: block;
+      width: 100%;
+      color: inherit !important;
+      text-align: left !important;
+      white-space: normal !important;
+    }
+
+    .label-nav-item:hover,
+    .label-nav-item:focus,
+    .v-button-label-nav-item:hover,
+    .v-button-label-nav-item:focus {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .label-nav-item-active,
+    .v-button-label-nav-item-active,
+    .v-label-label-nav-item-active {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.12) !important;
+      border-left-color: #ffb11b !important;
+    }
+
+    // Правая рабочая область — карточки edit-card (эталон IteractionListEdit).
+    .edit-card {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      margin-bottom: 10px;
+      padding: 0 !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.15) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+      overflow: hidden;
+    }
+
+    .edit-card .v-groupbox-caption,
+    .edit-card .v-panel-caption {
+      box-sizing: border-box;
+      min-height: 50px;
+      padding: 12px 16px;
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+      font-size: 17px !important;
+      font-weight: 700 !important;
+      line-height: 24px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 68%) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.15) !important;
+    }
+
+    .edit-card .v-groupbox-content,
+    .edit-card .v-panel-content {
+      box-sizing: border-box;
+      background: $v-panel-background-color !important;
+      border: 0 !important;
+    }
+
+    .edit-card .v-gridlayout,
+    .edit-card form .v-gridlayout {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .edit-card .v-gridlayout-slot {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      padding: 8px 10px;
+      vertical-align: top;
+    }
+
+    // Поля, подписи, фокус и состояния формы повторяют эталон IteractionListEdit.
+    .edit-card .v-textfield,
+    .edit-card .v-filterselect,
+    .edit-card .v-filterselect-input,
+    .edit-card .v-datefield,
+    .edit-card .v-datefield-textfield {
+      box-sizing: border-box;
+      min-height: 38px !important;
+      font-size: 15px !important;
+      line-height: 38px !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.20) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+      transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+
+    .edit-card .v-textfield,
+    .edit-card .v-textarea {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .edit-card .v-textarea {
+      box-sizing: border-box;
+      min-height: 38px !important;
+      font-size: 15px !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.20) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+    }
+
+    .edit-card .v-caption .v-captiontext {
+      color: mix($v-font-color, $v-panel-background-color, 72%) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+    }
+
+    .edit-card .v-textfield:focus,
+    .edit-card .v-textarea:focus,
+    .edit-card .v-filterselect-focus,
+    .edit-card .v-datefield-focus .v-datefield-textfield,
+    .edit-card .v-button:focus {
+      border-color: $v-selection-color !important;
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
+    }
+
+    .edit-card .v-textfield-readonly,
+    .edit-card .v-textarea-readonly,
+    .edit-card .v-filterselect-readonly,
+    .edit-card .v-readonly {
+      background: mix($v-app-background-color, $v-panel-background-color, 62%) !important;
+    }
+
+    .edit-card .v-checkbox {
+      padding: 3px 0;
+    }
+
+    .edit-card .v-checkbox label,
+    .edit-card .v-select-optiongroup label {
+      color: mix($v-font-color, $v-panel-background-color, 78%) !important;
+      font-size: 14px !important;
+      line-height: 1.4 !important;
+    }
+
+    .edit-card .v-button {
+      min-height: 38px;
+      padding-left: 14px;
+      padding-right: 14px;
+      font-size: 14px !important;
+      border-radius: 5px !important;
+      transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+    }
+
+    .edit-card .v-button:hover {
+      border-color: rgba($v-font-color, 0.34) !important;
+    }
+
+    // Кнопки footer (save/cancel) — эталонная геометрия кнопок Edit-форм.
+    .edit-footer-actions .v-button {
+      min-height: 38px;
+      padding: 0 16px;
+      font-size: 14px;
+      border-radius: 5px;
+    }
+  }
+}

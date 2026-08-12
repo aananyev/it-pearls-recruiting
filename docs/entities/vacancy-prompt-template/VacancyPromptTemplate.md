@@ -1,6 +1,6 @@
 # VacancyPromptTemplate — шаблон промпта вакансии
 
-> Cross-link: [hunttech_VacancyPromptTemplate.browse_Spec.md](../../screens/vacancy-prompt-template/hunttech_VacancyPromptTemplate.browse_Spec.md) · [hunttech_VacancyPromptTemplate.edit_Spec.md](../../screens/vacancy-prompt-template/hunttech_VacancyPromptTemplate.edit_Spec.md)
+> Cross-link: [VacancyPromptTemplateEdit_Spec.md](../../ui/VacancyPromptTemplateEdit_Spec.md) (канон edit) · [hunttech_VacancyPromptTemplate.browse_Spec.md](../../screens/vacancy-prompt-template/hunttech_VacancyPromptTemplate.browse_Spec.md) · [hunttech_VacancyPromptTemplate.edit_Spec.md](../../screens/vacancy-prompt-template/hunttech_VacancyPromptTemplate.edit_Spec.md) (legacy)
 
 ---
 
@@ -71,5 +71,6 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-12 | Edit-форма приведена к контракту Edit-экранов (sidebar, label-навигация, карточки) — канон [VacancyPromptTemplateEdit_Spec.md](../../ui/VacancyPromptTemplateEdit_Spec.md); локальный SCSS partial в 7 темах |
 | 2026-06-27 | Browse/edit экраны, views `vacancyPromptTemplate-browse-view`, `vacancyPromptTemplate-edit-view`, меню aiAdministration |
 | 2026-06-27 | Создание сущности и миграции AI |

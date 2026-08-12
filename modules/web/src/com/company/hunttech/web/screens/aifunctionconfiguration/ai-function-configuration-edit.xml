@@ -1,141 +1,160 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Edit-экран AI-функции по shared Edit contract HRM HuntTech: sidebar → workspace → footer. -->
+<!-- Edit-экран AI-функции: двухпанельная композиция по общему контракту Edit-экранов HRM HuntTech
+     (sidebar → workspace → footer). Правки 2026-08-12 — только presentation-слой: caption полей,
+     edit-form-control на все поля, полоса-заголовок навигации; data/binding/actions не менялись. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
         focusComponent="codeField"
         messagesPack="com.company.hunttech.web.screens.aifunctionconfiguration">
-    <!-- Data section отделяет основной edit graph от safe options corporate connections. -->
+    <!-- Секция данных отделяет редактируемый edit-graph функции от коллекции безопасных корпоративных подключений. -->
     <data>
-        <!-- Edited entity загружается с prompt LOB только в редакторе. -->
+        <!-- Редактируемая сущность AI-функции загружается с prompt-LOB только в редакторе (edit-view). -->
         <instance id="aiFunctionDc"
                   class="com.company.hunttech.entity.ai.AiFunctionConfiguration"
                   view="ai-function-configuration-edit-view">
-            <!-- Стандартный editor loader по id. -->
+            <!-- Стандартный editor-loader берёт id из открытой записи и не имеет собственного запроса. -->
             <loader/>
         </instance>
-        <!-- Safe collection корпоративных подключений: view не содержит API_KEY_ENCRYPTED. -->
+        <!-- Безопасная коллекция корпоративных подключений: view не содержит API_KEY_ENCRYPTED. -->
         <collection id="adminConfigurationsDc"
                     class="com.company.hunttech.entity.ai.AdminAiConfiguration"
                     view="admin-ai-configuration-browse-view">
-            <!-- В picker доступны только активные подключения. -->
+            <!-- В picker доступны только активные подключения; порядок — приоритет, затем имя. -->
             <loader id="adminConfigurationsDl">
-                <!-- Приоритетные подключения отображаются первыми. -->
+                <!-- JPQL отбирает активные подключения и сортирует их по убыванию приоритета. -->
                 <query><![CDATA[select e from hunttech_AdminAiConfiguration e where e.active = true order by e.priority desc, e.name]]></query>
             </loader>
         </collection>
     </data>
-    <!-- Полноэкранный editor соответствует сложным Edit-формам HRM HuntTech. -->
+    <!-- Полноэкранный модальный editor соответствует сложным Edit-формам HRM HuntTech. -->
     <dialogMode width="100%" height="100%" modal="true"/>
-    <!-- Root namespace экрана + shared layout API. -->
+    <!-- Корневой layout формы: локальный namespace ai-function-configuration-editor + shared-контракт. -->
     <layout stylename="ai-function-configuration-editor"
             expand="mainLayout"
             spacing="false"
             width="100%"
             height="100%">
-        <!-- Двухпанельная композиция Edit contract. -->
+        <!-- Двухпанельная композиция: постоянная sidebar слева и расширяемая рабочая область справа. -->
         <hbox id="mainLayout" stylename="edit-screen-layout" expand="workspace" spacing="false" width="100%" height="100%">
-            <!-- Постоянная sidebar: identity → label navigation → context. -->
+            <!-- Левая контекстная панель: identity → label-навигация → spacer → hint (контракт §4.1). -->
             <vbox id="sidebar" stylename="edit-sidebar" width="312px" height="100%" spacing="true" expand="sidebarSpacer">
-                <!-- Идентификация текущей AI-функции. -->
+                <!-- Блок идентификации: живое название функции и тип редактируемого объекта. -->
                 <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
-                    <!-- Живое название функции из edit container. -->
+                    <!-- Логотип по умолчанию: круглый логотип компании (fallback-изображение, без привязки к данным). -->
+                    <ovaFallbackImage id="aiFunctionConfigurationLogoImage"
+                                      width="96px"
+                                      height="96px"
+                                      ovalWidth="96px"
+                                      ovalHeight="96px"
+                                      visible="true"
+                                      align="MIDDLE_CENTER"
+                                      scaleMode="SCALE_DOWN"
+                                      fallbackThemePath="icons/hunttech-logo.png"/>
+                    <!-- Живое название функции читается из edit-контейнера (свойство name). -->
                     <label dataContainer="aiFunctionDc" property="name" stylename="edit-sidebar-title" width="100%"/>
-                    <!-- Тип редактируемого объекта. -->
+                    <!-- Подпись типа записи, статична и не дублирует название функции. -->
                     <label value="AI-функция" stylename="edit-sidebar-subtitle" width="100%"/>
                 </vbox>
-                <!-- Обязательная label-navigation после identity. -->
+                <!-- Обязательная label-навигация по разделам формы (фокус, без изменения данных). -->
                 <vbox id="navigation" stylename="label-navigation" width="100%" spacing="false">
-                    <!-- Заголовок навигации по разделам. -->
-                    <label value="Разделы" stylename="label-nav-title" width="100%"/>
-                    <!-- Основной раздел активен по умолчанию. -->
+                    <!-- Заголовок «Разделы»: полоса-заголовок с inset-линиями (контракт §4.1);
+                         локальный класс ai-function-configuration-navigation-title поверх label-nav-title. -->
+                    <label value="Разделы" stylename="label-nav-title ai-function-configuration-navigation-title" width="100%"/>
+                    <!-- Пункт «Основное» активен по умолчанию и фокусирует первое поле карточки. -->
                     <button id="mainNav" caption="Основное" stylename="borderless label-nav-item label-nav-item-active" width="100%" invoke="focusMainSection"/>
-                    <!-- Маршрутизация credentials. -->
+                    <!-- Пункт «Маршрутизация» фокусирует правила выбора credentials. -->
                     <button id="routingNav" caption="Маршрутизация" stylename="borderless label-nav-item" width="100%" invoke="focusRoutingSection"/>
-                    <!-- Prompt contract. -->
+                    <!-- Пункт «Промпт» фокусирует карточку prompt-контракта функции. -->
                     <button id="promptNav" caption="Промпт" stylename="borderless label-nav-item" width="100%" invoke="focusPromptSection"/>
-                    <!-- Параметры модели. -->
+                    <!-- Пункт «Параметры модели» фокусирует настройки конкретного model invocation. -->
                     <button id="modelNav" caption="Параметры модели" stylename="borderless label-nav-item" width="100%" invoke="focusModelSection"/>
                 </vbox>
-                <!-- Spacer удерживает служебный hint в нижней части sidebar. -->
+                <!-- Spacer забирает оставшуюся высоту sidebar и прижимает подсказку к нижней границе. -->
                 <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
-                <!-- Контекстная подсказка не меняет данные. -->
+                <!-- Контекстная подсказка о роли функции: данные не меняет, только поясняет архитектуру. -->
                 <label value="Бизнес-экраны вызывают эту функцию по стабильному коду; provider, model и credential выбираются централизованно."
                        stylename="edit-sidebar-hint" width="100%"/>
             </vbox>
-            <!-- Правая рабочая область с toolbar, scroll и footer. -->
+            <!-- Правая рабочая область: toolbar, прокручиваемые карточки и постоянный footer. -->
             <vbox id="workspace" stylename="edit-workspace" expand="workspaceScroll" width="100%" height="100%" spacing="false">
-                <!-- Toolbar формы. -->
+                <!-- Toolbar с заголовком формы и кратким назначением. -->
                 <hbox id="toolbar" stylename="edit-toolbar" width="100%" spacing="true">
-                    <!-- Заголовок и краткое назначение формы. -->
+                    <!-- Текстовый блок toolbar: основной заголовок и пояснение контракта. -->
                     <vbox id="toolbarText" width="100%" spacing="false">
-                        <!-- Основной заголовок рабочей области. -->
+                        <!-- Заголовок рабочей области формы. -->
                         <label value="Конфигурация AI-функции" stylename="edit-toolbar-title"/>
-                        <!-- Пояснение архитектурного контракта. -->
+                        <!-- Пояснение архитектурного назначения формы. -->
                         <label value="Назначение, маршрутизация, prompt и параметры выполнения" stylename="edit-toolbar-description"/>
                     </vbox>
                 </hbox>
-                <!-- Независимая прокрутка содержимого справа. -->
+                <!-- Независимая вертикальная прокрутка содержимого рабочей области. -->
                 <scrollBox id="workspaceScroll" stylename="edit-workspace-scroll" width="100%" height="100%">
-                    <!-- Поток тематических карточек. -->
+                    <!-- Поток тематических карточек-секций формы. -->
                     <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
-                        <!-- Карточка стабильного идентификатора и назначения. -->
+                        <!-- Карточка «Основное»: стабильный идентификатор, назначение и признак активности. -->
                         <groupBox id="mainSection" caption="Основное" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <!-- Код является API-контрактом и блокируется после создания. -->
-                            <textField id="codeField" dataContainer="aiFunctionDc" property="code" required="true" width="100%" stylename="edit-form-control"/>
-                            <!-- Человекочитаемое название. -->
-                            <textField id="nameField" dataContainer="aiFunctionDc" property="name" required="true" width="100%" stylename="edit-form-control"/>
-                            <!-- Описание бизнес-назначения функции. -->
-                            <textArea id="descriptionField" dataContainer="aiFunctionDc" property="description" width="100%" rows="3"/>
-                            <!-- Capability определяет допустимый execution adapter. -->
-                            <lookupField id="capabilityField" dataContainer="aiFunctionDc" property="capability" required="true" width="100%" stylename="edit-form-control"/>
+                            <!-- Код является API-контрактом потребителей и блокируется после создания (Java). -->
+                            <textField id="codeField" dataContainer="aiFunctionDc" property="code" required="true" width="100%" stylename="edit-form-control" caption="msg://aiFunctionCode.caption"/>
+                            <!-- Человекочитаемое название функции, обязательное поле. -->
+                            <textField id="nameField" dataContainer="aiFunctionDc" property="name" required="true" width="100%" stylename="edit-form-control" caption="msg://aiFunctionName.caption"/>
+                            <!-- Описание бизнес-назначения функции (многострочное, необязательное). -->
+                            <textArea id="descriptionField" dataContainer="aiFunctionDc" property="description" width="100%" rows="3" stylename="edit-form-control" caption="msg://aiFunctionDescription.caption"/>
+                            <!-- Capability определяет допустимый execution adapter функции. -->
+                            <lookupField id="capabilityField" dataContainer="aiFunctionDc" property="capability" required="true" width="100%" stylename="edit-form-control" caption="msg://aiFunctionCapability.caption"/>
                             <!-- Флаг централизованного включения функции. -->
-                            <checkBox id="activeField" dataContainer="aiFunctionDc" property="active"/>
+                            <checkBox id="activeField" dataContainer="aiFunctionDc" property="active" caption="msg://aiFunctionActive.caption"/>
                         </groupBox>
-                        <!-- Карточка admin/user routing policy. -->
+                        <!-- Карточка «Маршрутизация»: политика выполнения и выбор корпоративного подключения. -->
                         <groupBox id="routingSection" caption="Маршрутизация" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
                             <!-- Политика определяет ADMIN_ONLY / allowed override / user required. -->
-                            <lookupField id="executionPolicyField" dataContainer="aiFunctionDc" property="executionPolicy" required="true" width="100%" stylename="edit-form-control"/>
-                            <!-- Safe picker корпоративного подключения без secret view. -->
-                            <lookupPickerField id="adminConfigurationField" dataContainer="aiFunctionDc" property="adminConfiguration" optionsContainer="adminConfigurationsDc" width="100%">
-                                <!-- Стандартный lookup action не меняет security модели сущности. -->
+                            <lookupField id="executionPolicyField" dataContainer="aiFunctionDc" property="executionPolicy" required="true" width="100%" stylename="edit-form-control" caption="msg://aiFunctionExecutionPolicy.caption"/>
+                            <!-- Безопасный picker корпоративного подключения: optionsContainer без secret-view. -->
+                            <lookupPickerField id="adminConfigurationField" dataContainer="aiFunctionDc" property="adminConfiguration" optionsContainer="adminConfigurationsDc" width="100%" stylename="edit-form-control" caption="msg://aiFunctionAdminConfiguration.caption">
+                                <!-- Стандартные picker-actions не меняют security-модель сущности. -->
                                 <actions>
                                     <!-- Выбор корпоративного подключения из разрешённой коллекции. -->
                                     <action id="lookup" type="picker_lookup"/>
-                                    <!-- Очистка связи, если policy допускает user-only. -->
+                                    <!-- Очистка связи, если политика допускает user-only выполнение. -->
                                     <action id="clear" type="picker_clear"/>
                                 </actions>
                             </lookupPickerField>
                             <!-- Fallback применяется только после ошибки персонального вызова. -->
-                            <lookupField id="fallbackPolicyField" dataContainer="aiFunctionDc" property="fallbackPolicy" required="true" width="100%" stylename="edit-form-control"/>
+                            <lookupField id="fallbackPolicyField" dataContainer="aiFunctionDc" property="fallbackPolicy" required="true" width="100%" stylename="edit-form-control" caption="msg://aiFunctionFallbackPolicy.caption"/>
                             <!-- Разрешение пользователю заменить только модель в рамках его credential. -->
-                            <checkBox id="allowModelOverrideField" dataContainer="aiFunctionDc" property="allowModelOverride"/>
+                            <checkBox id="allowModelOverrideField" dataContainer="aiFunctionDc" property="allowModelOverride" caption="msg://aiFunctionAllowModelOverride.caption"/>
                         </groupBox>
-                        <!-- Prompt LOB загружаются только в Edit-форме функции. -->
+                        <!-- Карточка «Промпт»: LOB-поля загружаются только в Edit-форме функции. -->
                         <groupBox id="promptSection" caption="Промпт" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <!-- System prompt задаёт общие рамки выполнения. -->
-                            <textArea id="systemPromptField" dataContainer="aiFunctionDc" property="systemPrompt" width="100%" rows="6"/>
-                            <!-- FreeMarker-compatible template получает business context от потребителя. -->
-                            <textArea id="promptTemplateField" dataContainer="aiFunctionDc" property="promptTemplate" required="true" width="100%" rows="10"/>
+                            <!-- System prompt задаёт общие рамки выполнения функции. -->
+                            <textArea id="systemPromptField" dataContainer="aiFunctionDc" property="systemPrompt" width="100%" rows="6" stylename="edit-form-control" caption="msg://aiFunctionSystemPrompt.caption"/>
+                            <!-- FreeMarker-совместимый шаблон получает business-контекст от потребителя; обязателен. -->
+                            <textArea id="promptTemplateField" dataContainer="aiFunctionDc" property="promptTemplate" required="true" width="100%" rows="10" stylename="edit-form-control" caption="msg://aiFunctionPromptTemplate.caption"/>
                         </groupBox>
-                        <!-- Настройки конкретного model invocation. -->
+                        <!-- Карточка «Параметры модели»: настройки конкретного model invocation. -->
                         <groupBox id="modelSection" caption="Параметры модели" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <!-- Необязательная модель функции перекрывает default модели corporate connection. -->
-                            <textField id="adminModelNameField" dataContainer="aiFunctionDc" property="adminModelName" width="100%" stylename="edit-form-control"/>
-                            <!-- Temperature передаётся provider через options. -->
-                            <textField id="temperatureField" dataContainer="aiFunctionDc" property="temperature" width="100%" stylename="edit-form-control"/>
-                            <!-- Max tokens передаётся provider, если adapter поддерживает опцию. -->
-                            <textField id="maxTokensField" dataContainer="aiFunctionDc" property="maxTokens" width="100%" stylename="edit-form-control"/>
-                            <!-- Версия нужна для операционной воспроизводимости prompt/config. -->
-                            <textField id="configurationVersionField" dataContainer="aiFunctionDc" property="configurationVersion" required="true" width="100%" stylename="edit-form-control"/>
+                            <!-- Необязательная модель функции перекрывает default-модель корпоративного подключения. -->
+                            <textField id="adminModelNameField" dataContainer="aiFunctionDc" property="adminModelName" width="100%" stylename="edit-form-control" caption="msg://aiFunctionAdminModelName.caption"/>
+                            <!-- Temperature передаётся provider через options вызова. -->
+                            <textField id="temperatureField" dataContainer="aiFunctionDc" property="temperature" width="100%" stylename="edit-form-control" caption="msg://aiFunctionTemperature.caption"/>
+                            <!-- Max tokens передаётся provider, если adapter поддерживает эту опцию. -->
+                            <textField id="maxTokensField" dataContainer="aiFunctionDc" property="maxTokens" width="100%" stylename="edit-form-control" caption="msg://aiFunctionMaxTokens.caption"/>
+                            <!-- Версия конфигурации нужна для операционной воспроизводимости prompt/config; обязательна. -->
+                            <textField id="configurationVersionField" dataContainer="aiFunctionDc" property="configurationVersion" required="true" width="100%" stylename="edit-form-control" caption="msg://aiFunctionConfigurationVersion.caption"/>
                         </groupBox>
                     </vbox>
                 </scrollBox>
-                <!-- Стандартные editor actions остаются в нижней панели. -->
-                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" align="MIDDLE_RIGHT" width="100%">
-                    <!-- Save выполняет штатный DataContext commit. -->
-                    <button action="windowCommitAndClose"/>
-                    <!-- Close сохраняет стандартную semantics CUBA editor. -->
-                    <button action="windowClose"/>
+                <!-- Нижняя панель штатных editor-actions: сохранить и отменить (вне прокручиваемого контента). -->
+                <!-- Кнопки прижаты в правый нижний угол по эталону IteractionListEdit: expand-спейсер + AUTO-группа MIDDLE_RIGHT. -->
+                <hbox id="editActions" stylename="edit-footer-actions" width="100%" expand="editActionsSpacer" align="MIDDLE_RIGHT">
+                    <!-- Спейсер заполняет свободную ширину footer и выталкивает группу кнопок к правому краю. -->
+                    <vbox id="editActionsSpacer" width="100%" height="1px"/>
+                    <!-- Группа кнопок с фиксированной шириной: визуальный порядок Save → Cancel, как у эталона. -->
+                    <hbox id="editActionsGroup" width="AUTO" align="MIDDLE_RIGHT">
+                        <!-- Save выполняет штатный DataContext commit и закрывает редактор. -->
+                        <button action="windowCommitAndClose" stylename="ai-function-configuration-primary-action"/>
+                        <!-- Close сохраняет стандартную semantics CUBA editor без подтверждения. -->
+                        <button action="windowClose" stylename="ai-function-configuration-secondary-action"/>
+                    </hbox>
                 </hbox>
             </vbox>
         </hbox>
