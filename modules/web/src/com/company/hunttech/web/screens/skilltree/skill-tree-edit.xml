@@ -1,18 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Edit-экран навыка «Дерево компетенций»: двухпанельная композиция по общему контракту Edit-экранов HRM HuntTech. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
+        focusComponent="skillNameField"
         messagesPack="com.company.hunttech.web.screens.skilltree"
         icon="CODE_FORK">
+    <!-- Секция данных: корневой контейнер навыка, коллекция корневых навыков и специализаций. -->
     <data>
+        <!-- Корневой контейнер навыка с edit-view; загрузчик берёт id из editor. -->
         <instance id="skillTreeDc"
                   class="com.company.hunttech.entity.SkillTree"
                   view="skillTree-edit-view">
+            <!-- Штатный загрузчик контейнера (без собственного запроса). -->
             <loader/>
         </instance>
+        <!-- Коллекция корневых навыков (без родителя) для picker-поля «Элемент верхнего уровня». -->
         <collection id="skillTreesDc"
                     class="com.company.hunttech.entity.SkillTree"
                     view="skillTree-picker-view">
+            <!-- Кэшируемый загрузчик корней дерева компетенций. -->
             <loader id="skillTreesLc" cacheable="true">
+                <!-- Только корневые элементы, по алфавиту. -->
                 <query>
                     <![CDATA[select e from hunttech_SkillTree e
                     where e.skillTree is null
@@ -20,143 +28,288 @@
                 </query>
             </loader>
         </collection>
+        <!-- Коллекция специализаций для picker-поля «Специализация». -->
         <collection id="specialisationDc"
                     class="com.company.hunttech.entity.Specialisation"
                     view="specialisation-picker-view">
+            <!-- Кэшируемый загрузчик специализаций по русскому названию. -->
             <loader id="specialisationDl" cacheable="true">
+                <!-- Специализации сортируются по русскому наименованию. -->
                 <query>
                     <![CDATA[select e from hunttech_Specialisation e order by e.specRuName]]>
                 </query>
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="allBox" spacing="true">
-        <vbox id="allBox"
+    <!-- Полноэкранный модальный редактор справочника навыков (sidebar + рабочая область). -->
+    <dialogMode height="100%" width="100%" modal="true"/>
+    <!-- Корневой layout формы: локальный namespace skill-tree-editor + общий контракт Edit-экранов. -->
+    <layout stylename="skill-tree-editor"
+            expand="skillTreeMainLayout"
+            spacing="false"
+            width="100%"
+            height="100%">
+        <!-- Двухпанельная композиция: постоянная sidebar слева и рабочая область справа. -->
+        <hbox id="skillTreeMainLayout"
+              stylename="edit-screen-layout"
+              expand="skillTreeWorkspace"
+              spacing="false"
               width="100%"
-              height="AUTO"
-              expand="areaBox"
-              spacing="true">
-            <hbox id="fieldBox"
-                  width="100%"
-                  height="AUTO"
-                  expand="skillTreeTab"
-                  spacing="true">
-                <groupBox id="skillTreeTab"
-                          spacing="true"
-                          width="100%"
-                          height="266px"
-                          align="TOP_LEFT">
-                    <lookupPickerField id="skillTreeField"
-                                       optionsContainer="skillTreesDc"
-                                       dataContainer="skillTreeDc"
-                                       align="TOP_LEFT"
-                                       caption="mainMsg://msgSkillTree"
-                                       property="skillTree"
-                                       width="50%">
-                        <actions>
-                            <action id="lookup"
-                                    type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <lookupPickerField id="specialisationField"
-                                       optionsContainer="specialisationDc"
-                                       dataContainer="skillTreeDc"
-                                       caption="msg://msgSpecialisation"
-                                       align="TOP_LEFT"
-                                       property="specialisation"
-                                       width="50%">
-                        <actions>
-                            <action id="lookup" type="picker_lookup"/>
-                        </actions>
-                    </lookupPickerField>
-                    <hbox spacing="true"
-                          width="100%"
-                          expand="skillNameField"
-                          align="TOP_LEFT">
-                        <textField id="skillNameField"
-                                   caption="mainMsg://msgSkill"
-                                   dataContainer="skillTreeDc"
-                                   property="skillName"
-                                   align="BOTTOM_LEFT"
-                                   width="100%"/>
-                        <lookupField id="skillPriorityField"
-                                     caption="msg://msgPrioritySkill"
-                                     width="AUTO"
-                                     dataContainer="skillTreeDc"
-                                     property="prioritySkill"/>
-                        <checkBox id="notParsingCheckBox"
-                                  dataContainer="skillTreeDc"
-                                  property="notParsing"
-                                  caption="msg://msgNotParsing"
-                                  description="msg://msgNotParsingDesc"
-                                  align="BOTTOM_LEFT"
-                                  width="AUTO"/>
-                    </hbox>
-                    <hbox spacing="true"
-                          width="100%"
-                          expand="wikiPateField">
-                        <textField id="wikiPateField"
-                                   caption="msg://msgWikiPage"
-                                   align="BOTTOM_LEFT"
-                                   trim="true"
-                                   dataContainer="skillTreeDc"
-                                   property="wikiPage" width="50%"/>
-                        <textField id="styleHighlightingField"
-                                   caption="msg://msgStyleHighlighting"
-                                   dataContainer="skillTreeDc"
-                                   property="styleHighlighting"
-                                   maxLength="64"
-                                   align="BOTTOM_LEFT"
-                                   width="50%"/>
-                        <button id="parseWikiText"
-                                align="BOTTOM_LEFT"
-                                caption="msg://msgParseWikiText"
-                                invoke="parseWikiToDescription"/>
-                    </hbox>
-                </groupBox>
-                <vbox id="dropZone"
+              height="100%">
+            <!-- Левая контекстная панель 312px: логотип, идентификация, label-навигация, подсказка.
+                 Ширина и внутренние отступы совпадают с эталоном IteractionListEdit. -->
+            <vbox id="skillTreeSidebar"
+                  stylename="edit-sidebar"
+                  width="312px"
+                  height="100%"
+                  spacing="true"
+                  expand="skillTreeSidebarSpacer">
+                <!-- Визуальный блок sidebar: круглое превью логотипа навыка с fallback-картинкой. -->
+                <vbox id="skillTreeVisual"
+                      stylename="edit-sidebar-visual"
+                      width="100%"
                       spacing="true"
-                      width="200px"
-                      height="266px"
-                      align="TOP_RIGHT"
-                      expand="skillPic"
-                      stylename="dropzone-container">
-                    <image id="skillPic"
-                           dataContainer="skillTreeDc"
-                           property="fileImageLogo"
-                           width="100%"
-                           align="TOP_RIGHT"
-                           height="100%"
-                           stylename="widget-border"
-                           scaleMode="SCALE_DOWN"/>
+                      align="MIDDLE_CENTER">
+                    <!-- Круглый аватар логотипа навыка 176×176 (как candidatePic в JobCandidateEdit):
+                         кастомный компонент OvaFallbackImage читает fileImageLogo из сущности,
+                         при отсутствии файла показывает icons/no-programmer.jpeg. -->
+                    <ovaFallbackImage id="skillPic"
+                                      dataContainer="skillTreeDc"
+                                      property="fileImageLogo"
+                                      width="176px"
+                                      height="176px"
+                                      ovalWidth="176px"
+                                      ovalHeight="176px"
+                                      align="MIDDLE_CENTER"
+                                      fallbackThemePath="icons/no-programmer.jpeg"
+                                      stylename="skill-tree-logo-image"
+                                      scaleMode="SCALE_DOWN"/>
+                    <!-- Загрузка логотипа: файл сразу кладётся в fileImageLogo (IMMEDIATE), перетаскивание на блок визуала. -->
                     <upload id="fileImageSkillUpload"
                             fileStoragePutMode="IMMEDIATE"
                             dataContainer="skillTreeDc"
-                            align="BOTTOM_CENTER"
+                            align="BOTTOM_LEFT"
                             showFileName="false"
-                            dropZone="dropZone"
+                            dropZone="skillTreeVisual"
                             showClearButton="true"
                             property="fileImageLogo"/>
                 </vbox>
-            </hbox>
-            <groupBox id="areaBox"
+                <!-- Блок идентификации: название навыка и тип записи из контейнера. -->
+                <vbox id="skillTreeIdentity"
+                      stylename="edit-sidebar-identity"
                       width="100%"
-                      height="100%"
-                      align="TOP_LEFT">
-                <richTextArea id="skillCommentRichTextArea"
-                              dataContainer="skillTreeDc"
-                              align="TOP_LEFT"
-                              property="comment"
-                              width="100%"
-                              caption="msg://msgSkillComment"
-                              height="100%"/>
-            </groupBox>
-        </vbox>
-        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
-            <button action="windowCommitAndClose"/>
-            <button action="windowClose"/>
+                      spacing="true">
+                    <!-- Название навыка (свойство skillName), живое из skillTreeDc. -->
+                    <label id="skillTreeSidebarTitle"
+                           dataContainer="skillTreeDc"
+                           property="skillName"
+                           stylename="edit-sidebar-title"
+                           width="100%"/>
+                    <!-- Подпись типа записи. -->
+                    <label value="Навык"
+                           stylename="edit-sidebar-subtitle"
+                           width="100%"/>
+                </vbox>
+                <!-- Вертикальная label-навигация по разделам формы (фокус, без изменения данных). -->
+                <vbox id="skillTreeNavigation"
+                      stylename="label-navigation"
+                      width="100%"
+                      spacing="false">
+                    <!-- Заголовок навигационного блока: полоса-заголовок с двумя inset-линиями (контракт §4.1). -->
+                    <label value="Разделы"
+                           stylename="label-nav-title skill-tree-navigation-title"
+                           width="100%"/>
+                    <!-- Пункт «Основные данные» — активен по умолчанию, фокусирует первое поле. -->
+                    <button id="skillTreeMainNav"
+                            caption="Основные данные"
+                            stylename="borderless label-nav-item label-nav-item-active"
+                            width="100%"
+                            invoke="focusMainSection"/>
+                    <!-- Пункт «Описание» — фокусирует редактор описания навыка. -->
+                    <button id="skillTreeDescriptionNav"
+                            caption="Описание"
+                            stylename="borderless label-nav-item"
+                            width="100%"
+                            invoke="focusDescriptionSection"/>
+                </vbox>
+                <!-- Служебный spacer на всю высоту sidebar (100%×100%) прижимает подсказку
+                     к нижней границе — как iteractionListSidebarSpacer эталона IteractionListEdit. -->
+                <vbox id="skillTreeSidebarSpacer" width="100%" height="100%" stylename="edit-sidebar-spacer"/>
+                <!-- Нейтральная подсказка о роли навыка в справочниках HRM HuntTech. -->
+                <label value="Навык объединяет компетенции дерева и используется в парсинге резюме и вакансий."
+                       stylename="edit-sidebar-hint"
+                       width="100%"/>
+            </vbox>
+            <!-- Правая рабочая область: toolbar, прокручиваемые секции и footer-actions. -->
+            <vbox id="skillTreeWorkspace"
+                  stylename="edit-workspace"
+                  expand="skillTreeWorkspaceScroll"
+                  width="100%"
+                  height="100%"
+                  spacing="false">
+                <!-- Toolbar с заголовком карточки и пояснением. -->
+                <hbox id="skillTreeToolbar"
+                      stylename="edit-toolbar"
+                      width="100%"
+                      spacing="true">
+                    <!-- Текстовый блок toolbar: заголовок и описание. -->
+                    <vbox id="skillTreeToolbarText" width="100%" spacing="false">
+                        <!-- Заголовок рабочей области. -->
+                        <label value="Карточка навыка" stylename="edit-toolbar-title"/>
+                        <!-- Пояснение: реквизиты, логотип и описание из Wiki. -->
+                        <label value="Реквизиты навыка, логотип и описание из Wiki" stylename="edit-toolbar-description"/>
+                    </vbox>
+                </hbox>
+                <!-- Прокручиваемая область контента рабочей области. -->
+                <scrollBox id="skillTreeWorkspaceScroll"
+                           stylename="edit-workspace-scroll"
+                           width="100%"
+                           height="100%">
+                    <!-- Поток карточек рабочей области: общий класс контента edit-workspace-content
+                         + локальный skill-tree-content с отступами 8px 20px 24px (эталон IteractionListEdit). -->
+                    <vbox id="skillTreeSections" width="100%" spacing="true"
+                          stylename="edit-workspace-content skill-tree-content">
+                        <!-- Карточка «Основные данные»: реквизиты навыка. -->
+                        <groupBox id="skillTreeMainSection"
+                                  caption="Основные данные"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%"
+                                  spacing="true">
+                            <!-- Ряд 1: название навыка (растягивается) и приоритет категории. -->
+                            <hbox id="skillTreeMainRow1"
+                                  spacing="true"
+                                  width="100%"
+                                  expand="skillNameField"
+                                  align="BOTTOM_LEFT">
+                                <!-- Название компетенции (уникальное, обязательное). -->
+                                <textField id="skillNameField"
+                                           caption="mainMsg://msgSkill"
+                                           dataContainer="skillTreeDc"
+                                           property="skillName"
+                                           align="BOTTOM_LEFT"
+                                           width="100%"
+                                           stylename="edit-form-control"/>
+                                <!-- Приоритет навыка: варианты из контроллера (StandartPrioritySkills). -->
+                                <lookupField id="skillPriorityField"
+                                             caption="msg://msgPrioritySkill"
+                                             width="220px"
+                                             dataContainer="skillTreeDc"
+                                             property="prioritySkill"
+                                             stylename="edit-form-control"/>
+                            </hbox>
+                            <!-- Ряд 2: родительский элемент дерева и специализация (50/50). -->
+                            <hbox id="skillTreeMainRow2" spacing="true" width="100%" align="BOTTOM_LEFT">
+                                <!-- Родительский элемент в дереве компетенций (корни — из skillTreesDc). -->
+                                <lookupPickerField id="skillTreeField"
+                                                   optionsContainer="skillTreesDc"
+                                                   dataContainer="skillTreeDc"
+                                                   align="BOTTOM_LEFT"
+                                                   caption="mainMsg://msgSkillTree"
+                                                   property="skillTree"
+                                                   width="50%">
+                                    <!-- Стандартный lookup по коллекции корней. -->
+                                    <actions>
+                                        <action id="lookup"
+                                                type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                                <!-- Специализация навыка (варианты из specialisationDc). -->
+                                <lookupPickerField id="specialisationField"
+                                                   optionsContainer="specialisationDc"
+                                                   dataContainer="skillTreeDc"
+                                                   caption="msg://msgSpecialisation"
+                                                   align="BOTTOM_LEFT"
+                                                   property="specialisation"
+                                                   width="50%">
+                                    <!-- Стандартный lookup по коллекции специализаций. -->
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                    </actions>
+                                </lookupPickerField>
+                            </hbox>
+                            <!-- Ряд 3: ссылка на Wiki (растягивается) и CSS-стиль выделения. -->
+                            <hbox id="skillTreeMainRow3"
+                                  spacing="true"
+                                  width="100%"
+                                  expand="wikiPateField"
+                                  align="BOTTOM_LEFT">
+                                <!-- Ссылка на статью Wikipedia; контроллер включает/выключает кнопку загрузки. -->
+                                <textField id="wikiPateField"
+                                           caption="msg://msgWikiPage"
+                                           align="BOTTOM_LEFT"
+                                           trim="true"
+                                           dataContainer="skillTreeDc"
+                                           property="wikiPage"
+                                           width="100%"
+                                           stylename="edit-form-control"/>
+                                <!-- CSS-класс подсветки навыка (максимум 64 символа). -->
+                                <textField id="styleHighlightingField"
+                                           caption="msg://msgStyleHighlighting"
+                                           dataContainer="skillTreeDc"
+                                           property="styleHighlighting"
+                                           maxLength="64"
+                                           align="BOTTOM_LEFT"
+                                           width="240px"
+                                           stylename="edit-form-control"/>
+                            </hbox>
+                            <!-- Ряд 4: флаг «Не участвовать в парсинге» слева и кнопка загрузки описания справа
+                                 (спейсер выталкивает кнопку к правому краю — композиция как у эталона IteractionListEdit). -->
+                            <hbox id="skillTreeMainRow4"
+                                  spacing="true"
+                                  width="100%"
+                                  expand="skillTreeMainRow4Spacer"
+                                  align="MIDDLE_LEFT">
+                                <!-- Флаг исключения навыка из парсинга резюме/вакансий. -->
+                                <checkBox id="notParsingCheckBox"
+                                          dataContainer="skillTreeDc"
+                                          property="notParsing"
+                                          caption="msg://msgNotParsing"
+                                          description="msg://msgNotParsingDesc"
+                                          align="MIDDLE_LEFT"/>
+                                <!-- Служебный spacer занимает свободное место строки. -->
+                                <vbox id="skillTreeMainRow4Spacer" width="100%" height="1px"/>
+                                <!-- Кнопка «Загрузить описание»: парсит wikiPateField и заполняет описание + логотип. -->
+                                <button id="parseWikiText"
+                                        align="MIDDLE_RIGHT"
+                                        caption="msg://msgParseWikiText"
+                                        invoke="parseWikiToDescription"/>
+                            </hbox>
+                        </groupBox>
+                        <!-- Карточка «Описание навыка»: rich text из Wiki. -->
+                        <groupBox id="skillTreeDescriptionSection"
+                                  caption="Описание навыка"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%"
+                                  spacing="true">
+                            <!-- Редактор описания навыка (LOB comment), заполняется парсером Wiki или вручную. -->
+                            <richTextArea id="skillCommentRichTextArea"
+                                          dataContainer="skillTreeDc"
+                                          align="TOP_LEFT"
+                                          property="comment"
+                                          width="100%"
+                                          caption="msg://msgSkillComment"
+                                          height="280px"/>
+                        </groupBox>
+                    </vbox>
+                </scrollBox>
+                <!-- Нижняя панель штатных действий: спейсер (expand) выталкивает группу
+                     к правому краю, как editActionsSpacer + editActionsGroup эталона IteractionListEdit. -->
+                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%"
+                      expand="skillTreeActionsSpacer" align="MIDDLE_RIGHT">
+                    <!-- Spacer шириной 100% занимает всё свободное место footer. -->
+                    <vbox id="skillTreeActionsSpacer" width="100%" height="1px"/>
+                    <!-- Группа действий AUTO/MIDDLE_RIGHT объединяет primary и secondary команды. -->
+                    <hbox id="skillTreeActionsGroup" width="AUTO" height="AUTO" spacing="true"
+                          align="MIDDLE_RIGHT" stylename="skill-tree-footer-actions">
+                        <!-- Сохранить и закрыть (штатный action editor-а) — акцентная primary-кнопка, как эталон IteractionListEdit. -->
+                        <button action="windowCommitAndClose" stylename="skill-tree-primary-action"/>
+                        <!-- Отменить изменения и закрыть — вторичная прозрачная кнопка, как эталон IteractionListEdit. -->
+                        <button action="windowClose" stylename="skill-tree-secondary-action"/>
+                    </hbox>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>

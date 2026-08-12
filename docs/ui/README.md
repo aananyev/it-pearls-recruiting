@@ -17,6 +17,7 @@
 | `HrmMainScreen` | [HrmMainScreen_Spec.md](HrmMainScreen_Spec.md) | Главный dashboard с персональным фоном либо случайным каталогом 7 × 10 нейтральных SVG |
 | `IteractionListEdit` | [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) · [XML-компоновка](IteractionListEdit_XmlLayout_2026-07-27.md) | Бизнес-логика взаимодействия, контекстная sidebar, аккордеоны и сохранённые CUBA-контракты |
 | `IteractionEdit` | [IteractionEdit_Spec.md](IteractionEdit_Spec.md) | Справочник типов взаимодействий: sidebar с label-навигацией по вкладкам, карточки-панели, lazy LOB/справочники; компоновка по эталону IteractionListEdit |
+| `SkillTreeEdit` | [SkillTreeEdit_Spec.md](SkillTreeEdit_Spec.md) | Справочник «Дерево компетенций»: sidebar с логотипом и label-навигацией, карточки-панели, парсинг описания Wiki |
 | `OutstaffingRatesBrowse` | [OutstaffingRatesBrowse_Spec.md](OutstaffingRatesBrowse_Spec.md) | Рейты по аутстафу — список ступеней шкалы (lookup, CRUD) |
 | `OutstaffingRatesEdit` | [OutstaffingRatesEdit_Spec.md](OutstaffingRatesEdit_Spec.md) | Рейты по аутстафу — форма ступени (commit → триггеры маржинальности и аудита) |
 | `PositionEdit` | [PositionEdit_Spec.md](PositionEdit_Spec.md) | Справочник должностей — ru/en-наименования + LOB-описания (inline view контейнера, фикс UNFETCHED 2026-08-11) |

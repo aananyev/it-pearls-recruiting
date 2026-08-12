@@ -6,6 +6,7 @@ import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.company.hunttech.entity.SkillTree;
+import com.hunttech.hrm.gui.components.OvaFallbackImage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -32,7 +33,7 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
     @Inject
     private Dialogs dialogs;
     @Inject
-    private Image skillPic;
+    private OvaFallbackImage skillPic;
     @Inject
     private FileUploadField fileImageSkillUpload;
     static String referer = "http://www.google.com";
@@ -42,6 +43,10 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
     private CheckBox notParsingCheckBox;
     @Inject
     private LookupField<Integer> skillPriorityField;
+    @Inject
+    private Button skillTreeMainNav;
+    @Inject
+    private Button skillTreeDescriptionNav;
 
     public void parseWikiToDescription() throws IOException {
         Document doc = Jsoup.connect(wikiPateField.getValue())
@@ -71,6 +76,12 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
             e.printStackTrace();
+        }
+
+        // Если картинку из Wiki получить не удалось — не затирать текущий
+        // источник (fallback-аватар OvaFallbackImage), иначе src станет пустым.
+        if (url == null) {
+            return;
         }
 
         skillPic.setSource(UrlResource.class).setUrl(url);
@@ -221,8 +232,14 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
+        // Если логотип не задан — показать fallback-аватар OvaFallbackImage
+        // (как эталон JobCandidateEdit: applyFallback при отсутствии файла).
+        if (getEditedEntity().getFileImageLogo() == null) {
+            skillPic.applyFallback();
+        }
+        String comment = skillCommentRichTextArea.getValue();
         if (skillPic.getValueSource().getValue() == null &&
-                skillCommentRichTextArea.getValue() != null) {
+                comment != null && !comment.trim().isEmpty()) {
             setLogo();
         }
     }
@@ -236,5 +253,28 @@ public class SkillTreeEdit extends StandardEditor<SkillTree> {
                 notParsingCheckBox.setValue(false);
             }
         }
+    }
+
+    /**
+     * Презентационная навигация: переводит фокус к первому полю «Основных данных»
+     * и подсвечивает активный пункт sidebar. Entity, loaders и lifecycle не затрагиваются.
+     */
+    public void focusMainSection() {
+        skillNameField.focus();
+        setActiveNavigation(skillTreeMainNav, skillTreeDescriptionNav);
+    }
+
+    /**
+     * Презентационная навигация: переводит фокус к редактору описания навыка
+     * и подсвечивает активный пункт sidebar. Entity, loaders и lifecycle не затрагиваются.
+     */
+    public void focusDescriptionSection() {
+        skillCommentRichTextArea.focus();
+        setActiveNavigation(skillTreeDescriptionNav, skillTreeMainNav);
+    }
+
+    private void setActiveNavigation(Button activeButton, Button inactiveButton) {
+        activeButton.addStyleName("label-nav-item-active");
+        inactiveButton.removeStyleName("label-nav-item-active");
     }
 }

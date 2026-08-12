@@ -1,6 +1,7 @@
 # SkillTree Edit (`hunttech_SkillTree.edit`)
 
 > Сущность: [SkillTree.md](../../entities/skill-tree/SkillTree.md)
+> **Актуальная каноническая версия:** [docs/ui/SkillTreeEdit_Spec.md](../../ui/SkillTreeEdit_Spec.md) (рефакторинг по контракту Edit-экранов 2026-08-11)
 
 ---
 
@@ -117,9 +118,8 @@ Browse: колонка wikiPage (ссылка), prioritySkill (стиль по S
 
 ### Структура layout
 
-- Корневой layout: `expand` на основную таблицу / форму (``)
-- Фильтр: `filter` → `skillTreesLc`
-- Таблицы: —
+- Рефакторинг 2026-08-11 по контракту Edit-экранов: двухпанельная композиция `edit-screen-layout` — sidebar 270px (`edit-sidebar`, тёмная, логотип + upload, идентификация, label-навигация «Разделы» с полосой-заголовком) и рабочая область (`edit-workspace`: toolbar, карточки-панели `edit-card`/`showAsPanel` «Основные данные» и «Описание навыка», footer `edit-footer-actions`).
+- Полная детализация — в [docs/ui/SkillTreeEdit_Spec.md](../../ui/SkillTreeEdit_Spec.md).
 
 ### Стили и сообщения
 
@@ -134,6 +134,7 @@ Browse: колонка wikiPage (ссылка), prioritySkill (стиль по S
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-11 | Рефакторинг Edit-формы по контракту Edit-экранов (sidebar/workspace/label-навигация/edit-card); каноническая версия — [docs/ui/SkillTreeEdit_Spec.md](../../ui/SkillTreeEdit_Spec.md) |
 | 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

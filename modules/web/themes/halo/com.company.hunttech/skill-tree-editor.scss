@@ -1,0 +1,537 @@
+/*
+ * Edit-форма навыка «Дерево компетенций» HRM HuntTech (SkillTreeEdit) —
+ * локальный визуальный слой поверх общего контракта Edit-экранов.
+ *
+ * Общие edit-* и label-* stylename задаёт edit-screen-shared-styles (геометрия,
+ * светлые карточки и поля рабочей области). Этот partial добавляет фирменную
+ * тёмную sidebar и каноническую label-навигацию по эталону IteractionListEdit
+ * (контракт §3.1): hover — белый текст на rgba(255,255,255,.08),
+ * active — жёлтый #ffb11b на rgba(255,177,27,.12) с жёлтой левой границей.
+ *
+ * Все правила ограничены локальным namespace .skill-tree-editor
+ * и не затрагивают глобальные Vaadin-селекторы.
+ */
+@mixin skill-tree-editor-theme {
+  .skill-tree-editor {
+    // Фирменная тёмная sidebar: совпадает с эталоном HRM HuntTech.
+    // Ширина 312px и внутренние отступы 14px 16px 12px — как iteraction-list-sidebar
+    // (эталон IteractionListEdit, контракт §3.1). Отступы задаются ТОЛЬКО самому
+    // компоненту (.edit-sidebar), а не слоту — иначе vbox сдвигается на (16,14).
+    .edit-sidebar,
+    .v-slot-edit-sidebar {
+      box-sizing: border-box;
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
+      background-color: #172638 !important;
+      background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%) !important;
+    }
+
+    .edit-sidebar {
+      padding: 14px 16px 12px !important;
+    }
+
+    // Правая граница и внешняя тень отделяют sidebar от рабочей области —
+    // border-right + 5px 0 20px как у iteraction-list-sidebar эталона.
+    .edit-sidebar {
+      border-right: 1px solid rgba(15, 23, 42, 0.78) !important;
+      box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18) !important;
+    }
+
+    // Тексты идентификации и подсказки в тёмной sidebar.
+    .edit-sidebar-subtitle,
+    .edit-sidebar-subtitle.v-label {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      margin: -4px 0 0 !important;
+      color: rgba(248, 250, 252, 0.72) !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      line-height: 17px !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+      text-align: center !important;
+      white-space: normal !important;
+    }
+
+    .edit-sidebar-title,
+    .edit-sidebar-title.v-label {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      margin: 2px 0 0 !important;
+      color: #ffb11b !important;
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      line-height: 24px !important;
+      text-align: center !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+    }
+
+    .edit-sidebar-hint,
+    .edit-sidebar-hint.v-label {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      color: rgba(248, 250, 252, 0.55) !important;
+      font-size: 12px !important;
+      line-height: 18px !important;
+      white-space: normal !important;
+    }
+
+    // Визуальный блок sidebar: без карточки-рамки (прозрачный фон), как identity-images
+    // эталона IteractionListEdit — аватар просто стоит на фоне sidebar.
+    // Геометрия min-height 104px без нижнего отступа — финальный слой эталона
+    // (iteraction-list-identity-images в iteraction-list-visual-alignment).
+    .edit-sidebar-visual {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 104px;
+      padding: 0 !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+    }
+
+    // Круглый аватар логотипа навыка: геометрия 176px (как candidatePic JobCandidateEdit),
+    // border-radius 50%, object-fit contain — эталон OvaFallbackImage
+    // (контракт §4.1 визуального блока sidebar).
+    .skill-tree-logo-image,
+    .skill-tree-logo-image img,
+    .skill-tree-logo-image .v-image-element {
+      box-sizing: border-box;
+      width: 176px !important;
+      height: 176px !important;
+      min-width: 176px !important;
+      min-height: 176px !important;
+      max-width: 176px !important;
+      max-height: 176px !important;
+      border-radius: 50% !important;
+      object-fit: contain !important;
+    }
+
+    .skill-tree-logo-image {
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.10) !important;
+      border: 3px solid rgba(255, 255, 255, 0.90) !important;
+      box-shadow: 0 7px 18px rgba(0, 0, 0, 0.26);
+    }
+
+    // Fallback-иллюстрация содержит собственные светлые поля: рамка обрезки
+    // приближает картинку к границе круга, как у эталона IteractionListEdit.
+    .skill-tree-logo-image[src*="/icons/no-programmer.jpeg"],
+    .skill-tree-logo-image img[src*="/icons/no-programmer.jpeg"],
+    .skill-tree-logo-image .v-image-element[src*="/icons/no-programmer.jpeg"] {
+      object-view-box: inset(8%);
+      object-fit: cover !important;
+    }
+
+    // Кнопки «Загрузить»/«Очистить» загрузчика логотипа (fileImageSkillUpload):
+    // канонический вид кнопок upload в тёмном sidebar — пара 96×36 с полупрозрачным
+    // белым фоном, центрированная в блоке визуала (эталон JobCandidateEdit);
+    // замещает дефолтные белые Vaadin-кнопки, выпадающие из тёмной панели.
+    // Промежуточный .c-fileupload-wrapper (inline-block, ширина по контенту)
+    // растягивается на ширину визуального блока, иначе пара остаётся слева.
+    .edit-sidebar-visual .c-fileupload-wrapper {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .edit-sidebar-visual .c-fileupload-container {
+      box-sizing: border-box;
+      display: flex !important;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .edit-sidebar-visual .c-fileupload .v-button,
+    .edit-sidebar-visual .c-fileupload-clear {
+      box-sizing: border-box;
+      width: 96px !important;
+      min-width: 96px !important;
+      max-width: 96px !important;
+      min-height: 36px !important;
+      padding: 0 14px !important;
+      color: #f8fafc !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      text-align: center !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(255, 255, 255, 0.34) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+    }
+
+    // Скрытый file input загрузчика совпадает по геометрии с видимой кнопкой,
+    // чтобы клик и drag&drop попадали в область кнопки «Загрузить».
+    .edit-sidebar-visual .c-fileupload input {
+      width: 96px !important;
+      height: 36px !important;
+    }
+
+    .edit-sidebar-visual .c-fileupload .v-button:hover,
+    .edit-sidebar-visual .c-fileupload-clear:hover {
+      background: rgba(255, 255, 255, 0.14) !important;
+      border-color: rgba(255, 255, 255, 0.58) !important;
+    }
+
+    // Каноническая label-навигация в тёмной sidebar (эталон IteractionListEdit).
+    .label-navigation {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      padding: 10px 0 4px !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
+    }
+
+    .label-nav-title,
+    .v-label-label-nav-title {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      height: auto !important;
+      padding: 6px 10px 8px !important;
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      line-height: 16px !important;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: normal !important;
+      opacity: 1 !important;
+    }
+
+    // Заголовок «Разделы» навигации: полоса-заголовок с двумя горизонтальными
+    // inset-линиями (белая сверху, светлая снизу) — как заголовки секций
+    // IteractionListEdit/OpenPositionEdit, контракт §4.1.
+    .label-navigation .skill-tree-navigation-title,
+    .label-navigation .v-label-skill-tree-navigation-title {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-height: 36px !important;
+      height: auto !important;
+      padding: 7px 11px !important;
+      color: #ffb11b !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 21px !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+      background: rgba(255, 255, 255, 0.045) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+      box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
+                  rgba(244, 244, 244, 1) 0 -1px 0 0 inset;
+      white-space: normal !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+
+    .label-nav-item,
+    .v-button-label-nav-item,
+    .v-label-label-nav-item {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 27px !important;
+      height: auto !important;
+      padding: 3px 10px !important;
+      color: rgba(248, 250, 252, 0.82) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
+      text-align: left !important;
+      white-space: normal !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-left: 3px solid transparent !important;
+      border-radius: 0 5px 5px 0 !important;
+      box-shadow: none !important;
+      opacity: 1 !important;
+    }
+
+    // Vaadin-кнопка навигации: убираем базовую высоту halo-темы (height 25px
+    // + выравнивание) — пункты занимают ровно 27px, как у эталона IteractionListEdit.
+    .v-button-label-nav-item {
+      height: 27px !important;
+      max-height: 27px !important;
+      align-items: center !important;
+    }
+
+    .v-button-label-nav-item .v-button-wrap {
+      box-sizing: border-box;
+      display: flex !important;
+      align-items: center !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+    }
+
+    .label-nav-item .v-button-caption,
+    .v-button-label-nav-item .v-button-caption {
+      display: block;
+      width: 100%;
+      color: inherit !important;
+      text-align: left !important;
+      white-space: normal !important;
+    }
+
+    .label-nav-item:hover,
+    .label-nav-item:focus,
+    .v-button-label-nav-item:hover,
+    .v-button-label-nav-item:focus {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .label-nav-item-active,
+    .v-button-label-nav-item-active,
+    .v-label-label-nav-item-active {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.12) !important;
+      border-left-color: #ffb11b !important;
+    }
+
+    // Правая рабочая область — эталон IteractionListEdit (аккордеон-карточки).
+    // Секции groupBox: карточка с заголовком, контентом и лёгкой тенью.
+    .edit-card {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      margin-bottom: 12px;
+      padding: 0 !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.15) !important;
+      border-radius: 8px !important;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+      overflow: hidden;
+    }
+
+    // Заголовок карточки: геометрия финального слоя эталона IteractionListEdit
+    // (flat-section-header 46px + flat-section-title 16px/23px, без вало-inset-shadow).
+    .edit-card .v-groupbox-caption,
+    .edit-card .v-panel-caption {
+      box-sizing: border-box;
+      min-height: 46px;
+      padding: 11px 16px;
+      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
+      font-size: 16px !important;
+      font-weight: 700 !important;
+      line-height: 23px !important;
+      background: mix($v-app-background-color, $v-panel-background-color, 68%) !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.15) !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+
+    .edit-card .v-groupbox-content,
+    .edit-card .v-panel-content {
+      box-sizing: border-box;
+      padding: 14px 16px 16px !important;
+      background: $v-panel-background-color !important;
+      border: 0 !important;
+    }
+
+    // Поля, подписи, фокус и состояния формы повторяют SettingsWindow/IteractionListEdit.
+    .edit-card .v-textfield,
+    .edit-card .v-filterselect,
+    .edit-card .v-filterselect-input,
+    .edit-card .v-datefield,
+    .edit-card .v-datefield-textfield {
+      box-sizing: border-box;
+      min-height: 38px !important;
+      font-size: 15px !important;
+      line-height: 38px !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.20) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+      transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+
+    .edit-card .v-textfield,
+    .edit-card .v-textarea {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .edit-card .v-filterselect-input {
+      padding-left: 10px !important;
+    }
+
+    .edit-card .v-caption .v-captiontext {
+      color: mix($v-font-color, $v-panel-background-color, 72%) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+    }
+
+    // Фиксированные ширины полей (220px приоритет) заданы в XML-дескрипторе; общий
+    // shared-стиль .edit-form-control принудительно растягивает filterselect на 100%
+    // и схлопывает явные ширины — отменяем это локально, чтобы XML-ширины работали
+    // (эталон IteractionListEdit, контракт §2). Пейкеры 50% (row2) при этом НЕ трогаем:
+    // у них убран edit-form-control, и Vaadin-инлайн width:50% работает без конкурентов.
+    .edit-card .v-filterselect {
+      width: auto !important;
+      max-width: none !important;
+    }
+
+    // Пейкеры (lookupPickerField): Vaadin ставит width:50% и слоту, и обёртке
+    // .v-has-caption, и компоненту — эффективная ширина получается 12,5–25%.
+    // Явно задаём слот 50%, обёртку и компонент 100% от слота
+    // (эталон IteractionListEdit — две колонки по 50%), высота поля 38px.
+    .edit-card .v-slot-c-combobox-pickerfield {
+      width: 50% !important;
+      max-width: 50% !important;
+    }
+
+    .edit-card .v-slot-c-combobox-pickerfield > .v-has-caption {
+      width: 100% !important;
+      max-width: none !important;
+    }
+
+    .edit-card .c-pickerfield {
+      width: 100% !important;
+      max-width: none !important;
+      height: 40px !important;
+      min-height: 40px !important;
+    }
+
+    .edit-card .c-pickerfield .v-filterselect-input {
+      height: 38px !important;
+      min-height: 38px !important;
+      padding: 0 10px !important;
+      font-size: 15px !important;
+    }
+
+    .edit-card .c-pickerfield-layout {
+      table-layout: fixed;
+    }
+
+    // Чекбоксы карточек: вертикальный ритм и шрифт 14px/1.4 как у эталона
+    // IteractionListEdit (flat-section .v-checkbox).
+    .edit-card .v-checkbox {
+      padding: 3px 0;
+    }
+
+    .edit-card .v-checkbox label {
+      color: mix($v-font-color, $v-panel-background-color, 78%) !important;
+      font-size: 14px !important;
+      line-height: 1.4 !important;
+    }
+
+    // RichTextArea (описание навыка) получает единый стиль полей формы:
+    // рамка rgba($v-font-color,.20) и скругление 5px вместо вало-дефолта.
+    .edit-card .v-richtextarea {
+      box-sizing: border-box;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.20) !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+    }
+
+    .edit-card .v-richtextarea iframe,
+    .edit-card .v-richtextarea .gwt-RichTextArea {
+      box-sizing: border-box;
+      border: 0 !important;
+      background: $v-panel-background-color !important;
+    }
+
+    .edit-card .v-textfield:focus,
+    .edit-card .v-filterselect-focus,
+    .edit-card .v-datefield-focus .v-datefield-textfield,
+    .edit-card .v-button:focus {
+      border-color: $v-selection-color !important;
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
+    }
+
+    .edit-card .v-textfield-readonly,
+    .edit-card .v-filterselect-readonly,
+    .edit-card .v-readonly {
+      background: mix($v-app-background-color, $v-panel-background-color, 62%) !important;
+    }
+
+    .edit-card .v-button {
+      min-height: 38px;
+      padding-left: 14px;
+      padding-right: 14px;
+      font-size: 14px !important;
+      border-radius: 5px !important;
+      transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+    }
+
+    // Заголовок и описание toolbar: 20px/700 + 12px/18px — эталон IteractionListEdit.
+    .edit-toolbar-title,
+    .edit-toolbar-title.v-label {
+      font-size: 20px !important;
+      line-height: 27px !important;
+    }
+
+    .edit-toolbar-description,
+    .edit-toolbar-description.v-label {
+      line-height: 18px !important;
+      color: mix($v-font-color, $v-panel-background-color, 60%) !important;
+    }
+
+    // Контент рабочей области: отступы 8px 20px 24px — финальный слой эталона
+    // IteractionListEdit (iteraction-list-content + reference-finish).
+    .skill-tree-content {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      padding: 8px 20px 24px !important;
+    }
+
+    // Нижняя панель действий: отступы 11px 20px, кнопки 14px/600 высотой 40px
+    // и верхняя тень — эталон IteractionListEdit (primary «Сохранить», secondary «Отмена»).
+    .edit-footer-actions {
+      padding: 11px 20px !important;
+      min-height: 62px !important;
+      border-top: 1px solid rgba($v-font-color, 0.16) !important;
+      box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.04) !important;
+    }
+
+    .edit-footer-actions .v-button {
+      box-sizing: border-box;
+      min-height: 40px !important;
+      padding: 0 18px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      line-height: 38px !important;
+      border-radius: 4px !important;
+    }
+
+    .edit-footer-actions .v-button:hover {
+      filter: brightness(0.98);
+    }
+
+    .skill-tree-primary-action {
+      color: #ffffff !important;
+      background: $v-selection-color !important;
+      border-color: $v-selection-color !important;
+    }
+
+    .skill-tree-secondary-action {
+      background: transparent !important;
+    }
+
+    .skill-tree-primary-action:focus,
+    .skill-tree-secondary-action:focus {
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
+      outline: 0;
+    }
+  }
+}

@@ -13,6 +13,7 @@
 @import "com.company.hunttech/open-position-preview-sidebar-usability";
 @import "com.company.hunttech/recruiter-dashboard-shared-styles";
 @import "com.company.hunttech/geolocation-edit-forms";
+@import "com.company.hunttech/skill-tree-editor";
 @import "com.company.hunttech/ext-user-editor";
 @import "com.company.hunttech/iteraction-list-editor";
 @import "com.company.hunttech/iteraction-list-accordion-navigation";
@@ -47,6 +48,7 @@
   @include open-position-preview-sidebar-usability-theme;
   @include recruiter-dashboard-shared-styles;
   @include geolocation-edit-forms-theme;
+  @include skill-tree-editor-theme;
   @include ext-user-editor-theme;
   @include iteraction-list-editor-theme;
   @include iteraction-list-accordion-navigation-theme;

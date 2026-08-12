@@ -12,7 +12,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`hunttech_SkillTree.browse` (дерево), `hunttech_SkillTree.edit`; вкладка Skills в OpenPositionEdit; фрагменты browse кандидатов/вакансий. UI Spec: [browse](../../screens/skill-tree/hunttech_SkillTree.browse_Spec.md), [edit](../../screens/skill-tree/hunttech_SkillTree.edit_Spec.md).
+`hunttech_SkillTree.browse` (дерево), `hunttech_SkillTree.edit`; вкладка Skills в OpenPositionEdit; фрагменты browse кандидатов/вакансий. UI Spec (Edit, канон): [docs/ui/SkillTreeEdit_Spec.md](../../ui/SkillTreeEdit_Spec.md); legacy: [browse](../../screens/skill-tree/hunttech_SkillTree.browse_Spec.md), [edit](../../screens/skill-tree/hunttech_SkillTree.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -132,7 +132,7 @@ erDiagram
 | Экран | Файл | View | Оптимизации |
 |-------|------|------|-------------|
 | Browse | `skill-tree-browse.xml` | `skillTree-browse-view` | readOnly, cacheable loader, узкий filter exclude |
-| Edit | `skill-tree-edit.xml` | `skillTree-edit-view` | picker loaders cacheable; исправлен dataContainer image/upload → `skillTreeDc` |
+| Edit | `skill-tree-edit.xml` | `skillTree-edit-view` | picker loaders cacheable; исправлен dataContainer image/upload → `skillTreeDc`; рефакторинг 2026-08-11 по контракту Edit-экранов (sidebar 270px + label-навигация + карточки-панели edit-card + edit-form-control), presentation-only навигация `focusMainSection`/`focusDescriptionSection` |
 | BrowseCheck | `skill-tree-browse-check.xml` | `skillTree-browse-check-view` | tree grid, comment только для description |
 | SkillsFilter | `skills-filter-job-candidate-browse.xml` | picker/filter views | cross-form |
 | CandidateCV (вкладка) | `candidate-cv-edit.xml` | `skillTree-cv-tab-view` | collection view |
@@ -251,6 +251,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-11 | Рефакторинг Edit-формы по контракту Edit-экранов: sidebar 270px (логотип+upload, идентификация, label-навигация), карточки-панели edit-card/showAsPanel, edit-form-control на полях, presentation-only навигация; view integrity пройдена (все getters контроллера ⊆ skillTree-edit-view) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-23 | `skillTree-openPosition-tab-view`: вкладка «Требуемые навыки» OpenPositionEdit — `fileImageLogo` + reload после parse; `openPosition-view.skillsList` сужен |
 | 2026-06-23 | Оптимизация: специализированные views (browse/edit/picker/parser/check/filter/cv-tab), cacheable loaders, cross-form consumers, FTS cleanup, `SkillTreeServiceTest`, исправление image/upload dataContainer на Edit |
