@@ -70,18 +70,21 @@
                       width="100%"
                       spacing="true"
                       align="MIDDLE_CENTER">
-                    <!-- Круглый аватар логотипа навыка 176×176 (как candidatePic в JobCandidateEdit):
-                         кастомный компонент OvaFallbackImage читает fileImageLogo из сущности,
-                         при отсутствии файла показывает icons/no-programmer.jpeg. -->
+                    <!-- Круглый аватар логотипа навыка: характеристики 1:1 с ovaFallbackImage
+                         candidateImage эталона IteractionListEdit — размер 96×96
+                         (width/height/ovalWidth/ovalHeight), visible, MIDDLE_CENTER,
+                         fallback icons/no-programmer.jpeg, SCALE_DOWN; при отсутствии
+                         файла показывает fallback-картинку. -->
                     <ovaFallbackImage id="skillPic"
                                       dataContainer="skillTreeDc"
                                       property="fileImageLogo"
-                                      width="176px"
-                                      height="176px"
-                                      ovalWidth="176px"
-                                      ovalHeight="176px"
-                                      align="MIDDLE_CENTER"
+                                      width="96px"
+                                      height="96px"
+                                      ovalWidth="96px"
+                                      ovalHeight="96px"
                                       fallbackThemePath="icons/no-programmer.jpeg"
+                                      visible="true"
+                                      align="MIDDLE_CENTER"
                                       stylename="skill-tree-logo-image"
                                       scaleMode="SCALE_DOWN"/>
                     <!-- Загрузка логотипа: файл сразу кладётся в fileImageLogo (IMMEDIATE), перетаскивание на блок визуала. -->
@@ -283,14 +286,15 @@
                                   showAsPanel="true"
                                   width="100%"
                                   spacing="true">
-                            <!-- Редактор описания навыка (LOB comment), заполняется парсером Wiki или вручную. -->
+                            <!-- Редактор описания навыка (LOB comment), заполняется парсером Wiki или вручную;
+                                 высота растянута почти на весь экран (100vh минус фиксированные слои формы). -->
                             <richTextArea id="skillCommentRichTextArea"
                                           dataContainer="skillTreeDc"
                                           align="TOP_LEFT"
                                           property="comment"
                                           width="100%"
                                           caption="msg://msgSkillComment"
-                                          height="280px"/>
+                                          stylename="skill-description-rich-text"/>
                         </groupBox>
                     </vbox>
                 </scrollBox>

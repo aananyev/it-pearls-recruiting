@@ -98,28 +98,25 @@
       border-radius: 0 !important;
     }
 
-    // Круглый аватар логотипа навыка: геометрия 176px (как candidatePic JobCandidateEdit),
-    // border-radius 50%, object-fit contain — эталон OvaFallbackImage
-    // (контракт §4.1 визуального блока sidebar).
+    // Круглый аватар логотипа навыка: геометрия 96px (как аватар кандидата
+    // в эталоне IteractionListEdit), border-radius 50%, object-fit contain —
+    // чистый круг без рамки и тени (контракт §4.1 визуального блока sidebar).
     .skill-tree-logo-image,
     .skill-tree-logo-image img,
     .skill-tree-logo-image .v-image-element {
       box-sizing: border-box;
-      width: 176px !important;
-      height: 176px !important;
-      min-width: 176px !important;
-      min-height: 176px !important;
-      max-width: 176px !important;
-      max-height: 176px !important;
+      width: 96px !important;
+      height: 96px !important;
+      min-width: 96px !important;
+      min-height: 96px !important;
+      max-width: 96px !important;
+      max-height: 96px !important;
       border-radius: 50% !important;
       object-fit: contain !important;
     }
 
     .skill-tree-logo-image {
       overflow: hidden;
-      background: rgba(255, 255, 255, 0.10) !important;
-      border: 3px solid rgba(255, 255, 255, 0.90) !important;
-      box-shadow: 0 7px 18px rgba(0, 0, 0, 0.26);
     }
 
     // Fallback-иллюстрация содержит собственные светлые поля: рамка обрезки
@@ -279,6 +276,16 @@
       height: 100% !important;
       min-height: 0 !important;
       padding: 0 !important;
+    }
+
+    // halo-тема добавляет кнопке :before (inline-block, vertical-align:middle)
+    // для центрирования текста; при display:flex у .v-button-wrap псевдоэлемент
+    // встаёт отдельным блоком и выталкивает текст вниз — подсветка nav-пункта
+    // оказывается на строку выше текста. Отключаем псевдоэлемент.
+    .label-nav-item:before,
+    .v-button-label-nav-item:before {
+      display: none !important;
+      content: none !important;
     }
 
     .label-nav-item .v-button-caption,
@@ -532,6 +539,15 @@
     .skill-tree-secondary-action:focus {
       box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
       outline: 0;
+    }
+
+    // Редактор описания навыка (richTextArea, LOB comment): высота почти во весь
+    // экран — calc(100vh − фиксированные слои формы: отступ окна, toolbar, footer,
+    // caption и spacing), чтобы длинный текст из Wiki был виден без прокрутки;
+    // min-height подстраховывает малые экраны.
+    .skill-description-rich-text {
+      height: calc(100vh - 230px) !important;
+      min-height: 320px !important;
     }
   }
 }
