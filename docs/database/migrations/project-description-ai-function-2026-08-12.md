@@ -49,7 +49,7 @@ Liquibase:
 
 `modules/core/db/update/postgres/26/260812-2-addProjectDescriptionAiFunction.sql`
 
-Оба варианта INSERT-only/idempotent по `CODE`.
+Оба варианта INSERT-only/idempotent по `CODE`. Оба используют PostgreSQL `E'...'` для `PROMPT_TEMPLATE`, поэтому переводы строк и итоговый административный prompt совпадают между Liquibase и ручным production SQL.
 
 ## 3. Preflight production
 
@@ -114,4 +114,5 @@ Runtime smoke после deploy: TXT → DOCX → PDF; configured AI success; di
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-12 | Синхронизировано хранение переводов строк `PROMPT_TEMPLATE` между Liquibase и production SQL; добавлен контрактный тест |
 | 2026-08-12 | Подготовлен идемпотентный production-runbook для `PROJECT_DESCRIPTION_GENERATE`; production не изменён |

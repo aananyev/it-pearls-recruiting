@@ -58,6 +58,11 @@ public class ProjectDescriptionAiUploadContractTest {
         assertTrue(changelog.contains("PROJECT_DESCRIPTION_GENERATE"));
         assertTrue(master.contains("260812-2-addProjectDescriptionAiFunction.xml"));
 
+        // Liquibase и ручной production SQL должны сохранять одинаковые реальные
+        // переводы строк в административном prompt, а не литералы backslash+n.
+        assertTrue(sql.contains("E'Наименование проекта: ${projectName}\\n"));
+        assertTrue(changelog.contains("E'Наименование проекта: ${projectName}\\n"));
+
         String upper = sql.toUpperCase();
         assertFalse(upper.contains("DROP TABLE"));
         assertFalse(upper.contains("DROP COLUMN"));
