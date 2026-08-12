@@ -5,15 +5,15 @@ import com.company.hunttech.entity.UserAiConfiguration;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.cuba.gui.components.TextField;
-import com.haulmont.cuba.gui.screen.InitEntityEvent;
-import com.haulmont.cuba.gui.screen.InitEvent;
+import com.haulmont.cuba.gui.screen.StandardEditor.InitEntityEvent;
+import com.haulmont.cuba.gui.screen.Screen.InitEvent;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.StandardEditor;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.gui.screen.EditedEntityContainer;
-import com.haulmont.cuba.gui.screen.BeforeShowEvent;
+import com.haulmont.cuba.gui.screen.Screen.BeforeShowEvent;
 import com.haulmont.cuba.security.entity.User;
 
 import javax.inject.Inject;
