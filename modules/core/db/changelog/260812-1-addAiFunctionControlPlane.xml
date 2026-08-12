@@ -109,4 +109,37 @@
             <column name="USER_AI_CONFIGURATION_ID"/>
         </createIndex>
     </changeSet>
+
+    <!--
+        Legacy VacancyPromptTemplate сохраняется как совместимый справочник, но runtime
+        больше его не читает. Существующие записи копируются в Control Plane с тем же
+        стабильным CODE, чтобы старые templateCode продолжили работать как functionCode.
+        USER_REQUIRED выбран безопасным стартовым policy: миграция не расходует
+        корпоративный API без явной настройки администратора.
+    -->
+    <changeSet id="260812-4-migrateLegacyVacancyPrompts" author="HRM HuntTech">
+        <sql dbms="postgresql"><![CDATA[
+            INSERT INTO HUNTTECH_AI_FUNCTION_CONFIGURATION (
+                ID, VERSION, CREATE_TS, CREATED_BY, UPDATE_TS, UPDATED_BY,
+                DELETE_TS, DELETED_BY, CODE, NAME, DESCRIPTION, CAPABILITY,
+                SYSTEM_PROMPT, PROMPT_TEMPLATE, TEMPERATURE, EXECUTION_POLICY,
+                FALLBACK_POLICY, ALLOW_MODEL_OVERRIDE, IS_ACTIVE, CONFIGURATION_VERSION
+            )
+            SELECT
+                t.ID, t.VERSION, t.CREATE_TS, t.CREATED_BY, t.UPDATE_TS, t.UPDATED_BY,
+                NULL, NULL, t.CODE, t.NAME,
+                'Мигрировано из legacy VacancyPromptTemplate',
+                CASE WHEN t.CODE = 'STANDARDIZE_VACANCY'
+                     THEN 'TEXT_TRANSFORMATION' ELSE 'TEXT_GENERATION' END,
+                t.SYSTEM_CONTEXT, t.PROMPT_TEXT, t.TEMPERATURE,
+                'USER_REQUIRED', 'NO_FALLBACK', FALSE, TRUE, 1
+            FROM HUNTTECH_VACANCY_PROMPT_TEMPLATE t
+            WHERE t.DELETE_TS IS NULL
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM HUNTTECH_AI_FUNCTION_CONFIGURATION f
+                  WHERE f.CODE = t.CODE
+              );
+        ]]></sql>
+    </changeSet>
 </databaseChangeLog>

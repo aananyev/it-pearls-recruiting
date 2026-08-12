@@ -17,13 +17,13 @@ import java.util.UUID;
 /**
  * Реализация защищённых административных операций с корпоративными AI credentials.
  *
- * Проверка screen permission выполняется и на middleware, поэтому вызов сервиса в обход
- * UI не позволяет обычному пользователю расходовать корпоративный API для тестов.
+ * Specific permission проверяется на middleware, поэтому один только screen grant
+ * не позволяет вызвать шифрование/тест корпоративного credential через сервис.
  */
 @Service(AiCredentialService.NAME)
 public class AiCredentialServiceBean implements AiCredentialService {
-    private static final String ADMIN_BROWSE_SCREEN = "hunttech_AdminAiConfiguration.browse";
-    private static final String ADMIN_EDIT_SCREEN = "hunttech_AdminAiConfiguration.edit";
+    public static final String MANAGE_CORPORATE_CREDENTIALS_PERMISSION =
+            "hunttech.ai.manageCorporateCredentials";
 
     @Inject
     private DataManager dataManager;
@@ -93,8 +93,7 @@ public class AiCredentialServiceBean implements AiCredentialService {
     }
 
     private void requireAdminPermission() {
-        if (!security.isScreenPermitted(ADMIN_BROWSE_SCREEN)
-                && !security.isScreenPermitted(ADMIN_EDIT_SCREEN)) {
+        if (!security.isSpecificPermitted(MANAGE_CORPORATE_CREDENTIALS_PERMISSION)) {
             throw new DevelopmentException("Нет права управления корпоративными AI-подключениями.");
         }
     }

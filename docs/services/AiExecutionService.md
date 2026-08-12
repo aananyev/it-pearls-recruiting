@@ -4,11 +4,11 @@
 
 ### Назначение и бизнес-смысл (What & Why)
 
-`AiExecutionService` — единая middleware-точка выполнения AI-функций HRM HuntTech. Потребитель перестаёт выбирать provider, модель и API key: он передаёт только стабильный `functionCode` и бизнес-контекст.
+`AiExecutionService` — единая middleware-точка выполнения AI-функций HRM HuntTech. Потребитель не выбирает provider, модель и API key: он передаёт только стабильный `functionCode` и бизнес-контекст.
 
 ### UI Context & Navigation
 
-Сервис не имеет собственного экрана. Его конфигурация управляется через «Управление AI» → «Функции AI», «Корпоративные AI-подключения» и «Мои замещения AI-функций». Подключение существующих бизнес-экранов выполняется отдельными задачами; текущий этап их не изменяет.
+Сервис не имеет собственного экрана. Его конфигурация управляется через «Управление AI» → «Функции AI», «Корпоративные AI-подключения» и «Мои замещения AI-функций». Legacy vacancy-фасад `HrmAiService` уже маршрутизирует рабочие генерации через этот сервис; изменение не-AI бизнес-экранов в текущем PR не выполняется.
 
 ### Behavior Summary
 
@@ -17,7 +17,8 @@
 - `USER_OVERRIDE_ALLOWED` → при наличии валидного override вызывается personal provider;
 - ошибка personal provider + `FALLBACK_TO_ADMIN` → выполняется corporate provider;
 - override отсутствует / `ADMIN_ONLY` → используется corporate provider;
-- secret корпоративного подключения → расшифровывается в core непосредственно перед `AIProvider.generateText`.
+- secret корпоративного подключения → расшифровывается в core непосредственно перед `AIProvider.generateText`;
+- `HrmAiService` legacy providerCode → не влияет на route и не может обойти policy.
 
 ## API
 
@@ -38,6 +39,10 @@ Prompt формируется через `TemplateHelper.processTemplate`. Provi
 
 Ошибки конфигурации преобразуются в `DevelopmentException`. При fallback логируется код функции и класс исключения, но не API key и не payload. Неподдержанная capability блокируется до внешнего вызова.
 
+## Интеграция legacy vacancy AI
+
+`HrmAiServiceBean` больше не содержит JPQL к `UserAiConfiguration`/`VacancyPromptTemplate` для рабочих методов. `STANDARDIZE_VACANCY` и legacy template codes становятся function codes. Liquibase переносит существующие vacancy templates в `AiFunctionConfiguration`.
+
 ## Ограничения первого этапа
 
 `executeText` поддерживает TEXT_GENERATION, TEXT_ANALYSIS, TEXT_TRANSFORMATION и DOCUMENT_ANALYSIS. `VISION`, `IMAGE_GENERATION`, `EMBEDDING`, `AUDIO_TRANSCRIPTION` присутствуют в модели, но требуют отдельных typed adapters.
@@ -46,4 +51,5 @@ Prompt формируется через `TemplateHelper.processTemplate`. Provi
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-12 | Подключён `HrmAiService` как совместимый vacancy-фасад; provider selection из legacy API исключён |
 | 2026-08-12 | Реализован централизованный function resolver с per-function override и admin fallback |
