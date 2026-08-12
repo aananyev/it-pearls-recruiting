@@ -2,132 +2,98 @@
 
 > Сущность: [City.md](../../entities/city/City.md)
 
----
-
 ## Business & Context Intro
 
 ### Назначение и Бизнес-смысл (What & Why)
 
-Экран подсистемы **City** HRM HuntTech: редактирование записи сущности `City`.
+`CityEdit` поддерживает ведение городов, которые используются в адресах кандидатов, компаний и вакансий HRM HuntTech. Форма должна позволять быстро идентифицировать город, проверить телефонный код и назначить корректный регион без изменения стандартного CUBA lifecycle редактора.
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Контроллер `hunttech_City.edit`; навигация и дочерние формы — §3 «Иерархия и взаимосвязь форм».
+Экран открывается из `hunttech_City.browse` стандартными действиями создания и редактирования, а также может использоваться как связанный editor справочника городов. Регион выбирается через штатный `picker_lookup` из контейнера `cityRegionsDc`.
+
+Левая контекстная панель содержит название редактируемого города, label-навигацию по разделам «Наименование» и «Регион и связь», сводку по выбранному региону и служебную подсказку. Контент формы прокручивается только в правой рабочей области.
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-Справочник городов: стандартный список и форма без кастомной логики в Java. При открытии загружается полный список; создание и редактирование — через стандартные действия CUBA.
+- открытие формы → CUBA загружает `cityDc` и кэшируемый справочник регионов → пользователь получает текущие реквизиты города;
+- выбор «Наименование» в sidebar → active-state переключается на первый пункт → фокус устанавливается в `cityRuNameField`;
+- выбор «Регион и связь» → active-state переключается на второй пункт → фокус устанавливается в `cityRegionField`;
+- выбор региона → используется прежний `picker_lookup` и binding `cityRegion` → связанная сущность сохраняется штатно;
+- сохранение или отмена → выполняются `windowCommitAndClose` или `windowClose` → presentation-слой не вмешивается в lifecycle.
 
-
----
-
-## 1. Точка вызова и контекст (Invocation & Context)
-
-| Параметр | Значение |
-|----------|----------|
-| **@UiController** | `hunttech_City.edit` |
-| **Java-класс** | `com.company.hunttech.web.screens.city.CityEdit ` |
-| **XML-дескриптор** | `city-edit.xml` |
-| **messagesPack** | `com.company.hunttech.web.screens.city` |
-| **Базовый класс** | `StandardEditor` |
-| **Lookup-компонент** | `` |
-| **EditedEntityContainer** | `cityDc` |
-| **focusComponent** | `form` |
-| **Меню** | `web-menu.xml` → `screen="hunttech_City.edit"` (если есть пункт) |
-| **Загрузка данных** | `@LoadDataBeforeShow` |
-
-### Назначение
-
-Экран подсистемы **City** HRM HuntTech: редактирование записи сущности `City`.
-
----
-
-## 2. Связь с моделью данных (Data & Entity Binding)
+## 1. Технический контракт
 
 | Параметр | Значение |
-|----------|----------|
-| **Entity** | `City` |
-| **View** | `city-edit-view` |
-| **Data containers** | `cityDc` (instance), `cityRegionsDc` (collection) |
-| **Loader** | `cityRegionsLc` |
+|---|---|
+| `@UiController` | `hunttech_City.edit` |
+| Java-класс | `com.company.hunttech.web.screens.city.CityEdit` |
+| XML | `city-edit.xml` |
+| Базовый класс | `StandardEditor<City>` |
+| Edited entity container | `cityDc` |
+| View | `city-edit-view` |
+| Lookup container | `cityRegionsDc` |
+| Loader | `cityRegionsLc`, `cacheable=true` |
+| JPQL | `select e from hunttech_Region e` |
+| Focus component | `cityRuNameField` |
 
-### JPQL (если задан)
+## 2. Информационная архитектура
 
-```
-select e from hunttech_Region e
-```
+### Левая панель
 
-### Привязки property (form / table)
+Порядок элементов соответствует обязательному контракту Edit-форм HRM HuntTech:
 
-- `cityRuName`
-- `cityPhoneCode`
-- `cityRegion`
+1. наименование типа объекта и экземпляра;
+2. label-навигация;
+3. детализация выбранного региона;
+4. служебная подсказка.
 
-### Колонки таблицы (browse)
+### Правая рабочая область
 
-- см. XML
+1. toolbar «Карточка города»;
+2. карточка «Наименование» — `cityRuName`, `cityPhoneCode`;
+3. карточка «Регион и связь» — `cityRegion`;
+4. footer-actions сохранения и отмены.
 
----
+Разделение выполнено только на уровне визуальных контейнеров. Property binding, loaders, views, JPQL и actions не изменены.
 
-## 3. Иерархия и взаимосвязь форм (Form Hierarchy)
+## 3. Presentation-навигация
 
-| Связь | Экран / фрагмент | Способ открытия |
-|-------|------------------|-----------------|
-| Родитель | `web-menu.xml` / opener | menu / lookup |
-| Парный экран | `hunttech_City.browse` | create / edit action |
-| Lookup targets | picker_lookup на FK-полях | `screenBuilders.lookup()` |
+| Метод | Результат |
+|---|---|
+| `focusMainSection()` | совместимый вход, делегирует фокус разделу наименования |
+| `focusIdentitySection()` | активирует `cityIdentityNav`, снимает active-state с `cityRegionNav`, фокусирует `cityRuNameField` |
+| `focusRegionSection()` | активирует `cityRegionNav`, снимает active-state с `cityIdentityNav`, фокусирует `cityRegionField` |
 
----
+Методы не изменяют entity, не запускают loaders и не инициируют сохранение.
 
-## 4. Модель поведения и интерактивность (Behavior Model)
+## 4. Data View Integrity
 
-### 4.1 Жизненный цикл формы (Lifecycle)
+Контроллер не читает дополнительные атрибуты сущности. XML sidebar использует `cityRegion.regionRuName`, который должен оставаться доступным через `city-edit-view`. Изменения fetch plan в этом этапе не выполнялись.
 
-| Этап | Что происходит |
-|------|----------------|
-| Открытие browse | Загрузка всех городов; generic-фильтр CUBA |
-| Открытие edit | Стандартный editor, commit через framework |
+## 5. Визуальный контракт
 
-### 4.2 Скрытые вычисления
+- локальный namespace: `.city-editor`;
+- sidebar: `270px`, тёмная поверхность HRM HuntTech;
+- navigation: `label-navigation`, `label-nav-title`, `label-nav-item`, `label-nav-item-active`;
+- карточки: `edit-card`;
+- поля: `edit-form-control`;
+- рабочая область и footer используют общий контракт `edit-workspace` и `edit-footer-actions`;
+- поддерживаются все темы, подключающие `geolocation-edit-forms.scss`.
 
-Нет — колонки привязаны к полям сущности.
+## 6. Проверки
 
-### 4.3 Валидация и сохранение
-
-Стандартная валидация полей entity и commit editor'а.
-
----
-
-## 5. Логика управляющих элементов (Actions & Buttons Logic)
-
-| Элемент | Цепочка |
-|---------|----------|
-| Создать / Изменить / Удалить | Стандартный CUBA CRUD |
-
-
----
-
-## 6. Визуальная компоновка элементов (Visual Layout Schema)
-
-### Структура layout
-
-- Корневой layout: `expand` на основную таблицу / форму (`form`)
-- Фильтр: `filter` → `cityRegionsLc`
-- Таблицы: —
-
-### Стили и сообщения
-
-| Элемент | Источник |
-|---------|----------|
-| Caption | `msg://` / `mainMsg://` из `com.company.hunttech.web.screens.city` |
-| Иконка окна | атрибут `icon` в XML (если задан) |
-
----
+- `CityEditRedesignContractTest`;
+- `GeolocationEditFormsContractTest`;
+- `ScreenViewIntegrityTest` — ожидается `8/8 PASS`;
+- `buildScssThemes`;
+- `clean assemble`;
+- local deploy `/hrm/` и visual smoke на 1920×1080 и 1366×768.
 
 ## История изменений
 
 | Дата | Изменение |
-|------|-----------|
-| 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
-| 2026-06-26 | Business & Context Intro (Living Documentation standard) |
-| 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |
+|---|---|
+| 2026-08-05 | Применён отдельный редизайн CityEdit: два логических раздела, синхронная label-навигация, active-state и контрактный тест |
+| 2026-07-28 | Форма приведена к общему двухпанельному контракту геолокационных Edit-экранов |
+| 2026-06-26 | Добавлены Business & Context Intro и первая версия UI-спецификации |
