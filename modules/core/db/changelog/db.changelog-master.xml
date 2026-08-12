@@ -28,4 +28,8 @@
     <include file="260729-1-addAccountingBotEntities.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- AI Control Plane: корпоративные credentials, функции и персональные per-function override. -->
+    <include file="260812-1-addAiFunctionControlPlane.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
