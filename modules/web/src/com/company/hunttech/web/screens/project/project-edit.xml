@@ -59,7 +59,7 @@
     <!-- Корневой layout: локальный namespace project-editor + общий контракт edit-screen-layout;
          слева sidebar 270px, справа workspace (toolbar + вкладки + footer). -->
     <layout stylename="project-editor"
-            expand="projectEditorWorkspace"
+            expand="projectEditorMainLayout"
             spacing="false">
         <hbox id="projectEditorMainLayout"
               stylename="edit-screen-layout"
@@ -392,7 +392,7 @@
                     <tab id="tabTemplateLetter"
                          caption="msg://msgTemplateLetter"
                          margin="true,true,true,true"
-                         expand="templateLetterBox"
+                         expand="projectTemplateCard"
                          spacing="true"
                          stylename="project-template-letter-tab">
                         <!-- Карточка шаблона сопроводительного письма: LOB-редактор,
