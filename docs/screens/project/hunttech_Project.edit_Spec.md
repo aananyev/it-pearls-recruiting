@@ -1,5 +1,7 @@
 # Project Edit (`hunttech_Project.edit`)
 
+> **ВНИМАНИЕ (2026-08-12):** форма отрефакторена по контракту Edit-форм (sidebar 270px, label-навигация «Разделы», карточки edit-card, полноэкранный модальный режим). Актуальная спецификация: [docs/ui/ProjectEdit_Spec.md](../../ui/ProjectEdit_Spec.md). Этот legacy-файл сохранён для истории.
+
 > Сущность: [Project.md](../../entities/project/Project.md)
 
 ---

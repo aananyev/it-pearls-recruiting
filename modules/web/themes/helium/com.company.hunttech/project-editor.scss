@@ -1,0 +1,290 @@
+/*
+ * Edit-форма проекта HRM HuntTech (ProjectEdit, hunttech_Project.edit) —
+ * локальный визуальный слой поверх общего контракта Edit-экранов.
+ *
+ * Общие edit-* и label-* stylename задаёт edit-screen-shared-styles (геометрия,
+ * светлые карточки и поля рабочей области). Этот partial добавляет фирменную
+ * тёмную sidebar 270px и каноническую label-навигацию по эталону IteractionListEdit
+ * (контракт §3.1/§4): hover — белый текст на rgba(255,255,255,.08),
+ * active — жёлтый #ffb11b на rgba(255,177,27,.12) с жёлтой левой границей,
+ * полоса-заголовок «Разделы» с inset-линиями (контракт §4.1).
+ *
+ * Все правила ограничены локальным namespace .project-editor
+ * и не затрагивают глобальные Vaadin-селекторы.
+ */
+@mixin project-editor-theme {
+  .project-editor {
+    // Фирменная тёмная sidebar 270px (контракт §4.2; для viewport ≤1366px shared
+    // ужимает до 250px): градиент, правая граница и внешняя тень отделяют её
+    // от рабочей области, как iteraction-list-sidebar эталона.
+    .edit-sidebar,
+    .v-slot-edit-sidebar {
+      box-sizing: border-box;
+      width: 270px !important;
+      min-width: 270px !important;
+      max-width: 270px !important;
+      background-color: #172638 !important;
+      background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%) !important;
+    }
+
+    .edit-sidebar {
+      padding: 14px 16px 12px !important;
+      border-right: 1px solid rgba(15, 23, 42, 0.78) !important;
+      box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18) !important;
+    }
+
+    // Тексты идентификации и подсказки в тёмной sidebar.
+    .edit-sidebar-subtitle,
+    .edit-sidebar-subtitle.v-label {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      margin: -4px 0 0 !important;
+      color: rgba(248, 250, 252, 0.72) !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      line-height: 17px !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+      text-align: center !important;
+      white-space: normal !important;
+    }
+
+    .edit-sidebar-title,
+    .edit-sidebar-title.v-label {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      margin: 2px 0 0 !important;
+      color: #ffb11b !important;
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      line-height: 24px !important;
+      text-align: center !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+    }
+
+    .edit-sidebar-hint,
+    .edit-sidebar-hint.v-label {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      color: rgba(248, 250, 252, 0.55) !important;
+      font-size: 12px !important;
+      line-height: 18px !important;
+      white-space: normal !important;
+    }
+
+    // Визуальный блок sidebar: без карточки-рамки, аватар логотипа стоит на фоне
+    // sidebar; блок центрирует круглый логотип 96×96 (PNG уже круглый после
+    // обработки логотипа) и пару кнопок «Загрузить»/«Очистить».
+    .edit-sidebar-visual {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 104px;
+      padding: 0 !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    // Круглый логотип проекта: border-radius 50% при object-fit FILL (PNG с
+    // прозрачностью), без рамки и тени.
+    .project-editor-logo-image,
+    .project-editor-logo-image.v-embedded {
+      box-sizing: border-box;
+      border-radius: 50% !important;
+      overflow: hidden !important;
+    }
+
+    // Пара кнопок загрузчика логотипа 96×36 — канон контракта §4.1: полупрозрачный
+    // белый фон, светлая рамка, скругление 5px, текст 14px/600; wrapper растянут
+    // на ширину блока, контейнер центрирует пару с зазором 10px.
+    .edit-sidebar-visual .c-fileupload-wrapper {
+      box-sizing: border-box;
+      display: block !important;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .edit-sidebar-visual .c-fileupload-container {
+      box-sizing: border-box;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 10px;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    .edit-sidebar-visual .c-fileupload .v-button,
+    .edit-sidebar-visual .c-fileupload-clear {
+      box-sizing: border-box;
+      width: 96px !important;
+      min-width: 96px !important;
+      max-width: 96px !important;
+      min-height: 36px !important;
+      height: 36px !important;
+      padding: 0 8px !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+      border: 1px solid rgba(255, 255, 255, 0.34) !important;
+      border-radius: 5px !important;
+      color: #f8fafc !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      line-height: 34px !important;
+      box-shadow: none !important;
+    }
+
+    .edit-sidebar-visual .c-fileupload .v-button:hover,
+    .edit-sidebar-visual .c-fileupload-clear:hover {
+      background: rgba(255, 255, 255, 0.12) !important;
+      border-color: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    // Полоса-заголовок набора навигации «Разделы» (контракт §4.1): две inset-линии,
+    // разделитель снизу, жёлтый текст 15px/700 на полупрозрачной полосе.
+    .label-nav-title.project-editor-navigation-title,
+    .label-nav-title.project-editor-navigation-title.v-label {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 36px !important;
+      padding: 7px 11px !important;
+      margin: 0 0 8px !important;
+      background: rgba(255, 255, 255, 0.045) !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+      box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
+        rgba(244, 244, 244, 1) 0 -1px 0 0 inset !important;
+      color: #ffb11b !important;
+      font-size: 15px !important;
+      font-weight: 700 !important;
+      line-height: 21px !important;
+      text-transform: none !important;
+      letter-spacing: normal !important;
+      white-space: normal !important;
+    }
+
+    // Пункты навигации: 27px/13px/600 (эталон IteractionListEdit), левая граница
+    // 3px — маркер активного пункта; :before halo-темы отключён, иначе текст
+    // выталкивается вниз относительно маркера.
+    .label-nav-item,
+    .v-button-label-nav-item {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      min-height: 27px !important;
+      height: 27px !important;
+      max-height: 27px !important;
+      padding: 3px 10px !important;
+      color: rgba(248, 250, 252, 0.82) !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      line-height: 20px !important;
+      text-align: left !important;
+      background: transparent !important;
+      border: 0 !important;
+      border-left: 3px solid transparent !important;
+      border-radius: 0 5px 5px 0 !important;
+      box-shadow: none !important;
+      align-items: center !important;
+    }
+
+    .label-nav-item:before,
+    .v-button-label-nav-item:before {
+      display: none !important;
+      content: none !important;
+    }
+
+    .v-button-label-nav-item .v-button-wrap {
+      box-sizing: border-box;
+      display: flex !important;
+      align-items: center !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+    }
+
+    .label-nav-item .v-button-caption,
+    .v-button-label-nav-item .v-button-caption {
+      display: block;
+      width: 100% !important;
+      white-space: normal !important;
+    }
+
+    .label-nav-item:hover,
+    .v-button-label-nav-item:hover,
+    .label-nav-item:focus,
+    .v-button-label-nav-item:focus {
+      color: #ffffff !important;
+      background: rgba(255, 255, 255, 0.08) !important;
+      outline: 0;
+    }
+
+    .label-nav-item-active,
+    .v-button-label-nav-item-active {
+      color: #ffb11b !important;
+      background: rgba(255, 177, 27, 0.12) !important;
+      border-left-color: #ffb11b !important;
+    }
+
+    // Заголовок и описание toolbar: 20px/700 + 12px/18px — эталон IteractionListEdit.
+    .edit-toolbar-title,
+    .edit-toolbar-title.v-label {
+      font-size: 20px !important;
+      line-height: 27px !important;
+    }
+
+    .edit-toolbar-description,
+    .edit-toolbar-description.v-label {
+      line-height: 18px !important;
+      color: mix($v-font-color, $v-panel-background-color, 60%) !important;
+    }
+
+    // Вкладки проекта: каноническая высота строки 48px (контракт §5.3).
+    .edit-tabs .v-tabsheet-tabitemcell,
+    .edit-tabs .v-tabsheet-tabitem {
+      min-height: 48px !important;
+    }
+
+    // Нижняя панель действий: отступы 11px 20px, кнопки 14px/600 высотой 40px
+    // и верхняя тень — эталон IteractionListEdit.
+    .edit-footer-actions {
+      padding: 11px 20px !important;
+      min-height: 62px !important;
+      border-top: 1px solid rgba($v-font-color, 0.16) !important;
+      box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.04) !important;
+    }
+
+    .edit-footer-actions .v-button {
+      box-sizing: border-box;
+      min-height: 40px !important;
+      padding: 0 18px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      line-height: 38px !important;
+      border-radius: 4px !important;
+    }
+
+    .edit-footer-actions .v-button:hover {
+      filter: brightness(0.98);
+    }
+
+    .project-editor-primary-action {
+      color: #ffffff !important;
+      background: $v-selection-color !important;
+      border-color: $v-selection-color !important;
+    }
+
+    .project-editor-secondary-action {
+      color: $v-font-color !important;
+      background: transparent !important;
+      border-color: rgba($v-font-color, 0.55) !important;
+    }
+  }
+}

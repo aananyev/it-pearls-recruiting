@@ -8,6 +8,7 @@ import com.company.hunttech.entity.Project;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
+import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.Dialogs;
@@ -18,8 +19,10 @@ import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @UiController("hunttech_Project.edit")
 @UiDescriptor("project-edit.xml")
@@ -100,6 +103,8 @@ public class ProjectEdit extends StandardEditor<Project> {
     @Inject
     private Events events;
     @Inject
+    private Messages messages;
+    @Inject
     private TextField<String> generalChatTextField;
     @Inject
     private TextField<String> chatForCVTextField;
@@ -109,6 +114,22 @@ public class ProjectEdit extends StandardEditor<Project> {
     private Link chatForCVLink;
     @Inject
     private TabSheet projectTab;
+
+    // Presentation-контракт sidebar (контракт Edit-форм): контейнер label-навигации
+    // и пункты навигации карточек вкладки «Проект»; активное состояние и видимость
+    // управляются presentation-only методами ниже.
+    @Inject
+    private VBoxLayout projectEditorSidebarNavigation;
+    @Inject
+    private Label projectSidebarTitle;
+    @Inject
+    private Button projectEditorNavMain;
+    @Inject
+    private Button projectEditorNavChats;
+
+    /** Вкладки, на которых sidebar-навигация «Разделы» видима (правило контракта §3.6). */
+    private static final Set<String> TABS_WITH_SIDEBAR_NAVIGATION =
+            Collections.singleton("tabProject");
 
     private boolean projectDescriptionLoaded;
     private boolean templateLetterLoaded;
@@ -360,5 +381,63 @@ public class ProjectEdit extends StandardEditor<Project> {
     }
 
     public void gotoGeneralChat() {
+    }
+
+    // ===== Presentation-only: sidebar-навигация «Разделы» (контракт Edit-форм) =====
+
+    @Subscribe
+    public void onBeforeShowSidebar(BeforeShowEvent event) {
+        // Динамический title sidebar: наименование проекта, иначе общий заголовок формы.
+        if (getEditedEntity().getProjectName() != null) {
+            projectSidebarTitle.setValue(getEditedEntity().getProjectName());
+        } else {
+            projectSidebarTitle.setValue(messages.getMessage(getClass(), "browseCaption"));
+        }
+    }
+
+    @Subscribe("projectEditorNavMain")
+    public void onProjectEditorNavMainClick(Button.ClickEvent event) {
+        setNavigationActive(projectEditorNavMain);
+        projectNameField.focus();
+    }
+
+    @Subscribe("projectEditorNavChats")
+    public void onProjectEditorNavChatsClick(Button.ClickEvent event) {
+        setNavigationActive(projectEditorNavChats);
+        generalChatTextField.focus();
+    }
+
+    @Subscribe("projectTab")
+    public void onProjectTabSelectedTabChangeNav(TabSheet.SelectedTabChangeEvent event) {
+        // Отдельный обработчик смены вкладки: синхронизирует видимость и активный
+        // пункт sidebar-навигации; бизнес-логика ленивой загрузки — в основном методе.
+        TabSheet.Tab selected = event.getSelectedTab();
+        updateNavigationVisibility(selected);
+        updateActiveNavigation(selected);
+    }
+
+    private void updateNavigationVisibility(TabSheet.Tab selectedTab) {
+        boolean visible = selectedTab != null
+                && TABS_WITH_SIDEBAR_NAVIGATION.contains(selectedTab.getName());
+        projectEditorSidebarNavigation.setVisible(visible);
+    }
+
+    private void updateActiveNavigation(TabSheet.Tab selectedTab) {
+        if (selectedTab == null) {
+            return;
+        }
+        if ("tabProject".equals(selectedTab.getName())) {
+            setNavigationActive(projectEditorNavMain);
+        }
+    }
+
+    private void resetNavigationActiveStyles() {
+        projectEditorNavMain.removeStyleName("label-nav-item-active");
+        projectEditorNavChats.removeStyleName("label-nav-item-active");
+    }
+
+    private void setNavigationActive(Button activeButton) {
+        resetNavigationActiveStyles();
+        activeButton.addStyleName("label-nav-item-active");
     }
 }

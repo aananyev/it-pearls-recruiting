@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`hunttech_Project.browse`, `hunttech_Project.edit`; FK в `OpenPosition`, фильтры browse вакансий. UI Spec: [browse](../../screens/project/hunttech_Project.browse_Spec.md), [edit](../../screens/project/hunttech_Project.edit_Spec.md).
+`hunttech_Project.browse`, `hunttech_Project.edit`; FK в `OpenPosition`, фильтры browse вакансий. UI Spec: [browse](../../screens/project/hunttech_Project.browse_Spec.md), [edit — канон](../../ui/ProjectEdit_Spec.md), [edit — legacy](../../screens/project/hunttech_Project.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -148,6 +148,7 @@ HSQL получил обычные составные аналоги этих и
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-12 | ProjectEdit отрефакторена по контракту Edit-форм: sidebar 270px (визуал логотипа 96×96, identity, label-навигация «Разделы», spacer, hint), workspace (toolbar, tabSheet edit-tabs, карточки edit-card, footer), presentation-only Java-навигация; канонический UI Spec — `docs/ui/ProjectEdit_Spec.md`, контрактный тест `ProjectEditLayoutContractTest`, detached-тест `ProjectDetachedObjectTest` |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-23 | Fix ProjectEdit: `projectOpenPositionsDc` — standalone loader вместо `property="openPosition"`; lazy load по вкладке «Вакансии» |
 | 2026-06-22 | Аудит Edit unfetched FK: `ProjectEdit` без каскадных обработчиков location; lazy LOB/collections через reload — OK |

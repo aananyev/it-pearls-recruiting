@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Окно редактирования проекта (hunttech_Project.edit): полноэкранный модальный редактор
+     по контракту Edit-форм — sidebar (визуал логотипа + идентификация + label-навигация
+     «Разделы») и workspace (toolbar + tabSheet + footer-действия). -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="msg://editorCaption"
         focusComponent="projectNameField"
         messagesPack="com.company.hunttech.web.screens.project" icon="ARCHIVE">
+    <!-- Контейнеры данных формы: главный экземпляр проекта (project-edit-view, LOB-поля
+         подгружаются лениво), открытые вакансии проекта (JPQL по projectName),
+         справочники родительских проектов, департаментов и владельцев. -->
     <data>
         <instance id="projectDc"
                   class="com.company.hunttech.entity.Project"
@@ -46,211 +52,390 @@
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="projectTab"
-            spacing="true">
-        <tabSheet id="projectTab"
-                  caption="msg://msgTabProject"
-                  stylename="framed">
-            <tab caption="msg://msgProjectName"
-                 margin="true,true,true,true"
-                 spacing="true"
-                 id="tabProject">
-                <hbox spacing="true"
+    <!-- Полноэкранный модальный режим диалога (контракт §5.3). -->
+    <dialogMode height="100%"
+                width="100%"
+                modal="true"/>
+    <!-- Корневой layout: локальный namespace project-editor + общий контракт edit-screen-layout;
+         слева sidebar 270px, справа workspace (toolbar + вкладки + footer). -->
+    <layout stylename="project-editor"
+            expand="projectEditorWorkspace"
+            spacing="false">
+        <hbox id="projectEditorMainLayout"
+              stylename="edit-screen-layout"
+              width="100%"
+              height="100%"
+              expand="projectEditorWorkspace"
+              spacing="false">
+            <!-- Sidebar проекта: визуальный блок (логотип + загрузка), идентификация,
+                 label-навигация «Разделы», spacer и подсказка. -->
+            <vbox id="projectEditorSidebar"
+                  stylename="edit-sidebar"
+                  width="270px"
+                  height="100%"
+                  spacing="true"
+                  expand="projectSidebarSpacer">
+                <!-- Визуальный блок: круглый логотип проекта 96×96 (или fallback no-company.png
+                     при отсутствии файла) и канонические кнопки «Загрузить»/«Очистить»;
+                     dropZone — сам блок, файл IMMEDIATE кладётся в projectLogo. -->
+                <vbox id="projectEditorSidebarVisual"
+                      stylename="edit-sidebar-visual"
                       width="100%"
-                      height="100%"
-                      expand="mainProjectVBox">
-                    <vbox id="mainProjectVBox" spacing="true">
-                        <checkBox id="checkBoxProjectIsClosed"
-                                  dataContainer="projectDc"
-                                  property="projectIsClosed"
-                                  caption="msg://msgProjectIsClosed"/>
-                        <checkBox id="defaultProjectCheckBox"
-                                  dataContainer="projectDc"
-                                  property="defaultProject"
-                                  caption="msg://msgDefault"/>
-                        <lookupPickerField id="highLevelProjectLookupPickerField"
-                                           dataContainer="projectDc"
-                                           property="projectTree"
-                                           caption="msg://msgProjectTree"
-                                           optionsContainer="projectTreeDc"
-                                           width="50%"/>
-                        <textField id="projectNameField"
-                                   dataContainer="projectDc"
-                                   property="projectName"
-                                   caption="msg://msgProjectName"
-                                   width="50%"
-                                   required="true"/>
-                        <hbox width="50%">
-                            <dateField id="startProjectDateField"
-                                       dataContainer="projectDc"
-                                       property="startProjectDate"
-                                       caption="msg://msgProjectStartDate"
-                                       width="AUTO"/>
-                            <dateField id="endProjectDateField"
-                                       dataContainer="projectDc"
-                                       property="endProjectDate"
-                                       caption="msg://msgProjectEndDate"
-                                       width="AUTO"/>
-                        </hbox>
-                        <lookupPickerField id="projectDepartmentField"
-                                           optionsContainer="projectDepartmentsDc"
-                                           dataContainer="projectDc"
-                                           property="projectDepartment"
-                                           required="true"
-                                           caption="msg://msgProjectDepartament"
-                                           width="50%">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <lookupPickerField id="projectOwnerField"
-                                           required="true"
-                                           optionsContainer="projectOwnersDc"
-                                           dataContainer="projectDc"
-                                           property="projectOwner"
-                                           caption="msg://msgProjectOwner"
-                                           width="50%">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <hbox spacing="true"
-                              width="100%"
-                              expand="generalChatTextField">
-                            <textField id="generalChatTextField"
-                                       dataContainer="projectDc"
-                                       property="generalChat"
-                                       caption="msg://msgGeneralChat"
-                                       description="msg://msgGeneralChatDescription"
-                                       width="100%"
-                                       inputPrompt="msg://msgChatImputPrompt"/>
-                            <link id="generalChatLink"
-                                  icon="font-icon:FILE_WORD_O"
-                                  align="BOTTOM_LEFT"
-                                  target="_blank"
-                                  width="AUTO"
-                                  caption="msg://msgGoTo"
-                                  description="msg://msgGoTo"/>
-                        </hbox>
-                        <hbox spacing="true"
-                              expand="chatForCVTextField"
-                              width="100%">
-                            <textField id="chatForCVTextField"
-                                       dataContainer="projectDc"
-                                       property="chatForCV"
-                                       caption="msg://msgChatForCV"
-                                       description="msg://msgChatForCVDescription"
-                                       width="100%"
-                                       inputPrompt="msg://msgChatImputPrompt"/>
-                            <link id="chatForCVLink"
-                                  icon="font-icon:FILE_WORD_O"
-                                  align="BOTTOM_LEFT"
-                                  target="_blank"
-                                  width="AUTO"
-                                  caption="msg://msgGoTo"
-                                  description="msg://msgGoTo"/>
-                        </hbox>
+                      spacing="true"
+                      align="MIDDLE_CENTER">
+                    <vbox id="projectLogoPicBox"
+                          width="96px"
+                          height="96px"
+                          spacing="false"
+                          align="MIDDLE_CENTER">
+                        <image id="projectLogoFileImage"
+                               dataContainer="projectDc"
+                               property="projectLogo"
+                               width="96px"
+                               height="96px"
+                               visible="true"
+                               align="MIDDLE_CENTER"
+                               stylename="project-editor-logo-image"
+                               scaleMode="FILL"/>
+                        <image id="projectDefaultLogoFileImage"
+                               width="96px"
+                               height="96px"
+                               visible="false"
+                               align="MIDDLE_CENTER"
+                               stylename="project-editor-logo-image"
+                               scaleMode="FILL">
+                            <theme path="icons/no-company.png"/>
+                        </image>
                     </vbox>
-                    <vbox id="dropZone"
-                          spacing="true"
-                          width="200px"
-                          height="266px"
-                          align="TOP_RIGHT"
-                          expand="picVBox"
-                          stylename="dropzone-container">
-                        <vbox id="picVBox">
-                            <image id="projectLogoFileImage"
-                                   dataContainer="projectDc"
-                                   property="projectLogo"
-                                   width="100%"
-                                   visible="true"
-                                   align="TOP_RIGHT"
-                                   height="100%"
-                                   stylename="widget-border"
-                                   scaleMode="FILL"/>
-                            <image id="projectDefaultLogoFileImage"
-                                   width="100%"
-                                   visible="false"
-                                   align="TOP_RIGHT"
-                                   height="100%"
-                                   stylename="widget-border"
-                                   scaleMode="FILL">
-                                <theme path="icons/no-company.png"/>
-                            </image>
-                        </vbox>
-                        <upload id="projectLogoFileUpload"
-                                fileStoragePutMode="IMMEDIATE"
-                                dataContainer="projectDc"
-                                align="BOTTOM_CENTER"
-                                showFileName="false"
-                                dropZone="dropZone"
-                                showClearButton="true"
-                                property="projectLogo"/>
+                    <upload id="projectLogoFileUpload"
+                            fileStoragePutMode="IMMEDIATE"
+                            dataContainer="projectDc"
+                            align="MIDDLE_CENTER"
+                            showFileName="false"
+                            dropZone="projectEditorSidebarVisual"
+                            showClearButton="true"
+                            property="projectLogo"/>
+                </vbox>
+                <!-- Идентификация: наименование проекта (динамическое) и роль «Проект». -->
+                <vbox id="projectEditorSidebarIdentity"
+                      stylename="edit-sidebar-identity"
+                      width="100%"
+                      spacing="false">
+                    <label id="projectSidebarTitle"
+                           stylename="edit-sidebar-title"
+                           width="100%"
+                           value="msg://browseCaption"/>
+                    <label id="projectSidebarSubtitle"
+                           stylename="edit-sidebar-subtitle"
+                           width="100%"
+                           value="msg://msgProjectSidebarSubtitle"/>
+                </vbox>
+                <!-- Label-навигация «Разделы»: полоса-заголовок по контракту §4.1 и пункты
+                     карточек вкладки «Проект»; активный пункт управляется контроллером. -->
+                <vbox id="projectEditorSidebarNavigation"
+                      stylename="label-navigation"
+                      width="100%"
+                      spacing="false">
+                    <label value="Разделы"
+                           stylename="label-nav-title project-editor-navigation-title"/>
+                    <button id="projectEditorNavMain"
+                            stylename="label-nav-item label-nav-item-active"
+                            caption="msg://msgProjectMainSection"
+                            width="100%"/>
+                    <button id="projectEditorNavChats"
+                            stylename="label-nav-item"
+                            caption="msg://msgProjectChatSection"
+                            width="100%"/>
+                </vbox>
+                <!-- Spacer отделяет навигацию от нижней подсказки (expand в sidebar). -->
+                <vbox id="projectSidebarSpacer"
+                      stylename="edit-sidebar-spacer"
+                      width="100%"
+                      height="100%"/>
+                <!-- Подсказка о назначении формы в нижней части sidebar. -->
+                <label id="projectSidebarHint"
+                       stylename="edit-sidebar-hint"
+                       width="100%"
+                       value="msg://msgProjectSidebarHint"/>
+            </vbox>
+            <!-- Workspace: toolbar с заголовком, вкладки проекта (ленивая загрузка LOB
+                 и вакансий) и footer-действия ОК/Отмена в правом нижнем углу. -->
+            <vbox id="projectEditorWorkspace"
+                  stylename="edit-workspace"
+                  width="100%"
+                  height="100%"
+                  spacing="false"
+                  expand="projectTab">
+                <!-- Toolbar: заголовок «Проект» и краткое описание назначения формы. -->
+                <hbox id="projectEditorToolbar"
+                      stylename="edit-toolbar"
+                      width="100%"
+                      spacing="false">
+                    <vbox id="projectEditorToolbarTitleBox"
+                          width="100%"
+                          spacing="false">
+                        <label id="projectEditorToolbarTitle"
+                               stylename="edit-toolbar-title"
+                               value="msg://browseCaption"/>
+                        <label id="projectEditorToolbarDescription"
+                               stylename="edit-toolbar-description"
+                               value="msg://msgProjectToolbarDescription"/>
                     </vbox>
                 </hbox>
-            </tab>
-            <tab id="tabProjectDescription"
-                 margin="true,true,true,true"
-                 spacing="true"
-                 expand="projectDescriptionRichTextArea"
-                 caption="msg://msgProjectDescription">
-                <richTextArea id="projectDescriptionRichTextArea"
-                              dataContainer="projectDc"
-                              property="projectDescription"
-                              width="100%"
-                              height="AUTO"
-                              caption="msg://msgProjectDescription"/>
-            </tab>
-            <tab id="tabVacansy"
-                 margin="true,true,true,true"
-                 spacing="true"
-                 expand="projectOpenPositionTable"
-                 caption="msg://msgTabVacancy">
-                <dataGrid id="projectOpenPositionTable"
-                          height="250px" width="100%"
-                          dataContainer="projectOpenPositionsDc">
-                    <columns>
-                        <column id="openClose"
-                                property="openClose"
-                                width="35px"/>
-                        <column id="vacansyName"
-                                property="vacansyName"/>
-                        <column id="numberPosition"
-                                property="numberPosition"/>
-                        <column id="positionType"
-                                caption="msg://msgNumberPosition"
-                                property="positionType"/>
-                        <column property="createTs" id="createTs">
-                            <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter"
-                                       format="dd.MM.yyyy"
-                                       useUserTimezone="true"/>
-                        </column>
-                    </columns>
-                </dataGrid>
-            </tab>
-            <tab id="tabTemplateLetter"
-                 caption="msg://msgTemplateLetter"
-                 margin="true,true,true,true"
-                 expand="templateLetterBox"
-                 spacing="true">
-                <vbox id="templateLetterBox"
-                      width="100%"
-                      height="100%"
-                      expand="templateLetterRichTextArea">
-                    <richTextArea id="templateLetterRichTextArea"
-                                  dataContainer="projectDc"
-                                  property="templateLetter"
+                <!-- Вкладки проекта: «Проект» (карточки основных данных и чатов),
+                     «Описание проекта» (LOB), «Вакансии» (dataGrid), «Информация в
+                     сопроводительном письме» (LOB); имена вкладок — контракт ленивой
+                     загрузки контроллера. -->
+                <tabSheet id="projectTab"
+                          stylename="edit-tabs"
+                          width="100%"
+                          height="100%">
+                    <tab id="tabProject"
+                         caption="msg://msgProjectName"
+                         spacing="true"
+                         expand="projectTabScroll"
+                         stylename="project-main-tab">
+                        <!-- Прокручиваемый контент вкладки: две контрактные карточки
+                             (edit-card + showAsPanel) — «Основные данные» и «Чаты». -->
+                        <scrollBox id="projectTabScroll"
+                                   width="100%"
+                                   height="100%"
+                                   orientation="vertical"
+                                   scrollBars="vertical"
+                                   stylename="edit-workspace edit-workspace-scroll">
+                            <vbox id="projectTabContent"
                                   width="100%"
-                                  height="AUTO"
-                                  required="false"/>
-                </vbox>
-            </tab>
-        </tabSheet>
-        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
-            <button action="windowCommitAndClose"/>
-            <button action="windowClose"/>
+                                  spacing="true"
+                                  stylename="edit-workspace-content">
+                                <!-- Карточка «Основные данные»: реквизиты проекта —
+                                     закрыт, по умолчанию, родительский проект, наименование,
+                                     даты старта/окончания, департамент, владелец. -->
+                                <groupBox id="projectMainCard"
+                                          stylename="edit-card"
+                                          showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          width="100%">
+                                    <vbox id="projectMainFieldsBox"
+                                          width="100%"
+                                          spacing="true">
+                                        <checkBox id="checkBoxProjectIsClosed"
+                                                  dataContainer="projectDc"
+                                                  property="projectIsClosed"
+                                                  caption="msg://msgProjectIsClosed"/>
+                                        <checkBox id="defaultProjectCheckBox"
+                                                  dataContainer="projectDc"
+                                                  property="defaultProject"
+                                                  caption="msg://msgDefault"/>
+                                        <lookupPickerField id="highLevelProjectLookupPickerField"
+                                                           dataContainer="projectDc"
+                                                           property="projectTree"
+                                                           caption="msg://msgProjectTree"
+                                                           optionsContainer="projectTreeDc"
+                                                           stylename="edit-form-control"
+                                                           width="50%"/>
+                                        <textField id="projectNameField"
+                                                   dataContainer="projectDc"
+                                                   property="projectName"
+                                                   caption="msg://msgProjectName"
+                                                   stylename="edit-form-control"
+                                                   width="50%"
+                                                   required="true"/>
+                                        <hbox width="50%" spacing="true">
+                                            <dateField id="startProjectDateField"
+                                                       dataContainer="projectDc"
+                                                       property="startProjectDate"
+                                                       caption="msg://msgProjectStartDate"
+                                                       stylename="edit-form-control"
+                                                       width="AUTO"/>
+                                            <dateField id="endProjectDateField"
+                                                       dataContainer="projectDc"
+                                                       property="endProjectDate"
+                                                       caption="msg://msgProjectEndDate"
+                                                       stylename="edit-form-control"
+                                                       width="AUTO"/>
+                                        </hbox>
+                                        <lookupPickerField id="projectDepartmentField"
+                                                           optionsContainer="projectDepartmentsDc"
+                                                           dataContainer="projectDc"
+                                                           property="projectDepartment"
+                                                           required="true"
+                                                           caption="msg://msgProjectDepartament"
+                                                           stylename="edit-form-control"
+                                                           width="50%">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                        <lookupPickerField id="projectOwnerField"
+                                                           required="true"
+                                                           optionsContainer="projectOwnersDc"
+                                                           dataContainer="projectDc"
+                                                           property="projectOwner"
+                                                           caption="msg://msgProjectOwner"
+                                                           stylename="edit-form-control"
+                                                           width="50%">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                    </vbox>
+                                </groupBox>
+                                <!-- Карточка «Чаты»: ссылки на чат с заказчиком и чат для
+                                     резюме; текстовое поле (expand) + кнопка-ссылка. -->
+                                <groupBox id="projectChatCard"
+                                          stylename="edit-card"
+                                          showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          width="100%">
+                                    <vbox id="projectChatFieldsBox"
+                                          width="100%"
+                                          spacing="true">
+                                        <hbox spacing="true"
+                                              width="100%"
+                                              expand="generalChatTextField">
+                                            <textField id="generalChatTextField"
+                                                       dataContainer="projectDc"
+                                                       property="generalChat"
+                                                       caption="msg://msgGeneralChat"
+                                                       description="msg://msgGeneralChatDescription"
+                                                       stylename="edit-form-control"
+                                                       width="100%"
+                                                       inputPrompt="msg://msgChatImputPrompt"/>
+                                            <link id="generalChatLink"
+                                                  icon="font-icon:FILE_WORD_O"
+                                                  align="BOTTOM_LEFT"
+                                                  target="_blank"
+                                                  width="AUTO"
+                                                  caption="msg://msgGoTo"
+                                                  description="msg://msgGoTo"/>
+                                        </hbox>
+                                        <hbox spacing="true"
+                                              expand="chatForCVTextField"
+                                              width="100%">
+                                            <textField id="chatForCVTextField"
+                                                       dataContainer="projectDc"
+                                                       property="chatForCV"
+                                                       caption="msg://msgChatForCV"
+                                                       description="msg://msgChatForCVDescription"
+                                                       stylename="edit-form-control"
+                                                       width="100%"
+                                                       inputPrompt="msg://msgChatImputPrompt"/>
+                                            <link id="chatForCVLink"
+                                                  icon="font-icon:FILE_WORD_O"
+                                                  align="BOTTOM_LEFT"
+                                                  target="_blank"
+                                                  width="AUTO"
+                                                  caption="msg://msgGoTo"
+                                                  description="msg://msgGoTo"/>
+                                        </hbox>
+                                    </vbox>
+                                </groupBox>
+                            </vbox>
+                        </scrollBox>
+                    </tab>
+                    <tab id="tabProjectDescription"
+                         caption="msg://msgProjectDescription"
+                         spacing="true"
+                         expand="projectDescriptionCard"
+                         stylename="project-description-tab">
+                        <!-- Карточка описания проекта: LOB-редактор, подгружается лениво
+                             при первом открытии вкладки (контроллер). -->
+                        <groupBox id="projectDescriptionCard"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%">
+                            <richTextArea id="projectDescriptionRichTextArea"
+                                          dataContainer="projectDc"
+                                          property="projectDescription"
+                                          width="100%"
+                                          height="100%"
+                                          stylename="edit-form-control"
+                                          caption="msg://msgProjectDescription"/>
+                        </groupBox>
+                    </tab>
+                    <tab id="tabVacansy"
+                         caption="msg://msgTabVacancy"
+                         spacing="true"
+                         expand="projectVacancyCard"
+                         stylename="project-vacancy-tab">
+                        <!-- Карточка вакансий проекта: dataGrid открытых позиций, загрузка
+                             выполняется при первом открытии вкладки (JPQL-параметр project). -->
+                        <groupBox id="projectVacancyCard"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%">
+                            <dataGrid id="projectOpenPositionTable"
+                                      height="250px" width="100%"
+                                      dataContainer="projectOpenPositionsDc">
+                                <columns>
+                                    <column id="openClose"
+                                            property="openClose"
+                                            width="35px"/>
+                                    <column id="vacansyName"
+                                            property="vacansyName"/>
+                                    <column id="numberPosition"
+                                            property="numberPosition"/>
+                                    <column id="positionType"
+                                            caption="msg://msgNumberPosition"
+                                            property="positionType"/>
+                                    <column property="createTs" id="createTs">
+                                        <formatter class="com.haulmont.cuba.gui.components.formatters.DateFormatter"
+                                                   format="dd.MM.yyyy"
+                                                   useUserTimezone="true"/>
+                                    </column>
+                                </columns>
+                            </dataGrid>
+                        </groupBox>
+                    </tab>
+                    <tab id="tabTemplateLetter"
+                         caption="msg://msgTemplateLetter"
+                         margin="true,true,true,true"
+                         expand="templateLetterBox"
+                         spacing="true"
+                         stylename="project-template-letter-tab">
+                        <!-- Карточка шаблона сопроводительного письма: LOB-редактор,
+                             подгружается лениво при первом открытии вкладки. -->
+                        <groupBox id="projectTemplateCard"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%">
+                            <vbox id="templateLetterBox"
+                                  width="100%"
+                                  height="100%"
+                                  expand="templateLetterRichTextArea">
+                                <richTextArea id="templateLetterRichTextArea"
+                                              dataContainer="projectDc"
+                                              property="templateLetter"
+                                              width="100%"
+                                              height="100%"
+                                              stylename="edit-form-control"
+                                              required="false"/>
+                            </vbox>
+                        </groupBox>
+                    </tab>
+                </tabSheet>
+                <!-- Footer-действия: спейсер выталкивает пару ОК/Отмена к правому краю,
+                     кнопки получают канонические стили primary/secondary. -->
+                <hbox id="editActions"
+                      stylename="edit-footer-actions"
+                      width="100%"
+                      expand="bottomActionsSpacer"
+                      align="MIDDLE_RIGHT"
+                      spacing="false">
+                    <vbox id="bottomActionsSpacer"
+                          width="100%"
+                          height="1px"/>
+                    <hbox id="bottomActionsGroup"
+                          width="AUTO"
+                          align="MIDDLE_RIGHT"
+                          spacing="true">
+                        <button action="windowCommitAndClose" stylename="project-editor-primary-action"/>
+                        <button action="windowClose" stylename="project-editor-secondary-action"/>
+                    </hbox>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>
