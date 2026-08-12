@@ -4,4 +4,12 @@
 
     <!-- Annotation-based beans -->
     <context:component-scan base-package="com.company.hunttech,com.company.hunttech"/>
+
+    <!--
+      Переопределение платформенного Emailer (cuba_Emailer): HunttechEmailer наследует
+      Emailer и защищает очередь от «писем-сирот» (потерянный файл контента), которые
+      иначе навсегда застревают в статусе SENDING и засоряют лог NPE каждые
+      sendingTimeoutSec. Spring перекрывает бин с тем же id (allowBeanDefinitionOverriding).
+    -->
+    <bean id="cuba_Emailer" class="com.company.hunttech.app.HunttechEmailer"/>
 </beans>

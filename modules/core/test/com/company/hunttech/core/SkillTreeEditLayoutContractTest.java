@@ -169,12 +169,12 @@ public class SkillTreeEditLayoutContractTest {
         assertTrue(xml.contains("property=\"fileImageLogo\""));
         assertTrue(xml.contains("fileStoragePutMode=\"IMMEDIATE\""));
         assertTrue(xml.contains("showClearButton=\"true\""));
-        // Превью логотипа — круглый OvaFallbackImage по эталону JobCandidateEdit:
-        // овальная геометрия 176px и fallback-картинка при отсутствии файла.
+        // Превью логотипа — круглый OvaFallbackImage по эталону IteractionListEdit:
+        // овальная геометрия 96px и fallback-картинка при отсутствии файла.
         assertTrue("skillPic не ovaFallbackImage (круглый аватар)",
                 xml.contains("<ovaFallbackImage id=\"skillPic\""));
         assertTrue("нет ovalWidth/ovalHeight у skillPic",
-                xml.contains("ovalWidth=\"176px\"") && xml.contains("ovalHeight=\"176px\""));
+                xml.contains("ovalWidth=\"96px\"") && xml.contains("ovalHeight=\"96px\""));
         assertTrue("нет fallback-картинки no-programmer.jpeg у skillPic",
                 xml.contains("fallbackThemePath=\"icons/no-programmer.jpeg\""));
         assertTrue("нет локального класса круглого аватара skill-tree-logo-image",
@@ -222,6 +222,14 @@ public class SkillTreeEditLayoutContractTest {
         // Пункты навигации строго 27px (кнопки Vaadin без базовой высоты halo-темы).
         assertTrue("nav-кнопки не 27px", canon.contains("height: 27px !important"));
         assertTrue("nav-кнопки не центрированы", canon.contains("align-items: center !important"));
+        // halo-тема добавляет кнопке :before (vertical-align:middle), который при
+        // display:flex у wrap выталкивает текст вниз — подсветка на строку выше текста.
+        assertTrue("nav-кнопка не отключает :before halo-темы",
+                canon.contains(".label-nav-item:before"));
+        assertTrue(":before отключён не display:none",
+                canon.contains("display: none !important"));
+        assertTrue(":before отключён не content:none",
+                canon.contains("content: none !important"));
         // Заголовок toolbar 20px и описание 18px — эталон.
         assertTrue("toolbar title не 20px", canon.contains("font-size: 20px !important"));
         // Нижняя панель: отступы 11px 20px, кнопки 14px/600 высотой 40px, primary/secondary.
@@ -235,14 +243,15 @@ public class SkillTreeEditLayoutContractTest {
                 canon.contains("rgba(255, 255, 255, 1) 0 1px 0 0 inset"));
         assertTrue("Нет разделителя полосы-заголовка (border-bottom)",
                 canon.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14)"));
-        // Визуальный блок sidebar: круглый аватар 96px по эталону OvaFallbackImage.
+        // Визуальный блок sidebar: круглый аватар 96px по эталону IteractionListEdit —
+        // чистый круг без рамки/тени (в отличие от 176px candidatePic JobCandidateEdit).
         assertTrue("Нет блока .edit-sidebar-visual", canon.contains(".edit-sidebar-visual"));
         assertTrue("Нет круглой геометрии .skill-tree-logo-image",
                 canon.contains(".skill-tree-logo-image"));
         assertTrue("Нет border-radius 50% у аватара",
                 canon.contains("border-radius: 50% !important"));
-        assertTrue("Нет рамки аватара (border 3px white)",
-                canon.contains("border: 3px solid rgba(255, 255, 255, 0.90)"));
+        assertTrue("Аватар сохранил рамку 3px (эталон — чистый круг)",
+                !canon.contains("border: 3px solid rgba(255, 255, 255, 0.90)"));
         // Правые карточки по эталону.
         assertTrue("Нет карточек .edit-card с радиусом 8px", canon.contains("border-radius: 8px"));
         assertTrue("Нет полей 38px (.edit-card .v-textfield)",
