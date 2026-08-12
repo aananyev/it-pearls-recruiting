@@ -98,19 +98,19 @@
       border-radius: 0 !important;
     }
 
-    // Круглый аватар логотипа навыка: геометрия 96px (как аватар кандидата
-    // в эталоне IteractionListEdit), border-radius 50%, object-fit contain —
+    // Круглый аватар логотипа навыка: геометрия 176px (как candidatePic
+    // в эталоне JobCandidateEdit), border-radius 50%, object-fit contain —
     // чистый круг без рамки и тени (контракт §4.1 визуального блока sidebar).
     .skill-tree-logo-image,
     .skill-tree-logo-image img,
     .skill-tree-logo-image .v-image-element {
       box-sizing: border-box;
-      width: 96px !important;
-      height: 96px !important;
-      min-width: 96px !important;
-      min-height: 96px !important;
-      max-width: 96px !important;
-      max-height: 96px !important;
+      width: 176px !important;
+      height: 176px !important;
+      min-width: 176px !important;
+      min-height: 176px !important;
+      max-width: 176px !important;
+      max-height: 176px !important;
       border-radius: 50% !important;
       object-fit: contain !important;
     }

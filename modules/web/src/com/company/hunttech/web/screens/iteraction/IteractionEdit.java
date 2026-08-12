@@ -137,11 +137,6 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     private Button checkTraceNav;
 
     private static final String ACTIVE_NAV_STYLE = "label-nav-item-active";
-    // Вкладки с двумя и более блоками ввода показывают sidebar-навигацию;
-    // на вкладках с единственным блоком контейнер label-navigation скрывается целиком (правило 3.6).
-    private static final List<String> TABS_WITH_SIDEBAR_NAVIGATION =
-            Arrays.asList("tabType", "tabSigns", "outstaffingTab", "tabSetup", "checkTrace");
-
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         if (signEndCaseCheckBox.getValue() == null) {
@@ -206,7 +201,7 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     /**
      * Строит sidebar-навигацию по вкладкам: клик переключает TabSheet и помечает
      * активный пункт (presentation-only; loaders, commit и данные не затрагиваются).
-     * На вкладках с единственным блоком ввода контейнер label-navigation скрывается (правило 3.6).
+     * Навигация видна на всех вкладках формы.
      */
     private void initTabNavigation() {
         typeTabNav.addClickListener(e -> switchToTab("tabType", typeTabNav));
@@ -222,7 +217,6 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
             TabSheet.Tab selected = event.getSelectedTab();
             if (selected != null && selected.getName() != null) {
                 updateActiveNavigation(selected.getName());
-                updateNavigationVisibility(selected.getName());
             }
         });
 
@@ -230,13 +224,11 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
         String initialName = initialTab != null && initialTab.getName() != null
                 ? initialTab.getName() : "tabType";
         updateActiveNavigation(initialName);
-        updateNavigationVisibility(initialName);
     }
 
     private void switchToTab(String tabName, Button activeButton) {
         tabSheet.setSelectedTab(tabName);
         updateActiveNavigation(tabName);
-        updateNavigationVisibility(tabName);
     }
 
     private void updateActiveNavigation(String tabName) {
@@ -273,12 +265,9 @@ public class IteractionEdit extends StandardEditor<Iteraction> {
     }
 
     /**
-     * Правило 3.6: на вкладке с единственным блоком ввода контейнер label-navigation
-     * (заголовок и пункты) скрывается целиком; на вкладках с двумя и более блоками — показывается.
+     * Правило 3.6 контракта ранее скрывало label-navigation на одноблочных вкладках;
+     * по решению 2026-08-11 навигация видна на всех вкладках, метод удалён.
      */
-    private void updateNavigationVisibility(String tabName) {
-        iteractionNavigation.setVisible(TABS_WITH_SIDEBAR_NAVIGATION.contains(tabName));
-    }
 
     private void addNotificationWhenSend() {
         mapWhenSendMessage.put("На момент создания", 1);

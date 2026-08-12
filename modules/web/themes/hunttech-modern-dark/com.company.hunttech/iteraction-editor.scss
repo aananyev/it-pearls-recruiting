@@ -34,7 +34,15 @@
     }
 
     // Фирменная тёмная sidebar HRM HuntTech 1:1 с эталоном IteractionListEdit.
-    // Ширину (270px / 250px <=1366px) даёт общий слой edit-sidebar.
+    // Локальная ширина 312px (как у эталона) — иначе общий edit-sidebar (270px)
+    // сдвигает workspace; ширина slot должна совпадать с шириной sidebar.
+    .v-slot-iteraction-sidebar {
+      box-sizing: border-box;
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
+    }
+
     .v-slot-iteraction-sidebar,
     .iteraction-sidebar {
       background-color: #172638 !important;
@@ -42,6 +50,9 @@
     }
 
     .iteraction-sidebar {
+      width: 312px !important;
+      min-width: 312px !important;
+      max-width: 312px !important;
       height: 100% !important;
       padding: 14px 12px;
       color: #f8fafc !important;
@@ -252,7 +263,9 @@
 
     // Карточки groupBox рендерятся как v-panel (showAsPanel): заголовок 17px/700/50px
     // (те же значения, что у общего edit-accordion-section).
-    .iteraction-editor .edit-card .v-panel-caption {
+    // Заголовки карточек-панелей — 17px/700/50px (эталон), без повторного префикса
+    // (Vaadin-компилятор scoping иначе создаёт дубль .iteraction-editor).
+    .edit-card .v-panel-caption {
       box-sizing: border-box;
       display: block !important;
       min-height: 50px;
@@ -265,7 +278,7 @@
       border-bottom: 1px solid rgba($v-font-color, 0.15);
     }
 
-    .iteraction-editor .edit-card .v-panel-content {
+    .edit-card .v-panel-content {
       box-sizing: border-box;
       height: auto !important;
       min-height: 0 !important;
@@ -276,34 +289,53 @@
     }
 
     // Вложенные подкарточки (колонки уведомлений) — компактный заголовок 15px/42px.
-    .iteraction-editor .iteraction-editor-subcard .v-panel-caption {
+    .iteraction-editor-subcard .v-panel-caption {
       min-height: 42px;
       padding: 9px 14px;
       font-size: 15px !important;
       line-height: 23px !important;
     }
 
-    .iteraction-editor .iteraction-editor-subcard .v-panel-content {
+    .iteraction-editor-subcard .v-panel-content {
       padding: 12px 14px 14px !important;
     }
 
     // Подписи полей и фокус в карточках — общий вид Edit-экранов HRM HuntTech.
-    .iteraction-editor .edit-card .v-caption .v-captiontext {
+    .edit-card .v-caption .v-captiontext {
       color: mix($v-font-color, $v-panel-background-color, 72%) !important;
       font-size: 13px !important;
       font-weight: 600 !important;
     }
 
-    .iteraction-editor .edit-card .v-textfield:focus,
-    .iteraction-editor .edit-card .v-filterselect-focus,
-    .iteraction-editor .edit-card .v-datefield-focus .v-datefield-textfield {
+    // Чекбоксы и радио внутри карточек — 1:1 с эталоном (14px, mix 78%).
+    .edit-card .v-checkbox {
+      padding: 3px 0;
+    }
+
+    .edit-card .v-checkbox label,
+    .edit-card .v-select-optiongroup label {
+      color: mix($v-font-color, $v-panel-background-color, 78%) !important;
+      font-size: 14px !important;
+      line-height: 1.4 !important;
+    }
+
+    // Readonly-поля в карточках — серый фон, как в эталоне.
+    .edit-card .v-textfield-readonly,
+    .edit-card .v-filterselect-readonly,
+    .edit-card .v-readonly {
+      background: mix($v-app-background-color, $v-panel-background-color, 62%) !important;
+    }
+
+    .edit-card .v-textfield:focus,
+    .edit-card .v-filterselect-focus,
+    .edit-card .v-datefield-focus .v-datefield-textfield {
       border-color: $v-selection-color !important;
       box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
       outline: 0;
     }
 
-    .iteraction-editor .edit-card .v-filterselect-button,
-    .iteraction-editor .edit-card .c-pickerfield-layout .v-button {
+    .edit-card .v-filterselect-button,
+    .edit-card .c-pickerfield-layout .v-button {
       min-width: 38px;
       min-height: 38px;
     }

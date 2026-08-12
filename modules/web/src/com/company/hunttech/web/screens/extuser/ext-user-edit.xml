@@ -33,8 +33,8 @@
             <vbox id="profilePanel" width="270px" height="100%" spacing="true" expand="profilePanelSpacer" stylename="edit-sidebar">
                 <!-- Визуальный блок сохраняет upload/drop-zone и стабильный размер фотографии пользователя. -->
                 <vbox id="dropZone" spacing="true" width="100%" align="TOP_CENTER" stylename="dropzone-container edit-sidebar-visual">
-                    <!-- OvaFallbackImage читает userDs.officialPhoto и показывает fallback при отсутствии файла (эталон IteractionListEdit). -->
-                    <ovaFallbackImage id="userPic" width="180px" height="180px" ovalWidth="180px" ovalHeight="180px" align="MIDDLE_CENTER" scaleMode="SCALE_DOWN" datasource="userDs" property="officialPhoto" fallbackThemePath="icons/no-programmer.jpeg" stylename="ext-user-editor-avatar"/>
+                    <!-- OvaFallbackImage читает userDs.officialPhoto и показывает fallback при отсутствии файла (размер 176×176 — эталон JobCandidateEdit). -->
+                    <ovaFallbackImage id="userPic" width="176px" height="176px" ovalWidth="176px" ovalHeight="176px" align="MIDDLE_CENTER" scaleMode="SCALE_DOWN" datasource="userDs" property="officialPhoto" fallbackThemePath="icons/no-programmer.jpeg" stylename="ext-user-editor-avatar"/>
                     <!-- Upload сохраняет прежние datasource/property и immediate file-storage contract. -->
                     <upload id="officialPhotoUpload" fileStoragePutMode="IMMEDIATE" datasource="userDs" align="BOTTOM_CENTER" showFileName="false" dropZone="dropZone" showClearButton="true" property="officialPhoto"/>
                 </vbox>
