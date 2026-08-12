@@ -67,7 +67,7 @@ SkillTreeBrowse (дерево компетенций)
 
 - `onInit` → вешается слушатель изменения текста «Навык» (предложение ссылки Wiki) и заполняются варианты приоритета (`setOptionsSkillPriorityField`, значения из `StandartPrioritySkills`).
 - `onBeforeShow` → флаг `notParsing` приводится к `false` для новой записи и для записи с пустым значением.
-- `onAfterShow` → если логотип (`fileImageLogo`) не задан — `applyFallback()` показывает fallback-аватар `icons/no-programmer.jpeg` (эталон JobCandidateEdit); если логотип ещё не задан, а описание есть и непустое — превью берётся из первой картинки HTML-описания (`setLogo`). Пустое описание не вызывает парсинг Wiki — у новой записи остаётся fallback-аватар.
+- `onAfterShow` → если логотип (`fileImageLogo`) не задан — `applyFallback()` показывает fallback-аватар `icons/no-programmer.jpeg` (эталон IteractionListEdit); если логотип ещё не задан, а описание есть и непустое — превью берётся из первой картинки HTML-описания (`setLogo`). Пустое описание не вызывает парсинг Wiki — у новой записи остаётся fallback-аватар.
 
 ### 4.2 Скрытые вычисления (без явного клика)
 
@@ -99,9 +99,9 @@ window skill-tree-editor (100%×100%, modal)
 └─ layout (expand=skillTreeMainLayout)
    └─ hbox skillTreeMainLayout (edit-screen-layout)
       ├─ vbox skillTreeSidebar (edit-sidebar, 312px, тёмная #172638→#0f1b28, padding 14px 16px 12px)
-      │   ├─ visual (edit-sidebar-visual, прозрачный): круглый ovaFallbackImage skillPic (логотип 176px, border-radius 50%, fallback no-programmer.jpeg) + upload fileImageSkillUpload (dropZone; кнопки «Загрузить»/«Очистить» — пара 96×36, полупрозрачный белый фон, центрирована)
+      │   ├─ visual (edit-sidebar-visual, прозрачный): круглый ovaFallbackImage skillPic (логотип 96×96, border-radius 50%, чистый круг без рамки — эталон IteractionListEdit, fallback no-programmer.jpeg) + upload fileImageSkillUpload (dropZone; кнопки «Загрузить»/«Очистить» — пара 96×36, полупрозрачный белый фон, центрирована)
       │   ├─ identity (edit-sidebar-identity): title skillTreeSidebarTitle (skillName, жёлтый #ffb11b 18px) СВЕРХУ + subtitle «Навык» (12px/400) СНИЗУ
-      │   ├─ label-navigation: заголовок-полоса «Разделы» (skill-tree-navigation-title, 36px, #ffb11b, inset-линии) + 2 пункта (27px/13px/600, active #ffb11b)
+      │   ├─ label-navigation: заголовок-полоса «Разделы» (skill-tree-navigation-title, 36px, #ffb11b, inset-линии) + 2 пункта (27px/13px/600, active #ffb11b; :before halo-темы отключён display:none/content:none — текст центрирован, подсветка не смещается на строку выше)
       │   ├─ spacer (edit-sidebar-spacer)
       │   └─ hint (edit-sidebar-hint): подсказка о роли навыка
       └─ vbox skillTreeWorkspace (edit-workspace)
@@ -113,7 +113,7 @@ window skill-tree-editor (100%×100%, modal)
           │       │   ├─ row2: skillTreeField (50%, edit-form-control) + specialisationField (50%, edit-form-control)
           │       │   └─ row3 (expand=wikiPateField): wikiPateField (edit-form-control) + styleHighlightingField (240px, edit-form-control) + parseWikiText
           │       └─ groupBox skillTreeDescriptionSection (edit-card, showAsPanel, «Описание навыка», caption 13px/600)
-          │           └─ richTextArea skillCommentRichTextArea (property comment, 280px)
+          │           └─ richTextArea skillCommentRichTextArea (property comment, stylename skill-description-rich-text: высота calc(100vh − 230px), min-height 320px — почти на весь экран)
           └─ footer editActions (edit-footer-actions, 11px 20px): skillTreeActionsSpacer (expand) + skillTreeActionsGroup (AUTO, MIDDLE_RIGHT: windowCommitAndClose + windowClose)
 ```
 
@@ -130,6 +130,10 @@ window skill-tree-editor (100%×100%, modal)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-12 | `ovaFallbackImage skillPic`: набор и порядок характеристик XML приведены 1:1 к `candidateImage` эталона IteractionListEdit (размер 96×96, `visible="true"`, порядок атрибутов, `fallbackThemePath`/`align`/`scaleMode`) — размер совпадал и ранее (96×96), правка формальная. |
+| 2026-08-12 | Исправлено смещение подсветки label-навигации: halo-тема добавляет nav-кнопке `:before` (inline-block, vertical-align:middle), который при `display:flex` у `.v-button-wrap` выталкивает текст вниз («выделение на строку выше текста») — псевдоэлемент отключён `.label-nav-item:before/.v-button-label-nav-item:before { display:none; content:none }` во всех 7 темах; контрактный тест дополнен тремя проверками; CDP: текст по центру кнопки (delta=0). |
+| 2026-08-12 | `richTextArea` «Описание навыка» расширена по вертикали до высоты экрана: вместо фикс. `height="280px"` — stylename `skill-description-rich-text` с высотой `calc(100vh − 230px)` и `min-height: 320px` (все 7 тем); обновлены §6 и комментарий XML. |
+| 2026-08-12 | Аватар `skillPic` приведён к виду блока визуала эталона IteractionListEdit: геометрия 176px → 96×96 (XML `width/height/ovalWidth/ovalHeight` + SCSS `.skill-tree-logo-image` во всех 7 темах), убрана рамка 3px rgba(255,255,255,.90), фон и тень — чистый круг border-radius 50% как `candidateImage` эталона; контрактный тест обновлён (`ovalWidth/ovalHeight=96px`, проверка отсутствия рамки) |
 | 2026-08-12 | Кнопки «Загрузить»/«Очистить» загрузчика логотипа приведены к канону тёмного sidebar (эталон JobCandidateEdit): пара 96×36, полупрозрачный белый фон `rgba(255,255,255,.06)`, рамка `rgba(255,255,255,.34)`, скругление 5px, светлый текст 14px/600 `#f8fafc`, центрирование flex'ом (`.c-fileupload-wrapper` растянут на ширину визуального блока) — вместо дефолтных белых Vaadin-кнопок; SCSS во всех 7 темах (sha256-идентичны); контрактный тест дополнен методом `uploadButtonsFollowCanonicalDarkSidebarStyle` |
 | 2026-08-12 | Приведение к эталону IteractionListEdit, финальная доводка: аватар `skillPic` 96px → 176px (как candidatePic в JobCandidateEdit/CandidateCVEdit, SCSS `.skill-tree-logo-image` во всех 7 темах), пейкеры row2 (`skillTreeField`, `specialisationField`) — слот/обёртка/компонент явно 50%/100%/100% (эффективная 50/50 вместо 25%; убран `stylename=edit-form-control`, shared `width:100%!important` отменён локально), ряд 4 (чекбокс «Не участвовать в парсинге» + spacer + кнопка «Загрузить описание»), расширенные поля «Навык»/«Wiki» (expand больше не съедается чекбоксом и кнопкой), sidebar без сдвига (16,14) — padding только на `.edit-sidebar`, не на слоте |
 | 2026-08-12 | Доводка до эталона IteractionListEdit: spacer sidebar `skillTreeSidebarSpacer` 100%×100%, контент рабочей области `stylename="edit-workspace-content skill-tree-content"` (отступы 8px 20px 24px как `iteractionListSections`), footer-композиция «expand-спейсер + группа AUTO/MIDDLE_RIGHT» (`skillTreeActionsGroup`), caption карточек 13px/600; контрактный тест расширен методом `visualContractFollowsIteractionListEditReference` |
