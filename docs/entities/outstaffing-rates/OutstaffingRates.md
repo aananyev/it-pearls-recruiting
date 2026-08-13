@@ -63,7 +63,7 @@
 ## 4. Экраны
 
 - `hunttech_OutstaffingRates.browse` — `outstaffing-rates-browse.xml` / `OutstaffingRatesBrowse.java` (`StandardLookup<OutstaffingRates>`), колонки: rate, minSalary, maxSalary, maxIESalary, currency, comment; readOnly data; create/edit/remove.
-- `hunttech_OutstaffingRates.edit` — `outstaffing-rates-edit.xml` / `OutstaffingRatesEdit.java`: поля rate, minSalary, maxSalary, maxIESalary, currency (lookup), comment.
+- `hunttech_OutstaffingRates.edit` — `outstaffing-rates-edit.xml` / `OutstaffingRatesEdit.java`: поля rate, minSalary, maxSalary, maxIESalary, currency (lookup), comment; двухпанельная композиция серии Dictionary (sidebar 270px + карточки «Ставки»/«Комментарий»), view `outstaffingRates-view`, JPQL валют `select e from hunttech_Currency e`; с 13.08.2026 — presentation-навигация `focusRatesSection`/`focusCommentSection`.
 
 ## 5. Бизнес-логика (триггеры БД)
 
@@ -85,4 +85,5 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-13 | Edit-форма приведена к контракту серии справочных Edit-форм (см. `docs/ui/OutstaffingRatesEdit_Spec.md` и `docs/ui/DictionaryEditForms_Spec.md`): двухпанельная композиция, presentation-навигация; сущность, view и триггеры БД не изменялись |
 | 2026-07-31 | Миграция 260731-1: колонки маржинальности, триггер пересчёта, аудит-таблица и триггеры; шкала расширена до 6000; min_salary = FLOOR(max × 0.5 / 100) × 100; ступень 3400 восстановлена |

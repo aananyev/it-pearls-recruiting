@@ -1,71 +1,168 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Edit-экран справочника «Тип социальной сети»: двухпанельная композиция по общему контракту
+     Edit-экранов HRM HuntTech. Сохраняет исходный data binding (socialNetworkTypeDc),
+     загрузку логотипа (logo) и actions. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
+        focusComponent="socialNetworkField"
         messagesPack="com.company.hunttech.web.screens.socialnetworktype">
+    <!-- Секция данных: корневой контейнер типа социальной сети. -->
     <data>
+        <!-- Корневой контейнер типа соцсети; view socialNetworkType-view включает логотип. -->
         <instance id="socialNetworkTypeDc"
                   class="com.company.hunttech.entity.SocialNetworkType"
                   view="socialNetworkType-view">
+            <!-- Загрузчик контейнера с явно пустым id редактируемой записи. -->
             <loader id="socialNetworkTypeDl" entityId=""/>
         </instance>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="editHBox" spacing="true" width="100%" height="100%">
-        <hbox id="editHBox" spacing="true" width="100%" height="100%" expand="form">
-            <form id="form" dataContainer="socialNetworkTypeDc">
-                <column width="400px">
-                    <textField id="socialNetworkField"
-                               property="socialNetwork"
-                               required="true"/>
-                    <textField id="socialNetworkURLField"
-                               property="socialNetworkURL"
-                               required="true"/>
-                    <textField id="commentField"
-                               property="comment"/>
-                </column>
-            </form>
-            <vbox id="dropZone"
+    <!-- Режим диалога: полноэкранный модальный редактор справочника. -->
+    <dialogMode height="100%" width="100%" modal="true"/>
+    <!-- Корневой layout формы: локальный namespace social-network-type-editor + общий контракт Edit-экранов. -->
+    <layout stylename="social-network-type-editor"
+            expand="mainLayout"
+            spacing="false"
+            width="100%"
+            height="100%">
+        <!-- Двухпанельная композиция: постоянная sidebar слева и рабочая область справа. -->
+        <hbox id="mainLayout"
+              stylename="edit-screen-layout"
+              expand="workspace"
+              spacing="false"
+              width="100%"
+              height="100%">
+            <!-- Левая контекстная панель 270px: логотип, идентификация, навигация и подсказка. -->
+            <vbox id="sidebar"
+                  stylename="edit-sidebar"
+                  width="270px"
+                  height="100%"
                   spacing="true"
-                  width="200px"
-                  height="266px"
-                  align="TOP_RIGHT"
-                  expand="picVBox"
-                  stylename="dropzone-container">
-                <vbox id="picVBox">
-                    <image id="snLogoFileImage"
-                           dataContainer="socialNetworkTypeDc"
-                           property="logo"
-                           width="100%"
-                           visible="true"
-                           align="TOP_RIGHT"
-                           height="100%"
-                           stylename="widget-border"
-                           scaleMode="FILL"/>
-                    <image id="snDefaultLogoFileImage"
-                           width="100%"
-                           visible="false"
-                           align="TOP_RIGHT"
-                           height="100%"
-                           stylename="widget-border"
-                           scaleMode="FILL">
-                        <theme path="icons/no-company.png"/>
-                    </image>
+                  expand="sidebarSpacer">
+                <!-- Визуальный блок sidebar: круглый логотип соцсети с загрузкой файла. -->
+                <vbox id="visual"
+                      stylename="edit-sidebar-visual"
+                      width="100%"
+                      spacing="true"
+                      align="MIDDLE_CENTER">
+                    <!-- Круглый аватар логотипа соцсети: 176×176 как candidatePic JobCandidateEdit;
+                         fallback — логотип HRM HuntTech; при отсутствии файла показывает fallback. -->
+                    <ovaFallbackImage id="snLogo"
+                                      dataContainer="socialNetworkTypeDc"
+                                      property="logo"
+                                      width="176px"
+                                      height="176px"
+                                      ovalWidth="176px"
+                                      ovalHeight="176px"
+                                      visible="true"
+                                      align="MIDDLE_CENTER"
+                                      scaleMode="SCALE_DOWN"
+                                      fallbackThemePath="icons/hunttech-logo.png"
+                                      stylename="dictionary-logo-image"/>
+                    <!-- Загрузка логотипа: файл сразу кладётся в logo (IMMEDIATE), перетаскивание на блок визуала. -->
+                    <upload id="snLogoFileUpload"
+                            fileStoragePutMode="IMMEDIATE"
+                            dataContainer="socialNetworkTypeDc"
+                            align="BOTTOM_CENTER"
+                            showFileName="false"
+                            dropZone="visual"
+                            showClearButton="true"
+                            property="logo"/>
                 </vbox>
-                <upload id="snLogoFileUpload"
-                        fileStoragePutMode="IMMEDIATE"
-                        dataContainer="socialNetworkTypeDc"
-                        align="BOTTOM_CENTER"
-                        showFileName="false"
-                        dropZone="dropZone"
-                        showClearButton="true"
-                        property="logo"/>
+                <!-- Блок идентификации: тип записи и название соцсети из контейнера. -->
+                <vbox id="identity"
+                      stylename="edit-sidebar-identity"
+                      width="100%"
+                      spacing="true">
+                    <!-- Подпись типа записи. -->
+                    <label value="Социальная сеть"
+                           stylename="edit-sidebar-subtitle"
+                           width="100%"/>
+                    <!-- Название соцсети (свойство socialNetwork), живое из socialNetworkTypeDc. -->
+                    <label id="sidebarTitle"
+                           dataContainer="socialNetworkTypeDc"
+                           property="socialNetwork"
+                           stylename="edit-sidebar-title"
+                           width="100%"/>
+                </vbox>
+                <!-- Вертикальная label-навигация по разделам формы (фокус, без изменения данных). -->
+                <vbox id="navigation"
+                      stylename="label-navigation"
+                      width="100%"
+                      spacing="false">
+                    <!-- Заголовок навигационного блока: полоса-заголовок с двумя inset-линиями (контракт §4.1). -->
+                    <label value="Разделы"
+                           stylename="label-nav-title dictionary-navigation-title"
+                           width="100%"/>
+                    <!-- Пункт «Основные данные» — активен по умолчанию, фокусирует первое поле. -->
+                    <button id="mainNav"
+                            caption="Основные данные"
+                            stylename="borderless label-nav-item label-nav-item-active"
+                            width="100%"
+                            invoke="focusMainSection"/>
+                </vbox>
+                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar. -->
+                <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
+                <!-- Нейтральная подсказка о роли справочника в HRM HuntTech. -->
+                <label value="Тип социальной сети задаёт название, URL и логотип для контактов кандидатов в HRM HuntTech."
+                       stylename="edit-sidebar-hint"
+                       width="100%"/>
             </vbox>
-        </hbox>
-        <hbox id="editActions" spacing="true" width="AUTO" height="AUTO" align="BOTTOM_RIGHT">
-            <button action="windowCommitAndClose"/>
-            <button action="windowClose"/>
+            <!-- Правая рабочая область: toolbar, прокручиваемые секции и footer-actions. -->
+            <vbox id="workspace"
+                  stylename="edit-workspace"
+                  expand="workspaceScroll"
+                  width="100%"
+                  height="100%"
+                  spacing="false">
+                <!-- Toolbar с заголовком карточки и пояснением. -->
+                <hbox id="toolbar"
+                      stylename="edit-toolbar"
+                      width="100%"
+                      spacing="true">
+                    <!-- Текстовый блок toolbar: заголовок и описание. -->
+                    <vbox id="toolbarText" width="100%" spacing="false">
+                        <label value="Карточка соцсети" stylename="edit-toolbar-title"/>
+                        <label value="Название, URL и логотип социальной сети" stylename="edit-toolbar-description"/>
+                    </vbox>
+                </hbox>
+                <!-- Прокручиваемая область контента рабочей области. -->
+                <scrollBox id="workspaceScroll"
+                           stylename="edit-workspace-scroll"
+                           width="100%"
+                           height="100%">
+                    <!-- Поток карточек рабочей области. -->
+                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
+                        <!-- Карточка «Основные данные»: реквизиты типа соцсети. -->
+                        <groupBox id="mainSection"
+                                  caption="Основные данные"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%"
+                                  spacing="true">
+                            <!-- Форма типа соцсети с полями, привязанными к socialNetworkTypeDc. -->
+                            <form id="form" dataContainer="socialNetworkTypeDc" width="100%">
+                                <column width="100%">
+                                    <!-- Название социальной сети (обязательное поле). -->
+                                    <textField id="socialNetworkField" property="socialNetwork" required="true" caption="msg://msgSocialNetwork" width="100%" stylename="edit-form-control"/>
+                                    <!-- Базовый URL социальной сети (обязательное поле). -->
+                                    <textField id="socialNetworkURLField" property="socialNetworkURL" required="true" caption="msg://msgSocialNetworkURL" width="100%" stylename="edit-form-control"/>
+                                    <!-- Произвольный комментарий к типу соцсети. -->
+                                    <textField id="commentField" property="comment" caption="msg://msgComment" width="100%" stylename="edit-form-control"/>
+                                </column>
+                            </form>
+                        </groupBox>
+                    </vbox>
+                </scrollBox>
+                <!-- Нижняя панель штатных действий: сохранить и отменить. -->
+                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
+                    <!-- Spacer прижимает кнопки к правому краю. -->
+                    <vbox id="actionsSpacer" width="100%"/>
+                    <!-- Сохранить и закрыть (штатный action editor-а). -->
+                    <button action="windowCommitAndClose"/>
+                    <!-- Отменить изменения и закрыть. -->
+                    <button action="windowClose"/>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>

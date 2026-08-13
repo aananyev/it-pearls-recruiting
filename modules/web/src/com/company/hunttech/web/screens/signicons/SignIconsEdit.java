@@ -4,10 +4,11 @@ import com.company.hunttech.core.ParseCVService;
 import com.company.hunttech.core.StarsAndOtherService;
 import com.company.hunttech.entity.ExtUser;
 import com.haulmont.cuba.gui.ScreenBuilders;
-import com.haulmont.cuba.gui.Screens;
+import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.ColorPicker;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.components.TextArea;
 import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
@@ -45,6 +46,12 @@ public class SignIconsEdit extends StandardEditor<SignIcons> {
     private ParseCVService parseCVService;
     @Inject
     private UserSession userSession;
+    @Inject
+    private TextArea<String> titleDescription;
+    @Inject
+    private Button iconNav;
+    @Inject
+    private Button descriptionNav;
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
@@ -115,5 +122,28 @@ public class SignIconsEdit extends StandardEditor<SignIcons> {
     @Subscribe
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         getEditedEntity().setUser((ExtUser) userSession.getUser());
+    }
+
+    /**
+     * Презентационная навигация: переводит фокус к первому полю карточки «Иконка»
+     * и подсвечивает активный пункт sidebar. Entity, loaders и lifecycle не затрагиваются.
+     */
+    public void focusIconSection() {
+        iconNameField.focus();
+        setActiveNavigation(iconNav, descriptionNav);
+    }
+
+    /**
+     * Презентационная навигация: переводит фокус к описанию признака
+     * и подсвечивает активный пункт sidebar. Entity, loaders и lifecycle не затрагиваются.
+     */
+    public void focusDescriptionSection() {
+        titleDescription.focus();
+        setActiveNavigation(descriptionNav, iconNav);
+    }
+
+    private void setActiveNavigation(Button activeButton, Button inactiveButton) {
+        activeButton.addStyleName("label-nav-item-active");
+        inactiveButton.removeStyleName("label-nav-item-active");
     }
 }

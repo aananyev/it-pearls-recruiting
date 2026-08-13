@@ -1,27 +1,157 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Edit-экран справочника «Валюты»: двухпанельная композиция по общему контракту
+     Edit-экранов HRM HuntTech. Сохраняет исходный data binding (currencyDc) и actions. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://currencyEdit.caption"
-        focusComponent="form"
+        focusComponent="currencyLongNameField"
         messagesPack="com.company.hunttech.web.screens.currency">
+    <!-- Секция данных: корневой контейнер валюты. -->
     <data>
+        <!-- Корневой контейнер валюты; view currency-view покрывает все поля формы. -->
         <instance id="currencyDc"
                   class="com.company.hunttech.entity.Currency">
-            <view extends="_local"/>
+            <!-- View контейнера: currency-view (локальные поля). -->
+            <view extends="currency-view"/>
+            <!-- Штатный загрузчик контейнера (берёт id из editor). -->
             <loader/>
         </instance>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="currencyDc">
-            <column width="350px">
-                <textField id="currencyLongNameField" property="currencyLongName"/>
-                <textField id="currencyShortNameField" property="currencyShortName"/>
-            </column>
-        </form>
-        <hbox id="editActions" spacing="true">
-            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
-            <button id="closeBtn" action="windowClose"/>
+    <!-- Режим диалога: полноэкранный модальный редактор справочника. -->
+    <dialogMode height="100%" width="100%" modal="true"/>
+    <!-- Корневой layout формы: локальный namespace currency-editor + общий контракт Edit-экранов. -->
+    <layout stylename="currency-editor"
+            expand="mainLayout"
+            spacing="false"
+            width="100%"
+            height="100%">
+        <!-- Двухпанельная композиция: постоянная sidebar слева и рабочая область справа. -->
+        <hbox id="mainLayout"
+              stylename="edit-screen-layout"
+              expand="workspace"
+              spacing="false"
+              width="100%"
+              height="100%">
+            <!-- Левая контекстная панель 270px: фирменный логотип, идентификация,
+                 label-навигация и подсказка (контракт §4.2). -->
+            <vbox id="sidebar"
+                  stylename="edit-sidebar"
+                  width="270px"
+                  height="100%"
+                  spacing="true"
+                  expand="sidebarSpacer">
+                <!-- Визуальный блок sidebar: штатная заглушка-логотип HRM HuntTech
+                     (круглый OvaFallbackImage 176×176 как candidatePic JobCandidateEdit). -->
+                <vbox id="visual"
+                      stylename="edit-sidebar-visual"
+                      width="100%"
+                      spacing="true"
+                      align="MIDDLE_CENTER">
+                    <!-- Круглый логотип компании по умолчанию: статичный fallback без
+                         привязки к данным (загрузка изображения формой не предусмотрена). -->
+                    <ovaFallbackImage id="currencyLogoImage"
+                                      width="176px"
+                                      height="176px"
+                                      ovalWidth="176px"
+                                      ovalHeight="176px"
+                                      visible="true"
+                                      align="MIDDLE_CENTER"
+                                      scaleMode="SCALE_DOWN"
+                                      fallbackThemePath="icons/hunttech-logo.png"
+                                      stylename="dictionary-logo-image"/>
+                </vbox>
+                <!-- Блок идентификации: тип записи и название валюты из контейнера. -->
+                <vbox id="identity"
+                      stylename="edit-sidebar-identity"
+                      width="100%"
+                      spacing="true">
+                    <!-- Подпись типа записи. -->
+                    <label value="Валюта"
+                           stylename="edit-sidebar-subtitle"
+                           width="100%"/>
+                    <!-- Полное название валюты (свойство currencyLongName), живое из currencyDc. -->
+                    <label id="sidebarTitle"
+                           dataContainer="currencyDc"
+                           property="currencyLongName"
+                           stylename="edit-sidebar-title"
+                           width="100%"/>
+                </vbox>
+                <!-- Вертикальная label-навигация по разделам формы (фокус, без изменения данных). -->
+                <vbox id="navigation"
+                      stylename="label-navigation"
+                      width="100%"
+                      spacing="false">
+                    <!-- Заголовок навигационного блока: полоса-заголовок с двумя inset-линиями (контракт §4.1). -->
+                    <label value="Разделы"
+                           stylename="label-nav-title dictionary-navigation-title"
+                           width="100%"/>
+                    <!-- Пункт «Основные данные» — активен по умолчанию, фокусирует первое поле. -->
+                    <button id="mainNav"
+                            caption="Основные данные"
+                            stylename="borderless label-nav-item label-nav-item-active"
+                            width="100%"
+                            invoke="focusMainSection"/>
+                </vbox>
+                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar. -->
+                <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
+                <!-- Нейтральная подсказка о роли справочника в HRM HuntTech. -->
+                <label value="Валюты используются в зарплатных вилках, ставках и финансовых расчётах HRM HuntTech."
+                       stylename="edit-sidebar-hint"
+                       width="100%"/>
+            </vbox>
+            <!-- Правая рабочая область: toolbar, прокручиваемые секции и footer-actions. -->
+            <vbox id="workspace"
+                  stylename="edit-workspace"
+                  expand="workspaceScroll"
+                  width="100%"
+                  height="100%"
+                  spacing="false">
+                <!-- Toolbar с заголовком карточки и пояснением. -->
+                <hbox id="toolbar"
+                      stylename="edit-toolbar"
+                      width="100%"
+                      spacing="true">
+                    <!-- Текстовый блок toolbar: заголовок и описание. -->
+                    <vbox id="toolbarText" width="100%" spacing="false">
+                        <label value="Карточка валюты" stylename="edit-toolbar-title"/>
+                        <label value="Полное и краткое наименование валюты" stylename="edit-toolbar-description"/>
+                    </vbox>
+                </hbox>
+                <!-- Прокручиваемая область контента рабочей области. -->
+                <scrollBox id="workspaceScroll"
+                           stylename="edit-workspace-scroll"
+                           width="100%"
+                           height="100%">
+                    <!-- Поток карточек рабочей области. -->
+                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
+                        <!-- Карточка «Основные данные»: реквизиты валюты. -->
+                        <groupBox id="mainSection"
+                                  caption="Основные данные"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%"
+                                  spacing="true">
+                            <!-- Форма валюты с полями, привязанными к currencyDc. -->
+                            <form id="form" dataContainer="currencyDc" width="100%">
+                                <column width="100%">
+                                    <!-- Полное наименование валюты (обязательное уникальное поле). -->
+                                    <textField id="currencyLongNameField" property="currencyLongName" caption="msg://msgCurrencyLongName" width="100%" stylename="edit-form-control"/>
+                                    <!-- Краткое наименование валюты (обязательное уникальное поле). -->
+                                    <textField id="currencyShortNameField" property="currencyShortName" caption="msg://msgCurrencyShortName" width="100%" stylename="edit-form-control"/>
+                                </column>
+                            </form>
+                        </groupBox>
+                    </vbox>
+                </scrollBox>
+                <!-- Нижняя панель штатных действий: сохранить и отменить. -->
+                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
+                    <!-- Spacer прижимает кнопки к правому краю. -->
+                    <vbox id="actionsSpacer" width="100%"/>
+                    <!-- Сохранить и закрыть (штатный action editor-а). -->
+                    <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+                    <!-- Отменить изменения и закрыть. -->
+                    <button id="closeBtn" action="windowClose"/>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>

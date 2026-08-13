@@ -14,6 +14,7 @@
 @import "com.company.hunttech/open-position-preview-sidebar-usability";
 @import "com.company.hunttech/recruiter-dashboard-shared-styles";
 @import "com.company.hunttech/geolocation-edit-forms";
+@import "com.company.hunttech/dictionary-edit-forms";
 @import "com.company.hunttech/vacancy-prompt-template-editor";
 @import "com.company.hunttech/ai-function-configuration-editor";
 @import "com.company.hunttech/admin-ai-configuration-editor";
@@ -46,6 +47,7 @@
   @include open-position-preview-sidebar-usability-theme;
   @include recruiter-dashboard-shared-styles;
   @include geolocation-edit-forms-theme;
+  @include dictionary-edit-forms-theme;
   @include vacancy-prompt-template-editor-theme;
   @include ai-function-configuration-editor-theme;
   @include admin-ai-configuration-editor-theme;

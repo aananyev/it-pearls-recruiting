@@ -1,40 +1,190 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Edit-экран справочника «Рейты по аутстафу»: двухпанельная композиция по общему
+     контракту Edit-экранов HRM HuntTech. Сохраняет исходный data binding
+     (outstaffingRatesDc), коллекцию валют (currenciesDc), JPQL и actions. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://outstaffingRatesEdit.caption"
-        focusComponent="form"
+        focusComponent="rateField"
         messagesPack="com.company.hunttech.web.screens.outstaffingrates">
+    <!-- Секция данных: корневой контейнер рейта и коллекция валют для picker-поля. -->
     <data>
+        <!-- Корневой контейнер рейта; view outstaffingRates-view включает FK currency. -->
         <instance id="outstaffingRatesDc"
                   class="com.company.hunttech.entity.OutstaffingRates">
-            <view extends="_local">
-                <property name="currency" view="_local"/>
-            </view>
+            <!-- View контейнера: локальные поля + FK currency. -->
+            <view extends="outstaffingRates-view"/>
+            <!-- Штатный загрузчик контейнера (берёт id из editor). -->
             <loader/>
         </instance>
-        <collection id="currenciesDc" class="com.company.hunttech.entity.Currency" view="_minimal">
+        <!-- Коллекция валют для picker-поля «Валюта» (минимальный view). -->
+        <collection id="currenciesDc" class="com.company.hunttech.entity.Currency" view="currency-view">
+            <!-- Загрузчик всех валют справочника. -->
             <loader id="currenciesDl">
+                <!-- Все валюты системы, порядок не важен. -->
                 <query>
                     <![CDATA[select e from hunttech_Currency e]]>
                 </query>
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="editActions" spacing="true">
-        <form id="form" dataContainer="outstaffingRatesDc">
-            <column width="350px">
-                <textField id="rateField" property="rate"/>
-                <textField id="minSalaryField" property="minSalary"/>
-                <textField id="maxSalaryField" property="maxSalary"/>
-                <textField id="maxIESalaryField" property="maxIESalary"/>
-                <lookupPickerField id="currencyField" optionsContainer="currenciesDc" property="currency"/>
-                <textArea id="commentField" property="comment" rows="5"/>
-            </column>
-        </form>
-        <hbox id="editActions" spacing="true">
-            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
-            <button id="closeBtn" action="windowClose"/>
+    <!-- Режим диалога: полноэкранный модальный редактор справочника. -->
+    <dialogMode height="100%" width="100%" modal="true"/>
+    <!-- Корневой layout формы: локальный namespace outstaffing-rates-editor + общий контракт Edit-экранов. -->
+    <layout stylename="outstaffing-rates-editor"
+            expand="mainLayout"
+            spacing="false"
+            width="100%"
+            height="100%">
+        <!-- Двухпанельная композиция: постоянная sidebar слева и рабочая область справа. -->
+        <hbox id="mainLayout"
+              stylename="edit-screen-layout"
+              expand="workspace"
+              spacing="false"
+              width="100%"
+              height="100%">
+            <!-- Левая контекстная панель 270px: фирменный логотип, идентификация,
+                 label-навигация и подсказка (контракт §4.2). -->
+            <vbox id="sidebar"
+                  stylename="edit-sidebar"
+                  width="270px"
+                  height="100%"
+                  spacing="true"
+                  expand="sidebarSpacer">
+                <!-- Визуальный блок sidebar: штатная заглушка-логотип HRM HuntTech
+                     (круглый OvaFallbackImage 176×176 как candidatePic JobCandidateEdit). -->
+                <vbox id="visual"
+                      stylename="edit-sidebar-visual"
+                      width="100%"
+                      spacing="true"
+                      align="MIDDLE_CENTER">
+                    <!-- Круглый логотип компании по умолчанию: статичный fallback без
+                         привязки к данным (загрузка изображения формой не предусмотрена). -->
+                    <ovaFallbackImage id="outstaffingRatesLogoImage"
+                                      width="176px"
+                                      height="176px"
+                                      ovalWidth="176px"
+                                      ovalHeight="176px"
+                                      visible="true"
+                                      align="MIDDLE_CENTER"
+                                      scaleMode="SCALE_DOWN"
+                                      fallbackThemePath="icons/hunttech-logo.png"
+                                      stylename="dictionary-logo-image"/>
+                </vbox>
+                <!-- Блок идентификации: тип записи и ставка из контейнера. -->
+                <vbox id="identity"
+                      stylename="edit-sidebar-identity"
+                      width="100%"
+                      spacing="true">
+                    <!-- Подпись типа записи. -->
+                    <label value="Рейт по аутстафу"
+                           stylename="edit-sidebar-subtitle"
+                           width="100%"/>
+                    <!-- Ставка (свойство rate), живая из outstaffingRatesDc. -->
+                    <label id="sidebarTitle"
+                           dataContainer="outstaffingRatesDc"
+                           property="rate"
+                           stylename="edit-sidebar-title"
+                           width="100%"/>
+                </vbox>
+                <!-- Вертикальная label-навигация по разделам формы (фокус, без изменения данных). -->
+                <vbox id="navigation"
+                      stylename="label-navigation"
+                      width="100%"
+                      spacing="false">
+                    <!-- Заголовок навигационного блока: полоса-заголовок с двумя inset-линиями (контракт §4.1). -->
+                    <label value="Разделы"
+                           stylename="label-nav-title dictionary-navigation-title"
+                           width="100%"/>
+                    <!-- Пункт «Ставки» — активен по умолчанию, фокусирует первое поле ставки. -->
+                    <button id="ratesNav"
+                            caption="Ставки"
+                            stylename="borderless label-nav-item label-nav-item-active"
+                            width="100%"
+                            invoke="focusRatesSection"/>
+                    <!-- Пункт «Комментарий» — фокусирует текстовую область комментария. -->
+                    <button id="commentNav"
+                            caption="Комментарий"
+                            stylename="borderless label-nav-item"
+                            width="100%"
+                            invoke="focusCommentSection"/>
+                </vbox>
+                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar. -->
+                <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
+                <!-- Нейтральная подсказка о роли справочника в HRM HuntTech. -->
+                <label value="Рейты по аутстафу задают ставки и зарплатные вилки ступеней тарифной шкалы HRM HuntTech."
+                       stylename="edit-sidebar-hint"
+                       width="100%"/>
+            </vbox>
+            <!-- Правая рабочая область: toolbar, прокручиваемые секции и footer-actions. -->
+            <vbox id="workspace"
+                  stylename="edit-workspace"
+                  expand="workspaceScroll"
+                  width="100%"
+                  height="100%"
+                  spacing="false">
+                <!-- Toolbar с заголовком карточки и пояснением. -->
+                <hbox id="toolbar"
+                      stylename="edit-toolbar"
+                      width="100%"
+                      spacing="true">
+                    <!-- Текстовый блок toolbar: заголовок и описание. -->
+                    <vbox id="toolbarText" width="100%" spacing="false">
+                        <label value="Карточка рейта" stylename="edit-toolbar-title"/>
+                        <label value="Ставка, зарплатные вилки и валюта ступени тарифной шкалы" stylename="edit-toolbar-description"/>
+                    </vbox>
+                </hbox>
+                <!-- Прокручиваемая область контента рабочей области. -->
+                <scrollBox id="workspaceScroll"
+                           stylename="edit-workspace-scroll"
+                           width="100%"
+                           height="100%">
+                    <!-- Поток карточек рабочей области. -->
+                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
+                        <!-- Карточка «Ставки»: денежные параметры ступени тарифной шкалы. -->
+                        <groupBox id="ratesSection"
+                                  caption="Ставки"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%"
+                                  spacing="true">
+                            <!-- Форма рейта с денежными полями, привязанными к outstaffingRatesDc. -->
+                            <form id="form" dataContainer="outstaffingRatesDc" width="100%">
+                                <column width="100%">
+                                    <!-- Ставка за час работы (обязательное поле, руб.). -->
+                                    <textField id="rateField" property="rate" caption="msg://msgRate" width="100%" stylename="edit-form-control"/>
+                                    <!-- Минимальная зарплата «на руки» по ТК. -->
+                                    <textField id="minSalaryField" property="minSalary" caption="msg://msgMinSalary" width="100%" stylename="edit-form-control"/>
+                                    <!-- Максимальная зарплата «на руки» по ТК. -->
+                                    <textField id="maxSalaryField" property="maxSalary" caption="msg://msgMaxSalary" width="100%" stylename="edit-form-control"/>
+                                    <!-- Максимальная выплата ИП. -->
+                                    <textField id="maxIESalaryField" property="maxIESalary" caption="msg://msgMaxIESalary" width="100%" stylename="edit-form-control"/>
+                                    <!-- Валюта ставки: picker из коллекции валют (обязательное поле). -->
+                                    <lookupPickerField id="currencyField" optionsContainer="currenciesDc" property="currency" caption="msg://msgCurrency" width="100%" stylename="edit-form-control"/>
+                                </column>
+                            </form>
+                        </groupBox>
+                        <!-- Карточка «Комментарий»: пояснение к ступени тарифной шкалы. -->
+                        <groupBox id="commentSection"
+                                  caption="Комментарий"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%"
+                                  spacing="true">
+                            <!-- Текстовая область комментария (LOB-поле), привязанная к outstaffingRatesDc. -->
+                            <textArea id="commentField" property="comment" caption="msg://msgComment" rows="5" width="100%" stylename="edit-form-control"/>
+                        </groupBox>
+                    </vbox>
+                </scrollBox>
+                <!-- Нижняя панель штатных действий: сохранить и отменить. -->
+                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
+                    <!-- Spacer прижимает кнопки к правому краю. -->
+                    <vbox id="actionsSpacer" width="100%"/>
+                    <!-- Сохранить и закрыть (штатный action editor-а). -->
+                    <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+                    <!-- Отменить изменения и закрыть. -->
+                    <button id="closeBtn" action="windowClose"/>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>

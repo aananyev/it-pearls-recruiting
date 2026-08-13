@@ -21,6 +21,7 @@
 | `ProjectEdit` | [ProjectEdit_Spec.md](ProjectEdit_Spec.md) | Проект (заказчик/группа вакансий): sidebar с логотипом и навигацией «Разделы», карточки-панели, ленивые вкладки LOB и вакансий |
 | `OutstaffingRatesBrowse` | [OutstaffingRatesBrowse_Spec.md](OutstaffingRatesBrowse_Spec.md) | Рейты по аутстафу — список ступеней шкалы (lookup, CRUD) |
 | `OutstaffingRatesEdit` | [OutstaffingRatesEdit_Spec.md](OutstaffingRatesEdit_Spec.md) | Рейты по аутстафу — форма ступени (commit → триггеры маржинальности и аудита) |
+| `FileTypeEdit` · `SocialNetworkTypeEdit` · `GradeEdit` · `CurrencyEdit` · `EmployeeWorkStatusEdit` · `SignIconsEdit` (+ `OutstaffingRatesEdit`) | [DictionaryEditForms_Spec.md](DictionaryEditForms_Spec.md) | Серия справочных Edit-форм: sidebar 270px, label-навигация с полосой-заголовком, штатная заглушка-логотип `OvaFallbackImage` 176×176 (у соцсети — реальный upload логотипа) |
 | `PositionEdit` | [PositionEdit_Spec.md](PositionEdit_Spec.md) | Справочник должностей — ru/en-наименования + LOB-описания (inline view контейнера, фикс UNFETCHED 2026-08-11) |
 | Halo Precision Components | [HaloPrecisionComponents_Spec.md](HaloPrecisionComponents_Spec.md) | Точное воспроизведение варианта 1 (светлый голубой) для Halo: namespace `ht-halo-precision-*`, метрики из референсов halo_variant1_*.png |
 | Modern Light Components (вариант 3) | [HRM_HuntTech_Modern_Light_Component_Style_Spec.md](HRM_HuntTech_Modern_Light_Component_Style_Spec.md) | Тёплый светло-серый деловой интерфейс hunttech-modern-light: DataGrid, Table, TreeTable, TextArea, RichTextArea |
@@ -250,6 +251,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-13 | Добавлена спецификация серии справочных Edit-форм [DictionaryEditForms_Spec.md](DictionaryEditForms_Spec.md) (FileType, SocialNetworkType, Grade, Currency, OutstaffingRates, EmployeeWorkStatus, SignIcons); обновлён OutstaffingRatesEdit_Spec под двухпанельную композицию |
 | 2026-08-01 | Добавлена спецификация изолированного `OpenPositionEditPreview` без замены legacy-экрана, menu/browse integration и изменения бизнес-логики. |
 | 2026-07-29 | Добавлена каноническая спецификация `ExtUserEdit`; экран сопоставлен общему `edit-*`/`label-*` UI API и семи темам. |
 | 2026-07-29 | Обновлена спецификация `JobCandidateEdit`: экран приведён к общим `edit-*`/`label-*` stylename и видимой sidebar-навигации с active-state |

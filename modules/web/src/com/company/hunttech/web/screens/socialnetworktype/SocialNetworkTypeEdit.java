@@ -1,10 +1,12 @@
 package com.company.hunttech.web.screens.socialnetworktype;
 
+import com.company.hunttech.entity.SocialNetworkType;
+import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.FileDescriptorResource;
 import com.haulmont.cuba.gui.components.FileUploadField;
-import com.haulmont.cuba.gui.components.Image;
+import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.hunttech.entity.SocialNetworkType;
+import com.hunttech.hrm.gui.components.OvaFallbackImage;
 
 import javax.inject.Inject;
 
@@ -14,41 +16,46 @@ import javax.inject.Inject;
 @LoadDataBeforeShow
 public class SocialNetworkTypeEdit extends StandardEditor<SocialNetworkType> {
     @Inject
-    private Image snLogoFileImage;
-    @Inject
-    private Image snDefaultLogoFileImage;
+    private OvaFallbackImage snLogo;
     @Inject
     private FileUploadField snLogoFileUpload;
+    @Inject
+    private TextField<String> socialNetworkField;
+    @Inject
+    private Button mainNav;
 
     @Subscribe("snLogoFileUpload")
     public void onSnLogoFileUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
         try {
-            snLogoFileImage.setVisible(true);
-            snDefaultLogoFileImage.setVisible(false);
-
             FileDescriptorResource fileDescriptorResource =
-                    snLogoFileImage.createResource(FileDescriptorResource.class)
-                            .setFileDescriptor(
-                                    snLogoFileUpload.getFileDescriptor());
+                    snLogo.createResource(FileDescriptorResource.class)
+                            .setFileDescriptor(snLogoFileUpload.getFileDescriptor());
 
-            snLogoFileImage.setSource(fileDescriptorResource);
+            snLogo.setSource(fileDescriptorResource);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }
 
     @Subscribe
-    public void onBeforeShow(BeforeShowEvent event) {
-        setSNPicImage();
+    public void onAfterShow(AfterShowEvent event) {
+        // Если логотип не задан — показать fallback-аватар OvaFallbackImage
+        // (эталон JobCandidateEdit: applyFallback при отсутствии файла).
+        if (getEditedEntity().getLogo() == null) {
+            snLogo.applyFallback();
+        }
     }
 
-    private void setSNPicImage() {
-        if (getEditedEntity().getLogo() == null) {
-            snDefaultLogoFileImage.setVisible(true);
-            snLogoFileImage.setVisible(false);
-        } else {
-            snDefaultLogoFileImage.setVisible(false);
-            snLogoFileImage.setVisible(true);
-        }
+    /**
+     * Презентационная навигация: переводит фокус к первому полю «Основных данных»
+     * и подсвечивает активный пункт sidebar. Entity, loaders и lifecycle не затрагиваются.
+     */
+    public void focusMainSection() {
+        socialNetworkField.focus();
+        setActiveNavigation(mainNav);
+    }
+
+    private void setActiveNavigation(Button activeButton) {
+        activeButton.addStyleName("label-nav-item-active");
     }
 }

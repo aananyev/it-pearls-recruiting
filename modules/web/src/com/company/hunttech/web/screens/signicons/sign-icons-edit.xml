@@ -1,50 +1,193 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Edit-экран справочника «Иконки признака»: двухпанельная композиция по общему
+     контракту Edit-экранов HRM HuntTech. Сохраняет исходный data binding
+     (signIconsDc), валидатор, invoke выбора иконки и обработчики контроллера. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://signIconsEdit.caption"
-        focusComponent="form"
+        focusComponent="iconNameField"
         messagesPack="com.company.hunttech.web.screens.signicons">
+    <!-- Секция данных: корневой контейнер иконки признака. -->
     <data>
+        <!-- Корневой контейнер иконки; view signIcons-view покрывает все поля формы. -->
         <instance id="signIconsDc"
                   class="com.company.hunttech.entity.SignIcons">
-            <view extends="_local"/>
+            <!-- View контейнера: signIcons-view (локальные поля). -->
+            <view extends="signIcons-view"/>
+            <!-- Штатный загрузчик контейнера (берёт id из editor). -->
             <loader/>
         </instance>
     </data>
-    <dialogMode height="800"
-                width="1000"/>
-    <layout expand="editActions" spacing="true">
-        <hbox spacing="true">
-            <label id="iconSampleLabel" visible="true" align="MIDDLE_CENTER" width="AUTO"/>
-            <label id="labelNameLabel" visible="true" align="MIDDLE_CENTER" width="AUTO"/>
-        </hbox>
-        <form id="form" dataContainer="signIconsDc">
-            <column width="350px">
-                <textField id="titleEndField"
-                           property="titleEnd"
-                           editable="false">
-                    <validator class="com.haulmont.cuba.gui.components.validators.StringValidator"/>
-                </textField>
-                <textField id="titleRuField"
-                           property="titleRu"/>
-                <hbox spacing="true"
-                      expand="iconNameField">
-                    <textField id="iconNameField"
-                               dataContainer="signIconsDc"
-                               align="MIDDLE_LEFT"
-                               property="iconName"/>
-                    <button id="selectIconButton"
-                            width="AUTO"
-                            align="MIDDLE_RIGHT"
-                            icon="FONTICONS"
-                            invoke="selectIconButtonInvoke"/>
+    <!-- Режим диалога: полноэкранный модальный редактор справочника. -->
+    <dialogMode height="100%" width="100%" modal="true"/>
+    <!-- Корневой layout формы: локальный namespace sign-icons-editor + общий контракт Edit-экранов. -->
+    <layout stylename="sign-icons-editor"
+            expand="mainLayout"
+            spacing="false"
+            width="100%"
+            height="100%">
+        <!-- Двухпанельная композиция: постоянная sidebar слева и рабочая область справа. -->
+        <hbox id="mainLayout"
+              stylename="edit-screen-layout"
+              expand="workspace"
+              spacing="false"
+              width="100%"
+              height="100%">
+            <!-- Левая контекстная панель 270px: фирменный логотип, идентификация,
+                 label-навигация и подсказка (контракт §4.2). -->
+            <vbox id="sidebar"
+                  stylename="edit-sidebar"
+                  width="270px"
+                  height="100%"
+                  spacing="true"
+                  expand="sidebarSpacer">
+                <!-- Визуальный блок sidebar: штатная заглушка-логотип HRM HuntTech
+                     (круглый OvaFallbackImage 176×176 как candidatePic JobCandidateEdit). -->
+                <vbox id="visual"
+                      stylename="edit-sidebar-visual"
+                      width="100%"
+                      spacing="true"
+                      align="MIDDLE_CENTER">
+                    <!-- Круглый логотип компании по умолчанию: статичный fallback без
+                         привязки к данным (загрузка изображения формой не предусмотрена —
+                         иконка признака задаётся font-символом, а не файлом). -->
+                    <ovaFallbackImage id="signIconsLogoImage"
+                                      width="176px"
+                                      height="176px"
+                                      ovalWidth="176px"
+                                      ovalHeight="176px"
+                                      visible="true"
+                                      align="MIDDLE_CENTER"
+                                      scaleMode="SCALE_DOWN"
+                                      fallbackThemePath="icons/hunttech-logo.png"
+                                      stylename="dictionary-logo-image"/>
+                </vbox>
+                <!-- Блок идентификации: тип записи и русское название из контейнера. -->
+                <vbox id="identity"
+                      stylename="edit-sidebar-identity"
+                      width="100%"
+                      spacing="true">
+                    <!-- Подпись типа записи. -->
+                    <label value="Иконка признака"
+                           stylename="edit-sidebar-subtitle"
+                           width="100%"/>
+                    <!-- Русское название (свойство titleRu), живое из signIconsDc. -->
+                    <label id="sidebarTitle"
+                           dataContainer="signIconsDc"
+                           property="titleRu"
+                           stylename="edit-sidebar-title"
+                           width="100%"/>
+                </vbox>
+                <!-- Вертикальная label-навигация по разделам формы (фокус, без изменения данных). -->
+                <vbox id="navigation"
+                      stylename="label-navigation"
+                      width="100%"
+                      spacing="false">
+                    <!-- Заголовок навигационного блока: полоса-заголовок с двумя inset-линиями (контракт §4.1). -->
+                    <label value="Разделы"
+                           stylename="label-nav-title dictionary-navigation-title"
+                           width="100%"/>
+                    <!-- Пункт «Иконка» — активен по умолчанию, фокусирует выбор иконки. -->
+                    <button id="iconNav"
+                            caption="Иконка"
+                            stylename="borderless label-nav-item label-nav-item-active"
+                            width="100%"
+                            invoke="focusIconSection"/>
+                    <!-- Пункт «Описание» — фокусирует текстовую область описания. -->
+                    <button id="descriptionNav"
+                            caption="Описание"
+                            stylename="borderless label-nav-item"
+                            width="100%"
+                            invoke="focusDescriptionSection"/>
+                </vbox>
+                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar. -->
+                <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
+                <!-- Нейтральная подсказка о роли справочника в HRM HuntTech. -->
+                <label value="Иконки признака используются как наглядные маркеры типов признаков в профилях HRM HuntTech."
+                       stylename="edit-sidebar-hint"
+                       width="100%"/>
+            </vbox>
+            <!-- Правая рабочая область: toolbar, прокручиваемые секции и footer-actions. -->
+            <vbox id="workspace"
+                  stylename="edit-workspace"
+                  expand="workspaceScroll"
+                  width="100%"
+                  height="100%"
+                  spacing="false">
+                <!-- Toolbar с заголовком карточки и пояснением. -->
+                <hbox id="toolbar"
+                      stylename="edit-toolbar"
+                      width="100%"
+                      spacing="true">
+                    <!-- Текстовый блок toolbar: заголовок и описание. -->
+                    <vbox id="toolbarText" width="100%" spacing="false">
+                        <label value="Карточка иконки" stylename="edit-toolbar-title"/>
+                        <label value="Font-иконка, цвет и текстовые подписи признака" stylename="edit-toolbar-description"/>
+                    </vbox>
                 </hbox>
-                <colorPicker id="iconColorColorPicker" property="iconColor" width="AUTO"/>
-                <textArea id="titleDescription" property="titleDescription" width="100%" stylename="ht-halo-precision-textarea"/>
-            </column>
-        </form>
-        <hbox id="editActions" spacing="true">
-            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
-            <button id="closeBtn" action="windowClose"/>
+                <!-- Прокручиваемая область контента рабочей области. -->
+                <scrollBox id="workspaceScroll"
+                           stylename="edit-workspace-scroll"
+                           width="100%"
+                           height="100%">
+                    <!-- Поток карточек рабочей области. -->
+                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
+                        <!-- Карточка «Иконка»: превью, выбор font-иконки и её цвет. -->
+                        <groupBox id="iconSection"
+                                  caption="Иконка"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%"
+                                  spacing="true">
+                            <!-- Ряд превью: образец иконки и текущее название признака (обновляются контроллером). -->
+                            <hbox id="iconSampleHBox" spacing="true" width="100%">
+                                <!-- Образец выбранной иконки (font-символ с цветом). -->
+                                <label id="iconSampleLabel" visible="true" align="MIDDLE_CENTER" width="AUTO"/>
+                                <!-- Текущее русское название признака рядом с образцом. -->
+                                <label id="labelNameLabel" visible="true" align="MIDDLE_CENTER" width="AUTO"/>
+                            </hbox>
+                            <!-- Код иконки (латиница, генерируется из рус. названия; только чтение). -->
+                            <textField id="titleEndField" property="titleEnd" caption="msg://msgTitleEnd" editable="false" width="100%" stylename="edit-form-control">
+                                <!-- Валидатор длины кода иконки. -->
+                                <validator class="com.haulmont.cuba.gui.components.validators.StringValidator"/>
+                            </textField>
+                            <!-- Русское название признака: из него транслитерацией строится titleEnd. -->
+                            <textField id="titleRuField" property="titleRu" caption="msg://msgTitleRu" width="100%" stylename="edit-form-control"/>
+                            <!-- Ряд выбора иконки: поле font-символа и кнопка выбора из каталога. -->
+                            <hbox id="iconNameHBox" spacing="true" width="100%" expand="iconNameField">
+                                <!-- Имя font-иконки (символ) — привязано к signIconsDc. -->
+                                <textField id="iconNameField" dataContainer="signIconsDc" align="MIDDLE_LEFT" property="iconName" caption="msg://msgIconName" width="100%" stylename="edit-form-control"/>
+                                <!-- Кнопка открытия каталога иконок (invoke контроллера). -->
+                                <button id="selectIconButton"
+                                        width="AUTO"
+                                        align="MIDDLE_RIGHT"
+                                        icon="FONTICONS"
+                                        invoke="selectIconButtonInvoke"/>
+                            </hbox>
+                            <!-- Цвет иконки (colorPicker). -->
+                            <colorPicker id="iconColorColorPicker" property="iconColor" caption="msg://msgIconColor" width="AUTO"/>
+                        </groupBox>
+                        <!-- Карточка «Описание»: развёрнутое описание признака. -->
+                        <groupBox id="descriptionSection"
+                                  caption="Описание"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%"
+                                  spacing="true">
+                            <!-- Текстовая область описания признака (LOB-поле). -->
+                            <textArea id="titleDescription" property="titleDescription" caption="msg://msgTitleDescription" width="100%" stylename="edit-form-control ht-halo-precision-textarea"/>
+                        </groupBox>
+                    </vbox>
+                </scrollBox>
+                <!-- Нижняя панель штатных действий: сохранить и отменить. -->
+                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
+                    <!-- Spacer прижимает кнопки к правому краю. -->
+                    <vbox id="actionsSpacer" width="100%"/>
+                    <!-- Сохранить и закрыть (штатный action editor-а). -->
+                    <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+                    <!-- Отменить изменения и закрыть. -->
+                    <button id="closeBtn" action="windowClose"/>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>
