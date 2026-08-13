@@ -104,10 +104,13 @@
 
 ---
 
+Sidebar-логотип: `ovaFallbackImage` 176×176, border-radius 50% — как фото кандидата в JobCandidateEdit (эталон).
+
 ## История изменений
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-13 | Размер sidebar-логотипа `ovaFallbackImage` приведён к эталону JobCandidateEdit: 176×176 (было 96×96) |
 | 2026-08-12 | Рефакторинг по контракту Edit-экранов: sidebar 270px, label-навигация «Разделы» с полосой-заголовком, toolbar, карточки edit-card (showAsPanel), footer edit-footer-actions, presentation-only Java-навигация (focusMainSection/focusPromptSection), msg-ключи templateCodeCaption/templateTemperatureCaption, локальный SCSS partial в 7 темах, контракт-тест VacancyPromptTemplateEditContractTest |
 | 2026-06-29 | Добавлены стандартные всплывающие подсказки (description) для полей формы на понятном для пользователей языке. |
 | 2026-06-28 | `systemContextField` / `promptTextField`: отдельные caption и description (`systemContext.*`, `promptText.*`) вместо entity-ключей |

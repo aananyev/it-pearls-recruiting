@@ -28,10 +28,10 @@
                 <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
                     <!-- Логотип по умолчанию: круглый логотип компании (fallback-изображение, без привязки к данным). -->
                     <ovaFallbackImage id="adminAiConfigurationLogoImage"
-                                      width="96px"
-                                      height="96px"
-                                      ovalWidth="96px"
-                                      ovalHeight="96px"
+                                      width="176px"
+                                      height="176px"
+                                      ovalWidth="176px"
+                                      ovalHeight="176px"
                                       visible="true"
                                       align="MIDDLE_CENTER"
                                       scaleMode="SCALE_DOWN"
@@ -107,12 +107,19 @@
                         </groupBox>
                     </vbox>
                 </scrollBox>
-                <!-- Нижняя панель штатных editor-actions: сохранить и отменить. -->
-                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" align="MIDDLE_RIGHT" width="100%">
-                    <!-- Commit и закрытие редактора (middleware-шифрование выполняется в onBeforeCommitChanges). -->
-                    <button action="windowCommitAndClose"/>
-                    <!-- Закрытие без сохранения изменений. -->
-                    <button action="windowClose"/>
+                <!-- Нижняя панель штатных editor-actions: сохранить и отменить (вне прокручиваемого контента). -->
+                <!-- Кнопки прижаты в правый нижний угол по эталону IteractionListEdit: expand-спейсер + AUTO-группа MIDDLE_RIGHT. -->
+                <hbox id="editActions" stylename="edit-footer-actions" width="100%" expand="editActionsSpacer" align="MIDDLE_RIGHT">
+                    <!-- Спейсер заполняет свободную ширину footer и выталкивает группу кнопок к правому краю. -->
+                    <vbox id="editActionsSpacer" width="100%" height="1px"/>
+                    <!-- Группа кнопок с фиксированной шириной: визуальный порядок Save → Cancel, как у эталона;
+                         spacing=true даёт межкнопочный зазор v-spacing 10px (эталон IteractionListEdit). -->
+                    <hbox id="editActionsGroup" width="AUTO" align="MIDDLE_RIGHT" spacing="true">
+                        <!-- Commit и закрытие редактора (middleware-шифрование выполняется в onBeforeCommitChanges). -->
+                        <button action="windowCommitAndClose" stylename="admin-ai-configuration-primary-action"/>
+                        <!-- Закрытие без сохранения изменений. -->
+                        <button action="windowClose" stylename="admin-ai-configuration-secondary-action"/>
+                    </hbox>
                 </hbox>
             </vbox>
         </hbox>

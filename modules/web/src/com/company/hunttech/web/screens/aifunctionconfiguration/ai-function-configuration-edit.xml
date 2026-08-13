@@ -42,10 +42,10 @@
                 <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
                     <!-- Логотип по умолчанию: круглый логотип компании (fallback-изображение, без привязки к данным). -->
                     <ovaFallbackImage id="aiFunctionConfigurationLogoImage"
-                                      width="96px"
-                                      height="96px"
-                                      ovalWidth="96px"
-                                      ovalHeight="96px"
+                                      width="176px"
+                                      height="176px"
+                                      ovalWidth="176px"
+                                      ovalHeight="176px"
                                       visible="true"
                                       align="MIDDLE_CENTER"
                                       scaleMode="SCALE_DOWN"
@@ -148,8 +148,9 @@
                 <hbox id="editActions" stylename="edit-footer-actions" width="100%" expand="editActionsSpacer" align="MIDDLE_RIGHT">
                     <!-- Спейсер заполняет свободную ширину footer и выталкивает группу кнопок к правому краю. -->
                     <vbox id="editActionsSpacer" width="100%" height="1px"/>
-                    <!-- Группа кнопок с фиксированной шириной: визуальный порядок Save → Cancel, как у эталона. -->
-                    <hbox id="editActionsGroup" width="AUTO" align="MIDDLE_RIGHT">
+                    <!-- Группа кнопок с фиксированной шириной: визуальный порядок Save → Cancel, как у эталона;
+                         spacing=true даёт межкнопочный зазор v-spacing 10px (эталон IteractionListEdit). -->
+                    <hbox id="editActionsGroup" width="AUTO" align="MIDDLE_RIGHT" spacing="true">
                         <!-- Save выполняет штатный DataContext commit и закрывает редактор. -->
                         <button action="windowCommitAndClose" stylename="ai-function-configuration-primary-action"/>
                         <!-- Close сохраняет стандартную semantics CUBA editor без подтверждения. -->

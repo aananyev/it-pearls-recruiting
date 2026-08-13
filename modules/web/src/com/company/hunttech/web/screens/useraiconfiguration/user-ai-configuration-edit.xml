@@ -35,10 +35,10 @@
                 <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
                     <!-- Логотип по умолчанию: круглый логотип компании (fallback-изображение, без привязки к данным). -->
                     <ovaFallbackImage id="userAiConfigurationLogoImage"
-                                      width="96px"
-                                      height="96px"
-                                      ovalWidth="96px"
-                                      ovalHeight="96px"
+                                      width="176px"
+                                      height="176px"
+                                      ovalWidth="176px"
+                                      ovalHeight="176px"
                                       visible="true"
                                       align="MIDDLE_CENTER"
                                       scaleMode="SCALE_DOWN"

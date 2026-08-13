@@ -59,19 +59,20 @@
       }
     }
 
-    // Тексты идентификации в тёмной sidebar.
+    // Тексты идентификации в тёмной sidebar — по эталону IteractionListEdit
+    // (profile-title 18px/700 #ffb11b, profile-subtitle 12px/400 rgba(248,250,252,.72)).
     .edit-sidebar-subtitle,
     .edit-sidebar-subtitle.v-label {
       box-sizing: border-box;
       display: block;
       width: 100% !important;
       min-width: 0 !important;
-      color: rgba(248, 250, 252, 0.62) !important;
-      font-size: 11px !important;
-      font-weight: 700 !important;
-      line-height: 16px !important;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+      color: rgba(248, 250, 252, 0.72) !important;
+      font-size: 12px !important;
+      font-weight: 400 !important;
+      line-height: 17px !important;
+      letter-spacing: normal;
+      text-transform: none;
       white-space: normal !important;
     }
 
@@ -81,10 +82,10 @@
       display: block;
       width: 100% !important;
       min-width: 0 !important;
-      color: #ffffff !important;
-      font-size: 19px !important;
+      color: #ffb11b !important;
+      font-size: 18px !important;
       font-weight: 700 !important;
-      line-height: 26px !important;
+      line-height: 24px !important;
       white-space: normal !important;
       overflow-wrap: anywhere;
     }
@@ -212,12 +213,37 @@
       border-left-color: #ffb11b !important;
     }
 
+    // Toolbar (заголовок + описание) повторяет эталон IteractionListEdit:
+    // title 20px/700, контекст 12px mix 60%, нижняя линия 0.16.
+    .edit-toolbar {
+      box-sizing: border-box;
+      width: 100% !important;
+      border-bottom: 1px solid rgba($v-font-color, 0.16) !important;
+    }
+
+    .edit-toolbar-title,
+    .edit-toolbar-title.v-label {
+      color: mix($v-font-color, $v-panel-background-color, 92%) !important;
+      font-size: 20px !important;
+      font-weight: 700 !important;
+      line-height: 27px !important;
+      white-space: normal !important;
+    }
+
+    .edit-toolbar-description,
+    .edit-toolbar-description.v-label {
+      color: mix($v-font-color, $v-panel-background-color, 60%) !important;
+      font-size: 12px !important;
+      line-height: 18px !important;
+      white-space: normal !important;
+    }
+
     // Правая рабочая область — карточки edit-card (эталон IteractionListEdit).
     .edit-card {
       box-sizing: border-box;
       width: 100% !important;
       min-width: 0 !important;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       padding: 0 !important;
       background: $v-panel-background-color !important;
       border: 1px solid rgba($v-font-color, 0.15) !important;
@@ -277,16 +303,19 @@
       transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
     }
 
-    .edit-card .v-textfield,
-    .edit-card .v-textarea {
+    .edit-card .v-textfield {
       padding-left: 10px;
       padding-right: 10px;
     }
 
+    // Textarea повторяет эталон IteractionListEdit: valo-ритм строк 21.75px и
+    // внутренний отступ 4px (без боковых 10px, как у textfield).
     .edit-card .v-textarea {
       box-sizing: border-box;
       min-height: 38px !important;
       font-size: 15px !important;
+      line-height: 21.75px !important;
+      padding: 4px !important;
       background: $v-panel-background-color !important;
       border: 1px solid rgba($v-font-color, 0.20) !important;
       border-radius: 5px !important;
@@ -315,8 +344,9 @@
       background: mix($v-app-background-color, $v-panel-background-color, 62%) !important;
     }
 
+    // Чекбокс — valo-отступы эталона (3px 8px), текст 14px как у IteractionListEdit.
     .edit-card .v-checkbox {
-      padding: 3px 0;
+      padding: 3px 8px;
     }
 
     .edit-card .v-checkbox label,
@@ -339,12 +369,53 @@
       border-color: rgba($v-font-color, 0.34) !important;
     }
 
-    // Кнопки footer (save/cancel) — эталонная геометрия кнопок Edit-форм.
+    // Footer (save/cancel) — эталонная геометрия IteractionListEdit:
+    // box 11px 20px / min-height 62px / тень вверх; кнопки 40px, padding 0 18px,
+    // скругление 4px, font-weight 600.
+    .edit-footer-actions {
+      box-sizing: border-box;
+      width: 100% !important;
+      min-height: 62px !important;
+      padding: 11px 20px !important;
+      background: $v-panel-background-color !important;
+      border-top: 1px solid rgba($v-font-color, 0.16) !important;
+      box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.04) !important;
+      white-space: nowrap;
+    }
+
+    .edit-footer-actions > .v-slot {
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
     .edit-footer-actions .v-button {
-      min-height: 38px;
-      padding: 0 16px;
+      min-height: 40px;
+      padding: 0 18px;
       font-size: 14px;
-      border-radius: 5px;
+      font-weight: 600;
+      border-radius: 4px;
+      box-shadow: none !important;
+    }
+
+    .edit-footer-actions .v-button:hover {
+      filter: brightness(0.98);
+    }
+
+    .edit-footer-actions .v-button:focus {
+      box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;
+      outline: 0;
+    }
+
+    // Акцентная кнопка Save: белый текст на primary (как iteraction-list-primary-action),
+    // вторая кнопка — прозрачный фон (iteraction-list-secondary-action).
+    .edit-footer-actions .admin-ai-configuration-primary-action {
+      color: #ffffff !important;
+      background: $v-selection-color !important;
+      border-color: $v-selection-color !important;
+    }
+
+    .edit-footer-actions .admin-ai-configuration-secondary-action {
+      background: transparent !important;
     }
   }
 }

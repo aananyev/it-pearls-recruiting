@@ -45,8 +45,11 @@ Footer `edit-footer-actions`: `windowCommitAndClose` (Сохранить) / `win
 
 Все поля контроллера входят в view контейнера `userAiConfigDc`; секретный `apiKey` не выводится ни в одном browse-view.
 
+Sidebar-логотип: `ovaFallbackImage` 176×176, border-radius 50% — как фото кандидата в JobCandidateEdit (эталон).
+
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-13 | Размер sidebar-логотипа `ovaFallbackImage` приведён к эталону JobCandidateEdit: 176×176 (было 96×96) |
 | 2026-08-12 | Рефакторинг из legacy-диалога 450×AUTO в полноэкранную двухпанельную форму по общему Edit-контракту: sidebar 312px + label-навигация + toolbar + 2 карточки edit-card + footer; локальный partial `user-ai-configuration-editor.scss` (7 тем, sha256-идентичен); edit-form-control на все 4 поля + caption msg-ключами; dialogMode 100%×100% modal. Эталон — IteractionListEdit |
