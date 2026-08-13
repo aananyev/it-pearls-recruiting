@@ -296,6 +296,7 @@
       padding-bottom: 0 !important;
       padding-left: 10px;
       padding-right: 10px;
+      color: $v-font-color !important;
     }
 
     .edit-card .v-filterselect-input {
@@ -307,7 +308,8 @@
       min-height: 38px !important;
       font-size: 15px !important;
       line-height: 21.75px !important;
-      padding: 4px 10px !important;
+      padding: 4px !important;
+      color: $v-font-color !important;
       background: $v-panel-background-color !important;
       border: 1px solid rgba($v-font-color, 0.20) !important;
       border-radius: 5px !important;
