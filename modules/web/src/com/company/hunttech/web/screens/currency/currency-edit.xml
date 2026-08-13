@@ -143,11 +143,13 @@
                     </vbox>
                 </scrollBox>
                 <!-- Нижняя панель штатных действий: сохранить и отменить. -->
-                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
+                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%"
+                           expand="actionsSpacer" align="MIDDLE_RIGHT">
                     <!-- Spacer прижимает кнопки к правому краю. -->
-                    <vbox id="actionsSpacer" width="100%"/>
+                    <vbox id="actionsSpacer" width="100%" height="1px"/>
                     <!-- Сохранить и закрыть (штатный action editor-а). -->
-                    <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+                    <button id="commitAndCloseBtn" action="windowCommitAndClose"
+                                    stylename="c-primary-action"/>
                     <!-- Отменить изменения и закрыть. -->
                     <button id="closeBtn" action="windowClose"/>
                 </hbox>
