@@ -16,5 +16,6 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-13 | `openPosition-rtasks-browse-view`: добавлены `openClose` (iconProvider таблицы) и `projectDescription` (projectLogoColumnGenerator) — фикс UNFETCHED ATTRIBUTE ACCESS в RecrutiesTasksBrowse |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-23 | browse/edit views, узкий FK openPosition, RecrutiesTasksServiceTest |

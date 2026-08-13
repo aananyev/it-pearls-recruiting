@@ -203,8 +203,12 @@
     </view>
     <view entity="hunttech_OpenPosition" name="openPosition-rtasks-browse-view" extends="_minimal">
         <property name="vacansyName"/>
+        <!-- openClose читает iconProvider таблицы RecrutiesTasks (ok/close), projectDescription —
+             projectLogoColumnGenerator (tooltip описания проекта). -->
+        <property name="openClose"/>
         <property name="projectName" view="project-picker-view">
             <property name="projectLogo" view="_minimal"/>
+            <property name="projectDescription"/>
         </property>
     </view>
     <view entity="hunttech_OpenPosition" name="openPosition-rtasks-picker-view" extends="_minimal">
