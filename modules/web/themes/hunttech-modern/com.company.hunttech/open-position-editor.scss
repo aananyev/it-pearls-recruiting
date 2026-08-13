@@ -731,6 +731,15 @@
       background: transparent;
     }
 
+    /* Вкладка «Описание должности» OpenPositionEdit: vbox-раскладка растягивает аккордеон
+     * редакторов на оставшуюся высоту, но на малых высотах окна (когда «Опыт работы» и
+     * короткое описание не влезают в 100% вкладки) сохраняет вертикальную прокрутку.
+     * Селектор заскопен namespace-ом: .edit-workspace-scroll на vbox есть только здесь
+     * (в остальных формах этот класс лежит на scrollBox — v-scrollpanel, не v-verticallayout). */
+    .open-position-editor .v-verticallayout.edit-workspace-scroll {
+      overflow-y: auto !important;
+    }
+
     .edit-workspace-content {
       box-sizing: border-box;
       width: 100% !important;
@@ -1410,7 +1419,10 @@
       border-radius: 4px;
     }
 
-    /* Variant 5: единая поверхность RichTextArea (toolbar 42px, content min-height 220px). */
+    /* Variant 5: единая поверхность RichTextArea (toolbar 42px, content min-height 220px).
+     * В секции аккордеона вкладки «Описание вакансии» min-height переопределяется ниже:
+     * expand-цепочка растягивает аккордеон на оставшуюся высоту, и жёсткий минимум
+     * секции (360px) выталкивал контент за пределы вкладки на экранах ≤ ~900px. */
     .open-position-editor-richtext-section > .v-expand,
     .open-position-editor-richtext-section .v-tabsheet-content,
     .open-position-editor-richtext-section .v-tabsheet-tabcontainer {
@@ -1418,7 +1430,7 @@
     }
 
     .open-position-editor-richtext-section {
-      min-height: 360px;
+      min-height: 120px;
     }
 
     .open-position-editor-richtext-variant5,
@@ -1431,6 +1443,14 @@
       border-radius: 6px;
       background: $v-panel-background-color;
       overflow: hidden;
+    }
+
+    /* Внутри аккордеона вкладки «Описание вакансии» редактор растягивается expand-цепочкой
+     * на всю высоту таба аккордеона — общий минимум 260px (toolbar 42 + content 220) здесь
+     * заменён на 120px, иначе на экранах ≤ ~900px редактор вылезал за границу вкладки. */
+    .open-position-editor-richtext-section .open-position-editor-richtext-variant5,
+    .open-position-editor-richtext-section .open-position-editor-richtext-variant5.v-richtextarea {
+      min-height: 120px;
     }
 
     .open-position-editor-richtext-variant5 .v-richtextarea-toolbar {
