@@ -44,15 +44,16 @@
                       width="100%"
                       spacing="true">
                     <!-- Тематическая HuntTech-иллюстрация шаблона промпта; fallback без привязки к данным. -->
-                    <ovaFallbackImage id="vacancyPromptTemplateLogoImage"
-                                      width="176px"
-                                      height="176px"
-                                      ovalWidth="176px"
-                                      ovalHeight="176px"
-                                      visible="true"
-                                      align="MIDDLE_CENTER"
-                                      scaleMode="SCALE_DOWN"
-                                      fallbackThemePath="icons/ai/vacancy-prompt-template.png"/>
+                    <ovalImage id="vacancyPromptTemplateLogoImage"
+                               width="176px"
+                               height="176px"
+                               ovalWidth="176px"
+                               ovalHeight="176px"
+                               visible="true"
+                               align="MIDDLE_CENTER"
+                               scaleMode="SCALE_DOWN">
+                        <theme path="icons/ai/vacancy-prompt-template.png"/>
+                    </ovalImage>
                     <!-- Подпись типа записи. -->
                     <label value="Шаблон промпта"
                            stylename="edit-sidebar-subtitle"

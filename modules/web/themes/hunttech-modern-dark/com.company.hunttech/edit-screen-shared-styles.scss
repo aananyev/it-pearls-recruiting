@@ -332,6 +332,15 @@
     padding: 16px 20px;
   }
 
+  /* Шапки groupBox-карточек (showAsPanel=true) рендерятся как .v-panel-captionwrap:
+     базовая halo-тема выносит их на 50px вверх (margin-top:-50px), из-за чего шапка
+     карточки наезжает на предыдущую карточку и на toolbar. Сброс возвращает шапку
+     внутрь панели (эталон — open-position-editor). */
+  .edit-card > .v-panel-captionwrap,
+  .edit-card > .c-groupbox-captionwrap {
+    margin-top: 0 !important;
+  }
+
   .edit-card-title,
   .edit-card-title.v-label {
     display: block;

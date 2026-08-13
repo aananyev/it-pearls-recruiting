@@ -61,8 +61,10 @@ public class AiEditFormIllustrationContractTest {
             assertTrue(entry.getKey(), xml.contains("height=\"176px\""));
             assertTrue(entry.getKey(), xml.contains("ovalWidth=\"176px\""));
             assertTrue(entry.getKey(), xml.contains("ovalHeight=\"176px\""));
+            // Иллюстрация подаётся как прямой theme-ресурс в ovalImage (без fallback-механики).
+            assertTrue(entry.getKey(), xml.contains("<ovalImage id=\""));
             assertTrue(entry.getKey(), xml.contains(
-                    "fallbackThemePath=\"icons/ai/" + entry.getValue() + "\""));
+                    "<theme path=\"icons/ai/" + entry.getValue() + "\"/>"));
 
             for (String theme : THEMES) {
                 Path asset = projectRoot().resolve(

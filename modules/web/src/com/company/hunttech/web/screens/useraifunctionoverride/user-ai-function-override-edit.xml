@@ -47,15 +47,16 @@
                 <!-- Identity записи: статичный заголовок и пояснение области действия. -->
                 <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
                     <!-- Тематическая HuntTech-иллюстрация персонального замещения AI-функции; fallback без привязки к данным. -->
-                    <ovaFallbackImage id="userAiFunctionOverrideLogoImage"
-                                      width="176px"
-                                      height="176px"
-                                      ovalWidth="176px"
-                                      ovalHeight="176px"
-                                      visible="true"
-                                      align="MIDDLE_CENTER"
-                                      scaleMode="SCALE_DOWN"
-                                      fallbackThemePath="icons/ai/user-ai-function-override.png"/>
+                    <ovalImage id="userAiFunctionOverrideLogoImage"
+                               width="176px"
+                               height="176px"
+                               ovalWidth="176px"
+                               ovalHeight="176px"
+                               visible="true"
+                               align="MIDDLE_CENTER"
+                               scaleMode="SCALE_DOWN">
+                        <theme path="icons/ai/user-ai-function-override.png"/>
+                    </ovalImage>
                     <!-- Статичный заголовок избегает чтения вложенных атрибутов до загрузки view. -->
                     <label value="Моё AI-замещение" stylename="edit-sidebar-title" width="100%"/>
                     <!-- Область действия записи — ровно одна функция. -->

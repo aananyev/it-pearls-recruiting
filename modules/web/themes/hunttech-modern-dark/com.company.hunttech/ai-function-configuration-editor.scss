@@ -344,17 +344,8 @@
       background: mix($v-app-background-color, $v-panel-background-color, 62%) !important;
     }
 
-    // Чекбокс — valo-отступы эталона (3px 8px), текст 14px как у IteractionListEdit.
-    .edit-card .v-checkbox {
-      padding: 3px 8px;
-    }
-
-    .edit-card .v-checkbox label,
-    .edit-card .v-select-optiongroup label {
-      color: mix($v-font-color, $v-panel-background-color, 78%) !important;
-      font-size: 14px !important;
-      line-height: 1.4 !important;
-    }
+    // Чекбоксы формы используют общие стили темы CUBA Platform (Valo): без локальной
+    // кастомизации квадратика и подписи — штатное выравнивание и отступы темы.
 
     .edit-card .v-button {
       min-height: 38px;

@@ -34,15 +34,16 @@
                 <!-- Блок идентификации: тип записи и живой provider из контейнера. -->
                 <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
                     <!-- Тематическая HuntTech-иллюстрация персонального AI-подключения; fallback без привязки к данным. -->
-                    <ovaFallbackImage id="userAiConfigurationLogoImage"
-                                      width="176px"
-                                      height="176px"
-                                      ovalWidth="176px"
-                                      ovalHeight="176px"
-                                      visible="true"
-                                      align="MIDDLE_CENTER"
-                                      scaleMode="SCALE_DOWN"
-                                      fallbackThemePath="icons/ai/user-ai-configuration.png"/>
+                    <ovalImage id="userAiConfigurationLogoImage"
+                               width="176px"
+                               height="176px"
+                               ovalWidth="176px"
+                               ovalHeight="176px"
+                               visible="true"
+                               align="MIDDLE_CENTER"
+                               scaleMode="SCALE_DOWN">
+                        <theme path="icons/ai/user-ai-configuration.png"/>
+                    </ovalImage>
                     <!-- Подпись типа записи. -->
                     <label value="Персональная AI-конфигурация" stylename="edit-sidebar-subtitle" width="100%"/>
                     <!-- Живой provider-код конфигурации из edit-контейнера (свойство providerCode). -->

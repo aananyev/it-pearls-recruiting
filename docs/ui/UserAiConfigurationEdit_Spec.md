@@ -45,12 +45,14 @@ Footer `edit-footer-actions`: `windowCommitAndClose` (Сохранить) / `win
 
 Все поля контроллера входят в view контейнера `userAiConfigDc`; секретный `apiKey` не выводится ни в одном browse-view.
 
-Sidebar-иллюстрация: `ovaFallbackImage` отображается 176×176 и использует отдельный theme asset `icons/ai/user-ai-configuration.png` размером 200×200. Графика в чёрно-серо-бело-красной палитре HRM HuntTech объединяет HuntTech-монограмму, пользовательский профиль и ключ, визуально обозначая персональный AI credential.
+Sidebar-иллюстрация: `ovalImage` отображается 176×176 через прямой theme-ресурс и использует отдельный theme asset `icons/ai/user-ai-configuration.png` размером 200×200. Графика в чёрно-серо-бело-красной палитре HRM HuntTech объединяет HuntTech-монограмму, пользовательский профиль и ключ, визуально обозначая персональный AI credential.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
-| 2026-08-13 | Общий fallback `icons/hunttech-logo.png` заменён на тематическую иллюстрацию персонального AI-подключения `icons/ai/user-ai-configuration.png`: исходный asset 200×200, отображение `ovaFallbackImage` сохранено 176×176 |
-| 2026-08-13 | Размер sidebar-логотипа `ovaFallbackImage` приведён к эталону JobCandidateEdit: 176×176 (было 96×96) |
+| 2026-08-13 | Фикс наложения шапок карточек в правой части формы: в shared-контракт `edit-screen-shared-styles.scss` (7 тем) добавлен сброс `margin-top: 0 !important` для `.edit-card > .v-panel-captionwrap` / `.c-groupbox-captionwrap` — базовое правило halo-темы выносило шапку панели на 50px вверх, шапки наезжали на соседние карточки и toolbar (эталон — open-position-editor) |
+| 2026-08-13 | Sidebar-иллюстрация переведена с `ovaFallbackImage` на `ovalImage` с прямым `<theme path="icons/ai/user-ai-configuration.png">` — отображение гарантировано без fallback-механики |
+| 2026-08-13 | Общий fallback `icons/hunttech-logo.png` заменён на тематическую иллюстрацию персонального AI-подключения `icons/ai/user-ai-configuration.png`: исходный asset 200×200, отображение `ovalImage` с `<theme path="icons/ai/user-ai-configuration.png">` сохранено 176×176 |
+| 2026-08-13 | Размер sidebar-логотипа `ovalImage` приведён к эталону JobCandidateEdit: 176×176 (было 96×96) |
 | 2026-08-12 | Рефакторинг из legacy-диалога 450×AUTO в полноэкранную двухпанельную форму по общему Edit-контракту: sidebar 312px + label-навигация + toolbar + 2 карточки edit-card + footer; локальный partial `user-ai-configuration-editor.scss` (7 тем, sha256-идентичен); edit-form-control на все 4 поля + caption msg-ключами; dialogMode 100%×100% modal. Эталон — IteractionListEdit |

@@ -41,15 +41,16 @@
                 <!-- Блок идентификации: живое название функции и тип редактируемого объекта. -->
                 <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
                     <!-- Тематическая HuntTech-иллюстрация AI-функции и её настроек; fallback без привязки к данным. -->
-                    <ovaFallbackImage id="aiFunctionConfigurationLogoImage"
-                                      width="176px"
-                                      height="176px"
-                                      ovalWidth="176px"
-                                      ovalHeight="176px"
-                                      visible="true"
-                                      align="MIDDLE_CENTER"
-                                      scaleMode="SCALE_DOWN"
-                                      fallbackThemePath="icons/ai/ai-function-configuration.png"/>
+                    <ovalImage id="aiFunctionConfigurationLogoImage"
+                               width="176px"
+                               height="176px"
+                               ovalWidth="176px"
+                               ovalHeight="176px"
+                               visible="true"
+                               align="MIDDLE_CENTER"
+                               scaleMode="SCALE_DOWN">
+                        <theme path="icons/ai/ai-function-configuration.png"/>
+                    </ovalImage>
                     <!-- Живое название функции читается из edit-контейнера (свойство name). -->
                     <label dataContainer="aiFunctionDc" property="name" stylename="edit-sidebar-title" width="100%"/>
                     <!-- Подпись типа записи, статична и не дублирует название функции. -->

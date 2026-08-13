@@ -27,15 +27,16 @@
                 <!-- Identity текущего корпоративного подключения. -->
                 <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
                     <!-- Тематическая HuntTech-иллюстрация корпоративного AI-подключения; fallback без привязки к данным. -->
-                    <ovaFallbackImage id="adminAiConfigurationLogoImage"
-                                      width="176px"
-                                      height="176px"
-                                      ovalWidth="176px"
-                                      ovalHeight="176px"
-                                      visible="true"
-                                      align="MIDDLE_CENTER"
-                                      scaleMode="SCALE_DOWN"
-                                      fallbackThemePath="icons/ai/admin-ai-configuration.png"/>
+                    <ovalImage id="adminAiConfigurationLogoImage"
+                               width="176px"
+                               height="176px"
+                               ovalWidth="176px"
+                               ovalHeight="176px"
+                               visible="true"
+                               align="MIDDLE_CENTER"
+                               scaleMode="SCALE_DOWN">
+                        <theme path="icons/ai/admin-ai-configuration.png"/>
+                    </ovalImage>
                     <!-- Название подключения читается из edit-контейнера (свойство name). -->
                     <label dataContainer="adminConfigurationDc" property="name" stylename="edit-sidebar-title" width="100%"/>
                     <!-- Подпись типа системной записи. -->
