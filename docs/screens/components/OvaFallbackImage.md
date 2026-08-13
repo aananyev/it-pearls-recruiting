@@ -31,6 +31,7 @@
 ## Behavior Summary
 
 - bound значение равно `null` → применяется `fallbackThemePath` → layout сохраняет размер изображения;
+- **без привязки к данным** (`dataContainer`/`property` отсутствуют — статичная иллюстрация AI Control Plane форм, справочников) → `fallbackThemePath` показывается как обычный source, но только пока контроллер не установил явный `Resource` через `setSource(...)`;
 - bound значение содержит `FileDescriptor` → helper открывает файл через `FileLoader.openStream()` → при успехе используется стандартный `FileDescriptorResource`;
 - metadata существует, но физический файл отсутствует или storage недоступен → ошибка преобразуется в fallback → UI продолжает строиться;
 - nested property unfetched на detached entity → чтение `ValueSource` перехватывается → отображается fallback до загрузки подходящего view;
@@ -121,6 +122,15 @@ ValueSource<FileDescriptor>
 
 Fallback не заменяет Data View Integrity. Он предотвращает падение UI, а корректный узкий view обеспечивает отображение фактического изображения.
 
+### 3.3. Статичный fallback без привязки к данным
+
+Сценарий: `ovaFallbackImage` объявлен **без** `dataContainer`/`property` — компонент используется как статичная тематическая иллюстрация (`fallbackThemePath="icons/ai/*.png"` в AI Control Plane формах, `icons/hunttech-logo.png` в справочниках). У такого компонента `valueSource == null`, поэтому `updateComponent()` не вызывается вообще (он срабатывает только при `setValueSource`/change). Два уровня защиты:
+
+- **Немедленное применение в `setFallbackThemePath()`**: при `valueSource == null` и `host.getSource() == null` fallback ставится как source сразу при загрузке XML-дескриптора — иначе пустой овал;
+- **`tryApplyFallback()`** дополнительно применяет fallback при `valueSource == null`, но НЕ затирает явный source, установленный контроллером через `setSource(...)` (эталон: `OpenPositionEdit.updateProjectLogoImage()`).
+
+Проверка `host.getSource()` добавлена в интерфейс `FallbackImageHost` и делегат, чтобы не ломать контроллеры, управляющие изображением вручную.
+
 ## 4. Программное использование
 
 ```java
@@ -174,6 +184,7 @@ Helper сначала сбрасывает прежний `ValueSource`, про�
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-13 | Статичный fallback без `dataContainer`/`property` применяется сразу в `setFallbackThemePath()` (`updateComponent` у компонента без valueSource не вызывается); guard `host.getSource() == null` — не затирает ручной `setSource(...)` контроллера; в `FallbackImageHost` добавлен `getSource()` |
 | 2026-07-27 | Проверка descriptor переведена на фактическое `FileLoader.openStream()`; `FallbackImageResourceDelegate` защищён от unfetched `ValueSource` и ошибок FileStorage с переходом на theme fallback |
 | 2026-07-21 | `JobCandidateEdit.candidatePic` переведён на `OvaFallbackImage` 176×176 с binding и fallback |
 | 2026-06-30 | `RoundImageWithFallback` переименован в `OvaFallbackImage`; oval и fallback поведение вынесены в delegates |

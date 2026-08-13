@@ -17,4 +17,11 @@ public interface FallbackImageHost {
     void updateValue(Resource resource);
 
     <R extends Resource> R createResource(Class<R> resourceClass);
+
+    /**
+     * Текущий явно установленный source (setSource) или null, если компонент
+     * не имеет ни привязки к данным, ни явного ресурса. Нужен делегату, чтобы
+     * не затирать source, установленный контроллером вручную (OpenPositionEdit).
+     */
+    Resource getSource();
 }

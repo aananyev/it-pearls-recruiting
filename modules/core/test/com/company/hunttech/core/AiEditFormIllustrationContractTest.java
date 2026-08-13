@@ -77,6 +77,30 @@ public class AiEditFormIllustrationContractTest {
         }
     }
 
+    @Test
+    public void staticFallbackWithoutDataBindingIsRendered() throws IOException {
+        // OvaFallbackImage без dataContainer/property (статичная иллюстрация
+        // AI Control Plane форм) обязан показывать fallbackThemePath, а не
+        // пустой овал. Два уровня защиты:
+        // 1) setFallbackThemePath применяет fallback сразу при статичном
+        //    использовании (updateComponent у компонента без valueSource
+        //    не вызывается вообще);
+        // 2) tryApplyFallback дополнительно применяет fallback при
+        //    valueSource == null, не затирая явный source контроллера.
+        String delegate = new String(Files.readAllBytes(projectRoot().resolve(
+                "modules/web/src/com/hunttech/hrm/web/components/delegate/"
+                        + "FallbackImageResourceDelegate.java")), StandardCharsets.UTF_8);
+
+        // Ветка немедленного применения в setFallbackThemePath
+        assertTrue(delegate.contains("if (host.getBoundValueSource() == null && host.getSource() == null) {"));
+        // Guard в tryApplyFallback
+        assertTrue(delegate.contains("if (fallbackResource == null) {"));
+        assertTrue(delegate.contains("if (valueSource == null) {"));
+        assertTrue(delegate.contains("if (host.getSource() == null) {"));
+        assertTrue(delegate.contains("host.updateValue(fallbackResource);"));
+        assertTrue(delegate.contains("return true;"));
+    }
+
     private Path projectRoot() {
         Path root = Paths.get(System.getProperty("user.dir", ".")).toAbsolutePath();
         while (root != null && !Files.exists(root.resolve("build.gradle"))) {

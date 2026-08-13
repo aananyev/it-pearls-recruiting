@@ -38,6 +38,13 @@ public class FallbackImageResourceDelegate {
     public void setFallbackThemePath(String path) {
         if (StringUtils.isNotBlank(path)) {
             this.fallbackResource = host.createResource(ThemeResource.class).setPath(path);
+            // Статичная иллюстрация без dataContainer/property: updateComponent()
+            // не вызывается (он срабатывает только при setValueSource / change),
+            // поэтому fallback применяем сразу — но не затирая явный source,
+            // установленный контроллером (OpenPositionEdit ставит FileDescriptorResource).
+            if (host.getBoundValueSource() == null && host.getSource() == null) {
+                host.updateValue(fallbackResource);
+            }
         } else {
             this.fallbackResource = null;
         }
@@ -68,8 +75,20 @@ public class FallbackImageResourceDelegate {
      * @return {@code true} when fallback was applied and caller should skip default update
      */
     public boolean tryApplyFallback() {
+        if (fallbackResource == null) {
+            return false;
+        }
+
         ValueSource<FileDescriptor> valueSource = host.getBoundValueSource();
-        if (valueSource == null || fallbackResource == null) {
+        if (valueSource == null) {
+            // Компонент без привязки к данным (статичная иллюстрация через
+            // fallbackThemePath): показываем fallback, только если контроллер
+            // ещё не установил явный source (например, OpenPositionEdit ставит
+            // FileDescriptorResource вручную — его нельзя затирать).
+            if (host.getSource() == null) {
+                host.updateValue(fallbackResource);
+                return true;
+            }
             return false;
         }
 
