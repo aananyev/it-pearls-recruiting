@@ -66,6 +66,7 @@ Sidebar-иллюстрация: `ovalImage` отображается 176×176 ч
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-13 | Чекбоксы форм переведены на общие стили темы CUBA Platform (Valo): из локальных партиалов удалена кастомная стилизация квадратика/подписи — устранён наезд чекбокса на элементы под ним, выравнивание квадратика и подписи штатное (тема) |
 | 2026-08-13 | Фикс наложения шапок карточек в правой части формы: в shared-контракт `edit-screen-shared-styles.scss` (7 тем) добавлен сброс `margin-top: 0 !important` для `.edit-card > .v-panel-captionwrap` / `.c-groupbox-captionwrap` — базовое правило halo-темы выносило шапку панели на 50px вверх, шапки наезжали на соседние карточки и toolbar (эталон — open-position-editor) |
 | 2026-08-13 | Sidebar-иллюстрация переведена с `ovaFallbackImage` на `ovalImage` с прямым `<theme path="icons/ai/ai-function-configuration.png">` — отображение гарантировано без fallback-механики |
 | 2026-08-13 | Общий fallback `icons/hunttech-logo.png` заменён на тематическую иллюстрацию AI-функции `icons/ai/ai-function-configuration.png`: исходный asset 200×200, отображение `ovalImage` с `<theme path="icons/ai/ai-function-configuration.png">` сохранено 176×176 |
