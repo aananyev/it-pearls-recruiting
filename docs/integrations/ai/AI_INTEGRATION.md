@@ -116,7 +116,17 @@ Fallback первого этапа:
 - `TEXT_TRANSFORMATION`;
 - `DOCUMENT_ANALYSIS`.
 
-`VISION`, `IMAGE_GENERATION`, `EMBEDDING`, `AUDIO_TRANSCRIPTION` зарезервированы моделью и требуют отдельных typed adapters.
+`executeImage` поддерживает:
+
+- `IMAGE_GENERATION` — редактирование переданного изображения (typed adapter
+  `byte[] executeImage(functionCode, context, sourceImage, sourceMimeType)`); промпт
+  собирается из prompt-шаблона функции, source image передаётся провайдеру как есть.
+  На текущий момент adapter реализован провайдером `openai` (endpoint
+  `POST /v1/images/edits`, ответ `data[0].b64_json`); остальные провайдеры
+  наследуют default-метод `AIProvider.generateImage` и не поддерживают изображения.
+
+`VISION`, `EMBEDDING`, `AUDIO_TRANSCRIPTION` зарезервированы моделью и требуют
+отдельных typed adapters.
 
 ## 5. Vacancy compatibility facade
 

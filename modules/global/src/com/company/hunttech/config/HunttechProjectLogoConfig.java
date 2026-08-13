@@ -54,4 +54,14 @@ public interface HunttechProjectLogoConfig extends Config {
     @Property("hunttech.projectLogo.enabled")
     @DefaultBoolean(true)
     boolean getEnabled();
+
+    /**
+     * Включает AI-первый этап обработки логотипа (capability IMAGE_GENERATION, функция
+     * PROJECT_LOGO_IMAGE_GENERATE): нейросеть удаляет фон, затем классический конвейер
+     * выполняет ресайз и вписывание в круг. При недоступности AI — автоматический
+     * классический конвейер (flood-fill).
+     */
+    @Property("hunttech.projectLogo.ai.enabled")
+    @DefaultBoolean(true)
+    boolean getAiProcessingEnabled();
 }

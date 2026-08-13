@@ -44,6 +44,8 @@
                 <entry key="hunttech_AiCredentialService" value="com.company.hunttech.service.AiCredentialService"/>
                 <entry key="hunttech_ImageProcessingService"
                        value="com.company.hunttech.app.ImageProcessingService"/>
+                <entry key="hunttech_ProjectLogoImageProcessingService"
+                       value="com.company.hunttech.app.ProjectLogoImageProcessingService"/>
                 <entry key="hunttech_UserAiContextService"
                        value="com.company.hunttech.service.UserAiContextService"/>
             </map>

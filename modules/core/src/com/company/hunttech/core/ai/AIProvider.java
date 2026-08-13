@@ -20,4 +20,26 @@ public interface AIProvider {
      */
     String generateText(String prompt, String systemContext, String apiKey, String modelName,
                         Map<String, Object> options);
+
+    /**
+     * Выполняет редактирование изображения (capability IMAGE_GENERATION).
+     *
+     * <p>Провайдер получает исходное изображение и возвращает обработанный
+     * растровый файл (например PNG с прозрачным фоном). Реализация по умолчанию
+     * не поддерживает изображения — текстовые провайдеры не обязаны её переопределять.</p>
+     *
+     * @param prompt         инструкция на языке модели (уже собранный prompt-шаблон функции)
+     * @param systemContext  системный промпт функции
+     * @param apiKey         API-ключ из AiCredentialService/UserAiConfiguration
+     * @param modelName      имя image-модели; пустое — модель провайдера по умолчанию
+     * @param options        общие опции функции (temperature и др.)
+     * @param sourceImage    исходное изображение
+     * @param sourceMimeType MIME-тип исходного изображения (image/png, image/jpeg, ...)
+     * @return обработанное изображение
+     */
+    default byte[] generateImage(String prompt, String systemContext, String apiKey, String modelName,
+                                 Map<String, Object> options, byte[] sourceImage, String sourceMimeType) {
+        throw new UnsupportedOperationException(
+                "Провайдер «" + getProviderCode() + "» не поддерживает IMAGE_GENERATION.");
+    }
 }

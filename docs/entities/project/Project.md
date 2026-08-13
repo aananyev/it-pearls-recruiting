@@ -148,6 +148,7 @@ HSQL получил обычные составные аналоги этих и
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-13 | Обработка логотипа проекта переведена на AI-first: функция `PROJECT_LOGO_IMAGE_GENERATE` (capability IMAGE_GENERATION, OpenAI `gpt-image-2`) удаляет фон, классический конвейер (ресайз, flood-fill, круг) — детерминированный финал и fallback; исправлена интеграция `hunttech_ProjectLogoImageProcessingService` web↔core (`WebRemoteProxyBeanCreator`), AI-слой получил `AiExecutionService.executeImage`; конфиг `hunttech.projectLogo.ai.enabled` |
 | 2026-08-12 | ProjectEdit отрефакторена по контракту Edit-форм: sidebar 270px (визуал логотипа 96×96, identity, label-навигация «Разделы», spacer, hint), workspace (toolbar, tabSheet edit-tabs, карточки edit-card, footer), presentation-only Java-навигация; канонический UI Spec — `docs/ui/ProjectEdit_Spec.md`, контрактный тест `ProjectEditLayoutContractTest`, detached-тест `ProjectDetachedObjectTest` |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-23 | Fix ProjectEdit: `projectOpenPositionsDc` — standalone loader вместо `property="openPosition"`; lazy load по вкладке «Вакансии» |

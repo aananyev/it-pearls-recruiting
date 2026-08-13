@@ -82,6 +82,94 @@ public class AiExecutionServiceBean implements AiExecutionService {
         return executeWithAdmin(function, prompt);
     }
 
+    @Override
+    public byte[] executeImage(String functionCode, Map<String, Object> context,
+                               byte[] sourceImage, String sourceMimeType) {
+        if (sourceImage == null || sourceImage.length == 0) {
+            throw new DevelopmentException("Для AI-обработки изображения не переданы данные.");
+        }
+        AiFunctionConfiguration function = loadFunction(functionCode);
+        validateImageCapability(function);
+        String prompt = buildPrompt(function, context == null ? Collections.emptyMap() : context);
+        User currentUser = userSessionSource.getUserSession().getUser();
+        AiExecutionPolicy policy = function.getExecutionPolicy();
+        if (policy == null) {
+            throw new DevelopmentException("Для AI-функции «" + functionCode + "» не задана политика выполнения.");
+        }
+
+        UserAiFunctionOverride userOverride = loadUserOverride(currentUser, function);
+        if (AiExecutionPolicy.USER_REQUIRED == policy) {
+            validateUserOverride(userOverride, currentUser, functionCode);
+            return executeWithUserImage(function, userOverride, prompt, sourceImage, sourceMimeType);
+        }
+        if (AiExecutionPolicy.USER_OVERRIDE_ALLOWED == policy && isUsableUserOverride(userOverride, currentUser)) {
+            try {
+                return executeWithUserImage(function, userOverride, prompt, sourceImage, sourceMimeType);
+            } catch (RuntimeException userFailure) {
+                if (AiFallbackPolicy.FALLBACK_TO_ADMIN == function.getFallbackPolicy()
+                        && isUsableAdminConfiguration(function.getAdminConfiguration())) {
+                    log.warn("Персональное AI-подключение функции {} недоступно; используется разрешённый admin fallback. Причина: {}",
+                            functionCode, userFailure.getClass().getSimpleName());
+                    return executeWithAdminImage(function, prompt, sourceImage, sourceMimeType);
+                }
+                throw new DevelopmentException(
+                        "Персональное AI-подключение для функции «" + functionCode + "» недоступно.", userFailure);
+            }
+        }
+        return executeWithAdminImage(function, prompt, sourceImage, sourceMimeType);
+    }
+
+    private byte[] executeWithUserImage(AiFunctionConfiguration function,
+                                        UserAiFunctionOverride override,
+                                        String prompt, byte[] sourceImage, String sourceMimeType) {
+        UserAiConfiguration configuration = override.getUserAiConfiguration();
+        String model = configuration.getDefaultModelName();
+        if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(override.getModelName())) {
+            model = override.getModelName();
+        }
+        return executeProviderImage(configuration.getProviderCode(), configuration.getApiKey(), model,
+                function, prompt, sourceImage, sourceMimeType);
+    }
+
+    private byte[] executeWithAdminImage(AiFunctionConfiguration function, String prompt,
+                                         byte[] sourceImage, String sourceMimeType) {
+        AdminAiConfiguration configuration = function.getAdminConfiguration();
+        if (!isUsableAdminConfiguration(configuration)) {
+            throw new DevelopmentException(
+                    "Для AI-функции «" + function.getCode() + "» не настроено активное корпоративное подключение.");
+        }
+        String model = isConfigured(function.getAdminModelName())
+                ? function.getAdminModelName() : configuration.getDefaultModelName();
+        String apiKey = aiSecretService.decrypt(configuration.getApiKeyEncrypted());
+        return executeProviderImage(configuration.getProviderCode(), apiKey, model, function,
+                prompt, sourceImage, sourceMimeType);
+    }
+
+    private byte[] executeProviderImage(String providerCode, String apiKey, String model,
+                                        AiFunctionConfiguration function, String prompt,
+                                        byte[] sourceImage, String sourceMimeType) {
+        if (!isConfigured(providerCode) || !isConfigured(apiKey)) {
+            throw new DevelopmentException("Эффективное AI-подключение настроено не полностью.");
+        }
+        AIProvider provider;
+        try {
+            provider = aiProviderRegistry.getProvider(providerCode);
+        } catch (IllegalArgumentException e) {
+            throw new DevelopmentException("Провайдер AI «" + providerCode + "» не подключён в приложении.", e);
+        }
+        return provider.generateImage(prompt, function.getSystemPrompt(), apiKey, model,
+                buildOptions(function), sourceImage, sourceMimeType);
+    }
+
+    private void validateImageCapability(AiFunctionConfiguration function) {
+        AiCapability capability = function.getCapability();
+        if (AiCapability.IMAGE_GENERATION != capability) {
+            throw new DevelopmentException(
+                    "AI-функция «" + function.getCode() + "» требует capability «" + capability
+                            + "», которая не поддержана image execution layer (ожидается IMAGE_GENERATION).");
+        }
+    }
+
     private AiFunctionConfiguration loadFunction(String functionCode) {
         if (!isConfigured(functionCode)) {
             throw new DevelopmentException("Не задан код AI-функции.");

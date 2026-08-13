@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260813-2-seedProjectLogoAiFunction" author="HRM HuntTech">
+        <preConditions onFail="HALT">
+            <tableExists tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION"/>
+        </preConditions>
+        <!--
+            INSERT-only seed AI-функции удаления фона логотипа проекта (capability IMAGE_GENERATION).
+            Существующая запись с тем же CODE не изменяется: административные prompt/model/policy
+            не перезаписываются. Подключение к провайдеру настраивается в «Управление AI».
+        -->
+        <sql dbms="postgresql"><![CDATA[
+            INSERT INTO HUNTTECH_AI_FUNCTION_CONFIGURATION (
+                ID, VERSION, CREATE_TS, CREATED_BY, CODE, NAME, DESCRIPTION,
+                CAPABILITY, SYSTEM_PROMPT, PROMPT_TEMPLATE, TEMPERATURE, MAX_TOKENS,
+                ADMIN_MODEL_NAME, EXECUTION_POLICY, FALLBACK_POLICY, ALLOW_MODEL_OVERRIDE,
+                IS_ACTIVE, CONFIGURATION_VERSION
+            )
+            SELECT
+                '3a8d5f2e-1b44-4c9e-8d27-6f0a91c2e5d7'::uuid,
+                1,
+                CURRENT_TIMESTAMP,
+                'migration',
+                'PROJECT_LOGO_IMAGE_GENERATE',
+                'AI-обработка логотипа проекта',
+                'Удаление фона загруженного логотипа проекта (ProjectEdit) нейросетью; ресайз и вписывание в круг выполняет классический конвейер',
+                'IMAGE_GENERATION',
+                'Ты — сервис обработки логотипов HRM HuntTech. Получи исходное изображение логотипа проекта и удали сплошной однотонный фон (обычно белый или очень светлый), сохранив сам логотип без искажений пропорций. Белые элементы внутри логотипа сохраняй. Верни изображение в формате PNG с прозрачным фоном, без рамок, теней и добавленных элементов.',
+                E'Имя загруженного файла: ${sourceFileName}\n\nУдали белый фон логотипа и верни изображение в формате PNG с прозрачным фоном.',
+                NULL,
+                NULL,
+                'gpt-image-2',
+                'USER_OVERRIDE_ALLOWED',
+                'FALLBACK_TO_ADMIN',
+                FALSE,
+                TRUE,
+                1
+            WHERE NOT EXISTS (
+                SELECT 1 FROM HUNTTECH_AI_FUNCTION_CONFIGURATION
+                 WHERE CODE = 'PROJECT_LOGO_IMAGE_GENERATE'
+            );
+        ]]></sql>
+    </changeSet>
+</databaseChangeLog>

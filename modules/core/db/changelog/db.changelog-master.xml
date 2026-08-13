@@ -40,4 +40,8 @@
     <include file="260813-1-localizeProjectDescriptionAiPrompts.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- ProjectEdit upload: AI-функция удаления фона логотипа проекта (capability IMAGE_GENERATION). -->
+    <include file="260813-2-addProjectLogoAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

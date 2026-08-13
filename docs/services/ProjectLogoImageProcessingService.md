@@ -1,0 +1,136 @@
+# ProjectLogoImageProcessingService (`hunttech_ProjectLogoImageProcessingService`)
+
+> Серверная обработка логотипа проекта, загружаемого пользователем в форме ProjectEdit: AI-удаление фона (capability IMAGE_GENERATION) с детерминированным классическим fallback, ресайз, вписывание в круг.
+
+**Связанные документы:** [AI_INTEGRATION](../integrations/ai/AI_INTEGRATION.md) · [Project Edit Spec](../screens/project/hunttech_Project.edit_Spec.md) · [ImageProcessingService](file-storage/ImageProcessingService.md) (фото профиля)
+
+---
+
+## Бизнес-контекст (обязательный ввод)
+
+### Назначение и Бизнес-смысл (What & Why)
+
+Рекрутёры прикрепляют к проекту логотип — изображение компании/продукта в произвольном формате (JPEG, PNG, GIF, BMP, WebP). Логотип отображается в круглом аватаре `ovaFallbackImage` в списках и карточках. Без нормализации файл может быть тяжёлым, а прямоугольное изображение с белым фоном выглядит чужеродно в круглом аватаре (белые углы, обрезка контента по краям круга). **ProjectLogoImageProcessingService** приводит любой загруженный логотип к единому виду: PNG с прозрачным фоном, максимум 300×300, содержимое вписано в круг. С 13.08.2026 фон удаляет нейросеть (AI-функция `PROJECT_LOGO_IMAGE_GENERATE`), а классический конвейер остаётся автоматическим fallback — загрузка никогда не прерывается недоступностью ИИ.
+
+### Связи в интерфейсе и Навигация (UI Context & Navigation)
+
+| Точка вызова | Роль |
+|--------------|------|
+| `ProjectEdit` (вкладка «Основное», sidebar) | Пользователь загружает логотип через кастомный upload-компонент |
+| `WebProjectLogoFileUploadField` | Web-компонент (зарегистрирован в `cuba-ui-component.xml` как `upload`); перехватывает `saveFile()` в режиме IMMEDIATE и вызывает сервис |
+| `web-spring.xml` | Регистрирует интерфейс в `WebRemoteProxyBeanCreator` — web-контекст получает CUBA service proxy `hunttech_ProjectLogoImageProcessingService` |
+
+Сервис входит в AI Control Plane: AI-этап маршрутизируется через `AiExecutionService.executeImage` (стабильный function code `PROJECT_LOGO_IMAGE_GENERATE`, capability `IMAGE_GENERATION`, политики `USER_OVERRIDE_ALLOWED`/`FALLBACK_TO_ADMIN`, корпоративные credentials из `AdminAiConfiguration`). Промпт и модель администратор меняет в «Управление AI → Функции AI» без выпуска кода.
+
+### Краткий обзор бизнес-логики поведения (Behavior Summary)
+
+- **Загрузка логотипа** → `WebProjectLogoFileUploadField.saveFile` → `beanLocator.get(ProjectLogoImageProcessingService.NAME)` (proxy) → `process(data, fileName)`.
+- **AI-этап** (если `hunttech.projectLogo.ai.enabled=true`): функция `PROJECT_LOGO_IMAGE_GENERATE` получает изображение и возвращает PNG с прозрачным фоном (OpenAI `images/edits`, модель `gpt-image-2`).
+- **AI недоступен** (функция не активна, нет credentials, таймаут/ошибка провайдера) → лог `warn` + классический конвейер: flood-fill удаление белого фона от краёв (порог 235), плавный край (EDGE_SOFTNESS 24).
+- **Детерминированный финал** (всегда): ARGB → ресайз до 300px → обрезка по содержимому → квадратный канвас со стороной = диагонали/0.95 → PNG.
+- **Не-растровый файл** или пустые данные → исходные байты, `processed=false`.
+- **Ошибка обработки** → компонент логирует `warn` и сохраняет исходный файл — загрузка не прерывается.
+
+---
+
+## 1. Архитектура и размещение
+
+| Элемент | Путь |
+|---------|------|
+| Интерфейс Service API | `modules/global/src/com/company/hunttech/app/ProjectLogoImageProcessingService.java` |
+| Реализация middleware | `modules/core/src/com/company/hunttech/app/ProjectLogoImageProcessingServiceBean.java` |
+| DTO результата | `modules/global/src/com/company/hunttech/app/ProcessedImage.java` (общий с `ImageProcessingService`) |
+| Конфигурация | `modules/global/src/com/company/hunttech/config/HunttechProjectLogoConfig.java` |
+| AI-функция | `AiFunctionConfiguration` code `PROJECT_LOGO_IMAGE_GENERATE`, capability `IMAGE_GENERATION` |
+| Web-компонент | `modules/web/src/com/company/hunttech/web/gui/components/WebProjectLogoFileUploadField.java` |
+| Реестр web proxy | `modules/web/src/com/company/hunttech/web-spring.xml` |
+| CUBA service name | `hunttech_ProjectLogoImageProcessingService` |
+
+Зависимости реализации: `AiExecutionService` (AI-этап), CUBA `Configuration`, `ImageIO`/Java2D (классический конвейер), Apache Commons Lang.
+
+### 1.1. Граница web/core
+
+Аналогично `ImageProcessingService` (см. `docs/services/file-storage/ImageProcessingService.md` §1.1): core-реализация живёт в отдельном middleware webapp. Web-компонент получает её **только** через CUBA service proxy, зарегистрированный в `WebRemoteProxyBeanCreator` (`web-spring.xml`). Class-based lookup запрещён; отсутствие записи воспроизводит `NoSuchBeanDefinitionException` (баг был выявлен и закрыт 13.08.2026).
+
+## 2. Конфигурация (`HunttechProjectLogoConfig`)
+
+Источник: `@Source(type = SourceType.DATABASE)` — ключи в `SYS_CONFIG`:
+
+| Свойство | Ключ | Тип | По умолчанию | Смысл |
+|----------|------|-----|--------------|-------|
+| `maxSize` | `hunttech.projectLogo.maxSize` | int | **300** | Максимальная сторона логотипа, px |
+| `format` | `hunttech.projectLogo.format` | String | **png** | Выходной формат (PNG — прозрачность) |
+| `whiteThreshold` | `hunttech.projectLogo.whiteThreshold` | int | **235** | Порог «белизны» классического flood-fill (0–255) |
+| `circleInscribeRatioPercent` | `hunttech.projectLogo.circleInscribeRatio` | int | **71** | Резерв на будущее; реализация использует `CANVAS_MARGIN=0.95` от диагонали |
+| `enabled` | `hunttech.projectLogo.enabled` | boolean | **true** | Общий выключатель обработки |
+| `aiProcessingEnabled` | `hunttech.projectLogo.ai.enabled` | boolean | **true** | AI-первый этап; `false` — сразу классический конвейер |
+
+## 3. API сервиса
+
+```java
+String NAME = "hunttech_ProjectLogoImageProcessingService";
+ProcessedImage process(byte[] data, String fileName);
+```
+
+### `ProcessedImage`
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `data` | `byte[]` | Итоговое содержимое файла |
+| `name` | `String` | Имя без расширения |
+| `extension` | `String` | Расширение без точки (после обработки — `png`) |
+| `processed` | `boolean` | `true` — файл перекодирован; `false` — возврат оригинала |
+
+DTO реализует `Serializable` — обязательная часть удалённого контракта web ↔ core.
+
+## 4. Правила обработки (AI-first)
+
+1. `data == null` или `length == 0` → `DevelopmentException("Empty image data")`.
+2. `ImageIO.read` вернул `null` → оригинал, `processed=false`.
+3. `aiProcessingEnabled=true` → `AiExecutionService.executeImage("PROJECT_LOGO_IMAGE_GENERATE", {sourceFileName}, data, mimeType)`.
+4. AI-результат — растровый → используется как источник для финала; пустой/не-растровый/исключение → классический конвейер (лог `warn`, загрузка продолжается).
+5. Финал (всегда): ARGB → ресайз ≤ `maxSize` → `removeWhiteBackground` → обрезка по содержимому → `fitIntoCircle` → запись в `format`.
+6. Ошибка IO при обработке → `DevelopmentException`.
+
+AI-контекст функции: `sourceFileName` (имя загруженного файла). Промпт и модель задаёт администратор; seed `260813-2-addProjectLogoAiFunction` — INSERT-only и идемпотентный.
+
+## 5. Интеграционные точки (web)
+
+### `WebProjectLogoFileUploadField`
+
+Цепочка: `saveFile` → `processLogo` → `beanLocator.get(ProjectLogoImageProcessingService.NAME)` → `process(data, fileName)` → при `processed=true` — `descriptor.setExtension`, `setSize`, перезапись файла в `FileStorageService`. При ошибке — `warn` и сохранение исходного файла.
+
+## 6. Тестирование
+
+| Файл | Назначение |
+|------|------------|
+| `modules/core/test/com/company/hunttech/hunttech/core/ProjectLogoImageProcessingServiceBeanTest.java` | классический конвейер: конвертация, ресайз, прозрачность, круг, pass-through |
+| `modules/core/test/com/company/hunttech/core/ProjectLogoImageProcessingServiceCoreBeanLookupTest.java` | запись proxy в `web-spring.xml`, запрет class-based lookup, AI-контракт с fallback |
+| `modules/core/test/com/company/hunttech/core/ProjectLogoAiFunctionSeedContractTest.java` | seed: INSERT-only, capability IMAGE_GENERATION, русские промпты, `gpt-image-2`, include в master |
+
+Запуск:
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 11)
+./gradlew :app-core:test \
+  --tests '*ProjectLogoImageProcessingServiceBeanTest*' \
+  --tests '*ProjectLogoImageProcessingServiceCoreBeanLookupTest*' \
+  --tests '*ProjectLogoAiFunctionSeedContractTest*' \
+  --no-daemon
+```
+
+## 7. Инструкция по развертыванию
+
+- Код входит в артефакты `app-global`, `app-core`, web-клиент; миграция БД — seed AI-функции (применяется штатным `updateDb`/Liquibase).
+- Web-артефакт обязан содержать запись `hunttech_ProjectLogoImageProcessingService` в `WebRemoteProxyBeanCreator`.
+- Для AI-этапа администратор настраивает в «Управление AI»: активную корпоративную конфигурацию (провайдер OpenAI, ключ), модель `gpt-image-2` (или свою) у функции `PROJECT_LOGO_IMAGE_GENERATE`. Без настройки — автоматический классический конвейер.
+- Локальный deploy точного HEAD, перезапуск Tomcat, HTTP `/hrm/` = 200, smoke: ProjectEdit → загрузка логотипа → лог без `NoSuchBeanDefinitionException`.
+
+---
+
+## История изменений
+
+| Дата | Изменение |
+|------|-----------|
+| 2026-08-13 | AI-first: функция `PROJECT_LOGO_IMAGE_GENERATE` (IMAGE_GENERATION, OpenAI `images/edits`) с детерминированным классическим fallback; исправлена интеграция web↔core (запись в `WebRemoteProxyBeanCreator` устранила `NoSuchBeanDefinitionException`); конфиг `hunttech.projectLogo.ai.enabled` |
+| 2026-08-12 | Создание сервиса: классический конвейер (PNG, ресайз 300, flood-fill белого фона, вписывание в круг), интеграция с `WebProjectLogoFileUploadField` |

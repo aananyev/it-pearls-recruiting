@@ -83,6 +83,7 @@ docs/
 │   └── ui-template.md        ← шаблон UI Spec (6 разделов)
 ├── services/
 │   ├── ImageProcessingService.md  ← сжатие/масштабирование фото профиля
+│   ├── ProjectLogoImageProcessingService.md  ← AI-обработка логотипа проекта (фон, круг)
 │   └── UserAiContextService.md    ← безопасная сборка ИИ-контекста
 ├── components/
 │   └── FallbackImage.md           ← UI-компонент placeholder для image
@@ -151,6 +152,7 @@ docs/
 | Понять подсистему кандидатов | [entities/JobCandidate.md](entities/JobCandidate.md) · UI: [каталог](ui/README.md#jobcandidate) |
 | Понять подсистему вакансий | [entities/OpenPosition.md](entities/OpenPosition.md) · [architecture/OpenPosition_Spec.md](architecture/OpenPosition_Spec.md) · UI: [каталог](ui/README.md#openposition) |
 | Обработка фото профиля (сжатие, лимиты) | [services/ImageProcessingService.md](services/ImageProcessingService.md) · [entities/ExtUser.md](entities/ExtUser.md) |
+| AI-обработка логотипа проекта (фон, круг) | [services/ProjectLogoImageProcessingService.md](services/ProjectLogoImageProcessingService.md) · [integrations/ai/AI_INTEGRATION.md](integrations/ai/AI_INTEGRATION.md) |
 | Модуль пользователя и синхронизация фото (TDD) | [02_business_logic/user-settings-photo-sync.md](02_business_logic/user-settings-photo-sync.md) |
 | UI-компонент FallbackImage (placeholder для image) | [components/FallbackImage.md](components/FallbackImage.md) · [ui/FallbackImage_Component.md](ui/FallbackImage_Component.md) |
 | UI-компонент OvalImage (круглый аватар) | [ui-components/OvalImage.md](ui-components/OvalImage.md) |

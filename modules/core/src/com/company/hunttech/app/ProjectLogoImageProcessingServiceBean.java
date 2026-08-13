@@ -1,6 +1,7 @@
 package com.company.hunttech.app;
 
 import com.company.hunttech.config.HunttechProjectLogoConfig;
+import com.company.hunttech.service.AiExecutionService;
 import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.DevelopmentException;
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +18,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Реализация обработки логотипа проекта.
@@ -24,6 +27,10 @@ import java.util.Deque;
  * <p>Конвейер преобразований (все шаги выполняются в памяти до записи в файловое хранилище):</p>
  * <ol>
  *     <li>чтение растрового изображения любого поддерживаемого формата (ImageIO);</li>
+ *     <li>AI-первый этап (если включён {@code hunttech.projectLogo.ai.enabled}): функция
+ *         {@code PROJECT_LOGO_IMAGE_GENERATE} (capability IMAGE_GENERATION) удаляет фон
+ *         нейросетью; при недоступности AI (функция не активна, нет credentials, ошибка
+ *         провайдера) — бесшовный переход к классическому конвейеру;</li>
  *     <li>перевод в ARGB и конвертация в PNG (нужна прозрачность после удаления фона);</li>
  *     <li>если сторона больше {@code maxSize} — пропорциональное уменьшение до {@code maxSize};</li>
  *     <li>удаление белого фона: flood-fill от краёв изображения — белые пиксели, достижимые
@@ -39,6 +46,12 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
     private static final Logger log = LoggerFactory.getLogger(ProjectLogoImageProcessingServiceBean.class);
 
     /**
+     * Стабильный код AI-функции удаления фона логотипа (см. AiFunctionConfiguration,
+     * capability IMAGE_GENERATION). Управляется администратором в «Управление AI» без кода.
+     */
+    public static final String FUNCTION_PROJECT_LOGO_IMAGE_GENERATE = "PROJECT_LOGO_IMAGE_GENERATE";
+
+    /**
      * Запас канваса относительно диагонали логотипа (5%) — логотип не касается границы круга.
      */
     private static final double CANVAS_MARGIN = 0.95;
@@ -50,6 +63,9 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
 
     @Inject
     private Configuration configuration;
+
+    @Inject
+    private AiExecutionService aiExecutionService;
 
     @Override
     public ProcessedImage process(byte[] data, String fileName) {
@@ -71,6 +87,19 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
             if (source == null) {
                 log.debug("Файл {} не является растровым изображением, обработка пропущена", fileName);
                 return new ProcessedImage(data, name, extension, false);
+            }
+
+            // 0. AI-первый этап: нейросеть удаляет фон; результат проходит тот же
+            // детерминированный финал (ресайз, обрезка, круг). При сбое — классический конвейер.
+            byte[] aiResult = tryAiBackgroundRemoval(data, fileName, config);
+            if (aiResult != null) {
+                BufferedImage aiImage = ImageIO.read(new ByteArrayInputStream(aiResult));
+                if (aiImage != null) {
+                    source = aiImage;
+                } else {
+                    log.warn("AI-результат логотипа {} не является растровым изображением, используется оригинал",
+                            fileName);
+                }
             }
 
             // 1. Единое представление с альфа-каналом (ARGB) — основа для PNG и прозрачности.
@@ -105,6 +134,62 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
             log.error("Ошибка обработки логотипа {}: {}", fileName, e.toString(), e);
             throw new DevelopmentException("Failed to process project logo: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Пробует AI-удаление фона логотипа через функцию {@link #FUNCTION_PROJECT_LOGO_IMAGE_GENERATE}.
+     *
+     * <p>Любая недоступность AI (функция не активна, не настроено подключение, ошибка
+     * провайдера, сетевой таймаут) не прерывает загрузку: возвращается {@code null},
+     * и вызывающий код продолжает классическим конвейером.</p>
+     *
+     * @return обработанное изображение или {@code null} при недоступности AI
+     */
+    private byte[] tryAiBackgroundRemoval(byte[] data, String fileName, HunttechProjectLogoConfig config) {
+        if (!config.getAiProcessingEnabled()) {
+            log.debug("AI-обработка логотипа отключена конфигом hunttech.projectLogo.ai.enabled=false");
+            return null;
+        }
+        try {
+            Map<String, Object> context = new LinkedHashMap<>();
+            context.put("sourceFileName", safeValue(fileName));
+            byte[] result = aiExecutionService.executeImage(
+                    FUNCTION_PROJECT_LOGO_IMAGE_GENERATE, context, data, detectMimeType(fileName));
+            if (result == null || result.length == 0) {
+                log.warn("AI вернул пустой результат для логотипа {}, используется классический конвейер", fileName);
+                return null;
+            }
+            log.info("Логотип {} обработан AI-функцией {}", fileName, FUNCTION_PROJECT_LOGO_IMAGE_GENERATE);
+            return result;
+        } catch (Exception e) {
+            log.warn("AI-обработка логотипа {} недоступна, используется классический конвейер. Причина: {}",
+                    fileName, e.toString());
+            return null;
+        }
+    }
+
+    private String detectMimeType(String fileName) {
+        String extension = extractExtension(fileName);
+        if (extension == null) {
+            return "image/png";
+        }
+        switch (extension.toLowerCase()) {
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+            case "gif":
+                return "image/gif";
+            case "bmp":
+                return "image/bmp";
+            case "webp":
+                return "image/webp";
+            default:
+                return "image/png";
+        }
+    }
+
+    private String safeValue(String value) {
+        return value == null ? "" : value.trim();
     }
 
     /**
