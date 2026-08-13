@@ -42,4 +42,5 @@
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-13 | Чекбоксы 7 форм серии (в т.ч. «В штате» `inStaffField` у EmployeeWorkStatusEdit) переведены на общие стили темы CUBA Platform (Valo): из локального партиала `dictionary-edit-forms.scss` (7 тем) удалена кастомная стилизация квадратика/подписи (`padding: 3px 0` + подпись 14px/1.4) — штатные отступы темы исключают наезд чекбокса на элементы под ним; добавлен контрактный тест `DictionaryEditFormsCheckboxContractTest` |
 | 2026-08-13 | Создание Spec серии: 7 справочных Edit-форм приведены к общему контракту Edit-экранов (sidebar 270px + edit-card + label-nav с полосой-заголовком `dictionary-navigation-title`, `showAsPanel=true`); добавлена штатная заглушка-логотип `OvaFallbackImage` 176×176 с fallback `icons/hunttech-logo.png` (для `SocialNetworkTypeEdit` — реальный логотип с upload); локальный SCSS `dictionary-edit-forms.scss` во всех 7 темах; caption-ключи в локальных messages-пакетах; тесты `DictionaryEditFormsContractTest` и `DictionaryEditFormsDetachedObjectTest`. |

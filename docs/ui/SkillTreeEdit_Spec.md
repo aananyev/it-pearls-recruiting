@@ -130,6 +130,7 @@ window skill-tree-editor (100%×100%, modal)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-13 | Чекбокс «Не участвовать в парсинге» (`notParsingCheckBox`) переведён на общие стили темы CUBA Platform (Valo): из локального партиала `skill-tree-editor.scss` (7 тем) удалена кастомная стилизация квадратика/подписи (`padding: 3px 0` + подпись 14px/1.4) — штатные отступы темы исключают наезд чекбокса на элементы под ним; контрактный тест `DictionaryEditFormsCheckboxContractTest` |
 | 2026-08-12 | Аватар `skillPic` приведён к размеру 176×176 (width/height/ovalWidth/ovalHeight в XML + SCSS `.skill-tree-logo-image` во всех 7 темах) — в точности как `candidatePic` эталона JobCandidateEdit; контрактный тест обновлён (`ovalWidth/ovalHeight=176px`). |
 | 2026-08-12 | Исправлено смещение подсветки label-навигации: halo-тема добавляет nav-кнопке `:before` (inline-block, vertical-align:middle), который при `display:flex` у `.v-button-wrap` выталкивает текст вниз («выделение на строку выше текста») — псевдоэлемент отключён `.label-nav-item:before/.v-button-label-nav-item:before { display:none; content:none }` во всех 7 темах; контрактный тест дополнен тремя проверками; CDP: текст по центру кнопки (delta=0). |
 | 2026-08-12 | `richTextArea` «Описание навыка» расширена по вертикали до высоты экрана: вместо фикс. `height="280px"` — stylename `skill-description-rich-text` с высотой `calc(100vh − 230px)` и `min-height: 320px` (все 7 тем); обновлены §6 и комментарий XML. |

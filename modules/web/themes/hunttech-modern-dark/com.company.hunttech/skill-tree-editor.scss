@@ -428,17 +428,8 @@
       table-layout: fixed;
     }
 
-    // Чекбоксы карточек: вертикальный ритм и шрифт 14px/1.4 как у эталона
-    // IteractionListEdit (flat-section .v-checkbox).
-    .edit-card .v-checkbox {
-      padding: 3px 0;
-    }
-
-    .edit-card .v-checkbox label {
-      color: mix($v-font-color, $v-panel-background-color, 78%) !important;
-      font-size: 14px !important;
-      line-height: 1.4 !important;
-    }
+    // Чекбоксы формы используют общие стили темы CUBA Platform (Valo): без
+    // локальной кастомизации квадратика и подписи — штатные отступы темы.
 
     // RichTextArea (описание навыка) получает единый стиль полей формы:
     // рамка rgba($v-font-color,.20) и скругление 5px вместо вало-дефолта.

@@ -337,17 +337,9 @@
       background: mix($v-app-background-color, $v-panel-background-color, 62%) !important;
     }
 
-    // Чекбоксы карточек (признак «в штате»): вертикальный ритм и шрифт
-    // как у эталона IteractionListEdit.
-    .edit-card .v-checkbox {
-      padding: 3px 0;
-    }
-
-    .edit-card .v-checkbox label {
-      color: mix($v-font-color, $v-panel-background-color, 78%) !important;
-      font-size: 14px !important;
-      line-height: 1.4 !important;
-    }
+    // Чекбоксы форм используют общие стили темы CUBA Platform (Valo): без
+    // локальной кастомизации квадратика и подписи — штатные отступы темы
+    // исключают наезд чекбокса на элементы под ним.
 
     // Кнопки внутри карточек и footer: единая геометрия кнопок Edit-форм.
     .edit-card .v-button {

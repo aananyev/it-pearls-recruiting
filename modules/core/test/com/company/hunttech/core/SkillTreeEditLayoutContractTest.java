@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -351,10 +352,10 @@ public class SkillTreeEditLayoutContractTest {
                 canon.contains("padding: 14px 16px 16px !important"));
         // Межкарточный отступ 12px (эталон flat-section margin-bottom 12px).
         assertTrue("margin карточек не 12px", canon.contains("margin-bottom: 12px"));
-        // Чекбокс карточки: 14px/1.4 mix 78% (эталон flat-section .v-checkbox label).
-        assertTrue("Нет стиля чекбокса 14px/1.4",
-                canon.contains(".edit-card .v-checkbox label"));
-        assertTrue("Чекбокс не 14px", canon.contains("font-size: 14px !important"));
+        // Чекбокс карточки — на общих стилях темы CUBA Platform (Valo), без локальной
+        // кастомизации квадратика/подписи (контракт 2026-08-13).
+        assertFalse("Осталась кастомизация чекбокса",
+                canon.contains(".edit-card .v-checkbox"));
         // RichTextArea — единый стиль полей (рамка rgba 20%, скругление 5px).
         assertTrue("Нет стиля .v-richtextarea", canon.contains(".edit-card .v-richtextarea"));
         // Footer: верхняя тень и hover-эффект кнопок (эталон iteraction-list-footer).

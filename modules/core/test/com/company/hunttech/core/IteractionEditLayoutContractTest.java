@@ -177,11 +177,12 @@ public class IteractionEditLayoutContractTest {
         assertTrue(scss.contains("min-height: 50px"));
         assertTrue(scss.contains("font-size: 17px !important"));
 
-        // Подписи полей — 13px/600, чекбоксы — 14px (1:1 с эталоном).
+        // Подписи полей — 13px/600 (1:1 с эталоном); чекбоксы — на общих стилях
+        // темы CUBA Platform (Valo), без локальной кастомизации (контракт 2026-08-13).
         assertTrue(scss.contains(".edit-card .v-caption .v-captiontext"));
         assertTrue(scss.contains("font-size: 13px !important"));
-        assertTrue(scss.contains(".edit-card .v-checkbox label"));
-        assertTrue(scss.contains("font-size: 14px !important"));
+        assertFalse(scss.contains(".edit-card .v-checkbox"));
+        assertFalse(scss.contains(".edit-card .v-select-optiongroup label"));
 
         // Глобальных вало-селекторов быть не должно.
         assertFalse(scss.contains("\n  .v-button"));
