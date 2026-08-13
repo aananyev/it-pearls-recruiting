@@ -36,4 +36,8 @@
     <include file="260812-2-addProjectDescriptionAiFunction.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Канонические русские административные prompt для PROJECT_DESCRIPTION_GENERATE. -->
+    <include file="260813-1-localizeProjectDescriptionAiPrompts.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
