@@ -57,12 +57,13 @@ Shared Edit: sidebar 312px → workspace → toolbar → three `edit-card` → f
 | Footer | min-height 62px, padding 11px 20px, border-top rgba(52,66,79,0.16), shadow 0 -2px 8px rgba(15,23,42,0.04) |
 | Footer-кнопки | min-height 40px, padding 0 18px, 14px/600, border-radius 4px; OK primary, Отмена transparent |
 
-Sidebar-логотип: `ovaFallbackImage` 176×176, border-radius 50% — как фото кандидата в JobCandidateEdit (эталон).
+Sidebar-иллюстрация: `ovaFallbackImage` отображается 176×176, использует отдельный theme asset `icons/ai/admin-ai-configuration.png` размером 200×200. Графика выполнена в фирменной чёрно-серо-бело-красной палитре HRM HuntTech и передаёт смысл защищённого корпоративного AI credential через HuntTech-монограмму, shield/key и элементы системной конфигурации.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-13 | Общий fallback `icons/hunttech-logo.png` заменён на тематическую иллюстрацию корпоративного AI-подключения `icons/ai/admin-ai-configuration.png`: исходный asset 200×200, отображение `ovaFallbackImage` сохранено 176×176 |
 | 2026-08-13 | Размер sidebar-логотипа `ovaFallbackImage` приведён к эталону JobCandidateEdit: 176×176 (было 96×96) |
 | 2026-08-12 | Детальный дифф по эталону IteractionListEdit (30 отличий): footer-паттерн `expand=editActionsSpacer` + `editActionsGroup` (AUTO, MIDDLE_RIGHT) — кнопки прижаты в правый нижний угол; primary/secondary-классы кнопок (`admin-ai-configuration-primary-action`/`secondary-action`); sidebar title 18px/700 `#ffb11b`/24px, subtitle 12px/400 `rgba(248,250,252,0.72)`/17px; toolbar title 20px/700, description mix 60%/18px, border-bottom 0.16; карточки margin-bottom 12px; чекбокс padding 3px 8px; textarea line-height 21.75px/padding 4px; footer min-height 62px/padding 11px 20px/border-top 0.16/shadow 0 -2px 8px; кнопки footer 40px/padding 0 18px/600/radius 4px + hover brightness(0.98) + focus ring. Обновлён партиал `admin-ai-configuration-editor.scss` (7 тем, sha256-идентичен) |
 | 2026-08-12 | Рефакторинг по эталону IteractionListEdit: локальный partial `admin-ai-configuration-editor.scss` (7 тем, sha256-идентичен), тёмная sidebar #172638 312px с padding 14px 16px 12px, border-right и box-shadow (слот — только фон), каноническая label-навигация с полосой-заголовком `admin-ai-configuration-navigation-title` (§4.1, inset-линии), media-тиры 296/284px; edit-form-control на все поля + caption msg-ключами |

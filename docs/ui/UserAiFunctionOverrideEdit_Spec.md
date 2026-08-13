@@ -46,12 +46,13 @@ Shared Edit: 312px sidebar → workspace → two `edit-card` → footer. Root `u
 
 Контроллер не читает `apiKey`; safe picker view не содержит secret. Execution view с key используется только core resolver.
 
-Sidebar-логотип: `ovaFallbackImage` 176×176, border-radius 50% — как фото кандидата в JobCandidateEdit (эталон).
+Sidebar-иллюстрация: `ovaFallbackImage` отображается 176×176 и использует отдельный theme asset `icons/ai/user-ai-function-override.png` размером 200×200. Графика в фирменной чёрно-серо-бело-красной палитре HRM HuntTech объединяет HuntTech-монограмму, две конфигурации и switch/arrow, чтобы показать смысл per-function пользовательского замещения.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-13 | Общий fallback `icons/hunttech-logo.png` заменён на тематическую иллюстрацию пользовательского AI-замещения `icons/ai/user-ai-function-override.png`: исходный asset 200×200, отображение `ovaFallbackImage` сохранено 176×176 |
 | 2026-08-13 | Размер sidebar-логотипа `ovaFallbackImage` приведён к эталону JobCandidateEdit: 176×176 (было 96×96) |
 | 2026-08-12 | Рефакторинг по эталону IteractionListEdit: локальный partial `user-ai-function-override-editor.scss` (7 тем, sha256-идентичен), тёмная sidebar #172638 312px с padding 14px 16px 12px, border-right и box-shadow (слот — только фон), каноническая label-навигация с полосой-заголовком `user-ai-function-override-navigation-title` (§4.1, inset-линии), media-тиры 296/284px; edit-form-control на все поля + caption msg-ключами |
 | 2026-08-12 | Создана Edit-форма персонального per-function override по общему Edit-контракту |

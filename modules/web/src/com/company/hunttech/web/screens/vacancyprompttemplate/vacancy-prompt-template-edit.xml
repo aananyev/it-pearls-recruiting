@@ -43,7 +43,7 @@
                       stylename="edit-sidebar-identity"
                       width="100%"
                       spacing="true">
-                    <!-- Логотип по умолчанию: круглый логотип компании (fallback-изображение, без привязки к данным). -->
+                    <!-- Тематическая HuntTech-иллюстрация шаблона промпта; fallback без привязки к данным. -->
                     <ovaFallbackImage id="vacancyPromptTemplateLogoImage"
                                       width="176px"
                                       height="176px"
@@ -52,7 +52,7 @@
                                       visible="true"
                                       align="MIDDLE_CENTER"
                                       scaleMode="SCALE_DOWN"
-                                      fallbackThemePath="icons/hunttech-logo.png"/>
+                                      fallbackThemePath="icons/ai/vacancy-prompt-template.png"/>
                     <!-- Подпись типа записи. -->
                     <label value="Шаблон промпта"
                            stylename="edit-sidebar-subtitle"
