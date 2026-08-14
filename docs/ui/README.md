@@ -16,6 +16,9 @@
 | `ExtSettingsWindowAvatar` | [ExtSettingsWindowAvatar_Spec.md](ExtSettingsWindowAvatar_Spec.md) | Круглая фотография пользователя через `OvaFallbackImage` без изменения модели данных |
 | `HrmMainScreen` | [HrmMainScreen_Spec.md](HrmMainScreen_Spec.md) | Главный dashboard с персональным фоном либо случайным каталогом 7 × 10 нейтральных SVG |
 | `IteractionListEdit` | [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) · [XML-компоновка](IteractionListEdit_XmlLayout_2026-07-27.md) | Бизнес-логика взаимодействия, контекстная sidebar, аккордеоны и сохранённые CUBA-контракты |
+| `IteractionEdit` | [IteractionEdit_Spec.md](IteractionEdit_Spec.md) | Справочник типов взаимодействий: sidebar с label-навигацией по вкладкам, карточки-панели, lazy LOB/справочники; компоновка по эталону IteractionListEdit |
+| `SkillTreeEdit` | [SkillTreeEdit_Spec.md](SkillTreeEdit_Spec.md) | Справочник «Дерево компетенций»: sidebar с логотипом и label-навигацией, карточки-панели, парсинг описания Wiki |
+| `ProjectEdit` | [ProjectEdit_Spec.md](ProjectEdit_Spec.md) | Проект (заказчик/группа вакансий): sidebar с логотипом и навигацией «Разделы», карточки-панели, ленивые вкладки LOB и вакансий |
 | `OutstaffingRatesBrowse` | [OutstaffingRatesBrowse_Spec.md](OutstaffingRatesBrowse_Spec.md) | Рейты по аутстафу — список ступеней шкалы (lookup, CRUD) |
 | `OutstaffingRatesEdit` | [OutstaffingRatesEdit_Spec.md](OutstaffingRatesEdit_Spec.md) | Рейты по аутстафу — форма ступени (commit → триггеры маржинальности и аудита) |
 | Halo Precision Components | [HaloPrecisionComponents_Spec.md](HaloPrecisionComponents_Spec.md) | Точное воспроизведение варианта 1 (светлый голубой) для Halo: namespace `ht-halo-precision-*`, метрики из референсов halo_variant1_*.png |

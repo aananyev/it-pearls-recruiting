@@ -297,8 +297,17 @@
       font-weight: 600 !important;
     }
 
-    // Чекбоксы и радио формы используют общие стили темы CUBA Platform (Valo):
-    // без локальной кастомизации квадратика и подписи — штатные отступы темы.
+    // Чекбоксы и радио внутри карточек — 1:1 с эталоном (14px, mix 78%).
+    .edit-card .v-checkbox {
+      padding: 3px 0;
+    }
+
+    .edit-card .v-checkbox label,
+    .edit-card .v-select-optiongroup label {
+      color: mix($v-font-color, $v-panel-background-color, 78%) !important;
+      font-size: 14px !important;
+      line-height: 1.4 !important;
+    }
 
     // Readonly-поля в карточках — серый фон, как в эталоне.
     .edit-card .v-textfield-readonly,

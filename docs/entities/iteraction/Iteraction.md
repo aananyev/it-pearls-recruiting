@@ -368,7 +368,6 @@ rg "view=\".*iteraction" modules/ --glob '*.xml'
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-08-13 | Sidebar `IteractionEdit`: иконка `REFRESH_ACTION` 96px заменена на круглую статичную иллюстрацию `ovalImage` 176×176 (`icons/dictionaries/iteraction.png`, stylename `dictionary-logo-image`); из `iteraction-editor.scss` (7 тем) удалены стили `iteraction-editor-icon-preview`; тест `DictionaryEditFormIllustrationContractTest` |
 | 2026-08-11 | Label-навигация видна на всех 8 вкладках (убрано скрытие на одноблочных «Кнопка»/«Уведомления»/«Виджеты», правило 3.6 не применяется) |
 | 2026-08-11 | Рефакторинг `IteractionEdit` по эталону `IteractionListEdit`: sidebar+workspace, label-навигация по вкладкам (presentation-only Java), карточки-панели, toolbar/footer по общему Edit-контракту; `iteraction-editor.scss` × 7 тем; контрактный тест `IteractionEditLayoutContractTest` |
 | 2026-06-22 | Аудит Edit unfetched FK: `IteractionEdit` — обращения только к полям `iteraction-edit-view`; LOB lazy reload — OK |

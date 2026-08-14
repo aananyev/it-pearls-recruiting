@@ -12,7 +12,6 @@ import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Events;
-import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.ViewBuilder;
@@ -20,10 +19,6 @@ import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.executors.BackgroundTask;
-import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
-import com.haulmont.cuba.gui.executors.BackgroundWorker;
-import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.model.DataContext;
@@ -34,14 +29,12 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 @UiController("hunttech_Project.edit")
 @UiDescriptor("project-edit.xml")
@@ -123,6 +116,30 @@ public class ProjectEdit extends StandardEditor<Project> {
 
     private FileUploadField projectDescriptionUpload;
     private Label<String> projectDescriptionAiStatus;
+
+    // Presentation-контракт sidebar: пункты label-навигации «Разделы» = вкладки TabSheet
+    // правой части экрана (по явному указанию владельца; навигация видна на всех
+    // вкладках, правило контракта §3.6 не применяется). Активное состояние управляется
+    // presentation-only методами ниже.
+    @Inject
+    private Label projectSidebarTitle;
+    @Inject
+    private Button projectEditorNavMain;
+    @Inject
+    private Button projectEditorNavDescription;
+    @Inject
+    private Button projectEditorNavVacancy;
+    @Inject
+    private Button projectEditorNavTemplate;
+
+    /** Соответствие «имя вкладки TabSheet → пункт label-навигации». */
+    private static final Map<String, String> TAB_TO_NAV_BUTTON =
+            Collections.unmodifiableMap(new HashMap<String, String>() {{
+                put("tabProject", "projectEditorNavMain");
+                put("tabProjectDescription", "projectEditorNavDescription");
+                put("tabVacansy", "projectEditorNavVacancy");
+                put("tabTemplateLetter", "projectEditorNavTemplate");
+            }});
 
     // Presentation-контракт sidebar: пункты label-навигации «Разделы» = вкладки TabSheet
     // правой части экрана (по явному указанию владельца; навигация видна на всех
