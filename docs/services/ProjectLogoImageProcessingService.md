@@ -1,6 +1,6 @@
 # ProjectLogoImageProcessingService (`hunttech_ProjectLogoImageProcessingService`)
 
-> Серверная обработка логотипа проекта, загружаемого пользователем в форме ProjectEdit: AI-удаление фона (capability IMAGE_GENERATION) с детерминированным классическим fallback, ресайз, вписывание в круг.
+> Серверная обработка логотипа проекта, загружаемого пользователем в форме ProjectEdit: локальный rembg-этап (бесплатная нейросеть u2net на сервере приложения) и AI-удаление фона (capability IMAGE_GENERATION) с детерминированным классическим fallback, ресайз, вписывание в круг.
 
 **Связанные документы:** [AI_INTEGRATION](../integrations/ai/AI_INTEGRATION.md) · [Project Edit Spec](../screens/project/hunttech_Project.edit_Spec.md) · [ImageProcessingService](file-storage/ImageProcessingService.md) (фото профиля)
 
@@ -10,7 +10,7 @@
 
 ### Назначение и Бизнес-смысл (What & Why)
 
-Рекрутёры прикрепляют к проекту логотип — изображение компании/продукта в произвольном формате (JPEG, PNG, GIF, BMP, WebP). Логотип отображается в круглом аватаре `ovaFallbackImage` в списках и карточках. Без нормализации файл может быть тяжёлым, а прямоугольное изображение с белым фоном выглядит чужеродно в круглом аватаре (белые углы, обрезка контента по краям круга). **ProjectLogoImageProcessingService** приводит любой загруженный логотип к единому виду: PNG с прозрачным фоном, максимум 300×300, содержимое вписано в круг. С 13.08.2026 фон удаляет нейросеть (AI-функция `PROJECT_LOGO_IMAGE_GENERATE`), а классический конвейер остаётся автоматическим fallback — загрузка никогда не прерывается недоступностью ИИ.
+Рекрутёры прикрепляют к проекту логотип — изображение компании/продукта в произвольном формате (JPEG, PNG, GIF, BMP, WebP). Логотип отображается в круглом аватаре `ovaFallbackImage` в списках и карточках. Без нормализации файл может быть тяжёлым, а прямоугольное изображение с белым фоном выглядит чужеродно в круглом аватаре (белые углы, обрезка контента по краям круга). **ProjectLogoImageProcessingService** приводит любой загруженный логотип к единому виду: PNG с прозрачным фоном, максимум 300×300, содержимое вписано в круг. С 13.08.2026 фон удаляет нейросеть (AI-функция `PROJECT_LOGO_IMAGE_GENERATE`); с 14.08.2026 первым шагом AI-конвейера стал локальный rembg (бесплатная нейросеть u2net, развёрнутая на сервере приложения — данные не покидают сервер и не требуют API-ключей), а классический конвейер остаётся автоматическим fallback — загрузка никогда не прерывается недоступностью ИИ.
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
@@ -25,6 +25,7 @@
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
 - **Загрузка логотипа** → `WebProjectLogoFileUploadField.saveFile` → `beanLocator.get(ProjectLogoImageProcessingService.NAME)` (proxy) → `process(data, fileName)`.
+- **rembg-этап** (если `hunttech.projectLogo.rembg.enabled=true`): первый шаг AI-конвейера — POST `{url}/api/remove` (multipart, поле `file`) на локальный сервер приложения; u2net возвращает PNG с прозрачным фоном без внешних API и ключей. Недоступен (сервис лежит, таймаут, HTTP-ошибка) → платный AI-этап.
 - **AI-этап** (если `hunttech.projectLogo.ai.enabled=true`): функция `PROJECT_LOGO_IMAGE_GENERATE` получает изображение и возвращает PNG с прозрачным фоном (OpenAI `images/edits`, модель `gpt-image-2`).
 - **AI недоступен** (функция не активна, нет credentials, таймаут/ошибка провайдера) → лог `warn` + классический конвейер: удаление белого фона по порогу 235 (`removeAllWhite=true` — включая замкнутые полости внутри букв) и серого фона (насыщенность ≤ 30, яркость ≥ 40 — фон-градиенты типа логотипа SSP), плавный край белого фона (EDGE_SOFTNESS 24), серый фон — полностью прозрачный.
 - **Детерминированный финал** (всегда): ARGB → ресайз до 300px → обрезка по содержимому → квадратный канвас со стороной = диагонали/0.95 → PNG.
@@ -46,7 +47,7 @@
 | Реестр web proxy | `modules/web/src/com/company/hunttech/web-spring.xml` |
 | CUBA service name | `hunttech_ProjectLogoImageProcessingService` |
 
-Зависимости реализации: `AiExecutionService` (AI-этап), CUBA `Configuration`, `ImageIO`/Java2D (классический конвейер), Apache Commons Lang.
+Зависимости реализации: `AiExecutionService` (платный AI-этап), локальный HTTP-вызов rembg (`HttpURLConnection`, multipart form-data), CUBA `Configuration`, `ImageIO`/Java2D (классический конвейер), Apache Commons Lang.
 
 ### 1.1. Граница web/core
 
@@ -66,7 +67,10 @@
 | `circleInscribeRatioPercent` | `hunttech.projectLogo.circleInscribeRatio` | int | **71** | Резерв на будущее; реализация использует `CANVAS_MARGIN=0.95` от диагонали |
 | `removeAllWhite` | `hunttech.projectLogo.removeAllWhite` | boolean | **true** | Удалять ВСЕ белые пиксели по порогу, включая замкнутые полости внутри букв (просвет «А»); `false` — flood-fill только от краёв (белые элементы дизайна сохраняются) |
 | `enabled` | `hunttech.projectLogo.enabled` | boolean | **true** | Общий выключатель обработки |
-| `aiProcessingEnabled` | `hunttech.projectLogo.ai.enabled` | boolean | **true** | AI-первый этап; `false` — сразу классический конвейер |
+| `aiProcessingEnabled` | `hunttech.projectLogo.ai.enabled` | boolean | **true** | Платный AI-этап; `false` — сразу классический конвейер (после rembg) |
+| `rembgEnabled` | `hunttech.projectLogo.rembg.enabled` | boolean | **true** | Локальный rembg-этап (первый шаг AI-конвейера); `false` — сразу платный AI |
+| `rembgUrl` | `hunttech.projectLogo.rembg.url` | String | **http://127.0.0.1:7000** | Базовый URL rembg-сервера; эндпоинт `{url}/api/remove` (multipart `file`) |
+| `rembgTimeoutMs` | `hunttech.projectLogo.rembg.timeoutMs` | int | **15000** | Таймаут HTTP-запроса к rembg, мс (обработка 0.7–2.5 с + холодный старт модели) |
 
 ## 3. API сервиса
 
@@ -86,14 +90,15 @@ ProcessedImage process(byte[] data, String fileName);
 
 DTO реализует `Serializable` — обязательная часть удалённого контракта web ↔ core.
 
-## 4. Правила обработки (AI-first)
+## 4. Правила обработки (rembg → AI → классика)
 
 1. `data == null` или `length == 0` → `DevelopmentException("Empty image data")`.
 2. `ImageIO.read` вернул `null` → оригинал, `processed=false`.
-3. `aiProcessingEnabled=true` → `AiExecutionService.executeImage("PROJECT_LOGO_IMAGE_GENERATE", {sourceFileName}, data, mimeType)`.
-4. AI-результат — растровый → используется как источник для финала; пустой/не-растровый/исключение → классический конвейер (лог `warn`, загрузка продолжается).
-5. Финал (всегда): ARGB → ресайз ≤ `maxSize` → удаление белого/серого фона (flood-fill от краёв: белые по порогу 235; серые — насыщенность ≤ 30 при яркости ≥ 40, полностью прозрачные) → обрезка по содержимому → `fitIntoCircle` → запись в `format`.
-6. Ошибка IO при обработке → `DevelopmentException`.
+3. `rembgEnabled=true` → `POST {rembgUrl}/api/remove` (multipart `file`, таймаут `rembgTimeoutMs`); PNG-ответ используется как источник для финала.
+4. rembg недоступен (выключен, таймаут, HTTP-ошибка, пустой/не-растровый ответ) → `warn` + платный AI-этап: `aiProcessingEnabled=true` → `AiExecutionService.executeImage("PROJECT_LOGO_IMAGE_GENERATE", {sourceFileName}, data, mimeType)`.
+5. AI-результат — растровый → используется как источник для финала; пустой/не-растровый/исключение → классический конвейер (лог `warn`, загрузка продолжается).
+6. Финал (всегда): ARGB → ресайз ≤ `maxSize` → удаление белого/серого фона (flood-fill от краёв: белые по порогу 235; серые — насыщенность ≤ 30 при яркости ≥ 40, полностью прозрачные) → обрезка по содержимому → `fitIntoCircle` → запись в `format`.
+7. Ошибка IO при обработке → `DevelopmentException`.
 
 AI-контекст функции: `sourceFileName` (имя загруженного файла). Промпт и модель задаёт администратор; seed `260813-2-addProjectLogoAiFunction` — INSERT-only и идемпотентный.
 
@@ -108,6 +113,7 @@ AI-контекст функции: `sourceFileName` (имя загруженн�
 | Файл | Назначение |
 |------|------------|
 | `modules/core/test/com/company/hunttech/hunttech/core/ProjectLogoImageProcessingServiceBeanTest.java` | классический конвейер: конвертация, ресайз, прозрачность, круг, pass-through |
+| `modules/core/test/com/company/hunttech/hunttech/core/ProjectLogoRembgServiceBeanTest.java` | rembg-этап: доступен → результат используется; недоступен/отключён → классический fallback (встроенный `HttpServer`-заглушка на случайном порту, конфиг через `AppContext.setProperty`) |
 | `modules/core/test/com/company/hunttech/core/ProjectLogoImageProcessingServiceCoreBeanLookupTest.java` | запись proxy в `web-spring.xml`, запрет class-based lookup, AI-контракт с fallback |
 | `modules/core/test/com/company/hunttech/core/ProjectLogoAiFunctionSeedContractTest.java` | seed: INSERT-only, capability IMAGE_GENERATION, русские промпты, `gpt-image-2`, include в master |
 
@@ -117,6 +123,7 @@ AI-контекст функции: `sourceFileName` (имя загруженн�
 export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 ./gradlew :app-core:test \
   --tests '*ProjectLogoImageProcessingServiceBeanTest*' \
+  --tests '*ProjectLogoRembgServiceBeanTest*' \
   --tests '*ProjectLogoImageProcessingServiceCoreBeanLookupTest*' \
   --tests '*ProjectLogoAiFunctionSeedContractTest*' \
   --no-daemon
@@ -126,7 +133,8 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 
 - Код входит в артефакты `app-global`, `app-core`, web-клиент; миграция БД — seed AI-функции (применяется штатным `updateDb`/Liquibase).
 - Web-артефакт обязан содержать запись `hunttech_ProjectLogoImageProcessingService` в `WebRemoteProxyBeanCreator`.
-- Для AI-этапа администратор настраивает в «Управление AI»: активную корпоративную конфигурацию (провайдер OpenAI, ключ), модель `gpt-image-2` (или свою) у функции `PROJECT_LOGO_IMAGE_GENERATE`. Без настройки — автоматический классический конвейер.
+- **rembg-сервер** (развёрнут 14.08.2026 на проде `hr.hunttech.ru`): systemd `rembg.service` (юзер `rembg`, `NoNewPrivileges`), venv `/opt/rembg/venv`, модель `/opt/rembg/.u2net/u2net.onnx` (168 МБ), слушает только `127.0.0.1:7000`; эндпоинт `POST /api/remove` (в rembg 2.0.78 — именно `/api/remove`, `/health` отсутствует). Время: первый запрос ~2.2 с (загрузка модели), повторные ~0.7 с. Подробности и питфоллы установки — в скилле `hunttech-devops`.
+- Для платного AI-этапа администратор настраивает в «Управление AI»: активную корпоративную конфигурацию (провайдер OpenAI, ключ), модель `gpt-image-2` (или свою) у функции `PROJECT_LOGO_IMAGE_GENERATE`. Без настройки — автоматический классический конвейер.
 
 ### 7.1 Корпоративное подключение OpenAI (как настроено 13.08.2026, локальная среда)
 
@@ -144,6 +152,7 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Локальный rembg-этап — первый шаг AI-конвейера: бесплатная нейросеть u2net на сервере приложения (`POST {rembgUrl}/api/remove`, multipart `file`) удаляет фон до платного AI-этапа; недоступность rembg (сервис лежит, таймаут, HTTP-ошибка) → платный AI → классика; конфиг `hunttech.projectLogo.rembg.{enabled,url,timeoutMs}`; тест `ProjectLogoRembgServiceBeanTest` (встроенный `HttpServer`-заглушка, 3 сценария); сервер развёрнут на проде `hr.hunttech.ru` (systemd rembg.service, 127.0.0.1:7000) |
 | 2026-08-14 | Классический конвейер удаляет серый фон-градиенты (логотип SSP): пиксели с насыщенностью ≤ 30 и яркостью ≥ 40 (`graySaturationThreshold`/`grayMinChannel`), соединённые с краем, становятся полностью прозрачными; белый фон — как раньше (порог 235, плавный край); тест `testGrayGradientBackgroundBecomesTransparent` |
 | 2026-08-13 | Классический конвейер: конфиг `hunttech.projectLogo.removeAllWhite` (default true) — удаление всех белых пикселей по порогу, включая замкнутые полости внутри букв (просвет «А» Альфа-Банка); тест `testWhiteCavityInsideLetterBecomesTransparent` |
 | 2026-08-13 | Настроено корпоративное подключение OpenAI: `hunttech.ai.encryptionKey` в `${app.home}/local.app.properties`, admin-конфигурация `HUNTTECH_ADMIN_AI_CONFIGURATION` (openai, gpt-4o, активна), привязка к функциям `PROJECT_LOGO_IMAGE_GENERATE` и `PROJECT_DESCRIPTION_GENERATE`; загрузка логотипа реально вызывает `images/edits` (при 4xx — классический fallback) |

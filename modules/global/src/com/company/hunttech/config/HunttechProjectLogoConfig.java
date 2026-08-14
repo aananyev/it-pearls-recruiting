@@ -94,4 +94,31 @@ public interface HunttechProjectLogoConfig extends Config {
     @Property("hunttech.projectLogo.ai.enabled")
     @DefaultBoolean(true)
     boolean getAiProcessingEnabled();
+
+    /**
+     * Включает локальный rembg-этап (первый шаг AI-конвейера): бесплатная нейросеть
+     * u2net, развёрнутая на сервере приложения (systemd rembg.service, эндпоинт
+     * POST /api/remove), удаляет фон до платного AI-этапа. Данные не покидают сервер.
+     * При недоступности rembg — переход к платному AI-этапу, затем к классическому
+     * конвейеру (flood-fill).
+     */
+    @Property("hunttech.projectLogo.rembg.enabled")
+    @DefaultBoolean(true)
+    boolean getRembgEnabled();
+
+    /**
+     * Базовый URL локального rembg-сервера; эндпоинт формируется как
+     * {@code url + "/api/remove"} (multipart form-data, поле {@code file}).
+     */
+    @Property("hunttech.projectLogo.rembg.url")
+    @DefaultString("http://127.0.0.1:7000")
+    String getRembgUrl();
+
+    /**
+     * Таймаут HTTP-запроса к rembg, мс. Локальный сервер обрабатывает логотип
+     * 0.7–2.5 с; таймаут защищает загрузку от зависания при холодном старте модели.
+     */
+    @Property("hunttech.projectLogo.rembg.timeoutMs")
+    @DefaultInt(15000)
+    int getRembgTimeoutMs();
 }

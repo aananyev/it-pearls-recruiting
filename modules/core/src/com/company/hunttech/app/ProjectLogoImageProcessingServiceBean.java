@@ -16,6 +16,11 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedHashMap;
@@ -27,7 +32,10 @@ import java.util.Map;
  * <p>Конвейер преобразований (все шаги выполняются в памяти до записи в файловое хранилище):</p>
  * <ol>
  *     <li>чтение растрового изображения любого поддерживаемого формата (ImageIO);</li>
- *     <li>AI-первый этап (если включён {@code hunttech.projectLogo.ai.enabled}): функция
+ *     <li>локальный rembg-этап (если включён {@code hunttech.projectLogo.rembg.enabled}):
+ *         бесплатная нейросеть u2net на сервере приложения (POST /api/remove) удаляет фон
+ *         без внешних API; при недоступности — платный AI-этап, затем классика;</li>
+ *     <li>платный AI-этап (если включён {@code hunttech.projectLogo.ai.enabled}): функция
  *         {@code PROJECT_LOGO_IMAGE_GENERATE} (capability IMAGE_GENERATION) удаляет фон
  *         нейросетью; при недоступности AI (функция не активна, нет credentials, ошибка
  *         провайдера) — бесшовный переход к классическому конвейеру;</li>
@@ -89,16 +97,31 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
                 return new ProcessedImage(data, name, extension, false);
             }
 
-            // 0. AI-первый этап: нейросеть удаляет фон; результат проходит тот же
-            // детерминированный финал (ресайз, обрезка, круг). При сбое — классический конвейер.
-            byte[] aiResult = tryAiBackgroundRemoval(data, fileName, config);
-            if (aiResult != null) {
-                BufferedImage aiImage = ImageIO.read(new ByteArrayInputStream(aiResult));
-                if (aiImage != null) {
-                    source = aiImage;
+            // 0. Локальный rembg-этап (бесплатная нейросеть u2net на сервере приложения):
+            // удаляет фон без внешних API и ключей; результат проходит тот же
+            // детерминированный финал (ресайз, обрезка, круг). При недоступности —
+            // платный AI-этап, затем классический конвейер.
+            byte[] rembgResult = tryRembgBackgroundRemoval(data, fileName, config);
+            if (rembgResult != null) {
+                BufferedImage rembgImage = ImageIO.read(new ByteArrayInputStream(rembgResult));
+                if (rembgImage != null) {
+                    source = rembgImage;
                 } else {
-                    log.warn("AI-результат логотипа {} не является растровым изображением, используется оригинал",
+                    log.warn("rembg вернул не-растровое изображение для логотипа {}, используется следующий этап",
                             fileName);
+                }
+            } else {
+                // 0.1. Платный AI-этап (если включён hunttech.projectLogo.ai.enabled):
+                // нейросеть удаляет фон; при недоступности — классический конвейер.
+                byte[] aiResult = tryAiBackgroundRemoval(data, fileName, config);
+                if (aiResult != null) {
+                    BufferedImage aiImage = ImageIO.read(new ByteArrayInputStream(aiResult));
+                    if (aiImage != null) {
+                        source = aiImage;
+                    } else {
+                        log.warn("AI-результат логотипа {} не является растровым изображением, используется оригинал",
+                                fileName);
+                    }
                 }
             }
 
@@ -136,6 +159,84 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
             log.error("Ошибка обработки логотипа {}: {}", fileName, e.toString(), e);
             throw new DevelopmentException("Failed to process project logo: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Пробует удалить фон локальным rembg-сервером — первым шагом AI-конвейера.
+     *
+     * <p>Бесплатная нейросеть u2net развёрнута на сервере приложения (systemd
+     * {@code rembg.service}, эндпоинт {@code POST {url}/api/remove}, multipart
+     * form-data, поле {@code file}). Этап не требует API-ключей и не передаёт
+     * изображение во внешние сервисы. Любая недоступность (сервис выключен,
+     * таймаут, HTTP-ошибка, пустой или не-растровый ответ) возвращает
+     * {@code null} — вызывающий код переходит к платному AI-этапу, затем
+     * к классическому конвейеру; загрузка никогда не прерывается.</p>
+     *
+     * @return PNG с прозрачным фоном или {@code null} при недоступности rembg
+     */
+    private byte[] tryRembgBackgroundRemoval(byte[] data, String fileName, HunttechProjectLogoConfig config) {
+        if (!config.getRembgEnabled()) {
+            log.debug("rembg-этап отключён конфигом hunttech.projectLogo.rembg.enabled=false");
+            return null;
+        }
+        String endpoint = StringUtils.removeEnd(config.getRembgUrl(), "/") + "/api/remove";
+        HttpURLConnection connection = null;
+        try {
+            connection = (HttpURLConnection) new URL(endpoint).openConnection();
+            connection.setDoOutput(true);
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(config.getRembgTimeoutMs());
+            connection.setReadTimeout(config.getRembgTimeoutMs());
+
+            String boundary = "----hrmRembg" + Long.toHexString(System.nanoTime());
+            connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+            try (OutputStream output = connection.getOutputStream()) {
+                output.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
+                output.write(("Content-Disposition: form-data; name=\"file\"; filename=\""
+                        + safeFileName(fileName) + "\"\r\n").getBytes(StandardCharsets.UTF_8));
+                output.write(("Content-Type: " + detectMimeType(fileName) + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+                output.write(data);
+                output.write(("\r\n--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
+            }
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode < 200 || responseCode >= 300) {
+                log.warn("rembg вернул HTTP {} для логотипа {}, используется следующий этап",
+                        responseCode, fileName);
+                return null;
+            }
+            try (InputStream input = connection.getInputStream()) {
+                ByteArrayOutputStream result = new ByteArrayOutputStream();
+                byte[] buffer = new byte[8192];
+                int read;
+                while ((read = input.read(buffer)) != -1) {
+                    result.write(buffer, 0, read);
+                }
+                if (result.size() == 0) {
+                    log.warn("rembg вернул пустой ответ для логотипа {}, используется следующий этап", fileName);
+                    return null;
+                }
+                log.info("Логотип {} обработан локальным rembg ({} байт)", fileName, result.size());
+                return result.toByteArray();
+            }
+        } catch (Exception e) {
+            log.warn("rembg недоступен для логотипа {}, используется следующий этап. Причина: {}",
+                    fileName, e.toString());
+            return null;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+    }
+
+    /**
+     * Обеззараживает имя файла для заголовка {@code Content-Disposition}: убирает
+     * кавычки и переводы строк — защита от инъекции в multipart-заголовок.
+     */
+    private String safeFileName(String fileName) {
+        return safeValue(fileName).replace("\"", "").replace("\r", "").replace("\n", "");
     }
 
     /**
