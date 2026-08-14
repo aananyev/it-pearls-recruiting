@@ -207,6 +207,33 @@
       white-space: normal !important;
     }
 
+    // Vaadin-кнопка навигации: убираем базовую высоту halo-темы (height 25px
+    // + выравнивание) — пункты занимают ровно 27px, как у эталона IteractionListEdit.
+    .v-button-label-nav-item {
+      height: 27px !important;
+      max-height: 27px !important;
+      align-items: center !important;
+    }
+
+    .v-button-label-nav-item .v-button-wrap {
+      box-sizing: border-box;
+      display: flex !important;
+      align-items: center !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+    }
+
+    // halo-тема добавляет кнопке :before (inline-block, vertical-align:middle)
+    // для центрирования текста; при display:flex у .v-button-wrap псевдоэлемент
+    // встаёт отдельным блоком и выталкивает текст вниз — подсветка nav-пункта
+    // оказывается на строку выше текста. Отключаем псевдоэлемент.
+    .label-nav-item:before,
+    .v-button-label-nav-item:before {
+      display: none !important;
+      content: none !important;
+    }
+
     .label-nav-item:hover,
     .label-nav-item:focus,
     .v-button-label-nav-item:hover,

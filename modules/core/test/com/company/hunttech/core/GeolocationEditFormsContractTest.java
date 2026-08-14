@@ -171,6 +171,24 @@ public class GeolocationEditFormsContractTest {
     }
 
     @Test
+    public void localMessagesContainSidebarCaptions() throws IOException {
+        // Подписи sidebar («Регион»/«Город») переводятся msg-ключами локальных пакетов
+        // (в главных messages msgRegion=«Область» — для подписи типа записи не подходит).
+        String[][] packs = {
+                {"region", "msgRegion"},
+                {"city", "msgCity"},
+                {"city", "msgRegion"} // подпись сводки «Регион» в sidebar города
+        };
+        for (String[] p : packs) {
+            String base = "modules/web/src/com/company/hunttech/web/screens/" + p[0] + "/messages";
+            assertTrue(p[0] + " " + p[1] + " отсутствует в messages.properties",
+                    readProjectFile(base + ".properties").contains(p[1] + "="));
+            assertTrue(p[0] + " " + p[1] + " отсутствует в messages_ru.properties",
+                    readProjectFile(base + "_ru.properties").contains(p[1] + "="));
+        }
+    }
+
+    @Test
     public void everyThemeAppliesSharedEditStyles() throws IOException {
         String canon = readProjectFile(
                 "modules/web/themes/hover/com.company.hunttech/edit-screen-shared-styles.scss");
@@ -218,6 +236,12 @@ public class GeolocationEditFormsContractTest {
                 canon.contains("color: #ffb11b !important;"));
         assertTrue("Нет min-height 36px полосы-заголовка",
                 canon.contains("min-height: 36px !important;"));
+        // Nav-кнопки sidebar — ровно 27px (фикс высоты Vaadin-кнопки, эталон IteractionListEdit;
+        // иначе halo-тема раздувает пункты до 46px).
+        assertTrue("Нет фикса высоты nav-кнопки 27px (.v-button-label-nav-item)",
+                canon.contains("height: 27px !important"));
+        assertTrue("Нет flex-wrap центрирования .v-button-label-nav-item .v-button-wrap",
+                canon.contains(".v-button-label-nav-item .v-button-wrap"));
 
         // Правая рабочая область по эталону IteractionListEdit.
         assertTrue("Нет карточек .edit-card с радиусом 8px", canon.contains("border-radius: 8px"));

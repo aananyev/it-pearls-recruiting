@@ -273,6 +273,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Sidebar CityEdit по контракту Edit-экранов: nav-пункты 27px (общий SCSS гео-форм, фикс высоты Vaadin-кнопки), subtitle → `msg://msgCity`, подпись сводки → `msg://msgRegion`, spacer `width/height 100%`; UI Spec: `docs/ui/GeolocationEditForms_Spec.md` |
 | 2026-08-13 | Sidebar CityEdit: добавлен visual-блок с круглой иллюстрацией `ovalImage` 176×176 (`icons/dictionaries/city.png`); identity выровнен по контракту (title 18/700 #ffb11b, subtitle 12/400); тест DictionaryEditFormIllustrationContractTest |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: каскад город→регион использует `city-location-view` в `company-edit-view`; CityEdit без Java-обработчиков вложенных FK — OK |
