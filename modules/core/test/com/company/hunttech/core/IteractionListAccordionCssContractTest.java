@@ -13,127 +13,69 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
- * Защищает локальный CSS-контракт IteractionListEdit: аккордеоны,
- * заголовки и элементы ввода визуально повторяют SettingsWindow.
+ * Защищает локальный CSS-контракт аккордеонов IteractionListEdit,
+ * визуально синхронизированный с подтверждённым оформлением SettingsWindow.
  */
 public class IteractionListAccordionCssContractTest {
+
     private static final List<String> THEMES = Arrays.asList(
             "halo", "havana", "helium", "hover",
             "hunttech-modern", "hunttech-modern-light", "hunttech-modern-dark");
 
     @Test
-    public void allThemesImportFinalScopedOverrideAfterReferences() throws IOException {
+    public void allThemesKeepSettingsWindowGeometryInsideIteractionListRoot() throws IOException {
         for (String theme : THEMES) {
-            String scss = readProjectFile("modules/web/themes/" + theme
-                    + "/com.company.hunttech/iteraction-list-reference-finish.scss");
-            String shared = readProjectFile("modules/web/themes/" + theme
-                    + "/com.company.hunttech/edit-screen-shared-styles.scss");
+            String scss = readProjectFile(
+                    "modules/web/themes/" + theme
+                            + "/com.company.hunttech/iteraction-list-accordion-navigation.scss");
+            String settingsScss = readProjectFile(
+                    "modules/web/themes/" + theme
+                            + "/com.company.hunttech/user-ai-profile.scss");
             String styles = readProjectFile("modules/web/themes/" + theme + "/styles.scss");
 
-            assertTrue(shared.contains(".edit-form-control"));
-            assertTrue(shared.contains(".edit-form-control .v-textfield"));
-            assertTrue(shared.contains(".edit-form-control .v-textarea"));
-            assertTrue(shared.contains(".edit-form-control .c-pickerfield-layout"));
-            assertTrue(shared.contains(".edit-form-control .c-suggestionfield"));
-            assertTrue(shared.contains(".edit-form-control .v-filterselect > .v-icon"));
-            assertTrue(shared.contains(".v-icon + .v-filterselect-input"));
-            assertTrue(shared.contains("padding-left: 40px !important;"));
-            String visual = readProjectFile("modules/web/themes/" + theme
-                    + "/com.company.hunttech/iteraction-list-visual-alignment.scss");
-            assertTrue(visual.contains(".iteraction-list-form-grid.iteraction-list-participants-grid"));
-            assertTrue(visual.contains(".iteraction-list-form-grid.iteraction-list-result-grid"));
-            assertTrue(visual.contains("> .v-gridlayout-slot:last-child"));
-            assertTrue(visual.contains(".iteraction-list-service-card .c-datefield-layout"));
-            assertTrue(visual.contains("> .c-timefield-wrapper"));
-            assertTrue(visual.contains("margin-top: 12px !important;"));
-            assertTrue(scss.contains(".iteraction-list-editor"));
-            assertTrue(scss.contains(".iteraction-list-accordion-section"));
-            assertTrue(scss.contains(".iteraction-list-popular-host"));
-            assertTrue(scss.contains(".iteraction-list-footer-actions"));
-            assertTrue(scss.contains("height: 40px !important;"));
-            assertTrue(scss.contains("border-radius: 8px !important;"));
-            assertTrue(scss.contains("visibility: visible !important;"));
-            assertFalse(scss.contains("background: #2e7d32 !important;"));
-            assertFalse(scss.contains("border-radius: 999px !important;"));
-            assertFalse(scss.contains("@mixin iteraction-list-reference-finish-theme {\n  .v-panel"));
-            assertTrue(styles.indexOf("@import \"com.company.hunttech/iteraction-list-reference-finish\";")
-                    > styles.indexOf("@import \"com.company.hunttech/candidate-cv-editor\";"));
-            assertTrue(styles.indexOf("@import \"com.company.hunttech/iteraction-list-visual-alignment\";")
-                    > styles.indexOf("@import \"com.company.hunttech/edit-screen-shared-styles\";"));
-            assertTrue(styles.indexOf("@include iteraction-list-visual-alignment-theme;")
-                    > styles.indexOf("@include edit-screen-shared-styles;"));
-            assertTrue(styles.indexOf("@include iteraction-list-reference-finish-theme;")
-                    > styles.indexOf("@include candidate-cv-editor-theme;"));
+            assertTrue("В теме " + theme + " отсутствует локальный root IteractionListEdit",
+                    scss.contains(".iteraction-list-editor"));
+            assertTrue("В теме " + theme + " не оформлен фактический класс аккордеона",
+                    scss.contains(".user-ai-profile-section"));
+            assertTrue("В теме " + theme + " не сохранён локальный accordion-класс",
+                    scss.contains(".iteraction-list-accordion-section"));
+
+            assertCanonicalRule(theme, scss, settingsScss, "margin-bottom: 10px;");
+            assertCanonicalRule(theme, scss, settingsScss, "border-radius: 7px");
+            assertCanonicalRule(theme, scss, settingsScss,
+                    "border: 1px solid rgba(127, 127, 127, 0.20)");
+            assertCanonicalRule(theme, scss, settingsScss,
+                    "background: rgba(255, 255, 255, 0.45)");
+            assertCanonicalRule(theme, scss, settingsScss, "padding-top: 9px;");
+            assertCanonicalRule(theme, scss, settingsScss, "padding-bottom: 9px;");
+            assertCanonicalRule(theme, scss, settingsScss, "font-weight: 600");
+            assertCanonicalRule(theme, scss, settingsScss,
+                    "background: rgba(127, 127, 127, 0.045)");
+
+            assertFalse("В теме " + theme + " запрещён глобальный panel-selector",
+                    scss.contains("@mixin iteraction-list-accordion-navigation-theme {\n  .v-panel"));
+            assertTrue(styles.contains(
+                    "@import \"com.company.hunttech/iteraction-list-accordion-navigation\";"));
+            assertTrue(styles.contains("@include iteraction-list-accordion-navigation-theme;"));
         }
     }
 
-    @Test
-    public void finalOverrideMatchesSettingsWindowAccordionAndFormControls() throws IOException {
-        for (String theme : THEMES) {
-            String settings = readProjectFile("modules/web/themes/" + theme
-                    + "/com.company.hunttech/settings-window-sections.scss");
-            String iteraction = readProjectFile("modules/web/themes/" + theme
-                    + "/com.company.hunttech/iteraction-list-reference-finish.scss");
-
-            String settingsCaption = extractRule(settings, ".user-ai-profile-section .v-panel-caption");
-            String iteractionCaption = extractRule(iteraction,
-                    ".iteraction-list-accordion-section .v-panel-caption");
-
-            assertSharedToken(settingsCaption, iteractionCaption, "min-height: 50px;");
-            assertSharedToken(settingsCaption, iteractionCaption, "padding: 12px 16px;");
-            assertSharedToken(settingsCaption, iteractionCaption, "font-size: 17px !important;");
-            assertSharedToken(settingsCaption, iteractionCaption, "font-weight: 700 !important;");
-            assertSharedToken(settingsCaption, iteractionCaption,
-                    "background: mix($v-app-background-color, $v-panel-background-color, 68%) !important;");
-            assertSharedToken(settingsCaption, iteractionCaption,
-                    "border-bottom: 1px solid rgba($v-font-color, 0.15) !important;");
-
-            assertTrue(iteraction.contains("min-height: 38px !important;"));
-            assertTrue(iteraction.contains("border: 1px solid rgba($v-font-color, 0.20) !important;"));
-            assertTrue(iteraction.contains("border-radius: 5px !important;"));
-            assertTrue(iteraction.contains(
-                    "box-shadow: 0 0 0 2px rgba($v-selection-color, 0.20) !important;"));
-            assertTrue(iteraction.contains("font-size: 13px !important;"));
-            assertTrue(iteraction.contains("font-size: 14px !important;"));
-            assertTrue(iteraction.contains(
-                    "background: mix($v-app-background-color, $v-panel-background-color, 62%) !important;"));
-            assertFalse(iteraction.contains("min-height: 44px;"));
-            assertFalse(iteraction.contains("padding: 16px 18px 20px !important;"));
-        }
-    }
-
-    private void assertSharedToken(String expectedRule, String actualRule, String token) {
-        assertTrue("SettingsWindow не содержит ожидаемый токен: " + token, expectedRule.contains(token));
-        assertTrue("IteractionListEdit не повторяет токен SettingsWindow: " + token, actualRule.contains(token));
-    }
-
-    private String extractRule(String scss, String selector) {
-        int selectorStart = scss.indexOf(selector);
-        assertTrue("Не найден SCSS-селектор: " + selector, selectorStart >= 0);
-        int openingBrace = scss.indexOf('{', selectorStart);
-        assertTrue("Не найдено начало правила: " + selector, openingBrace >= 0);
-
-        int depth = 0;
-        for (int i = openingBrace; i < scss.length(); i++) {
-            char symbol = scss.charAt(i);
-            if (symbol == '{') {
-                depth++;
-            } else if (symbol == '}') {
-                depth--;
-                if (depth == 0) {
-                    return scss.substring(selectorStart, i + 1);
-                }
-            }
-        }
-        fail("Не найдено окончание SCSS-правила: " + selector);
-        return "";
+    private void assertCanonicalRule(String theme,
+                                     String iteractionScss,
+                                     String settingsScss,
+                                     String rule) {
+        assertTrue("В эталоне SettingsWindow темы " + theme + " отсутствует правило: " + rule,
+                settingsScss.contains(rule));
+        assertTrue("В IteractionListEdit темы " + theme + " отсутствует правило: " + rule,
+                iteractionScss.contains(rule));
     }
 
     private String readProjectFile(String relativePath) throws IOException {
-        return new String(Files.readAllBytes(projectRoot().resolve(relativePath)), StandardCharsets.UTF_8);
+        return new String(
+                Files.readAllBytes(projectRoot().resolve(relativePath)),
+                StandardCharsets.UTF_8);
     }
 
     private Path projectRoot() {

@@ -13,17 +13,7 @@
 
 Запись фиксирует:
 
-- кандидата;
-- вакансию;
-- ответственного рекрутёра;
-- дату и номер взаимодействия;
-- тип взаимодействия;
-- дополнительное значение, зависящее от типа;
-- оценку коммуникации;
-- способ связи;
-- комментарий;
-- снимок приоритета и открытости вакансии;
-- ссылку на предыдущее взаимодействие цепочки.
+Оформление аккордеонов повторяет подтверждённую геометрию `SettingsWindow`. Фактический XML-класс `user-ai-profile-section` дополнительно оформляется локальным селектором внутри корня `.iteraction-list-editor`, поэтому внешний вид контролируется `IteractionListEdit` и не распространяется на другие экраны. Одинаковый CSS-контракт синхронизирован во всех семи темах.
 
 Сохранение может дополнительно:
 
@@ -39,7 +29,16 @@ UI-рефакторинг не изменяет entity, JPQL, loaders, views, с
 
 ## 2. UI Context & Navigation
 
-### 2.1. Точки открытия
+- открытие нового взаимодействия → контроллер заполняет номер, дату и текущего рекрутёра → пользователь получает готовую форму;
+- открытие формы → секция «Взаимодействие» раскрыта, «Комментарий» и «Популярные взаимодействия» свёрнуты → пользователь сразу видит основные поля;
+- раскрытие или сворачивание секции → меняется только presentation state `GroupBoxLayout` → значения и lifecycle не затрагиваются;
+- выбор кандидата с фотографией → сохраняется прежний `ContainerValueSource` → `OvaFallbackImage` отображает фотографию круглой;
+- выбор кандидата без фотографии → существующая Java-логика и `fallbackThemePath` указывают на `icons/no-programmer.jpeg` → sidebar не содержит пустого изображения;
+- выбор вакансии → сохраняются проверки закрытия, подписки, статуса, приоритета и логотипа → sidebar обновляет вакансию;
+- выбор типа взаимодействия → Java переключает `buttonCallAction`, `addString`, `addDate` или `addInteger` → дополнительное значение отображается следующей строкой под типом;
+- изменение rating → Java сохраняет прежнее оформление и правила → оценка отображается в форме и sidebar;
+- сохранение → выполняются прежние BeforeCommit/AfterCommit/BeforeClose обработчики → данные и связанные процессы изменяются как до reflow;
+- смена темы → локальный mixin `iteraction-list-accordion-navigation-theme` применяет ту же геометрию, что и `SettingsWindow` → функциональные контракты не меняются.
 
 Экран открывается как editor `hunttech_IteractionList.edit` в сценариях:
 
@@ -107,7 +106,7 @@ Legacy component ID с суффиксом `Accordion` сохранены рад�
 
 `candidateField` и `vacancyFiels` сохраняют специализированный `iteraction-list-primary-picker`, но итоговая SCSS-геометрия совпадает с `edit-form-control`: высота `38px`, единая рамка, фон, focus-state и фиксированная ширина action-кнопок. Это устраняет расхождения между `SuggestionPickerField`, `LookupPickerField`, `LookupField`, `TextField` и `TextArea` без изменения bindings, actions и validators.
 
-### 2.4. Label-navigation
+Каждая рабочая секция сохраняет штатный CUBA-контракт `GroupBoxLayout`:
 
 `IteractionListEdit` заменяет XML fallback labels четырьмя keyboard-доступными кнопками.
 
@@ -172,7 +171,7 @@ Controller всегда создаёт ровно пять визуальных 
 | Подписаться | новая запись | подтверждение сохранения и отдельный editor подписки |
 | Отмена | стандартное закрытие | `windowClose` |
 
-## 4. Модель данных и bindings
+Локальный CSS повторяет подтверждённые параметры `SettingsWindow`: радиус `7 px`, граница `1 px`, лёгкая поверхность, отступ между секциями `10 px`, вертикальный padding заголовка `9 px` и насыщенность `600`. Селекторы `.user-ai-profile-section` и `.v-panel-caption` применяются только внутри `.iteraction-list-editor`, поэтому изменение не влияет на `SettingsWindow` и другие экраны.
 
 ### 4.1. Основные поля `IteractionList`
 
@@ -213,235 +212,15 @@ Controller всегда создаёт ровно пять визуальных 
 
 ### 4.3. Sidebar
 
-| Component | Источник / поведение |
-|---|---|
-| `candidateImage` | `candidate.fileImageFace`, fallback `icons/no-programmer.jpeg` |
-| `projectLogoImage` | `vacancy.projectName.projectLogo`, fallback `icons/no-company.png` |
-| `iteractionCandidateNameLabel` | `candidate.fullName` |
-| `iteractionVacancyNameLabel` | `vacancy.vacansyName` |
-| `statusOfVacansyLabel` | `ОТКРЫТА` / `ЗАКРЫТА` |
-| `alternativeVacancyLinkButton` | открытые альтернативы того же типа позиции |
-| `currentPriorityLabel` | текстовый приоритет |
-| `trafficLighterImage` | иконка приоритета |
-| `companyLabel` | компания и подразделение проекта |
-| `projectLabel` | проект |
-| `closingDateVacancyLabel` | дата закрытия и просрочка |
-| `outstaffingCostHBox` | видим при непустом `outstaffingCost` |
-| `iteractionListNavigationTitle` | заголовок «Разделы формы» навигации (полоса-заголовок) |
-| vacancy-карточка `iteraction-list-sidebar-card-title` | заголовок «Вакансия» (полоса-заголовок) |
+## 6. Локальный SCSS
 
-Заголовки содержательных секций sidebar — «Разделы формы» (`iteraction-list-navigation-title`) и «Вакансия» (`iteraction-list-sidebar-card-title`) — оформлены как полоса-заголовок по контракту `HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md` §4.1: две горизонтальные inset-линии (белая сверху `rgba(255,255,255,1) 0 1px 0 0 inset`, светлая снизу `rgba(244,244,244,1) 0 -1px 0 0 inset`), разделитель снизу `border-bottom: 1px solid rgba(255,255,255,.14)`, полоса `rgba(255,255,255,.045)`, текст `#ffb11b` 15px/700, `min-height: 36px`, `padding: 7px 11px`; заголовок «Вакансия» растянут на ширину карточки (`margin: -14px -14px 12px`, верхние углы скруглены). SCSS-правила: `iteraction-list-visual-alignment.scss` (навигация) и `iteraction-list-accordion-navigation.scss` (карточка), идентичны во всех 7 темах.
-
-## 5. Data containers, loaders и views
-
-| ID | Тип | View / запрос |
-|---|---|---|
-| `iteractionListDc` | instance `IteractionList` | `iteractionList-edit-view` |
-| `iteractionListDl` | instance loader | view контейнера |
-| `iteractionTypesDc` | collection `Iteraction` | `iteraction-list-type-view` |
-| `iteractionTypesLc` | collection loader | типы с динамическим параметром `number` |
-| `openPositionDc` | collection `OpenPosition` | `openPosition-iteraction-list-picker-view` |
-| `openPositionsDl` | collection loader | department + subscriber conditions |
-| `usersDc` | collection `User` | `_minimal` |
-| `usersDl` | collection loader | активные пользователи |
-
-### 5.1. Защита загрузки вакансий
-
-`@LoadDataBeforeShow` не должен загружать все вакансии до установки фильтров. `PreLoadListener` вызывает `preventLoad()`, пока `openPositionsReady=false`.
-
-### 5.2. Data View Integrity
-
-Обязательные views:
-
-- `iteractionList-edit-view`;
-- `jobCandidate-iteraction-list-suggestion-view`;
-- `openPosition-iteraction-list-picker-view`;
-- `iteraction-list-type-view`;
-- `employee-view`;
-- `subscribeCandidateAction-view`.
-
-`ScreenViewIntegrityTest` должен завершаться результатом `8/8 PASS`.
-
-## 6. Lifecycle
-
-### 6.1. `InitEvent`
-
-- строится label-navigation;
-- устанавливаются fallback-изображения;
-- блокируется преждевременная загрузка вакансий;
-- сбрасываются параметры и флаги;
-- скрываются dynamic fields;
-- читаются screen options;
-- формируются rating options и priority map.
-
-### 6.2. Item change основного контейнера
-
-Для новой entity:
-
-- `number = InteractionService.getCountInteraction() + 1`;
-- `date = new Date()`;
-- вызывается legacy `setCurrentUserName()`.
-
-`setCurrentUserName()` получает имя, но не сохраняет его в entity.
-
-### 6.3. `BeforeShowEvent`
-
-1. подключаются option providers вакансии;
-2. скрывается action-кнопка;
-3. запоминается кандидат;
-4. включается фильтр подписок и загружаются вакансии;
-5. восстанавливается состояние dynamic fields;
-6. применяется `parentCandidate`;
-7. строятся пять quick-action позиций;
-8. дата разрешается к редактированию только новой entity.
-
-### 6.4. `AfterShowEvent`
-
-- новой entity назначается текущий рекрутёр;
-- существующей entity один раз догружается `comment` узким view;
-- listener кандидата запускает проверку истории контактов.
-
-### 6.5. `BeforeCommitChangesEvent`
-
-1. `comment=null` преобразуется в `""`;
-2. сохраняется snapshot `currentPriority`;
-3. сохраняется snapshot `currentOpenClose`;
-4. определяется `chainInteraction`;
-5. выполняется optional start/end employee side effect.
-
-### 6.6. `AfterCommitChangesEvent`
-
-Один раз:
-
-- вызывается legacy `setSubscribe()`;
-- создаётся автоматическая новость через `OpenPositionService`.
-
-### 6.7. `BeforeCloseEvent`
-
-При commit-and-close:
-
-- числовой префикс `Iteraction.number` переносится в `candidate.status`;
-- выполняются email/notification сценарии;
-- при необходимости открывается `InternalEmailerEdit`.
-
-## 7. Выбор кандидата
-
-### 7.1. Фото
-
-При наличии `fileImageFace` компонент привязывается к `candidate.fileImageFace`; иначе отображается fallback.
-
-### 7.2. История контактов
-
-`copyAndCheckCandidate()`:
-
-- для истории текущего рекрутёра может предложить копирование предыдущей вакансии;
-- при недавнем контакте другого рекрутёра показывает имя и дату предупреждением.
-
-### 7.3. Копирование
-
-`copyPrevionsItems()` загружает последнюю запись кандидата по максимальному номеру и переносит только вакансию.
-
-## 8. Выбор вакансии
-
-### 8.1. Проверка соответствия
-
-Сравниваются:
-
-- позиция кандидата и тип позиции вакансии;
-- город кандидата и допустимые города;
-- признак удалённой работы.
-
-При расхождении пользователь может очистить вакансию либо продолжить.
-
-### 8.2. Новый процесс
-
-Для открытой вакансии считается количество взаимодействий пары:
-
-- `0` → параметр типов `001` и предупреждение;
-- больше `0` → ограничение снимается.
-
-### 8.3. Закрытая вакансия
-
-Для новой записи показывается диалог. При подтверждении выбора вакансия и визуальные индикаторы очищаются; отказ позволяет продолжить.
-
-### 8.4. Researcher без подписки
-
-При отсутствии активной `RecrutiesTasks` предлагается открыть `RecrutiesTasksEdit` с текущим пользователем, вакансией, текущей датой и датой будущего понедельника.
-
-### 8.5. Sidebar-контекст
-
-Обновляются компания, подразделение, проект, логотип, closing date, просрочка, статус, альтернативы, приоритет, иконка и стоимость аутстаффинга.
-
-## 9. Фильтр «только мои подписки»
-
-По умолчанию включён.
-
-- включён → `subscriber=currentUser`;
-- выключен → параметр удаляется;
-- loader перезапускается;
-- пустой список вызывает warning.
-
-Фильтр меняет только options вакансии.
-
-## 10. Тип взаимодействия и dynamic fields
-
-| Настройка `Iteraction` | Влияние |
-|---|---|
-| `addFlag` | включает дополнительное значение |
-| `addType` | дата / строка / число |
-| `addCaption` | caption дополнительного поля |
-| `callForm` | видимость action-кнопки |
-| `callButtonText` | caption кнопки |
-| `callClass` | динамически открываемая meta-class |
-| `findToDic` | legacy-ветка открытия |
-| `setDateTime` | автозаполнение `addDate` |
-| `signComment` | required-комментарий |
-| `number` | статус кандидата |
-| `signStartProject` | начало кадрового проекта |
-| `signEndProject` | завершение кадрового проекта |
-| `workStatus` | статус сотрудника |
-| `needSendLetter` | подготовка письма |
-| `textEmailToSend` | шаблон письма |
-| `notificationNeedSend` | включение notification |
-| `notificationWhenSend` | момент notification |
-| `notificationType` | аудитория |
-| `signPriorityNews` | приоритет vacancy news |
-
-### 10.1. Матрица add-fields
-
-| `addFlag` | `addType` | Компонент | Required | Action |
-|---:|---:|---|---:|---|
-| true | 1 | `addDate` | да | скрыта |
-| true | 2 | `addString` | да | скрыта |
-| true | 3 | `addInteger` | да | скрыта |
-| false | — | add-fields скрыты | нет | видима при `callForm=true` |
-
-`setDateTime=true` заполняет пустой `addDate` текущим временем.
-
-`signComment=true` делает `commentField` обязательным.
-
-Изменение add-value дописывает в комментарий строку `<Название типа>: <значение>`.
-
-## 11. Быстрые взаимодействия
-
-### 11.1. Источник
-
-```java
-InteractionService.getMostPolularIteraction(userSession.getUser(), 5)
-```
-
-Сервис использует:
+Во всех семи темах аккордеон оформляется одинаковым локальным mixin:
 
 ```text
-текущий пользователь
-→ текущая дата минус один календарный месяц
-→ iteractionType is not null
-→ group by iteractionType
-→ order by count DESC
-→ до пяти результатов
+modules/web/themes/<theme>/com.company.hunttech/iteraction-list-accordion-navigation.scss
 ```
 
-### 11.2. Визуальный контракт
+Mixin оформляет фактический XML-класс через локальный селектор `.iteraction-list-editor .user-ai-profile-section` и одновременно сохраняет собственный класс `.iteraction-list-accordion-section` для дальнейшего безопасного reflow. Параметры геометрии совпадают с `SettingsWindow`, но правила не выходят за root экрана. Собственные стили полей, footer, toolbar и sidebar остаются в `iteraction-list-editor.scss`. Глобальные Vaadin-селекторы не добавляются.
 
 Controller выполняет цикл ровно по пяти индексам.
 
@@ -452,7 +231,22 @@ iteractionTypeField.setValue(interaction);
 iteractionTypeField.focus();
 ```
 
-Для пустого результата создаётся disabled-кнопка `Нет данных` без click listener.
+1. HEAD branch и HEAD PR совпадают с переданным SHA.
+2. Base PR = `master`, conflicts = NONE.
+3. `git diff --check`.
+4. `IteractionListAccordionCssContractTest` — `1/1 PASS`.
+5. `IteractionListEditAccordionLayoutTest` — `5/5 PASS`.
+6. `LeftSidebarAvatarComponentTest` — `2/2 PASS`.
+7. Compile web и core tests.
+8. `ScreenViewIntegrityTest` — `8/8 PASS`.
+9. Data View Integrity — getters контроллера входят в `iteractionList-edit-view`.
+10. `:app-web:buildScssThemes` — PASS для семи тем.
+11. `clean assemble` — `BUILD SUCCESSFUL`.
+12. Local deploy и HTTP `/hrm/` = `200`.
+13. Functional smoke: последовательно заполнить кандидата, вакансию, тип, dynamic fields, rating, рекрутёра, способ связи и комментарий; проверить подписку, save/cancel.
+14. Accordion smoke: свернуть и раскрыть каждый из трёх блоков, убедиться в сохранении введённых значений и отсутствии пустых горизонтальных областей.
+15. Visual smoke семи тем: радиус, граница, поверхность, заголовок и интервалы аккордеонов соответствуют `SettingsWindow`; поля идут одной колонкой, horizontal scroll отсутствует.
+16. Tomcat logs: новых critical errors NONE; P1 = 0; P2 = 0.
 
 Ряд имеет пять одинаковых expand ratio и визуально соответствует сетке `5 × 20%`.
 
@@ -649,15 +443,8 @@ Runtime:
 
 | Дата | Изменение |
 |---|---|
-| 2026-08-09 | Быстрые кнопки «Частые взаимодействия» завершены по исторической реализации 2024 года: зелёная поверхность `#008000` с белой подписью, рамка `rgba(81,255,0,0.55)`, радиус 10px, подписи «N. Название» (номер частоты + `iterationName`); клик по-прежнему устанавливает точный `Iteraction` в `iteractionTypeField`, пустые позиции disabled «Нет данных». Бизнес-логика сервиса (топ-5 частых типов рекрутёра за месяц), XML-компоновка и остальная логика формы не менялись; контрактный тест `IteractionListMostPopularInteractionTest` закрепляет зелёный стиль и нумерованные подписи. |
-| 2026-08-08 | Заголовкам разделов sidebar «Разделы формы» (`iteractionListNavigationTitle`, класс `iteraction-list-navigation-title`) и «Вакансия» (`iteraction-list-sidebar-card-title`) добавлены две горизонтальные inset-линии полосы (белая сверху, светлая снизу) + разделитель `border-bottom`, как у заголовков секций OpenPositionEdit / caption инфокарточки — контракт §4.1; SCSS: `iteraction-list-visual-alignment.scss` и `iteraction-list-accordion-navigation.scss` во всех 7 темах; добавлен контрактный тест `IteractionListVisualAlignmentTest.sectionTitlesHaveTwoInsetLinesLikeInfoCaption`. |
-| 2026-07-29 | Реальный visual smoke под `okozhevnikova` выявил вертикальное переполнение длинных caption: высота quick-action увеличена до `64px`, caption ограничен тремя строками внутри кнопки. |
-| 2026-07-29 | Усилен контраст disabled-подписей `Нет данных` в семи темах, чтобы пустая позиция не выглядела бесконтентной. |
-| 2026-07-29 | Реальная локальная проверка выявила пустые captions: после агрегирующего запроса сервис догружает только `iteraction-picker-view`, сохраняя порядок рейтинга и обработчик quick action. |
-| 2026-07-29 | Подписи пяти частых взаимодействий зафиксированы как видимые captions во всех локальных темах; Java-обработчик и бизнес-контракт не изменялись. |
-| 2026-07-28 | Унифицирована типографика candidate/vacancy, provider-пиктограммы отделены от текста, fallback-изображения увеличены внутри кругов, checkbox подписок выровнен; service-card перенесена под профиль кандидата и защищена от переполнения date/time-контролом. |
-| 2026-07-28 | Двухколоночные GridLayout закреплены как `50/50` на уровне absolute-positioned slot-ов CUBA 7.3, корням сеток сохранена ненулевая высота, локальная ширина sidebar синхронизирована с Vaadin slot, внутренний date/time layout служебной карточки ограничен шириной родителя, оба верхних `OvaFallbackImage` выровнены до `96 × 96`; добавлены regression-критерии видимости vacancy/recruiter и отсутствия переполнения. |
-| 2026-07-28 | Уточнён визуальный слой: общий `edit-screen-shared-styles` применяется как базовый SCSS-контракт, локальный `iteraction-list-visual-alignment` финально ограничивает карточки, GridLayout, picker/action-кнопки, поля результата и комментарий; добавлен `edit-form-control` для однотипных полей. |
-| 2026-07-28 | XML, active-controller и SCSS синхронизированы с точным render-контрактом: четыре обычных VBox-блока, четыре navigation target, отсутствие expanded state и ровно пять quick-action позиций. |
-| 2026-07-27 | Зафиксирована подробная бизнес-логика: lifecycle, loaders, candidate/vacancy rules, dynamic fields, subscriptions, Employee, chain interaction, notifications, email и риски. |
-| 2026-07-27 | Экран переведён на двухпанельную компоновку HRM HuntTech. |
+| 2026-07-25 | В семи темах добавлено локальное CSS-оформление `.iteraction-list-editor .user-ai-profile-section`, визуально соответствующее `SettingsWindow`; XML и Java не изменены, добавлен `IteractionListAccordionCssContractTest` |
+| 2026-07-25 | Основные рабочие блоки преобразованы в сворачиваемые секции; `gridIterationData` переведён на одну колонку, все поля расположены друг под другом без изменения business/data-контрактов |
+| 2026-07-25 | По итогам аудита переработанных форм `candidateImage` в левой панели заменён на `OvaFallbackImage` 104×104 px с fallback `icons/no-programmer.jpeg`; ID, binding и Java-инъекция `Image` сохранены |
+| 2026-07-25 | Улучшена компоновка: sidebar сделан непрерывным по высоте, toolbar и footer перенесены в workspace, ширина sidebar уменьшена, поля выстроены по сценарию рекрутёра, геометрия синхронизирована в семи темах |
+| 2026-07-25 | Выполнена строго визуальная адаптация `IteractionListEdit`: двухпанельная композиция, локальный namespace `.iteraction-list-editor`, карточки и theme-aware состояния семи тем |

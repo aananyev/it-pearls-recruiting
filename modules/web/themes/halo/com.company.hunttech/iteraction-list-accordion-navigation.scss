@@ -1,7 +1,7 @@
 /*
- * IteractionListEdit — комбинированный presentation-контракт HRM HuntTech.
- * Sidebar следует CandidateCVEdit, индекс и аккордеоны — SettingsWindow.
- * Все Vaadin-селекторы ограничены корнем .iteraction-list-editor.
+ * IteractionListEdit — локальная аккордеонная навигация HRM HuntTech.
+ * Геометрия секций повторяет SettingsWindow, а все Vaadin-селекторы
+ * ограничены корнем .iteraction-list-editor и не влияют на другие экраны.
  */
 @mixin iteraction-list-accordion-navigation-theme {
   .iteraction-list-editor {
@@ -346,91 +346,26 @@
       border-left-color: #ffb11b !important;
     }
 
-    // Рабочая область повторяет вертикальный ритм SettingsWindow и CandidateCVEdit.
-    .iteraction-list-toolbar {
-      box-sizing: border-box;
-      width: 100% !important;
-      min-height: 58px;
-      padding: 10px 20px;
-    }
-
-    .iteraction-list-toolbar-title-box,
-    .iteraction-list-toolbar-title-box > .v-slot {
-      width: 100% !important;
-      min-width: 0;
-    }
-
-    .iteraction-list-toolbar-title {
-      font-size: 20px !important;
-      line-height: 27px !important;
-    }
-
-    .iteraction-list-toolbar-context {
-      font-size: 12px !important;
-      line-height: 18px !important;
-    }
-
-    .iteraction-list-tabs > .v-tabsheet-tabcontainer,
-    .iteraction-list-tabs .v-tabsheet-tabs,
-    .iteraction-list-tabs .v-tabsheet-tabitem,
-    .iteraction-list-tabs .v-tabsheet-tabitem-selected,
-    .iteraction-list-tabs .v-tabsheet-tabitem .v-caption {
-      height: 48px;
-    }
-
-    .iteraction-list-tabs .v-tabsheet-tabitem .v-caption {
-      box-sizing: border-box;
-      padding: 0 16px !important;
-      font-size: 15px !important;
-      font-weight: 600 !important;
-      line-height: 48px !important;
-    }
-
-    .iteraction-list-tabs > .v-tabsheet-content {
-      height: calc(100% - 49px) !important;
-    }
-
-    .iteraction-list-scroll > .v-scrollable {
-      box-sizing: border-box;
-      padding-right: 6px;
-    }
-
-    .iteraction-list-content {
-      width: 100% !important;
-      min-width: 0 !important;
-      padding: 18px 20px 24px;
-    }
-
-    // Аккордеон в точности повторяет итоговый визуальный контракт SettingsWindow.
-    // Локальный namespace сохраняет изоляцию от остальных экранов CUBA Platform.
-    .iteraction-list-accordion-section {
+    // Локальная копия подтверждённой геометрии аккордеона SettingsWindow.
+    .iteraction-list-accordion-section,
+    .user-ai-profile-section {
       box-sizing: border-box;
       width: 100% !important;
       min-width: 0 !important;
       margin-bottom: 10px;
       padding: 0 !important;
-      background: $v-panel-background-color !important;
-      border: 1px solid rgba($v-font-color, 0.15) !important;
-      border-radius: 8px !important;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+      border-radius: 7px !important;
+      border: 1px solid rgba(127, 127, 127, 0.20) !important;
       overflow: hidden;
+      background: rgba(255, 255, 255, 0.45) !important;
     }
 
-    .iteraction-list-accordion-section .v-panel-caption {
-      min-height: 50px;
-      padding: 12px 16px;
-      color: mix($v-font-color, $v-panel-background-color, 90%) !important;
-      font-size: 17px !important;
-      font-weight: 700 !important;
-      line-height: 24px !important;
-      background: mix($v-app-background-color, $v-panel-background-color, 68%) !important;
-      border-bottom: 1px solid rgba($v-font-color, 0.15) !important;
-    }
-
-    .iteraction-list-accordion-section .v-panel-content {
-      box-sizing: border-box;
-      background: $v-panel-background-color !important;
-      border: 0 !important;
+    .iteraction-list-accordion-section .v-panel-caption,
+    .user-ai-profile-section .v-panel-caption {
+      padding-top: 9px;
+      padding-bottom: 9px;
+      font-weight: 600 !important;
+      background: rgba(127, 127, 127, 0.045) !important;
     }
 
     // GridLayout самостоятельно распределяет explicit flex-колонки.
@@ -630,41 +565,6 @@
       .iteraction-list-content {
         padding-right: 14px;
         padding-left: 14px;
-      }
-
-      .iteraction-list-accordion-section .v-panel-content {
-        padding-right: 14px !important;
-        padding-left: 14px !important;
-      }
-    }
-
-    @media (max-width: 1080px) {
-      .iteraction-list-sidebar {
-        width: 260px !important;
-        min-width: 260px !important;
-        max-width: 260px !important;
-      }
-
-      .iteraction-list-candidate-image,
-      .iteraction-list-candidate-image img,
-      .iteraction-list-candidate-image .v-image-element {
-        width: 100px !important;
-        height: 100px !important;
-        min-width: 100px !important;
-        min-height: 100px !important;
-        max-width: 100px !important;
-        max-height: 100px !important;
-      }
-
-      .iteraction-list-project-image,
-      .iteraction-list-project-image img,
-      .iteraction-list-project-image .v-image-element {
-        width: 70px !important;
-        height: 70px !important;
-        min-width: 70px !important;
-        min-height: 70px !important;
-        max-width: 70px !important;
-        max-height: 70px !important;
       }
     }
   }
