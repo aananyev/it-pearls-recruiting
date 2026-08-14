@@ -3,7 +3,7 @@
 -- HRM HuntTech (CUBA 7.3)
 --
 -- Что делает: добавляет «Коротко о проекте» — краткое описание сути
--- проекта (до 5 предложений), генерируется AI по кнопке «Кратко» во
+-- проекта (одно предложение), генерируется AI по кнопке «Кратко» во
 -- вкладке «Описание проекта» ProjectEdit и выводится в sidebar-разделе
 -- «Коротко».
 --
@@ -15,4 +15,4 @@ ALTER TABLE HUNTTECH_PROJECT
   ADD COLUMN IF NOT EXISTS SHORT_DESCRIPTION TEXT;
 
 COMMENT ON COLUMN HUNTTECH_PROJECT.SHORT_DESCRIPTION IS
-  'Краткое описание сути проекта (до 5 предложений), генерируется AI в ProjectEdit, выводится в sidebar «Коротко»';
+  'Краткое описание сути проекта (одно предложение), генерируется AI в ProjectEdit, выводится в sidebar «Коротко»';

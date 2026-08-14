@@ -209,12 +209,12 @@ public class ProjectEdit extends StandardEditor<Project> {
         projectDescriptionAiStatus = uiComponents.create(Label.TYPE_STRING);
         projectDescriptionAiStatus.setId("projectDescriptionAiStatus");
         projectDescriptionAiStatus.setWidthFull();
-        projectDescriptionAiStatus.setValue(
-                messages.getMessage(getClass(), "msgProjectDescriptionUploadHint"));
+        // Без подсказки о формате файла: label используется только для статусов
+        // AI-обработки (processing/done/fallback), пустое значение не занимает места.
         projectDescriptionAiStatus.setStyleName("edit-toolbar-description");
 
-        // Кнопка «Кратко»: генерирует AI-краткое описание сути проекта (до 5
-        // предложений) из текста RichTextArea в поле сущности shortDescription.
+        // Кнопка «Кратко»: генерирует AI-краткое описание сути проекта (одно
+        // предложение) из текста RichTextArea в поле сущности shortDescription.
         // Доступна только при непустом тексте описания; пока идёт AI-вызов —
         // блокируется, чтобы исключить повторный запуск.
         projectDescriptionShortButton = uiComponents.create(Button.class);
@@ -225,9 +225,12 @@ public class ProjectEdit extends StandardEditor<Project> {
         projectDescriptionShortButton.setEnabled(false);
         projectDescriptionShortButton.addClickListener(event -> onProjectDescriptionShortButtonClick());
 
+        // Пара кнопок «Загрузить описание» + «Кратко» прижата к правому краю:
+        // растягиваемый статус-лейбл занимает всё свободное место слева (пустой
+        // label невидим), кнопки следуют за ним у правой границы карточки.
+        uploadRow.add(projectDescriptionAiStatus);
         uploadRow.add(projectDescriptionUpload);
         uploadRow.add(projectDescriptionShortButton);
-        uploadRow.add(projectDescriptionAiStatus);
         uploadRow.expand(projectDescriptionAiStatus);
         projectDescriptionCard.add(uploadRow, 0);
         projectDescriptionCard.expand(projectDescriptionRichTextArea);
@@ -244,7 +247,7 @@ public class ProjectEdit extends StandardEditor<Project> {
 
     /**
      * Кнопка «Кратко»: запускает фоновую AI-генерацию краткого описания сути проекта
-     * (не более 5 предложений) и помещает результат в поле сущности shortDescription.
+     * (одно предложение) и помещает результат в поле сущности shortDescription.
      * При недоступности AI пользователь получает предупреждение; описание не меняется.
      */
     private void onProjectDescriptionShortButtonClick() {

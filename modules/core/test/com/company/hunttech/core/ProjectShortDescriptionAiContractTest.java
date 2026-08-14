@@ -114,10 +114,12 @@ public class ProjectShortDescriptionAiContractTest {
         assertTrue(sql.contains("'TEXT_GENERATION'"));
         assertTrue(sql.contains("'USER_OVERRIDE_ALLOWED'"));
         assertTrue(sql.contains("'FALLBACK_TO_ADMIN'"));
-        assertTrue("Промпт без ограничения 5 предложений",
-                sql.contains("не более 5 предложений"));
+        assertTrue("Промпт без ограничения 1 предложения",
+                sql.contains("не более 1 предложения"));
         assertTrue("Промпт без запрета выдумывать факты",
                 sql.contains("Не выдумывай фактов"));
+        assertTrue("MAX_TOKENS не сокращён до 125 (генерация в 4 раза короче)",
+                sql.contains("0.3,\n        125,"));
         assertTrue("Промпт-шаблон без ${projectName}", sql.contains("${projectName}"));
         assertTrue("Промпт-шаблон без ${sourceText}", sql.contains("${sourceText}"));
     }
@@ -127,6 +129,65 @@ public class ProjectShortDescriptionAiContractTest {
         String master = read("modules/core/db/changelog/db.changelog-master.xml");
         assertTrue(master.contains("260814-1-addProjectShortDescriptionColumn.xml"));
         assertTrue(master.contains("260814-2-addProjectShortDescriptionAiFunction.xml"));
+        assertTrue(master.contains("260814-3-shortenProjectShortDescriptionPrompt.xml"));
+        assertTrue(master.contains("260814-4-increaseProjectShortDescriptionPrompt.xml"));
+    }
+
+    @Test
+    public void shortenPromptMigrationUpdatesExistingSeedOnly() throws IOException {
+        String sql = read("modules/core/db/update/postgres/26/260814-3-shortenProjectShortDescriptionPrompt.sql");
+        String changelog = read("modules/core/db/changelog/260814-3-shortenProjectShortDescriptionPrompt.xml");
+
+        for (String migration : new String[]{sql, changelog}) {
+            String upper = migration.toUpperCase(Locale.ROOT);
+            assertTrue("Нет UPDATE существующей записи", upper.contains("UPDATE "));
+            assertTrue("UPDATE не ограничен по CODE",
+                    migration.contains("WHERE CODE = 'PROJECT_SHORT_DESCRIPTION_GENERATE'"));
+            assertFalse("Запрещён DROP в миграции", upper.contains("DROP "));
+            assertFalse("Запрещён TRUNCATE в миграции", upper.contains("TRUNCATE "));
+        }
+        assertTrue("Нет нового SYSTEM_PROMPT (1 предложение)",
+                sql.contains("не более 1 предложения"));
+        assertTrue("MAX_TOKENS не 125", sql.contains("MAX_TOKENS = 125"));
+        assertTrue("Нет INSERT-fallback (WHERE NOT EXISTS)",
+                sql.toUpperCase(Locale.ROOT).contains("WHERE NOT EXISTS"));
+        // Административная настройка не перезаписывается: только записи от
+        // миграции/без кастомизации попадают под UPDATE (контракт 260813-1).
+        assertTrue("Нет защиты админской настройки (CREATED_BY = 'migration')",
+                sql.contains("CREATED_BY = 'migration'"));
+        assertTrue("Нет защиты админской настройки (CONFIGURATION_VERSION)",
+                sql.contains("CONFIGURATION_VERSION, 1) <= 1"));
+    }
+
+    @Test
+    public void increasePromptMigrationDoublesGeneration() throws IOException {
+        String sql = read("modules/core/db/update/postgres/26/260814-4-increaseProjectShortDescriptionPrompt.sql");
+        String changelog = read("modules/core/db/changelog/260814-4-increaseProjectShortDescriptionPrompt.xml");
+
+        for (String migration : new String[]{sql, changelog}) {
+            String upper = migration.toUpperCase(Locale.ROOT);
+            assertTrue("Нет UPDATE существующей записи", upper.contains("UPDATE "));
+            assertTrue("UPDATE не ограничен по CODE",
+                    migration.contains("WHERE CODE = 'PROJECT_SHORT_DESCRIPTION_GENERATE'"));
+            assertFalse("Запрещён DROP в миграции", upper.contains("DROP "));
+            assertFalse("Запрещён TRUNCATE в миграции", upper.contains("TRUNCATE "));
+            assertFalse("Запрещён DELETE в миграции", upper.contains("DELETE "));
+        }
+        // Генерация в 2 раза больше: два предложения вместо одного, MAX_TOKENS 250.
+        assertTrue("Нет нового SYSTEM_PROMPT (2 предложения)",
+                sql.contains("не более 2 предложений"));
+        assertTrue("MAX_TOKENS не 250", sql.contains("MAX_TOKENS = 250"));
+        assertTrue("Нет INSERT-fallback (WHERE NOT EXISTS)",
+                sql.toUpperCase(Locale.ROOT).contains("WHERE NOT EXISTS"));
+        // Административная настройка не перезаписывается: только записи от
+        // миграции (seed v1 / результат 260814-3 v2) попадают под UPDATE
+        // (контракт 260813-1).
+        assertTrue("Нет защиты админской настройки (CREATED_BY = 'migration')",
+                sql.contains("CREATED_BY = 'migration'"));
+        assertTrue("Нет защиты админской настройки (CONFIGURATION_VERSION <= 2)",
+                sql.contains("CONFIGURATION_VERSION, 1) <= 2"));
+        assertTrue("Промпт-шаблон без ${projectName}", sql.contains("${projectName}"));
+        assertTrue("Промпт-шаблон без ${sourceText}", sql.contains("${sourceText}"));
     }
 
     @Test
