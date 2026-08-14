@@ -392,8 +392,11 @@
     }
 
     // Primary (ОК/сохранить): акцентная заливка $v-selection-color — как
-    // project-editor-primary-action (эталон ProjectEdit).
-    .country-editor-primary-action {
+    // project-editor-primary-action (эталон ProjectEdit). Классы namespace-форм
+    // серии гео-справочников: каждая форма получает свой, из общего правила.
+    .country-editor-primary-action,
+    .region-editor-primary-action,
+    .city-editor-primary-action {
       color: #ffffff !important;
       background: $v-selection-color !important;
       border-color: $v-selection-color !important;
@@ -401,7 +404,9 @@
 
     // Secondary (Отмена): прозрачная кнопка с рамкой — как
     // project-editor-secondary-action (эталон ProjectEdit).
-    .country-editor-secondary-action {
+    .country-editor-secondary-action,
+    .region-editor-secondary-action,
+    .city-editor-secondary-action {
       color: $v-font-color !important;
       background: transparent !important;
       border-color: rgba($v-font-color, 0.55) !important;

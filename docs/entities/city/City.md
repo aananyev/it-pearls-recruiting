@@ -134,6 +134,7 @@ erDiagram
 - **View:** `city-edit-view`
 - **Loader регионов:** `region-picker-view` + `cacheable="true"`
 - **Вкладок нет** — lazy LOB/collection не требуется
+- **Sidebar-контракт** (канон: `docs/ui/GeolocationEditForms_Spec.md`): стандартные отступы контента sidebar (`padding: 14px 16px 12px` + граница + тень), название города `edit-sidebar-title` по центру по горизонтали, подпись типа записи убрана из identity (сводка `edit-sidebar-summary` с подписью «Регион» сохранена); footer-кнопки ОК/Отмена в правом нижнем углу со стилем primary/secondary формы Project
 
 ### 5.3 Cross-form потребители
 
@@ -273,6 +274,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | §5.2: CityEdit sidebar доведён до эталона ProjectEdit — стандартные отступы контента sidebar, название города по центру по горизонтали, подпись типа записи «Город» удалена из identity (сводка «Регион» сохранена), footer-кнопки ОК/Отмена в правом нижнем углу со стилем primary/secondary (`city-editor-primary-action`/`city-editor-secondary-action`); тест `GeolocationEditFormsContractTest` дополнен |
 | 2026-08-14 | Sidebar CityEdit по контракту Edit-экранов: nav-пункты 27px (общий SCSS гео-форм, фикс высоты Vaadin-кнопки), subtitle → `msg://msgCity`, подпись сводки → `msg://msgRegion`, spacer `width/height 100%`; UI Spec: `docs/ui/GeolocationEditForms_Spec.md` |
 | 2026-08-13 | Sidebar CityEdit: добавлен visual-блок с круглой иллюстрацией `ovalImage` 176×176 (`icons/dictionaries/city.png`); identity выровнен по контракту (title 18/700 #ffb11b, subtitle 12/400); тест DictionaryEditFormIllustrationContractTest |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |

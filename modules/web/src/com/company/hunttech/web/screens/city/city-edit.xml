@@ -38,9 +38,12 @@
                         <theme path="icons/dictionaries/city.png"/>
                     </ovalImage>
                 </vbox>
+                <!-- Блок идентификации: название города из контейнера.
+                     Подпись типа записи убрана — название выровнено по центру
+                     sidebar (text-align: center в geolocation SCSS). -->
                 <vbox id="cityIdentity" stylename="edit-sidebar-identity" width="100%" spacing="true">
-                    <!-- Подпись типа записи (msg-ключ из пакета города). -->
-                    <label value="msg://msgCity" stylename="edit-sidebar-subtitle" width="100%"/>
+                    <!-- Название города (свойство cityRuName), живое из cityDc,
+                         по центру по горизонтали относительно sidebar. -->
                     <label id="citySidebarTitle" dataContainer="cityDc" property="cityRuName" stylename="edit-sidebar-title" width="100%"/>
                 </vbox>
                 <!-- Label-навигация повторяет фактическую информационную архитектуру правой области. -->
@@ -95,10 +98,24 @@
                         </groupBox>
                     </vbox>
                 </scrollBox>
-                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
-                    <vbox id="cityActionsSpacer" width="100%"/>
-                    <button action="windowCommitAndClose"/>
-                    <button action="windowClose"/>
+                <!-- Нижняя панель штатных действий: спейсер выталкивает пару
+                     ОК/Отмена к правому нижнему углу, кнопки получают канонические
+                     стили primary/secondary (эталон ProjectEdit). -->
+                <hbox id="editActions"
+                      stylename="edit-footer-actions"
+                      width="100%"
+                      expand="cityActionsSpacer"
+                      align="MIDDLE_RIGHT"
+                      spacing="false">
+                    <!-- Спейсер: растягивает группу кнопок к правому краю панели. -->
+                    <vbox id="cityActionsSpacer" width="100%" height="1px"/>
+                    <!-- Группа ОК/Отмена: primary (сохранить) и secondary (отмена). -->
+                    <hbox id="cityActionsGroup" width="AUTO" align="MIDDLE_RIGHT" spacing="true">
+                        <!-- Сохранить и закрыть (штатный action editor-а). -->
+                        <button action="windowCommitAndClose" stylename="city-editor-primary-action"/>
+                        <!-- Отменить изменения и закрыть. -->
+                        <button action="windowClose" stylename="city-editor-secondary-action"/>
+                    </hbox>
                 </hbox>
             </vbox>
         </hbox>
