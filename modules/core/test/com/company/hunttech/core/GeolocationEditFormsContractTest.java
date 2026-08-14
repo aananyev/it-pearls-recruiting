@@ -266,6 +266,50 @@ public class GeolocationEditFormsContractTest {
         }
     }
 
+    @Test
+    public void countrySidebarDropsTypeSubtitleAndCentersTitle() throws IOException {
+        // По запросу «убери слово "Страна"» из sidebar: подпись типа записи
+        // (edit-sidebar-subtitle) удалена, остаётся только название страны.
+        String country = readProjectFile(SCREENS + "country/country-edit.xml");
+        assertTrue("Слово «Страна» (edit-sidebar-subtitle) осталось в sidebar CountryEdit",
+                !country.contains("edit-sidebar-subtitle"));
+        assertTrue(country.contains("id=\"countrySidebarTitle\""));
+        assertTrue(country.contains("stylename=\"edit-sidebar-title\""));
+
+        // Название страны выровнено по центру по горизонтали (эталон ProjectEdit).
+        String canon = readProjectFile(
+                "modules/web/themes/hover/com.company.hunttech/geolocation-edit-forms.scss");
+        assertTrue("Нет центрирования .edit-sidebar-title (text-align: center)",
+                canon.contains("text-align: center !important"));
+        // Стандартные отступы контента sidebar от краёв (эталон ProjectEdit).
+        assertTrue("Нет стандартного padding sidebar 14px 16px 12px",
+                canon.contains("padding: 14px 16px 12px !important"));
+        assertTrue("Нет правой границы sidebar",
+                canon.contains("border-right: 1px solid rgba(15, 23, 42, 0.78) !important"));
+    }
+
+    @Test
+    public void countryFooterActionsUseProjectStyle() throws IOException {
+        // Кнопки ОК/Отмена прижаты к правому нижнему углу (expand + MIDDLE_RIGHT)
+        // и стилизованы как у ProjectEdit: primary/secondary классы в XML.
+        String country = readProjectFile(SCREENS + "country/country-edit.xml");
+        assertTrue(country.contains("expand=\"countryActionsSpacer\""));
+        assertTrue(country.contains("align=\"MIDDLE_RIGHT\""));
+        assertTrue(country.contains("stylename=\"country-editor-primary-action\""));
+        assertTrue(country.contains("stylename=\"country-editor-secondary-action\""));
+
+        // SCSS-слой: панель и кнопки 40px/14px/600/radius 4px, primary/secondary
+        // цвета — 1:1 с project-editor.scss.
+        String canon = readProjectFile(
+                "modules/web/themes/hover/com.company.hunttech/geolocation-edit-forms.scss");
+        assertTrue("Нет стилей .edit-footer-actions", canon.contains(".edit-footer-actions"));
+        assertTrue("Нет кнопок 40px footer", canon.contains("min-height: 40px !important"));
+        assertTrue("Нет .country-editor-primary-action", canon.contains(".country-editor-primary-action"));
+        assertTrue("Нет .country-editor-secondary-action", canon.contains(".country-editor-secondary-action"));
+        assertTrue("Нет акцентной заливки primary ($v-selection-color)",
+                canon.contains("background: $v-selection-color !important"));
+    }
+
     private String readProjectFile(String relativePath) throws IOException {
         return new String(
                 Files.readAllBytes(projectRoot().resolve(relativePath)),

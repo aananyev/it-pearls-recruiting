@@ -23,6 +23,17 @@
       background-image: linear-gradient(180deg, #172638 0%, #132130 58%, #0f1b28 100%) !important;
     }
 
+    // Стандартные отступы контента sidebar от краёв (эталон ProjectEdit/
+    // IteractionListEdit): padding 14px 16px 12px, правая граница и внешняя
+    // тень отделяют панель от рабочей области. На слот — только ширина
+    // (shared edit-screen-shared-styles), декор живёт на .edit-sidebar.
+    .edit-sidebar {
+      box-sizing: border-box;
+      padding: 14px 16px 12px !important;
+      border-right: 1px solid rgba(15, 23, 42, 0.78) !important;
+      box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18) !important;
+    }
+
     // Тексты идентификации и подсказки в тёмной sidebar — эталон IteractionListEdit:
     // subtitle 12px/400 rgba(248,250,252,.72), title 18px/700 #ffb11b.
     .edit-sidebar-subtitle,
@@ -50,6 +61,7 @@
       font-size: 18px !important;
       font-weight: 700 !important;
       line-height: 24px !important;
+      text-align: center !important;
       white-space: normal !important;
       overflow-wrap: anywhere;
     }
@@ -353,6 +365,46 @@
       font-size: 14px !important;
       border-radius: 5px !important;
       transition: border-color 120ms ease, background 120ms ease, box-shadow 120ms ease;
+    }
+
+    // Нижняя панель действий: отступы 11px 20px, кнопки 14px/600 высотой 40px
+    // и верхняя тень — эталон ProjectEdit/IteractionListEdit (перекрывает shared).
+    .edit-footer-actions {
+      box-sizing: border-box;
+      padding: 11px 20px !important;
+      min-height: 62px !important;
+      border-top: 1px solid rgba($v-font-color, 0.16) !important;
+      box-shadow: 0 -2px 8px rgba(15, 23, 42, 0.04) !important;
+    }
+
+    .edit-footer-actions .v-button {
+      box-sizing: border-box;
+      min-height: 40px !important;
+      padding: 0 18px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      line-height: 38px !important;
+      border-radius: 4px !important;
+    }
+
+    .edit-footer-actions .v-button:hover {
+      filter: brightness(0.98);
+    }
+
+    // Primary (ОК/сохранить): акцентная заливка $v-selection-color — как
+    // project-editor-primary-action (эталон ProjectEdit).
+    .country-editor-primary-action {
+      color: #ffffff !important;
+      background: $v-selection-color !important;
+      border-color: $v-selection-color !important;
+    }
+
+    // Secondary (Отмена): прозрачная кнопка с рамкой — как
+    // project-editor-secondary-action (эталон ProjectEdit).
+    .country-editor-secondary-action {
+      color: $v-font-color !important;
+      background: transparent !important;
+      border-color: rgba($v-font-color, 0.55) !important;
     }
   }
 }
