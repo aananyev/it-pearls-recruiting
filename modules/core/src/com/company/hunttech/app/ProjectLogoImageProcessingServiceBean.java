@@ -249,32 +249,73 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
      * чтобы избежать грубой ступеньки по контуру логотипа.
      */
     private BufferedImage removeWhiteBackground(BufferedImage image, int whiteThreshold) {
+        boolean removeAllWhite =
+                configuration.getConfig(HunttechProjectLogoConfig.class).getRemoveAllWhite();
+        return removeWhiteBackground(image, whiteThreshold, removeAllWhite);
+    }
+
+    /**
+     * Удаляет белый фон изображения.
+     *
+     * <p>При {@code removeAllWhite = true} прозрачными становятся ВСЕ пиксели,
+     * удовлетворяющие порогу белизны, — включая замкнутые полости внутри букв и фигур
+     * (например, белый просвет внутри буквы «А» у логотипа Альфа-Банка): такие области
+     * считаются фоном. Это согласуется с требованием AI-промпта функции
+     * {@code PROJECT_LOGO_IMAGE_GENERATE}.</p>
+     *
+     * <p>При {@code removeAllWhite = false} используется flood-fill от границ: белыми
+     * становятся только области, соединённые с краем непрерывной белой зоной, а белые
+     * элементы дизайна внутри логотипа (текст, просветы букв) сохраняются.</p>
+     *
+     * <p>На границе фона применяется плавный переход прозрачности ({@link #EDGE_SOFTNESS}),
+     * чтобы избежать грубой ступеньки по контуру логотипа.</p>
+     */
+    private BufferedImage removeWhiteBackground(BufferedImage image, int whiteThreshold,
+                                                boolean removeAllWhite) {
         int width = image.getWidth();
         int height = image.getHeight();
 
         boolean[][] isBackground = new boolean[height][width];
-        Deque<int[]> queue = new ArrayDeque<>();
 
-        // Затравка: все пиксели на границе, удовлетворяющие порогу белизны.
-        for (int x = 0; x < width; x++) {
-            enqueueIfWhite(image, isBackground, queue, x, 0, whiteThreshold);
-            enqueueIfWhite(image, isBackground, queue, x, height - 1, whiteThreshold);
-        }
-        for (int y = 0; y < height; y++) {
-            enqueueIfWhite(image, isBackground, queue, 0, y, whiteThreshold);
-            enqueueIfWhite(image, isBackground, queue, width - 1, y, whiteThreshold);
-        }
+        if (removeAllWhite) {
+            // Маска по всему полотну: любой пиксель с минимумом RGB-каналов >= порога
+            // считается фоном (включая замкнутые полости внутри букв).
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int rgb = image.getRGB(x, y);
+                    int r = (rgb >> 16) & 0xFF;
+                    int g = (rgb >> 8) & 0xFF;
+                    int b = rgb & 0xFF;
+                    int minChannel = Math.min(r, Math.min(g, b));
+                    if (minChannel >= whiteThreshold) {
+                        isBackground[y][x] = true;
+                    }
+                }
+            }
+        } else {
+            Deque<int[]> queue = new ArrayDeque<>();
 
-        // BFS по 4-связным белым пикселям.
-        int[] dx = {1, -1, 0, 0};
-        int[] dy = {0, 0, 1, -1};
-        while (!queue.isEmpty()) {
-            int[] p = queue.poll();
-            for (int i = 0; i < 4; i++) {
-                int nx = p[0] + dx[i];
-                int ny = p[1] + dy[i];
-                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                    enqueueIfWhite(image, isBackground, queue, nx, ny, whiteThreshold);
+            // Затравка: все пиксели на границе, удовлетворяющие порогу белизны.
+            for (int x = 0; x < width; x++) {
+                enqueueIfWhite(image, isBackground, queue, x, 0, whiteThreshold);
+                enqueueIfWhite(image, isBackground, queue, x, height - 1, whiteThreshold);
+            }
+            for (int y = 0; y < height; y++) {
+                enqueueIfWhite(image, isBackground, queue, 0, y, whiteThreshold);
+                enqueueIfWhite(image, isBackground, queue, width - 1, y, whiteThreshold);
+            }
+
+            // BFS по 4-связным белым пикселям.
+            int[] dx = {1, -1, 0, 0};
+            int[] dy = {0, 0, 1, -1};
+            while (!queue.isEmpty()) {
+                int[] p = queue.poll();
+                for (int i = 0; i < 4; i++) {
+                    int nx = p[0] + dx[i];
+                    int ny = p[1] + dy[i];
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        enqueueIfWhite(image, isBackground, queue, nx, ny, whiteThreshold);
+                    }
                 }
             }
         }

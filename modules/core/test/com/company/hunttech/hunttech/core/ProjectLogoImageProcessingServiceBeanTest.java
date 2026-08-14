@@ -95,6 +95,34 @@ public class ProjectLogoImageProcessingServiceBeanTest {
     }
 
     @Test
+    public void testWhiteCavityInsideLetterBecomesTransparent() throws IOException {
+        // Белый фон + красный блок с белой полостью внутри (имитация буквы «А»
+        // Альфа-Банка): при removeAllWhite=true полость считается фоном и удаляется.
+        BufferedImage image = new BufferedImage(120, 120, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = image.createGraphics();
+        try {
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, 120, 120);
+            g.setColor(new Color(200, 40, 40));
+            g.fillRect(30, 20, 60, 80);
+            g.setColor(Color.WHITE);
+            g.fillRect(50, 40, 20, 40); // замкнутая белая полость
+        } finally {
+            g.dispose();
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ImageIO.write(image, "jpg", out);
+
+        ProcessedImage processed = service.process(out.toByteArray(), "logo.jpg");
+        BufferedImage result = read(processed);
+
+        // Центр канваса — полость (логотип рисуется по центру): должен стать прозрачным.
+        int centerAlpha = (result.getRGB(result.getWidth() / 2, result.getHeight() / 2) >> 24) & 0xFF;
+        assertEquals("Белая полость внутри буквы должна удаляться (removeAllWhite=true)",
+                0, centerAlpha);
+    }
+
+    @Test
     public void testNonImageFileIsPassedThrough() {
         // Не изображение — обработка не требуется, данные возвращаются как есть.
         byte[] data = "not an image".getBytes();

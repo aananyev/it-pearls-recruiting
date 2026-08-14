@@ -26,7 +26,7 @@
 
 - **Загрузка логотипа** → `WebProjectLogoFileUploadField.saveFile` → `beanLocator.get(ProjectLogoImageProcessingService.NAME)` (proxy) → `process(data, fileName)`.
 - **AI-этап** (если `hunttech.projectLogo.ai.enabled=true`): функция `PROJECT_LOGO_IMAGE_GENERATE` получает изображение и возвращает PNG с прозрачным фоном (OpenAI `images/edits`, модель `gpt-image-2`).
-- **AI недоступен** (функция не активна, нет credentials, таймаут/ошибка провайдера) → лог `warn` + классический конвейер: flood-fill удаление белого фона от краёв (порог 235), плавный край (EDGE_SOFTNESS 24).
+- **AI недоступен** (функция не активна, нет credentials, таймаут/ошибка провайдера) → лог `warn` + классический конвейер: удаление белых пикселей по порогу 235 (`removeAllWhite=true` — включая замкнутые полости внутри букв), плавный край (EDGE_SOFTNESS 24).
 - **Детерминированный финал** (всегда): ARGB → ресайз до 300px → обрезка по содержимому → квадратный канвас со стороной = диагонали/0.95 → PNG.
 - **Не-растровый файл** или пустые данные → исходные байты, `processed=false`.
 - **Ошибка обработки** → компонент логирует `warn` и сохраняет исходный файл — загрузка не прерывается.
@@ -62,6 +62,7 @@
 | `format` | `hunttech.projectLogo.format` | String | **png** | Выходной формат (PNG — прозрачность) |
 | `whiteThreshold` | `hunttech.projectLogo.whiteThreshold` | int | **235** | Порог «белизны» классического flood-fill (0–255) |
 | `circleInscribeRatioPercent` | `hunttech.projectLogo.circleInscribeRatio` | int | **71** | Резерв на будущее; реализация использует `CANVAS_MARGIN=0.95` от диагонали |
+| `removeAllWhite` | `hunttech.projectLogo.removeAllWhite` | boolean | **true** | Удалять ВСЕ белые пиксели по порогу, включая замкнутые полости внутри букв (просвет «А»); `false` — flood-fill только от краёв (белые элементы дизайна сохраняются) |
 | `enabled` | `hunttech.projectLogo.enabled` | boolean | **true** | Общий выключатель обработки |
 | `aiProcessingEnabled` | `hunttech.projectLogo.ai.enabled` | boolean | **true** | AI-первый этап; `false` — сразу классический конвейер |
 
@@ -124,6 +125,15 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 - Код входит в артефакты `app-global`, `app-core`, web-клиент; миграция БД — seed AI-функции (применяется штатным `updateDb`/Liquibase).
 - Web-артефакт обязан содержать запись `hunttech_ProjectLogoImageProcessingService` в `WebRemoteProxyBeanCreator`.
 - Для AI-этапа администратор настраивает в «Управление AI»: активную корпоративную конфигурацию (провайдер OpenAI, ключ), модель `gpt-image-2` (или свою) у функции `PROJECT_LOGO_IMAGE_GENERATE`. Без настройки — автоматический классический конвейер.
+
+### 7.1 Корпоративное подключение OpenAI (как настроено 13.08.2026, локальная среда)
+
+1. **Ключ шифрования**: `hunttech.ai.encryptionKey` (≥32 симв.) в `${app.home}/local.app.properties` (`deploy/app_home/local.app.properties`, вне Git — `deploy/*` в .gitignore). Пустое значение блокирует корпоративные секреты предсказуемой ошибкой.
+2. **Шифрование API-ключа**: AES-GCM (SHA-256 от ключа шифрования), формат `v1:<iv>:<ciphertext>` — идентичен `AiSecretCipher`.
+3. **Корпоративная конфигурация**: запись в `HUNTTECH_ADMIN_AI_CONFIGURATION` (провайдер `openai`, модель `gpt-4o`, `IS_ACTIVE=true`, `API_KEY_ENCRYPTED`).
+4. **Привязка**: `HUNTTECH_AI_FUNCTION_CONFIGURATION.ADMIN_CONFIGURATION_ID` → `PROJECT_LOGO_IMAGE_GENERATE` (и `PROJECT_DESCRIPTION_GENERATE`).
+5. **Проверка**: загрузка логотипа в ProjectEdit → лог `Логотип ... обработан`; при 4xx/5xx провайдера (например, HTTP 429 — исчерпаны кредиты OpenAI) — `warn` + классический fallback, загрузка не прерывается.
+
 - Локальный deploy точного HEAD, перезапуск Tomcat, HTTP `/hrm/` = 200, smoke: ProjectEdit → загрузка логотипа → лог без `NoSuchBeanDefinitionException`.
 
 ---
@@ -132,5 +142,7 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-13 | Классический конвейер: конфиг `hunttech.projectLogo.removeAllWhite` (default true) — удаление всех белых пикселей по порогу, включая замкнутые полости внутри букв (просвет «А» Альфа-Банка); тест `testWhiteCavityInsideLetterBecomesTransparent` |
+| 2026-08-13 | Настроено корпоративное подключение OpenAI: `hunttech.ai.encryptionKey` в `${app.home}/local.app.properties`, admin-конфигурация `HUNTTECH_ADMIN_AI_CONFIGURATION` (openai, gpt-4o, активна), привязка к функциям `PROJECT_LOGO_IMAGE_GENERATE` и `PROJECT_DESCRIPTION_GENERATE`; загрузка логотипа реально вызывает `images/edits` (при 4xx — классический fallback) |
 | 2026-08-13 | AI-first: функция `PROJECT_LOGO_IMAGE_GENERATE` (IMAGE_GENERATION, OpenAI `images/edits`) с детерминированным классическим fallback; исправлена интеграция web↔core (запись в `WebRemoteProxyBeanCreator` устранила `NoSuchBeanDefinitionException`); конфиг `hunttech.projectLogo.ai.enabled` |
 | 2026-08-12 | Создание сервиса: классический конвейер (PNG, ресайз 300, flood-fill белого фона, вписывание в круг), интеграция с `WebProjectLogoFileUploadField` |

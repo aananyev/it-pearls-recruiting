@@ -49,6 +49,17 @@ public interface HunttechProjectLogoConfig extends Config {
     int getCircleInscribeRatioPercent();
 
     /**
+     * Удалять ВСЕ пиксели, удовлетворяющие порогу белизны, включая замкнутые полости
+     * внутри букв и фигур (например, белый просвет внутри буквы «А» у логотипа
+     * Альфа-Банка) — они считаются фоном. При {@code false} удаляется только фон,
+     * соединённый с краями изображения (flood-fill), а белые элементы дизайна внутри
+     * логотипа сохраняются.
+     */
+    @Property("hunttech.projectLogo.removeAllWhite")
+    @DefaultBoolean(true)
+    boolean getRemoveAllWhite();
+
+    /**
      * Включает обработку логотипа проекта (JPEG/PNG -> PNG, ресайз, удаление белого фона, вписывание в круг).
      */
     @Property("hunttech.projectLogo.enabled")

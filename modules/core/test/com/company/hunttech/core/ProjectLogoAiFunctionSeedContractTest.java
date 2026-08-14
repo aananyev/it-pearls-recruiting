@@ -55,7 +55,11 @@ public class ProjectLogoAiFunctionSeedContractTest {
         assertTrue(sql.contains("'USER_OVERRIDE_ALLOWED'"));
         assertTrue(sql.contains("'FALLBACK_TO_ADMIN'"));
         assertTrue(sql.contains("${sourceFileName}"));
-        assertTrue(sql.contains("PNG с прозрачным фоном"));
+        assertTrue(sql.contains("PNG с полностью прозрачным фоном"));
+        assertTrue("Промпт обязан требовать удаление фоновых полостей внутри букв",
+                sql.contains("замкнутые полости внутри букв"));
+        assertTrue("Промпт обязан упоминать просвет буквы «А» как фон",
+                sql.contains("просвет внутри буквы «А»"));
     }
 
     @Test
