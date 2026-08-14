@@ -1,0 +1,29 @@
+/* Helium — фирменный голубой: светлые поверхности, акцент #197de1, выраженный selected */
+/* Токены табличных и текстовых компонентов HRM HuntTech. */
+/* Переопределяются в mixin hrm-table-text-components (table-text-components.scss). */
+
+$hrm-table-bg: #ffffff;
+$hrm-table-text: #20262c;
+$hrm-table-border: #cfe0ef;
+$hrm-table-header-bg: #f0f6fc;
+$hrm-table-header-text: #2e5f8f;
+$hrm-table-divider: #dde9f4;
+$hrm-table-hover: rgba(25,125,225,0.07);
+$hrm-table-selected: rgba(25,125,225,0.14);
+$hrm-table-selected-border: #197de1;
+$hrm-table-focus: #197de1;
+$hrm-table-zebra: rgba(40,120,200,0.04);
+$hrm-table-sort: #197de1;
+$hrm-table-resize: #9cc2e5;
+$hrm-editor-bg: #ffffff;
+$hrm-editor-text: #20262c;
+$hrm-editor-border: #b8d0e6;
+$hrm-editor-focus: #197de1;
+$hrm-editor-invalid: #c43d3d;
+$hrm-editor-disabled-bg: #f4f7fa;
+$hrm-editor-readonly-bg: #f9fbfd;
+$hrm-editor-placeholder: rgba(32,38,44,0.40);
+$hrm-scrollbar-track: #eef4f9;
+$hrm-scrollbar-thumb: #aec6db;
+$hrm-rich-toolbar-bg: #f2f8fd;
+$hrm-rich-toolbar-border: #cfe0ef;

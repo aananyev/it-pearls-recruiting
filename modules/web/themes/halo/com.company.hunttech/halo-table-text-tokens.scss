@@ -1,0 +1,29 @@
+/* Halo — вариант 1: светлый голубой, тонкие границы, чистый header, заметный focus */
+/* Токены табличных и текстовых компонентов HRM HuntTech. */
+/* Переопределяются в mixin hrm-table-text-components (table-text-components.scss). */
+
+$hrm-table-bg: #ffffff;
+$hrm-table-text: #1d2b3a;
+$hrm-table-border: #d3dee9;
+$hrm-table-header-bg: #f0f5fa;
+$hrm-table-header-text: #3c5a75;
+$hrm-table-divider: #e2eaf2;
+$hrm-table-hover: rgba(64,124,190,0.07);
+$hrm-table-selected: rgba(64,124,190,0.14);
+$hrm-table-selected-border: #7fa8d0;
+$hrm-table-focus: #2f6fb2;
+$hrm-table-zebra: rgba(96,140,190,0.04);
+$hrm-table-sort: #2f6fb2;
+$hrm-table-resize: #9db8d0;
+$hrm-editor-bg: #ffffff;
+$hrm-editor-text: #1d2b3a;
+$hrm-editor-border: #bcccdc;
+$hrm-editor-focus: #2f6fb2;
+$hrm-editor-invalid: #c0392b;
+$hrm-editor-disabled-bg: #f4f7fa;
+$hrm-editor-readonly-bg: #f8fafc;
+$hrm-editor-placeholder: rgba(29,43,58,0.40);
+$hrm-scrollbar-track: #eef3f8;
+$hrm-scrollbar-thumb: #b7c6d4;
+$hrm-rich-toolbar-bg: #f4f8fb;
+$hrm-rich-toolbar-border: #d3dee9;

@@ -7,12 +7,18 @@
 | Экран | Документ | Назначение |
 |---|---|---|
 | `JobCandidateEdit` | [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md) | Карточка кандидата, вкладки, история вакансий, анализ навыков и защита от OOM |
-| `CandidateCVEdit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) | Редактор резюме, ленивое чтение текста и безопасная загрузка фотографии |
-| `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | Стандартные пользовательские настройки и персональные AI API-ключи без отдельного пункта меню |
-| `AiPromptTemplateBrowse` | [AiPromptTemplateBrowse_Spec.md](AiPromptTemplateBrowse_Spec.md) | Локализованный список системных промптов AI |
-| `AiPromptTemplateEdit` | [AiPromptTemplateEdit_Spec.md](AiPromptTemplateEdit_Spec.md) | Читаемый редактор системного промпта с фиксированной панелью действий |
-| `UserAiConfigurationBrowse` | [UserAiConfigurationBrowse_Spec.md](UserAiConfigurationBrowse_Spec.md) | Технический экран мониторинга и выбора текущей нейросети без отдельной пользовательской навигации |
-| `UserAiConfigurationEdit` | [UserAiConfigurationEdit_Spec.md](UserAiConfigurationEdit_Spec.md) | Читаемый редактор подключения к AI API с резервным состоянием по умолчанию |
+| `CandidateCVEdit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) | Подготовка резюме с постоянной live-sidebar кандидата, сопроводительным письмом, деревом навыков, фотографией и файлами без изменения lazy-init |
+| `OpenPositionEditPreview` | [OpenPositionEditPreview_Spec.md](OpenPositionEditPreview_Spec.md) | Изолированный preview новой компоновки вакансии без замены legacy-экрана и изменения бизнес-логики |
+| `ExtUserEdit` | [ExtUserEdit_Spec.md](ExtUserEdit_Spec.md) | Администрирование профиля пользователя, ролей, замещений, email и AI в общем Edit-контракте |
+| `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | Персональные настройки пользователя, интерфейса, email и AI |
+| `ExtSettingsWindowMainBackground` | [ExtSettingsWindowMainBackground_Spec.md](ExtSettingsWindowMainBackground_Spec.md) | Загрузка, очистка и безопасное хранение персонального фона без изменения entity и БД |
+| `ExtSettingsWindowEmailNavigation` | [ExtSettingsWindowEmailNavigation_Spec.md](ExtSettingsWindowEmailNavigation_Spec.md) | Связь навигации SMTP, POP3 и IMAP слева с соответствующими аккордеонами справа |
+| `ExtSettingsWindowAvatar` | [ExtSettingsWindowAvatar_Spec.md](ExtSettingsWindowAvatar_Spec.md) | Круглая фотография пользователя через `OvaFallbackImage` без изменения модели данных |
+| `HrmMainScreen` | [HrmMainScreen_Spec.md](HrmMainScreen_Spec.md) | Главный dashboard с персональным фоном либо случайным каталогом 7 × 10 нейтральных SVG |
+| `IteractionListEdit` | [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) · [XML-компоновка](IteractionListEdit_XmlLayout_2026-07-27.md) | Бизнес-логика взаимодействия, контекстная sidebar, аккордеоны и сохранённые CUBA-контракты |
+| `OutstaffingRatesBrowse` | [OutstaffingRatesBrowse_Spec.md](OutstaffingRatesBrowse_Spec.md) | Рейты по аутстафу — список ступеней шкалы (lookup, CRUD) |
+| `OutstaffingRatesEdit` | [OutstaffingRatesEdit_Spec.md](OutstaffingRatesEdit_Spec.md) | Рейты по аутстафу — форма ступени (commit → триггеры маржинальности и аудита) |
+| Table & Text Components | [HRM_HuntTech_Table_And_Text_Components_Style_Spec.md](HRM_HuntTech_Table_And_Text_Components_Style_Spec.md) | Единый дизайн DataGrid, Table, TreeTable, TextArea, RichTextArea во всех темах (токены `$hrm-*`, mixin, варианты Halo=1 / modern-light=3 / modern-dark=5) |
 
 ## Правила актуализации
 

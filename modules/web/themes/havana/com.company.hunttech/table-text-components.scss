@@ -1,0 +1,301 @@
+/* Общий слой табличных и текстовых компонентов HRM HuntTech.
+   Покрывает DataGrid (.v-grid), Table (.v-table), TreeTable (CUBA Tree: .v-tree),
+   TextArea (.v-textarea) и RichTextArea (.v-richtextarea).
+   Палитра задаётся токенами $hrm-* из <theme>-table-text-tokens.scss;
+   этот файл идентичен во всех темах — различия только в токенах. */
+
+@mixin hrm-table-text-components {
+
+  /* ── DataGrid ──────────────────────────────── */
+  .v-grid {
+    background: $hrm-table-bg;
+    color: $hrm-table-text;
+    border: 1px solid $hrm-table-border;
+    border-radius: 8px;
+  }
+  .v-grid-header .v-grid-cell {
+    background: $hrm-table-header-bg;
+    color: $hrm-table-header-text;
+    font-weight: 600;
+    font-size: 12px;
+    border-bottom: 1px solid $hrm-table-divider;
+  }
+  .v-grid-header .v-grid-cell:hover {
+    background: $hrm-table-header-bg;
+  }
+  .v-grid-row {
+    border-bottom: 1px solid $hrm-table-divider;
+  }
+  .v-grid-row-stripe {
+    background: $hrm-table-zebra;
+  }
+  .v-grid-row:hover {
+    background: $hrm-table-hover;
+  }
+  .v-grid-row-selected {
+    background: $hrm-table-selected;
+    box-shadow: inset 0 0 0 1px $hrm-table-selected-border;
+  }
+  .v-grid-row-focused {
+    box-shadow: inset 0 0 0 2px $hrm-table-focus;
+  }
+  .v-grid-cell-focused {
+    box-shadow: inset 0 0 0 2px $hrm-table-focus;
+  }
+  .v-grid-sort-indicator {
+    color: $hrm-table-sort;
+  }
+  .v-grid-column-resize-handle {
+    background: $hrm-table-resize;
+  }
+  .v-grid-footer .v-grid-cell {
+    background: $hrm-table-header-bg;
+    color: $hrm-table-header-text;
+    border-top: 1px solid $hrm-table-divider;
+    font-weight: 600;
+  }
+  .v-grid-editor-cells {
+    background: $hrm-editor-bg;
+  }
+  .v-grid-editor-cell input,
+  .v-grid-editor-cell textarea,
+  .v-grid-editor-cell .v-textfield {
+    background: $hrm-editor-bg;
+    color: $hrm-editor-text;
+    border: 1px solid $hrm-editor-border;
+  }
+  .v-grid-empty {
+    color: $hrm-editor-placeholder;
+  }
+  .v-grid-scroller-vertical,
+  .v-grid-scroller-horizontal {
+    background: $hrm-scrollbar-track;
+    &::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    &::-webkit-scrollbar-track {
+      background: $hrm-scrollbar-track;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: $hrm-scrollbar-thumb;
+      border-radius: 5px;
+    }
+  }
+
+  /* ── Table ─────────────────────────────────── */
+  .v-table {
+    background: $hrm-table-bg;
+    color: $hrm-table-text;
+    border: 1px solid $hrm-table-border;
+    border-radius: 8px;
+  }
+  .v-table-header-wrap {
+    background: $hrm-table-header-bg;
+    border-bottom: 1px solid $hrm-table-divider;
+  }
+  .v-table-caption-container {
+    color: $hrm-table-header-text;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .v-table-row,
+  .v-table-row-odd {
+    background: $hrm-table-bg;
+    border-bottom: 1px solid $hrm-table-divider;
+  }
+  .v-table-row-odd {
+    background: $hrm-table-zebra;
+  }
+  .v-table-row:hover {
+    background: $hrm-table-hover;
+  }
+  .v-table-row-selected {
+    background: $hrm-table-selected;
+    box-shadow: inset 0 0 0 1px $hrm-table-selected-border;
+  }
+  .v-table-cell-content {
+    color: $hrm-table-text;
+  }
+  .v-table-focus-slot-left {
+    background: $hrm-table-focus;
+  }
+  .v-table-sort-indicator {
+    color: $hrm-table-sort;
+  }
+  .v-table-footer-wrap {
+    background: $hrm-table-header-bg;
+    color: $hrm-table-header-text;
+    border-top: 1px solid $hrm-table-divider;
+    font-weight: 600;
+  }
+  .v-table-body {
+    &::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    &::-webkit-scrollbar-track {
+      background: $hrm-scrollbar-track;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: $hrm-scrollbar-thumb;
+      border-radius: 5px;
+    }
+  }
+
+  /* ── TreeTable (CUBA Tree) ─────────────────── */
+  .v-tree {
+    background: $hrm-table-bg;
+    color: $hrm-table-text;
+    border: 1px solid $hrm-table-border;
+    border-radius: 8px;
+  }
+  .v-tree-node-caption {
+    color: $hrm-table-text;
+    border-radius: 4px;
+  }
+  .v-tree-node-caption:hover {
+    background: $hrm-table-hover;
+  }
+  .v-tree-node-selected > .v-tree-node-caption {
+    background: $hrm-table-selected;
+    color: $hrm-table-text;
+    box-shadow: inset 0 0 0 1px $hrm-table-selected-border;
+  }
+  .v-tree-node-focused > .v-tree-node-caption {
+    box-shadow: inset 0 0 0 2px $hrm-table-focus;
+  }
+  .v-tree-node-children {
+    border-left: 1px solid $hrm-table-divider;
+    margin-left: 10px;
+    padding-left: 6px;
+  }
+
+  /* ── TextArea ──────────────────────────────── */
+  .v-textarea {
+    background: $hrm-editor-bg;
+    color: $hrm-editor-text;
+    border: 1px solid $hrm-editor-border;
+    border-radius: 6px;
+    padding: 8px 10px;
+    min-height: 120px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+    &::-webkit-scrollbar-track {
+      background: $hrm-scrollbar-track;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: $hrm-scrollbar-thumb;
+      border-radius: 5px;
+    }
+  }
+  .v-textarea:focus,
+  .v-textarea-focused {
+    border-color: $hrm-editor-focus;
+    box-shadow: 0 0 0 2px rgba($hrm-editor-focus, 0.18);
+  }
+  .v-textarea-error {
+    border-color: $hrm-editor-invalid;
+    box-shadow: 0 0 0 2px rgba($hrm-editor-invalid, 0.15);
+  }
+  .v-textarea-prompt {
+    color: $hrm-editor-placeholder;
+  }
+  .v-readonly.v-textarea {
+    background: $hrm-editor-readonly-bg;
+    color: $hrm-editor-text;
+  }
+  .v-disabled.v-textarea {
+    background: $hrm-editor-disabled-bg;
+    color: $hrm-editor-text;
+    opacity: 0.75;
+  }
+
+  /* ── RichTextArea ──────────────────────────── */
+  .v-richtextarea {
+    background: $hrm-editor-bg;
+    color: $hrm-editor-text;
+    border: 1px solid $hrm-editor-border;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  // Повышенная специфичность требуется из-за штатного селектора CUBA/Vaadin
+  // (.halo .v-richtextarea .gwt-RichTextToolbar) с тем же уровнем вложенности.
+  .v-richtextarea .gwt-RichTextToolbar,
+  .v-richtextarea-toolbar {
+    background: $hrm-rich-toolbar-bg;
+    border-bottom: 1px solid $hrm-rich-toolbar-border;
+    padding: 4px 6px;
+    min-height: 32px;
+  }
+  .v-richtextarea .gwt-RichTextToolbar .gwt-PushButton,
+  .v-richtextarea .gwt-RichTextToolbar .gwt-ToggleButton {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: $hrm-editor-text;
+    min-width: 26px;
+    min-height: 26px;
+    padding: 2px 4px;
+    cursor: pointer;
+    line-height: 26px;
+    text-align: center;
+  }
+  .v-richtextarea .gwt-RichTextToolbar .gwt-PushButton:hover,
+  .v-richtextarea .gwt-RichTextToolbar .gwt-ToggleButton:hover {
+    background: $hrm-table-hover;
+    border-color: $hrm-editor-border;
+  }
+  .v-richtextarea .gwt-RichTextToolbar .gwt-ToggleButton-down {
+    background: $hrm-table-selected;
+    border-color: $hrm-table-selected-border;
+  }
+  .v-richtextarea-content iframe,
+  .gwt-RichTextArea {
+    background: $hrm-editor-bg;
+    color: $hrm-editor-text;
+  }
+  .v-richtextarea-readonly {
+    background: $hrm-editor-readonly-bg;
+  }
+  .v-richtextarea-error {
+    border-color: $hrm-editor-invalid;
+    box-shadow: 0 0 0 2px rgba($hrm-editor-invalid, 0.15);
+  }
+
+  /* Legacy-слои тем (hover-ext / dark-ext) задают background, border и цвет
+     таблиц с !important — обычные правила их не перебивают, поэтому ключевые
+     свойства таблиц и header продублированы с !important. */
+  .v-grid,
+  .v-table {
+    background: $hrm-table-bg !important;
+    border: 1px solid $hrm-table-border !important;
+    color: $hrm-table-text !important;
+  }
+  .v-grid-header .v-grid-cell,
+  .v-table-header-wrap,
+  .v-table-caption-container {
+    background: $hrm-table-header-bg !important;
+    color: $hrm-table-header-text !important;
+  }
+  .v-table-row,
+  .v-table-row-odd,
+  .v-grid-row {
+    background: $hrm-table-bg !important;
+  }
+  .v-table-row-odd,
+  .v-grid-row-stripe {
+    background: $hrm-table-zebra !important;
+  }
+  .v-table-row:hover,
+  .v-grid-row:hover {
+    background: $hrm-table-hover !important;
+  }
+  .v-table-row-selected,
+  .v-grid-row-selected {
+    background: $hrm-table-selected !important;
+    box-shadow: inset 0 0 0 1px $hrm-table-selected-border !important;
+  }
+}
