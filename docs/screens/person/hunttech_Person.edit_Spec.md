@@ -1,6 +1,7 @@
 # Person Edit (`hunttech_Person.edit`)
 
 > Сущность: [Person.md](../../entities/person/Person.md)
+> Канонический UI Spec: [PersonEdit_Spec.md](../../ui/PersonEdit_Spec.md) (рефакторинг 2026-08-14 по контракту Edit-экранов)
 
 ---
 
@@ -32,7 +33,7 @@
 | **Базовый класс** | `StandardEditor` |
 | **Lookup-компонент** | `` |
 | **EditedEntityContainer** | `personDc` |
-| **focusComponent** | `form` |
+| **focusComponent** | `firstNameField` |
 | **Меню** | `web-menu.xml` → `screen="hunttech_Person.edit"` (если есть пункт) |
 | **Загрузка данных** | `@LoadDataBeforeShow` |
 
@@ -96,7 +97,7 @@ select e from hunttech_City e order by e.cityRuName
 
 ### 4.1 Жизненный цикл
 
-Browse: только генератор колонки аватара. Edit: перед показом — default или загруженное фото; upload/clear обновляет preview.
+Browse: только генератор колонки аватара. Edit: `onAfterShow` — при отсутствии `fileImageFace` fallback-аватар `applyFallback` (ovaFallbackImage 176×176); upload/clear обновляет preview; label-навигация sidebar «Разделы» переводит фокус к первому полю раздела и подсвечивает активный пункт (presentation-only).
 
 ### 4.2 Скрытые вычисления
 
@@ -119,16 +120,17 @@ Browse: только генератор колонки аватара. Edit: п�
 
 ### Структура layout
 
-- Корневой layout: `expand` на основную таблицу / форму (`form`)
-- Фильтр: `filter` → `positionCityLc`
-- Таблицы: —
+- Корневой layout: `person-editor` (namespace) + `edit-screen-layout` — двухпанельная композиция sidebar 270px + workspace (эталон SkillTreeEdit/гео-форм, контракт Edit-экранов)
+- Sidebar (`edit-sidebar`): фото `ovaFallbackImage` 176×176 + upload (dropZone) → title по центру (без подписи типа записи) → label-навигация «Разделы» (3 пункта, полоса-заголовок) → spacer → hint
+- Workspace (`edit-workspace`): toolbar («Карточка человека» + описание) → scrollBox → карточки `edit-card` («Основные данные», «Контакты», «Местоположение и должность»; поля `edit-form-control`) → footer `edit-footer-actions` (primary/secondary)
 
 ### Стили и сообщения
 
 | Элемент | Источник |
 |---------|----------|
+| Локальный SCSS | `person-editor.scss` (7 тем, идентичны; sidebar #172638, аватар 176px, nav 27px, карточки 8px, footer 40px) |
 | Caption | `msg://` / `mainMsg://` из `com.company.hunttech.web.screens.person` |
-| Иконка окна | атрибут `icon` в XML (если задан) |
+| Иконка окна | атрибут `icon` в XML (`USER`) |
 
 ---
 
@@ -136,6 +138,7 @@ Browse: только генератор колонки аватара. Edit: п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Рефакторинг по контракту Edit-экранов (эталон SkillTreeEdit/гео-форм): sidebar 270px + ovaFallbackImage 176×176 + upload, title по центру, label-навигация «Разделы», карточки, footer primary/secondary; актуализированы §1/§4/§6, канон — PersonEdit_Spec.md |
 | 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

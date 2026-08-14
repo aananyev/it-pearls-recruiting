@@ -145,9 +145,10 @@ erDiagram
 
 ### 5.2 PersonEdit
 
-- **Вкладок нет** — lazy LOB не требуется
+- **Композиция (2026-08-14, контракт Edit-экранов):** двухпанельная — sidebar 270px (фото `ovaFallbackImage` 176×176 + upload, title по центру без подписи типа записи, label-навигация «Разделы» с 3 пунктами, hint) и рабочая область (toolbar, карточки «Основные данные» / «Контакты» / «Местоположение и должность», footer primary/secondary).
 - **Loaders (cacheable):** `positionCityLc`, `positionCountriesLc`, `personPositionsLc` — справочники City/Country/Position
 - **Удалён** неиспользуемый loader `companyDepartamentsDl` (поле закомментировано в форме)
+- **UI Spec:** [PersonEdit_Spec.md](../../ui/PersonEdit_Spec.md)
 
 ### 5.3 Cross-form потребители
 
@@ -246,6 +247,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Рефакторинг PersonEdit по контракту Edit-экранов: sidebar 270px с ovaFallbackImage 176×176 + upload, title по центру без подписи типа записи, label-навигация «Разделы», карточки Основные данные/Контакты/Местоположение, footer primary/secondary; Java → OvaFallbackImage (applyFallback); создан PersonEditLayoutContractTest |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: `PersonEdit` без каскадных обработчиков; `person-edit-view` покрывает поля формы — OK |
 | 2026-06-23 | Исправление `person-browse-view`: `position-picker-view`, `fileImageFace.name` для ImageRenderer |

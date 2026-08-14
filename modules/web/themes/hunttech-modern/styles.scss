@@ -21,6 +21,7 @@
 @import "com.company.hunttech/user-ai-configuration-editor";
 @import "com.company.hunttech/user-ai-function-override-editor";
 @import "com.company.hunttech/skill-tree-editor";
+@import "com.company.hunttech/person-editor";
 @import "com.company.hunttech/ext-user-editor";
 @import "com.company.hunttech/iteraction-list-editor";
 @import "com.company.hunttech/iteraction-list-accordion-navigation";
@@ -54,6 +55,7 @@
   @include user-ai-configuration-editor-theme;
   @include user-ai-function-override-editor-theme;
   @include skill-tree-editor-theme;
+  @include person-editor-theme;
   @include ext-user-editor-theme;
   @include iteraction-list-editor-theme;
   @include iteraction-list-accordion-navigation-theme;

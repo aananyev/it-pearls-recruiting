@@ -1,11 +1,14 @@
 package com.company.hunttech.web.screens.person;
 
+import com.company.hunttech.entity.City;
+import com.company.hunttech.entity.Person;
+import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.FileDescriptorResource;
 import com.haulmont.cuba.gui.components.FileUploadField;
-import com.haulmont.cuba.gui.components.Image;
-import com.haulmont.cuba.gui.components.ResourceView;
+import com.haulmont.cuba.gui.components.LookupPickerField;
+import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.screen.*;
-import com.company.hunttech.entity.Person;
+import com.hunttech.hrm.gui.components.OvaFallbackImage;
 
 import javax.inject.Inject;
 
@@ -18,52 +21,70 @@ public class PersonEdit extends StandardEditor<Person> {
     @Inject
     private FileUploadField fileImageFaceUpload;
     @Inject
-    private Image peoplePic;
+    private OvaFallbackImage personPic;
     @Inject
-    private Image defaultPeoplePic;
+    private TextField<String> firstNameField;
+    @Inject
+    private TextField<String> emailField;
+    @Inject
+    private LookupPickerField<City> positionCityField;
+    @Inject
+    private Button personMainNav;
+    @Inject
+    private Button personContactsNav;
+    @Inject
+    private Button personLocationNav;
 
     @Subscribe("fileImageFaceUpload")
     public void onFileImageFaceUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-
         try {
-            peoplePic.setVisible(true);
-            defaultPeoplePic.setVisible(false);
-
-            FileDescriptorResource fileDescriptorResource =
-                    peoplePic.createResource(FileDescriptorResource.class)
-                            .setFileDescriptor(fileImageFaceUpload.getFileDescriptor());
-
-            peoplePic.setSource(fileDescriptorResource);
+            personPic.setSource(personPic.createResource(FileDescriptorResource.class)
+                    .setFileDescriptor(fileImageFaceUpload.getFileDescriptor()));
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
-        }
-
-    }
-
-    private void setPeoplePicImage() {
-        if (getEditedEntity().getFileImageFace() == null) {
-            defaultPeoplePic.setVisible(true);
-            peoplePic.setVisible(false);
-        } else {
-            defaultPeoplePic.setVisible(false);
-            peoplePic.setVisible(true);
         }
     }
 
     @Subscribe
-    public void onBeforeShow(BeforeShowEvent event) {
-        setPeoplePicImage();
+    public void onAfterShow(AfterShowEvent event) {
+        // Если фото не задано — показать fallback-аватар OvaFallbackImage
+        // (как эталон SkillTreeEdit/JobCandidateEdit: applyFallback при отсутствии файла).
+        if (getEditedEntity().getFileImageFace() == null) {
+            personPic.applyFallback();
+        }
     }
 
-    @Subscribe("defaultPeoplePic")
-    public void onDefaultPeoplePicSourceChange(ResourceView.SourceChangeEvent event) {
-        setPeoplePicImage();
-
+    /**
+     * Презентационная навигация: переводит фокус к имени
+     * и подсвечивает активный пункт sidebar. Entity, loaders и lifecycle не затрагиваются.
+     */
+    public void focusMainSection() {
+        firstNameField.focus();
+        setActiveNavigation(personMainNav, personContactsNav, personLocationNav);
     }
 
-    @Subscribe("fileImageFaceUpload")
-    public void onFileImageFaceUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
-        peoplePic.setVisible(false);
-        defaultPeoplePic.setVisible(true);
+    /**
+     * Презентационная навигация: переводит фокус к email
+     * и подсвечивает активный пункт sidebar. Entity, loaders и lifecycle не затрагиваются.
+     */
+    public void focusContactsSection() {
+        emailField.focus();
+        setActiveNavigation(personContactsNav, personMainNav, personLocationNav);
+    }
+
+    /**
+     * Презентационная навигация: переводит фокус к городу проживания
+     * и подсвечивает активный пункт sidebar. Entity, loaders и lifecycle не затрагиваются.
+     */
+    public void focusLocationSection() {
+        positionCityField.focus();
+        setActiveNavigation(personLocationNav, personMainNav, personContactsNav);
+    }
+
+    private void setActiveNavigation(Button activeButton, Button... inactiveButtons) {
+        activeButton.addStyleName("label-nav-item-active");
+        for (Button inactiveButton : inactiveButtons) {
+            inactiveButton.removeStyleName("label-nav-item-active");
+        }
     }
 }
