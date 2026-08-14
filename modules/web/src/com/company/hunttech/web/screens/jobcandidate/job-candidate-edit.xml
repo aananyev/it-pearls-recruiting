@@ -234,37 +234,401 @@
             </loader>
         </collection>
     </data>
-
-    <!-- Режим диалога: фиксированный размер окна формы 1200×750. -->
-    <dialogMode height="750" width="1200"/>
-
-    <!-- Корневой layout экрана: растягивает главный hbox на всю доступную область. -->
-    <layout stylename="job-candidate-editor edit-screen-layout"
-            expand="jobCandidateMainLayout"
-            spacing="false"
+    <dialogMode height="90%"
+                width="90%"/>
+    <layout id="jobCandidateEditorLayout"
+            expand="jobCandidateSplitRoot"
+            spacing="true"
             width="100%"
-            height="100%">
-
-        <!-- Главный горизонтальный контейнер: слева профильный sidebar, справа рабочая область. -->
-        <hbox id="jobCandidateMainLayout"
+            height="100%"
+            stylename="job-candidate-editor">
+        <hbox id="jobCandidateSplitRoot"
               width="100%"
               height="100%"
-              spacing="false"
+              spacing="true"
               expand="jobCandidateWorkspace"
-              stylename="job-candidate-main-layout edit-screen-layout">
-
-            <!-- ===== SIDEBAR ===== -->
-            <!-- Левая профильная панель 312px: фото, ФИО, сводка, навигация, контакты, действия. -->
+              stylename="job-candidate-split-root">
             <vbox id="jobCandidateSidebar"
-                  width="312px"
+                  width="280px"
                   height="100%"
                   spacing="true"
-                  expand="candidateSidebarSpacer"
-                  stylename="job-candidate-sidebar edit-sidebar">
-
-                <!-- Profile Header: photo + name + position -->
-                <!-- Шапка профиля: фотография с зоной загрузки, ФИО и должность кандидата. -->
-                <vbox id="candidateProfileHeader"
+                  expand="jobCandidateSidebarSummary"
+                  stylename="job-candidate-sidebar">
+            <textField id="fullNameTextField"
+                       visible="false"
+                       dataContainer="jobCandidateDc"
+                       property="fullName"/>
+            <checkBox id="blockCandidateCheckBox"
+                      dataContainer="jobCandidateDc"
+                      property="blockCandidate"
+                      visible="false"/>
+                <vbox id="dropZone"
+                      spacing="true"
+                      width="220px"
+                      height="292px"
+                      align="BOTTOM_RIGHT"
+                      expand="picVBox"
+                      stylename="dropzone-container">
+                    <vbox id="picVBox">
+                        <image id="candidatePic"
+                               dataContainer="jobCandidateDc"
+                               property="fileImageFace"
+                               width="100%"
+                               visible="true"
+                               align="TOP_RIGHT"
+                               stylename="widget-border"
+                               scaleMode="FILL"/>
+                        <image id="candidateDefaultPic"
+                               width="100%"
+                               visible="false"
+                               align="TOP_RIGHT"
+                               stylename="widget-border"
+                               scaleMode="FILL">
+                            <theme path="icons/no-programmer.jpeg"/>
+                        </image>
+                    </vbox>
+                    <upload id="fileImageFaceUpload"
+                            fileStoragePutMode="IMMEDIATE"
+                            dataContainer="jobCandidateDc"
+                            align="BOTTOM_CENTER"
+                            showFileName="false"
+                            dropZone="dropZone"
+                            showClearButton="true"
+                            property="fileImageFace"/>
+                    <button id="openPositionMasterBrowseButton"
+                            caption="msg://msgOpenPositionMasterBrowse"
+                            description="msg://msgOpenPositiionMasterBrowseDescription"
+                            invoke="openPositionMasterBrowseStart"
+                            width="100%"
+                            height="AUTO"/>
+                </vbox>
+                <groupBox id="jobCandidateSidebarSummary"
+                          caption="msg://msgCandidateSnapshot"
+                          collapsable="false"
+                          spacing="true"
+                          stylename="light job-candidate-sidebar-summary">
+                    <grid spacing="true" height="45px">
+                <columns count="12"/>
+                <rows>
+                    <row>
+                        <label id="iteractionListLabelCandidate"
+                               stylename="h3"
+                               align="MIDDLE_LEFT"/>
+                        <label stylename="h2"
+                               align="MIDDLE_LEFT"
+                               value="|"/>
+                        <label stylename="h3"
+                               value="msg://msgRating"
+                               align="MIDDLE_LEFT"/>
+                        <label id="candidateRatingLabel"
+                               stylename="h3"
+                               align="MIDDLE_LEFT"/>
+                        <label stylename="h2"
+                               align="MIDDLE_LEFT"
+                               value="|"/>
+                        <label stylename="h3"
+                               align="MIDDLE_LEFT"
+                               dataContainer="jobCandidateDc"
+                               property="personPosition"/>
+                        <label stylename="h2"
+                               align="MIDDLE_LEFT"
+                               value="|"/>
+                        <label id="cityOfCandidate"
+                               stylename="h3"
+                               align="MIDDLE_LEFT"
+                               dataContainer="jobCandidateDc"
+                               property="cityOfResidence"/>
+                        <label stylename="h2"
+                               align="MIDDLE_LEFT"
+                               value="|"/>
+                        <label id="labelCV"
+                               align="MIDDLE_CENTER"
+                               stylename="h3"/>
+                        <label stylename="h2"
+                               align="MIDDLE_LEFT"
+                               value="|"/>
+                        <label id="labelQualityPercent"
+                               align="MIDDLE_CENTER"
+                               stylename="h3"/>
+                    </row>
+                </rows>
+            </grid>
+            <grid spacing="true">
+                <columns count="5"/>
+                <rows>
+                    <row>
+                        <label id="emailLabel"
+                               description="msg://msgEmail"
+                               stylename="h4"
+                               align="MIDDLE_LEFT"/>
+                        <label id="phoneLabel"
+                               description="msg://msgPhone"
+                               stylename="h4"
+                               align="MIDDLE_LEFT"
+                               dataContainer="jobCandidateDc"
+                               property="phone"/>
+                        <label id="mobilePhoneLabel"
+                               description="msg://msgMobilePhone"
+                               stylename="h4"/>
+                        <label id="skypuLabel"
+                               description="msg://msgSkype"
+                               stylename="h4"
+                               align="MIDDLE_LEFT"/>
+                        <label id="telegramLabel"
+                               description="msg://msgTelegram"
+                               stylename="h4"
+                               align="MIDDLE_LEFT"/>
+                    </row>
+                </rows>
+            </grid>
+                </groupBox>
+            </vbox>
+            <vbox id="jobCandidateWorkspace"
+                  width="100%"
+                  height="100%"
+                  spacing="true"
+                  expand="tabSheetSocialNetworks"
+                  stylename="job-candidate-workspace">
+                <hbox id="editActions"
+              spacing="true"
+              width="100%"
+              align="TOP_RIGHT"
+              stylename="job-candidate-toolbar"
+              expand="createdByLabel">
+            <hbox id="createdByLabel"
+                  spacing="true"
+                  expand="createdUpdatedLabel">
+                <label id="createdUpdatedLabel"
+                       align="MIDDLE_LEFT"
+                       stylename="small"/>
+            </hbox>
+            <hbox id="buttonCancelOk" spacing="true">
+                <button id="blockCandidateButton"
+                        caption="msg://msgBlockCandidate"
+                        invoke="blockCandidateButton"
+                        icon="WINDOW_CLOSE_O"
+                        align="MIDDLE_RIGHT"/>
+                <button id="buttonSubscribe"
+                        caption="msg://msgSubscribe"
+                        invoke="onButtonSubscribeClick"
+                        icon="BELL"
+                        visible="false"
+                        align="MIDDLE_RIGHT"/>
+                <button id="windowCommitAndCloseButton"
+                        action="windowCommitAndClose"
+                        align="MIDDLE_RIGHT"/>
+                <button action="windowClose"
+                        align="MIDDLE_RIGHT"/>
+            </hbox>
+        </hbox>
+                <tabSheet id="tabSheetSocialNetworks"
+                          lazy="true"
+                          width="100%"
+                          height="100%"
+                          stylename="job-candidate-tabs">
+            <tab id="jobCandidateCard"
+                 caption="msg://msgTabVacancies"
+                 margin="true,true,true,true"
+                 spacing="true"
+                 expand="jobCandidateCardScrollBox"
+                 icon="ID_CARD">
+                <scrollBox id="jobCandidateCardScrollBox"
+                           width="100%"
+                           height="AUTO"
+                           orientation="vertical">
+                    <vbox id="jobCandidateCardVBox"
+                          expand="lastProjectsScrollBox"
+                          width="100%"
+                          height="100%">
+                        <hbox id="cardBox"
+                              spacing="true"
+                              width="100%"
+                              expand="cardTextBox">
+                            <groupBox id="cardTextBox"
+                                      spacing="true"
+                                      stylename="light"
+                                      collapsable="false"
+                                      align="TOP_LEFT"
+                                      caption="msg://msgContactsOfCandidate"
+                                      height="100%">
+                                <hbox spacing="false">
+                                    <label id="jobTitleTitle"
+                                           value="msg://msgFIO"
+                                           stylename="h3"
+                                           htmlEnabled="true"/>
+                                    <label id="fullNameField"
+                                           stylename="h3"/>
+                                    <label value=", " stylename="h3" htmlEnabled="true"/>
+                                    <label id="currentCompanyLabel"
+                                           dataContainer="jobCandidateDc"
+                                           property="currentCompany"
+                                           stylename="h3"/>
+                                    <label value=", "
+                                           stylename="h3"
+                                           htmlEnabled="true"/>
+                                    <label dataContainer="jobCandidateDc"
+                                           property="cityOfResidence"
+                                           stylename="h3"
+                                           htmlEnabled="true"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label id="personPositionTitle"
+                                           value="msg://msgPosition"
+                                           stylename="h4"
+                                           htmlEnabled="true"/>
+                                    <label dataContainer="jobCandidateDc"
+                                           property="personPosition"
+                                           stylename="h4"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label id="emailTitle"
+                                           value="msg://msgEmail"
+                                           align="MIDDLE_LEFT"
+                                           stylename="h4"
+                                           htmlEnabled="true"/>
+                                    <linkButton id="emailLinkButton"
+                                                align="MIDDLE_LEFT"
+                                                description="msg://msgEmail"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label id="phoneTitle"
+                                           value="msg://msgPhone"
+                                           stylename="h4"
+                                           htmlEnabled="true"/>
+                                    <label dataContainer="jobCandidateDc"
+                                           property="phone"
+                                           stylename="h4"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label id="mobilePhoneTitle"
+                                           value="msg://msgMobilePhone"
+                                           stylename="h4"
+                                           htmlEnabled="true"/>
+                                    <label dataContainer="jobCandidateDc"
+                                           property="mobilePhone"
+                                           stylename="h4"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label id="telegramTitle"
+                                           value="msg://msgTelegram"
+                                           stylename="h4"
+                                           align="MIDDLE_LEFT"
+                                           htmlEnabled="true"/>
+                                    <linkButton id="telegrammLinkButton"
+                                                align="MIDDLE_LEFT"
+                                                description="msg://msgTelegram"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label id="telegramGroupTitle"
+                                           value="msg://msgTelegramGroup"
+                                           stylename="h4"
+                                           align="MIDDLE_LEFT"
+                                           htmlEnabled="true"/>
+                                    <linkButton id="telegrammGroupLinkButton"
+                                                align="MIDDLE_LEFT"
+                                                description="msg://msgTelegramGroup"/>
+                                </hbox>
+                                <hbox spacing="true">
+                                    <label id="skypeTitle"
+                                           value="msg://msgSkype"
+                                           align="MIDDLE_LEFT"
+                                           stylename="h4"
+                                           htmlEnabled="true"/>
+                                    <linkButton id="skypeLinkButton"
+                                                align="MIDDLE_LEFT"
+                                                description="msg://msgSkype"/>
+                                </hbox>
+                            </groupBox>
+                        </hbox>
+                        <hbox id="skillBox"
+                              width="100%"
+                              height="AUTO"/>
+                        <scrollBox id="lastProjectsScrollBox" orientation="vertical">
+                            <groupBox id="lastProjects"
+                                      caption="msg://msgCandidateProjects"
+                                      collapsable="true"
+                                      width="100%"
+                                      stylename="light"
+                                      expand="dictionatysTavlesHBox">
+                                <grid id="dictionatysTavlesHBox"
+                                      spacing="true"
+                                      width="100%">
+                                    <columns count="6"/>
+                                    <rows>
+                                        <row>
+                                            <table id="lastProjectTable"
+                                                   width="100%"
+                                                   height="100%"
+                                                   stylename="no-horizontal-lines"
+                                                   editable="false"
+                                                   contextMenuEnabled="false"
+                                                   colspan="4"
+                                                   dataContainer="lastProjectDc">
+                                                <columns>
+                                                    <column id="number"
+                                                            width="30px"
+                                                            caption="№"
+                                                            generator="lastIteractionCount"/>
+                                                    <column id="vacancy"
+                                                            width="300px"
+                                                            maxTextLength="40"
+                                                            caption="msg://msgVacancy"/>
+                                                    <column id="max"
+                                                            width="70px"
+                                                            caption="msg://msgDate"/>
+                                                    <column id="lastInteraction"
+                                                            width="200px"
+                                                            maxTextLength="40"
+                                                            caption="msg://msgLastInteraction"
+                                                            generator="lastInteractionGeneratorColumn"/>
+                                                    <column id="researcher"
+                                                            width="100px"
+                                                            caption="msg://msgResearcher"
+                                                            generator="whoIsResearcherGeneratorColumn"/>
+                                                    <column id="recruter"
+                                                            width="100px"
+                                                            caption="msg://msgRecruter"
+                                                            generator="whoIsRecruterGeneratorColumn"/>
+                                                    <column id="idViewIteractionsButton"
+                                                            width="100px"
+                                                            caption="msg://msgInteractionsView"
+                                                            generator="addInteractionsViewButton"/>
+                                                </columns>
+                                            </table>
+                                            <table id="suggestVacancyTable"
+                                                   contextMenuEnabled="false"
+                                                   width="100%"
+                                                   colspan="2"
+                                                   height="100%"
+                                                   editable="false"
+                                                   stylename="no-horizontal-lines"
+                                                   dataContainer="suggestOpenPositionDc">
+                                                <columns>
+                                                    <column id="notSendedIconColumn"
+                                                            caption="msg://msgStatus"
+                                                            width="20px"/>
+                                                    <column id="vacansyName"
+                                                            captionAsHtml="true"
+                                                            maxTextLength="60"
+                                                            caption="msg://msgSuggestVacansies"/>
+                                                </columns>
+                                                <rows/>
+                                            </table>
+                                        </row>
+                                    </rows>
+                                </grid>
+                            </groupBox>
+                        </scrollBox>
+                    </vbox>
+                </scrollBox>
+            </tab>
+            <tab id="tabCandidate"
+                 caption="msg://msgTabMain"
+                 margin="true,true,true,true"
+                 icon="USER"
+                 spacing="true">
+                <hbox id="cardCandidateBox"
+                      spacing="true"
                       width="100%"
                       spacing="true"
                       align="TOP_CENTER"
@@ -395,11 +759,15 @@
                             </row>
                         </rows>
                     </grid>
-                </vbox>
-
-                <!-- Sidebar navigation: кнопки переключения вкладок по Edit-контракту идут после сводки (рейтинг/карточка). -->
-                <!-- Вертикальная label-навигация по разделам формы (переключение вкладок tabsheet). -->
-                <vbox id="candidateNavigation"
+                </hbox>
+            </tab>
+            <tab id="tabContactInfo"
+                 caption="msg://msgCandidateContacts"
+                 margin="true,true,true,true"
+                 expand="contactInfoGroupBox"
+                 icon="font-icon:PHONE"
+                 spacing="true">
+                <hbox id="contactInfoGroupBox"
                       width="100%"
                       spacing="false"
                       stylename="job-candidate-navigation label-navigation">
@@ -1164,557 +1532,386 @@
                                     <!-- Ряд: таблица соцсетей + колонка обслуживающих кнопок. -->
                                     <hbox id="socialNetworkTableHbox"
                                           width="100%"
-                                          height="100%"
-                                          spacing="true"
-                                          stylename="borderless"
-                                          expand="socialNetworkTable">
-                                        <!-- Таблица соцсетей кандидата с инлайн-редактированием
-                                             (колонки: логотип, сеть, URL, ссылка на профиль). -->
-                                        <dataGrid id="socialNetworkTable"
-                                                  height="100%"
-                                                  width="100%"
-                                                  stylename="job-candidate-table"
-                                                  editorEnabled="true"
-                                                  dataContainer="jobCandidateSocialNetworksDc">
-                                            <columns>
-                                                <!-- Логотип соцсети (рендерится компонентом). -->
-                                                <column id="socialNetworkLogoColumn" width="50px" caption="">
-                                                    <componentRenderer/>
-                                                </column>
-                                                <!-- Название соцсети (нередактируемое). -->
-                                                <column id="networkName" editable="false"
-                                                        caption="msg://msgNetworkName"
-                                                        property="socialNetworkURL.socialNetwork" maximumWidth="200px"/>
-                                                <!-- URL профиля (редактируемое). -->
-                                                <column id="networkURLS" editable="true" property="networkURLS"/>
-                                                <!-- Кликабельная ссылка на профиль. -->
-                                                <column id="linkToWeb" caption="msg://msgLinkURL" maximumWidth="150px">
-                                                    <componentRenderer/>
-                                                </column>
-                                            </columns>
-                                            <!-- Стандартные CRUD-действия таблицы. -->
-                                            <actions>
-                                                <action id="create" type="create"/>
-                                                <action id="edit" type="edit"/>
-                                                <!-- Действие remove (remove). -->
-                                                <action id="remove" type="remove"/>
-                                            </actions>
-                                        </dataGrid>
-                                        <!-- Панель обслуживания списка соцсетей: добавление недостающих и очистка. -->
-                                        <vbox spacing="true" width="220px" height="AUTO"
-                                              stylename="job-candidate-social-actions">
-                                            <!-- Скрытая кнопка массового добавления (выключена). -->
-                                            <button id="addSocialNetworkListsButton" visible="false" enable="false"
-                                                    width="100%" caption="msg://msgAddSocialNetworks"
-                                                    description="msg://msgAddSocialNetworksDesc"
-                                                    invoke="addSocialNetworksListsInvoke"/>
-                                            <!-- Добавить недостающие соцсети из справочника. -->
-                                            <button id="addMissingSocialNetworkListsButton" width="100%" enable="true"
-                                                    caption="msg://msgAddMissingSocialNetrorkButton"
-                                                    description="msg://msgAddMissingSocialNetrorkButtonDesc"
-                                                    invoke="addMissingSocialNetworksListsInvoke"/>
-                                            <!-- Удалить пустые (без URL) записи соцсетей. -->
-                                            <button id="removeEmptySocialNetworkListsButton" width="100%" enable="true"
-                                                    caption="msg://removeEmptySocialNetworkListsButton"
-                                                    description="msg://removeEmptySocialNetworkListsButtonDesc"
-                                                    invoke="removeEmptySocialNetworkListsButton"/>
-                                        </vbox>
-                                    </hbox>
-
-                                </vbox>
-                            </vbox>
-                        </scrollBox>
-                    </tab>
-
-                    <!-- TAB: Позиции и вакансии. Данные загружаются лениво контроллером. -->
-                    <!-- Вкладка «Позиции и вакансии»: история рассмотрения и подходящие вакансии. -->
-                    <tab id="tabPositions"
-                         caption="msg://msgTabPositions"
-                         spacing="true"
-                         margin="false"
-                         expand="tabPositionsSection">
-                        <!-- Аккордеон-секция вкладки. -->
-                        <vbox id="tabPositionsSection"
-                              width="100%"
-                              height="100%"
-                              spacing="true"
-                              expand="tabPositionsContent"
-                              stylename="job-candidate-accordion-section edit-accordion-section">
-                            <!-- Заголовок секции. -->
-                            <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
-                                <label value="msg://msgTabPositions" stylename="job-candidate-accordion-title"/>
-                            </hbox>
-                            <!-- Контент секции: двухколоночная раскладка. -->
-                            <vbox id="tabPositionsContent"
-                                  width="100%"
-                                  height="100%"
-                                  spacing="true"
-                                  expand="jobCandidatePositionsLayout"
-                                  stylename="job-candidate-accordion-content">
-                                <!-- Ряд двух колонок: история рассмотрения и подходящие вакансии. -->
-                                <hbox id="jobCandidatePositionsLayout"
-                                      width="100%"
-                                      height="100%"
-                                      spacing="true">
-
-                                    <!-- Левая колонка: история рассмотрения -->
-                                    <!-- Карточка истории рассмотрения: таблица последних проектов кандидата. -->
-                                    <vbox id="jobCandidatePositionHistory"
-                                          width="100%" height="100%"
-                                          spacing="true"
-                                          box.expandRatio="1"
-                                          stylename="job-candidate-card job-candidate-position-column edit-card">
-                                        <!-- Таблица последних проектов: №, вакансия, дата, взаимодействия,
-                                             исследователь, рекрутер, кнопка просмотра взаимодействий. -->
-                                        <table id="lastProjectTable"
-                                               width="100%"
-                                               height="100%"
-                                               stylename="no-horizontal-lines job-candidate-table"
-                                               editable="false"
-                                               contextMenuEnabled="false"
-                                               dataContainer="lastProjectDc">
-                                            <columns>
-                                                <!-- Порядковый номер (генерируется контроллером). -->
-                                                <column id="number" width="30px" caption="№"
-                                                        generator="lastIteractionCount"/>
-                                                <!-- Вакансия (название, с ограничением длины). -->
-                                                <column id="vacancy" width="300px" maxTextLength="40"
-                                                        caption="msg://msgVacancy"/>
-                                                <!-- Дата последнего взаимодействия. -->
-                                                <column id="max" width="70px" caption="msg://msgDate"/>
-                                                <!-- Последнее взаимодействие (генерируется контроллером). -->
-                                                <column id="lastInteraction" width="200px" maxTextLength="40"
-                                                        caption="msg://msgLastInteraction"
-                                                        generator="lastInteractionGeneratorColumn"/>
-                                                <!-- Исследователь по вакансии (генератор). -->
-                                                <column id="researcher" width="100px" caption="msg://msgResearcher"
-                                                        generator="whoIsResearcherGeneratorColumn"/>
-                                                <!-- Рекрутер по вакансии (генератор). -->
-                                                <column id="recruter" width="100px" caption="msg://msgRecruter"
-                                                        generator="whoIsRecruterGeneratorColumn"/>
-                                                <!-- Кнопка просмотра взаимодействий по вакансии (генератор). -->
-                                                <column id="idViewIteractionsButton" width="100px"
-                                                        caption="msg://msgInteractionsView"
-                                                        generator="addInteractionsViewButton"/>
-                                            </columns>
-                                        </table>
-                                    </vbox>
-
-                                    <!-- Правая колонка: подходящие вакансии -->
-                                    <!-- Карточка подходящих вакансий: таблица открытых вакансий. -->
-                                    <vbox id="jobCandidateSuitableVacancies"
-                                          width="100%" height="100%"
-                                          spacing="true"
-                                          box.expandRatio="1"
-                                          stylename="job-candidate-card job-candidate-position-column edit-card">
-                                        <!-- Таблица подходящих вакансий (статус отправки + название). -->
-                                        <table id="suggestVacancyTable"
-                                               contextMenuEnabled="false"
-                                               width="100%"
-                                               height="100%"
-                                               editable="false"
-                                               stylename="no-horizontal-lines job-candidate-table"
-                                               dataContainer="suggestOpenPositionDc">
-                                            <columns>
-                                                <!-- Индикатор статуса (отправлено/нет). -->
-                                                <column id="notSendedIconColumn" caption="msg://msgStatus"
-                                                        width="20px"/>
-                                                <!-- Название вакансии с HTML-разметкой в капшне. -->
-                                                <column id="vacansyName" captionAsHtml="true" maxTextLength="60"
-                                                        caption="msg://msgSuggestVacansies"/>
-                                            </columns>
-                                            <rows/>
-                                        </table>
-                                    </vbox>
-
-                                </hbox>
-                            </vbox>
-                        </vbox>
-                    </tab>
-                    <!-- TAB: Взаимодействия -->
-                    <!-- Вкладка «Взаимодействия»: история взаимодействий с кандидатом. -->
-                    <tab id="tabIteraction"
-                         caption="msg://msgCandidateIteraction"
-                         spacing="true"
-                         margin="false"
-                         expand="tabIteractionSection">
-                        <!-- Аккордеон-секция вкладки. -->
-                        <vbox id="tabIteractionSection"
-                              width="100%"
-                              height="100%"
-                              spacing="true"
-                              expand="tabIteractionContent"
-                              stylename="job-candidate-accordion-section edit-accordion-section">
-                            <!-- Заголовок секции. -->
-                            <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
-                                <label value="msg://msgCandidateIteraction" stylename="job-candidate-accordion-title"/>
-                            </hbox>
-                            <!-- Контент секции: фильтр по вакансии и таблица взаимодействий. -->
-                            <vbox id="tabIteractionContent"
-                                  width="100%"
-                                  height="100%"
-                                  spacing="true"
-                                  expand="jobCandidateIteractionListTable"
-                                  stylename="job-candidate-accordion-content">
-
-                                <!-- Фильтр таблицы по вакансии (picker открытых вакансий). -->
-                                <lookupPickerField id="vacancyFilterLookupPickerField"
-                                                   caption="msg://msgVacancyFiler"
-                                                   visible="true" width="AUTO"
-                                                   stylename="edit-form-control">
-                                    <!-- Элемент actions. -->
-                                    <actions>
-                                        <!-- Действие picker_lookup (lookup). -->
-                                        <action id="lookup" type="picker_lookup"/>
-                                        <!-- Действие picker_open (open). -->
-                                        <action id="open" type="picker_open" icon="EDIT_ACTION"/>
-                                    </actions>
-                                </lookupPickerField>
-                                <!-- Таблица взаимодействий кандидата: иконка, проект, номер, рейтинг,
-                                     вакансия, статус, тип, комментарий, рекрутер, дата. -->
-                                <dataGrid id="jobCandidateIteractionListTable"
-                                          dataContainer="jobCandidateIteractionDc"
-                                          stylename="job-candidate-table"
-                                          width="100%"
-                                          bodyRowHeight="36px"
-                                          contextMenuEnabled="false"
-                                          textSelectionEnabled="false"
-                                          reorderingAllowed="true">
-                                    <!-- CRUD-действия таблицы. -->
-                                    <actions>
-                                        <action id="create" type="create"/>
-                                        <action type="edit" id="edit"/>
-                                        <!-- Действие remove (remove). -->
-                                        <action id="remove" type="remove"/>
-                                        <!-- Действие refresh (refresh). -->
-                                        <action id="refresh" type="refresh"/>
-                                    </actions>
-                                    <!-- Панель кнопок таблицы: создание, часто используемые, копирование и др. -->
-                                    <buttonsPanel>
-                                        <button action="jobCandidateIteractionListTable.create"/>
-                                        <!-- Часто используемые взаимодействия (выпадающий список, включается по контексту). -->
-                                        <popupButton id="frequentInteractionPopupButton"
-                                                     icon="FILE_TEXT"
-                                                     enable="false"
-                                                     caption="msg://msgAddPopularIteraction"/>
-                                        <button action="jobCandidateIteractionListTable.edit"/>
-                                        <!-- Копирование выбранного взаимодействия. -->
-                                        <button id="copyIteractionButton" caption="msg://msgCopy" icon="COPY"/>
-                                        <button action="jobCandidateIteractionListTable.remove"/>
-                                        <!-- Описание вакансии проекта (включается по выбору). -->
-                                        <button id="openPositionProjectDescriptionButton"
-                                                enable="false"
-                                                caption="msg://msgOpenPositionDescription"/>
-                                    </buttonsPanel>
-                                    <columns>
-                                        <!-- Иконка типа взаимодействия. -->
-                                        <column id="icon" width="48px" caption=""/>
-                                        <!-- Логотип проекта (рендер компонентом). -->
-                                        <column id="projectLogoColumn" resizable="true" collapsible="true"
-                                                collapsed="false"
-                                                caption="msg://msgProject" width="70px" minimumWidth="70px">
-                                            <!-- Рендер ячейки кастомным компонентом. -->
-                                            <componentRenderer/>
-                                        </column>
-                                        <!-- Номер взаимодействия (сортировка по убыванию). -->
-                                        <column id="numberIteraction" property="numberIteraction" sort="DESCENDING"
-                                                width="85px" maximumWidth="100px" sortable="true"/>
-                                        <!-- Рейтинг взаимодействия (HTML-значение). -->
-                                        <column id="rating" minimumWidth="85px" width="85px" maximumWidth="100px"
-                                                caption="msg://msgRating">
-                                            <htmlRenderer nullRepresentation="null"/>
-                                        </column>
-                                        <!-- Вакансия взаимодействия. -->
-                                        <column id="vacancy" maximumWidth="400px" property="vacancy" caption="msg://msgVacancyName"/>
-                                        <!-- Признак открытой/закрытой вакансии (иконка). -->
-                                        <column id="currentOpenCloseColumn" caption="mainMsg://msgCurrentOpenClose"
-                                                maximumWidth="45px">
-                                            <iconRenderer/>
-                                        </column>
-                                        <!-- Тип взаимодействия. -->
-                                        <column id="iteractionType" maximumWidth="250px" property="iteractionType" caption="msg://msgIteractionType"/>
-                                        <!-- Признак наличия комментария (иконка). -->
-                                        <column id="commentColumn" maximumWidth="80px" width="60px"
-                                                caption="msg://msgIsComment">
-                                            <iconRenderer/>
-                                        </column>
-                                        <!-- Рекрутер взаимодействия. -->
-                                        <column id="recrutier" maximumWidth="150px" property="recrutier" caption="msg://msgRecrutier"/>
-                                        <!-- Дата взаимодействия (формат dd.MM.yyyy). -->
-                                        <column id="dateIteraction" property="dateIteraction" width="80px"
-                                                caption="msg://msgDate">
-                                            <formatter format="dd.MM.yyyy"
-                                                       class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
-                                        </column>
-                                    </columns>
-                                    <!-- Счётчик записей таблицы. -->
-                                    <rowsCount/>
-                                </dataGrid>
-
-                            </vbox>
-                        </vbox>
-                    </tab>
-
-                    <!-- TAB: Резюме и файлы -->
-                    <!-- Вкладка «Резюме и файлы»: список резюме кандидата с файлами. -->
-                    <tab id="tabResume"
-                         caption="msg://msgTabResume"
-                         spacing="true"
-                         margin="false"
-                         expand="tabResumeSection">
-                        <!-- Аккордеон-секция вкладки. -->
-                        <vbox id="tabResumeSection"
-                              width="100%"
-                              height="100%"
-                              spacing="true"
-                              expand="tabResumeContent"
-                              stylename="job-candidate-accordion-section edit-accordion-section">
-                            <!-- Заголовок секции. -->
-                            <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
-                                <label value="msg://msgTabResume" stylename="job-candidate-accordion-title"/>
-                            </hbox>
-                            <!-- Контент секции: кнопка проверки навыков и таблица резюме. -->
-                            <vbox id="tabResumeContent"
-                                  width="100%"
-                                  height="100%"
-                                  spacing="true"
-                                  expand="tabResumeVbox"
-                                  stylename="job-candidate-accordion-content">
-
-                                <!-- Вертикальный контейнер вкладки: кнопка над таблицей. -->
-                                <vbox id="tabResumeVbox" spacing="true" width="100%" height="100%"
-                                      expand="jobCandidateCandidateCvTable">
-                                    <!-- Панель с кнопкой проверки навыков по описанию вакансии. -->
-                                    <hbox spacing="true" width="100%" align="MIDDLE_RIGHT">
-                                        <button id="checkSkillFromJD" caption="msg://msgCheckSkills" align="BOTTOM_LEFT"
-                                                enable="false"/>
-                                    </hbox>
-                                    <!-- Таблица резюме кандидата: проект, дата поста, вакансия, позиция,
-                                         оригинальный/HRM CV, сопроводительное письмо, автор. -->
-                                    <dataGrid id="jobCandidateCandidateCvTable"
-                                              width="100%"
-                                              descriptionAsHtml="true"
-                                              captionAsHtml="true"
-                                              stylename="job-candidate-table"
-                                              bodyRowHeight="55px"
-                                              dataContainer="jobCandidateCandidateCvsDc">
-                                        <columns>
-                                            <!-- Логотип проекта (рендер компонентом). -->
-                                            <column id="projectLogoColumn" resizable="true" collapsible="true"
-                                                    collapsed="false"
-                                                    caption="msg://msgProject" width="70px" minimumWidth="70px">
-                                                <!-- Рендер ячейки кастомным компонентом. -->
-                                                <componentRenderer/>
-                                            </column>
-                                            <!-- Дата публикации резюме. -->
-                                            <column id="datePost" width="100px" maximumWidth="100px" property="datePost"
-                                                    caption="msg://msgDatePost"/>
-                                            <!-- Вакансия, на которую подано резюме. -->
-                                            <column id="toVacancy" property="toVacancy" caption="msg://msgToVacansy"/>
-                                            <!-- Позиция в резюме (скрыта по умолчанию). -->
-                                            <column id="resumePosition" collapsible="true" collapsed="true"
-                                                    property="resumePosition" caption="msg://msgToPosition"/>
-                                            <!-- Иконка оригинального файла CV. -->
-                                            <column id="iconOriginalCVFile" width="100px" maximumWidth="100px"
-                                                    caption="msg://msgOriginalCV">
-                                                <iconRenderer/>
-                                            </column>
-                                            <!-- Иконка файла CV HRM HuntTech. -->
-                                            <column id="iconHuntTechCVFile" width="100px" maximumWidth="100px"
-                                                    caption="msg://msgHuntTechCV">
-                                                <iconRenderer/>
-                                            </column>
-                                            <!-- Иконка сопроводительного письма. -->
-                                            <column id="letter" width="100px" maximumWidth="100px"
-                                                    caption="msg://msgCoverLetter">
-                                                <iconRenderer/>
-                                            </column>
-                                            <!-- Ссылка на оригинальный CV (компонент-рендер). -->
-                                            <column id="candidateOriginalCVColumn" width="150px"
-                                                    caption="msg://msgOriginalCV">
-                                                <componentRenderer/>
-                                            </column>
-                                            <!-- Ссылка на CV HRM HuntTech (компонент-рендер). -->
-                                            <column id="candidateHuntTechCVColumn" width="150px"
-                                                    caption="msg://msgHuntTechCV">
-                                                <componentRenderer/>
-                                            </column>
-                                            <!-- Автор резюме. -->
-                                            <column id="createdBy" property="createdBy" width="100px"
-                                                    caption="msg://msgCreatedBy"/>
-                                        </columns>
-                                        <!-- CRUD-действия таблицы. -->
-                                        <actions>
-                                            <action type="create" id="create"/>
-                                            <action id="edit" type="edit"/>
-                                            <!-- Действие remove (remove). -->
-                                            <action id="remove" type="remove"/>
-                                        </actions>
-                                        <!-- Панель кнопок: создание, копирование, редактирование, удаление, скан контактов. -->
-                                        <buttonsPanel>
-                                            <button id="addButtonCV" action="jobCandidateCandidateCvTable.create"/>
-                                            <button id="copyCVButton" caption="msg://msgCopy" icon="COPY"/>
-                                            <!-- Кнопка editButtonCV: действие jobCandidateCandidateCvTable.edit. -->
-                                            <button id="editButtonCV" action="jobCandidateCandidateCvTable.edit"/>
-                                            <button id="removeButtonCV" action="jobCandidateCandidateCvTable.remove"/>
-                                            <!-- Скан контактов из CV (включается при выборе резюме). -->
-                                            <button id="scanContactsFromCVButton" caption="msg://msgScan" enable="false"
-                                                    invoke="scanContactsFromCVs"/>
-                                        </buttonsPanel>
-                                    </dataGrid>
-                                </vbox>
-
-                            </vbox>
-                        </vbox>
-                    </tab>
-
-                    <!-- TAB: Комментарии -->
-                    <!-- Вкладка «Комментарии»: лента комментариев и отправка нового. -->
-                    <tab id="commentsTab"
-                         caption="msg://msgComments"
-                         spacing="true"
-                         margin="false"
-                         expand="tabCommentsSection">
-                        <!-- Аккордеон-секция вкладки. -->
-                        <vbox id="tabCommentsSection"
-                              width="100%"
-                              height="100%"
-                              spacing="true"
-                              expand="tabCommentsContent"
-                              stylename="job-candidate-accordion-section edit-accordion-section">
-                            <!-- Заголовок секции. -->
-                            <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
-                                <label value="msg://msgComments" stylename="job-candidate-accordion-title"/>
-                            </hbox>
-                            <!-- Контент секции: лента комментариев и панель отправки. -->
-                            <vbox id="tabCommentsContent"
-                                  width="100%"
-                                  height="100%"
-                                  spacing="true"
-                                  expand="tabCommentsVbox"
-                                  stylename="job-candidate-accordion-content">
-
-                                <!-- Вертикальный контейнер: лента над панелью отправки. -->
-                                <vbox id="tabCommentsVbox" spacing="true" width="100%" height="100%"
-                                      expand="jobCandidateCommentsScroll">
-                                    <!-- Лента комментариев: вертикальный список пузырей с высотой по содержимому.
-                                         dataGrid (Vaadin Grid) не поддерживает авто-высоту строк — кастомные пузыри
-                                         разной высоты перекрывали соседние строки (фиксированная rowHeight 30px),
-                                         поэтому лента выведена в scrollBox + vbox и заполняется контроллером. -->
-                                    <scrollBox id="jobCandidateCommentsScroll"
-                                               orientation="vertical"
-                                               scrollBars="vertical"
-                                               width="100%"
-                                               height="100%">
-                                        <!-- Контейнер пузырей комментариев (заполняется в renderComments()). -->
-                                        <vbox id="jobCandidateCommentsContainer"
-                                              width="100%"
-                                              spacing="true"/>
-                                    </scrollBox>
-                                    <!-- Панель отправки комментария: текст, вакансия, кнопка «Отправить». -->
-                                    <groupBox stylename="job-candidate-card edit-card" spacing="true" width="100%">
-                                        <!-- Поле ввода текста нового комментария (Enter — подтверждение отправки). -->
-                                        <textField id="chatMessageTextField"
-                                                   stylename="edit-form-control"
-                                                   width="100%"
-                                                   inputPrompt="msg://msgInputComment"/>
-                                        <!-- Ряд: выбор вакансии и кнопка отправки. -->
-                                        <hbox width="100%" expand="vacancyPopupPickerField" spacing="true">
-                                            <!-- Вакансия, к которой относится комментарий (из открытых). -->
-                                            <lookupPickerField id="vacancyPopupPickerField"
-                                                               align="MIDDLE_LEFT"
-                                                               stylename="edit-form-control"
-                                                               optionsContainer="openPositionDc"
-                                                               width="100%"/>
-                                            <!-- Отправка комментария (включается при заполнении текста). -->
-                                            <button id="sendCommentButton"
-                                                    caption="msg://msgSendComment"
-                                                    stylename="large"
-                                                    icon="COMMENTING"
-                                                    width="AUTO"
-                                                    enable="false"
-                                                    align="MIDDLE_RIGHT"
-                                                    invoke="sendCommentButtonInvoke"/>
-                                        </hbox>
-                                    </groupBox>
-                                </vbox>
-
-                            </vbox>
-                        </vbox>
-                    </tab>
-
-                    <!-- TAB: История -->
-                    <!-- Вкладка «История»: служебная информация о записи кандидата. -->
-                    <tab id="tabHistory"
-                         caption="msg://msgTabHistory"
-                         spacing="true"
-                         margin="false">
-                        <!-- Аккордеон-секция вкладки. -->
-                        <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section edit-accordion-section">
-                            <!-- Заголовок секции. -->
-                            <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
-                                <label value="msg://msgTabHistory" stylename="job-candidate-accordion-title"/>
-                            </hbox>
-                            <!-- Контент секции: данные создания записи. -->
-                            <vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
-
-                                <!-- Карточка «Данные записи»: автор и дата создания. -->
-                                <groupBox caption="msg://msgRecordData"
-                                          stylename="light job-candidate-card edit-card"
-                                          spacing="true" width="100%">
-                                    <!-- Сетка служебных полей записи (подписи выровнены с колонкой
-                                         подписей формы через общий класс job-candidate-form-grid). -->
-                                    <grid spacing="true" width="100%" stylename="job-candidate-form-grid">
-                                        <columns count="2"/>
-                                        <rows>
-                                            <row>
-                                                <!-- Подпись «Создал» и автор записи. -->
-                                                <label value="msg://msgCreatedByUser" stylename="small"/>
-                                                <label id="historyCreatedByLabel"
-                                                       dataContainer="jobCandidateDc"
-                                                       property="createdBy"
-                                                       stylename="small"/>
-                                            </row>
-                                            <row>
-                                                <!-- Подпись «Дата создания» и timestamp создания. -->
-                                                <label value="msg://msgCreateTsLabel" stylename="small"/>
-                                                <label id="historyCreateTsLabel"
-                                                       dataContainer="jobCandidateDc"
-                                                       property="createTs"
-                                                       stylename="small"/>
-                                            </row>
-                                        </rows>
-                                    </grid>
-                                </groupBox>
-
-                            </vbox>
-                        </vbox>
-                    </tab>
-                </tabSheet>
-
-                <!-- Нижняя панель основных действий. -->
-                <!-- Обёртка нижней панели действий формы. -->
-                <hbox width="100%"
-                      spacing="false">
-                    <!-- Панель действий: «Сохранить и закрыть» и «Отмена». -->
-                    <hbox id="jobCandidateBottomBar"
-                          width="100%"
-                          spacing="true"
-                          align="MIDDLE_RIGHT"
-                          stylename="job-candidate-bottom-bar edit-footer-actions">
-                        <!-- Сохранение изменений и закрытие формы. -->
-                        <button id="windowCommitAndCloseButton"
-                                action="windowCommitAndClose"
-                                caption="msg://msgSaveAndClose"
-                                stylename="primary job-candidate-primary-action"
-                                align="MIDDLE_RIGHT"/>
-                        <!-- Отмена изменений и закрытие формы. -->
-                        <button action="windowClose"
-                                caption="msg://msgCancel"
-                                stylename="default job-candidate-secondary-action"
-                                align="MIDDLE_RIGHT"/>
-                    </hbox>
+                                          required="true"
+                                          dataContainer="jobCandidateDc"
+                                          property="priorityContact"/>
+                    </vbox>
                 </hbox>
+            </tab>
+            <tab id="tabSocialNetworks"
+                 caption="msg://msgTabSocialNetworks"
+                 margin="true,true,true,true"
+                 expand="socialNetworkTableHbox"
+                 icon="font-icon:SHARE_ALT"
+                 spacing="true">
+                <hbox id="socialNetworkTableHbox"
+                      width="100%"
+                      height="100%"
+                      spacing="true"
+                      stylename="borderless"
+                      margin="false,false,false,false"
+                      expand="socialNetworkTable">
+                    <dataGrid id="socialNetworkTable"
+                              height="100%"
+                              width="100%"
+                              editorEnabled="true"
+                              dataContainer="jobCandidateSocialNetworksDc">
+                        <columns>
+                            <column id="socialNetworkLogoColumn"
+                                    width="50px"
+                                    caption="">
+                                <componentRenderer/>
+                            </column>
+                            <column id="networkName"
+                                    editable="false"
+                                    property="socialNetworkURL.socialNetwork"
+                                    maximumWidth="200px"/>
+                            <column id="networkURLS"
+                                    editable="true"
+                                    property="networkURLS"/>
+                            <column id="linkToWeb"
+                                    caption="msg://msgLinkURL"
+                                    maximumWidth="150px">
+                                <componentRenderer/>
+                            </column> <!-- <componentRenderer/> -->
+                        </columns>
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                        </actions>
+                    </dataGrid>
+                    <vbox spacing="true"
+                          width="AUTO"
+                          height="AUTO">
+                        <button id="addSocialNetworkListsButton"
+                                visible="false"
+                                enable="false"
+                                width="100%"
+                                caption="msg://msgAddSocialNetworks"
+                                description="msg://msgAddSocialNetworksDesc"
+                                invoke="addSocialNetworksListsInvoke"/>
+                        <button id="addMissingSocialNetworkListsButton"
+                                width="100%"
+                                enable="true"
+                                caption="msg://msgAddMissingSocialNetrorkButton"
+                                description="msg://msgAddMissingSocialNetrorkButtonDesc"
+                                invoke="addMissingSocialNetworksListsInvoke"/>
+                        <button id="removeEmptySocialNetworkListsButton"
+                                width="100%"
+                                enable="true"
+                                caption="msg://removeEmptySocialNetworkListsButton"
+                                description="msg://removeEmptySocialNetworkListsButtonDesc"
+                                invoke="removeEmptySocialNetworkListsButton"/>
+                    </vbox>
+                </hbox>
+
+            </tab>
+            <tab id="tabIteraction"
+                 caption="msg://msgCandidateIteraction"
+                 margin="true,true,true,true"
+                 expand="jobCandidateIteractionListTable"
+                 icon="LIST"
+                 spacing="true">
+                <lookupPickerField id="vacancyFilterLookupPickerField"
+                                   caption="msg://msgVacancyFiler"
+                                   visible="true"
+                                   width="AUTO">
+                    <actions>
+                        <action id="lookup" type="picker_lookup"/>
+                        <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                    </actions>
+                </lookupPickerField>
+                <dataGrid id="jobCandidateIteractionListTable"
+                          dataContainer="jobCandidateIteractionDc"
+                          width="100%"
+                          bodyRowHeight="58px"
+                          contextMenuEnabled="false"
+                          textSelectionEnabled="false"
+                          reorderingAllowed="true"
+                          height="100%">
+                    <actions>
+                        <action id="create" type="create"/>
+                        <action type="edit" id="edit"/>
+                        <action id="remove" type="remove"/>
+                        <action id="refresh" type="refresh"/>
+                    </actions>
+                    <buttonsPanel>
+                        <button action="jobCandidateIteractionListTable.create"/>
+                        <popupButton id="frequentInteractionPopupButton"
+                                     icon="FILE_TEXT"
+                                     enable="false"
+                                     caption="msg://msgAddPopularIteraction"/>
+                        <button action="jobCandidateIteractionListTable.edit"/>
+                        <button id="copyIteractionButton"
+                                caption="msg://msgCopy"
+                                icon="COPY"/>
+                        <button action="jobCandidateIteractionListTable.remove"/>
+                        <button id="openPositionProjectDescriptionButton"
+                                enable="false"
+                                caption="msg://msgOpenPositionDescription"/>
+                    </buttonsPanel>
+                    <columns>
+                        <column id="icon"
+                                width="48px"
+                                caption=""/>
+                        <column id="projectLogoColumn"
+                                resizable="true"
+                                collapsible="true"
+                                collapsed="false"
+                                caption="msg://msgProject"
+                                width="70px"
+                                minimumWidth="70px">
+                            <componentRenderer/>
+                        </column>
+                        <column id="numberIteraction"
+                                property="numberIteraction"
+                                sort="DESCENDING"
+                                width="85px"
+                                maximumWidth="100px"
+                                sortable="true"/>
+                        <column id="rating"
+                                minimumWidth="85px"
+                                width="85px"
+                                maximumWidth="100px"
+                                caption="msg://msgRating">
+                            <htmlRenderer nullRepresentation="null"/>
+                        </column>
+                        <column id="vacancy"
+                                maximumWidth="400px"
+                                property="vacancy"/>
+                        <column id="currentOpenCloseColumn"
+                                caption="mainMsg://msgCurrentOpenClose"
+                                maximumWidth="45px">
+                            <iconRenderer/>
+                        </column>
+                        <column id="iteractionType"
+                                maximumWidth="250px"
+                                property="iteractionType"/>
+                        <column id="commentColumn"
+                                maximumWidth="80px"
+                                width="60px"
+                                caption="msg://msgIsComment">
+                            <iconRenderer/>
+                        </column>
+                        <column id="recrutier"
+                                maximumWidth="150px"
+                                property="recrutier"/>
+                        <column id="dateIteraction"
+                                property="dateIteraction"
+                                width="80px"
+                                caption="msg://msgDate">
+                            <formatter format="dd.MM.yyyy"
+                                       class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
+                        </column>
+                    </columns>
+                    <rowsCount/>
+                </dataGrid>
+            </tab>
+            <tab id="tabResume"
+                 caption="msg://msgTabResumeFiles"
+                 margin="true,true,true,true"
+                 icon="font-icon:FILE_TEXT"
+                 expand="tabResumeVbox"
+                 spacing="true">
+                <vbox id="tabResumeVbox"
+                      spacing="true"
+                      height="100%"
+                      expand="jobCandidateCandidateCvTable">
+                    <button id="checkSkillFromJD"
+                            caption="msg://msgCheckSkills"
+                            align="BOTTOM_LEFT"
+                            enable="false"/>
+                    <dataGrid id="jobCandidateCandidateCvTable"
+                              width="100%"
+                              descriptionAsHtml="true"
+                              captionAsHtml="true"
+                              bodyRowHeight="55px"
+                              dataContainer="jobCandidateCandidateCvsDc"
+                              height="100%">
+                        <columns>
+                            <column id="projectLogoColumn"
+                                    resizable="true"
+                                    collapsible="true"
+                                    collapsed="false"
+                                    caption="msg://msgProject"
+                                    width="70px"
+                                    minimumWidth="70px">
+                                <componentRenderer/>
+                            </column>
+                            <column id="datePost"
+                                    width="100px"
+                                    maximumWidth="100px"
+                                    property="datePost"
+                                    caption="msg://msgDatePost"/>
+                            <column id="toVacancy"
+                                    property="toVacancy"
+                                    caption="msg://msgToVacansy">
+                            </column>
+                            <column id="resumePosition"
+                                    collapsible="true"
+                                    collapsed="true"
+                                    property="resumePosition"
+                                    caption="msg://msgToPosition"/>
+                            <column id="iconOriginalCVFile"
+                                    width="100px"
+                                    maximumWidth="100px"
+                                    caption="msg://msgOriginalCV">
+                                <iconRenderer/>
+                            </column> <!--                                <iconRenderer/> -->
+                            <column id="iconHuntTechCVFile"
+                                    width="100px"
+                                    maximumWidth="100px"
+                                    caption="msg://msgHuntTechCV">
+                                <iconRenderer/>
+                            </column> <!--                                <iconRenderer/> -->
+                            <column id="letter"
+                                    width="100px"
+                                    maximumWidth="100px"
+                                    caption="msg://msgCoverLetter">
+                                <iconRenderer/>
+                            </column><!--                                <iconRenderer/> -->
+                            <column id="candidateOriginalCVColumn"
+                                    width="150px"
+                                    caption="msg://msgOriginalCV">
+                                <componentRenderer/>
+                            </column><!--                                <componentRenderer/> -->
+                            <column id="candidateHuntTechCVColumn"
+                                    width="150px"
+                                    caption="msg://msgHuntTechCV">
+                                <componentRenderer/>
+                            </column><!--                                <componentRenderer/> -->
+                            <column id="createdBy"
+                                    property="createdBy"
+                                    width="100px"
+                                    caption="msg://msgCreatedBy"/>
+                        </columns>
+                        <actions>
+                            <action type="create"
+                                    id="create"/>
+                            <action id="edit"
+                                    type="edit"/>
+                            <action id="remove"
+                                    type="remove"/>
+                        </actions>
+                        <buttonsPanel>
+                            <button id="addButtonCV"
+                                    action="jobCandidateCandidateCvTable.create"/>
+                            <button id="copyCVButton"
+                                    caption="msg://msgCopy"
+                                    icon="COPY"/>
+                            <button id="editButtonCV"
+                                    action="jobCandidateCandidateCvTable.edit"/>
+                            <button id="removeButtonCV"
+                                    action="jobCandidateCandidateCvTable.remove"/>
+                            <button id="scanContactsFromCVButton"
+                                    caption="msg://msgScan"
+                                    enable="false"
+                                    invoke="scanContactsFromCVs"/>
+                        </buttonsPanel>
+                    </dataGrid>
+                </vbox>
+            </tab>
+            <tab id="commentsTab"
+                 caption="msg://msgComments"
+                 margin="true,true,true,true"
+                 icon="font-icon:COMMENT"
+                 expand="tabCommentsVbox"
+                 spacing="true">
+                <vbox id="tabCommentsVbox"
+                      spacing="true"
+                      height="100%"
+                      expand="jobCandidateCommentsDataGrid">
+                    <dataGrid id="jobCandidateCommentsDataGrid"
+                              dataContainer="interactionCommentDc"
+                              bodyRowHeight="130px"
+                              headerVisible="false"
+                              reorderingAllowed="false"
+                              textSelectionEnabled="false"
+                              selectionMode="NONE"
+                              stylename="no-horizontal-lines no-stripes no-vertical-lines borderless"
+                              sortable="false"
+                              width="100%"
+                              height="100%">
+                        <columns>
+                            <column id="commentDialog"
+                                    sortable="false">
+                                <componentRenderer/>
+                            </column>
+                            <column id="dateIteraction"
+                                    sortable="true"
+                                    sort="DESCENDING"
+                                    width="80px"
+                                    collapsed="true"
+                                    property="dateIteraction"/>
+                            <column id="recrutier"
+                                    collapsed="true"
+                                    width="250px"
+                                    property="recrutier"/>
+                            <column id="comment"
+                                    collapsed="true"
+                                    sortable="false"
+                                    property="comment"/>
+                        </columns>
+                    </dataGrid>
+                    <groupBox stylename="well"
+                              spacing="true"
+                              width="100%">
+                        <textField id="chatMessageTextField"
+                                   stylename="large"
+                                   width="100%"/>
+                        <hbox width="100%" expand="vacancyPopupPickerField" spacing="true">
+                            <lookupPickerField id="vacancyPopupPickerField"
+                                               align="MIDDLE_LEFT"
+                                               stylename="large"
+                                               optionsContainer="openPositionDc"
+                                               width="100%"/>
+                            <button id="sendCommentButton"
+                                    caption="msg://msgSendComment"
+                                    stylename="large"
+                                    icon="COMMENTING"
+                                    width="AUTO"
+                                    enable="false"
+                                    align="MIDDLE_RIGHT"
+                                    invoke="sendCommentButtonInvoke"/>
+                        </hbox>
+                    </groupBox>
+                </vbox>
+            </tab>
+            <tab id="tabHistory"
+                 caption="msg://msgTabHistory"
+                 margin="true,true,true,true"
+                 icon="font-icon:HISTORY"
+                 spacing="true">
+                <vbox id="jobCandidateHistoryBox"
+                      width="100%"
+                      height="100%"
+                      spacing="true"
+                      stylename="job-candidate-history">
+                    <label value="msg://msgTabHistory"
+                           stylename="h2"/>
+                    <grid id="jobCandidateHistoryGrid"
+                          spacing="true"
+                          width="100%">
+                        <columns count="2"/>
+                        <rows>
+                            <row>
+                                <label value="msg://msgCandidateCreatedBy"
+                                       stylename="h4"/>
+                                <label dataContainer="jobCandidateDc"
+                                       property="createdBy"/>
+                            </row>
+                            <row>
+                                <label value="msg://msgCandidateUpdatedBy"
+                                       stylename="h4"/>
+                                <label dataContainer="jobCandidateDc"
+                                       property="updatedBy"/>
+                            </row>
+                        </rows>
+                    </grid>
+                </vbox>
+            </tab>
+        </tabSheet>
             </vbox>
         </hbox>
     </layout>

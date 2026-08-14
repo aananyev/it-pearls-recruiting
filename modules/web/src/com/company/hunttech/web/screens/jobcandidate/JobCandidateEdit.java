@@ -244,7 +244,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private Button copyIteractionButton;
     private boolean candidateInitialized = false;
     private boolean tabContactInfoInitialized = false;
-    private boolean positionsTabInitialized = false;
+    private boolean tabSocialNetworksInitialized = false;
     private boolean initialInteractionAdded = false;
     private boolean companyEditorOpen = false;
     private Table lastProjectTable;
@@ -1405,6 +1405,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             initTabInteractions();
             initTabCandidate();
             initTabContactInfo();
+            initTabSocialNetworks();
             initTabComments();
             initTabPositions();
             updateCandidateNavigationActiveState();
@@ -1947,48 +1948,83 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (selectedTab == null || !"tabContactInfo".equals(selectedTab.getName())) {
             return;
         }
-        if (tabContactInfoInitialized) {
-            return;
+        if (!tabContactInfoInitialized) {
+            if (emailField == null) {
+                emailField = (TextField<String>) getWindow().getComponent("emailField");
+            }
+            emailField.addTextChangeListener(e -> enableDisableContacts());
+
+            if (phoneField == null) {
+                phoneField = (TextField<String>) getWindow().getComponent("phoneField");
+            }
+            phoneField.addTextChangeListener(e -> enableDisableContacts());
+
+            if (skypeNameField == null) {
+                skypeNameField = (TextField<String>) getWindow().getComponent("skypeNameField");
+            }
+            skypeNameField.addTextChangeListener(e -> enableDisableContacts());
+
+            if (telegramNameField == null) {
+                telegramNameField = (TextField<String>) getWindow().getComponent("telegramNameField");
+            }
+            telegramNameField.addTextChangeListener(e -> enableDisableContacts());
+
+            if (whatsupNameField == null) {
+                whatsupNameField = (TextField<String>) getWindow().getComponent("whatsupNameField");
+            }
+            whatsupNameField.addTextChangeListener(e -> enableDisableContacts());
+
+            if (wiberNameField == null) {
+                wiberNameField = (TextField<String>) getWindow().getComponent("wiberNameField");
+            }
+            wiberNameField.addTextChangeListener(e -> enableDisableContacts());
+
+            if (priorityCommunicationMethodRadioButton == null) {
+                priorityCommunicationMethodRadioButton = (RadioButtonGroup) getWindow()
+                        .getComponent("priorityCommunicationMethodRadioButton");
+            }
+            priorityCommenicationMethodRadioButtonInit();
+
+            if (telegramGroupField == null) {
+                telegramGroupField = (TextField<String>) getWindow().getComponent("telegramGroupField");
+            }
+            telegramGroupField.addTextChangeListener(e -> enableDisableContacts());
+
+            if (mobilePhoneField == null) {
+                mobilePhoneField = (TextField<String>) getWindow().getComponent("mobilePhoneField");
+            }
+            mobilePhoneField.addTextChangeListener(e -> enableDisableContacts());
+
+            trimTelegramName();
+            enableDisableContacts();
         }
 
-        emailField = (TextField<String>) getWindow().getComponentNN("emailField");
-        phoneField = (TextField<String>) getWindow().getComponentNN("phoneField");
-        mobilePhoneField = (TextField<String>) getWindow().getComponentNN("mobilePhoneField");
-        telegramNameField = (TextField<String>) getWindow().getComponentNN("telegramNameField");
-        whatsupNameField = (TextField<String>) getWindow().getComponentNN("whatsupNameField");
-        wiberNameField = (TextField<String>) getWindow().getComponentNN("wiberNameField");
-        skypeNameField = (TextField<String>) getWindow().getComponentNN("skypeNameField");
-        priorityCommunicationMethodRadioButton = (RadioButtonGroup<Integer>) getWindow()
-                .getComponentNN("priorityCommunicationMethodRadioButton");
-        socialNetworkTable = (DataGrid<SocialNetworkURLs>) getWindow().getComponentNN("socialNetworkTable");
-        addSocialNetworkListsButton = (Button) getWindow().getComponentNN("addSocialNetworkListsButton");
-
-        emailField.addTextChangeListener(e -> enableDisableContacts());
-        phoneField.addTextChangeListener(e -> enableDisableContacts());
-        mobilePhoneField.addTextChangeListener(e -> enableDisableContacts());
-        telegramNameField.addTextChangeListener(e -> enableDisableContacts());
-        whatsupNameField.addTextChangeListener(e -> enableDisableContacts());
-        wiberNameField.addTextChangeListener(e -> enableDisableContacts());
-        skypeNameField.addTextChangeListener(e -> enableDisableContacts());
-
-        phoneField.addValueChangeListener(this::onPhoneFieldValueChange);
-        mobilePhoneField.addValueChangeListener(this::onMobilePhoneFieldValueChange1);
-        emailField.addValueChangeListener(this::onEmailFieldValueChange);
-        mobilePhoneField.addValueChangeListener(this::onMobilePhoneFieldValueChange);
-        skypeNameField.addValueChangeListener(this::onSkypeNameFieldValueChange);
-        telegramNameField.addValueChangeListener(this::onTelegramNameFieldValueChange);
-
-        socialNetworkTable.addEditorCloseListener(e -> enableDisableContacts());
-        socialNetworkTable.addEditorPostCommitListener(e -> enableDisableContacts());
-        socialNetworkTable.addSelectionListener(e -> enableDisableContacts());
-
-        priorityCommenicationMethodRadioButtonInit();
-        ensureSocialNetworksLoaded();
-        initSocialNeiworkTable();
-        setAddSocialNetworkButtonEnable();
-        trimTelegramName();
         tabContactInfoInitialized = true;
-        enableDisableContacts();
+    }
+
+    private void initTabSocialNetworks() {
+        TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
+        if (selectedTab == null || !"tabSocialNetworks".equals(selectedTab.getName())) {
+            return;
+        }
+        if (!tabSocialNetworksInitialized) {
+            ensureSocialNetworksLoaded();
+
+            if (socialNetworkTable == null) {
+                socialNetworkTable = (DataGrid<SocialNetworkURLs>) getWindow()
+                        .getComponent("socialNetworkTable");
+            }
+
+            socialNetworkTable.addEditorCloseListener(e -> enableDisableContacts());
+            socialNetworkTable.addEditorPostCommitListener(e -> enableDisableContacts());
+            socialNetworkTable.addSelectionListener(e -> enableDisableContacts());
+
+            enableDisableContacts();
+            initSocialNeiworkTable();
+            setAddSocialNetworkButtonEnable();
+        }
+
+        tabSocialNetworksInitialized = true;
     }
 
     public void initSocialNeiworkTable() {
