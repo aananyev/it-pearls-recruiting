@@ -49,8 +49,8 @@ order by e.countryRuName]]></query>
                 </vbox>
                 <!-- Блок идентификации: тип записи и название региона из контейнера. -->
                 <vbox id="regionIdentity" stylename="edit-sidebar-identity" width="100%" spacing="true">
-                    <!-- Подпись типа записи. -->
-                    <label value="Регион" stylename="edit-sidebar-subtitle" width="100%"/>
+                    <!-- Подпись типа записи (msg-ключ из пакета региона). -->
+                    <label value="msg://msgRegion" stylename="edit-sidebar-subtitle" width="100%"/>
                     <!-- Название региона (свойство regionRuName), живое из regionDc. -->
                     <label id="regionSidebarTitle" dataContainer="regionDc" property="regionRuName" stylename="edit-sidebar-title" width="100%"/>
                 </vbox>
@@ -63,8 +63,12 @@ order by e.countryRuName]]></query>
                     <!-- Пункт «Города» — фокусирует таблицу городов региона. -->
                     <button id="regionCitiesNav" caption="Города" stylename="borderless label-nav-item" width="100%" invoke="focusCitiesSection"/>
                 </vbox>
-                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar. -->
-                <vbox id="regionSidebarSpacer" stylename="edit-sidebar-spacer"/>
+                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar
+                     (эталонный паттерн: width/height 100%, expand на контейнере). -->
+                <vbox id="regionSidebarSpacer"
+                      stylename="edit-sidebar-spacer"
+                      width="100%"
+                      height="100%"/>
                 <!-- Нейтральная подсказка о роли региона в иерархии геоданных. -->
                 <label value="Регион связывает страну и входящие в него города." stylename="edit-sidebar-hint" width="100%"/>
             </vbox>

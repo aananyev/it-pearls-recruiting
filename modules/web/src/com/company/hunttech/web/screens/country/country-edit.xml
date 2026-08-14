@@ -66,8 +66,8 @@
                       stylename="edit-sidebar-identity"
                       width="100%"
                       spacing="true">
-                    <!-- Подпись типа записи. -->
-                    <label value="Страна"
+                    <!-- Подпись типа записи (msg-ключ из пакета страны). -->
+                    <label value="msg://msgCountry"
                            stylename="edit-sidebar-subtitle"
                            width="100%"/>
                     <!-- Название страны (свойство countryRuName), живое из countryDc. -->
@@ -99,8 +99,12 @@
                             width="100%"
                             invoke="focusRegionsSection"/>
                 </vbox>
-                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar. -->
-                <vbox id="countrySidebarSpacer" stylename="edit-sidebar-spacer"/>
+                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar
+                     (эталонный паттерн: width/height 100%, expand на контейнере). -->
+                <vbox id="countrySidebarSpacer"
+                      stylename="edit-sidebar-spacer"
+                      width="100%"
+                      height="100%"/>
                 <!-- Нейтральная подсказка о роли страны в справочниках HRM HuntTech. -->
                 <label value="Страна объединяет регионы и используется в географических справочниках HRM HuntTech."
                        stylename="edit-sidebar-hint"

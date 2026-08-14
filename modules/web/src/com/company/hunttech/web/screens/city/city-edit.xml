@@ -39,7 +39,8 @@
                     </ovalImage>
                 </vbox>
                 <vbox id="cityIdentity" stylename="edit-sidebar-identity" width="100%" spacing="true">
-                    <label value="Город" stylename="edit-sidebar-subtitle" width="100%"/>
+                    <!-- Подпись типа записи (msg-ключ из пакета города). -->
+                    <label value="msg://msgCity" stylename="edit-sidebar-subtitle" width="100%"/>
                     <label id="citySidebarTitle" dataContainer="cityDc" property="cityRuName" stylename="edit-sidebar-title" width="100%"/>
                 </vbox>
                 <!-- Label-навигация повторяет фактическую информационную архитектуру правой области. -->
@@ -51,10 +52,16 @@
                     <button id="cityRegionNav" caption="Регион и связь" stylename="borderless label-nav-item" width="100%" invoke="focusRegionSection"/>
                 </vbox>
                 <vbox id="citySidebarSummary" stylename="edit-sidebar-summary" width="100%" spacing="true">
-                    <label value="Регион" stylename="edit-sidebar-subtitle"/>
+                    <!-- Подпись сводки: регион, к которому относится город (msg-ключ пакета города). -->
+                    <label value="msg://msgRegion" stylename="edit-sidebar-subtitle"/>
                     <label dataContainer="cityDc" property="cityRegion.regionRuName" width="100%"/>
                 </vbox>
-                <vbox id="citySidebarSpacer" stylename="edit-sidebar-spacer"/>
+                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar
+                     (эталонный паттерн: width/height 100%, expand на контейнере). -->
+                <vbox id="citySidebarSpacer"
+                      stylename="edit-sidebar-spacer"
+                      width="100%"
+                      height="100%"/>
                 <label value="Город используется в адресах кандидатов, компаний и вакансий HRM HuntTech." stylename="edit-sidebar-hint" width="100%"/>
             </vbox>
             <!-- Правая рабочая область: toolbar, логические карточки и footer-actions. -->
