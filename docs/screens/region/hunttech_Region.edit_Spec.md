@@ -122,6 +122,7 @@ order by e.countryRuName
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | §6: RegionEdit sidebar доведён до эталона ProjectEdit (серия гео-форм) — стандартные отступы контента sidebar (`padding: 14px 16px 12px` + граница + тень), подпись типа записи «Регион» удалена, название региона по центру по горизонтали, footer-кнопки ОК/Отмена в правом нижнем углу со стилем primary/secondary (`region-editor-primary-action`/`region-editor-secondary-action`); тест `GeolocationEditFormsContractTest` дополнен |
 | 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

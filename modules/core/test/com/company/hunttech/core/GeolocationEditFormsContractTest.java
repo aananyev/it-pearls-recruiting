@@ -310,6 +310,41 @@ public class GeolocationEditFormsContractTest {
                 canon.contains("background: $v-selection-color !important"));
     }
 
+    @Test
+    public void regionAndCityFollowCountrySidebarContract() throws IOException {
+        // Серия гео-форм: те же правки, что у CountryEdit — подпись типа записи
+        // убрана из identity, title по центру, footer-кнопки primary/secondary
+        // в правом нижнем углу (эталон ProjectEdit).
+        String region = readProjectFile(SCREENS + "region/region-edit.xml");
+        assertTrue("Подпись типа записи «Регион» осталась в identity RegionEdit",
+                !region.contains("msg://msgRegion"));
+        assertTrue(region.contains("id=\"regionSidebarTitle\""));
+        assertTrue(region.contains("stylename=\"edit-sidebar-title\""));
+        assertTrue(region.contains("expand=\"regionActionsSpacer\""));
+        assertTrue(region.contains("align=\"MIDDLE_RIGHT\""));
+        assertTrue(region.contains("stylename=\"region-editor-primary-action\""));
+        assertTrue(region.contains("stylename=\"region-editor-secondary-action\""));
+
+        String city = readProjectFile(SCREENS + "city/city-edit.xml");
+        assertTrue("Подпись типа записи «Город» осталась в identity CityEdit",
+                !city.contains("msg://msgCity"));
+        assertTrue(city.contains("id=\"citySidebarTitle\""));
+        assertTrue(city.contains("stylename=\"edit-sidebar-title\""));
+        assertTrue(city.contains("expand=\"cityActionsSpacer\""));
+        assertTrue(city.contains("align=\"MIDDLE_RIGHT\""));
+        assertTrue(city.contains("stylename=\"city-editor-primary-action\""));
+        assertTrue(city.contains("stylename=\"city-editor-secondary-action\""));
+
+        // SCSS-слой: primary/secondary классы объединены для всех трёх форм
+        // в общем geolocation-edit-forms.scss.
+        String canon = readProjectFile(
+                "modules/web/themes/hover/com.company.hunttech/geolocation-edit-forms.scss");
+        assertTrue("Нет .region-editor-primary-action", canon.contains(".region-editor-primary-action"));
+        assertTrue("Нет .city-editor-primary-action", canon.contains(".city-editor-primary-action"));
+        assertTrue("Нет .region-editor-secondary-action", canon.contains(".region-editor-secondary-action"));
+        assertTrue("Нет .city-editor-secondary-action", canon.contains(".city-editor-secondary-action"));
+    }
+
     private String readProjectFile(String relativePath) throws IOException {
         return new String(
                 Files.readAllBytes(projectRoot().resolve(relativePath)),

@@ -47,11 +47,12 @@ order by e.countryRuName]]></query>
                         <theme path="icons/dictionaries/region.png"/>
                     </ovalImage>
                 </vbox>
-                <!-- Блок идентификации: тип записи и название региона из контейнера. -->
+                <!-- Блок идентификации: название региона из контейнера.
+                     Подпись типа записи убрана — название выровнено по центру
+                     sidebar (text-align: center в geolocation SCSS). -->
                 <vbox id="regionIdentity" stylename="edit-sidebar-identity" width="100%" spacing="true">
-                    <!-- Подпись типа записи (msg-ключ из пакета региона). -->
-                    <label value="msg://msgRegion" stylename="edit-sidebar-subtitle" width="100%"/>
-                    <!-- Название региона (свойство regionRuName), живое из regionDc. -->
+                    <!-- Название региона (свойство regionRuName), живое из regionDc,
+                         по центру по горизонтали относительно sidebar. -->
                     <label id="regionSidebarTitle" dataContainer="regionDc" property="regionRuName" stylename="edit-sidebar-title" width="100%"/>
                 </vbox>
                 <!-- Вертикальная label-навигация по разделам формы (фокус, без изменения данных). -->
@@ -120,14 +121,24 @@ order by e.countryRuName]]></query>
                         </groupBox>
                     </vbox>
                 </scrollBox>
-                <!-- Нижняя панель штатных действий: сохранить и отменить. -->
-                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
-                    <!-- Spacer прижимает кнопки к правому краю. -->
-                    <vbox id="regionActionsSpacer" width="100%"/>
-                    <!-- Сохранить и закрыть (штатный action editor-а). -->
-                    <button action="windowCommitAndClose"/>
-                    <!-- Отменить изменения и закрыть. -->
-                    <button action="windowClose"/>
+                <!-- Нижняя панель штатных действий: спейсер выталкивает пару
+                     ОК/Отмена к правому нижнему углу, кнопки получают канонические
+                     стили primary/secondary (эталон ProjectEdit). -->
+                <hbox id="editActions"
+                      stylename="edit-footer-actions"
+                      width="100%"
+                      expand="regionActionsSpacer"
+                      align="MIDDLE_RIGHT"
+                      spacing="false">
+                    <!-- Спейсер: растягивает группу кнопок к правому краю панели. -->
+                    <vbox id="regionActionsSpacer" width="100%" height="1px"/>
+                    <!-- Группа ОК/Отмена: primary (сохранить) и secondary (отмена). -->
+                    <hbox id="regionActionsGroup" width="AUTO" align="MIDDLE_RIGHT" spacing="true">
+                        <!-- Сохранить и закрыть (штатный action editor-а). -->
+                        <button action="windowCommitAndClose" stylename="region-editor-primary-action"/>
+                        <!-- Отменить изменения и закрыть. -->
+                        <button action="windowClose" stylename="region-editor-secondary-action"/>
+                    </hbox>
                 </hbox>
             </vbox>
         </hbox>

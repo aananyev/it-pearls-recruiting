@@ -131,6 +131,7 @@ erDiagram
 - **View:** `country-edit-view`
 - **Вкладок нет** — lazy LOB/collection по вкладкам не требуется
 - **Таблица регионов:** `countryOfRegion` через `region-country-child-view` (без городов)
+- **Sidebar-контракт** (канон: `docs/ui/GeolocationEditForms_Spec.md`): стандартные отступы контента sidebar (`padding: 14px 16px 12px` + граница + тень), название страны `edit-sidebar-title` по центру по горизонтали, подпись типа записи убрана; footer-кнопки ОК/Отмена в правом нижнем углу со стилем primary/secondary формы Project
 
 ### 5.3 Cross-form потребители
 
@@ -259,6 +260,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | §5.2: CountryEdit sidebar доведён до эталона ProjectEdit — стандартные отступы контента sidebar, название страны по центру по горизонтали, подпись «Страна» удалена, footer-кнопки ОК/Отмена в правом нижнем углу со стилем primary/secondary; тест `GeolocationEditFormsContractTest` дополнен |
 | 2026-08-14 | Sidebar CountryEdit по контракту Edit-экранов: nav-пункты 27px (фикс высоты Vaadin-кнопки), subtitle → `msg://msgCountry`, spacer `width/height 100%`; UI Spec: `docs/ui/GeolocationEditForms_Spec.md` |
 | 2026-08-13 | Sidebar CountryEdit: добавлен visual-блок с круглой иллюстрацией `ovalImage` 176×176 (`icons/dictionaries/country.png`); identity выровнен по контракту (title 18/700 #ffb11b, subtitle 12/400); тест DictionaryEditFormIllustrationContractTest |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
