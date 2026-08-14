@@ -519,12 +519,10 @@
     }
 
     .job-candidate-tabs > .v-tabsheet-tabcontainer {
-      width: 100% !important;
       padding: 0 12px;
       background: #fff !important;
       border-bottom: 1px solid #dfe5ec;
-      overflow-x: auto !important;
-      overflow-y: hidden !important;
+      overflow: hidden;
     }
 
     .job-candidate-tabs .v-tabsheet-tabs,
@@ -544,16 +542,12 @@
     .job-candidate-tabs .v-caption {
       box-sizing: border-box;
       height: 48px;
-      width: auto !important;
-      max-width: none !important;
       padding: 0 10px;
       color: #26384c !important;
       font-size: 14px !important;
       font-weight: 600;
       line-height: 48px;
       white-space: nowrap !important;
-      overflow: visible !important;
-      text-overflow: clip !important;
       background: transparent !important;
       border: 0 !important;
     }

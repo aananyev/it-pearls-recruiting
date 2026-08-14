@@ -12,14 +12,14 @@ STATUS: WAITING_FOR_HERMES
 ## Репозиторий
 
 Repo: `aananyev/it-pearls-recruiting`
-Branch: `agent/accounting-documents-telegram-ingest-clean`
+Branch: `agent/accounting-documents-telegram-ingest`
 Base: `master`
 
-Проверяемый HEAD должен совпадать с HEAD ветки `agent/accounting-documents-telegram-ingest-clean` после последнего push.
+Проверяемый HEAD должен совпадать с HEAD ветки `agent/accounting-documents-telegram-ingest` после последнего push.
 
 ## Что Проверить
 
-1. Ветка существует, PR открыт из `agent/accounting-documents-telegram-ingest-clean` в `master`.
+1. Ветка существует, PR открыт из `agent/accounting-documents-telegram-ingest` в `master`.
 2. HEAD PR совпадает с проверяемым SHA; при несовпадении остановить проверку со статусом `HEAD_MISMATCH`.
 3. Конфликтов с `master` нет.
 4. Telegram-бот:
@@ -74,7 +74,7 @@ Base: `master`
 PROJECT: HRM HuntTech
 STATUS: READY_TO_MERGE
 Repo: aananyev/it-pearls-recruiting
-Branch: agent/accounting-documents-telegram-ingest-clean
+Branch: agent/accounting-documents-telegram-ingest
 PR: <номер PR>
 Base: master
 проверен HEAD: <SHA>

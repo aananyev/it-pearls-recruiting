@@ -253,8 +253,8 @@ layout stylename="job-candidate-editor"
 │   │   └── hidden placeholders: skillBox, suggestVacancyTable, lastProjects, ...
 │   └── vbox id="jobCandidateWorkspace" (job-candidate-workspace)
 │       ├── hbox id="jobCandidateTopBar" (job-candidate-top-bar)
-│       │   ├── vbox id="jobCandidateToolbarTitleBox" — заголовок (edit-toolbar-title) + описание (edit-toolbar-description)
-│       │   └── popupButton id="moreActionsPopUpButton" — Еще (popup: блокировка, подписка, аудит)
+│       │   ├── hbox id="jobCandidateAuditBox" — createdUpdatedLabel
+│       │   └── popupButton id="moreActionsPopUpButton" — Еще (popup: блокировка, подписка)
 │       ├── tabSheet id="tabSheetSocialNetworks" (framed job-candidate-tabs, lazy)
 │       │   ├── tab tabMain (Основное) — аккордеон, 2 карточки: Персональные/Профессиональные данные
 │       │   ├── tab tabContactInfo (Контакты) — аккордеон, 2 колонки inline-полей
@@ -505,8 +505,6 @@ git checkout e246a7bc -- modules/web/themes/*/com.company.hunttech/job-candidate
 
 | Дата | Изменение |
 |------|-----------|
-| 2026-08-03 | **Дизайн-ревью компоновки JobCandidateEdit (22 файла, presentation-only)** по заданию `.team/JobCandidateEdit/design-notes.md` (P1-1…P3-14), Java-контроллер не менялся. XML: toolbar получил заголовок/описание (`jobCandidateToolbarTitleBox`, `edit-toolbar-title`/`-description`, `expand` переведён на него), русские подписи переведены на `msg://`/`mainMsg://` (+24 ключа в `messages*.properties`), секция «Социальные сети» — `height="AUTO"` + `min-height: 320px` у `socialNetworkTable`, удалены мёртвые stylename (`job-candidate-half-card`, `-contact-card`, `-positions-layout`, `-table-comments`, `-info-grid`, `-sidebar-grid`, `-name-row`), добавлены captions колонок `networkName`/`vacancy`/`iteractionType`/`recrutier`, панель комментариев — `edit-card`/`edit-form-control` вместо `well`/`large`. SCSS ×7 тем: label-навигация по эталону 27px/3px/20px (было 38px/8px/18px), убран маркер `▼`, карточки «Основного» — вертикальный стек, подписи вкладок 14px + `$v-selection-color`, поля 15px/38px, подписи строк контактов 100px, sidebar 296/284px, удалены `.job-candidate-audit-*`; `styles.scss` ×7 — порядок слоёв по контракту 6.4; контракт-тест — ассерты 27px/14px. Бизнес-логика, actions, loaders и bindings не менялись. |
-| 2026-07-29 | По визуальной проверке во внутреннем браузере на `1280×720` устранено перекрытие sidebar/workspace: Vaadin slot sidebar зафиксирован на 312px во всех темах, вкладки ограничены `112px` с ellipsis, чтобы длинные captions не выходили за границы формы. |
 | 2026-07-29 | Компоновка уточнена по контракту Edit-форм: `candidateNavigation` стоит сразу после профиля, sidebar зафиксирован как 312px, actions сохранения описаны в нижней панели, вкладки и табличные контейнеры защищены от переполнения без изменения loaders/actions/bindings. |
 | 2026-07-29 | `JobCandidateEdit` приведён к общему контракту Edit-форм: добавлены `edit-*`/`label-*` stylename, показана sidebar-навигация, синхронизирован `label-nav-item-active`, сохранён `edit-sidebar-title` при runtime-блокировке кандидата и усилена защита sidebar от переполнения. |
 | 2026-07-21 | Исправлен процент заполнения: 15 активных input properties, расчёт по `jobCandidateDc` без создания lazy-вкладок и запросов; добавлены null/detached тесты. |

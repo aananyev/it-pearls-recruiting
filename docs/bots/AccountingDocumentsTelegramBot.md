@@ -64,24 +64,22 @@ Telegram
 
 Бот не сканирует существующий архив с целью изменения файлов актов, договоров, УПД, счетов, заданий, чеков и других деловых документов. Чтение структуры папок допускается только для выбора целевого пути и формирования алиасов, без записи в существующие документы.
 
-### 1.1. Реализация Этапа 2 и уточнение архитектуры
+### 1.1. Реализация Этапа 2
 
 Этап 2 реализует первый рабочий участок процесса:
 
 ```text
 Telegram photo/PDF
-→ скачивание файла
+→ скачивание файла Telegram-ботом
 → AccountingDocumentIngestService
 → Сканы/Входящие/YYYY-MM-DD/
 → AccountingDocument(status = NEW)
 → AccountingDocumentEvent(eventType = RECEIVED)
 ```
 
-После уточнения архитектуры бухгалтерский прием и AI-распознавание переносятся в Hermes. Встроенный HRM Telegram-бот не должен принимать бухгалтерские фото/PDF. HRM HuntTech оставляет сервис приема и учетную модель, чтобы Hermes мог фиксировать новые документы и события.
+В Этапе 2 бот не выполняет OCR, не просит подтверждение карточкой, не выбирает контрагента, не раскладывает документы по `Договоры/Клиенты/...` и не отправляет письма бухгалтеру. Эти действия остаются в следующих этапах.
 
 Технические настройки входящей папки и разрешенного Telegram user id описаны в [AccountingDocumentIngestService.md](../services/AccountingDocumentIngestService.md).
-
-Текущий внешний контур описан в [AccountingDocumentsHermesBot.md](AccountingDocumentsHermesBot.md).
 
 ## 2. Потоки документов
 
@@ -439,7 +437,6 @@ YYYY-MM-DD <категория> <сумма> <организация>.pdf
 ## 9. Связанные документы
 
 - [AccountingDocumentsTelegramBot_MVP_Plan.md](AccountingDocumentsTelegramBot_MVP_Plan.md) — план минимально необходимой первой реализации.
-- [AccountingDocumentsHermesBot.md](AccountingDocumentsHermesBot.md) — внешний бот Hermes и границы ответственности Telegram/AI.
 - [AccountingDocumentIngestService.md](../services/AccountingDocumentIngestService.md) — сервис приема фото/PDF из Telegram.
 - [accounting-bot-preseed-migration-2026-07-29.md](../database/migrations/accounting-bot-preseed-migration-2026-07-29.md) — обязательный регламент будущей миграции и предзаполнения справочников.
 
@@ -447,7 +444,6 @@ YYYY-MM-DD <категория> <сумма> <организация>.pdf
 
 | Дата | Изменение |
 | --- | --- |
-| 2026-07-29 | Уточнено, что бухгалтерский Telegram-бот работает в Hermes и использует AI API Hermes, а встроенный HRM-бот не обрабатывает первичку |
 | 2026-07-29 | Описана фактическая реализация Этапа 2: прием фото/PDF во входящую папку и запись `AccountingDocument`/`RECEIVED` |
 | 2026-07-29 | Уточнено, что правило неприкосновенности относится к деловым документам: актам, договорам, УПД, счетам, заданиям и чекам |
 | 2026-07-29 | Зафиксировано правило неприкосновенности существующих файлов на Yandex.Disk и локальном диске |
