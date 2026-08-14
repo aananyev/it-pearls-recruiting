@@ -61,15 +61,13 @@
                         <theme path="icons/dictionaries/specialisation.png"/>
                     </ovalImage>
                 </vbox>
-                <!-- Блок идентификации: тип записи и название специализации из контейнера. -->
+                <!-- Блок идентификации: живое название специализации из контейнера,
+                     по центру sidebar (подпись типа записи удалена по канону серии
+                     2026-08-14, как в ProjectEdit/гео-формах). -->
                 <vbox id="identity"
                       stylename="edit-sidebar-identity"
                       width="100%"
                       spacing="true">
-                    <!-- Подпись типа записи. -->
-                    <label value="Специализация"
-                           stylename="edit-sidebar-subtitle"
-                           width="100%"/>
                     <!-- Название специализации (свойство specRuName), живое из specialisationDc. -->
                     <label id="sidebarTitle"
                            dataContainer="specialisationDc"

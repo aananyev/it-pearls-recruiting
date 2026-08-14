@@ -410,6 +410,37 @@
     }
   }
 
+  // «Карточка специализации» (SpecialisationEdit, 2026-08-14): канон серии
+  // sidebar 2026-08-14 — отступы контента от краёв, центрирование названия,
+  // тонкий скроллбар при переполнении (эталон ProjectEdit/OpenPositionEdit).
+  .specialisation-editor .edit-sidebar {
+    box-sizing: border-box;
+    padding: 14px 16px 12px !important;
+    border-right: 1px solid rgba(15, 23, 42, 0.78) !important;
+    box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18) !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+  }
+
+  .specialisation-editor .edit-sidebar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .specialisation-editor .edit-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 3px;
+  }
+
+  .specialisation-editor .edit-sidebar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  // Название специализации в identity — по центру sidebar (как в ProjectEdit).
+  .specialisation-editor .edit-sidebar-title,
+  .specialisation-editor .edit-sidebar-title.v-label {
+    text-align: center !important;
+  }
+
   // Кнопки «Загрузить»/«Очистить» загрузчика логотипа соцсети
   // (snLogoFileUpload): канонический вид кнопок upload в тёмном sidebar —
   // пара 96×36 с полупрозрачным белым фоном, центрированная в блоке визуала
