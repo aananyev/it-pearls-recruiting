@@ -127,6 +127,12 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                     + "order by e.candidate.id, e.numberIteraction desc";
     private static final String QUERY_EMPLOYEES_BY_CANDIDATES =
             "select e from hunttech_Employee e where e.jobCandidate in :candidates";
+    static final View EMPLOYEE_STATUS_CACHE_VIEW = ViewBuilder.of(Employee.class)
+            .add("jobCandidate", "_minimal")
+            .add("workStatus", view -> view
+                    .add("workStatusName")
+                    .add("inStaff"))
+            .build();
     private static final String QUERY_GET_OTHER_SOCIAL_NETWORK = "select e from hunttech_SocialNetworkType e where e.socialNetwork = :other";
     private static final String QUERY_GET_LASTRECRUTIER = "select e from hunttech_IteractionList e where e.candidate = :candidate order by e.numberIteraction desc";
 
@@ -211,11 +217,7 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         List<Employee> employees = dataManager.load(Employee.class)
                 .query(QUERY_EMPLOYEES_BY_CANDIDATES)
                 .parameter("candidates", candidates)
-                .view(ViewBuilder.of(Employee.class)
-                        .add("jobCandidate", "_minimal")
-                        // The status column reads inStaff after DataManager detaches the result.
-                        .add("workStatus", workStatusView -> workStatusView.add("inStaff"))
-                        .build())
+                .view(EMPLOYEE_STATUS_CACHE_VIEW)
                 .list();
 
         Map<UUID, Employee> cache = new HashMap<>();
