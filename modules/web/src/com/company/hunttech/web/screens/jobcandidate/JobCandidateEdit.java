@@ -232,6 +232,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private boolean candidateCvLoaded = false;
     private boolean interactionsLoaded = false;
     private boolean socialNetworksLoaded = false;
+    private boolean skillBoxInitialized = false;
     private Button copyIteractionButton;
     private boolean candidateInitialized = false;
     private boolean tabContactInfoInitialized = false;
@@ -360,7 +361,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setupSkillBox() {
-        if (!PersistenceHelper.isNew(getEditedEntity())) {
+        if (!skillBoxInitialized && !PersistenceHelper.isNew(getEditedEntity())) {
+            skillBoxInitialized = true;
             Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
             if (skillBoxFragment.generateSkillLabels(getLastCVText())) {
                 skillBox.add(skillBoxFragment.getFragment());
@@ -523,12 +525,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onAfterClose(AfterCloseEvent event) {
-        // чтоб после закрытия не возникало
-        jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
-            if (jobCandidateCandidateCvTable != null) {
-                jobCandidateCandidateCvTable.repaint();
-            }
-        });
+        skillBox.removeAll();
     }
 
     private void setPercentLabel() {
@@ -608,7 +605,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         enableDisableContacts();
         setLabelTitle();
         setCreatedUpdatedLabel();
-
+        setRatingLabel(getEditedEntity());
         setLinkButtonEmail();
         setLinkButtonTelegrem();
         setLinkButtonTelegremGroup();
@@ -860,12 +857,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onBeforeClose1(BeforeCloseEvent event) {
-        // удалить листенер изменения, чтобы  не пугало сообщение о ненадйенности новых контактов в резюмехе
-        jobCandidateCandidateCvsDc.addCollectionChangeListener(e -> {
-            if (jobCandidateCandidateCvTable != null) {
-                jobCandidateCandidateCvTable.repaint();
-            }
-        });
+        // No manual listener cleanup is needed here: CUBA disposes screen-owned component listeners.
     }
 
 /*    private void workStatusRadioButtonInit() {
@@ -1902,6 +1894,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
         if (!cvTabInitialized) {
             ensureCandidateCvLoaded();
+            setupSkillBox();
             if (scanContactsFromCVButton == null) {
                 scanContactsFromCVButton = (Button) getWindow()
                         .getComponent("scanContactsFromCVButton");

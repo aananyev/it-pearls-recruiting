@@ -135,4 +135,24 @@ public class JobCandidateEditPerfTest {
         assertEquals("tabCandidate must not preload the full Company options container",
                 companyLoadListCallsBeforeTab, metrics.getCompanyLoadListCalls());
     }
+
+    @Test
+    public void testCandidateCvIsNotLoadedWhenEditorOpens() {
+        JobCandidate candidate = JobCandidatePerfTestSupport.createJobCandidateForEdit(environment);
+
+        Screens screens = environment.getScreens();
+        JobCandidateBrowse browse = screens.create(JobCandidateBrowse.class, OpenMode.ROOT);
+        browse.show();
+
+        ScreenBuilders screenBuilders = AppBeans.get(ScreenBuilders.class);
+
+        JobCandidateEdit edit = (JobCandidateEdit) screenBuilders.editor(JobCandidate.class, browse)
+                .editEntity(candidate)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+        edit.show();
+
+        assertEquals("JobCandidateEdit must not load CandidateCV rows while opening the initial card tab",
+                0, metrics.getCandidateCvLoadListCalls());
+    }
 }
