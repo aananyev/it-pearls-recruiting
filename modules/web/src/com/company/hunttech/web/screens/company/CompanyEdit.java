@@ -4,12 +4,17 @@ import com.company.hunttech.entity.City;
 import com.company.hunttech.entity.Company;
 import com.company.hunttech.entity.Region;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
+import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 
 import javax.inject.Inject;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @UiController("hunttech_Company.edit")
 @UiDescriptor("company-edit.xml")
@@ -17,19 +22,35 @@ import javax.inject.Inject;
 @LoadDataBeforeShow
 public class CompanyEdit extends StandardEditor<Company> {
     @Inject
-    private Image companyDefaultLogoFileImage;
-    @Inject
-    private Image companyLogoFileImage;
+    private WebOvaFallbackImage companyLogoFileImage;
     @Inject
     private FileUploadField companyLogoFileUpload;
     @Inject
     private DataManager dataManager;
     @Inject
     private TabSheet mainTab;
+    @Inject
+    private Messages messages;
+    @Inject
+    private Label companySidebarTitle;
+    @Inject
+    private Button companyEditorNavMain;
+    @Inject
+    private Button companyEditorNavDescription;
+    @Inject
+    private Button companyEditorNavDepartments;
 
     private boolean addressLoaded;
     private boolean companyDescriptionLoaded;
     private boolean departmentsLoaded;
+
+    /** Соответствие «имя вкладки TabSheet → пункт label-навигации». */
+    private static final Map<String, String> TAB_TO_NAV_BUTTON =
+            Collections.unmodifiableMap(new HashMap<String, String>() {{
+                put("tabConpanyDetails", "companyEditorNavMain");
+                put("companyDescriptionTab", "companyEditorNavDescription");
+                put("tabCompanyDepartament", "companyEditorNavDepartments");
+            }});
 
     @Subscribe("mainTab")
     public void onMainTabSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
@@ -84,26 +105,6 @@ public class CompanyEdit extends StandardEditor<Company> {
         }
     }
 
-    @Subscribe("companyLogoFileUpload")
-    public void onCompanyLogoFileUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
-        setCompanyPicImage();
-    }
-
-    @Subscribe
-    public void onBeforeShow(BeforeShowEvent event) {
-       setCompanyPicImage();
-    }
-
-    private void setCompanyPicImage() {
-        if (getEditedEntity().getFileCompanyLogo() == null) {
-            companyDefaultLogoFileImage.setVisible(true);
-            companyLogoFileImage.setVisible(false);
-        } else {
-            companyDefaultLogoFileImage.setVisible(false);
-            companyLogoFileImage.setVisible(true);
-        }
-    }
-
     @Subscribe("cityOfCompanyField")
     public void onCityOfCompanyFieldValueChange(HasValue.ValueChangeEvent<City> event) {
         City city = event.getValue();
@@ -129,25 +130,74 @@ public class CompanyEdit extends StandardEditor<Company> {
         getEditedEntity().setCountryOfCompany(regionLoaded.getRegionCountry());
     }
 
-    @Subscribe("companyLogoFileUpload")
-    public void onCompanyLogoFileUploadFileUploadSucceed(FileUploadField.FileUploadSucceedEvent event) {
-        try {
-            companyLogoFileImage.setVisible(true);
-            companyDefaultLogoFileImage.setVisible(false);
+    // ===== Presentation-only: sidebar-навигация «Разделы» (контракт Edit-форм) =====
 
-            FileDescriptorResource fileDescriptorResource =
-                    companyLogoFileImage.createResource(FileDescriptorResource.class)
-                            .setFileDescriptor(
-                                    companyLogoFileUpload.getFileDescriptor());
-
-            companyLogoFileImage.setSource(fileDescriptorResource);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+    @Subscribe
+    public void onBeforeShowSidebar(BeforeShowEvent event) {
+        // Динамический title sidebar: наименование компании, иначе общий заголовок формы.
+        if (getEditedEntity().getComanyName() != null) {
+            companySidebarTitle.setValue(getEditedEntity().getComanyName());
+        } else {
+            companySidebarTitle.setValue(messages.getMessage(getClass(), "browseCaption"));
         }
     }
 
-    @Subscribe("companyLogoFileImage")
-    public void onCompanyLogoFileImageSourceChange(ResourceView.SourceChangeEvent event) {
-        setCompanyPicImage();
+    @Subscribe("companyEditorNavMain")
+    public void onCompanyEditorNavMainClick(Button.ClickEvent event) {
+        setNavigationActive(companyEditorNavMain);
+        mainTab.setSelectedTab("tabConpanyDetails");
+    }
+
+    @Subscribe("companyEditorNavDescription")
+    public void onCompanyEditorNavDescriptionClick(Button.ClickEvent event) {
+        setNavigationActive(companyEditorNavDescription);
+        mainTab.setSelectedTab("companyDescriptionTab");
+    }
+
+    @Subscribe("companyEditorNavDepartments")
+    public void onCompanyEditorNavDepartmentsClick(Button.ClickEvent event) {
+        setNavigationActive(companyEditorNavDepartments);
+        mainTab.setSelectedTab("tabCompanyDepartament");
+    }
+
+    @Subscribe("mainTab")
+    public void onMainTabSelectedTabChangeNav(TabSheet.SelectedTabChangeEvent event) {
+        // Отдельный обработчик смены вкладки: синхронизирует активный пункт
+        // sidebar-навигации; бизнес-логика ленивой загрузки — в основном методе.
+        updateActiveNavigation(event.getSelectedTab());
+    }
+
+    private void updateActiveNavigation(TabSheet.Tab selectedTab) {
+        if (selectedTab == null) {
+            return;
+        }
+        String navButtonId = TAB_TO_NAV_BUTTON.get(selectedTab.getName());
+        if (navButtonId == null) {
+            return;
+        }
+        switch (navButtonId) {
+            case "companyEditorNavMain":
+                setNavigationActive(companyEditorNavMain);
+                break;
+            case "companyEditorNavDescription":
+                setNavigationActive(companyEditorNavDescription);
+                break;
+            case "companyEditorNavDepartments":
+                setNavigationActive(companyEditorNavDepartments);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void resetNavigationActiveStyles() {
+        companyEditorNavMain.removeStyleName("label-nav-item-active");
+        companyEditorNavDescription.removeStyleName("label-nav-item-active");
+        companyEditorNavDepartments.removeStyleName("label-nav-item-active");
+    }
+
+    private void setNavigationActive(Button activeButton) {
+        resetNavigationActiveStyles();
+        activeButton.addStyleName("label-nav-item-active");
     }
 }

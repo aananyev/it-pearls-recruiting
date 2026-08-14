@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Экраны: `hunttech_Company.browse` (дерево), `hunttech_Company.edit`, специализированные `hunttech_OurCompany.browse` и `hunttech_ClientsCompany.browse`. Lookup через `company-picker-view` в карточках кандидата, вакансии, проекта. UI Spec: [browse](../../screens/company/hunttech_Company.browse_Spec.md), [edit](../../screens/company/hunttech_Company.edit_Spec.md).
+Экраны: `hunttech_Company.browse` (дерево), `hunttech_Company.edit`, специализированные `hunttech_OurCompany.browse` и `hunttech_ClientsCompany.browse`. Lookup через `company-picker-view` в карточках кандидата, вакансии, проекта. UI Spec: [browse](../../screens/company/hunttech_Company.browse_Spec.md), [edit — канон](../../ui/CompanyEdit_Spec.md), [edit — legacy](../../screens/company/hunttech_Company.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -204,6 +204,7 @@ IllegalStateException: Cannot get unfetched attribute [departmentOfCompany] from
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Рефакторинг `CompanyEdit` по контракту Edit-форм (эталон ProjectEdit): sidebar 270px с логотипом и навигацией «Разделы», карточки, lazy LOB сохранены; канонический Spec — [docs/ui/CompanyEdit_Spec.md](../../ui/CompanyEdit_Spec.md) |
 | 2026-07-02 | Локальная БД: добавлены частичные индексы `IDX_HUNTTECH_COMPANY_ACTIVE_*` для активного списка и checkbox-фильтров CompanyBrowse |
 | 2026-07-02 | Актуализация после оптимизации: удалена повторная загрузка `CompanyBrowse`; добавлены perf-тесты и view-contract regression-тесты; зафиксировано, что `departmentOfCompany` обязателен в `company-edit-view` из-за `departmentOfCompanyDc` |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
