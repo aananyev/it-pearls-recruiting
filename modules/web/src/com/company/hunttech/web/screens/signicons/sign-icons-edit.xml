@@ -125,72 +125,13 @@
                         <label value="Font-иконка, цвет и текстовые подписи признака" stylename="edit-toolbar-description"/>
                     </vbox>
                 </hbox>
-                <!-- Прокручиваемая область контента рабочей области. -->
-                <scrollBox id="workspaceScroll"
-                           stylename="edit-workspace-scroll"
-                           width="100%"
-                           height="100%">
-                    <!-- Поток карточек рабочей области. -->
-                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
-                        <!-- Карточка «Иконка»: превью, выбор font-иконки и её цвет. -->
-                        <groupBox id="iconSection"
-                                  caption="Иконка"
-                                  stylename="edit-card"
-                                  showAsPanel="true"
-                                  width="100%"
-                                  spacing="true">
-                            <!-- Ряд превью: образец иконки и текущее название признака (обновляются контроллером). -->
-                            <hbox id="iconSampleHBox" spacing="true" width="100%">
-                                <!-- Образец выбранной иконки (font-символ с цветом). -->
-                                <label id="iconSampleLabel" visible="true" align="MIDDLE_CENTER" width="AUTO"/>
-                                <!-- Текущее русское название признака рядом с образцом. -->
-                                <label id="labelNameLabel" visible="true" align="MIDDLE_CENTER" width="AUTO"/>
-                            </hbox>
-                            <!-- Код иконки (латиница, генерируется из рус. названия; только чтение). -->
-                            <textField id="titleEndField" property="titleEnd" caption="msg://msgTitleEnd" editable="false" width="100%" stylename="edit-form-control">
-                                <!-- Валидатор длины кода иконки. -->
-                                <validator class="com.haulmont.cuba.gui.components.validators.StringValidator"/>
-                            </textField>
-                            <!-- Русское название признака: из него транслитерацией строится titleEnd. -->
-                            <textField id="titleRuField" property="titleRu" caption="msg://msgTitleRu" width="100%" stylename="edit-form-control"/>
-                            <!-- Ряд выбора иконки: поле font-символа и кнопка выбора из каталога. -->
-                            <hbox id="iconNameHBox" spacing="true" width="100%" expand="iconNameField">
-                                <!-- Имя font-иконки (символ) — привязано к signIconsDc. -->
-                                <textField id="iconNameField" dataContainer="signIconsDc" align="MIDDLE_LEFT" property="iconName" caption="msg://msgIconName" width="100%" stylename="edit-form-control"/>
-                                <!-- Кнопка открытия каталога иконок (invoke контроллера). -->
-                                <button id="selectIconButton"
-                                        width="AUTO"
-                                        align="MIDDLE_RIGHT"
-                                        icon="FONTICONS"
-                                        invoke="selectIconButtonInvoke"/>
-                            </hbox>
-                            <!-- Цвет иконки (colorPicker). -->
-                            <colorPicker id="iconColorColorPicker" property="iconColor" caption="msg://msgIconColor" width="AUTO"/>
-                        </groupBox>
-                        <!-- Карточка «Описание»: развёрнутое описание признака. -->
-                        <groupBox id="descriptionSection"
-                                  caption="Описание"
-                                  stylename="edit-card"
-                                  showAsPanel="true"
-                                  width="100%"
-                                  spacing="true">
-                            <!-- Текстовая область описания признака (LOB-поле). -->
-                            <textArea id="titleDescription" property="titleDescription" caption="msg://msgTitleDescription" width="100%" stylename="edit-form-control ht-halo-precision-textarea"/>
-                        </groupBox>
-                    </vbox>
-                </scrollBox>
-                <!-- Нижняя панель штатных действий: сохранить и отменить. -->
-                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%"
-                           expand="actionsSpacer" align="MIDDLE_RIGHT">
-                    <!-- Spacer прижимает кнопки к правому краю. -->
-                    <vbox id="actionsSpacer" width="100%" height="1px"/>
-                    <!-- Сохранить и закрыть (штатный action editor-а). -->
-                    <button id="commitAndCloseBtn" action="windowCommitAndClose"
-                                    stylename="c-primary-action"/>
-                    <!-- Отменить изменения и закрыть. -->
-                    <button id="closeBtn" action="windowClose"/>
-                </hbox>
-            </vbox>
+                <colorPicker id="iconColorColorPicker" property="iconColor" width="AUTO"/>
+                <textArea id="titleDescription" property="titleDescription" width="100%" stylename="ht-halo-precision-textarea"/>
+            </column>
+        </form>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
         </hbox>
     </layout>
 </window>
