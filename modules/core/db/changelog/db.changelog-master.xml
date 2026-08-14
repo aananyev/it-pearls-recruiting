@@ -44,4 +44,12 @@
     <include file="260813-2-addProjectLogoAiFunction.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- ProjectEdit «Кратко»: колонка SHORT_DESCRIPTION в HUNTTECH_PROJECT. -->
+    <include file="260814-1-addProjectShortDescriptionColumn.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- ProjectEdit «Кратко»: AI-функция генерации краткого описания проекта (capability TEXT_GENERATION). -->
+    <include file="260814-2-addProjectShortDescriptionAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

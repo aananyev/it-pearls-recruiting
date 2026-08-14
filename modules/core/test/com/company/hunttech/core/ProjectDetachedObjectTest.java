@@ -69,6 +69,8 @@ public class ProjectDetachedObjectTest {
         assertEquals(project.getEndProjectDate(), detached.getEndProjectDate());
         assertEquals(project.getGeneralChat(), detached.getGeneralChat());
         assertEquals(project.getChatForCV(), detached.getChatForCV());
+        assertEquals("shortDescription не загрузился в project-edit-view",
+                project.getShortDescription(), detached.getShortDescription());
     }
 
     @Test
@@ -146,6 +148,7 @@ public class ProjectDetachedObjectTest {
                 .one();
         detached.setGeneralChat("https://chat.example.com/updated");
         detached.setProjectIsClosed(true);
+        detached.setShortDescription("Новое краткое описание проекта");
 
         Project committed = dataManager.commit(detached);
         tracker.track(committed);
@@ -156,6 +159,8 @@ public class ProjectDetachedObjectTest {
                 .one();
         assertEquals("https://chat.example.com/updated", reloaded.getGeneralChat());
         assertTrue("projectIsClosed не сохранился", reloaded.getProjectIsClosed());
+        assertEquals("shortDescription не сохранился при commit",
+                "Новое краткое описание проекта", reloaded.getShortDescription());
     }
 
     private Project createProject() {
@@ -168,6 +173,7 @@ public class ProjectDetachedObjectTest {
         project.setGeneralChat("https://chat.example.com");
         project.setChatForCV("https://cv.example.com");
         project.setProjectDescription("Тестовое описание проекта " + UUID.randomUUID());
+        project.setShortDescription("Краткое тестовое описание " + UUID.randomUUID());
         project.setTemplateLetter("Тестовый шаблон письма " + UUID.randomUUID());
         return tracker.track(dataManager.commit(project));
     }

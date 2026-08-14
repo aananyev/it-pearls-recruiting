@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260814-1-addProjectShortDescriptionColumn" author="HRM HuntTech">
+        <preConditions onFail="HALT">
+            <tableExists tableName="HUNTTECH_PROJECT"/>
+        </preConditions>
+        <!--
+            Колонка SHORT_DESCRIPTION в HUNTTECH_PROJECT: краткое описание сути
+            проекта («Коротко о проекте», не более 5 предложений). Заполняется AI
+            по кнопке «Кратко» во вкладке «Описание проекта» ProjectEdit
+            (PROJECT_SHORT_DESCRIPTION_GENERATE) и выводится в sidebar-разделе
+            «Коротко». CLOB (TEXT в PostgreSQL) — как у projectDescription.
+        -->
+        <addColumn tableName="HUNTTECH_PROJECT">
+            <column name="SHORT_DESCRIPTION" type="clob">
+                <remarks>Краткое описание сути проекта (до 5 предложений), генерируется AI в ProjectEdit, выводится в sidebar «Коротко»</remarks>
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

@@ -108,8 +108,10 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
             // 2. Пропорциональное уменьшение, если сторона превышает лимит.
             argb = downscaleIfNeeded(argb, config.getMaxSize());
 
-            // 3. Удаление белого фона, соединённого с краями изображения.
-            argb = removeWhiteBackground(argb, config.getWhiteThreshold());
+            // 3. Удаление белого/серого фона, соединённого с краями изображения.
+            argb = removeWhiteBackground(argb, config.getWhiteThreshold(),
+                    config.getRemoveAllWhite(),
+                    config.getGraySaturationThreshold(), config.getGrayMinChannel());
 
             // 4. Обрезка по фактическому содержимому (прозрачные поля после удаления фона).
             Rectangle bounds = getOpaqueBounds(argb);
@@ -238,48 +240,38 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
     }
 
     /**
-     * Удаляет белый фон, соединённый с краями изображения.
+     * Удаляет белый и серый фон, соединённый с краями изображения.
      *
-     * <p>Flood-fill от всех граничных пикселей: если пиксель "белый" (минимум RGB-каналов
-     * не меньше порога) — он помечается как фон. Все достижимые от края белые области
-     * становятся прозрачными. Белые пиксели ВНУТРИ логотипа не затрагиваются, так как
-     * не соединены с границей непрерывной белой областью.</p>
+     * <p>Фоном считаются пиксели двух типов:</p>
+     * <ul>
+     *     <li><b>белый</b> — минимум RGB-каналов не ниже {@code whiteThreshold}
+     *     (порог конфигурации, по умолчанию 235);</li>
+     *     <li><b>серый</b> — низкая насыщенность (разница max-min каналов не выше
+     *     {@code graySaturationThreshold}, по умолчанию 30) при яркости не ниже
+     *     {@code grayMinChannel} (по умолчанию 40) — покрывает фон-градиенты
+     *     от белого к тёмно-серому (логотип SSP).</li>
+     * </ul>
      *
-     * <p>На границе фона применяется плавный переход прозрачности ({@link #EDGE_SOFTNESS}),</p>
-     * чтобы избежать грубой ступеньки по контуру логотипа.
-     */
-    private BufferedImage removeWhiteBackground(BufferedImage image, int whiteThreshold) {
-        boolean removeAllWhite =
-                configuration.getConfig(HunttechProjectLogoConfig.class).getRemoveAllWhite();
-        return removeWhiteBackground(image, whiteThreshold, removeAllWhite);
-    }
-
-    /**
-     * Удаляет белый фон изображения.
+     * <p>Серый фон удаляется только если соединён с краем непрерывной областью
+     * (flood-fill от границ) — серые элементы дизайна внутри логотипа (текст, значки),
+     * окружённые цветными пикселями, сохраняются. Белый фон при
+     * {@code removeAllWhite = true} удаляется по всему полотну, включая замкнутые
+     * полости внутри букв и фигур (например, белый просвет внутри буквы «А»).</p>
      *
-     * <p>При {@code removeAllWhite = true} прозрачными становятся ВСЕ пиксели,
-     * удовлетворяющие порогу белизны, — включая замкнутые полости внутри букв и фигур
-     * (например, белый просвет внутри буквы «А» у логотипа Альфа-Банка): такие области
-     * считаются фоном. Это согласуется с требованием AI-промпта функции
-     * {@code PROJECT_LOGO_IMAGE_GENERATE}.</p>
-     *
-     * <p>При {@code removeAllWhite = false} используется flood-fill от границ: белыми
-     * становятся только области, соединённые с краем непрерывной белой зоной, а белые
-     * элементы дизайна внутри логотипа (текст, просветы букв) сохраняются.</p>
-     *
-     * <p>На границе фона применяется плавный переход прозрачности ({@link #EDGE_SOFTNESS}),
-     * чтобы избежать грубой ступеньки по контуру логотипа.</p>
+     * <p>На границе белого фона применяется плавный переход прозрачности
+     * ({@link #EDGE_SOFTNESS}); серый фон становится полностью прозрачным.</p>
      */
     private BufferedImage removeWhiteBackground(BufferedImage image, int whiteThreshold,
-                                                boolean removeAllWhite) {
+                                                boolean removeAllWhite,
+                                                int graySaturationThreshold, int grayMinChannel) {
         int width = image.getWidth();
         int height = image.getHeight();
 
         boolean[][] isBackground = new boolean[height][width];
 
         if (removeAllWhite) {
-            // Маска по всему полотну: любой пиксель с минимумом RGB-каналов >= порога
-            // считается фоном (включая замкнутые полости внутри букв).
+            // Маска по всему полотну: белые пиксели (минимум RGB-каналов >= порога)
+            // считаются фоном (включая замкнутые полости внутри букв).
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
                     int rgb = image.getRGB(x, y);
@@ -292,35 +284,39 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
                     }
                 }
             }
-        } else {
-            Deque<int[]> queue = new ArrayDeque<>();
+        }
 
-            // Затравка: все пиксели на границе, удовлетворяющие порогу белизны.
-            for (int x = 0; x < width; x++) {
-                enqueueIfWhite(image, isBackground, queue, x, 0, whiteThreshold);
-                enqueueIfWhite(image, isBackground, queue, x, height - 1, whiteThreshold);
-            }
-            for (int y = 0; y < height; y++) {
-                enqueueIfWhite(image, isBackground, queue, 0, y, whiteThreshold);
-                enqueueIfWhite(image, isBackground, queue, width - 1, y, whiteThreshold);
-            }
+        // Flood-fill от краёв: и белый, и серый фон, соединённый с границей.
+        // Серые пиксели помечаются только здесь (не по всему полотну) — так серые
+        // элементы дизайна внутри логотипа, не соединённые с краем, сохраняются.
+        Deque<int[]> queue = new ArrayDeque<>();
 
-            // BFS по 4-связным белым пикселям.
-            int[] dx = {1, -1, 0, 0};
-            int[] dy = {0, 0, 1, -1};
-            while (!queue.isEmpty()) {
-                int[] p = queue.poll();
-                for (int i = 0; i < 4; i++) {
-                    int nx = p[0] + dx[i];
-                    int ny = p[1] + dy[i];
-                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                        enqueueIfWhite(image, isBackground, queue, nx, ny, whiteThreshold);
-                    }
+        // Затравка: все пиксели на границе, удовлетворяющие белому или серому порогу.
+        for (int x = 0; x < width; x++) {
+            enqueueIfWhite(image, isBackground, queue, x, 0, whiteThreshold, graySaturationThreshold, grayMinChannel);
+            enqueueIfWhite(image, isBackground, queue, x, height - 1, whiteThreshold, graySaturationThreshold, grayMinChannel);
+        }
+        for (int y = 0; y < height; y++) {
+            enqueueIfWhite(image, isBackground, queue, 0, y, whiteThreshold, graySaturationThreshold, grayMinChannel);
+            enqueueIfWhite(image, isBackground, queue, width - 1, y, whiteThreshold, graySaturationThreshold, grayMinChannel);
+        }
+
+        // BFS по 4-связным белым/серым пикселям.
+        int[] dx = {1, -1, 0, 0};
+        int[] dy = {0, 0, 1, -1};
+        while (!queue.isEmpty()) {
+            int[] p = queue.poll();
+            for (int i = 0; i < 4; i++) {
+                int nx = p[0] + dx[i];
+                int ny = p[1] + dy[i];
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                    enqueueIfWhite(image, isBackground, queue, nx, ny, whiteThreshold,
+                            graySaturationThreshold, grayMinChannel);
                 }
             }
         }
 
-        // Применение прозрачности: фон полностью прозрачный, зона у порога — с плавным переходом.
+        // Применение прозрачности: белый фон — с плавным переходом, серый — полностью прозрачный.
         BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -332,15 +328,20 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
                 int minChannel = Math.min(r, Math.min(g, b));
 
                 if (isBackground[y][x]) {
-                    // Пиксель фона: прозрачность зависит от "белизны" — плавный край.
-                    // Чем белее пиксель (ближе к 255), тем прозрачнее; у нижней границы
-                    // зоны (threshold - EDGE_SOFTNESS) пиксель остаётся непрозрачным.
-                    int alpha = 255 - clamp255((minChannel - (whiteThreshold - EDGE_SOFTNESS))
-                            * 255 / EDGE_SOFTNESS);
-                    result.setRGB(x, y, (Math.min(a, alpha) << 24) | (r << 16) | (g << 8) | b);
+                    if (minChannel >= whiteThreshold) {
+                        // Белый фон: прозрачность зависит от "белизны" — плавный край.
+                        // Чем белее пиксель (ближе к 255), тем прозрачнее; у нижней границы
+                        // зоны (threshold - EDGE_SOFTNESS) пиксель остаётся непрозрачным.
+                        int alpha = 255 - clamp255((minChannel - (whiteThreshold - EDGE_SOFTNESS))
+                                * 255 / EDGE_SOFTNESS);
+                        result.setRGB(x, y, (Math.min(a, alpha) << 24) | (r << 16) | (g << 8) | b);
+                    } else {
+                        // Серый фон: полностью прозрачный (градиент удаляется целиком).
+                        result.setRGB(x, y, 0);
+                    }
                 } else if (hasBackgroundNeighbor(isBackground, x, y, width, height)
                         && minChannel >= whiteThreshold - EDGE_SOFTNESS) {
-                    // Пиксель на границе фона: частичная прозрачность для сглаживания контура.
+                    // Пиксель на границе белого фона: частичная прозрачность для сглаживания контура.
                     int alpha = 255 - clamp255((minChannel - (whiteThreshold - EDGE_SOFTNESS))
                             * 255 / EDGE_SOFTNESS);
                     result.setRGB(x, y, (Math.min(a, alpha) << 24) | (r << 16) | (g << 8) | b);
@@ -353,10 +354,14 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
     }
 
     /**
-     * Добавляет пиксель в очередь flood-fill, если он ещё не помечен и является "белым".
+     * Добавляет пиксель в очередь flood-fill, если он ещё не помечен и является
+     * белым (минимум RGB-каналов >= {@code whiteThreshold}) или серым фоном
+     * (насыщенность max-min <= {@code graySaturationThreshold} при яркости
+     * >= {@code grayMinChannel}).
      */
     private void enqueueIfWhite(BufferedImage image, boolean[][] isBackground, Deque<int[]> queue,
-                                int x, int y, int whiteThreshold) {
+                                int x, int y, int whiteThreshold,
+                                int graySaturationThreshold, int grayMinChannel) {
         if (isBackground[y][x]) {
             return;
         }
@@ -364,7 +369,13 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
         int r = (rgb >> 16) & 0xFF;
         int g = (rgb >> 8) & 0xFF;
         int b = rgb & 0xFF;
-        if (Math.min(r, Math.min(g, b)) >= whiteThreshold) {
+        int minChannel = Math.min(r, Math.min(g, b));
+        int maxChannel = Math.max(r, Math.max(g, b));
+        boolean isWhite = minChannel >= whiteThreshold;
+        boolean isGray = !isWhite
+                && minChannel >= grayMinChannel
+                && (maxChannel - minChannel) <= graySaturationThreshold;
+        if (isWhite || isGray) {
             isBackground[y][x] = true;
             queue.add(new int[]{x, y});
         }

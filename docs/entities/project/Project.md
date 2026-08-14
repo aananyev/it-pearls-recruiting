@@ -41,7 +41,10 @@ Browse без LOB descriptions в основном SELECT; nested `projectOwner`
 | Поле | Колонка |
 |------|---------|
 | `projectDescription` | `PROJECT_DESCRIPTION` |
+| `shortDescription` | `SHORT_DESCRIPTION` |
 | `templateLetter` | `TEMPLATE_LETTER` |
+
+`shortDescription` («Коротко о проекте») — краткое описание сути проекта (не более 5 предложений), генерируется AI по кнопке «Кратко» во вкладке «Описание проекта» ProjectEdit и выводится в sidebar-разделе «Коротко». В отличие от `projectDescription`/`templateLetter` грузится сразу в `project-edit-view` (раздел sidebar виден при открытии формы, без lazy load по вкладкам).
 
 ### Индексы производительности
 
@@ -62,7 +65,7 @@ HSQL получил обычные составные аналоги этих и
 | View | Назначение | Где используется |
 |------|------------|------------------|
 | `project-browse-view` | колонки tree-browse **без LOB** | `project-browse.xml` |
-| `project-edit-view` | поля формы **без LOB и openPosition** | `project-edit.xml`, CRUD-тесты |
+| `project-edit-view` | поля формы **без LOB-описаний и openPosition** (исключение: `shortDescription` — нужен sidebar-разделу «Коротко» при открытии) | `project-edit.xml`, CRUD-тесты |
 | `project-picker-view` | lookup / FK | OpenPosition, ApplicationRecruitmentList, group-subscribe |
 | `project-tree-picker-view` | родитель в дереве | project-edit, project-browse (projectTree) |
 | `project-department-child-view` | проекты департамента на вкладке | CompanyDepartament edit |
@@ -85,6 +88,7 @@ HSQL получил обычные составные аналоги этих и
 - **Browse Java:** начальные фильтры задаются в `InitEvent` до `@LoadDataBeforeShow`; вложенные изменения checkbox не вызывают повторные `projectsDl.load()`
 - **Edit Java:** lazy load LOB и коллекции `openPosition` по вкладкам (`ProjectEdit`); вакансии — отдельный `CollectionLoader` с JPQL `where e.projectName = :project`, без привязки к `property="openPosition"` на instance (избегает unfetched при `@LoadDataBeforeShow`)
 - **Edit Java:** новый несохранённый проект не выполняет запрос открытых вакансий, потому что связанных строк ещё не может быть
+- **Edit AI «Кратко»:** кнопка «Кратко» во вкладке «Описание проекта» генерирует `shortDescription` (sidebar-раздел «Коротко») через `ProjectAiService.generateShortDescription` → `PROJECT_SHORT_DESCRIPTION_GENERATE`; кнопка disabled без текста описания, раздел sidebar скрыт при пустом `shortDescription`
 - **Loaders:** `companyDepartament-picker-view` + `cacheable`, `person-picker-view` + `cacheable`
 
 ---
@@ -148,6 +152,10 @@ HSQL получил обычные составные аналоги этих и
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | «Кратко о проекте»: новое поле `shortDescription` (`SHORT_DESCRIPTION`, CLOB) — краткое описание сути проекта (до 5 предложений); AI-функция `PROJECT_SHORT_DESCRIPTION_GENERATE` (capability TEXT_GENERATION), кнопка «Кратко» во вкладке «Описание проекта» ProjectEdit, sidebar-раздел «Коротко» (виден при непустом значении); поле добавлено в `project-edit-view` |
+| 2026-08-14 | Обработка логотипа: классический конвейер дополнительно удаляет серый фон-градиенты (логотип SSP) — пиксели с насыщенностью ≤ 30 и яркостью ≥ 40, соединённые с краем, полностью прозрачны (`graySaturationThreshold`/`grayMinChannel`); белый фон — без изменений |
+| 2026-08-14 | ProjectEdit: строка дат — обе даты на одной строке одинакового размера (box.expandRatio 50/50) |
+| 2026-08-14 | ProjectEdit: компоновка рабочей области — поля вкладки «Проект» на всю ширину (50%→100%), RichTextArea описания и dataGrid вакансий ограничены по ширине (SCSS min-width: 0 / max-width: 100%) |
 | 2026-08-13 | Обработка логотипа проекта переведена на AI-first: функция `PROJECT_LOGO_IMAGE_GENERATE` (capability IMAGE_GENERATION, OpenAI `gpt-image-2`) удаляет фон, классический конвейер (ресайз, flood-fill, круг) — детерминированный финал и fallback; исправлена интеграция `hunttech_ProjectLogoImageProcessingService` web↔core (`WebRemoteProxyBeanCreator`), AI-слой получил `AiExecutionService.executeImage`; конфиг `hunttech.projectLogo.ai.enabled` |
 | 2026-08-12 | ProjectEdit отрефакторена по контракту Edit-форм: sidebar 270px (визуал логотипа 96×96, identity, label-навигация «Разделы», spacer, hint), workspace (toolbar, tabSheet edit-tabs, карточки edit-card, footer), presentation-only Java-навигация; канонический UI Spec — `docs/ui/ProjectEdit_Spec.md`, контрактный тест `ProjectEditLayoutContractTest`, detached-тест `ProjectDetachedObjectTest` |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |

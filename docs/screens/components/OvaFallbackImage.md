@@ -48,7 +48,7 @@
 | delegate | `modules/web/src/com/hunttech/hrm/web/components/delegate/OvalImageShapeDelegate.java` | геометрия и класс `ht-oval-image` |
 | delegate | `modules/web/src/com/hunttech/hrm/web/components/delegate/FallbackImageResourceDelegate.java` | разрешение bound value и fallback |
 | helper | `modules/web/src/com/company/hunttech/web/util/FileDescriptorImageHelper.java` | проверка физической читаемости и создание ресурсов |
-| loader | `modules/web/src/com/hunttech/hrm/web/loaders/OvaFallbackImageLoader.java` | атрибуты `ovalWidth`, `ovalHeight`, `fallbackThemePath` |
+| loader | `modules/web/src/com/hunttech/hrm/web/loaders/OvaFallbackImageLoader.java` | атрибуты `ovalWidth`, `ovalHeight`, `fallbackThemePath`, `ovalBackground` |
 | XML registration | `modules/web/src/com/hunttech/hrm/web/cuba-ui-component.xml` | регистрация XML-тега |
 | Java registration | `modules/web/src/com/hunttech/hrm/web/config/HunttechUiComponentsRegistrar.java` | регистрация в `UiComponents` |
 | config | `modules/global/src/com/company/hunttech/config/HunttechImageConfig.java` | глобальный fallback path |
@@ -184,6 +184,8 @@ Helper сначала сбрасывает прежний `ValueSource`, про�
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-14 | `OvaFallbackImageLoader` читает XML-атрибут `ovalBackground` (фон-подложка под прозрачные изображения), вызов `setOvalBackground(...)`; в `ProjectEdit` логотипу проекта задан тёмно-серый фон `#3a3e44` |
+| 2026-08-14 | Унаследован атрибут `ovalBackground` от `OvalImage` (фон-подложка под прозрачные изображения); `WebOvaFallbackImage` реализует его через общий `OvalImageBackgroundSupport` |
 | 2026-08-13 | Статичный fallback без `dataContainer`/`property` применяется сразу в `setFallbackThemePath()` (`updateComponent` у компонента без valueSource не вызывается); guard `host.getSource() == null` — не затирает ручной `setSource(...)` контроллера; в `FallbackImageHost` добавлен `getSource()` |
 | 2026-07-27 | Проверка descriptor переведена на фактическое `FileLoader.openStream()`; `FallbackImageResourceDelegate` защищён от unfetched `ValueSource` и ошибок FileStorage с переходом на theme fallback |
 | 2026-07-21 | `JobCandidateEdit.candidatePic` переведён на `OvaFallbackImage` 176×176 с binding и fallback |

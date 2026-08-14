@@ -408,6 +408,107 @@ public class ProjectEditLayoutContractTest {
                 xml.contains("stylename=\"edit-sidebar-hint\""));
     }
 
+    @Test
+    public void mainTabInputsSpanFullWidthAndTabsDoNotOverflow() throws IOException {
+        String xml = readProjectFile(SCREEN);
+
+        // Вкладка «Проект»: все элементы ввода растянуты на ширину страницы (100%),
+        // в карточке «Основные данные» не осталось полей на 50%.
+        assertFalse("В форме остались поля width=50%", xml.contains("width=\"50%\""));
+        String[] fullWidthInputs = {"highLevelProjectLookupPickerField", "projectNameField",
+                "projectDepartmentField", "projectOwnerField"};
+        for (String id : fullWidthInputs) {
+            int idx = xml.indexOf("id=\"" + id + "\"");
+            assertTrue(id + ": поле не найдено", idx >= 0);
+            int widthIdx = xml.indexOf("width=\"100%\"", idx);
+            assertTrue(id + ": ширина не 100%", widthIdx > idx && widthIdx - idx < 700);
+        }
+        // Строка дат растянута на всю ширину, оба поля дат делят строку поровну.
+        assertTrue("Нет строки дат hbox width=100%",
+                xml.contains("<hbox width=\"100%\" spacing=\"true\">"));
+        for (String id : new String[]{"startProjectDateField", "endProjectDateField"}) {
+            int idx = xml.indexOf("id=\"" + id + "\"");
+            int widthIdx = xml.indexOf("width=\"100%\"", idx);
+            assertTrue(id + ": ширина не 100%", widthIdx > idx && widthIdx - idx < 700);
+            // Обе даты на одной строке одинакового размера: box.expandRatio делит hbox 50/50
+            // (два width=100% без expandRatio выталкивали вторую дату за границы).
+            int ratioIdx = xml.indexOf("box.expandRatio=\"1\"", idx);
+            assertTrue(id + ": нет box.expandRatio=1", ratioIdx > widthIdx && ratioIdx - widthIdx < 300);
+        }
+
+        // RichTextArea и dataGrid не выходят за границы: локальный SCSS ограничивает
+        // ширину flex-контейнеров (min-width:auto — источник переполнения).
+        String canon = readProjectFile(
+                "modules/web/themes/hover/com.company.hunttech/project-editor.scss");
+        assertTrue("Нет ограничения .v-richtextarea (min-width: 0)",
+                canon.contains(".v-richtextarea {")
+                        && canon.contains("min-width: 0 !important"));
+        assertTrue("Нет ограничения iframe RichTextArea (max-width: 100%)",
+                canon.contains(".v-richtextarea .v-richtextarea-content")
+                        && canon.contains("max-width: 100%;"));
+        assertTrue("Нет ограничения .v-grid (min-width: 0 / max-width: 100%)",
+                canon.contains(".v-grid {")
+                        && canon.contains("max-width: 100% !important"));
+    }
+
+    @Test
+    public void shortDescriptionSidebarSectionContract() throws IOException {
+        String xml = readProjectFile(SCREEN);
+
+        // Раздел «Коротко» sidebar: контейнер между идентификацией и навигацией,
+        // заголовок и текст — отдельные label'ы с локальными stylename.
+        assertTrue("Нет контейнера раздела «Коротко»",
+                xml.contains("id=\"projectEditorSidebarShortDescription\""));
+        assertTrue("Раздел не скрыт по умолчанию (visible=false)",
+                xml.contains("visible=\"false\""));
+        assertTrue("Нет заголовка раздела",
+                xml.contains("id=\"projectSidebarShortDescriptionTitle\""));
+        assertTrue("Заголовок без msg-ключа",
+                xml.contains("value=\"msg://msgProjectShortDescriptionSection\""));
+        assertTrue("Нет текста раздела",
+                xml.contains("id=\"projectSidebarShortDescriptionText\""));
+        assertTrue("Заголовок без stylename project-editor-short-description-title",
+                xml.contains("stylename=\"project-editor-short-description-title\""));
+        assertTrue("Текст без stylename project-editor-short-description-text",
+                xml.contains("stylename=\"project-editor-short-description-text\""));
+
+        // Раздел расположен между идентификацией (identity) и навигацией («Разделы»).
+        int identityIdx = xml.indexOf("id=\"projectEditorSidebarIdentity\"");
+        int sectionIdx = xml.indexOf("id=\"projectEditorSidebarShortDescription\"");
+        int navIdx = xml.indexOf("id=\"projectEditorSidebarNavigation\"");
+        assertTrue("identity отсутствует", identityIdx >= 0);
+        assertTrue("навигация отсутствует", navIdx >= 0);
+        assertTrue("раздел не между identity и навигацией",
+                identityIdx < sectionIdx && sectionIdx < navIdx);
+    }
+
+    @Test
+    public void shortDescriptionScssStylesInCanon() throws IOException {
+        String canon = readProjectFile(
+                "modules/web/themes/hover/com.company.hunttech/project-editor.scss");
+
+        // Заголовок раздела «Коротко»: подпись 11px/700 uppercase.
+        assertTrue("Нет стиля заголовка .project-editor-short-description-title",
+                canon.contains(".project-editor-short-description-title"));
+        assertTrue("Заголовок не 11px/700",
+                canon.contains("font-size: 11px !important")
+                        && canon.contains("font-weight: 700 !important"));
+        // Текст раздела: 13px/500, переносы включены.
+        assertTrue("Нет стиля текста .project-editor-short-description-text",
+                canon.contains(".project-editor-short-description-text"));
+        assertTrue("Текст не 13px/500",
+                canon.contains("font-size: 13px !important")
+                        && canon.contains("font-weight: 500 !important"));
+        assertTrue("Текст без переноса overflow-wrap",
+                canon.contains("overflow-wrap: anywhere"));
+        // Кнопка «Кратко» в рабочей области.
+        assertTrue("Нет стиля кнопки .project-editor-short-description-button",
+                canon.contains(".project-editor-short-description-button"));
+        assertTrue("Кнопка не 38px",
+                canon.contains("height: 38px !important")
+                        && canon.contains("min-height: 38px !important"));
+    }
+
     private String readProjectFile(String relativePath) throws IOException {
         return new String(
                 Files.readAllBytes(projectRoot().resolve(relativePath)),

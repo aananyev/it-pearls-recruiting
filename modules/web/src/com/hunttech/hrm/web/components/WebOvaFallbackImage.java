@@ -1,5 +1,6 @@
 package com.hunttech.hrm.web.components;
 
+import com.company.hunttech.web.gui.components.OvalImageBackgroundSupport;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.BeanLocator;
 import com.haulmont.cuba.gui.components.Resource;
@@ -11,6 +12,7 @@ import com.hunttech.hrm.web.components.delegate.FallbackImageHost;
 import com.hunttech.hrm.web.components.delegate.FallbackImageResourceDelegate;
 import com.hunttech.hrm.web.components.delegate.OvalImageHost;
 import com.hunttech.hrm.web.components.delegate.OvalImageShapeDelegate;
+import com.vaadin.ui.AbstractComponent;
 
 /**
  * Web implementation combining oval sizing ({@code ht-oval-image}) and fallback placeholder logic
@@ -59,6 +61,23 @@ public class WebOvaFallbackImage extends WebImage implements OvaFallbackImage, O
     @Override
     public void setOvalHeight(String height) {
         ovalDelegate.setOvalHeight(height);
+    }
+
+    // --- OvalImage background delegation ---
+
+    private String ovalBackground;
+
+    @Override
+    public String getOvalBackground() {
+        return ovalBackground;
+    }
+
+    @Override
+    public void setOvalBackground(String background) {
+        this.ovalBackground = background;
+        // Фон под прозрачным изображением (логотип после removeAllWhite):
+        // динамический CSS-класс через Page.getStyles(), общий с WebOvalImage.
+        OvalImageBackgroundSupport.applyBackground((AbstractComponent) component, background);
     }
 
     // --- FallbackImageHost / FallbackImage delegation ---

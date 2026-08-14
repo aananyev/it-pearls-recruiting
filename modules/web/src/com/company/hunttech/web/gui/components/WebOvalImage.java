@@ -3,6 +3,7 @@ package com.company.hunttech.web.gui.components;
 import com.company.hunttech.gui.components.OvalImage;
 import com.haulmont.cuba.web.gui.components.WebImage;
 import com.haulmont.cuba.web.widgets.CubaImage;
+import com.vaadin.ui.AbstractComponent;
 import org.apache.commons.lang3.StringUtils;
 
 public class WebOvalImage extends WebImage implements OvalImage {
@@ -11,6 +12,7 @@ public class WebOvalImage extends WebImage implements OvalImage {
 
     private String ovalWidth;
     private String ovalHeight;
+    private String ovalBackground;
 
     public WebOvalImage() {
         super();
@@ -58,5 +60,20 @@ public class WebOvalImage extends WebImage implements OvalImage {
     private void setOvalHeightInternal(String height) {
         this.ovalHeight = height;
         setHeight(height);
+    }
+
+    @Override
+    public String getOvalBackground() {
+        return ovalBackground;
+    }
+
+    @Override
+    public void setOvalBackground(String background) {
+        this.ovalBackground = background;
+        // Инлайн-стилей в Vaadin 8 нет — фон задаётся динамическим CSS-классом
+        // через Page.getStyles() (паттерн SignIconsEdit.injectColorCss). Класс
+        // переиспользуется для одинаковых значений, поэтому соседние овалы
+        // с другим фоном не перекрашиваются.
+        OvalImageBackgroundSupport.applyBackground((AbstractComponent) component, background);
     }
 }

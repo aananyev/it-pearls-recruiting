@@ -124,10 +124,23 @@ public class ProjectEdit extends StandardEditor<Project> {
     private FileUploadField projectDescriptionUpload;
     private Label<String> projectDescriptionAiStatus;
 
-    // Presentation-контракт sidebar: пункты label-навигации «Разделы» = вкладки TabSheet
-    // правой части экрана (по явному указанию владельца; навигация видна на всех
-    // вкладках, правило контракта §3.6 не применяется). Активное состояние управляется
-    // presentation-only методами ниже.
+    /** Кнопка «Кратко» (вкладка «Описание проекта»): генерирует AI-краткое описание
+     *  сути проекта в поле сущности shortDescription. Создаётся программно в той же
+     *  строке, что и upload описания (XML-контракт не перестраивается). */
+    private Button projectDescriptionShortButton;
+
+    // Presentation-контракт sidebar: раздел «Коротко» (заголовок + текст краткого
+    // описания). Виден только при непустом значении shortDescription — контейнер
+    // объявлен в XML со visible="false", показ/скрытие выполняет контроллер.
+    @Inject
+    private VBoxLayout projectEditorSidebarShortDescription;
+    @Inject
+    private Label projectSidebarShortDescriptionText;
+
+    // Presentation-контракт sidebar: пункты label-навигации «Разделы» = вкладки
+    // TabSheet правой части экрана (по явному указанию владельца; навигация видна
+    // на всех вкладках, правило контракта §3.6 не применяется). Активное состояние
+    // управляется presentation-only методами ниже.
     @Inject
     private Label projectSidebarTitle;
     @Inject
@@ -200,11 +213,125 @@ public class ProjectEdit extends StandardEditor<Project> {
                 messages.getMessage(getClass(), "msgProjectDescriptionUploadHint"));
         projectDescriptionAiStatus.setStyleName("edit-toolbar-description");
 
+        // Кнопка «Кратко»: генерирует AI-краткое описание сути проекта (до 5
+        // предложений) из текста RichTextArea в поле сущности shortDescription.
+        // Доступна только при непустом тексте описания; пока идёт AI-вызов —
+        // блокируется, чтобы исключить повторный запуск.
+        projectDescriptionShortButton = uiComponents.create(Button.class);
+        projectDescriptionShortButton.setId("projectDescriptionShortButton");
+        projectDescriptionShortButton.setCaption(
+                messages.getMessage(getClass(), "msgProjectShortDescriptionButton"));
+        projectDescriptionShortButton.setStyleName("project-editor-short-description-button");
+        projectDescriptionShortButton.setEnabled(false);
+        projectDescriptionShortButton.addClickListener(event -> onProjectDescriptionShortButtonClick());
+
         uploadRow.add(projectDescriptionUpload);
+        uploadRow.add(projectDescriptionShortButton);
         uploadRow.add(projectDescriptionAiStatus);
         uploadRow.expand(projectDescriptionAiStatus);
         projectDescriptionCard.add(uploadRow, 0);
         projectDescriptionCard.expand(projectDescriptionRichTextArea);
+    }
+
+    /** Обновляет доступность кнопки «Кратко» по наличию текста в описании проекта. */
+    private void updateProjectDescriptionShortButtonState() {
+        if (projectDescriptionShortButton == null) {
+            return;
+        }
+        boolean hasText = !stripHtmlToPlainText(projectDescriptionRichTextArea.getValue()).isEmpty();
+        projectDescriptionShortButton.setEnabled(hasText);
+    }
+
+    /**
+     * Кнопка «Кратко»: запускает фоновую AI-генерацию краткого описания сути проекта
+     * (не более 5 предложений) и помещает результат в поле сущности shortDescription.
+     * При недоступности AI пользователь получает предупреждение; описание не меняется.
+     */
+    private void onProjectDescriptionShortButtonClick() {
+        String plainText = stripHtmlToPlainText(projectDescriptionRichTextArea.getValue());
+        if (plainText.isEmpty()) {
+            updateProjectDescriptionShortButtonState();
+            return;
+        }
+        String projectName = getEditedEntity().getProjectName();
+        projectDescriptionShortButton.setEnabled(false);
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption(messages.getMessage(getClass(), "msgProjectShortDescriptionStarted"))
+                .show();
+
+        BackgroundTask<Integer, String> task = new BackgroundTask<Integer, String>(120, this) {
+            @Override
+            public String run(TaskLifeCycle<Integer> taskLifeCycle) {
+                // Middleware-вызов: экран не выбирает provider/model/credential
+                // и не содержит prompt — маршрутизацию выполняет AI Control Plane
+                // по функции PROJECT_SHORT_DESCRIPTION_GENERATE.
+                return projectAiService.generateShortDescription(projectName, plainText);
+            }
+
+            @Override
+            public void done(String shortDescription) {
+                getEditedEntity().setShortDescription(shortDescription);
+                applyShortDescriptionSidebar(shortDescription);
+                projectDescriptionShortButton.setEnabled(true);
+                updateProjectDescriptionShortButtonState();
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption(messages.getMessage(ProjectEdit.class, "msgProjectShortDescriptionDone"))
+                        .show();
+            }
+
+            @Override
+            public boolean handleException(Exception exception) {
+                log.warn("Генерация краткого описания проекта не выполнена: {}",
+                        exception.getClass().getSimpleName());
+                projectDescriptionShortButton.setEnabled(true);
+                updateProjectDescriptionShortButtonState();
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption(messages.getMessage(ProjectEdit.class, "msgProjectShortDescriptionFailed"))
+                        .show();
+                return true;
+            }
+        };
+        backgroundWorker.handle(task).execute();
+    }
+
+    /** Показывает/скрывает sidebar-раздел «Коротко» и заполняет его текст. */
+    private void applyShortDescriptionSidebar(String shortDescription) {
+        boolean visible = shortDescription != null && !shortDescription.trim().isEmpty();
+        projectEditorSidebarShortDescription.setVisible(visible);
+        if (visible) {
+            projectSidebarShortDescriptionText.setValue(shortDescription);
+        }
+    }
+
+    /**
+     * Приводит HTML-содержимое RichTextArea к обычному тексту: теги/переносы
+     * заменяются на разделители строк, HTML-сущности — на символы. Используется
+     * для проверки наличия текста и как вход AI-функции «Кратко».
+     */
+    private String stripHtmlToPlainText(String html) {
+        if (html == null) {
+            return "";
+        }
+        String text = html
+                .replaceAll("(?i)<br\\s*/?>", "\n")
+                .replaceAll("(?i)</p>", "\n")
+                .replaceAll("(?i)</div>", "\n")
+                .replaceAll("(?i)</li>", "\n")
+                .replaceAll("<[^>]+>", "");
+        return text.replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace("&quot;", "\"")
+                .replace("&#39;", "'")
+                .replace("&nbsp;", " ")
+                .trim();
+    }
+
+    @Subscribe("projectDescriptionRichTextArea")
+    public void onProjectDescriptionRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
+        // Описание изменилось (вручную или после lazy load вкладки) — синхронизируем
+        // доступность кнопки «Кратко»: без текста генерировать нечего.
+        updateProjectDescriptionShortButtonState();
     }
 
     @Subscribe("projectTab")
@@ -594,6 +721,9 @@ public class ProjectEdit extends StandardEditor<Project> {
         } else {
             projectSidebarTitle.setValue(messages.getMessage(getClass(), "browseCaption"));
         }
+        // Раздел «Коротко»: показывается, только если у проекта уже есть краткое
+        // описание (shortDescription не null/не пустое).
+        applyShortDescriptionSidebar(getEditedEntity().getShortDescription());
     }
 
     @Subscribe("projectEditorNavMain")

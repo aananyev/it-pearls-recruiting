@@ -26,7 +26,7 @@
 
 - **Загрузка логотипа** → `WebProjectLogoFileUploadField.saveFile` → `beanLocator.get(ProjectLogoImageProcessingService.NAME)` (proxy) → `process(data, fileName)`.
 - **AI-этап** (если `hunttech.projectLogo.ai.enabled=true`): функция `PROJECT_LOGO_IMAGE_GENERATE` получает изображение и возвращает PNG с прозрачным фоном (OpenAI `images/edits`, модель `gpt-image-2`).
-- **AI недоступен** (функция не активна, нет credentials, таймаут/ошибка провайдера) → лог `warn` + классический конвейер: удаление белых пикселей по порогу 235 (`removeAllWhite=true` — включая замкнутые полости внутри букв), плавный край (EDGE_SOFTNESS 24).
+- **AI недоступен** (функция не активна, нет credentials, таймаут/ошибка провайдера) → лог `warn` + классический конвейер: удаление белого фона по порогу 235 (`removeAllWhite=true` — включая замкнутые полости внутри букв) и серого фона (насыщенность ≤ 30, яркость ≥ 40 — фон-градиенты типа логотипа SSP), плавный край белого фона (EDGE_SOFTNESS 24), серый фон — полностью прозрачный.
 - **Детерминированный финал** (всегда): ARGB → ресайз до 300px → обрезка по содержимому → квадратный канвас со стороной = диагонали/0.95 → PNG.
 - **Не-растровый файл** или пустые данные → исходные байты, `processed=false`.
 - **Ошибка обработки** → компонент логирует `warn` и сохраняет исходный файл — загрузка не прерывается.
@@ -61,6 +61,8 @@
 | `maxSize` | `hunttech.projectLogo.maxSize` | int | **300** | Максимальная сторона логотипа, px |
 | `format` | `hunttech.projectLogo.format` | String | **png** | Выходной формат (PNG — прозрачность) |
 | `whiteThreshold` | `hunttech.projectLogo.whiteThreshold` | int | **235** | Порог «белизны» классического flood-fill (0–255) |
+| `graySaturationThreshold` | `hunttech.projectLogo.graySaturationThreshold` | int | **30** | Макс. насыщенность (max−min каналов) пикселя «серого фона» (градиенты, логотип SSP) |
+| `grayMinChannel` | `hunttech.projectLogo.grayMinChannel` | int | **40** | Мин. яркость (minChannel) пикселя «серого фона»; темнее — не удаляется (тёмно-серый текст) |
 | `circleInscribeRatioPercent` | `hunttech.projectLogo.circleInscribeRatio` | int | **71** | Резерв на будущее; реализация использует `CANVAS_MARGIN=0.95` от диагонали |
 | `removeAllWhite` | `hunttech.projectLogo.removeAllWhite` | boolean | **true** | Удалять ВСЕ белые пиксели по порогу, включая замкнутые полости внутри букв (просвет «А»); `false` — flood-fill только от краёв (белые элементы дизайна сохраняются) |
 | `enabled` | `hunttech.projectLogo.enabled` | boolean | **true** | Общий выключатель обработки |
@@ -90,7 +92,7 @@ DTO реализует `Serializable` — обязательная часть у
 2. `ImageIO.read` вернул `null` → оригинал, `processed=false`.
 3. `aiProcessingEnabled=true` → `AiExecutionService.executeImage("PROJECT_LOGO_IMAGE_GENERATE", {sourceFileName}, data, mimeType)`.
 4. AI-результат — растровый → используется как источник для финала; пустой/не-растровый/исключение → классический конвейер (лог `warn`, загрузка продолжается).
-5. Финал (всегда): ARGB → ресайз ≤ `maxSize` → `removeWhiteBackground` → обрезка по содержимому → `fitIntoCircle` → запись в `format`.
+5. Финал (всегда): ARGB → ресайз ≤ `maxSize` → удаление белого/серого фона (flood-fill от краёв: белые по порогу 235; серые — насыщенность ≤ 30 при яркости ≥ 40, полностью прозрачные) → обрезка по содержимому → `fitIntoCircle` → запись в `format`.
 6. Ошибка IO при обработке → `DevelopmentException`.
 
 AI-контекст функции: `sourceFileName` (имя загруженного файла). Промпт и модель задаёт администратор; seed `260813-2-addProjectLogoAiFunction` — INSERT-only и идемпотентный.
@@ -142,6 +144,7 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Классический конвейер удаляет серый фон-градиенты (логотип SSP): пиксели с насыщенностью ≤ 30 и яркостью ≥ 40 (`graySaturationThreshold`/`grayMinChannel`), соединённые с краем, становятся полностью прозрачными; белый фон — как раньше (порог 235, плавный край); тест `testGrayGradientBackgroundBecomesTransparent` |
 | 2026-08-13 | Классический конвейер: конфиг `hunttech.projectLogo.removeAllWhite` (default true) — удаление всех белых пикселей по порогу, включая замкнутые полости внутри букв (просвет «А» Альфа-Банка); тест `testWhiteCavityInsideLetterBecomesTransparent` |
 | 2026-08-13 | Настроено корпоративное подключение OpenAI: `hunttech.ai.encryptionKey` в `${app.home}/local.app.properties`, admin-конфигурация `HUNTTECH_ADMIN_AI_CONFIGURATION` (openai, gpt-4o, активна), привязка к функциям `PROJECT_LOGO_IMAGE_GENERATE` и `PROJECT_DESCRIPTION_GENERATE`; загрузка логотипа реально вызывает `images/edits` (при 4xx — классический fallback) |
 | 2026-08-13 | AI-first: функция `PROJECT_LOGO_IMAGE_GENERATE` (IMAGE_GENERATION, OpenAI `images/edits`) с детерминированным классическим fallback; исправлена интеграция web↔core (запись в `WebRemoteProxyBeanCreator` устранила `NoSuchBeanDefinitionException`); конфиг `hunttech.projectLogo.ai.enabled` |

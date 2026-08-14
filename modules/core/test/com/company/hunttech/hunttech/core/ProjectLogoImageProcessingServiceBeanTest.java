@@ -133,6 +133,41 @@ public class ProjectLogoImageProcessingServiceBeanTest {
     }
 
     @Test
+    public void testGrayGradientBackgroundBecomesTransparent() throws IOException {
+        // Логотип SSP: серый градиентный фон (от светлого к тёмно-серому) + синий логотип
+        // в центре. Серый фон, соединённый с краями, должен стать полностью прозрачным,
+        // а цветной логотип сохраниться.
+        BufferedImage image = new BufferedImage(300, 300, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = image.createGraphics();
+        try {
+            // Горизонтальный серый градиент: слева светлый (200,200,200), справа тёмный (80,80,80).
+            for (int x = 0; x < 300; x++) {
+                int v = 200 - (int) (120.0 * x / 299);
+                g.setColor(new Color(v, v, v));
+                g.drawLine(x, 0, x, 299);
+            }
+            // Синий логотип в центре (насыщенный цвет — не должен быть удалён как серый фон).
+            g.setColor(new Color(20, 60, 200));
+            g.fillRect(120, 110, 60, 80);
+        } finally {
+            g.dispose();
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ImageIO.write(image, "jpg", out);
+
+        ProcessedImage processed = service.process(out.toByteArray(), "logo.jpg");
+        BufferedImage result = read(processed);
+
+        // Угол канваса был серым — после обработки должен стать полностью прозрачным.
+        int cornerAlpha = (result.getRGB(0, 0) >> 24) & 0xFF;
+        assertEquals("Серый градиентный угол должен быть прозрачным (фон удалён)", 0, cornerAlpha);
+
+        // Синий логотип в центре должен остаться непрозрачным.
+        int centerAlpha = (result.getRGB(result.getWidth() / 2, result.getHeight() / 2) >> 24) & 0xFF;
+        assertTrue("Синий логотип должен остаться непрозрачным", centerAlpha > 200);
+    }
+
+    @Test
     public void testSmallImageIsNotUpscaled() throws IOException {
         // Маленькое изображение 100x100 — не должно увеличиваться сверх исходного размера.
         byte[] data = createWhiteBackgroundImage(100, 100);

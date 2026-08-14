@@ -78,6 +78,39 @@
       white-space: normal !important;
     }
 
+    // Раздел sidebar «Коротко»: заголовок-подпись (11px/700 uppercase, как caption
+    // инфокарточек) и текст краткого описания сути проекта (13px/500). Раздел
+    // показывается контроллером только при непустом значении shortDescription.
+    .project-editor-short-description-title,
+    .project-editor-short-description-title.v-label {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      margin: 2px 0 4px !important;
+      color: rgba(248, 250, 252, 0.62) !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      line-height: 16px !important;
+      letter-spacing: 0.5px !important;
+      text-transform: uppercase !important;
+      white-space: normal !important;
+    }
+
+    .project-editor-short-description-text,
+    .project-editor-short-description-text.v-label {
+      box-sizing: border-box;
+      display: block;
+      width: 100% !important;
+      min-width: 0 !important;
+      color: #f8fafc !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      line-height: 18px !important;
+      white-space: normal !important;
+      overflow-wrap: anywhere;
+    }
+
     // Визуальный блок sidebar: без карточки-рамки, аватар логотипа стоит на фоне
     // sidebar; блок центрирует круглый логотип 96×96 (PNG уже круглый после
     // обработки логотипа) и пару кнопок «Загрузить»/«Очистить».
@@ -282,6 +315,51 @@
       color: $v-font-color !important;
       background: transparent !important;
       border-color: rgba($v-font-color, 0.55) !important;
+    }
+
+    // Кнопка «Кратко» в строке upload вкладки «Описание проекта»: аккуратная
+    // вторичная кнопка 38px в светлой рабочей области (рядом с upload-кнопкой),
+    // акцентный цвет текста, как у primary-действий форм.
+    .project-editor-short-description-button {
+      box-sizing: border-box;
+      min-height: 38px !important;
+      height: 38px !important;
+      padding: 0 14px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      line-height: 36px !important;
+      color: $v-selection-color !important;
+      background: $v-panel-background-color !important;
+      border: 1px solid rgba($v-font-color, 0.25) !important;
+      border-radius: 4px !important;
+      box-shadow: none !important;
+    }
+
+    .project-editor-short-description-button:hover {
+      filter: brightness(0.97);
+    }
+
+    // RichTextArea (описание проекта и шаблон письма): iframe Vaadin RTE без
+    // ограничений расширяет карточку за границы вкладки (flex min-width:auto).
+    // Те же ограничения, что open-position-editor-richtext-variant5.
+    .v-richtextarea {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      max-width: 100% !important;
+    }
+
+    .v-richtextarea .v-richtextarea-content,
+    .v-richtextarea iframe {
+      box-sizing: border-box;
+      max-width: 100%;
+    }
+
+    // Таблица вакансий (dataGrid): Grid внутри flex-карточки без min-width: 0
+    // выталкивает ширину за границы вкладки (приём open-position-editor-table-variant5).
+    .v-grid {
+      box-sizing: border-box;
+      min-width: 0 !important;
+      max-width: 100% !important;
     }
   }
 }

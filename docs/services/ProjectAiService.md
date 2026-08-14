@@ -13,6 +13,8 @@
 - upload извлечён → `ProjectEdit` передал `projectName/sourceFileName/sourceText` → сервис вызывает `AiExecutionService`;
 - source text пуст → вызов внешнего AI не выполняется → controlled `DevelopmentException`;
 - source text > 120000 символов → внешний AI не вызывается → controlled error;
+- кнопка «Кратко» → `ProjectEdit` передал `projectName/descriptionText` → сервис вызывает `AiExecutionService` с функцией `PROJECT_SHORT_DESCRIPTION_GENERATE`;
+- краткое описание пусто → вызов внешнего AI не выполняется → controlled `DevelopmentException`;
 - функция настроена → resolver выбирает credential/model/provider по policy → результат возвращается экрану;
 - prompt/model/policy изменены администратором → сервисный код не меняется → следующий вызов использует новые настройки.
 
@@ -22,20 +24,23 @@
 String processUploadedDescription(String projectName,
                                   String sourceFileName,
                                   String sourceText);
+
+String generateShortDescription(String projectName,
+                                String descriptionText);
 ```
 
-Стабильный function code:
+Стабильные function code:
 
 ```text
 PROJECT_DESCRIPTION_GENERATE
+PROJECT_SHORT_DESCRIPTION_GENERATE
 ```
 
 Context:
 
 ```text
-projectName
-sourceFileName
-sourceText
+processUploadedDescription:      projectName, sourceFileName, sourceText
+generateShortDescription:        projectName, sourceText
 ```
 
 ## Граница ответственности
@@ -50,4 +55,5 @@ sourceText
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-14 | Добавлен `generateShortDescription(projectName, descriptionText)` для функции `PROJECT_SHORT_DESCRIPTION_GENERATE` (кнопка «Кратко» ProjectEdit, sidebar-раздел «Коротко») |
 | 2026-08-12 | Создан facade `ProjectAiService` для `PROJECT_DESCRIPTION_GENERATE` поверх AI Control Plane |

@@ -67,6 +67,16 @@ public class Project extends StandardEntity {
     @Column(name = "PROJECT_DESCRIPTION")
     protected String projectDescription;
 
+    /**
+     * Краткое описание сути проекта («Коротко о проекте»): не более 5 предложений.
+     * Заполняется AI по кнопке «Кратко» во вкладке «Описание проекта» ProjectEdit
+     * (функция PROJECT_SHORT_DESCRIPTION_GENERATE); выводится в sidebar-разделе
+     * «Коротко», если значение не пустое.
+     */
+    @Lob
+    @Column(name = "SHORT_DESCRIPTION")
+    protected String shortDescription;
+
     @Lob
     @Column(name = "TEMPLATE_LETTER")
     protected String templateLetter;
@@ -123,6 +133,14 @@ public class Project extends StandardEntity {
 
     public void setProjectDescription(String projectDescription) {
         this.projectDescription = projectDescription;
+    }
+
+    public String getShortDescription() {
+        return shortDescription;
+    }
+
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
     }
 
     public Boolean getProjectIsClosed() {

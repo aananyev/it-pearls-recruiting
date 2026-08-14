@@ -8,6 +8,7 @@
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Добавлен атрибут `ovalBackground` (API `getOvalBackground` / `setOvalBackground`): фон-подложка под прозрачные изображения; реализация через динамический CSS-класс и `Page.getStyles()` |
 | 2026-06-29 | Первоначальная документация компонента в `docs/ui-components/OvalImage.md` |
 | 2026-06-29 | Реализация `OvalImage` / `WebOvalImage` / `OvalImageLoader`; стили `.ht-oval-image` в темах hover и halo |
 | 2026-06-30 | Cross-link на объединённый компонент [OvaFallbackImage](OvaFallbackImage.md) |
@@ -24,7 +25,7 @@
 - единообразный визуальный стиль без дублирования CSS в каждом экране;
 - наследование всего API `Image`: привязка к `dataContainer` / `property`, `scaleMode`, `FileDescriptor`, клики и т.д.
 
-Визуальный эффект достигается CSS-классом `ht-oval-image` (`border-radius: 50%`, `object-fit: cover`, `overflow: hidden`). Компонент задаёт размеры через атрибуты `ovalWidth` / `ovalHeight` (или стандартные `width` / `height` после синхронизации).
+Визуальный эффект достигается CSS-классом `ht-oval-image` (`border-radius: 50%`, `object-fit: cover`, `overflow: hidden`). Компонент задаёт размеры через атрибуты `ovalWidth` / `ovalHeight` (или стандартные `width` / `height` после синхронизации), а фон-подложку под прозрачные изображения — через атрибут `ovalBackground` (см. раздел «Фон под прозрачным изображением»).
 
 Типичные сценарии в HRM HuntTech:
 
@@ -40,8 +41,9 @@
 |------|------|------|
 | **gui** (контракт) | [`modules/gui/src/com/company/hunttech/gui/components/OvalImage.java`](../../../modules/gui/src/com/company/hunttech/gui/components/OvalImage.java) | Интерфейс, расширяет `Image`; `NAME = "ovalImage"`; API `ovalWidth` / `ovalHeight` |
 | **gui** (legacy alias) | [`modules/gui/src/com/company/hunttech/gui/components/OvalImage.java`](../../../modules/gui/src/com/company/hunttech/gui/components/OvalImage.java) | `@deprecated` — делегирует в `com.company.hunttech.gui.components.OvalImage` |
-| **web** (реализация) | [`modules/web/src/com/company/hunttech/web/gui/components/WebOvalImage.java`](../../../modules/web/src/com/company/hunttech/web/gui/components/WebOvalImage.java) | Vaadin/CUBA web-компонент; применяет `ht-oval-image`; синхронизация размеров |
-| **web** (XML-loader) | [`modules/web/src/com/company/hunttech/web/gui/xml/layout/loaders/OvalImageLoader.java`](../../../modules/web/src/com/company/hunttech/web/gui/xml/layout/loaders/OvalImageLoader.java) | Создаёт `ovalImage`, читает `ovalWidth` / `ovalHeight` из screen XML |
+| **web** (реализация) | [`modules/web/src/com/company/hunttech/web/gui/components/WebOvalImage.java`](../../../modules/web/src/com/company/hunttech/web/gui/components/WebOvalImage.java) | Vaadin/CUBA web-компонент; применяет `ht-oval-image`; синхронизация размеров; фон `ovalBackground` через `OvalImageBackgroundSupport` |
+| **web** (XML-loader) | [`modules/web/src/com/company/hunttech/web/gui/xml/layout/loaders/OvalImageLoader.java`](../../../modules/web/src/com/company/hunttech/web/gui/xml/layout/loaders/OvalImageLoader.java) | Создаёт `ovalImage`, читает `ovalWidth` / `ovalHeight` / `ovalBackground` из screen XML |
+| **web** (helper фона) | [`modules/web/src/com/company/hunttech/web/gui/components/OvalImageBackgroundSupport.java`](../../../modules/web/src/com/company/hunttech/web/gui/components/OvalImageBackgroundSupport.java) | Динамический CSS-класс фона через `Page.getStyles()`; общий для `WebOvalImage` и `WebOvaFallbackImage` |
 | **регистрация XML** | [`modules/web/src/com/hunttech/hrm/web/cuba-ui-component.xml`](../../../modules/web/src/com/hunttech/hrm/web/cuba-ui-component.xml) | Связка имени `ovalImage`, класса `WebOvalImage` и `OvalImageLoader` |
 | **подключение** | [`modules/web/src/com/company/hunttech/web-app.properties`](../../../modules/web/src/com/company/hunttech/web-app.properties) | `cuba.web.componentsConfig = +com/hunttech/hrm/web/cuba-ui-component.xml` |
 | **регистрация Java** | [`modules/web/src/com/hunttech/hrm/web/config/HunttechUiComponentsRegistrar.java`](../../../modules/web/src/com/hunttech/hrm/web/config/HunttechUiComponentsRegistrar.java) | `@Component`; при старте регистрирует `WebOvalImage` в `WebUiComponents` для `uiComponents.create()` |
@@ -88,7 +90,56 @@ flowchart TD
 
 ---
 
-## 4. Примеры использования
+## 4. Фон под прозрачным изображением (ovalBackground)
+
+После обработки логотипов в HRM HuntTech (удаление белого фона, `removeAllWhite` — см. `ProjectLogoImageProcessingServiceBean`) в компонент загружаются **PNG с прозрачным фоном**. На светлом или тёмном фоне формы такой логотип может сливаться или быть плохо различим. Атрибут `ovalBackground` задаёт CSS-фон самого элемента — круглую подложку, на которой прозрачные области изображения становятся видимыми.
+
+### API
+
+| Уровень | Объявление |
+|---------|------------|
+| **gui** (контракт) | `OvalImage.getOvalBackground()` / `OvalImage.setOvalBackground(String)` |
+| **web** (реализация) | `WebOvalImage` — прямо; `WebOvaFallbackImage` — через общий helper `OvalImageBackgroundSupport` |
+| **XML** (loader) | атрибут `ovalBackground` в теге `<ovalImage>` / `<ovaFallbackImage>` |
+
+### XML
+
+```xml
+<ovalImage id="projectLogoImage"
+           ovalWidth="176px"
+           ovalHeight="176px"
+           ovalBackground="#ffffff"
+           scaleMode="SCALE_DOWN"
+           dataContainer="projectDc"
+           property="projectLogo">
+    <theme path="icons/projects/logo.png"/>
+</ovalImage>
+```
+
+Значение — любой валидный CSS-цвет: `#ffffff`, `#f0f2f5`, `rgba(255,255,255,0.9)` и т.п.
+
+### Java — программное создание
+
+```java
+OvalImage image = uiComponents.create(OvalImage.NAME);
+image.setOvalBackground("#ffffff");
+```
+
+### Механика (важно для отладки)
+
+Vaadin 8 не имеет server-side API для inline-стилей, поэтому фон задаётся **динамическим CSS-классом**, который инжектится в страницу через `Page.getStyles().add(css)` — тот же приём, что в `SignIconsEdit.injectColorCss`. Класс строится из хэша значения фона (`ht-oval-image-bg-<hex>`):
+
+- одинаковые значения фона переиспользуют один CSS-класс (нет дубликатов в DOM);
+- разные значения не перекрашивают соседние овалы на странице;
+- `overflow: hidden` + `border-radius: 50%` класса `ht-oval-image` обрезают подложку кругом.
+
+Так как XML-loader вызывает `setOvalBackground` **до attach** компонента, инъекция CSS откладывается до первого `attach` (страница становится доступной). При вызове из Java после добавления в layout фон применяется сразу.
+
+`setOvalBackground(null)` — no-op: фон, заданный в XML, остаётся до уничтожения компонента.
+
+---
+
+## 5. Примеры использования
 
 ### Screen XML (browse / edit / view)
 
@@ -161,7 +212,7 @@ webUiComponents.register(OvalImage.NAME, WebOvalImage.class);
 
 ---
 
-## См. также
+## 6. См. также
 
 - [FallbackImage](FallbackImage.md) — placeholder при пустом `FileDescriptor`
 - [OvaFallbackImage](OvaFallbackImage.md) — круг + fallback в одном компоненте

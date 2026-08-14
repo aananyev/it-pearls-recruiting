@@ -37,5 +37,12 @@ public class OvaFallbackImageLoader extends ImageLoader {
         if (StringUtils.isNotBlank(fallbackThemePath)) {
             component.setFallbackThemePath(fallbackThemePath);
         }
+
+        // Фон-подложка под прозрачное изображение (например, логотип после removeAllWhite):
+        // атрибут тот же, что у ovalImage, общий CSS-класс через OvalImageBackgroundSupport.
+        String ovalBackground = element.attributeValue("ovalBackground");
+        if (StringUtils.isNotBlank(ovalBackground)) {
+            component.setOvalBackground(ovalBackground);
+        }
     }
 }

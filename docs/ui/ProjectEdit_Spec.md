@@ -6,7 +6,9 @@ Cross-links: [Project](../entities/project/Project.md) · [Project AI upload arc
 
 `ProjectEdit` редактирует проект HRM HuntTech: его наименование, владельца, департамент, даты, чаты, описание, вакансии и шаблон сопроводительного письма. Вкладка «Описание проекта» дополнена безопасным upload-сценарием: пользователь может загрузить PDF, DOCX или TXT с исходным описанием, а AI приводит текст к административно управляемому формату.
 
-Ключевой принцип после внедрения AI Control Plane: экран проекта не содержит системный prompt, не выбирает AI-провайдера, модель или API-ключ. Экран знает только бизнес-функцию `PROJECT_DESCRIPTION_GENERATE` через `ProjectAiService`; содержание prompt и маршрутизация управляются администратором.
+Кнопка «Кратко» в той же строке генерирует из описания краткое описание сути проекта (не более 5 предложений) в поле сущности `shortDescription`; sidebar-раздел «Коротко» показывает его, если значение не пустое.
+
+Ключевой принцип после внедрения AI Control Plane: экран проекта не содержит системный prompt, не выбирает AI-провайдера, модель или API-ключ. Экран знает только бизнес-функции `PROJECT_DESCRIPTION_GENERATE` и `PROJECT_SHORT_DESCRIPTION_GENERATE` через `ProjectAiService`; содержание prompt и маршрутизация управляются администратором.
 
 ## UI Context & Navigation
 
@@ -21,7 +23,11 @@ Cross-links: [Project](../entities/project/Project.md) · [Project AI upload arc
 - текст извлечён → AI-функция настроена → `BackgroundWorker` вызывает `ProjectAiService`, результат заменяет fallback в `projectDescription`;
 - AI-функция/credential недоступны или provider вернул ошибку → исходный извлечённый текст остаётся в форме, пользователь получает контролируемое предупреждение;
 - администратор меняет `SYSTEM_PROMPT`, `PROMPT_TEMPLATE`, provider/model/policy для `PROJECT_DESCRIPTION_GENERATE` → следующий upload использует новую конфигурацию без изменения `ProjectEdit`;
-- сохранить проект → стандартный `DataContext` сохраняет текущее значение `projectDescription` вместе с остальными изменениями.
+- сохранить проект → стандартный `DataContext` сохраняет текущее значение `projectDescription` вместе с остальными изменениями;
+- открыть проект с непустым `shortDescription` → sidebar-раздел «Коротко» виден с текстом краткого описания; при пустом значении раздел скрыт;
+- во вкладке «Описание проекта» нажать «Кратко» → текст описания есть → AI генерирует краткое описание (до 5 предложений) → результат записывается в `shortDescription` и сразу появляется в sidebar-разделе «Коротко»;
+- нажать «Кратко» при пустом описании → кнопка disabled (текст отсутствует → генерация невозможна);
+- AI-функция/credential недоступны при генерации «Кратко» → `shortDescription` не меняется, пользователь получает предупреждение.
 
 ## 1. Точка вызова и контекст
 
@@ -37,9 +43,11 @@ Cross-links: [Project](../entities/project/Project.md) · [Project AI upload arc
 
 ## 2. Data View Integrity
 
-`projectDescription` остаётся существующим LOB-полем `Project`; новых полей, таблиц и связей сущности не добавляется. Поле намеренно не включается в основной `project-edit-view`: при первом открытии вкладки контроллер выполняет `dataManager.reload()` с узким `ViewBuilder.of(Project.class).add("projectDescription")`.
+`projectDescription` и `templateLetter` остаются LOB-полями `Project` и намеренно не включаются в основной `project-edit-view`: при первом открытии вкладок контроллер выполняет `dataManager.reload()` с узким `ViewBuilder`.
 
-AI-upload не читает незагруженные getters detached-сущностей. Для AI передаются только уже доступные значения `projectName`, имя файла и извлечённый текст.
+Исключение — новое поле `shortDescription` («Коротко о проекте»): оно **включено** в `project-edit-view`, потому что sidebar-раздел «Коротко» должен быть виден сразу при открытии формы (контроллер читает `getShortDescription()` в `onBeforeShowSidebar` и после AI-генерации пишет `setShortDescription()`). Это единственный CLOB в edit-view; на browse-view и другие views поля нет.
+
+AI-upload и «Кратко» не читают незагруженные getters detached-сущностей. Для AI передаются только уже доступные значения `projectName` и текст описания (у «Кратко» — из текущего значения RichTextArea, приведённый к обычному тексту).
 
 ## 3. Upload-контракт
 
@@ -111,20 +119,70 @@ AI-вызов выполняется через `BackgroundWorker`, timeout за
 
 ```bash
 ./gradlew :app-core:test \
+  --tests '*ProjectEditLayoutContractTest*' \
   --tests '*ProjectAiServiceTest*' \
   --tests '*ProjectDescriptionTextExtractorTest*' \
   --tests '*ProjectDescriptionAiUploadContractTest*' \
+  --tests '*ProjectShortDescriptionAiContractTest*' \
+  --tests '*ProjectDetachedObjectTest*' \
   --no-daemon --stacktrace
 ./gradlew test --tests '*ScreenViewIntegrityTest*' --no-daemon --stacktrace
 ./gradlew :app-web:buildScssThemes --no-daemon --stacktrace
 ./gradlew clean assemble --no-daemon --stacktrace
 ```
 
-Runtime smoke: PDF/DOCX/TXT, configured AI, unavailable AI fallback, сохранение/повторное открытие проекта, новый проект, повторная загрузка, отсутствие временного файла после извлечения.
+Runtime smoke: PDF/DOCX/TXT, configured AI, unavailable AI fallback, сохранение/повторное открытие проекта, новый проект, повторная загрузка, отсутствие временного файла после извлечения; кнопка «Кратко» disabled/enabled, генерация краткого описания, появление/скрытие sidebar-раздела «Коротко», сохранение `shortDescription` при повторном открытии.
+
+Компоновка рабочей области (2026-08-14): все элементы ввода вкладки «Проект» растянуты на ширину страницы (было 50%); строка дат занимает всю ширину, поля дат делят её поровну; RichTextArea описания и dataGrid вакансий ограничены по ширине локальным SCSS (min-width: 0 / max-width: 100%, как open-position-editor-richtext-variant5 / -table-variant5) — устранён выход за границы экрана.
+
+Логотип проекта в sidebar (2026-08-14): `projectLogoFileImage` (`ovaFallbackImage`) получил XML-атрибут `ovalBackground="#3a3e44"` — тёмно-серая круглая подложка под прозрачный логотип после `removeAllWhite`; атрибут читается `OvaFallbackImageLoader` (общий механизм с `ovalImage`, динамический CSS-класс через `OvalImageBackgroundSupport`).
+
+## 9. Кнопка «Кратко» и sidebar-раздел «Коротко»
+
+### 9.1 Модель данных
+
+Сущность `Project` получила поле `shortDescription` («Коротко о проекте», колонка `SHORT_DESCRIPTION`, CLOB). Значение заполняется только AI (отдельного поля ввода в форме нет) и сохраняется стандартным `DataContext` при commit.
+
+### 9.2 Кнопка «Кратко» (вкладка «Описание проекта»)
+
+Строка upload (создаётся программно в `initProjectDescriptionUpload`) содержит: upload → кнопка «Кратко» → status-label.
+
+| Условие | Поведение |
+|---------|-----------|
+| Текст RichTextArea пуст (null/пробелы/без контента) | кнопка disabled |
+| Текст появился (ввод или lazy load вкладки) | кнопка enabled (обработчик `onProjectDescriptionRichTextAreaValueChange`) |
+| Клик по «Кратко» | HTML-контент RichTextArea → обычный текст (`stripHtmlToPlainText`) → `BackgroundWorker` (timeout 120 с) → `ProjectAiService.generateShortDescription(projectName, text)` |
+| AI вернул текст | `setShortDescription(result)` на сущности; sidebar-раздел «Коротко» показывается с этим текстом; TRAY-уведомление |
+| AI недоступен / ошибка провайдера | `shortDescription` не меняется; WARNING-уведомление; кнопка снова enabled |
+
+### 9.3 Sidebar-раздел «Коротко»
+
+XML-контейнер `projectEditorSidebarShortDescription` (`visible="false"` по умолчанию) расположен между идентификацией (`projectEditorSidebarIdentity`) и навигацией «Разделы». Заголовок — label «Коротко» (`projectSidebarShortDescriptionTitle`, stylename `project-editor-short-description-title`), текст — label `projectSidebarShortDescriptionText` (stylename `project-editor-short-description-text`).
+
+Контроллер (`applyShortDescriptionSidebar`):
+- `shortDescription == null || пустая строка` → раздел скрыт;
+- иначе → раздел виден, текст заполнен.
+
+Вызывается в `onBeforeShowSidebar` (при открытии формы) и в `done()` AI-задачи (сразу после генерации).
+
+### 9.4 AI Control Plane
+
+```text
+ProjectAiService.generateShortDescription(projectName, descriptionText)
+    → AiExecutionService.executeText("PROJECT_SHORT_DESCRIPTION_GENERATE", context)
+    → AiFunctionConfiguration (capability TEXT_GENERATION)
+    → effective credential/model/provider
+```
+
+Переменные административного prompt template: `${projectName}`, `${sourceText}`. Seed-миграция `260814-2-addProjectShortDescriptionAiFunction` INSERT-only и идемпотентна; административные prompt/model/policy не перезаписываются.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-14 | «Кратко» и sidebar «Коротко»: поле `Project.shortDescription` (`SHORT_DESCRIPTION`, включено в `project-edit-view`); кнопка «Кратко» в строке upload вкладки «Описание проекта» генерирует краткое описание сути проекта (до 5 предложений) через `PROJECT_SHORT_DESCRIPTION_GENERATE`; раздел sidebar виден только при непустом значении; кнопка disabled без текста описания; SCSS-стили в 7 темах; контракт-тест `ProjectShortDescriptionAiContractTest` |
+| 2026-08-14 | Логотип проекта в sidebar: фон-подложка `ovalBackground="#3a3e44"` (тёмно-серая) под прозрачный логотип после removeAllWhite; `OvaFallbackImageLoader` начал читать атрибут `ovalBackground` |
+| 2026-08-14 | Исправлен рендер строки дат: обе даты на одной строке одинакового размера (`box.expandRatio="1"` 50/50; два width=100% без expandRatio выталкивали «Окончание проекта» за границы) |
+| 2026-08-14 | Компоновка рабочей области: поля вкладки «Проект» на всю ширину (50%→100%, даты делят строку), RichTextArea описания и dataGrid вакансий ограничены по ширине локальным SCSS (min-width: 0 / max-width: 100%) — устранён выход за границы экрана; контрактный тест ProjectEditLayoutContractTest.mainTabInputsSpanFullWidthAndTabsDoNotOverflow |
 | 2026-08-12 | Вкладка «Описание проекта» адаптирована к AI Control Plane: upload PDF/DOCX/TXT, raw fallback, background AI и административный prompt `PROJECT_DESCRIPTION_GENERATE` |
 | 2026-08-04 | Зафиксирован двухпанельный Edit-layout, label-navigation и lazy-loading тяжёлых вкладок |

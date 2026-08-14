@@ -32,5 +32,10 @@ public class OvalImageLoader extends ImageLoader {
         if (StringUtils.isNotBlank(ovalHeight)) {
             ovalImage.setOvalHeight(ovalHeight);
         }
+
+        String ovalBackground = element.attributeValue("ovalBackground");
+        if (StringUtils.isNotBlank(ovalBackground)) {
+            ovalImage.setOvalBackground(ovalBackground);
+        }
     }
 }

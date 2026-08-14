@@ -98,6 +98,9 @@
         <property name="endProjectDate"/>
         <property name="generalChat"/>
         <property name="chatForCV"/>
+        <!-- Короткое описание грузится сразу (в отличие от LOB-описаний по вкладкам):
+             sidebar-раздел «Коротко» виден уже при открытии ProjectEdit. -->
+        <property name="shortDescription"/>
         <property name="projectLogo" view="_minimal"/>
         <property name="projectTree" view="project-tree-picker-view"/>
         <property name="projectDepartment" view="companyDepartament-picker-view"/>

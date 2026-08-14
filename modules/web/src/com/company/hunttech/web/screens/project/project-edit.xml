@@ -91,7 +91,9 @@
                         <!-- OvaFallbackImage логотипа проекта: единый элемент по эталону
                              JobCandidateEdit — 176×176 (width/height/ovalWidth/ovalHeight),
                              fallback no-company.png при отсутствии файла, SCALE_DOWN;
-                             загрузка — upload ниже (dataContainer/property projectLogo). -->
+                             фон-подложка тёмно-серая (под прозрачный логотип после
+                             removeAllWhite); загрузка — upload ниже
+                             (dataContainer/property projectLogo). -->
                         <ovaFallbackImage id="projectLogoFileImage"
                                           dataContainer="projectDc"
                                           property="projectLogo"
@@ -99,6 +101,7 @@
                                           height="176px"
                                           ovalWidth="176px"
                                           ovalHeight="176px"
+                                          ovalBackground="#3a3e44"
                                           fallbackThemePath="icons/no-company.png"
                                           visible="true"
                                           align="MIDDLE_CENTER"
@@ -127,6 +130,23 @@
                            stylename="edit-sidebar-subtitle"
                            width="100%"
                            value="msg://msgProjectSidebarSubtitle"/>
+                </vbox>
+                <!-- Раздел «Коротко»: краткое описание сути проекта (не более 5
+                     предложений). Значение формирует AI по кнопке «Кратко» во вкладке
+                     «Описание проекта» (поле сущности shortDescription); раздел виден
+                     только при непустом значении — видимость и текст управляются
+                     контроллером ProjectEdit. -->
+                <vbox id="projectEditorSidebarShortDescription"
+                      stylename="edit-sidebar-summary"
+                      width="100%"
+                      spacing="false"
+                      visible="false">
+                    <label id="projectSidebarShortDescriptionTitle"
+                           value="msg://msgProjectShortDescriptionSection"
+                           stylename="project-editor-short-description-title"/>
+                    <label id="projectSidebarShortDescriptionText"
+                           stylename="project-editor-short-description-text"
+                           width="100%"/>
                 </vbox>
                 <!-- Label-навигация «Разделы»: пункты = вкладки TabSheet в правой части экрана
                      (по явному указанию владельца; правило §3.6 не применяется — навигация
@@ -240,27 +260,29 @@
                                                            caption="msg://msgProjectTree"
                                                            optionsContainer="projectTreeDc"
                                                            stylename="edit-form-control"
-                                                           width="50%"/>
+                                                           width="100%"/>
                                         <textField id="projectNameField"
                                                    dataContainer="projectDc"
                                                    property="projectName"
                                                    caption="msg://msgProjectName"
                                                    stylename="edit-form-control"
-                                                   width="50%"
+                                                   width="100%"
                                                    required="true"/>
-                                        <hbox width="50%" spacing="true">
+                                        <hbox width="100%" spacing="true">
                                             <dateField id="startProjectDateField"
                                                        dataContainer="projectDc"
                                                        property="startProjectDate"
                                                        caption="msg://msgProjectStartDate"
                                                        stylename="edit-form-control"
-                                                       width="AUTO"/>
+                                                       width="100%"
+                                                       box.expandRatio="1"/>
                                             <dateField id="endProjectDateField"
                                                        dataContainer="projectDc"
                                                        property="endProjectDate"
                                                        caption="msg://msgProjectEndDate"
                                                        stylename="edit-form-control"
-                                                       width="AUTO"/>
+                                                       width="100%"
+                                                       box.expandRatio="1"/>
                                         </hbox>
                                         <lookupPickerField id="projectDepartmentField"
                                                            optionsContainer="projectDepartmentsDc"
@@ -269,7 +291,7 @@
                                                            required="true"
                                                            caption="msg://msgProjectDepartament"
                                                            stylename="edit-form-control"
-                                                           width="50%">
+                                                           width="100%">
                                             <actions>
                                                 <action id="lookup" type="picker_lookup"/>
                                             </actions>
@@ -281,7 +303,7 @@
                                                            property="projectOwner"
                                                            caption="msg://msgProjectOwner"
                                                            stylename="edit-form-control"
-                                                           width="50%">
+                                                           width="100%">
                                             <actions>
                                                 <action id="lookup" type="picker_lookup"/>
                                             </actions>

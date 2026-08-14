@@ -16,10 +16,27 @@ public interface ProjectAiService {
     String FUNCTION_PROJECT_DESCRIPTION_GENERATE = "PROJECT_DESCRIPTION_GENERATE";
 
     /**
+     * Стабильный код функции генерации краткого описания сути проекта
+     * (кнопка «Кратко» во вкладке «Описание проекта» ProjectEdit, capability
+     * TEXT_GENERATION). Администратор меняет prompt/model/policy в
+     * AiFunctionConfiguration без изменений ProjectEdit.
+     */
+    String FUNCTION_PROJECT_SHORT_DESCRIPTION_GENERATE = "PROJECT_SHORT_DESCRIPTION_GENERATE";
+
+    /**
      * Обрабатывает текст, извлечённый из загруженного файла описания проекта.
      *
      * Доступные переменные административного prompt template:
      * projectName, sourceFileName, sourceText.
      */
     String processUploadedDescription(String projectName, String sourceFileName, String sourceText);
+
+    /**
+     * Генерирует краткое описание сути проекта (не более 5 предложений) на
+     * основании полного описания.
+     *
+     * Доступные переменные административного prompt template:
+     * projectName, sourceText.
+     */
+    String generateShortDescription(String projectName, String descriptionText);
 }
