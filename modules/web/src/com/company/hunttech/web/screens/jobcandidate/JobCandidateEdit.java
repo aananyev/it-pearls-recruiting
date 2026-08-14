@@ -54,6 +54,34 @@ import java.util.function.Function;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+/**
+ * Контроллер формы редактирования / создания кандидатов (JobCandidate).
+ *
+ * ═══ ОСНОВНЫЕ ФУНКЦИИ ═══
+ * • Просмотр/редактирование основной информации о кандидате (ФИО, контакты,
+ *   город, дата рождения, текущее место работы).
+ * • Управление позициями кандидата, привязка к вакансиям.
+ * • Взаимодействия (звонки, собеседования, письма) — вкладка «Взаимодействия».
+ * • Резюме и файлы — вкладка «Резюме».
+ * • Комментарии, история изменений.
+ *
+ * ═══ ЛЕНИВАЯ ЗАГРУЗКА (lazy loading) ═══
+ * Многие collection-loader'ы (citiesDl, personPositionsLc, openPositionDl и др.)
+ * заблокированы через preventAutoLoadUntilReady() и загружаются только при
+ * первом открытии соответствующей вкладки (tabSheetSocialNetworks).
+ * Исключение: tabMain (Основное) — инициализируется сразу в onInit():
+ *   initTabCandidate() вызывается как в addSelectedTabChangeListener,
+ *   так и явно после его регистрации, чтобы reference loaders
+ *   (citiesDl, personPositionsLc) загрузились при старте формы.
+ *
+ * ═══ ВАЖНЫЕ ЗАМЕЧАНИЯ ═══
+ * • positionsLabel находится внутри tabPositions (visible="false"),
+ *   поэтому получается через getComponent(), а не @Inject.
+ * • setPositionsLabel() проверяет getEditedEntity() на null —
+ *   guard от NPE при вызове из onInit до загрузки сущности.
+ * • cityOfCompany в Company загружается через company-picker-view;
+ *   для безопасности используется PersistenceHelper.isLoaded().
+ */
 @UiController("hunttech_JobCandidate.edit")
 @UiDescriptor("job-candidate-edit.xml")
 @EditedEntityContainer("jobCandidateDc")
@@ -890,6 +918,45 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         priorityCommunicationMethodRadioButton.setOptionsMap(priorityMap);
     }
 
+    /**
+     * Открывает модальное окно выбора приоритетного способа связи
+     * и записывает выбранное значение в поле priorityContact.
+     */
+    public void openPriorityDialog() {
+        Map<String, Integer> priorityMap = new LinkedHashMap<>();
+        priorityMap.put("Email", 1);
+        priorityMap.put("Phone", 2);
+        priorityMap.put("Telegramm", 3);
+        priorityMap.put("Skype", 4);
+        priorityMap.put("Viber", 5);
+        priorityMap.put("WhatsApp", 6);
+        priorityMap.put("Social Network", 7);
+        priorityMap.put("Other", 9);
+
+        dialogs.createInputDialog(this)
+                .withCaption("Приоритетный способ связи")
+                .withParameters(
+                        InputParameter.stringParameter("priority")
+                                .withCaption("Способ связи")
+                                .withField(() -> {
+                                    LookupField<String> field = uiComponents.create(LookupField.TYPE_STRING);
+                                    field.setWidthFull();
+                                    field.setOptionsList(new ArrayList<>(priorityMap.keySet()));
+                                    return field;
+                                })
+                )
+                .withCloseListener(closeEvent -> {
+                    if (closeEvent.getCloseAction().equals(InputDialog.INPUT_DIALOG_OK_ACTION)) {
+                        String selected = closeEvent.getValue("priority");
+                        Integer value = priorityMap.get(selected);
+                        if (value != null && jobCandidateDc.getItem() != null) {
+                            jobCandidateDc.getItem().setPriorityContact(value);
+                        }
+                    }
+                })
+                .show();
+    }
+
     private void checkNotUsePosition() {
         if (personPositionField != null) {
             if (personPositionField.getValue() != null) {
@@ -1290,39 +1357,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             initTabPositions();
             updateCandidateNavigationActiveState();
         });
-        updateCandidateNavigationActiveState();
 
-    }
-
-    void configureAvailableComponentRenderers() {
-        configureComponentRenderer("socialNetworkTable", "socialNetworkLogoColumn",
-                this::socialNetworkTableSocialNetworkLogoColumnColumnGenerator);
-        configureComponentRenderer("socialNetworkTable", "linkToWeb",
-                this::socialNetworkTableLinkToWebColumnGenerator);
-        configureComponentRenderer("jobCandidateIteractionListTable", "projectLogoColumn",
-                this::jobCandidateIteractionListTableProjectLogoColumnColumnGenerator);
-        configureComponentRenderer("jobCandidateCandidateCvTable", "projectLogoColumn",
-                this::jobCandidateCandidateCvTableProjectLogoColumnColumnGenerator);
-        configureComponentRenderer("jobCandidateCandidateCvTable", "candidateOriginalCVColumn",
-                this::jobCandidateCandidateCvTableCandidateOriginalCvColumnGenerator);
-        configureComponentRenderer("jobCandidateCandidateCvTable", "candidateHuntTechCVColumn",
-                this::jobCandidateCandidateCvTableCandidateHuntTechCvColumnGenerator);
-    }
-
-    @SuppressWarnings("unchecked")
-    <E extends Entity> void configureComponentRenderer(String dataGridId,
-                                                        String columnId,
-                                                        DataGrid.GenericColumnGenerator<E, Object> generator) {
-        Component component = getWindow().getComponent(dataGridId);
-        if (!(component instanceof DataGrid)) {
-            return;
-        }
-
-        DataGrid<E> dataGrid = (DataGrid<E>) component;
-        DataGrid.Column<E> column = dataGrid.getColumn(columnId);
-        if (column != null && dataGrid.getColumnGenerator(columnId) == null) {
-            column.setColumnGenerator(generator);
-        }
+        // Принудительная инициализация для стартового таба tabMain
+        initTabCandidate();
     }
 
     private <E extends Entity> void preventAutoLoadUntilReady(CollectionLoader<E> loader,
@@ -1687,7 +1724,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 positionsLabel = (CssLayout) getWindow().getComponent("positionsLabel");
             }
             if (positionsLabel != null) {
-                setPositionsLabel();
+                // getEditedEntity может быть null при вызове из onInit до загрузки сущности
+                if (getEditedEntity() != null) {
+                    setPositionsLabel();
+                }
             }
 
             setupNameSearchExecutors();
@@ -3832,7 +3872,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 socialNetworkURLs.setSocialNetworkURL(socialNetworkType);
                 socialNetworkURLs.setNetworkName(socialNetworkType.getSocialNetwork());
 
-                jobCandidateSocialNetworksDc.getMutableItems().add(dataContext.merge(socialNetworkURLs));
+                getEditedEntity().getSocialNetwork().add(socialNetworkURLs);
+                dataContext.merge(socialNetworkURLs);
+                jobCandidateSocialNetworksDc.getMutableItems().add(socialNetworkURLs);
             }
         }
 
@@ -4132,6 +4174,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     public void candidateNavContactInfo() {
+        selectCandidateTab("tabContactInfo");
+    }
+
+    public void candidateNavSocialNetworks() {
         selectCandidateTab("tabContactInfo");
     }
 

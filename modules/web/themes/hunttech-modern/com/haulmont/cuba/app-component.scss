@@ -1,0 +1,5 @@
+@import "../../hunttech-modern";
+
+@mixin com_haulmont_cuba {
+  @include hunttech-modern;
+}

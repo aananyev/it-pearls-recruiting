@@ -5,36 +5,8 @@
    (меню теряет layout, логотип растягивается). */
 @import "../halo/halo";
 @import "app-components";
-@import "com.company.hunttech/hunttech-modern-light-ext";
+@import "hunttech-modern-light";
 @import "com.company.hunttech/chat-style.css";
-@import "com.company.hunttech/user-ai-profile";
-@import "com.company.hunttech/settings-window-sections";
-@import "com.company.hunttech/main-screen-background-settings";
-@import "com.company.hunttech/ext-settings-about-sidebar-fix";
-@import "com.company.hunttech/edit-screen-shared-styles";
-@import "com.company.hunttech/hunttech-modern-light-table-text-tokens";
-@import "com.company.hunttech/table-text-components";
-@import "com.company.hunttech/job-candidate-editor.scss";
-@import "com.company.hunttech/open-position-preview";
-@import "com.company.hunttech/open-position-preview-sidebar-usability";
-@import "com.company.hunttech/recruiter-dashboard-shared-styles";
-@import "com.company.hunttech/geolocation-edit-forms";
-@import "com.company.hunttech/dictionary-edit-forms";
-@import "com.company.hunttech/vacancy-prompt-template-editor";
-@import "com.company.hunttech/ai-function-configuration-editor";
-@import "com.company.hunttech/admin-ai-configuration-editor";
-@import "com.company.hunttech/user-ai-configuration-editor";
-@import "com.company.hunttech/user-ai-function-override-editor";
-@import "com.company.hunttech/skill-tree-editor";
-@import "com.company.hunttech/ext-user-editor";
-@import "com.company.hunttech/iteraction-list-editor";
-@import "com.company.hunttech/iteraction-list-accordion-navigation";
-@import "com.company.hunttech/iteraction-list-flat-layout";
-@import "com.company.hunttech/candidate-cv-editor";
-@import "com.company.hunttech/iteraction-list-reference-finish";
-@import "com.company.hunttech/iteraction-list-visual-alignment";
-@import "com.company.hunttech/iteraction-editor";
-@import "com.company.hunttech/project-editor";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 .hunttech-modern-light {
@@ -42,38 +14,5 @@
   @include halo;
 
   @include app_components;
-
-  @include com_company_hunttech-hunttech-modern-light-ext;
-  @include user-ai-profile;
-  @include settings-window-sections;
-  @include main-screen-background-settings;
-  @include ext-settings-about-sidebar-fix;
-  @include edit-screen-shared-styles;
-  @include hrm-table-text-components;
-  @include job-candidate-editor-theme;
-  @include open-position-preview-theme;
-  @include open-position-preview-sidebar-usability-theme;
-  @include recruiter-dashboard-shared-styles;
-  @include geolocation-edit-forms-theme;
-  @include dictionary-edit-forms-theme;
-  @include vacancy-prompt-template-editor-theme;
-  @include ai-function-configuration-editor-theme;
-  @include admin-ai-configuration-editor-theme;
-  @include user-ai-configuration-editor-theme;
-  @include user-ai-function-override-editor-theme;
-  @include skill-tree-editor-theme;
-  @include ext-user-editor-theme;
-  @include iteraction-list-editor-theme;
-  @include iteraction-list-accordion-navigation-theme;
-  @include iteraction-list-flat-layout-theme;
-  @include candidate-cv-editor-theme;
-  @include iteraction-list-reference-finish-theme;
-  @include iteraction-list-visual-alignment-theme;
-
-  @include iteraction-editor-theme;
-  @include project-editor-theme;
-  // Вариант 3 (тёплый светло-серый): табличные и текстовые компоненты.
-  // Импорт в конце корневого селектора — после всех include, чтобы при
-  // равной специфичности перебивать существующие правила ext-файла темы.
-  @import "com.company.hunttech/modern-light-component-style-v3";
+  @include hunttech-modern-light;
 }

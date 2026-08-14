@@ -217,7 +217,10 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         List<Employee> employees = dataManager.load(Employee.class)
                 .query(QUERY_EMPLOYEES_BY_CANDIDATES)
                 .parameter("candidates", candidates)
-                .view(EMPLOYEE_STATUS_CACHE_VIEW)
+                .view(ViewBuilder.of(Employee.class)
+                        .add("jobCandidate", "_minimal")
+                        .add("workStatus", "_local")
+                        .build())
                 .list();
 
         Map<UUID, Employee> cache = new HashMap<>();
@@ -3005,6 +3008,19 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
                 .getComponentNN("secondNameField"))
                 .setSearchExecutor((searchString, searchParams) ->
                         parseCVService.getSecondNameList(
+                                ((Onlytext) screenOnlytext).getResultText())
+                                .stream()
+                                .filter(str ->
+                                        StringUtils
+                                                .containsAnyIgnoreCase(str, searchString))
+                                .collect(Collectors.toList()));
+
+        ((SuggestionField<Object>) eventJobCandidateEdit
+                .getSource()
+                .getWindow()
+                .getComponentNN("middleNameField"))
+                .setSearchExecutor((searchString, searchParams) ->
+                        parseCVService.getMiddleNameList(
                                 ((Onlytext) screenOnlytext).getResultText())
                                 .stream()
                                 .filter(str ->

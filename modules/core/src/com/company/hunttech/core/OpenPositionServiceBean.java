@@ -109,6 +109,11 @@ public class OpenPositionServiceBean implements OpenPositionService {
 
         OpenPositionNews openPositionNews = metadata.create(OpenPositionNews.class);
 
+        // Сохраняем OpenPosition если он новый — предотвращает IllegalStateException
+        if (PersistenceHelper.isNew(editedEntity)) {
+            dataManager.commit(editedEntity);
+        }
+
         openPositionNews.setOpenPosition(editedEntity);
         openPositionNews.setAuthor(user);
         openPositionNews.setDateNews(date);

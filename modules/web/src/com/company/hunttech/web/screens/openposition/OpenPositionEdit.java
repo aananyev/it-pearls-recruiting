@@ -1893,9 +1893,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
         if (PersistenceHelper.isNew(getEditedEntity())) {
             if (companyNameField.getValue() != null && cityOpenPositionField.getValue() == null) {
                 if (companyDepartamentField.getValue() != null) {
-                    if (companyDepartamentField.getValue().getCompanyName() != null) {
-                        if (companyDepartamentField.getValue().getCompanyName().getCityOfCompany() != null)
-                            cityOpenPositionField.setValue(companyDepartamentField.getValue().getCompanyName().getCityOfCompany());
+                    Company company = companyDepartamentField.getValue().getCompanyName();
+                    if (company != null && PersistenceHelper.isLoaded(company, "cityOfCompany")) {
+                        City city = company.getCityOfCompany();
+                        if (city != null) {
+                            cityOpenPositionField.setValue(city);
+                        }
                     }
                 }
             }

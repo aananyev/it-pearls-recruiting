@@ -175,7 +175,7 @@
         <!-- Справочник должностей для поля «Должность» (кэш; исключены служебные записи). -->
         <collection id="personPositionsDc"
                     class="com.company.hunttech.entity.Position">
-            <view extends="position-picker-view"/>
+            <view extends="position-view"/>
             <loader id="personPositionsLc" cacheable="true">
                 <query>
                     <!-- Все должности, кроме помеченных «(не использовать)», по алфавиту. -->
@@ -183,6 +183,13 @@
                             where e.positionRuName not like '%(не использовать)%'
                             order by e.positionRuName]]>
                 </query>
+            </loader>
+        </collection>
+        <collection id="currentCompaniesDc"
+                    class="com.company.hunttech.entity.Company">
+            <view extends="company-picker-view"/>
+            <loader id="currentCompaniesLc" cacheable="true">
+                <query><![CDATA[select e from hunttech_Company e order by e.comanyName]]></query>
             </loader>
         </collection>
         <collection id="citiesDc" class="com.company.hunttech.entity.City">
@@ -633,7 +640,7 @@
                       align="TOP_CENTER"
                       stylename="job-candidate-profile-header">
                     <vbox id="dropZone" spacing="false" align="TOP_CENTER">
-                        <vbox id="picVBox" align="TOP_CENTER" spacing="true">
+                        <vbox id="picVBox" align="TOP_CENTER">
                             <image id="candidatePic"
                                    dataContainer="jobCandidateDc"
                                    property="fileImageFace"
@@ -724,28 +731,17 @@
                           width="100%"
                           spacing="false"
                           stylename="job-candidate-status">
-                        <!-- Строка «Рейтинг»: подпись и звёздный рейтинг кандидата. -->
-                        <hbox width="100%" spacing="false">
-                            <label value="msg://msgRating"
-                                   box.expandRatio="1"
-                                   stylename="h3"/>
-                            <!-- Значение рейтинга (заполняется контроллером). -->
-                            <label id="candidateRatingLabel"
-                                   box.expandRatio="2"
-                                   stylename="h3"/>
-                        </hbox>
-                        <!-- Строка «Карточка»: процент заполнения профиля. -->
-                        <hbox width="100%" spacing="false">
-                            <label value="msg://msgCard"
-                                   box.expandRatio="1"
-                                   stylename="h3"/>
-                            <!-- Процент заполнения карточки (заполняется контроллером). -->
-                            <label id="labelQualityPercent"
-                                   stylename="h3"/>
-                        </hbox>
-                    </vbox>
-                    <!-- Сетка ключевой информации: город, компания, резюме. -->
-                    <grid id="profileInfoGrid" spacing="true" width="100%">
+                        <label id="candidateRatingLabel"
+                               stylename="h3"
+                               align="MIDDLE_LEFT"/>
+                        <label id="labelQualityPercent"
+                               align="MIDDLE_RIGHT"
+                               stylename="job-candidate-quality"/>
+                    </hbox>
+                    <grid id="profileInfoGrid"
+                          spacing="true"
+                          width="100%"
+                          stylename="job-candidate-info-grid job-candidate-sidebar-grid">
                         <columns count="2"/>
                         <rows>
                             <row>
@@ -825,33 +821,11 @@
                                 </hbox>
                             </row>
                             <row>
-                                <!-- Строка «Компания»: текущая компания кандидата. -->
-                                <hbox spacing="false"
-                                      width="100%">
-                                    <label value="msg://msgCompany"
-                                           stylename="small"
-                                           box.expandRatio="1"/>
-                                    <!-- Текущая компания кандидата (свойство currentCompany). -->
-                                    <label id="currentCompanyLabel"
-                                           box.expandRatio="2"
-                                           stylename="small"
-                                           dataContainer="jobCandidateDc"
-                                           property="currentCompany"/>
-                                </hbox>
-                            </row>
-                            <row>
-                                <!-- Строка «Резюме»: количество/ссылка на резюме (заполняется контроллером). -->
-                                <hbox spacing="false"
-                                      width="100%">
-                                    <label value="msg://msgResume"
-                                           stylename="small"
-                                           box.expandRatio="1"/>
-                                    <!-- Ссылка на резюме (заполняется контроллером). -->
-                                    <label id="labelCV"
-                                           align="MIDDLE_LEFT"
-                                           stylename="small"
-                                           box.expandRatio="2"/>
-                                </hbox>
+                                <label value="Резюме"
+                                       stylename="small"/>
+                                <label id="labelCV"
+                                       align="MIDDLE_CENTER"
+                                       stylename="small"/>
                             </row>
                         </rows>
                     </grid>
@@ -920,45 +894,76 @@
                         <columns count="2"/>
                         <rows>
                             <row>
-                                <!-- Строка Email: подпись и кликабельная ссылка mailto. -->
-                                <hbox spacing="false" width="100%">
-                                    <label value="msg://msgEmail"
-                                           stylename="small"
-                                           box.expandRatio="1"/>
-                                    <!-- Ссылка mailto на email кандидата (заполняется контроллером). -->
-                                    <linkButton id="emailLinkButton"
-                                                box.expandRatio="2"
-                                                align="MIDDLE_LEFT"
-                                                stylename="small"/>
-                                </hbox>
+                                <label value="Email"
+                                       stylename="small"/>
+                                <linkButton id="emailLinkButton"
+                                            align="MIDDLE_LEFT"
+                                            stylename="small"/>
                             </row>
                             <row>
-                                <!-- Строка «Телефон»: номер из jobCandidateDc. -->
-                                <hbox spacing="false"
-                                      width="100%">
-                                    <label value="msg://msgPhone"
-                                           stylename="small"
-                                           box.expandRatio="1"/>
-                                    <!-- Телефон кандидата (свойство phone). -->
-                                    <label id="phoneLabel"
-                                           box.expandRatio="2"
-                                           stylename="small"
-                                           dataContainer="jobCandidateDc"
-                                           property="phone"/>
-                                </hbox>
+                                <label value="Телефон"
+                                       stylename="small"/>
+                                <label id="phoneLabel"
+                                       stylename="small"
+                                       dataContainer="jobCandidateDc"
+                                       property="phone"/>
                             </row>
                             <row>
-                                <!-- Строка Telegram: кликабельная ссылка на профиль. -->
-                                <hbox spacing="false" width="100%">
-                                    <label value="msg://msgTelegramAccount" stylename="small" box.expandRatio="1"/>
-                                    <linkButton id="telegrammLinkButton"
-                                                box.expandRatio="2"
-                                                align="MIDDLE_LEFT"
-                                                stylename="small"/>
-                                </hbox>
+                                <label value="Telegram"
+                                       stylename="small"/>
+                                <linkButton id="telegrammLinkButton"
+                                            align="MIDDLE_LEFT"
+                                            stylename="small"/>
                             </row>
                         </rows>
                     </grid>
+                </vbox>
+
+                <!-- Sidebar navigation: кнопки переключения вкладок -->
+                <vbox id="candidateNavigation"
+                      width="100%"
+                      spacing="false"
+                      stylename="job-candidate-navigation">
+                    <button id="candidateNavMain"
+                            invoke="candidateNavMain"
+                            caption="Основное"
+                            width="100%"
+                            stylename="job-candidate-nav-item"/>
+                    <button id="candidateNavPositions"
+                            invoke="candidateNavPositions"
+                            caption="Позиции и вакансии"
+                            width="100%"
+                            stylename="job-candidate-nav-item"/>
+                    <button id="candidateNavIteraction"
+                            invoke="candidateNavIteraction"
+                            caption="Взаимодействия"
+                            width="100%"
+                            stylename="job-candidate-nav-item"/>
+                    <button id="candidateNavResume"
+                            invoke="candidateNavResume"
+                            caption="Резюме и файлы"
+                            width="100%"
+                            stylename="job-candidate-nav-item"/>
+                    <button id="candidateNavContactInfo"
+                            invoke="candidateNavContactInfo"
+                            caption="Контакты"
+                            width="100%"
+                            stylename="job-candidate-nav-item"/>
+                    <button id="candidateNavSocialNetworks"
+                            invoke="candidateNavSocialNetworks"
+                            caption="Социальные сети"
+                            width="100%"
+                            stylename="job-candidate-nav-item"/>
+                    <button id="candidateNavComments"
+                            invoke="candidateNavComments"
+                            caption="Комментарии"
+                            width="100%"
+                            stylename="job-candidate-nav-item"/>
+                    <button id="candidateNavHistory"
+                            invoke="candidateNavHistory"
+                            caption="История"
+                            width="100%"
+                            stylename="job-candidate-nav-item"/>
                 </vbox>
 
                 <!-- Свободное пространство прижимает HR-Мастер к нижней границе sidebar. -->
@@ -1004,42 +1009,43 @@
                           dataContainer="jobCandidateDc"
                           property="blockCandidate"
                           visible="false"/>
-                <!-- Скрытые поля-помощники для контроллера (телефон/email/skype/telegram и заголовки). -->
-                <label id="mobilePhoneLabel" visible="false"/>
-                <label id="emailLabel" visible="false"/>
-                <label id="skypuLabel" visible="false"/>
-                <!-- Скрытый label telegramLabel (контракт контроллера). -->
-                <label id="telegramLabel" visible="false"/>
-                <!-- Элемент linkButton. -->
-                <linkButton id="skypeLinkButton" visible="false"/>
-                <!-- Элемент linkButton. -->
-                <linkButton id="telegrammGroupLinkButton" visible="false"/>
-                <!-- Скрытый label personPositionTitle (контракт контроллера). -->
-                <label id="personPositionTitle" visible="false"/>
-                <!-- Скрытый label emailTitle (контракт контроллера). -->
-                <label id="emailTitle" visible="false"/>
-                <!-- Скрытый label phoneTitle (контракт контроллера). -->
-                <label id="phoneTitle" visible="false"/>
-                <!-- Скрытый label telegramTitle (контракт контроллера). -->
-                <label id="telegramTitle" visible="false"/>
-                <!-- Скрытый label skypeTitle (контракт контроллера). -->
-                <label id="skypeTitle" visible="false"/>
-                <label id="jobTitleTitle" visible="false"/>
-                <!-- Скрытый контейнер навыков (используется контроллером при проверке навыков). -->
-                <hbox id="skillBox" visible="false"/>
+                <label id="mobilePhoneLabel"
+                       visible="false"/>
+                <label id="emailLabel"
+                       visible="false"/>
+                <label id="skypuLabel"
+                       visible="false"/>
+                <label id="telegramLabel"
+                       visible="false"/>
+                <linkButton id="skypeLinkButton"
+                            visible="false"/>
+                <linkButton id="telegrammGroupLinkButton"
+                            visible="false"/>
+                <label id="personPositionTitle"
+                       visible="false"/>
+                <label id="emailTitle"
+                       visible="false"/>
+                <label id="phoneTitle"
+                       visible="false"/>
+                <label id="telegramTitle"
+                       visible="false"/>
+                <label id="skypeTitle"
+                       visible="false"/>
+                <label id="jobTitleTitle"
+                       visible="false"/>
+                <hbox id="skillBox"
+                      visible="false"/>
             </vbox>
 
             <!-- Legacy-контейнеры сохраняют XML-контракт @Inject контроллера.
                  Таблицы здесь не дублируются: их рабочие экземпляры находятся
                  во вкладке «Позиции и вакансии» и имеют штатные dataContainer. -->
-            <!-- Legacy-группа «Последние проекты»: скрыта, сохраняет @Inject-контракт контроллера. -->
             <groupBox id="lastProjects"
                       visible="false"
                       width="1px"
                       height="1px"
                       caption="msg://msgLastProject"
                       expand="dictionatysTavlesHBox">
-                <!-- Legacy-сетка словарей: скрыта, заглушка контракта. -->
                 <grid id="dictionatysTavlesHBox"
                       visible="false"
                       width="1px"
@@ -1048,7 +1054,6 @@
                     <columns count="1"/>
                     <rows>
                         <row>
-                            <!-- Label : значение, заполняемое контроллером. -->
                             <label value=""/>
                         </row>
                     </rows>
@@ -1064,21 +1069,23 @@
                   expand="tabSheetSocialNetworks"
                   stylename="job-candidate-workspace edit-workspace">
 
-                <!-- Верхняя панель: меню «Еще» справа. -->
-                <!-- Панель инструментов: кнопка-меню «Еще» с действиями над карточкой. -->
+                <!-- ═══════════════════════════════════════════════════════════
+                     ВЕРХНЯЯ ПАНЕЛЬ
+                     — "Еще" (popup-меню) строго справа.
+                     ───────────────────────────────────────────────────────
+                     Элементы:
+                       • label (spacer) — занимает всё доступное пространство,
+                         прижимая кнопку "Еще" к правому краю.
+                       • moreActionsPopUpButton — выпадающее меню доп. действий
+                         (блокировка кандидата, подписка на уведомления).
+                     ═══════════════════════════════════════════════════════ -->
                 <hbox id="jobCandidateTopBar"
                       width="100%"
                       spacing="true"
-                      expand="jobCandidateToolbarTitleBox"
                       align="MIDDLE_LEFT"
-                      stylename="job-candidate-top-bar edit-toolbar">
-                    <!-- Заголовок и описание формы слева (контракт edit-toolbar-title/-description). -->
-                    <vbox id="jobCandidateToolbarTitleBox" width="100%" spacing="false"
-                          stylename="job-candidate-toolbar-title-box">
-                        <label value="msg://editorCaption" stylename="edit-toolbar-title" width="100%"/>
-                        <label value="mainMsg://msgCandidate" stylename="edit-toolbar-description" width="100%"/>
-                    </vbox>
-                    <!-- Меню «Еще»: блокировка, подписка, аудит-справка. -->
+                      stylename="job-candidate-top-bar">
+                    <!-- Растяжимый разделитель: прижимает "Еще" к правому краю -->
+                    <label width="100%" stylename="job-candidate-spacer"/>
                     <popupButton id="moreActionsPopUpButton"
                                  caption="msg://msgMore"
                                  align="MIDDLE_RIGHT"
@@ -1108,6 +1115,7 @@
                         </popup>
                     </popupButton>
                 </hbox>
+
 
                 <!-- TabSheet -->
                 <!-- Основной TabSheet формы: разделы «Основное», «Контакты», «Позиции и вакансии»,
@@ -1152,137 +1160,117 @@
                                       spacing="true"
                                       box.expandRatio="1"
                                       stylename="job-candidate-card job-candidate-half-card">
-                                    <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
-                                        <label value="msg://msgPersonalData" stylename="job-candidate-card-title edit-card-title"/>
+                                    <hbox width="100%"
+                                          align="MIDDLE_LEFT"
+                                          stylename="job-candidate-card-heading">
+                                        <label value="Персональные данные"
+                                               stylename="job-candidate-card-title"/>
                                     </hbox>
-
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
-                                          expand="firstNameField" stylename="job-candidate-form-row">
-                                        <label value="Имя" stylename="small" width="80px"/>
-                                        <suggestionField id="firstNameField"
-                                                         dataContainer="jobCandidateDc"
-                                                         property="firstName"
-                                                         width="100%"
-                                                         minSearchStringLength="1"
-                                                         editable="true"
-                                                         inputPrompt="msg://msgPressEnter">
-                                            <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                   escapeValueForLike="true"
-                                                   searchStringFormat="%$searchString%">
-                                                select e.firstName from hunttech_JobCandidate e
-                                                where lower(e.firstName) like lower(:searchString) escape '\'
-                                            </query>
-                                        </suggestionField>
-                                    </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
-                                          expand="middleNameField" stylename="job-candidate-form-row">
-                                        <label value="Отчество" stylename="small" width="80px"/>
-                                        <suggestionField id="middleNameField"
-                                                         dataContainer="jobCandidateDc"
-                                                         property="middleName"
-                                                         width="100%"
-                                                         minSearchStringLength="1"
-                                                         editable="true"
-                                                         inputPrompt="msg://msgPressEnter">
-                                            <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                   escapeValueForLike="true"
-                                                   searchStringFormat="%$searchString%">
-                                                select e from hunttech_JobCandidate e
-                                                where lower(e.middleName) like lower(:searchString) escape '\'
-                                            </query>
-                                        </suggestionField>
-                                    </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
-                                          expand="secondNameField" stylename="job-candidate-form-row">
-                                        <label value="Фамилия" stylename="small" width="80px"/>
-                                        <suggestionField id="secondNameField"
-                                                         dataContainer="jobCandidateDc"
-                                                         property="secondName"
-                                                         width="100%"
-                                                         minSearchStringLength="1"
-                                                         editable="true"
-                                                         inputPrompt="msg://msgPressEnter">
-                                            <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                   escapeValueForLike="true"
-                                                   searchStringFormat="%$searchString%">
-                                                select e from hunttech_JobCandidate e
-                                                where lower(e.secondName) like lower(:searchString) escape '\'
-                                            </query>
-                                        </suggestionField>
-                                    </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
-                                          expand="birdhDateField" stylename="job-candidate-form-row">
-                                        <label value="Дата рождения" stylename="small" width="80px"/>
-                                        <dateField id="birdhDateField"
-                                                   dataContainer="jobCandidateDc"
-                                                   property="birdhDate"
-                                                   width="100%"/>
-                                    </hbox>
-
-                                    <!-- Сохраняются существующие component ID, data binding и запросы подсказок;
-                                         изменена только визуальная компоновка полей. -->
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
-                                          expand="firstNameField" stylename="job-candidate-form-row">
-                                        <label value="Имя" stylename="small" width="80px"/>
-                                        <suggestionField id="firstNameField"
-                                                         dataContainer="jobCandidateDc"
-                                                         property="firstName"
-                                                         width="100%"
-                                                         minSearchStringLength="1"
-                                                         editable="true"
-                                                         inputPrompt="msg://msgPressEnter">
-                                            <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                   escapeValueForLike="true"
-                                                   searchStringFormat="%$searchString%">
-                                                select e from hunttech_JobCandidate e
-                                                where lower(e.firstName) like lower(:searchString) escape '\'
-                                            </query>
-                                        </suggestionField>
-                                    </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
-                                          expand="middleNameField" stylename="job-candidate-form-row">
-                                        <label value="Отчество" stylename="small" width="80px"/>
-                                        <suggestionField id="middleNameField"
-                                                         dataContainer="jobCandidateDc"
-                                                         property="middleName"
-                                                         width="100%"
-                                                         minSearchStringLength="1"
-                                                         editable="true"
-                                                         inputPrompt="msg://msgPressEnter">
-                                            <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                   escapeValueForLike="true"
-                                                   searchStringFormat="%$searchString%">
-                                                select e from hunttech_JobCandidate e
-                                                where lower(e.middleName) like lower(:searchString) escape '\'
-                                            </query>
-                                        </suggestionField>
-                                    </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
-                                          expand="secondNameField" stylename="job-candidate-form-row">
-                                        <label value="Фамилия" stylename="small" width="80px"/>
-                                        <suggestionField id="secondNameField"
-                                                         dataContainer="jobCandidateDc"
-                                                         property="secondName"
-                                                         width="100%"
-                                                         minSearchStringLength="1"
-                                                         editable="true"
-                                                         inputPrompt="msg://msgPressEnter">
-                                            <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                   escapeValueForLike="true"
-                                                   searchStringFormat="%$searchString%">
-                                                select e from hunttech_JobCandidate e
-                                                where lower(e.secondName) like lower(:searchString) escape '\'
-                                            </query>
-                                        </suggestionField>
-                                    </hbox>
-                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
-                                          expand="birdhDateField" stylename="job-candidate-form-row">
-                                        <label value="Дата рождения" stylename="small" width="80px"/>
-                                        <dateField id="birdhDateField"
-                                                   dataContainer="jobCandidateDc"
-                                                   property="birdhDate"
-                                                   width="100%"/>
-                                    </hbox>
+                                    <grid id="personalDataGrid"
+                                          spacing="true"
+                                          width="100%"
+                                          stylename="job-candidate-form-grid">
+                                        <columns count="2"/>
+                                        <rows>
+                                            <row>
+                                                <hbox spacing="false" width="100%">
+                                                    <label value="Имя"
+                                                           box.expandRatio="1"
+                                                           stylename="small"/>
+                                                    <suggestionField id="firstNameField"
+                                                                     dataContainer="jobCandidateDc"
+                                                                     property="firstName"
+                                                                     width="100%"
+                                                                     box.expandRatio="4"
+                                                                     stylename="job-candidate-person-name-field"
+                                                                     minSearchStringLength="1"
+                                                                     editable="true"
+                                                                     inputPrompt="msg://msgPressEnter">
+                                                        <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                                               escapeValueForLike="false"
+                                                               view="_local"
+                                                               searchStringFormat="%$searchString%">
+                                                            select e.firstName from hunttech_JobCandidate e
+                                                            where lower(e.firstName) like lower(:searchString) escape
+                                                            '\'
+                                                        </query>
+                                                    </suggestionField>
+                                                </hbox>
+                                            </row>
+                                            <row>
+                                                <hbox width="100%" spacing="false">
+                                                    <label value="Отчество"
+                                                           box.expandRatio="1"
+                                                           stylename="small"/>
+                                                    <suggestionField id="middleNameField"
+                                                                     box.expandRatio="3"
+                                                                     dataContainer="jobCandidateDc"
+                                                                     property="middleName"
+                                                                     width="100%"
+                                                                     stylename="job-candidate-person-name-field"
+                                                                     minSearchStringLength="1"
+                                                                     editable="true"
+                                                                     inputPrompt="msg://msgPressEnter">
+                                                        <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                                               escapeValueForLike="false"
+                                                               searchStringFormat="%$searchString%">
+                                                            select e.middleName from hunttech_JobCandidate e
+                                                            where lower(e.middleName) like lower(:searchString) escape
+                                                            '\'
+                                                        </query>
+                                                    </suggestionField>
+                                                </hbox>
+                                            </row>
+                                            <row>
+                                                <hbox spacing="false" width="100%">
+                                                    <label value="Фамилия" stylename="small" box.expandRatio="1"/>
+                                                    <suggestionField id="secondNameField"
+                                                                     box.expandRatio="3"
+                                                                     dataContainer="jobCandidateDc"
+                                                                     property="secondName"
+                                                                     width="100%"
+                                                                     stylename="job-candidate-person-name-field"
+                                                                     minSearchStringLength="1"
+                                                                     editable="true"
+                                                                     inputPrompt="msg://msgPressEnter">
+                                                        <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                                               escapeValueForLike="false"
+                                                               searchStringFormat="%$searchString%">
+                                                            select e.secondName from hunttech_JobCandidate e
+                                                            where lower(e.secondName) like lower(:searchString) escape
+                                                            '\'
+                                                        </query>
+                                                    </suggestionField>
+                                                </hbox>
+                                            </row>
+                                            <row>
+                                                <hbox width="100%" spacing="false">
+                                                    <label value="Дата рождения" box.expandRatio="1" stylename="small"/>
+                                                    <dateField id="birdhDateField"
+                                                               box.expandRatio="3"
+                                                               dataContainer="jobCandidateDc"
+                                                               property="birdhDate"
+                                                               width="AUTO"/>
+                                                </hbox>
+                                            </row>
+                                            <row>
+                                                <hbox spacing="false" width="100%">
+                                                    <label value="Город" stylename="small" box.expandRatio="1"/>
+                                                    <lookupPickerField id="jobCityCandidateField"
+                                                                       box.expandRatio="3"
+                                                                       dataContainer="jobCandidateDc"
+                                                                       width="100%"
+                                                                       optionsContainer="citiesDc"
+                                                                       property="cityOfResidence"
+                                                                       required="true">
+                                                        <actions>
+                                                            <action id="lookup" type="picker_lookup"/>
+                                                        </actions>
+                                                    </lookupPickerField>
+                                                </hbox>
+                                            </row>
+                                        </rows>
+                                    </grid>
                                 </vbox>
 
                                 <!-- Правая карточка: Профессиональные данные -->
@@ -1292,9 +1280,87 @@
                                       spacing="true"
                                       box.expandRatio="1"
                                       stylename="job-candidate-card job-candidate-half-card">
-                                    <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
-                                        <label value="msg://msgProfessionalData" stylename="job-candidate-card-title edit-card-title"/>
+                                    <hbox width="100%"
+                                          align="MIDDLE_LEFT"
+                                          stylename="job-candidate-card-heading">
+                                        <label value="Профессиональные данные"
+                                               stylename="job-candidate-card-title"/>
                                     </hbox>
+                                    <grid id="professionalDataGrid"
+                                          spacing="true"
+                                          width="100%"
+                                          stylename="job-candidate-form-grid">
+                                        <columns count="2"/>
+                                        <rows>
+                                            <row>
+                                                <hbox width="100%" spacing="false">
+                                                    <label value="Должность" stylename="small" box.expandRatio="1"/>
+                                                    <lookupPickerField id="personPositionField"
+                                                                       box.expandRatio="3"
+                                                                       optionsContainer="personPositionsDc"
+                                                                       dataContainer="jobCandidateDc"
+                                                                       property="personPosition"
+                                                                       width="100%"
+                                                                       required="true">
+                                                        <actions>
+                                                            <action id="lookup"
+                                                                    type="picker_lookup"/>
+                                                            <action id="open"
+                                                                    type="picker_open"
+                                                                    icon="EDIT_ACTION"/>
+                                                        </actions>
+                                                    </lookupPickerField>
+                                                </hbox>
+                                            </row>
+                                            <row>
+                                                <hbox spacing="false" width="100%">
+                                                    <label value="Компания" stylename="small" box.expandRatio="1"/>
+                                                    <suggestionPickerField id="currentCompanyField"
+                                                                           box.expandRatio="3"
+                                                                           dataContainer="jobCandidateDc"
+                                                                           property="currentCompany"
+                                                                           width="100%"
+                                                                           minSearchStringLength="2"
+                                                                           suggestionsLimit="50"
+                                                                           asyncSearchDelayMs="300"
+                                                                           inputPrompt="msg://msgPressEnter"
+                                                                           required="true">
+                                                        <actions>
+                                                            <action id="lookup"
+                                                                    type="picker_lookup"/>
+                                                            <action id="open"
+                                                                    type="picker_open"
+                                                                    icon="EDIT_ACTION"/>
+                                                        </actions>
+                                                        <query entityClass="com.company.hunttech.entity.Company"
+                                                               escapeValueForLike="true"
+                                                               searchStringFormat="%$searchString%">
+                                                            select e from hunttech_Company e
+                                                            where lower(e.comanyName) like lower(:searchString) escape
+                                                            '\'
+                                                            order by e.comanyName, e.companyShortName
+                                                        </query>
+                                                    </suggestionPickerField>
+                                                </hbox>
+                                            </row>
+                                            <row>
+                                                <hbox width="100%" spacing="false">
+                                                    <label value="Доп. позиции" box.expandRatio="1" stylename="small"/>
+                                                    <hbox spacing="true" width="100%" expand="positionsLabel">
+                                                        <button id="addPositions"
+                                                                caption="..."
+                                                                enable="true"
+                                                                description="msg://msgSetPositions"
+                                                                invoke="addPositionList"/>
+                                                        <label id="positionsLabel"
+                                                               stylename="small"
+                                                               align="MIDDLE_LEFT"/>
+                                                    </hbox>
+                                                </hbox>
+                                            </row>
+                                        </rows>
+                                    </grid>
+                                </vbox>
 
                                     <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
                                           expand="jobCityCandidateField" stylename="job-candidate-form-row">
@@ -1446,21 +1512,163 @@
                     <tab id="tabContactInfo"
                          caption="msg://msgCandidateContacts"
                          spacing="true"
-                         margin="false"
-                         expand="tabContactInfoScrollBox">
-                        <!-- Прокручиваемый контейнер вкладки: обязательные размеры 100%×100%
-                             для корректной вертикальной прокрутки содержимого. -->
-                        <scrollBox id="tabContactInfoScrollBox"
-                                   orientation="vertical"
-                                   scrollBars="vertical"
-                                   width="100%"
-                                   height="100%"
-                                   spacing="true">
-                            <!-- Аккордеон-секция «Контакты». -->
-                            <vbox width="100%" spacing="true" stylename="job-candidate-accordion-section edit-accordion-section">
-                                <!-- Заголовок секции. -->
-                                <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
-                                    <label value="msg://msgCandidateContacts" stylename="job-candidate-accordion-title"/>
+                         margin="false">
+                        <vbox width="100%"
+                              spacing="true"
+                              stylename="job-candidate-accordion-section">
+                            <hbox width="100%"
+                                  align="MIDDLE_LEFT"
+                                  stylename="job-candidate-accordion-header">
+                                <label value="Контакты"
+                                       stylename="job-candidate-accordion-title"/>
+                            </hbox>
+                            <vbox width="100%"
+                                  height="AUTO"
+                                  spacing="true"
+                                  stylename="job-candidate-accordion-content">
+                                <hbox width="100%"
+                                      spacing="true"
+                                      stylename="job-candidate-card-row">
+                                    <!-- Основные контакты -->
+                                    <vbox id="jobCandidateMainContacts"
+                                          width="100%" height="AUTO"
+                                          spacing="true"
+                                          box.expandRatio="1"
+                                          stylename="job-candidate-card job-candidate-half-card job-candidate-contact-card">
+                                        <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
+                                            <label value="Основные контакты" stylename="job-candidate-card-title"/>
+                                        </hbox>
+                                        <hbox width="100%"
+                                              spacing="true"
+                                              align="MIDDLE_LEFT"
+                                              expand="emailField"
+                                              stylename="job-candidate-form-row">
+                                            <label value="Email"
+                                                   stylename="small"
+                                                   width="80px"/>
+                                            <textField id="emailField"
+                                                       dataContainer="jobCandidateDc"
+                                                       property="email"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <hbox width="100%"
+                                              spacing="true"
+                                              align="MIDDLE_LEFT"
+                                              expand="phoneField"
+                                              stylename="job-candidate-form-row">
+                                            <label value="Телефон"
+                                                   stylename="small"
+                                                   width="80px"/>
+                                            <textField id="phoneField"
+                                                       dataContainer="jobCandidateDc"
+                                                       property="phone"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <hbox width="100%"
+                                              spacing="true"
+                                              align="MIDDLE_LEFT"
+                                              expand="mobilePhoneField"
+                                              stylename="job-candidate-form-row">
+                                            <label value="Моб. телефон"
+                                                   stylename="small"
+                                                   width="80px"/>
+                                            <textField id="mobilePhoneField"
+                                                       dataContainer="jobCandidateDc"
+                                                       property="mobilePhone"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <hbox width="100%"
+                                              spacing="true"
+                                              align="MIDDLE_LEFT"
+                                              expand="telegramNameField"
+                                              stylename="job-candidate-form-row">
+                                            <label value="Telegram"
+                                                   stylename="small"
+                                                   width="80px"/>
+                                            <textField id="telegramNameField"
+                                                       dataContainer="jobCandidateDc"
+                                                       property="telegramName"
+                                                       width="100%"/>
+                                        </hbox>
+                                    </vbox>
+                                    <!-- Дополнительные контакты + Приоритет -->
+                                    <vbox id="jobCandidateAdditionalContacts"
+                                          width="100%" height="AUTO"
+                                          spacing="true"
+                                          box.expandRatio="1"
+                                          stylename="job-candidate-card job-candidate-half-card job-candidate-contact-card">
+                                        <hbox width="100%"
+                                              align="MIDDLE_LEFT"
+                                              stylename="job-candidate-card-heading">
+                                            <label value="Дополнительные контакты"
+                                                   stylename="job-candidate-card-title"/>
+                                        </hbox>
+                                        <hbox width="100%"
+                                              spacing="true"
+                                              align="MIDDLE_LEFT"
+                                              expand="telegramGroupField"
+                                              stylename="job-candidate-form-row">
+                                            <label value="Telegram-группа"
+                                                   stylename="small"
+                                                   width="100px"/>
+                                            <textField id="telegramGroupField"
+                                                       dataContainer="jobCandidateDc"
+                                                       property="telegramGroup"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <hbox width="100%"
+                                              spacing="true"
+                                              align="MIDDLE_LEFT"
+                                              expand="whatsupNameField"
+                                              stylename="job-candidate-form-row">
+                                            <label value="WhatsApp"
+                                                   stylename="small"
+                                                   width="100px"/>
+                                            <textField id="whatsupNameField"
+                                                       dataContainer="jobCandidateDc"
+                                                       property="whatsupName"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <hbox width="100%"
+                                              spacing="true"
+                                              align="MIDDLE_LEFT"
+                                              expand="wiberNameField"
+                                              stylename="job-candidate-form-row">
+                                            <label value="Viber"
+                                                   stylename="small"
+                                                   width="100px"/>
+                                            <textField id="wiberNameField"
+                                                       dataContainer="jobCandidateDc"
+                                                       property="wiberName"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <hbox width="100%"
+                                              spacing="true"
+                                              align="MIDDLE_LEFT"
+                                              expand="skypeNameField"
+                                              stylename="job-candidate-form-row">
+                                            <label value="Skype"
+                                                   stylename="small"
+                                                   width="100px"/>
+                                            <textField id="skypeNameField"
+                                                       dataContainer="jobCandidateDc"
+                                                       property="skypeName"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <hbox width="100%"
+                                              spacing="true"
+                                              align="MIDDLE_LEFT"
+                                              expand="priorityCommunicationMethodRadioButton"
+                                              stylename="job-candidate-form-row">
+                                            <label value="Приоритетный способ"
+                                                   stylename="small"
+                                                   width="100px"/>
+                                            <radioButtonGroup id="priorityCommunicationMethodRadioButton"
+                                                              width="100%"
+                                                              dataContainer="jobCandidateDc"
+                                                              property="priorityContact"/>
+                                        </hbox>
+                                    </vbox>
                                 </hbox>
                                 <!-- Контент секции: карточки контактов и соцсетей. -->
                                 <vbox width="100%" height="AUTO" spacing="true"
@@ -1688,9 +1896,12 @@
                               height="100%"
                               spacing="true"
                               expand="tabPositionsContent"
-                              stylename="job-candidate-accordion-section edit-accordion-section">
-                            <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
-                                <label value="Позиции и вакансии" stylename="job-candidate-accordion-title"/>
+                              stylename="job-candidate-accordion-section">
+                            <hbox width="100%"
+                                  align="MIDDLE_LEFT"
+                                  stylename="job-candidate-accordion-header">
+                                <label value="Позиции и вакансии"
+                                       stylename="job-candidate-accordion-title"/>
                             </hbox>
                             <vbox id="tabPositionsContent"
                                   width="100%"
@@ -1718,19 +1929,32 @@
                                                contextMenuEnabled="false"
                                                dataContainer="lastProjectDc">
                                             <columns>
-                                                <column id="number" width="30px" caption="№"
+                                                <column id="number"
+                                                        width="30px"
+                                                        caption="№"
                                                         generator="lastIteractionCount"/>
-                                                <column id="vacancy" width="300px" maxTextLength="40"
+                                                <column id="vacancy"
+                                                        width="300px"
+                                                        maxTextLength="40"
                                                         caption="msg://msgVacancy"/>
-                                                <column id="max" width="70px" caption="msg://msgDate"/>
-                                                <column id="lastInteraction" width="200px" maxTextLength="40"
+                                                <column id="max"
+                                                        width="70px"
+                                                        caption="msg://msgDate"/>
+                                                <column id="lastInteraction"
+                                                        width="200px"
+                                                        maxTextLength="40"
                                                         caption="msg://msgLastInteraction"
                                                         generator="lastInteractionGeneratorColumn"/>
-                                                <column id="researcher" width="100px" caption="msg://msgResearcher"
+                                                <column id="researcher"
+                                                        width="100px"
+                                                        caption="msg://msgResearcher"
                                                         generator="whoIsResearcherGeneratorColumn"/>
-                                                <column id="recruter" width="100px" caption="msg://msgRecruter"
+                                                <column id="recruter"
+                                                        width="100px"
+                                                        caption="msg://msgRecruter"
                                                         generator="whoIsRecruterGeneratorColumn"/>
-                                                <column id="idViewIteractionsButton" width="100px"
+                                                <column id="idViewIteractionsButton"
+                                                        width="100px"
                                                         caption="msg://msgInteractionsView"
                                                         generator="addInteractionsViewButton"/>
                                             </columns>
@@ -1751,9 +1975,12 @@
                                                stylename="no-horizontal-lines job-candidate-table"
                                                dataContainer="suggestOpenPositionDc">
                                             <columns>
-                                                <column id="notSendedIconColumn" caption="msg://msgStatus"
+                                                <column id="notSendedIconColumn"
+                                                        caption="msg://msgStatus"
                                                         width="20px"/>
-                                                <column id="vacansyName" captionAsHtml="true" maxTextLength="60"
+                                                <column id="vacansyName"
+                                                        captionAsHtml="true"
+                                                        maxTextLength="60"
                                                         caption="msg://msgSuggestVacansies"/>
                                             </columns>
                                             <rows/>
@@ -1775,9 +2002,12 @@
                               height="100%"
                               spacing="true"
                               expand="tabIteractionContent"
-                              stylename="job-candidate-accordion-section edit-accordion-section">
-                            <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
-                                <label value="Взаимодействия" stylename="job-candidate-accordion-title"/>
+                              stylename="job-candidate-accordion-section">
+                            <hbox width="100%"
+                                  align="MIDDLE_LEFT"
+                                  stylename="job-candidate-accordion-header">
+                                <label value="Взаимодействия"
+                                       stylename="job-candidate-accordion-title"/>
                             </hbox>
                             <vbox id="tabIteractionContent"
                                   width="100%"
@@ -1788,11 +2018,13 @@
 
                                 <lookupPickerField id="vacancyFilterLookupPickerField"
                                                    caption="msg://msgVacancyFiler"
-                                                   visible="true" width="AUTO"
-                                                   stylename="edit-form-control">
+                                                   visible="true" width="AUTO">
                                     <actions>
-                                        <action id="lookup" type="picker_lookup"/>
-                                        <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                                        <action id="lookup"
+                                                type="picker_lookup"/>
+                                        <action id="open"
+                                                type="picker_open"
+                                                icon="EDIT_ACTION"/>
                                     </actions>
                                 </lookupPickerField>
                                 <dataGrid id="jobCandidateIteractionListTable"
@@ -1804,10 +2036,14 @@
                                           textSelectionEnabled="false"
                                           reorderingAllowed="true">
                                     <actions>
-                                        <action id="create" type="create"/>
-                                        <action type="edit" id="edit"/>
-                                        <action id="remove" type="remove"/>
-                                        <action id="refresh" type="refresh"/>
+                                        <action id="create"
+                                                type="create"/>
+                                        <action type="edit"
+                                                id="edit"/>
+                                        <action id="remove"
+                                                type="remove"/>
+                                        <action id="refresh"
+                                                type="refresh"/>
                                     </actions>
                                     <buttonsPanel>
                                         <button action="jobCandidateIteractionListTable.create"/>
@@ -1816,37 +2052,63 @@
                                                      enable="false"
                                                      caption="msg://msgAddPopularIteraction"/>
                                         <button action="jobCandidateIteractionListTable.edit"/>
-                                        <button id="copyIteractionButton" caption="msg://msgCopy" icon="COPY"/>
+                                        <button id="copyIteractionButton"
+                                                caption="msg://msgCopy"
+                                                icon="COPY"/>
                                         <button action="jobCandidateIteractionListTable.remove"/>
                                         <button id="openPositionProjectDescriptionButton"
                                                 enable="false"
                                                 caption="msg://msgOpenPositionDescription"/>
                                     </buttonsPanel>
                                     <columns>
-                                        <column id="icon" width="48px" caption=""/>
-                                        <column id="projectLogoColumn" resizable="true" collapsible="true"
+                                        <column id="icon"
+                                                width="48px"
+                                                caption=""/>
+                                        <column id="projectLogoColumn"
+                                                resizable="true"
+                                                collapsible="true"
                                                 collapsed="false"
-                                                caption="msg://msgProject" width="70px" minimumWidth="70px">
+                                                caption="msg://msgProject"
+                                                width="70px"
+                                                minimumWidth="70px">
                                             <componentRenderer/>
                                         </column>
-                                        <column id="numberIteraction" property="numberIteraction" sort="DESCENDING"
-                                                width="85px" maximumWidth="100px" sortable="true"/>
-                                        <column id="rating" minimumWidth="85px" width="85px" maximumWidth="100px"
+                                        <column id="numberIteraction"
+                                                property="numberIteraction"
+                                                sort="DESCENDING"
+                                                width="85px"
+                                                maximumWidth="100px"
+                                                sortable="true"/>
+                                        <column id="rating"
+                                                minimumWidth="85px"
+                                                width="85px"
+                                                maximumWidth="100px"
                                                 caption="msg://msgRating">
                                             <htmlRenderer nullRepresentation="null"/>
                                         </column>
-                                        <column id="vacancy" maximumWidth="400px" property="vacancy"/>
-                                        <column id="currentOpenCloseColumn" caption="mainMsg://msgCurrentOpenClose"
+                                        <column id="vacancy"
+                                                maximumWidth="400px"
+                                                property="vacancy"/>
+                                        <column id="currentOpenCloseColumn"
+                                                caption="mainMsg://msgCurrentOpenClose"
                                                 maximumWidth="45px">
                                             <iconRenderer/>
                                         </column>
-                                        <column id="iteractionType" maximumWidth="250px" property="iteractionType"/>
-                                        <column id="commentColumn" maximumWidth="80px" width="60px"
+                                        <column id="iteractionType"
+                                                maximumWidth="250px"
+                                                property="iteractionType"/>
+                                        <column id="commentColumn"
+                                                maximumWidth="80px"
+                                                width="60px"
                                                 caption="msg://msgIsComment">
                                             <iconRenderer/>
                                         </column>
-                                        <column id="recrutier" maximumWidth="150px" property="recrutier"/>
-                                        <column id="dateIteraction" property="dateIteraction" width="80px"
+                                        <column id="recrutier"
+                                                maximumWidth="150px"
+                                                property="recrutier"/>
+                                        <column id="dateIteraction"
+                                                property="dateIteraction"
+                                                width="80px"
                                                 caption="msg://msgDate">
                                             <formatter format="dd.MM.yyyy"
                                                        class="com.haulmont.cuba.gui.components.formatters.DateFormatter"/>
@@ -1870,9 +2132,12 @@
                               height="100%"
                               spacing="true"
                               expand="tabResumeContent"
-                              stylename="job-candidate-accordion-section edit-accordion-section">
-                            <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
-                                <label value="Резюме и файлы" stylename="job-candidate-accordion-title"/>
+                              stylename="job-candidate-accordion-section">
+                            <hbox width="100%"
+                                  align="MIDDLE_LEFT"
+                                  stylename="job-candidate-accordion-header">
+                                <label value="Резюме и файлы"
+                                       stylename="job-candidate-accordion-title"/>
                             </hbox>
                             <vbox id="tabResumeContent"
                                   width="100%"
@@ -1881,10 +2146,16 @@
                                   expand="tabResumeVbox"
                                   stylename="job-candidate-accordion-content">
 
-                                <vbox id="tabResumeVbox" spacing="true" width="100%" height="100%"
+                                <vbox id="tabResumeVbox"
+                                      spacing="true"
+                                      height="100%"
                                       expand="jobCandidateCandidateCvTable">
-                                    <hbox spacing="true" width="100%" align="MIDDLE_RIGHT">
-                                        <button id="checkSkillFromJD" caption="msg://msgCheckSkills" align="BOTTOM_LEFT"
+                                    <hbox spacing="true"
+                                          width="100%"
+                                          align="MIDDLE_RIGHT">
+                                        <button id="checkSkillFromJD"
+                                                caption="msg://msgCheckSkills"
+                                                align="BOTTOM_LEFT"
                                                 enable="false"/>
                                     </hbox>
                                     <dataGrid id="jobCandidateCandidateCvTable"
@@ -1895,38 +2166,59 @@
                                               bodyRowHeight="55px"
                                               dataContainer="jobCandidateCandidateCvsDc">
                                         <columns>
-                                            <column id="projectLogoColumn" resizable="true" collapsible="true"
+                                            <column id="projectLogoColumn"
+                                                    resizable="true"
+                                                    collapsible="true"
                                                     collapsed="false"
-                                                    caption="msg://msgProject" width="70px" minimumWidth="70px">
+                                                    caption="msg://msgProject"
+                                                    width="70px"
+                                                    minimumWidth="70px">
                                                 <componentRenderer/>
                                             </column>
-                                            <column id="datePost" width="100px" maximumWidth="100px" property="datePost"
+                                            <column id="datePost"
+                                                    width="100px"
+                                                    maximumWidth="100px"
+                                                    property="datePost"
                                                     caption="msg://msgDatePost"/>
-                                            <column id="toVacancy" property="toVacancy" caption="msg://msgToVacansy"/>
-                                            <column id="resumePosition" collapsible="true" collapsed="true"
-                                                    property="resumePosition" caption="msg://msgToPosition"/>
-                                            <column id="iconOriginalCVFile" width="100px" maximumWidth="100px"
+                                            <column id="toVacancy"
+                                                    property="toVacancy"
+                                                    caption="msg://msgToVacansy"/>
+                                            <column id="resumePosition"
+                                                    collapsible="true"
+                                                    collapsed="true"
+                                                    property="resumePosition"
+                                                    caption="msg://msgToPosition"/>
+                                            <column id="iconOriginalCVFile"
+                                                    width="100px"
+                                                    maximumWidth="100px"
                                                     caption="msg://msgOriginalCV">
                                                 <iconRenderer/>
                                             </column>
-                                            <column id="iconHuntTechCVFile" width="100px" maximumWidth="100px"
+                                            <column id="iconHuntTechCVFile"
+                                                    width="100px"
+                                                    maximumWidth="100px"
                                                     caption="msg://msgHuntTechCV">
                                                 <iconRenderer/>
                                             </column>
-                                            <column id="letter" width="100px" maximumWidth="100px"
+                                            <column id="letter"
+                                                    width="100px"
+                                                    maximumWidth="100px"
                                                     caption="msg://msgCoverLetter">
                                                 <iconRenderer/>
                                             </column>
-                                            <column id="candidateOriginalCVColumn" width="150px"
+                                            <column id="candidateOriginalCVColumn"
+                                                    width="150px"
                                                     caption="msg://msgOriginalCV">
                                                 <componentRenderer/>
                                             </column>
-                                            <column id="candidateHuntTechCVColumn" width="150px"
+                                            <column id="candidateHuntTechCVColumn"
+                                                    width="150px"
                                                     caption="msg://msgHuntTechCV">
                                                 <componentRenderer/>
                                             </column>
-                                            <column id="createdBy" property="createdBy" width="100px"
-                                                    caption="msg://msgCreatedBy"/>
+                                            <column id="createdBy"
+                                                    property="createdBy"
+                                                    width="100px" caption="msg://msgCreatedBy"/>
                                         </columns>
                                         <actions>
                                             <action type="create" id="create"/>
@@ -1943,6 +2235,77 @@
                                         </buttonsPanel>
                                     </dataGrid>
                                 </vbox>
+
+                            </vbox>
+                        </vbox>
+                    </tab>
+
+                    <!-- TAB: Социальные сети -->
+                    <tab id="tabSocialNetworks"
+                         caption="Социальные сети"
+                         spacing="true"
+                         margin="true"
+                         expand="tabSocialNetworksSection">
+                        <vbox id="tabSocialNetworksSection"
+                              width="100%"
+                              height="100%"
+                              spacing="true"
+                              expand="tabSocialNetworksContent"
+                              stylename="job-candidate-accordion-section">
+                            <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-accordion-header">
+                                <label value="Социальные сети" stylename="job-candidate-accordion-title"/>
+                            </hbox>
+                            <vbox id="tabSocialNetworksContent"
+                                  width="100%"
+                                  height="100%"
+                                  spacing="true"
+                                  expand="socialNetworkTableHbox"
+                                  stylename="job-candidate-accordion-content">
+
+                                <hbox id="socialNetworkTableHbox"
+                                      width="100%"
+                                      height="100%"
+                                      spacing="true"
+                                      stylename="borderless"
+                                      expand="socialNetworkTable">
+                                    <dataGrid id="socialNetworkTable"
+                                              height="100%"
+                                              width="100%"
+                                              stylename="job-candidate-table"
+                                              editorEnabled="true"
+                                              dataContainer="jobCandidateSocialNetworksDc">
+                                        <columns>
+                                            <column id="socialNetworkLogoColumn" width="50px" caption="">
+                                                <componentRenderer/>
+                                            </column>
+                                            <column id="networkName" editable="false"
+                                                    property="socialNetworkURL.socialNetwork" maximumWidth="200px"/>
+                                            <column id="networkURLS" editable="true" property="networkURLS"/>
+                                            <column id="linkToWeb" caption="msg://msgLinkURL" maximumWidth="150px">
+                                                <componentRenderer/>
+                                            </column>
+                                        </columns>
+                                        <actions>
+                                            <action id="create" type="create"/>
+                                            <action id="edit" type="edit"/>
+                                            <action id="remove" type="remove"/>
+                                        </actions>
+                                    </dataGrid>
+                                    <vbox spacing="true" width="AUTO" height="AUTO">
+                                        <button id="addSocialNetworkListsButton" visible="false" enable="false"
+                                                width="100%" caption="msg://msgAddSocialNetworks"
+                                                description="msg://msgAddSocialNetworksDesc"
+                                                invoke="addSocialNetworksListsInvoke"/>
+                                        <button id="addMissingSocialNetworkListsButton" width="100%" enable="true"
+                                                caption="msg://msgAddMissingSocialNetrorkButton"
+                                                description="msg://msgAddMissingSocialNetrorkButtonDesc"
+                                                invoke="addMissingSocialNetworksListsInvoke"/>
+                                        <button id="removeEmptySocialNetworkListsButton" width="100%" enable="true"
+                                                caption="msg://removeEmptySocialNetworkListsButton"
+                                                description="msg://removeEmptySocialNetworkListsButtonDesc"
+                                                invoke="removeEmptySocialNetworkListsButton"/>
+                                    </vbox>
+                                </hbox>
 
                             </vbox>
                         </vbox>
@@ -1970,7 +2333,7 @@
                                   expand="tabCommentsVbox"
                                   stylename="job-candidate-accordion-content">
 
-                                <vbox id="tabCommentsVbox" spacing="true" width="100%" height="100%"
+                                <vbox id="tabCommentsVbox" spacing="true" height="100%"
                                       expand="jobCandidateCommentsDataGrid">
                                     <dataGrid id="jobCandidateCommentsDataGrid"
                                               dataContainer="interactionCommentDc"
@@ -1993,11 +2356,11 @@
                                         </columns>
                                     </dataGrid>
                                     <groupBox stylename="well" spacing="true" width="100%">
-                                        <textField id="chatMessageTextField" stylename="large edit-form-control" width="100%"/>
+                                        <textField id="chatMessageTextField" stylename="large" width="100%"/>
                                         <hbox width="100%" expand="vacancyPopupPickerField" spacing="true">
                                             <lookupPickerField id="vacancyPopupPickerField"
                                                                align="MIDDLE_LEFT"
-                                                               stylename="large edit-form-control"
+                                                               stylename="large"
                                                                optionsContainer="openPositionDc"
                                                                width="100%"/>
                                             <button id="sendCommentButton"
@@ -2028,7 +2391,7 @@
                             <vbox width="100%" height="AUTO" spacing="true" stylename="job-candidate-accordion-content">
 
                                 <groupBox caption="Данные записи"
-                                          stylename="light job-candidate-card edit-card"
+                                          stylename="light job-candidate-card"
                                           spacing="true" width="100%">
                                     <grid spacing="true" width="100%">
                                         <columns count="2"/>
@@ -2054,25 +2417,44 @@
                             </vbox>
                         </vbox>
                     </tab>
+
                 </tabSheet>
 
-                <!-- Нижняя панель основных действий. -->
-                <hbox width="100%" spacing="false">
-                    <hbox id="jobCandidateBottomBar"
-                          width="100%"
-                          spacing="true"
-                          align="MIDDLE_RIGHT"
-                          stylename="job-candidate-bottom-bar edit-footer-actions">
-                        <button id="windowCommitAndCloseButton"
-                                action="windowCommitAndClose"
-                                caption="Сохранить и закрыть"
-                                stylename="primary job-candidate-primary-action"
-                                align="MIDDLE_RIGHT"/>
-                        <button action="windowClose"
-                                caption="Отмена"
-                                stylename="default job-candidate-secondary-action"
-                                align="MIDDLE_RIGHT"/>
-                    </hbox>
+                <!-- ═══════════════════════════════════════════════════════════
+                     НИЖНЯЯ ПАНЕЛЬ
+                     — служебное сообщение (audit) справа.
+                     — кнопки "Сохранить и закрыть" / "Отмена" рядом, правее.
+                     ───────────────────────────────────────────────────────
+                     Элементы:
+                       • label (spacer) — растягивается на всё свободное место,
+                         прижимая audit + кнопки к правому краю.
+                       • createdUpdatedLabel — информация о создании/изменении
+                         записи (выставляется в Java).
+                       • windowCommitAndCloseButton — сохранить и закрыть.
+                       • windowClose — отмена, закрытие без сохранения.
+                     ═══════════════════════════════════════════════════════ -->
+                <hbox id="jobCandidateBottomBar"
+                      width="100%"
+                      spacing="true"
+                      align="MIDDLE_RIGHT"
+                      stylename="job-candidate-bottom-bar">
+                    <!-- Растяжимый разделитель: прижимает audit + кнопки вправо -->
+                    <label width="100%" stylename="job-candidate-spacer"/>
+                    <!-- Служебное сообщение: дата создания / обновления записи -->
+                    <label id="createdUpdatedLabel"
+                           width="AUTO"
+                           align="MIDDLE_RIGHT"
+                           stylename="job-candidate-audit-label"/>
+                    <!-- Кнопки: Сохранить и Отмена, рядом друг с другом -->
+                    <button id="windowCommitAndCloseButton"
+                            action="windowCommitAndClose"
+                            caption="Сохранить и закрыть"
+                            stylename="primary job-candidate-primary-action"
+                            align="MIDDLE_RIGHT"/>
+                    <button action="windowClose"
+                            caption="Отмена"
+                            stylename="default job-candidate-secondary-action"
+                            align="MIDDLE_RIGHT"/>
                 </hbox>
             </tab>
             <tab id="tabSocialNetworks"
