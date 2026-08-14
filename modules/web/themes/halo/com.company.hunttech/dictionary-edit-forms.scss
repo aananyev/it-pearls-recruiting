@@ -23,7 +23,10 @@
   .currency-editor,
   .outstaffing-rates-editor,
   .employee-work-status-editor,
-  .sign-icons-editor {
+  .sign-icons-editor,
+  .specialisation-editor,
+  .ownershup-editor,
+  .position-editor {
     // Фирменная тёмная sidebar: совпадает с эталоном HRM HuntTech.
     // background-color и background-image задаются раздельно: SCSS-шорткат
     // background: linear-gradient(...) компилируется в невалидный CSS.

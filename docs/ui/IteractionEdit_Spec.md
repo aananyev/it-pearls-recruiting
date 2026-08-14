@@ -100,7 +100,7 @@ window iteraction-editor (100%×100%)
 └─ layout (expand=iteractionMainLayout)
    └─ hbox iteractionMainLayout (edit-screen-layout)
       ├─ vbox iteractionSidebar (edit-sidebar, 270px, тёмная #172638→#0f1b28)
-      │   ├─ visual: иконка REFRESH_ACTION в круге 96px (iteraction-editor-icon-preview)
+      │   ├─ visual: круглая иллюстрация типа 176×176 (ovalImage, theme-ресурс icons/dictionaries/iteraction.png, dictionary-logo-image)
       │   ├─ identity: labelItercationName (18px/700 белый) + подзаголовок «Тип взаимодействия» (12px)
       │   ├─ label-navigation: заголовок-полоса «Разделы формы» (36px, #ffb11b, inset-линии) + 8 пунктов (27px/13px/600, active #ffb11b)
       │   ├─ labelWarning (iteraction-editor-warning, янтарный блок)
@@ -126,6 +126,7 @@ window iteraction-editor (100%×100%)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-13 | Sidebar-иконка типа взаимодействия заменена на круглую статичную иллюстрацию `ovalImage` 176×176 (theme-ресурс `icons/dictionaries/iteraction.png`, stylename `dictionary-logo-image`) — эталон JobCandidateEdit; убраны стили `iteraction-editor-icon-preview` 96px из `iteraction-editor.scss` (7 тем), добавлен блок `.dictionary-logo-image` 176px; контрактный тест `DictionaryEditFormIllustrationContractTest` |
 | 2026-08-13 | Чекбоксы формы переведены на общие стили темы CUBA Platform (Valo): из локального партиала `iteraction-editor.scss` (7 тем) удалена кастомная стилизация квадратика/подписи (`padding: 3px 0` + подпись 14px/1.4) — штатные отступы темы исключают наезд чекбокса на элементы под ним; контрактный тест `DictionaryEditFormsCheckboxContractTest` |
 | 2026-08-11 | Поле «Номер» (`numberField`) возвращено из sidebar во вкладку 1 «Тип взаимодействия» — строка «номер + корневой элемент дерева» в карточке «Основные параметры» (как до рефакторинга). Служебная карточка `iteraction-service-card` из sidebar удалена (пуста) |
 | 2026-08-11 | Label-навигация теперь видна на **всех** 8 вкладках: убрано скрытие контейнера на одноблочных вкладках «Кнопка», «Всплывающие сообщения», «Настройки виджетов» (правило 3.6 не применяется); активный пункт подсвечивается на каждой вкладке. CDP-подтверждение: navVisible=true + корректный активный пункт на вкладках 4/5/7 |

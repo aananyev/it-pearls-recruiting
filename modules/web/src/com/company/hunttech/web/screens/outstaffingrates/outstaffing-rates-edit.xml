@@ -57,18 +57,19 @@
                       width="100%"
                       spacing="true"
                       align="MIDDLE_CENTER">
-                    <!-- Круглый логотип компании по умолчанию: статичный fallback без
-                         привязки к данным (загрузка изображения формой не предусмотрена). -->
-                    <ovaFallbackImage id="outstaffingRatesLogoImage"
-                                      width="176px"
-                                      height="176px"
-                                      ovalWidth="176px"
-                                      ovalHeight="176px"
-                                      visible="true"
-                                      align="MIDDLE_CENTER"
-                                      scaleMode="SCALE_DOWN"
-                                      fallbackThemePath="icons/hunttech-logo.png"
-                                      stylename="dictionary-logo-image"/>
+                    <!-- Круглый логотип формы: статичная иллюстрация рейта по аутстафу
+                         (без привязки к данным — загрузка изображения формой не предусмотрена). -->
+                    <ovalImage id="outstaffingRatesLogoImage"
+                               width="176px"
+                               height="176px"
+                               ovalWidth="176px"
+                               ovalHeight="176px"
+                               visible="true"
+                               align="MIDDLE_CENTER"
+                               scaleMode="SCALE_DOWN"
+                               stylename="dictionary-logo-image">
+                        <theme path="icons/dictionaries/outstaffing-rates.png"/>
+                    </ovalImage>
                 </vbox>
                 <!-- Блок идентификации: тип записи и ставка из контейнера. -->
                 <vbox id="identity"

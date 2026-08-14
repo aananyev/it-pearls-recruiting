@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Edit-экран справочника «Специализации»: двухпанельная композиция по общему контракту
+     Edit-экранов HRM HuntTech. Сохраняет исходный data binding (specialisationDc),
+     вкладки tabSheet и таблицу кандидатов. -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
+        focusComponent="specRuNameField"
         messagesPack="com.company.hunttech.web.screens.specialisation" icon="icons/to-client.png">
+    <!-- Секция данных: корневой контейнер специализации и связанные кандидаты. -->
     <data>
+        <!-- Корневой контейнер специализации; view specialisation-view покрывает поля формы,
+             кандидаты подгружаются отдельной коллекцией (property candidate). -->
         <instance id="specialisationDc"
                   class="com.company.hunttech.entity.Specialisation">
             <view extends="specialisation-view">
@@ -13,36 +19,168 @@
             <collection id="specialisationCandidatesDc" property="candidate"/>
         </instance>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="editActions" spacing="true" width="100%">
-        <form id="form" dataContainer="specialisationDc" width="100%">
-            <column width="100%">
-                <tabSheet>
-                    <tab id="tabSpecialisation" caption="mainMsg://msgSpecialisation" margin="true,false,false,false" spacing="true">
-                        <textField id="specRuNameField" caption="mainMsg://msgName"
-                                   dataContainer="specialisationDc" property="specRuName" width="50%"/>
-                    </tab>
-                    <tab id="tabCandidate" caption="msg://msgSpecialisation" margin="true,false,false,false" spacing="true">
-                        <table id="specialisationCandidateTable" height="400px" width="100%" dataContainer="specialisationCandidatesDc">
-                            <columns>
-                                <column id="firstName"/>
-                                <column id="middleName"/>
-                                <column id="secondName"/>
-                                <column id="birdhDate"/>
-                                <column id="email"/>
-                                <column id="phone"/>
-                                <column id="skypeName"/>
-                                <column id="telegramName"/>
-                            </columns>
-                        </table>
-                    </tab>
-                </tabSheet>
-            </column>
-        </form>
-        <hbox id="editActions" spacing="true" align="TOP_RIGHT">
-            <button action="windowCommitAndClose"/>
-            <button action="windowClose"/>
+    <!-- Режим диалога: полноэкранный модальный редактор справочника. -->
+    <dialogMode height="100%" width="100%" modal="true"/>
+    <!-- Корневой layout формы: локальный namespace specialisation-editor + общий контракт Edit-экранов. -->
+    <layout stylename="specialisation-editor"
+            expand="mainLayout"
+            spacing="false"
+            width="100%"
+            height="100%">
+        <!-- Двухпанельная композиция: постоянная sidebar слева и рабочая область справа. -->
+        <hbox id="mainLayout"
+              stylename="edit-screen-layout"
+              expand="workspace"
+              spacing="false"
+              width="100%"
+              height="100%">
+            <!-- Левая контекстная панель 270px: фирменный логотип, идентификация,
+                 label-навигация и подсказка (контракт §4.2). -->
+            <vbox id="sidebar"
+                  stylename="edit-sidebar"
+                  width="270px"
+                  height="100%"
+                  spacing="true"
+                  expand="sidebarSpacer">
+                <!-- Визуальный блок sidebar: круглая иллюстрация специализации
+                     (без привязки к данным — загрузка изображения формой не предусмотрена). -->
+                <vbox id="visual"
+                      stylename="edit-sidebar-visual"
+                      width="100%"
+                      spacing="true"
+                      align="MIDDLE_CENTER">
+                    <ovalImage id="specialisationLogoImage"
+                               width="176px"
+                               height="176px"
+                               ovalWidth="176px"
+                               ovalHeight="176px"
+                               visible="true"
+                               align="MIDDLE_CENTER"
+                               scaleMode="SCALE_DOWN"
+                               stylename="dictionary-logo-image">
+                        <theme path="icons/dictionaries/specialisation.png"/>
+                    </ovalImage>
+                </vbox>
+                <!-- Блок идентификации: тип записи и название специализации из контейнера. -->
+                <vbox id="identity"
+                      stylename="edit-sidebar-identity"
+                      width="100%"
+                      spacing="true">
+                    <!-- Подпись типа записи. -->
+                    <label value="Специализация"
+                           stylename="edit-sidebar-subtitle"
+                           width="100%"/>
+                    <!-- Название специализации (свойство specRuName), живое из specialisationDc. -->
+                    <label id="sidebarTitle"
+                           dataContainer="specialisationDc"
+                           property="specRuName"
+                           stylename="edit-sidebar-title"
+                           width="100%"/>
+                </vbox>
+                <!-- Вертикальная label-навигация по вкладкам формы (фокус, без изменения данных). -->
+                <vbox id="navigation"
+                      stylename="label-navigation"
+                      width="100%"
+                      spacing="false">
+                    <!-- Заголовок навигационного блока: полоса-заголовок с двумя inset-линиями (контракт §4.1). -->
+                    <label value="Разделы"
+                           stylename="label-nav-title dictionary-navigation-title"
+                           width="100%"/>
+                    <!-- Пункт «Специализация» — переключает первую вкладку tabSheet. -->
+                    <button id="specialisationNav"
+                            caption="Специализация"
+                            stylename="borderless label-nav-item"
+                            width="100%"/>
+                    <!-- Пункт «Кандидаты» — переключает вторую вкладку с таблицей кандидатов. -->
+                    <button id="candidatesNav"
+                            caption="Кандидаты"
+                            stylename="borderless label-nav-item"
+                            width="100%"/>
+                </vbox>
+                <!-- Служебный spacer прижимает подсказку к нижней границе sidebar. -->
+                <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
+                <!-- Нейтральная подсказка о роли справочника в HRM HuntTech. -->
+                <label value="Специализации описывают направление работы кандидата и используются при подборе в HRM HuntTech."
+                       stylename="edit-sidebar-hint"
+                       width="100%"/>
+            </vbox>
+            <!-- Правая рабочая область: toolbar, прокручиваемые секции и footer-actions. -->
+            <vbox id="workspace"
+                  stylename="edit-workspace"
+                  expand="workspaceScroll"
+                  width="100%"
+                  height="100%"
+                  spacing="false">
+                <!-- Toolbar с заголовком карточки и пояснением. -->
+                <hbox id="toolbar"
+                      stylename="edit-toolbar"
+                      width="100%"
+                      spacing="true">
+                    <!-- Текстовый блок toolbar: заголовок и описание. -->
+                    <vbox id="toolbarText" width="100%" spacing="false">
+                        <label value="Карточка специализации" stylename="edit-toolbar-title"/>
+                        <label value="Наименование специализации и связанные кандидаты" stylename="edit-toolbar-description"/>
+                    </vbox>
+                </hbox>
+                <!-- Прокручиваемая область контента рабочей области. -->
+                <scrollBox id="workspaceScroll"
+                           stylename="edit-workspace-scroll"
+                           width="100%"
+                           height="100%">
+                    <!-- Поток карточек рабочей области. -->
+                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
+                        <!-- Карточка «Данные специализации»: две вкладки — наименование и кандидаты. -->
+                        <groupBox id="mainSection"
+                                  caption="Данные специализации"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%"
+                                  spacing="true">
+                            <!-- TabSheet группирует наименование специализации и таблицу кандидатов. -->
+                            <tabSheet id="tabSheet" width="100%" height="100%" stylename="edit-tabs">
+                                <!-- Вкладка наименования специализации. -->
+                                <tab id="tabSpecialisation" caption="mainMsg://msgSpecialisation" spacing="true">
+                                    <form id="form" dataContainer="specialisationDc" width="100%">
+                                        <column width="100%">
+                                            <!-- Русское наименование специализации. -->
+                                            <textField id="specRuNameField" property="specRuName" caption="mainMsg://msgName" width="100%" stylename="edit-form-control"/>
+                                        </column>
+                                    </form>
+                                </tab>
+                                <!-- Вкладка кандидатов, связанных со специализацией. -->
+                                <tab id="tabCandidate" caption="msg://captionSpec" spacing="true">
+                                    <table id="specialisationCandidateTable"
+                                           height="400px"
+                                           width="100%"
+                                           dataContainer="specialisationCandidatesDc">
+                                        <columns>
+                                            <column id="firstName"/>
+                                            <column id="middleName"/>
+                                            <column id="secondName"/>
+                                            <column id="birdhDate"/>
+                                            <column id="email"/>
+                                            <column id="phone"/>
+                                            <column id="skypeName"/>
+                                            <column id="telegramName"/>
+                                        </columns>
+                                    </table>
+                                </tab>
+                            </tabSheet>
+                        </groupBox>
+                    </vbox>
+                </scrollBox>
+                <!-- Нижняя панель штатных действий: сохранить и отменить. -->
+                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%"
+                      expand="actionsSpacer" align="MIDDLE_RIGHT">
+                    <!-- Spacer прижимает кнопки к правому краю. -->
+                    <vbox id="actionsSpacer" width="100%" height="1px"/>
+                    <!-- Сохранить и закрыть (штатный action editor-а). -->
+                    <button id="commitAndCloseBtn" action="windowCommitAndClose"
+                            stylename="c-primary-action"/>
+                    <!-- Отменить изменения и закрыть. -->
+                    <button id="closeBtn" action="windowClose"/>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>

@@ -47,19 +47,20 @@
                       width="100%"
                       spacing="true"
                       align="MIDDLE_CENTER">
-                    <!-- Круглый логотип компании по умолчанию: статичный fallback без
-                         привязки к данным (загрузка изображения формой не предусмотрена —
-                         иконка признака задаётся font-символом, а не файлом). -->
-                    <ovaFallbackImage id="signIconsLogoImage"
-                                      width="176px"
-                                      height="176px"
-                                      ovalWidth="176px"
-                                      ovalHeight="176px"
-                                      visible="true"
-                                      align="MIDDLE_CENTER"
-                                      scaleMode="SCALE_DOWN"
-                                      fallbackThemePath="icons/hunttech-logo.png"
-                                      stylename="dictionary-logo-image"/>
+                    <!-- Круглый логотип формы: статичная иллюстрация иконки признака
+                         (без привязки к данным — иконка признака задаётся font-символом,
+                         а не файлом, поэтому иллюстрация обобщённая). -->
+                    <ovalImage id="signIconsLogoImage"
+                               width="176px"
+                               height="176px"
+                               ovalWidth="176px"
+                               ovalHeight="176px"
+                               visible="true"
+                               align="MIDDLE_CENTER"
+                               scaleMode="SCALE_DOWN"
+                               stylename="dictionary-logo-image">
+                        <theme path="icons/dictionaries/sign-icons.png"/>
+                    </ovalImage>
                 </vbox>
                 <!-- Блок идентификации: тип записи и русское название из контейнера. -->
                 <vbox id="identity"

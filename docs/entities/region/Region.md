@@ -261,6 +261,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-13 | Sidebar RegionEdit: добавлен visual-блок с круглой иллюстрацией `ovalImage` 176×176 (`icons/dictionaries/region.png`); identity выровнен по контракту (title 18/700 #ffb11b, subtitle 12/400); тест DictionaryEditFormIllustrationContractTest |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: `region-edit-view` покрывает `regionCountry`; каскад в `CompanyEdit` reload через `region-browse-view` |
 | 2026-06-23 | Исправление `region-browse-view`: `regionCountry` → `country-browse-view` для колонки и фильтра |

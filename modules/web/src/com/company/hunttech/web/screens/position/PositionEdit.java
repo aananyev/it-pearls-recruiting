@@ -1,7 +1,9 @@
 package com.company.hunttech.web.screens.position;
 
+import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.HasValue;
 import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.components.RichTextArea;
 import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.components.TextInputField;
 import com.haulmont.cuba.gui.screen.*;
@@ -20,6 +22,12 @@ public class PositionEdit extends StandardEditor<Position> {
     private TextField<String> positionEnNameField;
     @Inject
     private TextField<String> positionRuNameField;
+    @Inject
+    private RichTextArea standartDescriptionTextArea;
+    @Inject
+    private Button mainNav;
+    @Inject
+    private Button descriptionNav;
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
@@ -51,5 +59,27 @@ public class PositionEdit extends StandardEditor<Position> {
         String a = positionEnNameField.getValue() + " - " + positionRuNameField.getValue();
 
         textPositionName.setValue( a );
+    }
+
+    /**
+     * Презентационная навигация: переводит фокус к русскому наименованию должности
+     * и подсвечивает активный пункт sidebar. Entity, loaders и lifecycle не затрагиваются.
+     */
+    public void focusMainSection() {
+        positionRuNameField.focus();
+        setActiveNavigation(mainNav);
+    }
+
+    /**
+     * Презентационная навигация: переводит фокус к редактору общего описания
+     * и подсвечивает активный пункт sidebar. Entity, loaders и lifecycle не затрагиваются.
+     */
+    public void focusDescriptionSection() {
+        standartDescriptionTextArea.focus();
+        setActiveNavigation(descriptionNav);
+    }
+
+    private void setActiveNavigation(Button activeButton) {
+        activeButton.addStyleName("label-nav-item-active");
     }
 }

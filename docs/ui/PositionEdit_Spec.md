@@ -5,7 +5,7 @@
 **UI controller:** `hunttech_Position.edit`
 **Controller:** `modules/web/src/com/company/hunttech/web/screens/position/PositionEdit.java`
 **Descriptor:** `modules/web/src/com/company/hunttech/web/screens/position/position-edit.xml`
-**Статус:** актуально (фикс UNFETCHED ATTRIBUTE ACCESS 2026-08-11)
+**Статус:** актуально (редизайн по контракту 2026-08-13; фикс UNFETCHED ATTRIBUTE ACCESS 2026-08-11)
 
 ## Назначение и Бизнес-смысл (What & Why)
 
@@ -13,7 +13,7 @@
 
 ## Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-Форма открывается из `PositionBrowse` (`hunttech_Position.browse`, меню справочников) по кнопкам edit/create как модальный диалог `600×800`. Внешние потребители должности — формы вакансий (lookup через `position-picker-view`) и REST-публичные view; внутри формы дочерних экранов нет.
+Форма открывается из `PositionBrowse` (`hunttech_Position.browse`, меню справочников) по кнопкам edit/create как полноэкранный модальный редактор (`dialogMode 100%×100% modal`). Внешние потребители должности — формы вакансий (lookup через `position-picker-view`) и REST-публичные view; внутри формы дочерних экранов нет. Sidebar формы показывает круглую иллюстрацию должности 176×176 и label-навигацию «Наименование»/«Описание».
 
 ## Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -32,7 +32,7 @@
 public class PositionEdit extends StandardEditor<Position>
 ```
 
-- Диалоговый режим: `<dialogMode height="600" width="800"/>`.
+- Диалоговый режим: `<dialogMode height="100%" width="100%" modal="true"/>` (полноэкранный модальный редактор справочника — общий контракт Edit-экранов; до редизайна 2026-08-13 было `600×800`).
 - Открытие из `PositionBrowse` (EditAction/create), а также программно из других форм по `position-picker-view`.
 - Доступ: стандартные права на `hunttech_Position` (CRUD).
 
@@ -50,8 +50,8 @@ public class PositionEdit extends StandardEditor<Position>
 
 | Поле | Компонент | Property | Caption |
 |------|-----------|----------|---------|
-| `positionRuNameField` | `textField` | `positionRuName` | msg://msgPositionEnName |
-| `positionEnNameField` | `textField` | `positionEnName` | msg://msgPositionRuName |
+| `positionRuNameField` | `textField` | `positionRuName` | msg://msgPositionRuName |
+| `positionEnNameField` | `textField` | `positionEnName` | msg://msgPositionEnName |
 | `standartDescriptionTextArea` | `richTextArea` | `standartDescription` | msg://msgStandartDescription |
 | `whoIsThisGuyTextArea` | `richTextArea` | `whoIsThisGuy` | msg://msgWhoThisGuyDescription |
 
@@ -92,34 +92,42 @@ public class PositionEdit extends StandardEditor<Position>
 | Элемент | Действие | Цепочка |
 |---------|----------|---------|
 | `positionEnNameField` / `positionRuNameField` | text change | изменение значения → `setLabel()` → заголовок формы обновляется |
+| Кнопка «Наименование» (`mainNav`, sidebar) | нажатие | `focusMainSection()` → фокус на `positionRuNameField` + активный пункт навигации (presentation-only, entity/loaders не меняются) |
+| Кнопка «Описание» (`descriptionNav`, sidebar) | нажатие | `focusDescriptionSection()` → фокус на `standartDescriptionTextArea` + активный пункт навигации |
 | Кнопка Сохранить (`windowCommitAndClose`) | commit | валидация обязательных полей → сохранение entity + LOB → закрытие диалога |
 | Кнопка Отмена (`windowClose`) | закрытие | закрытие без сохранения |
 
 ## 6. Визуальная компоновка элементов
 
 ```
-┌───────────────────────────────────────────┐
-│ textPositionName (заголовок, h1)          │
-├───────────────────────────────────────────┤
-│ positionRuNameField (textField, 100%)     │
-│ positionEnNameField (textField, 100%)     │
-│ ┌───────────────────┬───────────────────┐ │
-│ │ standartDescriptionTextArea (rich)    │ │
-│ │ whoIsThisGuyTextArea (rich)           │ │
-│ └───────────────────┴───────────────────┘ │
-├───────────────────────────────────────────┤
-│                      [Сохранить] [Отмена] │
-└───────────────────────────────────────────┘
+┌──────────────┬─────────────────────────────────────┐
+│ SIDEBAR 270px│ Toolbar: «Карточка должности»       │
+│ visual       │   + описание (edit-toolbar)         │
+│ ovalImage    ├─────────────────────────────────────┤
+│ 176×176      │ scrollBox (edit-workspace-scroll)   │
+│ identity     │  ┌ edit-card «Наименование» ──────┐ │
+│  «Должность» │  │ textPositionName (h1)          │ │
+│  title (18px)│  │ positionRuNameField (100%)     │ │
+│ navigation   │  │ positionEnNameField (100%)     │ │
+│  «Разделы»   │  └────────────────────────────────┘ │
+│  · Наименование│ ┌ edit-card «Описание» ──────────┐ │
+│  · Описание  │  │ standartDescriptionTextArea     │ │
+│ hint         │  │ whoIsThisGuyTextArea            │ │
+│              │  └────────────────────────────────┘ │
+│              ├─────────────────────────────────────┤
+│              │ footer:        [Сохранить] [Отмена] │
+└──────────────┴─────────────────────────────────────┘
 ```
 
-- Корневой `layout expand="positionEditVBox" spacing="true"`.
-- Заголовок `textPositionName` — `label stylename="h1"` внутри `groupBox`.
-- Основной `vbox positionEditVBox` c `expand="textAreaBox"`: два `textField` шириной 100% + `hbox textAreaBox` с двумя `richTextArea` (оба 100%×100%).
-- Footer `hbox editActions align="BOTTOM_RIGHT"` с кнопками `windowCommitAndClose` / `windowClose`.
+- Корневой `layout stylename="position-editor" expand="mainLayout"` + `hbox mainLayout` (`edit-screen-layout`).
+- Sidebar `vbox sidebar` (`edit-sidebar` 270px, тёмная `#172638→#0f1b28`): visual-блок с круглой иллюстрацией `ovalImage` 176×176 (theme-ресурс `icons/dictionaries/position.png`, stylename `dictionary-logo-image`), identity (subtitle «Должность», title `positionRuName` 18px/700 `#ffb11b`), label-навигация «Разделы» (пункты «Наименование»/«Описание», полоса-заголовок с inset-линиями), spacer и hint.
+- Workspace `vbox workspace` (`edit-workspace`): toolbar (`edit-toolbar-title`/`edit-toolbar-description`), `scrollBox` с двумя карточками `edit-card` (`showAsPanel="true"`): «Наименование» (заголовок `textPositionName` + два textField с `edit-form-control`) и «Описание» (два `richTextArea` по 220px).
+- Footer `hbox editActions` (`edit-footer-actions` 62px, кнопки 40px/600): `windowCommitAndClose` (`c-primary-action`) / `windowClose`.
 - Messages: локальный пакет `com.company.hunttech.web.screens.position` (`messages.properties` / `messages_ru.properties`).
 
 ## История изменений
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-13 | Редизайн по общему контракту Edit-экранов: двухпанельная композиция (sidebar 270px + workspace), круглый `ovalImage` 176×176 с theme-ресурсом `icons/dictionaries/position.png`, label-навигация «Разделы» («Наименование»/«Описание» → `focusMainSection`/`focusDescriptionSection`), карточки `edit-card` «Наименование»/«Описание», footer 62px; `dialogMode` 600×800 → 100%×100% modal; исправлены перепутанные captions полей (`positionRuNameField` → `msgPositionRuName`, `positionEnNameField` → `msgPositionEnName`); Java: добавлены `focusMainSection()`/`focusDescriptionSection()` (фокус + active-nav), сохранены `setLabel()` и все binding-контракты; тест `DictionaryEditSidebarRedesignContractTest` |
 | 2026-08-11 | Фикс UNFETCHED ATTRIBUTE ACCESS: LOB-поля вынесены в inline view контейнера `positionDc` (`<view extends="position-edit-view">`), reload+setter в `onBeforeShow` удалён; тест `PositionServiceTest.testEditViewLoadsLobFields` |

@@ -31,12 +31,13 @@
 ## 5. Экраны
 
 - **PositionBrowse:** batch-кэш `standartDescription` / `whoIsThisGuy` для иконок (scalar `loadValues` в `PostLoadEvent`), LOB не читаются с entity.
-- **PositionEdit:** LOB-поля декларированы inline в view контейнера `positionDc`; `onBeforeShow` только формирует заголовок (reload+setter на detached удалён — ловушка UNFETCHED ATTRIBUTE ACCESS).
+- **PositionEdit:** двухпанельная композиция по общему контракту Edit-экранов (sidebar 270px с круглой иллюстрацией `ovalImage` 176×176 `icons/dictionaries/position.png` + label-навигация «Наименование»/«Описание»); LOB-поля декларированы inline в view контейнера `positionDc`; `onBeforeShow` только формирует заголовок (reload+setter на detached удалён — ловушка UNFETCHED ATTRIBUTE ACCESS); навигация — presentation-only (`focusMainSection`/`focusDescriptionSection`).
 
 ## 9. История изменений
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-13 | Редизайн PositionEdit по общему контракту Edit-экранов: sidebar 270px (ovalImage 176×176 + label-навигация), карточки edit-card «Наименование»/«Описание», dialogMode 100%×100% modal; binding-контракты (positionDc, inline LOB view) не изменены; тест `DictionaryEditSidebarRedesignContractTest` |
 | 2026-08-11 | Fix UNFETCHED ATTRIBUTE ACCESS: `PositionEdit.onBeforeShow` больше не вызывает `setStandartDescription`/`setWhoIsThisGuy` на detached-объекте; LOB-поля задекларированы inline в view контейнера `positionDc` (Localized In-Screen View Extension); добавлен регрессионный тест `PositionServiceTest.testEditViewLoadsLobFields` |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-23 | PositionEdit: исправлен lazy LOB reload — отдельные `.add()` для `standartDescription` и `whoIsThisGuy` |

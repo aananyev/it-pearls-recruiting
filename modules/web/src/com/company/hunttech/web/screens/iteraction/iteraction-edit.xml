@@ -86,19 +86,26 @@ order by e.number]]>
                       height="AUTO"
                       spacing="true"
                       stylename="iteraction-profile-box edit-sidebar-identity">
-                    <!-- Горизонтальный контейнер центрирует пиктограмму типа взаимодействия. -->
+                    <!-- Горизонтальный контейнер центрирует иллюстрацию типа взаимодействия. -->
                     <hbox id="iteractionIdentityImages"
                           width="100%"
                           height="AUTO"
                           spacing="true"
                           align="MIDDLE_CENTER"
                           stylename="iteraction-identity-images edit-sidebar-visual">
-                        <!-- Статическая иконка типа в круге sidebar; реальная пиктограмма живёт в карточке «Пиктограмма». -->
-                        <label icon="REFRESH_ACTION"
-                               width="96px"
-                               height="96px"
-                               align="MIDDLE_CENTER"
-                               stylename="iteraction-editor-icon-preview"/>
+                        <!-- Круглая иллюстрация типа взаимодействия 176×176 (эталон JobCandidateEdit);
+                             реальная пиктограмма живёт в карточке «Пиктограмма» на вкладке формы. -->
+                        <ovalImage id="iteractionLogoImage"
+                                   width="176px"
+                                   height="176px"
+                                   ovalWidth="176px"
+                                   ovalHeight="176px"
+                                   visible="true"
+                                   align="MIDDLE_CENTER"
+                                   scaleMode="SCALE_DOWN"
+                                   stylename="dictionary-logo-image">
+                            <theme path="icons/dictionaries/iteraction.png"/>
+                        </ovalImage>
                     </hbox>
                     <!-- Label наименования идентифицирует тип взаимодействия, для которого открыта форма. -->
                     <label id="labelItercationName"

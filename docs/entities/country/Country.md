@@ -259,6 +259,7 @@ erDiagram
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-13 | Sidebar CountryEdit: добавлен visual-блок с круглой иллюстрацией `ovalImage` 176×176 (`icons/dictionaries/country.png`); identity выровнен по контракту (title 18/700 #ffb11b, subtitle 12/400); тест DictionaryEditFormIllustrationContractTest |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: `CountryEdit` без обработчиков вложенных FK; `country-edit-view` покрывает поля формы — OK |
 | 2026-06-23 | Исправление `country-edit.xml`: явный `view="region-country-child-view"` на collection `countryOfRegion` |

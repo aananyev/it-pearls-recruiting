@@ -67,39 +67,29 @@
       }
     }
 
-    // Профиль: иконка типа в круге 96×96, наименование и подзаголовок (эталон 18/12px).
+    // Профиль: круглая иллюстрация типа взаимодействия 176×176 (эталон JobCandidateEdit),
+    // наименование и подзаголовок (эталон 18/12px).
     .iteraction-identity-images {
       min-height: 104px;
       padding: 2px 0 8px;
     }
 
-    .iteraction-editor-icon-preview,
-    .iteraction-editor-icon-preview .v-icon {
+    .dictionary-logo-image,
+    .dictionary-logo-image img,
+    .dictionary-logo-image .v-image-element {
       box-sizing: border-box;
-      width: 96px !important;
-      height: 96px !important;
-      min-width: 96px !important;
-      min-height: 96px !important;
-      max-width: 96px !important;
-      max-height: 96px !important;
-    }
-
-    .iteraction-editor-icon-preview {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      color: #f8fafc !important;
-      background: rgba(255, 255, 255, 0.10) !important;
-      border: 3px solid rgba(255, 255, 255, 0.90) !important;
+      width: 176px !important;
+      height: 176px !important;
+      min-width: 176px !important;
+      min-height: 176px !important;
+      max-width: 176px !important;
+      max-height: 176px !important;
       border-radius: 50% !important;
-      box-shadow: 0 7px 18px rgba(0, 0, 0, 0.26);
+      object-fit: contain !important;
     }
 
-    .iteraction-editor-icon-preview .v-icon {
-      font-size: 42px;
-      line-height: 42px;
-      text-align: center;
+    .dictionary-logo-image {
+      overflow: hidden;
     }
 
     .iteraction-profile-title,
