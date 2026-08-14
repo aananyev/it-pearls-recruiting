@@ -13,7 +13,7 @@
 
 ### Связи в интерфейсе и Навигация (UI Context & Navigation)
 
-`hunttech_CompanyDepartament.browse`, `hunttech_CompanyDepartament.edit`; FK в `Project.projectDepartment`. UI Spec: [browse](../../screens/company-departament/hunttech_CompanyDepartament.browse_Spec.md), [edit](../../screens/company-departament/hunttech_CompanyDepartament.edit_Spec.md).
+`hunttech_CompanyDepartament.browse`, `hunttech_CompanyDepartament.edit`; FK в `Project.projectDepartment`. UI Spec: [browse](../../screens/company-departament/hunttech_CompanyDepartament.browse_Spec.md), [edit — канон](../../ui/CompanyDepartamentEdit_Spec.md), [edit — legacy](../../screens/company-departament/hunttech_CompanyDepartament.edit_Spec.md).
 
 ### Краткий обзор бизнес-логики поведения (Behavior Summary)
 
@@ -140,6 +140,7 @@ ORDER BY departament_ru_name;
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Рефакторинг `CompanyDepartamentEdit` по контракту Edit-форм (эталон ProjectEdit/CompanyEdit): sidebar 270px со статичной иллюстрацией, навигация «Разделы», карточки, lazy LOB сохранены; канонический Spec — [docs/ui/CompanyDepartamentEdit_Spec.md](../../ui/CompanyDepartamentEdit_Spec.md) |
 | 2026-07-02 | Локальная БД: добавлен частичный индекс `IDX_HUNTTECH_COMPANY_DEPT_ACTIVE_COMPANY_NAME` для активных департаментов компании |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-22 | Аудит Edit unfetched FK: `CompanyDepartamentEdit` без каскадных обработчиков; lazy LOB/projects через reload — OK |

@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Окно редактирования департамента (hunttech_CompanyDepartament.edit):
+     полноэкранный модальный редактор по контракту Edit-форм — sidebar (статичная
+     иллюстрация + идентификация + label-навигация «Разделы») и workspace
+     (toolbar + tabSheet с карточками + footer-действия). -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
-        focusComponent="form"
-        messagesPack="com.company.hunttech.web.screens.companydepartament" icon="GROUP">
+        focusComponent="departamentRuNameField"
+        messagesPack="com.company.hunttech.web.screens.companydepartament"
+        icon="GROUP">
+    <!-- Контейнеры данных формы: главный экземпляр департамента
+         (companyDepartament-edit-view, LOB-поля описания и шаблона письма
+         подгружаются лениво при открытии вкладок), проекты департамента
+         (composition) и справочники компаний и директоров. -->
     <data>
         <instance id="companyDepartamentDc"
                   class="com.company.hunttech.entity.CompanyDepartament"
@@ -32,102 +41,326 @@
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout expand="tabSheetDepartment" spacing="true">
-        <tabSheet id="tabSheetDepartment"
-                  stylename="framed">
-            <tab id="tabEditProject"
-                 caption="msg://TabProject"
-                 margin="true,true,true,true"
-                 expand="departamentDescriptionField"
-                 spacing="true">
-                <textField id="departamentRuNameField" width="50%"
-                           caption="msg://msgDepartamentName" dataContainer="companyDepartamentDc"
-                           property="departamentRuName"/>
-                <lookupPickerField id="companyNameField" optionsContainer="companyNamesDc" required="true"
-                                   width="50%" caption="msg://msgCompanyName" dataContainer="companyDepartamentDc"
-                                   property="companyName">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="departamentHrDirectorField" optionsContainer="departamentHrDirectorsDc"
-                                   width="50%"
-                                   caption="msg://msgHrDirectorOfDepartament" dataContainer="companyDepartamentDc"
-                                   property="departamentHrDirector">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupPickerField id="departamentDirectorField" optionsContainer="departamentDirectorsDc"
-                                   width="50%" caption="msg://msdDirectorName"
-                                   dataContainer="companyDepartamentDc" property="departamentDirector">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                    </actions>
-                </lookupPickerField>
-                <textField id="departamentNumberOfProgrammersField"
-                           width="50%" caption="msg://msgNumberOfPosition" dataContainer="companyDepartamentDc"
-                           property="departamentNumberOfProgrammers"/>
-                <textArea id="departamentDescriptionField"
-                          property="departamentDescription"
-                          caption="msg://msgShortDescription"
-                          rows="5"
-                          height="100%"
-                          width="100%"/>
-            </tab>
-            <tab id="tabOpenPosition"
-                 caption="msg://TabOpenPosition"
-                 margin="true,true,true,true"
-                 expand="companyDepartamentTable"
-                 spacing="true">
-                <table id="companyDepartamentTable"
-                       dataContainer="companyDepartamentProjectOfDepartmentsDc"
-                       height="100%"
-                       width="100%">
-                    <columns>
-                        <column id="projectName"/>
-                        <column id="startProjectDate"/>
-                        <column id="endProjectDate"/>
-                    </columns>
-                    <buttonsPanel>
-                        <button id="addButton" action="companyDepartamentTable.add"/>
-                        <button id="editButton" action="companyDepartamentTable.edit"/>
-                        <button id="removeButton" action="companyDepartamentTable.remove"/>
-                    </buttonsPanel>
-                    <actions>
-                        <action id="add" type="add"/>
-                        <action id="edit" type="edit"/>
-                        <action id="remove" type="remove"/>
-                    </actions>
-                </table>
-            </tab>
-            <tab id="tabTemplateLetter"
-                 caption="msg://msgTemplateLetter"
-                 margin="true,true,true,true"
-                 expand="templateLetterBox"
-                 spacing="true">
-                <vbox id="templateLetterBox"
+    <!-- Полноэкранный модальный режим диалога (контракт §5.3). -->
+    <dialogMode height="100%"
+                width="100%"
+                modal="true"/>
+    <!-- Корневой layout: локальный namespace company-departament-editor + общий
+         контракт edit-screen-layout; слева sidebar 270px, справа workspace. -->
+    <layout stylename="company-departament-editor"
+            expand="companyDepartamentEditorMainLayout"
+            spacing="false">
+        <hbox id="companyDepartamentEditorMainLayout"
+              stylename="edit-screen-layout"
+              width="100%"
+              height="100%"
+              expand="companyDepartamentEditorWorkspace"
+              spacing="false">
+            <!-- Sidebar департамента: визуальный блок (статичная иллюстрация без
+                 загрузки изображения), идентификация, label-навигация «Разделы»,
+                 spacer и подсказка. -->
+            <vbox id="companyDepartamentEditorSidebar"
+                  stylename="edit-sidebar"
+                  width="270px"
+                  height="100%"
+                  spacing="true"
+                  expand="companyDepartamentSidebarSpacer">
+                <!-- Визуальный блок: круглая иллюстрация департамента 176×176
+                     (канон серии справочников — статичный ovalImage, тема
+                     icons/dictionaries/company-departament.png; загрузка
+                     изображения формой не предусмотрена). -->
+                <vbox id="companyDepartamentEditorSidebarVisual"
+                      stylename="edit-sidebar-visual"
                       width="100%"
-                      height="100%"
-                      expand="templateLetterRichTextArea">
-                    <richTextArea id="templateLetterRichTextArea"
-                                  dataContainer="companyDepartamentDc"
-                                  property="templateLetter"
-                                  width="100%"
-                                  height="AUTO"
-                                  required="false"/>
+                      spacing="true"
+                      align="MIDDLE_CENTER">
+                    <ovalImage id="companyDepartamentLogoImage"
+                               width="176px"
+                               height="176px"
+                               ovalWidth="176px"
+                               ovalHeight="176px"
+                               visible="true"
+                               align="MIDDLE_CENTER"
+                               stylename="company-departament-logo-image"
+                               scaleMode="SCALE_DOWN">
+                        <theme path="icons/dictionaries/company-departament.png"/>
+                    </ovalImage>
                 </vbox>
-            </tab>
-        </tabSheet>
-        <form id="form" dataContainer="companyDepartamentDc">
-            <column width="250px">
-            </column>
-        </form>
-        <hbox id="editActions" spacing="true" align="BOTTOM_RIGHT">
-            <button action="windowCommitAndClose"/>
-            <button action="windowClose"/>
+                <!-- Идентификация: название департамента по центру (динамическое —
+                     контроллер подставляет departamentRuName либо заголовок формы);
+                     подпись типа записи не используется (канон серии 2026-08-14). -->
+                <vbox id="companyDepartamentEditorSidebarIdentity"
+                      stylename="edit-sidebar-identity"
+                      width="100%"
+                      spacing="false">
+                    <label id="companyDepartamentSidebarTitle"
+                           stylename="edit-sidebar-title"
+                           width="100%"
+                           value="msg://browseCaption"/>
+                </vbox>
+                <!-- Label-навигация «Разделы»: полоса-заголовок + пункты = вкладки
+                     TabSheet правой части; активный пункт управляется контроллером
+                     (эталон ProjectEdit/CompanyEdit — навигация видна на всех
+                     вкладках). -->
+                <vbox id="companyDepartamentEditorSidebarNavigation"
+                      stylename="label-navigation"
+                      width="100%"
+                      spacing="false">
+                    <label value="Разделы"
+                           stylename="label-nav-title company-departament-editor-navigation-title"/>
+                    <button id="companyDepartamentNavMain"
+                            stylename="label-nav-item label-nav-item-active"
+                            caption="msg://TabProject"
+                            width="100%"/>
+                    <button id="companyDepartamentNavProjects"
+                            stylename="label-nav-item"
+                            caption="msg://TabOpenPosition"
+                            width="100%"/>
+                    <button id="companyDepartamentNavTemplate"
+                            stylename="label-nav-item"
+                            caption="msg://msgTemplateLetter"
+                            width="100%"/>
+                </vbox>
+                <!-- Spacer отделяет навигацию от нижней подсказки (expand в sidebar). -->
+                <vbox id="companyDepartamentSidebarSpacer"
+                      stylename="edit-sidebar-spacer"
+                      width="100%"
+                      height="100%"/>
+                <!-- Подсказка о назначении формы в нижней части sidebar. -->
+                <label id="companyDepartamentSidebarHint"
+                       stylename="edit-sidebar-hint"
+                       width="100%"
+                       value="msg://msgCompanyDepartamentSidebarHint"/>
+            </vbox>
+            <!-- Workspace: toolbar с заголовком, вкладки департамента (ленивая
+                 загрузка LOB и проектов) и footer-действия ОК/Отмена. -->
+            <vbox id="companyDepartamentEditorWorkspace"
+                  stylename="edit-workspace"
+                  width="100%"
+                  height="100%"
+                  spacing="false"
+                  expand="tabSheetDepartment">
+                <!-- Toolbar: заголовок «Департамент» и краткое описание формы. -->
+                <hbox id="companyDepartamentEditorToolbar"
+                      stylename="edit-toolbar"
+                      width="100%"
+                      spacing="false">
+                    <vbox id="companyDepartamentEditorToolbarTitleBox"
+                          width="100%"
+                          spacing="false">
+                        <label id="companyDepartamentEditorToolbarTitle"
+                               stylename="edit-toolbar-title"
+                               value="msg://browseCaption"/>
+                        <label id="companyDepartamentEditorToolbarDescription"
+                               stylename="edit-toolbar-description"
+                               value="msg://msgCompanyDepartamentToolbarDescription"/>
+                    </vbox>
+                </hbox>
+                <!-- Вкладки департамента: «Проект» (карточки реквизитов и краткого
+                     описания), «Открытые позиции» (таблица проектов), «Шаблон
+                     письма» (LOB-редактор); имена вкладок — контракт ленивой
+                     загрузки контроллера. -->
+                <tabSheet id="tabSheetDepartment"
+                          stylename="edit-tabs"
+                          width="100%"
+                          height="100%">
+                    <tab id="tabEditProject"
+                         caption="msg://TabProject"
+                         spacing="true"
+                         expand="companyDepartamentDetailsScroll"
+                         stylename="company-departament-main-tab">
+                        <!-- Прокручиваемый контент вкладки: контрактные карточки
+                             (edit-card + showAsPanel) «Реквизиты департамента» и
+                             «Краткое описание». -->
+                        <scrollBox id="companyDepartamentDetailsScroll"
+                                   width="100%"
+                                   height="100%"
+                                   orientation="vertical"
+                                   scrollBars="vertical"
+                                   stylename="edit-workspace edit-workspace-scroll">
+                            <vbox id="companyDepartamentDetailsContent"
+                                  width="100%"
+                                  spacing="true"
+                                  stylename="edit-workspace-content">
+                                <!-- Карточка «Реквизиты департамента»: название,
+                                     компания, директор по персоналу, директор,
+                                     количество открытых позиций. -->
+                                <groupBox id="companyDepartamentMainCard"
+                                          caption="msg://msgDepartamentMainSection"
+                                          stylename="edit-card"
+                                          showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          width="100%">
+                                    <vbox id="companyDepartamentMainFieldsBox"
+                                          width="100%"
+                                          spacing="true">
+                                        <textField id="departamentRuNameField"
+                                                   dataContainer="companyDepartamentDc"
+                                                   property="departamentRuName"
+                                                   caption="msg://msgDepartamentName"
+                                                   stylename="edit-form-control"
+                                                   width="100%"/>
+                                        <lookupPickerField id="companyNameField"
+                                                           optionsContainer="companyNamesDc"
+                                                           dataContainer="companyDepartamentDc"
+                                                           property="companyName"
+                                                           caption="msg://msgCompanyName"
+                                                           stylename="edit-form-control"
+                                                           width="100%"
+                                                           required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                        <lookupPickerField id="departamentHrDirectorField"
+                                                           optionsContainer="departamentHrDirectorsDc"
+                                                           dataContainer="companyDepartamentDc"
+                                                           property="departamentHrDirector"
+                                                           caption="msg://msgHrDirectorOfDepartament"
+                                                           stylename="edit-form-control"
+                                                           width="100%">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                        <lookupPickerField id="departamentDirectorField"
+                                                           optionsContainer="departamentDirectorsDc"
+                                                           dataContainer="companyDepartamentDc"
+                                                           property="departamentDirector"
+                                                           caption="msg://msdDirectorName"
+                                                           stylename="edit-form-control"
+                                                           width="100%">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                        <textField id="departamentNumberOfProgrammersField"
+                                                   dataContainer="companyDepartamentDc"
+                                                   property="departamentNumberOfProgrammers"
+                                                   caption="msg://msgNumberOfPosition"
+                                                   stylename="edit-form-control"
+                                                   width="100%"/>
+                                    </vbox>
+                                </groupBox>
+                                <!-- Карточка «Краткое описание»: LOB-редактор,
+                                     подгружается лениво при первом открытии вкладки
+                                     (контроллер). -->
+                                <groupBox id="companyDepartamentDescriptionCard"
+                                          caption="msg://msgDepartamentDescriptionSection"
+                                          stylename="edit-card"
+                                          showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          width="100%">
+                                    <vbox id="companyDepartamentDescriptionFieldsBox"
+                                          width="100%"
+                                          height="100%"
+                                          expand="departamentDescriptionField"
+                                          spacing="true">
+                                        <textArea id="departamentDescriptionField"
+                                                  dataContainer="companyDepartamentDc"
+                                                  property="departamentDescription"
+                                                  caption="msg://msgShortDescription"
+                                                  stylename="edit-form-control"
+                                                  width="100%"
+                                                  height="100%"
+                                                  rows="5"/>
+                                    </vbox>
+                                </groupBox>
+                            </vbox>
+                        </scrollBox>
+                    </tab>
+                    <tab id="tabOpenPosition"
+                         caption="msg://TabOpenPosition"
+                         spacing="true"
+                         expand="companyDepartamentProjectsCard"
+                         stylename="company-departament-projects-tab">
+                        <!-- Карточка «Открытые позиции»: таблица проектов департамента,
+                             загрузка при первом открытии вкладки (composition
+                             companyDepartamentDc.projectOfDepartment). -->
+                        <groupBox id="companyDepartamentProjectsCard"
+                                  caption="msg://msgDepartamentProjectsSection"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%"
+                                  height="100%">
+                            <vbox id="companyDepartamentProjectsBox"
+                                  width="100%"
+                                  height="100%"
+                                  expand="companyDepartamentTable"
+                                  spacing="true">
+                                <table id="companyDepartamentTable"
+                                       dataContainer="companyDepartamentProjectOfDepartmentsDc"
+                                       height="100%"
+                                       width="100%">
+                                    <columns>
+                                        <column id="projectName"/>
+                                        <column id="startProjectDate"/>
+                                        <column id="endProjectDate"/>
+                                    </columns>
+                                    <buttonsPanel>
+                                        <button id="addButton" action="companyDepartamentTable.add"/>
+                                        <button id="editButton" action="companyDepartamentTable.edit"/>
+                                        <button id="removeButton" action="companyDepartamentTable.remove"/>
+                                    </buttonsPanel>
+                                    <actions>
+                                        <action id="add" type="add"/>
+                                        <action id="edit" type="edit"/>
+                                        <action id="remove" type="remove"/>
+                                    </actions>
+                                </table>
+                            </vbox>
+                        </groupBox>
+                    </tab>
+                    <tab id="tabTemplateLetter"
+                         caption="msg://msgTemplateLetter"
+                         spacing="true"
+                         expand="companyDepartamentTemplateCard"
+                         stylename="company-departament-template-tab">
+                        <!-- Карточка шаблона сопроводительного письма: LOB-редактор,
+                             подгружается лениво при первом открытии вкладки. -->
+                        <groupBox id="companyDepartamentTemplateCard"
+                                  caption="msg://msgDepartamentTemplateSection"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%"
+                                  height="100%">
+                            <vbox id="companyDepartamentTemplateBox"
+                                  width="100%"
+                                  height="100%"
+                                  expand="templateLetterRichTextArea"
+                                  spacing="true">
+                                <richTextArea id="templateLetterRichTextArea"
+                                              dataContainer="companyDepartamentDc"
+                                              property="templateLetter"
+                                              stylename="edit-form-control"
+                                              width="100%"
+                                              height="100%"/>
+                            </vbox>
+                        </groupBox>
+                    </tab>
+                </tabSheet>
+                <!-- Footer-действия: спейсер выталкивает пару ОК/Отмена к правому
+                     краю, кнопки получают канонические стили primary/secondary. -->
+                <hbox id="editActions"
+                      stylename="edit-footer-actions"
+                      width="100%"
+                      expand="bottomActionsSpacer"
+                      align="MIDDLE_RIGHT"
+                      spacing="false">
+                    <vbox id="bottomActionsSpacer"
+                          width="100%"
+                          height="1px"/>
+                    <hbox id="bottomActionsGroup"
+                          width="AUTO"
+                          align="MIDDLE_RIGHT"
+                          spacing="true">
+                        <button action="windowCommitAndClose" stylename="company-departament-editor-primary-action"/>
+                        <button action="windowClose" stylename="company-departament-editor-secondary-action"/>
+                    </hbox>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>

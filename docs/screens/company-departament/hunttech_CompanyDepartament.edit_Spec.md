@@ -1,6 +1,8 @@
 # CompanyDepartament Edit (`hunttech_CompanyDepartament.edit`)
 
 > Сущность: [CompanyDepartament.md](../../entities/company-departament/CompanyDepartament.md)
+>
+> ⚠️ **Актуальная каноническая версия:** [docs/ui/CompanyDepartamentEdit_Spec.md](../../ui/CompanyDepartamentEdit_Spec.md) (2026-08-14, рефакторинг по контракту Edit-форм). Этот legacy-документ сохранён для истории; технические разделы ниже актуализированы по состоянию на 2026-08-14.
 
 ---
 
@@ -32,7 +34,8 @@
 | **Базовый класс** | `StandardEditor` |
 | **Lookup-компонент** | `` |
 | **EditedEntityContainer** | `companyDepartamentDc` |
-| **focusComponent** | `form` |
+| **focusComponent** | `departamentRuNameField` (legacy `form` удалён, 2026-08-14) |
+| **dialogMode** | `height="100%" width="100%" modal="true"` (контракт §5.3, с 2026-08-14) |
 | **Меню** | `web-menu.xml` → `screen="hunttech_CompanyDepartament.edit"` (если есть пункт) |
 | **Загрузка данных** | `@LoadDataBeforeShow` |
 
@@ -92,11 +95,11 @@ select e from hunttech_Company e
 
 ### 4.1 Жизненный цикл
 
-Browse — стандартный. Edit: после показа для существующей записи подгружается описание департамента; смена вкладки → ленивая загрузка LOB и коллекции проектов.
+Browse — стандартный. Edit: после показа для существующей записи подгружается описание департамента; смена вкладки → ленивая загрузка LOB и коллекции проектов. С 2026-08-14: title sidebar — название департамента; навигация «Разделы» синхронизирует активный пункт с вкладкой; статичная иллюстрация `ovalImage` 176×176.
 
 ### 4.2 Скрытые вычисления
 
-Ленивый reload текстовых полей и `projectOfDepartment` только при первом заходе на вкладку.
+Ленивый reload текстовых полей и `projectOfDepartment` только при первом заходе на вкладку; presentation-навигация (TAB_TO_NAV_BUTTON + setSelectedTab) — без изменения данных.
 
 ### 4.3 Валидация и сохранение
 
@@ -115,9 +118,11 @@ Browse — стандартный. Edit: после показа для суще
 
 ### Структура layout
 
-- Корневой layout: `expand` на основную таблицу / форму (`form`)
-- Фильтр: `filter` → `companyNamesLc`
-- Таблицы: `companyDepartamentTable`
+- Двухпанельная компоновка `edit-screen-layout` (с 2026-08-14): sidebar 270px (иллюстрация 176×176 + identity-title + навигация «Разделы» + spacer + hint) и workspace (toolbar + tabSheet `edit-tabs` + footer `edit-footer-actions`)
+- Вкладки: `tabEditProject` (карточки `companyDepartamentMainCard`/`companyDepartamentDescriptionCard` в scrollBox), `tabOpenPosition` (карточка с table `companyDepartamentTable`), `tabTemplateLetter` (карточка с richTextArea)
+- Footer: `windowCommitAndClose` (primary) / `windowClose` (secondary), правый нижний угол
+- Legacy `form id="form"` удалён (focusComponent → `departamentRuNameField`)
+- Таблицы: `companyDepartamentTable` (composition `projectOfDepartment`)
 
 ### Стили и сообщения
 
@@ -132,6 +137,7 @@ Browse — стандартный. Edit: после показа для суще
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Рефакторинг по контракту Edit-форм (эталон ProjectEdit/CompanyEdit): sidebar 270px, статичная иллюстрация `ovalImage` 176×176, навигация «Разделы», карточки `edit-card`+`showAsPanel`, footer primary/secondary, `dialogMode` 100%×100% modal, legacy `form` удалён; канон — [docs/ui/CompanyDepartamentEdit_Spec.md](../../ui/CompanyDepartamentEdit_Spec.md) |
 | 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |
