@@ -772,7 +772,9 @@
     .job-candidate-form-row .c-suggestionfield,
     .job-candidate-form-row .c-suggestion-field,
     .job-candidate-form-row .v-datefield,
-    .job-candidate-form-row .v-datefield-textfield {
+    .job-candidate-form-row .v-datefield-textfield,
+    .job-candidate-form-row .v-suggestionfield,
+    .job-candidate-form-row .v-suggestionpickerfield {
       width: 100% !important;
       min-width: 0 !important;
       height: 38px !important;
@@ -787,15 +789,13 @@
     }
 
     .job-candidate-form-row > .v-slot:first-child {
-      width: 100px !important;
-      min-width: 100px !important;
+      flex: 0 0 auto !important;
       padding-right: 12px;
     }
 
     .job-candidate-form-row > .v-slot:last-child {
-      width: calc(100% - 100px) !important;
-      min-width: 0 !important;
       flex: 1 1 auto !important;
+      min-width: 0 !important;
     }
 
     .job-candidate-form-row .v-select-optiongroup {
