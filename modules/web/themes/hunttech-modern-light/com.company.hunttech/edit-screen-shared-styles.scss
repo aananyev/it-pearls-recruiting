@@ -361,7 +361,6 @@
   }
 
   .edit-form-control,
-  .v-slot-edit-form-control,
   .edit-form-control .v-filterselect,
   .edit-form-control .v-filterselect-input,
   .edit-form-control .v-textfield,
@@ -373,6 +372,17 @@
   .edit-form-control .c-suggestionfield {
     box-sizing: border-box;
     width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  // Слот поля edit-form-control: растягивается самим Vaadin по ширине компонента
+  // (width=100% → инлайн width: 100% на слоте), поэтому width: 100% !important
+  // здесь НЕ задаём — иначе он перебивает expandRatio-инлайн (width: 50%) пар
+  // полей в hbox (даты ProjectEdit, пары OpenPositionEdit) и второе поле
+  // выталкивается за границу экрана (2026-08-14).
+  .v-slot-edit-form-control {
+    box-sizing: border-box;
     min-width: 0 !important;
     max-width: 100% !important;
   }

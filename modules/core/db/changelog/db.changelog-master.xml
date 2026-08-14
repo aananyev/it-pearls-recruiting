@@ -52,4 +52,12 @@
     <include file="260814-2-addProjectShortDescriptionAiFunction.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- ProjectEdit «Кратко»: сокращение AI-генерации в 4 раза (одно предложение, MAX_TOKENS 125) для существующих сред. -->
+    <include file="260814-3-shortenProjectShortDescriptionPrompt.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- ProjectEdit «Кратко»: увеличение AI-генерации в 2 раза (два предложения, MAX_TOKENS 250) для существующих сред. -->
+    <include file="260814-4-increaseProjectShortDescriptionPrompt.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

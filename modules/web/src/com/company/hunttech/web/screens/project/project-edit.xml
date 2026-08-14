@@ -117,7 +117,8 @@
                             showClearButton="true"
                             property="projectLogo"/>
                 </vbox>
-                <!-- Идентификация: наименование проекта (динамическое) и роль «Проект». -->
+                <!-- Идентификация: только наименование проекта (динамическое, по центру);
+                     подпись типа записи «Проект» удалена по указанию владельца. -->
                 <vbox id="projectEditorSidebarIdentity"
                       stylename="edit-sidebar-identity"
                       width="100%"
@@ -126,29 +127,9 @@
                            stylename="edit-sidebar-title"
                            width="100%"
                            value="msg://browseCaption"/>
-                    <label id="projectSidebarSubtitle"
-                           stylename="edit-sidebar-subtitle"
-                           width="100%"
-                           value="msg://msgProjectSidebarSubtitle"/>
                 </vbox>
-                <!-- Раздел «Коротко»: краткое описание сути проекта (не более 5
-                     предложений). Значение формирует AI по кнопке «Кратко» во вкладке
-                     «Описание проекта» (поле сущности shortDescription); раздел виден
-                     только при непустом значении — видимость и текст управляются
-                     контроллером ProjectEdit. -->
-                <vbox id="projectEditorSidebarShortDescription"
-                      stylename="edit-sidebar-summary"
-                      width="100%"
-                      spacing="false"
-                      visible="false">
-                    <label id="projectSidebarShortDescriptionTitle"
-                           value="msg://msgProjectShortDescriptionSection"
-                           stylename="project-editor-short-description-title"/>
-                    <label id="projectSidebarShortDescriptionText"
-                           stylename="project-editor-short-description-text"
-                           width="100%"/>
-                </vbox>
-                <!-- Label-навигация «Разделы»: пункты = вкладки TabSheet в правой части экрана
+                <!-- Label-навигация «Разделы»: идёт сразу после идентификации, перед разделом
+                     «Коротко»; пункты = вкладки TabSheet в правой части экрана
                      (по явному указанию владельца; правило §3.6 не применяется — навигация
                      видна на всех вкладках); активный пункт управляется контроллером. -->
                 <vbox id="projectEditorSidebarNavigation"
@@ -173,6 +154,23 @@
                             stylename="label-nav-item"
                             caption="msg://msgTemplateLetter"
                             width="100%"/>
+                </vbox>
+                <!-- Раздел «Коротко»: краткое описание сути проекта (одно предложение —
+                     AI-генерация по кнопке «Кратко» во вкладке «Описание проекта»,
+                     поле shortDescription); следует сразу после навигации «Разделы»;
+                     виден только при непустом значении — видимость и текст
+                     управляются контроллером ProjectEdit. -->
+                <vbox id="projectEditorSidebarShortDescription"
+                      stylename="edit-sidebar-summary"
+                      width="100%"
+                      spacing="false"
+                      visible="false">
+                    <label id="projectSidebarShortDescriptionTitle"
+                           value="msg://msgProjectShortDescriptionSection"
+                           stylename="label-nav-title project-editor-short-description-title"/>
+                    <label id="projectSidebarShortDescriptionText"
+                           stylename="project-editor-short-description-text"
+                           width="100%"/>
                 </vbox>
                 <!-- Spacer отделяет навигацию от нижней подсказки (expand в sidebar). -->
                 <vbox id="projectSidebarSpacer"
@@ -268,6 +266,10 @@
                                                    stylename="edit-form-control"
                                                    width="100%"
                                                    required="true"/>
+                                        <!-- Строка дат проекта: «Дата старта» и «Дата окончания» делят
+                                             строку поровну (box.expandRatio=1 у обоих — 50/50); слоты
+                                             полей растягиваются Vaadin-инлайном, shared-стили
+                                             edit-screen-shared-styles не перебивают expandRatio. -->
                                         <hbox width="100%" spacing="true">
                                             <dateField id="startProjectDateField"
                                                        dataContainer="projectDc"

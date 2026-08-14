@@ -68,7 +68,7 @@ public class Project extends StandardEntity {
     protected String projectDescription;
 
     /**
-     * Краткое описание сути проекта («Коротко о проекте»): не более 5 предложений.
+     * Краткое описание сути проекта («Коротко о проекте»): одно предложение.
      * Заполняется AI по кнопке «Кратко» во вкладке «Описание проекта» ProjectEdit
      * (функция PROJECT_SHORT_DESCRIPTION_GENERATE); выводится в sidebar-разделе
      * «Коротко», если значение не пустое.

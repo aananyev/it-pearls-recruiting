@@ -31,26 +31,29 @@
       padding: 14px 16px 12px !important;
       border-right: 1px solid rgba(15, 23, 42, 0.78) !important;
       box-shadow: 5px 0 20px rgba(15, 23, 42, 0.18) !important;
+      // Вертикальный скролл контента sidebar при переполнении (overflow-y: auto
+      // даёт shared edit-screen-shared-styles): тонкий незаметный скроллбар,
+      // как у эталона OpenPositionEdit (контракт §4.2).
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+    }
+
+    // Тонкий скроллбар sidebar для WebKit (Chrome): запас под длинный текст
+    // раздела «Коротко» и навигацию — незаметный, не спорит с тёмным фоном.
+    .edit-sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .edit-sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 3px;
+    }
+
+    .edit-sidebar::-webkit-scrollbar-track {
+      background: transparent;
     }
 
     // Тексты идентификации и подсказки в тёмной sidebar.
-    .edit-sidebar-subtitle,
-    .edit-sidebar-subtitle.v-label {
-      box-sizing: border-box;
-      display: block;
-      width: 100% !important;
-      min-width: 0 !important;
-      margin: -4px 0 0 !important;
-      color: rgba(248, 250, 252, 0.72) !important;
-      font-size: 12px !important;
-      font-weight: 400 !important;
-      line-height: 17px !important;
-      letter-spacing: normal !important;
-      text-transform: none !important;
-      text-align: center !important;
-      white-space: normal !important;
-    }
-
     .edit-sidebar-title,
     .edit-sidebar-title.v-label {
       box-sizing: border-box;
@@ -78,25 +81,10 @@
       white-space: normal !important;
     }
 
-    // Раздел sidebar «Коротко»: заголовок-подпись (11px/700 uppercase, как caption
-    // инфокарточек) и текст краткого описания сути проекта (13px/500). Раздел
-    // показывается контроллером только при непустом значении shortDescription.
-    .project-editor-short-description-title,
-    .project-editor-short-description-title.v-label {
-      box-sizing: border-box;
-      display: block;
-      width: 100% !important;
-      min-width: 0 !important;
-      margin: 2px 0 4px !important;
-      color: rgba(248, 250, 252, 0.62) !important;
-      font-size: 11px !important;
-      font-weight: 700 !important;
-      line-height: 16px !important;
-      letter-spacing: 0.5px !important;
-      text-transform: uppercase !important;
-      white-space: normal !important;
-    }
-
+    // Раздел sidebar «Коротко»: заголовок — полоса-заголовок в точности как у
+    // навигации «Разделы» (контракт §4.1, селекторы объединены ниже); текст
+    // краткого описания сути проекта — 13px/500. Раздел показывается
+    // контроллером только при непустом значении shortDescription.
     .project-editor-short-description-text,
     .project-editor-short-description-text.v-label {
       box-sizing: border-box;
@@ -178,10 +166,13 @@
       border-color: rgba(255, 255, 255, 0.5) !important;
     }
 
-    // Полоса-заголовок набора навигации «Разделы» (контракт §4.1): две inset-линии,
-    // разделитель снизу, жёлтый текст 15px/700 на полупрозрачной полосе.
+    // Полоса-заголовок набора навигации «Разделы» и раздела «Коротко» (контракт
+    // §4.1): две inset-линии, разделитель снизу, жёлтый текст 15px/700 на
+    // полупрозрачной полосе. Оба заголовка sidebar — одинаковые полосы.
     .label-nav-title.project-editor-navigation-title,
-    .label-nav-title.project-editor-navigation-title.v-label {
+    .label-nav-title.project-editor-navigation-title.v-label,
+    .label-nav-title.project-editor-short-description-title,
+    .label-nav-title.project-editor-short-description-title.v-label {
       box-sizing: border-box;
       display: block;
       width: 100% !important;

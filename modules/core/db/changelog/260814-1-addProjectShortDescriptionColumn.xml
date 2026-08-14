@@ -11,14 +11,14 @@
         </preConditions>
         <!--
             Колонка SHORT_DESCRIPTION в HUNTTECH_PROJECT: краткое описание сути
-            проекта («Коротко о проекте», не более 5 предложений). Заполняется AI
+            проекта («Коротко о проекте», одно предложение). Заполняется AI
             по кнопке «Кратко» во вкладке «Описание проекта» ProjectEdit
             (PROJECT_SHORT_DESCRIPTION_GENERATE) и выводится в sidebar-разделе
             «Коротко». CLOB (TEXT в PostgreSQL) — как у projectDescription.
         -->
         <addColumn tableName="HUNTTECH_PROJECT">
             <column name="SHORT_DESCRIPTION" type="clob">
-                <remarks>Краткое описание сути проекта (до 5 предложений), генерируется AI в ProjectEdit, выводится в sidebar «Коротко»</remarks>
+                <remarks>Краткое описание сути проекта (одно предложение), генерируется AI в ProjectEdit, выводится в sidebar «Коротко»</remarks>
             </column>
         </addColumn>
     </changeSet>

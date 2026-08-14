@@ -44,7 +44,7 @@ Browse без LOB descriptions в основном SELECT; nested `projectOwner`
 | `shortDescription` | `SHORT_DESCRIPTION` |
 | `templateLetter` | `TEMPLATE_LETTER` |
 
-`shortDescription` («Коротко о проекте») — краткое описание сути проекта (не более 5 предложений), генерируется AI по кнопке «Кратко» во вкладке «Описание проекта» ProjectEdit и выводится в sidebar-разделе «Коротко». В отличие от `projectDescription`/`templateLetter` грузится сразу в `project-edit-view` (раздел sidebar виден при открытии формы, без lazy load по вкладкам).
+`shortDescription` («Коротко о проекте») — краткое описание сути проекта (два предложения — генерация в 2 раза больше изначальной редакции), генерируется AI по кнопке «Кратко» во вкладке «Описание проекта» ProjectEdit и выводится в sidebar-разделе «Коротко». В отличие от `projectDescription`/`templateLetter` грузится сразу в `project-edit-view` (раздел sidebar виден при открытии формы, без lazy load по вкладкам).
 
 ### Индексы производительности
 
@@ -88,7 +88,7 @@ HSQL получил обычные составные аналоги этих и
 - **Browse Java:** начальные фильтры задаются в `InitEvent` до `@LoadDataBeforeShow`; вложенные изменения checkbox не вызывают повторные `projectsDl.load()`
 - **Edit Java:** lazy load LOB и коллекции `openPosition` по вкладкам (`ProjectEdit`); вакансии — отдельный `CollectionLoader` с JPQL `where e.projectName = :project`, без привязки к `property="openPosition"` на instance (избегает unfetched при `@LoadDataBeforeShow`)
 - **Edit Java:** новый несохранённый проект не выполняет запрос открытых вакансий, потому что связанных строк ещё не может быть
-- **Edit AI «Кратко»:** кнопка «Кратко» во вкладке «Описание проекта» генерирует `shortDescription` (sidebar-раздел «Коротко») через `ProjectAiService.generateShortDescription` → `PROJECT_SHORT_DESCRIPTION_GENERATE`; кнопка disabled без текста описания, раздел sidebar скрыт при пустом `shortDescription`
+- **Edit AI «Кратко»:** кнопка «Кратко» во вкладке «Описание проекта» генерирует `shortDescription` (sidebar-раздел «Коротко») через `ProjectAiService.generateShortDescription` → `PROJECT_SHORT_DESCRIPTION_GENERATE`; генерация сокращена в 4 раза (одно предложение, `MAX_TOKENS` 125, миграция 260814-3), затем увеличена в 2 раза (два предложения, `MAX_TOKENS` 250, миграция 260814-4); кнопка disabled без текста описания, раздел sidebar скрыт при пустом `shortDescription`; sidebar-порядок: идентификация (только название, подпись «Проект» удалена) → «Разделы» → «Коротко», заголовок «Коротко» — полоса как у «Разделы», при переполнении sidebar скроллится тонким скроллбаром
 - **Loaders:** `companyDepartament-picker-view` + `cacheable`, `person-picker-view` + `cacheable`
 
 ---
@@ -152,6 +152,9 @@ HSQL получил обычные составные аналоги этих и
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | ProjectEdit: исправлена строка дат — shared `.v-slot-edit-form-control { width: 100% !important }` перебивал expandRatio (50/50), «Дата окончания проекта» выталкивалась за границу; слоты растягиваются Vaadin-инлайном (7 тем) |
+| 2026-08-14 | ProjectEdit: AI-генерация «Кратко» увеличена в 2 раза (два предложения вместо одного, `MAX_TOKENS` 125→250, миграция 260814-4); из sidebar убрана подпись типа записи «Проект»; sidebar скроллится при переполнении (тонкий скроллбар, SCSS 7 тем) |
+| 2026-08-14 | ProjectEdit sidebar: блок «Коротко» перенесён после навигации «Разделы»; заголовок «Коротко» — полоса-заголовок как у «Разделы» (`label-nav-title project-editor-short-description-title`); AI-генерация «Кратко» сокращена в 4 раза (одно предложение, `MAX_TOKENS` 500→125; seed 260814-2 + миграция 260814-3); убрана подсказка «PDF, DOCX или TXT до 10 МБ…», кнопки «Загрузить описание»/«Кратко» выровнены вправо |
 | 2026-08-14 | Обработка логотипа: локальный rembg-этап (бесплатная нейросеть u2net, systemd rembg.service на сервере приложения, `POST 127.0.0.1:7000/api/remove`) — первый шаг AI-конвейера перед платной функцией `PROJECT_LOGO_IMAGE_GENERATE`; недоступность rembg → AI → классический flood-fill; конфиг `hunttech.projectLogo.rembg.{enabled,url,timeoutMs}` |
 | 2026-08-14 | «Кратко о проекте»: новое поле `shortDescription` (`SHORT_DESCRIPTION`, CLOB) — краткое описание сути проекта (до 5 предложений); AI-функция `PROJECT_SHORT_DESCRIPTION_GENERATE` (capability TEXT_GENERATION), кнопка «Кратко» во вкладке «Описание проекта» ProjectEdit, sidebar-раздел «Коротко» (виден при непустом значении); поле добавлено в `project-edit-view` |
 | 2026-08-14 | Обработка логотипа: классический конвейер дополнительно удаляет серый фон-градиенты (логотип SSP) — пиксели с насыщенностью ≤ 30 и яркостью ≥ 40, соединённые с краем, полностью прозрачны (`graySaturationThreshold`/`grayMinChannel`); белый фон — без изменений |

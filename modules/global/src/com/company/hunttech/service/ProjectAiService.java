@@ -32,7 +32,7 @@ public interface ProjectAiService {
     String processUploadedDescription(String projectName, String sourceFileName, String sourceText);
 
     /**
-     * Генерирует краткое описание сути проекта (не более 5 предложений) на
+     * Генерирует краткое описание сути проекта (одно предложение) на
      * основании полного описания.
      *
      * Доступные переменные административного prompt template:

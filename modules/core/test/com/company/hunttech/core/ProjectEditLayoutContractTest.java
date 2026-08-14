@@ -51,14 +51,14 @@ public class ProjectEditLayoutContractTest {
         assertTrue(xml.contains("stylename=\"edit-toolbar\""));
         assertTrue("вкладки без контрактного edit-tabs",
                 xml.contains("stylename=\"edit-tabs\""));
-        // Порядок идентификации как эталон IteractionListEdit: название (title)
-        // СВЕРХУ, подпись типа (subtitle) СНИЗУ.
+        // Идентификация: title по центру; подпись типа записи (subtitle «Проект»)
+        // удалена по указанию владельца (2026-08-14, как в гео-формах).
         int titleIdx = xml.indexOf("id=\"projectSidebarTitle\"");
-        int subtitleIdx = xml.indexOf("stylename=\"edit-sidebar-subtitle\"");
         assertTrue("нет title в identity", titleIdx >= 0);
-        assertTrue("нет subtitle в identity", subtitleIdx >= 0);
-        assertTrue("порядок не эталонный: subtitle раньше title",
-                titleIdx < subtitleIdx);
+        assertFalse("подпись типа записи (subtitle) осталась в identity",
+                xml.contains("stylename=\"edit-sidebar-subtitle\""));
+        assertFalse("msg-ключ подписи типа записи остался в XML",
+                xml.contains("msgProjectSidebarSubtitle"));
         // Нижние действия: primary «Сохранить и закрыть» и secondary «Отмена».
         assertTrue(xml.contains("stylename=\"project-editor-primary-action\""));
         assertTrue(xml.contains("stylename=\"project-editor-secondary-action\""));
@@ -235,9 +235,13 @@ public class ProjectEditLayoutContractTest {
         // Название (title) жёлтое #ffb11b 18px по центру — эталон.
         assertTrue("title не жёлтый 18px", canon.contains("color: #ffb11b !important")
                 && canon.contains("font-size: 18px !important"));
-        // Подпись типа (subtitle) 12px/400 — эталон.
-        assertTrue("subtitle не 12px/400", canon.contains("font-size: 12px !important")
-                && canon.contains("font-weight: 400 !important"));
+        // Подпись типа записи (subtitle) удалена из XML и SCSS по указанию
+        // владельца; sidebar скроллится при переполнении тонким скроллбаром
+        // (scrollbar-width: thin + webkit-стили, эталон OpenPositionEdit §4.2).
+        assertFalse("subtitle-блок остался в SCSS",
+                canon.contains(".edit-sidebar-subtitle"));
+        assertTrue("нет тонкого скроллбара sidebar (scrollbar-width: thin)",
+                canon.contains("scrollbar-width: thin"));
         assertTrue("Нет канонического hover rgba(255,255,255,0.08)",
                 canon.contains("rgba(255, 255, 255, 0.08)"));
         assertTrue("Нет канонического активного фона rgba(255,177,27,0.12)",
@@ -322,6 +326,14 @@ public class ProjectEditLayoutContractTest {
             assertEquals(theme + ": edit-screen-shared-styles.scss не идентичен halo",
                     sharedHalo, s);
         }
+        // Слот edit-form-control НЕ должен получать width: 100% !important:
+        // это перебивало Vaadin-инлайн width: 50% от box.expandRatio пар дат
+        // ProjectEdit (второе поле выталкивалось за границу экрана, 2026-08-14).
+        int slotIdx = sharedCanon.indexOf(".v-slot-edit-form-control {");
+        assertTrue("нет отдельного правила .v-slot-edit-form-control", slotIdx >= 0);
+        String slotRule = sharedCanon.substring(slotIdx, slotIdx + 250);
+        assertFalse("слот edit-form-control получил width: 100% !important (ломает expandRatio)",
+                slotRule.matches("(?s).*\\n\\s*width: 100% !important;.*"));
     }
 
     @Test
@@ -455,8 +467,9 @@ public class ProjectEditLayoutContractTest {
     public void shortDescriptionSidebarSectionContract() throws IOException {
         String xml = readProjectFile(SCREEN);
 
-        // Раздел «Коротко» sidebar: контейнер между идентификацией и навигацией,
-        // заголовок и текст — отдельные label'ы с локальными stylename.
+        // Раздел «Коротко» sidebar: контейнер сразу ПОСЛЕ навигации «Разделы»
+        // (по указанию владельца), заголовок — полоса label-nav-title в точности
+        // как у «Разделы»; текст — отдельный label с локальным stylename.
         assertTrue("Нет контейнера раздела «Коротко»",
                 xml.contains("id=\"projectEditorSidebarShortDescription\""));
         assertTrue("Раздел не скрыт по умолчанию (visible=false)",
@@ -467,19 +480,24 @@ public class ProjectEditLayoutContractTest {
                 xml.contains("value=\"msg://msgProjectShortDescriptionSection\""));
         assertTrue("Нет текста раздела",
                 xml.contains("id=\"projectSidebarShortDescriptionText\""));
-        assertTrue("Заголовок без stylename project-editor-short-description-title",
-                xml.contains("stylename=\"project-editor-short-description-title\""));
+        assertTrue("Заголовок без полосы label-nav-title (как «Разделы»)",
+                xml.contains("stylename=\"label-nav-title project-editor-short-description-title\""));
         assertTrue("Текст без stylename project-editor-short-description-text",
                 xml.contains("stylename=\"project-editor-short-description-text\""));
 
-        // Раздел расположен между идентификацией (identity) и навигацией («Разделы»).
+        // Раздел расположен между навигацией («Разделы») и spacer: identity →
+        // navigation → shortDescription → spacer.
         int identityIdx = xml.indexOf("id=\"projectEditorSidebarIdentity\"");
-        int sectionIdx = xml.indexOf("id=\"projectEditorSidebarShortDescription\"");
         int navIdx = xml.indexOf("id=\"projectEditorSidebarNavigation\"");
+        int sectionIdx = xml.indexOf("id=\"projectEditorSidebarShortDescription\"");
+        int spacerIdx = xml.indexOf("id=\"projectSidebarSpacer\"");
         assertTrue("identity отсутствует", identityIdx >= 0);
         assertTrue("навигация отсутствует", navIdx >= 0);
-        assertTrue("раздел не между identity и навигацией",
-                identityIdx < sectionIdx && sectionIdx < navIdx);
+        assertTrue("spacer отсутствует", spacerIdx >= 0);
+        assertTrue("раздел не после навигации «Разделы»",
+                identityIdx < navIdx && navIdx < sectionIdx);
+        assertTrue("раздел не перед spacer",
+                sectionIdx < spacerIdx);
     }
 
     @Test
@@ -487,12 +505,21 @@ public class ProjectEditLayoutContractTest {
         String canon = readProjectFile(
                 "modules/web/themes/hover/com.company.hunttech/project-editor.scss");
 
-        // Заголовок раздела «Коротко»: подпись 11px/700 uppercase.
+        // Заголовок раздела «Коротко» — полоса-заголовок в точности как у
+        // навигации «Разделы» (контракт §4.1): селектор объединён с полосой.
         assertTrue("Нет стиля заголовка .project-editor-short-description-title",
                 canon.contains(".project-editor-short-description-title"));
-        assertTrue("Заголовок не 11px/700",
-                canon.contains("font-size: 11px !important")
+        assertTrue("Заголовок не в полосе label-nav-title",
+                canon.contains(".label-nav-title.project-editor-short-description-title"));
+        assertTrue("Полоса не 15px/700",
+                canon.contains("font-size: 15px !important")
                         && canon.contains("font-weight: 700 !important"));
+        assertTrue("Полоса не 36px высотой",
+                canon.contains("min-height: 36px !important"));
+        assertTrue("Нет inset-линий полосы (box-shadow)",
+                canon.contains("rgba(255, 255, 255, 1) 0 1px 0 0 inset"));
+        assertTrue("Нет разделителя полосы (border-bottom)",
+                canon.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14)"));
         // Текст раздела: 13px/500, переносы включены.
         assertTrue("Нет стиля текста .project-editor-short-description-text",
                 canon.contains(".project-editor-short-description-text"));
