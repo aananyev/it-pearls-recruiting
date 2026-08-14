@@ -184,8 +184,7 @@
         <!-- Справочник должностей для поля «Должность» (кэш; исключены служебные записи). -->
         <collection id="personPositionsDc"
                     class="com.company.hunttech.entity.Position">
-            <view extends="position-view"/>
-            <!-- Загрузчик данных personPositionsLc. -->
+            <view extends="position-picker-view"/>
             <loader id="personPositionsLc" cacheable="true">
                 <query>
                     <!-- Все должности, кроме помеченных «(не использовать)», по алфавиту. -->
@@ -195,16 +194,6 @@
                 </query>
             </loader>
         </collection>
-        <!-- Справочник компаний для поля «Компания» (кэш, по названию). -->
-        <collection id="currentCompaniesDc"
-                    class="com.company.hunttech.entity.Company">
-            <view extends="company-picker-view"/>
-            <!-- Загрузчик данных currentCompaniesLc. -->
-            <loader id="currentCompaniesLc" cacheable="true">
-                <query><![CDATA[select e from hunttech_Company e order by e.comanyName]]></query>
-            </loader>
-        </collection>
-        <!-- Справочник городов для поля «Город» (кэш, по русскому названию). -->
         <collection id="citiesDc" class="com.company.hunttech.entity.City">
             <view extends="city-picker-view"/>
             <loader id="citiesDl" cacheable="true">
@@ -287,34 +276,16 @@
                       width="100%"
                       spacing="true"
                       align="TOP_CENTER"
-                      stylename="job-candidate-profile-header edit-sidebar-visual">
-                    <!-- Контейнер фотографии и зоны drag&drop загрузки нового фото. -->
-                    <vbox id="dropZone"
-                          spacing="true"
-                          align="TOP_CENTER">
-                        <!-- Обёртка изображения-аватара. -->
-                        <vbox id="picVBox"
-                              align="TOP_CENTER"
-                              spacing="true">
-                            <!--
-                              One data-bound component renders both the stored photo and the fallback.
-                              Keeping the fallback in the same component prevents layout shifts and
-                              removes the need to synchronize visibility of two parallel Image instances.
-                            -->
-                            <!-- Фотография кандидата: кастомный компонент с fallback-картинкой,
-                                 176×176, овальная обрезка, масштабирование по контейнеру. -->
-                            <ovaFallbackImage id="candidatePic"
-                                              dataContainer="jobCandidateDc"
-                                              property="fileImageFace"
-                                              width="176px" height="176px"
-                                              ovalWidth="176px" ovalHeight="176px"
-                                              align="TOP_CENTER"
-                                              stylename="job-candidate-avatar"
-                                              scaleMode="SCALE_DOWN"
-                                              fallbackThemePath="icons/no-programmer.jpeg"/>
-                            <!--
-                            Legacy two-component fallback retained temporarily for comparison only.
-                            It must stay commented while candidatePic is an ovaFallbackImage.
+                      stylename="job-candidate-profile-header">
+                    <vbox id="dropZone" spacing="false" align="TOP_CENTER">
+                        <vbox id="picVBox" align="TOP_CENTER" spacing="true">
+                            <image id="candidatePic"
+                                   dataContainer="jobCandidateDc"
+                                   property="fileImageFace"
+                                   width="176px" height="176px"
+                                   align="TOP_CENTER"
+                                   stylename="job-candidate-avatar"
+                                   scaleMode="SCALE_DOWN"/>
                             <image id="candidateDefaultPic"
                                    width="176px" height="176px"
                                    align="TOP_CENTER"
@@ -689,9 +660,8 @@
                           stylename="framed job-candidate-tabs edit-tabs"
                           width="100%"
                           height="100%">
-
-                    <!-- TAB: Основное -->
-                    <!-- Вкладка «Основное»: персональные и профессиональные данные кандидата. -->
+                    <!-- TAB: Основное — строковая компоновка повторяет проверенный шаблон вкладки «Контакты»:
+                         подпись фиксированной ширины 80px, поле `width="100%"` растягивается на остаток строки. -->
                     <tab id="tabMain"
                          caption="msg://msgTabMain"
                          spacing="true"
@@ -716,248 +686,163 @@
                             <vbox id="jobCandidateMainSectionContent"
                                   width="100%"
                                   spacing="true"
-                                  stylename="job-candidate-accordion-content">
+                                  stylename="job-candidate-accordion-content job-candidate-card-row">
 
-                                <!-- Карточка «Персональные данные»: ФИО, дата рождения, город. -->
+                                <!-- Левая карточка: Персональные данные -->
                                 <vbox id="personalDataBlock"
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
-                                      stylename="job-candidate-card edit-card">
-                                    <!-- Заголовок карточки. -->
+                                      box.expandRatio="1"
+                                      stylename="job-candidate-card job-candidate-half-card">
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="msg://msgPersonalData" stylename="job-candidate-card-title edit-card-title"/>
                                     </hbox>
-                                    <!-- Сетка полей персональных данных (подпись + поле в каждой строке). -->
-                                    <grid id="personalDataGrid"
-                                          spacing="true"
-                                          width="100%"
-                                          stylename="job-candidate-form-grid">
-                                        <columns count="2"/>
-                                        <rows>
-                                            <!-- Fixed caption width + one expanded field keeps all three
-                                                 SuggestionFields equal without changing lazy initialization. -->
-                                            <row>
-                                                <!-- Строка «Имя»: подпись и поле с автодополнением имён. -->
-                                                <hbox spacing="false" width="100%"
-                                                      expand="firstNameField"
-                                                      >
-                                                    <!-- Подпись «Имя». -->
-                                                    <label value="msg://msgFirstName"
-                                                           stylename="small"
-                                                           box.expandRatio="1"/>
-                                                    <!-- Поле имени: подсказывает ранее встречавшиеся имена
-                                                         (поиск по firstName из таблицы кандидатов). -->
-                                                    <suggestionField id="firstNameField"
-                                                                     box.expandRatio="4"
-                                                                     dataContainer="jobCandidateDc"
-                                                                     property="firstName"
-                                                                     width="100%"
-                                                                     stylename="edit-form-control"
-                                                                     minSearchStringLength="1"
-                                                                     editable="true"
-                                                                     inputPrompt="msg://msgPressEnter">
-                                                        <!-- Запрос подсказок имён (поиск по firstName). -->
-                                                        <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                               escapeValueForLike="false"
-                                                               view="_local"
-                                                               searchStringFormat="%$searchString%">
-                                                            select e.firstName from hunttech_JobCandidate e
-                                                            where lower(e.firstName) like lower(:searchString) escape
-                                                            '\'
-                                                        </query>
-                                                    </suggestionField>
-                                                </hbox>
-                                            </row>
-                                            <row>
-                                                <!-- Строка «Отчество»: поле с автодополнением отчеств. -->
-                                                <hbox spacing="false" width="100%"
-                                                      expand="middleNameField"
-                                                      >
-                                                    <!-- Подпись «Отчество». -->
-                                                    <label value="msg://msgMiddleName"
-                                                           box.expandRatio="1"
-                                                           stylename="small"/>
-                                                    <!-- Поле «Отчество»: автодополнение (свойство middleName). -->
-                                                    <suggestionField id="middleNameField"
-                                                                     dataContainer="jobCandidateDc"
-                                                                     box.expandRatio="4"
-                                                                     property="middleName"
-                                                                     width="100%"
-                                                                     stylename="edit-form-control"
-                                                                     minSearchStringLength="1"
-                                                                     editable="true"
-                                                                     inputPrompt="msg://msgPressEnter">
-                                                        <!-- Запрос подсказок отчеств (поиск по middleName). -->
-                                                        <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                               searchStringFormat="%$searchString%"
-                                                               view="_minimal"
-                                                               escapeValueForLike="true">
-                                                            select e from hunttech_JobCandidate e
-                                                            where lower(e.middleName) like lower(:searchString) escape
-                                                            '\'
-                                                        </query>
-                                                    </suggestionField>
-                                                </hbox>
-                                            </row>
-                                            <row>
-                                                <!-- Строка «Фамилия»: поле с автодополнением фамилий. -->
-                                                <hbox spacing="false" width="100%"
-                                                      expand="secondNameField"
-                                                      >
-                                                    <!-- Подпись «Фамилия». -->
-                                                    <label value="msg://msgSecondName" stylename="small" box.expandRatio="1"/>
-                                                    <suggestionField id="secondNameField"
-                                                                     dataContainer="jobCandidateDc"
-                                                                     box.expandRatio="4"
-                                                                     property="secondName"
-                                                                     width="100%"
-                                                                     stylename="edit-form-control"
-                                                                     minSearchStringLength="1"
-                                                                     editable="true"
-                                                                     inputPrompt="msg://msgPressEnter">
-                                                        <!-- Запрос подсказок фамилий (поиск по secondName). -->
-                                                        <query entityClass="com.company.hunttech.entity.JobCandidate"
-                                                               escapeValueForLike="true"
-                                                               searchStringFormat="%$searchString%">
-                                                            select e from hunttech_JobCandidate e
-                                                            where lower(e.secondName) like lower(:searchString) escape
-                                                            '\'
-                                                        </query>
-                                                    </suggestionField>
-                                                </hbox>
-                                            </row>
-                                            <row>
-                                                <!-- Строка «Дата рождения»: стандартное поле даты. -->
-                                                <hbox spacing="false" width="100%" expand="birdhDateField">
-                                                    <label value="msg://msgBirthDate" stylename="small" box.expandRatio="1"/>
-                                                    <dateField id="birdhDateField"
-                                                               box.expandRatio="4"
-                                                               dataContainer="jobCandidateDc"
-                                                               property="birdhDate"
-                                                               stylename="edit-form-control"
-                                                               width="100%"/>
-                                                </hbox>
-                                            </row>
-                                            <row>
-                                                <!-- Строка «Город»: lookup-выбор из справочника городов (обязательное). -->
-                                                <hbox spacing="false" width="100%" expand="jobCityCandidateField">
-                                                    <label value="mainMsg://msgCity" stylename="small" box.expandRatio="1"/>
-                                                    <lookupPickerField id="jobCityCandidateField"
-                                                                       box.expandRatio="4"
-                                                                       dataContainer="jobCandidateDc"
-                                                                       width="100%"
-                                                                       stylename="edit-form-control"
-                                                                       optionsContainer="citiesDc"
-                                                                       property="cityOfResidence"
-                                                                       required="true">
-                                                        <!-- Элемент actions. -->
-                                                        <actions>
-                                                            <!-- Действие picker_lookup (lookup). -->
-                                                            <action id="lookup" type="picker_lookup"/>
-                                                        </actions>
-                                                    </lookupPickerField>
-                                                </hbox>
-                                            </row>
-                                        </rows>
-                                    </grid>
+
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
+                                          expand="firstNameField" stylename="job-candidate-form-row">
+                                        <label value="Имя" stylename="small" width="80px"/>
+                                        <suggestionField id="firstNameField"
+                                                         dataContainer="jobCandidateDc"
+                                                         property="firstName"
+                                                         width="100%"
+                                                         minSearchStringLength="1"
+                                                         editable="true"
+                                                         inputPrompt="msg://msgPressEnter">
+                                            <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                                   escapeValueForLike="true"
+                                                   searchStringFormat="%$searchString%">
+                                                select e.firstName from hunttech_JobCandidate e
+                                                where lower(e.firstName) like lower(:searchString) escape '\'
+                                            </query>
+                                        </suggestionField>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
+                                          expand="middleNameField" stylename="job-candidate-form-row">
+                                        <label value="Отчество" stylename="small" width="80px"/>
+                                        <suggestionField id="middleNameField"
+                                                         dataContainer="jobCandidateDc"
+                                                         property="middleName"
+                                                         width="100%"
+                                                         minSearchStringLength="1"
+                                                         editable="true"
+                                                         inputPrompt="msg://msgPressEnter">
+                                            <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                                   escapeValueForLike="true"
+                                                   searchStringFormat="%$searchString%">
+                                                select e from hunttech_JobCandidate e
+                                                where lower(e.middleName) like lower(:searchString) escape '\'
+                                            </query>
+                                        </suggestionField>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
+                                          expand="secondNameField" stylename="job-candidate-form-row">
+                                        <label value="Фамилия" stylename="small" width="80px"/>
+                                        <suggestionField id="secondNameField"
+                                                         dataContainer="jobCandidateDc"
+                                                         property="secondName"
+                                                         width="100%"
+                                                         minSearchStringLength="1"
+                                                         editable="true"
+                                                         inputPrompt="msg://msgPressEnter">
+                                            <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                                   escapeValueForLike="true"
+                                                   searchStringFormat="%$searchString%">
+                                                select e from hunttech_JobCandidate e
+                                                where lower(e.secondName) like lower(:searchString) escape '\'
+                                            </query>
+                                        </suggestionField>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
+                                          expand="birdhDateField" stylename="job-candidate-form-row">
+                                        <label value="Дата рождения" stylename="small" width="80px"/>
+                                        <dateField id="birdhDateField"
+                                                   dataContainer="jobCandidateDc"
+                                                   property="birdhDate"
+                                                   width="100%"/>
+                                    </hbox>
                                 </vbox>
 
-                                <!-- Карточка «Профессиональные данные»: должность, компания, доп. позиции. -->
+                                <!-- Правая карточка: Профессиональные данные -->
                                 <vbox id="professionalDataBlock"
                                       width="100%"
                                       height="AUTO"
                                       spacing="true"
-                                      stylename="job-candidate-card edit-card">
-                                    <!-- Заголовок карточки. -->
+                                      box.expandRatio="1"
+                                      stylename="job-candidate-card job-candidate-half-card">
                                     <hbox width="100%" align="MIDDLE_LEFT" stylename="job-candidate-card-heading">
                                         <label value="msg://msgProfessionalData" stylename="job-candidate-card-title edit-card-title"/>
                                     </hbox>
-                                    <!-- Сетка полей профессиональных данных. -->
-                                    <grid id="professionalDataGrid"
-                                          spacing="true"
-                                          width="100%"
-                                          stylename="job-candidate-form-grid">
-                                        <columns count="2"/>
-                                        <rows>
-                                            <row>
-                                                <!-- Строка «Должность»: lookup-выбор из справочника должностей (обязательное). -->
-                                                <hbox spacing="false" width="100%" expand="personPositionField">
-                                                    <label value="msg://msgPersonPosition" stylename="small" box.expandRatio="1"/>
-                                                    <lookupPickerField id="personPositionField"
-                                                                       box.expandRatio="3"
-                                                                       optionsContainer="personPositionsDc"
-                                                                       dataContainer="jobCandidateDc"
-                                                                       property="personPosition"
-                                                                       width="100%"
-                                                                       stylename="edit-form-control"
-                                                                       required="true">
-                                                        <!-- Элемент actions. -->
-                                                        <actions>
-                                                            <!-- Действие picker_lookup (lookup). -->
-                                                            <action id="lookup" type="picker_lookup"/>
-                                                            <!-- Действие picker_open (open). -->
-                                                            <action id="open" type="picker_open" icon="EDIT_ACTION"/>
-                                                        </actions>
-                                                    </lookupPickerField>
-                                                </hbox>
-                                            </row>
-                                            <row>
-                                                <!-- Строка «Компания»: поиск компании с подсказками (обязательное). -->
-                                                <hbox spacing="false" width="100%" expand="currentCompanyField">
-                                                    <label value="msg://msgCompany" stylename="small" box.expandRatio="1"/>
-                                                    <suggestionPickerField id="currentCompanyField"
-                                                                           box.expandRatio="3"
-                                                                           dataContainer="jobCandidateDc"
-                                                                           property="currentCompany"
-                                                                           width="100%"
-                                                                           stylename="edit-form-control"
-                                                                           minSearchStringLength="2"
-                                                                           suggestionsLimit="50"
-                                                                           asyncSearchDelayMs="300"
-                                                                           inputPrompt="msg://msgPressEnter"
-                                                                           required="true">
-                                                        <!-- Элемент actions. -->
-                                                        <actions>
-                                                            <!-- Действие picker_lookup (lookup). -->
-                                                            <action id="lookup" type="picker_lookup"/>
-                                                            <!-- Действие picker_open (open). -->
-                                                            <action id="open" type="picker_open" icon="EDIT_ACTION"/>
-                                                        </actions>
-                                                        <query entityClass="com.company.hunttech.entity.Company"
-                                                               escapeValueForLike="true"
-                                                               searchStringFormat="%$searchString%">
-                                                            select e from hunttech_Company e
-                                                            where lower(e.comanyName) like lower(:searchString) escape
-                                                            '\'
-                                                            order by e.comanyName, e.companyShortName
-                                                        </query>
-                                                    </suggestionPickerField>
-                                                </hbox>
-                                            </row>
-                                            <row>
-                                                <!-- Строка «Доп. позиции»: кнопка добавления и список выбранных позиций. -->
-                                                <hbox spacing="true" width="100%" expand="positionsLabel">
-                                                    <label value="msg://msgAdditionalPositions"
-                                                           align="MIDDLE_LEFT"
-                                                           stylename="small"/>
-                                                    <!-- Кнопка добавления дополнительных позиций (диалог выбора). -->
-                                                    <button id="addPositions"
-                                                            caption="..."
-                                                            enable="true"
-                                                            align="MIDDLE_LEFT"
-                                                            description="msg://msgSetPositions"
-                                                            invoke="addPositionList"/>
-                                                    <!-- Список выбранных дополнительных позиций: горизонтальный flow-контейнер
-                                                         (flex-wrap) — каждая позиция отдельным элементом, перенос по позициям,
-                                                         а не по словам внутри одного Label (заполняется контроллером). -->
-                                                    <cssLayout id="positionsLabel"
+
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
+                                          expand="jobCityCandidateField" stylename="job-candidate-form-row">
+                                        <label value="Город" stylename="small" width="80px"/>
+                                        <lookupPickerField id="jobCityCandidateField"
+                                                           dataContainer="jobCandidateDc"
+                                                           width="100%"
+                                                           optionsContainer="citiesDc"
+                                                           property="cityOfResidence"
+                                                           required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
+                                          expand="personPositionField" stylename="job-candidate-form-row">
+                                        <label value="Должность" stylename="small" width="80px"/>
+                                        <lookupPickerField id="personPositionField"
+                                                           optionsContainer="personPositionsDc"
+                                                           dataContainer="jobCandidateDc"
+                                                           property="personPosition"
+                                                           width="100%"
+                                                           required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                                <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
+                                          expand="currentCompanyField" stylename="job-candidate-form-row">
+                                        <label value="Компания" stylename="small" width="80px"/>
+                                        <suggestionPickerField id="currentCompanyField"
+                                                               dataContainer="jobCandidateDc"
+                                                               property="currentCompany"
                                                                width="100%"
-                                                               stylename="job-candidate-positions"/>
-                                                </hbox>
-                                            </row>
-                                        </rows>
-                                    </grid>
+                                                               minSearchStringLength="2"
+                                                               suggestionsLimit="50"
+                                                               asyncSearchDelayMs="300"
+                                                               inputPrompt="msg://msgPressEnter"
+                                                               required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                                <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                                            </actions>
+                                            <query entityClass="com.company.hunttech.entity.Company"
+                                                   escapeValueForLike="true"
+                                                   searchStringFormat="%$searchString%">
+                                                select e from hunttech_Company e
+                                                where lower(e.comanyName) like lower(:searchString) escape '\'
+                                                order by e.comanyName, e.companyShortName
+                                            </query>
+                                        </suggestionPickerField>
+                                    </hbox>
+                                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT"
+                                          expand="positionsControl" stylename="job-candidate-form-row">
+                                        <label value="Доп. позиции" stylename="small" width="80px"/>
+                                        <hbox id="positionsControl" width="100%" spacing="true" expand="positionsLabel">
+                                            <label id="positionsLabel"
+                                                   width="100%"
+                                                   stylename="small"
+                                                   align="MIDDLE_LEFT"/>
+                                            <button id="addPositions"
+                                                    caption="..."
+                                                    enable="true"
+                                                    description="msg://msgSetPositions"
+                                                    invoke="addPositionList"/>
+                                        </hbox>
+                                    </hbox>
                                 </vbox>
                             </vbox>
                         </vbox>

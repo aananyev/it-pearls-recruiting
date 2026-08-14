@@ -50,6 +50,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -167,7 +168,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private static final String QUERY_GET_OTHER_SOCIAL_NETWORK = "select e from hunttech_SocialNetworkType e where e.socialNetwork = :other";
     private static final String QUERY_GET_CANDIDATE_CV = "select e from hunttech_CandidateCV e where e.candidate = :candidate";
     private static final String TELEGRAM_NAME_URL = "http://t.me/";
-    private static final String QUERY_GET_LAST_ITERACTION = "select e from hunttech_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from hunttech_IteractionList f where f.candidate = :candidate)";
     private static final String CREATE_COMPANY_ACTION_ID = "createCompany";
 
     /**
@@ -255,10 +255,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionLoader<OpenPosition> suggestOpenPositionDl;
     @Inject
     private CollectionLoader<OpenPosition> openPositionDl;
-    @Inject
-    private CollectionLoader<Company> currentCompaniesLc;
-    @Inject
-    private CollectionContainer<Company> currentCompaniesDc;
     @Inject
     private CollectionLoader<City> citiesDl;
     @Inject
@@ -641,10 +637,9 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 false : blockCandidateCheckBox.getValue();
         setBlockUnblockButton(b);
 
-        // Запуск фоновой загрузки и анализа резюме для блока навыков (Skillsbar).
-        // Операция вынесена из onBeforeShow, чтобы SQL-запрос полного textCV
-        // и сопоставление навыков не блокировали открытие формы.
-        // UI-компоненты Skillsbar создаются только в done() BackgroundTask.
+        startCandidatePicBackgroundLoading();
+        startCandidateCvIndicatorBackgroundLoading();
+        startRatingBackgroundLoading();
         startSkillsBackgroundLoading();
     }
 
@@ -711,14 +706,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         initTabCandidate();
 
         // Heavy comments data is loaded lazily from initTabComments() when the user opens the tab.
-        // если есть резюме, то поставить галку
+        // Индикатор резюме определяется фоновой задачей после first paint.
+        // До завершения background-запроса показывается нейтральная подпись.
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            boolean hasCv = hasCandidateCv();
-            String locale = userSession.getLocale().getLanguage();
-            boolean isRussian = "ru".equals(locale);
-            String yes = isRussian ? "ДА" : "YES";
-            String no = isRussian ? "НЕТ" : "NO";
-            labelCV.setValue(hasCv ? yes : no);
+            labelCV.setValue("Резюме: …");
         }
 
         // обнулить статус для вновь создаваемного кандидата
@@ -729,18 +720,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setSaveRecordOfViewCandidate();
 
         setLabelTitle();
-        setRatingLabel(getEditedEntity());
+        setCreatedUpdatedLabel();
 
         setLinkButtonEmail();
         setLinkButtonTelegrem();
         setLinkButtonTelegremGroup();
         setLinkButtonSkype();
 
-        setCandidatePicImage();
-        checkTelegramName();
+        // Фотография загружается асинхронно после первого отображения формы.
+        // До проверки file storage показывается безопасная заглушка.
+        showCandidatePicPlaceholder();
 
-        lastIteraction = interactionService.getLastIteraction(getEditedEntity());
-        lastIteractionLoaded = true;
+        checkTelegramName();
 
         if (getRoleService.isUserRoles(userSession.getUser(), StandartRoles.MANAGER) ||
                 getRoleService.isUserRoles(userSession.getUser(), StandartRoles.ADMINISTRATOR)) {
@@ -841,9 +832,89 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     /**
-     * Shows the fallback immediately when the user clears the uploaded photo. The entity value
-     * is still changed by the upload field's standard data binding and is saved with the editor.
+     * Устанавливает безопасное начальное состояние фото до фоновой проверки.
+     * Заглушка видна, фото скрыто. Нет обращения к FileLoader.
      */
+    private void showCandidatePicPlaceholder() {
+        candidateDefaultPic.setVisible(true);
+        candidatePic.setVisible(false);
+    }
+
+    /** Флаг предотвращения повторного запуска фоновой загрузки фото. */
+    private boolean candidatePicLoading;
+    /** Флаг завершения фоновой проверки фото (успех или ошибка). */
+    private boolean candidatePicLoaded;
+
+    /**
+     * Запускает фоновую проверку наличия фотографии кандидата после открытия формы.
+     * Вызывается из onAfterShow, чтобы проверка file storage не блокировала first paint.
+     */
+    private void startCandidatePicBackgroundLoading() {
+        if (candidatePicLoading || candidatePicLoaded) {
+            return;
+        }
+
+        FileDescriptor faceImage = getEditedEntity().getFileImageFace();
+
+        if (PersistenceHelper.isNew(getEditedEntity())
+                || getEditedEntity().getId() == null
+                || faceImage == null) {
+            candidatePicLoaded = true;
+            return;
+        }
+
+        UUID fileDescriptorId = faceImage.getId();
+        candidatePicLoading = true;
+
+        BackgroundTask<Void, Boolean> task =
+                new BackgroundTask<Void, Boolean>(30, TimeUnit.SECONDS, this) {
+                    @Override
+                    public Boolean run(TaskLifeCycle<Void> taskLifeCycle) {
+                        DataManager backgroundDataManager = AppBeans.get(DataManager.class);
+                        FileLoader backgroundFileLoader = AppBeans.get(FileLoader.class);
+                        FileDescriptor descriptor = backgroundDataManager.load(FileDescriptor.class)
+                                .id(fileDescriptorId)
+                                .view("_minimal")
+                                .optional()
+                                .orElse(null);
+                        if (descriptor == null) {
+                            return false;
+                        }
+                        return FileDescriptorImageHelper.fileExists(backgroundFileLoader, descriptor);
+                    }
+
+                    @Override
+                    public void done(Boolean fileExists) {
+                        candidatePicLoading = false;
+                        candidatePicLoaded = true;
+                        if (fileExists != null && fileExists && faceImage != null) {
+                            updatingCandidatePic = true;
+                            try {
+                                candidatePic.setValueSource(null);
+                                FileDescriptorResource resource = candidatePic.createResource(FileDescriptorResource.class)
+                                        .setFileDescriptor(faceImage);
+                                candidatePic.setSource(resource);
+                                candidateDefaultPic.setVisible(false);
+                                candidatePic.setVisible(true);
+                            } finally {
+                                updatingCandidatePic = false;
+                            }
+                        }
+                    }
+
+                    @Override
+                    public boolean handleException(Exception exception) {
+                        candidatePicLoading = false;
+                        candidatePicLoaded = true;
+                        log.error("Не удалось проверить фотографию кандидата, candidateId={}",
+                                getEditedEntity().getId(), exception);
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(task).execute();
+    }
+
     @Subscribe("fileImageFaceUpload")
     public void onFileImageFaceUploadBeforeValueClear(FileUploadField.BeforeValueClearEvent event) {
         candidatePic.applyFallback();
@@ -1409,12 +1480,65 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         openPositionDl.load();
     }
 
-    private boolean hasCandidateCv() {
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            return false;
+    /** Применяет результат скалярной проверки CV к индикатору. */
+    private void applyCandidateCvIndicator(boolean hasCv) {
+        labelCV.setValue(hasCv ? "Резюме: ДА" : "Резюме: НЕТ");
+    }
+
+    /** Флаг предотвращения повторного запуска фоновой проверки CV. */
+    private boolean candidateCvIndicatorLoading;
+    /** Флаг завершения фоновой проверки CV (успех или ошибка). */
+    private boolean candidateCvIndicatorLoaded;
+
+    /**
+     * Запускает фоновую проверку наличия резюме после открытия формы.
+     * Scalar COUNT не блокирует first paint и не загружает коллекцию CandidateCV.
+     */
+    private void startCandidateCvIndicatorBackgroundLoading() {
+        if (candidateCvIndicatorLoading || candidateCvIndicatorLoaded) {
+            return;
         }
-        List<CandidateCV> cvs = getEditedEntity().getCandidateCv();
-        return cvs != null && !cvs.isEmpty();
+
+        if (PersistenceHelper.isNew(getEditedEntity()) || getEditedEntity().getId() == null) {
+            candidateCvIndicatorLoaded = true;
+            return;
+        }
+
+        UUID candidateId = getEditedEntity().getId();
+        candidateCvIndicatorLoading = true;
+
+        BackgroundTask<Void, Boolean> task =
+                new BackgroundTask<Void, Boolean>(30, TimeUnit.SECONDS, this) {
+                    @Override
+                    public Boolean run(TaskLifeCycle<Void> taskLifeCycle) {
+                        DataManager backgroundDataManager = AppBeans.get(DataManager.class);
+                        Long count = backgroundDataManager.loadValue(
+                                "select count(e) from hunttech_CandidateCV e " +
+                                        "where e.candidate.id = :candidateId and e.deleteTs is null",
+                                Long.class)
+                                .parameter("candidateId", candidateId)
+                                .one();
+                        return count != null && count > 0;
+                    }
+
+                    @Override
+                    public void done(Boolean hasCv) {
+                        candidateCvIndicatorLoading = false;
+                        candidateCvIndicatorLoaded = true;
+                        applyCandidateCvIndicator(hasCv != null && hasCv);
+                    }
+
+                    @Override
+                    public boolean handleException(Exception exception) {
+                        candidateCvIndicatorLoading = false;
+                        candidateCvIndicatorLoaded = true;
+                        log.error("Не удалось проверить наличие резюме, candidateId={}",
+                                candidateId, exception);
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(task).execute();
     }
 
     private double loadAverageRating() {
@@ -1429,6 +1553,67 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .parameter("candidateId", candidateId)
                 .one();
         return avg != null ? avg.doubleValue() : 0.0;
+    }
+
+    /** Флаг предотвращения повторного запуска фоновой загрузки рейтинга. */
+    private boolean ratingLoading;
+    /** Флаг завершения фоновой загрузки рейтинга (успех или ошибка). */
+    private boolean ratingLoaded;
+
+    /**
+     * Запускает фоновый расчёт среднего рейтинга кандидата после открытия формы.
+     * Вызов из onAfterShow, чтобы scalar AVG не блокировал first paint.
+     */
+    private void startRatingBackgroundLoading() {
+        if (ratingLoading || ratingLoaded) {
+            return;
+        }
+
+        if (PersistenceHelper.isNew(getEditedEntity()) || getEditedEntity().getId() == null) {
+            ratingLoaded = true;
+            applyRatingLabel(0.0);
+            return;
+        }
+
+        UUID candidateId = getEditedEntity().getId();
+        ratingLoading = true;
+
+        BackgroundTask<Void, Double> task =
+                new BackgroundTask<Void, Double>(30, TimeUnit.SECONDS, this) {
+                    @Override
+                    public Double run(TaskLifeCycle<Void> taskLifeCycle) {
+                        DataManager backgroundDataManager = AppBeans.get(DataManager.class);
+                        Double average = backgroundDataManager.loadValue(
+                                "select avg(e.rating + 1) " +
+                                        "from hunttech_IteractionList e " +
+                                        "where e.candidate.id = :candidateId " +
+                                        "and e.rating is not null",
+                                Double.class)
+                                .parameter("candidateId", candidateId)
+                                .optional()
+                                .orElse(0.0);
+                        return average != null ? average : 0.0;
+                    }
+
+                    @Override
+                    public void done(Double result) {
+                        ratingLoading = false;
+                        ratingLoaded = true;
+                        applyRatingLabel(result != null ? result : 0.0);
+                    }
+
+                    @Override
+                    public boolean handleException(Exception exception) {
+                        ratingLoading = false;
+                        ratingLoaded = true;
+                        log.error("Не удалось загрузить рейтинг кандидата, candidateId={}",
+                                candidateId, exception);
+                        applyRatingLabel(0.0);
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(task).execute();
     }
 
     private List<CandidateCV> ensureCandidateCvLoaded() {
@@ -1693,6 +1878,31 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 getEditedEntity().getPositionList() : Collections.emptyList();
     }
 
+    /**
+     * Загружает последнее взаимодействие только при первом обращении.
+     * Вызов сервиса отложен до момента копирования без выбранной строки.
+     */
+    private IteractionList ensureLastInteractionLoaded() {
+        if (lastIteractionLoaded) {
+            return lastIteraction;
+        }
+
+        if (PersistenceHelper.isNew(getEditedEntity()) || getEditedEntity().getId() == null) {
+            lastIteractionLoaded = true;
+            lastIteraction = null;
+            return null;
+        }
+
+        lastIteraction = interactionService.getLastIteraction(getEditedEntity());
+        lastIteractionLoaded = true;
+        return lastIteraction;
+    }
+
+    private void invalidateLastInteractionCache() {
+        lastIteraction = null;
+        lastIteractionLoaded = false;
+    }
+
     private void setupCurrentCompanySearchExecutor() {
         if (currentCompanyField == null) {
             return;
@@ -1950,18 +2160,34 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
+    /**
+     * После сохранения CompanyEdit повторно загружает только созданную компанию
+     * узким picker-view и merge ит её в DataContext текущего редактора кандидата.
+     */
     private Company mergeCreatedCompany(Company company) {
+        return resolveCreatedCompany(
+                company,
+                companyId -> dataManager.load(Company.class)
+                        .query("select e from hunttech_Company e where e.id = :companyId")
+                        .parameter("companyId", companyId)
+                        .view("company-picker-view")
+                        .one(),
+                dataContext::merge);
+    }
+
+    /**
+     * Сохраняет create-company flow тестируемым без полного справочника компаний.
+     * Для несохранённой или отменённой сущности не выполняет SQL и merge.
+     */
+    static Company resolveCreatedCompany(Company company,
+                                         Function<UUID, Company> companyLoader,
+                                         Function<Company, Company> companyMerger) {
         if (company == null || company.getId() == null) {
             return company;
         }
 
-        Company mergedCompany = dataContext.merge(company);
-        if (currentCompaniesDc != null && !currentCompaniesDc.containsItem(mergedCompany)) {
-            currentCompaniesDc.getMutableItems().add(mergedCompany);
-        } else if (currentCompaniesDc != null) {
-            currentCompaniesDc.replaceItem(mergedCompany);
-        }
-        return mergedCompany;
+        Company persistedCompany = companyLoader.apply(company.getId());
+        return companyMerger.apply(persistedCompany);
     }
 
     public void repaintSocialNetworksTable() {
@@ -2029,7 +2255,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             });
 
             jobCandidateIteractionListTable.addEditorCloseListener(event -> {
-                setRatingLabel(getEditedEntity());
+                applyRatingLabel(loadAverageRating());
             });
 
             jobCandidateIteractionListTable.getColumn("iteractionType")
@@ -2280,26 +2506,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 .show();
     }
 
-    /* private IteractionList getLastIteraction() {
-        try {
-            lastIteraction = dataManager.load(IteractionList.class)
-                    .query(QUERY_GET_LAST_ITERACTION)
-                    .parameter("candidate", getEditedEntity())
-                    .cacheable(true)
-                    .view("iteractionList-view")
-                    .cacheable(true)
-                    .one();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-            lastIteraction = null;
-        }
-
-        return lastIteraction;
-    } */
-
 
     public void copyIteractionJobCandidate() {
         if (jobCandidateIteractionListTable.getSingleSelected() == null) {
+            ensureLastInteractionLoaded();
             if (lastIteraction != null) {
                 IteractionList finalLastIteraction = lastIteraction;
 
@@ -2699,8 +2909,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return null;
     }
 
-    private void setRatingLabel(JobCandidate editedEntity) {
-        double avgRating = loadAverageRating();
+    /**
+     * Применяет заранее вычисленный средний рейтинг к UI-компоненту.
+     * Не выполняет SQL-запросы и не обращается к DataManager.
+     */
+    private void applyRatingLabel(double avgRating) {
         int intRating = (int) Math.round(avgRating);
 
         if (intRating > 0) {
@@ -3909,6 +4122,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void reloadInteractions() {
+        invalidateLastInteractionCache();
         if (!PersistenceHelper.isNew(getEditedEntity())) {
             dataContext.commit();
             interactionCommentDl.load();
