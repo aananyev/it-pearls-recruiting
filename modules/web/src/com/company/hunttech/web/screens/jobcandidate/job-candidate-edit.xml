@@ -64,18 +64,10 @@
                 <!-- Резюме кандидата: пакетно, с вакансией (projectName с проектом/департаментом/логотипом). -->
                 <property name="candidateCv" fetch="BATCH" view="_minimal">
                     <property name="toVacancy" view="openPosition-edit-view">
-                        <!-- projectName — FK на Project: view="_minimal" обязателен, т.к. _local
-                             включает только скалярные колонки и НЕ подгружает FK projectLogo;
-                             nested-свойства добавляют поля, которые читает генератор колонки логотипа. -->
                         <property name="projectName" view="_minimal">
-                            <!-- Название проекта (скаляр, показывается в tooltip логотипа). -->
                             <property name="projectName"/>
-                            <!-- Описание проекта (скаляр, показывается в tooltip логотипа). -->
                             <property name="projectDescription"/>
-                            <!-- Логотип проекта — FK FileDescriptor, полный _local view
-                                 (достаточно для FileDescriptorImageHelper.setCompanyLogo). -->
                             <property name="projectLogo" view="_local"/>
-                            <!-- Департамент проекта — FK справочника, минимальный view. -->
                             <property name="projectDepartment" view="_minimal"/>
                         </property>
                     </property>

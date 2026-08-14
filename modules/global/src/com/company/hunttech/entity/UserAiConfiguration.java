@@ -32,8 +32,13 @@ public class UserAiConfiguration extends StandardEntity {
     @Column(name = "DEFAULT_MODEL_NAME", length = 128)
     private String defaultModelName;
 
+    /**
+     * Признак единственной конфигурации пользователя, которую используют
+     * системные кнопки AI-анализа. Остальные строки остаются сохранёнными
+     * и доступны для тестирования или явного выбора провайдера.
+     */
     @Column(name = "IS_ACTIVE")
-    private Boolean isActive = true;
+    private Boolean isActive = false;
 
     public User getUser() {
         return user;

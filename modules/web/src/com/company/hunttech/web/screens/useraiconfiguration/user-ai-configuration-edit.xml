@@ -18,116 +18,49 @@
             <loader/>
         </instance>
     </data>
-    <!-- Полноэкранный модальный editor соответствует сложным Edit-формам HRM HuntTech
-         (было: диалог 450×AUTO c forceDialog). -->
-    <dialogMode width="100%" height="100%" modal="true"/>
-    <!-- Корневой layout формы: локальный namespace user-ai-configuration-editor + shared-контракт. -->
-    <layout stylename="user-ai-configuration-editor"
-            expand="mainLayout"
-            spacing="false"
-            width="100%"
-            height="100%">
-        <!-- Двухпанельная композиция: постоянная sidebar слева и расширяемая рабочая область справа. -->
-        <hbox id="mainLayout" stylename="edit-screen-layout" expand="workspace" spacing="false" width="100%" height="100%">
-            <!-- Левая контекстная панель 270px: identity → label-навигация → spacer → hint. -->
-            <vbox id="sidebar" stylename="edit-sidebar" width="270px" height="100%" spacing="true" expand="sidebarSpacer">
-                <!-- Блок идентификации: тип записи и живой provider из контейнера. -->
-                <vbox id="identity" stylename="edit-sidebar-identity" width="100%" spacing="true">
-                    <!-- Тематическая HuntTech-иллюстрация персонального AI-подключения; fallback без привязки к данным. -->
-                    <ovalImage id="userAiConfigurationLogoImage"
-                               width="176px"
-                               height="176px"
-                               ovalWidth="176px"
-                               ovalHeight="176px"
-                               visible="true"
-                               align="MIDDLE_CENTER"
-                               scaleMode="SCALE_DOWN">
-                        <theme path="icons/ai/user-ai-configuration.png"/>
-                    </ovalImage>
-                    <!-- Подпись типа записи. -->
-                    <label value="Персональная AI-конфигурация" stylename="edit-sidebar-subtitle" width="100%"/>
-                    <!-- Живой provider-код конфигурации из edit-контейнера (свойство providerCode). -->
-                    <label dataContainer="userAiConfigurationDc" property="providerCode" stylename="edit-sidebar-title" width="100%"/>
-                </vbox>
-                <!-- Обязательная label-навигация по разделам формы (display-only: у контроллера нет focus-методов). -->
-                <vbox id="navigation" stylename="label-navigation" width="100%" spacing="false">
-                    <!-- Заголовок «Разделы»: полоса-заголовок с inset-линиями (контракт §4.1);
-                         локальный класс user-ai-configuration-navigation-title поверх label-nav-title. -->
-                    <label value="Разделы" stylename="label-nav-title user-ai-configuration-navigation-title" width="100%"/>
-                    <!-- Fallback-пункт «Основное» обозначает первую карточку формы (некликабельный label). -->
-                    <label value="Основное" stylename="label-nav-item label-nav-item-active" width="100%"/>
-                    <!-- Fallback-пункт «Безопасность» обозначает карточку API-ключа (некликабельный label). -->
-                    <label value="Безопасность" stylename="label-nav-item" width="100%"/>
-                </vbox>
-                <!-- Spacer прижимает подсказку к нижней границе sidebar. -->
-                <vbox id="sidebarSpacer" stylename="edit-sidebar-spacer" width="100%" height="100%"/>
-                <!-- Контекстная подсказка о роли персонального ключа: данные не меняет. -->
-                <label value="Ключ используется только для ваших замещений AI-функций; корпоративные подключения настраивает администратор."
-                       stylename="edit-sidebar-hint" width="100%"/>
-            </vbox>
-            <!-- Правая рабочая область: toolbar, прокручиваемые карточки и footer. -->
-            <vbox id="workspace" stylename="edit-workspace" expand="workspaceScroll" width="100%" height="100%" spacing="false">
-                <!-- Toolbar с заголовком и пояснением формы. -->
-                <hbox id="toolbar" stylename="edit-toolbar" width="100%" spacing="true">
-                    <!-- Текстовый блок toolbar. -->
-                    <vbox id="toolbarText" width="100%" spacing="false">
-                        <!-- Заголовок рабочей области. -->
-                        <label value="Персональная AI-конфигурация" stylename="edit-toolbar-title"/>
-                        <!-- Пояснение: личный provider, модель и API-ключ. -->
-                        <label value="Личный провайдер, модель по умолчанию и API-ключ" stylename="edit-toolbar-description"/>
-                    </vbox>
-                </hbox>
-                <!-- Прокручиваемая область карточек рабочей области. -->
-                <scrollBox id="workspaceScroll" stylename="edit-workspace-scroll" width="100%" height="100%">
-                    <!-- Поток карточек рабочей области. -->
-                    <vbox id="sections" stylename="edit-workspace-content" width="100%" spacing="true">
-                        <!-- Карточка «Основное»: провайдер, модель по умолчанию и признак активности. -->
-                        <groupBox id="mainSection" caption="Основное" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <!-- Провайдер выбирается из общего каталога AiProviderCatalog; обязателен. -->
-                            <lookupField id="providerCodeField"
-                                         dataContainer="userAiConfigurationDc"
-                                         property="providerCode"
-                                         required="true"
-                                         width="100%"
-                                         stylename="edit-form-control"
-                                         caption="msg://userProviderCode.caption"/>
-                            <!-- Модель по умолчанию подставляется автоматически при выборе провайдера (Java). -->
-                            <textField id="defaultModelNameField"
-                                       dataContainer="userAiConfigurationDc"
-                                       property="defaultModelName"
-                                       width="100%"
-                                       stylename="edit-form-control"
-                                       caption="msg://userDefaultModelName.caption"/>
-                            <!-- Признак активности конфигурации. -->
-                            <checkBox id="isActiveField"
-                                      dataContainer="userAiConfigurationDc"
-                                      property="isActive"
-                                      width="100%"
-                                      caption="msg://userIsActive.caption"/>
-                        </groupBox>
-                        <!-- Карточка «Безопасность»: персональный API-ключ (secret-поле). -->
-                        <groupBox id="securitySection" caption="Безопасность" stylename="edit-card" showAsPanel="true" width="100%" spacing="true">
-                            <!-- API-ключ хранится только у пользователя и отображается как secret. -->
-                            <passwordField id="apiKeyField"
-                                           dataContainer="userAiConfigurationDc"
-                                           property="apiKey"
-                                           secret="true"
-                                           width="100%"
-                                           stylename="edit-form-control"
-                                           caption="msg://userApiKey.caption"/>
-                        </groupBox>
-                    </vbox>
-                </scrollBox>
-                <!-- Нижняя панель штатных editor-actions: сохранить и отменить. -->
-                <hbox id="editActions" stylename="edit-footer-actions" spacing="true" width="100%">
-                    <!-- Spacer прижимает группу кнопок к правому краю footer. -->
-                    <vbox id="editActionsSpacer" width="100%"/>
-                    <!-- Сохранить и закрыть (штатный action editor-а). -->
-                    <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
-                    <!-- Отменить изменения и закрыть. -->
-                    <button id="closeBtn" action="windowClose"/>
-                </hbox>
-            </vbox>
+    <dialogMode height="560"
+                width="650"
+                modal="true"
+                forceDialog="true"/>
+    <layout expand="contentScrollBox"
+            spacing="true"
+            margin="true"
+            height="100%"
+            width="100%">
+        <scrollBox id="contentScrollBox"
+                   height="100%"
+                   width="100%">
+            <form id="form"
+                  dataContainer="userAiConfigurationDc"
+                  captionPosition="TOP"
+                  width="100%">
+                <column width="100%">
+                    <lookupField id="providerCodeField"
+                                 property="providerCode"
+                                 caption="msg://UserAiConfiguration.providerCode"
+                                 required="true"
+                                 width="100%"/>
+                    <passwordField id="apiKeyField"
+                                   property="apiKey"
+                                   caption="msg://UserAiConfiguration.apiKey"
+                                   secret="true"
+                                   required="true"
+                                   width="100%"/>
+                    <textField id="defaultModelNameField"
+                               property="defaultModelName"
+                               caption="msg://UserAiConfiguration.defaultModelName"
+                               width="100%"/>
+                    <checkBox id="isActiveField"
+                              property="isActive"
+                              caption="msg://UserAiConfiguration.currentForAnalysis"
+                              description="msg://currentProviderHint"
+                              editable="false"/>
+                </column>
+            </form>
+        </scrollBox>
+        <hbox id="editActions" spacing="true">
+            <button id="commitAndCloseBtn" action="windowCommitAndClose"/>
+            <button id="closeBtn" action="windowClose"/>
         </hbox>
     </layout>
 </window>

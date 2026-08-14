@@ -3,6 +3,7 @@ package com.company.hunttech.web.screens.iteractionlist;
 import com.company.hunttech.UiNotificationEvent;
 import com.company.hunttech.core.*;
 import com.company.hunttech.entity.*;
+import com.company.hunttech.web.ai.AiAnalysisHelper;
 import com.company.hunttech.service.GetRoleService;
 import com.company.hunttech.service.SubscribeDateService;
 import com.company.hunttech.web.StandartPriorityVacancy;
@@ -2018,5 +2019,10 @@ public class IteractionListEdit extends StandardEditor<IteractionList> {
         } else {
             return retImage.createResource(ThemeResource.class).setPath("icons/no-company.png");
         }
+    }
+
+    // --- AI-анализ взаимодействия ---
+    public void onAiAnalysisClick() {
+        AiAnalysisHelper.analyze(this, getEditedEntity(), "INTERACTION_ANALYSIS");
     }
 }

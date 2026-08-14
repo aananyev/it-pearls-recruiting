@@ -1906,22 +1906,11 @@
                 <button id="subscribePositionButton"
                         invoke="subscribePosition"
                         caption="msg://msgSubscribe"
-                        icon="BELL"
-                        stylename="open-position-editor-secondary-action"/>
-                <!-- Группа завершения: OK (сохранить и закрыть) и Отмена (закрыть без сохранения)
-                     всегда остаются вместе и прижаты к правому нижнему углу формы. -->
-                <hbox id="commitActions"
-                      spacing="true"
-                      stylename="open-position-editor-commit-actions">
-                    <!-- Сохранить позицию и закрыть форму (главное действие). -->
-                    <button id="windowCommitAndCloseButton"
-                            action="windowCommitAndClose"
-                            stylename="open-position-editor-primary-action"/>
-                    <!-- Закрыть форму без сохранения (вторичное действие). -->
-                    <button id="windowCloseButton"
-                            action="windowClose"
-                            stylename="open-position-editor-secondary-action"/>
-                </hbox>
+                        icon="BELL"/>
+                <button id="aiAnalysisBtn" caption="AI-анализ" invoke="onAiAnalysisClick"/>
+                <button id="windowCommitAndCloseButton"
+                        action="windowCommitAndClose"/>
+                <button action="windowClose"/>
             </hbox>
         </vbox>
     </vbox>

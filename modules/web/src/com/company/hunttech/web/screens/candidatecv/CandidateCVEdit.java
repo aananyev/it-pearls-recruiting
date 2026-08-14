@@ -5,6 +5,7 @@ import com.company.hunttech.core.PdfParserService;
 import com.company.hunttech.core.ResumeRecognitionService;
 import com.company.hunttech.core.WebLoadService;
 import com.company.hunttech.entity.*;
+import com.company.hunttech.web.ai.AiAnalysisHelper;
 import com.company.hunttech.web.screens.SelectedCloseAction;
 import com.company.hunttech.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -327,6 +328,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe
     public void onAfterShow2(AfterShowEvent event) {
+        // Инициализация фотографии после загрузки candidateCVDc полным editor view.
+        // В BeforeShow редактор содержит detached-экземпляр из вызывающего экрана
+        // с узким browse-view, не включающим fileImageFace.
+        setCandidatePicImage();
+
         candidateCVFieldOpenPosition.addValueChangeListener(e -> {
             if (e.getValue().getNeedLetter() != null) {
                 if (e.getValue().getTemplateLetter() != null) {
@@ -611,13 +617,22 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
         setOnlyMySubscribeCheckBox();
-        // Keep the heavy resume body out of the initial form opening; it is prepared when the CV tab is selected.
-        textResumeStringBuffer = new StringBuffer(getEditedEntity().getTextCV() != null ? getEditedEntity().getTextCV() : "");
 
-/*        if (candidateCVRichTextArea.getValue() != null) {
-            textResumeStringBuffer = new StringBuffer(candidateCVRichTextArea.getValue());
-        } */
+        // textCV может быть не загружен в detached-экземпляре из browse-view.
+        // Откладываем инициализацию до ленивой загрузки вкладки CV (ensureCvTextInitialized).
+        CandidateCV edited = getEditedEntity();
+        boolean hasTextCV = edited != null
+                && PersistenceHelper.isLoaded(edited, "textCV")
+                && edited.getTextCV() != null
+                && !edited.getTextCV().isEmpty();
 
+        if (hasTextCV) {
+            textResumeStringBuffer = new StringBuffer(edited.getTextCV());
+            convertToTextButton.setEnabled(true);
+        } else {
+            textResumeStringBuffer = new StringBuffer();
+            convertToTextButton.setEnabled(false);
+        }
 
         if (textFieldIOriginalCV.getValue() != null) {
             originalCVLink.setUrl(textFieldIOriginalCV.getValue());
@@ -633,7 +648,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         quoteTextArea.setValue(messageBundle.getMessage("msgSalesCV"));
-        convertToTextButton.setEnabled(getEditedEntity().getTextCV() != null && !getEditedEntity().getTextCV().equals(""));
 
         if (!PersistenceHelper.isNew(getEditedEntity()) &&
                 (userSessionSource.getUserSession().getUser().getGroup().getName().equals(StdUserGroup.ACCOUNTING) ||
@@ -642,7 +656,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         setLetterRecommendation();
-        refreshConditionalNavigationItems();
+//        setVisibleLogo();
     }
 
     private void convertTextCV() {
@@ -773,6 +787,39 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 "</ol>";
 
         cvResomandation.setValue(text);
+    }
+
+/*    public void setVisibleLogo() {
+
+        if (candidatePic.getValueSource().getValue() == null) {
+            //candidatePic.setVisible(false);
+            //candidateFaceDefaultImage.setVisible(true);
+        } else {
+            candidatePic.setVisible(true);
+            candidateFaceDefaultImage.setVisible(false);
+        }
+    } */
+
+    private void setCandidatePicImage() {
+        // В BeforeShow редактор ещё содержит detached-экземпляр из вызывающего экрана.
+        // Проверяем загруженность fileImageFace перед обращением — узкий browse-view
+        // не включает это поле, и вызов getFileImageFace() вызовет IllegalStateException.
+        CandidateCV cv = getEditedEntity();
+        if (cv == null || !PersistenceHelper.isLoaded(cv, "fileImageFace")) {
+            return;
+        }
+        if (cv.getFileImageFace() == null) {
+            candidateFaceDefaultImage.setVisible(true);
+            candidatePic.setVisible(false);
+        } else {
+            candidateFaceDefaultImage.setVisible(false);
+            candidatePic.setVisible(true);
+        }
+    }
+
+    @Subscribe("candidatePic")
+    public void onCandidatePicSourceChange(ResourceView.SourceChangeEvent event) {
+        setCandidatePicImage();
     }
 
     private void setLetterRecommendation() {
@@ -1168,5 +1215,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     public void setParentDataContext(DataContext parentDataContext) {
         dataContext.setParent(parentDataContext);
+    }
+
+    // --- AI-анализ резюме ---
+    public void onAiAnalysisClick() {
+        AiAnalysisHelper.analyze(this, getEditedEntity(), "RESUME_ANALYSIS");
     }
 }

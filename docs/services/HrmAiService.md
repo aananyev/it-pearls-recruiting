@@ -2,61 +2,69 @@
 
 ## Business & Context Intro
 
-### Назначение и бизнес-смысл (What & Why)
+### 1. Назначение и Бизнес-смысл
 
-`HrmAiService` — совместимый vacancy AI-фасад HRM HuntTech. После внедрения AI Control Plane он больше не выбирает provider/API key и не читает `VacancyPromptTemplate` во время рабочей генерации. Его задача — перевести vacancy-контекст в стабильный `functionCode + context` и передать выполнение `AiExecutionService`.
+`HrmAiService` централизует доступ HRM HuntTech к внешним AI-провайдерам, выбирает API-конфигурацию, передаёт промпт и возвращает ответ бизнес-экрану.
 
-Это сохраняет существующий middleware-контракт приложения, одновременно исключая обход централизованных execution/fallback policies.
+### 2. Связи в интерфейсе и Навигация
 
-### UI Context & Navigation
+Сервис вызывается `AiAnalysisServiceBean`, редактором и browse-экраном `UserAiConfiguration`, а также сценариями генерации материалов вакансии с явным выбором провайдера. UI-вызов системного анализа проходит через [AiAnalysisHelper](AiAnalysisHelper.md).
 
-Сервис собственного UI не имеет. Конфигурация рабочих AI-вызовов выполняется в меню «Управление AI» через:
+### 3. Краткий обзор бизнес-логики поведения
 
-- «Функции AI» — function code, prompt, capability, policy, model;
-- «Корпоративные подключения» — защищённые admin credentials;
-- «Мои замещения AI-функций» — per-function personal override;
-- `UserAiConfiguration` — персональные подключения пользователя;
-- `VacancyPromptTemplate` — legacy-справочник для миграции, а не runtime source of truth.
+- Системный AI-анализ → вызывается `sendPromptUsingCurrentConfiguration` → загружается единственная текущая конфигурация пользователя → вызывается соответствующий `AIProvider`.
+- Явный выбор провайдера → вызывается `sendPrompt(prompt, providerCode)` → используется сохранённая конфигурация этого провайдера независимо от текущего признака.
+- Переключение текущей конфигурации → `setCurrentConfiguration(UUID)` → в одной core-транзакции остальные строки пользователя деактивируются → выбранная строка активируется.
+- Нет текущей конфигурации или их несколько → запрос не отправляется → пользователь получает диагностическое сообщение.
 
-Бизнес-экраны могут продолжить использовать legacy overloads до отдельного изменения их кода: `providerCode` в этих overloads намеренно игнорируется.
+## Контракт сервиса
 
-### Behavior Summary
+| Метод | Назначение |
+|---|---|
+| `standardizeVacancyDescription` | Стандартизирует описание вакансии через явно выбранного провайдера. |
+| `generateVacancyArtifact` | Генерирует артефакт вакансии по шаблону и явно выбранному провайдеру. |
+| `testConnection` | Проверяет конкретную строку конфигурации, включая резервную. |
+| `sendPrompt` | Отправляет промпт провайдеру, указанному вызывающим сценарием. |
+| `sendPromptUsingCurrentConfiguration` | Используется системными кнопками AI-анализа и выбирает текущую конфигурацию. |
+| `setCurrentConfiguration` | Атомарно переключает текущую нейросеть владельца конфигурации. |
 
-- `standardizeVacancyDescription(rawText)` → `AiExecutionService.executeText("STANDARDIZE_VACANCY", {rawDescription})`;
-- `generateVacancyArtifact(description, functionCode)` → `AiExecutionService.executeText(functionCode, {description})`;
-- legacy overload с `providerCode` → делегирование provider-independent методу;
-- `testConnection(UserAiConfiguration)` → диагностический прямой вызов конкретного personal credential, без выполнения бизнес-функции;
-- отсутствие/отключение function configuration → controlled error из `AiExecutionService` до внешнего API.
+## UI-мост системного анализа
 
-## API
+`AiAnalysisHelper` получает `Dialogs` и `Notifications` из `ScreenContext` текущего экрана через `UiControllerUtils`. UI-фасады нельзя запрашивать через Spring `AppBeans`, поскольку они создаются внутренней UI-инфраструктурой CUBA. Middleware-сервис остаётся доступным через `AppBeans` по имени remote service.
 
-```java
-String standardizeVacancyDescription(String rawText);
-String generateVacancyArtifact(String standardizedDescription, String functionCode);
+Helper передаёт исходную экранную сущность в `AiAnalysisServiceBean`. Специализированный analysis-view загружается на core-tier; повторная web-tier загрузка с `View.LOCAL` не выполняется.
 
-@Deprecated
-String standardizeVacancyDescription(String rawText, String providerCode);
+## Выбор конфигурации
 
-@Deprecated
-String generateVacancyArtifact(String standardizedDescription,
-                               String templateCode,
-                               String providerCode);
+`QUERY_USER_AI_CONFIG` ищет конфигурацию по пользователю и `providerCode` без проверки `isActive`. Это сохраняет работу сценариев с явным выбором провайдера.
 
-void testConnection(UserAiConfiguration configuration);
-```
+`QUERY_CURRENT_AI_CONFIG` ищет `isActive=true` и загружает максимум две строки. Ноль строк означает, что администратор ещё не выбрал текущую нейросеть. Две строки считаются нарушением инварианта и приводят к диагностической ошибке вместо случайного выбора.
 
-## Legacy migration
+## Транзакционное переключение
 
-Liquibase changeSet `260812-4-migrateLegacyVacancyPrompts` переносит существующие активные `HUNTTECH_VACANCY_PROMPT_TEMPLATE` в `HUNTTECH_AI_FUNCTION_CONFIGURATION` с тем же `CODE`.
+`setCurrentConfiguration(UUID)` выполняется в core-транзакции:
 
-Начальная политика мигрированных функций — `USER_REQUIRED` + `NO_FALLBACK`. Это намеренно не включает расход корпоративного API без явной административной настройки. `STANDARDIZE_VACANCY` получает capability `TEXT_TRANSFORMATION`, остальные legacy templates — `TEXT_GENERATION`.
+1. Загружает выбранную конфигурацию.
+2. Проверяет наличие API-ключа.
+3. Деактивирует остальные неудалённые конфигурации того же пользователя.
+4. Устанавливает `isActive=true` выбранной строке.
+5. Фиксирует транзакцию.
 
-## Ограничения
+Частичный уникальный индекс PostgreSQL дополнительно защищает инвариант на уровне БД.
 
-`testConnection` остаётся исключением из общего resolver path, потому что проверяет именно выбранный credential до его назначения на функцию. Рабочая генерация через этот метод невозможна.
+## Контракт безопасности
+
+API-ключ используется только при вызове провайдера и не выводится в журнал. В INFO-лог попадают код провайдера, модель и длины запроса/ответа, но не полный промпт и не секретные данные.
+
+## База данных и Развёртывание
+
+Скрипт `270722-002-enforceCurrentAiConfiguration.sql` нормализует существующие активные строки и создаёт индекс `IDX_HUNTTECH_USER_AI_CFG_ONE_CURRENT` по `USER_ID` для `IS_ACTIVE = TRUE AND DELETE_TS IS NULL`.
+
+При локальном развёртывании обязательны updateDb, core/web compilation, service contract test, `AiAnalysisHelperUiContextContractTest`, `ScreenViewIntegrityTest`, локальный deploy, HTTP 200 и реальное нажатие AI-кнопки.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
-| 2026-08-12 | Vacancy AI-фасад переведён на `AiExecutionService`; legacy providerCode оставлен только для совместимости |
+| 2026-07-22 | Исправлен UI-мост системного анализа: Dialogs/Notifications получаются из ScreenContext, удалена повторная загрузка View.LOCAL. |
+| 2026-07-22 | Добавлен выбор единственной текущей AI-конфигурации для системных кнопок анализа. |

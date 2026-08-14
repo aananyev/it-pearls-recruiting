@@ -686,12 +686,9 @@
                        property="datePost"
                        caption="msg://msgDatePost"
                        width="AUTO"/>
-            <hbox id="footerActions"
-                  align="MIDDLE_RIGHT"
-                  spacing="true"
-                  width="100%">
-                <label value=""
-                       box.expandRatio="1"/>
+            <hbox align="BOTTOM_RIGHT"
+                  spacing="true">
+                <button id="aiAnalysisBtn" caption="AI-анализ" invoke="onAiAnalysisClick"/>
                 <button action="windowCommitAndClose"
                         stylename="primary candidate-cv-primary-action"
                         align="MIDDLE_RIGHT"/>

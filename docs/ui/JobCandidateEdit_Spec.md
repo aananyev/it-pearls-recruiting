@@ -31,17 +31,10 @@
 
 ### 3. Краткий обзор бизнес-логики поведения (Behavior Summary)
 
-- Открытие существующего кандидата → runtime-view исключает `iteractionList`, `candidateCv` и `socialNetwork` → тяжёлые коллекции не материализуются в initial load.
-- Открытие формы → до first paint показывается заглушка фотографии → проверка file storage выполняется отдельной фоновой задачей после `AfterShow`.
-- Открытие формы → индикатор резюме получает нейтральное значение `Резюме: …` → после first paint единственный background scalar `COUNT` устанавливает `ДА` или `НЕТ`.
-- Открытие формы → средний рейтинг не рассчитывается в `onBeforeShow` → после first paint отдельная фоновая задача выполняет scalar `AVG` и отображает звёзды.
-- Ввод в поле «Компания» → после двух символов выполняется ограниченный серверный поиск → отображается не более 50 компаний.
-- Создание компании → `CompanyEdit` сохраняет запись → созданная компания точечно загружается по UUID через `company-picker-view`, merge-ится в текущий `DataContext` и подставляется в поле.
-- Первое открытие вкладки «Взаимодействия» → выполняется отдельный запрос → строки merge-ятся в экранный `DataContext`.
-- Первое открытие вкладки «Резюме» → выполняется запрос через `candidateCV-browse-view` → после загрузки одним batch-запросом гидратируются проекты и логотипы.
-- Первое открытие вкладки «Контакты» или «Социальные сети» → загружается `socialNetwork` → типы социальных сетей и логотипы гидратируются отдельным batch-запросом.
-- Первое открытие вкладки «Позиции и вакансии» → запускается фоновая агрегация истории → loader’ы UI выполняются после установки обязательных параметров.
-- Копирование взаимодействия без выбранной строки → последнее взаимодействие загружается лениво и кешируется → повторный сервисный запрос не выполняется до инвалидации.
+- Открытие кандидата → загружается основной view → слева показывается профиль, справа рабочие вкладки.
+- Открытие таблицы резюме → для связанной вакансии загружается проект и `projectLogo` → колонка показывает логотип либо стандартную заглушку без обращения к unfetched-атрибуту detached-сущности.
+- Первое открытие тяжёлой вкладки → устанавливаются обязательные параметры loaders → данные загружаются один раз.
+- Изменение поля → данные остаются в штатном `DataContext` → перед сохранением выполняется существующая валидация.
 - «Сохранить и закрыть» → выполняется `windowCommitAndClose` → кандидат сохраняется и экран закрывается.
 - «Отмена» → выполняется `windowClose` → применяется стандартный сценарий CUBA.
 
@@ -59,7 +52,7 @@
 | Платформа | CUBA Platform 7.3 |
 | Корневой style name | `job-candidate-editor` |
 
-Сущности, поля entity, миграции Liquibase, component ID, основные actions и бизнес-правила сохранения кандидата не изменяются в рамках performance-этапов.
+Визуальная компоновка не меняет сущности, component ID, data bindings, actions, invoke, loaders и JPQL. Для устранения detached/unfetched ошибки `projectLogo` загружается через вложенный view в `job-candidate-edit.xml`: ссылка `projectName.projectLogo` указывается с `view="_local"` непосредственно в экранном view кандидата, без глобального override shared-entity view.
 
 ### Этап 1 — взаимодействия
 
@@ -148,15 +141,26 @@ where e.id = :companyId
 | `candidateRatingLabel` | средний рейтинг | background scalar `AVG` после first paint |
 | `candidatePic` | фотография | background file-storage check после first paint |
 
-Правила загрузки:
+Граф для логотипа проекта в таблице резюме:
 
-- сохранение кандидата без открытия ленивых вкладок не должно удалять существующие коллекции;
-- коллекции после отдельной загрузки merge-ятся в текущий `DataContext`;
-- повторное открытие вкладки не выполняет повторную полную загрузку;
-- фоновые задачи передают UUID и скалярные DTO, но не экранные entity-графы;
-- UI изменяется только на UI-потоке в `done()` или `handleException()`;
-- hydration добавляет недостающие поля managed-сущностям и не изменяет связи;
-- новый кандидат не выполняет CV `COUNT`, rating `AVG` и file-storage check.
+```text
+JobCandidate.candidateCv
+└── CandidateCV.toVacancy
+    └── OpenPosition.projectName
+        ├── Project.projectDescription
+        ├── Project.projectLogo → FileDescriptor (_local)
+        └── Project.projectDepartment
+```
+
+`Project.projectLogo` остаётся `FetchType.LAZY`. Загрузка осуществляется локально в экранном view `job-candidate-edit.xml` через вложенное свойство `<property name="projectLogo" view="_local"/>`. Глобальный shared-entity view `openPosition-edit-view` не изменяется.
+
+Правила:
+
+- ленивое открытие тяжёлых вкладок сохраняется;
+- обязательные параметры loaders не изменяются;
+- визуальный слой не выполняет дополнительные запросы;
+- таблицы продолжают использовать прежние dataContainer и actions;
+- ссылочные атрибуты, читаемые генераторами колонок, должны иметь явный вложенный view.
 
 ---
 
@@ -186,6 +190,14 @@ jobCandidateMainLayout
 - индикаторы рейтинга и CV обновляются после first paint;
 - оформление поддерживается в Halo, Hover, Havana и Helium.
 
+### Вкладка «Резюме и файлы»
+
+- `jobCandidateCandidateCvTable` сохраняет существующий dataContainer и генераторы колонок;
+- колонка логотипа проекта читает уже загруженный `Project.projectLogo`;
+- при отсутствии логотипа отображается `icons/no-company.png`;
+- открытие вкладки не должно приводить к `Cannot get unfetched attribute [projectLogo]`;
+- Java-генератор и `FileDescriptorImageHelper` не выполняют дополнительную перезагрузку проекта.
+
 ---
 
 ## 4. Actions и неизменяемые контракты
@@ -199,7 +211,7 @@ jobCandidateMainLayout
 | `personPositionField` | `optionsContainer=personPositionsDc`, lookup и open |
 | `jobCityCandidateField` | `optionsContainer=citiesDc`, lookup |
 | `jobCandidateIteractionListTable` | прежние actions, columns и handlers |
-| `jobCandidateCandidateCvTable` | прежние actions, columns и handlers |
+| `jobCandidateCandidateCvTable` | прежние actions, columns и handlers; логотип проекта обеспечивается view |
 | `socialNetworkTable` | прежний editor и generators |
 | `fileImageFaceUpload` | immediate upload, clear и обновление изображения |
 
@@ -221,33 +233,42 @@ jobCandidateMainLayout
 
 ```bash
 git diff --check
-./gradlew :app-web:compileJava :app-web:compileTestJava --no-daemon --stacktrace
-./gradlew :app-web:test --tests '*ScreenViewIntegrityTest*' --no-daemon --stacktrace
+./gradlew :app-web:compileTestJava --no-daemon --stacktrace
+./gradlew :app-web:test --tests '*JobCandidateProjectLogoViewContractTest*' --no-daemon --stacktrace
+./gradlew :app-web:buildScssThemes --no-daemon --stacktrace
 ./gradlew clean assemble --no-daemon --stacktrace
 ```
 
 Acceptance gate:
 
-- `ScreenViewIntegrityTest` — 8/8;
-- итоговый build — `BUILD SUCCESSFUL`;
-- существующий кандидат открывается без `unfetched` и detached ошибок;
-- новый кандидат открывается без необязательных SQL-запросов;
-- быстрый выход не вызывает UI-thread exception;
-- сохранение без открытия ленивых вкладок не удаляет дочерние данные;
-- hydration логотипов CV и социальных сетей работает после открытия соответствующих вкладок;
-- `/hrm` отвечает HTTP 200.
+- HTTP 200 для `/hrm`;
+- открытие существующего и нового кандидата;
+- открытие вкладки «Резюме и файлы» у кандидата с резюме, вакансией и проектом;
+- отображение реального логотипа проекта и стандартной заглушки при его отсутствии;
+- отсутствие `Cannot get unfetched attribute [projectLogo]` и detached exceptions в журнале;
+- сохранение и отмена;
+- меню «Еще»;
+- фотография и HR-Мастер;
+- accordion-заголовки на каждой вкладке;
+- одинаковый шрифт полей ФИО, города, должности и компании;
+- ширина полей на вкладках «Основное» и «Контакты»;
+- рейтинг без повреждённых символов;
+- все таблицы, actions и ленивые loaders;
+- темы Halo, Hover, Havana и Helium.
 
 ## История изменений
 
 | Дата | Изменение |
 |---|---|
-| 2026-07-15 | Stage 14: удалён дублирующий CandidateCV `COUNT` из `JobCandidateCvInitialViewOptimizer`; единственный индикатор CV загружается фоновой задачей контроллера. |
-| 2026-07-15 | Stage 13: индикатор «Резюме: ДА/НЕТ» перенесён в background scalar `COUNT` после first paint. |
-| 2026-07-15 | Stage 12: проверка фотографии в file storage вынесена в фон. |
-| 2026-07-15 | Stage 11: фоновый расчёт рейтинга через `BackgroundTask`; форматирование звёзд сохранено. |
-| 2026-07-15 | Stage 10: чтение коллекции CV заменено scalar `COUNT`. |
-| 2026-07-15 | Stage 9: последнее взаимодействие загружается лениво при фактическом использовании. |
-| 2026-07-15 | Stage 6: `personPositionsDc` переведён на `position-picker-view`. |
-| 2026-07-15 | Удалён полный loader компаний; create-company переведён на точечную загрузку по UUID. |
-| 2026-07-15 | `socialNetwork`, `candidateCv` и `iteractionList` исключены из initial view. |
-| 2026-07-14 | Реализована двухпанельная компоновка и локальный theme-aware SCSS. |
+| 2026-07-22 | Глобальный overwrite `openPosition-edit-view` удалён. `projectLogo` загружается через локальный вложенный view `job-candidate-edit.xml`. Исходный shared view восстановлен. |
+| 2026-07-22 | (SUPERSEDED) `openPosition-edit-view` дополнен графом `projectName.projectLogo` через глобальный overwrite; заменён локальным экранным view. |
+| 2026-07-21 | Исправлены типографика и центрирование ФИО, вывод должности, размеры sidebar labels и одинаковая ширина трёх полей ФИО; процент заполнения считается по 15 полям без изменения lazy-алгоритма. |
+| 2026-07-21 | Профиль кандидата переведён на единый `OvaFallbackImage` 176×176 с локальным fallback; ФИО и должность синхронизируются через `jobCandidateDc` независимо от lazy-вкладок. |
+| 2026-07-21 | Во всех семи темах восстановлена видимость должности и сохранение структурного класса ФИО при блокировке; добавлены регрессионные тесты и пользовательская инструкция. |
+| 2026-07-15 | Завершено performance-тестирование: удалены временные runtime-пробы, performance-тесты, JFR/лог-скрипты и диагностическое system property; оптимизированный SCSS сохранён. |
+| 2026-07-15 | Выполнен этап 1 клиентской оптимизации: удалён универсальный selector потомков, упрощены цепочки Vaadin-селекторов и сокращены принудительные CSS-ограничения без изменения XML и бизнес-логики. |
+| 2026-07-14 | Добавлены диагностическое профилирование жизненного цикла JobCandidateEdit, unit-тесты, JFR-сборщик и генератор отчёта по времени открытия формы. |
+| 2026-07-14 | Увеличены и приближены к подписям поля ФИО, должности и компании; шрифт SuggestionField синхронизирован с остальными полями вкладки «Основное» во всех темах. |
+| 2026-07-14 | Исправлено фактическое отображение варианта 3: возвращены accordion-заголовки, растянуты GridLayout и поля, исправлены фон sidebar, повтор ФИО и кодировка звёзд рейтинга во всех темах. |
+| 2026-07-14 | Реализована двухпанельная компоновка JobCandidateEdit, нижняя панель действий и локальный визуальный слой для подключённых тем. |
+| 2026-07-14 | Сохранены XML-контракты, data bindings, actions, loaders и бизнес-логика экрана. |

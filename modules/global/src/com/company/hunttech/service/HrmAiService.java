@@ -2,19 +2,16 @@ package com.company.hunttech.service;
 
 import com.company.hunttech.entity.UserAiConfiguration;
 
-/**
- * AI-фасад HRM HuntTech для vacancy-сценариев и проверки пользовательских подключений.
- *
- * Рабочая генерация маршрутизируется только через AiExecutionService и стабильный
- * functionCode. Выбор provider/model/credential выполняется AI Control Plane.
- */
+import java.util.UUID;
+
 public interface HrmAiService {
     String NAME = "hunttech_HrmAiService";
 
     String FUNCTION_STANDARDIZE_VACANCY = "STANDARDIZE_VACANCY";
 
     /**
-     * Стандартизирует исходное описание вакансии через функцию STANDARDIZE_VACANCY.
+     * Строит стандартизированное описание вакансии через сохранённую
+     * AI-конфигурацию текущего пользователя для явно выбранного провайдера.
      */
     String standardizeVacancyDescription(String rawText);
 
@@ -42,4 +39,23 @@ public interface HrmAiService {
      * Это диагностическая операция подключения, а не рабочая AI-функция приложения.
      */
     void testConnection(UserAiConfiguration configuration);
+
+    /**
+     * Отправляет произвольный промпт явно выбранному провайдеру.
+     * Используется сценариями, где провайдер выбирается пользователем непосредственно.
+     */
+    String sendPrompt(String userPrompt, String providerCode);
+
+    /**
+     * Отправляет системный промпт через единственную текущую AI-конфигурацию
+     * пользователя. Этим методом пользуются кнопки AI-анализа на экранах сущностей.
+     */
+    String sendPromptUsingCurrentConfiguration(String userPrompt);
+
+    /**
+     * Делает выбранную конфигурацию единственной текущей для её пользователя.
+     *
+     * @param configurationId идентификатор UserAiConfiguration
+     */
+    void setCurrentConfiguration(UUID configurationId);
 }

@@ -832,39 +832,18 @@
                         </vbox>
                     </vbox>
                 </scrollBox>
-
-                <!-- Footer удерживает подписку, сохранение и отмену вне прокручиваемого содержимого. -->
-                <hbox id="editActions"
-                      stylename="iteraction-list-footer edit-footer-actions"
-                      width="100%"
-                      height="AUTO"
-                      spacing="true"
-                      expand="editActionsSpacer"
-                      align="MIDDLE_RIGHT">
-                    <!-- Spacer выталкивает группу действий к правому краю footer. -->
-                    <vbox id="editActionsSpacer" width="100%" height="1px"/>
-                    <!-- Группа действий объединяет пользовательские и стандартные editor-команды. -->
-                    <hbox id="editActionsGroup"
-                          width="AUTO"
-                          height="AUTO"
-                          spacing="true"
-                          align="MIDDLE_RIGHT"
-                          stylename="iteraction-list-footer-actions">
-                        <!-- Button открывает или создаёт подписку пользователя на кандидата. -->
-                        <button id="subscribeButton"
-                                invoke="onButtonSubscribeClick"
-                                caption="mainMsg://msgSubscribe"
-                                icon="BELL"
-                                stylename="iteraction-list-subscribe-action"/>
-                        <!-- Стандартная action сохраняет IteractionList и закрывает editor. -->
-                        <button action="windowCommitAndClose"
-                                stylename="iteraction-list-primary-action"/>
-                        <!-- Стандартная action закрывает editor без подтверждённого сохранения изменений. -->
-                        <button action="windowClose"
-                                stylename="iteraction-list-secondary-action"/>
-                    </hbox>
-                </hbox>
-            </vbox>
+            </tab>
+        </tabSheet>
+        <hbox id="editActions"
+              spacing="true"
+              align="BOTTOM_RIGHT">
+            <button id="subscribeButton"
+                    invoke="onButtonSubscribeClick"
+                    caption="mainMsg://msgSubscribe"
+                    icon="BELL"/>
+            <button id="aiAnalysisBtn" caption="AI-анализ" invoke="onAiAnalysisClick"/>
+            <button action="windowCommitAndClose"/>
+            <button action="windowClose"/>
         </hbox>
     </layout>
 </window>

@@ -113,8 +113,10 @@
         <item screen="hunttech_UserAiFunctionOverride.browse"
               caption="mainMsg://menu_config.hunttech_UserAiFunctionOverride.browse" icon="SLIDERS"/>
         <item screen="hunttech_VacancyPromptTemplate.browse"
-              caption="mainMsg://menu_config.hunttech_VacancyPromptTemplate.browse" icon="FILE_TEXT_O"/>
-        <item screen="hunttech_UserAiConfiguration.browse"
-              caption="mainMsg://menu_config.hunttech_UserAiConfiguration.browse" icon="KEY"/>
+              caption="mainMsg://menu_config.hunttech_VacancyPromptTemplate.browse" icon="FILE_TEXT_O"
+              roles="Administrators"/>
+        <item screen="hunttech_AiPromptTemplate.browse"
+              caption="mainMsg://menu_config.hunttech_AiPromptTemplate.browse" icon="FILE_TEXT_O"
+              roles="Administrators"/>
     </menu>
 </menu-config>

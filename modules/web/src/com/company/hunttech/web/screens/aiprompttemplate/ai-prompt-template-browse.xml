@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://aiPromptTemplateBrowse.caption"
+        focusComponent="aiPromptTemplatesTable"
+        messagesPack="com.company.hunttech.web.screens.aiprompttemplate">
+    <data>
+        <collection id="aiPromptTemplatesDc"
+                    class="com.company.hunttech.entity.AiPromptTemplate"
+                    view="aiPromptTemplate-browse-view">
+            <loader id="aiPromptTemplatesDl">
+                <query>
+                    <![CDATA[select e from hunttech_AiPromptTemplate e order by e.code]]>
+                </query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode height="600"
+                width="900"/>
+    <layout expand="aiPromptTemplatesTable"
+            spacing="true">
+        <hbox spacing="true">
+            <button action="aiPromptTemplatesTable.create"/>
+            <button action="aiPromptTemplatesTable.edit"/>
+            <button action="aiPromptTemplatesTable.remove"/>
+        </hbox>
+        <table id="aiPromptTemplatesTable"
+               width="100%"
+               dataContainer="aiPromptTemplatesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
+            </actions>
+            <columns>
+                <column id="name" caption="msg://AiPromptTemplate.name"/>
+                <column id="code" caption="msg://AiPromptTemplate.code"/>
+                <column id="entityClass" caption="msg://AiPromptTemplate.entityClass"/>
+                <column id="active" caption="msg://AiPromptTemplate.active"/>
+            </columns>
+            <rowsCount/>
+        </table>
+        <hbox id="lookupActions" spacing="true" visible="false">
+            <button action="lookupSelectAction"/>
+            <button action="lookupCancelAction"/>
+        </hbox>
+    </layout>
+</window>

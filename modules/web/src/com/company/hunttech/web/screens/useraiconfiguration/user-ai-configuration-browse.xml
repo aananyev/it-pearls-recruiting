@@ -10,7 +10,7 @@
             <view extends="userAiConfiguration-browse-view"/>
             <loader id="userAiConfigurationsDl">
                 <query>
-                    <![CDATA[select e from hunttech_UserAiConfiguration e]]>
+                    <![CDATA[select e from hunttech_UserAiConfiguration e order by e.user.login, e.providerCode]]>
                 </query>
             </loader>
         </collection>
@@ -28,21 +28,30 @@
             <button action="userAiConfigurationsTable.create"/>
             <button action="userAiConfigurationsTable.edit"/>
             <button action="userAiConfigurationsTable.remove"/>
-            <button id="testBtn" caption="Тест AI" invoke="onTestBtnClick" icon="CHECK"/>
+            <button id="makeCurrentBtn"
+                    caption="msg://makeCurrentBtn.caption"
+                    description="msg://makeCurrentBtn.description"
+                    invoke="onMakeCurrentBtnClick"
+                    icon="CHECK"/>
+            <button id="testBtn"
+                    caption="msg://testBtn.caption"
+                    description="msg://testBtn.description"
+                    invoke="onTestBtnClick"
+                    icon="CHECK"/>
         </hbox>
         <table id="userAiConfigurationsTable"
-                    width="100%"
-                    dataContainer="userAiConfigurationsDc">
+               width="100%"
+               dataContainer="userAiConfigurationsDc">
             <actions>
                 <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
             </actions>
             <columns>
-                <column id="user.login"/>
-                <column id="providerCode"/>
-                <column id="isActive"/>
-                <column id="defaultModelName"/>
+                <column id="user.login" caption="msg://UserAiConfiguration.user"/>
+                <column id="providerCode" caption="msg://UserAiConfiguration.providerCode"/>
+                <column id="isActive" caption="msg://UserAiConfiguration.currentForAnalysis"/>
+                <column id="defaultModelName" caption="msg://UserAiConfiguration.defaultModelName"/>
             </columns>
             <rowsCount/>
         </table>

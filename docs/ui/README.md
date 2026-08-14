@@ -7,24 +7,12 @@
 | Экран | Документ | Назначение |
 |---|---|---|
 | `JobCandidateEdit` | [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md) | Карточка кандидата, вкладки, история вакансий, анализ навыков и защита от OOM |
-| `CandidateCVEdit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) | Подготовка резюме с постоянной live-sidebar кандидата, сопроводительным письмом, деревом навыков, фотографией и файлами без изменения lazy-init |
-| `OpenPositionEditPreview` | [OpenPositionEditPreview_Spec.md](OpenPositionEditPreview_Spec.md) | Изолированный preview новой компоновки вакансии без замены legacy-экрана и изменения бизнес-логики |
-| `ExtUserEdit` | [ExtUserEdit_Spec.md](ExtUserEdit_Spec.md) | Администрирование профиля пользователя, ролей, замещений, email и AI в общем Edit-контракте |
-| `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | Персональные настройки пользователя, интерфейса, email и AI |
-| `ExtSettingsWindowMainBackground` | [ExtSettingsWindowMainBackground_Spec.md](ExtSettingsWindowMainBackground_Spec.md) | Загрузка, очистка и безопасное хранение персонального фона без изменения entity и БД |
-| `ExtSettingsWindowEmailNavigation` | [ExtSettingsWindowEmailNavigation_Spec.md](ExtSettingsWindowEmailNavigation_Spec.md) | Связь навигации SMTP, POP3 и IMAP слева с соответствующими аккордеонами справа |
-| `ExtSettingsWindowAvatar` | [ExtSettingsWindowAvatar_Spec.md](ExtSettingsWindowAvatar_Spec.md) | Круглая фотография пользователя через `OvaFallbackImage` без изменения модели данных |
-| `HrmMainScreen` | [HrmMainScreen_Spec.md](HrmMainScreen_Spec.md) | Главный dashboard с персональным фоном либо случайным каталогом 7 × 10 нейтральных SVG |
-| `IteractionListEdit` | [IteractionListEdit_Spec.md](IteractionListEdit_Spec.md) · [XML-компоновка](IteractionListEdit_XmlLayout_2026-07-27.md) | Бизнес-логика взаимодействия, контекстная sidebar, аккордеоны и сохранённые CUBA-контракты |
-| `IteractionEdit` | [IteractionEdit_Spec.md](IteractionEdit_Spec.md) | Справочник типов взаимодействий: sidebar с label-навигацией по вкладкам, карточки-панели, lazy LOB/справочники; компоновка по эталону IteractionListEdit |
-| `SkillTreeEdit` | [SkillTreeEdit_Spec.md](SkillTreeEdit_Spec.md) | Справочник «Дерево компетенций»: sidebar с логотипом и label-навигацией, карточки-панели, парсинг описания Wiki |
-| `ProjectEdit` | [ProjectEdit_Spec.md](ProjectEdit_Spec.md) | Проект (заказчик/группа вакансий): sidebar с логотипом и навигацией «Разделы», карточки-панели, ленивые вкладки LOB и вакансий |
-| `OutstaffingRatesBrowse` | [OutstaffingRatesBrowse_Spec.md](OutstaffingRatesBrowse_Spec.md) | Рейты по аутстафу — список ступеней шкалы (lookup, CRUD) |
-| `OutstaffingRatesEdit` | [OutstaffingRatesEdit_Spec.md](OutstaffingRatesEdit_Spec.md) | Рейты по аутстафу — форма ступени (commit → триггеры маржинальности и аудита) |
-| `FileTypeEdit` · `SocialNetworkTypeEdit` · `GradeEdit` · `CurrencyEdit` · `EmployeeWorkStatusEdit` · `SignIconsEdit` (+ `OutstaffingRatesEdit`, `SpecialisationEdit`, `OwnershupEdit`, `PositionEdit`) | [DictionaryEditForms_Spec.md](DictionaryEditForms_Spec.md) | Серия справочных Edit-форм: sidebar 270px, label-навигация с полосой-заголовком, статичная круглая иллюстрация `ovalImage` 176×176 (у соцсети — реальный upload логотипа) |
-| `PositionEdit` | [PositionEdit_Spec.md](PositionEdit_Spec.md) | Справочник должностей — ru/en-наименования + LOB-описания (inline view контейнера, фикс UNFETCHED 2026-08-11) |
-| Halo Precision Components | [HaloPrecisionComponents_Spec.md](HaloPrecisionComponents_Spec.md) | Точное воспроизведение варианта 1 (светлый голубой) для Halo: namespace `ht-halo-precision-*`, метрики из референсов halo_variant1_*.png |
-| Modern Light Components (вариант 3) | [HRM_HuntTech_Modern_Light_Component_Style_Spec.md](HRM_HuntTech_Modern_Light_Component_Style_Spec.md) | Тёплый светло-серый деловой интерфейс hunttech-modern-light: DataGrid, Table, TreeTable, TextArea, RichTextArea |
+| `CandidateCVEdit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) | Редактор резюме, ленивое чтение текста и безопасная загрузка фотографии |
+| `ExtSettingsWindow` | [ExtSettingsWindow_Spec.md](ExtSettingsWindow_Spec.md) | Стандартные пользовательские настройки и персональные AI API-ключи без отдельного пункта меню |
+| `AiPromptTemplateBrowse` | [AiPromptTemplateBrowse_Spec.md](AiPromptTemplateBrowse_Spec.md) | Локализованный список системных промптов AI |
+| `AiPromptTemplateEdit` | [AiPromptTemplateEdit_Spec.md](AiPromptTemplateEdit_Spec.md) | Читаемый редактор системного промпта с фиксированной панелью действий |
+| `UserAiConfigurationBrowse` | [UserAiConfigurationBrowse_Spec.md](UserAiConfigurationBrowse_Spec.md) | Технический экран мониторинга и выбора текущей нейросети без отдельной пользовательской навигации |
+| `UserAiConfigurationEdit` | [UserAiConfigurationEdit_Spec.md](UserAiConfigurationEdit_Spec.md) | Читаемый редактор подключения к AI API с резервным состоянием по умолчанию |
 
 ## Правила актуализации
 

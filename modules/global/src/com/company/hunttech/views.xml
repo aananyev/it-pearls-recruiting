@@ -1415,25 +1415,21 @@
         <property name="temperature"/>
     </view>
     <view entity="hunttech_VacancyPromptTemplate" name="vacancyPromptTemplate-edit-view" extends="_local"/>
-    <view entity="hunttech_AccountingExpenseCategory" name="accountingExpenseCategory-view" extends="_local"/>
-    <view entity="hunttech_AccountingRecipient" name="accountingRecipient-view" extends="_local"/>
-    <view entity="hunttech_AccountingCompanyAlias" name="accountingCompanyAlias-view" extends="_local">
-        <property name="company" view="company-picker-view"/>
+
+    <!-- AiPromptTemplate views -->
+    <view entity="hunttech_AiPromptTemplate" name="aiPromptTemplate-browse-view" extends="_local">
+        <property name="name"/>
+        <property name="code"/>
+        <property name="entityClass"/>
+        <property name="active"/>
     </view>
-    <view entity="hunttech_AccountingAutomationSettings" name="accountingAutomationSettings-view" extends="_local">
-        <property name="senderUser" view="extUser-picker-view"/>
-    </view>
-    <view entity="hunttech_AccountingEmailBatch" name="accountingEmailBatch-view" extends="_local">
-        <property name="senderUser" view="extUser-picker-view"/>
-    </view>
-    <view entity="hunttech_AccountingDocument" name="accountingDocument-view" extends="_local">
-        <property name="company" view="company-picker-view"/>
-        <property name="currency" view="currency-view"/>
-        <property name="expenseCategory" view="accountingExpenseCategory-view"/>
-        <property name="laborAgreement" view="_minimal"/>
-        <property name="emailBatch" view="accountingEmailBatch-view"/>
-    </view>
-    <view entity="hunttech_AccountingDocumentEvent" name="accountingDocumentEvent-view" extends="_local">
-        <property name="document" view="_minimal"/>
+    <view entity="hunttech_AiPromptTemplate" name="aiPromptTemplate-edit-view" extends="_local">
+        <property name="name"/>
+        <property name="code"/>
+        <property name="entityClass"/>
+        <property name="promptText"/>
+        <property name="availablePlaceholders"/>
+        <property name="description"/>
+        <property name="active"/>
     </view>
 </views>

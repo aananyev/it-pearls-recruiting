@@ -2,6 +2,8 @@
 
 | Задача | Где искать | Основные файлы |
 | ------ | ---------- | -------------- |
+| Проверить обязательные правила проекта и роли | `docs/project/` | [HRM_HuntTech_Project_Working_Rules.md](../project/HRM_HuntTech_Project_Working_Rules.md) |
+| Получить канонический prompt Hermes | `docs/ai/` | [Hermes_DevOps_Operating_Prompt.md](Hermes_DevOps_Operating_Prompt.md) |
 | Изменить сущность JobCandidate | `docs/entities/job-candidate/` | [JobCandidate.md](../entities/job-candidate/JobCandidate.md), [current-company.md](../entities/job-candidate/current-company.md) |
 | Изменить сущность Company | `docs/entities/company/` | [Company.md](../entities/company/Company.md) |
 | Изменить вакансию OpenPosition | `docs/entities/open-position/` | [OpenPosition.md](../entities/open-position/OpenPosition.md), [OpenPosition_Spec.md](../entities/open-position/OpenPosition_Spec.md) |
@@ -15,6 +17,13 @@
 | Поднять локальную среду | `docs/operations/local-development/` | [local-database.md](../operations/local-development/local-database.md) |
 | Выполнить production deployment | `deployment/production-deployment/` и `docs/operations/` | [production-deployment-runbook.md](../../deployment/production-deployment/runbooks/production-deployment-runbook.md), [operations README](../operations/README.md) |
 | Выполнить migration/backup/restore | `deployment/database-migration/` и `docs/operations/` | [production-migration-runbook.md](../../deployment/database-migration/runbooks/production-migration-runbook.md), [production-backup-runbook.md](../../deployment/database-migration/runbooks/production-backup-runbook.md), [production-restore-runbook.md](../../deployment/database-migration/runbooks/production-restore-runbook.md) |
+| Мигрировать системные промпты AI | `deployment/production-deployment/runbooks/` | [ai-system-prompts-production-migration-runbook.md](../../deployment/production-deployment/runbooks/ai-system-prompts-production-migration-runbook.md) |
 | Проверить тесты и smoke validation | `deployment/database-migration/validation/` | [application-smoke-test.md](../../deployment/database-migration/validation/application-smoke-test.md), [post-migration-checklist.md](../../deployment/database-migration/validation/post-migration-checklist.md) |
 | Найти отчёты аудита | `docs/reports/` и `deployment/*/reports/` | [performance summary](../reports/performance/job-candidate-performance-audit-summary.md), [database migration reports](../../deployment/database-migration/reports/) |
 | Настроить или сопровождать AI-подключения | `docs/integrations/ai/` | [USER_AI_CONNECTION_GUIDE.md](../integrations/ai/USER_AI_CONNECTION_GUIDE.md), [USER_AI_SETTINGS_IMPLEMENTATION.md](../integrations/ai/USER_AI_SETTINGS_IMPLEMENTATION.md), [AI_INTEGRATION.md](../integrations/ai/AI_INTEGRATION.md) |
+
+## История изменений
+
+| Дата | Изменение |
+| --- | --- |
+| 2026-07-22 | Добавлены правила проекта, канонический DevOps-промпт Hermes и production runbook системных промптов AI. |
