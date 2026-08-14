@@ -168,17 +168,8 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private static final String QUERY_GET_OTHER_SOCIAL_NETWORK = "select e from hunttech_SocialNetworkType e where e.socialNetwork = :other";
     private static final String QUERY_GET_CANDIDATE_CV = "select e from hunttech_CandidateCV e where e.candidate = :candidate";
     private static final String TELEGRAM_NAME_URL = "http://t.me/";
+    private static final String QUERY_GET_LAST_ITERACTION = "select e from hunttech_IteractionList e where e.candidate = :candidate and e.numberIteraction = (select max(f.numberIteraction) from hunttech_IteractionList f where f.candidate = :candidate)";
     private static final String CREATE_COMPANY_ACTION_ID = "createCompany";
-
-    /**
-     * Entity properties represented by visible data-entry controls in the candidate card.
-     * The list is intentionally independent from component creation so completion can be
-     * calculated before CUBA builds the lazy tabs.
-     */
-    static final List<String> CARD_COMPLETION_PROPERTIES = Collections.unmodifiableList(Arrays.asList(
-            "firstName", "middleName", "secondName", "birdhDate", "cityOfResidence",
-            "personPosition", "currentCompany", "email", "phone", "mobilePhone",
-            "telegramName", "whatsupName", "wiberName", "skypeName", "priorityContact"));
 
     List<Position> setPos = new ArrayList<>();
     // Данные вкладки «Позиции и вакансии» загружаются один раз при первом открытии.
@@ -247,6 +238,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private boolean tabSocialNetworksInitialized = false;
     private boolean initialInteractionAdded = false;
     private boolean companyEditorOpen = false;
+    @Inject
     private Table lastProjectTable;
     @Inject
     private KeyValueCollectionContainer lastProjectDc;
@@ -255,6 +247,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private CollectionLoader<OpenPosition> suggestOpenPositionDl;
     @Inject
     private CollectionLoader<OpenPosition> openPositionDl;
+    @Inject
+    private CollectionLoader<Company> currentCompaniesLc;
+    @Inject
+    private CollectionContainer<Company> currentCompaniesDc;
     @Inject
     private CollectionLoader<City> citiesDl;
     @Inject
@@ -364,132 +360,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     }
 
     private void setupSkillBox() {
-        // Skills are now loaded asynchronously via startSkillsBackgroundLoading()
-    }
-
-    private String loadLastCvText(UUID candidateId) {
-        if (candidateId == null) {
-            return null;
-        }
-        return dataManager.loadValue(
-                "select e.textCV from hunttech_CandidateCV e " +
-                "where e.candidate.id = :candidateId " +
-                "order by e.datePost desc",
-                String.class)
-                .parameter("candidateId", candidateId)
-                .maxResults(1)
-                .optional()
-                .orElse(null);
-    }
-
-    private void startSkillsBackgroundLoading() {
-        if (skillsLoading || skillsLoaded) {
-            return;
-        }
-        if (PersistenceHelper.isNew(getEditedEntity())
-                || getEditedEntity().getId() == null) {
-            return;
-        }
-
-        UUID candidateId = getEditedEntity().getId();
-        skillsLoading = true;
-
-        BackgroundTask<Void, List<SkillLabelData>> task =
-                new BackgroundTask<Void, List<SkillLabelData>>(
-                        60, TimeUnit.SECONDS, this) {
-
-                    @Override
-                    public List<SkillLabelData> run(TaskLifeCycle<Void> taskLifeCycle) {
-                        String cvText = loadLastCvText(candidateId);
-                        if (cvText == null || cvText.isEmpty()) {
-                            return Collections.emptyList();
-                        }
-                        // DataManager is safe to call from background thread
-                        // via AppBeans (injected DataManager bound to middleware)
-                        DataManager bgDataManager = AppBeans.get(DataManager.class);
-                        PdfParserService bgPdf = AppBeans.get(PdfParserService.class);
-                        ParseCVService bgParse = AppBeans.get(ParseCVService.class);
-
-                        String plainText = Jsoup.parse(cvText).text();
-                        List<SkillTree> skillTrees = bgPdf.parseSkillTree(plainText);
-                        HashMap<SkillTree, Integer> skillCounter = new HashMap<>();
-                        for (SkillTree skillTree : skillTrees) {
-                            skillCounter.put(skillTree,
-                                    bgParse.countMachesSkill(plainText, skillTree));
-                        }
-
-                        // Deduplicate
-                        for (int i = 0; i < skillTrees.size(); i++) {
-                            if (skillTrees.get(i).getNotParsing()) continue;
-                            for (int j = i + 1; j < skillTrees.size(); j++) {
-                                if (skillTrees.get(i).getSkillName()
-                                        .equalsIgnoreCase(skillTrees.get(j).getSkillName())) {
-                                    skillTrees.remove(j);
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (skillTrees.isEmpty()) {
-                            return Collections.emptyList();
-                        }
-
-                        List<SkillLabelData> result = new ArrayList<>();
-                        for (int i = StandartPrioritySkills.PROGRAMMING_LANGUAGE_INT;
-                             i >= StandartPrioritySkills.DEFAULT_INT; i--) {
-                            for (SkillTree st : skillTrees) {
-                                if (!st.getNotParsing() && st.getPrioritySkill() != null
-                                        && st.getPrioritySkill() == i) {
-                                    Integer count = skillCounter.get(st);
-                                    if (count != null && count > 0) {
-                                        result.add(new SkillLabelData(
-                                                st.getSkillName(), count,
-                                                skillStyleForPriority(st.getPrioritySkill()),
-                                                st.getComment(), count >= 2));
-                                    }
-                                }
-                            }
-                        }
-                        return result;
-                    }
-
-                    @Override
-                    public void done(List<SkillLabelData> result) {
-                        skillsLoading = false;
-                        skillsLoaded = true;
-                        if (result == null || result.isEmpty()) {
-                            return;
-                        }
-                        // UI thread — create fragment and render
-                        Skillsbar skillBoxFragment = fragments.create(
-                                JobCandidateEdit.this, Skillsbar.class);
-                        if (skillBoxFragment.renderSkillLabels(result)) {
-                            skillBox.add(skillBoxFragment.getFragment());
-                        }
-                    }
-
-                    @Override
-                    public boolean handleException(Exception exception) {
-                        skillsLoading = false;
-                        log.error("Unable to load candidate skills in background, " +
-                                "candidateId={}", candidateId, exception);
-                        return true;
-                    }
-                };
-
-        backgroundWorker.handle(task).execute();
-    }
-
-    private static String skillStyleForPriority(Integer priority) {
-        if (priority == null) return StandartPrioritySkills.DEFAULT_STYLE;
-        switch (priority) {
-            case -1: return StandartPrioritySkills.NOT_USED_SKILLS_STYLE;
-            case 0:  return StandartPrioritySkills.DEFAULT_STYLE;
-            case 1:  return StandartPrioritySkills.SUBJECT_AREA_STYLE;
-            case 2:  return StandartPrioritySkills.FRAMEWORKS_STYLE;
-            case 3:  return StandartPrioritySkills.METHODOLORY_STYLE;
-            case 4:  return StandartPrioritySkills.PROGRAMMING_LANGUAGE_STYLE;
-            default: return StandartPrioritySkills.NOT_USED_SKILLS_STYLE;
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            Skillsbar skillBoxFragment = fragments.create(this, Skillsbar.class);
+            if (skillBoxFragment.generateSkillLabels(getLastCVText())) {
+                skillBox.add(skillBoxFragment.getFragment());
+            }
         }
     }
 
@@ -498,13 +373,16 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             return null;
         }
 
-        return dataManager.loadValue(
-                "select e.textCV from hunttech_CandidateCV e where e.candidate = :candidate order by e.datePost desc",
-                String.class)
+        List<CandidateCV> candidateCvs = dataManager.load(CandidateCV.class)
+                .query("select e from hunttech_CandidateCV e " +
+                        "where e.candidate = :candidate " +
+                        "order by e.datePost desc")
                 .parameter("candidate", getEditedEntity())
                 .maxResults(1)
-                .optional()
-                .orElse(null);
+                .view("_local")
+                .list();
+
+        return candidateCvs.isEmpty() ? null : candidateCvs.get(0).getTextCV();
     }
 
     private void setFrequentInteractionPopupButton() {
@@ -698,6 +576,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
     @Subscribe
     public void onAfterShow1(AfterShowEvent event) {
+
+        if (!PersistenceHelper.isNew(getEditedEntity())) {
+            iteractionListFromCandidate = loadInteractionsForRating();
+        }
     }
 
     // загрузить таблицу взаимодействий
@@ -709,7 +591,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         // Индикатор резюме определяется фоновой задачей после first paint.
         // До завершения background-запроса показывается нейтральная подпись.
         if (!PersistenceHelper.isNew(getEditedEntity())) {
-            labelCV.setValue("Резюме: …");
+            if (!hasCandidateCv()) {
+                labelCV.setValue("Резюме: НЕТ");
+            } else {
+                labelCV.setValue("Резюме: ДА");
+            }
         }
 
         // обнулить статус для вновь создаваемного кандидата
@@ -719,6 +605,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
 
         setSaveRecordOfViewCandidate();
 
+        enableDisableContacts();
         setLabelTitle();
         setCreatedUpdatedLabel();
 
@@ -727,9 +614,10 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         setLinkButtonTelegremGroup();
         setLinkButtonSkype();
 
-        // Фотография загружается асинхронно после первого отображения формы.
-        // До проверки file storage показывается безопасная заглушка.
-        showCandidatePicPlaceholder();
+        setSuggestOpenPositionTable();
+        setLastProjectOfCandidate();
+        setCandidatePicImage();
+        checkTelegramName();
 
         checkTelegramName();
 
@@ -1481,140 +1369,29 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         openPositionDl.load();
     }
 
-    /** Применяет результат скалярной проверки CV к индикатору. */
-    private void applyCandidateCvIndicator(boolean hasCv) {
-        labelCV.setValue(hasCv ? "Резюме: ДА" : "Резюме: НЕТ");
-    }
-
-    /** Флаг предотвращения повторного запуска фоновой проверки CV. */
-    private boolean candidateCvIndicatorLoading;
-    /** Флаг завершения фоновой проверки CV (успех или ошибка). */
-    private boolean candidateCvIndicatorLoaded;
-
-    /**
-     * Запускает фоновую проверку наличия резюме после открытия формы.
-     * Scalar COUNT не блокирует first paint и не загружает коллекцию CandidateCV.
-     */
-    private void startCandidateCvIndicatorBackgroundLoading() {
-        if (candidateCvIndicatorLoading || candidateCvIndicatorLoaded) {
-            return;
+    private boolean hasCandidateCv() {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            return false;
         }
 
-        if (PersistenceHelper.isNew(getEditedEntity()) || getEditedEntity().getId() == null) {
-            candidateCvIndicatorLoaded = true;
-            return;
-        }
-
-        UUID candidateId = getEditedEntity().getId();
-        candidateCvIndicatorLoading = true;
-
-        BackgroundTask<Void, Boolean> task =
-                new BackgroundTask<Void, Boolean>(30, TimeUnit.SECONDS, this) {
-                    @Override
-                    public Boolean run(TaskLifeCycle<Void> taskLifeCycle) {
-                        DataManager backgroundDataManager = AppBeans.get(DataManager.class);
-                        Long count = backgroundDataManager.loadValue(
-                                "select count(e) from hunttech_CandidateCV e " +
-                                        "where e.candidate.id = :candidateId and e.deleteTs is null",
-                                Long.class)
-                                .parameter("candidateId", candidateId)
-                                .one();
-                        return count != null && count > 0;
-                    }
-
-                    @Override
-                    public void done(Boolean hasCv) {
-                        candidateCvIndicatorLoading = false;
-                        candidateCvIndicatorLoaded = true;
-                        applyCandidateCvIndicator(hasCv != null && hasCv);
-                    }
-
-                    @Override
-                    public boolean handleException(Exception exception) {
-                        candidateCvIndicatorLoading = false;
-                        candidateCvIndicatorLoaded = true;
-                        log.error("Не удалось проверить наличие резюме, candidateId={}",
-                                candidateId, exception);
-                        return true;
-                    }
-                };
-
-        backgroundWorker.handle(task).execute();
-    }
-
-    private double loadAverageRating() {
-        if (PersistenceHelper.isNew(getEditedEntity())
-                || getEditedEntity().getId() == null) {
-            return 0.0;
-        }
-        UUID candidateId = getEditedEntity().getId();
-        Double avg = dataManager.loadValue(
-                "select avg(e.rating + 1) from hunttech_IteractionList e where e.candidate.id = :candidateId and e.rating is not null",
-                Double.class)
-                .parameter("candidateId", candidateId)
+        Long count = dataManager.loadValue(
+                "select count(e) from hunttech_CandidateCV e where e.candidate = :candidate",
+                Long.class)
+                .parameter("candidate", getEditedEntity())
                 .one();
-        return avg != null ? avg.doubleValue() : 0.0;
+        return count != null && count > 0;
     }
 
-    /** Флаг предотвращения повторного запуска фоновой загрузки рейтинга. */
-    private boolean ratingLoading;
-    /** Флаг завершения фоновой загрузки рейтинга (успех или ошибка). */
-    private boolean ratingLoaded;
-
-    /**
-     * Запускает фоновый расчёт среднего рейтинга кандидата после открытия формы.
-     * Вызов из onAfterShow, чтобы scalar AVG не блокировал first paint.
-     */
-    private void startRatingBackgroundLoading() {
-        if (ratingLoading || ratingLoaded) {
-            return;
+    private List<IteractionList> loadInteractionsForRating() {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
+            return Collections.emptyList();
         }
 
-        if (PersistenceHelper.isNew(getEditedEntity()) || getEditedEntity().getId() == null) {
-            ratingLoaded = true;
-            applyRatingLabel(0.0);
-            return;
-        }
-
-        UUID candidateId = getEditedEntity().getId();
-        ratingLoading = true;
-
-        BackgroundTask<Void, Double> task =
-                new BackgroundTask<Void, Double>(30, TimeUnit.SECONDS, this) {
-                    @Override
-                    public Double run(TaskLifeCycle<Void> taskLifeCycle) {
-                        DataManager backgroundDataManager = AppBeans.get(DataManager.class);
-                        Double average = backgroundDataManager.loadValue(
-                                "select avg(e.rating + 1) " +
-                                        "from hunttech_IteractionList e " +
-                                        "where e.candidate.id = :candidateId " +
-                                        "and e.rating is not null",
-                                Double.class)
-                                .parameter("candidateId", candidateId)
-                                .optional()
-                                .orElse(0.0);
-                        return average != null ? average : 0.0;
-                    }
-
-                    @Override
-                    public void done(Double result) {
-                        ratingLoading = false;
-                        ratingLoaded = true;
-                        applyRatingLabel(result != null ? result : 0.0);
-                    }
-
-                    @Override
-                    public boolean handleException(Exception exception) {
-                        ratingLoading = false;
-                        ratingLoaded = true;
-                        log.error("Не удалось загрузить рейтинг кандидата, candidateId={}",
-                                candidateId, exception);
-                        applyRatingLabel(0.0);
-                        return true;
-                    }
-                };
-
-        backgroundWorker.handle(task).execute();
+        return dataManager.load(IteractionList.class)
+                .query("select e from hunttech_IteractionList e where e.candidate = :candidate")
+                .parameter("candidate", getEditedEntity())
+                .view("_local")
+                .list();
     }
 
     private List<CandidateCV> ensureCandidateCvLoaded() {
@@ -1662,196 +1439,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         return mergedInteractions;
     }
 
-    /**
-     * Инициализирует историю рассмотрения и подходящие вакансии только при первом
-     * открытии вкладки. Открытие JobCandidateEdit не выполняет эти запросы.
-     */
-    private void initTabPositions() {
-        TabSheet.Tab selectedTab = tabSheetSocialNetworks.getSelectedTab();
-        if (selectedTab == null || !"tabPositions".equals(selectedTab.getName())) {
-            return;
-        }
-
-        if (!positionsTabInitialized) {
-            lastProjectTable = (Table) getWindow().getComponentNN("lastProjectTable");
-            suggestVacancyTable = (Table<OpenPosition>) getWindow().getComponentNN("suggestVacancyTable");
-            suggestVacancyTable.setItemDescriptionProvider(this::suggestVacancyTableItemDescriptionProvider);
-            suggestVacancyTable.getColumn("notSendedIconColumn")
-                    .setColumnGenerator(this::suggestVacancyTableNotSendedIconColumnColumnGenerator);
-            positionsTabInitialized = true;
-        }
-
-        if (positionsTabLoaded || positionsTabLoading) {
-            return;
-        }
-
-        if (PersistenceHelper.isNew(getEditedEntity()) || getEditedEntity().getId() == null) {
-            positionsTabLoaded = true;
-            lastProjectTable.setVisible(false);
-            suggestVacancyTable.setVisible(false);
-            return;
-        }
-
-        startPositionsBackgroundLoading();
-    }
-
-    /**
-     * В фоне агрегирует только скалярные значения взаимодействий. Entity-графы
-     * кандидата, резюме и вакансий между потоками не передаются.
-     */
-    private void startPositionsBackgroundLoading() {
-        if (positionsTabLoading || positionsTabLoaded) {
-            return;
-        }
-
-        UUID candidateId = getEditedEntity().getId();
-        positionsTabLoading = true;
-
-        BackgroundTask<Void, Map<UUID, HistoryRowData>> task =
-                new BackgroundTask<Void, Map<UUID, HistoryRowData>>(
-                        60, TimeUnit.SECONDS, this) {
-                    @Override
-                    public Map<UUID, HistoryRowData> run(TaskLifeCycle<Void> taskLifeCycle) {
-                        DataManager bgDataManager = AppBeans.get(DataManager.class);
-                        List<KeyValueEntity> rows = bgDataManager.loadValues(
-                                "select vacancy.id, vacancy.vacansyName, e.dateIteraction, " +
-                                        "interactionType.iterationName, " +
-                                        "interactionType.signOurInterviewAssigned, " +
-                                        "interactionType.signOurInterview, " +
-                                        "recruiter.name, e.recrutierName " +
-                                        "from hunttech_IteractionList e " +
-                                        "left join e.vacancy vacancy " +
-                                        "left join e.iteractionType interactionType " +
-                                        "left join e.recrutier recruiter " +
-                                        "where e.candidate.id = :candidateId " +
-                                        "and vacancy.id is not null " +
-                                        "and vacancy.vacansyName not like 'Default' " +
-                                        "order by e.dateIteraction desc")
-                                .properties(
-                                        "vacancyId",
-                                        "vacancyName",
-                                        "dateIteraction",
-                                        "interactionName",
-                                        "signResearcher",
-                                        "signRecruiter",
-                                        "recruiterName",
-                                        "legacyRecruiterName")
-                                .parameter("candidateId", candidateId)
-                                .list();
-                        return buildHistoryRowData(rows);
-                    }
-
-                    @Override
-                    public void done(Map<UUID, HistoryRowData> result) {
-                        historyRowDataByVacancy = result != null
-                                ? result : Collections.emptyMap();
-                        positionsTabLoading = false;
-                        positionsTabLoaded = true;
-
-                        // UI-loader'ы запускаются только на UI-потоке и только
-                        // после установки обязательных параметров.
-                        try {
-                            lastProjectDl.setParameter("candidate", getEditedEntity());
-                            lastProjectDl.load();
-                            setLastProjectOfCandidate();
-                            setSuggestOpenPositionTable();
-                            lastProjectTable.repaint();
-                            suggestVacancyTable.repaint();
-                        } catch (RuntimeException loaderException) {
-                            // Разрешаем повторное открытие вкладки после временной ошибки БД.
-                            positionsTabLoaded = false;
-                            log.error("Не удалось применить данные вкладки позиций, candidateId={}",
-                                    candidateId, loaderException);
-                            notifications.create(Notifications.NotificationType.ERROR)
-                                    .withCaption(messageBundle.getMessage("msgError"))
-                                    .withDescription("Не удалось загрузить позиции и вакансии кандидата")
-                                    .show();
-                        }
-                    }
-
-                    @Override
-                    public boolean handleException(Exception exception) {
-                        positionsTabLoading = false;
-                        log.error("Не удалось загрузить вкладку позиций кандидата, candidateId={}",
-                                candidateId, exception);
-                        notifications.create(Notifications.NotificationType.ERROR)
-                                .withCaption(messageBundle.getMessage("msgError"))
-                                .withDescription("Не удалось загрузить историю позиций кандидата")
-                                .show();
-                        return true;
-                    }
-                };
-
-        backgroundWorker.handle(task).execute();
-    }
-
-    /** Один раз агрегирует значения для генераторов колонок истории. */
-    private Map<UUID, HistoryRowData> buildHistoryRowData(List<KeyValueEntity> rows) {
-        if (rows == null || rows.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        Map<UUID, HistoryAccumulator> accumulators = new LinkedHashMap<>();
-        for (KeyValueEntity row : rows) {
-            UUID vacancyId = row.getValue("vacancyId");
-            if (vacancyId == null) {
-                continue;
-            }
-
-            HistoryAccumulator accumulator = accumulators.computeIfAbsent(
-                    vacancyId,
-                    id -> new HistoryAccumulator(id, row.getValue("vacancyName")));
-
-            Date interactionDate = row.getValue("dateIteraction");
-            if (accumulator.maxDate == null
-                    || interactionDate != null && interactionDate.after(accumulator.maxDate)) {
-                accumulator.maxDate = interactionDate;
-                accumulator.lastInteractionName = row.getValue("interactionName");
-            }
-
-            String employeeName = row.getValue("recruiterName");
-            if (employeeName == null || employeeName.trim().isEmpty()) {
-                employeeName = row.getValue("legacyRecruiterName");
-            }
-
-            if (accumulator.researcherName == null
-                    && Boolean.TRUE.equals(row.getValue("signResearcher"))) {
-                accumulator.researcherName = employeeName;
-            }
-            if (accumulator.recruiterName == null
-                    && Boolean.TRUE.equals(row.getValue("signRecruiter"))) {
-                accumulator.recruiterName = employeeName;
-            }
-        }
-
-        Map<UUID, HistoryRowData> result = new LinkedHashMap<>();
-        for (HistoryAccumulator accumulator : accumulators.values()) {
-            result.put(accumulator.vacancyId, new HistoryRowData(
-                    accumulator.vacancyId,
-                    accumulator.vacancyName,
-                    accumulator.maxDate,
-                    accumulator.lastInteractionName,
-                    accumulator.researcherName,
-                    accumulator.recruiterName));
-        }
-        return result;
-    }
-
-    /** Внутренняя изменяемая модель для единственного прохода по строкам JPQL. */
-    private static final class HistoryAccumulator {
-        final UUID vacancyId;
-        final String vacancyName;
-        Date maxDate;
-        String lastInteractionName;
-        String researcherName;
-        String recruiterName;
-
-        HistoryAccumulator(UUID vacancyId, String vacancyName) {
-            this.vacancyId = vacancyId;
-            this.vacancyName = vacancyName;
-        }
-    }
-
     private List<SocialNetworkURLs> ensureSocialNetworksLoaded() {
         if (socialNetworksLoaded || PersistenceHelper.isNew(getEditedEntity())) {
             return getEditedEntity().getSocialNetwork() != null ?
@@ -1877,31 +1464,6 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
     private List<JobCandidatePositionLists> ensurePositionListLoaded() {
         return getEditedEntity().getPositionList() != null ?
                 getEditedEntity().getPositionList() : Collections.emptyList();
-    }
-
-    /**
-     * Загружает последнее взаимодействие только при первом обращении.
-     * Вызов сервиса отложен до момента копирования без выбранной строки.
-     */
-    private IteractionList ensureLastInteractionLoaded() {
-        if (lastIteractionLoaded) {
-            return lastIteraction;
-        }
-
-        if (PersistenceHelper.isNew(getEditedEntity()) || getEditedEntity().getId() == null) {
-            lastIteractionLoaded = true;
-            lastIteraction = null;
-            return null;
-        }
-
-        lastIteraction = interactionService.getLastIteraction(getEditedEntity());
-        lastIteractionLoaded = true;
-        return lastIteraction;
-    }
-
-    private void invalidateLastInteractionCache() {
-        lastIteraction = null;
-        lastIteractionLoaded = false;
     }
 
     private void setupCurrentCompanySearchExecutor() {
@@ -1949,6 +1511,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             return;
         }
         if (!tabContactInfoInitialized) {
+            ensureSocialNetworksLoaded();
             if (emailField == null) {
                 emailField = (TextField<String>) getWindow().getComponent("emailField");
             }
@@ -2196,34 +1759,18 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         }
     }
 
-    /**
-     * После сохранения CompanyEdit повторно загружает только созданную компанию
-     * узким picker-view и merge ит её в DataContext текущего редактора кандидата.
-     */
     private Company mergeCreatedCompany(Company company) {
-        return resolveCreatedCompany(
-                company,
-                companyId -> dataManager.load(Company.class)
-                        .query("select e from hunttech_Company e where e.id = :companyId")
-                        .parameter("companyId", companyId)
-                        .view("company-picker-view")
-                        .one(),
-                dataContext::merge);
-    }
-
-    /**
-     * Сохраняет create-company flow тестируемым без полного справочника компаний.
-     * Для несохранённой или отменённой сущности не выполняет SQL и merge.
-     */
-    static Company resolveCreatedCompany(Company company,
-                                         Function<UUID, Company> companyLoader,
-                                         Function<Company, Company> companyMerger) {
         if (company == null || company.getId() == null) {
             return company;
         }
 
-        Company persistedCompany = companyLoader.apply(company.getId());
-        return companyMerger.apply(persistedCompany);
+        Company mergedCompany = dataContext.merge(company);
+        if (currentCompaniesDc != null && !currentCompaniesDc.containsItem(mergedCompany)) {
+            currentCompaniesDc.getMutableItems().add(mergedCompany);
+        } else if (currentCompaniesDc != null) {
+            currentCompaniesDc.replaceItem(mergedCompany);
+        }
+        return mergedCompany;
     }
 
     public void repaintSocialNetworksTable() {
@@ -2238,30 +1785,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             return;
         }
         if (!interationTabInitialized) {
-            jobCandidateIteractionListTable = (DataGrid<IteractionList>) getWindow()
-                    .getComponentNN("jobCandidateIteractionListTable");
-            frequentInteractionPopupButton = (PopupButton) getWindow()
-                    .getComponentNN("frequentInteractionPopupButton");
-            copyIteractionButton = (Button) getWindow().getComponentNN("copyIteractionButton");
-            vacancyFilterLookupPickerField = (LookupPickerField<OpenPosition>) getWindow()
-                    .getComponentNN("vacancyFilterLookupPickerField");
-            openPositionProjectDescriptionButton = (Button) getWindow()
-                    .getComponentNN("openPositionProjectDescriptionButton");
-
-            jobCandidateIteractionListTable.getColumn("currentOpenCloseColumn")
-                    .setColumnGenerator(this::jobCandidateIteractionListTableCurrentOpenCloseColumnColumnGenerator);
-            jobCandidateIteractionListTable.getColumn("currentOpenCloseColumn")
-                    .setStyleProvider(this::jobCandidateIteractionListTableCurrentOpenCloseColumnStyleProvider);
-            jobCandidateIteractionListTable.getColumn("currentOpenCloseColumn")
-                    .setDescriptionProvider(this::jobCandidateIteractionListTableCurrentOpenCloseColumnDescriptionProvider);
-            jobCandidateIteractionListTable.getColumn("vacancy")
-                    .setStyleProvider(this::jobCandidateIteractionListTableVacancyStyleProvider);
-            jobCandidateIteractionListTable.getColumn("iteractionType")
-                    .setStyleProvider(this::jobCandidateIteractionListTableIteractionTypeStyleProvider);
-            vacancyFilterLookupPickerField
-                    .setOptionImageProvider(this::vacancyFilterLookupPickerFieldOptionImageProvider);
-
             ensureInteractionsLoaded();
+            if (jobCandidateIteractionListTable == null) {
+                jobCandidateIteractionListTable = (DataGrid<IteractionList>) getWindow()
+                        .getComponent("jobCandidateIteractionListTable");
+            }
 
             addIconColumn();
 
@@ -2373,19 +1901,11 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
             return;
         }
         if (!cvTabInitialized) {
-            jobCandidateCandidateCvTable = (DataGrid<CandidateCV>) getWindow()
-                    .getComponentNN("jobCandidateCandidateCvTable");
-            scanContactsFromCVButton = (Button) getWindow().getComponentNN("scanContactsFromCVButton");
-            copyCVButton = (Button) getWindow().getComponentNN("copyCVButton");
-            checkSkillFromJD = (Button) getWindow().getComponentNN("checkSkillFromJD");
-
-            jobCandidateCandidateCvTable.getColumn("toVacancy")
-                    .setDescriptionProvider(this::jobCandidateCandidateCvTableToVacancyDescriptionProvider);
-            jobCandidateCandidateCvTable.getColumn("resumePosition")
-                    .setDescriptionProvider(this::jobCandidateCandidateCvTableResumePositionDescriptionProvider);
-            jobCandidateCandidateCvTable.getColumn("toVacancy")
-                    .setStyleProvider(this::jobCandidateCandidateCvTableToVacancyStyleProvider);
             ensureCandidateCvLoaded();
+            if (scanContactsFromCVButton == null) {
+                scanContactsFromCVButton = (Button) getWindow()
+                        .getComponent("scanContactsFromCVButton");
+            }
             scanContactsFromCVButton.addClickListener(e -> scanContactsFromCVs());
 
             copyCVButton.addClickListener(e -> copyCVJobCandidate());

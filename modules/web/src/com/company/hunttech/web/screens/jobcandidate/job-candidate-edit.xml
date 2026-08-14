@@ -17,7 +17,6 @@
             <!-- View контейнера: _local + точечные вложенные свойства; коллекции подгружаются
                  пакетно (fetch="BATCH"), чтобы избежать N+1 при рендере списков. -->
             <view extends="_local">
-                <!-- Город проживания кандидата — локальные поля справочника. -->
                 <property name="cityOfResidence" view="_local"/>
                 <!-- Текущая компания с группой компаний: пакетная загрузка для карточки и форм. -->
                 <property name="currentCompany" fetch="BATCH" view="_local">
@@ -750,8 +749,69 @@
                         <columns count="2"/>
                         <rows>
                             <row>
-                                <!-- Строка «Город»: подпись и значение города проживания. -->
-                                <hbox spacing="false"
+                                <suggestionField id="firstNameField"
+                                                 dataContainer="jobCandidateDc"
+                                                 property="firstName"
+                                                 width="100%"
+                                                 caption="msg://msgFirstName"
+                                                 rowspan="1"
+                                                 colspan="1"
+                                                 minSearchStringLength="1"
+                                                 required="true"
+                                                 editable="true"
+                                                 inputPrompt="msg://msgPressEnter">
+                                    <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                           escapeValueForLike="false"
+                                           view="_local"
+                                           searchStringFormat="%$searchString%">
+                                        select e.firstName from hunttech_JobCandidate e where lower(e.firstName) like
+                                        lower(:searchString) escape '\'
+                                    </query>
+                                </suggestionField>
+                                <suggestionPickerField id="currentCompanyField"
+                                                       dataContainer="jobCandidateDc"
+                                                       property="currentCompany"
+                                                       width="100%"
+                                                       caption="msg://msgCorrentCompany"
+                                                       minSearchStringLength="2"
+                                                       suggestionsLimit="50"
+                                                       asyncSearchDelayMs="300"
+                                                       inputPrompt="msg://msgPressEnter"
+                                                       required="true">
+                                    <actions>
+                                        <action id="lookup" type="picker_lookup"/>
+                                        <action id="open" type="picker_open" icon="EDIT_ACTION"/>
+                                    </actions>
+                                    <query entityClass="com.company.hunttech.entity.Company"
+                                           escapeValueForLike="true"
+                                           searchStringFormat="%$searchString%">
+                                        select e
+                                        from hunttech_Company e
+                                        where lower(e.comanyName) like lower(:searchString) escape '\'
+                                        order by e.comanyName, e.companyShortName
+                                    </query>
+                                </suggestionPickerField>
+                            </row>
+                            <row>
+                                <suggestionField id="middleNameField"
+                                                 dataContainer="jobCandidateDc"
+                                                 property="middleName"
+                                                 width="100%"
+                                                 minSearchStringLength="1"
+                                                 caption="msg://msgMiddleName"
+                                                 editable="true"
+                                                 inputPrompt="msg://msgPressEnter">
+                                    <query entityClass="com.company.hunttech.entity.JobCandidate"
+                                           searchStringFormat="%$searchString%"
+                                           view="_minimal"
+                                           escapeValueForLike="true">
+                                        select e from hunttech_JobCandidate e where lower(e.middleName) like
+                                        lower(:searchString) escape '\'
+                                    </query>
+                                </suggestionField>
+                                <hbox expand="personPositionField"
+                                      spacing="true"
+                                      align="MIDDLE_LEFT"
                                       width="100%">
                                     <label value="mainMsg://msgCity"
                                            stylename="small"
