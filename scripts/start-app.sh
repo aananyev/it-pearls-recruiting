@@ -76,7 +76,7 @@ check_git_clean() {
     log "✅ git: ветка master, рабочая копия чистая (среди tracked-файлов)."
 }
 
-APP_URL="${APP_URL:-http://localhost:8080/app/}"
+APP_URL="${APP_URL:-http://localhost:8080/hrm/}"
 WAIT_TIMEOUT="${WAIT_TIMEOUT:-300}"
 POLL_INTERVAL="${POLL_INTERVAL:-5}"
 PROJECT_MARKER="hunttech_recruiting/deploy/tomcat"
