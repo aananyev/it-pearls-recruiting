@@ -19,7 +19,7 @@
 - Открытие существующей записи → LOB-поля (адрес, описание, условия работы) и подразделения подгружаются лениво при первом переключении на соответствующую вкладку (флаги `addressLoaded`/`companyDescriptionLoaded`/`departmentsLoaded`).
 - Новая запись → `ourClient = false`; адрес не грузится.
 - Смена города → контроллер через `dataManager.reload` (views `city-location-view`/`region-browse-view`) автоматически подставляет регион и страну; смена региона — страну.
-- Логотип: загрузка IMMEDIATE пишет файл в `fileCompanyLogo`, `WebOvaFallbackImage` сам показывает fallback `icons/no-company.png` при отсутствии файла.
+- Логотип: загрузка IMMEDIATE проходит умный конвейер (общий с ProjectEdit — `WebProjectLogoFileUploadField` + `ProjectLogoImageProcessingService`, конфиг `hunttech.projectLogo.*`): PNG, ресайз до 300×300, удаление белого фона (rembg/AI/классика), вписывание в круг — затем пишет файл в `fileCompanyLogo`; `WebOvaFallbackImage` сам показывает fallback `icons/no-company.png` при отсутствии файла. Повторная загрузка без закрытия экрана обрабатывается заново.
 - Сохранение/отмена — стандартные `windowCommitAndClose`/`windowClose` в правом нижнем углу footer.
 
 ---
@@ -89,7 +89,7 @@ Property-биндинги полей: `ourLegalEntity`, `ourClient`, `companyOwn
 |---------|---------|
 | Пункт навигации «Разделы» (`companyEditorNavMain/Description/Departments`) | Клик → активный пункт (`label-nav-item-active`) → `mainTab.setSelectedTab(...)` соответствующей вкладки; навигация видима только на вкладке `tabConpanyDetails` (правило 3.6) |
 | Вкладка TabSheet | Смена → (бизнес) ленивая загрузка LOB, если ещё не грузилась; (presentation) активный пункт навигации |
-| Загрузчик логотипа (`companyLogoFileUpload`) | Выбор файла → IMMEDIATE в `fileCompanyLogo` → OvaFallbackImage перечитывает контейнер; «Очистить» → сброс значения |
+| Загрузчик логотипа (`companyLogoFileUpload`) | Выбор файла → умная обработка (`WebProjectLogoFileUploadField`: PNG, ресайз 300px, удаление белого фона, круг) → IMMEDIATE в `fileCompanyLogo` → OvaFallbackImage перечитывает контейнер; «Очистить» → сброс значения; повторная загрузка в том же экране обрабатывается заново |
 | `cityOfCompanyField` | Выбор города → reload `city-location-view` → `regionOfCompany`; если регион найден → reload `region-browse-view` → `countryOfCompany` |
 | `regionOfCompanyField` | Выбор региона → reload `region-browse-view` → `countryOfCompany` |
 | Footer «Сохранить и закрыть» / «Отмена» | `windowCommitAndClose` (primary) / `windowClose` (secondary), правый нижний угол |
@@ -117,5 +117,6 @@ Property-биндинги полей: `ourLegalEntity`, `ourClient`, `companyOwn
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-15 | Умная обработка логотипа компании (как у проекта): `WebProjectLogoFileUploadField` расширен на свойство `fileCompanyLogo` — PNG, ресайз 300px, удаление белого фона (rembg/AI/классика), вписывание в круг; конфиг общий `hunttech.projectLogo.*`; повторная загрузка без закрытия экрана обрабатывается заново (фикс кэша `processedDescriptor`) |
 | 2026-08-14 | Сверка с эталоном (контракт §3.1/§3.6/§4.1): пункты навигации по высоте контента (`height: auto`), удалено локальное wrap-правило с принудительной высотой, полоса-заголовок `height: auto`; реализовано правило 3.6 — `label-navigation` скрывается на одноблочных вкладках (`TABS_WITH_SIDEBAR_NAVIGATION`) |
 | 2026-08-14 | Рефакторинг по контракту Edit-форм (эталон ProjectEdit): sidebar 270px с логотипом `ovaFallbackImage` 176×176 и навигацией «Разделы» (вкладки), карточки `edit-card`+`showAsPanel`, footer primary/secondary, `dialogMode` 100%×100% modal; `WebOvaFallbackImage` вместо пары image, presentation-навигация в Java; `company-editor.scss` ×7 тем; новый `CompanyEditLayoutContractTest` (7/7) |
