@@ -5,6 +5,7 @@ import com.company.hunttech.core.PdfParserService;
 import com.company.hunttech.core.ResumeRecognitionService;
 import com.company.hunttech.core.WebLoadService;
 import com.company.hunttech.entity.*;
+import com.company.hunttech.service.SkillAnalysisService;
 import com.company.hunttech.web.screens.SelectedCloseAction;
 import com.company.hunttech.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -85,6 +86,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private RichTextArea candidateCVRichTextArea;
     @Inject
     private PdfParserService pdfParserService;
+    @Inject
+    private SkillAnalysisService skillAnalysisService;
+    @Inject
+    private Metadata metadata;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -1045,6 +1050,135 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     public void rescanCV() {
         rescanResume();
+    }
+
+    /**
+     * Выполняет анализ текста резюме с помощью сервиса SkillAnalysisService (AI Control Plane + справочник SkillTree)
+     * и сохраняет распознанные навыки кандидата в сущность CandidateSkill с уровнями критичности.
+     */
+    public void scanCandidateSkills() {
+        ensureCvTextInitialized();
+
+        if (candidateCVRichTextArea.getValue() == null || candidateCVRichTextArea.getValue().trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Текст резюме пуст. Для анализа навыков необходимо заполнить текст резюме.")
+                    .show();
+            return;
+        }
+
+        JobCandidate candidate = getEditedEntity().getCandidate();
+        if (candidate == null && candidateField.getValue() != null) {
+            candidate = (JobCandidate) candidateField.getValue();
+        }
+
+        if (candidate == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Кандидат не выбран. Для сохранения навыков укажите кандидата.")
+                    .show();
+            return;
+        }
+
+        String inputText = Jsoup.parse(candidateCVRichTextArea.getValue()).text();
+        if (inputText.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Текст резюме после очистки HTML-разметки пуст.")
+                    .show();
+            return;
+        }
+
+        try {
+            // 1. Загружаем уже существующие навыки кандидата из БД для предотвращения дублирования
+            List<CandidateSkill> existingSkills = dataManager.load(CandidateSkill.class)
+                    .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate")
+                    .parameter("candidate", candidate)
+                    .view("candidateSkill-view")
+                    .list();
+
+            Set<UUID> existingSkillIds = new HashSet<>();
+            for (CandidateSkill cs : existingSkills) {
+                if (cs.getSkill() != null) {
+                    existingSkillIds.add(cs.getSkill().getId());
+                }
+            }
+
+            // 2. Вызываем SkillAnalysisService для каждого уровня критичности
+            List<SkillTree> mainSkills = skillAnalysisService.analyzeMain(inputText);
+            List<SkillTree> secondarySkills = skillAnalysisService.analyzeSecondary(inputText);
+            List<SkillTree> tertiarySkills = skillAnalysisService.analyzeTertiary(inputText);
+
+            // Если списки по уровням пусты (например, при классическом fallback), анализируем все навыки как основные
+            if ((mainSkills == null || mainSkills.isEmpty()) &&
+                (secondarySkills == null || secondarySkills.isEmpty()) &&
+                (tertiarySkills == null || tertiarySkills.isEmpty())) {
+                mainSkills = skillAnalysisService.analyzeAll(inputText);
+            }
+
+            List<CandidateSkill> toSave = new ArrayList<>();
+            Set<UUID> processedSkillIds = new HashSet<>(existingSkillIds);
+
+            // Основные навыки (MAIN)
+            if (mainSkills != null) {
+                for (SkillTree st : mainSkills) {
+                    if (st != null && processedSkillIds.add(st.getId())) {
+                        CandidateSkill cs = metadata.create(CandidateSkill.class);
+                        cs.setCandidate(candidate);
+                        cs.setSkill(st);
+                        cs.setPriority(CandidateSkillPriority.MAIN);
+                        toSave.add(cs);
+                    }
+                }
+            }
+
+            // Второстепенные навыки (SECONDARY)
+            if (secondarySkills != null) {
+                for (SkillTree st : secondarySkills) {
+                    if (st != null && processedSkillIds.add(st.getId())) {
+                        CandidateSkill cs = metadata.create(CandidateSkill.class);
+                        cs.setCandidate(candidate);
+                        cs.setSkill(st);
+                        cs.setPriority(CandidateSkillPriority.SECONDARY);
+                        toSave.add(cs);
+                    }
+                }
+            }
+
+            // Третьестепенные навыки (TERTIARY)
+            if (tertiarySkills != null) {
+                for (SkillTree st : tertiarySkills) {
+                    if (st != null && processedSkillIds.add(st.getId())) {
+                        CandidateSkill cs = metadata.create(CandidateSkill.class);
+                        cs.setCandidate(candidate);
+                        cs.setSkill(st);
+                        cs.setPriority(CandidateSkillPriority.TERTIARY);
+                        toSave.add(cs);
+                    }
+                }
+            }
+
+            if (!toSave.isEmpty()) {
+                CommitContext commitContext = new CommitContext(toSave);
+                dataManager.commit(commitContext);
+
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption("Анализ навыков завершен")
+                        .withDescription("Успешно распознано и сохранено новых навыков для кандидата: " + toSave.size())
+                        .show();
+            } else {
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption("Анализ навыков")
+                        .withDescription("Новых навыков не обнаружено (ранее сохранено: " + existingSkillIds.size() + ").")
+                        .show();
+            }
+
+        } catch (Exception ex) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Ошибка анализа навыков")
+                    .withDescription("Не удалось выполнить анализ навыков: " + ex.getMessage())
+                    .show();
+        }
     }
 
     public void resumeRecognition() {

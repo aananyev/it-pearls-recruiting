@@ -1439,4 +1439,8 @@
     <view entity="hunttech_AccountingDocumentEvent" name="accountingDocumentEvent-view" extends="_local">
         <property name="document" view="_minimal"/>
     </view>
+    <view entity="hunttech_CandidateSkill" name="candidateSkill-view" extends="_local">
+        <property name="candidate" view="_minimal"/>
+        <property name="skill" view="_minimal"/>
+    </view>
 </views>

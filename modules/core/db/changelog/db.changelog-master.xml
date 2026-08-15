@@ -65,4 +65,8 @@
     <include file="260815-1-addSkillAnalysisAiFunction.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- CandidateSkill: сущность «Навыки кандидата» со связью на Candidate и SkillTree, признаком критичности. -->
+    <include file="260815-2-addCandidateSkillEntity.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
