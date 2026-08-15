@@ -1,10 +1,13 @@
 package com.company.hunttech.web.screens.jobcandidate;
 
+import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.web.util.FileDescriptorImageHelper;
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Button;
-import com.haulmont.cuba.gui.components.FileDescriptorResource;
 import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
@@ -23,6 +26,7 @@ import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 
 import javax.inject.Inject;
+import java.util.Comparator;
 
 @UiController("hunttech_JobCandidateTest1.browse")
 @UiDescriptor("job-candidate-test1-browse.xml")
@@ -38,6 +42,8 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     private ScreenBuilders screenBuilders;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private FileLoader fileLoader;
 
     @Inject
     private WebOvaFallbackImage detailPic;
@@ -74,9 +80,8 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             avatarImg.setOvalHeight("36px");
             avatarImg.setFallbackThemePath("icons/no-programmer.jpeg");
             avatarImg.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-            if (candidate.getFileImageFace() != null) {
-                avatarImg.setSource(FileDescriptorResource.class).setFileDescriptor(candidate.getFileImageFace());
-            }
+            // Фото берётся из карточки кандидата, а при его отсутствии — из последнего резюме (CandidateCV)
+            FileDescriptorImageHelper.setCandidateFace(avatarImg, fileLoader, resolveCandidateFace(candidate));
             return avatarImg;
         });
     }
@@ -89,6 +94,25 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         } else {
             populateDetailPane(selected);
         }
+    }
+
+    /**
+     * Возвращает фото кандидата: сначала из карточки (JobCandidate.fileImageFace),
+     * при отсутствии — из последнего резюме с фото (CandidateCV.fileImageFace).
+     */
+    private FileDescriptor resolveCandidateFace(JobCandidate candidate) {
+        if (candidate.getFileImageFace() != null) {
+            return candidate.getFileImageFace();
+        }
+        if (candidate.getCandidateCv() != null) {
+            return candidate.getCandidateCv().stream()
+                    .filter(cv -> cv.getFileImageFace() != null)
+                    .max(Comparator.comparing(CandidateCV::getCreateTs,
+                            Comparator.nullsLast(Comparator.naturalOrder())))
+                    .map(CandidateCV::getFileImageFace)
+                    .orElse(null);
+        }
+        return null;
     }
 
     private void clearDetailPane() {
@@ -127,11 +151,9 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         }
         detailCompany.setValue(company != null ? company : "-");
 
-        if (candidate.getFileImageFace() != null) {
-            detailPic.setSource(FileDescriptorResource.class).setFileDescriptor(candidate.getFileImageFace());
-        } else {
-            detailPic.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-        }
+        // Фото: из карточки кандидата, при отсутствии — из последнего резюме (CandidateCV);
+        // если файла нет в хранилище — автоматический fallback без битой картинки
+        FileDescriptorImageHelper.setCandidateFace(detailPic, fileLoader, resolveCandidateFace(candidate));
 
         int count = candidate.getIteractionList() != null ? candidate.getIteractionList().size() : 0;
         detailInteractionsInfo.setHtmlEnabled(true);

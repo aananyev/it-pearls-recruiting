@@ -42,7 +42,7 @@
 Все экраны работают с сущностью `JobCandidate` ([JobCandidate.md](../entities/JobCandidate.md)), используя:
 * **Collection Container:** `jobCandidatesDc`
 * **Collection Loader:** `jobCandidatesDl`
-* **View:** `jobCandidate-view` (включающий связанные `personPosition`, `cityOfResidence`, `currentCompany`, `fileImageFace` и `iteractionList` для корректного отображения аватаров, должностей и статистики).
+* **View:** `jobCandidate-view` (включающий связанные `personPosition`, `cityOfResidence`, `currentCompany`, `fileImageFace`, `candidateCv.fileImageFace` и `iteractionList` для корректного отображения аватаров, должностей и статистики).
 * **JPQL Запрос по умолчанию:**
   ```sql
   select e from hunttech_JobCandidate e order by e.createTs desc
@@ -79,8 +79,8 @@ layout (spacing=true)
 ```
 
 #### Поведение:
-* При инициализации (`onInit`) колонка `avatar` генерирует компонент `WebOvaFallbackImage` (36×36px) с подгрузкой `fileImageFace` или дефолтным плейсхолдером `no-programmer.jpeg`.
-* Выбор строки таблицы (`onCandidatesTableSelection`) заполняет детальную панель справа (`populateDetailPane`). Если строка не выбрана — панель очищается (`clearDetailPane`), а кнопки «Открыть карточку» и «Взаимодействие» блокируются.
+* При инициализации (`onInit`) колонка `avatar` генерирует компонент `WebOvaFallbackImage` (36×36px). Фото резолвится методом `resolveCandidateFace`: сначала `JobCandidate.fileImageFace`, при отсутствии — фото из последнего резюме (`CandidateCV.fileImageFace`, по `createTs`). Установка через `FileDescriptorImageHelper.setCandidateFace` — если файла нет в хранилище, автоматически ставится плейсхолдер `no-programmer.jpeg` (без битой картинки и модальных окон).
+* Выбор строки таблицы (`onCandidatesTableSelection`) заполняет детальную панель справа (`populateDetailPane`) — аватар `detailPic` (140×140px) использует тот же резолв фото. Если строка не выбрана — панель очищается (`clearDetailPane`), а кнопки «Открыть карточку» и «Взаимодействие» блокируются.
 
 ---
 
@@ -194,4 +194,5 @@ layout (expand=candidatesDataGrid)
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-15 | Фикс отображения фото кандидатов (Эскиз 1/базовый): резолв `resolveCandidateFace` — `JobCandidate.fileImageFace`, при отсутствии — фото из последнего `CandidateCV`; установка через `FileDescriptorImageHelper.setCandidateFace` (fallback при отсутствии файла в хранилище). |
 | 2026-08-15 | Первичная публикация UI Spec для 5 экспериментальных тестовых эскизов реестра кандидатов с векторными SVG-схемами компоновок. |
