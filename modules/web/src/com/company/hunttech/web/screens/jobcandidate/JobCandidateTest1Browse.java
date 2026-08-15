@@ -133,6 +133,47 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         }
     }
 
+    @Inject
+    private Button filterAllBtn;
+    @Inject
+    private Button filterFreeBtn;
+    @Inject
+    private Button filterMyBtn;
+    @Inject
+    private Button filterOtherBtn;
+
+    private void updateFilterButtons(Button activeBtn) {
+        filterAllBtn.setStyleName("secondary");
+        filterFreeBtn.setStyleName("secondary");
+        filterMyBtn.setStyleName("secondary");
+        filterOtherBtn.setStyleName("secondary");
+        activeBtn.setStyleName("primary");
+    }
+
+    @Subscribe("filterAllBtn")
+    public void onFilterAllBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterAllBtn);
+        jobCandidatesDl.load();
+    }
+
+    @Subscribe("filterFreeBtn")
+    public void onFilterFreeBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterFreeBtn);
+        jobCandidatesDl.load();
+    }
+
+    @Subscribe("filterMyBtn")
+    public void onFilterMyBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterMyBtn);
+        jobCandidatesDl.load();
+    }
+
+    @Subscribe("filterOtherBtn")
+    public void onFilterOtherBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterOtherBtn);
+        jobCandidatesDl.load();
+    }
+
     @Subscribe
     public void onInit(Screen.InitEvent event) {
         candidatesTable.addGeneratedColumn("avatar", candidate -> {
@@ -149,6 +190,45 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             return avatarImg;
         });
 
+        candidatesTable.addGeneratedColumn("candidateInfo", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
+            String sub = candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() :
+                    (candidate.getEmail() != null ? candidate.getEmail() : "");
+            lbl.setValue("<div><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
+                    (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>");
+            return lbl;
+        });
+
+        candidatesTable.addGeneratedColumn("personPositionFormatted", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
+            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + pos + "</span>");
+            return lbl;
+        });
+
+        candidatesTable.addGeneratedColumn("cityFormatted", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
+            lbl.setValue("<span style='font-size: 12px; color: #34495e;'>📍 " + city + "</span>");
+            return lbl;
+        });
+
+        candidatesTable.addGeneratedColumn("companyFormatted", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String company = "-";
+            if (candidate.getCurrentCompany() != null) {
+                company = candidate.getCurrentCompany().getComanyName() != null ?
+                        candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
+            }
+            lbl.setValue("<span style='font-size: 12px; color: #34495e;'>🏢 " + (company != null ? company : "-") + "</span>");
+            return lbl;
+        });
+
         candidatesTable.addGeneratedColumn("lastInteractionStatus", candidate -> {
             Label<String> statusLbl = uiComponents.create(Label.NAME);
             statusLbl.setHtmlEnabled(true);
@@ -157,6 +237,19 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
                     "; padding: 3px 8px; border-radius: 12px; font-weight: 600; font-size: 11px; display: inline-block;'>" +
                     status.getLabel() + "</span>");
             return statusLbl;
+        });
+
+        candidatesTable.addGeneratedColumn("rowActions", candidate -> {
+            Button openBtn = uiComponents.create(Button.class);
+            openBtn.setCaption("Открыть");
+            openBtn.setStyleName("primary");
+            openBtn.addClickListener(e -> {
+                screenBuilders.editor(candidatesTable)
+                        .editEntity(candidate)
+                        .withOpenMode(OpenMode.DIALOG)
+                        .show();
+            });
+            return openBtn;
         });
     }
 
