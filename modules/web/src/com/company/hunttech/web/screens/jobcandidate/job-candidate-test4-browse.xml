@@ -1,33 +1,46 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Эскиз 4: Executive Card-Grid (Сетка карточек с навыками и рейтингом) в теме CUBA Halo -->
+<!-- Корневое окно: концепт сеточного отображения карточек кандидатов по 3 в ряд -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="Тест 4: Executive Card-Grid"
         messagesPack="com.company.hunttech.web.screens.jobcandidate"
         icon="TH_LARGE">
+    <!-- Секция данных: контейнеры и лоадеры кандидатов -->
     <data readOnly="true">
+        <!-- Коллекция кандидатов для построения сеточных карточек -->
         <collection id="jobCandidatesDc"
                     class="com.company.hunttech.entity.JobCandidate"
                     view="jobCandidate-view">
+            <!-- Лоадер коллекции с лимитом 200 записей для быстрой отрисовки сетки -->
             <loader id="jobCandidatesDl" maxResults="200">
+                <!-- JPQL-запрос выгружает кандидатов с сортировкой от новых к старым -->
                 <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]></query>
             </loader>
         </collection>
     </data>
 
+    <!-- Размеры диалогового окна по умолчанию -->
     <dialogMode height="700" width="1100"/>
 
+    <!-- Главный контейнер: вертикально размещает тулбар поиска и сеточную прокручиваемую область -->
     <layout expand="scrollCards" spacing="true" width="100%" height="100%">
         <!-- Верхняя строка поиска и чипсов фильтров -->
         <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar">
+            <!-- Лейбл с заголовком концепта дизайна -->
             <label value="Эскиз 4: Executive Card-Grid" stylename="h2" align="MIDDLE_LEFT"/>
+            <!-- Поле ввода для быстрого поиска кандидатов по имени/фамилии -->
             <textField id="searchField" inputPrompt="Быстрый поиск кандидатов..." width="300px"/>
+            <!-- Кнопка вызова поиска и перерисовки сетки -->
             <button id="searchBtn" caption="Найти" icon="SEARCH" stylename="primary"/>
+            <!-- Кнопка сброса/обновления данных -->
             <button id="refreshBtn" caption="Обновить" icon="REFRESH"/>
         </hbox>
 
         <!-- Прокручиваемая сетка карточек (Card Grid) -->
         <scrollBox id="scrollCards" width="100%" height="100%" orientation="vertical">
+            <!-- Динамический вертикальный контейнер, куда Java-контроллер добавляет строки HBox с карточками -->
             <vbox id="gridContainer" width="100%" spacing="true"/>
         </scrollBox>
     </layout>
 </window>
+

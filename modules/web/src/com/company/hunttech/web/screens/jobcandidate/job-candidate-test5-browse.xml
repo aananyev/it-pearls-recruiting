@@ -1,27 +1,38 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Эскиз 5: DataGrid с раскрывающимися деталями строк (Row Details) в теме CUBA Halo -->
+<!-- Корневое окно: концепт реестра на DataGrid с раскрытием детальной карточки под строкой -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="Тест 5: Row Expansion (Details)"
         messagesPack="com.company.hunttech.web.screens.jobcandidate"
         icon="LIST">
+    <!-- Секция данных: контейнеры и лоадеры кандидатов -->
     <data readOnly="true">
+        <!-- Коллекция кандидатов для вывода в DataGrid, использует стандартный view -->
         <collection id="jobCandidatesDc"
                     class="com.company.hunttech.entity.JobCandidate"
                     view="jobCandidate-view">
+            <!-- Лоадер коллекции с ограничением до 200 записей -->
             <loader id="jobCandidatesDl" maxResults="200">
+                <!-- JPQL-запрос выгружает список кандидатов по убыванию даты создания -->
                 <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]></query>
             </loader>
         </collection>
     </data>
 
+    <!-- Размеры диалогового окна по умолчанию -->
     <dialogMode height="700" width="1100"/>
 
+    <!-- Главный контейнер разметки: тулбар действий сверху и DataGrid на всю оставшуюся область -->
     <layout expand="candidatesDataGrid" spacing="true" width="100%" height="100%">
         <!-- Верхняя панель управления -->
         <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar">
+            <!-- Текстовый лейбл с заголовком концепта дизайна -->
             <label value="Эскиз 5: DataGrid с раскрытием строк" stylename="h2" align="MIDDLE_LEFT"/>
+            <!-- Кнопка создания новой записи, связанная со стандартным CRUD действием DataGrid -->
             <button id="createBtn" action="candidatesDataGrid.create" stylename="primary"/>
+            <!-- Кнопка изменения существующей записи -->
             <button id="editBtn" action="candidatesDataGrid.edit"/>
+            <!-- Кнопка обновления текущего списка -->
             <button id="refreshBtn" action="candidatesDataGrid.refresh"/>
         </hbox>
 
@@ -30,17 +41,27 @@
                   width="100%"
                   height="100%"
                   dataContainer="jobCandidatesDc">
+            <!-- Зарегистрированные CRUD действия DataGrid -->
             <actions>
+                <!-- Действие создания новой записи -->
                 <action id="create" type="create"/>
+                <!-- Действие редактирования выбранной записи -->
                 <action id="edit" type="edit"/>
+                <!-- Действие перезагрузки лоадера данных -->
                 <action id="refresh" type="refresh"/>
             </actions>
+            <!-- Колонки DataGrid с привязкой к свойствам сущности -->
             <columns>
+                <!-- ФИО кандидата -->
                 <column property="fullName" caption="ФИО Кандидата"/>
+                <!-- Желаемая должность -->
                 <column property="personPosition" caption="Должность"/>
+                <!-- Город проживания -->
                 <column property="cityOfResidence" caption="Город"/>
+                <!-- Дата регистрации карточки -->
                 <column property="createTs" caption="Дата создания"/>
             </columns>
         </dataGrid>
     </layout>
 </window>
+

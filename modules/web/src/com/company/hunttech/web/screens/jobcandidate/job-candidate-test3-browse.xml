@@ -1,83 +1,119 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Эскиз 3: Kanban Pipeline & Дашборд метрик в теме CUBA Halo -->
+<!-- Корневое окно: концепт Kanban-доски воронки кандидатов с KPI метриками -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="Тест 3: Kanban Pipeline &amp; Метрики"
         messagesPack="com.company.hunttech.web.screens.jobcandidate"
         icon="COLUMNS">
+    <!-- Секция данных: контейнер и загрузчик кандидатов -->
     <data readOnly="true">
+        <!-- Коллекция кандидатов для построения карточек Kanban -->
         <collection id="jobCandidatesDc"
                     class="com.company.hunttech.entity.JobCandidate"
                     view="jobCandidate-view">
+            <!-- Лоадер коллекции с лимитом 200 строк для эффективной прорисовки доски -->
             <loader id="jobCandidatesDl" maxResults="200">
+                <!-- JPQL-запрос выгружает кандидатов от новых к старым -->
                 <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]></query>
             </loader>
         </collection>
     </data>
 
+    <!-- Диалоговые настройки окна -->
     <dialogMode height="700" width="1100"/>
 
+    <!-- Главный контейнер: вертикально располагает дашборд KPI и Kanban доску -->
     <layout expand="kanbanBoard" spacing="true" width="100%" height="100%">
         <!-- Верхняя панель карточек KPI метрик -->
         <hbox id="kpiBar" width="100%" spacing="true">
+            <!-- Метрика: Всего кандидатов в выборке -->
             <vbox stylename="edit-card" width="100%" spacing="false">
+                <!-- Подпись метрики -->
                 <label value="Всего кандидатов" stylename="small"/>
+                <!-- Значение счетчика всего кандидатов -->
                 <label id="totalCountLabel" value="0" stylename="h1"/>
             </vbox>
+            <!-- Метрика: Новые контакты (этап 1) -->
             <vbox stylename="edit-card" width="100%" spacing="false">
+                <!-- Подпись метрики -->
                 <label value="Первичный контакт" stylename="small"/>
+                <!-- Значение счетчика новых контактов -->
                 <label id="newCountLabel" value="0" stylename="h1"/>
             </vbox>
+            <!-- Метрика: Кандидаты на этапе интервью (этап 2) -->
             <vbox stylename="edit-card" width="100%" spacing="false">
+                <!-- Подпись метрики -->
                 <label value="На этапе интервью" stylename="small"/>
+                <!-- Значение счетчика на интервью -->
                 <label id="interviewCountLabel" value="0" stylename="h1"/>
             </vbox>
+            <!-- Метрика: Успешно нанятые или офферы (этап 4) -->
             <vbox stylename="edit-card" width="100%" spacing="false">
+                <!-- Подпись метрики -->
                 <label value="Приняты / Оффер" stylename="small"/>
+                <!-- Значение счетчика нанятых -->
                 <label id="hiredCountLabel" value="0" stylename="h1"/>
             </vbox>
         </hbox>
 
-        <!-- Основная доска воронки Kanban (4 колонки) -->
+        <!-- Основная доска воронки Kanban (4 колонки по этапам) -->
         <hbox id="kanbanBoard" width="100%" height="100%" spacing="true">
             <!-- Колонка 1: Новый контакт -->
             <vbox id="colNew" width="100%" height="100%" spacing="true" stylename="edit-sidebar">
+                <!-- Заголовок первой колонки -->
                 <hbox width="100%" spacing="true">
+                    <!-- Лейбл заголовка этапа -->
                     <label value="1. Новый контакт" stylename="h3"/>
                 </hbox>
+                <!-- Область прокрутки для карточек первого этапа -->
                 <scrollBox id="scrollColNew" width="100%" height="100%" orientation="vertical">
+                    <!-- Динамический контейнер для программно создаваемых карточек первого этапа -->
                     <vbox id="containerColNew" width="100%" spacing="true"/>
                 </scrollBox>
             </vbox>
 
             <!-- Колонка 2: Интервью -->
             <vbox id="colInterview" width="100%" height="100%" spacing="true" stylename="edit-sidebar">
+                <!-- Заголовок второй колонки -->
                 <hbox width="100%" spacing="true">
+                    <!-- Лейбл заголовка этапа -->
                     <label value="2. Интервью" stylename="h3"/>
                 </hbox>
+                <!-- Область прокрутки для карточек второго этапа -->
                 <scrollBox id="scrollColInterview" width="100%" height="100%" orientation="vertical">
+                    <!-- Динамический контейнер для карточек этапа интервью -->
                     <vbox id="containerColInterview" width="100%" spacing="true"/>
                 </scrollBox>
             </vbox>
 
-            <!-- Колонка 3: На рассмотрении -->
+            <!-- Колонка 3: На рассмотрении / У заказчика -->
             <vbox id="colReview" width="100%" height="100%" spacing="true" stylename="edit-sidebar">
+                <!-- Заголовок третьей колонки -->
                 <hbox width="100%" spacing="true">
+                    <!-- Лейбл заголовка этапа -->
                     <label value="3. У заказчика" stylename="h3"/>
                 </hbox>
+                <!-- Область прокрутки для карточек третьего этапа -->
                 <scrollBox id="scrollColReview" width="100%" height="100%" orientation="vertical">
+                    <!-- Динамический контейнер для карточек на рассмотрении -->
                     <vbox id="containerColReview" width="100%" spacing="true"/>
                 </scrollBox>
             </vbox>
 
             <!-- Колонка 4: Оффер / Нанят -->
             <vbox id="colOffer" width="100%" height="100%" spacing="true" stylename="edit-sidebar">
+                <!-- Заголовок четвертой колонки -->
                 <hbox width="100%" spacing="true">
+                    <!-- Лейбл заголовка этапа -->
                     <label value="4. Оффер / Нанят" stylename="h3"/>
                 </hbox>
+                <!-- Область прокрутки для карточек четвертого этапа -->
                 <scrollBox id="scrollColOffer" width="100%" height="100%" orientation="vertical">
+                    <!-- Динамический контейнер для карточек финального этапа -->
                     <vbox id="containerColOffer" width="100%" spacing="true"/>
                 </scrollBox>
             </vbox>
         </hbox>
     </layout>
 </window>
+
