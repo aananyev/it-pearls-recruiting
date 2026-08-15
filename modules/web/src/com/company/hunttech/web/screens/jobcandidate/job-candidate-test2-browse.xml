@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Эскиз 2: High-Density DataGrid с аккордеоном фильтров в теме CUBA Halo -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="Тест 2: High-Density DataGrid"
+        messagesPack="com.company.hunttech.web.screens.jobcandidate"
+        icon="TABLE">
+    <data readOnly="true">
+        <collection id="jobCandidatesDc"
+                    class="com.company.hunttech.entity.JobCandidate"
+                    view="jobCandidate-view">
+            <loader id="jobCandidatesDl">
+                <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]></query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="700" width="1100"/>
+
+    <layout expand="mainContentBox" spacing="true" width="100%" height="100%">
+        <!-- Стандартная панель действий CUBA Halo -->
+        <buttonsPanel id="buttonsPanel" alwaysVisible="true" width="100%">
+            <button id="createBtn" action="candidatesTable.create" stylename="primary"/>
+            <button id="editBtn" action="candidatesTable.edit"/>
+            <button id="removeBtn" action="candidatesTable.remove"/>
+            <button id="refreshBtn" action="candidatesTable.refresh"/>
+            <button id="excelBtn" caption="Экспорт Excel" icon="EXCEL_ACTION"/>
+        </buttonsPanel>
+
+        <hbox id="mainContentBox" width="100%" height="100%" spacing="true" expand="tableBox">
+            <!-- Левая сворачиваемая панель фильтрации (Аккордеон) -->
+            <vbox id="filterPanel" width="260px" height="100%" spacing="true" stylename="edit-card">
+                <label value="Фильтры кандидатов" stylename="h3"/>
+                <vbox spacing="true" width="100%">
+                    <label value="Поиск по ФИО:"/>
+                    <textField id="filterNameField" width="100%" inputPrompt="Введите имя..."/>
+                    
+                    <label value="Город:"/>
+                    <textField id="filterCityField" width="100%" inputPrompt="Город проживания..."/>
+                    
+                    <button id="applyFilterBtn" caption="Применить фильтр" icon="SEARCH" stylename="primary" width="100%"/>
+                    <button id="resetFilterBtn" caption="Сбросить" width="100%"/>
+                </vbox>
+            </vbox>
+
+            <!-- Основная плотная таблица реестра (High-Density DataGrid) -->
+            <vbox id="tableBox" width="100%" height="100%" spacing="true">
+                <groupTable id="candidatesTable"
+                            width="100%"
+                            height="100%"
+                            dataContainer="jobCandidatesDc"
+                            multiselect="true">
+                    <actions>
+                        <action id="create" type="create"/>
+                        <action id="edit" type="edit"/>
+                        <action id="remove" type="remove"/>
+                        <action id="refresh" type="refresh"/>
+                    </actions>
+                    <columns>
+                        <column id="avatar" caption="Аватар" width="45px"/>
+                        <column id="fullName" caption="ФИО Кандидата"/>
+                        <column id="personPosition" caption="Желаемая должность"/>
+                        <column id="cityOfResidence" caption="Город"/>
+                        <column id="currentCompany" caption="Текущая компания"/>
+                        <column id="createTs" caption="Дата создания"/>
+                    </columns>
+                    <simplePagination id="pagination"/>
+                </groupTable>
+            </vbox>
+        </hbox>
+    </layout>
+</window>
