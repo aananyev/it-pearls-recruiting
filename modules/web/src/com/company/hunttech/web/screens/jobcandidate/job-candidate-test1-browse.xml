@@ -24,18 +24,25 @@
 
     <!-- Корневой контейнер разметки экрана с применением базовых стилей темы Edit-форм -->
     <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
-        <!-- Верхний тулбар объединяет кнопки действий и строку поиска -->
-        <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar">
-            <!-- Текстовый лейбл с названием концепта дизайна -->
-            <label value="Эскиз 1: Split-View (Master-Detail)" stylename="h2" align="MIDDLE_LEFT"/>
-            <!-- Текстовое поле ввода для быстрого поиска кандидатов по ФИО -->
-            <textField id="searchField" inputPrompt="Поиск по ФИО..." width="250px"/>
-            <!-- Кнопка запуска поиска по введенному ФИО -->
-            <button id="searchButton" caption="Поиск" icon="SEARCH"/>
-            <!-- Кнопка создания новой карточки кандидата -->
-            <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary"/>
-            <!-- Кнопка обновления текущего списка кандидатов из БД -->
-            <button id="refreshBtn" caption="Обновить" icon="REFRESH"/>
+        <!-- Верхний тулбар управления в фирменном дизайне Edit-форм (edit-toolbar) -->
+        <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_CENTER" stylename="edit-toolbar" expand="toolbarTitleBox">
+            <!-- Левый заголовочный блок с названием концепта и описанием -->
+            <vbox id="toolbarTitleBox" width="100%" spacing="false" align="MIDDLE_LEFT">
+                <label value="Тест 1: Split-View (Master-Detail)" stylename="edit-toolbar-title"/>
+                <label value="Реестр кандидатов с профильным сайдбаром и индикацией рекрутеров" stylename="edit-toolbar-description"/>
+            </vbox>
+
+            <!-- Правая панель кнопок действий и поиска (edit-toolbar-actions) -->
+            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions">
+                <!-- Текстовое поле ввода для быстрого поиска кандидатов по ФИО -->
+                <textField id="searchField" inputPrompt="Поиск по ФИО..." width="240px" stylename="edit-form-control"/>
+                <!-- Кнопка запуска поиска по введенному ФИО -->
+                <button id="searchButton" caption="Поиск" icon="SEARCH" stylename="primary"/>
+                <!-- Кнопка создания новой карточки кандидата -->
+                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary"/>
+                <!-- Кнопка обновления текущего списка кандидатов из БД -->
+                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary"/>
+            </hbox>
         </hbox>
 
         <!-- Двухпанельная разметка Split-View: Левый профильный сайдбар Edit-формы (312px) + Таблица справа -->
