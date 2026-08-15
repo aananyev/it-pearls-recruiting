@@ -5,6 +5,77 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# ==============================================================================
+# СЕРИАЛИЗАЦИЯ ЛОКАЛЬНОГО ДЕПЛОЯ (протокол 3 агентов, 2026-08-15)
+# Один деплой/рестарт в один момент времени: flock-mutex + проверки git/gradle.
+# Прямые вызовы gradle deploy / startup.sh мимо этого скрипта запрещены.
+# ==============================================================================
+DEPLOY_LOCK_FILE="${DEPLOY_LOCK_FILE:-$ROOT/deploy/.local-deploy.lock}"
+DEPLOY_LOCK_TIMEOUT="${DEPLOY_LOCK_TIMEOUT:-600}"   # секунд ожидания mutex
+SKIP_GIT_CHECK="${SKIP_GIT_CHECK:-false}"
+DEPLOY_LOG="${DEPLOY_LOG:-$ROOT/deploy/tomcat/logs/local-deploy.log}"
+
+for arg in "$@"; do
+    case "$arg" in
+        --force|--skip-git-check) SKIP_GIT_CHECK=true ;;
+        -h|--help)
+            echo "Использование: $0 [--force|--skip-git-check]"
+            echo "  --force / --skip-git-check  пропустить проверки git (ветка master + чистая копия)"
+            echo "  Mutex: $DEPLOY_LOCK_FILE (ожидание до ${DEPLOY_LOCK_TIMEOUT} с)"
+            exit 0
+            ;;
+    esac
+done
+
+mkdir -p "$(dirname "$DEPLOY_LOG")"
+
+# shlock (macOS): lock-файл с PID оболочки-владельца; stale-лок после kill -9
+# снимается автоматически (shlock проверяет живость PID через kill(0)).
+acquire_lock() {
+    local waited=0
+    while ! shlock -f "$DEPLOY_LOCK_FILE" -p $$; do
+        if [ "$waited" -ge "$DEPLOY_LOCK_TIMEOUT" ]; then
+            echo "❌ Уже идёт локальный деплой/сборка (lock: $DEPLOY_LOCK_FILE,"
+            echo "   владелец PID $(cat "$DEPLOY_LOCK_FILE" 2>/dev/null))."
+            echo "   Дождитесь завершения текущего процесса (протокол 3 агентов);"
+            echo "   если владелец убит -9 — shlock подхватит лок автоматически."
+            exit 1
+        fi
+        sleep 2
+        waited=$((waited + 2))
+    done
+    echo "🔒 Mutex получен: $DEPLOY_LOCK_FILE (единственный процесс деплоя)"
+}
+
+cleanup_lock() {
+    rm -f "$DEPLOY_LOCK_FILE"
+}
+trap cleanup_lock EXIT
+
+acquire_lock
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] deploy start PID=$$ args=$*" >> "$DEPLOY_LOG"
+
+# Деплой/рестарт — только из чистой ветки master (общая копия; протокол 3 агентов).
+check_git_clean() {
+    if [ "$SKIP_GIT_CHECK" = "true" ]; then
+        log "Проверка git пропущена (--force)."
+        return 0
+    fi
+    local branch
+    branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'unknown')"
+    if [ "$branch" != "master" ]; then
+        log "❌ Деплой разрешён только из ветки master (текущая: $branch)."
+        log "   Worktree разработчика — только smoke со своим --force, деплой общей среды — только Hermes-1."
+        exit 1
+    fi
+    if [ -n "$(git status --porcelain --untracked-files=no 2>/dev/null)" ]; then
+        log "❌ Рабочая копия не чистая — деплой из грязной копии запрещён (протокол 3 агентов)."
+        log "   Закоммитьте/застейджите правки или осознанно используйте --force."
+        exit 1
+    fi
+    log "✅ git: ветка master, рабочая копия чистая (среди tracked-файлов)."
+}
+
 APP_URL="${APP_URL:-http://localhost:8080/app/}"
 WAIT_TIMEOUT="${WAIT_TIMEOUT:-300}"
 POLL_INTERVAL="${POLL_INTERVAL:-5}"
@@ -69,6 +140,29 @@ kill_stale_project_tomcat() {
       fi
     done
   done
+}
+
+# Два параллельных gradle-процесса = deadlock на кэше и FTS-локи (протокол 3 агентов).
+# Проверка до первого вызова ./gradlew: активные клиенты (не фоновые демоны).
+ensure_no_other_gradle() {
+  local pids
+  pids="$(pgrep -f 'GradleWrapperMain' 2>/dev/null || true)"
+  if [ -n "$pids" ]; then
+    log "❌ Обнаружены другие gradle-процессы (PID: $(echo "$pids" | tr '\n' ' ')) — параллельная сборка запрещена."
+    log "   Дождитесь завершения; после kill -9 чистить ~/.gradle/caches/*.lock и FTS write.lock."
+    exit 1
+  fi
+}
+
+# Порт 8080 после остановки нашего Tomcat должен быть свободен (или занят нашим же процессом).
+ensure_port_free_for_restart() {
+  local pid
+  pid="$(lsof -nP -iTCP:8080 -sTCP:LISTEN -t 2>/dev/null | head -1 || true)"
+  if [ -n "$pid" ] && ! is_project_java "$pid"; then
+    log "❌ Порт 8080 занят чужим процессом (PID $pid) — рестарт Tomcat невозможен."
+    log "   Остановите его вручную: kill $pid (проверьте, что это не важный сервис)."
+    exit 1
+  fi
 }
 
 ensure_postgres() {
@@ -193,7 +287,14 @@ write_jvm_diagnostics() {
 }
 
 ensure_postgres
+
+# Технические guard'ы протокола 3 агентов (деплой только Hermes-1, один процесс в момент).
+# Выполняются ДО остановки Tomcat: отказ не роняет работающее приложение.
+check_git_clean
+ensure_no_other_gradle
+
 kill_stale_project_tomcat
+ensure_port_free_for_restart
 
 log "Gradle stop (ошибки игнорируются)..."
 ./gradlew stop >/dev/null 2>&1 || true
@@ -218,3 +319,4 @@ log "Запуск Tomcat..."
 log "URL: $APP_URL"
 wait_for_http
 write_jvm_diagnostics
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] deploy done PID=$$ HTTP 200" >> "$DEPLOY_LOG"
