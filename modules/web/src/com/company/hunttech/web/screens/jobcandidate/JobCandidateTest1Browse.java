@@ -71,8 +71,6 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     private Button editCandidateBtn;
     @Inject
     private Button createInteractionBtn;
-    @Inject
-    private TextField<String> searchField;
 
     @Inject
     private com.haulmont.cuba.security.global.UserSession userSession;
@@ -416,18 +414,6 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
 
     @Subscribe("refreshBtn")
     public void onRefreshBtnClick(Button.ClickEvent event) {
-        jobCandidatesDl.load();
-    }
-
-    @Subscribe("searchButton")
-    public void onSearchButtonClick(Button.ClickEvent event) {
-        String queryText = searchField.getValue();
-        if (queryText == null || queryText.trim().isEmpty()) {
-            jobCandidatesDl.setQuery("select e from hunttech_JobCandidate e order by e.createTs desc");
-        } else {
-            jobCandidatesDl.setQuery("select e from hunttech_JobCandidate e where lower(e.fullName) like :queryText order by e.createTs desc");
-            jobCandidatesDl.setParameter("queryText", "%" + queryText.trim().toLowerCase() + "%");
-        }
         jobCandidatesDl.load();
     }
 }
