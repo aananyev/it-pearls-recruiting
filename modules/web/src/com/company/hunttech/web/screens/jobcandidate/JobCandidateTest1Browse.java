@@ -208,7 +208,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             return avatarImg;
         });
 
-        candidatesTable.addGeneratedColumn("candidateInfo", candidate -> {
+        candidatesTable.addGeneratedColumn("fullName", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
@@ -219,7 +219,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             return lbl;
         });
 
-        candidatesTable.addGeneratedColumn("personPositionFormatted", candidate -> {
+        candidatesTable.addGeneratedColumn("personPosition", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
@@ -227,7 +227,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             return lbl;
         });
 
-        candidatesTable.addGeneratedColumn("cityFormatted", candidate -> {
+        candidatesTable.addGeneratedColumn("cityOfResidence", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
@@ -235,7 +235,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             return lbl;
         });
 
-        candidatesTable.addGeneratedColumn("companyFormatted", candidate -> {
+        candidatesTable.addGeneratedColumn("currentCompany", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             String company = "-";

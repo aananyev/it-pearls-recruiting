@@ -173,18 +173,18 @@
                             <action id="edit" type="edit"/>
                             <action id="refresh" type="refresh"/>
                         </actions>
-                        <!-- Колонки таблицы с продуманными пропорциями ширины -->
+                        <!-- Колонки таблицы с привязкой к свойствам сущности для стандартной сортировки -->
                         <columns>
                             <!-- Генерируемая колонка для отображения миниатюры фото кандидата -->
-                            <column id="avatar" caption="Фото" width="50px"/>
-                            <!-- Колонка отображения ФИО кандидата с контактом -->
-                            <column id="candidateInfo" caption="Кандидат"/>
-                            <!-- Колонка отображения желаемой должности в виде плашки -->
-                            <column id="personPositionFormatted" caption="Должность"/>
-                            <!-- Колонка отображения города проживания -->
-                            <column id="cityFormatted" caption="Город" width="130px"/>
-                            <!-- Колонка текущей компании -->
-                            <column id="companyFormatted" caption="Компания"/>
+                            <column id="avatar" caption="Фото" width="50px" sortable="false"/>
+                            <!-- Колонка отображения ФИО кандидата с сортировкой по fullName -->
+                            <column id="fullName" caption="Кандидат"/>
+                            <!-- Колонка отображения желаемой должности с сортировкой по personPosition -->
+                            <column id="personPosition" caption="Должность"/>
+                            <!-- Колонка отображения города проживания с сортировкой по cityOfResidence -->
+                            <column id="cityOfResidence" caption="Город" width="130px"/>
+                            <!-- Колонка текущей компании с сортировкой по currentCompany -->
+                            <column id="currentCompany" caption="Компания"/>
                             <!-- Компактная генерируемая колонка даты последнего взаимодействия со светофорным статусом -->
                             <column id="lastInteractionStatus" caption="Посл. взаимодействие" width="135px"/>
                         </columns>
