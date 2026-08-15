@@ -25,19 +25,27 @@
     <!-- Корневой контейнер разметки экрана с базовыми стилями темы Edit-форм и правильными отступами -->
     <layout expand="splitMainLayout" spacing="true" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
         <!-- Верхний тулбар управления в фирменном дизайне Edit-форм (edit-toolbar) -->
-        <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_CENTER" stylename="edit-toolbar" expand="toolbarTitleBox">
+        <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_CENTER" stylename="edit-toolbar" expand="filter">
             <!-- Левый заголовочный блок с названием концепта и описанием -->
-            <vbox id="toolbarTitleBox" width="100%" spacing="false" align="MIDDLE_LEFT">
+            <vbox id="toolbarTitleBox" width="320px" spacing="false" align="MIDDLE_LEFT">
                 <label value="Тест 1: Split-View (Master-Detail)" stylename="edit-toolbar-title"/>
-                <label value="Реестр кандидатов с профильным сайдбаром и индикацией рекрутеров" stylename="edit-toolbar-description"/>
+                <label value="Реестр кандидатов с профильным сайдбаром" stylename="edit-toolbar-description"/>
             </vbox>
 
-            <!-- Правая панель кнопок действий и поиска (edit-toolbar-actions) -->
+            <!-- Стандартный фильтр поиска CUBA Platform со стилизацией под новую форму -->
+            <filter id="filter"
+                    applyTo="candidatesTable"
+                    dataLoader="jobCandidatesDl"
+                    defaultMode="generic"
+                    width="100%">
+                <properties include=".*"
+                            exclude="id"
+                            excludeRecursively="true"
+                            excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,fileImageFace,priorityContact"/>
+            </filter>
+
+            <!-- Правая панель кнопок действий (edit-toolbar-actions) -->
             <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions">
-                <!-- Текстовое поле ввода для быстрого поиска кандидатов по ФИО -->
-                <textField id="searchField" inputPrompt="Поиск по ФИО..." width="240px" stylename="edit-form-control"/>
-                <!-- Кнопка запуска поиска по введенному ФИО -->
-                <button id="searchButton" caption="Поиск" icon="SEARCH" stylename="primary"/>
                 <!-- Кнопка создания новой карточки кандидата -->
                 <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary"/>
                 <!-- Кнопка обновления текущего списка кандидатов из БД -->
@@ -64,14 +72,14 @@
                                               stylename="job-candidate-avatar"
                                               fallbackThemePath="icons/no-programmer.jpeg"
                                               scaleMode="SCALE_DOWN"/>
-                            <!-- Текстовый блок заголовка профиля с автопереносом строк -->
-                            <vbox width="100%" spacing="false" align="TOP_CENTER" stylename="edit-sidebar-identity">
-                                <!-- Подпись с ФИО выбранного кандидата -->
-                                <label id="detailFullName" value="Выберите кандидата" stylename="edit-sidebar-title h2"/>
+                            <!-- Текстовый блок заголовка профиля с автопереносом строк и центрированием -->
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <!-- Подпись с ФИО выбранного кандидата (+30% шрифт, центрировано) -->
+                                <label id="detailFullName" value="Выберите кандидата" stylename="edit-sidebar-title h2" align="MIDDLE_CENTER"/>
                                 <!-- Подпись с текущей должностью кандидата -->
-                                <label id="detailPosition" value="" stylename="edit-sidebar-subtitle h4"/>
-                                <!-- Подпись с городом проживания кандидата -->
-                                <label id="detailCity" value="" stylename="edit-help small"/>
+                                <label id="detailPosition" value="" stylename="edit-sidebar-subtitle h4" align="MIDDLE_CENTER"/>
+                                <!-- Подпись с городом проживания кандидата (+30% шрифт, центрировано) -->
+                                <label id="detailCity" value="" stylename="edit-help" align="MIDDLE_CENTER"/>
                             </vbox>
                         </vbox>
 
@@ -83,9 +91,9 @@
                             <button id="createInteractionBtn" caption="Взаимодействие" icon="PLUS" enabled="false" width="100%"/>
                         </vbox>
 
-                        <!-- Блок ключевой контактной информации кандидата (label-navigation) -->
-                        <vbox width="100%" spacing="true" stylename="label-navigation">
-                            <label value="КОНТАКТЫ И РЕКВИЗИТЫ" stylename="label-nav-title"/>
+                        <!-- Блок ключевой контактной информации кандидата (стиль Edit-форм с линиями) -->
+                        <vbox width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="КОНТАКТЫ И РЕКВИЗИТЫ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
                             <!-- Сетка контактов для упорядоченного вывода пар "ключ-значение" -->
                             <grid id="detailsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
@@ -106,13 +114,17 @@
                                         <label value="Компания:" stylename="bold"/>
                                         <label id="detailCompany" value="-"/>
                                     </row>
+                                    <row>
+                                        <label id="detailSalaryCaption" value="Ожидания:" stylename="bold" visible="false"/>
+                                        <label id="detailSalary" value="-" visible="false"/>
+                                    </row>
                                 </rows>
                             </grid>
                         </vbox>
 
-                        <!-- Блок истории взаимодействий кандидата (label-navigation) -->
-                        <vbox width="100%" spacing="true" stylename="label-navigation">
-                            <label value="ПОСЛЕДНЯЯ АКТИВНОСТЬ" stylename="label-nav-title"/>
+                        <!-- Блок истории взаимодействий кандидата (стиль Edit-форм с линиями) -->
+                        <vbox width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ПОСЛЕДНЯЯ АКТИВНОСТЬ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
                             <!-- Текстовое описание последних действий рекрутера -->
                             <label id="detailInteractionsInfo" value="Выберите кандидата в таблице справа для просмотра истории." width="100%" stylename="edit-help"/>
                         </vbox>
@@ -123,8 +135,8 @@
             <!-- ПРАВАЯ ПАНЕЛЬ: Рабочая область реестра (edit-workspace) -->
             <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace" expand="candidatesTableCard">
                 
-                <!-- Верхняя полоса быстрых фильтров и счетчиков таблицы -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-card">
+                <!-- Верхняя полоса быстрых фильтров, счетчиков и выпадающего меню действий -->
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-card" expand="statusFilterButtons">
                     <!-- Заголовок реестра -->
                     <label id="tableTitleLabel" value="👤 Реестр кандидатов" stylename="h3" align="MIDDLE_LEFT"/>
                     
@@ -135,6 +147,22 @@
                         <button id="filterMyBtn" caption="🟡 В моей работе" stylename="secondary"/>
                         <button id="filterOtherBtn" caption="🔴 У других" stylename="secondary"/>
                     </hbox>
+
+                    <!-- Выпадающая кнопка действий над кандидатом как в оригинальной форме -->
+                    <popupButton id="actionsWithCandidateButton"
+                                 caption="Действия"
+                                 icon="BARS"
+                                 showActionIcons="true"
+                                 enabled="false"
+                                 stylename="primary"
+                                 align="MIDDLE_RIGHT">
+                        <actions>
+                            <action id="editCandidateAction" caption="Редактировать карточку" icon="EDIT_ACTION"/>
+                            <action id="createInteractionAction" caption="Добавить взаимодействие" icon="PLUS"/>
+                            <action id="sendEmailAction" caption="Отправить Email" icon="ENVELOPE"/>
+                            <action id="addPersonalReserveAction" caption="В кадровый резерв" icon="SUPERSCRIPT"/>
+                        </actions>
+                    </popupButton>
                 </hbox>
 
                 <!-- Карточка-обёртка для таблицы кандидатов -->
@@ -149,22 +177,20 @@
                             <action id="edit" type="edit"/>
                             <action id="refresh" type="refresh"/>
                         </actions>
-                        <!-- Колонки таблицы с продуманными пропорциями ширины -->
+                        <!-- Колонки таблицы с привязкой к свойствам сущности для стандартной сортировки -->
                         <columns>
                             <!-- Генерируемая колонка для отображения миниатюры фото кандидата -->
-                            <column id="avatar" caption="Фото" width="50px"/>
-                            <!-- Колонка отображения ФИО кандидата с контактом -->
-                            <column id="candidateInfo" caption="Кандидат"/>
-                            <!-- Колонка отображения желаемой должности в виде плашки -->
-                            <column id="personPositionFormatted" caption="Должность"/>
-                            <!-- Колонка отображения города проживания -->
-                            <column id="cityFormatted" caption="Город" width="130px"/>
-                            <!-- Колонка текущей компании -->
-                            <column id="companyFormatted" caption="Компания"/>
-                            <!-- Генерируемая колонка статуса работы рекрутера (зеленый/желтый/красный) -->
-                            <column id="lastInteractionStatus" caption="Статус рекрутера" width="170px"/>
-                            <!-- Быстрые действия над строкой таблицы -->
-                            <column id="rowActions" caption="Действия" width="95px"/>
+                            <column id="avatar" caption="Фото" width="50px" sortable="false"/>
+                            <!-- Колонка отображения ФИО кандидата с сортировкой по fullName -->
+                            <column id="fullName" caption="Кандидат"/>
+                            <!-- Колонка отображения желаемой должности с сортировкой по personPosition -->
+                            <column id="personPosition" caption="Должность"/>
+                            <!-- Колонка отображения города проживания с сортировкой по cityOfResidence -->
+                            <column id="cityOfResidence" caption="Город" width="130px"/>
+                            <!-- Колонка текущей компании с сортировкой по currentCompany -->
+                            <column id="currentCompany" caption="Компания"/>
+                            <!-- Компактная генерируемая колонка даты последнего взаимодействия со светофорным статусом -->
+                            <column id="lastInteractionStatus" caption="Посл. взаимодействие" width="135px"/>
                         </columns>
                         <!-- Компонент отображения общего количества строк в таблице -->
                         <rowsCount/>
