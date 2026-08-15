@@ -22,8 +22,8 @@
     <!-- Настройка размеров экрана при открытии в режиме диалога или lookup-окна -->
     <dialogMode height="700" width="1100"/>
 
-    <!-- Корневой контейнер разметки экрана с применением базовых стилей темы Edit-форм -->
-    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+    <!-- Корневой контейнер разметки экрана с базовыми стилями темы Edit-форм и правильными отступами -->
+    <layout expand="splitMainLayout" spacing="true" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
         <!-- Верхний тулбар управления в фирменном дизайне Edit-форм (edit-toolbar) -->
         <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_CENTER" stylename="edit-toolbar" expand="toolbarTitleBox">
             <!-- Левый заголовочный блок с названием концепта и описанием -->
@@ -45,26 +45,26 @@
             </hbox>
         </hbox>
 
-        <!-- Двухпанельная разметка Split-View: Левый профильный сайдбар Edit-формы (312px) + Таблица справа -->
-        <hbox id="splitMainLayout" width="100%" height="100%" spacing="false" expand="candidatesTableBox" stylename="job-candidate-main-layout edit-screen-layout">
+        <!-- Двухпанельная разметка Split-View: Левый профильный сайдбар Edit-формы (312px) + Просторная рабочая область справа -->
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="candidatesTableBox" stylename="job-candidate-main-layout edit-screen-layout">
             
             <!-- ЛЕВАЯ ПАНЕЛЬ (САЙДБАР): Выдержана в фирменном стиле Edit-форм (job-candidate-sidebar edit-sidebar) -->
             <vbox id="candidateDetailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
                 <!-- Скроллер для детального просмотра всех карточек данных -->
                 <scrollBox id="detailScroll" width="100%" height="100%" orientation="vertical">
-                    <!-- Вертикальная стопка блоков карточки детализации -->
+                    <!-- Вертикальная стопка блоков карточки детализации с комфортными отступами -->
                     <vbox width="100%" spacing="true">
-                        <!-- Шапка профиля: овальный аватар 140x140px, ФИО и должность -->
+                        <!-- Шапка профиля: гармоничный аватар 120x120px, ФИО и должность -->
                         <vbox id="candidateProfileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
                             <!-- Кастомное круглое фото с фолбеком на случай отсутствия изображения -->
                             <ovaFallbackImage id="detailPic"
-                                              width="140px" height="140px"
-                                              ovalWidth="140px" ovalHeight="140px"
+                                              width="120px" height="120px"
+                                              ovalWidth="120px" ovalHeight="120px"
                                               align="TOP_CENTER"
                                               stylename="job-candidate-avatar"
                                               fallbackThemePath="icons/no-programmer.jpeg"
                                               scaleMode="SCALE_DOWN"/>
-                            <!-- Текстовый блок заголовка профиля -->
+                            <!-- Текстовый блок заголовка профиля с автопереносом строк -->
                             <vbox width="100%" spacing="false" align="TOP_CENTER" stylename="edit-sidebar-identity">
                                 <!-- Подпись с ФИО выбранного кандидата -->
                                 <label id="detailFullName" value="Выберите кандидата" stylename="edit-sidebar-title h2"/>
@@ -138,7 +138,7 @@
                 </hbox>
 
                 <!-- Карточка-обёртка для таблицы кандидатов -->
-                <vbox id="candidatesTableCard" width="100%" height="100%" spacing="false" stylename="edit-card">
+                <vbox id="candidatesTableCard" width="100%" height="100%" spacing="false" stylename="edit-card" expand="candidatesTable">
                     <!-- Таблица кандидатов отображает расширенные колонки реестра -->
                     <groupTable id="candidatesTable"
                                  width="100%"
@@ -149,22 +149,22 @@
                             <action id="edit" type="edit"/>
                             <action id="refresh" type="refresh"/>
                         </actions>
-                        <!-- Колонки таблицы с привязкой к свойствам сущности -->
+                        <!-- Колонки таблицы с продуманными пропорциями ширины -->
                         <columns>
                             <!-- Генерируемая колонка для отображения миниатюры фото кандидата -->
                             <column id="avatar" caption="Фото" width="50px"/>
                             <!-- Колонка отображения ФИО кандидата с контактом -->
-                            <column id="candidateInfo" caption="Кандидат" width="220px"/>
+                            <column id="candidateInfo" caption="Кандидат"/>
                             <!-- Колонка отображения желаемой должности в виде плашки -->
-                            <column id="personPositionFormatted" caption="Должность" width="180px"/>
+                            <column id="personPositionFormatted" caption="Должность"/>
                             <!-- Колонка отображения города проживания -->
-                            <column id="cityFormatted" caption="Город" width="140px"/>
+                            <column id="cityFormatted" caption="Город" width="130px"/>
                             <!-- Колонка текущей компании -->
-                            <column id="companyFormatted" caption="Компания" width="160px"/>
+                            <column id="companyFormatted" caption="Компания"/>
                             <!-- Генерируемая колонка статуса работы рекрутера (зеленый/желтый/красный) -->
-                            <column id="lastInteractionStatus" caption="Статус рекрутера" width="180px"/>
+                            <column id="lastInteractionStatus" caption="Статус рекрутера" width="170px"/>
                             <!-- Быстрые действия над строкой таблицы -->
-                            <column id="rowActions" caption="Действия" width="110px"/>
+                            <column id="rowActions" caption="Действия" width="95px"/>
                         </columns>
                         <!-- Компонент отображения общего количества строк в таблице -->
                         <rowsCount/>
