@@ -14,15 +14,34 @@ DEPLOY_LOCK_FILE="${DEPLOY_LOCK_FILE:-$ROOT/deploy/.local-deploy.lock}"
 DEPLOY_LOCK_TIMEOUT="${DEPLOY_LOCK_TIMEOUT:-600}"   # секунд ожидания mutex
 SKIP_GIT_CHECK="${SKIP_GIT_CHECK:-false}"
 DEPLOY_LOG="${DEPLOY_LOG:-$ROOT/deploy/tomcat/logs/local-deploy.log}"
+# Режим деплоя ветки агента-разработчика (Antigravity/Hermes-2) для проверки UI:
+#  --branch <worktree>  — собрать и запустить ветку из указанного worktree на общем Tomcat.
+#  Guard'ы: работа из worktree (не общая копия), нет merge-конфликтов,
+#  нет новых Liquibase-миграций относительно origin/master (миграции — только Hermes-1).
+BRANCH_WT=""
 
-for arg in "$@"; do
-    case "$arg" in
-        --force|--skip-git-check) SKIP_GIT_CHECK=true ;;
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --force|--skip-git-check) SKIP_GIT_CHECK=true ; shift ;;
+        --branch)
+            BRANCH_WT="${2:-}"
+            if [ -z "$BRANCH_WT" ]; then
+                echo "❌ --branch требует путь к worktree агента (например: $0 --branch ../hrm-antigravity)"
+                exit 1
+            fi
+            shift 2
+            ;;
         -h|--help)
-            echo "Использование: $0 [--force|--skip-git-check]"
+            echo "Использование: $0 [--force|--skip-git-check] [--branch <worktree>]"
             echo "  --force / --skip-git-check  пропустить проверки git (ветка master + чистая копия)"
+            echo "  --branch <worktree>         собрать и запустить ветку агента из указанного worktree"
+            echo "                              (guard'ы: без миграций, без конфликтов; общий Tomcat)"
             echo "  Mutex: $DEPLOY_LOCK_FILE (ожидание до ${DEPLOY_LOCK_TIMEOUT} с)"
             exit 0
+            ;;
+        *)
+            echo "Неизвестный аргумент: $1 (см. $0 --help)"
+            exit 1
             ;;
     esac
 done
@@ -74,6 +93,76 @@ check_git_clean() {
         exit 1
     fi
     log "✅ git: ветка master, рабочая копия чистая (среди tracked-файлов)."
+}
+
+# Деплой ветки агента (--branch <worktree>): Antigravity/Hermes-2 могут поднимать
+# СВОЮ ветку на общем Tomcat для проверки UI. Guard'ы протокола 3 агентов:
+#  - работаем из worktree агента, не из общей копии;
+#  - в worktree нет merge-конфликтов (UU/AA/DD);
+#  - в ветке нет новых Liquibase-миграций относительно origin/master
+#    (миграции на общую БД применяет только Hermes-1);
+#  - deploy/ worktree — пустой каталог (заменяется symlink'ом на общий deploy).
+check_branch_worktree() {
+    if [ "$SKIP_GIT_CHECK" = "true" ]; then
+        log "Проверка ветки пропущена (--force) — деплой ветки агента на общий Tomcat."
+        return 0
+    fi
+    local wt_real
+    wt_real="$(cd "$BRANCH_WT" && pwd 2>/dev/null || true)"
+    if [ -z "$wt_real" ] || [ "$wt_real" = "$ROOT" ]; then
+        log "❌ --branch: '$BRANCH_WT' — не worktree агента (или это общая копия $ROOT)."
+        exit 1
+    fi
+    if ! git -C "$wt_real" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        log "❌ --branch: '$wt_real' не является git-worktree."
+        exit 1
+    fi
+    local conflicts
+    conflicts="$(git -C "$wt_real" diff --name-only --diff-filter=U 2>/dev/null || true)"
+    if [ -n "$conflicts" ]; then
+        log "❌ В worktree агента незарезолвленные конфликты: $conflicts"
+        log "   Разрешите конфликты (обе стороны) и закоммитьте перед деплоем."
+        exit 1
+    fi
+    local migrations
+    migrations="$(git -C "$wt_real" diff origin/master -- modules/core/db/update/ --name-only 2>/dev/null || true)"
+    if [ -n "$migrations" ]; then
+        log "❌ В ветке агента новые Liquibase-миграции:"
+        log "   $migrations"
+        log "   Миграции на общую БД применяет только Hermes-1 — деплой ветки запрещён."
+        exit 1
+    fi
+    local dirty
+    dirty="$(git -C "$wt_real" status --porcelain --untracked-files=no 2>/dev/null || true)"
+    if [ -n "$dirty" ]; then
+        log "⚠️ В worktree агента незакоммиченные правки — деплоится текущее рабочее состояние:"
+        log "   $dirty"
+    fi
+    log "✅ worktree агента: $(git -C "$wt_real" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '(detached)') @ $wt_real"
+    log "   конфликтов нет, новых миграций нет."
+}
+
+# deploy/ в worktree агента должен указывать на ОБЩИЙ Tomcat ($ROOT/deploy).
+# gradle деплоит в $rootDir/deploy/tomcat — через symlink это общий Tomcat.
+prepare_branch_deploy() {
+    local wt_deploy="$BRANCH_WT/deploy"
+    if [ -e "$wt_deploy" ] && [ ! -L "$wt_deploy" ]; then
+        # Существующий каталог deploy в worktree: допустим только пустой/мусорный.
+        if find "$wt_deploy" -mindepth 1 -maxdepth 2 \( -name tomcat -o -name app_home -o -name webapps \) 2>/dev/null | grep -q .; then
+            log "❌ В worktree агента есть собственный deploy/ с данными ($wt_deploy)."
+            log "   Удалите его (он gitignored) — для проверки UI нужен ОБЩИЙ Tomcat:"
+            log "   rm -rf \"$wt_deploy\""
+            exit 1
+        fi
+        log "Удаляю пустой deploy/ в worktree агента (замена на symlink общего deploy)..."
+        rm -rf "$wt_deploy"
+    fi
+    if [ ! -L "$wt_deploy" ]; then
+        ln -s "$ROOT/deploy" "$wt_deploy"
+        log "Symlink: $wt_deploy → $ROOT/deploy (общий Tomcat)"
+    else
+        log "Symlink на общий deploy уже есть: $wt_deploy"
+    fi
 }
 
 APP_URL="${APP_URL:-http://localhost:8080/hrm/}"
@@ -288,9 +377,18 @@ write_jvm_diagnostics() {
 
 ensure_postgres
 
-# Технические guard'ы протокола 3 агентов (деплой только Hermes-1, один процесс в момент).
+# Технические guard'ы протокола 3 агентов (один процесс сборки/деплоя в момент).
 # Выполняются ДО остановки Tomcat: отказ не роняет работающее приложение.
-check_git_clean
+if [ -n "$BRANCH_WT" ]; then
+    # Деплой ветки агента: общий Tomcat, но сборка из worktree агента.
+    check_branch_worktree
+    prepare_branch_deploy
+    BUILD_DIR="$BRANCH_WT"
+    log "Режим ветки агента: сборка из $BUILD_DIR, Tomcat общий ($ROOT/deploy)."
+else
+    BUILD_DIR="$ROOT"
+    check_git_clean
+fi
 ensure_no_other_gradle
 
 kill_stale_project_tomcat
@@ -301,13 +399,14 @@ log "Gradle stop (ошибки игнорируются)..."
 
 # Схема должна обновляться до deploy: иначе новая entity-модель может обратиться
 # к ещё отсутствующей колонке и сорвать открытие экранов после входа.
+# updateDb всегда из корня: миграции master == миграции ветки (guard без новых миграций).
 log "Применяю накопленные миграции CUBA к локальной PostgreSQL..."
 ./gradlew updateDb --no-daemon --stacktrace
 
 clean_deployment
 
-log "Чистая сборка и deploy без запуска тестов..."
-./gradlew clean deploy -x test
+log "Чистая сборка и deploy без запуска тестов... (каталог: $BUILD_DIR)"
+( cd "$BUILD_DIR" && ./gradlew clean deploy -x test )
 
 # app_home и JVM-параметры задаются после deploy, чтобы их не затронула очистка.
 ensure_local_app_properties
@@ -319,4 +418,8 @@ log "Запуск Tomcat..."
 log "URL: $APP_URL"
 wait_for_http
 write_jvm_diagnostics
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] deploy done PID=$$ HTTP 200" >> "$DEPLOY_LOG"
+if [ -n "$BRANCH_WT" ]; then
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] BRANCH DEPLOY done PID=$$ worktree=$BRANCH_WT HTTP 200 (Tomcat на ветке агента; возврат master: $0)" >> "$DEPLOY_LOG"
+else
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] deploy done PID=$$ HTTP 200" >> "$DEPLOY_LOG"
+fi
