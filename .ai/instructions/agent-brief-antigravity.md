@@ -26,9 +26,17 @@ Git-протокол (не нарушать):
 - Слияние — только через PR (base=master): gh pr create с описанием «что сделано, как проверено, что ждёшь от Hermes-1»; метка WAITING_FOR_HERMES = «проверь и задеплой»
 
 Сборка и тесты:
-- gradle-прогоны СЕРИАЛИЗУЙ с другими агентами: один gradle-процесс в момент (общий кэш, FTS-локи hrm-core/work/ftsindex/write.lock, дубли jar в shared/lib ломают старт Tomcat). Видишь чужой gradle — жди
+- gradle-прогоны СЕРИАЛИЗУЙ с другими агентами: один gradle-процесс в момент (общий кэш, FTS-локи hrm-core/work/ftsindex/write.lock, дубли jar в shared/lib ломают старт Tomcat). Все gradle-вызовы — ТОЛЬКО через обёртку: bash ../hunttech_recruiting/scripts/agent-gradle.sh <args> (она берёт mutex и отклоняет запуск при чужой сборке/деплое). Примеры:
+  - bash ../hunttech_recruiting/scripts/agent-gradle.sh :app-web:compileJava
+  - bash ../hunttech_recruiting/scripts/agent-gradle.sh :app-core:test --tests "com.company.hunttech.core.ScreenViewIntegrityTest"
+  - bash ../hunttech_recruiting/scripts/agent-gradle.sh :app-web:buildScssThemes
 - Перед PR обязательно: контрактный тест формы + com.company.hunttech.core.ScreenViewIntegrityTest (:app-core:test), при правке SCSS — :app-web:buildScssThemes (7 тем, md5-идентично канону hover), синхронизация docs/ui/* и docs/entities/* по правилам проекта
-- НЕ деплой и НЕ рестарт — зона Hermes-1; свой Tomcat/БД не поднимай без запроса
+- ЛОКАЛЬНЫЙ ЗАПУСК СВОЕЙ ВЕТКИ для проверки UI (2026-08-15, разрешено пользователем):
+  - Только через: bash ../hunttech_recruiting/scripts/start-app.sh --branch "$PWD"
+  - Скрипт соберёт ТВОЮ ветку и поднимет её на ОБЩЕМ Tomcat (http://localhost:8080/hrm/), НО только если: worktree без merge-конфликтов, в ветке НЕТ новых Liquibase-миграций (миграции на общую БД — только Hermes-1) и нет чужой сборки (mutex)
+  - После проверки форм ОБЯЗАТЕЛЬНО верни master на общий Tomcat: bash ../hunttech_recruiting/scripts/start-app.sh (без флагов) — или явно оставь пометку «Tomcat на ветке X» в PR/отчёте
+  - Если скрипт откажет (например, «конфликты»/«миграции») — НЕ обходи guard'ы через --force без веской причины: сначала разберись (разреши конфликты, убери миграции из ветки или согласуй с Hermes-1)
+- НЕ деплой master и НЕ рестарт общей среды — это зона Hermes-1; деплой чужой ветки/общей копии без --branch запрещён
 
 Коммуникация (асинхронно):
 - Задания — .ai/tasks/*.md, отчёты о своей работе — .ai/reports/*.md и описания/комментарии PR

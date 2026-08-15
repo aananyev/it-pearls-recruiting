@@ -40,10 +40,20 @@
    `deploy/tomcat/bin/startup.sh` мимо скрипта ЗАПРЕЩЕНЫ: они не видят
    mutex и ломают чужой деплой. Smoke на своей ветке — только
    `scripts/start-app.sh --force`, и только когда mutex свободен.
-4. После kill -9 gradle: чистить `~/.gradle/caches/*.lock`, `~/.gradle/daemon`,
+4. ИСКЛЮЧЕНИЕ (2026-08-15, согласовано с пользователем): агент-разработчик
+   может ПОДНИМАТЬ СВОЮ ВЕТКУ на общем Tomcat для проверки UI:
+   `scripts/start-app.sh --branch <worktree>` — сборка из worktree агента,
+   общий Tomcat. Guard'ы: worktree без merge-конфликтов, в ветке НЕТ новых
+   Liquibase-миграций относительно origin/master (миграции на общую БД —
+   только Hermes-1), mutex свободен. После проверки — возврат master:
+   `scripts/start-app.sh` без флагов (или явная пометка «Tomcat на ветке X»).
+   Все gradle-прогоны агентов — через `scripts/agent-gradle.sh <args>`
+   (та же сериализация, тот же mutex). Guard'ы не обходить через --force
+   без веской причины.
+5. После kill -9 gradle: чистить `~/.gradle/caches/*.lock`, `~/.gradle/daemon`,
    `.gradle` worktree, FTS write.lock. Lock-файл `deploy/.local-deploy.lock`
    после kill -9 владельца снимается shlock автоматически.
-5. Первый прогон в новом worktree долгий (10–15 мин, медленный
+6. Первый прогон в новом worktree долгий (10–15 мин, медленный
    repo.cuba-platform.com) — это норма, не убивать.
 6. Дубли jar в `deploy/tomcat/shared/lib` (напр. groovy 2.5.2 + 2.5.23 →
    «Conflicting module versions», Context startup failed) — удалять старые дубли.
