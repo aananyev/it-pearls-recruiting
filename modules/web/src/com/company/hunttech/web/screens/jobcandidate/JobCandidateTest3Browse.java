@@ -7,11 +7,12 @@ import com.haulmont.cuba.gui.components.HBoxLayout;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.VBoxLayout;
+import com.haulmont.cuba.gui.model.CollectionChangeType;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
-import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.StandardLookup;
 import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.Target;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
@@ -47,9 +48,13 @@ public class JobCandidateTest3Browse extends StandardLookup<JobCandidate> {
     @Inject
     private VBoxLayout containerColOffer;
 
-    @Subscribe
-    public void onBeforeShow(Screen.BeforeShowEvent event) {
-        buildKanbanBoard();
+    // Канбан строится по факту загрузки данных контейнера (BeforeShow срабатывает
+    // до REFRESH-события, поэтому пустой список давал нулевые метрики и без карточек)
+    @Subscribe(id = "jobCandidatesDc", target = Target.DATA_CONTAINER)
+    public void onJobCandidatesDcCollectionChange(CollectionContainer.CollectionChangeEvent<JobCandidate> event) {
+        if (event.getChangeType() == CollectionChangeType.REFRESH) {
+            buildKanbanBoard();
+        }
     }
 
     private void buildKanbanBoard() {
