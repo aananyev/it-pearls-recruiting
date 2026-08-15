@@ -15,9 +15,10 @@
         <class>com.hunttech.hrm.web.components.WebOvaFallbackImage</class>
         <componentLoader>com.hunttech.hrm.web.loaders.OvaFallbackImageLoader</componentLoader>
     </component>
-    <!-- Загрузчик файлов с обработкой логотипа проекта: регистрируется под стандартным
-         именем upload, поэтому заменяет WebFileUploadField во всех экранах без правки XML.
-         Обработка выполняется только для полей, привязанных к property="projectLogo". -->
+    <!-- Загрузчик файлов с обработкой логотипа (проекта/компании): регистрируется под
+         стандартным именем upload, поэтому заменяет WebFileUploadField во всех экранах без
+         правки XML. Обработка выполняется только для полей, привязанных к property="projectLogo"
+         (Project) или property="fileCompanyLogo" (Company). -->
     <component>
         <name>upload</name>
         <class>com.company.hunttech.web.gui.components.WebProjectLogoFileUploadField</class>

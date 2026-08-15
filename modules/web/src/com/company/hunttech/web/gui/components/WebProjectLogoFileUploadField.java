@@ -19,14 +19,16 @@ import java.io.OutputStream;
 
 /**
  * Загрузчик файлов, который перед записью в файловое хранилище обрабатывает изображение
- * логотипа проекта: конвертация в PNG, ресайз до 300x300, удаление белого фона,
- * вписывание в круг (подробности — {@link ProjectLogoImageProcessingService}).
+ * логотипа проекта ({@code Project.projectLogo}) или компании ({@code Company.fileCompanyLogo}):
+ * конвертация в PNG, ресайз до 300x300, удаление белого фона, вписывание в круг
+ * (подробности — {@link ProjectLogoImageProcessingService}).
  *
  * <p>Компонент зарегистрирован в {@code cuba-ui-component.xml} под именем {@code upload},
  * поэтому бесшовно заменяет стандартный {@link WebFileUploadField} во всех экранах без
  * правки их XML. Обработка выполняется ТОЛЬКО для полей, привязанных к свойству
- * {@code projectLogo} сущности {@code com.company.hunttech.entity.Project}; все остальные
- * загрузки ведут себя точно так же, как стандартный компонент.</p>
+ * {@code projectLogo} сущности {@code com.company.hunttech.entity.Project} или
+ * {@code fileCompanyLogo} сущности {@code com.company.hunttech.entity.Company}; все
+ * остальные загрузки ведут себя точно так же, как стандартный компонент.</p>
  *
  * <p>Точка перехвата — {@link #saveFile(FileDescriptor)} в режиме
  * {@link FileStoragePutMode#IMMEDIATE}: к этому моменту файл уже принят во временное
@@ -42,6 +44,11 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
     private static final String PROJECT_LOGO_PROPERTY = "projectLogo";
 
     /**
+     * Имя свойства сущности Company, для которого выполняется обработка логотипа.
+     */
+    private static final String COMPANY_LOGO_PROPERTY = "fileCompanyLogo";
+
+    /**
      * Дескриптор после обработки: возвращается из {@link #getFileDescriptor()}, чтобы
      * превью в экране и последующий коммит использовали обработанный файл (PNG).
      */
@@ -51,8 +58,8 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
     protected void saveFile(FileDescriptor fileDescriptor) {
         // Сбрасываем кэш обработанного дескриптора при каждой новой загрузке.
         processedDescriptor = null;
-        // Обрабатываем только логотип проекта; остальные загрузки — стандартное поведение.
-        if (isProjectLogoField() && fileDescriptor != null) {
+        // Обрабатываем только логотипы (проекта/компании); остальные загрузки — стандартное поведение.
+        if (isLogoField() && fileDescriptor != null) {
             try {
                 FileDescriptor processed = processLogo(fileDescriptor);
                 if (processed != null) {
@@ -62,7 +69,7 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
                 }
             } catch (Exception e) {
                 // При любой ошибке обработки сохраняем исходный файл — загрузка не должна ломаться.
-                log.warn("Не удалось обработать логотип проекта id={}: {}", fileDescriptor.getId(), e.toString(), e);
+                log.warn("Не удалось обработать логотип id={}: {}", fileDescriptor.getId(), e.toString(), e);
             }
         }
         super.saveFile(fileDescriptor);
@@ -97,14 +104,15 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
     }
 
     /**
-     * Проверяет, привязано ли поле к свойству {@code projectLogo}.
+     * Проверяет, привязано ли поле к свойству логотипа ({@code projectLogo} у Project
+     * или {@code fileCompanyLogo} у Company).
      */
-    private boolean isProjectLogoField() {
+    private boolean isLogoField() {
         ValueSource<FileDescriptor> valueSource = getValueSource();
         if (valueSource instanceof ContainerValueSource) {
             ContainerValueSource<?, ?> containerSource = (ContainerValueSource<?, ?>) valueSource;
-            return PROJECT_LOGO_PROPERTY.equals(
-                    containerSource.getMetaPropertyPath().getMetaProperty().getName());
+            String property = containerSource.getMetaPropertyPath().getMetaProperty().getName();
+            return PROJECT_LOGO_PROPERTY.equals(property) || COMPANY_LOGO_PROPERTY.equals(property);
         }
         return false;
     }
