@@ -10,7 +10,7 @@
         <collection id="jobCandidatesDc"
                     class="com.company.hunttech.entity.JobCandidate"
                     view="jobCandidate-view">
-            <loader id="jobCandidatesDl">
+            <loader id="jobCandidatesDl" maxResults="200">
                 <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]></query>
             </loader>
         </collection>
