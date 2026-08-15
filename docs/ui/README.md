@@ -20,6 +20,7 @@
 | `SkillTreeEdit` | [SkillTreeEdit_Spec.md](SkillTreeEdit_Spec.md) | Справочник «Дерево компетенций»: sidebar с логотипом и label-навигацией, карточки-панели, парсинг описания Wiki |
 | `PersonEdit` | [PersonEdit_Spec.md](PersonEdit_Spec.md) | Справочник «Люди»: sidebar 270px с фото (`ovaFallbackImage` + upload), label-навигация «Разделы», карточки ФИО/контакты/местоположение, footer primary/secondary |
 | `ProjectEdit` | [ProjectEdit_Spec.md](ProjectEdit_Spec.md) | Проект (заказчик/группа вакансий): sidebar с логотипом и навигацией «Разделы», карточки-панели, ленивые вкладки LOB и вакансий |
+| `CompanyEdit` | [CompanyEdit_Spec.md](CompanyEdit_Spec.md) | Карточка компании: sidebar с логотипом 176×176 и навигацией «Разделы» (вкладки), карточки реквизитов/адреса/описания/подразделений, ленивые LOB |
 | `OutstaffingRatesBrowse` | [OutstaffingRatesBrowse_Spec.md](OutstaffingRatesBrowse_Spec.md) | Рейты по аутстафу — список ступеней шкалы (lookup, CRUD) |
 | `OutstaffingRatesEdit` | [OutstaffingRatesEdit_Spec.md](OutstaffingRatesEdit_Spec.md) | Рейты по аутстафу — форма ступени (commit → триггеры маржинальности и аудита) |
 | `FileTypeEdit` · `SocialNetworkTypeEdit` · `GradeEdit` · `CurrencyEdit` · `EmployeeWorkStatusEdit` · `SignIconsEdit` (+ `OutstaffingRatesEdit`, `SpecialisationEdit`, `OwnershupEdit`, `PositionEdit`) | [DictionaryEditForms_Spec.md](DictionaryEditForms_Spec.md) | Серия справочных Edit-форм: sidebar 270px, label-навигация с полосой-заголовком, статичная круглая иллюстрация `ovalImage` 176×176 (у соцсети — реальный upload логотипа) |

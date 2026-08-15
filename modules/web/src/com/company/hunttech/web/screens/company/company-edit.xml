@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Окно редактирования компании (hunttech_Company.edit): полноэкранный модальный
+     редактор по контракту Edit-форм — sidebar (логотип + идентификация +
+     label-навигация «Разделы») и workspace (toolbar + tabSheet + footer-действия). -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="msg://editorCaption"
         focusComponent="companyOwnershipField"
         messagesPack="com.company.hunttech.web.screens.company" icon="BUILDING">
+    <!-- Контейнеры данных формы: главный экземпляр компании (company-edit-view,
+         LOB-поля адреса/описания подгружаются лениво при открытии вкладок),
+         подразделения (composition) и справочники форм собственности, директоров,
+         групп компаний, городов, регионов и стран. -->
     <data>
         <instance id="companyDc"
                   class="com.company.hunttech.entity.Company"
@@ -55,203 +62,386 @@
             </loader>
         </collection>
     </data>
-    <dialogMode height="600"
-                width="800"/>
-    <layout spacing="true"
-            expand="mainTab">
-        <tabSheet id="mainTab"
-                  stylename="framed">
-            <tab caption="mainMsg://msgCompanyDetail"
-                 margin="true,true,true,true"
-                 spacing="true"
-                 expand="mainCompany"
-                 id="tabConpanyDetails">
-                <hbox spacing="true">
-                    <checkBox id="ourLegalEnityCheckBox"
-                              dataContainer="companyDc"
-                              caption="msg://msgOurLegalEntity"
-                              property="ourLegalEntity"/>
-                    <checkBox id="checkBoxOurClient"
-                              caption="mainMsg://msgOurClient"
-                              dataContainer="companyDc"
-                              property="ourClient"/>
-                </hbox>
-                <hbox id="mainCompany"
-                      expand="companyInfo"
-                      height="100%"
+    <!-- Полноэкранный модальный режим диалога (контракт §5.3). -->
+    <dialogMode height="100%"
+                width="100%"
+                modal="true"/>
+    <!-- Корневой layout: локальный namespace company-editor + общий контракт
+         edit-screen-layout; слева sidebar 270px, справа workspace (toolbar +
+         вкладки + footer). -->
+    <layout stylename="company-editor"
+            expand="companyEditorMainLayout"
+            spacing="false">
+        <hbox id="companyEditorMainLayout"
+              stylename="edit-screen-layout"
+              width="100%"
+              height="100%"
+              expand="companyEditorWorkspace"
+              spacing="false">
+            <!-- Sidebar компании: визуальный блок (логотип + загрузка), идентификация,
+                 label-навигация «Разделы», spacer и подсказка. -->
+            <vbox id="companyEditorSidebar"
+                  stylename="edit-sidebar"
+                  width="270px"
+                  height="100%"
+                  spacing="true"
+                  expand="companySidebarSpacer">
+                <!-- Визуальный блок: круглый логотип компании 176×176 (эталон
+                     JobCandidateEdit) с fallback icons/no-company.png при отсутствии
+                     файла и канонические кнопки «Загрузить»/«Очистить»; файл IMMEDIATE
+                     кладётся в fileCompanyLogo, dropZone — сам блок. -->
+                <vbox id="companyEditorSidebarVisual"
+                      stylename="edit-sidebar-visual"
+                      width="100%"
                       spacing="true"
-                      width="100%">
-                    <vbox id="companyInfo"
-                          height="100%"
-                          spacing="true"
-                          expand="addressOfCompanyField"
-                          width="AUTO">
-                        <lookupPickerField id="companyOwnershipField"
-                                           optionsContainer="companyOwnershipsDc"
-                                           dataContainer="companyDc"
-                                           property="companyOwnership"
-                                           caption="mainMsg://msgOwnership">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <textField id="comanyNameField"
-                                   dataContainer="companyDc"
-                                   property="comanyName"
-                                   width="100%"
-                                   caption="msg://msgCompanyName"/>
-                        <textField id="companyShortNameField"
-                                   dataContainer="companyDc"
-                                   width="100%"
-                                   property="companyShortName"
-                                   caption="mainMsg://msgCountryShortName"/>
-                        <lookupPickerField id="companyGroupLookupPickerField"
-                                           dataContainer="companyDc"
-                                           property="companyGroup"
-                                           optionsContainer="companyGroupDc"
-                                           width="100%"
-                                           caption="msg://msgCompanyGroup"/>
-                        <lookupPickerField id="companyDirectorField"
-                                           dataContainer="companyDc"
-                                           optionsContainer="companyDirectorsDc"
-                                           property="companyDirector"
-                                           width="100%"
-                                           caption="msg://msgDirector">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <lookupPickerField id="cityOfCompanyField"
-                                           dataContainer="companyDc"
-                                           optionsContainer="cityOfCompaniesDc"
-                                           property="cityOfCompany"
-                                           width="100%"
-                                           caption="msg://msgCityOfCompany"
-                                           required="true">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <lookupPickerField id="regionOfCompanyField"
-                                           dataContainer="companyDc"
-                                           optionsContainer="regionOfCompaniesDc"
-                                           property="regionOfCompany"
-                                           width="100%"
-                                           caption="msg://msgRegionOfCompany"
-                                           required="true">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <lookupPickerField id="countryOfCompanyField"
-                                           dataContainer="companyDc"
-                                           optionsContainer="countryOfCompaniesDc"
-                                           property="countryOfCompany"
-                                           width="100%"
-                                           caption="msg://msgCountryOfCompany"
-                                           required="true">
-                            <actions>
-                                <action id="lookup" type="picker_lookup"/>
-                            </actions>
-                        </lookupPickerField>
-                        <textArea id="addressOfCompanyField"
-                                  dataContainer="companyDc"
-                                  property="addressOfCompany"
-                                  width="100%"
-                                  rows="5"
-                                  caption="msg://mshCompanyAddress"/>
+                      align="MIDDLE_CENTER">
+                    <!-- Обёртка аватара без фиксированного размера: размер задаёт сам
+                         OvaFallbackImage 176×176 (как projectLogoPicBox эталона). -->
+                    <vbox id="companyLogoPicBox"
+                          spacing="false"
+                          align="MIDDLE_CENTER">
+                        <!-- OvaFallbackImage логотипа компании: единый элемент по эталону
+                             ProjectEdit/JobCandidateEdit — 176×176 (width/height/ovalWidth/
+                             ovalHeight), fallback no-company.png, SCALE_DOWN; при отсутствии
+                             файла компонент сам показывает fallback (WebOvaFallbackImage). -->
+                        <ovaFallbackImage id="companyLogoFileImage"
+                                          dataContainer="companyDc"
+                                          property="fileCompanyLogo"
+                                          width="176px"
+                                          height="176px"
+                                          ovalWidth="176px"
+                                          ovalHeight="176px"
+                                          ovalBackground="#3a3e44"
+                                          fallbackThemePath="icons/no-company.png"
+                                          visible="true"
+                                          align="MIDDLE_CENTER"
+                                          stylename="company-editor-logo-image"
+                                          scaleMode="SCALE_DOWN"/>
                     </vbox>
-                    <vbox id="dropZone"
-                          spacing="true"
-                          width="200px"
-                          height="266px"
-                          align="TOP_RIGHT"
-                          expand="picVBox"
-                          stylename="dropzone-container">
-                        <vbox id="picVBox">
-                            <image id="companyLogoFileImage"
-                                   dataContainer="companyDc"
-                                   property="fileCompanyLogo"
-                                   width="100%"
-                                   visible="true"
-                                   align="TOP_RIGHT"
-                                   height="100%"
-                                   stylename="widget-border"
-                                   scaleMode="FILL"/>
-                            <image id="companyDefaultLogoFileImage"
-                                   width="100%"
-                                   visible="false"
-                                   align="TOP_RIGHT"
-                                   height="100%"
-                                   stylename="widget-border"
-                                   scaleMode="FILL">
-                                <theme path="icons/no-company.png"/>
-                            </image>
-                        </vbox>
-                        <upload id="companyLogoFileUpload"
-                                fileStoragePutMode="IMMEDIATE"
-                                dataContainer="companyDc"
-                                align="BOTTOM_CENTER"
-                                showFileName="false"
-                                dropZone="dropZone"
-                                showClearButton="true"
-                                property="fileCompanyLogo"/>
-                    </vbox>
-                </hbox>
-            </tab>
-            <tab id="companyDescriptionTab"
-                 margin="true,true,true,true"
-                 spacing="true"
-                 caption="msg://msgCompanyDescription"
-                 expand="companyDescriptionVBox">
-                <vbox id="companyDescriptionVBox"
-                      height="100%"
-                      spacing="true"
-                      width="100%">
-                    <richTextArea id="companyDescritionRichTextArea"
-                                  dataContainer="companyDc"
-                                  property="companyDescription"
-                                  height="100%"
-                                  width="100%"/>
-                    <richTextArea id="companyWorkingConditionsRichTextArea"
-                                  dataContainer="companyDc"
-                                  property="workingConditions"
-                                  caption="msg://msgCompanyWorkCondition"
-                                  width="100%"
-                                  height="100%"/>
+                    <!-- Загрузчик логотипа: файл IMMEDIATE пишется в fileCompanyLogo
+                         (обновляет контейнер — OvaFallbackImage перечитывает значение). -->
+                    <upload id="companyLogoFileUpload"
+                            fileStoragePutMode="IMMEDIATE"
+                            dataContainer="companyDc"
+                            align="MIDDLE_CENTER"
+                            showFileName="false"
+                            dropZone="companyEditorSidebarVisual"
+                            showClearButton="true"
+                            property="fileCompanyLogo"/>
                 </vbox>
-            </tab>
-            <tab caption="mainMsg://msgCompanyDepartament"
-                 margin="true,true,true,true"
-                 expand="departmentOfCompanyTable"
-                 spacing="true"
-                 id="tabCompanyDepartament">
-                <dataGrid id="departmentOfCompanyTable"
-                          dataContainer="departmentOfCompanyDc"
-                          width="100%">
-                    <actions>
-                        <action id="create" type="create"/>
-                        <action id="edit" type="edit"/>
-                        <action id="remove" type="remove"/>
-                    </actions>
-                    <columns>
-                        <column id="departamentRuName" property="departamentRuName"/>
-                        <column id="departamentDirector" property="departamentDirector"/>
-                        <column id="departamentHrDirector" property="departamentHrDirector"/>
-                    </columns>
-                    <buttonsPanel>
-                        <button action="departmentOfCompanyTable.create"/>
-                        <button action="departmentOfCompanyTable.edit"/>
-                        <button action="departmentOfCompanyTable.remove"/>
-                    </buttonsPanel>
-                </dataGrid>
-            </tab>
-        </tabSheet>
-        <hbox id="editActions"
-              spacing="true"
-              align="BOTTOM_RIGHT">
-            <button action="windowCommitAndClose"/>
-            <button action="windowClose"/>
+                <!-- Идентификация: наименование компании по центру (динамическое —
+                     контроллер подставляет comanyName либо заголовок формы); подпись
+                     типа записи не используется (канон серии Edit-форм 2026-08-14). -->
+                <vbox id="companyEditorSidebarIdentity"
+                      stylename="edit-sidebar-identity"
+                      width="100%"
+                      spacing="false">
+                    <label id="companySidebarTitle"
+                           stylename="edit-sidebar-title"
+                           width="100%"
+                           value="msg://browseCaption"/>
+                </vbox>
+                <!-- Label-навигация «Разделы»: полоса-заголовок + пункты = вкладки
+                     TabSheet правой части; активный пункт управляется контроллером
+                     (эталон ProjectEdit — навигация видна на всех вкладках). -->
+                <vbox id="companyEditorSidebarNavigation"
+                      stylename="label-navigation"
+                      width="100%"
+                      spacing="false">
+                    <label value="Разделы"
+                           stylename="label-nav-title company-editor-navigation-title"/>
+                    <button id="companyEditorNavMain"
+                            stylename="label-nav-item label-nav-item-active"
+                            caption="mainMsg://msgCompanyDetail"
+                            width="100%"/>
+                    <button id="companyEditorNavDescription"
+                            stylename="label-nav-item"
+                            caption="msg://msgCompanyDescription"
+                            width="100%"/>
+                    <button id="companyEditorNavDepartments"
+                            stylename="label-nav-item"
+                            caption="mainMsg://msgCompanyDepartament"
+                            width="100%"/>
+                </vbox>
+                <!-- Spacer отделяет навигацию от нижней подсказки (expand в sidebar). -->
+                <vbox id="companySidebarSpacer"
+                      stylename="edit-sidebar-spacer"
+                      width="100%"
+                      height="100%"/>
+                <!-- Подсказка о назначении формы в нижней части sidebar. -->
+                <label id="companySidebarHint"
+                       stylename="edit-sidebar-hint"
+                       width="100%"
+                       value="msg://msgCompanySidebarHint"/>
+            </vbox>
+            <!-- Workspace: toolbar с заголовком, вкладки компании (ленивая загрузка
+                 LOB и подразделений) и footer-действия ОК/Отмена в правом нижнем углу. -->
+            <vbox id="companyEditorWorkspace"
+                  stylename="edit-workspace"
+                  width="100%"
+                  height="100%"
+                  spacing="false"
+                  expand="mainTab">
+                <!-- Toolbar: заголовок «Компании» и краткое описание назначения формы. -->
+                <hbox id="companyEditorToolbar"
+                      stylename="edit-toolbar"
+                      width="100%"
+                      spacing="false">
+                    <vbox id="companyEditorToolbarTitleBox"
+                          width="100%"
+                          spacing="false">
+                        <label id="companyEditorToolbarTitle"
+                               stylename="edit-toolbar-title"
+                               value="msg://browseCaption"/>
+                        <label id="companyEditorToolbarDescription"
+                               stylename="edit-toolbar-description"
+                               value="msg://msgCompanyToolbarDescription"/>
+                    </vbox>
+                </hbox>
+                <!-- Вкладки компании: «Информация о компании» (карточки реквизитов и
+                     адреса), «Описание компании» (LOB-редакторы), «Департамент»
+                     (dataGrid подразделений); имена вкладок — контракт ленивой
+                     загрузки контроллера. -->
+                <tabSheet id="mainTab"
+                          stylename="edit-tabs"
+                          width="100%"
+                          height="100%">
+                    <tab id="tabConpanyDetails"
+                         caption="mainMsg://msgCompanyDetail"
+                         spacing="true"
+                         expand="companyDetailsScroll"
+                         stylename="company-main-tab">
+                        <!-- Прокручиваемый контент вкладки: контрактные карточки
+                             (edit-card + showAsPanel) «Реквизиты компании» и
+                             «Адрес компании». -->
+                        <scrollBox id="companyDetailsScroll"
+                                   width="100%"
+                                   height="100%"
+                                   orientation="vertical"
+                                   scrollBars="vertical"
+                                   stylename="edit-workspace edit-workspace-scroll">
+                            <vbox id="companyDetailsContent"
+                                  width="100%"
+                                  spacing="true"
+                                  stylename="edit-workspace-content">
+                                <!-- Карточка «Реквизиты компании»: признак юрлица и
+                                     клиента, форма собственности, наименования,
+                                     группа компаний, директор. -->
+                                <groupBox id="companyMainCard"
+                                          caption="msg://msgCompanyMainSection"
+                                          stylename="edit-card"
+                                          showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          width="100%">
+                                    <vbox id="companyMainFieldsBox"
+                                          width="100%"
+                                          spacing="true">
+                                        <hbox spacing="true"
+                                              width="100%">
+                                            <checkBox id="ourLegalEnityCheckBox"
+                                                      dataContainer="companyDc"
+                                                      caption="msg://msgOurLegalEntity"
+                                                      property="ourLegalEntity"
+                                                      stylename="edit-form-control"/>
+                                            <checkBox id="checkBoxOurClient"
+                                                      caption="mainMsg://msgOurClient"
+                                                      dataContainer="companyDc"
+                                                      property="ourClient"
+                                                      stylename="edit-form-control"/>
+                                        </hbox>
+                                        <lookupPickerField id="companyOwnershipField"
+                                                           optionsContainer="companyOwnershipsDc"
+                                                           dataContainer="companyDc"
+                                                           property="companyOwnership"
+                                                           caption="mainMsg://msgOwnership"
+                                                           stylename="edit-form-control"
+                                                           width="100%">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                        <textField id="comanyNameField"
+                                                   dataContainer="companyDc"
+                                                   property="comanyName"
+                                                   caption="msg://msgCompanyName"
+                                                   stylename="edit-form-control"
+                                                   width="100%"/>
+                                        <textField id="companyShortNameField"
+                                                   dataContainer="companyDc"
+                                                   property="companyShortName"
+                                                   caption="mainMsg://msgCountryShortName"
+                                                   stylename="edit-form-control"
+                                                   width="100%"/>
+                                        <lookupPickerField id="companyGroupLookupPickerField"
+                                                           dataContainer="companyDc"
+                                                           property="companyGroup"
+                                                           optionsContainer="companyGroupDc"
+                                                           caption="msg://msgCompanyGroup"
+                                                           stylename="edit-form-control"
+                                                           width="100%"/>
+                                        <lookupPickerField id="companyDirectorField"
+                                                           dataContainer="companyDc"
+                                                           optionsContainer="companyDirectorsDc"
+                                                           property="companyDirector"
+                                                           caption="msg://msgDirector"
+                                                           stylename="edit-form-control"
+                                                           width="100%">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                    </vbox>
+                                </groupBox>
+                                <!-- Карточка «Адрес компании»: город/регион/страна
+                                     (цепочка value-change в контроллере) и адрес
+                                     (LOB, ленивая загрузка). -->
+                                <groupBox id="companyAddressCard"
+                                          caption="msg://msgCompanyAddressSection"
+                                          stylename="edit-card"
+                                          showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          width="100%">
+                                    <vbox id="companyAddressFieldsBox"
+                                          width="100%"
+                                          spacing="true">
+                                        <lookupPickerField id="cityOfCompanyField"
+                                                           dataContainer="companyDc"
+                                                           optionsContainer="cityOfCompaniesDc"
+                                                           property="cityOfCompany"
+                                                           caption="msg://msgCityOfCompany"
+                                                           stylename="edit-form-control"
+                                                           width="100%"
+                                                           required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                        <lookupPickerField id="regionOfCompanyField"
+                                                           dataContainer="companyDc"
+                                                           optionsContainer="regionOfCompaniesDc"
+                                                           property="regionOfCompany"
+                                                           caption="msg://msgRegionOfCompany"
+                                                           stylename="edit-form-control"
+                                                           width="100%"
+                                                           required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                        <lookupPickerField id="countryOfCompanyField"
+                                                           dataContainer="companyDc"
+                                                           optionsContainer="countryOfCompaniesDc"
+                                                           property="countryOfCompany"
+                                                           caption="msg://msgCountryOfCompany"
+                                                           stylename="edit-form-control"
+                                                           width="100%"
+                                                           required="true">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                        <textArea id="addressOfCompanyField"
+                                                  dataContainer="companyDc"
+                                                  property="addressOfCompany"
+                                                  caption="msg://mshCompanyAddress"
+                                                  stylename="edit-form-control"
+                                                  width="100%"
+                                                  rows="5"/>
+                                    </vbox>
+                                </groupBox>
+                            </vbox>
+                        </scrollBox>
+                    </tab>
+                    <tab id="companyDescriptionTab"
+                         caption="msg://msgCompanyDescription"
+                         spacing="true"
+                         expand="companyDescriptionCard"
+                         stylename="company-description-tab">
+                        <!-- Карточка описания компании: LOB-редакторы описания и
+                             условий работы, подгружаются лениво при первом открытии
+                             вкладки (контроллер). -->
+                        <groupBox id="companyDescriptionCard"
+                                  caption="msg://msgCompanyDescriptionSection"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%">
+                            <vbox id="companyDescriptionFieldsBox"
+                                  width="100%"
+                                  spacing="true">
+                                <richTextArea id="companyDescritionRichTextArea"
+                                              dataContainer="companyDc"
+                                              property="companyDescription"
+                                              caption="msg://msgCompanyDescription"
+                                              stylename="edit-form-control"
+                                              width="100%"
+                                              height="100%"/>
+                                <richTextArea id="companyWorkingConditionsRichTextArea"
+                                              dataContainer="companyDc"
+                                              property="workingConditions"
+                                              caption="msg://msgCompanyWorkCondition"
+                                              stylename="edit-form-control"
+                                              width="100%"
+                                              height="100%"/>
+                            </vbox>
+                        </groupBox>
+                    </tab>
+                    <tab id="tabCompanyDepartament"
+                         caption="mainMsg://msgCompanyDepartament"
+                         spacing="true"
+                         expand="companyDepartmentsCard"
+                         stylename="company-departments-tab">
+                        <!-- Карточка подразделений компании: dataGrid состава,
+                             загрузка при первом открытии вкладки (composition
+                             companyDc.departmentOfCompany). -->
+                        <groupBox id="companyDepartmentsCard"
+                                  caption="msg://msgCompanyDepartmentsSection"
+                                  stylename="edit-card"
+                                  showAsPanel="true"
+                                  width="100%">
+                            <dataGrid id="departmentOfCompanyTable"
+                                      dataContainer="departmentOfCompanyDc"
+                                      width="100%">
+                                <actions>
+                                    <action id="create" type="create"/>
+                                    <action id="edit" type="edit"/>
+                                    <action id="remove" type="remove"/>
+                                </actions>
+                                <columns>
+                                    <column id="departamentRuName" property="departamentRuName"/>
+                                    <column id="departamentDirector" property="departamentDirector"/>
+                                    <column id="departamentHrDirector" property="departamentHrDirector"/>
+                                </columns>
+                                <buttonsPanel>
+                                    <button action="departmentOfCompanyTable.create"/>
+                                    <button action="departmentOfCompanyTable.edit"/>
+                                    <button action="departmentOfCompanyTable.remove"/>
+                                </buttonsPanel>
+                            </dataGrid>
+                        </groupBox>
+                    </tab>
+                </tabSheet>
+                <!-- Footer-действия: спейсер выталкивает пару ОК/Отмена к правому краю,
+                     кнопки получают канонические стили primary/secondary. -->
+                <hbox id="editActions"
+                      stylename="edit-footer-actions"
+                      width="100%"
+                      expand="bottomActionsSpacer"
+                      align="MIDDLE_RIGHT"
+                      spacing="false">
+                    <vbox id="bottomActionsSpacer"
+                          width="100%"
+                          height="1px"/>
+                    <hbox id="bottomActionsGroup"
+                          width="AUTO"
+                          align="MIDDLE_RIGHT"
+                          spacing="true">
+                        <button action="windowCommitAndClose" stylename="company-editor-primary-action"/>
+                        <button action="windowClose" stylename="company-editor-secondary-action"/>
+                    </hbox>
+                </hbox>
+            </vbox>
         </hbox>
     </layout>
 </window>
