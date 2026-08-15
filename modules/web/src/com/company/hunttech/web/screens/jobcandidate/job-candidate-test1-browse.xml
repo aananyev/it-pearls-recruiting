@@ -135,6 +135,8 @@
                         <column id="personPosition" caption="Должность"/>
                         <!-- Колонка отображения города проживания -->
                         <column id="cityOfResidence" caption="Город"/>
+                        <!-- Генерируемая колонка статуса работы рекрутера (зеленый/желтый/красный) -->
+                        <column id="lastInteractionStatus" caption="Статус рекрутера"/>
                     </columns>
                     <!-- Компонент отображения общего количества строк в таблице -->
                     <rowsCount/>
