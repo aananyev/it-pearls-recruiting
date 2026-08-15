@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Загрузчик файлов, который перед записью в файловое хранилище обрабатывает изображение
@@ -65,6 +66,22 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
             }
         }
         super.saveFile(fileDescriptor);
+    }
+
+    /**
+     * Сбрасывает кэш обработанного дескриптора в момент начала новой загрузки.
+     *
+     * <p>Родительский succeeded-листенер вызывает {@code saveFile(getFileDescriptor())},
+     * причём {@link #getFileDescriptor()} вычисляется ДО входа в {@link #saveFile}.
+     * Без сброса здесь вторая (и последующие) загрузки логотипа в том же экране
+     * получали бы дескриптор ПЕРВОЙ загрузки (тот же UUID): повторный
+     * {@code putFileIntoStorage} на уже существующий файл не сохранялся,
+     * {@code setValue} не обновлял контейнер, и превью/алгоритм не срабатывали.</p>
+     */
+    @Override
+    protected OutputStream receiveUpload(String fileName, String MIMEType) {
+        processedDescriptor = null;
+        return super.receiveUpload(fileName, MIMEType);
     }
 
     /**
