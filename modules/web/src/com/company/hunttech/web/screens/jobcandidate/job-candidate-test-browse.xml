@@ -51,19 +51,19 @@
                 <!-- Скроллер для детального просмотра данных -->
                 <scrollBox id="detailScroll" width="100%" height="100%" orientation="vertical">
                     <vbox width="100%" spacing="true">
-                        <!-- Шапка профиля с фото -->
+                        <!-- Шапка профиля с фото, центрированным ФИО и городом -->
                         <vbox id="candidateProfileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
                             <ovaFallbackImage id="detailPic"
-                                              width="140px" height="140px"
-                                              ovalWidth="140px" ovalHeight="140px"
+                                              width="120px" height="120px"
+                                              ovalWidth="120px" ovalHeight="120px"
                                               align="TOP_CENTER"
                                               stylename="job-candidate-avatar"
                                               fallbackThemePath="icons/no-programmer.jpeg"
                                               scaleMode="SCALE_DOWN"/>
-                            <vbox width="100%" spacing="false" align="TOP_CENTER" stylename="edit-sidebar-identity">
-                                <label id="detailFullName" value="Выберите кандидата" stylename="edit-sidebar-title h2"/>
-                                <label id="detailPosition" value="" stylename="edit-sidebar-subtitle h4"/>
-                                <label id="detailCity" value="" stylename="edit-help small"/>
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <label id="detailFullName" value="Выберите кандидата" stylename="edit-sidebar-title h2" align="MIDDLE_CENTER"/>
+                                <label id="detailPosition" value="" stylename="edit-sidebar-subtitle h4" align="MIDDLE_CENTER"/>
+                                <label id="detailCity" value="" stylename="edit-help" align="MIDDLE_CENTER"/>
                             </vbox>
                         </vbox>
 
@@ -73,9 +73,9 @@
                             <button id="createInteractionBtn" caption="Взаимодействие" icon="PLUS" enabled="false" width="100%"/>
                         </vbox>
 
-                        <!-- Таблица ключевых контактов и атрибутов -->
-                        <vbox width="100%" spacing="true" stylename="label-navigation">
-                            <label value="КОНТАКТЫ И РЕКВИЗИТЫ" stylename="label-nav-title"/>
+                        <!-- Таблица ключевых контактов и реквизитов (стиль Edit-форм с линиями над и под заголовком) -->
+                        <vbox width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="КОНТАКТЫ И РЕКВИЗИТЫ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
                             <grid id="detailsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
                                 <rows>
@@ -95,16 +95,18 @@
                                         <label value="Компания:" stylename="bold"/>
                                         <label id="detailCompany" value="-"/>
                                     </row>
+                                    <row>
+                                        <label id="detailSalaryCaption" value="Ожидания:" stylename="bold" visible="false"/>
+                                        <label id="detailSalary" value="-" visible="false"/>
+                                    </row>
                                 </rows>
                             </grid>
                         </vbox>
 
-                        <!-- Лента активности/взаимодействий -->
-                        <vbox width="100%" spacing="true">
-                            <!-- Заголовок раздела истории -->
-                            <label value="История последних взаимодействий" stylename="h3"/>
-                            <!-- Текстовое описание последних действий рекрутера -->
-                            <label id="detailInteractionsInfo" value="Выберите кандидата в таблице слева для просмотра истории." width="100%"/>
+                        <!-- Лента активности/взаимодействий (стиль Edit-форм с линиями над и под заголовком) -->
+                        <vbox width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ПОСЛЕДНЯЯ АКТИВНОСТЬ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label id="detailInteractionsInfo" value="Выберите кандидата в таблице для просмотра истории." width="100%" stylename="edit-help"/>
                         </vbox>
                     </vbox>
                 </scrollBox>

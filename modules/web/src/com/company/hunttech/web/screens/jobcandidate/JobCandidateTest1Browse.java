@@ -71,6 +71,12 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     private Button editCandidateBtn;
     @Inject
     private Button createInteractionBtn;
+    @Inject
+    private com.haulmont.cuba.core.global.DataManager dataManager;
+    @Inject
+    private Label<String> detailSalaryCaption;
+    @Inject
+    private Label<String> detailSalary;
 
     @Inject
     private com.haulmont.cuba.security.global.UserSession userSession;
@@ -99,6 +105,33 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
 
     @Inject
     private PopupButton actionsWithCandidateButton;
+
+    private String getSalaryExpectations(JobCandidate candidate) {
+        if (candidate == null) return null;
+        if (candidate.getIteractionList() != null) {
+            for (IteractionList it : candidate.getIteractionList()) {
+                if (it.getIteractionType() != null &&
+                    it.getIteractionType().getIterationName() != null &&
+                    it.getIteractionType().getIterationName().toLowerCase().contains("зарплатные ожидания")) {
+                    if (it.getAddString() != null && !it.getAddString().trim().isEmpty()) {
+                        return it.getAddString().trim();
+                    }
+                }
+            }
+        }
+        try {
+            java.util.List<IteractionList> list = dataManager.load(IteractionList.class)
+                    .query("select e from hunttech_IteractionList e where e.iteractionType.iterationName like :name and e.candidate = :cand order by e.createTs desc")
+                    .parameter("name", "%Зарплатные ожидания%")
+                    .parameter("cand", candidate)
+                    .view("iteractionList-view")
+                    .list();
+            if (!list.isEmpty() && list.get(0).getAddString() != null && !list.get(0).getAddString().trim().isEmpty()) {
+                return list.get(0).getAddString().trim();
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
 
     private com.company.hunttech.entity.IteractionList getLastInteraction(JobCandidate candidate) {
         if (candidate == null || candidate.getIteractionList() == null || candidate.getIteractionList().isEmpty()) {
@@ -345,6 +378,8 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         detailEmail.setValue("-");
         detailTelegram.setValue("-");
         detailCompany.setValue("-");
+        detailSalaryCaption.setVisible(false);
+        detailSalary.setVisible(false);
         detailInteractionsInfo.setValue("Выберите кандидата в таблице справа для просмотра истории.");
         detailPic.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         editCandidateBtn.setEnabled(false);
@@ -374,6 +409,17 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
                     candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
         }
         detailCompany.setValue(company != null ? company : "-");
+
+        String salary = getSalaryExpectations(candidate);
+        if (salary != null && !salary.isEmpty()) {
+            detailSalaryCaption.setVisible(true);
+            detailSalary.setVisible(true);
+            detailSalary.setHtmlEnabled(true);
+            detailSalary.setValue("<span style='color: #27ae60; font-weight: 600;'>" + salary + "</span>");
+        } else {
+            detailSalaryCaption.setVisible(false);
+            detailSalary.setVisible(false);
+        }
 
         if (candidate.getFileImageFace() != null) {
             detailPic.setSource(FileDescriptorResource.class).setFileDescriptor(candidate.getFileImageFace());

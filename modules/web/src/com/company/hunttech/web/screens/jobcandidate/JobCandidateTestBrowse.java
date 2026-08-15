@@ -62,7 +62,40 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private Button createInteractionBtn;
     @Inject
+    private com.haulmont.cuba.core.global.DataManager dataManager;
+    @Inject
+    private Label<String> detailSalaryCaption;
+    @Inject
+    private Label<String> detailSalary;
+    @Inject
     private TextField<String> searchField;
+
+    private String getSalaryExpectations(JobCandidate candidate) {
+        if (candidate == null) return null;
+        if (candidate.getIteractionList() != null) {
+            for (com.company.hunttech.entity.IteractionList it : candidate.getIteractionList()) {
+                if (it.getIteractionType() != null &&
+                    it.getIteractionType().getIterationName() != null &&
+                    it.getIteractionType().getIterationName().toLowerCase().contains("зарплатные ожидания")) {
+                    if (it.getAddString() != null && !it.getAddString().trim().isEmpty()) {
+                        return it.getAddString().trim();
+                    }
+                }
+            }
+        }
+        try {
+            java.util.List<com.company.hunttech.entity.IteractionList> list = dataManager.load(com.company.hunttech.entity.IteractionList.class)
+                    .query("select e from hunttech_IteractionList e where e.iteractionType.iterationName like :name and e.candidate = :cand order by e.createTs desc")
+                    .parameter("name", "%Зарплатные ожидания%")
+                    .parameter("cand", candidate)
+                    .view("iteractionList-view")
+                    .list();
+            if (!list.isEmpty() && list.get(0).getAddString() != null && !list.get(0).getAddString().trim().isEmpty()) {
+                return list.get(0).getAddString().trim();
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
 
     @Subscribe
     public void onInit(Screen.InitEvent event) {
@@ -93,14 +126,17 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
     }
 
     private void clearDetailPane() {
-        detailFullName.setValue("Выберите кандидата");
+        detailFullName.setHtmlEnabled(true);
+        detailFullName.setValue("<div style='text-align: center; font-size: 21px; font-weight: 700; color: #7f8c8d;'>Выберите кандидата</div>");
         detailPosition.setValue("");
         detailCity.setValue("");
         detailPhone.setValue("-");
         detailEmail.setValue("-");
         detailTelegram.setValue("-");
         detailCompany.setValue("-");
-        detailInteractionsInfo.setValue("Выберите кандидата в таблице слева для просмотра истории.");
+        detailSalaryCaption.setVisible(false);
+        detailSalary.setVisible(false);
+        detailInteractionsInfo.setValue("Выберите кандидата в таблице для просмотра истории.");
         detailPic.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         editCandidateBtn.setEnabled(false);
         createInteractionBtn.setEnabled(false);
@@ -108,13 +144,16 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
 
     private void populateDetailPane(JobCandidate candidate) {
         String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
-        detailFullName.setValue(name);
+        detailFullName.setHtmlEnabled(true);
+        detailFullName.setValue("<div style='text-align: center; font-size: 22px; font-weight: 700; color: #2c3e50; line-height: 1.3;'>" + name + "</div>");
 
-        String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "";
-        detailPosition.setValue(pos != null ? pos : "");
+        String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
+        detailPosition.setHtmlEnabled(true);
+        detailPosition.setValue("<div style='text-align: center; margin: 4px 0;'><span style='background: rgba(43, 130, 201, 0.15); color: #2b82c9; padding: 3px 10px; border-radius: 4px; font-weight: 600; font-size: 14px; display: inline-block;'>" + pos + "</span></div>");
 
-        String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "";
-        detailCity.setValue(city != null ? city : "");
+        String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
+        detailCity.setHtmlEnabled(true);
+        detailCity.setValue("<div style='text-align: center; font-size: 15px; font-weight: 500; color: #7f8c8d; margin-top: 2px;'>📍 " + city + "</div>");
 
         detailPhone.setValue(candidate.getPhone() != null ? candidate.getPhone() : "-");
         detailEmail.setValue(candidate.getEmail() != null ? candidate.getEmail() : "-");
@@ -127,6 +166,17 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         }
         detailCompany.setValue(company != null ? company : "-");
 
+        String salary = getSalaryExpectations(candidate);
+        if (salary != null && !salary.isEmpty()) {
+            detailSalaryCaption.setVisible(true);
+            detailSalary.setVisible(true);
+            detailSalary.setHtmlEnabled(true);
+            detailSalary.setValue("<span style='color: #27ae60; font-weight: 600;'>" + salary + "</span>");
+        } else {
+            detailSalaryCaption.setVisible(false);
+            detailSalary.setVisible(false);
+        }
+
         if (candidate.getFileImageFace() != null) {
             detailPic.setSource(FileDescriptorResource.class).setFileDescriptor(candidate.getFileImageFace());
         } else {
@@ -134,7 +184,10 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         }
 
         int interactionsCount = candidate.getIteractionList() != null ? candidate.getIteractionList().size() : 0;
-        detailInteractionsInfo.setValue("Всего зарегистрировано взаимодействий: " + interactionsCount);
+        detailInteractionsInfo.setHtmlEnabled(true);
+        detailInteractionsInfo.setValue("<div style='background: #f8f9fa; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #2980b9; margin-top: 6px; font-size: 12px; line-height: 1.6;'>" +
+                "• Всего зарегистрировано взаимодействий: <b>" + interactionsCount + "</b>" +
+                "</div>");
 
         editCandidateBtn.setEnabled(true);
         createInteractionBtn.setEnabled(true);
