@@ -19,15 +19,17 @@ import java.io.OutputStream;
 
 /**
  * Загрузчик файлов, который перед записью в файловое хранилище обрабатывает изображение
- * логотипа проекта ({@code Project.projectLogo}) или компании ({@code Company.fileCompanyLogo}):
- * конвертация в PNG, ресайз до 300x300, удаление белого фона, вписывание в круг
- * (подробности — {@link ProjectLogoImageProcessingService}).
+ * логотипа проекта ({@code Project.projectLogo}), логотипа компании
+ * ({@code Company.fileCompanyLogo}) или фотографии кандидата
+ * ({@code JobCandidate.fileImageFace}): конвертация в PNG, ресайз до 300x300, удаление
+ * белого фона, вписывание в круг (подробности — {@link ProjectLogoImageProcessingService}).
  *
  * <p>Компонент зарегистрирован в {@code cuba-ui-component.xml} под именем {@code upload},
  * поэтому бесшовно заменяет стандартный {@link WebFileUploadField} во всех экранах без
  * правки их XML. Обработка выполняется ТОЛЬКО для полей, привязанных к свойству
- * {@code projectLogo} сущности {@code com.company.hunttech.entity.Project} или
- * {@code fileCompanyLogo} сущности {@code com.company.hunttech.entity.Company}; все
+ * {@code projectLogo} сущности {@code com.company.hunttech.entity.Project},
+ * {@code fileCompanyLogo} сущности {@code com.company.hunttech.entity.Company} или
+ * {@code fileImageFace} сущности {@code com.company.hunttech.entity.JobCandidate}; все
  * остальные загрузки ведут себя точно так же, как стандартный компонент.</p>
  *
  * <p>Точка перехвата — {@link #saveFile(FileDescriptor)} в режиме
@@ -49,6 +51,11 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
     private static final String COMPANY_LOGO_PROPERTY = "fileCompanyLogo";
 
     /**
+     * Имя свойства сущности JobCandidate, для которого выполняется обработка фотографии.
+     */
+    private static final String CANDIDATE_PHOTO_PROPERTY = "fileImageFace";
+
+    /**
      * Дескриптор после обработки: возвращается из {@link #getFileDescriptor()}, чтобы
      * превью в экране и последующий коммит использовали обработанный файл (PNG).
      */
@@ -58,7 +65,8 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
     protected void saveFile(FileDescriptor fileDescriptor) {
         // Сбрасываем кэш обработанного дескриптора при каждой новой загрузке.
         processedDescriptor = null;
-        // Обрабатываем только логотипы (проекта/компании); остальные загрузки — стандартное поведение.
+        // Обрабатываем только изображения (логотипы проекта/компании, фото кандидата);
+        // остальные загрузки — стандартное поведение.
         if (isLogoField() && fileDescriptor != null) {
             try {
                 FileDescriptor processed = processLogo(fileDescriptor);
@@ -104,15 +112,16 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
     }
 
     /**
-     * Проверяет, привязано ли поле к свойству логотипа ({@code projectLogo} у Project
-     * или {@code fileCompanyLogo} у Company).
+     * Проверяет, привязано ли поле к обрабатываемому свойству: {@code projectLogo} у Project,
+     * {@code fileCompanyLogo} у Company или {@code fileImageFace} у JobCandidate.
      */
     private boolean isLogoField() {
         ValueSource<FileDescriptor> valueSource = getValueSource();
         if (valueSource instanceof ContainerValueSource) {
             ContainerValueSource<?, ?> containerSource = (ContainerValueSource<?, ?>) valueSource;
             String property = containerSource.getMetaPropertyPath().getMetaProperty().getName();
-            return PROJECT_LOGO_PROPERTY.equals(property) || COMPANY_LOGO_PROPERTY.equals(property);
+            return PROJECT_LOGO_PROPERTY.equals(property) || COMPANY_LOGO_PROPERTY.equals(property)
+                    || CANDIDATE_PHOTO_PROPERTY.equals(property);
         }
         return false;
     }
@@ -152,7 +161,7 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
         fileDescriptor.setExtension(processed.getExtension());
         fileDescriptor.setSize((long) processed.getData().length);
 
-        log.debug("Логотип проекта обработан: {} -> {} ({} байт)",
+        log.debug("Изображение обработано: {} -> {} ({} байт)",
                 fileDescriptor.getId(), newName, processed.getData().length);
         return fileDescriptor;
     }

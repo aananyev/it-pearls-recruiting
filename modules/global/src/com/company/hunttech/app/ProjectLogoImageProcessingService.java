@@ -1,8 +1,9 @@
 package com.company.hunttech.app;
 
 /**
- * Сервис обработки логотипа (проекта {@code Project.projectLogo} и компании
- * {@code Company.fileCompanyLogo}) перед сохранением в файловое хранилище.
+ * Сервис обработки изображений перед сохранением в файловое хранилище: логотипа проекта
+ * ({@code Project.projectLogo}), логотипа компании ({@code Company.fileCompanyLogo}) и
+ * фотографии кандидата ({@code JobCandidate.fileImageFace}).
  *
  * Преобразует загруженное изображение любого формата (JPEG, PNG, GIF, BMP, WebP и т.п.) в PNG,
  * уменьшает до заданного максимального размера (по умолчанию 300x300) с сохранением пропорций,
