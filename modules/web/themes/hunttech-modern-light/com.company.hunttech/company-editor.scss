@@ -158,6 +158,7 @@
       width: 100% !important;
       min-width: 0 !important;
       min-height: 36px !important;
+      height: auto !important;
       padding: 7px 11px !important;
       margin: 0 0 8px !important;
       background: rgba(255, 255, 255, 0.045) !important;
@@ -183,8 +184,7 @@
       width: 100% !important;
       min-width: 0 !important;
       min-height: 27px !important;
-      height: 27px !important;
-      max-height: 27px !important;
+      height: auto !important;
       padding: 3px 10px !important;
       color: rgba(248, 250, 252, 0.82) !important;
       font-size: 13px !important;
@@ -203,15 +203,6 @@
     .v-button-label-nav-item:before {
       display: none !important;
       content: none !important;
-    }
-
-    .v-button-label-nav-item .v-button-wrap {
-      box-sizing: border-box;
-      display: flex !important;
-      align-items: center !important;
-      height: 100% !important;
-      min-height: 0 !important;
-      padding: 0 !important;
     }
 
     .label-nav-item .v-button-caption,
