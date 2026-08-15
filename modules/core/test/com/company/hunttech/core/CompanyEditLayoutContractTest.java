@@ -221,6 +221,20 @@ public class CompanyEditLayoutContractTest {
         assertTrue(java.contains("mainTab.setSelectedTab(\"companyDescriptionTab\")"));
         assertTrue(java.contains("mainTab.setSelectedTab(\"tabCompanyDepartament\")"));
         assertTrue(java.contains("TAB_TO_NAV_BUTTON"));
+        // Правило 3.6: label-навигация видима только на вкладках с 2+ блоками
+        // (tabConpanyDetails — 2 карточки; описание и департамент — одноблочные,
+        // контейнер скрывается целиком).
+        assertTrue("Нет константы TABS_WITH_SIDEBAR_NAVIGATION",
+                java.contains("TABS_WITH_SIDEBAR_NAVIGATION"));
+        assertTrue("Контейнер навигации не инжектится",
+                java.contains("VBoxLayout companyEditorSidebarNavigation"));
+        assertTrue("setVisible по TABS_WITH_SIDEBAR_NAVIGATION отсутствует",
+                java.contains("companyEditorSidebarNavigation.setVisible(")
+                        && java.contains("TABS_WITH_SIDEBAR_NAVIGATION.contains"));
+        assertTrue("tabConpanyDetails не в списке вкладок с навигацией",
+                java.contains("\"tabConpanyDetails\""));
+        assertTrue("Нет контейнера companyEditorSidebarNavigation в XML",
+                xml.contains("id=\"companyEditorSidebarNavigation\""));
         assertTrue("логотип должен инжектиться как WebOvaFallbackImage (авто-fallback)",
                 java.contains("WebOvaFallbackImage companyLogoFileImage"));
         assertFalse("legacy-переключатель пары image остался",
@@ -252,9 +266,17 @@ public class CompanyEditLayoutContractTest {
                 canon.contains("rgba(255, 255, 255, 0.08)"));
         assertTrue("Нет канонического активного фона rgba(255,177,27,0.12)",
                 canon.contains("rgba(255, 177, 27, 0.12)"));
-        // Пункты навигации строго 27px.
-        assertTrue("nav-кнопки не 27px", canon.contains("height: 27px !important"));
-        assertTrue("nav-кнопки не центрированы", canon.contains("align-items: center !important"));
+        // Пункты навигации: min-height 27px, высота по контенту (эталон
+        // IteractionListEdit — длинная подпись переносится, строка не режется).
+        assertTrue("nav-пункты без min-height 27px", canon.contains("min-height: 27px !important"));
+        assertTrue("nav-пункты не по высоте контента (height: auto)",
+                canon.contains("height: auto !important"));
+        assertFalse("nav-пункты с фиксированной высотой (обрезает перенос текста)",
+                canon.contains("max-height: 27px !important"));
+        // Локальное wrap-правило с принудительной высотой запрещено (контракт
+        // §3.1 — сдвигает текст относительно маркера): shared flex+align-items.
+        assertFalse("локальное .v-button-wrap правило осталось (контракт §3.1)",
+                canon.contains(".v-button-label-nav-item .v-button-wrap"));
         // halo-тема добавляет кнопке :before — отключаем.
         assertTrue("nav-кнопка не отключает :before halo-темы",
                 canon.contains(".label-nav-item:before"));
