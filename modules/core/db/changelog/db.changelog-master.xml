@@ -60,4 +60,9 @@
     <include file="260814-4-increaseProjectShortDescriptionPrompt.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- SkillAnalysisService: AI-функция извлечения навыков из текста резюме/вакансии
+         (capability TEXT_GENERATION, уровни ALL/MAIN/SECONDARY/TERTIARY). -->
+    <include file="260815-1-addSkillAnalysisAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
