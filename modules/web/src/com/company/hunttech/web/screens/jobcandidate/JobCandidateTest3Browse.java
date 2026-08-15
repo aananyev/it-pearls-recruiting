@@ -128,12 +128,13 @@ public class JobCandidateTest3Browse extends StandardLookup<JobCandidate> {
         VBoxLayout nameBox = uiComponents.create(VBoxLayout.class);
         nameBox.setSpacing(false);
 
-        Label<String> nameLbl = uiComponents.create(Label.TYPE_STRING);
+        Label<String> nameLbl = uiComponents.create(Label.NAME);
         String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
         nameLbl.setValue(name);
         nameLbl.setStyleName("bold");
 
-        Label<String> posLbl = uiComponents.create(Label.TYPE_HTML);
+        Label<String> posLbl = uiComponents.create(Label.NAME);
+        posLbl.setHtmlEnabled(true);
         String posName = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Разработчик";
         posLbl.setValue("<span style='background: rgba(0,123,255,0.15); color: #2b82c9; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;'>" + posName + "</span>");
 
@@ -149,11 +150,13 @@ public class JobCandidateTest3Browse extends StandardLookup<JobCandidate> {
         infoRow.setSpacing(true);
         infoRow.setWidthFull();
 
-        Label<String> ratingLbl = uiComponents.create(Label.TYPE_HTML);
+        Label<String> ratingLbl = uiComponents.create(Label.NAME);
+        ratingLbl.setHtmlEnabled(true);
         double rating = 4.2 + (Math.abs(candidate.hashCode()) % 8) / 10.0;
         ratingLbl.setValue("<span style='color: #f39c12; font-weight: bold;'>★ " + String.format("%.1f", rating) + "</span>");
 
-        Label<String> cityLbl = uiComponents.create(Label.TYPE_HTML);
+        Label<String> cityLbl = uiComponents.create(Label.NAME);
+        cityLbl.setHtmlEnabled(true);
         String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
         cityLbl.setValue("<span style='color: #7f8c8d; font-size: 11px;'>📍 " + city + "</span>");
 
@@ -161,7 +164,8 @@ public class JobCandidateTest3Browse extends StandardLookup<JobCandidate> {
         infoRow.add(cityLbl);
 
         // Блок навыков / Теги
-        Label<String> skillsLbl = uiComponents.create(Label.TYPE_HTML);
+        Label<String> skillsLbl = uiComponents.create(Label.NAME);
+        skillsLbl.setHtmlEnabled(true);
         skillsLbl.setValue("<div style='display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;'>" +
                 "<span style='background: #ecf0f1; color: #34495e; padding: 1px 5px; border-radius: 3px; font-size: 10px;'>Java</span>" +
                 "<span style='background: #ecf0f1; color: #34495e; padding: 1px 5px; border-radius: 3px; font-size: 10px;'>Spring</span>" +

@@ -37,7 +37,8 @@ public class JobCandidateTest5Browse extends StandardLookup<JobCandidate> {
             detailsBox.setWidthFull();
             detailsBox.setSpacing(true);
 
-            Label<String> title = uiComponents.create(Label.TYPE_HTML);
+            Label<String> title = uiComponents.create(Label.NAME);
+            title.setHtmlEnabled(true);
             String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
             String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
             title.setValue("<div style='font-size: 15px; font-weight: 700; color: #2c3e50; margin-bottom: 4px;'>" +
@@ -53,14 +54,16 @@ public class JobCandidateTest5Browse extends StandardLookup<JobCandidate> {
             leftBox.setSpacing(true);
             leftBox.setWidthFull();
 
-            Label<String> contactsLbl = uiComponents.create(Label.TYPE_HTML);
+            Label<String> contactsLbl = uiComponents.create(Label.NAME);
+            contactsLbl.setHtmlEnabled(true);
             contactsLbl.setValue("<div style='font-size: 12px; line-height: 1.6;'>" +
                     "<b>📞 Телефон:</b> " + (candidate.getPhone() != null ? candidate.getPhone() : "-") + "<br/>" +
                     "<b>✉️ Email:</b> " + (candidate.getEmail() != null ? candidate.getEmail() : "-") + "<br/>" +
                     "<b>✈️ Telegram:</b> " + (candidate.getTelegramName() != null ? candidate.getTelegramName() : "-") +
                     "</div>");
 
-            Label<String> skillsLbl = uiComponents.create(Label.TYPE_HTML);
+            Label<String> skillsLbl = uiComponents.create(Label.NAME);
+            skillsLbl.setHtmlEnabled(true);
             skillsLbl.setValue("<div style='margin-top: 4px;'>" +
                     "<b style='font-size: 11px; color: #95a5a6;'>КЛЮЧЕВЫЕ НАВЫКИ:</b><br/>" +
                     "<div style='display: flex; gap: 4px; margin-top: 2px;'>" +
@@ -77,7 +80,8 @@ public class JobCandidateTest5Browse extends StandardLookup<JobCandidate> {
             rightBox.setSpacing(true);
             rightBox.setWidthFull();
 
-            Label<String> statsLbl = uiComponents.create(Label.TYPE_HTML);
+            Label<String> statsLbl = uiComponents.create(Label.NAME);
+            statsLbl.setHtmlEnabled(true);
             int count = candidate.getIteractionList() != null ? candidate.getIteractionList().size() : 0;
             rightBox.add(statsLbl);
             statsLbl.setValue("<div style='background: #f8f9fa; padding: 8px 12px; border-radius: 6px; border-left: 3px solid #3498db; font-size: 12px;'>" +

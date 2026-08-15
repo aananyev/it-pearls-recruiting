@@ -96,11 +96,12 @@ public class JobCandidateTest4Browse extends StandardLookup<JobCandidate> {
         VBoxLayout infoBox = uiComponents.create(VBoxLayout.class);
         infoBox.setSpacing(false);
 
-        Label<String> nameLbl = uiComponents.create(Label.TYPE_STRING);
+        Label<String> nameLbl = uiComponents.create(Label.NAME);
         nameLbl.setValue(candidate.getFullName() != null ? candidate.getFullName() : "Без имени");
         nameLbl.setStyleName("h3");
 
-        Label<String> posLbl = uiComponents.create(Label.TYPE_HTML);
+        Label<String> posLbl = uiComponents.create(Label.NAME);
+        posLbl.setHtmlEnabled(true);
         String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Инженер ПО";
         posLbl.setValue("<span style='background: rgba(43, 130, 201, 0.15); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;'>" + pos + "</span>");
 
@@ -112,7 +113,8 @@ public class JobCandidateTest4Browse extends StandardLookup<JobCandidate> {
         topRow.expand(infoBox);
 
         // Строка дополнительной информации: Локация + Ожидания по зарплате
-        Label<String> metaLbl = uiComponents.create(Label.TYPE_HTML);
+        Label<String> metaLbl = uiComponents.create(Label.NAME);
+        metaLbl.setHtmlEnabled(true);
         String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
         int salary = 150000 + (Math.abs(candidate.hashCode()) % 150) * 1000;
         metaLbl.setValue("<div style='margin-top: 4px; font-size: 12px; color: #7f8c8d;'>" +
@@ -121,7 +123,8 @@ public class JobCandidateTest4Browse extends StandardLookup<JobCandidate> {
                 "</div>");
 
         // Блок ключевых навыков / Tech Stack
-        Label<String> skillsLbl = uiComponents.create(Label.TYPE_HTML);
+        Label<String> skillsLbl = uiComponents.create(Label.NAME);
+        skillsLbl.setHtmlEnabled(true);
         skillsLbl.setValue("<div style='display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px;'>" +
                 "<span style='background: #e8f4f8; color: #2980b9; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500;'>Java</span>" +
                 "<span style='background: #e8f4f8; color: #2980b9; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500;'>Spring Boot</span>" +
