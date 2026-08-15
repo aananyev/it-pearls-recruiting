@@ -25,8 +25,8 @@
     <dialogMode height="700" width="1100"/>
 
     <!-- Корневой контейнер разметки экрана с вертикальным размещением тулбара и рабочей области -->
-    <layout expand="splitMainLayout" spacing="true" width="100%" height="100%">
-        <!-- Верхний Toolbar управления -->
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+        <!-- Верхний тулбар объединяет кнопки действий и строку поиска -->
         <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar">
             <!-- Текстовый лейбл с названием концепта дизайна -->
             <label value="Кандидаты (Split-View Halo)" stylename="h2" align="MIDDLE_LEFT"/>
@@ -40,38 +40,40 @@
             <button id="refreshBtn" caption="Обновить" icon="REFRESH"/>
         </hbox>
 
-        <!-- Двухпанельная разметка Split-View: Левый сайдбар детализации (340px) + Таблица реестра справа -->
-        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="candidatesTableBox">
+        <!-- Двухпанельная разметка Split-View: Левый профильный сайдбар Edit-формы (312px) + Таблица справа -->
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="false" expand="candidatesTableBox" stylename="job-candidate-main-layout edit-screen-layout">
             
-            <!-- ЛЕВАЯ ПАНЕЛЬ (САЙДБАР): Детализация выделенной в таблице строки кандидатов -->
-            <vbox id="candidateDetailPane" width="340px" height="100%" spacing="true" stylename="edit-card edit-sidebar">
+            <!-- ЛЕВАЯ ПАНЕЛЬ (САЙДБАР): Выдержана в фирменном стиле Edit-форм (job-candidate-sidebar edit-sidebar) -->
+            <vbox id="candidateDetailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
                 <!-- Скроллер для детального просмотра данных -->
                 <scrollBox id="detailScroll" width="100%" height="100%" orientation="vertical">
                     <vbox width="100%" spacing="true">
                         <!-- Шапка профиля с фото -->
-                        <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                        <vbox id="candidateProfileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
                             <ovaFallbackImage id="detailPic"
-                                              width="80px" height="80px"
-                                              ovalWidth="80px" ovalHeight="80px"
+                                              width="140px" height="140px"
+                                              ovalWidth="140px" ovalHeight="140px"
+                                              align="TOP_CENTER"
+                                              stylename="job-candidate-avatar"
                                               fallbackThemePath="icons/no-programmer.jpeg"
                                               scaleMode="SCALE_DOWN"/>
-                            <vbox width="100%" spacing="false" align="MIDDLE_LEFT">
-                                <label id="detailFullName" value="Выберите кандидата" stylename="h2"/>
-                                <label id="detailPosition" value="" stylename="h4"/>
-                                <label id="detailCity" value="" stylename="small"/>
+                            <vbox width="100%" spacing="false" align="TOP_CENTER" stylename="edit-sidebar-identity">
+                                <label id="detailFullName" value="Выберите кандидата" stylename="edit-sidebar-title h2"/>
+                                <label id="detailPosition" value="" stylename="edit-sidebar-subtitle h4"/>
+                                <label id="detailCity" value="" stylename="edit-help small"/>
                             </vbox>
-                        </hbox>
+                        </vbox>
 
                         <!-- Кнопки действий -->
-                        <hbox width="100%" spacing="true">
+                        <vbox width="100%" spacing="true" stylename="edit-sidebar-summary">
                             <button id="editCandidateBtn" caption="Открыть карточку" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
                             <button id="createInteractionBtn" caption="Взаимодействие" icon="PLUS" enabled="false" width="100%"/>
-                        </hbox>
+                        </vbox>
 
                         <!-- Таблица ключевых контактов и атрибутов -->
-                        <vbox width="100%" spacing="true" stylename="edit-sidebar-summary">
-                            <label value="Контакты и реквизиты" stylename="bold"/>
-                            <grid id="detailsGrid" spacing="true" width="100%">
+                        <vbox width="100%" spacing="true" stylename="label-navigation">
+                            <label value="КОНТАКТЫ И РЕКВИЗИТЫ" stylename="label-nav-title"/>
+                            <grid id="detailsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                                 <columns count="2"/>
                                 <rows>
                                     <row>
@@ -84,14 +86,10 @@
                                     </row>
                                     <row>
                                         <label value="Telegram:" stylename="bold"/>
-                                        <!-- Значение Telegram -->
                                         <label id="detailTelegram" value="-"/>
                                     </row>
-                                    <!-- Строка вывода текущего места работы -->
                                     <row>
-                                        <!-- Подпись поля -->
                                         <label value="Компания:" stylename="bold"/>
-                                        <!-- Значение компании -->
                                         <label id="detailCompany" value="-"/>
                                     </row>
                                 </rows>
