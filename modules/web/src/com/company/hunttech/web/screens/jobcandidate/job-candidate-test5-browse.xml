@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Эскиз 5: DataGrid с раскрывающимися деталями строк (Row Details) в теме CUBA Halo -->
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="Тест 5: Row Expansion (Details)"
+        messagesPack="com.company.hunttech.web.screens.jobcandidate"
+        icon="LIST">
+    <data readOnly="true">
+        <collection id="jobCandidatesDc"
+                    class="com.company.hunttech.entity.JobCandidate"
+                    view="jobCandidate-view">
+            <loader id="jobCandidatesDl">
+                <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]></query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="700" width="1100"/>
+
+    <layout expand="candidatesDataGrid" spacing="true" width="100%" height="100%">
+        <!-- Верхняя панель управления -->
+        <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar">
+            <label value="Эскиз 5: DataGrid с раскрытием строк" stylename="h2" align="MIDDLE_LEFT"/>
+            <button id="createBtn" action="candidatesDataGrid.create" stylename="primary"/>
+            <button id="editBtn" action="candidatesDataGrid.edit"/>
+            <button id="refreshBtn" action="candidatesDataGrid.refresh"/>
+        </hbox>
+
+        <!-- DataGrid с раскрытием генератора деталей (Row Details) -->
+        <dataGrid id="candidatesDataGrid"
+                  width="100%"
+                  height="100%"
+                  dataContainer="jobCandidatesDc">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="refresh" type="refresh"/>
+            </actions>
+            <columns>
+                <column property="fullName" caption="ФИО Кандидата"/>
+                <column property="personPosition" caption="Должность"/>
+                <column property="cityOfResidence" caption="Город"/>
+                <column property="createTs" caption="Дата создания"/>
+            </columns>
+        </dataGrid>
+    </layout>
+</window>
