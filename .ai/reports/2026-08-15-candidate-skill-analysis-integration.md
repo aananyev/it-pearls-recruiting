@@ -6,6 +6,7 @@
 * **Перечисление уровней критичности:** `com.company.hunttech.entity.CandidateSkillPriority` (MAIN / 10, SECONDARY / 20, TERTIARY / 30)
 * **Используемый сервис анализа навыков:** `hunttech_SkillAnalysisService` (`SkillAnalysisService`)
 * **Точка интеграции в UI:** Экран редактирования резюме `hunttech_CandidateCV.edit` (`CandidateCVEdit.java`, `candidate-cv-edit.xml`), вкладка «Текст резюме» (`tabCV`), кнопка **«Сканировать навыки»** (`scanCandidateSkillsButton`).
+* **Всплывающее уведомление:** TRAY-нотификация с подробной статистикой обнаруженных/сохраненных навыков и автоматическим скрытием через **5 секунд** (`withHideDelayMs(5000)`).
 * **Миграции базы данных:**
   * Liquibase: `modules/core/db/changelog/260815-2-addCandidateSkillEntity.xml` (включена в `db.changelog-master.xml`)
   * SQL: `modules/core/db/update/postgres/26/260815-2-addCandidateSkillEntity.sql`
@@ -57,8 +58,13 @@ CREATE UNIQUE INDEX IF NOT EXISTS IDX_HUNTTECH_CANDIDATE_SKILL_UNQ
    * Навыки сохраняются в строгом приоритетном порядке (MAIN → SECONDARY → TERTIARY), дубликаты среди уровней исключаются.
    * Новые записи `CandidateSkill` атомарно сохраняются через `DataManager.commit()`.
 
-5. **Оповещение пользователя:**
-   * Выводится всплывающее уведомление `HUMANIZED` с точным количеством распознанных и сохраненных новых навыков.
+5. **Всплывающая статистика (5 секунд):**
+   * Выводится структурированное HTML-оповещение с таймером автоскрытия `5000 мс`:
+     * Всего обнаружено навыков: `N`
+     * • Основных: `X`
+     * • Второстепенных: `Y`
+     * • Третьестепенных: `Z`
+     * ✅ Сохранено новых: `K` (Уже присутствуют: `M`).
 
 ---
 

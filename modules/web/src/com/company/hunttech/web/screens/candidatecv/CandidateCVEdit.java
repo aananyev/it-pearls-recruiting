@@ -1158,20 +1158,39 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 }
             }
 
+            int mainDetected = mainSkills != null ? mainSkills.size() : 0;
+            int secondaryDetected = secondarySkills != null ? secondarySkills.size() : 0;
+            int tertiaryDetected = tertiarySkills != null ? tertiarySkills.size() : 0;
+            int totalDetected = mainDetected + secondaryDetected + tertiaryDetected;
+            int savedCount = toSave.size();
+            int existingOrDuplicate = totalDetected - savedCount;
+
             if (!toSave.isEmpty()) {
                 CommitContext commitContext = new CommitContext(toSave);
                 dataManager.commit(commitContext);
-
-                notifications.create(Notifications.NotificationType.HUMANIZED)
-                        .withCaption("Анализ навыков завершен")
-                        .withDescription("Успешно распознано и сохранено новых навыков для кандидата: " + toSave.size())
-                        .show();
-            } else {
-                notifications.create(Notifications.NotificationType.HUMANIZED)
-                        .withCaption("Анализ навыков")
-                        .withDescription("Новых навыков не обнаружено (ранее сохранено: " + existingSkillIds.size() + ").")
-                        .show();
             }
+
+            String statsDescription = String.format(
+                    "Всего обнаружено навыков: <b>%d</b><br/>" +
+                    "• Основных: <b>%d</b><br/>" +
+                    "• Второстепенных: <b>%d</b><br/>" +
+                    "• Третьестепенных: <b>%d</b><br/>" +
+                    "──────────────────────<br/>" +
+                    "✅ Сохранено новых: <b>%d</b>%s",
+                    totalDetected,
+                    mainDetected,
+                    secondaryDetected,
+                    tertiaryDetected,
+                    savedCount,
+                    (existingOrDuplicate > 0 ? "<br/>ℹ️ Уже присутствуют у кандидата: <b>" + existingOrDuplicate + "</b>" : "")
+            );
+
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption("Статистика анализа навыков")
+                    .withDescription(statsDescription)
+                    .withContentMode(ContentMode.HTML)
+                    .withHideDelayMs(5000)
+                    .show();
 
         } catch (Exception ex) {
             notifications.create(Notifications.NotificationType.ERROR)
