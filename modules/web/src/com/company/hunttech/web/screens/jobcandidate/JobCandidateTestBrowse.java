@@ -1,5 +1,6 @@
 package com.company.hunttech.web.screens.jobcandidate;
 
+import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
@@ -24,54 +25,123 @@ import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 
 import javax.inject.Inject;
 
+/**
+ * Контроллер базового тестового экрана просмотра кандидатов «Split-View Halo».
+ * <p>
+ * Реализует просмотр кандидатов с левым сайдбаром в теме CUBA Halo:
+ * <ul>
+ *   <li>Центрированные ФИО (+30% шрифт), плашка должности и город проживания.</li>
+ *   <li>Динамический поиск и отображение зарплатных ожиданий кандидата из связанных сущностей IteractionList.</li>
+ *   <li>Стилизованные разделы сайдбара с линиями над и под заголовком (по аналогии с Edit-формами).</li>
+ * </ul>
+ *
+ * @see JobCandidate
+ * @see IteractionList
+ */
 @UiController("hunttech_JobCandidateTest.browse")
 @UiDescriptor("job-candidate-test-browse.xml")
 @LookupComponent("candidatesTable")
 @LoadDataBeforeShow
 public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
 
+    /* =========================================================================
+     * Инъекции компонентов UI и сервисов
+     * ========================================================================= */
+
+    /** Таблица реестра кандидатов */
     @Inject
     private GroupTable<JobCandidate> candidatesTable;
+
+    /** Загрузчик данных реестра */
     @Inject
     private CollectionLoader<JobCandidate> jobCandidatesDl;
+
+    /** Построитель диалоговых экранов */
     @Inject
     private ScreenBuilders screenBuilders;
+
+    /** Фабрика UI-компонентов */
     @Inject
     private UiComponents uiComponents;
 
-    @Inject
-    private WebOvaFallbackImage detailPic;
-    @Inject
-    private Label<String> detailFullName;
-    @Inject
-    private Label<String> detailPosition;
-    @Inject
-    private Label<String> detailCity;
-    @Inject
-    private Label<String> detailPhone;
-    @Inject
-    private Label<String> detailEmail;
-    @Inject
-    private Label<String> detailTelegram;
-    @Inject
-    private Label<String> detailCompany;
-    @Inject
-    private Label<String> detailInteractionsInfo;
-    @Inject
-    private Button editCandidateBtn;
-    @Inject
-    private Button createInteractionBtn;
+    /** Сервис DataManager для выполнения прямых запросов к БД */
     @Inject
     private com.haulmont.cuba.core.global.DataManager dataManager;
+
+    /* =========================================================================
+     * Поля левого профильного сайдбара
+     * ========================================================================= */
+
+    /** Овальный фото-аватар кандидата */
+    @Inject
+    private WebOvaFallbackImage detailPic;
+
+    /** Заголовок с ФИО выбранного кандидата */
+    @Inject
+    private Label<String> detailFullName;
+
+    /** Подзаголовок с наименованием должности */
+    @Inject
+    private Label<String> detailPosition;
+
+    /** Метка города проживания */
+    @Inject
+    private Label<String> detailCity;
+
+    /** Номер телефона */
+    @Inject
+    private Label<String> detailPhone;
+
+    /** Адрес электронной почты */
+    @Inject
+    private Label<String> detailEmail;
+
+    /** Имя в Telegram */
+    @Inject
+    private Label<String> detailTelegram;
+
+    /** Наименование текущей компании */
+    @Inject
+    private Label<String> detailCompany;
+
+    /** Заголовок поля зарплатных ожиданий */
     @Inject
     private Label<String> detailSalaryCaption;
+
+    /** Значение зарплатных ожиданий кандидата */
     @Inject
     private Label<String> detailSalary;
+
+    /** Сводка по истории взаимодействий */
+    @Inject
+    private Label<String> detailInteractionsInfo;
+
+    /** Кнопка открытия формы редактирования */
+    @Inject
+    private Button editCandidateBtn;
+
+    /** Кнопка быстрого создания взаимодействия */
+    @Inject
+    private Button createInteractionBtn;
+
+    /** Поле быстрого поиска кандидатов */
     @Inject
     private TextField<String> searchField;
 
+    /* =========================================================================
+     * Бизнес-логика извлечения зарплатных ожиданий
+     * ========================================================================= */
+
+    /**
+     * Извлекает зарплатные ожидания кандидата из сущности IteractionList.
+     *
+     * @param candidate кандидат
+     * @return строка с суммой ожиданий либо null
+     */
     private String getSalaryExpectations(JobCandidate candidate) {
         if (candidate == null) return null;
+        
+        // 1. Поиск во встроенной коллекции
         if (candidate.getIteractionList() != null) {
             for (com.company.hunttech.entity.IteractionList it : candidate.getIteractionList()) {
                 if (it.getIteractionType() != null &&
@@ -83,6 +153,8 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
                 }
             }
         }
+        
+        // 2. Резервный запрос в БД через DataManager
         try {
             java.util.List<com.company.hunttech.entity.IteractionList> list = dataManager.load(com.company.hunttech.entity.IteractionList.class)
                     .query("select e from hunttech_IteractionList e where e.iteractionType.iterationName like :name and e.candidate = :cand order by e.createTs desc")
@@ -97,9 +169,15 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         return null;
     }
 
+    /* =========================================================================
+     * Инициализация и обработчики событий
+     * ========================================================================= */
+
+    /**
+     * Инициализация экрана: генератор аватара в первой колонке.
+     */
     @Subscribe
     public void onInit(Screen.InitEvent event) {
-        // Генератор фото-аватара в первой колонке таблицы
         candidatesTable.addGeneratedColumn("avatar", candidate -> {
             WebOvaFallbackImage avatarImg = uiComponents.create(WebOvaFallbackImage.class);
             avatarImg.setWidth("36px");
@@ -115,6 +193,9 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         });
     }
 
+    /**
+     * Обработчик выбора строки в таблице: заполняет сайдбар.
+     */
     @Subscribe("candidatesTable")
     public void onCandidatesTableSelection(Table.SelectionEvent<JobCandidate> event) {
         JobCandidate selected = candidatesTable.getSingleSelected();
@@ -125,6 +206,9 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         }
     }
 
+    /**
+     * Сброс сайдбара в пустое состояние.
+     */
     private void clearDetailPane() {
         detailFullName.setHtmlEnabled(true);
         detailFullName.setValue("<div style='text-align: center; font-size: 21px; font-weight: 700; color: #7f8c8d;'>Выберите кандидата</div>");
@@ -142,6 +226,12 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         createInteractionBtn.setEnabled(false);
     }
 
+    /**
+     * Заполнение сайдбара данными выбранного кандидата:
+     * центрированная шапка (+30% шрифт), контакты, зарплата и счетчик взаимодействий.
+     *
+     * @param candidate выбранный кандидат
+     */
     private void populateDetailPane(JobCandidate candidate) {
         String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
         detailFullName.setHtmlEnabled(true);
