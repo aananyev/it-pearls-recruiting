@@ -320,7 +320,18 @@ Strictly follow this **numbered** structure when creating or updating documentat
    `gh pr merge N --merge --delete-branch`.
 4. **Сборки/деплой сериализовать**: один gradle-процесс в момент времени
    (два параллельных = deadlock на кэше, FTS-локи, SIGKILL); деплой только
-   из чистой ветки master, когда копия свободна.
+   из чистой ветки master, когда копия свободна. Локальный деплой/рестарт
+   Tomcat — ТОЛЬКО через `scripts/start-app.sh` (shlock-mutex
+   `deploy/.local-deploy.lock`, проверки git/gradle/порта 8080, лог
+   `deploy/tomcat/logs/local-deploy.log`); прямые `./gradlew deploy` и
+   `startup.sh` мимо скрипта запрещены, smoke на своей ветке —
+   `scripts/start-app.sh --force` при свободном mutex.
+   **Исключение (2026-08-15):** агент-разработчик может поднять СВОЮ ветку
+   на общем Tomcat для проверки UI через `scripts/start-app.sh --branch <worktree>`
+   (guard'ы: без merge-конфликтов, без новых миграций относительно
+   origin/master, mutex; миграции на общую БД — только Hermes-1); после
+   проверки вернуть master (`start-app.sh` без флагов). gradle-прогоны
+   агентов — только через `scripts/agent-gradle.sh <args>` (тот же mutex).
 5. **Конфликты shared-файлов** (`styles.scss` ×7 тем, `messages*`,
    `build.gradle`, `docs/README.md`) резолвит **автор ветки**, беря обе
    стороны; version бампает только pre-commit hook.

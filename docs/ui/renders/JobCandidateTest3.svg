@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="600" fill="#f4f5f7"/>
+
+  <!-- Top KPI metrics dashboard -->
+  <!-- Card 1 -->
+  <rect x="15" y="15" width="227" height="70" rx="6" fill="#ffffff" filter="url(#shadow)"/>
+  <rect x="15" y="15" width="4" height="70" rx="2" fill="#3b82f6"/>
+  <text x="35" y="38" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#64748b">Всего кандидатов</text>
+  <text x="35" y="68" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#1e293b">145</text>
+
+  <!-- Card 2 -->
+  <rect x="257" y="15" width="227" height="70" rx="6" fill="#ffffff" filter="url(#shadow)"/>
+  <rect x="257" y="15" width="4" height="70" rx="2" fill="#f59e0b"/>
+  <text x="277" y="38" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#64748b">Первичный контакт</text>
+  <text x="277" y="68" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#1e293b">37</text>
+
+  <!-- Card 3 -->
+  <rect x="499" y="15" width="227" height="70" rx="6" fill="#ffffff" filter="url(#shadow)"/>
+  <rect x="499" y="15" width="4" height="70" rx="2" fill="#8b5cf6"/>
+  <text x="519" y="38" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#64748b">На этапе интервью</text>
+  <text x="519" y="68" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#1e293b">42</text>
+
+  <!-- Card 4 -->
+  <rect x="741" y="15" width="244" height="70" rx="6" fill="#ffffff" filter="url(#shadow)"/>
+  <rect x="741" y="15" width="4" height="70" rx="2" fill="#10b981"/>
+  <text x="761" y="38" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#64748b">Приняты / Оффер</text>
+  <text x="761" y="68" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#1e293b">18</text>
+
+  <!-- Kanban Pipeline columns (4 columns) -->
+  <!-- Column 1: Новый контакт -->
+  <rect x="15" y="105" width="232" height="480" rx="6" fill="#e2e8f0"/>
+  <rect x="15" y="105" width="232" height="40" rx="6" fill="#cbd5e1"/>
+  <text x="30" y="130" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b">1. Новый контакт</text>
+  
+  <!-- Candidate Card 1-1 -->
+  <rect x="25" y="155" width="212" height="65" rx="6" fill="#ffffff" filter="url(#shadow)"/>
+  <circle cx="50" cy="187" r="16" fill="#bfdbfe"/>
+  <text x="50" y="191" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#2563eb">АИ</text>
+  <text x="76" y="180" font-family="Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b">Алексей Иванов</text>
+  <text x="76" y="197" font-family="Arial, sans-serif" font-size="11" fill="#64748b">Java Developer</text>
+
+  <!-- Candidate Card 1-2 -->
+  <rect x="25" y="230" width="212" height="65" rx="6" fill="#ffffff" filter="url(#shadow)"/>
+  <circle cx="50" cy="262" r="16" fill="#fed7aa"/>
+  <text x="50" y="266" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#ea580c">МП</text>
+  <text x="76" y="255" font-family="Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b">Мария Петрова</text>
+  <text x="76" y="272" font-family="Arial, sans-serif" font-size="11" fill="#64748b">QA Engineer</text>
+
+  <!-- Column 2: Интервью -->
+  <rect x="262" y="105" width="232" height="480" rx="6" fill="#e2e8f0"/>
+  <rect x="262" y="105" width="232" height="40" rx="6" fill="#cbd5e1"/>
+  <text x="277" y="130" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b">2. Интервью</text>
+  
+  <!-- Candidate Card 2-1 -->
+  <rect x="272" y="155" width="212" height="65" rx="6" fill="#ffffff" filter="url(#shadow)"/>
+  <circle cx="297" cy="187" r="16" fill="#bbf7d0"/>
+  <text x="297" y="191" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#16a34a">СБ</text>
+  <text x="323" y="180" font-family="Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b">Сергей Борисов</text>
+  <text x="323" y="197" font-family="Arial, sans-serif" font-size="11" fill="#64748b">DevOps Engineer</text>
+
+  <!-- Column 3: У заказчика -->
+  <rect x="509" y="105" width="232" height="480" rx="6" fill="#e2e8f0"/>
+  <rect x="509" y="105" width="232" height="40" rx="6" fill="#cbd5e1"/>
+  <text x="524" y="130" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b">3. У заказчика</text>
+  
+  <!-- Candidate Card 3-1 -->
+  <rect x="519" y="155" width="212" height="65" rx="6" fill="#ffffff" filter="url(#shadow)"/>
+  <circle cx="544" cy="187" r="16" fill="#fbcfe8"/>
+  <text x="544" y="191" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#db2777">ЕК</text>
+  <text x="570" y="180" font-family="Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b">Елена Козлова</text>
+  <text x="570" y="197" font-family="Arial, sans-serif" font-size="11" fill="#64748b">Product Manager</text>
+
+  <!-- Column 4: Оффер / Нанят -->
+  <rect x="756" y="105" width="229" height="480" rx="6" fill="#e2e8f0"/>
+  <rect x="756" y="105" width="229" height="40" rx="6" fill="#cbd5e1"/>
+  <text x="771" y="130" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b">4. Оффер / Нанят</text>
+  
+  <!-- Candidate Card 4-1 -->
+  <rect x="765" y="155" width="210" height="65" rx="6" fill="#ffffff" filter="url(#shadow)"/>
+  <circle cx="790" cy="187" r="16" fill="#ddd6fe"/>
+  <text x="790" y="191" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="700" fill="#6d28d9">ДМ</text>
+  <text x="816" y="180" font-family="Arial, sans-serif" font-size="12.5" font-weight="700" fill="#1e293b">Дмитрий Морозов</text>
+  <text x="816" y="197" font-family="Arial, sans-serif" font-size="11" fill="#64748b">Frontend Developer</text>
+</svg>
