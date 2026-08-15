@@ -105,11 +105,25 @@ public class JobCandidateTest4Browse extends StandardLookup<JobCandidate> {
         String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Инженер ПО";
         posLbl.setValue("<span style='background: rgba(43, 130, 201, 0.15); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;'>" + pos + "</span>");
 
+        Label<String> statusPill = uiComponents.create(Label.NAME);
+        statusPill.setHtmlEnabled(true);
+        int statusIdx = Math.abs(candidate.hashCode()) % 3;
+        String statusHtml;
+        if (statusIdx == 0) {
+            statusHtml = "<span style='background: #27ae60; color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;'>Активен</span>";
+        } else if (statusIdx == 1) {
+            statusHtml = "<span style='background: #e67e22; color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;'>На интервью</span>";
+        } else {
+            statusHtml = "<span style='background: #f39c12; color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;'>Оффер</span>";
+        }
+        statusPill.setValue(statusHtml);
+
         infoBox.add(nameLbl);
         infoBox.add(posLbl);
 
         topRow.add(img);
         topRow.add(infoBox);
+        topRow.add(statusPill);
         topRow.expand(infoBox);
 
         // Строка дополнительной информации: Локация + Ожидания по зарплате

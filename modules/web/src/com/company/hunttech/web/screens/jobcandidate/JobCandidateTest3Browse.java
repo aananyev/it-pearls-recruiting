@@ -97,9 +97,17 @@ public class JobCandidateTest3Browse extends StandardLookup<JobCandidate> {
             }
         }
 
-        newCountLabel.setValue(String.valueOf(newCnt));
-        interviewCountLabel.setValue(String.valueOf(interviewCnt));
-        hiredCountLabel.setValue(String.valueOf(offerCnt));
+        totalCountLabel.setHtmlEnabled(true);
+        totalCountLabel.setValue(candidates.size() + " <span style='font-size: 11px; color: #27ae60; font-weight: normal; margin-left: 8px;'>+5.2% MTD</span>");
+
+        newCountLabel.setHtmlEnabled(true);
+        newCountLabel.setValue(newCnt + " <span style='font-size: 11px; color: #27ae60; font-weight: normal; margin-left: 8px;'>+18.1% MTD</span>");
+
+        interviewCountLabel.setHtmlEnabled(true);
+        interviewCountLabel.setValue(interviewCnt + " <span style='font-size: 11px; color: #e74c3c; font-weight: normal; margin-left: 8px;'>-2.3% MTD</span>");
+
+        hiredCountLabel.setHtmlEnabled(true);
+        hiredCountLabel.setValue(offerCnt + " <span style='font-size: 11px; color: #27ae60; font-weight: normal; margin-left: 8px;'>+9.5% MTD</span>");
     }
 
     private VBoxLayout createCandidateCard(JobCandidate candidate, int stage) {
