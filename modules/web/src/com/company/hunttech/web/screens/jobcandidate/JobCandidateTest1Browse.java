@@ -70,6 +70,116 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     @Inject
     private TextField<String> searchField;
 
+    @Inject
+    private com.haulmont.cuba.security.global.UserSession userSession;
+
+    public enum InteractionStatus {
+        FREE("🟢 Свободен (> 1 мес)", "#27ae60", "rgba(39, 174, 96, 0.15)"),
+        MY_CANDIDATE("🟡 В вашей работе (< 1 мес)", "#f39c12", "rgba(243, 156, 18, 0.15)"),
+        OTHER_RECRUITER("🔴 В работе у другого (< 1 мес)", "#e74c3c", "rgba(231, 76, 60, 0.15)");
+
+        private final String label;
+        private final String color;
+        private final String bgColor;
+
+        InteractionStatus(String label, String color, String bgColor) {
+            this.label = label;
+            this.color = color;
+            this.bgColor = bgColor;
+        }
+
+        public String getLabel() { return label; }
+        public String getColor() { return color; }
+        public String getBgColor() { return bgColor; }
+    }
+
+    private InteractionStatus calculateInteractionStatus(JobCandidate candidate) {
+        if (candidate == null) {
+            return InteractionStatus.FREE;
+        }
+        com.company.hunttech.entity.IteractionList last = null;
+        if (candidate.getIteractionList() != null && !candidate.getIteractionList().isEmpty()) {
+            for (com.company.hunttech.entity.IteractionList item : candidate.getIteractionList()) {
+                if (last == null) {
+                    last = item;
+                } else {
+                    java.util.Date d1 = item.getDateIteraction() != null ? item.getDateIteraction() : item.getCreateTs();
+                    java.util.Date d2 = last.getDateIteraction() != null ? last.getDateIteraction() : last.getCreateTs();
+                    if (d1 != null && (d2 == null || d1.after(d2))) {
+                        last = item;
+                    }
+                }
+            }
+        }
+
+        if (last == null) {
+            return InteractionStatus.FREE;
+        }
+
+        java.util.Date date = last.getDateIteraction() != null ? last.getDateIteraction() : last.getCreateTs();
+        if (date == null) {
+            return InteractionStatus.FREE;
+        }
+
+        java.util.Calendar threshold = java.util.Calendar.getInstance();
+        threshold.setTime(date);
+        threshold.add(java.util.Calendar.MONTH, 1);
+
+        java.util.Calendar now = java.util.Calendar.getInstance();
+
+        if (now.after(threshold)) {
+            return InteractionStatus.FREE;
+        } else {
+            if (last.getRecrutier() != null && userSession.getUser() != null
+                    && !last.getRecrutier().getId().equals(userSession.getUser().getId())) {
+                return InteractionStatus.OTHER_RECRUITER;
+            } else {
+                return InteractionStatus.MY_CANDIDATE;
+            }
+        }
+    }
+
+    @Inject
+    private Button filterAllBtn;
+    @Inject
+    private Button filterFreeBtn;
+    @Inject
+    private Button filterMyBtn;
+    @Inject
+    private Button filterOtherBtn;
+
+    private void updateFilterButtons(Button activeBtn) {
+        filterAllBtn.setStyleName("secondary");
+        filterFreeBtn.setStyleName("secondary");
+        filterMyBtn.setStyleName("secondary");
+        filterOtherBtn.setStyleName("secondary");
+        activeBtn.setStyleName("primary");
+    }
+
+    @Subscribe("filterAllBtn")
+    public void onFilterAllBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterAllBtn);
+        jobCandidatesDl.load();
+    }
+
+    @Subscribe("filterFreeBtn")
+    public void onFilterFreeBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterFreeBtn);
+        jobCandidatesDl.load();
+    }
+
+    @Subscribe("filterMyBtn")
+    public void onFilterMyBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterMyBtn);
+        jobCandidatesDl.load();
+    }
+
+    @Subscribe("filterOtherBtn")
+    public void onFilterOtherBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterOtherBtn);
+        jobCandidatesDl.load();
+    }
+
     @Subscribe
     public void onInit(Screen.InitEvent event) {
         candidatesTable.addGeneratedColumn("avatar", candidate -> {
@@ -83,6 +193,68 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             // Фото берётся из карточки кандидата, а при его отсутствии — из последнего резюме (CandidateCV)
             FileDescriptorImageHelper.setCandidateFace(avatarImg, fileLoader, resolveCandidateFace(candidate));
             return avatarImg;
+        });
+
+        candidatesTable.addGeneratedColumn("candidateInfo", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
+            String sub = candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() :
+                    (candidate.getEmail() != null ? candidate.getEmail() : "");
+            lbl.setValue("<div><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
+                    (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>");
+            return lbl;
+        });
+
+        candidatesTable.addGeneratedColumn("personPositionFormatted", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
+            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + pos + "</span>");
+            return lbl;
+        });
+
+        candidatesTable.addGeneratedColumn("cityFormatted", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
+            lbl.setValue("<span style='font-size: 12px; color: #34495e;'>📍 " + city + "</span>");
+            return lbl;
+        });
+
+        candidatesTable.addGeneratedColumn("companyFormatted", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String company = "-";
+            if (candidate.getCurrentCompany() != null) {
+                company = candidate.getCurrentCompany().getComanyName() != null ?
+                        candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
+            }
+            lbl.setValue("<span style='font-size: 12px; color: #34495e;'>🏢 " + (company != null ? company : "-") + "</span>");
+            return lbl;
+        });
+
+        candidatesTable.addGeneratedColumn("lastInteractionStatus", candidate -> {
+            Label<String> statusLbl = uiComponents.create(Label.NAME);
+            statusLbl.setHtmlEnabled(true);
+            InteractionStatus status = calculateInteractionStatus(candidate);
+            statusLbl.setValue("<span style='background: " + status.getBgColor() + "; color: " + status.getColor() +
+                    "; padding: 3px 8px; border-radius: 12px; font-weight: 600; font-size: 11px; display: inline-block;'>" +
+                    status.getLabel() + "</span>");
+            return statusLbl;
+        });
+
+        candidatesTable.addGeneratedColumn("rowActions", candidate -> {
+            Button openBtn = uiComponents.create(Button.class);
+            openBtn.setCaption("Открыть");
+            openBtn.setStyleName("primary");
+            openBtn.addClickListener(e -> {
+                screenBuilders.editor(candidatesTable)
+                        .editEntity(candidate)
+                        .withOpenMode(OpenMode.DIALOG)
+                        .show();
+            });
+            return openBtn;
         });
     }
 
@@ -123,7 +295,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         detailEmail.setValue("-");
         detailTelegram.setValue("-");
         detailCompany.setValue("-");
-        detailInteractionsInfo.setValue("Выберите кандидата в таблице слева для просмотра истории.");
+        detailInteractionsInfo.setValue("Выберите кандидата в таблице справа для просмотра истории.");
         detailPic.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         editCandidateBtn.setEnabled(false);
         createInteractionBtn.setEnabled(false);
@@ -155,13 +327,12 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         // если файла нет в хранилище — автоматический fallback без битой картинки
         FileDescriptorImageHelper.setCandidateFace(detailPic, fileLoader, resolveCandidateFace(candidate));
 
+        InteractionStatus status = calculateInteractionStatus(candidate);
         int count = candidate.getIteractionList() != null ? candidate.getIteractionList().size() : 0;
         detailInteractionsInfo.setHtmlEnabled(true);
-        detailInteractionsInfo.setValue("<div style='background: #f8f9fa; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #2980b9; margin-top: 6px; font-size: 12px; line-height: 1.6;'>" +
-                "<b>⏱ Последняя активность по кандидату:</b><br/>" +
-                "• Получен отклик с профиля<br/>" +
-                "• Назначено интервью с рекрутером<br/>" +
-                "• Зарегистрировано взаимодействий: <b>" + count + "</b>" +
+        detailInteractionsInfo.setValue("<div style='background: #f8f9fa; padding: 10px 14px; border-radius: 6px; border-left: 4px solid " + status.getColor() + "; margin-top: 6px; font-size: 12px; line-height: 1.6;'>" +
+                "<b>Статус рекрутера:</b> <span style='color: " + status.getColor() + "; font-weight: bold;'>" + status.getLabel() + "</span><br/>" +
+                "• Всего зарегистрированных актов: <b>" + count + "</b>" +
                 "</div>");
 
         editCandidateBtn.setEnabled(true);
