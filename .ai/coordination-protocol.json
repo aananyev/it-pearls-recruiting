@@ -1,18 +1,38 @@
 {
-  "Hermes → ChatGPT": {
-    "description": "Hermes пишет сюда результаты сборок, найденные ошибки, задачи на исправление",
-    "actions": [
-      "create_pr_finding",
-      "build_report",
-      "verification_result",
-      "error_fix_request"
-    ]
+  "agents": {
+    "Hermes-1 (CI/CD)": {
+      "role": "проверка PR, merge, deploy, restart, миграции, отчёты, pr-watcher",
+      "reads": [".ai/instructions/", ".ai/tasks/", "PR-описания и комментарии"],
+      "writes": [".ai/reports/", "PR-комментарии", "метки WAITING_FOR_HERMES"]
+    },
+    "Hermes-2 (разработка)": {
+      "role": "фичи, ветки agent/*, PR; своя сессия Hermes в своём worktree",
+      "reads": [".ai/instructions/", ".ai/reports/", "PR-статусы"],
+      "writes": [".ai/instructions/", "ветки agent/*", "PR с описанием"]
+    },
+    "Antigravity (разработка)": {
+      "role": "второй поток фич: Antigravity IDE (agentic IDE Google, launcher ~/bin/antigravity-ide, форвардер 127.0.0.1:18080 → 209.46.2.183); свой worktree, ветки agent/*, PR",
+      "reads": [".ai/instructions/", ".ai/reports/", "PR-статусы"],
+      "writes": [".ai/instructions/", "ветки agent/*", "PR с описанием"]
+    }
   },
-  "ChatGPT → Hermes": {
-    "description": "ChatGPT создаёт PR, указывает статус и что сделано",
-    "actions": [
-      "pr_created",
-      "status_update"
-    ]
+  "channels": {
+    "Hermes-1 → разработчики": {
+      "description": "Hermes-1 пишет сюда результаты сборок, найденные ошибки, задачи на исправление",
+      "actions": ["create_pr_finding", "build_report", "verification_result", "error_fix_request"]
+    },
+    "Hermes-2/Antigravity → Hermes-1": {
+      "description": "Разработчики создают PR, указывают статус и что сделано",
+      "actions": ["pr_created", "status_update"]
+    },
+    "Общий git": {
+      "description": "Ветки agent/*, PR (base=master), merge только Hermes-1 после проверки и согласия пользователя",
+      "rules": [
+        "один агент = одна ветка + свой worktree",
+        "рабочее дерево держать чистым (коммит + push после каждого шага)",
+        "один gradle-процесс в момент времени",
+        "конфликты shared-файлов (styles.scss x7, messages, build.gradle) резолвит автор ветки, беря обе стороны"
+      ]
+    }
   }
 }
