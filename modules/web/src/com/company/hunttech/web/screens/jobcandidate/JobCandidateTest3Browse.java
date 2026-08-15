@@ -73,10 +73,8 @@ public class JobCandidateTest3Browse extends StandardLookup<JobCandidate> {
 
         for (int i = 0; i < candidates.size(); i++) {
             JobCandidate candidate = candidates.get(i);
-            VBoxLayout card = createCandidateCard(candidate);
-
-            // Имитация распределения по колонкам для демонстрации Kanban
             int stage = i % 4;
+            VBoxLayout card = createCandidateCard(candidate, stage);
             switch (stage) {
                 case 0:
                     containerColNew.add(card);
@@ -104,21 +102,22 @@ public class JobCandidateTest3Browse extends StandardLookup<JobCandidate> {
         hiredCountLabel.setValue(String.valueOf(offerCnt));
     }
 
-    private VBoxLayout createCandidateCard(JobCandidate candidate) {
+    private VBoxLayout createCandidateCard(JobCandidate candidate, int stage) {
         VBoxLayout card = uiComponents.create(VBoxLayout.class);
         card.setStyleName("edit-card");
         card.setWidthFull();
         card.setSpacing(true);
 
+        // Шапка карточки: Фото + ФИО + Должность
         HBoxLayout header = uiComponents.create(HBoxLayout.class);
         header.setSpacing(true);
         header.setWidthFull();
 
         WebOvaFallbackImage img = uiComponents.create(WebOvaFallbackImage.class);
-        img.setWidth("40px");
-        img.setHeight("40px");
-        img.setOvalWidth("40px");
-        img.setOvalHeight("40px");
+        img.setWidth("44px");
+        img.setHeight("44px");
+        img.setOvalWidth("44px");
+        img.setOvalHeight("44px");
         img.setFallbackThemePath("icons/no-programmer.jpeg");
         img.setScaleMode(Image.ScaleMode.SCALE_DOWN);
 
@@ -130,13 +129,13 @@ public class JobCandidateTest3Browse extends StandardLookup<JobCandidate> {
         nameBox.setSpacing(false);
 
         Label<String> nameLbl = uiComponents.create(Label.TYPE_STRING);
-        nameLbl.setValue(candidate.getFullName() != null ? candidate.getFullName() : "Без имени");
+        String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
+        nameLbl.setValue(name);
         nameLbl.setStyleName("bold");
 
-        Label<String> posLbl = uiComponents.create(Label.TYPE_STRING);
-        String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "";
-        posLbl.setValue(pos != null ? pos : "");
-        posLbl.setStyleName("small");
+        Label<String> posLbl = uiComponents.create(Label.TYPE_HTML);
+        String posName = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Разработчик";
+        posLbl.setValue("<span style='background: rgba(0,123,255,0.15); color: #2b82c9; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;'>" + posName + "</span>");
 
         nameBox.add(nameLbl);
         nameBox.add(posLbl);
@@ -145,7 +144,52 @@ public class JobCandidateTest3Browse extends StandardLookup<JobCandidate> {
         header.add(nameBox);
         header.expand(nameBox);
 
+        // Инфо-строка: Рейтинг + Локация
+        HBoxLayout infoRow = uiComponents.create(HBoxLayout.class);
+        infoRow.setSpacing(true);
+        infoRow.setWidthFull();
+
+        Label<String> ratingLbl = uiComponents.create(Label.TYPE_HTML);
+        double rating = 4.2 + (Math.abs(candidate.hashCode()) % 8) / 10.0;
+        ratingLbl.setValue("<span style='color: #f39c12; font-weight: bold;'>★ " + String.format("%.1f", rating) + "</span>");
+
+        Label<String> cityLbl = uiComponents.create(Label.TYPE_HTML);
+        String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
+        cityLbl.setValue("<span style='color: #7f8c8d; font-size: 11px;'>📍 " + city + "</span>");
+
+        infoRow.add(ratingLbl);
+        infoRow.add(cityLbl);
+
+        // Блок навыков / Теги
+        Label<String> skillsLbl = uiComponents.create(Label.TYPE_HTML);
+        skillsLbl.setValue("<div style='display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px;'>" +
+                "<span style='background: #ecf0f1; color: #34495e; padding: 1px 5px; border-radius: 3px; font-size: 10px;'>Java</span>" +
+                "<span style='background: #ecf0f1; color: #34495e; padding: 1px 5px; border-radius: 3px; font-size: 10px;'>Spring</span>" +
+                "<span style='background: #ecf0f1; color: #34495e; padding: 1px 5px; border-radius: 3px; font-size: 10px;'>PostgreSQL</span>" +
+                "</div>");
+
+        // Нижние кнопки действий
+        HBoxLayout btnRow = uiComponents.create(HBoxLayout.class);
+        btnRow.setSpacing(true);
+        btnRow.setWidthFull();
+
+        com.haulmont.cuba.gui.components.Button profileBtn = uiComponents.create(com.haulmont.cuba.gui.components.Button.class);
+        profileBtn.setCaption("Карточка");
+        profileBtn.setStyleName("small primary");
+        profileBtn.setIcon("font-icon:USER");
+
+        com.haulmont.cuba.gui.components.Button msgBtn = uiComponents.create(com.haulmont.cuba.gui.components.Button.class);
+        msgBtn.setCaption("Чат");
+        msgBtn.setStyleName("small");
+        msgBtn.setIcon("font-icon:COMMENTS");
+
+        btnRow.add(profileBtn);
+        btnRow.add(msgBtn);
+
         card.add(header);
+        card.add(infoRow);
+        card.add(skillsLbl);
+        card.add(btnRow);
         return card;
     }
 }
