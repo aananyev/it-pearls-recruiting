@@ -1,6 +1,8 @@
 # Company Edit (`hunttech_Company.edit`)
 
 > Сущность: [Company.md](../../entities/company/Company.md)
+>
+> ⚠️ **Актуальная каноническая версия:** [docs/ui/CompanyEdit_Spec.md](../../ui/CompanyEdit_Spec.md) (2026-08-14, рефакторинг по контракту Edit-форм). Этот legacy-документ сохранён для истории; технические разделы ниже актуализированы по состоянию на 2026-08-14.
 
 ---
 
@@ -33,6 +35,7 @@
 | **Lookup-компонент** | `` |
 | **EditedEntityContainer** | `companyDc` |
 | **focusComponent** | `companyOwnershipField` |
+| **dialogMode** | `height="100%" width="100%" modal="true"` (контракт §5.3, с 2026-08-14) |
 | **Меню** | `web-menu.xml` → `screen="hunttech_Company.edit"` (если есть пункт) |
 | **Загрузка данных** | `@LoadDataBeforeShow` |
 
@@ -103,7 +106,7 @@ select e from hunttech_Ownershup e
 | Экран | Что происходит при открытии |
 |-------|----------------------------|
 | Browse | Перед показом применяются фильтры «только наш клиент» / «только юрлицо»; после загрузки списка кэшируются текстовые описания для подсказок в колонках |
-| Edit | Для новой записи `ourClient=false`; при первом открытии вкладок лениво подгружаются адрес, описание и департаменты |
+| Edit | Для новой записи `ourClient=false`; при первом открытии вкладок лениво подгружаются адрес, описание и департаменты; sidebar-навигация «Разделы» синхронизирует активный пункт с вкладкой; title sidebar — наименование компании; логотип — `WebOvaFallbackImage` (авто-fallback `icons/no-company.png`) |
 
 ### 4.2 Скрытые вычисления
 
@@ -132,7 +135,9 @@ select e from hunttech_Ownershup e
 
 ### Структура layout
 
-- Корневой layout: `expand` на основную таблицу / форму (`companyOwnershipField`)
+- Двухпанельная компоновка `edit-screen-layout` (с 2026-08-14): sidebar 270px (логотип 176×176 + identity-title + навигация «Разделы» + spacer + hint) и workspace (toolbar + tabSheet `edit-tabs` + footer `edit-footer-actions`)
+- Вкладки: `tabConpanyDetails` (карточки `companyMainCard`/`companyAddressCard` в scrollBox), `companyDescriptionTab` (карточка описания с двумя RichTextArea), `tabCompanyDepartament` (карточка с dataGrid `departmentOfCompanyTable`)
+- Footer: `windowCommitAndClose` (primary) / `windowClose` (secondary), правый нижний угол
 - Фильтр: `filter` → `companyOwnershipsLc`
 - Таблицы: `departmentOfCompanyTable`
 
@@ -149,6 +154,7 @@ select e from hunttech_Ownershup e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Рефакторинг по контракту Edit-форм (эталон ProjectEdit): sidebar 270px, логотип `ovaFallbackImage` 176×176, навигация «Разделы», карточки `edit-card`+`showAsPanel`, footer primary/secondary, `dialogMode` 100%×100% modal; канон — [docs/ui/CompanyEdit_Spec.md](../../ui/CompanyEdit_Spec.md) |
 | 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |
 | 2026-06-26 | Первая версия UI Spec (автогенерация из XML/Java) |

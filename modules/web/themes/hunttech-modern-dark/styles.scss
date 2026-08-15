@@ -36,6 +36,7 @@
 @import "com.company.hunttech/iteraction-editor";
 @import "com.company.hunttech/project-editor";
 @import "com.company.hunttech/company-departament-editor";
+@import "com.company.hunttech/company-editor";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 .hunttech-modern-dark {
@@ -74,7 +75,8 @@
 
   @include iteraction-editor-theme;
   @include project-editor-theme;
-  @include company-departament-editor-theme;
+@include company-departament-editor-theme;
+@include company-editor-theme;
   // Вариант 5 (современный тёмный): табличные и текстовые компоненты.
   // Импорт в конце корневого селектора — после всех include, чтобы при
   // равной специфичности перебивать существующие правила ext-файла темы.
