@@ -154,6 +154,7 @@ select e from hunttech_Ownershup e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Сверка с эталоном (контракт §3.1/§3.6): пункты навигации `height: auto`, wrap-правило удалено, на одноблочных вкладках `label-navigation` скрывается (`TABS_WITH_SIDEBAR_NAVIGATION`) |
 | 2026-08-14 | Рефакторинг по контракту Edit-форм (эталон ProjectEdit): sidebar 270px, логотип `ovaFallbackImage` 176×176, навигация «Разделы», карточки `edit-card`+`showAsPanel`, footer primary/secondary, `dialogMode` 100%×100% modal; канон — [docs/ui/CompanyEdit_Spec.md](../../ui/CompanyEdit_Spec.md) |
 | 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |
 | 2026-06-26 | Business & Context Intro (Living Documentation standard) |

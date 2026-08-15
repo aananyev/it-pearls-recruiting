@@ -76,6 +76,7 @@ Property-биндинги полей: `ourLegalEntity`, `ourClient`, `companyOwn
 
 - Sidebar title: наименование компании по центру (жёлтый `#ffb11b`, 18px/700).
 - Активный пункт навигации «Разделы»: `label-nav-item-active` управляется контроллером (`setNavigationActive`/`resetNavigationActiveStyles`), базовый класс `label-nav-item` не снимается.
+- Видимость навигации (контракт §3.6, эталон OpenPositionEdit): контейнер `label-navigation` показывается только на вкладках с двумя и более блоками ввода (`tabConpanyDetails` — 2 карточки); одноблочные вкладки («Описание компании» — карточка LOB, «Департамент» — dataGrid) скрывают навигацию целиком вместе с заголовком; контейнер и кнопки остаются в XML/Java как контракт инжекции (`TABS_WITH_SIDEBAR_NAVIGATION`).
 - Логотип: `WebOvaFallbackImage` сам читает `fileCompanyLogo` из контейнера и показывает fallback `icons/no-company.png` при отсутствии файла; ручные переключатели пары image (legacy `setCompanyPicImage`, `companyDefaultLogoFileImage`) удалены.
 
 ### 4.3 Валидация и сохранение
@@ -86,7 +87,7 @@ Property-биндинги полей: `ourLegalEntity`, `ourClient`, `companyOwn
 
 | Элемент | Цепочка |
 |---------|---------|
-| Пункт навигации «Разделы» (`companyEditorNavMain/Description/Departments`) | Клик → активный пункт (`label-nav-item-active`) → `mainTab.setSelectedTab(...)` соответствующей вкладки |
+| Пункт навигации «Разделы» (`companyEditorNavMain/Description/Departments`) | Клик → активный пункт (`label-nav-item-active`) → `mainTab.setSelectedTab(...)` соответствующей вкладки; навигация видима только на вкладке `tabConpanyDetails` (правило 3.6) |
 | Вкладка TabSheet | Смена → (бизнес) ленивая загрузка LOB, если ещё не грузилась; (presentation) активный пункт навигации |
 | Загрузчик логотипа (`companyLogoFileUpload`) | Выбор файла → IMMEDIATE в `fileCompanyLogo` → OvaFallbackImage перечитывает контейнер; «Очистить» → сброс значения |
 | `cityOfCompanyField` | Выбор города → reload `city-location-view` → `regionOfCompany`; если регион найден → reload `region-browse-view` → `countryOfCompany` |
@@ -100,7 +101,7 @@ Property-биндинги полей: `ourLegalEntity`, `ourClient`, `companyOwn
 - **Sidebar 270px** (`company-editor` namespace, тёмный `#172638`, `padding: 14px 16px 12px`, border-right + тень, тонкий скроллбар):
   1. visual `edit-sidebar-visual` — `ovaFallbackImage companyLogoFileImage` 176×176 (ovalBackground `#3a3e44`, fallback `icons/no-company.png`, `SCALE_DOWN`) + upload 96×36 (канон §4.1);
   2. identity `edit-sidebar-identity` — живой title `companySidebarTitle` по центру, без подписи типа записи;
-  3. навигация `label-navigation` — полоса-заголовок «Разделы» (`label-nav-title company-editor-navigation-title`, inset-линии §4.1) + 3 пункта 27px (`label-nav-item`, active `#ffb11b`);
+  3. навигация `label-navigation` — полоса-заголовок «Разделы» (`label-nav-title company-editor-navigation-title`, inset-линии §4.1) + 3 пункта 27px (`label-nav-item`, активный `#ffb11b`); пункты по высоте контента (`height: auto`, перенос длинной подписи), локальное wrap-правило с принудительной высотой отсутствует (контракт §3.1); на одноблочных вкладках контейнер скрывается (правило 3.6);
   4. spacer `edit-sidebar-spacer` (100%×100%) + hint `edit-sidebar-hint`.
 - **Workspace**: toolbar (`edit-toolbar-title` 20px + `edit-toolbar-description`), tabSheet `edit-tabs` (НЕ framed; общие стили тем), вкладки:
   - `tabConpanyDetails` — scrollBox `edit-workspace-scroll` → `edit-workspace-content` → карточки `edit-card`+`showAsPanel`: `companyMainCard` («Реквизиты компании») и `companyAddressCard` («Адрес компании»);
@@ -116,4 +117,5 @@ Property-биндинги полей: `ourLegalEntity`, `ourClient`, `companyOwn
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Сверка с эталоном (контракт §3.1/§3.6/§4.1): пункты навигации по высоте контента (`height: auto`), удалено локальное wrap-правило с принудительной высотой, полоса-заголовок `height: auto`; реализовано правило 3.6 — `label-navigation` скрывается на одноблочных вкладках (`TABS_WITH_SIDEBAR_NAVIGATION`) |
 | 2026-08-14 | Рефакторинг по контракту Edit-форм (эталон ProjectEdit): sidebar 270px с логотипом `ovaFallbackImage` 176×176 и навигацией «Разделы» (вкладки), карточки `edit-card`+`showAsPanel`, footer primary/secondary, `dialogMode` 100%×100% modal; `WebOvaFallbackImage` вместо пары image, presentation-навигация в Java; `company-editor.scss` ×7 тем; новый `CompanyEditLayoutContractTest` (7/7) |
