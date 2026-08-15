@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="600" fill="#f4f5f7"/>
+
+  <!-- Top Action Toolbar -->
+  <rect x="15" y="15" width="970" height="50" rx="6" fill="#ffffff" filter="url(#shadow)"/>
+  <text x="30" y="46" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#1e293b">Тест 5: Row Expansion (Details)</text>
+
+  <rect x="350" y="25" width="120" height="30" rx="4" fill="#10b981"/>
+  <text x="410" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="600" fill="#ffffff">Создать</text>
+
+  <rect x="480" y="25" width="120" height="30" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="540" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#475569">Изменить</text>
+
+  <rect x="610" y="25" width="120" height="30" rx="4" fill="#ffffff" stroke="#cbd5e1"/>
+  <text x="670" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#475569">Обновить</text>
+
+  <!-- DataGrid with Row Details -->
+  <rect x="15" y="80" width="970" height="505" rx="6" fill="#ffffff" filter="url(#shadow)"/>
+  
+  <!-- Table Header -->
+  <rect x="15" y="80" width="970" height="35" rx="6" fill="#f8fafc"/>
+  <line x1="15" y1="115" x2="985" y2="115" stroke="#e2e8f0"/>
+  
+  <text x="40" y="102" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#475569">ФИО КАНДИДАТА</text>
+  <text x="300" y="102" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#475569">ДОЛЖНОСТЬ</text>
+  <text x="550" y="102" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#475569">ГОРОД</text>
+  <text x="800" y="102" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#475569">ДАТА СОЗДАНИЯ</text>
+
+  <!-- Row 1: Expanded -->
+  <rect x="15" y="115" width="970" height="40" fill="#eff6ff"/>
+  <text x="25" y="140" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#2563eb">▼  Алексей Иванов</text>
+  <text x="300" y="140" font-family="Arial, sans-serif" font-size="13" fill="#1e293b">Java Developer</text>
+  <text x="550" y="140" font-family="Arial, sans-serif" font-size="13" fill="#1e293b">Москва</text>
+  <text x="800" y="140" font-family="Arial, sans-serif" font-size="13" fill="#64748b">14.08.2026</text>
+  <line x1="15" y1="155" x2="985" y2="155" stroke="#bfdbfe"/>
+
+  <!-- Row Details Area for Row 1 -->
+  <rect x="40" y="165" width="920" height="120" rx="4" fill="#f8fafc" stroke="#bfdbfe"/>
+  
+  <text x="60" y="195" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#1e293b">Детальные контакты и история кандидата: Алексей Иванов</text>
+  
+  <g font-family="Arial, sans-serif" font-size="13" fill="#334155">
+    <text x="60" y="230"><tspan font-weight="700" fill="#64748b">Телефон: </tspan>+7 999 123 4567</text>
+    <text x="300" y="230"><tspan font-weight="700" fill="#64748b">Email: </tspan>alex@hunttech.ru</text>
+    <text x="540" y="230"><tspan font-weight="700" fill="#64748b">Telegram: </tspan>@alex_dev</text>
+    
+    <text x="60" y="262" font-weight="700" fill="#2563eb">Зарегистрировано взаимодействий по вакансиям: 3</text>
+  </g>
+  <line x1="15" y1="295" x2="985" y2="295" stroke="#e2e8f0"/>
+
+  <!-- Row 2 -->
+  <text x="25" y="320" font-family="Arial, sans-serif" font-size="13" fill="#1e293b">►  Мария Петрова</text>
+  <text x="300" y="320" font-family="Arial, sans-serif" font-size="13" fill="#1e293b">QA Engineer</text>
+  <text x="550" y="320" font-family="Arial, sans-serif" font-size="13" fill="#1e293b">Санкт-Петербург</text>
+  <text x="800" y="320" font-family="Arial, sans-serif" font-size="13" fill="#64748b">12.08.2026</text>
+  <line x1="15" y1="335" x2="985" y2="335" stroke="#e2e8f0"/>
+
+  <!-- Row 3 -->
+  <text x="25" y="360" font-family="Arial, sans-serif" font-size="13" fill="#1e293b">►  Сергей Борисов</text>
+  <text x="300" y="360" font-family="Arial, sans-serif" font-size="13" fill="#1e293b">DevOps Engineer</text>
+  <text x="550" y="360" font-family="Arial, sans-serif" font-size="13" fill="#1e293b">Новосибирск</text>
+  <text x="800" y="360" font-family="Arial, sans-serif" font-size="13" fill="#64748b">10.08.2026</text>
+  <line x1="15" y1="375" x2="985" y2="375" stroke="#e2e8f0"/>
+</svg>

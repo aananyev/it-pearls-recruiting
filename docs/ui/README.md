@@ -7,6 +7,7 @@
 | Экран | Документ | Назначение |
 |---|---|---|
 | `JobCandidateEdit` | [JobCandidateEdit_Spec.md](JobCandidateEdit_Spec.md) | Карточка кандидата, вкладки, история вакансий, анализ навыков и защита от OOM |
+| `JobCandidateTestScreens` | [JobCandidateTestScreens_Spec.md](JobCandidateTestScreens_Spec.md) | Пять экспериментальных эскизов (тестовых окон) для просмотра кандидатов |
 | `CandidateCVEdit` | [CandidateCVEdit_Spec.md](CandidateCVEdit_Spec.md) | Подготовка резюме с постоянной live-sidebar кандидата, сопроводительным письмом, деревом навыков, фотографией и файлами без изменения lazy-init |
 | `OpenPositionEditPreview` | [OpenPositionEditPreview_Spec.md](OpenPositionEditPreview_Spec.md) | Изолированный preview новой компоновки вакансии без замены legacy-экрана и изменения бизнес-логики |
 | `ExtUserEdit` | [ExtUserEdit_Spec.md](ExtUserEdit_Spec.md) | Администрирование профиля пользователя, ролей, замещений, email и AI в общем Edit-контракте |
@@ -85,6 +86,7 @@ Living-документация экранов, окон, фрагментов �
 | Detail fragment | `itpearls_JobCanidateDetailScreenFragment` | [itpearls_JobCanidateDetailScreenFragment_Spec.md](itpearls_JobCanidateDetailScreenFragment_Spec.md) |
 | Image face | `itpearls_JobCandidateImageFace` | [itpearls_JobCandidateImageFace_Spec.md](itpearls_JobCandidateImageFace_Spec.md) |
 | Select positions | `itpearls_SelectPersonPositions` | [itpearls_SelectPersonPositions_Spec.md](itpearls_SelectPersonPositions_Spec.md) |
+| Test Screens / Sketches | `hunttech_JobCandidateTest*.browse` | [JobCandidateTestScreens_Spec.md](JobCandidateTestScreens_Spec.md) |
 
 ### CandidateCV
 
@@ -254,6 +256,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-15 | Добавлена спецификация и схемы пяти эскизов экранов просмотра кандидатов [JobCandidateTestScreens_Spec.md](JobCandidateTestScreens_Spec.md) |
 | 2026-08-13 | Добавлена спецификация серии справочных Edit-форм [DictionaryEditForms_Spec.md](DictionaryEditForms_Spec.md) (FileType, SocialNetworkType, Grade, Currency, OutstaffingRates, EmployeeWorkStatus, SignIcons); обновлён OutstaffingRatesEdit_Spec под двухпанельную композицию |
 | 2026-08-01 | Добавлена спецификация изолированного `OpenPositionEditPreview` без замены legacy-экрана, menu/browse integration и изменения бизнес-логики. |
 | 2026-07-29 | Добавлена каноническая спецификация `ExtUserEdit`; экран сопоставлен общему `edit-*`/`label-*` UI API и семи темам. |

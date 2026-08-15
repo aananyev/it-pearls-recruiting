@@ -1,30 +1,42 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Тестовый экран брауза кандидатов по контракту Split-View (Master-Detail) в теме CUBA Halo.
      Не затрагивает основной экран hunttech_JobCandidate.browse. -->
+<!-- Корневой элемент: тестовый экран просмотра кандидатов Split-View -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="Тест: Кандидаты (Split-View Halo)"
         messagesPack="com.company.hunttech.web.screens.jobcandidate"
         icon="USER">
+    <!-- Секция данных экрана: декларативные контейнеры и лоадеры -->
     <data readOnly="true">
+        <!-- Коллекция кандидатов загружает список сущностей JobCandidate с view по умолчанию -->
         <collection id="jobCandidatesDc"
                     class="com.company.hunttech.entity.JobCandidate"
                     view="jobCandidate-view">
+            <!-- Загрузчик коллекции кандидатов ограничивает выборку 200 записями -->
             <loader id="jobCandidatesDl" maxResults="200">
+                <!-- JPQL-запрос выбирает кандидатов, сортируя по дате создания по убыванию -->
                 <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]></query>
             </loader>
         </collection>
     </data>
 
+    <!-- Настройка размеров экрана при открытии в режиме диалога или lookup-окна -->
     <dialogMode height="700" width="1100"/>
 
+    <!-- Корневой контейнер разметки экрана с вертикальным размещением тулбара и рабочей области -->
     <layout expand="splitMainLayout" spacing="true" width="100%" height="100%">
         <!-- Верхний Toolbar управления -->
         <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar">
+            <!-- Текстовый лейбл с названием концепта дизайна -->
             <label value="Кандидаты (Split-View Halo)" stylename="h2" align="MIDDLE_LEFT"/>
+            <!-- Текстовое поле ввода для быстрого поиска кандидатов по ФИО -->
             <textField id="searchField" inputPrompt="Поиск по ФИО..." width="250px"/>
+            <!-- Кнопка запуска поиска по введенному ФИО -->
             <button id="searchButton" caption="Поиск" icon="SEARCH"/>
+            <!-- Кнопка создания новой карточки кандидата -->
             <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary"/>
+            <!-- Кнопка обновления списка кандидатов -->
             <button id="refreshBtn" caption="Обновить" icon="REFRESH"/>
         </hbox>
 
@@ -33,68 +45,102 @@
             
             <!-- Левая панель: Таблица реестра кандидатов (60%) -->
             <vbox id="candidatesTableBox" width="60%" height="100%" spacing="true">
+                <!-- Таблица кандидатов отображает ключевые поля реестра -->
                 <groupTable id="candidatesTable"
                             width="100%"
                             height="100%"
                             dataContainer="jobCandidatesDc"
                             stylename="borderless grid">
+                    <!-- Зарегистрированные действия таблицы -->
                     <actions>
+                        <!-- Действие редактирования карточки кандидата -->
                         <action id="edit" type="edit"/>
+                        <!-- Действие обновления списка -->
                         <action id="refresh" type="refresh"/>
                     </actions>
+                    <!-- Колонки таблицы с привязкой к свойствам сущности -->
                     <columns>
+                        <!-- Генерируемая колонка для отображения миниатюры фото кандидата -->
                         <column id="avatar" caption="Фото" width="50px"/>
+                        <!-- ФИО кандидата -->
                         <column id="fullName" caption="ФИО"/>
+                        <!-- Должность кандидата -->
                         <column id="personPosition" caption="Должность"/>
+                        <!-- Город проживания -->
                         <column id="cityOfResidence" caption="Город"/>
                     </columns>
+                    <!-- Компонент отображения общего количества строк в таблице -->
                     <rowsCount/>
                 </groupTable>
             </vbox>
 
             <!-- Правая панель: Детальная превью-карточка выбранного кандидата (40%) -->
             <vbox id="candidateDetailPane" width="40%" height="100%" spacing="true" stylename="edit-card">
+                <!-- Скроллер для возможности просмотра всех деталей на малых экранах -->
                 <scrollBox id="detailScroll" width="100%" height="100%" orientation="vertical">
+                    <!-- Вертикальная стопка блоков карточки детализации -->
                     <vbox width="100%" spacing="true">
                         <!-- Шапка профиля с фото -->
                         <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                            <!-- Кастомное круглое фото с фолбеком на случай отсутствия изображения -->
                             <ovaFallbackImage id="detailPic"
                                               width="80px" height="80px"
                                               ovalWidth="80px" ovalHeight="80px"
                                               fallbackThemePath="icons/no-programmer.jpeg"
                                               scaleMode="SCALE_DOWN"/>
+                            <!-- Текстовый блок заголовка профиля -->
                             <vbox width="100%" spacing="false" align="MIDDLE_LEFT">
+                                <!-- ФИО выбранного кандидата -->
                                 <label id="detailFullName" value="Выберите кандидата" stylename="h2"/>
+                                <!-- Должность кандидата -->
                                 <label id="detailPosition" value="" stylename="h4"/>
+                                <!-- Город проживания кандидата -->
                                 <label id="detailCity" value="" stylename="small"/>
                             </vbox>
                         </hbox>
 
                         <!-- Кнопки действий -->
                         <hbox width="100%" spacing="true">
+                            <!-- Кнопка перехода к полному редактированию карточки -->
                             <button id="editCandidateBtn" caption="Открыть карточку" icon="EDIT_ACTION" stylename="primary" enabled="false"/>
+                            <!-- Кнопка быстрой регистрации нового взаимодействия -->
                             <button id="createInteractionBtn" caption="Взаимодействие" icon="PLUS" enabled="false"/>
                         </hbox>
 
                         <!-- Таблица ключевых контактов и атрибутов -->
                         <vbox width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <!-- Сетка контактов для упорядоченного вывода пар "ключ-значение" -->
                             <grid id="detailsGrid" spacing="true" width="100%">
+                                <!-- Конфигурация колонок сетки контактов -->
                                 <columns count="2"/>
+                                <!-- Строки сетки контактов -->
                                 <rows>
+                                    <!-- Строка вывода телефона -->
                                     <row>
+                                        <!-- Подпись поля -->
                                         <label value="Телефон:" stylename="bold"/>
+                                        <!-- Значение телефона -->
                                         <label id="detailPhone" value="-"/>
                                     </row>
+                                    <!-- Строка вывода email -->
                                     <row>
+                                        <!-- Подпись поля -->
                                         <label value="Email:" stylename="bold"/>
+                                        <!-- Значение email -->
                                         <label id="detailEmail" value="-"/>
                                     </row>
+                                    <!-- Строка вывода логина Telegram -->
                                     <row>
+                                        <!-- Подпись поля -->
                                         <label value="Telegram:" stylename="bold"/>
+                                        <!-- Значение Telegram -->
                                         <label id="detailTelegram" value="-"/>
                                     </row>
+                                    <!-- Строка вывода текущего места работы -->
                                     <row>
+                                        <!-- Подпись поля -->
                                         <label value="Компания:" stylename="bold"/>
+                                        <!-- Значение компании -->
                                         <label id="detailCompany" value="-"/>
                                     </row>
                                 </rows>
@@ -103,7 +149,9 @@
 
                         <!-- Лента активности/взаимодействий -->
                         <vbox width="100%" spacing="true">
+                            <!-- Заголовок раздела истории -->
                             <label value="История последних взаимодействий" stylename="h3"/>
+                            <!-- Текстовое описание последних действий рекрутера -->
                             <label id="detailInteractionsInfo" value="Выберите кандидата в таблице слева для просмотра истории." width="100%"/>
                         </vbox>
                     </vbox>

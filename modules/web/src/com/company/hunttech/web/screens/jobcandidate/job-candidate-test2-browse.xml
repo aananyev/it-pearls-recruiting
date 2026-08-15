@@ -1,71 +1,107 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Эскиз 2: High-Density DataGrid с аккордеоном фильтров в теме CUBA Halo -->
+<!-- Корневое окно: концепт высокоплотного реестра кандидатов с аккордеоном фильтров -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         caption="Тест 2: High-Density DataGrid"
         messagesPack="com.company.hunttech.web.screens.jobcandidate"
         icon="TABLE">
+    <!-- Секция данных: контейнеры и лоадеры кандидатов -->
     <data readOnly="true">
+        <!-- Коллекция кандидатов для вывода в таблице, используется view с полной информацией -->
         <collection id="jobCandidatesDc"
                     class="com.company.hunttech.entity.JobCandidate"
                     view="jobCandidate-view">
+            <!-- Лоадер коллекции ограничивает загрузку 200 записями для оптимизации производительности -->
             <loader id="jobCandidatesDl" maxResults="200">
+                <!-- Запрос по умолчанию выбирает всех кандидатов по дате создания по убыванию -->
                 <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]></query>
             </loader>
         </collection>
     </data>
 
+    <!-- Размеры диалогового окна по умолчанию -->
     <dialogMode height="700" width="1100"/>
 
+    <!-- Главный контейнер разметки с вертикальным стеком панели кнопок и рабочей области -->
     <layout expand="mainContentBox" spacing="true" width="100%" height="100%">
-        <!-- Стандартная панель действий CUBA Halo -->
+        <!-- Стандартная панель действий над таблицей, размещенная вверху -->
         <buttonsPanel id="buttonsPanel" alwaysVisible="true" width="100%">
+            <!-- Кнопка создания новой записи, связанная со стандартным CRUD действием таблицы -->
             <button id="createBtn" action="candidatesTable.create" stylename="primary"/>
+            <!-- Кнопка изменения существующей записи -->
             <button id="editBtn" action="candidatesTable.edit"/>
+            <!-- Кнопка удаления выбранной записи -->
             <button id="removeBtn" action="candidatesTable.remove"/>
+            <!-- Кнопка перезагрузки данных в таблице -->
             <button id="refreshBtn" action="candidatesTable.refresh"/>
+            <!-- Кнопка экспорта реестра в файл Excel -->
             <button id="excelBtn" caption="Экспорт Excel" icon="EXCEL_ACTION"/>
         </buttonsPanel>
 
+        <!-- Рабочая область: левый аккордеон фильтрации и правая таблица -->
         <hbox id="mainContentBox" width="100%" height="100%" spacing="true" expand="tableBox">
             <!-- Левая сворачиваемая панель фильтрации (Аккордеон) -->
             <vbox id="filterPanel" width="260px" height="100%" spacing="true" stylename="edit-card">
+                <!-- Заголовок панели фильтрации -->
                 <label value="Фильтры кандидатов" stylename="h3"/>
+                <!-- Вертикальный контейнер с полями ввода фильтров -->
                 <vbox spacing="true" width="100%">
+                    <!-- Метка для поля ввода имени -->
                     <label value="Поиск по ФИО:"/>
+                    <!-- Текстовое поле ввода поискового запроса по имени -->
                     <textField id="filterNameField" width="100%" inputPrompt="Введите имя..."/>
                     
+                    <!-- Метка для поля ввода города -->
                     <label value="Город:"/>
+                    <!-- Текстовое поле ввода поискового запроса по городу -->
                     <textField id="filterCityField" width="100%" inputPrompt="Город проживания..."/>
                     
+                    <!-- Кнопка применения фильтра, инициализирующая новый JPQL-запрос лоадера -->
                     <button id="applyFilterBtn" caption="Применить фильтр" icon="SEARCH" stylename="primary" width="100%"/>
+                    <!-- Кнопка сброса параметров фильтрации -->
                     <button id="resetFilterBtn" caption="Сбросить" width="100%"/>
                 </vbox>
             </vbox>
 
-            <!-- Основная плотная таблица реестра (High-Density DataGrid) -->
+            <!-- Правый контейнер, содержащий реестровую таблицу -->
             <vbox id="tableBox" width="100%" height="100%" spacing="true">
+                <!-- Высокоплотная таблица кандидатов с поддержкой множественного выбора -->
                 <groupTable id="candidatesTable"
                             width="100%"
                             height="100%"
                             dataContainer="jobCandidatesDc"
                             multiselect="true">
+                    <!-- Зарегистрированные CRUD и сервисные действия таблицы -->
                     <actions>
+                        <!-- Действие создания новой записи -->
                         <action id="create" type="create"/>
+                        <!-- Действие редактирования выбранной записи -->
                         <action id="edit" type="edit"/>
+                        <!-- Действие удаления выбранной записи -->
                         <action id="remove" type="remove"/>
+                        <!-- Действие перезагрузки данных лоадера -->
                         <action id="refresh" type="refresh"/>
                     </actions>
+                    <!-- Колонки таблицы с привязкой к свойствам сущности -->
                     <columns>
+                        <!-- Генерируемая колонка для отображения миниатюрного аватара кандидата -->
                         <column id="avatar" caption="Аватар" width="45px"/>
+                        <!-- Отображаемое ФИО кандидата -->
                         <column id="fullName" caption="ФИО Кандидата"/>
+                        <!-- Желаемая должность кандидата -->
                         <column id="personPosition" caption="Желаемая должность"/>
+                        <!-- Город проживания -->
                         <column id="cityOfResidence" caption="Город"/>
+                        <!-- Текущее место работы кандидата -->
                         <column id="currentCompany" caption="Текущая компания"/>
+                        <!-- Дата и время регистрации карточки в системе -->
                         <column id="createTs" caption="Дата создания"/>
                     </columns>
+                    <!-- Компонент пагинации для разбивки большого списка на страницы -->
                     <simplePagination id="pagination"/>
                 </groupTable>
             </vbox>
         </hbox>
     </layout>
 </window>
+
