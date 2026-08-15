@@ -77,6 +77,11 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
 
     @Override
     public ProcessedImage process(byte[] data, String fileName) {
+        return process(data, fileName, false);
+    }
+
+    @Override
+    public ProcessedImage process(byte[] data, String fileName, boolean candidatePhoto) {
         if (data == null || data.length == 0) {
             throw new DevelopmentException("Empty image data");
         }
@@ -98,21 +103,22 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
             }
 
             // 0. Локальный rembg-этап (бесплатная нейросеть u2net на сервере приложения):
-            // удаляет фон без внешних API и ключей; результат проходит тот же
-            // детерминированный финал (ресайз, обрезка, круг). При недоступности —
-            // платный AI-этап, затем классический конвейер.
+            // удаляет фон без внешних API и ключей. Для фото кандидата это ЕДИНСТВЕННЫЙ
+            // способ удаления фона (u2net обучен на людях); при недоступности фон
+            // не удаляется вовсе — классический flood-fill для людей не применяется.
             byte[] rembgResult = tryRembgBackgroundRemoval(data, fileName, config);
             if (rembgResult != null) {
                 BufferedImage rembgImage = ImageIO.read(new ByteArrayInputStream(rembgResult));
                 if (rembgImage != null) {
                     source = rembgImage;
                 } else {
-                    log.warn("rembg вернул не-растровое изображение для логотипа {}, используется следующий этап",
+                    log.warn("rembg вернул не-растровое изображение для {}, используется следующий этап",
                             fileName);
                 }
-            } else {
-                // 0.1. Платный AI-этап (если включён hunttech.projectLogo.ai.enabled):
-                // нейросеть удаляет фон; при недоступности — классический конвейер.
+            } else if (!candidatePhoto) {
+                // 0.1. Платный AI-этап (если включён hunttech.projectLogo.ai.enabled) — только
+                // для логотипов: функция заточена под удаление фона логотипа, для фото людей
+                // не используется. При недоступности — классический конвейер.
                 byte[] aiResult = tryAiBackgroundRemoval(data, fileName, config);
                 if (aiResult != null) {
                     BufferedImage aiImage = ImageIO.read(new ByteArrayInputStream(aiResult));
@@ -131,33 +137,42 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
             // 2. Пропорциональное уменьшение, если сторона превышает лимит.
             argb = downscaleIfNeeded(argb, config.getMaxSize());
 
-            // 3. Удаление белого/серого фона, соединённого с краями изображения.
-            argb = removeWhiteBackground(argb, config.getWhiteThreshold(),
-                    config.getRemoveAllWhite(),
-                    config.getGraySaturationThreshold(), config.getGrayMinChannel());
+            BufferedImage result;
+            if (candidatePhoto) {
+                // Фото кандидата: только ресайз + PNG. Удаление фона — только нейросетью
+                // (rembg), классический flood-fill и вписывание в круг НЕ применяются:
+                // они рассчитаны на плоские логотипы и «съедают» светлые части человека.
+                result = argb;
+            } else {
+                // 3. Удаление белого/серого фона, соединённого с краями изображения.
+                argb = removeWhiteBackground(argb, config.getWhiteThreshold(),
+                        config.getRemoveAllWhite(),
+                        config.getGraySaturationThreshold(), config.getGrayMinChannel());
 
-            // 4. Обрезка по фактическому содержимому (прозрачные поля после удаления фона).
-            Rectangle bounds = getOpaqueBounds(argb);
-            if (bounds.isEmpty()) {
-                log.debug("После удаления белого фона содержимое отсутствует, возвращён исходный файл");
-                return new ProcessedImage(data, name, extension, false);
+                // 4. Обрезка по фактическому содержимому (прозрачные поля после удаления фона).
+                Rectangle bounds = getOpaqueBounds(argb);
+                if (bounds.isEmpty()) {
+                    log.debug("После удаления белого фона содержимое отсутствует, возвращён исходный файл");
+                    return new ProcessedImage(data, name, extension, false);
+                }
+                argb = argb.getSubimage(bounds.x, bounds.y, bounds.width, bounds.height);
+
+                // 5. Вписывание в круг: канвас-квадрат со стороной, равной диагонали содержимого.
+                result = fitIntoCircle(argb, config.getMaxSize());
             }
-            argb = argb.getSubimage(bounds.x, bounds.y, bounds.width, bounds.height);
-
-            // 5. Вписывание в круг: канвас-квадрат со стороной, равной диагонали содержимого.
-            BufferedImage circle = fitIntoCircle(argb, config.getMaxSize());
 
             ByteArrayOutputStream output = new ByteArrayOutputStream();
-            ImageIO.write(circle, config.getFormat(), output);
+            ImageIO.write(result, config.getFormat(), output);
 
-            log.info("Логотип {} обработан: {}x{} -> {}x{}, формат {}",
+            log.info("{} {} обработан: {}x{} -> {}x{}, формат {}",
+                    candidatePhoto ? "Фото кандидата" : "Логотип",
                     fileName, source.getWidth(), source.getHeight(),
-                    circle.getWidth(), circle.getHeight(), config.getFormat());
+                    result.getWidth(), result.getHeight(), config.getFormat());
 
             return new ProcessedImage(output.toByteArray(), name, config.getFormat(), true);
         } catch (IOException e) {
-            log.error("Ошибка обработки логотипа {}: {}", fileName, e.toString(), e);
-            throw new DevelopmentException("Failed to process project logo: " + e.getMessage(), e);
+            log.error("Ошибка обработки изображения {}: {}", fileName, e.toString(), e);
+            throw new DevelopmentException("Failed to process image: " + e.getMessage(), e);
         }
     }
 

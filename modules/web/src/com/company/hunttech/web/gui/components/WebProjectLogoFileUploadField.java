@@ -67,12 +67,19 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
         processedDescriptor = null;
         // Обрабатываем только изображения (логотипы проекта/компании, фото кандидата);
         // остальные загрузки — стандартное поведение.
-        if (isLogoField() && fileDescriptor != null) {
+        ProcessingMode mode = resolveProcessingMode();
+        if (mode != ProcessingMode.NONE && fileDescriptor != null) {
             try {
-                FileDescriptor processed = processLogo(fileDescriptor);
+                FileDescriptor processed = processLogo(fileDescriptor, mode);
                 if (processed != null) {
                     processedDescriptor = processed;
                     super.saveFile(processed);
+                    // Принудительная перерисовка виджета загрузки: клиентский RPC
+                    // continueUploading() (снимает блокировку jquery-file-upload после
+                    // загрузки) для legacy-компонента CubaFileUpload отправляется в браузер
+                    // ТОЛЬКО при paint. Без этого повторный клик по кнопке «Загрузить»
+                    // не открывает диалог выбора файла (повторная загрузка невозможна).
+                    getComposition().markAsDirty();
                     return;
                 }
             } catch (Exception e) {
@@ -112,18 +119,35 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
     }
 
     /**
-     * Проверяет, привязано ли поле к обрабатываемому свойству: {@code projectLogo} у Project,
-     * {@code fileCompanyLogo} у Company или {@code fileImageFace} у JobCandidate.
+     * Режим обработки поля загрузки: какой конвейер применять к изображению.
      */
-    private boolean isLogoField() {
+    private enum ProcessingMode {
+        /** Обычная загрузка без обработки (поле не привязано к обрабатываемому свойству). */
+        NONE,
+        /** Логотип проекта/компании — классический конвейер (flood-fill, круг). */
+        LOGO,
+        /** Фото кандидата — щадящий режим (только нейросеть rembg + ресайз, без flood-fill). */
+        CANDIDATE_PHOTO
+    }
+
+    /**
+     * Определяет режим обработки по привязке поля: {@code projectLogo} у Project
+     * или {@code fileCompanyLogo} у Company — {@link ProcessingMode#LOGO};
+     * {@code fileImageFace} у JobCandidate — {@link ProcessingMode#CANDIDATE_PHOTO}.
+     */
+    private ProcessingMode resolveProcessingMode() {
         ValueSource<FileDescriptor> valueSource = getValueSource();
         if (valueSource instanceof ContainerValueSource) {
             ContainerValueSource<?, ?> containerSource = (ContainerValueSource<?, ?>) valueSource;
             String property = containerSource.getMetaPropertyPath().getMetaProperty().getName();
-            return PROJECT_LOGO_PROPERTY.equals(property) || COMPANY_LOGO_PROPERTY.equals(property)
-                    || CANDIDATE_PHOTO_PROPERTY.equals(property);
+            if (PROJECT_LOGO_PROPERTY.equals(property) || COMPANY_LOGO_PROPERTY.equals(property)) {
+                return ProcessingMode.LOGO;
+            }
+            if (CANDIDATE_PHOTO_PROPERTY.equals(property)) {
+                return ProcessingMode.CANDIDATE_PHOTO;
+            }
         }
-        return false;
+        return ProcessingMode.NONE;
     }
 
     /**
@@ -134,7 +158,7 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
      * @return обработанный дескриптор, или {@code null}, если файл не является изображением
      *         (обработка не требуется)
      */
-    private FileDescriptor processLogo(FileDescriptor fileDescriptor) throws IOException {
+    private FileDescriptor processLogo(FileDescriptor fileDescriptor, ProcessingMode mode) throws IOException {
         ProjectLogoImageProcessingService service =
                 beanLocator.get(ProjectLogoImageProcessingService.NAME);
 
@@ -144,7 +168,8 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
             originalBytes = IOUtils.toByteArray(inputStream);
         }
 
-        ProcessedImage processed = service.process(originalBytes, fileDescriptor.getName());
+        ProcessedImage processed = service.process(originalBytes, fileDescriptor.getName(),
+                mode == ProcessingMode.CANDIDATE_PHOTO);
         if (!processed.isProcessed()) {
             return null;
         }

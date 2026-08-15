@@ -177,4 +177,86 @@ public class ProjectLogoImageProcessingServiceBeanTest {
         assertTrue("Канвас не больше 300", result.getWidth() <= 300);
         assertTrue("Канвас не больше 300", result.getHeight() <= 300);
     }
+
+    @Test
+    public void testCandidatePhotoKeepsLightShirtAndBody() throws IOException {
+        // Имитация фотографии человека: белый фон + «тело» со светлой рубашкой
+        // (235,235,235 — ниже whiteThreshold 235 логотипного конвейера) и тёмной головой.
+        // В щадящем режиме (candidatePhoto=true) классический flood-fill НЕ применяется,
+        // поэтому светлая рубашка и голова должны остаться полностью непрозрачными.
+        BufferedImage image = new BufferedImage(300, 400, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = image.createGraphics();
+        try {
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, 300, 400);
+            // Голова (тёмная).
+            g.setColor(new Color(60, 50, 40));
+            g.fillOval(100, 30, 100, 110);
+            // Светлая рубашка (почти белая — логотипный flood-fill «съел» бы её).
+            g.setColor(new Color(238, 238, 238));
+            g.fillRect(80, 140, 140, 200);
+            // Тёмные брюки.
+            g.setColor(new Color(40, 40, 60));
+            g.fillRect(90, 340, 120, 60);
+        } finally {
+            g.dispose();
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ImageIO.write(image, "jpg", out);
+
+        ProcessedImage processed = service.process(out.toByteArray(), "photo.jpg", true);
+        BufferedImage result = read(processed);
+
+        // Соотношение сторон сохраняется (не вписывается в круг) — канвас не квадратный.
+        assertTrue("Портретная ориентация должна сохраняться",
+                result.getHeight() > result.getWidth());
+
+        // «Рубашка» должна остаться непрозрачной (щадящий режим не режет светлые участки).
+        int shirtAlpha = (result.getRGB(result.getWidth() / 2, result.getHeight() / 2) >> 24) & 0xFF;
+        assertTrue("Светлая рубашка должна остаться непрозрачной (candidatePhoto=true)",
+                shirtAlpha > 200);
+    }
+
+    @Test
+    public void testCandidatePhotoKeepsWhiteCavityInsideBody() throws IOException {
+        // Фото человека: на светлом фоне — человек с белой рубашкой ПОСЛЕДОВАТЕЛЬНО
+        // (вся фигура светлая). В логотипном режиме removeAllWhite=true удалил бы и
+        // светлую рубашку; в щадящем режиме она сохраняется.
+        BufferedImage image = new BufferedImage(200, 260, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = image.createGraphics();
+        try {
+            g.setColor(new Color(240, 240, 240));
+            g.fillRect(0, 0, 200, 260);
+            // Человек целиком светлый (кожа/рубашка) — как на реальном фото.
+            g.setColor(new Color(250, 245, 235));
+            g.fillOval(70, 20, 60, 70);   // лицо
+            g.setColor(new Color(245, 245, 245));
+            g.fillRect(50, 90, 100, 140); // светлая одежда
+        } finally {
+            g.dispose();
+        }
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ImageIO.write(image, "jpg", out);
+
+        ProcessedImage processed = service.process(out.toByteArray(), "photo.jpg", true);
+        BufferedImage result = read(processed);
+
+        // Светлая одежда (центр канваса) должна остаться непрозрачной.
+        int bodyAlpha = (result.getRGB(result.getWidth() / 2, result.getHeight() / 2) >> 24) & 0xFF;
+        assertTrue("Светлая одежда человека должна остаться непрозрачной (candidatePhoto=true)",
+                bodyAlpha > 200);
+    }
+
+    @Test
+    public void testCandidatePhotoKeepsOriginalAspectRatio() throws IOException {
+        // Портрет 300x400 в щадящем режиме не вписывается в круг: размеры сохраняются
+        // с пропорциями (ресайз до maxSize по большей стороне).
+        byte[] data = createWhiteBackgroundImage(300, 400);
+        ProcessedImage processed = service.process(data, "photo.jpg", true);
+        BufferedImage result = read(processed);
+
+        assertTrue("Портретная ориентация должна сохраняться",
+                result.getHeight() > result.getWidth());
+        assertTrue("Большая сторона не больше 300", Math.max(result.getWidth(), result.getHeight()) <= 300);
+    }
 }
