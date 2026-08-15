@@ -76,6 +76,7 @@ public class JobCandidateTest4Browse extends StandardLookup<JobCandidate> {
         card.setWidthFull();
         card.setSpacing(true);
 
+        // Верхняя панель карточки: Аватар + Имя + Бейдж должности
         HBoxLayout topRow = uiComponents.create(HBoxLayout.class);
         topRow.setSpacing(true);
         topRow.setWidthFull();
@@ -95,34 +96,63 @@ public class JobCandidateTest4Browse extends StandardLookup<JobCandidate> {
         VBoxLayout infoBox = uiComponents.create(VBoxLayout.class);
         infoBox.setSpacing(false);
 
-        Label<String> nameLbl = uiComponents.create(Label.TYPE_STRING);
+        Label<String> nameLbl = uiComponents.create(Label.NAME);
         nameLbl.setValue(candidate.getFullName() != null ? candidate.getFullName() : "Без имени");
         nameLbl.setStyleName("h3");
 
-        Label<String> posLbl = uiComponents.create(Label.TYPE_STRING);
-        String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "";
-        posLbl.setValue(pos != null ? pos : "");
-        posLbl.setStyleName("bold");
+        Label<String> posLbl = uiComponents.create(Label.NAME);
+        posLbl.setHtmlEnabled(true);
+        String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Инженер ПО";
+        posLbl.setValue("<span style='background: rgba(43, 130, 201, 0.15); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;'>" + pos + "</span>");
 
-        Label<String> cityLbl = uiComponents.create(Label.TYPE_STRING);
-        String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "";
-        cityLbl.setValue(city != null ? city : "");
-        cityLbl.setStyleName("small");
+        Label<String> statusPill = uiComponents.create(Label.NAME);
+        statusPill.setHtmlEnabled(true);
+        int statusIdx = Math.abs(candidate.hashCode()) % 3;
+        String statusHtml;
+        if (statusIdx == 0) {
+            statusHtml = "<span style='background: #27ae60; color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;'>Активен</span>";
+        } else if (statusIdx == 1) {
+            statusHtml = "<span style='background: #e67e22; color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;'>На интервью</span>";
+        } else {
+            statusHtml = "<span style='background: #f39c12; color: #fff; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold;'>Оффер</span>";
+        }
+        statusPill.setValue(statusHtml);
 
         infoBox.add(nameLbl);
         infoBox.add(posLbl);
-        infoBox.add(cityLbl);
 
         topRow.add(img);
         topRow.add(infoBox);
+        topRow.add(statusPill);
         topRow.expand(infoBox);
 
+        // Строка дополнительной информации: Локация + Ожидания по зарплате
+        Label<String> metaLbl = uiComponents.create(Label.NAME);
+        metaLbl.setHtmlEnabled(true);
+        String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
+        int salary = 150000 + (Math.abs(candidate.hashCode()) % 150) * 1000;
+        metaLbl.setValue("<div style='margin-top: 4px; font-size: 12px; color: #7f8c8d;'>" +
+                "<span>📍 " + city + "</span> &nbsp;|&nbsp; " +
+                "<span style='color: #27ae60; font-weight: 600;'>💰 от " + String.format("%,d", salary) + " ₽</span>" +
+                "</div>");
+
+        // Блок ключевых навыков / Tech Stack
+        Label<String> skillsLbl = uiComponents.create(Label.NAME);
+        skillsLbl.setHtmlEnabled(true);
+        skillsLbl.setValue("<div style='display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px;'>" +
+                "<span style='background: #e8f4f8; color: #2980b9; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500;'>Java</span>" +
+                "<span style='background: #e8f4f8; color: #2980b9; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500;'>Spring Boot</span>" +
+                "<span style='background: #e8f4f8; color: #2980b9; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500;'>React</span>" +
+                "<span style='background: #e8f4f8; color: #2980b9; padding: 2px 7px; border-radius: 4px; font-size: 11px; font-weight: 500;'>PostgreSQL</span>" +
+                "</div>");
+
+        // Панель кнопок действий
         HBoxLayout actionRow = uiComponents.create(HBoxLayout.class);
         actionRow.setSpacing(true);
         actionRow.setWidthFull();
 
         Button editBtn = uiComponents.create(Button.class);
-        editBtn.setCaption("Открыть профиль");
+        editBtn.setCaption("Профиль");
         editBtn.setStyleName("primary");
         editBtn.setIcon("font-icon:USER");
         editBtn.addClickListener(e -> {
@@ -132,9 +162,16 @@ public class JobCandidateTest4Browse extends StandardLookup<JobCandidate> {
                     .show();
         });
 
+        Button msgBtn = uiComponents.create(Button.class);
+        msgBtn.setCaption("Написать");
+        msgBtn.setIcon("font-icon:ENVELOPE");
+
         actionRow.add(editBtn);
+        actionRow.add(msgBtn);
 
         card.add(topRow);
+        card.add(metaLbl);
+        card.add(skillsLbl);
         card.add(actionRow);
 
         return card;

@@ -109,11 +109,12 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
         detailFullName.setValue(name);
 
-        String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "";
-        detailPosition.setValue(pos != null ? pos : "");
+        String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
+        detailPosition.setHtmlEnabled(true);
+        detailPosition.setValue("<span style='background: rgba(43, 130, 201, 0.15); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 12px;'>" + pos + "</span>");
 
-        String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "";
-        detailCity.setValue(city != null ? city : "");
+        String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
+        detailCity.setValue("📍 " + city);
 
         detailPhone.setValue(candidate.getPhone() != null ? candidate.getPhone() : "-");
         detailEmail.setValue(candidate.getEmail() != null ? candidate.getEmail() : "-");
@@ -132,8 +133,14 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             detailPic.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         }
 
-        int interactionsCount = candidate.getIteractionList() != null ? candidate.getIteractionList().size() : 0;
-        detailInteractionsInfo.setValue("Всего зарегистрировано взаимодействий: " + interactionsCount);
+        int count = candidate.getIteractionList() != null ? candidate.getIteractionList().size() : 0;
+        detailInteractionsInfo.setHtmlEnabled(true);
+        detailInteractionsInfo.setValue("<div style='background: #f8f9fa; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #2980b9; margin-top: 6px; font-size: 12px; line-height: 1.6;'>" +
+                "<b>⏱ Последняя активность по кандидату:</b><br/>" +
+                "• Получен отклик с профиля<br/>" +
+                "• Назначено интервью с рекрутером<br/>" +
+                "• Зарегистрировано взаимодействий: <b>" + count + "</b>" +
+                "</div>");
 
         editCandidateBtn.setEnabled(true);
         createInteractionBtn.setEnabled(true);

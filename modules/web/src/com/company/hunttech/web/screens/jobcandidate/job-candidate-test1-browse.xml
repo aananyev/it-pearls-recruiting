@@ -38,35 +38,12 @@
             <button id="refreshBtn" caption="Обновить" icon="REFRESH"/>
         </hbox>
 
-        <!-- Двухпанельная разметка Split-View: реестр слева (60%) и детализация справа (40%) -->
+        <!-- Двухпанельная разметка Split-View: Левый сайдбар детализации (340px) + Таблица реестра справа -->
         <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="candidatesTableBox">
-            <!-- Левый контейнер, содержащий основную таблицу кандидатов -->
-            <vbox id="candidatesTableBox" width="60%" height="100%" spacing="true">
-                <!-- Таблица кандидатов отображает ключевые поля реестра -->
-                <groupTable id="candidatesTable"
-                             width="100%"
-                             height="100%"
-                             dataContainer="jobCandidatesDc"
-                             stylename="borderless grid">
-                    <!-- Колонки таблицы с привязкой к свойствам сущности -->
-                    <columns>
-                        <!-- Генерируемая колонка для отображения миниатюры фото кандидата -->
-                        <column id="avatar" caption="Фото" width="50px"/>
-                        <!-- Колонка отображения ФИО кандидата -->
-                        <column id="fullName" caption="ФИО"/>
-                        <!-- Колонка отображения желаемой должности -->
-                        <column id="personPosition" caption="Должность"/>
-                        <!-- Колонка отображения города проживания -->
-                        <column id="cityOfResidence" caption="Город"/>
-                    </columns>
-                    <!-- Компонент отображения общего количества строк в таблице -->
-                    <rowsCount/>
-                </groupTable>
-            </vbox>
-
-            <!-- Правая панель: карточка детального просмотра выбранного в таблице кандидата -->
-            <vbox id="candidateDetailPane" width="40%" height="100%" spacing="true" stylename="edit-card">
-                <!-- Скроллер для возможности просмотра всех деталей на малых экранах -->
+            
+            <!-- ЛЕВАЯ ПАНЕЛЬ (САЙДБАР): Детализация выделенной в таблице строки кандидатов -->
+            <vbox id="candidateDetailPane" width="340px" height="100%" spacing="true" stylename="edit-card edit-sidebar">
+                <!-- Скроллер для детального просмотра всех карточек данных -->
                 <scrollBox id="detailScroll" width="100%" height="100%" orientation="vertical">
                     <!-- Вертикальная стопка блоков карточки детализации -->
                     <vbox width="100%" spacing="true">
@@ -92,13 +69,14 @@
                         <!-- Панель быстрых действий над выбранным кандидатом -->
                         <hbox width="100%" spacing="true">
                             <!-- Кнопка перехода к полному редактированию карточки -->
-                            <button id="editCandidateBtn" caption="Открыть карточку" icon="EDIT_ACTION" stylename="primary" enabled="false"/>
+                            <button id="editCandidateBtn" caption="Открыть карточку" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
                             <!-- Кнопка быстрой регистрации нового взаимодействия -->
-                            <button id="createInteractionBtn" caption="Взаимодействие" icon="PLUS" enabled="false"/>
+                            <button id="createInteractionBtn" caption="Взаимодействие" icon="PLUS" enabled="false" width="100%"/>
                         </hbox>
 
                         <!-- Блок ключевой контактной информации кандидата -->
                         <vbox width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <label value="Контакты и реквизиты" stylename="bold"/>
                             <!-- Сетка контактов для упорядоченного вывода пар "ключ-значение" -->
                             <grid id="detailsGrid" spacing="true" width="100%">
                                 <!-- Конфигурация колонок сетки контактов -->
@@ -107,30 +85,22 @@
                                 <rows>
                                     <!-- Строка вывода телефона -->
                                     <row>
-                                        <!-- Подпись поля -->
                                         <label value="Телефон:" stylename="bold"/>
-                                        <!-- Значение телефона -->
                                         <label id="detailPhone" value="-"/>
                                     </row>
                                     <!-- Строка вывода email -->
                                     <row>
-                                        <!-- Подпись поля -->
                                         <label value="Email:" stylename="bold"/>
-                                        <!-- Значение email -->
                                         <label id="detailEmail" value="-"/>
                                     </row>
                                     <!-- Строка вывода логина Telegram -->
                                     <row>
-                                        <!-- Подпись поля -->
                                         <label value="Telegram:" stylename="bold"/>
-                                        <!-- Значение Telegram -->
                                         <label id="detailTelegram" value="-"/>
                                     </row>
                                     <!-- Строка вывода текущего места работы -->
                                     <row>
-                                        <!-- Подпись поля -->
                                         <label value="Компания:" stylename="bold"/>
-                                        <!-- Значение компании -->
                                         <label id="detailCompany" value="-"/>
                                     </row>
                                 </rows>
@@ -142,10 +112,38 @@
                             <!-- Заголовок раздела истории -->
                             <label value="История последних взаимодействий" stylename="h3"/>
                             <!-- Текстовое описание последних действий рекрутера -->
-                            <label id="detailInteractionsInfo" value="Выберите кандидата в таблице слева для просмотра истории." width="100%"/>
+                            <label id="detailInteractionsInfo" value="Выберите кандидата в таблице справа для просмотра истории." width="100%"/>
                         </vbox>
                     </vbox>
                 </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ ПАНЕЛЬ: Таблица реестра кандидатов -->
+            <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true">
+                <!-- Таблица кандидатов отображает ключевые поля реестра -->
+                <groupTable id="candidatesTable"
+                             width="100%"
+                             height="100%"
+                             dataContainer="jobCandidatesDc"
+                             stylename="borderless grid">
+                    <actions>
+                        <action id="edit" type="edit"/>
+                        <action id="refresh" type="refresh"/>
+                    </actions>
+                    <!-- Колонки таблицы с привязкой к свойствам сущности -->
+                    <columns>
+                        <!-- Генерируемая колонка для отображения миниатюры фото кандидата -->
+                        <column id="avatar" caption="Фото" width="50px"/>
+                        <!-- Колонка отображения ФИО кандидата -->
+                        <column id="fullName" caption="ФИО"/>
+                        <!-- Колонка отображения желаемой должности -->
+                        <column id="personPosition" caption="Должность"/>
+                        <!-- Колонка отображения города проживания -->
+                        <column id="cityOfResidence" caption="Город"/>
+                    </columns>
+                    <!-- Компонент отображения общего количества строк в таблице -->
+                    <rowsCount/>
+                </groupTable>
             </vbox>
         </hbox>
     </layout>

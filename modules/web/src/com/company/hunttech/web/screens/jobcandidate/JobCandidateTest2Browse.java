@@ -57,11 +57,23 @@ public class JobCandidateTest2Browse extends StandardLookup<JobCandidate> {
     @Subscribe("applyFilterBtn")
     public void onApplyFilterBtnClick(Button.ClickEvent event) {
         String nameQuery = filterNameField.getValue();
+        String cityQuery = filterCityField.getValue();
+
+        StringBuilder jpql = new StringBuilder("select e from hunttech_JobCandidate e where 1=1");
         if (nameQuery != null && !nameQuery.trim().isEmpty()) {
-            jobCandidatesDl.setQuery("select e from hunttech_JobCandidate e where lower(e.fullName) like :nameQuery order by e.createTs desc");
+            jpql.append(" and lower(e.fullName) like :nameQuery");
+        }
+        if (cityQuery != null && !cityQuery.trim().isEmpty()) {
+            jpql.append(" and lower(e.cityOfResidence.cityRuName) like :cityQuery");
+        }
+        jpql.append(" order by e.createTs desc");
+
+        jobCandidatesDl.setQuery(jpql.toString());
+        if (nameQuery != null && !nameQuery.trim().isEmpty()) {
             jobCandidatesDl.setParameter("nameQuery", "%" + nameQuery.trim().toLowerCase() + "%");
-        } else {
-            jobCandidatesDl.setQuery("select e from hunttech_JobCandidate e order by e.createTs desc");
+        }
+        if (cityQuery != null && !cityQuery.trim().isEmpty()) {
+            jobCandidatesDl.setParameter("cityQuery", "%" + cityQuery.trim().toLowerCase() + "%");
         }
         jobCandidatesDl.load();
     }
