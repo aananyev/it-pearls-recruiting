@@ -76,6 +76,7 @@ Property-биндинги полей: `departamentRuName`, `companyName`, `depar
 
 - Sidebar title: название департамента по центру (жёлтый `#ffb11b`, 18px/700).
 - Активный пункт навигации «Разделы»: `label-nav-item-active` управляется контроллером (`setNavigationActive`/`resetNavigationActiveStyles`), базовый класс `label-nav-item` не снимается.
+- Видимость навигации (контракт §3.6, эталон OpenPositionEdit): контейнер `label-navigation` показывается только на вкладках с двумя и более блоками ввода (`tabEditProject` — 2 карточки); одноблочные вкладки («Открытые позиции» — таблица, «Шаблон письма» — редактор) скрывают навигацию целиком вместе с заголовком; контейнер и кнопки остаются в XML/Java как контракт инжекции (`TABS_WITH_SIDEBAR_NAVIGATION`).
 - Иллюстрация: статичный `ovalImage` 176×176 (тема `icons/dictionaries/company-departament.png`) — загрузка изображения формой не предусмотрена, fallback-компонент не используется.
 
 ### 4.3 Валидация и сохранение
@@ -86,8 +87,8 @@ Property-биндинги полей: `departamentRuName`, `companyName`, `depar
 
 | Элемент | Цепочка |
 |---------|---------|
-| Пункт навигации «Разделы» (`companyDepartamentNavMain/Projects/Template`) | Клик → активный пункт (`label-nav-item-active`) → `tabSheetDepartment.setSelectedTab(...)` соответствующей вкладки |
-| Вкладка TabSheet | Смена → (бизнес) ленивая загрузка LOB/проектов, если ещё не грузились; (presentation) активный пункт навигации |
+| Пункт навигации «Разделы» (`companyDepartamentNavMain/Projects/Template`) | Клик → активный пункт (`label-nav-item-active`) → `tabSheetDepartment.setSelectedTab(...)` соответствующей вкладки; навигация видима только на вкладке `tabEditProject` (правило 3.6) |
+| Вкладка TabSheet | Смена → (бизнес) ленивая загрузка LOB/проектов, если ещё не грузились; (presentation) видимость навигации по правилу 3.6 + активный пункт |
 | Таблица проектов (`companyDepartamentTable`) | Кнопки «Добавить»/«Изменить»/«Удалить» → action-цепочки add/edit/remove таблицы (CRUD composition `projectOfDepartment`) |
 | Footer «Сохранить и закрыть» / «Отмена» | `windowCommitAndClose` (primary) / `windowClose` (secondary), правый нижний угол |
 
@@ -98,7 +99,7 @@ Property-биндинги полей: `departamentRuName`, `companyName`, `depar
 - **Sidebar 270px** (`company-departament-editor` namespace, тёмный `#172638`, `padding: 14px 16px 12px`, border-right + тень, тонкий скроллбар):
   1. visual `edit-sidebar-visual` — статичный `ovalImage companyDepartamentLogoImage` 176×176 (`company-departament-editor-logo-image`, `SCALE_DOWN`, theme `icons/dictionaries/company-departament.png`); без upload/fallback;
   2. identity `edit-sidebar-identity` — живой title `companyDepartamentSidebarTitle` по центру, без подписи типа записи;
-  3. навигация `label-navigation` — полоса-заголовок «Разделы» (`label-nav-title company-departament-editor-navigation-title`, inset-линии §4.1) + 3 пункта 27px (`label-nav-item`, active `#ffb11b`);
+  3. навигация `label-navigation` — полоса-заголовок «Разделы» (`label-nav-title company-departament-editor-navigation-title`, inset-линии §4.1) + 3 пункта 27px (`label-nav-item`, активный `#ffb11b`); пункты по высоте контента (`height: auto`, перенос длинной подписи), локальное wrap-правило с принудительной высотой отсутствует (контракт §3.1); на одноблочных вкладках контейнер скрывается (правило 3.6);
   4. spacer `edit-sidebar-spacer` (100%×100%) + hint `edit-sidebar-hint`.
 - **Workspace**: toolbar (`edit-toolbar-title` 20px + `edit-toolbar-description`), tabSheet `edit-tabs` (НЕ framed; общие стили тем), вкладки:
   - `tabEditProject` — scrollBox `edit-workspace-scroll` → `edit-workspace-content` → карточки `edit-card`+`showAsPanel`: `companyDepartamentMainCard` («Реквизиты департамента», 5 полей 100%) и `companyDepartamentDescriptionCard` (текст-область «Краткое описание», LOB lazy);
@@ -114,4 +115,5 @@ Property-биндинги полей: `departamentRuName`, `companyName`, `depar
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-14 | Сверка с эталоном (контракт §3.1/§3.6/§4.1): пункты навигации по высоте контента (`height: auto`, перенос подписи), удалено локальное wrap-правило с принудительной высотой, полоса-заголовок `height: auto`; реализовано правило 3.6 — `label-navigation` скрывается на одноблочных вкладках (`TABS_WITH_SIDEBAR_NAVIGATION`) |
 | 2026-08-14 | Рефакторинг по контракту Edit-форм (эталон ProjectEdit/CompanyEdit): sidebar 270px со статичной иллюстрацией `ovalImage` 176×176 и навигацией «Разделы» (вкладки), карточки `edit-card`+`showAsPanel`, footer primary/secondary, `dialogMode` 100%×100% modal; удалена legacy-форма `form` (focusComponent → `departamentRuNameField`), presentation-навигация в Java, lazy-load 1:1; `company-departament-editor.scss` ×7 тем, иконка `company-departament.png` ×7 тем; новый `CompanyDepartamentEditLayoutContractTest` (7/7) |

@@ -9,9 +9,12 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @UiController("hunttech_CompanyDepartament.edit")
 @UiDescriptor("company-departament-edit.xml")
@@ -33,6 +36,8 @@ public class CompanyDepartamentEdit extends StandardEditor<CompanyDepartament> {
     private Button companyDepartamentNavProjects;
     @Inject
     private Button companyDepartamentNavTemplate;
+    @Inject
+    private VBoxLayout companyDepartamentEditorSidebarNavigation;
 
     private boolean departamentDescriptionLoaded;
     private boolean templateLetterLoaded;
@@ -45,6 +50,13 @@ public class CompanyDepartamentEdit extends StandardEditor<CompanyDepartament> {
                 put("tabOpenPosition", "companyDepartamentNavProjects");
                 put("tabTemplateLetter", "companyDepartamentNavTemplate");
             }});
+
+    /** Вкладки с двумя и более блоками ввода — только на них label-навигация
+     *  sidebar видима (контракт Edit-форм §3.6, эталон OpenPositionEdit):
+     *  «Открытые позиции» (таблица) и «Шаблон письма» (редактор) — одноблочные,
+     *  навигация скрывается целиком вместе с заголовком. */
+    private static final Set<String> TABS_WITH_SIDEBAR_NAVIGATION =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList("tabEditProject")));
 
     @Subscribe("tabSheetDepartment")
     public void onTabSheetDepartmentSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
@@ -120,8 +132,16 @@ public class CompanyDepartamentEdit extends StandardEditor<CompanyDepartament> {
     @Subscribe("tabSheetDepartment")
     public void onTabSheetDepartmentSelectedTabChangeNav(TabSheet.SelectedTabChangeEvent event) {
         // Отдельный обработчик смены вкладки: синхронизирует активный пункт
-        // sidebar-навигации; бизнес-логика ленивой загрузки — в основном методе.
-        updateActiveNavigation(event.getSelectedTab());
+        // sidebar-навигации и скрывает контейнер навигации на одноблочных
+        // вкладках (контракт §3.6); бизнес-логика ленивой загрузки — в основном
+        // методе.
+        TabSheet.Tab selectedTab = event.getSelectedTab();
+        if (selectedTab == null) {
+            return;
+        }
+        companyDepartamentEditorSidebarNavigation.setVisible(
+                TABS_WITH_SIDEBAR_NAVIGATION.contains(selectedTab.getName()));
+        updateActiveNavigation(selectedTab);
     }
 
     private void updateActiveNavigation(TabSheet.Tab selectedTab) {

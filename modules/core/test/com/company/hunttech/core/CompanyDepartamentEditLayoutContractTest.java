@@ -198,6 +198,21 @@ public class CompanyDepartamentEditLayoutContractTest {
         assertTrue(java.contains("loadTemplateLetter"));
         assertTrue(java.contains("loadProjects"));
         assertTrue(java.contains("\"projectOfDepartment\", \"project-department-child-view\""));
+        // Правило 3.6: label-навигация видима только на вкладках с 2+ блоками
+        // (tabEditProject — 2 карточки; таблица проектов и шаблон письма —
+        // одноблочные, контейнер скрывается целиком).
+        assertTrue("Нет константы TABS_WITH_SIDEBAR_NAVIGATION",
+                java.contains("TABS_WITH_SIDEBAR_NAVIGATION"));
+        assertTrue("Контейнер навигации не инжектится",
+                java.contains("VBoxLayout companyDepartamentEditorSidebarNavigation"));
+        assertTrue("setVisible по TABS_WITH_SIDEBAR_NAVIGATION отсутствует",
+                java.contains("companyDepartamentEditorSidebarNavigation.setVisible(")
+                        && java.contains("TABS_WITH_SIDEBAR_NAVIGATION.contains"));
+        assertTrue("tabEditProject не в списке вкладок с навигацией",
+                java.contains("\"tabEditProject\""));
+        // Контейнер навигации присутствует в XML (контракт инжекции).
+        assertTrue("Нет контейнера companyDepartamentEditorSidebarNavigation в XML",
+                xml.contains("id=\"companyDepartamentEditorSidebarNavigation\""));
     }
 
     @Test
@@ -225,9 +240,17 @@ public class CompanyDepartamentEditLayoutContractTest {
                 canon.contains("rgba(255, 255, 255, 0.08)"));
         assertTrue("Нет канонического активного фона rgba(255,177,27,0.12)",
                 canon.contains("rgba(255, 177, 27, 0.12)"));
-        // Пункты навигации строго 27px.
-        assertTrue("nav-кнопки не 27px", canon.contains("height: 27px !important"));
-        assertTrue("nav-кнопки не центрированы", canon.contains("align-items: center !important"));
+        // Пункты навигации: min-height 27px, высота по контенту (эталон
+        // IteractionListEdit — длинная подпись переносится, строка не режется).
+        assertTrue("nav-пункты без min-height 27px", canon.contains("min-height: 27px !important"));
+        assertTrue("nav-пункты не по высоте контента (height: auto)",
+                canon.contains("height: auto !important"));
+        assertFalse("nav-пункты с фиксированной высотой (обрезает перенос текста)",
+                canon.contains("max-height: 27px !important"));
+        // Локальное wrap-правило с принудительной высотой запрещено (контракт
+        // §3.1 — сдвигает текст относительно маркера): shared flex+align-items.
+        assertFalse("локальное .v-button-wrap правило осталось (контракт §3.1)",
+                canon.contains(".v-button-label-nav-item .v-button-wrap"));
         // halo-тема добавляет кнопке :before — отключаем.
         assertTrue("nav-кнопка не отключает :before halo-темы",
                 canon.contains(".label-nav-item:before"));
