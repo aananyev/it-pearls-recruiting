@@ -1,13 +1,19 @@
 package com.company.hunttech.web.screens.jobcandidate;
 
+import com.company.hunttech.entity.ExtUser;
+import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
+import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.FileDescriptorResource;
 import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
+import com.haulmont.cuba.gui.components.PopupButton;
 import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.components.ThemeResource;
@@ -38,6 +44,10 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     private ScreenBuilders screenBuilders;
     @Inject
     private UiComponents uiComponents;
+    @Inject
+    private Metadata metadata;
+    @Inject
+    private Notifications notifications;
 
     @Inject
     private WebOvaFallbackImage detailPic;
@@ -87,25 +97,35 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         public String getBgColor() { return bgColor; }
     }
 
+    private final java.text.SimpleDateFormat interactionDateFormat = new java.text.SimpleDateFormat("dd.MM.yyyy");
+
+    @Inject
+    private PopupButton actionsWithCandidateButton;
+
+    private com.company.hunttech.entity.IteractionList getLastInteraction(JobCandidate candidate) {
+        if (candidate == null || candidate.getIteractionList() == null || candidate.getIteractionList().isEmpty()) {
+            return null;
+        }
+        com.company.hunttech.entity.IteractionList last = null;
+        for (com.company.hunttech.entity.IteractionList item : candidate.getIteractionList()) {
+            if (last == null) {
+                last = item;
+            } else {
+                java.util.Date d1 = item.getDateIteraction() != null ? item.getDateIteraction() : item.getCreateTs();
+                java.util.Date d2 = last.getDateIteraction() != null ? last.getDateIteraction() : last.getCreateTs();
+                if (d1 != null && (d2 == null || d1.after(d2))) {
+                    last = item;
+                }
+            }
+        }
+        return last;
+    }
+
     private InteractionStatus calculateInteractionStatus(JobCandidate candidate) {
         if (candidate == null) {
             return InteractionStatus.FREE;
         }
-        com.company.hunttech.entity.IteractionList last = null;
-        if (candidate.getIteractionList() != null && !candidate.getIteractionList().isEmpty()) {
-            for (com.company.hunttech.entity.IteractionList item : candidate.getIteractionList()) {
-                if (last == null) {
-                    last = item;
-                } else {
-                    java.util.Date d1 = item.getDateIteraction() != null ? item.getDateIteraction() : item.getCreateTs();
-                    java.util.Date d2 = last.getDateIteraction() != null ? last.getDateIteraction() : last.getCreateTs();
-                    if (d1 != null && (d2 == null || d1.after(d2))) {
-                        last = item;
-                    }
-                }
-            }
-        }
-
+        com.company.hunttech.entity.IteractionList last = getLastInteraction(candidate);
         if (last == null) {
             return InteractionStatus.FREE;
         }
@@ -233,24 +253,77 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             Label<String> statusLbl = uiComponents.create(Label.NAME);
             statusLbl.setHtmlEnabled(true);
             InteractionStatus status = calculateInteractionStatus(candidate);
+            com.company.hunttech.entity.IteractionList last = getLastInteraction(candidate);
+            String dot = status == InteractionStatus.FREE ? "🟢" :
+                    (status == InteractionStatus.MY_CANDIDATE ? "🟡" : "🔴");
+            String dateText = "нет";
+            if (last != null) {
+                java.util.Date d = last.getDateIteraction() != null ? last.getDateIteraction() : last.getCreateTs();
+                if (d != null) {
+                    dateText = interactionDateFormat.format(d);
+                }
+            }
             statusLbl.setValue("<span style='background: " + status.getBgColor() + "; color: " + status.getColor() +
-                    "; padding: 3px 8px; border-radius: 12px; font-weight: 600; font-size: 11px; display: inline-block;'>" +
-                    status.getLabel() + "</span>");
+                    "; padding: 2px 7px; border-radius: 8px; font-weight: 600; font-size: 11px; white-space: nowrap; display: inline-block;'>" +
+                    dot + " " + dateText + "</span>");
+            statusLbl.setDescription(status.getLabel() + (last != null && last.getRecrutier() != null ? " (" + last.getRecrutier().getName() + ")" : ""));
             return statusLbl;
         });
+    }
 
-        candidatesTable.addGeneratedColumn("rowActions", candidate -> {
-            Button openBtn = uiComponents.create(Button.class);
-            openBtn.setCaption("Открыть");
-            openBtn.setStyleName("primary");
-            openBtn.addClickListener(e -> {
-                screenBuilders.editor(candidatesTable)
-                        .editEntity(candidate)
-                        .withOpenMode(OpenMode.DIALOG)
-                        .show();
-            });
-            return openBtn;
-        });
+    @Subscribe("actionsWithCandidateButton.editCandidateAction")
+    public void onActionsEditCandidate(Action.ActionPerformedEvent event) {
+        JobCandidate selected = candidatesTable.getSingleSelected();
+        if (selected != null) {
+            screenBuilders.editor(candidatesTable)
+                    .editEntity(selected)
+                    .withOpenMode(OpenMode.DIALOG)
+                    .show();
+        }
+    }
+
+    @Subscribe("actionsWithCandidateButton.createInteractionAction")
+    public void onActionsCreateInteraction(Action.ActionPerformedEvent event) {
+        JobCandidate selected = candidatesTable.getSingleSelected();
+        if (selected != null) {
+            IteractionList interaction = metadata.create(IteractionList.class);
+            interaction.setCandidate(selected);
+            if (userSession.getUser() instanceof ExtUser) {
+                interaction.setRecrutier((ExtUser) userSession.getUser());
+            }
+            interaction.setDateIteraction(new java.util.Date());
+            screenBuilders.editor(IteractionList.class, this)
+                    .newEntity(interaction)
+                    .withOpenMode(OpenMode.DIALOG)
+                    .show();
+        }
+    }
+
+    @Subscribe("actionsWithCandidateButton.sendEmailAction")
+    public void onActionsSendEmail(Action.ActionPerformedEvent event) {
+        JobCandidate selected = candidatesTable.getSingleSelected();
+        if (selected != null && selected.getEmail() != null && !selected.getEmail().isEmpty()) {
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption("Отправка Email")
+                    .withDescription("Подготовка письма для " + selected.getEmail())
+                    .show();
+        } else {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Email отсутствует")
+                    .withDescription("У выбранного кандидата не указан адрес электронной почты.")
+                    .show();
+        }
+    }
+
+    @Subscribe("actionsWithCandidateButton.addPersonalReserveAction")
+    public void onActionsAddPersonalReserve(Action.ActionPerformedEvent event) {
+        JobCandidate selected = candidatesTable.getSingleSelected();
+        if (selected != null) {
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption("Кадровый резерв")
+                    .withDescription("Кандидат " + selected.getFullName() + " добавлен в кадровый резерв.")
+                    .show();
+        }
     }
 
     @Subscribe("candidatesTable")
@@ -258,8 +331,10 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         JobCandidate selected = candidatesTable.getSingleSelected();
         if (selected == null) {
             clearDetailPane();
+            actionsWithCandidateButton.setEnabled(false);
         } else {
             populateDetailPane(selected);
+            actionsWithCandidateButton.setEnabled(true);
         }
     }
 

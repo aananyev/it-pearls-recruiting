@@ -123,8 +123,8 @@
             <!-- ПРАВАЯ ПАНЕЛЬ: Рабочая область реестра (edit-workspace) -->
             <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace" expand="candidatesTableCard">
                 
-                <!-- Верхняя полоса быстрых фильтров и счетчиков таблицы -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-card">
+                <!-- Верхняя полоса быстрых фильтров, счетчиков и выпадающего меню действий -->
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-card" expand="statusFilterButtons">
                     <!-- Заголовок реестра -->
                     <label id="tableTitleLabel" value="👤 Реестр кандидатов" stylename="h3" align="MIDDLE_LEFT"/>
                     
@@ -135,6 +135,22 @@
                         <button id="filterMyBtn" caption="🟡 В моей работе" stylename="secondary"/>
                         <button id="filterOtherBtn" caption="🔴 У других" stylename="secondary"/>
                     </hbox>
+
+                    <!-- Выпадающая кнопка действий над кандидатом как в оригинальной форме -->
+                    <popupButton id="actionsWithCandidateButton"
+                                 caption="Действия"
+                                 icon="BARS"
+                                 showActionIcons="true"
+                                 enabled="false"
+                                 stylename="primary"
+                                 align="MIDDLE_RIGHT">
+                        <actions>
+                            <action id="editCandidateAction" caption="Редактировать карточку" icon="EDIT_ACTION"/>
+                            <action id="createInteractionAction" caption="Добавить взаимодействие" icon="PLUS"/>
+                            <action id="sendEmailAction" caption="Отправить Email" icon="ENVELOPE"/>
+                            <action id="addPersonalReserveAction" caption="В кадровый резерв" icon="SUPERSCRIPT"/>
+                        </actions>
+                    </popupButton>
                 </hbox>
 
                 <!-- Карточка-обёртка для таблицы кандидатов -->
@@ -161,10 +177,8 @@
                             <column id="cityFormatted" caption="Город" width="130px"/>
                             <!-- Колонка текущей компании -->
                             <column id="companyFormatted" caption="Компания"/>
-                            <!-- Генерируемая колонка статуса работы рекрутера (зеленый/желтый/красный) -->
-                            <column id="lastInteractionStatus" caption="Статус рекрутера" width="170px"/>
-                            <!-- Быстрые действия над строкой таблицы -->
-                            <column id="rowActions" caption="Действия" width="95px"/>
+                            <!-- Компактная генерируемая колонка даты последнего взаимодействия со светофорным статусом -->
+                            <column id="lastInteractionStatus" caption="Посл. взаимодействие" width="135px"/>
                         </columns>
                         <!-- Компонент отображения общего количества строк в таблице -->
                         <rowsCount/>
