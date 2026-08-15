@@ -2,12 +2,19 @@ package com.company.hunttech.web.screens.companydepartament;
 
 import com.company.hunttech.entity.CompanyDepartament;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.ViewBuilder;
-import com.haulmont.cuba.gui.components.TabSheet;
+import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 @UiController("hunttech_CompanyDepartament.edit")
 @UiDescriptor("company-departament-edit.xml")
@@ -19,18 +26,37 @@ public class CompanyDepartamentEdit extends StandardEditor<CompanyDepartament> {
     private DataManager dataManager;
     @Inject
     private TabSheet tabSheetDepartment;
+    @Inject
+    private Messages messages;
+    @Inject
+    private Label companyDepartamentSidebarTitle;
+    @Inject
+    private Button companyDepartamentNavMain;
+    @Inject
+    private Button companyDepartamentNavProjects;
+    @Inject
+    private Button companyDepartamentNavTemplate;
+    @Inject
+    private VBoxLayout companyDepartamentEditorSidebarNavigation;
 
     private boolean departamentDescriptionLoaded;
     private boolean templateLetterLoaded;
     private boolean projectsLoaded;
 
-    @Subscribe
-    public void onAfterShow(AfterShowEvent event) {
-        if (!PersistenceHelper.isNew(getEditedEntity()) && !departamentDescriptionLoaded) {
-            loadDepartamentDescription();
-            departamentDescriptionLoaded = true;
-        }
-    }
+    /** Соответствие «имя вкладки TabSheet → пункт label-навигации». */
+    private static final Map<String, String> TAB_TO_NAV_BUTTON =
+            Collections.unmodifiableMap(new HashMap<String, String>() {{
+                put("tabEditProject", "companyDepartamentNavMain");
+                put("tabOpenPosition", "companyDepartamentNavProjects");
+                put("tabTemplateLetter", "companyDepartamentNavTemplate");
+            }});
+
+    /** Вкладки с двумя и более блоками ввода — только на них label-навигация
+     *  sidebar видима (контракт Edit-форм §3.6, эталон OpenPositionEdit):
+     *  «Открытые позиции» (таблица) и «Шаблон письма» (редактор) — одноблочные,
+     *  навигация скрывается целиком вместе с заголовком. */
+    private static final Set<String> TABS_WITH_SIDEBAR_NAVIGATION =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList("tabEditProject")));
 
     @Subscribe("tabSheetDepartment")
     public void onTabSheetDepartmentSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
@@ -71,5 +97,84 @@ public class CompanyDepartamentEdit extends StandardEditor<CompanyDepartament> {
                 .add("projectOfDepartment", "project-department-child-view")
                 .build());
         getEditedEntity().setProjectOfDepartment(reloaded.getProjectOfDepartment());
+    }
+
+    // ===== Presentation-only: sidebar-навигация «Разделы» (контракт Edit-форм) =====
+
+    @Subscribe
+    public void onBeforeShowSidebar(BeforeShowEvent event) {
+        // Динамический title sidebar: название департамента, иначе общий заголовок формы.
+        if (getEditedEntity().getDepartamentRuName() != null) {
+            companyDepartamentSidebarTitle.setValue(getEditedEntity().getDepartamentRuName());
+        } else {
+            companyDepartamentSidebarTitle.setValue(messages.getMessage(getClass(), "browseCaption"));
+        }
+    }
+
+    @Subscribe("companyDepartamentNavMain")
+    public void onCompanyDepartamentNavMainClick(Button.ClickEvent event) {
+        setNavigationActive(companyDepartamentNavMain);
+        tabSheetDepartment.setSelectedTab("tabEditProject");
+    }
+
+    @Subscribe("companyDepartamentNavProjects")
+    public void onCompanyDepartamentNavProjectsClick(Button.ClickEvent event) {
+        setNavigationActive(companyDepartamentNavProjects);
+        tabSheetDepartment.setSelectedTab("tabOpenPosition");
+    }
+
+    @Subscribe("companyDepartamentNavTemplate")
+    public void onCompanyDepartamentNavTemplateClick(Button.ClickEvent event) {
+        setNavigationActive(companyDepartamentNavTemplate);
+        tabSheetDepartment.setSelectedTab("tabTemplateLetter");
+    }
+
+    @Subscribe("tabSheetDepartment")
+    public void onTabSheetDepartmentSelectedTabChangeNav(TabSheet.SelectedTabChangeEvent event) {
+        // Отдельный обработчик смены вкладки: синхронизирует активный пункт
+        // sidebar-навигации и скрывает контейнер навигации на одноблочных
+        // вкладках (контракт §3.6); бизнес-логика ленивой загрузки — в основном
+        // методе.
+        TabSheet.Tab selectedTab = event.getSelectedTab();
+        if (selectedTab == null) {
+            return;
+        }
+        companyDepartamentEditorSidebarNavigation.setVisible(
+                TABS_WITH_SIDEBAR_NAVIGATION.contains(selectedTab.getName()));
+        updateActiveNavigation(selectedTab);
+    }
+
+    private void updateActiveNavigation(TabSheet.Tab selectedTab) {
+        if (selectedTab == null) {
+            return;
+        }
+        String navButtonId = TAB_TO_NAV_BUTTON.get(selectedTab.getName());
+        if (navButtonId == null) {
+            return;
+        }
+        switch (navButtonId) {
+            case "companyDepartamentNavMain":
+                setNavigationActive(companyDepartamentNavMain);
+                break;
+            case "companyDepartamentNavProjects":
+                setNavigationActive(companyDepartamentNavProjects);
+                break;
+            case "companyDepartamentNavTemplate":
+                setNavigationActive(companyDepartamentNavTemplate);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void resetNavigationActiveStyles() {
+        companyDepartamentNavMain.removeStyleName("label-nav-item-active");
+        companyDepartamentNavProjects.removeStyleName("label-nav-item-active");
+        companyDepartamentNavTemplate.removeStyleName("label-nav-item-active");
+    }
+
+    private void setNavigationActive(Button activeButton) {
+        resetNavigationActiveStyles();
+        activeButton.addStyleName("label-nav-item-active");
     }
 }
