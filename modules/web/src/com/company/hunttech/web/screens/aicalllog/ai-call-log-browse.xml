@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://browseCaption"
+        focusComponent="aiCallLogsTable"
+        messagesPack="com.company.hunttech.web.screens.aicalllog">
+    <data>
+        <collection id="aiCallLogsDc"
+                    class="com.company.hunttech.entity.ai.AiCallLog"
+                    view="ai-call-log-edit-view">
+            <loader id="aiCallLogsDl">
+                <query><![CDATA[select e from hunttech_AiCallLog e order by e.callTime desc]]></query>
+            </loader>
+        </collection>
+    </data>
+    <dialogMode width="1300" height="750"/>
+    <layout expand="mainSplit" spacing="true">
+        <filter id="filter" dataLoader="aiCallLogsDl" applyTo="aiCallLogsTable">
+            <properties include=".*"/>
+        </filter>
+        <hbox id="buttonsPanel" spacing="true">
+            <button id="refreshBtn" action="aiCallLogsTable.refresh" icon="REFRESH"/>
+            <button id="removeBtn" action="aiCallLogsTable.remove" icon="REMOVE"/>
+        </hbox>
+        <split id="mainSplit" orientation="vertical" width="100%" pos="65">
+            <groupTable id="aiCallLogsTable" width="100%" height="100%" dataContainer="aiCallLogsDc">
+                <actions>
+                    <action id="refresh" type="refresh"/>
+                    <action id="remove" type="remove"/>
+                </actions>
+                <columns>
+                    <column id="callTime" caption="msg://callTime"/>
+                    <column id="userDisplay" caption="msg://user"/>
+                    <column id="callerSource" caption="msg://callerSource"/>
+                    <column id="functionName" caption="msg://function"/>
+                    <column id="providerCode" caption="msg://provider"/>
+                    <column id="modelName" caption="msg://model"/>
+                    <column id="tokensDisplay" caption="msg://tokens"/>
+                    <column id="costDisplay" caption="msg://cost"/>
+                    <column id="durationDisplay" caption="msg://duration"/>
+                    <column id="statusDisplay" caption="msg://status"/>
+                </columns>
+                <rowsCount/>
+            </groupTable>
+            <tabSheet id="detailsTabSheet" width="100%" height="100%">
+                <tab id="promptTab" caption="msg://promptTab" margin="true">
+                    <textArea id="promptTextArea" width="100%" height="100%" editable="false"/>
+                </tab>
+                <tab id="responseTab" caption="msg://responseTab" margin="true">
+                    <textArea id="responseTextArea" width="100%" height="100%" editable="false"/>
+                </tab>
+                <tab id="errorTab" caption="msg://errorTab" margin="true">
+                    <textArea id="errorTextArea" width="100%" height="100%" editable="false"/>
+                </tab>
+            </tabSheet>
+        </split>
+    </layout>
+</window>

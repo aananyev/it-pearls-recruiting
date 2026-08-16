@@ -109,6 +109,8 @@
           insertAfter="administration">
         <item screen="hunttech_AiFunctionConfiguration.browse"
               caption="mainMsg://menu_config.hunttech_AiFunctionConfiguration.browse" icon="MAGIC"/>
+        <item screen="hunttech_AiCallLog.browse"
+              caption="mainMsg://menu_config.hunttech_AiCallLog.browse" icon="HISTORY"/>
         <item screen="hunttech_AdminAiConfiguration.browse"
               caption="mainMsg://menu_config.hunttech_AdminAiConfiguration.browse" icon="LOCK"/>
         <item screen="hunttech_UserAiFunctionOverride.browse"

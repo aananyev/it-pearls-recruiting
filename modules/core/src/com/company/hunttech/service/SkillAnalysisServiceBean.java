@@ -103,6 +103,7 @@ public class SkillAnalysisServiceBean implements SkillAnalysisService {
             Map<String, Object> context = new LinkedHashMap<>();
             context.put(PARAM_SOURCE_TEXT, normalizedText);
             context.put(PARAM_SKILL_LEVEL, skillLevel);
+            context.put("callerSource", "SkillAnalysisService (" + skillLevel + ")");
             AiExecutionResult execution = aiExecutionService.executeText(FUNCTION_SKILLS_EXTRACT, context);
             List<SkillTree> matched = matchAgainstDictionary(parseSkillNames(execution.getText()));
             return SkillAnalysisResult.of(matched, execution);

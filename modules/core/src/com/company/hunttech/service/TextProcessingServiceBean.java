@@ -59,6 +59,7 @@ public class TextProcessingServiceBean implements TextProcessingService {
         try {
             Map<String, Object> context = new LinkedHashMap<>();
             context.put(PARAM_SOURCE_TEXT, rawText.trim());
+            context.put("callerSource", "TextProcessingService (formatHtml)");
             AiExecutionResult result = aiExecutionService.executeText(FUNCTION_TEXT_SMART_FORMAT_HTML, context);
             if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
                 String cleaned = cleanAiHtmlOutput(result.getText().trim());
@@ -85,6 +86,7 @@ public class TextProcessingServiceBean implements TextProcessingService {
         try {
             Map<String, Object> context = new LinkedHashMap<>();
             context.put(PARAM_SOURCE_TEXT, rawText.trim());
+            context.put("callerSource", "TextProcessingService (formatPlainText)");
             AiExecutionResult result = aiExecutionService.executeText(FUNCTION_TEXT_SMART_FORMAT_PLAIN, context);
             if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
                 String cleaned = cleanAiPlainOutput(result.getText().trim());

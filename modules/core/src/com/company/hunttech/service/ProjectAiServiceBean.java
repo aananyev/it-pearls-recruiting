@@ -37,6 +37,7 @@ public class ProjectAiServiceBean implements ProjectAiService {
         context.put("projectName", safeValue(projectName));
         context.put("sourceFileName", safeValue(sourceFileName));
         context.put("sourceText", normalizedSource);
+        context.put("callerSource", "ProjectAiService (processUploadedDescription)");
 
         AiExecutionResult result = aiExecutionService.executeText(
                 FUNCTION_PROJECT_DESCRIPTION_GENERATE, context);
@@ -64,6 +65,7 @@ public class ProjectAiServiceBean implements ProjectAiService {
         Map<String, Object> context = new LinkedHashMap<>();
         context.put("projectName", safeValue(projectName));
         context.put("sourceText", normalizedSource);
+        context.put("callerSource", "ProjectAiService (generateShortDescription)");
 
         AiExecutionResult result = aiExecutionService.executeText(
                 FUNCTION_PROJECT_SHORT_DESCRIPTION_GENERATE, context);
