@@ -87,5 +87,9 @@
          уровнями), иначе вторичные навыки резюме не попадают в сайдбар. -->
     <include file="260816-5-updateSkillAnalysisDisjointLevelsPrompt.xml"
              relativeToChangelogFile="true"/>
+    <!-- TextProcessingService: модернизация SYSTEM_PROMPT TEXT_SMART_FORMAT_HTML —
+         AI удаляет из итогового HTML все пустые строки и пустые абзацы исходника. -->
+    <include file="260816-4-updateTextProcessingHtmlPrompt.xml"
+             relativeToChangelogFile="true"/>
 
 </databaseChangeLog>

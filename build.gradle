@@ -115,6 +115,9 @@ configure(globalModule) {
         compile 'org.webjars.npm:domelementtype:2.2.0'
         compile 'com.ibm.icu:icu4j:69.1'
         compile 'org.apache.poi:poi-ooxml-lite:5.2.3'
+        // HWPF-экстрактор Word 97-2003 (.doc) для распознавания резюме в CandidateCVEdit;
+        // версия согласована с транзитивным poi/poi-ooxml 4.1.2 (тянет HhJavaApi).
+        compile 'org.apache.poi:poi-scratchpad:4.1.2'
         compile 'net.htmlparser.jericho:jericho-html:3.4'
         compile 'com.rubiconproject.oss:jchronic:0.2.8'
         compile 'ru.yaal.project.hhapi:HhJavaApi:0.2.6'

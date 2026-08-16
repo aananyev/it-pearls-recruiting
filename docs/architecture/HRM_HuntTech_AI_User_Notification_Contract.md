@@ -127,6 +127,16 @@ ProjectAiService            SkillAnalysisService            ProjectLogoImageProc
 логотип, `hunttech.projectLogo.rembg.enabled` — фото кандидата); при чисто
 классическом конвейере (flood-fill) стартовая нотификация не показывается.
 
+**Порядок показа.** Стартовая нотификация и «крутилка» должны появляться СРАЗУ
+в ответ на действие пользователя, поэтому AI-операции выполняются в фоне
+(`BackgroundTask`); синхронный вызов на UI-потоке недопустим — при нём обе
+нотификации (старт и итог) приходят одной пачкой в конце запроса (клиент всю
+операцию держит «крутилку» ожидания ответа). Во время фонового выполнения
+показывается модальный диалог прогресса «крутилка» (`AiProgressDialog`,
+indeterminate `ProgressBar`; открытие/закрытие —
+`AiOperationNotifier.showProgress`/`closeProgress`). Итоговая нотификация
+показывается после закрытия диалога в `done()`.
+
 Пример отображаемого текста итоговой нотификации:
 
 ```text
@@ -240,6 +250,7 @@ AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-16 | AI-текстовые функции переведены на фоновое выполнение (`BackgroundTask`) с модальным диалогом «крутилка» (`AiProgressDialog`; `AiOperationNotifier.showProgress`/`closeProgress`): стартовая нотификация показывается сразу (до «крутилки»), итоговая — по завершении с кратким отчётом. Затронуты `CandidateCVEdit` (анализ навыков, умное форматирование) и `OpenPositionEdit` (AI-анализ требований); `ProjectEdit` уже работал асинхронно. Синхронные AI-вызовы на UI-потоке недопустимы: обе нотификации приходили одной пачкой в конце запроса |
 | 2026-08-16 | Аудит всех AI-вызовов: `testConnection` (реальный AI-вызов в экранах «Управление AI») переведён на контракт — `HrmAiService.testConnection` возвращает `AiExecutionResult` (модель, провайдер, собственник = личный ключ `USER`); `UserAiConfigurationBrowse` и `ExtSettingsWindow` показывают исчезающую TRAY-нотификацию `AiOperationNotifier.show(...)`; §2.3: диагностика исключена из «вне области» |
 | 2026-08-16 | «AI-нотификации 2 раза»: добавлена стартовая исчезающая TRAY-нотификация `AiOperationNotifier.showStarted(...)` (при начале обработки, с обещанием итоговой: «После завершения будет указана модель и собственник API»); подключена в `ProjectEdit` («Кратко», upload описания), `CandidateCVEdit` (анализ навыков) и `WebProjectLogoFileUploadField` (логотип — по флагу `hunttech.projectLogo.ai.enabled`, фото — по `hunttech.projectLogo.rembg.enabled`); контракт-тест дополнен проверкой «2 раза» |
 | 2026-08-16 | Контракт введён: `AiExecutionResult`/`AiCredentialOwner`/`SkillAnalysisResult`; `AiExecutionService` и фасады возвращают метаданные; web-утилита `AiOperationNotifier` (TRAY, 5 с); нотификации в `ProjectEdit` («Кратко», upload), `CandidateCVEdit` («Сканировать навыки»), `WebProjectLogoFileUploadField` (логотип при AI-функции); контракт-тест `AiUserNotificationContractTest` |
