@@ -160,6 +160,58 @@
                     </vbox>
                 </hbox>
 
+                <!-- Сведения о целевой позиции: блок «Резюме для вакансии» на уровень выше навигации -->
+                <vbox id="candidateCvSidebarTargetCard"
+                      width="100%"
+                      spacing="true"
+                      stylename="job-candidate-profile-contacts job-candidate-sidebar-card edit-sidebar-summary candidate-cv-sidebar-card">
+                    <!-- Заголовок «Резюме для вакансии»: полоса-заголовок с двумя горизонтальными inset-линиями -->
+                    <label value="Резюме для вакансии"
+                           width="100%"
+                           stylename="label-nav-title job-candidate-section-title candidate-cv-sidebar-card-title"/>
+                    <grid spacing="true" width="100%">
+                        <columns count="1"/>
+                        <rows>
+                            <row>
+                                <hbox spacing="false" width="100%">
+                                    <label value="Должность:"
+                                           stylename="small"
+                                           width="75px"/>
+                                    <label id="candidateCvSidebarResumePosition"
+                                           width="100%"
+                                           dataContainer="candidateCVDc"
+                                           property="resumePosition"
+                                           stylename="small bold"/>
+                                </hbox>
+                            </row>
+                            <row>
+                                <hbox spacing="false" width="100%">
+                                    <label value="Вакансия:"
+                                           stylename="small"
+                                           width="75px"/>
+                                    <label id="candidateCvSidebarVacancy"
+                                           width="100%"
+                                           dataContainer="candidateCVDc"
+                                           property="toVacancy"
+                                           stylename="small"/>
+                                </hbox>
+                            </row>
+                            <row>
+                                <hbox spacing="false" width="100%">
+                                    <label value="Проект:"
+                                           stylename="small"
+                                           width="75px"/>
+                                    <label id="candidateCvSidebarProject"
+                                           width="100%"
+                                           dataContainer="candidateCVDc"
+                                           property="toVacancy.projectName"
+                                           stylename="small"/>
+                                </hbox>
+                            </row>
+                        </rows>
+                    </grid>
+                </vbox>
+
                 <!-- Обязательный порядок Edit-sidebar HRM HuntTech:
                      визуальный образ, наименование, label-навигация, детализация, прочее. -->
                 <vbox id="candidateCvSectionNavigation"
@@ -212,54 +264,6 @@
                           stylename="candidate-cv-tab-navigation">
                         <button id="candidateCvFilesTableNav" caption="msg://candidateCvNavFiles" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateFilesTable"/>
                     </vbox>
-                </vbox>
-
-                <vbox id="candidateCvSidebarTargetCard"
-                      width="100%"
-                      spacing="true"
-                      stylename="job-candidate-profile-contacts job-candidate-sidebar-card edit-sidebar-summary candidate-cv-sidebar-card">
-                    <!-- Заголовок «Резюме для вакансии»: полоса-заголовок с двумя горизонтальными inset-линиями -->
-                    <label value="Резюме для вакансии"
-                           width="100%"
-                           stylename="label-nav-title job-candidate-section-title candidate-cv-sidebar-card-title"/>
-                    <grid spacing="true" width="100%">
-                        <columns count="2"/>
-                        <rows>
-                            <row>
-                                <label value="Должность:"
-                                       stylename="small"
-                                       box.expandRatio="1"/>
-                                <label id="candidateCvSidebarResumePosition"
-                                       width="100%"
-                                       dataContainer="candidateCVDc"
-                                       property="resumePosition"
-                                       stylename="small bold"
-                                       box.expandRatio="2"/>
-                            </row>
-                            <row>
-                                <label value="Вакансия:"
-                                       stylename="small"
-                                       box.expandRatio="1"/>
-                                <label id="candidateCvSidebarVacancy"
-                                       width="100%"
-                                       dataContainer="candidateCVDc"
-                                       property="toVacancy"
-                                       stylename="small"
-                                       box.expandRatio="2"/>
-                            </row>
-                            <row>
-                                <label value="Проект:"
-                                       stylename="small"
-                                       box.expandRatio="1"/>
-                                <label id="candidateCvSidebarProject"
-                                       width="100%"
-                                       dataContainer="candidateCVDc"
-                                       property="toVacancy.projectName"
-                                       stylename="small"
-                                       box.expandRatio="2"/>
-                            </row>
-                        </rows>
-                    </grid>
                 </vbox>
 
                 <!-- Основные навыки кандидата, определенные нейросетью -->
