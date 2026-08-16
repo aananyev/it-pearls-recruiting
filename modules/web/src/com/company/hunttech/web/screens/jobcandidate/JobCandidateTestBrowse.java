@@ -597,9 +597,11 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
      */
     private void clearDetailPane() {
         detailFullName.setHtmlEnabled(true);
-        detailFullName.setValue("<div style='text-align: center; font-size: 21px; font-weight: 700; color: #7f8c8d;'>Выберите кандидата</div>");
-        detailPosition.setValue("");
-        detailCity.setValue("");
+        detailFullName.setValue("<div style='text-align: center; font-size: 21px; font-weight: 700; color: #94a3b8;'>Выберите кандидата</div>");
+        detailPosition.setHtmlEnabled(true);
+        detailPosition.setValue("<div style='text-align: center; margin: 4px 0;'><span style='background: rgba(255, 255, 255, 0.08); color: #94a3b8; padding: 3px 10px; border-radius: 4px; font-weight: 500; font-size: 13px; display: inline-block;'>Должность</span></div>");
+        detailCity.setHtmlEnabled(true);
+        detailCity.setValue("<div style='text-align: center; font-size: 14px; font-weight: 500; color: #64748b; margin-top: 2px;'>📍 —</div>");
         detailPhone.setValue("-");
         detailEmail.setValue("-");
         detailTelegram.setValue("-");
@@ -624,15 +626,15 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
     private void populateDetailPane(JobCandidate candidate) {
         String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
         detailFullName.setHtmlEnabled(true);
-        detailFullName.setValue("<div style='text-align: center; font-size: 22px; font-weight: 700; color: #2c3e50; line-height: 1.3;'>" + name + "</div>");
+        detailFullName.setValue("<div style='text-align: center; font-size: 22px; font-weight: 700; color: #f8fafc; line-height: 1.3; text-shadow: 0 1px 3px rgba(0,0,0,0.5);'>" + name + "</div>");
 
         String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
         detailPosition.setHtmlEnabled(true);
-        detailPosition.setValue("<div style='text-align: center; margin: 4px 0;'><span style='background: rgba(43, 130, 201, 0.15); color: #2b82c9; padding: 3px 10px; border-radius: 4px; font-weight: 600; font-size: 14px; display: inline-block;'>" + pos + "</span></div>");
+        detailPosition.setValue("<div style='text-align: center; margin: 4px 0;'><span style='background: rgba(59, 130, 246, 0.25); color: #93c5fd; padding: 3px 12px; border-radius: 12px; font-weight: 600; font-size: 13.5px; display: inline-block; border: 1px solid rgba(96, 165, 250, 0.35);'>" + pos + "</span></div>");
 
         String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
         detailCity.setHtmlEnabled(true);
-        detailCity.setValue("<div style='text-align: center; font-size: 15px; font-weight: 500; color: #7f8c8d; margin-top: 2px;'>📍 " + city + "</div>");
+        detailCity.setValue("<div style='text-align: center; font-size: 14px; font-weight: 500; color: #cbd5e1; margin-top: 2px;'>📍 " + city + "</div>");
 
         detailPhone.setValue(candidate.getPhone() != null ? candidate.getPhone() : "-");
         detailEmail.setValue(candidate.getEmail() != null ? candidate.getEmail() : "-");
