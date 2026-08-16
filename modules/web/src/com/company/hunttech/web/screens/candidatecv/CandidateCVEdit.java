@@ -713,24 +713,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             return;
         }
 
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            if (candidateCVRichTextArea.getValue() != null) {
-                getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
-            }
-        } else {
-            if (candidateCVRichTextArea.getValue() != null) {
-                StringBuffer newTextResume = new StringBuffer(candidateCVRichTextArea.getValue());
-
-                if (!textResumeStringBuffer.toString().equals(newTextResume.toString())) {
-                    getEditedEntity().setContactInfoChecked(false);
-
-                    if (candidateCVRichTextArea.getValue() != null) {
-                        getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
-                    }
-                }
-            } else {
+        if (candidateCVRichTextArea.getValue() != null) {
+            getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
+            if (textResumeStringBuffer != null && !textResumeStringBuffer.toString().equals(candidateCVRichTextArea.getValue())) {
                 getEditedEntity().setContactInfoChecked(false);
             }
+        } else {
+            getEditedEntity().setContactInfoChecked(false);
         }
     }
 
@@ -1489,16 +1478,34 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         try {
             TextProcessingResult result = textProcessingService.formatHtmlWithResult(currentText);
             if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
-                candidateCVRichTextArea.setValue(result.getText().replaceAll("\n", breakLine[0]));
-                setColorHighlightingCompetencies();
+                String formattedHtml = result.getText().replaceAll("\r?\n", breakLine[0]);
+
+                // Подсветка компетенций и компаний в структурированном HTML
+                try {
+                    if (candidateCVFieldOpenPosition != null && candidateCVFieldOpenPosition.getValue() != null) {
+                        formattedHtml = parseCVService.colorHighlightingCompetencies(
+                                candidateCVFieldOpenPosition.getValue(), formattedHtml, "brown", "red");
+                    } else {
+                        formattedHtml = parseCVService.colorHighlightingCompetencies(formattedHtml, "brown");
+                    }
+                    formattedHtml = parseCVService.colorHighlingCompany(formattedHtml, "green");
+                } catch (Exception ignored) {
+                }
+
+                // Загружаем структурированный текст обратно в RichTextArea и в сущность CandidateCV для сохранения
+                candidateCVRichTextArea.setValue(formattedHtml);
+                getEditedEntity().setTextCV(formattedHtml);
+                cvTextInitialized = true;
+                textResumeStringBuffer = new StringBuffer(formattedHtml);
+
                 if (result.getAiExecution() != null) {
                     AiOperationNotifier.show(notifications, result.getAiExecution(),
                             "Умное форматирование резюме выполнено",
-                            "Текст резюме структурирован с помощью нейросети.");
+                            "Текст резюме структурирован с помощью нейросети и загружен в редактор.");
                 } else {
                     notifications.create(Notifications.NotificationType.TRAY)
                             .withCaption("Форматирование резюме")
-                            .withDescription("Текст резюме структурирован локальным типографическим движком.")
+                            .withDescription("Текст резюме структурирован типографическим движком и загружен в редактор.")
                             .withHideDelayMs(3000)
                             .show();
                 }
@@ -1513,7 +1520,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe("candidateCVRichTextArea")
     public void onCandidateCVRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
-        // Значение текста резюме изменилось
+        if (event.getValue() != null) {
+            getEditedEntity().setTextCV(event.getValue());
+            cvTextInitialized = true;
+        }
     }
 
     @Subscribe("cvActionsPopupButton.scanSkillsAction")
