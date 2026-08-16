@@ -28,6 +28,7 @@ import com.haulmont.cuba.gui.screen.StandardLookup;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.security.global.UserSession;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 
 import javax.inject.Inject;
@@ -161,17 +162,13 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     @Inject
     private Button filterAllBtn;
 
-    /** Кнопка фильтра: 🟢 Свободные кандидаты (> 1 мес) */
+    /** Кнопка фильтра: Мои кандидаты */
     @Inject
-    private Button filterFreeBtn;
+    private Button filterMyCandidatesBtn;
 
-    /** Кнопка фильтра: 🟡 В моей работе (< 1 мес) */
+    /** Кнопка фильтра: С моим участием */
     @Inject
-    private Button filterMyBtn;
-
-    /** Кнопка фильтра: 🔴 В работе у других рекрутеров (< 1 мес) */
-    @Inject
-    private Button filterOtherBtn;
+    private Button filterMyParticipationBtn;
 
     /** Выпадающая кнопка действий над выбранным кандидатом */
     @Inject
@@ -327,9 +324,8 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
      */
     private void updateFilterButtons(Button activeBtn) {
         filterAllBtn.setStyleName("secondary");
-        filterFreeBtn.setStyleName("secondary");
-        filterMyBtn.setStyleName("secondary");
-        filterOtherBtn.setStyleName("secondary");
+        filterMyCandidatesBtn.setStyleName("secondary");
+        filterMyParticipationBtn.setStyleName("secondary");
         activeBtn.setStyleName("primary");
     }
 
@@ -607,24 +603,29 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     @Subscribe("filterAllBtn")
     public void onFilterAllBtnClick(Button.ClickEvent event) {
         updateFilterButtons(filterAllBtn);
+        jobCandidatesDl.removeParameter("createdBy");
+        jobCandidatesDl.removeParameter("recrutier");
+        jobCandidatesDl.removeParameter("recrutierName");
         jobCandidatesDl.load();
     }
 
-    @Subscribe("filterFreeBtn")
-    public void onFilterFreeBtnClick(Button.ClickEvent event) {
-        updateFilterButtons(filterFreeBtn);
+    @Subscribe("filterMyCandidatesBtn")
+    public void onFilterMyCandidatesBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterMyCandidatesBtn);
+        jobCandidatesDl.removeParameter("recrutier");
+        jobCandidatesDl.removeParameter("recrutierName");
+        String currentLogin = userSession.getUser() != null ? userSession.getUser().getLogin() : "";
+        jobCandidatesDl.setParameter("createdBy", currentLogin);
         jobCandidatesDl.load();
     }
 
-    @Subscribe("filterMyBtn")
-    public void onFilterMyBtnClick(Button.ClickEvent event) {
-        updateFilterButtons(filterMyBtn);
-        jobCandidatesDl.load();
-    }
-
-    @Subscribe("filterOtherBtn")
-    public void onFilterOtherBtnClick(Button.ClickEvent event) {
-        updateFilterButtons(filterOtherBtn);
+    @Subscribe("filterMyParticipationBtn")
+    public void onFilterMyParticipationBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterMyParticipationBtn);
+        jobCandidatesDl.removeParameter("createdBy");
+        jobCandidatesDl.setParameter("recrutier", userSession.getUser());
+        String currentLogin = userSession.getUser() != null ? userSession.getUser().getLogin() : "";
+        jobCandidatesDl.setParameter("recrutierName", currentLogin);
         jobCandidatesDl.load();
     }
 
