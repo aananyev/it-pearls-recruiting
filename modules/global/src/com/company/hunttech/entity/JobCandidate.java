@@ -125,6 +125,11 @@ public class JobCandidate extends StandardEntity {
     @OneToMany(mappedBy = "candidate")
     protected List<CandidateCV> candidateCv;
 
+    @Composition
+    @OnDelete(DeletePolicy.CASCADE)
+    @OneToMany(mappedBy = "candidate")
+    protected List<CandidateSkill> candidateSkills;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SKILL_TREE_ID")
     protected SkillTree skillTree;
@@ -374,5 +379,13 @@ public class JobCandidate extends StandardEntity {
 
     public void setMobilePhone(String mobilePhone) {
         this.mobilePhone = mobilePhone;
+    }
+
+    public List<CandidateSkill> getCandidateSkills() {
+        return candidateSkills;
+    }
+
+    public void setCandidateSkills(List<CandidateSkill> candidateSkills) {
+        this.candidateSkills = candidateSkills;
     }
 }
