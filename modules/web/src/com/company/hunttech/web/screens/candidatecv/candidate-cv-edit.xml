@@ -316,13 +316,16 @@
                   spacing="false"
                   expand="tabSheet"
                   stylename="candidate-cv-workspace-shell">
-        <!-- Имена и порядок вкладок являются lifecycle-контрактом CandidateCVEdit.java. -->
+        <!-- Имена и порядок вкладок являются lifecycle-контрактом CandidateCVEdit.java.
+             Тематические пиктограммы вкладок совпадают с иконками пунктов label-навигации
+             sidebar (USER/FILE_TEXT_O/SEND/SITEMAP/FOLDER_O) — единый визуальный язык. -->
         <tabSheet id="tabSheet"
                   width="100%"
                   height="100%"
                   stylename="candidate-cv-tabs">
             <tab id="tabCandidate"
                  caption="msg://msgCandidate"
+                 icon="font-icon:USER"
                  expand="candidateScrolBox"
                  margin="false"
                  spacing="false">
@@ -494,6 +497,7 @@
 
             <tab id="tabCV"
                  caption="msg://msgCV"
+                 icon="font-icon:FILE_TEXT_O"
                  margin="false"
                  expand="cvVbox"
                  spacing="false">
@@ -558,6 +562,7 @@
 
             <tab id="tabLetter"
                  caption="msg://msgLetter"
+                 icon="font-icon:SEND"
                  margin="false"
                  expand="letterTabVbox"
                  spacing="false">
@@ -630,6 +635,7 @@
 
             <tab id="tabSkillTree"
                  caption="msg://msgCVSkillTree"
+                 icon="font-icon:SITEMAP"
                  margin="false"
                  expand="skillBox"
                  spacing="false">
@@ -700,6 +706,7 @@
 
             <tab id="tabFiles"
                  caption="mainMsg://msgFiles"
+                 icon="font-icon:FOLDER_O"
                  margin="false"
                  spacing="false"
                  expand="someFilesVbox">

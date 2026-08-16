@@ -334,6 +334,12 @@
       color: #ffb11b !important;
       border-bottom-color: #ffb11b !important;
     }
+    // Тематическая пиктограмма вкладки: иконка FontAwesome перед подписью,
+    // выровнена по центру строки caption (line-height 48px).
+    .candidate-cv-tabs .v-caption .v-icon {
+      vertical-align: middle;
+      margin-right: 6px;
+    }
 
     .candidate-cv-tabs > .v-tabsheet-content {
       box-sizing: border-box;
@@ -503,6 +509,46 @@
       max-width: 100%;
       white-space: normal;
       overflow-wrap: anywhere;
+    }
+    // Кнопки «Загрузить»/«Очистить» файловых полей (FileUploadField рендерится как
+    // .c-fileupload): подпись выровнена по центру кнопки (вертикаль + горизонталь)
+    // и снабжена тематическими пиктограммами FontAwesome (fa-upload / fa-trash-o).
+    .candidate-cv-document-card .c-fileupload .v-button,
+    .candidate-cv-document-card .c-fileupload-clear {
+      box-sizing: border-box;
+      min-height: 38px;
+      padding: 0 14px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      text-align: center !important;
+    }
+
+    .candidate-cv-document-card .c-fileupload .v-button-wrap,
+    .candidate-cv-document-card .c-fileupload-clear .v-button-wrap {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      height: 100% !important;
+    }
+
+    // Пиктограмма «Загрузить» (fa-upload): заменяет пустой :before-трюк halo-темы.
+    .candidate-cv-document-card .c-fileupload .v-button:before {
+      content: '\f093';
+      font-family: FontAwesome;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+      font-size: 15px;
+    }
+
+    // Пиктограмма «Очистить» (fa-trash-o).
+    .candidate-cv-document-card .c-fileupload-clear:before {
+      content: '\f1f8';
+      font-family: FontAwesome;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+      font-size: 15px;
     }
 
     .candidate-cv-photo-dropzone {
