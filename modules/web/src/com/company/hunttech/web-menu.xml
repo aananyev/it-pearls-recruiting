@@ -107,6 +107,10 @@
     <item screen="hunttech_CheckCandidate.browse" icon="CHECK" insertAfter="application-reports" openType="DIALOG"/>
     <menu id="aiAdministration" caption="mainMsg://menu_config.aiAdministration" icon="MAGIC"
           insertAfter="administration">
+        <item screen="hunttech_AdminAiDashboard"
+              caption="mainMsg://menu_config.hunttech_AdminAiDashboard" icon="DASHBOARD"/>
+        <item screen="hunttech_UserAiDashboard"
+              caption="mainMsg://menu_config.hunttech_UserAiDashboard" icon="PIE_CHART"/>
         <item screen="hunttech_AiFunctionConfiguration.browse"
               caption="mainMsg://menu_config.hunttech_AiFunctionConfiguration.browse" icon="MAGIC"/>
         <item screen="hunttech_AiCallLog.browse"

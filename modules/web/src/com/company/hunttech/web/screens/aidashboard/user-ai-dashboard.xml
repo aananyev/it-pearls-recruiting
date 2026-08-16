@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd"
+        caption="msg://userDashboardCaption"
+        messagesPack="com.company.hunttech.web.screens.aidashboard">
+    <data>
+        <collection id="recentCallsDc"
+                    class="com.company.hunttech.entity.ai.AiCallLog"
+                    view="ai-call-log-browse-view">
+            <loader id="recentCallsDl">
+                <query><![CDATA[select e from hunttech_AiCallLog e where e.user = :currentUser order by e.callTime desc]]></query>
+            </loader>
+        </collection>
+    </data>
+    <layout expand="mainScroll" spacing="true">
+        <scrollBox id="mainScroll" width="100%" height="100%" spacing="true">
+            <!-- Filter Bar -->
+            <hbox id="filterPanel" spacing="true" width="100%" alignment="MIDDLE_LEFT" stylename="card-layout">
+                <label value="msg://periodLabel" alignment="MIDDLE_LEFT" stylename="bold"/>
+                <lookupField id="periodLookup" width="200px" nullOptionVisible="false"/>
+                <dateField id="dateFromField" caption="msg://dateFrom" resolution="DAY"/>
+                <dateField id="dateToField" caption="msg://dateTo" resolution="DAY"/>
+                <button id="refreshBtn" caption="msg://refresh" icon="REFRESH" stylename="primary"/>
+            </hbox>
+
+            <!-- KPI Cards -->
+            <hbox id="kpiPanel" spacing="true" width="100%">
+                <vbox id="totalCallsCard" stylename="card well" width="25%" height="110px" spacing="false">
+                    <label value="msg://totalCalls" stylename="bold small"/>
+                    <label id="totalCallsLabel" value="0" stylename="huge bold"/>
+                    <label id="totalCallsSubLabel" value="—" stylename="tiny"/>
+                </vbox>
+                <vbox id="tokensCard" stylename="card well" width="25%" height="110px" spacing="false">
+                    <label value="msg://totalTokens" stylename="bold small"/>
+                    <label id="tokensLabel" value="0" stylename="huge bold"/>
+                    <label id="tokensSubLabel" value="0 in / 0 out" stylename="tiny"/>
+                </vbox>
+                <vbox id="costCard" stylename="card well" width="25%" height="110px" spacing="false">
+                    <label value="msg://estimatedCost" stylename="bold small"/>
+                    <label id="costLabel" value="$ 0.00" stylename="huge bold"/>
+                    <label id="costSubLabel" value="—" stylename="tiny"/>
+                </vbox>
+                <vbox id="speedCard" stylename="card well" width="25%" height="110px" spacing="false">
+                    <label value="msg://avgSpeedAndSuccess" stylename="bold small"/>
+                    <label id="speedLabel" value="0.00 с" stylename="huge bold"/>
+                    <label id="successRateLabel" value="100% OK" stylename="tiny"/>
+                </vbox>
+            </hbox>
+
+            <!-- Charts Section -->
+            <hbox id="chartsPanel" spacing="true" width="100%" height="320px">
+                <vbox id="dynamicsChartBox" stylename="card" width="60%" height="100%" spacing="true">
+                    <label value="msg://dailyDynamics" stylename="bold"/>
+                    <chart:serialChart id="dynamicsChart"
+                                       categoryField="date"
+                                       height="100%"
+                                       width="100%">
+                        <chart:valueAxes>
+                            <chart:axis position="LEFT" stackType="REGULAR" title="msg://chartCallsCount"/>
+                        </chart:valueAxes>
+                        <chart:graphs>
+                            <chart:graph id="successGraph"
+                                         type="COLUMN"
+                                         fillAlphas="0.85"
+                                         color="#27ae60"
+                                         valueField="success"
+                                         title="msg://successCalls"/>
+                            <chart:graph id="errorGraph"
+                                         type="COLUMN"
+                                         fillAlphas="0.85"
+                                         color="#e74c3c"
+                                         valueField="error"
+                                         title="msg://errorCalls"/>
+                        </chart:graphs>
+                        <chart:legend position="BOTTOM" autoMargins="false"/>
+                        <chart:chartCursor cursorAlpha="0.1"/>
+                    </chart:serialChart>
+                </vbox>
+
+                <vbox id="functionChartBox" stylename="card" width="40%" height="100%" spacing="true">
+                    <label value="msg://functionsShare" stylename="bold"/>
+                    <chart:pieChart id="functionPieChart"
+                                    titleField="functionName"
+                                    valueField="count"
+                                    innerRadius="40%"
+                                    height="100%"
+                                    width="100%">
+                        <chart:legend position="BOTTOM" autoMargins="false"/>
+                        <chart:balloon text="[[title]]: [[value]] ([[percents]]%)"/>
+                    </chart:pieChart>
+                </vbox>
+            </hbox>
+
+            <!-- Recent Calls Table -->
+            <vbox id="recentTableBox" stylename="card" width="100%" spacing="true">
+                <label value="msg://recentCallsTitle" stylename="bold"/>
+                <table id="recentCallsTable" width="100%" height="280px" dataContainer="recentCallsDc">
+                    <columns>
+                        <column id="callTime" caption="msg://callTime"/>
+                        <column id="functionName" caption="msg://function"/>
+                        <column id="modelName" caption="msg://model"/>
+                        <column id="tokensDisplay" caption="msg://tokens"/>
+                        <column id="costDisplay" caption="msg://cost"/>
+                        <column id="durationDisplay" caption="msg://duration"/>
+                        <column id="statusDisplay" caption="msg://status"/>
+                    </columns>
+                </table>
+            </vbox>
+        </scrollBox>
+    </layout>
+</window>
