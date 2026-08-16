@@ -135,23 +135,80 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
                 jobCandidateSkillsVBox.setVisible(true);
             }
 
-            StringBuilder sb = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 0;'>");
+            List<CandidateSkill> mainSkills = new ArrayList<>();
+            List<CandidateSkill> secondarySkills = new ArrayList<>();
+            List<CandidateSkill> tertiarySkills = new ArrayList<>();
+
+            for (CandidateSkill cs : skills) {
+                if (cs.getPriority() == CandidateSkillPriority.MAIN) {
+                    mainSkills.add(cs);
+                } else if (cs.getPriority() == CandidateSkillPriority.SECONDARY) {
+                    secondarySkills.add(cs);
+                } else {
+                    tertiarySkills.add(cs);
+                }
+            }
+
             String[] palette = new String[]{
                     "#2b82c9", "#27ae60", "#8e44ad", "#d35400", "#16a085", "#2c3e50", "#e67e22", "#2980b9"
             };
-            for (CandidateSkill cs : skills) {
-                if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
-                    String skillName = cs.getSkill().getSkillName();
-                    String color = palette[Math.abs(skillName.hashCode()) % palette.length];
-                    String priorityIcon = cs.getPriority() == CandidateSkillPriority.MAIN ? "★ " : "";
-                    sb.append(String.format(
-                            "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
-                            "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
-                            "white-space: nowrap; display: inline-block;'>%s%s</span>",
-                            color, color, color, priorityIcon, skillName
-                    ));
+
+            StringBuilder sb = new StringBuilder("<div style='display: flex; flex-direction: column; gap: 8px; padding: 2px 0;'>");
+
+            if (!mainSkills.isEmpty()) {
+                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #1e293b; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Обязательные:</div>");
+                sb.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
+                for (CandidateSkill cs : mainSkills) {
+                    if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                        String name = cs.getSkill().getSkillName();
+                        String color = palette[Math.abs(name.hashCode()) % palette.length];
+                        sb.append(String.format(
+                                "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                                "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                                "white-space: nowrap; display: inline-block;'>★ %s</span>",
+                                color, color, color, name
+                        ));
+                    }
                 }
+                sb.append("</div></div>");
             }
+
+            if (!secondarySkills.isEmpty()) {
+                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Желательные:</div>");
+                sb.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
+                for (CandidateSkill cs : secondarySkills) {
+                    if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                        String name = cs.getSkill().getSkillName();
+                        String color = palette[Math.abs(name.hashCode()) % palette.length];
+                        sb.append(String.format(
+                                "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                                "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                                "white-space: nowrap; display: inline-block;'>%s</span>",
+                                color, color, color, name
+                        ));
+                    }
+                }
+                sb.append("</div></div>");
+            }
+
+            if (!tertiarySkills.isEmpty()) {
+                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Прочее:</div>");
+                sb.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
+                for (CandidateSkill cs : tertiarySkills) {
+                    if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                        String name = cs.getSkill().getSkillName();
+                        String color = palette[Math.abs(name.hashCode()) % palette.length];
+                        sb.append(String.format(
+                                "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                                "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                                "white-space: nowrap; display: inline-block;'>%s</span>",
+                                color, color, color, name
+                        ));
+                    }
+                }
+                sb.append("</div></div>");
+            }
+
             sb.append("</div>");
             candidateSkillsLabels.setValue(sb.toString());
         } catch (Exception ex) {

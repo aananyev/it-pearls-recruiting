@@ -3915,7 +3915,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             StringBuilder sb = new StringBuilder("<div style='display: flex; flex-direction: column; gap: 8px; padding: 2px 0;'>");
 
             if (!mainSkills.isEmpty()) {
-                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #1e293b; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Главное:</div>");
+                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #1e293b; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Обязательные:</div>");
                 sb.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
                 for (OpenPositionSkill ops : mainSkills) {
                     if (ops.getSkill() != null && ops.getSkill().getSkillName() != null) {
@@ -3933,7 +3933,7 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
 
             if (!secondarySkills.isEmpty()) {
-                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Вспомогательное:</div>");
+                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Желательные:</div>");
                 sb.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
                 for (OpenPositionSkill ops : secondarySkills) {
                     if (ops.getSkill() != null && ops.getSkill().getSkillName() != null) {
@@ -4117,8 +4117,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
             String statsDescription = String.format(
                     "Всего обнаружено требований: <b>%d</b><br/>" +
-                    "• Главных: <b>%d</b><br/>" +
-                    "• Вспомогательных: <b>%d</b><br/>" +
+                    "• Обязательных: <b>%d</b><br/>" +
+                    "• Желательных: <b>%d</b><br/>" +
                     "• Прочих: <b>%d</b><br/>" +
                     "Добавлено новых в базу: <b>%d</b> (уже привязано: %d)",
                     totalDetected, mainDetected, secondaryDetected, tertiaryDetected, savedCount, existingOrDuplicate

@@ -1472,14 +1472,23 @@
                               showAsPanel="true"
                               stylename="edit-accordion-section"
                               width="100%">
-                        <!-- Опыт коммерческой разработки (обязательный). -->
-                        <radioButtonGroup id="workExperienceRadioButton"
-                                          orientation="horizontal"
-                                          required="true"
-                                          description="msg://msgWorkExperience"
-                                          dataContainer="openPositionDc"
-                                          property="workExperience"
-                                          caption="msg://msgWorkExperience"/>
+                        <hbox id="workExperienceMainHBox" width="100%" spacing="true" expand="workExperienceRadioButton" align="MIDDLE_LEFT">
+                            <!-- Опыт коммерческой разработки (обязательный). -->
+                            <radioButtonGroup id="workExperienceRadioButton"
+                                              orientation="horizontal"
+                                              required="true"
+                                              description="msg://msgWorkExperience"
+                                              dataContainer="openPositionDc"
+                                              property="workExperience"
+                                              caption="msg://msgWorkExperience"/>
+                            <!-- Кнопка «AI-анализ требований», прижатая к правому краю около блока радиокнопок -->
+                            <hbox id="workExperienceAiActionBox" align="BOTTOM_RIGHT" spacing="true">
+                                <button id="scanOpenPositionSkillsBtn"
+                                        caption="msg://msgScanOpenPositionSkills"
+                                        icon="MAGIC"
+                                        stylename="primary"/>
+                            </hbox>
+                        </hbox>
                         <!-- Командный опыт (скрыт, заполняется программно). -->
                         <radioButtonGroup id="commanExperienceRadioButton"
                                           orientation="horizontal"
@@ -1504,13 +1513,6 @@
                                  caption="msg://msgRuComment">
                                 <!-- Контейнер редактора русского описания на всю высоту вкладки аккордеона. -->
                                 <vbox id="openPositionRuTabBox" width="100%" height="100%" spacing="true">
-                                    <!-- Панель действий: AI-анализ требований вакансии -->
-                                    <hbox id="openPositionRuActionsHBox" spacing="true" align="MIDDLE_RIGHT" width="100%">
-                                        <button id="scanOpenPositionSkillsBtn"
-                                                caption="msg://msgScanOpenPositionSkills"
-                                                icon="MAGIC"
-                                                stylename="primary"/>
-                                    </hbox>
                                     <!-- Редактор русского описания (обязательный). -->
                                     <richTextArea id="openPositionRichTextArea"
                                                   dataContainer="openPositionDc"
