@@ -2670,6 +2670,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                 s.addAfterCloseListener(e -> {
                     jobCandidateDl.load();
                     scanContactsFromCVs();
+                    initCandidateSkillsSidebar();
                 });
             }
 
@@ -3407,6 +3408,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
                     if (jobCandidateCandidateCvTable != null) {
                         jobCandidateCandidateCvTable.repaint();
                     }
+                    initCandidateSkillsSidebar();
                 })
                 .build()
                 .show();
@@ -3957,6 +3959,7 @@ public class JobCandidateEdit extends StandardEditor<JobCandidate> {
         if (jobCandidateCandidateCvTable != null) {
             jobCandidateCandidateCvTable.repaint();
         }
+        initCandidateSkillsSidebar();
     }
 
     private void reloadInteractions() {
