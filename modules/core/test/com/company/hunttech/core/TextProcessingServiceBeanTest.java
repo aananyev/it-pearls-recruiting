@@ -119,6 +119,71 @@ public class TextProcessingServiceBeanTest {
     }
 
     @Test
+    public void testAiHtmlOutputContainsNoEmptyLines() {
+        stub.register(TextProcessingService.FUNCTION_TEXT_SMART_FORMAT_HTML,
+                "```html\n<b>ОПЫТ РАБОТЫ</b>\n\n<p>Java разработчик</p>\n   \n<ul><li>Spring</li></ul>\n```");
+
+        TextProcessingResult result = bean.formatHtmlWithResult("Опыт работы\nJava разработчик\nSpring");
+
+        assertNotNull(result);
+        assertTrue(result.isAiFormatted());
+        assertFalse("В AI-HTML-результате не должно быть двойных переносов",
+                result.getText().contains("\n\n"));
+        for (String line : result.getText().split("\\r?\\n", -1)) {
+            assertFalse("Пустая строка в AI-HTML-результате: '" + line + "'", line.trim().isEmpty());
+        }
+        assertTrue(result.getText().contains("<b>ОПЫТ РАБОТЫ</b>"));
+        assertTrue(result.getText().contains("<li>Spring</li>"));
+    }
+
+    @Test
+    public void testAiPlainOutputContainsNoEmptyLines() {
+        stub.register(TextProcessingService.FUNCTION_TEXT_SMART_FORMAT_PLAIN,
+                "═══ ОПЫТ РАБОТЫ ═══\n\nJava разработчик\n   \n  • Spring\n");
+
+        TextProcessingResult result = bean.formatPlainTextWithResult("Опыт работы\nJava разработчик\nSpring");
+
+        assertNotNull(result);
+        assertTrue(result.isAiFormatted());
+        for (String line : result.getText().split("\\r?\\n", -1)) {
+            assertFalse("Пустая строка в AI-Plain-результате", line.trim().isEmpty());
+        }
+        assertTrue(result.getText().contains("═══ ОПЫТ РАБОТЫ ═══"));
+        assertTrue(result.getText().contains("  • Spring"));
+    }
+
+    @Test
+    public void testLocalHtmlFallbackContainsNoEmptyLines() {
+        stub.setThrowException(true);
+
+        String input = "Контакты\nИван Иванов\n+7 999 123-45-67\n\n\nОпыт работы\nJava разработчик\n   \nОбразование\nМГТУ им. Баумана";
+        TextProcessingResult result = bean.formatHtmlWithResult(input);
+
+        assertNotNull(result);
+        assertFalse(result.isAiFormatted());
+        for (String line : result.getText().split("\\r?\\n", -1)) {
+            assertFalse("Пустая строка в локальном HTML-результате: '" + line + "'", line.trim().isEmpty());
+        }
+        assertTrue(result.getText().contains("ОПЫТ РАБОТЫ"));
+    }
+
+    @Test
+    public void testLocalPlainTextFallbackContainsNoEmptyLines() {
+        stub.setThrowException(true);
+
+        String input = "Контакты\nИван Иванов\n+7 999 123-45-67\n\nОпыт работы\nJava разработчик\n\n\nНавыки\n* Java Core\n* SQL";
+        TextProcessingResult result = bean.formatPlainTextWithResult(input);
+
+        assertNotNull(result);
+        assertFalse(result.isAiFormatted());
+        for (String line : result.getText().split("\\r?\\n", -1)) {
+            assertFalse("Пустая строка в локальном Plain-результате: '" + line + "'", line.trim().isEmpty());
+        }
+        assertTrue(result.getText().contains("═══ ОПЫТ РАБОТЫ ═══"));
+        assertTrue(result.getText().contains("  • Java Core"));
+    }
+
+    @Test
     public void testEmptyInputHandling() {
         assertTrue(bean.formatHtml(null).isEmpty());
         assertTrue(bean.formatHtml("   ").isEmpty());

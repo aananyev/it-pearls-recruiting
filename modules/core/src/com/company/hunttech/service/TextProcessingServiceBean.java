@@ -63,7 +63,11 @@ public class TextProcessingServiceBean implements TextProcessingService {
             AiExecutionResult result = aiExecutionService.executeText(FUNCTION_TEXT_SMART_FORMAT_HTML, context);
             if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
                 String cleaned = cleanAiHtmlOutput(result.getText().trim());
-                return TextProcessingResult.aiResult(cleaned, result);
+                // Если после очистки (например, модель вернула одни пустые строки)
+                // результат пуст — используем локальный типографический движок.
+                if (!cleaned.isEmpty()) {
+                    return TextProcessingResult.aiResult(cleaned, result);
+                }
             }
         } catch (RuntimeException e) {
             log.warn("AI-форматирование HTML недоступно, используется локальный типографический движок. Причина: {}", e.toString());
@@ -90,7 +94,10 @@ public class TextProcessingServiceBean implements TextProcessingService {
             AiExecutionResult result = aiExecutionService.executeText(FUNCTION_TEXT_SMART_FORMAT_PLAIN, context);
             if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
                 String cleaned = cleanAiPlainOutput(result.getText().trim());
-                return TextProcessingResult.aiResult(cleaned, result);
+                // Если после очистки результат пуст — используем локальный движок.
+                if (!cleaned.isEmpty()) {
+                    return TextProcessingResult.aiResult(cleaned, result);
+                }
             }
         } catch (RuntimeException e) {
             log.warn("AI-форматирование Plain Text недоступно, используется локальный типографический движок. Причина: {}", e.toString());
@@ -172,24 +179,17 @@ public class TextProcessingServiceBean implements TextProcessingService {
         String text = extractPlainTextLines(rawText);
         String[] lines = text.split("\\r?\\n");
         List<String> output = new ArrayList<>();
-        boolean prevWasBlank = false;
 
         for (String rawLine : lines) {
             String line = rawLine != null ? rawLine.trim() : "";
             if (line.isEmpty()) {
-                if (!prevWasBlank && !output.isEmpty()) {
-                    output.add("");
-                    prevWasBlank = true;
-                }
+                // Контракт сервиса: форматирование удаляет пустые строки исходника —
+                // секции и так разделяются заголовками ═══ … ═══.
                 continue;
             }
 
             if (isSectionHeader(line)) {
-                if (!output.isEmpty() && !prevWasBlank) {
-                    output.add("");
-                }
                 output.add("═══ " + line.toUpperCase(Locale.getDefault()) + " ═══");
-                prevWasBlank = false;
                 continue;
             }
 
@@ -199,7 +199,6 @@ public class TextProcessingServiceBean implements TextProcessingService {
             } else {
                 output.add(line);
             }
-            prevWasBlank = false;
         }
 
         return String.join("\n", output).trim();
@@ -223,7 +222,11 @@ public class TextProcessingServiceBean implements TextProcessingService {
         if (result.endsWith("```")) {
             result = result.substring(0, result.length() - 3);
         }
-        return result.trim();
+        // Модель может вернуть лишние пустые строки: удаляем их, чтобы в итоговом
+        // HTML-фрагменте не оставалось пустых строк (в RichTextArea перенос строки
+        // результата превращается в видимую пустую строку — CandidateCVEdit заменяет
+        // перевод строки на <br>).
+        return removeEmptyLines(result.trim());
     }
 
     private String cleanAiPlainOutput(String aiResult) {
@@ -236,7 +239,34 @@ public class TextProcessingServiceBean implements TextProcessingService {
         if (result.endsWith("```")) {
             result = result.substring(0, result.length() - 3);
         }
-        return result.trim();
+        // Контракт сервиса: результат форматирования не содержит пустых строк,
+        // поэтому очищаем и plain-результат модели.
+        return removeEmptyLines(result.trim());
+    }
+
+    /**
+     * Удаляет из текста все пустые строки (в том числе строки из одних пробелов и табуляций).
+     * Гарантирует отсутствие пустых строк в результате форматирования независимо от того,
+     * что вернула AI-модель: пустая строка в выводе сервиса становится видимой пустой
+     * строкой в RichTextArea (CandidateCVEdit заменяет перевод строки на &lt;br&gt;).
+     */
+    private String removeEmptyLines(String text) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+        String[] lines = text.split("\\r?\\n", -1);
+        StringBuilder sb = new StringBuilder(text.length());
+        for (String line : lines) {
+            if (!line.trim().isEmpty()) {
+                sb.append(line).append('\n');
+            }
+        }
+        if (sb.length() == 0) {
+            return "";
+        }
+        // Убираем завершающий перевод строки, добавленный циклом.
+        sb.setLength(sb.length() - 1);
+        return sb.toString();
     }
 
     private String extractPlainTextLines(String rawText) {
