@@ -23,8 +23,16 @@
 ## API
 
 ```java
-String executeText(String functionCode, Map<String, Object> context);
+AiExecutionResult executeText(String functionCode, Map<String, Object> context);
+AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
+                               byte[] sourceImage, String sourceMimeType);
 ```
+
+`AiExecutionResult` (`modules/global/.../service/AiExecutionResult.java`) — payload +
+метаданные для пользовательской нотификации: `getText()`/`getImage()` (payload),
+`getFunctionCode()`/`getFunctionName()` (что делала), `getModelName()`/`getProviderCode()`
+(какая модель), `getCredentialOwner()` (`AiCredentialOwner.ADMIN | USER` — собственник
+API: корпоративное подключение администратора или личное подключение пользователя).
 
 Prompt формируется через `TemplateHelper.processTemplate`. Provider выбирается существующим `AIProviderRegistry`; vendor-specific HTTP/auth остаётся внутри `AIProvider` implementations.
 
@@ -39,6 +47,15 @@ Prompt формируется через `TemplateHelper.processTemplate`. Provi
 
 Ошибки конфигурации преобразуются в `DevelopmentException`. При fallback логируется код функции и класс исключения, но не API key и не payload. Неподдержанная capability блокируется до внешнего вызова.
 
+## Контракт пользовательской нотификации
+
+Каждый успешный реальный вызов возвращает `AiExecutionResult` с метаданными: модель,
+провайдер и собственник API (`ADMIN` — корпоративное подключение, `USER` — личное
+подключение пользователя; пользовательский путь проставляет `USER`, административный —
+`ADMIN`). Экраны обязаны показать исчезающую TRAY-нотификацию CUBA (web-утилита
+`AiOperationNotifier`, 5 с) с этими данными. Полный текст контракта —
+[HRM_HuntTech_AI_User_Notification_Contract](../architecture/HRM_HuntTech_AI_User_Notification_Contract.md).
+
 ## Интеграция legacy vacancy AI
 
 `HrmAiServiceBean` больше не содержит JPQL к `UserAiConfiguration`/`VacancyPromptTemplate` для рабочих методов. `STANDARDIZE_VACANCY` и legacy template codes становятся function codes. Liquibase переносит существующие vacancy templates в `AiFunctionConfiguration`.
@@ -51,5 +68,6 @@ Prompt формируется через `TemplateHelper.processTemplate`. Provi
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-16 | Контракт пользовательской нотификации: методы возвращают `AiExecutionResult` (payload + модель, провайдер, собственник API `AiCredentialOwner.ADMIN/USER`) — см. HRM_HuntTech_AI_User_Notification_Contract |
 | 2026-08-12 | Подключён `HrmAiService` как совместимый vacancy-фасад; provider selection из legacy API исключён |
 | 2026-08-12 | Реализован централизованный function resolver с per-function override и admin fallback |

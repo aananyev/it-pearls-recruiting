@@ -3,7 +3,11 @@ package com.company.hunttech.core;
 import com.company.hunttech.HunttechTestContainer;
 import com.company.hunttech.TestEntityTracker;
 import com.company.hunttech.entity.SkillTree;
+import com.company.hunttech.entity.ai.AiCapability;
+import com.company.hunttech.service.AiCredentialOwner;
+import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.AiExecutionService;
+import com.company.hunttech.service.SkillAnalysisResult;
 import com.company.hunttech.service.SkillAnalysisService;
 import com.company.hunttech.service.SkillAnalysisServiceBean;
 import com.haulmont.cuba.core.global.AppBeans;
@@ -22,12 +26,17 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
  * Контейнерный тест {@link SkillAnalysisServiceBean} со стабом {@link AiExecutionService}
  * (реальные провайдеры в тестах не вызываются — см. AI Control Plane, §5).
+ *
+ * <p>Проверяет и контракт пользовательской нотификации: результат несёт метаданные
+ * AI-выполнения (модель, провайдер, собственник API) при AI-анализе и {@code null}
+ * при классическом fallback (см. HRM_HuntTech_AI_User_Notification_Contract).</p>
  *
  * <p>Имена создаваемых навыков уникальны (SKILL_NAME — unique-constraint, тестовая БД
  * переиспользуется между прогонами).</p>
@@ -84,7 +93,8 @@ public class SkillAnalysisServiceBeanTest {
         String unknownSkill = "FakeSkill-" + UUID.randomUUID().toString().substring(0, 8);
         stub.result = "[\"" + javaName + "\", \"" + springName + "\", \"" + unknownSkill + "\"]";
 
-        List<SkillTree> skills = bean.analyzeAll("Текст резюме");
+        SkillAnalysisResult outcome = bean.analyzeAll("Текст резюме");
+        List<SkillTree> skills = outcome.getSkills();
 
         assertEquals(2, skills.size());
         assertEquals(javaName, skills.get(0).getSkillName());
@@ -93,6 +103,25 @@ public class SkillAnalysisServiceBeanTest {
                 stub.lastContext.get(SkillAnalysisService.PARAM_SKILL_LEVEL));
         assertEquals("Текст резюме",
                 stub.lastContext.get(SkillAnalysisService.PARAM_SOURCE_TEXT));
+    }
+
+    @Test
+    public void aiExecutionMetadataIsReturnedWhenAiUsed() {
+        String javaName = uniqueName("Java");
+        createSkill(javaName, false);
+        stub.result = "[\"" + javaName + "\"]";
+
+        SkillAnalysisResult outcome = bean.analyzeAll("Текст резюме");
+
+        // Контракт пользовательской нотификации: модель, провайдер и собственник API
+        // доходят до потребителя (экран показывает их в исчезающей нотификации).
+        AiExecutionResult execution = outcome.getAiExecution();
+        assertNotNull("AI-анализ выполнен — метаданные выполнения обязательны", execution);
+        assertEquals("test-model", execution.getModelName());
+        assertEquals("test-provider", execution.getProviderCode());
+        assertEquals(AiCredentialOwner.ADMIN, execution.getCredentialOwner());
+        assertEquals(SkillAnalysisService.FUNCTION_SKILLS_EXTRACT, execution.getFunctionCode());
+        assertTrue(outcome.isAiUsed());
     }
 
     @Test
@@ -129,7 +158,7 @@ public class SkillAnalysisServiceBeanTest {
         String unknownSkill = "FakeSkill-" + UUID.randomUUID().toString().substring(0, 8);
         stub.result = "```json\n[\"" + javaName + "\", \"" + unknownSkill + "\"]\n```";
 
-        List<SkillTree> skills = bean.analyzeAll("Текст");
+        List<SkillTree> skills = bean.analyzeAll("Текст").getSkills();
 
         assertEquals(1, skills.size());
         assertEquals(javaName, skills.get(0).getSkillName());
@@ -143,7 +172,7 @@ public class SkillAnalysisServiceBeanTest {
         createSkill(sqlName, false);
         stub.result = javaName + ", " + sqlName;
 
-        List<SkillTree> skills = bean.analyzeAll("Текст");
+        List<SkillTree> skills = bean.analyzeAll("Текст").getSkills();
 
         assertEquals(2, skills.size());
     }
@@ -156,9 +185,14 @@ public class SkillAnalysisServiceBeanTest {
         createSkill(springName, false);
         stub.failure = new RuntimeException("AI недоступен: нет активного корпоративного подключения");
 
-        List<SkillTree> skills = bean.analyzeAll("Владею технологиями " + javaName + " и " + springName);
+        SkillAnalysisResult outcome = bean.analyzeAll("Владею технологиями " + javaName + " и " + springName);
 
-        assertEquals(2, skills.size());
+        assertEquals(2, outcome.getSkills().size());
+        // Классический fallback: AI не выполнялся — метаданные отсутствуют, экран
+        // не показывает нотификацию «обработано ИИ» (контракт пользовательской нотификации).
+        assertNull("При классическом fallback метаданные AI-выполнения должны быть null",
+                outcome.getAiExecution());
+        assertTrue(!outcome.isAiUsed());
     }
 
     @Test
@@ -169,7 +203,7 @@ public class SkillAnalysisServiceBeanTest {
         createSkill(secretName, true);
         stub.result = "[\"" + javaName + "\", \"" + secretName + "\"]";
 
-        List<SkillTree> skills = bean.analyzeAll("Текст");
+        List<SkillTree> skills = bean.analyzeAll("Текст").getSkills();
 
         assertEquals(1, skills.size());
         assertEquals(javaName, skills.get(0).getSkillName());
@@ -194,12 +228,13 @@ public class SkillAnalysisServiceBeanTest {
     public void emptyAiResponseReturnsEmptyList() {
         createSkill(uniqueName("Java"), false);
         stub.result = "[]";
-        assertTrue(bean.analyzeAll("Текст").isEmpty());
+        assertTrue(bean.analyzeAll("Текст").getSkills().isEmpty());
     }
 
     /**
      * Стаб AI-шлюза: возвращает заданный ответ или бросает заданное исключение,
-     * запоминая последний вызов.
+     * запоминая последний вызов. Метаданные результата фиксированы (test-model /
+     * test-provider / ADMIN) — контракт нотификации проверяется по ним.
      */
     private static final class StubAiExecutionService implements AiExecutionService {
         private String result = "[]";
@@ -208,18 +243,21 @@ public class SkillAnalysisServiceBeanTest {
         private Map<String, Object> lastContext;
 
         @Override
-        public String executeText(String functionCode, Map<String, Object> context) {
+        public AiExecutionResult executeText(String functionCode, Map<String, Object> context) {
             lastFunctionCode = functionCode;
             lastContext = new LinkedHashMap<>(context);
             if (failure != null) {
                 throw failure;
             }
-            return result;
+            return AiExecutionResult.textResult(
+                    SkillAnalysisService.FUNCTION_SKILLS_EXTRACT, "Извлечение навыков",
+                    AiCapability.TEXT_GENERATION, "test-model", "test-provider",
+                    AiCredentialOwner.ADMIN, result);
         }
 
         @Override
-        public byte[] executeImage(String functionCode, Map<String, Object> context,
-                                   byte[] sourceImage, String sourceMimeType) {
+        public AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
+                                              byte[] sourceImage, String sourceMimeType) {
             throw new UnsupportedOperationException("Не используется в тестах SkillAnalysisService");
         }
     }

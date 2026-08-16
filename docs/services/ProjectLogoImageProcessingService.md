@@ -88,8 +88,14 @@ ProcessedImage process(byte[] data, String fileName);
 | `name` | `String` | Имя без расширения |
 | `extension` | `String` | Расширение без точки (после обработки — `png`) |
 | `processed` | `boolean` | `true` — файл перекодирован; `false` — возврат оригинала |
+| `aiProcessed` | `boolean` | `true` — фон удалён нейросетью (rembg/u2net или AI-функция), а не классикой |
+| `aiExecution` | `AiExecutionResult \| null` | Метаданные платного AI-выполнения (модель, провайдер, собственник API) — заполнены только когда фон удалён AI-функцией `PROJECT_LOGO_IMAGE_GENERATE`; `null` при локальном rembg/классике. Используется для нотификации «какая модель что сделала + чей API» (контракт [HRM_HuntTech_AI_User_Notification_Contract](../architecture/HRM_HuntTech_AI_User_Notification_Contract.md)) |
 
 DTO реализует `Serializable` — обязательная часть удалённого контракта web ↔ core.
+
+Нотификация: `WebProjectLogoFileUploadField` показывает исчезающую TRAY-нотификацию
+(5 с) при реальном применении AI-функции логотипа (`aiExecution != null`) и при
+rembg-обработке фото кандидата (без собственника API — локальная нейросеть, не внешний API).
 
 ## 4. Правила обработки (rembg → AI → классика)
 
@@ -153,6 +159,7 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-16 | Контракт пользовательской нотификации: `ProcessedImage` несёт `aiExecution` (модель, провайдер, собственник API) при реальном применении AI-функции; `WebProjectLogoFileUploadField` показывает исчезающую нотификацию «Логотип обработан с помощью AI» с моделью/собственником API |
 | 2026-08-15 | **Щадящий режим для фото кандидата** (`JobCandidate.fileImageFace`): новый метод `process(data, fileName, candidatePhoto)`. Для фото людей классический flood-fill/вписывание в круг НЕ применяются (съедали светлые участки — кожу, белую одежду, блики): фон удаляется только нейросетью rembg/u2net (обучен на людях), при недоступности — фон сохраняется (конвертация PNG + ресайз, пропорции не искажаются); AI-функция `PROJECT_LOGO_IMAGE_GENERATE` (логотипная) для фото не используется. Логотипы (`projectLogo`, `fileCompanyLogo`) — прежний конвейер. Фикс повторной загрузки в `WebProjectLogoFileUploadField`: `getComposition().markAsDirty()` после `saveFile` — legacy RPC `continueUploading()` отправляется только при paint, без этого клик по кнопке «Загрузить» после первой загрузки не открывал диалог выбора файла. Тесты: `testCandidatePhotoKeepsLightShirtAndBody`, `testCandidatePhotoKeepsWhiteCavityInsideBody`, `testCandidatePhotoKeepsOriginalAspectRatio` |
 | 2026-08-14 | Локальный rembg-этап — первый шаг AI-конвейера: бесплатная нейросеть u2net на сервере приложения (`POST {rembgUrl}/api/remove`, multipart `file`) удаляет фон до платного AI-этапа; недоступность rembg (сервис лежит, таймаут, HTTP-ошибка) → платный AI → классика; конфиг `hunttech.projectLogo.rembg.{enabled,url,timeoutMs}`; тест `ProjectLogoRembgServiceBeanTest` (встроенный `HttpServer`-заглушка, 3 сценария); сервер развёрнут на проде `hr.hunttech.ru` (systemd rembg.service, 127.0.0.1:7000) |
 | 2026-08-14 | Классический конвейер удаляет серый фон-градиенты (логотип SSP): пиксели с насыщенностью ≤ 30 и яркостью ≥ 40 (`graySaturationThreshold`/`grayMinChannel`), соединённые с краем, становятся полностью прозрачными; белый фон — как раньше (порог 235, плавный край); тест `testGrayGradientBackgroundBecomesTransparent` |

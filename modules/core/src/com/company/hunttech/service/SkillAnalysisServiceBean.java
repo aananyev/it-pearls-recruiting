@@ -34,11 +34,16 @@ import java.util.Map;
  *         анализирует их и добавляет в {@code HUNTTECH_SKILL_TREE};</li>
  *     <li>при любой недоступности AI (функция не активна, нет credentials, ошибка
  *         провайдера) — бесшовный классический fallback: {@link SkillNameMatcher#matchText}
- *         ищет навыки справочника прямо в тексте; анализ не прерывается.</li>
+ *         ищет навыки справочника прямо в тексте; анализ не прерывается, метаданные
+ *         AI-выполнения в результате равны {@code null}.</li>
  * </ol>
  *
  * <p>Промпт, модель и политики функции настраиваются администратором в «Управление AI»
  * (таблица {@code HUNTTECH_AI_FUNCTION_CONFIGURATION}) — код сервиса их не содержит.</p>
+ *
+ * <p>Результат каждого метода — {@link SkillAnalysisResult}: навыки + метаданные
+ * AI-выполнения ({@link AiExecutionResult}: модель, провайдер, собственник API) для
+ * контракта пользовательской нотификации (см. {@code docs/architecture/HRM_HuntTech_AI_User_Notification_Contract.md}).</p>
  */
 @Service(SkillAnalysisService.NAME)
 public class SkillAnalysisServiceBean implements SkillAnalysisService {
@@ -71,39 +76,42 @@ public class SkillAnalysisServiceBean implements SkillAnalysisService {
     private DataManager dataManager;
 
     @Override
-    public List<SkillTree> analyzeAll(String sourceText) {
+    public SkillAnalysisResult analyzeAll(String sourceText) {
         return analyze(sourceText, LEVEL_ALL);
     }
 
     @Override
-    public List<SkillTree> analyzeMain(String sourceText) {
+    public SkillAnalysisResult analyzeMain(String sourceText) {
         return analyze(sourceText, LEVEL_MAIN);
     }
 
     @Override
-    public List<SkillTree> analyzeSecondary(String sourceText) {
+    public SkillAnalysisResult analyzeSecondary(String sourceText) {
         return analyze(sourceText, LEVEL_SECONDARY);
     }
 
     @Override
-    public List<SkillTree> analyzeTertiary(String sourceText) {
+    public SkillAnalysisResult analyzeTertiary(String sourceText) {
         return analyze(sourceText, LEVEL_TERTIARY);
     }
 
-    private List<SkillTree> analyze(String sourceText, String skillLevel) {
+    private SkillAnalysisResult analyze(String sourceText, String skillLevel) {
         String normalizedText = validateAndNormalize(sourceText);
         try {
             Map<String, Object> context = new LinkedHashMap<>();
             context.put(PARAM_SOURCE_TEXT, normalizedText);
             context.put(PARAM_SKILL_LEVEL, skillLevel);
-            String response = aiExecutionService.executeText(FUNCTION_SKILLS_EXTRACT, context);
-            return matchAgainstDictionary(parseSkillNames(response));
+            AiExecutionResult execution = aiExecutionService.executeText(FUNCTION_SKILLS_EXTRACT, context);
+            List<SkillTree> matched = matchAgainstDictionary(parseSkillNames(execution.getText()));
+            return SkillAnalysisResult.of(matched, execution);
         } catch (RuntimeException e) {
             // AI недоступен (функция не активна, нет credentials, ошибка провайдера) —
             // бесшовный классический fallback: прямой словарный поиск в тексте.
+            // Метаданные AI-выполнения не заполняются — экран не показывает
+            // нотификацию «обработано ИИ» (контракт пользовательской нотификации).
             log.warn("AI-анализ навыков (уровень {}) недоступен, используется классический "
                     + "словарный поиск. Причина: {}", skillLevel, e.toString());
-            return SkillNameMatcher.matchText(loadDictionary(), normalizedText);
+            return SkillAnalysisResult.of(SkillNameMatcher.matchText(loadDictionary(), normalizedText), null);
         }
     }
 
