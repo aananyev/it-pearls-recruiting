@@ -1275,9 +1275,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void resumeRecognition() {
         // Recognition runs against the lazily loaded rich text area.
         ensureCvTextInitialized();
-        machRegexpFromCV.setValue(parseCVService.parseEmail(candidateCVRichTextArea.getValue())
-                + " "
-                + parseCVService.parsePhone(candidateCVRichTextArea.getValue()));
+        if (candidateCVRichTextArea.getValue() != null) {
+            machRegexpFromCV.setValue(parseCVService.parseEmail(candidateCVRichTextArea.getValue())
+                    + " "
+                    + parseCVService.parsePhone(candidateCVRichTextArea.getValue()));
+        }
+        // Распознавание навыков кандидата с сохранением в CandidateSkill и немедленным отображением в сайдбаре
+        scanCandidateSkills();
     }
 
     /**
