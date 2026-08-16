@@ -5,7 +5,10 @@
 * **Новая сущность:** `hunttech_CandidateSkill` (`com.company.hunttech.entity.CandidateSkill`)
 * **Перечисление уровней критичности:** `com.company.hunttech.entity.CandidateSkillPriority` (MAIN / 10, SECONDARY / 20, TERTIARY / 30)
 * **Используемый сервис анализа навыков:** `hunttech_SkillAnalysisService` (`SkillAnalysisService`)
-* **Точка интеграции в UI:** Экран редактирования резюме `hunttech_CandidateCV.edit` (`CandidateCVEdit.java`, `candidate-cv-edit.xml`), вкладка «Текст резюме» (`tabCV`), кнопка **«Сканировать навыки»** (`scanCandidateSkillsButton`).
+* **Точки интеграции в UI:**
+  * Экран редактирования резюме `hunttech_CandidateCV.edit` (`CandidateCVEdit.java`, `candidate-cv-edit.xml`), вкладка «Текст резюме» (`tabCV`), кнопка **«Сканировать навыки»** (`scanCandidateSkillsButton`).
+  * Сайдбар карточки кандидата `hunttech_JobCandidate.edit` (`JobCandidateEdit.java`, `job-candidate-edit.xml`): новый раздел **«ОСНОВНЫЕ НАВЫКИ»** (`candidateProfileSkills`) с цветными бейджами навыков кандидата.
+  * Сайдбар Split-View экранов `hunttech_JobCandidateTest1.browse` и `hunttech_JobCandidateTest.browse`: блок **«ОСНОВНЫЕ НАВЫКИ»** (`detailSkillsVBox`) с динамическим выводом бейджей навыков выбранного кандидата.
 * **Всплывающее уведомление:** TRAY-нотификация с подробной статистикой обнаруженных/сохраненных навыков и автоматическим скрытием через **5 секунд** (`withHideDelayMs(5000)`).
 * **Миграции базы данных:**
   * Liquibase: `modules/core/db/changelog/260815-2-addCandidateSkillEntity.xml` (включена в `db.changelog-master.xml`)
@@ -68,7 +71,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS IDX_HUNTTECH_CANDIDATE_SKILL_UNQ
 
 ---
 
-## 4. Сохранение обратной совместимости
+## 4. Отображение основных навыков в Sidebar (`JobCandidateEdit` и `JobCandidateTestBrowse`)
 
-* Все ранее существовавшие кнопки и методы (`rescanSkills` / `rescanCV`, `resumeRecognitionButton`, `convertToTextButton`, `showOriginalButon`) сохранены в неизменном виде.
-* Компоновка экранов и существующие сервисы парсинга (`PdfParserService`, `ParseCVService`) не модифицировались и функционируют штатно.
+1. **Раздел в сайдбаре `JobCandidateEdit`:**
+   * Стилизованный заголовок `msg://msgMainSkillsTitle` («Основные навыки») с фирменными линиями сверху и снизу (`job-candidate-section-title`).
+   * Контейнер с цветными бейджами (`chip-pills`), где основные навыки выделены маркировкой `★`, а каждый бейдж имеет уникальный оттенок из гармоничной палитры.
+2. **Раздел в Split-View экранах `JobCandidateTest1Browse` и `JobCandidateTestBrowse`:**
+   * Динамическое обновление списка навыков при выборе кандидата в таблице справа.
+   * Автоматический сброс при очистке выбора.
