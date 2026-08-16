@@ -266,6 +266,11 @@ public class ProjectEdit extends StandardEditor<Project> {
         AiOperationNotifier.showStarted(notifications,
                 messages.getMessage(getClass(), "msgProjectShortDescriptionStarted"), null);
 
+        // Модальный диалог «крутилка» — единая точка прогресса AI-операций
+        // (эталон: CandidateCVEdit «Сканировать навыки»): нотификация о старте → крутилка → итог.
+        final Screen progressDialog =
+                AiOperationNotifier.showProgress(this, "Генерация краткого описания…");
+
         BackgroundTask<Integer, AiExecutionResult> task = new BackgroundTask<Integer, AiExecutionResult>(120, this) {
             @Override
             public AiExecutionResult run(TaskLifeCycle<Integer> taskLifeCycle) {
@@ -277,6 +282,7 @@ public class ProjectEdit extends StandardEditor<Project> {
 
             @Override
             public void done(AiExecutionResult result) {
+                AiOperationNotifier.closeProgress(progressDialog);
                 getEditedEntity().setShortDescription(result.getText());
                 applyShortDescriptionSidebar(result.getText());
                 projectDescriptionShortButton.setEnabled(true);
@@ -292,10 +298,23 @@ public class ProjectEdit extends StandardEditor<Project> {
             public boolean handleException(Exception exception) {
                 log.warn("Генерация краткого описания проекта не выполнена: {}",
                         exception.getClass().getSimpleName());
+                AiOperationNotifier.closeProgress(progressDialog);
                 projectDescriptionShortButton.setEnabled(true);
                 updateProjectDescriptionShortButtonState();
                 notifications.create(Notifications.NotificationType.WARNING)
                         .withCaption(messages.getMessage(ProjectEdit.class, "msgProjectShortDescriptionFailed"))
+                        .show();
+                return true;
+            }
+
+            @Override
+            public boolean handleTimeoutException() {
+                AiOperationNotifier.closeProgress(progressDialog);
+                projectDescriptionShortButton.setEnabled(true);
+                updateProjectDescriptionShortButtonState();
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withCaption(messages.getMessage(ProjectEdit.class, "msgProjectShortDescriptionFailed"))
+                        .withDescription("Генерация краткого описания превысила допустимое время выполнения.")
                         .show();
                 return true;
             }
@@ -451,6 +470,11 @@ public class ProjectEdit extends StandardEditor<Project> {
         AiOperationNotifier.showStarted(notifications,
                 messages.getMessage(getClass(), "msgProjectDescriptionAiStarted"), null);
 
+        // Модальный диалог «крутилка» — единая точка прогресса AI-операций
+        // (эталон: CandidateCVEdit «Сканировать навыки»): нотификация о старте → крутилка → итог.
+        final Screen progressDialog =
+                AiOperationNotifier.showProgress(this, "Обработка описания проекта…");
+
         BackgroundTask<Integer, AiExecutionResult> task = new BackgroundTask<Integer, AiExecutionResult>(120, this) {
             @Override
             public AiExecutionResult run(TaskLifeCycle<Integer> taskLifeCycle) {
@@ -460,6 +484,7 @@ public class ProjectEdit extends StandardEditor<Project> {
 
             @Override
             public void done(AiExecutionResult result) {
+                AiOperationNotifier.closeProgress(progressDialog);
                 projectDescriptionUpload.setEnabled(true);
                 projectDescriptionRichTextArea.setValue(toSafeRichText(result.getText()));
                 projectDescriptionAiStatus.setValue(
@@ -477,11 +502,25 @@ public class ProjectEdit extends StandardEditor<Project> {
                 // а UI сообщает только контролируемый результат fallback.
                 log.warn("AI-обработка описания проекта не выполнена: {}",
                         exception.getClass().getSimpleName());
+                AiOperationNotifier.closeProgress(progressDialog);
                 projectDescriptionUpload.setEnabled(true);
                 projectDescriptionAiStatus.setValue(
                         messages.getMessage(ProjectEdit.class, "msgProjectDescriptionAiFallback"));
                 notifications.create(Notifications.NotificationType.WARNING)
                         .withCaption(messages.getMessage(ProjectEdit.class, "msgProjectDescriptionAiFailed"))
+                        .show();
+                return true;
+            }
+
+            @Override
+            public boolean handleTimeoutException() {
+                AiOperationNotifier.closeProgress(progressDialog);
+                projectDescriptionUpload.setEnabled(true);
+                projectDescriptionAiStatus.setValue(
+                        messages.getMessage(ProjectEdit.class, "msgProjectDescriptionAiFallback"));
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withCaption(messages.getMessage(ProjectEdit.class, "msgProjectDescriptionAiFailed"))
+                        .withDescription("Обработка описания превысила допустимое время выполнения.")
                         .show();
                 return true;
             }

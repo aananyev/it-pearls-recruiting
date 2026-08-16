@@ -137,6 +137,60 @@ indeterminate `ProgressBar`; открытие/закрытие —
 `AiOperationNotifier.showProgress`/`closeProgress`). Итоговая нотификация
 показывается после закрытия диалога в `done()`.
 
+### 4.1. Эталонный паттерн вызова (правило для всех экранов)
+
+Эталон — экран `CandidateCVEdit`, операция «Сканировать навыки»
+(`scanCandidateSkills`): нотификация о старте → «крутилка» → фоновая
+AI-операция → закрытие «крутилки» → итоговая нотификация с отчётом.
+Каждая AI-операция, инициированная из UI, обязана повторять этот паттерн:
+
+```text
+1. AiOperationNotifier.showStarted(notifications, caption, null)   // исчезающая TRAY, сразу
+2. final Screen progressDialog = AiOperationNotifier.showProgress(this, message)  // модальная «крутилка»
+3. BackgroundTask<ProgressType, ResultType>(timeout, this) {
+       run()     → AI-вызов (middleware)
+       done()    → AiOperationNotifier.closeProgress(progressDialog);
+                   итоговая нотификация (AiOperationNotifier.show / buildDescription)
+       handleException(ex)      → AiOperationNotifier.closeProgress(progressDialog) + ERROR
+       handleTimeoutException() → AiOperationNotifier.closeProgress(progressDialog) + ERROR
+   }
+4. backgroundWorker.handle(task).execute();
+```
+
+Требования:
+
+1. **Старт всегда до «крутилки»** — `showStarted` вызывается ПЕРЕД
+   `showProgress`, обе — до запуска фоновой задачи.
+2. **«Крутилка» закрывается во всех терминальных путях** — `done()`,
+   `handleException()`, `handleTimeoutException()`; иначе модальный диалог
+   зависнет до перезагрузки вкладки.
+3. **Таймаут обязателен** — `new BackgroundTask(timeout, this)` с разумным
+   лимитом (навыки/анализ — 240 с, текстовые операции — 120 с, диагностика
+   подключения — 60 с) и `handleTimeoutException()`, закрывающим «крутилку».
+4. **Кнопка-инициатор** на время фоновой операции отключается
+   (`setEnabled(false)`) и возвращается во всех терминальных путях.
+5. **Диагностика `testConnection`** — тоже реальный AI-вызов: выполняется по
+   тому же паттерну (таймаут 60 с), итоговая нотификация с моделью/провайдером
+   и собственником API = личный ключ пользователя.
+
+### 4.2. Исключение: загрузка изображений (upload-конвейер)
+
+`WebProjectLogoFileUploadField` (логотип проекта/компании, фото кандидата)
+**не использует «крутилку»**: обработка изображения выполняется внутри
+стандартного конвейера загрузки CUBA (`saveFile` → родительский
+`afterUpload`), асинхронный перенос на `BackgroundTask` невозможен без
+переделки самого конвейера (родитель завершает обработку загрузки сразу
+после возврата из `saveFile`). Клиент во время загрузки файла уже видит
+собственный индикатор прогресса. Для этого компонента действуют правила:
+
+- стартовая нотификация — только при включённом нейросетевом этапе
+  (логотип: `hunttech.projectLogo.ai.enabled`, фото:
+  `hunttech.projectLogo.rembg.enabled`); при чисто классическом конвейере
+  (flood-fill) стартовая нотификация не показывается;
+- итоговая нотификация — только при реальном нейросетевом удалении фона
+  (AI-функция логотипа: с блоком модель/собственник; локальный rembg: без
+  собственника — не внешний API).
+
 Пример отображаемого текста итоговой нотификации:
 
 ```text
@@ -214,14 +268,22 @@ AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
 ### 6.3. Обязательство экранов
 
 Каждый экран/компонент, инициирующий AI-операцию, обязан:
+
 1. в момент старта операции вызвать
    `AiOperationNotifier.showStarted(notifications, caption, detail)` —
    исчезающая нотификация «начало обработки» (для загрузки изображений —
    только при включённом нейросетевом этапе);
-2. в `done()`-обработчике вызвать `AiOperationNotifier.show(notifications, result,
-   caption, detail)` (или добавить `AiOperationNotifier.buildDescription(...)` в
-   существующую исчезающую нотификацию). Итоговая нотификация показывается
-   **только при реальном AI-выполнении** (метаданные не `null`).
+2. показать «крутилку» `AiOperationNotifier.showProgress(this, message)` и
+   выполнить AI-операцию в фоне (`BackgroundTask`) — эталонный паттерн §4.1
+   (исключение — upload-конвейер §4.2);
+3. в `done()`-обработчике закрыть «крутилку»
+   (`AiOperationNotifier.closeProgress`) и вызвать
+   `AiOperationNotifier.show(notifications, result, caption, detail)` (или
+   добавить `AiOperationNotifier.buildDescription(...)` в существующую
+   исчезающую нотификацию). Итоговая нотификация показывается
+   **только при реальном AI-выполнении** (метаданные не `null`);
+4. закрыть «крутилку» также в `handleException()` и
+   `handleTimeoutException()` (иначе модальный диалог зависнет).
 
 ## 7. Тесты контракта
 
@@ -250,6 +312,7 @@ AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-16 | **Эталонный паттерн вызова (§4.1)**: за эталон принят `CandidateCVEdit.scanCandidateSkills` («Сканировать навыки») — нотификация о старте → «крутилка» → фоновая AI-операция (`BackgroundTask`) → закрытие «крутилки» → итоговая нотификация. Все AI-операции приведены к паттерну: `ProjectEdit` (краткое описание, обработка описания — добавлены «крутилка» и `handleTimeoutException`), `UserAiConfigurationBrowse` и `ExtSettingsWindow` (`testConnection` переведён с синхронного вызова на `BackgroundTask` 60 с со стартовой нотификацией и «крутилкой»). Загрузка изображений (`WebProjectLogoFileUploadField`) зафиксирована как сознательное исключение (§4.2): upload-конвейер CUBA не переводится на `BackgroundTask`, «крутилки» нет |
 | 2026-08-16 | AI-текстовые функции переведены на фоновое выполнение (`BackgroundTask`) с модальным диалогом «крутилка» (`AiProgressDialog`; `AiOperationNotifier.showProgress`/`closeProgress`): стартовая нотификация показывается сразу (до «крутилки»), итоговая — по завершении с кратким отчётом. Затронуты `CandidateCVEdit` (анализ навыков, умное форматирование) и `OpenPositionEdit` (AI-анализ требований); `ProjectEdit` уже работал асинхронно. Синхронные AI-вызовы на UI-потоке недопустимы: обе нотификации приходили одной пачкой в конце запроса |
 | 2026-08-16 | Аудит всех AI-вызовов: `testConnection` (реальный AI-вызов в экранах «Управление AI») переведён на контракт — `HrmAiService.testConnection` возвращает `AiExecutionResult` (модель, провайдер, собственник = личный ключ `USER`); `UserAiConfigurationBrowse` и `ExtSettingsWindow` показывают исчезающую TRAY-нотификацию `AiOperationNotifier.show(...)`; §2.3: диагностика исключена из «вне области» |
 | 2026-08-16 | «AI-нотификации 2 раза»: добавлена стартовая исчезающая TRAY-нотификация `AiOperationNotifier.showStarted(...)` (при начале обработки, с обещанием итоговой: «После завершения будет указана модель и собственник API»); подключена в `ProjectEdit` («Кратко», upload описания), `CandidateCVEdit` (анализ навыков) и `WebProjectLogoFileUploadField` (логотип — по флагу `hunttech.projectLogo.ai.enabled`, фото — по `hunttech.projectLogo.rembg.enabled`); контракт-тест дополнен проверкой «2 раза» |
