@@ -27,6 +27,9 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.components.Timer;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.*;
 import com.haulmont.cuba.gui.screen.*;
@@ -212,6 +215,8 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
     private DataManager dataManager;
     @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private BackgroundWorker backgroundWorker;
 
     private Boolean booOpenClosePosition = false;
     private Boolean entityIsChanged = false;
@@ -3977,11 +3982,12 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
 
     /**
      * Обработчик нажатия на кнопку «AI-анализ требований»:
-     * 1. Запуск двухэтапной нотификации (AiOperationNotifier.showStarted)
-     * 2. Извлечение ключевых, второстепенных и прочих требований нейросетью через SkillAnalysisService
-     * 3. Сохранение выявленных сущностей OpenPositionSkill
-     * 4. Показ финальной нотификации с метаданными и статистикой (AiOperationNotifier.show)
-     * 5. Обновление сайдбара «ТРЕБУЕМЫЕ НАВЫКИ»
+     * 1. Стартовая нотификация (AiOperationNotifier.showStarted) — показывается сразу, до «крутилки»
+     * 2. Модальный диалог прогресса «крутилка» (AiOperationNotifier.showProgress)
+     * 3. Фоновый анализ (BackgroundTask): извлечение ключевых, второстепенных и прочих
+     *    требований нейросетью через SkillAnalysisService, сохранение OpenPositionSkill
+     * 4. done(): закрытие «крутилки», синхронизация сайдбара «ТРЕБУЕМЫЕ НАВЫКИ»,
+     *    финальная нотификация с метаданными и статистикой
      */
     @Subscribe("scanOpenPositionSkillsBtn")
     public void onScanOpenPositionSkillsBtnClick(Button.ClickEvent event) {
@@ -4008,143 +4014,181 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             return;
         }
 
+        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт
+        // операции — исчезающая TRAY-нотификация, показывается СРАЗУ (до «крутилки»).
         AiOperationNotifier.showStarted(notifications, "Запущен AI-анализ требований вакансии…", null);
 
-        try {
-            // Загружаем уже существующие навыки для предотвращения дубликатов
-            Set<UUID> existingSkillIds = new HashSet<>();
-            if (!PersistenceHelper.isNew(position)) {
-                List<OpenPositionSkill> currentSkills = dataManager.load(OpenPositionSkill.class)
-                        .query("select e from hunttech_OpenPositionSkill e where e.openPosition = :openPosition")
-                        .parameter("openPosition", position)
-                        .view("openPositionSkill-view")
-                        .list();
-                for (OpenPositionSkill ops : currentSkills) {
-                    if (ops.getSkill() != null) {
-                        existingSkillIds.add(ops.getSkill().getId());
+        // Анализ выполняется в фоне (BackgroundTask), чтобы стартовая нотификация
+        // отрисовалась до «крутилки»: при синхронном вызове на UI-потоке обе
+        // нотификации (старт и итог) пришли бы одной пачкой в конце запроса.
+        final OpenPosition positionForScan = position;
+        final String textForScan = plainText;
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, "Анализ требований вакансии…");
+
+        BackgroundTask<Integer, VacancySkillScanOutcome> task =
+                new BackgroundTask<Integer, VacancySkillScanOutcome>(240, this) {
+                    @Override
+                    public VacancySkillScanOutcome run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        // Загружаем уже существующие навыки для предотвращения дубликатов
+                        Set<UUID> existingSkillIds = new HashSet<>();
+                        if (!PersistenceHelper.isNew(positionForScan)) {
+                            List<OpenPositionSkill> currentSkills = dataManager.load(OpenPositionSkill.class)
+                                    .query("select e from hunttech_OpenPositionSkill e where e.openPosition = :openPosition")
+                                    .parameter("openPosition", positionForScan)
+                                    .view("openPositionSkill-view")
+                                    .list();
+                            for (OpenPositionSkill ops : currentSkills) {
+                                if (ops.getSkill() != null) {
+                                    existingSkillIds.add(ops.getSkill().getId());
+                                }
+                            }
+                        }
+
+                        SkillAnalysisResult mainResult = skillAnalysisService.analyzeMain(textForScan);
+                        SkillAnalysisResult secondaryResult = skillAnalysisService.analyzeSecondary(textForScan);
+                        SkillAnalysisResult tertiaryResult = skillAnalysisService.analyzeTertiary(textForScan);
+
+                        List<SkillTree> mainSkills = mainResult.getSkills();
+                        List<SkillTree> secondarySkills = secondaryResult.getSkills();
+                        List<SkillTree> tertiarySkills = tertiaryResult.getSkills();
+                        SkillAnalysisResult allResult = null;
+
+                        if (mainSkills == null) mainSkills = Collections.emptyList();
+                        if (secondarySkills == null) secondarySkills = Collections.emptyList();
+                        if (tertiarySkills == null) tertiarySkills = Collections.emptyList();
+
+                        if (mainSkills.isEmpty() && secondarySkills.isEmpty() && tertiarySkills.isEmpty()) {
+                            allResult = skillAnalysisService.analyzeAll(textForScan);
+                            mainSkills = allResult.getSkills();
+                            if (mainSkills == null) mainSkills = Collections.emptyList();
+                        }
+
+                        SkillAnalysisResult aiSourceResult = firstNonNull(mainResult, secondaryResult, tertiaryResult, allResult);
+                        AiExecutionResult aiExecution = aiSourceResult == null ? null : aiSourceResult.getAiExecution();
+
+                        List<OpenPositionSkill> toSave = new ArrayList<>();
+                        Set<UUID> processedSkillIds = new HashSet<>(existingSkillIds);
+                        List<SkillTree> allDetectedSkills = new ArrayList<>();
+
+                        for (SkillTree st : mainSkills) {
+                            if (st != null) {
+                                allDetectedSkills.add(st);
+                                if (processedSkillIds.add(st.getId())) {
+                                    OpenPositionSkill ops = metadata.create(OpenPositionSkill.class);
+                                    ops.setOpenPosition(positionForScan);
+                                    ops.setSkill(st);
+                                    ops.setPriority(CandidateSkillPriority.MAIN);
+                                    toSave.add(ops);
+                                }
+                            }
+                        }
+
+                        for (SkillTree st : secondarySkills) {
+                            if (st != null) {
+                                allDetectedSkills.add(st);
+                                if (processedSkillIds.add(st.getId())) {
+                                    OpenPositionSkill ops = metadata.create(OpenPositionSkill.class);
+                                    ops.setOpenPosition(positionForScan);
+                                    ops.setSkill(st);
+                                    ops.setPriority(CandidateSkillPriority.SECONDARY);
+                                    toSave.add(ops);
+                                }
+                            }
+                        }
+
+                        for (SkillTree st : tertiarySkills) {
+                            if (st != null) {
+                                allDetectedSkills.add(st);
+                                if (processedSkillIds.add(st.getId())) {
+                                    OpenPositionSkill ops = metadata.create(OpenPositionSkill.class);
+                                    ops.setOpenPosition(positionForScan);
+                                    ops.setSkill(st);
+                                    ops.setPriority(CandidateSkillPriority.TERTIARY);
+                                    toSave.add(ops);
+                                }
+                            }
+                        }
+
+                        int mainDetected = mainSkills.size();
+                        int secondaryDetected = secondarySkills.size();
+                        int tertiaryDetected = tertiarySkills.size();
+                        int totalDetected = mainDetected + secondaryDetected + tertiaryDetected;
+                        int savedCount = toSave.size();
+                        int existingOrDuplicate = totalDetected - savedCount;
+
+                        if (!toSave.isEmpty() && !PersistenceHelper.isNew(positionForScan)) {
+                            CommitContext commitContext = new CommitContext(toSave);
+                            dataManager.commit(commitContext);
+                        }
+
+                        String statsDescription = String.format(
+                                "Всего обнаружено требований: <b>%d</b><br/>" +
+                                "• Обязательных: <b>%d</b><br/>" +
+                                "• Желательных: <b>%d</b><br/>" +
+                                "• Прочих: <b>%d</b><br/>" +
+                                "Добавлено новых в базу: <b>%d</b> (уже привязано: %d)",
+                                totalDetected, mainDetected, secondaryDetected, tertiaryDetected, savedCount, existingOrDuplicate
+                        );
+
+                        return new VacancySkillScanOutcome(statsDescription, aiExecution, allDetectedSkills);
                     }
-                }
-            }
 
-            SkillAnalysisResult mainResult = skillAnalysisService.analyzeMain(plainText);
-            SkillAnalysisResult secondaryResult = skillAnalysisService.analyzeSecondary(plainText);
-            SkillAnalysisResult tertiaryResult = skillAnalysisService.analyzeTertiary(plainText);
+                    @Override
+                    public void done(VacancySkillScanOutcome outcome) {
+                        AiOperationNotifier.closeProgress(progressDialog);
 
-            List<SkillTree> mainSkills = mainResult.getSkills();
-            List<SkillTree> secondarySkills = secondaryResult.getSkills();
-            List<SkillTree> tertiarySkills = tertiaryResult.getSkills();
-            SkillAnalysisResult allResult = null;
+                        // Синхронизируем коллекцию skillsList в OpenPosition (если используется)
+                        if (!outcome.allDetectedSkills.isEmpty()) {
+                            Set<SkillTree> currentSet = new LinkedHashSet<>(outcome.allDetectedSkills);
+                            if (getEditedEntity().getSkillsList() != null) {
+                                currentSet.addAll(getEditedEntity().getSkillsList());
+                            }
+                            getEditedEntity().setSkillsList(new ArrayList<>(currentSet));
+                            if (openPositionSkillsListsDc != null) {
+                                openPositionSkillsListsDc.setItems(getEditedEntity().getSkillsList());
+                            }
+                        }
 
-            if (mainSkills == null) mainSkills = Collections.emptyList();
-            if (secondarySkills == null) secondarySkills = Collections.emptyList();
-            if (tertiarySkills == null) tertiarySkills = Collections.emptyList();
+                        String statsDescription = outcome.statsDescription;
+                        AiExecutionResult aiExecution = outcome.aiExecution;
+                        // Контракт пользовательской нотификации: в исчезающую нотификацию добавляем
+                        // блок «какая модель + собственник API» (AI реально выполнял анализ);
+                        // при классическом fallback (AI недоступен) метаданных нет — блок не добавляется.
+                        if (aiExecution != null) {
+                            statsDescription = AiOperationNotifier.buildDescription(aiExecution, statsDescription);
+                        }
 
-            if (mainSkills.isEmpty() && secondarySkills.isEmpty() && tertiarySkills.isEmpty()) {
-                allResult = skillAnalysisService.analyzeAll(plainText);
-                mainSkills = allResult.getSkills();
-                if (mainSkills == null) mainSkills = Collections.emptyList();
-            }
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Анализ требований вакансии выполнен")
+                                .withDescription(statsDescription)
+                                .withContentMode(ContentMode.HTML)
+                                .withHideDelayMs(5000)
+                                .show();
 
-            SkillAnalysisResult aiSourceResult = firstNonNull(mainResult, secondaryResult, tertiaryResult, allResult);
-            AiExecutionResult aiExecution = aiSourceResult == null ? null : aiSourceResult.getAiExecution();
-
-            List<OpenPositionSkill> toSave = new ArrayList<>();
-            Set<UUID> processedSkillIds = new HashSet<>(existingSkillIds);
-            List<SkillTree> allDetectedSkills = new ArrayList<>();
-
-            for (SkillTree st : mainSkills) {
-                if (st != null) {
-                    allDetectedSkills.add(st);
-                    if (processedSkillIds.add(st.getId())) {
-                        OpenPositionSkill ops = metadata.create(OpenPositionSkill.class);
-                        ops.setOpenPosition(position);
-                        ops.setSkill(st);
-                        ops.setPriority(CandidateSkillPriority.MAIN);
-                        toSave.add(ops);
+                        initOpenPositionSkillsSidebar();
                     }
-                }
-            }
 
-            for (SkillTree st : secondarySkills) {
-                if (st != null) {
-                    allDetectedSkills.add(st);
-                    if (processedSkillIds.add(st.getId())) {
-                        OpenPositionSkill ops = metadata.create(OpenPositionSkill.class);
-                        ops.setOpenPosition(position);
-                        ops.setSkill(st);
-                        ops.setPriority(CandidateSkillPriority.SECONDARY);
-                        toSave.add(ops);
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка анализа требований")
+                                .withDescription("Не удалось выполнить анализ требований: " + ex.getMessage())
+                                .show();
+                        return true;
                     }
-                }
-            }
 
-            for (SkillTree st : tertiarySkills) {
-                if (st != null) {
-                    allDetectedSkills.add(st);
-                    if (processedSkillIds.add(st.getId())) {
-                        OpenPositionSkill ops = metadata.create(OpenPositionSkill.class);
-                        ops.setOpenPosition(position);
-                        ops.setSkill(st);
-                        ops.setPriority(CandidateSkillPriority.TERTIARY);
-                        toSave.add(ops);
+                    @Override
+                    public boolean handleTimeoutException() {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка анализа требований")
+                                .withDescription("Анализ требований превысил допустимое время выполнения.")
+                                .show();
+                        return true;
                     }
-                }
-            }
-
-            int mainDetected = mainSkills.size();
-            int secondaryDetected = secondarySkills.size();
-            int tertiaryDetected = tertiarySkills.size();
-            int totalDetected = mainDetected + secondaryDetected + tertiaryDetected;
-            int savedCount = toSave.size();
-            int existingOrDuplicate = totalDetected - savedCount;
-
-            if (!toSave.isEmpty() && !PersistenceHelper.isNew(position)) {
-                CommitContext commitContext = new CommitContext(toSave);
-                dataManager.commit(commitContext);
-            }
-
-            // Синхронизируем коллекцию skillsList в OpenPosition (если используется)
-            if (!allDetectedSkills.isEmpty()) {
-                Set<SkillTree> currentSet = new LinkedHashSet<>(allDetectedSkills);
-                if (getEditedEntity().getSkillsList() != null) {
-                    currentSet.addAll(getEditedEntity().getSkillsList());
-                }
-                getEditedEntity().setSkillsList(new ArrayList<>(currentSet));
-                if (openPositionSkillsListsDc != null) {
-                    openPositionSkillsListsDc.setItems(getEditedEntity().getSkillsList());
-                }
-            }
-
-            String statsDescription = String.format(
-                    "Всего обнаружено требований: <b>%d</b><br/>" +
-                    "• Обязательных: <b>%d</b><br/>" +
-                    "• Желательных: <b>%d</b><br/>" +
-                    "• Прочих: <b>%d</b><br/>" +
-                    "Добавлено новых в базу: <b>%d</b> (уже привязано: %d)",
-                    totalDetected, mainDetected, secondaryDetected, tertiaryDetected, savedCount, existingOrDuplicate
-            );
-
-            // Контракт пользовательской нотификации: в исчезающую нотификацию добавляем
-            // блок «какая модель + собственник API» (AI реально выполнял анализ);
-            // при классическом fallback (AI недоступен) метаданных нет — блок не добавляется.
-            if (aiExecution != null) {
-                statsDescription = AiOperationNotifier.buildDescription(aiExecution, statsDescription);
-            }
-
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Анализ требований вакансии выполнен")
-                    .withDescription(statsDescription)
-                    .withContentMode(ContentMode.HTML)
-                    .withHideDelayMs(5000)
-                    .show();
-
-            initOpenPositionSkillsSidebar();
-        } catch (Exception ex) {
-            notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption("Ошибка анализа требований")
-                    .withDescription("Не удалось выполнить анализ требований: " + ex.getMessage())
-                    .show();
-        }
+                };
+        backgroundWorker.handle(task).execute();
     }
 
     private static SkillAnalysisResult firstNonNull(SkillAnalysisResult... results) {
@@ -4160,6 +4204,25 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
             }
         }
         return null;
+    }
+
+    /**
+     * Результат фонового AI-анализа требований вакансии: статистика для итоговой
+     * нотификации, метаданные AI-выполнения (модель/собственник API) и список
+     * обнаруженных навыков для синхронизации OpenPosition и контейнера на UI-потоке
+     * в {@code done()} (работа с сущностями — только в фоновом потоке {@code run()}).
+     */
+    private static final class VacancySkillScanOutcome {
+        final String statsDescription;
+        final AiExecutionResult aiExecution;
+        final List<SkillTree> allDetectedSkills;
+
+        VacancySkillScanOutcome(String statsDescription, AiExecutionResult aiExecution,
+                                List<SkillTree> allDetectedSkills) {
+            this.statsDescription = statsDescription;
+            this.aiExecution = aiExecution;
+            this.allDetectedSkills = allDetectedSkills;
+        }
     }
 
     @Subscribe("positionTypeField")
