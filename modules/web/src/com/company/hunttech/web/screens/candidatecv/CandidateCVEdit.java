@@ -197,7 +197,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private RichTextArea commentLetterRichTextArea;
     @Inject
-    private Button rescanResume;
+    private PopupButton skillActionsPopupButton;
     @Inject
     private TreeDataGrid<SkillTree> skillTreesTable;
     @Inject
@@ -336,7 +336,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     public void navigateSkillActions() {
-        navigateToSection(candidateCvSkillNavigation, candidateCvSkillActionsNav, rescanResume::focus);
+        navigateToSection(candidateCvSkillNavigation, candidateCvSkillActionsNav, skillActionsPopupButton::focus);
     }
 
     public void navigateSkillTree() {
