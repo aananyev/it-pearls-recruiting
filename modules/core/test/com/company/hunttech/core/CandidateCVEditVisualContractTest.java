@@ -318,7 +318,20 @@ public class CandidateCVEditVisualContractTest {
             assertTrue(theme, scss.contains("width: 312px !important"));
             assertTrue(theme, scss.contains(".candidate-cv-navigation {"));
             assertTrue(theme, scss.contains(".candidate-cv-nav-item.v-button"));
-            assertTrue(theme, scss.contains("min-height: 38px !important"));
+            if (theme.equals("helium") || theme.equals("hunttech-modern-light")
+                    || theme.equals("hunttech-modern-dark")) {
+                // Дизайн Antigravity (лаконичная навигация) — приоритет, не трогаем.
+                assertTrue(theme, scss.contains("min-height: 26px !important"));
+                assertTrue(theme, scss.contains("padding: 3px 8px !important"));
+                assertTrue(theme, scss.contains("line-height: 16px !important"));
+            } else {
+                // Канон JobCandidateEdit: отступы и интервалы label-навигации 1:1.
+                assertTrue(theme, scss.contains("min-height: 27px !important"));
+                assertTrue(theme, scss.contains("padding: 3px 10px !important"));
+                assertTrue(theme, scss.contains("line-height: 20px !important"));
+                assertTrue(theme, scss.contains("padding-top: 6px"));
+                assertTrue(theme, scss.contains("padding-bottom: 2px"));
+            }
             assertTrue(theme, scss.contains(".candidate-cv-nav-item-active.v-button"));
             assertTrue(theme, scss.contains(".candidate-cv-tabs > .v-tabsheet-tabcontainer"));
             assertTrue(theme, scss.contains("overflow-x: auto !important"));

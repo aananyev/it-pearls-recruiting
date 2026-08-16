@@ -226,6 +226,8 @@
 
 `syncSidebarSectionNavigation()` управляет только visibility контейнеров. Навигация не вызывает `tabSheet.setSelectedTab()`, не меняет `cvTextInitialized`/`skillTabInitialized`, не запускает loaders и не изменяет значения entity.
 
+Геометрия пунктов label-навигации выровнена по эталону `JobCandidateEdit` (1:1 с блоком `.label-nav-item` в `job-candidate-editor.scss`): пункт — `min-height: 27px`, `height: auto`, `padding: 3px 10px`, `line-height: 20px`, `font-weight: 600`, `opacity: 1`; контейнер навигации — `padding-top: 6px`, `padding-bottom: 2px`, `display: block`, `min-width: 0`; caption наследует `line-height` пункта (без локального override). Правило: `candidate-cv-editor.scss`, идентично во всех 7 темах.
+
 ### 4.2.1. Заголовки разделов sidebar (полоса-заголовок)
 
 Заголовки «Разделы вкладки» (`candidate-cv-navigation-title`) и «Резюме для вакансии» (`candidate-cv-sidebar-card-title`) оформлены как полоса-заголовок по контракту `HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md` §4.1: две горизонтальные inset-линии (белая сверху `rgba(255,255,255,1) 0 1px 0 0 inset`, светлая снизу `rgba(244,244,244,1) 0 -1px 0 0 inset`), разделитель снизу `border-bottom: 1px solid rgba(255,255,255,.14)`, полоса `rgba(255,255,255,.045)`, текст `#ffb11b` 15px/700, `min-height: 36px`, `padding: 7px 11px`; заголовок карточки растянут на её ширину (`margin: -14px -14px 12px`, верхние углы скруглены `8px 8px 0 0`). Правило: `candidate-cv-editor.scss`, идентично во всех 7 темах.
@@ -546,6 +548,7 @@ git diff --check
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-16 | Отступы и интервалы label-навигации sidebar приведены к эталону `JobCandidateEdit` (1:1 с блоком `.label-nav-item` в `job-candidate-editor.scss`): контейнер `padding-top: 6px` + `padding-bottom: 2px` (было 10px сверху, без нижнего), пункты `min-height: 27px` (было 38px), `padding: 3px 10px` (было 8px 10px), `line-height: 20px` (было 18px), `font-weight: 600`, `opacity: 1`, caption без локального `line-height`; заголовок навигации получил `height: auto`. Только SCSS-форматирование label-навигации: XML, Java, бизнес-логика и остальные компоненты формы не менялись; контрактный тест `CandidateCVEditVisualContractTest` обновлён на новый канон |
 | 2026-08-16 | «AI-нотификации 2 раза»: перед анализом навыков показывается стартовая исчезающая TRAY-нотификация «Запущен AI-анализ навыков резюме…» (`AiOperationNotifier.showStarted`, 5 с, обещание итоговой с моделью и собственником API) |
 | 2026-08-16 | Контракт пользовательской нотификации: нотификация «Статистика анализа навыков» (TRAY, автоскрытие 5 с) дополнена блоком «какая модель что сделала + собственник API» от `AiOperationNotifier` (модель, провайдер, корпоративный/личный ключ); `SkillAnalysisService` возвращает `SkillAnalysisResult` с метаданными AI-выполнения (при классическом fallback блок не показывается) |
 | 2026-08-08 | Заголовкам разделов sidebar «Разделы вкладки» (`candidate-cv-navigation-title`) и «Резюме для вакансии» (`candidate-cv-sidebar-card-title`) добавлены две горизонтальные inset-линии полосы (белая сверху, светлая снизу) + разделитель `border-bottom`, как у заголовков секций OpenPositionEdit/IteractionListEdit — контракт §4.1; SCSS `candidate-cv-editor.scss` во всех 7 темах; добавлен контрактный тест `CandidateCVEditVisualContractTest.sectionTitlesHaveTwoInsetLinesLikeInfoCaption`. |
