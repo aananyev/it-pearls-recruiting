@@ -1650,34 +1650,66 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             return;
         }
 
-        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт операции
+        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт
+        // операции — исчезающая TRAY-нотификация, показывается СРАЗУ (до «крутилки»).
         AiOperationNotifier.showStarted(notifications, "Запущено умное форматирование сопроводительного письма…", null);
 
-        try {
-            TextProcessingResult result = textProcessingService.formatHtmlWithResult(currentText);
-            if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
-                String formattedHtml = result.getText().replaceAll("\r?\n", breakLine[0]);
-                letterRichTextArea.setValue(formattedHtml);
-                getEditedEntity().setLetter(formattedHtml);
+        // Форматирование выполняется в фоне (BackgroundTask): при синхронном вызове
+        // на UI-потоке стартовая нотификация и итоговая пришли бы одной пачкой
+        // в конце запроса, а «крутилка» работала бы без нотификации о старте.
+        final String textToFormat = currentText;
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, "Умное форматирование письма…");
 
-                if (result.getAiExecution() != null) {
-                    AiOperationNotifier.show(notifications, result.getAiExecution(),
-                            "Умное форматирование письма выполнено",
-                            "Текст сопроводительного письма структурирован с помощью нейросети и загружен в редактор.");
-                } else {
-                    notifications.create(Notifications.NotificationType.TRAY)
-                            .withCaption("Форматирование письма")
-                            .withDescription("Текст сопроводительного письма структурирован типографическим движком и загружен в редактор.")
-                            .withHideDelayMs(3000)
-                            .show();
-                }
-            }
-        } catch (Exception ex) {
-            notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption("Ошибка форматирования")
-                    .withDescription("Не удалось выполнить умное форматирование сопроводительного письма: " + ex.getMessage())
-                    .show();
-        }
+        BackgroundTask<Integer, TextProcessingResult> task =
+                new BackgroundTask<Integer, TextProcessingResult>(120, this) {
+                    @Override
+                    public TextProcessingResult run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        return textProcessingService.formatHtmlWithResult(textToFormat);
+                    }
+
+                    @Override
+                    public void done(TextProcessingResult result) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
+                            String formattedHtml = result.getText().replaceAll("\r?\n", breakLine[0]);
+                            letterRichTextArea.setValue(formattedHtml);
+                            getEditedEntity().setLetter(formattedHtml);
+
+                            if (result.getAiExecution() != null) {
+                                AiOperationNotifier.show(notifications, result.getAiExecution(),
+                                        "Умное форматирование письма выполнено",
+                                        "Текст сопроводительного письма структурирован с помощью нейросети и загружен в редактор.");
+                            } else {
+                                notifications.create(Notifications.NotificationType.TRAY)
+                                        .withCaption("Форматирование письма")
+                                        .withDescription("Текст сопроводительного письма структурирован типографическим движком и загружен в редактор.")
+                                        .withHideDelayMs(3000)
+                                        .show();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка форматирования")
+                                .withDescription("Не удалось выполнить умное форматирование сопроводительного письма: " + ex.getMessage())
+                                .show();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean handleTimeoutException() {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка форматирования")
+                                .withDescription("Умное форматирование сопроводительного письма превысило допустимое время выполнения.")
+                                .show();
+                        return true;
+                    }
+                };
+        backgroundWorker.handle(task).execute();
     }
 
     @Subscribe("letterActionsPopupButton.smartFormatLetterAction")
