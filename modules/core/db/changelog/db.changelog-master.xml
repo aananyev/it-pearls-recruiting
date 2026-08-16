@@ -73,4 +73,8 @@
     <include file="260816-1-addTextProcessingAiFunction.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- OpenPositionSkill: сущность «Требуемые навыки вакансии» со связью на OpenPosition и SkillTree. -->
+    <include file="260816-2-addOpenPositionSkill.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

@@ -704,49 +704,28 @@
                        stylename="open-position-editor-summary-value"/>
             </vbox>
         </groupBox>
-        <!-- Контекст вакансии: города и итоговые комиссии (значения формирует Java, без новых бизнес-значений). -->
+        <!-- Требуемые навыки вакансии: главное, вспомогательное, прочее. -->
         <vbox id="openPositionEditorSummary"
               width="100%"
               spacing="true"
               stylename="edit-sidebar-summary open-position-editor-summary-grid">
-            <!-- Заголовок блока «КОНТЕКСТ ВАКАНСИИ»: стиль карточки «Информация»
-                 (полоса с фоном и разделителем снизу), статический визуальный заголовок. -->
+            <!-- Заголовок блока «ТРЕБУЕМЫЕ НАВЫКИ»: стиль карточки «Информация» -->
             <label id="openPositionEditorContextLabel"
-                   value="mainMsg://openPositionEditorNavContext"
+                   value="msg://msgOpenPositionSkillsTitle"
                    width="100%"
                    stylename="label-nav-title open-position-editor-section-title"/>
-            <!-- Сводка городов позиции (значение формирует changeCityListsLabel()). -->
-            <label id="citiesLabel"
-                   width="100%"
-                   stylename="open-position-editor-summary-caption"/>
-            <!-- Грейд позиции: контекст уровня вакансии (значение формирует refreshSidebarInfoCard(),
-                 presentation-only, из edited-объекта; в рабочей области — поле gradeField). -->
-            <label id="contextGradeLabel"
+            <!-- Контейнер вывода цветных бейджей требуемых навыков -->
+            <label id="openPositionSkillsLabels"
                    width="100%"
                    htmlEnabled="true"
-                   stylename="open-position-editor-summary-value"/>
-            <!-- Оформление: тип регистрации для работы — аутстаффинг/рекрутинг/все варианты
-                 (значение формирует refreshSidebarInfoCard() из registrationForWork). -->
-            <label id="contextRegistrationLabel"
-                   width="100%"
-                   htmlEnabled="true"
-                   stylename="open-position-editor-summary-value"/>
-            <!-- Статус вакансии: черновик (signDraft) / открыта-закрыта (openClose);
-                 значение формирует refreshSidebarInfoCard(), presentation-only. -->
-            <label id="contextStatusLabel"
-                   width="100%"
-                   htmlEnabled="true"
-                   stylename="open-position-editor-summary-value"/>
-            <!-- Итоговая комиссия рекрутера (HTML; значение формирует setTopLabel()). -->
-            <label id="labelTopComissionRecrutier"
-                   width="100%"
-                   htmlEnabled="true"
-                   stylename="open-position-editor-summary-value"/>
-            <!-- Итоговая комиссия ресурсера (HTML; значение формирует setTopLabel()). -->
-            <label id="labelTopComissionResearcher"
-                   width="100%"
-                   htmlEnabled="true"
-                   stylename="open-position-editor-summary-value"/>
+                   stylename="candidate-skills-chips"/>
+            <!-- Скрытые элементы обратной совместимости -->
+            <label id="citiesLabel" visible="false"/>
+            <label id="contextGradeLabel" visible="false"/>
+            <label id="contextRegistrationLabel" visible="false"/>
+            <label id="contextStatusLabel" visible="false"/>
+            <label id="labelTopComissionRecrutier" visible="false"/>
+            <label id="labelTopComissionResearcher" visible="false"/>
         </vbox>
         <!-- Предупреждение об автоматическом закрытии вакансии (обратный отсчёт от closingDate, Java-таймер). -->
         <label id="closedVacancyInfoLabel"
@@ -1524,7 +1503,14 @@
                             <tab id="openPositionRuTabAccordion"
                                  caption="msg://msgRuComment">
                                 <!-- Контейнер редактора русского описания на всю высоту вкладки аккордеона. -->
-                                <vbox id="openPositionRuTabBox" width="100%" height="100%">
+                                <vbox id="openPositionRuTabBox" width="100%" height="100%" spacing="true">
+                                    <!-- Панель действий: AI-анализ требований вакансии -->
+                                    <hbox id="openPositionRuActionsHBox" spacing="true" align="MIDDLE_RIGHT" width="100%">
+                                        <button id="scanOpenPositionSkillsBtn"
+                                                caption="msg://msgScanOpenPositionSkills"
+                                                icon="MAGIC"
+                                                stylename="primary"/>
+                                    </hbox>
                                     <!-- Редактор русского описания (обязательный). -->
                                     <richTextArea id="openPositionRichTextArea"
                                                   dataContainer="openPositionDc"
