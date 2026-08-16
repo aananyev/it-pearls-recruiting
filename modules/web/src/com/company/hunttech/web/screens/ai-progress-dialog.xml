@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://aiProgressDialog.caption"
+        messagesPack="com.company.hunttech.web.screens">
+    <dialogMode width="360"
+                height="110"
+                forceDialog="true"
+                modal="true"
+                closeable="false"
+                closeOnClickOutside="false"
+                resizable="false"/>
+    <layout spacing="true" margin="true">
+        <label id="messageLabel" align="MIDDLE_CENTER"/>
+        <progressBar id="progressBar" width="100%" indeterminate="true"/>
+    </layout>
+</window>

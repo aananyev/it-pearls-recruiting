@@ -2,11 +2,19 @@ package com.company.hunttech.web.util;
 
 import com.company.hunttech.service.AiCredentialOwner;
 import com.company.hunttech.service.AiExecutionResult;
+import com.company.hunttech.web.screens.AiProgressDialog;
+import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.ContentMode;
+import com.haulmont.cuba.gui.screen.FrameOwner;
+import com.haulmont.cuba.gui.screen.OpenMode;
+import com.haulmont.cuba.gui.screen.Screen;
 
 /**
- * Единая точка показа исчезающей нотификации пользователю о выполненной AI-операции.
+ * Единая точка показа пользователю фидбека об AI-операции: исчезающие
+ * TRAY-нотификации (старт/итог) и модальный диалог прогресса «крутилка»
+ * на время фонового выполнения.
  *
  * <p><b>Контракт</b> (полный текст — {@code docs/architecture/HRM_HuntTech_AI_User_Notification_Contract.md}):
  * каждая реальная AI-операция, инициированная из UI, завершается исчезающей
@@ -78,6 +86,42 @@ public final class AiOperationNotifier {
                 .withContentMode(ContentMode.HTML)
                 .withHideDelayMs(HIDE_DELAY_MS)
                 .show();
+    }
+
+    /**
+     * Показывает модальный диалог «крутилка» (indeterminate ProgressBar) на время
+     * выполнения фоновой AI-операции и возвращает его для последующего закрытия
+     * в {@link #closeProgress(Screen)} из завершающего обработчика
+     * {@code BackgroundTask} ({@code done} / {@code handleException} /
+     * {@code handleTimeoutException}).
+     *
+     * <p>Порядок показа по контракту: сначала {@link #showStarted(Notifications, String, String)}
+     * (нотификация о начале), затем этот диалог, по завершении —
+     * {@link #show(Notifications, AiExecutionResult, String, String)} (нотификация
+     * об итоге с кратким отчётом).</p>
+     *
+     * @param owner   экран-владелец (должен быть открыт)
+     * @param message текст под «крутилкой», например «Анализ навыков резюме…»
+     * @return открытый диалог прогресса; закрывается методом {@link #closeProgress(Screen)}
+     */
+    public static Screen showProgress(FrameOwner owner, String message) {
+        AiProgressDialog dialog = AppBeans.get(ScreenBuilders.class).screen(owner)
+                .withScreenClass(AiProgressDialog.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+        dialog.setMessage(message);
+        dialog.show();
+        return dialog;
+    }
+
+    /**
+     * Закрывает диалог прогресса, открытый {@link #showProgress(FrameOwner, String)}.
+     * Безопасен для {@code null} (диалог не открывался или уже закрыт).
+     */
+    public static void closeProgress(Screen progressDialog) {
+        if (progressDialog != null) {
+            progressDialog.closeWithDefaultAction();
+        }
     }
 
     /**
