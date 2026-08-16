@@ -2,6 +2,7 @@
 <!-- Эскиз 1: Split-View (Master-Detail) Browse в теме CUBA Halo -->
 <!-- Корневой элемент: тестовый экран просмотра кандидатов Split-View -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="Тест 1: Split-View (Master-Detail)"
         messagesPack="com.company.hunttech.web.screens.jobcandidate"
         icon="TH_LIST">
@@ -14,7 +15,18 @@
             <!-- Загрузчик коллекции кандидатов ограничивает выборку 200 записями -->
             <loader id="jobCandidatesDl" maxResults="200">
                 <!-- JPQL-запрос выбирает кандидатов, сортируя по дате создания по убыванию -->
-                <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]></query>
+                <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.createdBy like :createdBy</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select k.candidate from hunttech_IteractionList k where k.recrutier = :recrutier or k.createdBy = :recrutierName)</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
             </loader>
         </collection>
     </data>
@@ -146,12 +158,11 @@
                     <!-- Заголовок реестра -->
                     <label id="tableTitleLabel" value="👤 Реестр кандидатов" stylename="h3" align="MIDDLE_LEFT"/>
                     
-                    <!-- Кнопки быстрых фильтров по статусам рекрутеров -->
+                    <!-- Кнопки быстрых фильтров по кандидатам -->
                     <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT">
                         <button id="filterAllBtn" caption="Все кандидаты" stylename="primary" icon="USERS"/>
-                        <button id="filterFreeBtn" caption="🟢 Свободные" stylename="secondary"/>
-                        <button id="filterMyBtn" caption="🟡 В моей работе" stylename="secondary"/>
-                        <button id="filterOtherBtn" caption="🔴 У других" stylename="secondary"/>
+                        <button id="filterMyCandidatesBtn" caption="Мои кандидаты" stylename="secondary" icon="USER"/>
+                        <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary" icon="font-icon:ADN"/>
                     </hbox>
 
                     <!-- Выпадающая кнопка действий над кандидатом как в оригинальной форме -->

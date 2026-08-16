@@ -157,6 +157,34 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         refreshLastInteractionCache(event.getLoadedEntities());
         refreshCandidateCvCache(event.getLoadedEntities());
         refreshEmployeeCache(event.getLoadedEntities());
+        refreshCandidateSkillsCache(event.getLoadedEntities());
+    }
+
+    private Map<UUID, List<CandidateSkill>> candidateSkillsCache = Collections.emptyMap();
+
+    private void refreshCandidateSkillsCache(List<JobCandidate> candidates) {
+        if (candidates == null || candidates.isEmpty()) {
+            candidateSkillsCache = Collections.emptyMap();
+            return;
+        }
+
+        try {
+            List<CandidateSkill> rows = dataManager.load(CandidateSkill.class)
+                    .query("select e from hunttech_CandidateSkill e where e.candidate in :candidates order by e.priority, e.skill.skillName")
+                    .parameter("candidates", candidates)
+                    .view("candidateSkill-view")
+                    .list();
+
+            Map<UUID, List<CandidateSkill>> cache = new HashMap<>();
+            for (CandidateSkill row : rows) {
+                if (row.getCandidate() != null && row.getCandidate().getId() != null) {
+                    cache.computeIfAbsent(row.getCandidate().getId(), k -> new ArrayList<>()).add(row);
+                }
+            }
+            candidateSkillsCache = cache;
+        } catch (Exception ex) {
+            candidateSkillsCache = Collections.emptyMap();
+        }
     }
 
     private void refreshLastInteractionCache(List<JobCandidate> candidates) {
@@ -990,6 +1018,119 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         } else
             return null;
     } */
+
+    @Install(to = "jobCandidatesTable.mainSkills", subject = "columnGenerator")
+    private Component jobCandidatesTableMainSkillsColumnGenerator(DataGrid.ColumnGeneratorEvent<JobCandidate> event) {
+        JobCandidate candidate = event.getItem();
+        if (candidate == null || candidate.getId() == null) {
+            return null;
+        }
+
+        List<CandidateSkill> skills = candidateSkillsCache.get(candidate.getId());
+        if (skills == null) {
+            try {
+                skills = dataManager.load(CandidateSkill.class)
+                        .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate order by e.priority, e.skill.skillName")
+                        .parameter("candidate", candidate)
+                        .view("candidateSkill-view")
+                        .list();
+            } catch (Exception ex) {
+                skills = Collections.emptyList();
+            }
+        }
+
+        if (skills.isEmpty()) {
+            Label<String> emptyLabel = uiComponents.create(Label.TYPE_STRING);
+            emptyLabel.setValue("—");
+            emptyLabel.setStyleName("text-muted");
+            return emptyLabel;
+        }
+
+        // Выбираем ключевые (необходимые) навыки
+        List<CandidateSkill> mainSkills = new ArrayList<>();
+        for (CandidateSkill cs : skills) {
+            if (cs.getPriority() == CandidateSkillPriority.MAIN) {
+                mainSkills.add(cs);
+            }
+        }
+        if (mainSkills.isEmpty()) {
+            mainSkills.addAll(skills.subList(0, Math.min(3, skills.size())));
+        }
+
+        String[] palette = new String[]{
+                "#2b82c9", "#27ae60", "#8e44ad", "#d35400", "#16a085", "#2c3e50", "#e67e22", "#2980b9"
+        };
+
+        // Формируем сжатое превью (3-5 навыков) для ячейки таблицы
+        StringBuilder previewSb = new StringBuilder("<div style='display: flex; flex-wrap: nowrap; gap: 4px; align-items: center; overflow: hidden; cursor: pointer;'>");
+        int countToShow = Math.min(4, mainSkills.size());
+        for (int i = 0; i < countToShow; i++) {
+            CandidateSkill cs = mainSkills.get(i);
+            if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                String name = cs.getSkill().getSkillName();
+                String color = palette[Math.abs(name.hashCode()) % palette.length];
+                String star = cs.getPriority() == CandidateSkillPriority.MAIN ? "★ " : "";
+                previewSb.append(String.format(
+                        "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                        "padding: 1px 6px; border-radius: 10px; font-size: 10.5px; font-weight: 600; " +
+                        "white-space: nowrap; line-height: 16px;'>%s%s</span>",
+                        color, color, color, star, name
+                ));
+            }
+        }
+        int remaining = skills.size() - countToShow;
+        if (remaining > 0) {
+            previewSb.append(String.format(
+                    "<span style='background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; " +
+                    "padding: 1px 5px; border-radius: 10px; font-size: 10px; font-weight: 600; white-space: nowrap;'>+%d</span>",
+                    remaining
+            ));
+        }
+        previewSb.append("</div>");
+
+        // Формируем всплывающее окно (PopupView) со списком всех навыков
+        PopupView popupView = uiComponents.create(PopupView.class);
+        popupView.setMinimizedValue(previewSb.toString());
+        popupView.setHideOnMouseOut(true);
+
+        VBoxLayout popupContent = uiComponents.create(VBoxLayout.NAME);
+        popupContent.setWidth("280px");
+        popupContent.setSpacing(true);
+        popupContent.setStyleName("card");
+
+        Label<String> popupHeader = uiComponents.create(Label.TYPE_STRING);
+        popupHeader.setStyleName("bold");
+        popupHeader.setValue("Все навыки кандидата (" + skills.size() + "):");
+        popupContent.add(popupHeader);
+
+        StringBuilder allSkillsSb = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px; max-height: 220px; overflow-y: auto; padding: 4px 0;'>");
+        StringBuilder plainTooltipSb = new StringBuilder("Все навыки кандидата (" + skills.size() + "):\n");
+        for (CandidateSkill cs : skills) {
+            if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                String name = cs.getSkill().getSkillName();
+                String color = palette[Math.abs(name.hashCode()) % palette.length];
+                String star = cs.getPriority() == CandidateSkillPriority.MAIN ? "★ " : "";
+                allSkillsSb.append(String.format(
+                        "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                        "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                        "white-space: nowrap;'>%s%s</span>",
+                        color, color, color, star, name
+                ));
+                plainTooltipSb.append(" • ").append(star).append(name).append("\n");
+            }
+        }
+        allSkillsSb.append("</div>");
+
+        Label<String> allSkillsLabel = uiComponents.create(Label.TYPE_STRING);
+        allSkillsLabel.setHtmlEnabled(true);
+        allSkillsLabel.setValue(allSkillsSb.toString());
+        popupContent.add(allSkillsLabel);
+
+        popupView.setPopupContent(popupContent);
+        popupView.setDescription(plainTooltipSb.toString().trim());
+
+        return popupView;
+    }
 
     @Install(to = "jobCandidatesTable.resume", subject = "columnGenerator")
     private Icons.Icon jobCandidatesTableResumeColumnGenerator

@@ -80,6 +80,10 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
     private HBoxLayout whatsupNameHBox;
     @Inject
     private FlowBoxLayout socialNetworkFlowBox;
+    @Inject
+    private VBoxLayout jobCandidateSkillsVBox;
+    @Inject
+    private Label<String> candidateSkillsLabels;
 
     private static final String MANAGER_GROUP = "Менеджмент";
     private static final String RECRUTIER_GROUP = "Хантинг";
@@ -99,6 +103,62 @@ public class JobCanidateDetailScreenFragment extends ScreenFragment {
         this.jobCandidate = jobCandidate;
 
         createSocialNetworkFlowBox();
+        initCandidateSkills(jobCandidate);
+    }
+
+    private void initCandidateSkills(JobCandidate candidate) {
+        if (candidateSkillsLabels == null) {
+            return;
+        }
+        if (candidate == null) {
+            if (jobCandidateSkillsVBox != null) {
+                jobCandidateSkillsVBox.setVisible(false);
+            }
+            return;
+        }
+
+        try {
+            List<CandidateSkill> skills = dataManager.load(CandidateSkill.class)
+                    .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate order by e.priority, e.skill.skillName")
+                    .parameter("candidate", candidate)
+                    .view("candidateSkill-view")
+                    .list();
+
+            if (skills.isEmpty()) {
+                if (jobCandidateSkillsVBox != null) {
+                    jobCandidateSkillsVBox.setVisible(false);
+                }
+                return;
+            }
+
+            if (jobCandidateSkillsVBox != null) {
+                jobCandidateSkillsVBox.setVisible(true);
+            }
+
+            StringBuilder sb = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 0;'>");
+            String[] palette = new String[]{
+                    "#2b82c9", "#27ae60", "#8e44ad", "#d35400", "#16a085", "#2c3e50", "#e67e22", "#2980b9"
+            };
+            for (CandidateSkill cs : skills) {
+                if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                    String skillName = cs.getSkill().getSkillName();
+                    String color = palette[Math.abs(skillName.hashCode()) % palette.length];
+                    String priorityIcon = cs.getPriority() == CandidateSkillPriority.MAIN ? "★ " : "";
+                    sb.append(String.format(
+                            "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                            "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                            "white-space: nowrap; display: inline-block;'>%s%s</span>",
+                            color, color, color, priorityIcon, skillName
+                    ));
+                }
+            }
+            sb.append("</div>");
+            candidateSkillsLabels.setValue(sb.toString());
+        } catch (Exception ex) {
+            if (jobCandidateSkillsVBox != null) {
+                jobCandidateSkillsVBox.setVisible(false);
+            }
+        }
     }
 
     private void createSocialNetworkFlowBox() {

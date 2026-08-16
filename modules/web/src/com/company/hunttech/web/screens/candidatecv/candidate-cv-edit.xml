@@ -160,12 +160,12 @@
                     </vbox>
                 </hbox>
 
-                <!-- Сведения о целевой позиции: блок «Резюме для вакансии» на уровень выше навигации -->
+                <!-- Сведения о целевой позиции: блок «Резюме для вакансии» без рамки на уровень выше навигации -->
                 <vbox id="candidateCvSidebarTargetCard"
                       width="100%"
-                      spacing="true"
-                      stylename="job-candidate-profile-contacts job-candidate-sidebar-card edit-sidebar-summary candidate-cv-sidebar-card">
-                    <!-- Заголовок «Резюме для вакансии»: полоса-заголовок с двумя горизонтальными inset-линиями -->
+                      spacing="false"
+                      stylename="job-candidate-profile-contacts edit-sidebar-summary candidate-cv-sidebar-card">
+                    <!-- Заголовок «Резюме для вакансии»: лаконичный заголовок раздела -->
                     <label value="Резюме для вакансии"
                            width="100%"
                            stylename="label-nav-title job-candidate-section-title candidate-cv-sidebar-card-title"/>
@@ -175,8 +175,8 @@
                             <row>
                                 <hbox spacing="false" width="100%">
                                     <label value="Должность:"
-                                           stylename="small"
-                                           width="75px"/>
+                                           stylename="small candidate-cv-sidebar-field-label"
+                                           width="52px"/>
                                     <label id="candidateCvSidebarResumePosition"
                                            width="100%"
                                            dataContainer="candidateCVDc"
@@ -187,8 +187,8 @@
                             <row>
                                 <hbox spacing="false" width="100%">
                                     <label value="Вакансия:"
-                                           stylename="small"
-                                           width="75px"/>
+                                           stylename="small candidate-cv-sidebar-field-label"
+                                           width="52px"/>
                                     <label id="candidateCvSidebarVacancy"
                                            width="100%"
                                            dataContainer="candidateCVDc"
@@ -199,8 +199,8 @@
                             <row>
                                 <hbox spacing="false" width="100%">
                                     <label value="Проект:"
-                                           stylename="small"
-                                           width="75px"/>
+                                           stylename="small candidate-cv-sidebar-field-label"
+                                           width="52px"/>
                                     <label id="candidateCvSidebarProject"
                                            width="100%"
                                            dataContainer="candidateCVDc"
@@ -506,29 +506,31 @@
                     <hbox spacing="true"
                           width="100%"
                           stylename="candidate-cv-toolbar">
-                        <button id="scanCandidateSkillsButton"
-                                caption="msg://msgScanCandidateSkills"
-                                icon="font-icon:MAGIC"
-                                stylename="danger"
-                                align="BOTTOM_LEFT"
-                                invoke="scanCandidateSkills"/>
-                        <button id="rescanSkills"
-                                caption="msg://msgRescanResume"
-                                align="BOTTOM_LEFT"
-                                invoke="rescanCV"/>
-                        <button id="resumeRecognitionButton"
-                                caption="msg://msgResumeRecognition"
-                                align="BOTTOM_LEFT"
-                                invoke="resumeRecognition"/>
-                        <button id="convertToTextButton"
-                                caption="msg://msgConvertToText"
-                                align="BOTTOM_LEFT"
-                                enable="false"
-                                invoke="convertToText"/>
-                        <button id="showOriginalButon"
-                                caption="msg://msgShowOriginal"
-                                align="BOTTOM_LEFT"
-                                invoke="showOriginalText"/>
+                        <!-- Выпадающая кнопка «Действия» выровнена справа -->
+                        <popupButton id="cvActionsPopupButton"
+                                     caption="msg://msgActions"
+                                     icon="font-icon:BARS"
+                                     showActionIcons="true"
+                                     align="MIDDLE_RIGHT"
+                                     stylename="primary candidate-cv-actions-btn">
+                            <actions>
+                                <action id="scanSkillsAction"
+                                        caption="msg://msgScanCandidateSkills"
+                                        icon="font-icon:MAGIC"/>
+                                <action id="smartFormatCvAction"
+                                        caption="msg://msgConvertToText"
+                                        icon="font-icon:ALIGN_LEFT"/>
+                                <action id="rescanCvAction"
+                                        caption="msg://msgRescanResume"
+                                        icon="font-icon:REPEAT"/>
+                                <action id="resumeRecognitionAction"
+                                        caption="msg://msgResumeRecognition"
+                                        icon="font-icon:USER"/>
+                                <action id="showOriginalAction"
+                                        caption="msg://msgShowOriginal"
+                                        icon="font-icon:FILE_TEXT_O"/>
+                            </actions>
+                        </popupButton>
                     </hbox>
                     <hbox id="candidateCVHBox"
                           expand="candidateCVRichTextArea"
