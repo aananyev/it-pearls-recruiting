@@ -1,9 +1,10 @@
-package com.company.hunttech.web.screens.jobcandidate;
-
 import com.company.hunttech.entity.CandidateCV;
+import com.company.hunttech.entity.CandidateSkill;
+import com.company.hunttech.entity.CandidateSkillPriority;
 import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.entity.SkillTree;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.FileLoader;
@@ -17,8 +18,10 @@ import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.PopupButton;
+import com.haulmont.cuba.gui.components.PopupView;
 import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.components.ThemeResource;
+import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.LookupComponent;
@@ -26,12 +29,15 @@ import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.StandardLookup;
 import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.Target;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -417,6 +423,138 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             statusLbl.setDescription(status.getLabel() + (last != null && last.getRecrutier() != null ? " (" + last.getRecrutier().getName() + ")" : ""));
             return statusLbl;
         });
+
+        // Колонка 7: Ключевые навыки (3-4 чипа + PopupView со всеми навыками)
+        candidatesTable.addGeneratedColumn("mainSkills", candidate -> {
+            if (candidate == null || candidate.getId() == null) {
+                return null;
+            }
+
+            List<CandidateSkill> skills = candidateSkillsCache.get(candidate.getId());
+            if (skills == null) {
+                try {
+                    skills = dataManager.load(CandidateSkill.class)
+                            .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate order by e.priority, e.skill.skillName")
+                            .parameter("candidate", candidate)
+                            .view("candidateSkill-view")
+                            .list();
+                } catch (Exception ex) {
+                    skills = Collections.emptyList();
+                }
+            }
+
+            if (skills.isEmpty()) {
+                Label<String> emptyLabel = uiComponents.create(Label.TYPE_STRING);
+                emptyLabel.setValue("—");
+                emptyLabel.setStyleName("text-muted");
+                return emptyLabel;
+            }
+
+            List<CandidateSkill> mainSkills = new ArrayList<>();
+            for (CandidateSkill cs : skills) {
+                if (cs.getPriority() == CandidateSkillPriority.MAIN) {
+                    mainSkills.add(cs);
+                }
+            }
+            if (mainSkills.isEmpty()) {
+                mainSkills.addAll(skills.subList(0, Math.min(3, skills.size())));
+            }
+
+            String[] palette = new String[]{
+                    "#2b82c9", "#27ae60", "#8e44ad", "#d35400", "#16a085", "#2c3e50", "#e67e22", "#2980b9"
+            };
+
+            StringBuilder previewSb = new StringBuilder("<div style='display: flex; flex-wrap: nowrap; gap: 4px; align-items: center; overflow: hidden; cursor: pointer;'>");
+            int countToShow = Math.min(4, mainSkills.size());
+            for (int i = 0; i < countToShow; i++) {
+                CandidateSkill cs = mainSkills.get(i);
+                if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                    String name = cs.getSkill().getSkillName();
+                    String color = palette[Math.abs(name.hashCode()) % palette.length];
+                    String star = cs.getPriority() == CandidateSkillPriority.MAIN ? "★ " : "";
+                    previewSb.append(String.format(
+                            "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                            "padding: 1px 6px; border-radius: 10px; font-size: 10.5px; font-weight: 600; " +
+                            "white-space: nowrap; line-height: 16px;'>%s%s</span>",
+                            color, color, color, star, name
+                    ));
+                }
+            }
+            int remaining = skills.size() - countToShow;
+            if (remaining > 0) {
+                previewSb.append(String.format(
+                        "<span style='background: #e2e8f0; color: #475569; border: 1px solid #cbd5e1; " +
+                        "padding: 1px 5px; border-radius: 10px; font-size: 10px; font-weight: 600; white-space: nowrap;'>+%d</span>",
+                        remaining
+                ));
+            }
+            previewSb.append("</div>");
+
+            PopupView popupView = uiComponents.create(PopupView.class);
+            popupView.setMinimizedValue(previewSb.toString());
+            popupView.setHideOnMouseOut(true);
+
+            VBoxLayout popupContent = uiComponents.create(VBoxLayout.NAME);
+            popupContent.setWidth("280px");
+            popupContent.setSpacing(true);
+            popupContent.setStyleName("card");
+
+            Label<String> popupHeader = uiComponents.create(Label.TYPE_STRING);
+            popupHeader.setStyleName("bold");
+            popupHeader.setValue("Все навыки кандидата (" + skills.size() + "):");
+            popupContent.add(popupHeader);
+
+            StringBuilder allSkillsSb = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px; max-height: 220px; overflow-y: auto; padding: 4px 0;'>");
+            StringBuilder plainTooltipSb = new StringBuilder("Все навыки кандидата (" + skills.size() + "):\n");
+            for (CandidateSkill cs : skills) {
+                if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                    String name = cs.getSkill().getSkillName();
+                    String color = palette[Math.abs(name.hashCode()) % palette.length];
+                    String star = cs.getPriority() == CandidateSkillPriority.MAIN ? "★ " : "";
+                    allSkillsSb.append(String.format(
+                            "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                            "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                            "white-space: nowrap;'>%s%s</span>",
+                            color, color, color, star, name
+                    ));
+                    plainTooltipSb.append(" • ").append(star).append(name).append("\n");
+                }
+            }
+            allSkillsSb.append("</div>");
+
+            Label<String> allSkillsLabel = uiComponents.create(Label.TYPE_STRING);
+            allSkillsLabel.setHtmlEnabled(true);
+            allSkillsLabel.setValue(allSkillsSb.toString());
+            popupContent.add(allSkillsLabel);
+
+            popupView.setPopupContent(popupContent);
+            popupView.setDescription(plainTooltipSb.toString().trim());
+
+            return popupView;
+        });
+    }
+
+    private final java.util.Map<java.util.UUID, List<CandidateSkill>> candidateSkillsCache = new java.util.concurrent.ConcurrentHashMap<>();
+
+    @Subscribe(id = "jobCandidatesDl", target = Target.DATA_LOADER)
+    public void onJobCandidatesDlPostLoad(CollectionLoader.PostLoadEvent<JobCandidate> event) {
+        candidateSkillsCache.clear();
+        List<JobCandidate> candidates = event.getLoadedEntities();
+        if (candidates != null && !candidates.isEmpty()) {
+            try {
+                List<CandidateSkill> allSkills = dataManager.load(CandidateSkill.class)
+                        .query("select e from hunttech_CandidateSkill e where e.candidate in :candidates order by e.priority, e.skill.skillName")
+                        .parameter("candidates", candidates)
+                        .view("candidateSkill-view")
+                        .list();
+                for (CandidateSkill cs : allSkills) {
+                    if (cs.getCandidate() != null && cs.getCandidate().getId() != null) {
+                        candidateSkillsCache.computeIfAbsent(cs.getCandidate().getId(), k -> new ArrayList<>()).add(cs);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     /**
@@ -572,23 +710,80 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
                 return;
             }
 
-            StringBuilder sb = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 0;'>");
+            List<CandidateSkill> mainSkills = new ArrayList<>();
+            List<CandidateSkill> secondarySkills = new ArrayList<>();
+            List<CandidateSkill> tertiarySkills = new ArrayList<>();
+
+            for (CandidateSkill cs : skills) {
+                if (cs.getPriority() == CandidateSkillPriority.MAIN) {
+                    mainSkills.add(cs);
+                } else if (cs.getPriority() == CandidateSkillPriority.SECONDARY) {
+                    secondarySkills.add(cs);
+                } else {
+                    tertiarySkills.add(cs);
+                }
+            }
+
             String[] palette = new String[]{
                     "#2b82c9", "#27ae60", "#8e44ad", "#d35400", "#16a085", "#2c3e50", "#e67e22", "#2980b9"
             };
-            for (com.company.hunttech.entity.CandidateSkill cs : skills) {
-                if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
-                    String skillName = cs.getSkill().getSkillName();
-                    String color = palette[Math.abs(skillName.hashCode()) % palette.length];
-                    String priorityIcon = cs.getPriority() == com.company.hunttech.entity.CandidateSkillPriority.MAIN ? "★ " : "";
-                    sb.append(String.format(
-                            "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
-                            "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
-                            "white-space: nowrap; display: inline-block;'>%s%s</span>",
-                            color, color, color, priorityIcon, skillName
-                    ));
+
+            StringBuilder sb = new StringBuilder("<div style='display: flex; flex-direction: column; gap: 8px; padding: 2px 0;'>");
+
+            if (!mainSkills.isEmpty()) {
+                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #1e293b; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Обязательные:</div>");
+                sb.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
+                for (CandidateSkill cs : mainSkills) {
+                    if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                        String name = cs.getSkill().getSkillName();
+                        String color = palette[Math.abs(name.hashCode()) % palette.length];
+                        sb.append(String.format(
+                                "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                                "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                                "white-space: nowrap; display: inline-block;'>★ %s</span>",
+                                color, color, color, name
+                        ));
+                    }
                 }
+                sb.append("</div></div>");
             }
+
+            if (!secondarySkills.isEmpty()) {
+                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Желательные:</div>");
+                sb.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
+                for (CandidateSkill cs : secondarySkills) {
+                    if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                        String name = cs.getSkill().getSkillName();
+                        String color = palette[Math.abs(name.hashCode()) % palette.length];
+                        sb.append(String.format(
+                                "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                                "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                                "white-space: nowrap; display: inline-block;'>%s</span>",
+                                color, color, color, name
+                        ));
+                    }
+                }
+                sb.append("</div></div>");
+            }
+
+            if (!tertiarySkills.isEmpty()) {
+                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Прочее:</div>");
+                sb.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
+                for (CandidateSkill cs : tertiarySkills) {
+                    if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                        String name = cs.getSkill().getSkillName();
+                        String color = palette[Math.abs(name.hashCode()) % palette.length];
+                        sb.append(String.format(
+                                "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                                "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                                "white-space: nowrap; display: inline-block;'>%s</span>",
+                                color, color, color, name
+                        ));
+                    }
+                }
+                sb.append("</div></div>");
+            }
+
             sb.append("</div>");
             detailSkillsLabels.setValue(sb.toString());
         } catch (Exception ex) {
