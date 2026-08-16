@@ -86,11 +86,18 @@ public final class AiOperationNotifier {
      * <pre>Модель: deepseek-v4-flash · Провайдер: deepseek
      * Собственник API: корпоративный (администратора)</pre>
      *
-     * @param result          метаданные AI-выполнения
+     * <p>Если AI-выполнение не состоялось ({@code result == null} — классический
+     * fallback сервиса, AI недоступен), возвращается только {@code operationDetail}
+     * без AI-блока — контракт пользовательской нотификации (см. {@code docs/architecture/HRM_HuntTech_AI_User_Notification_Contract.md}).</p>
+     *
+     * @param result          метаданные AI-выполнения или {@code null} (fallback)
      * @param operationDetail детали операции (первая строка) или {@code null}
      * @return HTML-описание для {@code withDescription(...)}
      */
     public static String buildDescription(AiExecutionResult result, String operationDetail) {
+        if (result == null) {
+            return operationDetail == null ? "" : operationDetail;
+        }
         StringBuilder description = new StringBuilder();
         if (operationDetail != null && !operationDetail.trim().isEmpty()) {
             description.append(operationDetail).append("<br/>");
