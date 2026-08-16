@@ -146,7 +146,7 @@ String generateVacancyArtifact(String description, String functionCode);
 
 Таким образом старый UI не может обойти policy, даже если продолжает передавать vendor code.
 
-`testConnection(UserAiConfiguration)` остаётся прямой диагностикой конкретного personal credential. Он не используется для рабочих AI-функций.
+`testConnection(UserAiConfiguration)` остаётся прямой диагностикой конкретного personal credential. Он не используется для рабочих AI-функций, но (контракт пользовательской нотификации, 2026-08-16) возвращает `AiExecutionResult` с метаданными модели/провайдера и собственником `USER`, чтобы экраны «Управление AI» показывали исчезающую нотификацию с указанием «какая модель что делала + чей API».
 
 ## 6. Legacy prompt migration
 

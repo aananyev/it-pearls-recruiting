@@ -152,7 +152,7 @@ Runtime smoke: PDF/DOCX/TXT, configured AI, unavailable AI fallback, сохра�
 | Текст RichTextArea пуст (null/пробелы/без контента) | кнопка disabled |
 | Текст появился (ввод или lazy load вкладки) | кнопка enabled (обработчик `onProjectDescriptionRichTextAreaValueChange`) |
 | Клик по «Кратко» | HTML-контент RichTextArea → обычный текст (`stripHtmlToPlainText`) → `BackgroundWorker` (timeout 120 с) → `ProjectAiService.generateShortDescription(projectName, text)` |
-| AI вернул текст | `setShortDescription(result)` на сущности; sidebar-раздел «Коротко» показывается с этим текстом; TRAY-уведомление |
+| AI вернул текст | `setShortDescription(result.getText())` на сущности; sidebar-раздел «Коротко» показывается с этим текстом; исчезающая TRAY-нотификация с указанием модели и собственника API (`AiOperationNotifier`: «Модель: … · Провайдер: … / Собственник API: корпоративный (администратора) или личный (пользователя)», автоскрытие 5 с — контракт HRM_HuntTech_AI_User_Notification_Contract) |
 | AI недоступен / ошибка провайдера | `shortDescription` не меняется; WARNING-уведомление; кнопка снова enabled |
 
 ### 9.3 Sidebar-раздел «Коротко»
@@ -180,6 +180,8 @@ ProjectAiService.generateShortDescription(projectName, descriptionText)
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-16 | «AI-нотификации 2 раза»: стартовые TRAY-нотификации «Кратко» и AI-обработки описания переведены на контрактный `AiOperationNotifier.showStarted(...)` (исчезающая, 5 с, обещание итоговой нотификации с моделью и собственником API) |
+| 2026-08-16 | Контракт пользовательской нотификации: нотификации «Кратко» и AI-обработки описания показывают модель и собственника API (`AiOperationNotifier`, исчезающая TRAY, 5 с); `ProjectAiService` возвращает `AiExecutionResult` (текст + метаданные) |
 | 2026-08-14 | Исправлен рендер строки дат: shared `edit-screen-shared-styles` задавал `.v-slot-edit-form-control { width: 100% !important }`, перебивая Vaadin-инлайн `width: 50%` от `box.expandRatio` — поле «Дата окончания проекта» выталкивалось за правую границу окна и не было видно. Слоты переведены на растяжение Vaadin-инлайном (без `width: 100% !important`, 7 тем); строка дат получила смысловой XML-комментарий; контрактный тест защищает от регрессии |
 | 2026-08-14 | AI-генерация «Кратко» увеличена в 2 раза: два предложения вместо одного, `MAX_TOKENS` 125 → 250 (миграция `260814-4-increaseProjectShortDescriptionPrompt`, админские настройки не перезаписываются); из sidebar убрана подпись типа записи «Проект» (`projectSidebarSubtitle` удалён из XML и SCSS, 7 тем); sidebar получил тонкий вертикальный скроллбар при переполнении (`scrollbar-width: thin` + webkit-стили, эталон OpenPositionEdit §4.2); обновлены контрактные тесты |
 | 2026-08-14 | Sidebar ProjectEdit: блок «Коротко» перенесён ПОСЛЕ навигации «Разделы» (идентификация → «Разделы» → «Коротко» → spacer); заголовок «Коротко» стал полосой-заголовком 1:1 с «Разделы» (`label-nav-title project-editor-short-description-title`, контракт §4.1, SCSS 7 тем); AI-генерация «Кратко» сокращена в 4 раза — одно предложение вместо пяти, `MAX_TOKENS` 500 → 125 (seed 260814-2 + миграция 260814-3 для существующих сред, админские настройки не перезаписываются); убрана подсказка «PDF, DOCX или TXT до 10 МБ…» из строки upload; кнопки «Загрузить описание» и «Кратко» выровнены вправо (status-label expand слева); обновлены контрактные тесты |

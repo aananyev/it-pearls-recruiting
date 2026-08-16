@@ -2,6 +2,9 @@ package com.company.hunttech.web.gui.components;
 
 import com.company.hunttech.app.ProcessedImage;
 import com.company.hunttech.app.ProjectLogoImageProcessingService;
+import com.company.hunttech.config.HunttechProjectLogoConfig;
+import com.company.hunttech.service.AiExecutionResult;
+import com.company.hunttech.web.util.AiOperationNotifier;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.FileUploadField;
@@ -75,11 +78,20 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
      */
     private boolean processedByAi;
 
+    /**
+     * Метаданные платного AI-выполнения (модель, провайдер, собственник API), если фон
+     * логотипа удалён AI-функцией {@code PROJECT_LOGO_IMAGE_GENERATE}; {@code null} для
+     * локального rembg/классического конвейера. Используется для нотификации «какая
+     * модель что сделала + чей API» (контракт HRM_HuntTech_AI_User_Notification_Contract).
+     */
+    private AiExecutionResult processedAiExecution;
+
     @Override
     protected void saveFile(FileDescriptor fileDescriptor) {
         // Сбрасываем кэш обработанного дескриптора при каждой новой загрузке.
         processedDescriptor = null;
         processedByAi = false;
+        processedAiExecution = null;
         // Обрабатываем только изображения (логотипы проекта/компании, фото кандидата);
         // остальные загрузки — стандартное поведение.
         ProcessingMode mode = resolveProcessingMode();
@@ -97,6 +109,8 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
                     getComposition().markAsDirty();
                     if (mode == ProcessingMode.CANDIDATE_PHOTO && processedByAi) {
                         showAiProcessedNotification();
+                    } else if (mode == ProcessingMode.LOGO && processedAiExecution != null) {
+                        showLogoAiProcessedNotification();
                     }
                     return;
                 }
@@ -122,6 +136,7 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
     protected OutputStream receiveUpload(String fileName, String MIMEType) {
         processedDescriptor = null;
         processedByAi = false;
+        processedAiExecution = null;
         return super.receiveUpload(fileName, MIMEType);
     }
 
@@ -178,6 +193,8 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
      *         (обработка не требуется)
      */
     private FileDescriptor processLogo(FileDescriptor fileDescriptor, ProcessingMode mode) throws IOException {
+        showAiProcessingStartedNotification(mode);
+
         ProjectLogoImageProcessingService service =
                 beanLocator.get(ProjectLogoImageProcessingService.NAME);
 
@@ -193,6 +210,7 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
             return null;
         }
         processedByAi = processed.isAiProcessed();
+        processedAiExecution = processed.getAiExecution();
 
         // Перезаписываем временный файл обработанными байтами — дальше стандартный конвейер
         // (putFileIntoStorage + commit) сохранит именно обработанное изображение.
@@ -209,6 +227,43 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
         log.debug("Изображение обработано: {} -> {} ({} байт)",
                 fileDescriptor.getId(), newName, processed.getData().length);
         return fileDescriptor;
+    }
+
+    /**
+     * Показывает исчезающую нотификацию о НАЧАЛЕ AI-обработки изображения
+     * («AI-нотификации 2 раза» — при старте и по завершении, контракт
+     * HRM_HuntTech_AI_User_Notification_Contract).
+     *
+     * <p>Показывается только когда соответствующий нейросетевой этап включён
+     * конфигом: платная AI-функция логотипа ({@code hunttech.projectLogo.ai.enabled})
+     * или локальный rembg для фото кандидата ({@code hunttech.projectLogo.rembg.enabled}).
+     * При классическом конвейере (flood-fill) нотификация не показывается.</p>
+     */
+    private void showAiProcessingStartedNotification(ProcessingMode mode) {
+        HunttechProjectLogoConfig config = beanLocator.get(HunttechProjectLogoConfig.class);
+        String caption;
+        String detail;
+        if (mode == ProcessingMode.LOGO) {
+            if (!config.getAiProcessingEnabled()) {
+                return;
+            }
+            caption = "Запущена AI-обработка логотипа…";
+            detail = null; // по умолчанию — обещание итоговой нотификации с моделью и собственником API
+        } else if (mode == ProcessingMode.CANDIDATE_PHOTO) {
+            if (!config.getRembgEnabled()) {
+                return;
+            }
+            caption = "Запущена AI-обработка фотографии…";
+            detail = "Фон будет удалён автоматически нейросетью";
+        } else {
+            return;
+        }
+        AppUI appUI = AppUI.getCurrent();
+        if (appUI == null) {
+            log.debug("AppUI недоступен, нотификация о старте AI-обработки не показана");
+            return;
+        }
+        AiOperationNotifier.showStarted(appUI.getNotifications(), caption, detail);
     }
 
     /**
@@ -232,5 +287,27 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
                 .withCaption("Фотография обработана с помощью AI")
                 .withDescription("Фон удалён автоматически нейросетью")
                 .show();
+    }
+
+    /**
+     * Показывает исчезающую нотификацию, когда фон логотипа удалён платной
+     * AI-функцией {@code PROJECT_LOGO_IMAGE_GENERATE}: пользователю сообщается,
+     * какая модель выполнила обработку и чей API использован (корпоративный
+     * администратора или личный пользователя) — контракт пользовательской нотификации.
+     *
+     * <p>Вызывается только для {@link ProcessingMode#LOGO} при реальном применении
+     * AI-функции (метаданные {@link #processedAiExecution} заполнены). Для локального
+     * rembg и классического flood-fill нотификация не показывается — утверждение
+     * «обработано AI-функцией» было бы некорректным.</p>
+     */
+    private void showLogoAiProcessedNotification() {
+        AppUI appUI = AppUI.getCurrent();
+        if (appUI == null || processedAiExecution == null) {
+            log.debug("AppUI недоступен или нет метаданных AI-выполнения, нотификация не показана");
+            return;
+        }
+        AiOperationNotifier.show(appUI.getNotifications(), processedAiExecution,
+                "Логотип обработан с помощью AI",
+                "Фон удалён автоматически нейросетью");
     }
 }

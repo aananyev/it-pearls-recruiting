@@ -1,5 +1,7 @@
 package com.company.hunttech.app;
 
+import com.company.hunttech.service.AiExecutionResult;
+
 import java.io.Serializable;
 
 /**
@@ -20,17 +22,30 @@ public class ProcessedImage implements Serializable {
      */
     private final boolean aiProcessed;
 
+    /**
+     * Метаданные AI-выполнения, если фон удалён платной AI-функцией
+     * (модель, провайдер, собственник API — {@link AiExecutionResult}); {@code null},
+     * если использован локальный rembg или классический конвейер.
+     */
+    private final AiExecutionResult aiExecution;
+
     public ProcessedImage(byte[] data, String name, String extension, boolean processed) {
-        this(data, name, extension, processed, false);
+        this(data, name, extension, processed, false, null);
     }
 
     public ProcessedImage(byte[] data, String name, String extension, boolean processed,
                           boolean aiProcessed) {
+        this(data, name, extension, processed, aiProcessed, null);
+    }
+
+    public ProcessedImage(byte[] data, String name, String extension, boolean processed,
+                          boolean aiProcessed, AiExecutionResult aiExecution) {
         this.data = data;
         this.name = name;
         this.extension = extension;
         this.processed = processed;
         this.aiProcessed = aiProcessed;
+        this.aiExecution = aiExecution;
     }
 
     public byte[] getData() {
@@ -51,5 +66,14 @@ public class ProcessedImage implements Serializable {
 
     public boolean isAiProcessed() {
         return aiProcessed;
+    }
+
+    /**
+     * Метаданные платного AI-выполнения (модель, провайдер, собственник API) или
+     * {@code null} при локальном rembg/классическом конвейере. Для нотификации
+     * «обработано AI-функцией» с указанием собственника API проверяется именно он.
+     */
+    public AiExecutionResult getAiExecution() {
+        return aiExecution;
     }
 }

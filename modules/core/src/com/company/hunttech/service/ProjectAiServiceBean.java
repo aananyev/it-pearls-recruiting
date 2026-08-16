@@ -21,9 +21,9 @@ public class ProjectAiServiceBean implements ProjectAiService {
     private AiExecutionService aiExecutionService;
 
     @Override
-    public String processUploadedDescription(String projectName,
-                                             String sourceFileName,
-                                             String sourceText) {
+    public AiExecutionResult processUploadedDescription(String projectName,
+                                                        String sourceFileName,
+                                                        String sourceText) {
         if (!isConfigured(sourceText)) {
             throw new DevelopmentException("Загруженное описание проекта не содержит текста.");
         }
@@ -38,16 +38,19 @@ public class ProjectAiServiceBean implements ProjectAiService {
         context.put("sourceFileName", safeValue(sourceFileName));
         context.put("sourceText", normalizedSource);
 
-        String result = aiExecutionService.executeText(
+        AiExecutionResult result = aiExecutionService.executeText(
                 FUNCTION_PROJECT_DESCRIPTION_GENERATE, context);
-        if (!isConfigured(result)) {
+        if (!isConfigured(result.getText())) {
             throw new DevelopmentException("AI вернул пустое описание проекта.");
         }
-        return result.trim();
+        // Сохраняем прежнее поведение (обрезка пробелов), не теряя метаданные нотификации.
+        return AiExecutionResult.textResult(result.getFunctionCode(), result.getFunctionName(),
+                result.getCapability(), result.getModelName(), result.getProviderCode(),
+                result.getCredentialOwner(), result.getText().trim());
     }
 
     @Override
-    public String generateShortDescription(String projectName, String descriptionText) {
+    public AiExecutionResult generateShortDescription(String projectName, String descriptionText) {
         if (!isConfigured(descriptionText)) {
             throw new DevelopmentException(
                     "Описание проекта пусто — краткое описание не может быть сгенерировано.");
@@ -62,12 +65,15 @@ public class ProjectAiServiceBean implements ProjectAiService {
         context.put("projectName", safeValue(projectName));
         context.put("sourceText", normalizedSource);
 
-        String result = aiExecutionService.executeText(
+        AiExecutionResult result = aiExecutionService.executeText(
                 FUNCTION_PROJECT_SHORT_DESCRIPTION_GENERATE, context);
-        if (!isConfigured(result)) {
+        if (!isConfigured(result.getText())) {
             throw new DevelopmentException("AI вернул пустое краткое описание проекта.");
         }
-        return result.trim();
+        // Сохраняем прежнее поведение (обрезка пробелов), не теряя метаданные нотификации.
+        return AiExecutionResult.textResult(result.getFunctionCode(), result.getFunctionName(),
+                result.getCapability(), result.getModelName(), result.getProviderCode(),
+                result.getCredentialOwner(), result.getText().trim());
     }
 
     private String safeValue(String value) {

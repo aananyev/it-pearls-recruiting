@@ -14,6 +14,14 @@ public interface HrmAiService {
     String FUNCTION_STANDARDIZE_VACANCY = "STANDARDIZE_VACANCY";
 
     /**
+     * Код диагностической AI-функции «тест подключения» (проверка provider/key/model
+     * до назначения credential на рабочую функцию). Используется в метаданных
+     * результата {@link AiExecutionResult} для нотификации (контракт пользовательской
+     * нотификации).
+     */
+    String FUNCTION_TEST_CONNECTION = "TEST_CONNECTION";
+
+    /**
      * Стандартизирует исходное описание вакансии через функцию STANDARDIZE_VACANCY.
      */
     String standardizeVacancyDescription(String rawText);
@@ -40,6 +48,11 @@ public interface HrmAiService {
     /**
      * Выполняет реальный лёгкий запрос конкретным пользовательским credential.
      * Это диагностическая операция подключения, а не рабочая AI-функция приложения.
+     *
+     * <p>Контракт пользовательской нотификации: возвращает {@link AiExecutionResult}
+     * с метаданными (модель, провайдер, собственник API = личный ключ пользователя),
+     * чтобы экраны «Управление AI» показывали исчезающую нотификацию «какая модель
+     * что делала + чей API» наравне с рабочими операциями.</p>
      */
-    void testConnection(UserAiConfiguration configuration);
+    AiExecutionResult testConnection(UserAiConfiguration configuration);
 }

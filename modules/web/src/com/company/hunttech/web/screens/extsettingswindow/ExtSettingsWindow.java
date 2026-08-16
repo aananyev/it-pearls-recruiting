@@ -3,9 +3,11 @@ package com.company.hunttech.web.screens.extsettingswindow;
 import com.company.hunttech.app.ImageProcessingService;
 import com.company.hunttech.config.HunttechImageConfig;
 import com.company.hunttech.entity.*;
+import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.HrmAiService;
 import com.company.hunttech.service.UserAiContextService;
 import com.company.hunttech.web.screens.useraiconfiguration.UserAiConfigurationEdit;
+import com.company.hunttech.web.util.AiOperationNotifier;
 import com.company.hunttech.web.util.AvatarImageUploadHelper;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.app.FileStorageService;
@@ -306,11 +308,13 @@ public class ExtSettingsWindow extends SettingsWindow {
 
         try {
             // HTTP-контракт и endpoint провайдера остаются в HrmAiService, а не в UI-контроллере.
-            hrmAiService.testConnection(selected);
-            notifications.create(Notifications.NotificationType.HUMANIZED)
-                    .withCaption(getMessage("msgAiConnectionSuccess"))
-                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                    .show();
+            // Контракт пользовательской нотификации: реальный AI-вызов несёт метаданные
+            // (модель, провайдер, собственник API = личный ключ пользователя) и завершается
+            // исчезающей TRAY-нотификацией с указанием «какая модель что делала».
+            AiExecutionResult result = hrmAiService.testConnection(selected);
+            AiOperationNotifier.show(notifications, result,
+                    getMessage("msgAiConnectionSuccess"),
+                    "Провайдер «" + result.getProviderCode() + "» отвечает корректно.");
         } catch (Exception e) {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withCaption(getMessage("msgAiConnectionError"))
