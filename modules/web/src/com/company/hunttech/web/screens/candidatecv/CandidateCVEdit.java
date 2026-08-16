@@ -1606,6 +1606,21 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         smartFormatLetterText();
     }
 
+    @Subscribe("skillActionsPopupButton.scanSkillsAction")
+    public void onSkillActionsScanSkills(Action.ActionPerformedEvent event) {
+        scanCandidateSkills();
+    }
+
+    @Subscribe("skillActionsPopupButton.rescanCvAction")
+    public void onSkillActionsRescan(Action.ActionPerformedEvent event) {
+        rescanCV();
+    }
+
+    @Subscribe("skillActionsPopupButton.checkSkillFromJDAction")
+    public void onSkillActionsCheckSkillFromJD(Action.ActionPerformedEvent event) {
+        checkSkillFromJD();
+    }
+
     Boolean flagOriginal = false;
 
     public void showOriginalText() {
