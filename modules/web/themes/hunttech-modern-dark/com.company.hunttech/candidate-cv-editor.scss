@@ -652,6 +652,14 @@
       padding: 14px 16px 16px;
     }
 
+    /* Карточка-обёртка редактора в hbox с соседом (вкладка «Резюме»): базовый
+       candidate-cv-card принудительно растягивает ширину на 100% и ломает
+       раскладку expandRatio рядом с панелью рекомендаций — снимаем ширину. */
+    .candidate-cv-card.candidate-cv-editor-card {
+      width: auto !important;
+      padding: 14px 16px 16px;
+    }
+
     .candidate-cv-letter-template {
       background: mix($v-app-background-color, $v-panel-background-color, 66%);
       border-radius: 8px;
@@ -755,6 +763,10 @@
       }
 
       .candidate-cv-card {
+        padding: 16px;
+      }
+
+      .candidate-cv-card.candidate-cv-editor-card {
         padding: 16px;
       }
 
