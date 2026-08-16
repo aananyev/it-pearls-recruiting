@@ -4124,7 +4124,19 @@ public class OpenPositionEdit extends StandardEditor<OpenPosition> {
                     totalDetected, mainDetected, secondaryDetected, tertiaryDetected, savedCount, existingOrDuplicate
             );
 
-            AiOperationNotifier.show(notifications, aiExecution, "Анализ требований вакансии выполнен", statsDescription);
+            // Контракт пользовательской нотификации: в исчезающую нотификацию добавляем
+            // блок «какая модель + собственник API» (AI реально выполнял анализ);
+            // при классическом fallback (AI недоступен) метаданных нет — блок не добавляется.
+            if (aiExecution != null) {
+                statsDescription = AiOperationNotifier.buildDescription(aiExecution, statsDescription);
+            }
+
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption("Анализ требований вакансии выполнен")
+                    .withDescription(statsDescription)
+                    .withContentMode(ContentMode.HTML)
+                    .withHideDelayMs(5000)
+                    .show();
 
             initOpenPositionSkillsSidebar();
         } catch (Exception ex) {
