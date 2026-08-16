@@ -43,9 +43,17 @@ Prompt формируется через `TemplateHelper.processTemplate`. Provi
 - персональный API key появляется только в core execution view;
 - корпоративный ciphertext появляется только в core secret/execution view.
 
-## Ошибки и логирование
+## 4. Аудит и логирование вызовов (AiCallLog)
 
-Ошибки конфигурации преобразуются в `DevelopmentException`. При fallback логируется код функции и класс исключения, но не API key и не payload. Неподдержанная capability блокируется до внешнего вызова.
+Каждый вызов через `AiExecutionService` автоматически сохраняется в сущность `hunttech_AiCallLog` (`HUNTTECH_AI_CALL_LOG`):
+- **Инициатор**: системный пользователь `sec$User`, логин, ФИО.
+- **Временные метрики**: дата/время вызова, длительность (`durationMs`).
+- **Токены**: извлекаются из ответа API модели (`promptTokens`, `completionTokens`, `totalTokens`).
+- **Стоимость**: вычисляется с помощью калькулятора тарифов `AiCostCalculator` (`estimatedCost`, `currency`).
+- **Тексты**: сохраняются полный `promptText` и `responseText` (или `errorMessage` при статусе `ERROR`).
+- **Контекст вызова**: `callerSource` (название вызывающего сервиса или экрана).
+
+Журнал доступен для просмотра в интерфейсе через экран `AiCallLogBrowse` и агрегируется в дашбордах `UserAiDashboard` и `AdminAiDashboard`.
 
 ## Контракт пользовательской нотификации
 
@@ -68,6 +76,7 @@ Prompt формируется через `TemplateHelper.processTemplate`. Provi
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-16 | Добавлено сквозное логирование всех обращений к AI в `AiCallLog`, парсинг токенов (OpenAI, DeepSeek, Anthropic) и автоматический расчет стоимости запросов `AiCostCalculator`. |
 | 2026-08-16 | Контракт пользовательской нотификации: методы возвращают `AiExecutionResult` (payload + модель, провайдер, собственник API `AiCredentialOwner.ADMIN/USER`) — см. HRM_HuntTech_AI_User_Notification_Contract |
 | 2026-08-12 | Подключён `HrmAiService` как совместимый vacancy-фасад; provider selection из legacy API исключён |
 | 2026-08-12 | Реализован централизованный function resolver с per-function override и admin fallback |
