@@ -94,6 +94,10 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
 
         String name = extractName(fileName);
         String extension = extractExtension(fileName);
+        // Флаг нейросетевого удаления фона (rembg/AI-функция): true только если фон
+        // действительно удалён нейросетью. Классический flood-fill и простые
+        // конвертация/ресайз AI-обработкой не считаются.
+        boolean aiProcessed = false;
 
         try {
             BufferedImage source = ImageIO.read(new ByteArrayInputStream(data));
@@ -111,6 +115,7 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
                 BufferedImage rembgImage = ImageIO.read(new ByteArrayInputStream(rembgResult));
                 if (rembgImage != null) {
                     source = rembgImage;
+                    aiProcessed = true;
                 } else {
                     log.warn("rembg вернул не-растровое изображение для {}, используется следующий этап",
                             fileName);
@@ -124,6 +129,7 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
                     BufferedImage aiImage = ImageIO.read(new ByteArrayInputStream(aiResult));
                     if (aiImage != null) {
                         source = aiImage;
+                        aiProcessed = true;
                     } else {
                         log.warn("AI-результат логотипа {} не является растровым изображением, используется оригинал",
                                 fileName);
@@ -169,7 +175,7 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
                     fileName, source.getWidth(), source.getHeight(),
                     result.getWidth(), result.getHeight(), config.getFormat());
 
-            return new ProcessedImage(output.toByteArray(), name, config.getFormat(), true);
+            return new ProcessedImage(output.toByteArray(), name, config.getFormat(), true, aiProcessed);
         } catch (IOException e) {
             log.error("Ошибка обработки изображения {}: {}", fileName, e.toString(), e);
             throw new DevelopmentException("Failed to process image: " + e.getMessage(), e);
