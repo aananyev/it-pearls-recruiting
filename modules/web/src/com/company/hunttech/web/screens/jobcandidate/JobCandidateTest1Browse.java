@@ -37,6 +37,9 @@ import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.LookupComponent;
+import com.company.hunttech.web.screens.candidatecv.CandidateCVSimpleBrowse;
+import com.company.hunttech.web.screens.iteractionlist.iteractionlistbrowse.IteractionListSimpleBrowse;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.StandardLookup;
@@ -123,6 +126,10 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     /** Текущая сессия пользователя для проверки прав и авторства взаимодействий */
     @Inject
     private com.haulmont.cuba.security.global.UserSession userSession;
+
+    /** Менеджер экранов CUBA для создания и отображения связанных форм */
+    @Inject
+    private Screens screens;
 
     /* =========================================================================
      * Элементы левого профильного сайдбара (Detail Pane)
@@ -1318,6 +1325,30 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
                     .withCaption("Email отсутствует")
                     .withDescription("У выбранного кандидата не указан адрес электронной почты.")
                     .show();
+        }
+    }
+
+    /** Показать список резюме кандидата */
+    @Subscribe("actionsWithCandidateButton.showCandidateCVListAction")
+    public void onActionsShowCandidateCVList(Action.ActionPerformedEvent event) {
+        JobCandidate selected = candidatesTable.getSingleSelected();
+        if (selected != null) {
+            CandidateCVSimpleBrowse screen = screens.create(CandidateCVSimpleBrowse.class);
+            screen.setSelectedCandidate(selected);
+            screen.setJobCandidate(selected);
+            screens.show(screen);
+        }
+    }
+
+    /** Показать список взаимодействий кандидата */
+    @Subscribe("actionsWithCandidateButton.showIteractionListAction")
+    public void onActionsShowIteractionList(Action.ActionPerformedEvent event) {
+        JobCandidate selected = candidatesTable.getSingleSelected();
+        if (selected != null) {
+            IteractionListSimpleBrowse screen = screens.create(IteractionListSimpleBrowse.class);
+            screen.setSelectedCandidate(selected);
+            screen.setJobCandidate(selected);
+            screens.show(screen);
         }
     }
 

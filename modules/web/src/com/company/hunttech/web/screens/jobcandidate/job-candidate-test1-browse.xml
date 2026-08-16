@@ -177,6 +177,8 @@
                             <action id="scanSkillsAction" caption="Сканировать навыки" icon="font-icon:MAGIC"/>
                             <action id="editCandidateAction" caption="Редактировать карточку" icon="EDIT_ACTION"/>
                             <action id="createInteractionAction" caption="Добавить взаимодействие" icon="PLUS"/>
+                            <action id="showCandidateCVListAction" caption="Показать список резюме" icon="FILE_TEXT_O"/>
+                            <action id="showIteractionListAction" caption="Показать список взаимодействий" icon="HANDSHAKE_O"/>
                             <action id="sendEmailAction" caption="Отправить Email" icon="ENVELOPE"/>
                             <action id="addPersonalReserveAction" caption="В кадровый резерв" icon="SUPERSCRIPT"/>
                         </actions>
