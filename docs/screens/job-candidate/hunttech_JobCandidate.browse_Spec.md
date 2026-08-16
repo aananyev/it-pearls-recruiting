@@ -201,10 +201,46 @@ layout (expand=jobCandidatesTable)
 
 ---
 
+## 7. Модернизированный интерфейс Split-View (`JobCandidateTestBrowse` & `JobCandidateTest1Browse`)
+
+Экранные формы реестра кандидатов с Split-View разметкой (`job-candidate-test-browse.xml` / `job-candidate-test1-browse.xml`) реализуют современную эргономику рабочего места рекрутера:
+
+### 7.1 Левый профильный сайдбар (`job-candidate-sidebar`)
+- **Шапка кандидата**:
+  - Крупное фото 150×150px с круглой маской (`candidate-avatar-large`).
+  - ФИО кандидата: контрастный яркий белый `#f8fafc` с тенью `text-shadow: 0 1px 3px rgba(0,0,0,0.5)` (`candidate-sidebar-fullname`).
+  - Бейдж должности: синий акцент `#93c5fd` на полупрозрачном синем фоне `rgba(59, 130, 246, 0.25)` (`candidate-sidebar-position`).
+  - Город проживания: мягкий светлый тон `#cbd5e1` (`candidate-sidebar-city`).
+- **Секция «Контакты и реквизиты»**: телефон, Email, Telegram, компания, зарплатные ожидания без рамок на фоне сайдбара.
+- **Секция «Последняя активность» (`candidate-activity-sidebar`)**:
+  - Бесшовная интеграция на тёмном фоне `#172638` без светлых плашек и рамок.
+  - Светофорный статус (`🟢 Свободен` / `🔴 В работе`), роли команды процесса (Автор, Ресерчер, Рекрутер, Координатор) с указанием конкретных действий и даты.
+- **Секция «Основные навыки»**: разноцветные чип-бейджи навыков, распознанных AI.
+
+### 7.2 Панель быстрых фильтров (`tableFilterBar` / `candidate-filter-bar`)
+- Сегментированные кнопки-пилюли (`filter-pill-btn`, `filterAllBtn`, `filterMyCandidatesBtn`, `filterMyParticipationBtn`) с активной синей градиентной подсветкой.
+- Выравнивание от левого края без дублирующего заголовка таблицы.
+
+### 7.3 Фирменные кнопки действий (`candidate-btn`)
+- **«Создать кандидата» (`candidate-create-btn` / `primary`)**: насыщенный градиент `linear-gradient(135deg, #2563eb, #1d4ed8)`, скругление 6px, тень `0 2px 5px rgba(37, 99, 235, 0.25)`.
+- **«Обновить» (`candidate-refresh-btn` / `secondary`)**: панельный светлый градиент `linear-gradient(180deg, #ffffff, #f8fafc)`, граница `#cbd5e1`.
+- **«Поиск» (`candidate-search-btn`)**: согласованный тулбар и поле ввода `candidate-search-input`.
+- **Выпадающее меню «Действия» (`actionsWithCandidateButton`)**:
+  - `showCandidateCVListAction`: быстрый переход к списку резюме кандидата.
+  - `showCandidateInteractionsAction`: просмотр истории взаимодействий.
+
+### 7.4 Изоляция счетчика строк таблицы (`rowsCount`)
+- Карточка таблицы (`candidate-table-card`) с отдельным подвалом `c-table-bottom-bar` (высота 42px, фон `#f8fafc`, верхняя граница `#e2e8f0`).
+- Полная изоляция от области строк и горизонтального скроллбара, исключающая перекрытие данных.
+
+---
+
 ## История изменений
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-16 | Обновлен дизайн JobCandidateTestBrowse: удален избыточный заголовок реестра, стилизованы кнопки тулбара, изолирован rowsCount, настроены светлые цвета шапки сайдбара и бесшовный блок активности |
+| 2026-08-16 | В кнопку «Действия» добавлены действия показа списка резюме и списка взаимодействий |
 | 2026-07-21 | Исправлено открытие раздела «Кандидаты»: пакетный кеш сотрудников явно загружает `workStatus.inStaff`, а генератор статуса безопасно обрабатывает null и detached-сущности |
 | 2026-06-27 | Hover-preview фото: `descriptionProvider` + `FileDescriptorImageHelper.buildCandidateFacePreviewHtml`, CSS `candidate-face-thumb` / `candidate-face-preview-tooltip` (30px thumb, 300px circular tooltip) |
 | 2026-06-27 | Откат hover-preview фото: простая колонка 20px `circle-20px`, клик → `JobCandidateImageFace`; удалены `candidate-photo-wrapper` и CSS-hover |
