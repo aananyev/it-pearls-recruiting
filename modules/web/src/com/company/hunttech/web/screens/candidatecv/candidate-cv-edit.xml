@@ -559,51 +559,73 @@
             <tab id="tabLetter"
                  caption="msg://msgLetter"
                  margin="false"
-                 expand="letterHBox"
+                 expand="letterTabVbox"
                  spacing="false">
-                <hbox id="letterHBox"
-                      width="100%"
-                      expand="letterVbox"
+                <vbox id="letterTabVbox"
                       spacing="true"
+                      width="100%"
                       height="100%"
-                      stylename="candidate-cv-tab-content candidate-cv-workspace">
-                    <vbox id="letterVbox"
-                          spacing="true"
+                      expand="letterHBox"
+                      stylename="candidate-cv-tab-content">
+                    <hbox spacing="true"
                           width="100%"
+                          stylename="candidate-cv-toolbar">
+                        <popupButton id="letterActionsPopupButton"
+                                     caption="msg://msgActions"
+                                     icon="font-icon:BARS"
+                                     showActionIcons="true"
+                                     align="MIDDLE_RIGHT"
+                                     stylename="primary candidate-cv-actions-btn">
+                            <actions>
+                                <action id="smartFormatLetterAction"
+                                        caption="msg://msgConvertToText"
+                                        icon="font-icon:ALIGN_LEFT"/>
+                            </actions>
+                        </popupButton>
+                    </hbox>
+                    <hbox id="letterHBox"
+                          width="100%"
+                          expand="letterVbox"
+                          spacing="true"
                           height="100%"
-                          box.expandRatio="4"
-                          expand="letterRichTextArea"
-                          stylename="candidate-cv-card candidate-cv-letter-editor">
-                        <richTextArea id="questionLetterRichTextArea"
+                          stylename="candidate-cv-workspace">
+                        <vbox id="letterVbox"
+                              spacing="true"
+                              width="100%"
+                              height="100%"
+                              box.expandRatio="4"
+                              expand="letterRichTextArea"
+                              stylename="candidate-cv-card candidate-cv-letter-editor">
+                            <richTextArea id="questionLetterRichTextArea"
+                                          width="100%"
+                                          editable="false"
+                                          visible="false"
+                                          caption="msg://msgPatternLetter"
+                                          stylename="text-field-title-form candidate-cv-letter-template"
+                                          height="100%"/>
+                            <richTextArea id="letterRichTextArea"
+                                          dataContainer="candidateCVDc"
+                                          property="letter"
+                                          height="100%"
+                                          width="100%"
+                                          stylename="candidate-cv-rich-editor"/>
+                            <richTextArea id="commentLetterRichTextArea"
+                                          dataContainer="candidateCVDc"
+                                          property="commentLetter"
+                                          caption="msg://msgCommentLetter"
+                                          height="25%"
+                                          width="100%"
+                                          stylename="candidate-cv-letter-comment"/>
+                        </vbox>
+                        <richTextArea id="letterRecommendation"
                                       width="100%"
-                                      editable="false"
-                                      visible="false"
-                                      caption="msg://msgPatternLetter"
-                                      stylename="text-field-title-form candidate-cv-letter-template"
-                                      height="100%"/>
-                        <richTextArea id="letterRichTextArea"
-                                      dataContainer="candidateCVDc"
-                                      property="letter"
                                       height="100%"
-                                      caption="msg://msgLetter"
-                                      width="100%"
-                                      stylename="candidate-cv-rich-editor"/>
-                        <richTextArea id="commentLetterRichTextArea"
-                                      dataContainer="candidateCVDc"
-                                      property="commentLetter"
-                                      caption="msg://msgCommentLetter"
-                                      height="25%"
-                                      width="100%"
-                                      stylename="candidate-cv-letter-comment"/>
-                    </vbox>
-                    <richTextArea id="letterRecommendation"
-                                  width="100%"
-                                  height="100%"
-                                  stylename="borderless candidate-cv-recommendation"
-                                  visible="false"
-                                  editable="false"
-                                  box.expandRatio="1"/>
-                </hbox>
+                                      stylename="borderless candidate-cv-recommendation"
+                                      visible="false"
+                                      editable="false"
+                                      box.expandRatio="1"/>
+                    </hbox>
+                </vbox>
             </tab>
 
             <tab id="tabSkillTree"
