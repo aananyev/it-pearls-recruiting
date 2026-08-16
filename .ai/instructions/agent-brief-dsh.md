@@ -47,6 +47,10 @@ Git-протокол (не нарушать):
 - Перед PR обязательно: контрактный тест формы + com.company.hunttech.core.ScreenViewIntegrityTest
   (:app-core:test), при правке SCSS — :app-web:buildScssThemes (7 тем, md5-идентично
   канону hover), синхронизация docs/ui/* и docs/entities/* по правилам проекта
+- Перед созданием PR ОБЯЗАТЕЛЬНО запусти QA-субагента (он не принимает результат
+  при наличии ошибок): промпт — .ai/instructions/qa-subagent-prompt.md, роль и
+  чеклист — .ai/instructions/qa-agent-brief.md; вердикт должен быть PASS, отчёт —
+  .ai/reports/qa-*.md (упомяни его в описании PR); при FAIL — исправить и прогнать QA повторно
 - ЛОКАЛЬНЫЙ ЗАПУСК СВОЕЙ ВЕТКИ для проверки UI (разрешено пользователем):
   - Только через: bash ../hunttech_recruiting/scripts/start-app.sh --branch "$PWD"
   - Скрипт соберёт ТВОЮ ветку и поднимет её на ОБЩЕМ Tomcat (http://localhost:8080/hrm/),
