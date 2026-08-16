@@ -350,6 +350,26 @@
                     </vbox>
                 </vbox>
 
+                <!-- Быстрые действия вверху sidebar: Создать резюме и Создать взаимодействие. -->
+                <vbox id="candidateSidebarQuickActions"
+                      width="100%"
+                      spacing="true"
+                      stylename="edit-sidebar-summary">
+                    <!-- Создание резюме кандидата (открывает редактор CV). -->
+                    <button id="createCandidateCvButton"
+                            caption="msg://msgCreateCV"
+                            invoke="createCandidateCv"
+                            icon="CREATE_ACTION"
+                            stylename="primary"
+                            width="100%"/>
+                    <!-- Создание взаимодействия по кандидату. -->
+                    <button id="createCandidateIteractionButton"
+                            caption="msg://msgCreateIteraction"
+                            invoke="createCandidateIteraction"
+                            icon="PLUS"
+                            width="100%"/>
+                </vbox>
+
                 <!-- Summary: статус + рейтинг + карточка + ключевая информация. По Edit-контракту
                      сводка идёт сразу после identity (ФИО + должность), до label-навигации. -->
                 <!-- Сводная карточка: рейтинг, процент заполнения, город, компания, резюме. -->
@@ -555,23 +575,11 @@
                       stylename="job-candidate-sidebar-spacer edit-sidebar-spacer"/>
 
                 <!-- Quick Actions -->
-                <!-- Быстрые действия внизу sidebar: резюме, взаимодействие, HR-Мастер. -->
+                <!-- Быстрые действия внизу sidebar: HR-Мастер. -->
                 <vbox id="candidateProfileFooter"
                       width="100%"
                       spacing="true"
                       stylename="job-candidate-profile-footer edit-sidebar-summary">
-                    <!-- Создание резюме кандидата (открывает редактор CV). -->
-                    <button id="createCandidateCvButton"
-                            caption="msg://msgCreateCV"
-                            invoke="createCandidateCv"
-                            width="100%"
-                            stylename="small"/>
-                    <!-- Создание взаимодействия по кандидату. -->
-                    <button id="createCandidateIteractionButton"
-                            caption="msg://msgCreateIteraction"
-                            invoke="createCandidateIteraction"
-                            width="100%"
-                            stylename="small"/>
                     <!-- Запуск «HR-Мастера» — подбора вакансий. -->
                     <button id="openPositionMasterBrowseButton"
                             caption="msg://msgOpenPositionMasterBrowse"
@@ -1484,10 +1492,23 @@
                                 <!-- Вертикальный контейнер вкладки: кнопка над таблицей. -->
                                 <vbox id="tabResumeVbox" spacing="true" width="100%" height="100%"
                                       expand="jobCandidateCandidateCvTable">
-                                    <!-- Панель с кнопкой проверки навыков по описанию вакансии. -->
-                                    <hbox spacing="true" width="100%" align="MIDDLE_RIGHT">
-                                        <button id="checkSkillFromJD" caption="msg://msgCheckSkills" align="BOTTOM_LEFT"
-                                                enable="false"/>
+                                    <!-- Панель действий над резюме кандидата. -->
+                                    <hbox id="resumeActionsToolbar" spacing="true" width="100%" align="MIDDLE_RIGHT">
+                                        <popupButton id="skillActionsPopupButton"
+                                                     caption="msg://msgAdditional"
+                                                     icon="font-icon:BARS"
+                                                     showActionIcons="true"
+                                                     align="MIDDLE_RIGHT"
+                                                     stylename="primary">
+                                            <actions>
+                                                <action id="scanSkillsAction"
+                                                        caption="msg://msgScanCandidateSkills"
+                                                        icon="font-icon:MAGIC"/>
+                                                <action id="checkSkillFromJDAction"
+                                                        caption="msg://msgCheckSkills"
+                                                        icon="font-icon:CHECK_SQUARE_O"/>
+                                            </actions>
+                                        </popupButton>
                                     </hbox>
                                     <!-- Таблица резюме кандидата: проект, дата поста, вакансия, позиция,
                                          оригинальный/HRM CV, сопроводительное письмо, автор. -->

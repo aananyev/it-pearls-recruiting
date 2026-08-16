@@ -7,8 +7,13 @@ import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
 import com.company.hunttech.entity.SkillTree;
+import com.company.hunttech.service.SkillAnalysisService;
+import com.company.hunttech.service.SkillAnalysisResult;
+import com.company.hunttech.service.AiExecutionResult;
+import com.company.hunttech.web.util.AiOperationNotifier;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Notifications;
@@ -16,6 +21,7 @@ import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
@@ -24,6 +30,9 @@ import com.haulmont.cuba.gui.components.PopupView;
 import com.haulmont.cuba.gui.components.Table;
 import com.haulmont.cuba.gui.components.ThemeResource;
 import com.haulmont.cuba.gui.components.VBoxLayout;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.LookupComponent;
@@ -36,12 +45,16 @@ import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
+import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Контроллер тестового экрана просмотра кандидатов «Split-View (Master-Detail)» (Эскиз 1).
@@ -97,6 +110,14 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     /** Сервис DataManager для выполнения прямых JPQL-запросов */
     @Inject
     private com.haulmont.cuba.core.global.DataManager dataManager;
+
+    /** Сервис анализа навыков через AI */
+    @Inject
+    private SkillAnalysisService skillAnalysisService;
+
+    /** Исполнитель фоновых задач CUBA */
+    @Inject
+    private BackgroundWorker backgroundWorker;
 
     /** Текущая сессия пользователя для проверки прав и авторства взаимодействий */
     @Inject
@@ -733,7 +754,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             StringBuilder sb = new StringBuilder("<div style='display: flex; flex-direction: column; gap: 8px; padding: 2px 0;'>");
 
             if (!mainSkills.isEmpty()) {
-                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #1e293b; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Обязательные:</div>");
+                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #1e293b; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Основные:</div>");
                 sb.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
                 for (CandidateSkill cs : mainSkills) {
                     if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
@@ -751,7 +772,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             }
 
             if (!secondarySkills.isEmpty()) {
-                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Желательные:</div>");
+                sb.append("<div><div style='font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 3px; letter-spacing: 0.5px;'>Второстепенные:</div>");
                 sb.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
                 for (CandidateSkill cs : secondarySkills) {
                     if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
@@ -853,6 +874,249 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     /* =========================================================================
      * Обработчики выпадающего меню действий над кандидатом (PopupButton)
      * ========================================================================= */
+
+    /** Сканирование навыков по всем подчиненным резюме выбранного кандидата */
+    @Subscribe("actionsWithCandidateButton.scanSkillsAction")
+    public void onActionsScanSkills(Action.ActionPerformedEvent event) {
+        scanCandidateSkills();
+    }
+
+    public void scanCandidateSkills() {
+        JobCandidate candidate = candidatesTable.getSingleSelected();
+        if (candidate == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Для сканирования навыков выберите кандидата в таблице.")
+                    .show();
+            return;
+        }
+
+        List<CandidateCV> cvList = dataManager.load(CandidateCV.class)
+                .query("select e from hunttech_CandidateCV e where e.candidate = :candidate order by e.datePost desc")
+                .parameter("candidate", candidate)
+                .view("candidateCV-browse-view")
+                .list();
+
+        List<String> cvTexts = new ArrayList<>();
+        for (CandidateCV cv : cvList) {
+            if (cv.getTextCV() != null && !cv.getTextCV().trim().isEmpty()) {
+                String plain = Jsoup.parse(cv.getTextCV()).text();
+                if (!plain.trim().isEmpty()) {
+                    cvTexts.add(plain);
+                }
+            }
+        }
+
+        if (cvTexts.isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("У выбранного кандидата отсутствуют резюме с текстом для сканирования навыков.")
+                    .show();
+            return;
+        }
+
+        AiOperationNotifier.showStarted(notifications, "Запущен AI-анализ навыков по всем резюме кандидата…", null);
+        final JobCandidate candidateForScan = candidate;
+        final List<String> textsForScan = cvTexts;
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, "Анализ навыков по резюме кандидата…");
+
+        BackgroundTask<Integer, SkillScanOutcome> task =
+                new BackgroundTask<Integer, SkillScanOutcome>(240, this) {
+                    @Override
+                    public SkillScanOutcome run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        List<CandidateSkill> existingSkills = dataManager.load(CandidateSkill.class)
+                                .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate")
+                                .parameter("candidate", candidateForScan)
+                                .view("candidateSkill-view")
+                                .list();
+
+                        Set<UUID> existingSkillIds = new HashSet<>();
+                        for (CandidateSkill cs : existingSkills) {
+                            if (cs.getSkill() != null) {
+                                existingSkillIds.add(cs.getSkill().getId());
+                            }
+                        }
+
+                        List<CandidateSkill> toSave = new ArrayList<>();
+                        Set<UUID> processedSkillIds = new HashSet<>(existingSkillIds);
+                        List<SkillTree> allDetectedSkills = new ArrayList<>();
+                        AiExecutionResult lastAiExecution = null;
+
+                        int totalMain = 0;
+                        int totalSecondary = 0;
+                        int totalTertiary = 0;
+
+                        for (String textForScan : textsForScan) {
+                            SkillAnalysisResult mainResult = skillAnalysisService.analyzeMain(textForScan);
+                            SkillAnalysisResult secondaryResult = skillAnalysisService.analyzeSecondary(textForScan);
+                            SkillAnalysisResult tertiaryResult = skillAnalysisService.analyzeTertiary(textForScan);
+
+                            List<SkillTree> mainSkills = mainResult.getSkills();
+                            List<SkillTree> secondarySkills = secondaryResult.getSkills();
+                            List<SkillTree> tertiarySkills = tertiaryResult.getSkills();
+                            SkillAnalysisResult allResult = null;
+
+                            if (mainSkills == null) mainSkills = Collections.emptyList();
+                            if (secondarySkills == null) secondarySkills = Collections.emptyList();
+                            if (tertiarySkills == null) tertiarySkills = Collections.emptyList();
+
+                            if (mainSkills.isEmpty() && secondarySkills.isEmpty() && tertiarySkills.isEmpty()) {
+                                allResult = skillAnalysisService.analyzeAll(textForScan);
+                                mainSkills = allResult.getSkills();
+                                if (mainSkills == null) mainSkills = Collections.emptyList();
+                            }
+
+                            SkillAnalysisResult aiSourceResult = firstNonNull(mainResult, secondaryResult, tertiaryResult, allResult);
+                            if (aiSourceResult != null && aiSourceResult.getAiExecution() != null) {
+                                lastAiExecution = aiSourceResult.getAiExecution();
+                            }
+
+                            for (SkillTree st : mainSkills) {
+                                if (st != null) {
+                                    allDetectedSkills.add(st);
+                                    totalMain++;
+                                    if (processedSkillIds.add(st.getId())) {
+                                        CandidateSkill cs = metadata.create(CandidateSkill.class);
+                                        cs.setCandidate(candidateForScan);
+                                        cs.setSkill(st);
+                                        cs.setPriority(CandidateSkillPriority.MAIN);
+                                        toSave.add(cs);
+                                    }
+                                }
+                            }
+
+                            for (SkillTree st : secondarySkills) {
+                                if (st != null) {
+                                    allDetectedSkills.add(st);
+                                    totalSecondary++;
+                                    if (processedSkillIds.add(st.getId())) {
+                                        CandidateSkill cs = metadata.create(CandidateSkill.class);
+                                        cs.setCandidate(candidateForScan);
+                                        cs.setSkill(st);
+                                        cs.setPriority(CandidateSkillPriority.SECONDARY);
+                                        toSave.add(cs);
+                                    }
+                                }
+                            }
+
+                            for (SkillTree st : tertiarySkills) {
+                                if (st != null) {
+                                    allDetectedSkills.add(st);
+                                    totalTertiary++;
+                                    if (processedSkillIds.add(st.getId())) {
+                                        CandidateSkill cs = metadata.create(CandidateSkill.class);
+                                        cs.setCandidate(candidateForScan);
+                                        cs.setSkill(st);
+                                        cs.setPriority(CandidateSkillPriority.TERTIARY);
+                                        toSave.add(cs);
+                                    }
+                                }
+                            }
+                        }
+
+                        int totalDetected = totalMain + totalSecondary + totalTertiary;
+                        int savedCount = toSave.size();
+                        int existingOrDuplicate = totalDetected - savedCount;
+
+                        if (!toSave.isEmpty()) {
+                            CommitContext commitContext = new CommitContext(toSave);
+                            dataManager.commit(commitContext);
+                        }
+
+                        String statsDescription = String.format(
+                                "Всего обнаружено навыков по %d резюме: <b>%d</b><br/>" +
+                                "• Основных: <b>%d</b><br/>" +
+                                "• Второстепенных: <b>%d</b><br/>" +
+                                "• Прочих: <b>%d</b><br/>" +
+                                "──────────────────────<br/>" +
+                                "✅ Сохранено новых: <b>%d</b>%s",
+                                textsForScan.size(),
+                                totalDetected,
+                                totalMain,
+                                totalSecondary,
+                                totalTertiary,
+                                savedCount,
+                                (existingOrDuplicate > 0 ? "<br/>ℹ️ Уже присутствуют у кандидата: <b>" + existingOrDuplicate + "</b>" : "")
+                        );
+
+                        return new SkillScanOutcome(statsDescription, lastAiExecution, allDetectedSkills);
+                    }
+
+                    @Override
+                    public void done(SkillScanOutcome outcome) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+
+                        String statsDescription = outcome.statsDescription;
+                        AiExecutionResult aiExecution = outcome.aiExecution;
+                        if (aiExecution != null) {
+                            statsDescription = AiOperationNotifier.buildDescription(aiExecution, statsDescription);
+                        }
+
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Статистика анализа навыков")
+                                .withDescription(statsDescription)
+                                .withContentMode(ContentMode.HTML)
+                                .withHideDelayMs(5000)
+                                .show();
+
+                        candidateSkillsCache.remove(candidateForScan.getId());
+                        try {
+                            List<CandidateSkill> updatedSkills = dataManager.load(CandidateSkill.class)
+                                    .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate order by e.priority, e.skill.skillName")
+                                    .parameter("candidate", candidateForScan)
+                                    .view("candidateSkill-view")
+                                    .list();
+                            candidateSkillsCache.put(candidateForScan.getId(), updatedSkills);
+                        } catch (Exception ignored) {
+                        }
+
+                        candidatesTable.repaint();
+                        updateCandidateSkillsSidebar(candidateForScan);
+                    }
+
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка анализа навыков")
+                                .withDescription("Не удалось выполнить анализ навыков: " + ex.getMessage())
+                                .show();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean handleTimeoutException() {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка анализа навыков")
+                                .withDescription("Анализ навыков превысил допустимое время выполнения.")
+                                .show();
+                        return true;
+                    }
+                };
+        backgroundWorker.handle(task).execute();
+    }
+
+    private static class SkillScanOutcome {
+        final String statsDescription;
+        final AiExecutionResult aiExecution;
+        final List<SkillTree> allDetectedSkills;
+
+        SkillScanOutcome(String statsDescription, AiExecutionResult aiExecution, List<SkillTree> allDetectedSkills) {
+            this.statsDescription = statsDescription;
+            this.aiExecution = aiExecution;
+            this.allDetectedSkills = allDetectedSkills;
+        }
+    }
+
+    @SafeVarargs
+    private static <T> T firstNonNull(T... values) {
+        if (values == null) return null;
+        for (T v : values) {
+            if (v != null) return v;
+        }
+        return null;
+    }
 
     /** Редактирование карточки выбранного кандидата */
     @Subscribe("actionsWithCandidateButton.editCandidateAction")
