@@ -96,10 +96,13 @@ entity.setIsActive(true);
 Кнопка `Тестирование подключения` вызывает:
 
 ```java
-hrmAiService.testConnection(selected);
+AiExecutionResult result = hrmAiService.testConnection(selected);
+AiOperationNotifier.show(notifications, result,
+        getMessage("msgAiConnectionSuccess"),
+        "Провайдер «" + result.getProviderCode() + "» отвечает корректно.");
 ```
 
-Web-слой не делает HTTP-запросы напрямую. Он только передаёт выбранную персональную конфигурацию в middleware-сервис. Это сохраняет текущую архитектуру AI-подсистемы: UI управляет данными и уведомлениями, а core-слой отвечает за провайдеров и реальные API-вызовы.
+Web-слой не делает HTTP-запросы напрямую. Он только передаёт выбранную персональную конфигурацию в middleware-сервис. Это сохраняет текущую архитектуру AI-подсистемы: UI управляет данными и уведомлениями, а core-слой отвечает за провайдеров и реальные API-вызовы. Результат несёт метаданные AI-выполнения (модель, провайдер, собственник API = личный ключ пользователя) — контрактная исчезающая TRAY-нотификация (`AiOperationNotifier`, автоскрытие 5 с).
 
 ## 8. Алгоритм `HrmAiServiceBean.testConnection`
 

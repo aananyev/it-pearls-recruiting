@@ -1,7 +1,9 @@
 package com.company.hunttech.web.screens.useraiconfiguration;
 
 import com.company.hunttech.entity.UserAiConfiguration;
+import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.HrmAiService;
+import com.company.hunttech.web.util.AiOperationNotifier;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.LoadContext;
@@ -47,11 +49,13 @@ public class UserAiConfigurationBrowse extends StandardLookup<UserAiConfiguratio
 
         HrmAiService aiService = (HrmAiService) AppBeans.get("hunttech_HrmAiService");
         try {
-            aiService.testConnection(full);
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("AI-подключение успешно")
-                    .withDescription("Провайдер «" + full.getProviderCode() + "» отвечает корректно.")
-                    .show();
+            // Контракт пользовательской нотификации: реальный AI-вызов несёт метаданные
+            // (модель, провайдер, собственник API = личный ключ пользователя) и завершается
+            // исчезающей TRAY-нотификацией с указанием «какая модель что делала».
+            AiExecutionResult result = aiService.testConnection(full);
+            AiOperationNotifier.show(notifications, result,
+                    "AI-подключение успешно",
+                    "Провайдер «" + result.getProviderCode() + "» отвечает корректно.");
         } catch (Exception e) {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withCaption("Ошибка AI-подключения")

@@ -25,7 +25,10 @@
 - `standardizeVacancyDescription(rawText)` → `AiExecutionService.executeText("STANDARDIZE_VACANCY", {rawDescription})`;
 - `generateVacancyArtifact(description, functionCode)` → `AiExecutionService.executeText(functionCode, {description})`;
 - legacy overload с `providerCode` → делегирование provider-independent методу;
-- `testConnection(UserAiConfiguration)` → диагностический прямой вызов конкретного personal credential, без выполнения бизнес-функции;
+- `testConnection(UserAiConfiguration)` → диагностический прямой вызов конкретного
+  personal credential, без выполнения бизнес-функции; возвращает `AiExecutionResult`
+  с метаданными (модель, провайдер, собственник API = личный ключ пользователя) для
+  контрактной нотификации (контракт `HRM_HuntTech_AI_User_Notification_Contract`);
 - отсутствие/отключение function configuration → controlled error из `AiExecutionService` до внешнего API.
 
 ## API
@@ -42,7 +45,7 @@ String generateVacancyArtifact(String standardizedDescription,
                                String templateCode,
                                String providerCode);
 
-void testConnection(UserAiConfiguration configuration);
+AiExecutionResult testConnection(UserAiConfiguration configuration);
 ```
 
 ## Legacy migration

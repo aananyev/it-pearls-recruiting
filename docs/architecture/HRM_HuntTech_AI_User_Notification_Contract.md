@@ -40,6 +40,7 @@ credentials), и единую форму их показа в UI.
 | `SkillAnalysisService` | `analyzeAll/Main/Secondary/Tertiary` | `SkillAnalysisResult` (`skills` + `aiExecution`) | `aiExecution` — при AI-анализе; `null` при классическом fallback |
 | `ProjectLogoImageProcessingService` | `process` | `ProcessedImage` (+ `aiExecution`) | только когда фон удалён AI-функцией `PROJECT_LOGO_IMAGE_GENERATE` |
 | `HrmAiService` (legacy) | `standardizeVacancyDescription`, `generateVacancyArtifact` | `String` | **сознательное исключение**: методы возвращают `String` для внешних потребителей (боты); метаданные доступны на уровне вызываемого `AiExecutionService` |
+| `HrmAiService` — диагностика | `testConnection` | `AiExecutionResult` | модель, провайдер, собственник = личный ключ пользователя (`USER`) |
 
 ### 2.2. Экраны, показывающие нотификацию
 
@@ -50,17 +51,20 @@ credentials), и единую форму их показа в UI.
 | `CandidateCVEdit` — «Сканировать навыки» | `SKILLS_EXTRACT` | «Статистика анализа навыков» + модель + собственник API (добавляются в ту же исчезающую нотификацию) |
 | `WebProjectLogoFileUploadField` — логотип | `PROJECT_LOGO_IMAGE_GENERATE` | «Логотип обработан с помощью AI» + модель + собственник API |
 | `WebProjectLogoFileUploadField` — фото кандидата | локальный rembg/u2net (не API) | «Фотография обработана с помощью AI» — без собственника API (локальная нейросеть, не внешний API) |
+| `UserAiConfigurationBrowse` — «Проверить подключение» | `TEST_CONNECTION` (реальный AI-вызов) | «AI-подключение успешно» + модель + провайдер + собственник API (личный ключ пользователя) |
+| `ExtSettingsWindow` — «Проверить подключение» | `TEST_CONNECTION` (реальный AI-вызов) | «Подключение к API нейросети успешно проверено» + модель + провайдер + собственник API (личный ключ пользователя) |
 
 ### 2.3. Вне области
 
-- **Диагностические операции AI Control Plane** (`testConnection` в
-  `HrmAiService`/экранах «Управление AI») — это проверка подключения, а не бизнес-операция;
-  нотификация не требуется (экраны показывают статус проверки напрямую).
 - **Внешние потребители** (боты, REST) — UI-нотификация им не адресуется; контракт
   метаданных соблюдается на уровне `AiExecutionService`.
 - **Классический fallback без AI** (словарный поиск навыков, классический flood-fill,
   простая конвертация/ресайз) — нотификация «обработано ИИ» **не показывается**
   (честная семантика, см. §5).
+- **Неуспешные AI-вызовы** (ошибка провайдера, неверный ключ) — нотификация об ошибке
+  (`ERROR`, без автоскрытия) не требует блока «модель + собственник API»: операция
+  не выполнена. Исключение — диагностический `testConnection`, где текст ошибки
+  показывается экрану напрямую.
 
 ## 3. Поток метаданных (Data Flow)
 
@@ -190,8 +194,12 @@ AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
   fallback — экран в этом случае не добавляет блок «модель/собственник API».
 - `ProjectLogoImageProcessingService` → `ProcessedImage.getAiExecution()` заполнен
   только при реальном применении AI-функции `PROJECT_LOGO_IMAGE_GENERATE`.
-- `HrmAiService` (legacy, для ботов): возвращает `String`; контракт метаданных
-  соблюдается вызываемым `AiExecutionService`.
+- `HrmAiService` (legacy, для ботов): рабочие методы возвращают `String`; контракт
+  метаданных соблюдается вызываемым `AiExecutionService`.
+- `HrmAiService.testConnection` (диагностика): возвращает `AiExecutionResult` с
+  метаданными модели/провайдера и `credentialOwner = USER` (проверяется личный ключ
+  пользователя); экраны «Управление AI» показывают нотификацию
+  `AiOperationNotifier.show(...)`.
 
 ### 6.3. Обязательство экранов
 
@@ -232,5 +240,6 @@ AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-16 | Аудит всех AI-вызовов: `testConnection` (реальный AI-вызов в экранах «Управление AI») переведён на контракт — `HrmAiService.testConnection` возвращает `AiExecutionResult` (модель, провайдер, собственник = личный ключ `USER`); `UserAiConfigurationBrowse` и `ExtSettingsWindow` показывают исчезающую TRAY-нотификацию `AiOperationNotifier.show(...)`; §2.3: диагностика исключена из «вне области» |
 | 2026-08-16 | «AI-нотификации 2 раза»: добавлена стартовая исчезающая TRAY-нотификация `AiOperationNotifier.showStarted(...)` (при начале обработки, с обещанием итоговой: «После завершения будет указана модель и собственник API»); подключена в `ProjectEdit` («Кратко», upload описания), `CandidateCVEdit` (анализ навыков) и `WebProjectLogoFileUploadField` (логотип — по флагу `hunttech.projectLogo.ai.enabled`, фото — по `hunttech.projectLogo.rembg.enabled`); контракт-тест дополнен проверкой «2 раза» |
 | 2026-08-16 | Контракт введён: `AiExecutionResult`/`AiCredentialOwner`/`SkillAnalysisResult`; `AiExecutionService` и фасады возвращают метаданные; web-утилита `AiOperationNotifier` (TRAY, 5 с); нотификации в `ProjectEdit` («Кратко», upload), `CandidateCVEdit` («Сканировать навыки»), `WebProjectLogoFileUploadField` (логотип при AI-функции); контракт-тест `AiUserNotificationContractTest` |

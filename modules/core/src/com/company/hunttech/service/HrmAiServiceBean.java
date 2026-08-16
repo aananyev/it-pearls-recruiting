@@ -3,6 +3,7 @@ package com.company.hunttech.service;
 import com.company.hunttech.core.ai.AIProvider;
 import com.company.hunttech.core.ai.AIProviderRegistry;
 import com.company.hunttech.entity.UserAiConfiguration;
+import com.company.hunttech.entity.ai.AiCapability;
 import com.haulmont.cuba.core.global.DevelopmentException;
 import org.springframework.stereotype.Service;
 
@@ -63,7 +64,7 @@ public class HrmAiServiceBean implements HrmAiService {
     }
 
     @Override
-    public void testConnection(UserAiConfiguration configuration) {
+    public AiExecutionResult testConnection(UserAiConfiguration configuration) {
         /*
          * Диагностическая операция намеренно использует выбранную запись напрямую:
          * пользователь проверяет конкретные provider/key/model до назначения этого
@@ -99,6 +100,19 @@ public class HrmAiServiceBean implements HrmAiService {
             throw new DevelopmentException("API провайдера «"
                     + configuration.getProviderCode() + "» вернул пустой ответ.");
         }
+
+        // Контракт пользовательской нотификации: диагностическая операция тоже несёт
+        // метаданные AI-выполнения (модель, провайдер, собственник API = личный ключ
+        // пользователя), чтобы экраны «Управление AI» показывали исчезающую нотификацию
+        // «какая модель что делала + чей API» наравне с рабочими операциями.
+        return AiExecutionResult.textResult(
+                FUNCTION_TEST_CONNECTION,
+                "Тестирование AI-подключения",
+                AiCapability.TEXT_GENERATION,
+                configuration.getDefaultModelName(),
+                configuration.getProviderCode(),
+                AiCredentialOwner.USER,
+                response);
     }
 
     private boolean isConfigured(String value) {

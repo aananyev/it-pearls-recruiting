@@ -1,6 +1,7 @@
 package com.company.hunttech.core;
 
 import com.company.hunttech.app.ProcessedImage;
+import com.company.hunttech.entity.UserAiConfiguration;
 import com.company.hunttech.service.AiCredentialOwner;
 import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.AiExecutionService;
@@ -113,6 +114,32 @@ public class AiUserNotificationContractTest {
         // который этот фасад вызывает. Сознательное исключение, зафиксированное в доке.
         Method standardize = HrmAiService.class.getMethod("standardizeVacancyDescription", String.class);
         assertTrue(String.class == standardize.getReturnType());
+    }
+
+    @Test
+    public void connectionTestIsRealAiCallWithContractNotification() throws Exception {
+        // testConnection выполняет реальный AI-вызов (проверка provider/key/model)
+        // и, по контракту, несёт метаданные выполнения, а экраны «Управление AI»
+        // показывают исчезающую нотификацию «какая модель что делала + чей API».
+        Method testConnection = HrmAiService.class.getMethod("testConnection", UserAiConfiguration.class);
+        assertTrue("testConnection обязан возвращать AiExecutionResult",
+                AiExecutionResult.class == testConnection.getReturnType());
+
+        String bean = read("modules/core/src/com/company/hunttech/service/HrmAiServiceBean.java");
+        assertTrue("testConnection не строит результат с метаданными",
+                bean.contains("AiExecutionResult.textResult("));
+        assertTrue("testConnection не помечает собственник = личный ключ пользователя",
+                bean.contains("AiCredentialOwner.USER"));
+        assertTrue("testConnection не проставляет модель/провайдер в метаданные",
+                bean.contains("configuration.getDefaultModelName()")
+                        && bean.contains("configuration.getProviderCode()"));
+
+        String browse = read("modules/web/src/com/company/hunttech/web/screens/useraiconfiguration/UserAiConfigurationBrowse.java");
+        String settings = read("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindow.java");
+        assertTrue("UserAiConfigurationBrowse не показывает контрактную нотификацию",
+                browse.contains("AiOperationNotifier.show(notifications, result"));
+        assertTrue("ExtSettingsWindow не показывает контрактную нотификацию",
+                settings.contains("AiOperationNotifier.show(notifications, result"));
     }
 
     @Test

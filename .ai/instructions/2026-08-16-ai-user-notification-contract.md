@@ -22,6 +22,37 @@
 - Контракт-тест дополнен: `aiNotificationsAreShownTwiceStartedAndCompleted`
   (13/13 зелёные), контракт-документ §4, спеки экранов, отчёт обновлены.
 
+## Дополнение (2026-08-16): аудит всех AI-вызовов — нотификации во всех формах
+
+Проведён полный аудит всех AI-вызовов (middleware + UI). Полный инвентарь:
+
+| Экран / компонент | Операция | Нотификация |
+|---|---|---|
+| ProjectEdit — «Кратко» | PROJECT_SHORT_DESCRIPTION_GENERATE | ✅ контракт (старт + итог с моделью/собственником) |
+| ProjectEdit — upload описания | PROJECT_DESCRIPTION_GENERATE | ✅ контракт (старт + итог) |
+| CandidateCVEdit — «Сканировать навыки» | SKILLS_EXTRACT | ✅ контракт (старт + итог) |
+| WebProjectLogoFileUploadField — логотип | PROJECT_LOGO_IMAGE_GENERATE | ✅ контракт (старт + итог) |
+| WebProjectLogoFileUploadField — фото кандидата | локальный rembg | ✅ нотификация (без собственника — локальная NN) |
+| UserAiConfigurationBrowse — «Проверить подключение» | TEST_CONNECTION | ✅ БЫЛО ❌ → переведено на контракт |
+| ExtSettingsWindow — «Проверить подключение» | TEST_CONNECTION | ✅ БЫЛО ❌ → переведено на контракт |
+
+Найденные пробелы закрыты:
+- `HrmAiService.testConnection` возвращал `void` — теперь `AiExecutionResult`
+  (модель, провайдер, собственник API = личный ключ пользователя `USER`); реальный
+  AI-вызов остался прямым (проверка конкретного credential до назначения на функцию).
+- `UserAiConfigurationBrowse`/`ExtSettingsWindow`: обычные TRAY/HUMANIZED без
+  автоскрытия и без модели → контрактная исчезающая TRAY (5 с) с блоком
+  «Модель · Провайдер / Собственник API: личный (пользователя)».
+- Контракт-документ §2: диагностика перемещена из «вне области» в область действия.
+- Контракт-тест: `connectionTestIsRealAiCallWithContractNotification` (14/14 зелёные).
+- Доки: `docs/services/HrmAiService.md`, `docs/integrations/ai/AI_INTEGRATION.md`,
+  `docs/integrations/ai/USER_AI_SETTINGS_IMPLEMENTATION.md`.
+
+Прямых AI-вызовов в админ-экранах AI Control Plane (adminaiconfiguration,
+aifunctionconfiguration, useraifunctionoverride) нет; `JobCandidateEdit` использует
+фото-нотификацию через `WebProjectLogoFileUploadField`. Боты (HrmAiService String)
+— вне UI-контракта (зафиксировано в §2.3).
+
 ## Основное изменение (первоначальный контракт)
 
 ## Что сделано
