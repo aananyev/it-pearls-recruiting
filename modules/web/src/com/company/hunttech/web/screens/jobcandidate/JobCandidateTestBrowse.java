@@ -395,6 +395,44 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private TextField<String> searchField;
 
+    /** Кнопка фильтра Все кандидаты */
+    @Inject
+    private Button filterAllBtn;
+
+    /** Кнопка фильтра Мои кандидаты */
+    @Inject
+    private Button filterMyCandidatesBtn;
+
+    /** Кнопка фильтра С моим участием */
+    @Inject
+    private Button filterMyParticipationBtn;
+
+    private IteractionList getLastInteraction(JobCandidate candidate) {
+        if (candidate == null || candidate.getIteractionList() == null || candidate.getIteractionList().isEmpty()) {
+            return null;
+        }
+        IteractionList last = null;
+        for (IteractionList item : candidate.getIteractionList()) {
+            if (last == null) {
+                last = item;
+            } else {
+                java.util.Date d1 = item.getDateIteraction() != null ? item.getDateIteraction() : item.getCreateTs();
+                java.util.Date d2 = last.getDateIteraction() != null ? last.getDateIteraction() : last.getCreateTs();
+                if (d1 != null && (d2 == null || d1.after(d2))) {
+                    last = item;
+                }
+            }
+        }
+        return last;
+    }
+
+    private void updateFilterButtons(Button activeBtn) {
+        if (filterAllBtn != null) filterAllBtn.setStyleName("secondary filter-pill-btn");
+        if (filterMyCandidatesBtn != null) filterMyCandidatesBtn.setStyleName("secondary filter-pill-btn");
+        if (filterMyParticipationBtn != null) filterMyParticipationBtn.setStyleName("secondary filter-pill-btn");
+        if (activeBtn != null) activeBtn.setStyleName("primary filter-pill-btn active");
+    }
+
     /* ==================================================================     * Бизнес-логика извлечения зарплатных ожиданий
      * ========================================================================= */
 
@@ -439,10 +477,11 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
      * ========================================================================= */
 
     /**
-     * Инициализация экрана: генератор аватара в первой колонке.
+     * Инициализация экрана: генератор аватара в первой колонке и колонок реестра.
      */
     @Subscribe
     public void onInit(Screen.InitEvent event) {
+        // Колонка 1: Миниатюра фото кандидата (36px oval)
         candidatesTable.addGeneratedColumn("avatar", candidate -> {
             WebOvaFallbackImage avatarImg = uiComponents.create(WebOvaFallbackImage.class);
             avatarImg.setWidth("36px");
@@ -451,9 +490,73 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
             avatarImg.setOvalHeight("36px");
             avatarImg.setFallbackThemePath("icons/no-programmer.jpeg");
             avatarImg.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-            // Фото берётся из карточки кандидата, а при его отсутствии — из последнего резюме (CandidateCV)
             FileDescriptorImageHelper.setCandidateFace(avatarImg, fileLoader, resolveCandidateFace(candidate));
             return avatarImg;
+        });
+
+        // Колонка 2: Кандидат (ФИО + контакт)
+        candidatesTable.addGeneratedColumn("fullName", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
+            String sub = candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() :
+                    (candidate.getEmail() != null ? candidate.getEmail() : "");
+            lbl.setValue("<div><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
+                    (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>");
+            return lbl;
+        });
+
+        // Колонка 3: Должность
+        candidatesTable.addGeneratedColumn("personPosition", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
+            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + pos + "</span>");
+            return lbl;
+        });
+
+        // Колонка 4: Город
+        candidatesTable.addGeneratedColumn("cityOfResidence", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
+            lbl.setValue("<span style='font-size: 12px; color: #34495e;'>📍 " + city + "</span>");
+            return lbl;
+        });
+
+        // Колонка 5: Компания
+        candidatesTable.addGeneratedColumn("currentCompany", candidate -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String company = "-";
+            if (candidate.getCurrentCompany() != null) {
+                company = candidate.getCurrentCompany().getComanyName() != null ?
+                        candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
+            }
+            lbl.setValue("<span style='font-size: 12px; color: #34495e;'>🏢 " + (company != null ? company : "-") + "</span>");
+            return lbl;
+        });
+
+        // Колонка 6: Компактный светофорный статус взаимодействия
+        candidatesTable.addGeneratedColumn("lastInteractionStatus", candidate -> {
+            Label<String> statusLbl = uiComponents.create(Label.NAME);
+            statusLbl.setHtmlEnabled(true);
+            InteractionStatus status = calculateInteractionStatus(candidate);
+            IteractionList last = getLastInteraction(candidate);
+            String dot = status == InteractionStatus.FREE ? "🟢" :
+                    (status == InteractionStatus.MY_CANDIDATE ? "🟡" : "🔴");
+            String dateText = "нет";
+            if (last != null) {
+                java.util.Date d = last.getDateIteraction() != null ? last.getDateIteraction() : last.getCreateTs();
+                if (d != null) {
+                    dateText = interactionDateFormat.format(d);
+                }
+            }
+            statusLbl.setValue("<span style='background: " + status.getBgColor() + "; color: " + status.getColor() +
+                    "; padding: 2px 7px; border-radius: 8px; font-weight: 600; font-size: 11px; white-space: nowrap; display: inline-block;'>" +
+                    dot + " " + dateText + "</span>");
+            statusLbl.setDescription(status.getLabel() + (last != null && last.getRecrutier() != null ? " (" + last.getRecrutier().getName() + ")" : ""));
+            return statusLbl;
         });
     }
 
@@ -699,6 +802,35 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe("refreshBtn")
     public void onRefreshBtnClick(Button.ClickEvent event) {
+        jobCandidatesDl.load();
+    }
+
+    @Subscribe("filterAllBtn")
+    public void onFilterAllBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterAllBtn);
+        jobCandidatesDl.removeParameter("createdBy");
+        jobCandidatesDl.removeParameter("recrutier");
+        jobCandidatesDl.removeParameter("recrutierName");
+        jobCandidatesDl.load();
+    }
+
+    @Subscribe("filterMyCandidatesBtn")
+    public void onFilterMyCandidatesBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterMyCandidatesBtn);
+        jobCandidatesDl.removeParameter("recrutier");
+        jobCandidatesDl.removeParameter("recrutierName");
+        String currentLogin = userSession.getUser() != null ? userSession.getUser().getLogin() : "";
+        jobCandidatesDl.setParameter("createdBy", currentLogin);
+        jobCandidatesDl.load();
+    }
+
+    @Subscribe("filterMyParticipationBtn")
+    public void onFilterMyParticipationBtnClick(Button.ClickEvent event) {
+        updateFilterButtons(filterMyParticipationBtn);
+        jobCandidatesDl.removeParameter("createdBy");
+        jobCandidatesDl.setParameter("recrutier", userSession.getUser());
+        String currentLogin = userSession.getUser() != null ? userSession.getUser().getLogin() : "";
+        jobCandidatesDl.setParameter("recrutierName", currentLogin);
         jobCandidatesDl.load();
     }
 
