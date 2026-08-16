@@ -26,8 +26,13 @@ import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 
+import com.company.hunttech.entity.Iteraction;
+import com.haulmont.cuba.security.global.UserSession;
+
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -70,9 +75,173 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private FileLoader fileLoader;
 
-    /** Сервис DataManager для выполнения прямых запросов к БД */
+    /** Менеджер данных CUBA Platform для прямого поиска взаимодействий */
     @Inject
     private com.haulmont.cuba.core.global.DataManager dataManager;
+
+    /** Текущая пользовательская сессия */
+    @Inject
+    private UserSession userSession;
+
+    /** Форматтер даты */
+    private final java.text.SimpleDateFormat interactionDateFormat = new java.text.SimpleDateFormat("dd.MM.yyyy");
+
+    public enum InteractionStatus {
+        FREE("🟢 Свободен (> 1 мес)", "#27ae60"),
+        MY_CANDIDATE("🟡 В вашей работе (< 1 мес)", "#f39c12"),
+        OTHER_RECRUITER("🔴 В работе у другого рекрутера", "#e74c3c");
+
+        private final String label;
+        private final String color;
+
+        InteractionStatus(String label, String color) {
+            this.label = label;
+            this.color = color;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public String getColor() {
+            return color;
+        }
+    }
+
+    private InteractionStatus calculateInteractionStatus(JobCandidate candidate) {
+        if (candidate == null) {
+            return InteractionStatus.FREE;
+        }
+        List<IteractionList> list = candidate.getIteractionList();
+        if (list == null || list.isEmpty()) {
+            return InteractionStatus.FREE;
+        }
+        IteractionList last = list.stream()
+                .filter(i -> i.getDateIteraction() != null || i.getCreateTs() != null)
+                .max(Comparator.comparing(i -> i.getDateIteraction() != null ? i.getDateIteraction() : i.getCreateTs(),
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .orElse(null);
+        if (last == null) {
+            return InteractionStatus.FREE;
+        }
+        Date date = last.getDateIteraction() != null ? last.getDateIteraction() : last.getCreateTs();
+        if (date == null) {
+            return InteractionStatus.FREE;
+        }
+        java.util.Calendar threshold = java.util.Calendar.getInstance();
+        threshold.setTime(date);
+        threshold.add(java.util.Calendar.MONTH, 1);
+        java.util.Calendar now = java.util.Calendar.getInstance();
+        if (now.after(threshold)) {
+            return InteractionStatus.FREE;
+        } else {
+            if (last.getRecrutier() != null && userSession.getUser() != null
+                    && !last.getRecrutier().getId().equals(userSession.getUser().getId())) {
+                return InteractionStatus.OTHER_RECRUITER;
+            } else {
+                return InteractionStatus.MY_CANDIDATE;
+            }
+        }
+    }
+
+    private final java.util.Map<String, String> userFullNameCache = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private String resolveUserFullName(String login) {
+        if (login == null || login.trim().isEmpty()) {
+            return "—";
+        }
+        return userFullNameCache.computeIfAbsent(login, l -> {
+            try {
+                com.haulmont.cuba.security.entity.User u = dataManager.load(com.haulmont.cuba.security.entity.User.class)
+                        .query("select u from sec$User u where u.login = :login")
+                        .parameter("login", l)
+                        .view(com.haulmont.cuba.core.global.View.MINIMAL)
+                        .optional()
+                        .orElse(null);
+                if (u != null && u.getName() != null && !u.getName().trim().isEmpty()) {
+                    return u.getName().trim();
+                }
+            } catch (Exception ignored) {
+            }
+            return l;
+        });
+    }
+
+    public static class CandidateRoleTeam {
+        public String authorName;
+        public String researcherName;
+        public String recruiterName;
+        public String coordinatorName;
+        public boolean isFree;
+        public Date lastInteractionDate;
+        public int totalInteractions;
+        public InteractionStatus status;
+    }
+
+    private CandidateRoleTeam calculateCandidateTeam(JobCandidate candidate) {
+        CandidateRoleTeam team = new CandidateRoleTeam();
+        if (candidate == null) {
+            team.isFree = true;
+            team.status = InteractionStatus.FREE;
+            return team;
+        }
+        team.authorName = resolveUserFullName(candidate.getCreatedBy());
+        List<IteractionList> list = candidate.getIteractionList();
+        if (list == null || list.isEmpty()) {
+            team.isFree = true;
+            team.totalInteractions = 0;
+            team.status = InteractionStatus.FREE;
+            return team;
+        }
+        team.totalInteractions = list.size();
+        List<IteractionList> sortedList = new ArrayList<>(list);
+        sortedList.sort(Comparator.comparing(IteractionList::getDateIteraction, Comparator.nullsLast(Comparator.naturalOrder())));
+        IteractionList last = sortedList.get(sortedList.size() - 1);
+        team.lastInteractionDate = last.getDateIteraction();
+        team.status = calculateInteractionStatus(candidate);
+        team.isFree = (team.status == InteractionStatus.FREE);
+
+        for (IteractionList il : sortedList) {
+            Iteraction type = il.getIteractionType();
+            String personName = null;
+            if (il.getRecrutier() != null && il.getRecrutier().getName() != null && !il.getRecrutier().getName().trim().isEmpty()) {
+                personName = il.getRecrutier().getName().trim();
+            } else if (il.getCreatedBy() != null) {
+                personName = resolveUserFullName(il.getCreatedBy());
+            }
+            if (personName == null) continue;
+            if (type != null) {
+                if (Boolean.TRUE.equals(type.getSignSendToClient())
+                        || Boolean.TRUE.equals(type.getSignClientInterview())
+                        || Boolean.TRUE.equals(type.getSignStartProject())) {
+                    team.coordinatorName = personName;
+                }
+                if (Boolean.TRUE.equals(type.getSignOurInterview())
+                        || Boolean.TRUE.equals(type.getSignFeedback())
+                        || il.getRating() != null) {
+                    team.recruiterName = personName;
+                }
+                if (Boolean.TRUE.equals(type.getSignOurInterviewAssigned())
+                        || Boolean.TRUE.equals(type.getSignStartCase())) {
+                    if (team.researcherName == null) {
+                        team.researcherName = personName;
+                    }
+                }
+            }
+        }
+        if (team.researcherName == null && !sortedList.isEmpty()) {
+            IteractionList first = sortedList.get(0);
+            if (first.getRecrutier() != null && first.getRecrutier().getName() != null) {
+                team.researcherName = first.getRecrutier().getName().trim();
+            } else if (first.getCreatedBy() != null) {
+                team.researcherName = resolveUserFullName(first.getCreatedBy());
+            }
+        }
+        if (team.researcherName == null) {
+            team.researcherName = team.authorName;
+        }
+        return team;
+    }
 
     /* ==================================================================     * Поля левого профильного сайдбара
      * ========================================================================= */
@@ -299,11 +468,46 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         // если файла нет в хранилище — автоматический fallback без битой картинки
         FileDescriptorImageHelper.setCandidateFace(detailPic, fileLoader, resolveCandidateFace(candidate));
 
-        int interactionsCount = candidate.getIteractionList() != null ? candidate.getIteractionList().size() : 0;
+        // Светофорная карточка статуса взаимодействия и участников процесса
+        CandidateRoleTeam team = calculateCandidateTeam(candidate);
+        StringBuilder sb = new StringBuilder();
+        sb.append("<div style='background: #f8f9fa; padding: 10px 14px; border-radius: 6px; border-left: 4px solid ")
+                .append(team.status.getColor()).append("; margin-top: 6px; font-size: 12px; line-height: 1.6;'>");
+
+        sb.append("<div><b>Статус:</b> <span style='color: ").append(team.status.getColor())
+                .append("; font-weight: bold;'>").append(team.status.getLabel()).append("</span></div>");
+
+        if (team.isFree) {
+            sb.append("<div style='margin-top: 5px;'>👤 <b>Автор карточки:</b> ")
+                    .append(team.authorName != null ? team.authorName : "—").append("</div>");
+            if (team.lastInteractionDate != null) {
+                sb.append("<div style='color: #7f8c8d; font-size: 11px;'>Посл. активность: ")
+                        .append(interactionDateFormat.format(team.lastInteractionDate)).append("</div>");
+            }
+        } else {
+            sb.append("<div style='margin-top: 6px; border-top: 1px dashed #cbd5e1; padding-top: 5px; display: flex; flex-direction: column; gap: 3px;'>");
+            if (team.researcherName != null) {
+                sb.append("<div>🔍 <b>Ресерчер:</b> ").append(team.researcherName).append("</div>");
+            }
+            if (team.recruiterName != null) {
+                sb.append("<div>👔 <b>Рекрутер:</b> ").append(team.recruiterName).append("</div>");
+            }
+            if (team.coordinatorName != null) {
+                sb.append("<div>🎯 <b>Координатор:</b> ").append(team.coordinatorName).append("</div>");
+            }
+            if (team.lastInteractionDate != null) {
+                sb.append("<div style='color: #7f8c8d; font-size: 11px; margin-top: 2px;'>Посл. активность: ")
+                        .append(interactionDateFormat.format(team.lastInteractionDate)).append("</div>");
+            }
+            sb.append("</div>");
+        }
+
+        sb.append("<div style='color: #94a3b8; font-size: 10.5px; margin-top: 4px;'>Всего взаимодействий: ")
+                .append(team.totalInteractions).append("</div>");
+        sb.append("</div>");
+
         detailInteractionsInfo.setHtmlEnabled(true);
-        detailInteractionsInfo.setValue("<div style='background: #f8f9fa; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #2980b9; margin-top: 6px; font-size: 12px; line-height: 1.6;'>" +
-                "• Всего зарегистрировано взаимодействий: <b>" + interactionsCount + "</b>" +
-                "</div>");
+        detailInteractionsInfo.setValue(sb.toString());
 
         // Заполнение блока основных навыков кандидата
         updateCandidateSkillsSidebar(candidate);
