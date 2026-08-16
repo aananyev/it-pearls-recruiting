@@ -71,15 +71,35 @@ public class SkillAnalysisAiFunctionSeedContractTest {
     }
 
     @Test
+    public void singleExperiencePromptUpdateIsRegisteredAndSafe() throws IOException {
+        String sqlFile = "modules/core/db/update/postgres/26/260816-3-updateSkillAnalysisSingleExperiencePrompt.sql";
+        String xmlFile = "modules/core/db/changelog/260816-3-updateSkillAnalysisSingleExperiencePrompt.xml";
+        String sql = readProjectFile(sqlFile);
+        String xml = readProjectFile(xmlFile);
+        String master = readProjectFile("modules/core/db/changelog/db.changelog-master.xml");
+
+        assertTrue(master.contains(xmlFile.replace("modules/core/db/changelog/", "")));
+        for (String migration : new String[]{sql, xml}) {
+            assertTrue(migration.contains("'SKILLS_EXTRACT'"));
+            assertTrue("Промпт обязан требовать РОВНО ОДИН навык опыта",
+                    migration.contains("РОВНО ОДИН навык опыта"));
+            assertTrue("Промпт обязан определять общий стаж кандидата",
+                    migration.contains("общий стаж"));
+            assertTrue("Миграция не должна перезаписывать админскую настройку",
+                    migration.contains("COALESCE(UPDATED_BY, 'migration') = 'migration'"));
+        }
+    }
+
+    @Test
     public void serviceInterfaceDeclaresFourAnalysisMethodsAndFunctionCode() throws IOException {
         String service = readProjectFile(
                 "modules/global/src/com/company/hunttech/service/SkillAnalysisService.java");
 
         assertTrue(service.contains("FUNCTION_SKILLS_EXTRACT = \"SKILLS_EXTRACT\""));
-        assertTrue(service.contains("List<SkillTree> analyzeAll(String sourceText)"));
-        assertTrue(service.contains("List<SkillTree> analyzeMain(String sourceText)"));
-        assertTrue(service.contains("List<SkillTree> analyzeSecondary(String sourceText)"));
-        assertTrue(service.contains("List<SkillTree> analyzeTertiary(String sourceText)"));
+        assertTrue(service.contains("SkillAnalysisResult analyzeAll(String sourceText)"));
+        assertTrue(service.contains("SkillAnalysisResult analyzeMain(String sourceText)"));
+        assertTrue(service.contains("SkillAnalysisResult analyzeSecondary(String sourceText)"));
+        assertTrue(service.contains("SkillAnalysisResult analyzeTertiary(String sourceText)"));
     }
 
     @Test

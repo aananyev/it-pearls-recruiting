@@ -77,4 +77,9 @@
     <include file="260816-2-addOpenPositionSkill.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- SkillAnalysisService: модернизация SYSTEM_PROMPT SKILLS_EXTRACT — AI возвращает
+         ОДИН навык опыта (общий стаж кандидата в годах), а не последовательность значений. -->
+    <include file="260816-3-updateSkillAnalysisSingleExperiencePrompt.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
