@@ -19,147 +19,189 @@
     </data>
     <layout stylename="ai-dashboard-root" expand="mainScroll" spacing="true">
         <scrollBox id="mainScroll" width="100%" height="100%" spacing="true" stylename="ai-scrollbox">
-            <!-- Global Filter Bar -->
-            <hbox id="filterPanel" spacing="true" width="100%" alignment="MIDDLE_LEFT" stylename="ai-dashboard-filter-bar">
-                <label value="msg://periodLabel" alignment="MIDDLE_LEFT" stylename="ai-filter-label bold"/>
-                <lookupField id="periodLookup" width="180px" nullOptionVisible="false"/>
-                <dateField id="dateFromField" caption="msg://dateFrom" resolution="DAY"/>
-                <dateField id="dateToField" caption="msg://dateTo" resolution="DAY"/>
-                <lookupPickerField id="userPicker" caption="msg://userFilter" width="200px">
-                    <actions>
-                        <action id="lookup" type="picker_lookup"/>
-                        <action id="clear" type="picker_clear"/>
-                    </actions>
-                </lookupPickerField>
-                <lookupField id="providerLookup" caption="msg://providerFilter" width="150px"/>
-                <lookupField id="ownerLookup" caption="msg://ownerFilter" width="150px"/>
-                <button id="applyFilterBtn" caption="msg://apply" icon="SEARCH" stylename="primary ai-action-btn"/>
-                <button id="resetFilterBtn" caption="msg://reset" icon="ERASER" stylename="ai-secondary-btn"/>
-            </hbox>
+            
+            <!-- Dashboard Header Banner -->
+            <vbox id="adminHeaderCard" width="100%" spacing="true" stylename="ai-header-card">
+                <hbox width="100%" spacing="true" alignment="MIDDLE_LEFT">
+                    <vbox spacing="false" width="100%" expand="adminSubtitle">
+                        <hbox spacing="true" alignment="MIDDLE_LEFT">
+                            <label value="msg://adminDashboardTitle" stylename="ai-page-title bold"/>
+                            <label value="msg://badgeAdminMonitoring" stylename="ai-chip-badge badge-admin"/>
+                        </hbox>
+                        <label id="adminSubtitle" value="msg://adminDashboardSubtitle" stylename="ai-page-subtitle"/>
+                    </vbox>
+                </hbox>
 
-            <!-- Top KPI Cards -->
+                <!-- Filter Toolbar 2-row layout -->
+                <vbox id="filterPanel" spacing="true" width="100%" stylename="ai-dashboard-filter-bar">
+                    <!-- Filter Row 1: Time range -->
+                    <hbox spacing="true" width="100%" alignment="BOTTOM_LEFT">
+                        <lookupField id="periodLookup" caption="msg://periodLabel" width="200px" nullOptionVisible="false"/>
+                        <dateField id="dateFromField" caption="msg://dateFrom" resolution="DAY"/>
+                        <dateField id="dateToField" caption="msg://dateTo" resolution="DAY"/>
+                    </hbox>
+                    <!-- Filter Row 2: Entity selectors & Actions -->
+                    <hbox spacing="true" width="100%" alignment="BOTTOM_LEFT">
+                        <lookupPickerField id="userPicker" caption="msg://userFilter" width="220px">
+                            <actions>
+                                <action id="lookup" type="picker_lookup"/>
+                                <action id="clear" type="picker_clear"/>
+                            </actions>
+                        </lookupPickerField>
+                        <lookupField id="providerLookup" caption="msg://providerFilter" width="180px"/>
+                        <lookupField id="ownerLookup" caption="msg://ownerFilter" width="180px"/>
+                        <button id="applyFilterBtn" caption="msg://apply" icon="SEARCH" stylename="primary ai-action-btn"/>
+                        <button id="resetFilterBtn" caption="msg://reset" icon="ERASER" stylename="ai-secondary-btn"/>
+                    </hbox>
+                </vbox>
+            </vbox>
+
+            <!-- Top KPI Cards Grid -->
             <hbox id="kpiPanel" spacing="true" width="100%" stylename="ai-kpi-grid">
-                <vbox id="spendCard" stylename="ai-kpi-card kpi-blue" width="25%" height="115px" spacing="false">
-                    <label value="msg://totalSpend" stylename="kpi-title"/>
+                <vbox id="spendCard" stylename="ai-kpi-card kpi-blue" width="25%" height="120px" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://totalSpend" stylename="kpi-title" width="100%"/>
+                        <label value="💰" stylename="kpi-icon"/>
+                    </hbox>
                     <label id="totalSpendLabel" value="$ 0.00" stylename="kpi-value"/>
                     <label id="spendSubLabel" value="Corp: $0 | User: $0" stylename="kpi-sub"/>
                 </vbox>
-                <vbox id="activeUsersCard" stylename="ai-kpi-card kpi-purple" width="25%" height="115px" spacing="false">
-                    <label value="msg://activeUsers" stylename="kpi-title"/>
+                <vbox id="activeUsersCard" stylename="ai-kpi-card kpi-purple" width="25%" height="120px" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://activeUsers" stylename="kpi-title" width="100%"/>
+                        <label value="👥" stylename="kpi-icon"/>
+                    </hbox>
                     <label id="activeUsersLabel" value="0" stylename="kpi-value"/>
                     <label id="topSpenderLabel" value="—" stylename="kpi-sub"/>
                 </vbox>
-                <vbox id="totalVolumeCard" stylename="ai-kpi-card kpi-green" width="25%" height="115px" spacing="false">
-                    <label value="msg://totalCallsAndTokens" stylename="kpi-title"/>
+                <vbox id="totalVolumeCard" stylename="ai-kpi-card kpi-green" width="25%" height="120px" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://totalCallsAndTokens" stylename="kpi-title" width="100%"/>
+                        <label value="📊" stylename="kpi-icon"/>
+                    </hbox>
                     <label id="totalCallsLabel" value="0" stylename="kpi-value"/>
                     <label id="totalTokensLabel" value="0 токенов" stylename="kpi-sub"/>
                 </vbox>
-                <vbox id="reliabilityCard" stylename="ai-kpi-card kpi-orange" width="25%" height="115px" spacing="false">
-                    <label value="msg://reliabilityAndSpeed" stylename="kpi-title"/>
+                <vbox id="reliabilityCard" stylename="ai-kpi-card kpi-orange" width="25%" height="120px" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://reliabilityAndSpeed" stylename="kpi-title" width="100%"/>
+                        <label value="⚠️" stylename="kpi-icon"/>
+                    </hbox>
                     <label id="errorRateLabel" value="0.0% ошибок" stylename="kpi-value"/>
                     <label id="avgLatencyLabel" value="Ср. задержка: 0.00 с" stylename="kpi-sub"/>
                 </vbox>
             </hbox>
 
-            <!-- Charts Row 1 -->
-            <hbox id="chartsRow1" spacing="true" width="100%" height="340px">
-                <vbox id="costDynamicsBox" stylename="ai-chart-card" width="60%" height="100%" spacing="true">
-                    <label value="msg://costDynamicsTitle" stylename="ai-card-header"/>
-                    <chart:serialChart id="costDynamicsChart"
-                                       categoryField="date"
-                                       height="100%"
-                                       width="100%">
-                        <chart:valueAxes>
-                            <chart:axis position="LEFT" title="USD ($)"/>
-                        </chart:valueAxes>
-                        <chart:graphs>
-                            <chart:graph id="costGraph"
-                                         type="LINE"
-                                         lineThickness="2"
-                                         bullet="ROUND"
-                                         valueField="cost"
-                                         color="#2980b9"
-                                         title="msg://spendCost"/>
-                        </chart:graphs>
-                        <chart:chartCursor cursorAlpha="0.1"/>
-                    </chart:serialChart>
-                </vbox>
+            <!-- Dashboard TabSheet for Structured Analytics -->
+            <tabSheet id="dashboardTabSheet" width="100%" stylename="framed ai-dashboard-tabsheet">
+                
+                <!-- Tab 1: Charts & Analytics -->
+                <tab id="analyticsTab" caption="msg://analyticsTabTitle" icon="LINE_CHART" spacing="true">
+                    <vbox width="100%" spacing="true">
+                        <!-- Charts Row 1 -->
+                        <hbox id="chartsRow1" spacing="true" width="100%" height="360px">
+                            <vbox id="costDynamicsBox" stylename="ai-chart-card" width="60%" height="100%" spacing="true">
+                                <label value="msg://costDynamicsTitle" stylename="ai-card-header"/>
+                                <chart:serialChart id="costDynamicsChart"
+                                                   categoryField="date"
+                                                   height="100%"
+                                                   width="100%">
+                                    <chart:valueAxes>
+                                        <chart:axis position="LEFT" title="USD ($)"/>
+                                    </chart:valueAxes>
+                                    <chart:graphs>
+                                        <chart:graph id="costGraph"
+                                                     type="LINE"
+                                                     lineThickness="2"
+                                                     bullet="ROUND"
+                                                     valueField="cost"
+                                                     color="#2980b9"
+                                                     title="msg://spendCost"/>
+                                    </chart:graphs>
+                                    <chart:chartCursor cursorAlpha="0.1"/>
+                                </chart:serialChart>
+                            </vbox>
 
-                <vbox id="topUsersChartBox" stylename="ai-chart-card" width="40%" height="100%" spacing="true">
-                    <label value="msg://topUsersTitle" stylename="ai-card-header"/>
-                    <chart:serialChart id="topUsersChart"
-                                       rotate="true"
-                                       categoryField="userName"
-                                       height="100%"
-                                       width="100%">
-                        <chart:valueAxes>
-                            <chart:axis position="BOTTOM" title="USD ($)"/>
-                        </chart:valueAxes>
-                        <chart:graphs>
-                            <chart:graph id="userCostGraph"
-                                         type="COLUMN"
-                                         fillAlphas="0.85"
-                                         color="#3498db"
-                                         valueField="cost"/>
-                        </chart:graphs>
-                    </chart:serialChart>
-                </vbox>
-            </hbox>
+                            <vbox id="topUsersChartBox" stylename="ai-chart-card" width="40%" height="100%" spacing="true">
+                                <label value="msg://topUsersTitle" stylename="ai-card-header"/>
+                                <chart:serialChart id="topUsersChart"
+                                                   rotate="true"
+                                                   categoryField="userName"
+                                                   height="100%"
+                                                   width="100%">
+                                    <chart:valueAxes>
+                                        <chart:axis position="BOTTOM" title="USD ($)"/>
+                                    </chart:valueAxes>
+                                    <chart:graphs>
+                                        <chart:graph id="userCostGraph"
+                                                     type="COLUMN"
+                                                     fillAlphas="0.85"
+                                                     color="#3498db"
+                                                     valueField="cost"/>
+                                    </chart:graphs>
+                                </chart:serialChart>
+                            </vbox>
+                        </hbox>
 
-            <!-- Charts Row 2 -->
-            <hbox id="chartsRow2" spacing="true" width="100%" height="320px">
-                <vbox id="functionCostBox" stylename="ai-chart-card" width="50%" height="100%" spacing="true">
-                    <label value="msg://spendByFunctionTitle" stylename="ai-card-header"/>
-                    <chart:pieChart id="functionCostChart"
-                                    titleField="functionName"
-                                    valueField="cost"
-                                    innerRadius="35%"
-                                    height="100%"
-                                    width="100%">
-                        <chart:legend position="BOTTOM" autoMargins="false"/>
-                        <chart:balloon text="[[title]]: $[[value]] ([[percents]]%)"/>
-                    </chart:pieChart>
-                </vbox>
+                        <!-- Charts Row 2 -->
+                        <hbox id="chartsRow2" spacing="true" width="100%" height="340px">
+                            <vbox id="functionCostBox" stylename="ai-chart-card" width="50%" height="100%" spacing="true">
+                                <label value="msg://spendByFunctionTitle" stylename="ai-card-header"/>
+                                <chart:pieChart id="functionCostChart"
+                                                titleField="functionName"
+                                                valueField="cost"
+                                                innerRadius="35%"
+                                                height="100%"
+                                                width="100%">
+                                    <chart:legend position="BOTTOM" autoMargins="false"/>
+                                    <chart:balloon text="[[title]]: $[[value]] ([[percents]]%)"/>
+                                </chart:pieChart>
+                            </vbox>
 
-                <vbox id="modelStatsBox" stylename="ai-chart-card" width="50%" height="100%" spacing="true">
-                    <label value="msg://modelLatencyTitle" stylename="ai-card-header"/>
-                    <chart:serialChart id="modelLatencyChart"
-                                       categoryField="modelName"
-                                       height="100%"
-                                       width="100%">
-                        <chart:valueAxes>
-                            <chart:axis position="LEFT" title="msg://latencySeconds"/>
-                        </chart:valueAxes>
-                        <chart:graphs>
-                            <chart:graph id="latencyGraph"
-                                         type="COLUMN"
-                                         fillAlphas="0.8"
-                                         color="#e67e22"
-                                         valueField="latency"
-                                         title="msg://avgDurationSec"/>
-                        </chart:graphs>
-                    </chart:serialChart>
-                </vbox>
-            </hbox>
+                            <vbox id="modelStatsBox" stylename="ai-chart-card" width="50%" height="100%" spacing="true">
+                                <label value="msg://modelLatencyTitle" stylename="ai-card-header"/>
+                                <chart:serialChart id="modelLatencyChart"
+                                                   categoryField="modelName"
+                                                   height="100%"
+                                                   width="100%">
+                                    <chart:valueAxes>
+                                        <chart:axis position="LEFT" title="msg://latencySeconds"/>
+                                    </chart:valueAxes>
+                                    <chart:graphs>
+                                        <chart:graph id="latencyGraph"
+                                                     type="COLUMN"
+                                                     fillAlphas="0.8"
+                                                     color="#e67e22"
+                                                     valueField="latency"
+                                                     title="msg://avgDurationSec"/>
+                                    </chart:graphs>
+                                </chart:serialChart>
+                            </vbox>
+                        </hbox>
+                    </vbox>
+                </tab>
 
-            <!-- Summary Table by User -->
-            <vbox id="userTableBox" stylename="ai-table-card" width="100%" spacing="true">
-                <hbox spacing="true" width="100%">
-                    <label value="msg://userSummaryTitle" stylename="ai-card-header" alignment="MIDDLE_LEFT"/>
-                </hbox>
-                <table id="userSummaryTable" width="100%" height="280px" dataContainer="userSummaryDc" stylename="ai-dashboard-table">
-                    <columns>
-                        <column id="userName" caption="msg://colUser"/>
-                        <column id="totalCalls" caption="msg://colCalls"/>
-                        <column id="promptTokens" caption="msg://colPromptTokens"/>
-                        <column id="completionTokens" caption="msg://colCompletionTokens"/>
-                        <column id="totalTokens" caption="msg://colTotalTokens"/>
-                        <column id="estimatedCost" caption="msg://colCost"/>
-                        <column id="errorCount" caption="msg://colErrors"/>
-                        <column id="lastCallTime" caption="msg://colLastActive"/>
-                    </columns>
-                </table>
-            </vbox>
+                <!-- Tab 2: User Summary Table -->
+                <tab id="userRegistryTab" caption="msg://userRegistryTabTitle" icon="USERS" spacing="true">
+                    <vbox id="userTableBox" stylename="ai-table-card" width="100%" spacing="true">
+                        <hbox spacing="true" width="100%" alignment="MIDDLE_LEFT">
+                            <label value="msg://userSummaryTitle" stylename="ai-card-header" width="100%"/>
+                        </hbox>
+                        <table id="userSummaryTable" width="100%" height="450px" dataContainer="userSummaryDc" stylename="ai-dashboard-table">
+                            <columns>
+                                <column id="userName" caption="msg://colUser"/>
+                                <column id="totalCalls" caption="msg://colCalls"/>
+                                <column id="promptTokens" caption="msg://colPromptTokens"/>
+                                <column id="completionTokens" caption="msg://colCompletionTokens"/>
+                                <column id="totalTokens" caption="msg://colTotalTokens"/>
+                                <column id="estimatedCost" caption="msg://colCost"/>
+                                <column id="errorCount" caption="msg://colErrors"/>
+                                <column id="lastCallTime" caption="msg://colLastActive"/>
+                            </columns>
+                        </table>
+                    </vbox>
+                </tab>
+            </tabSheet>
         </scrollBox>
     </layout>
 </window>
