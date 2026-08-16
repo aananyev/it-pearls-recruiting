@@ -380,15 +380,16 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(navigationBlock.contains("box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,"));
         assertTrue(navigationBlock.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset;"));
 
-        // Полоса заголовка «Резюме для вакансии» растягивается на карточку (padding 14px)
-        // и несёт те же две inset-линии.
-        assertTrue(cardTitleBlock.contains("min-height: 36px !important;"));
-        assertTrue(cardTitleBlock.contains("padding: 7px 11px !important;"));
-        assertTrue(cardTitleBlock.contains("margin: -14px -14px 12px !important;"));
-        assertTrue(cardTitleBlock.contains("border-radius: 8px 8px 0 0 !important;"));
-        assertTrue(cardTitleBlock.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;"));
-        assertTrue(cardTitleBlock.contains("box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,"));
-        assertTrue(cardTitleBlock.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset;"));
+        // Заголовок «Резюме для вакансии» — лаконичный заголовок раздела без полосы-карточки
+        // (по образцу дизайна Antigravity: блок без рамки, заголовок 28px/14px/700).
+        assertTrue(cardTitleBlock.contains("min-height: 28px !important;"));
+        assertTrue(cardTitleBlock.contains("padding: 2px 0 6px 0 !important;"));
+        assertTrue(cardTitleBlock.contains("margin: 0 0 8px 0 !important;"));
+        assertTrue(cardTitleBlock.contains("font-size: 14px !important;"));
+        assertTrue(cardTitleBlock.contains("font-weight: 700 !important;"));
+        assertTrue(cardTitleBlock.contains("background: transparent !important;"));
+        assertTrue(cardTitleBlock.contains("border: 0 !important;"));
+        assertTrue(cardTitleBlock.contains("box-shadow: none !important;"));
 
         // SCSS обязан оставаться идентичным во всех 7 темах.
         for (String theme : THEMES) {
