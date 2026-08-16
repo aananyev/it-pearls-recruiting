@@ -18,6 +18,7 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.CollectionPropertyContainer;
 import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.model.InstanceContainer;
 import com.haulmont.cuba.gui.screen.*;
@@ -143,6 +144,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private CollectionLoader<OpenPosition> openPositionsDl;
     @Inject
     private CollectionContainer<OpenPosition> openPositionsDc;
+    @Inject
+    private CollectionPropertyContainer<SkillTree> skillTreesDc;
     private StringBuffer textResumeStringBuffer = null;
     @Inject
     private ResumeRecognitionService resumeRecognitionService;
@@ -1080,7 +1083,17 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void scanCandidateSkills() {
         ensureCvTextInitialized();
 
-        if (candidateCVRichTextArea.getValue() == null || candidateCVRichTextArea.getValue().trim().isEmpty()) {
+        String rawText = candidateCVRichTextArea.getValue();
+        if (rawText == null || rawText.trim().isEmpty()) {
+            rawText = getEditedEntity().getTextCV();
+        }
+        if (rawText == null || rawText.trim().isEmpty()) {
+            if (textResumeStringBuffer != null) {
+                rawText = textResumeStringBuffer.toString();
+            }
+        }
+
+        if (rawText == null || rawText.trim().isEmpty()) {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption("ВНИМАНИЕ!")
                     .withDescription("Текст резюме пуст. Для анализа навыков необходимо заполнить текст резюме.")
@@ -1089,8 +1102,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         JobCandidate candidate = getEditedEntity().getCandidate();
-        if (candidate == null && candidateField.getValue() != null) {
+        if (candidate == null && candidateField != null && candidateField.getValue() != null) {
             candidate = (JobCandidate) candidateField.getValue();
+            getEditedEntity().setCandidate(candidate);
         }
 
         if (candidate == null) {
@@ -1101,7 +1115,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             return;
         }
 
-        String inputText = Jsoup.parse(candidateCVRichTextArea.getValue()).text();
+        String inputText = Jsoup.parse(rawText).text();
         if (inputText.trim().isEmpty()) {
             notifications.create(Notifications.NotificationType.WARNING)
                     .withCaption("ВНИМАНИЕ!")
@@ -1117,11 +1131,14 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         try {
             // 1. Загружаем уже существующие навыки кандидата из БД для предотвращения дублирования
-            List<CandidateSkill> existingSkills = dataManager.load(CandidateSkill.class)
-                    .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate")
-                    .parameter("candidate", candidate)
-                    .view("candidateSkill-view")
-                    .list();
+            List<CandidateSkill> existingSkills = Collections.emptyList();
+            if (!PersistenceHelper.isNew(candidate)) {
+                existingSkills = dataManager.load(CandidateSkill.class)
+                        .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate")
+                        .parameter("candidate", candidate)
+                        .view("candidateSkill-view")
+                        .list();
+            }
 
             Set<UUID> existingSkillIds = new HashSet<>();
             for (CandidateSkill cs : existingSkills) {
@@ -1142,12 +1159,15 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             List<SkillTree> tertiarySkills = tertiaryResult.getSkills();
             SkillAnalysisResult allResult = null;
 
-            // Если списки по уровням пусты (например, при классическом fallback), анализируем все навыки как основные
-            if ((mainSkills == null || mainSkills.isEmpty()) &&
-                (secondarySkills == null || secondarySkills.isEmpty()) &&
-                (tertiarySkills == null || tertiarySkills.isEmpty())) {
+            if (mainSkills == null) mainSkills = Collections.emptyList();
+            if (secondarySkills == null) secondarySkills = Collections.emptyList();
+            if (tertiarySkills == null) tertiarySkills = Collections.emptyList();
+
+            // Если списки по уровням пусты (например, при классическом fallback), анализируем все навыки через analyzeAll
+            if (mainSkills.isEmpty() && secondarySkills.isEmpty() && tertiarySkills.isEmpty()) {
                 allResult = skillAnalysisService.analyzeAll(inputText);
                 mainSkills = allResult.getSkills();
+                if (mainSkills == null) mainSkills = Collections.emptyList();
             }
 
             // AI-метаданные для нотификации: все уровни выполняются одной функцией
@@ -1158,11 +1178,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
             List<CandidateSkill> toSave = new ArrayList<>();
             Set<UUID> processedSkillIds = new HashSet<>(existingSkillIds);
+            List<SkillTree> allDetectedSkills = new ArrayList<>();
 
             // Основные навыки (MAIN)
-            if (mainSkills != null) {
-                for (SkillTree st : mainSkills) {
-                    if (st != null && processedSkillIds.add(st.getId())) {
+            for (SkillTree st : mainSkills) {
+                if (st != null) {
+                    allDetectedSkills.add(st);
+                    if (processedSkillIds.add(st.getId())) {
                         CandidateSkill cs = metadata.create(CandidateSkill.class);
                         cs.setCandidate(candidate);
                         cs.setSkill(st);
@@ -1173,9 +1195,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             }
 
             // Второстепенные навыки (SECONDARY)
-            if (secondarySkills != null) {
-                for (SkillTree st : secondarySkills) {
-                    if (st != null && processedSkillIds.add(st.getId())) {
+            for (SkillTree st : secondarySkills) {
+                if (st != null) {
+                    allDetectedSkills.add(st);
+                    if (processedSkillIds.add(st.getId())) {
                         CandidateSkill cs = metadata.create(CandidateSkill.class);
                         cs.setCandidate(candidate);
                         cs.setSkill(st);
@@ -1186,9 +1209,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             }
 
             // Третьестепенные навыки (TERTIARY)
-            if (tertiarySkills != null) {
-                for (SkillTree st : tertiarySkills) {
-                    if (st != null && processedSkillIds.add(st.getId())) {
+            for (SkillTree st : tertiarySkills) {
+                if (st != null) {
+                    allDetectedSkills.add(st);
+                    if (processedSkillIds.add(st.getId())) {
                         CandidateSkill cs = metadata.create(CandidateSkill.class);
                         cs.setCandidate(candidate);
                         cs.setSkill(st);
@@ -1198,16 +1222,28 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 }
             }
 
-            int mainDetected = mainSkills != null ? mainSkills.size() : 0;
-            int secondaryDetected = secondarySkills != null ? secondarySkills.size() : 0;
-            int tertiaryDetected = tertiarySkills != null ? tertiarySkills.size() : 0;
+            int mainDetected = mainSkills.size();
+            int secondaryDetected = secondarySkills.size();
+            int tertiaryDetected = tertiarySkills.size();
             int totalDetected = mainDetected + secondaryDetected + tertiaryDetected;
             int savedCount = toSave.size();
             int existingOrDuplicate = totalDetected - savedCount;
 
-            if (!toSave.isEmpty()) {
+            if (!toSave.isEmpty() && !PersistenceHelper.isNew(candidate)) {
                 CommitContext commitContext = new CommitContext(toSave);
                 dataManager.commit(commitContext);
+            }
+
+            // Синхронизируем навыки в сущности CandidateCV и контейнере skillTreesDc для вкладки «Навыки»
+            if (!allDetectedSkills.isEmpty()) {
+                Set<SkillTree> currentSet = new LinkedHashSet<>(allDetectedSkills);
+                if (getEditedEntity().getSkillTree() != null) {
+                    currentSet.addAll(getEditedEntity().getSkillTree());
+                }
+                getEditedEntity().setSkillTree(new ArrayList<>(currentSet));
+                if (skillTreesDc != null) {
+                    skillTreesDc.setItems(getEditedEntity().getSkillTree());
+                }
             }
 
             String statsDescription = String.format(

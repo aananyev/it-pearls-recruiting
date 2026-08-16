@@ -508,8 +508,8 @@
                           stylename="candidate-cv-toolbar">
                         <button id="scanCandidateSkillsButton"
                                 caption="msg://msgScanCandidateSkills"
-                                icon="font-icon:CHECK_SQUARE_O"
-                                stylename="primary"
+                                icon="font-icon:MAGIC"
+                                stylename="danger"
                                 align="BOTTOM_LEFT"
                                 invoke="scanCandidateSkills"/>
                         <button id="rescanSkills"
@@ -616,6 +616,12 @@
                       spacing="true"
                       stylename="candidate-cv-tab-content">
                     <buttonsPanel stylename="candidate-cv-toolbar">
+                        <button id="scanCandidateSkillsTreeButton"
+                                caption="msg://msgScanCandidateSkills"
+                                icon="font-icon:MAGIC"
+                                stylename="danger"
+                                align="BOTTOM_LEFT"
+                                invoke="scanCandidateSkills"/>
                         <button id="rescanResume"
                                 caption="msg://msgRescanResume"
                                 align="BOTTOM_LEFT"
