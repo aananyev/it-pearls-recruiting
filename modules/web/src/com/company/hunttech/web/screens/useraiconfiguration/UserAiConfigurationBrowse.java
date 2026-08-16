@@ -11,6 +11,9 @@ import com.haulmont.cuba.core.global.View;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Table;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.screen.*;
 
 import javax.inject.Inject;
@@ -28,6 +31,8 @@ public class UserAiConfigurationBrowse extends StandardLookup<UserAiConfiguratio
     private Notifications notifications;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private BackgroundWorker backgroundWorker;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -42,25 +47,65 @@ public class UserAiConfigurationBrowse extends StandardLookup<UserAiConfiguratio
             return;
         }
 
-        // Перезагружаем с edit-view: browse-view не содержит apiKey (секретное поле)
-        UserAiConfiguration full = dataManager.load(LoadContext.create(UserAiConfiguration.class)
-                .setId(selected.getId())
-                .setView(View.LOCAL));
+        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт
+        // операции — исчезающая TRAY-нотификация, показывается СРАЗУ (до «крутилки»);
+        // по завершении — итоговая с моделью и собственником API (личный ключ).
+        AiOperationNotifier.showStarted(notifications, "Проверка AI-подключения…", null);
 
-        HrmAiService aiService = (HrmAiService) AppBeans.get("hunttech_HrmAiService");
-        try {
-            // Контракт пользовательской нотификации: реальный AI-вызов несёт метаданные
-            // (модель, провайдер, собственник API = личный ключ пользователя) и завершается
-            // исчезающей TRAY-нотификацией с указанием «какая модель что делала».
-            AiExecutionResult result = aiService.testConnection(full);
-            AiOperationNotifier.show(notifications, result,
-                    "AI-подключение успешно",
-                    "Провайдер «" + result.getProviderCode() + "» отвечает корректно.");
-        } catch (Exception e) {
-            notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption("Ошибка AI-подключения")
-                    .withDescription(e.getMessage())
-                    .show();
-        }
+        // Проверка выполняется в фоне (BackgroundTask) — эталонный паттерн
+        // AI-нотификаций (CandidateCVEdit «Сканировать навыки»): нотификация о старте
+        // → «крутилка» → итоговая нотификация. При синхронном вызове на UI-потоке
+        // обе нотификации (старт и итог) пришли бы одной пачкой в конце запроса.
+        final UserAiConfiguration configuration = selected;
+        testBtn.setEnabled(false);
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, "Проверка AI-подключения…");
+
+        BackgroundTask<Integer, AiExecutionResult> task =
+                new BackgroundTask<Integer, AiExecutionResult>(60, this) {
+                    @Override
+                    public AiExecutionResult run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        // Перезагружаем с edit-view: browse-view не содержит apiKey (секретное поле)
+                        UserAiConfiguration full = dataManager.load(LoadContext.create(UserAiConfiguration.class)
+                                .setId(configuration.getId())
+                                .setView(View.LOCAL));
+                        HrmAiService aiService = (HrmAiService) AppBeans.get("hunttech_HrmAiService");
+                        return aiService.testConnection(full);
+                    }
+
+                    @Override
+                    public void done(AiExecutionResult result) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        testBtn.setEnabled(true);
+                        // Контракт пользовательской нотификации: реальный AI-вызов несёт метаданные
+                        // (модель, провайдер, собственник API = личный ключ пользователя) и завершается
+                        // исчезающей TRAY-нотификацией с указанием «какая модель что делала».
+                        AiOperationNotifier.show(notifications, result,
+                                "AI-подключение успешно",
+                                "Провайдер «" + result.getProviderCode() + "» отвечает корректно.");
+                    }
+
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        testBtn.setEnabled(true);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка AI-подключения")
+                                .withDescription(ex.getMessage())
+                                .show();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean handleTimeoutException() {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        testBtn.setEnabled(true);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка AI-подключения")
+                                .withDescription("Проверка подключения превысила допустимое время выполнения.")
+                                .show();
+                        return true;
+                    }
+                };
+        backgroundWorker.handle(task).execute();
     }
 }
