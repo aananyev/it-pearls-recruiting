@@ -1426,6 +1426,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             return;
         }
 
+        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт операции
+        AiOperationNotifier.showStarted(notifications, "Запущено умное форматирование резюме…", null);
+
         try {
             TextProcessingResult result = textProcessingService.formatHtmlWithResult(currentText);
             if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
