@@ -73,5 +73,6 @@
         <class>com.company.hunttech.entity.AccountingEmailBatch</class>
         <class>com.company.hunttech.entity.AccountingDocument</class>
         <class>com.company.hunttech.entity.AccountingDocumentEvent</class>
+        <class>com.company.hunttech.entity.CandidateSkill</class>
     </persistence-unit>
 </persistence>

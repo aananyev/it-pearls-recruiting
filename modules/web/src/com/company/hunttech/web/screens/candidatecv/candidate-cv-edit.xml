@@ -483,6 +483,12 @@
                     <hbox spacing="true"
                           width="100%"
                           stylename="candidate-cv-toolbar">
+                        <button id="scanCandidateSkillsButton"
+                                caption="msg://msgScanCandidateSkills"
+                                icon="font-icon:CHECK_SQUARE_O"
+                                stylename="primary"
+                                align="BOTTOM_LEFT"
+                                invoke="scanCandidateSkills"/>
                         <button id="rescanSkills"
                                 caption="msg://msgRescanResume"
                                 align="BOTTOM_LEFT"
