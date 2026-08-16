@@ -32,6 +32,7 @@ import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 
 import javax.inject.Inject;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Контроллер тестового экрана просмотра кандидатов «Split-View (Master-Detail)» (Эскиз 1).
@@ -139,6 +140,10 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     /** Блок отображения статуса последнего рекрутерского взаимодействия */
     @Inject
     private Label<String> detailInteractionsInfo;
+
+    /** Метка цветных бейджей навыков кандидата */
+    @Inject
+    private Label<String> detailSkillsLabels;
 
     /** Кнопка открытия полной карточки редактирования кандидата */
     @Inject
@@ -472,6 +477,9 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         detailSalaryCaption.setVisible(false);
         detailSalary.setVisible(false);
         detailInteractionsInfo.setValue("Выберите кандидата в таблице справа для просмотра истории.");
+        if (detailSkillsLabels != null) {
+            detailSkillsLabels.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Выберите кандидата для просмотра навыков</span>");
+        }
         detailPic.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
         editCandidateBtn.setEnabled(false);
         createInteractionBtn.setEnabled(false);
@@ -537,8 +545,59 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
                 "• Всего зарегистрированных актов: <b>" + count + "</b>" +
                 "</div>");
 
+        // Заполнение блока основных навыков кандидата
+        updateCandidateSkillsSidebar(candidate);
+
         editCandidateBtn.setEnabled(true);
         createInteractionBtn.setEnabled(true);
+    }
+
+    /**
+     * Заполняет сайдбар цветными бейджами основных навыков кандидата, распознанными AI.
+     */
+    private void updateCandidateSkillsSidebar(JobCandidate candidate) {
+        if (detailSkillsLabels == null) {
+            return;
+        }
+        if (candidate == null) {
+            detailSkillsLabels.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
+            return;
+        }
+
+        try {
+            List<com.company.hunttech.entity.CandidateSkill> skills = dataManager.load(com.company.hunttech.entity.CandidateSkill.class)
+                    .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate order by e.priority, e.skill.skillName")
+                    .parameter("candidate", candidate)
+                    .view("candidateSkill-view")
+                    .list();
+
+            if (skills.isEmpty()) {
+                detailSkillsLabels.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 0;'>");
+            String[] palette = new String[]{
+                    "#2b82c9", "#27ae60", "#8e44ad", "#d35400", "#16a085", "#2c3e50", "#e67e22", "#2980b9"
+            };
+            for (com.company.hunttech.entity.CandidateSkill cs : skills) {
+                if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
+                    String skillName = cs.getSkill().getSkillName();
+                    String color = palette[Math.abs(skillName.hashCode()) % palette.length];
+                    String priorityIcon = cs.getPriority() == com.company.hunttech.entity.CandidateSkillPriority.MAIN ? "★ " : "";
+                    sb.append(String.format(
+                            "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                            "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                            "white-space: nowrap; display: inline-block;'>%s%s</span>",
+                            color, color, color, priorityIcon, skillName
+                    ));
+                }
+            }
+            sb.append("</div>");
+            detailSkillsLabels.setValue(sb.toString());
+        } catch (Exception ex) {
+            detailSkillsLabels.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
+        }
     }
 
     /* =========================================================================

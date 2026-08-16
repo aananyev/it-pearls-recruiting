@@ -534,6 +534,20 @@
                     </grid>
                 </vbox>
 
+                <!-- Основные навыки кандидата, определенные нейросетью -->
+                <vbox id="candidateProfileSkills"
+                      width="100%"
+                      spacing="true"
+                      stylename="job-candidate-navigation label-navigation">
+                    <label value="msg://msgMainSkillsTitle"
+                           width="100%"
+                           stylename="label-nav-title job-candidate-section-title"/>
+                    <label id="candidateSkillsLabels"
+                           width="100%"
+                           htmlEnabled="true"
+                           stylename="candidate-skills-chips"/>
+                </vbox>
+
                 <!-- Свободное пространство прижимает HR-Мастер к нижней границе sidebar. -->
                 <vbox id="candidateSidebarSpacer"
                       width="100%"
