@@ -660,54 +660,57 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         // если файла нет в хранилище — автоматический fallback без битой картинки
         FileDescriptorImageHelper.setCandidateFace(detailPic, fileLoader, resolveCandidateFace(candidate));
 
-        // Светофорная карточка статуса взаимодействия и участников процесса
+        // Формирование блока активности на стандартном фоне сайдбара без рамки
         CandidateRoleTeam team = calculateCandidateTeam(candidate);
         StringBuilder sb = new StringBuilder();
-        sb.append("<div style='background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid ")
-                .append(team.status.getColor()).append("; margin-top: 6px; font-size: 12px; line-height: 1.5;'>");
+        sb.append("<div class='candidate-activity-sidebar' style='padding: 4px 2px; font-size: 12.5px; line-height: 1.55; color: rgba(248, 250, 252, 0.85);'>");
 
-        sb.append("<div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;'>")
-                .append("<span style='font-weight: 700; color: #1e293b;'>Статус:</span> ")
+        sb.append("<div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);'>")
+                .append("<span style='font-weight: 600; color: rgba(248, 250, 252, 0.75); font-size: 12px;'>Статус:</span> ")
                 .append("<span style='color: ").append(team.status.getColor())
                 .append("; font-weight: 700; background: ").append(team.status.getBgColor())
-                .append("; padding: 2px 8px; border-radius: 4px;'>").append(team.status.getLabel()).append("</span>")
+                .append("; padding: 2px 8px; border-radius: 4px; font-size: 11.5px;'>").append(team.status.getLabel()).append("</span>")
                 .append("</div>");
 
-        sb.append("<div style='display: flex; flex-direction: column; gap: 4px; border-top: 1px dashed #cbd5e1; padding-top: 6px;'>");
+        sb.append("<div style='display: flex; flex-direction: column; gap: 5px;'>");
 
-        sb.append("<div>👤 <b>Автор:</b> ").append(team.authorName != null ? team.authorName : "—");
+        sb.append("<div>👤 <span style='font-weight: 600; color: rgba(248, 250, 252, 0.9);'>Автор:</span> <span style='color: rgba(248, 250, 252, 0.75);'>")
+                .append(team.authorName != null ? team.authorName : "—").append("</span>");
         if (team.createDate != null) {
-            sb.append(" <span style='color: #94a3b8; font-size: 11px;'>(").append(interactionDateFormat.format(team.createDate)).append(")</span>");
+            sb.append(" <span style='color: rgba(255, 255, 255, 0.45); font-size: 11px;'>(").append(interactionDateFormat.format(team.createDate)).append(")</span>");
         }
         sb.append("</div>");
 
         if (team.researcherName != null) {
-            sb.append("<div>🔍 <b>Ресерчер:</b> ").append(team.researcherName);
+            sb.append("<div>🔍 <span style='font-weight: 600; color: rgba(248, 250, 252, 0.9);'>Ресерчер:</span> <span style='color: rgba(248, 250, 252, 0.75);'>")
+                    .append(team.researcherName).append("</span>");
             if (team.researcherAction != null) {
-                sb.append(" <span style='color: #64748b; font-size: 11px;'>• ").append(team.researcherAction).append("</span>");
+                sb.append(" <span style='color: rgba(255, 255, 255, 0.55); font-size: 11px;'>• ").append(team.researcherAction).append("</span>");
             }
             sb.append("</div>");
         }
 
         if (team.recruiterName != null) {
-            sb.append("<div>💼 <b>Рекрутер:</b> ").append(team.recruiterName);
+            sb.append("<div>💼 <span style='font-weight: 600; color: rgba(248, 250, 252, 0.9);'>Рекрутер:</span> <span style='color: rgba(248, 250, 252, 0.75);'>")
+                    .append(team.recruiterName).append("</span>");
             if (team.recruiterAction != null) {
-                sb.append(" <span style='color: #64748b; font-size: 11px;'>• ").append(team.recruiterAction).append("</span>");
+                sb.append(" <span style='color: rgba(255, 255, 255, 0.55); font-size: 11px;'>• ").append(team.recruiterAction).append("</span>");
             }
             sb.append("</div>");
         }
 
         if (team.coordinatorName != null) {
-            sb.append("<div>🤝 <b>Координатор:</b> ").append(team.coordinatorName);
+            sb.append("<div>🤝 <span style='font-weight: 600; color: rgba(248, 250, 252, 0.9);'>Координатор:</span> <span style='color: rgba(248, 250, 252, 0.75);'>")
+                    .append(team.coordinatorName).append("</span>");
             if (team.coordinatorAction != null) {
-                sb.append(" <span style='color: #64748b; font-size: 11px;'>• ").append(team.coordinatorAction).append("</span>");
+                sb.append(" <span style='color: rgba(255, 255, 255, 0.55); font-size: 11px;'>• ").append(team.coordinatorAction).append("</span>");
             }
             sb.append("</div>");
         }
 
         if (team.lastInteractionDate != null) {
-            sb.append("<div style='color: #64748b; font-size: 11px; margin-top: 2px; padding-top: 4px; border-top: 1px dotted #e2e8f0;'>")
-                    .append("⏱️ <b>Посл. активность:</b> ").append(interactionDateFormat.format(team.lastInteractionDate));
+            sb.append("<div style='color: rgba(248, 250, 252, 0.7); font-size: 11.5px; margin-top: 4px; padding-top: 5px; border-top: 1px dashed rgba(255, 255, 255, 0.12);'>")
+                    .append("⏱️ <span style='font-weight: 600; color: rgba(248, 250, 252, 0.9);'>Посл. активность:</span> ").append(interactionDateFormat.format(team.lastInteractionDate));
             if (team.lastInteractionName != null) {
                 sb.append(" — ").append(team.lastInteractionName);
             }
@@ -719,7 +722,7 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
 
         sb.append("</div>");
 
-        sb.append("<div style='color: #94a3b8; font-size: 10.5px; margin-top: 6px; text-align: right;'>Всего взаимодействий: ")
+        sb.append("<div style='color: rgba(255, 255, 255, 0.45); font-size: 11px; margin-top: 6px; text-align: right;'>Всего взаимодействий: ")
                 .append(team.totalInteractions).append("</div>");
         sb.append("</div>");
 

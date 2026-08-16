@@ -1381,6 +1381,17 @@
     }
   }
 
+  /* Стилизация блока «Последняя активность» в сайдбаре на стандартном фоне */
+  .candidate-activity-sidebar {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 4px 2px !important;
+    font-size: 12.5px !important;
+    line-height: 1.55 !important;
+    color: rgba(248, 250, 252, 0.85) !important;
+  }
+
   @media (max-width: 1100px) {
     .job-candidate-editor {
       .v-slot-job-candidate-sidebar,
