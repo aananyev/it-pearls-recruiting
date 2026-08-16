@@ -1,3 +1,5 @@
+package com.company.hunttech.web.screens.jobcandidate;
+
 import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.CandidateSkill;
 import com.company.hunttech.entity.CandidateSkillPriority;

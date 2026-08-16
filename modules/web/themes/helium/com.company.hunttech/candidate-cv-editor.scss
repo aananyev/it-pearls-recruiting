@@ -572,9 +572,9 @@
       margin: 0 auto;
       overflow: hidden;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.10) !important;
-      border: 4px solid rgba(255, 255, 255, 0.96) !important;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
     }
 
     .candidate-cv-photo,

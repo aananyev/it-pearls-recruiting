@@ -705,24 +705,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             return;
         }
 
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            if (candidateCVRichTextArea.getValue() != null) {
-                getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
-            }
-        } else {
-            if (candidateCVRichTextArea.getValue() != null) {
-                StringBuffer newTextResume = new StringBuffer(candidateCVRichTextArea.getValue());
-
-                if (!textResumeStringBuffer.toString().equals(newTextResume.toString())) {
-                    getEditedEntity().setContactInfoChecked(false);
-
-                    if (candidateCVRichTextArea.getValue() != null) {
-                        getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
-                    }
-                }
-            } else {
+        if (candidateCVRichTextArea.getValue() != null) {
+            getEditedEntity().setTextCV(candidateCVRichTextArea.getValue());
+            if (textResumeStringBuffer != null && !textResumeStringBuffer.toString().equals(candidateCVRichTextArea.getValue())) {
                 getEditedEntity().setContactInfoChecked(false);
             }
+        } else {
+            getEditedEntity().setContactInfoChecked(false);
         }
     }
 
@@ -1333,9 +1322,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     public void resumeRecognition() {
         // Recognition runs against the lazily loaded rich text area.
         ensureCvTextInitialized();
-        machRegexpFromCV.setValue(parseCVService.parseEmail(candidateCVRichTextArea.getValue())
-                + " "
-                + parseCVService.parsePhone(candidateCVRichTextArea.getValue()));
+        if (candidateCVRichTextArea.getValue() != null) {
+            machRegexpFromCV.setValue(parseCVService.parseEmail(candidateCVRichTextArea.getValue())
+                    + " "
+                    + parseCVService.parsePhone(candidateCVRichTextArea.getValue()));
+        }
+        // Распознавание навыков кандидата с сохранением в CandidateSkill и немедленным отображением в сайдбаре
+        scanCandidateSkills();
     }
 
     /**
@@ -1551,16 +1544,34 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     public void done(TextProcessingResult result) {
                         AiOperationNotifier.closeProgress(progressDialog);
                         if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
-                            candidateCVRichTextArea.setValue(result.getText().replaceAll("\n", breakLine[0]));
-                            setColorHighlightingCompetencies();
+                            String formattedHtml = result.getText().replaceAll("\\r?\\n", breakLine[0]);
+
+                            // Подсветка компетенций и компаний в структурированном HTML
+                            try {
+                                if (candidateCVFieldOpenPosition != null && candidateCVFieldOpenPosition.getValue() != null) {
+                                    formattedHtml = parseCVService.colorHighlightingCompetencies(
+                                            candidateCVFieldOpenPosition.getValue(), formattedHtml, "brown", "red");
+                                } else {
+                                    formattedHtml = parseCVService.colorHighlightingCompetencies(formattedHtml, "brown");
+                                }
+                                formattedHtml = parseCVService.colorHighlingCompany(formattedHtml, "green");
+                            } catch (Exception ignored) {
+                            }
+
+                            // Загружаем структурированный текст обратно в RichTextArea и в сущность CandidateCV для сохранения
+                            candidateCVRichTextArea.setValue(formattedHtml);
+                            getEditedEntity().setTextCV(formattedHtml);
+                            cvTextInitialized = true;
+                            textResumeStringBuffer = new StringBuffer(formattedHtml);
+
                             if (result.getAiExecution() != null) {
                                 AiOperationNotifier.show(notifications, result.getAiExecution(),
                                         "Умное форматирование резюме выполнено",
-                                        "Текст резюме структурирован с помощью нейросети.");
+                                        "Текст резюме структурирован с помощью нейросети и загружен в редактор.");
                             } else {
                                 notifications.create(Notifications.NotificationType.TRAY)
                                         .withCaption("Форматирование резюме")
-                                        .withDescription("Текст резюме структурирован локальным типографическим движком.")
+                                        .withDescription("Текст резюме структурирован типографическим движком и загружен в редактор.")
                                         .withHideDelayMs(3000)
                                         .show();
                             }
@@ -1592,7 +1603,10 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     @Subscribe("candidateCVRichTextArea")
     public void onCandidateCVRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
-        // Значение текста резюме изменилось
+        if (event.getValue() != null) {
+            getEditedEntity().setTextCV(event.getValue());
+            cvTextInitialized = true;
+        }
     }
 
     @Subscribe("cvActionsPopupButton.scanSkillsAction")
@@ -1618,6 +1632,57 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Subscribe("cvActionsPopupButton.showOriginalAction")
     public void onCvActionsShowOriginal(Action.ActionPerformedEvent event) {
         showOriginalText();
+    }
+
+    /**
+     * Выполняет умное AI-форматирование текста сопроводительного письма в RichTextArea.
+     */
+    public void smartFormatLetterText() {
+        String currentText = letterRichTextArea.getValue();
+        if (currentText == null || currentText.trim().isEmpty()) {
+            currentText = getEditedEntity().getLetter();
+        }
+        if (currentText == null || currentText.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Текст сопроводительного письма пуст. Для умного форматирования заполните текст письма.")
+                    .show();
+            return;
+        }
+
+        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт операции
+        AiOperationNotifier.showStarted(notifications, "Запущено умное форматирование сопроводительного письма…", null);
+
+        try {
+            TextProcessingResult result = textProcessingService.formatHtmlWithResult(currentText);
+            if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
+                String formattedHtml = result.getText().replaceAll("\r?\n", breakLine[0]);
+                letterRichTextArea.setValue(formattedHtml);
+                getEditedEntity().setLetter(formattedHtml);
+
+                if (result.getAiExecution() != null) {
+                    AiOperationNotifier.show(notifications, result.getAiExecution(),
+                            "Умное форматирование письма выполнено",
+                            "Текст сопроводительного письма структурирован с помощью нейросети и загружен в редактор.");
+                } else {
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption("Форматирование письма")
+                            .withDescription("Текст сопроводительного письма структурирован типографическим движком и загружен в редактор.")
+                            .withHideDelayMs(3000)
+                            .show();
+                }
+            }
+        } catch (Exception ex) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Ошибка форматирования")
+                    .withDescription("Не удалось выполнить умное форматирование сопроводительного письма: " + ex.getMessage())
+                    .show();
+        }
+    }
+
+    @Subscribe("letterActionsPopupButton.smartFormatLetterAction")
+    public void onLetterActionsSmartFormat(Action.ActionPerformedEvent event) {
+        smartFormatLetterText();
     }
 
     Boolean flagOriginal = false;
