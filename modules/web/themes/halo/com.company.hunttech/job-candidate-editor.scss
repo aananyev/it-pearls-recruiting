@@ -1109,6 +1109,306 @@
     white-space: nowrap !important;
   }
 
+  /* =========================================================================
+   * Дизайн блока фильтрации и поиска в экранах реестра кандидатов Split-View
+   * ========================================================================= */
+  .candidate-filter-bar {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 10px 16px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    margin-bottom: 8px !important;
+    box-sizing: border-box !important;
+
+    .filter-title-box {
+      margin-right: 14px !important;
+      padding-right: 14px !important;
+      border-right: 1px solid #e2e8f0 !important;
+    }
+
+    .filter-header-icon {
+      font-size: 16px !important;
+      line-height: 1 !important;
+    }
+
+    .filter-header-title {
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      color: #1e293b !important;
+      letter-spacing: -0.2px !important;
+    }
+
+    .filter-buttons-panel {
+      gap: 6px !important;
+    }
+
+    /* Сегментированные кнопки-пилюли фильтров */
+    .filter-pill-btn {
+      border-radius: 20px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      padding: 0 14px !important;
+      height: 30px !important;
+      line-height: 28px !important;
+      transition: all 0.2s ease-in-out !important;
+      border: 1px solid transparent !important;
+
+      &.secondary {
+        background: #f1f5f9 !important;
+        color: #475569 !important;
+        border-color: #e2e8f0 !important;
+
+        &:hover {
+          background: #e2e8f0 !important;
+          color: #0f172a !important;
+          transform: translateY(-1px);
+        }
+      }
+
+      &.primary,
+      &.active {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        color: #ffffff !important;
+        border-color: #1e40af !important;
+        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25) !important;
+      }
+    }
+  }
+
+  /* Поле поиска в тулбаре */
+  .candidate-search-input {
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    font-size: 12.5px !important;
+    transition: all 0.2s ease !important;
+
+    &:focus {
+      border-color: #3b82f6 !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    }
+  }
+
+  /* =========================================================================
+   * Фирменная стилизация кнопок реестра кандидатов (Создать, Обновить, Поиск)
+   * ========================================================================= */
+  .candidate-toolbar-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .candidate-btn {
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    height: 34px !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+
+    .v-icon {
+      font-size: 14px !important;
+      margin-right: 6px !important;
+    }
+
+    /* Кнопка "Создать кандидата" (Акцентный Primary стиль с мягким синим градиентом) */
+    &.candidate-create-btn,
+    &.primary {
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+      color: #ffffff !important;
+      border: 1px solid #1e40af !important;
+      box-shadow: 0 2px 5px rgba(37, 99, 235, 0.25) !important;
+
+      &:hover:not(.v-disabled) {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35) !important;
+        transform: translateY(-1px);
+        color: #ffffff !important;
+      }
+
+      &:active:not(.v-disabled) {
+        background: #1e40af !important;
+        box-shadow: 0 1px 3px rgba(37, 99, 235, 0.2) !important;
+        transform: translateY(0);
+      }
+    }
+
+    /* Кнопка "Обновить" (Элегантный Secondary стиль со светлым панельным фоном) */
+    &.candidate-refresh-btn,
+    &.secondary {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+      color: #334155 !important;
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+
+      &:hover:not(.v-disabled) {
+        background: #f1f5f9 !important;
+        border-color: #94a3b8 !important;
+        color: #0f172a !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+        transform: translateY(-1px);
+      }
+
+      &:active:not(.v-disabled) {
+        background: #e2e8f0 !important;
+        border-color: #94a3b8 !important;
+        transform: translateY(0);
+      }
+    }
+
+    /* Кнопка поиска */
+    &.candidate-search-btn {
+      padding: 0 14px !important;
+    }
+  }
+
+  .candidate-filter-btn {
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    height: 32px !important;
+    transition: all 0.15s ease !important;
+  }
+
+  /* =========================================================================
+   * Фирменный дизайн и изоляция счетчика строк таблицы (rowsCount)
+   * ========================================================================= */
+  .candidate-table-card {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+
+  .candidate-browse-grid,
+  .job-candidate-editor .v-table,
+  .job-candidate-editor .c-grouptable {
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+
+    /* Обёртка таблицы */
+    .v-table-table {
+      box-sizing: border-box !important;
+    }
+
+    /* Нижняя панель таблицы со счетчиком строк — изолирована от тела таблицы */
+    .c-table-bottom-bar,
+    .c-table-controls,
+    .c-table-rowcount,
+    .v-table-footer-wrap {
+      position: relative !important;
+      bottom: auto !important;
+      left: auto !important;
+      right: auto !important;
+      width: 100% !important;
+      min-height: 42px !important;
+      height: 42px !important;
+      padding: 6px 18px !important;
+      background: #f8fafc !important;
+      border-top: 1px solid #e2e8f0 !important;
+      border-bottom-left-radius: 8px !important;
+      border-bottom-right-radius: 8px !important;
+      box-sizing: border-box !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      z-index: 2 !important;
+      margin-top: auto !important;
+    }
+
+    /* Компонент rowsCount */
+    .c-rows-count {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      color: #64748b !important;
+      margin-left: auto !important;
+
+      /* Текст и числа */
+      .c-rows-count-text,
+      .v-label {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: #334155 !important;
+      }
+
+      /* Ссылки пагинации / количества */
+      .c-rows-count-link,
+      .v-button-link {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: #2563eb !important;
+        text-decoration: none !important;
+        padding: 2px 6px !important;
+        border-radius: 4px !important;
+        transition: all 0.15s ease !important;
+
+        &:hover {
+          color: #1d4ed8 !important;
+          background: rgba(37, 99, 235, 0.08) !important;
+          text-decoration: underline !important;
+        }
+      }
+
+      /* Кнопки перелистывания страниц */
+      .v-button {
+        height: 26px !important;
+        min-height: 26px !important;
+        line-height: 24px !important;
+        padding: 0 8px !important;
+        border-radius: 4px !important;
+        border: 1px solid #cbd5e1 !important;
+        background: #ffffff !important;
+        color: #475569 !important;
+        font-size: 11px !important;
+        transition: all 0.15s ease !important;
+
+        &:hover:not(.v-disabled) {
+          background: #f1f5f9 !important;
+          color: #1e293b !important;
+          border-color: #94a3b8 !important;
+        }
+      }
+    }
+  }
+
+  /* Стилизация блока «Последняя активность» в сайдбаре на стандартном фоне */
+  .candidate-activity-sidebar {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 4px 2px !important;
+    font-size: 12.5px !important;
+    line-height: 1.55 !important;
+    color: rgba(248, 250, 252, 0.85) !important;
+  }
+
+  /* Стилизация шапки кандидата в сайдбаре (светлые контрастные цвета) */
+  .candidate-sidebar-fullname,
+  .job-candidate-sidebar .candidate-sidebar-fullname {
+    color: #f8fafc !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .candidate-sidebar-position,
+  .job-candidate-sidebar .candidate-sidebar-position {
+    color: #93c5fd !important;
+  }
+
+  .candidate-sidebar-city,
+  .job-candidate-sidebar .candidate-sidebar-city {
+    color: #cbd5e1 !important;
+  }
+
   @media (max-width: 1100px) {
     .job-candidate-editor {
       .v-slot-job-candidate-sidebar,

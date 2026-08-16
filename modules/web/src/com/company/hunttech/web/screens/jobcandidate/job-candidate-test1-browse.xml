@@ -57,11 +57,11 @@
             </filter>
 
             <!-- Правая панель кнопок действий (edit-toolbar-actions) -->
-            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions">
+            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions candidate-toolbar-actions">
                 <!-- Кнопка создания новой карточки кандидата -->
-                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary"/>
+                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
                 <!-- Кнопка обновления текущего списка кандидатов из БД -->
-                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary"/>
+                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary candidate-btn candidate-refresh-btn"/>
             </hbox>
         </hbox>
 
@@ -154,15 +154,12 @@
             <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace" expand="candidatesTableCard">
                 
                 <!-- Верхняя полоса быстрых фильтров, счетчиков и выпадающего меню действий -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-card" expand="statusFilterButtons">
-                    <!-- Заголовок реестра -->
-                    <label id="tableTitleLabel" value="👤 Реестр кандидатов" stylename="h3" align="MIDDLE_LEFT"/>
-                    
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="statusFilterButtons">
                     <!-- Кнопки быстрых фильтров по кандидатам -->
-                    <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT">
-                        <button id="filterAllBtn" caption="Все кандидаты" stylename="primary" icon="USERS"/>
-                        <button id="filterMyCandidatesBtn" caption="Мои кандидаты" stylename="secondary" icon="USER"/>
-                        <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary" icon="font-icon:ADN"/>
+                    <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                        <button id="filterAllBtn" caption="Все кандидаты" stylename="primary filter-pill-btn active" icon="USERS"/>
+                        <button id="filterMyCandidatesBtn" caption="Мои кандидаты" stylename="secondary filter-pill-btn" icon="USER"/>
+                        <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary filter-pill-btn" icon="font-icon:ADN"/>
                     </hbox>
 
                     <!-- Выпадающая кнопка действий над кандидатом как в оригинальной форме -->
@@ -186,13 +183,13 @@
                 </hbox>
 
                 <!-- Карточка-обёртка для таблицы кандидатов -->
-                <vbox id="candidatesTableCard" width="100%" height="100%" spacing="false" stylename="edit-card" expand="candidatesTable">
+                <vbox id="candidatesTableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="candidatesTable">
                     <!-- Таблица кандидатов отображает расширенные колонки реестра -->
                     <groupTable id="candidatesTable"
                                  width="100%"
                                  height="100%"
                                  dataContainer="jobCandidatesDc"
-                                 stylename="borderless grid">
+                                 stylename="borderless grid candidate-browse-grid">
                         <actions>
                             <action id="edit" type="edit"/>
                             <action id="refresh" type="refresh"/>
