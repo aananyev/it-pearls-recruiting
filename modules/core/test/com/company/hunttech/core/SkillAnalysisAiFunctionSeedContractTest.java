@@ -91,6 +91,30 @@ public class SkillAnalysisAiFunctionSeedContractTest {
     }
 
     @Test
+    public void disjointLevelsPromptUpdateIsRegisteredAndSafe() throws IOException {
+        String sqlFile = "modules/core/db/update/postgres/26/260816-5-updateSkillAnalysisDisjointLevelsPrompt.sql";
+        String xmlFile = "modules/core/db/changelog/260816-5-updateSkillAnalysisDisjointLevelsPrompt.xml";
+        String sql = readProjectFile(sqlFile);
+        String xml = readProjectFile(xmlFile);
+        String master = readProjectFile("modules/core/db/changelog/db.changelog-master.xml");
+
+        assertTrue(master.contains(xmlFile.replace("modules/core/db/changelog/", "")));
+        for (String migration : new String[]{sql, xml}) {
+            assertTrue(migration.contains("'SKILLS_EXTRACT'"));
+            assertTrue("Промпт обязан относить каждый навык ровно к одному уровню",
+                    migration.contains("РОВНО к одному уровню"));
+            assertTrue("Промпт обязан запрещать дублирование навыков между уровнями",
+                    migration.contains("НЕ дублируй навыки между уровнями"));
+            assertTrue("Промпт обязан сохранять требование единственного навыка опыта",
+                    migration.contains("РОВНО ОДИН навык опыта"));
+            assertTrue("Промпт обязан сохранять JSON-массив на выходе",
+                    migration.contains("JSON-массив"));
+            assertTrue("Миграция не должна перезаписывать админскую настройку",
+                    migration.contains("COALESCE(UPDATED_BY, 'migration') = 'migration'"));
+        }
+    }
+
+    @Test
     public void serviceInterfaceDeclaresFourAnalysisMethodsAndFunctionCode() throws IOException {
         String service = readProjectFile(
                 "modules/global/src/com/company/hunttech/service/SkillAnalysisService.java");
