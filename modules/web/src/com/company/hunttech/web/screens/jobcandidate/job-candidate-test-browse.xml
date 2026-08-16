@@ -108,6 +108,12 @@
                             <label value="ПОСЛЕДНЯЯ АКТИВНОСТЬ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
                             <label id="detailInteractionsInfo" value="Выберите кандидата в таблице для просмотра истории." width="100%" stylename="edit-help"/>
                         </vbox>
+
+                        <!-- Блок основных навыков кандидата (стиль Edit-форм с цветными бейджами) -->
+                        <vbox id="detailSkillsVBox" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ОСНОВНЫЕ НАВЫКИ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label id="detailSkillsLabels" width="100%" htmlEnabled="true" stylename="candidate-skills-chips"/>
+                        </vbox>
                     </vbox>
                 </scrollBox>
             </vbox>
