@@ -82,4 +82,10 @@
     <include file="260816-3-updateSkillAnalysisSingleExperiencePrompt.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- SkillAnalysisService: модернизация SYSTEM_PROMPT SKILLS_EXTRACT — AI относит
+         каждый навык РОВНО к одному уровню (MAIN, SECONDARY, TERTIARY; без дублей между
+         уровнями), иначе вторичные навыки резюме не попадают в сайдбар. -->
+    <include file="260816-5-updateSkillAnalysisDisjointLevelsPrompt.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
