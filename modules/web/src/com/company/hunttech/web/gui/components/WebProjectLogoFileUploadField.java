@@ -3,9 +3,11 @@ package com.company.hunttech.web.gui.components;
 import com.company.hunttech.app.ProcessedImage;
 import com.company.hunttech.app.ProjectLogoImageProcessingService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.FileUploadField;
 import com.haulmont.cuba.gui.components.data.ValueSource;
 import com.haulmont.cuba.gui.components.data.value.ContainerValueSource;
+import com.haulmont.cuba.web.AppUI;
 import com.haulmont.cuba.web.gui.components.WebFileUploadField;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -31,6 +33,11 @@ import java.io.OutputStream;
  * {@code fileCompanyLogo} сущности {@code com.company.hunttech.entity.Company} или
  * {@code fileImageFace} сущности {@code com.company.hunttech.entity.JobCandidate}; все
  * остальные загрузки ведут себя точно так же, как стандартный компонент.</p>
+ *
+ * <p>Если фотография кандидата ({@code fileImageFace}) реально обработана нейросетью
+ * (rembg/AI удалили фон), пользователю показывается исчезающая TRAY-нотификация
+ * «Фотография обработана с помощью AI» (стандартный механизм CUBA). Для логотипов
+ * нотификация не показывается — там фон может быть удалён классическим flood-fill.</p>
  *
  * <p>Точка перехвата — {@link #saveFile(FileDescriptor)} в режиме
  * {@link FileStoragePutMode#IMMEDIATE}: к этому моменту файл уже принят во временное
@@ -61,10 +68,18 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
      */
     private FileDescriptor processedDescriptor;
 
+    /**
+     * Флаг последней загрузки: фон изображения удалён нейросетью (rembg/AI-функция).
+     * Выставляется в {@link #processLogo(FileDescriptor, ProcessingMode)} и используется
+     * для уведомления пользователя об AI-обработке фотографии кандидата.
+     */
+    private boolean processedByAi;
+
     @Override
     protected void saveFile(FileDescriptor fileDescriptor) {
         // Сбрасываем кэш обработанного дескриптора при каждой новой загрузке.
         processedDescriptor = null;
+        processedByAi = false;
         // Обрабатываем только изображения (логотипы проекта/компании, фото кандидата);
         // остальные загрузки — стандартное поведение.
         ProcessingMode mode = resolveProcessingMode();
@@ -80,6 +95,9 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
                     // ТОЛЬКО при paint. Без этого повторный клик по кнопке «Загрузить»
                     // не открывает диалог выбора файла (повторная загрузка невозможна).
                     getComposition().markAsDirty();
+                    if (mode == ProcessingMode.CANDIDATE_PHOTO && processedByAi) {
+                        showAiProcessedNotification();
+                    }
                     return;
                 }
             } catch (Exception e) {
@@ -103,6 +121,7 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
     @Override
     protected OutputStream receiveUpload(String fileName, String MIMEType) {
         processedDescriptor = null;
+        processedByAi = false;
         return super.receiveUpload(fileName, MIMEType);
     }
 
@@ -173,6 +192,7 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
         if (!processed.isProcessed()) {
             return null;
         }
+        processedByAi = processed.isAiProcessed();
 
         // Перезаписываем временный файл обработанными байтами — дальше стандартный конвейер
         // (putFileIntoStorage + commit) сохранит именно обработанное изображение.
@@ -189,5 +209,28 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
         log.debug("Изображение обработано: {} -> {} ({} байт)",
                 fileDescriptor.getId(), newName, processed.getData().length);
         return fileDescriptor;
+    }
+
+    /**
+     * Показывает исчезающую (TRAY) нотификацию о том, что фотография кандидата
+     * обработана нейросетью: фон удалён автоматически (rembg/u2net или AI-функция).
+     *
+     * <p>Вызывается только для {@link ProcessingMode#CANDIDATE_PHOTO} при реальном
+     * нейросетевом удалении фона — для логотипов обработка может быть классической
+     * (flood-fill), и утверждение «обработано с помощью AI» было бы некорректным.
+     * Нотификация исчезает автоматически (стандартный механизм CUBA, TRAY).</p>
+     */
+    private void showAiProcessedNotification() {
+        AppUI appUI = AppUI.getCurrent();
+        if (appUI == null) {
+            log.debug("AppUI недоступен, нотификация об AI-обработке не показана");
+            return;
+        }
+        appUI.getNotifications()
+                .create(Notifications.NotificationType.TRAY)
+                .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                .withCaption("Фотография обработана с помощью AI")
+                .withDescription("Фон удалён автоматически нейросетью")
+                .show();
     }
 }
