@@ -130,6 +130,8 @@ public class ProjectLogoRembgServiceBeanTest {
 
         assertTrue("Изображение должно быть обработано", processed.isProcessed());
         assertEquals("rembg должен был получить ровно один запрос", 1, rembgCalls.get());
+        assertTrue("Фон удалён нейросетью rembg — изображение должно помечаться как AI-обработанное",
+                processed.isAiProcessed());
 
         BufferedImage result = ImageIO.read(new ByteArrayInputStream(processed.getData()));
         int cornerAlpha = (result.getRGB(0, 0) >> 24) & 0xFF;
@@ -147,6 +149,8 @@ public class ProjectLogoRembgServiceBeanTest {
 
         assertTrue("Изображение должно быть обработано классическим конвейером", processed.isProcessed());
         assertEquals("rembg не должен был получить запрос", 0, rembgCalls.get());
+        assertFalse("Классический flood-fill — не AI-обработка",
+                processed.isAiProcessed());
 
         BufferedImage result = ImageIO.read(new ByteArrayInputStream(processed.getData()));
         int cornerAlpha = (result.getRGB(0, 0) >> 24) & 0xFF;
@@ -162,9 +166,39 @@ public class ProjectLogoRembgServiceBeanTest {
 
         assertTrue("Изображение должно быть обработано классическим конвейером", processed.isProcessed());
         assertEquals("rembg не должен вызываться при отключённом этапе", 0, rembgCalls.get());
+        assertFalse("Классический flood-fill — не AI-обработка",
+                processed.isAiProcessed());
 
         BufferedImage result = ImageIO.read(new ByteArrayInputStream(processed.getData()));
         int cornerAlpha = (result.getRGB(0, 0) >> 24) & 0xFF;
         assertEquals("Угол должен быть прозрачным (классический конвейер удалил белый фон)", 0, cornerAlpha);
+    }
+
+    @Test
+    public void testCandidatePhotoRembgResultMarkedAiProcessed() throws IOException {
+        // Фото кандидата + доступный rembg: фон удалён нейросетью — результат должен
+        // помечаться как AI-обработанный (в форме показывается нотификация).
+        byte[] data = createWhiteBackgroundImage(300, 400);
+        ProcessedImage processed = service.process(data, "photo.jpg", true);
+
+        assertTrue("Фото должно быть обработано", processed.isProcessed());
+        assertEquals("rembg должен был получить ровно один запрос", 1, rembgCalls.get());
+        assertTrue("Фон фото удалён нейросетью — AI-обработка",
+                processed.isAiProcessed());
+    }
+
+    @Test
+    public void testCandidatePhotoRembgUnavailableIsNotMarkedAiProcessed() throws IOException {
+        // rembg недоступен (сервер остановлен): фото кандидата проходит только
+        // конвертацию в PNG + ресайз (processed=true), но НЕ помечается как
+        // AI-обработанное — нотификация «обработано с помощью AI» показываться не должна.
+        server.stop(0);
+
+        byte[] data = createWhiteBackgroundImage(300, 400);
+        ProcessedImage processed = service.process(data, "photo.jpg", true);
+
+        assertTrue("Фото должно быть конвертировано (PNG + ресайз)", processed.isProcessed());
+        assertFalse("Без rembg фон не удалён — фото не должно помечаться как AI-обработанное",
+                processed.isAiProcessed());
     }
 }
