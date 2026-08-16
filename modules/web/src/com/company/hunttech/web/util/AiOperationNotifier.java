@@ -55,6 +55,32 @@ public final class AiOperationNotifier {
     }
 
     /**
+     * Показывает исчезающую TRAY-нотификацию о НАЧАЛЕ AI-операции («AI-нотификации
+     * 2 раза» — при старте и по завершении, контракт пользовательской нотификации).
+     *
+     * <p>Если {@code operationDetail} не передан, в описании указывается, что по
+     * завершении будут показаны использованная модель и собственник API — так
+     * пользователь сразу понимает, что итоговая нотификация ещё придёт.</p>
+     *
+     * @param notifications     API нотификаций текущего экрана (CUBA)
+     * @param operationCaption  что запускается, например «AI генерирует краткое описание…»
+     * @param operationDetail   дополнительные детали операции или {@code null}
+     */
+    public static void showStarted(Notifications notifications, String operationCaption,
+                                   String operationDetail) {
+        String detail = (operationDetail == null || operationDetail.trim().isEmpty())
+                ? "После завершения будет указана модель и собственник API."
+                : operationDetail;
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                .withCaption(operationCaption)
+                .withDescription(detail)
+                .withContentMode(ContentMode.HTML)
+                .withHideDelayMs(HIDE_DELAY_MS)
+                .show();
+    }
+
+    /**
      * HTML-блок «какая модель что сделала + собственник API» для нотификации:
      *
      * <pre>Модель: deepseek-v4-flash · Провайдер: deepseek

@@ -157,6 +157,45 @@ public class AiUserNotificationContractTest {
     }
 
     @Test
+    public void aiNotificationsAreShownTwiceStartedAndCompleted() throws IOException {
+        String notifier = read("modules/web/src/com/company/hunttech/web/util/AiOperationNotifier.java");
+        String projectEdit = read("modules/web/src/com/company/hunttech/web/screens/project/ProjectEdit.java");
+        String candidateCv = read("modules/web/src/com/company/hunttech/web/screens/candidatecv/CandidateCVEdit.java");
+        String uploadField = read("modules/web/src/com/company/hunttech/web/gui/components/WebProjectLogoFileUploadField.java");
+
+        // Единая точка стартовой нотификации — та же исчезающая TRAY (5 с), что и итоговая.
+        assertTrue("AiOperationNotifier не имеет стартовой нотификации",
+                notifier.contains("public static void showStarted"));
+        assertTrue("Стартовая нотификация не исчезающая", notifier.contains("withHideDelayMs"));
+        assertTrue("Старт не обещает итоговую нотификацию с моделью и собственником API",
+                notifier.contains("После завершения будет указана модель и собственник API."));
+
+        // ProjectEdit: «Кратко» и обработка описания — старт + завершение.
+        assertTrue("ProjectEdit «Кратко» не показывает стартовую нотификацию",
+                projectEdit.contains("AiOperationNotifier.showStarted(notifications,"));
+        assertTrue("ProjectEdit upload-описания не показывает стартовую нотификацию",
+                countOccurrences(projectEdit, "AiOperationNotifier.showStarted(notifications,") >= 2);
+        assertTrue("ProjectEdit «Кратко» не показывает итоговую нотификацию",
+                projectEdit.contains("AiOperationNotifier.show(notifications, result"));
+
+        // CandidateCVEdit: старт анализа + итоговая статистика с моделью/собственником.
+        assertTrue("CandidateCVEdit не показывает стартовую нотификацию",
+                candidateCv.contains("AiOperationNotifier.showStarted(notifications, \"Запущен AI-анализ навыков резюме…\", null)"));
+        assertTrue("CandidateCVEdit не добавляет модель/собственника API в итоговую нотификацию",
+                candidateCv.contains("AiOperationNotifier.buildDescription(aiExecution, statsDescription)"));
+
+        // Загрузка изображений: старт только при включённом нейросетевом этапе.
+        assertTrue("WebProjectLogoFileUploadField не показывает стартовую нотификацию",
+                uploadField.contains("AiOperationNotifier.showStarted(appUI.getNotifications(), caption, detail)"));
+        assertTrue("Старт логотипа не завязан на hunttech.projectLogo.ai.enabled",
+                uploadField.contains("config.getAiProcessingEnabled()"));
+        assertTrue("Старт фото не завязан на hunttech.projectLogo.rembg.enabled",
+                uploadField.contains("config.getRembgEnabled()"));
+        assertTrue("WebProjectLogoFileUploadField не показывает итоговую нотификацию",
+                uploadField.contains("AiOperationNotifier.show(appUI.getNotifications(), processedAiExecution"));
+    }
+
+    @Test
     public void screensShowDisappearingNotificationForAiOperations() throws IOException {
         String projectEdit = read("modules/web/src/com/company/hunttech/web/screens/project/ProjectEdit.java");
         String candidateCv = read("modules/web/src/com/company/hunttech/web/screens/candidatecv/CandidateCVEdit.java");

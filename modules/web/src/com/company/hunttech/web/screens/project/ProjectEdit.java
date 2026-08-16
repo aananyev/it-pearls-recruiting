@@ -260,9 +260,11 @@ public class ProjectEdit extends StandardEditor<Project> {
         }
         String projectName = getEditedEntity().getProjectName();
         projectDescriptionShortButton.setEnabled(false);
-        notifications.create(Notifications.NotificationType.TRAY)
-                .withCaption(messages.getMessage(getClass(), "msgProjectShortDescriptionStarted"))
-                .show();
+        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт
+        // операции — исчезающая TRAY-нотификация; по завершении — итоговая с моделью
+        // и собственником API.
+        AiOperationNotifier.showStarted(notifications,
+                messages.getMessage(getClass(), "msgProjectShortDescriptionStarted"), null);
 
         BackgroundTask<Integer, AiExecutionResult> task = new BackgroundTask<Integer, AiExecutionResult>(120, this) {
             @Override
@@ -443,9 +445,11 @@ public class ProjectEdit extends StandardEditor<Project> {
         projectDescriptionUpload.setEnabled(false);
         projectDescriptionAiStatus.setValue(
                 messages.getMessage(getClass(), "msgProjectDescriptionAiProcessing"));
-        notifications.create(Notifications.NotificationType.TRAY)
-                .withCaption(messages.getMessage(getClass(), "msgProjectDescriptionAiStarted"))
-                .show();
+        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт
+        // операции — исчезающая TRAY-нотификация; по завершении — итоговая с моделью
+        // и собственником API.
+        AiOperationNotifier.showStarted(notifications,
+                messages.getMessage(getClass(), "msgProjectDescriptionAiStarted"), null);
 
         BackgroundTask<Integer, AiExecutionResult> task = new BackgroundTask<Integer, AiExecutionResult>(120, this) {
             @Override

@@ -97,6 +97,16 @@ ProjectAiService            SkillAnalysisService            ProjectLogoImageProc
 
 Реализация — web-утилита `modules/web/src/com/company/hunttech/web/util/AiOperationNotifier.java`.
 
+**AI-нотификации показываются 2 раза** — при начале обработки и после её завершения
+(обе — стандартные исчезающие TRAY-нотификации):
+
+| Момент | Метод | Заголовок (пример) | Описание |
+|---|---|---|---|
+| Начало обработки | `AiOperationNotifier.showStarted(...)` | «AI генерирует краткое описание проекта…» | «После завершения будет указана модель и собственник API.» (для операций без собственника — детали операции, например «Фон будет удалён автоматически нейросетью») |
+| Завершение обработки | `AiOperationNotifier.show(...)` | «Краткое описание проекта сгенерировано» | «Модель: X · Провайдер: Y / Собственник API: …» (из `AiExecutionResult`) |
+
+Общие параметры обеих нотификаций:
+
 | Параметр | Значение (контракт) |
 |---|---|
 | Механизм | стандартные `Notifications` CUBA Platform (никаких кастомных виджетов) |
@@ -108,7 +118,12 @@ ProjectAiService            SkillAnalysisService            ProjectLogoImageProc
 | Описание («какая модель») | `Модель: <modelName> · Провайдер: <providerCode>` |
 | Собственник API | `Собственник API: корпоративный (администратора)` для `ADMIN`; `Собственник API: личный (пользователя)` для `USER` |
 
-Пример отображаемого текста нотификации:
+Стартовая нотификация для загрузки изображений показывается только когда
+включён соответствующий нейросетевой этап (`hunttech.projectLogo.ai.enabled` —
+логотип, `hunttech.projectLogo.rembg.enabled` — фото кандидата); при чисто
+классическом конвейере (flood-fill) стартовая нотификация не показывается.
+
+Пример отображаемого текста итоговой нотификации:
 
 ```text
 Краткое описание проекта сгенерировано
@@ -180,11 +195,15 @@ AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
 
 ### 6.3. Обязательство экранов
 
-Каждый экран/компонент, инициирующий AI-операцию, обязан в `done()`-обработчике
-вызвать `AiOperationNotifier.show(notifications, result, caption, detail)` (или
-добавить `AiOperationNotifier.buildDescription(...)` в существующую исчезающую
-нотификацию). Нотификация показывается **только при реальном AI-выполнении**
-(метаданные не `null`).
+Каждый экран/компонент, инициирующий AI-операцию, обязан:
+1. в момент старта операции вызвать
+   `AiOperationNotifier.showStarted(notifications, caption, detail)` —
+   исчезающая нотификация «начало обработки» (для загрузки изображений —
+   только при включённом нейросетевом этапе);
+2. в `done()`-обработчике вызвать `AiOperationNotifier.show(notifications, result,
+   caption, detail)` (или добавить `AiOperationNotifier.buildDescription(...)` в
+   существующую исчезающую нотификацию). Итоговая нотификация показывается
+   **только при реальном AI-выполнении** (метаданные не `null`).
 
 ## 7. Тесты контракта
 
@@ -199,6 +218,9 @@ AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
 - legacy-контракт `HrmAiService` (`String`);
 - нотификацию: TRAY, BOTTOM_RIGHT, автоскрытие 5 с, подписи «Модель», «Провайдер»,
   «Собственник API: корпоративный (администратора) / личный (пользователя)»;
+- «AI-нотификации 2 раза»: `showStarted` во всех экранах + обещание итоговой
+  нотификации; старт загрузки изображений завязан на флаги
+  `getAiProcessingEnabled()`/`getRembgEnabled()`;
 - подключение нотификации в `ProjectEdit`, `CandidateCVEdit`, `WebProjectLogoFileUploadField`;
 - семантику fallback: `SkillAnalysisServiceBean` возвращает `aiExecution == null`
   при классическом поиске.
@@ -209,5 +231,6 @@ AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
 ## 8. История изменений
 
 | Дата | Изменение |
-|---|---|
+|------|-----------|
+| 2026-08-16 | «AI-нотификации 2 раза»: добавлена стартовая исчезающая TRAY-нотификация `AiOperationNotifier.showStarted(...)` (при начале обработки, с обещанием итоговой: «После завершения будет указана модель и собственник API»); подключена в `ProjectEdit` («Кратко», upload описания), `CandidateCVEdit` (анализ навыков) и `WebProjectLogoFileUploadField` (логотип — по флагу `hunttech.projectLogo.ai.enabled`, фото — по `hunttech.projectLogo.rembg.enabled`); контракт-тест дополнен проверкой «2 раза» |
 | 2026-08-16 | Контракт введён: `AiExecutionResult`/`AiCredentialOwner`/`SkillAnalysisResult`; `AiExecutionService` и фасады возвращают метаданные; web-утилита `AiOperationNotifier` (TRAY, 5 с); нотификации в `ProjectEdit` («Кратко», upload), `CandidateCVEdit` («Сканировать навыки»), `WebProjectLogoFileUploadField` (логотип при AI-функции); контракт-тест `AiUserNotificationContractTest` |

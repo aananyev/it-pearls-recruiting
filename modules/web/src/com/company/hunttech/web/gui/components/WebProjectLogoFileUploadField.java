@@ -2,6 +2,7 @@ package com.company.hunttech.web.gui.components;
 
 import com.company.hunttech.app.ProcessedImage;
 import com.company.hunttech.app.ProjectLogoImageProcessingService;
+import com.company.hunttech.config.HunttechProjectLogoConfig;
 import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.web.util.AiOperationNotifier;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -192,6 +193,8 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
      *         (обработка не требуется)
      */
     private FileDescriptor processLogo(FileDescriptor fileDescriptor, ProcessingMode mode) throws IOException {
+        showAiProcessingStartedNotification(mode);
+
         ProjectLogoImageProcessingService service =
                 beanLocator.get(ProjectLogoImageProcessingService.NAME);
 
@@ -224,6 +227,43 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
         log.debug("Изображение обработано: {} -> {} ({} байт)",
                 fileDescriptor.getId(), newName, processed.getData().length);
         return fileDescriptor;
+    }
+
+    /**
+     * Показывает исчезающую нотификацию о НАЧАЛЕ AI-обработки изображения
+     * («AI-нотификации 2 раза» — при старте и по завершении, контракт
+     * HRM_HuntTech_AI_User_Notification_Contract).
+     *
+     * <p>Показывается только когда соответствующий нейросетевой этап включён
+     * конфигом: платная AI-функция логотипа ({@code hunttech.projectLogo.ai.enabled})
+     * или локальный rembg для фото кандидата ({@code hunttech.projectLogo.rembg.enabled}).
+     * При классическом конвейере (flood-fill) нотификация не показывается.</p>
+     */
+    private void showAiProcessingStartedNotification(ProcessingMode mode) {
+        HunttechProjectLogoConfig config = beanLocator.get(HunttechProjectLogoConfig.class);
+        String caption;
+        String detail;
+        if (mode == ProcessingMode.LOGO) {
+            if (!config.getAiProcessingEnabled()) {
+                return;
+            }
+            caption = "Запущена AI-обработка логотипа…";
+            detail = null; // по умолчанию — обещание итоговой нотификации с моделью и собственником API
+        } else if (mode == ProcessingMode.CANDIDATE_PHOTO) {
+            if (!config.getRembgEnabled()) {
+                return;
+            }
+            caption = "Запущена AI-обработка фотографии…";
+            detail = "Фон будет удалён автоматически нейросетью";
+        } else {
+            return;
+        }
+        AppUI appUI = AppUI.getCurrent();
+        if (appUI == null) {
+            log.debug("AppUI недоступен, нотификация о старте AI-обработки не показана");
+            return;
+        }
+        AiOperationNotifier.showStarted(appUI.getNotifications(), caption, detail);
     }
 
     /**

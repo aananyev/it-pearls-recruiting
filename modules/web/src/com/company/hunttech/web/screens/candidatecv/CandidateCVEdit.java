@@ -1110,6 +1110,11 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             return;
         }
 
+        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт
+        // анализа — исчезающая TRAY-нотификация; по завершении — итоговая с моделью
+        // и собственником API (при классическом fallback — без AI-блока).
+        AiOperationNotifier.showStarted(notifications, "Запущен AI-анализ навыков резюме…", null);
+
         try {
             // 1. Загружаем уже существующие навыки кандидата из БД для предотвращения дублирования
             List<CandidateSkill> existingSkills = dataManager.load(CandidateSkill.class)
