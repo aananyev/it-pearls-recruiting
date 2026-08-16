@@ -21,13 +21,21 @@
 ## API
 
 ```java
-String processUploadedDescription(String projectName,
-                                  String sourceFileName,
-                                  String sourceText);
+AiExecutionResult processUploadedDescription(String projectName,
+                                             String sourceFileName,
+                                             String sourceText);
 
-String generateShortDescription(String projectName,
-                                String descriptionText);
+AiExecutionResult generateShortDescription(String projectName,
+                                           String descriptionText);
 ```
+
+Возврат — `AiExecutionResult` (`modules/global/.../service/AiExecutionResult.java`):
+`getText()` — сгенерированный текст (для подстановки в сущность/форму) + метаданные
+для контракта пользовательской нотификации: `getModelName()`/`getProviderCode()`
+(какая модель), `getCredentialOwner()` (собственник API — `AiCredentialOwner.ADMIN`
+корпоративное подключение или `USER` личное подключение пользователя). Экраны
+показывают исчезающую TRAY-нотификацию (web-утилита `AiOperationNotifier`) — полный
+контракт: [HRM_HuntTech_AI_User_Notification_Contract](../architecture/HRM_HuntTech_AI_User_Notification_Contract.md).
 
 Стабильные function code:
 
@@ -55,5 +63,6 @@ generateShortDescription:        projectName, sourceText
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-16 | Контракт пользовательской нотификации: методы возвращают `AiExecutionResult` (текст + модель, провайдер, собственник API); `ProjectEdit` показывает исчезающую нотификацию «какая модель что сделала + чей API» |
 | 2026-08-14 | Добавлен `generateShortDescription(projectName, descriptionText)` для функции `PROJECT_SHORT_DESCRIPTION_GENERATE` (кнопка «Кратко» ProjectEdit, sidebar-раздел «Коротко») |
 | 2026-08-12 | Создан facade `ProjectAiService` для `PROJECT_DESCRIPTION_GENERATE` поверх AI Control Plane |

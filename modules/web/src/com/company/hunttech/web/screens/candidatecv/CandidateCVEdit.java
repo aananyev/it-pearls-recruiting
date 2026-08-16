@@ -5,9 +5,12 @@ import com.company.hunttech.core.PdfParserService;
 import com.company.hunttech.core.ResumeRecognitionService;
 import com.company.hunttech.core.WebLoadService;
 import com.company.hunttech.entity.*;
+import com.company.hunttech.service.AiExecutionResult;
+import com.company.hunttech.service.SkillAnalysisResult;
 import com.company.hunttech.service.SkillAnalysisService;
 import com.company.hunttech.web.screens.SelectedCloseAction;
 import com.company.hunttech.web.screens.skilltree.SkillTreeBrowseCheck;
+import com.company.hunttech.web.util.AiOperationNotifier;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
@@ -1053,6 +1056,20 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     /**
+     * Первый не-{@code null} результат анализа уровней навыков — для метаданных
+     * AI-выполнения (все уровни выполняются одной функцией SKILLS_EXTRACT, поэтому
+     * модель/собственник API у результатов одинаковы).
+     */
+    private static SkillAnalysisResult firstNonNull(SkillAnalysisResult... results) {
+        for (SkillAnalysisResult result : results) {
+            if (result != null) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Выполняет анализ текста резюме с помощью сервиса SkillAnalysisService (AI Control Plane + справочник SkillTree)
      * и сохраняет распознанные навыки кандидата в сущность CandidateSkill с уровнями критичности.
      */
@@ -1104,17 +1121,31 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                 }
             }
 
-            // 2. Вызываем SkillAnalysisService для каждого уровня критичности
-            List<SkillTree> mainSkills = skillAnalysisService.analyzeMain(inputText);
-            List<SkillTree> secondarySkills = skillAnalysisService.analyzeSecondary(inputText);
-            List<SkillTree> tertiarySkills = skillAnalysisService.analyzeTertiary(inputText);
+            // 2. Вызываем SkillAnalysisService для каждого уровня критичности.
+            // Каждый результат несёт метаданные AI-выполнения (модель, провайдер,
+            // собственник API) — контракт пользовательской нотификации.
+            SkillAnalysisResult mainResult = skillAnalysisService.analyzeMain(inputText);
+            SkillAnalysisResult secondaryResult = skillAnalysisService.analyzeSecondary(inputText);
+            SkillAnalysisResult tertiaryResult = skillAnalysisService.analyzeTertiary(inputText);
+
+            List<SkillTree> mainSkills = mainResult.getSkills();
+            List<SkillTree> secondarySkills = secondaryResult.getSkills();
+            List<SkillTree> tertiarySkills = tertiaryResult.getSkills();
+            SkillAnalysisResult allResult = null;
 
             // Если списки по уровням пусты (например, при классическом fallback), анализируем все навыки как основные
             if ((mainSkills == null || mainSkills.isEmpty()) &&
                 (secondarySkills == null || secondarySkills.isEmpty()) &&
                 (tertiarySkills == null || tertiarySkills.isEmpty())) {
-                mainSkills = skillAnalysisService.analyzeAll(inputText);
+                allResult = skillAnalysisService.analyzeAll(inputText);
+                mainSkills = allResult.getSkills();
             }
+
+            // AI-метаданные для нотификации: все уровни выполняются одной функцией
+            // SKILLS_EXTRACT (модель/собственник API одинаковы) — берём первый успешный;
+            // при классическом fallback (AI недоступен) метаданные отсутствуют.
+            SkillAnalysisResult aiSourceResult = firstNonNull(mainResult, secondaryResult, tertiaryResult, allResult);
+            AiExecutionResult aiExecution = aiSourceResult == null ? null : aiSourceResult.getAiExecution();
 
             List<CandidateSkill> toSave = new ArrayList<>();
             Set<UUID> processedSkillIds = new HashSet<>(existingSkillIds);
@@ -1184,6 +1215,13 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     savedCount,
                     (existingOrDuplicate > 0 ? "<br/>ℹ️ Уже присутствуют у кандидата: <b>" + existingOrDuplicate + "</b>" : "")
             );
+
+            // Контракт пользовательской нотификации: в исчезающую нотификацию добавляем
+            // блок «какая модель + собственник API» (AI реально выполнял анализ);
+            // при классическом fallback (AI недоступен) метаданных нет — блок не добавляется.
+            if (aiExecution != null) {
+                statsDescription = AiOperationNotifier.buildDescription(aiExecution, statsDescription);
+            }
 
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption("Статистика анализа навыков")

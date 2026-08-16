@@ -1,6 +1,7 @@
 package com.company.hunttech.app;
 
 import com.company.hunttech.config.HunttechProjectLogoConfig;
+import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.AiExecutionService;
 import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.core.global.DevelopmentException;
@@ -98,6 +99,11 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
         // действительно удалён нейросетью. Классический flood-fill и простые
         // конвертация/ресайз AI-обработкой не считаются.
         boolean aiProcessed = false;
+        // Метаданные платного AI-выполнения (модель, провайдер, собственник API) —
+        // заполняются только когда фон удалён AI-функцией PROJECT_LOGO_IMAGE_GENERATE;
+        // для локального rembg и классики остаются null (нотификация с собственником API
+        // не показывается — контракт пользовательской нотификации).
+        AiExecutionResult aiExecutionInfo = null;
 
         try {
             BufferedImage source = ImageIO.read(new ByteArrayInputStream(data));
@@ -123,13 +129,16 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
             } else if (!candidatePhoto) {
                 // 0.1. Платный AI-этап (если включён hunttech.projectLogo.ai.enabled) — только
                 // для логотипов: функция заточена под удаление фона логотипа, для фото людей
-                // не используется. При недоступности — классический конвейер.
-                byte[] aiResult = tryAiBackgroundRemoval(data, fileName, config);
-                if (aiResult != null) {
-                    BufferedImage aiImage = ImageIO.read(new ByteArrayInputStream(aiResult));
+                // не используется. При недоступности — классический конвейер. Метаданные
+                // AI-выполнения сохраняются для нотификации пользователя (модель + собственник
+                // API — контракт HRM_HuntTech_AI_User_Notification_Contract).
+                AiExecutionResult aiExecution = tryAiBackgroundRemoval(data, fileName, config);
+                if (aiExecution != null) {
+                    BufferedImage aiImage = ImageIO.read(new ByteArrayInputStream(aiExecution.getImage()));
                     if (aiImage != null) {
                         source = aiImage;
                         aiProcessed = true;
+                        aiExecutionInfo = aiExecution;
                     } else {
                         log.warn("AI-результат логотипа {} не является растровым изображением, используется оригинал",
                                 fileName);
@@ -175,7 +184,8 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
                     fileName, source.getWidth(), source.getHeight(),
                     result.getWidth(), result.getHeight(), config.getFormat());
 
-            return new ProcessedImage(output.toByteArray(), name, config.getFormat(), true, aiProcessed);
+            return new ProcessedImage(output.toByteArray(), name, config.getFormat(), true,
+                    aiProcessed, aiExecutionInfo);
         } catch (IOException e) {
             log.error("Ошибка обработки изображения {}: {}", fileName, e.toString(), e);
             throw new DevelopmentException("Failed to process image: " + e.getMessage(), e);
@@ -267,9 +277,10 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
      * провайдера, сетевой таймаут) не прерывает загрузку: возвращается {@code null},
      * и вызывающий код продолжает классическим конвейером.</p>
      *
-     * @return обработанное изображение или {@code null} при недоступности AI
+     * @return результат AI-выполнения (изображение + метаданные модели/собственника API)
+     *         или {@code null} при недоступности AI
      */
-    private byte[] tryAiBackgroundRemoval(byte[] data, String fileName, HunttechProjectLogoConfig config) {
+    private AiExecutionResult tryAiBackgroundRemoval(byte[] data, String fileName, HunttechProjectLogoConfig config) {
         if (!config.getAiProcessingEnabled()) {
             log.debug("AI-обработка логотипа отключена конфигом hunttech.projectLogo.ai.enabled=false");
             return null;
@@ -277,13 +288,14 @@ public class ProjectLogoImageProcessingServiceBean implements ProjectLogoImagePr
         try {
             Map<String, Object> context = new LinkedHashMap<>();
             context.put("sourceFileName", safeValue(fileName));
-            byte[] result = aiExecutionService.executeImage(
+            AiExecutionResult result = aiExecutionService.executeImage(
                     FUNCTION_PROJECT_LOGO_IMAGE_GENERATE, context, data, detectMimeType(fileName));
-            if (result == null || result.length == 0) {
+            if (result == null || result.getImage() == null || result.getImage().length == 0) {
                 log.warn("AI вернул пустой результат для логотипа {}, используется классический конвейер", fileName);
                 return null;
             }
-            log.info("Логотип {} обработан AI-функцией {}", fileName, FUNCTION_PROJECT_LOGO_IMAGE_GENERATE);
+            log.info("Логотип {} обработан AI-функцией {} (модель {}, API {})", fileName,
+                    FUNCTION_PROJECT_LOGO_IMAGE_GENERATE, result.getModelName(), result.getCredentialOwner());
             return result;
         } catch (Exception e) {
             log.warn("AI-обработка логотипа {} недоступна, используется классический конвейер. Причина: {}",

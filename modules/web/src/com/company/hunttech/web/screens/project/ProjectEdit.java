@@ -6,7 +6,9 @@ import com.company.hunttech.entity.CompanyDepartament;
 import com.company.hunttech.entity.OpenPosition;
 import com.company.hunttech.entity.Person;
 import com.company.hunttech.entity.Project;
+import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.ProjectAiService;
+import com.company.hunttech.web.util.AiOperationNotifier;
 import com.haulmont.cuba.core.app.FileStorageService;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.CommitContext;
@@ -262,9 +264,9 @@ public class ProjectEdit extends StandardEditor<Project> {
                 .withCaption(messages.getMessage(getClass(), "msgProjectShortDescriptionStarted"))
                 .show();
 
-        BackgroundTask<Integer, String> task = new BackgroundTask<Integer, String>(120, this) {
+        BackgroundTask<Integer, AiExecutionResult> task = new BackgroundTask<Integer, AiExecutionResult>(120, this) {
             @Override
-            public String run(TaskLifeCycle<Integer> taskLifeCycle) {
+            public AiExecutionResult run(TaskLifeCycle<Integer> taskLifeCycle) {
                 // Middleware-вызов: экран не выбирает provider/model/credential
                 // и не содержит prompt — маршрутизацию выполняет AI Control Plane
                 // по функции PROJECT_SHORT_DESCRIPTION_GENERATE.
@@ -272,14 +274,16 @@ public class ProjectEdit extends StandardEditor<Project> {
             }
 
             @Override
-            public void done(String shortDescription) {
-                getEditedEntity().setShortDescription(shortDescription);
-                applyShortDescriptionSidebar(shortDescription);
+            public void done(AiExecutionResult result) {
+                getEditedEntity().setShortDescription(result.getText());
+                applyShortDescriptionSidebar(result.getText());
                 projectDescriptionShortButton.setEnabled(true);
                 updateProjectDescriptionShortButtonState();
-                notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption(messages.getMessage(ProjectEdit.class, "msgProjectShortDescriptionDone"))
-                        .show();
+                // Контракт пользовательской нотификации: исчезающая TRAY-нотификация
+                // с указанием модели и собственника API (административный/личный).
+                AiOperationNotifier.show(notifications, result,
+                        messages.getMessage(ProjectEdit.class, "msgProjectShortDescriptionDone"),
+                        null);
             }
 
             @Override
@@ -443,22 +447,24 @@ public class ProjectEdit extends StandardEditor<Project> {
                 .withCaption(messages.getMessage(getClass(), "msgProjectDescriptionAiStarted"))
                 .show();
 
-        BackgroundTask<Integer, String> task = new BackgroundTask<Integer, String>(120, this) {
+        BackgroundTask<Integer, AiExecutionResult> task = new BackgroundTask<Integer, AiExecutionResult>(120, this) {
             @Override
-            public String run(TaskLifeCycle<Integer> taskLifeCycle) {
+            public AiExecutionResult run(TaskLifeCycle<Integer> taskLifeCycle) {
                 return projectAiService.processUploadedDescription(
                         projectName, sourceFileName, sourceText);
             }
 
             @Override
-            public void done(String processedText) {
+            public void done(AiExecutionResult result) {
                 projectDescriptionUpload.setEnabled(true);
-                projectDescriptionRichTextArea.setValue(toSafeRichText(processedText));
+                projectDescriptionRichTextArea.setValue(toSafeRichText(result.getText()));
                 projectDescriptionAiStatus.setValue(
                         messages.getMessage(ProjectEdit.class, "msgProjectDescriptionAiDone"));
-                notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption(messages.getMessage(ProjectEdit.class, "msgProjectDescriptionAiDone"))
-                        .show();
+                // Контракт пользовательской нотификации: исчезающая TRAY-нотификация
+                // с указанием модели и собственника API (административный/личный).
+                AiOperationNotifier.show(notifications, result,
+                        messages.getMessage(ProjectEdit.class, "msgProjectDescriptionAiDone"),
+                        null);
             }
 
             @Override

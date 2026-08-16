@@ -29,14 +29,14 @@ public class HrmAiServiceBean implements HrmAiService {
     public String standardizeVacancyDescription(String rawText) {
         return aiExecutionService.executeText(
                 FUNCTION_STANDARDIZE_VACANCY,
-                Collections.<String, Object>singletonMap("rawDescription", rawText));
+                Collections.<String, Object>singletonMap("rawDescription", rawText)).getText();
     }
 
     @Override
     public String generateVacancyArtifact(String standardizedDescription, String functionCode) {
         return aiExecutionService.executeText(
                 functionCode,
-                Collections.<String, Object>singletonMap("description", standardizedDescription));
+                Collections.<String, Object>singletonMap("description", standardizedDescription)).getText();
     }
 
     /**

@@ -29,6 +29,12 @@ import java.util.List;
  * (таблица {@code HUNTTECH_AI_FUNCTION_CONFIGURATION}) без выпуска кода. При недоступности
  * AI (функция не активна, нет credentials, ошибка провайдера) сервис бесшовно переходит
  * на классический словарный поиск навыков по тексту — анализ не прерывается.</p>
+ *
+ * <p><b>Контракт пользовательской нотификации</b>: каждый метод возвращает
+ * {@link SkillAnalysisResult} — навыки + метаданные AI-выполнения
+ * ({@link AiExecutionResult}: модель, провайдер, собственник API). Если сработал
+ * классический fallback (AI не выполнялся), метаданные равны {@code null} — экран
+ * не показывает нотификацию «обработано ИИ».</p>
  */
 public interface SkillAnalysisService {
 
@@ -59,28 +65,29 @@ public interface SkillAnalysisService {
      * которые в нём упоминаются.
      *
      * @param sourceText текст резюме кандидата или описания вакансии
-     * @return коллекция навыков справочника (без дубликатов, в порядке обнаружения);
-     *         навыки, отсутствующие в справочнике, записываются в лог (WARN)
+     * @return результат анализа: навыки справочника (без дубликатов, в порядке обнаружения)
+     *         + метаданные AI-выполнения; навыки, отсутствующие в справочнике, записываются
+     *         в лог (WARN); при классическом fallback {@code getAiExecution()} равен {@code null}
      * @throws com.haulmont.cuba.core.global.DevelopmentException если текст пуст
      *         или превышает допустимый размер
      */
-    List<SkillTree> analyzeAll(String sourceText);
+    SkillAnalysisResult analyzeAll(String sourceText);
 
     /**
      * Анализирует текст и возвращает основные/обязательные навыки.
      * Для описания вакансии — обязательные требования, для резюме — ключевые навыки.
      */
-    List<SkillTree> analyzeMain(String sourceText);
+    SkillAnalysisResult analyzeMain(String sourceText);
 
     /**
      * Анализирует текст и возвращает второстепенные/желательные навыки.
      * Для описания вакансии — навыки «желательно», для резюме — дополнительные навыки.
      */
-    List<SkillTree> analyzeSecondary(String sourceText);
+    SkillAnalysisResult analyzeSecondary(String sourceText);
 
     /**
      * Анализирует текст и возвращает третьестепенные навыки, если такие упоминаются
      * (редко встречающиеся, не ключевые). Если третьестепенных навыков нет — пустой список.
      */
-    List<SkillTree> analyzeTertiary(String sourceText);
+    SkillAnalysisResult analyzeTertiary(String sourceText);
 }

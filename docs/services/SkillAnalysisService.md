@@ -84,13 +84,19 @@ String LEVEL_MAIN = "MAIN";        // основные/обязательные
 String LEVEL_SECONDARY = "SECONDARY"; // второстепенные/желательные
 String LEVEL_TERTIARY = "TERTIARY";   // третьестепенные
 
-List<SkillTree> analyzeAll(String sourceText);       // 1. все найденные навыки
-List<SkillTree> analyzeMain(String sourceText);      // 2. основные/обязательные
-List<SkillTree> analyzeSecondary(String sourceText); // 3. второстепенные/желательные
-List<SkillTree> analyzeTertiary(String sourceText);  // 4. третьестепенные (если есть)
+SkillAnalysisResult analyzeAll(String sourceText);       // 1. все найденные навыки
+SkillAnalysisResult analyzeMain(String sourceText);      // 2. основные/обязательные
+SkillAnalysisResult analyzeSecondary(String sourceText); // 3. второстепенные/желательные
+SkillAnalysisResult analyzeTertiary(String sourceText);  // 4. третьестепенные (если есть)
 ```
 
-Возврат — коллекция сущностей `SkillTree` (view `skillTree-parser-view`), без дубликатов, в порядке обнаружения. Исключение — `DevelopmentException`: пустой текст («Текст для анализа навыков пуст.»), текст длиннее 120 000 символов.
+`SkillAnalysisResult` (`modules/global/.../service/SkillAnalysisResult.java`):
+`getSkills()` — коллекция сущностей `SkillTree` (view `skillTree-parser-view`), без
+дубликатов, в порядке обнаружения; `getAiExecution()` — метаданные AI-выполнения
+(`AiExecutionResult`: модель, провайдер, собственник API) **при AI-анализе** и `null`
+при классическом fallback (экран не показывает нотификацию «обработано ИИ» — контракт
+[HRM_HuntTech_AI_User_Notification_Contract](../architecture/HRM_HuntTech_AI_User_Notification_Contract.md)).
+Исключение — `DevelopmentException`: пустой текст («Текст для анализа навыков пуст.»), текст длиннее 120 000 символов.
 
 ## 4. Алгоритм
 
@@ -156,4 +162,5 @@ export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-16 | Контракт пользовательской нотификации: методы возвращают `SkillAnalysisResult` (навыки + метаданные AI-выполнения: модель, провайдер, собственник API; `null` при классическом fallback); `CandidateCVEdit` показывает модель/собственника API в исчезающей нотификации статистики |
 | 2026-08-15 | Создание сервиса: интерфейс `SkillAnalysisService` (4 метода: all/main/secondary/tertiary), реализация `SkillAnalysisServiceBean` (AI-функция `SKILLS_EXTRACT` через `AiExecutionService` + классический fallback), словарный матчинг `SkillNameMatcher` (токенное сопоставление, дедупликация, лог неизвестных навыков для администратора), seed-миграция функции (INSERT-only), proxy в web-spring.xml, тесты (матчер/бин/seed-контракт) |

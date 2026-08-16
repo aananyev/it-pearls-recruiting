@@ -50,7 +50,7 @@ public class AiExecutionServiceBean implements AiExecutionService {
     private AiSecretService aiSecretService;
 
     @Override
-    public String executeText(String functionCode, Map<String, Object> context) {
+    public AiExecutionResult executeText(String functionCode, Map<String, Object> context) {
         AiFunctionConfiguration function = loadFunction(functionCode);
         validateTextCapability(function);
         String prompt = buildPrompt(function, context == null ? Collections.emptyMap() : context);
@@ -83,8 +83,8 @@ public class AiExecutionServiceBean implements AiExecutionService {
     }
 
     @Override
-    public byte[] executeImage(String functionCode, Map<String, Object> context,
-                               byte[] sourceImage, String sourceMimeType) {
+    public AiExecutionResult executeImage(String functionCode, Map<String, Object> context,
+                                          byte[] sourceImage, String sourceMimeType) {
         if (sourceImage == null || sourceImage.length == 0) {
             throw new DevelopmentException("Для AI-обработки изображения не переданы данные.");
         }
@@ -119,20 +119,22 @@ public class AiExecutionServiceBean implements AiExecutionService {
         return executeWithAdminImage(function, prompt, sourceImage, sourceMimeType);
     }
 
-    private byte[] executeWithUserImage(AiFunctionConfiguration function,
-                                        UserAiFunctionOverride override,
-                                        String prompt, byte[] sourceImage, String sourceMimeType) {
+    private AiExecutionResult executeWithUserImage(AiFunctionConfiguration function,
+                                                   UserAiFunctionOverride override,
+                                                   String prompt, byte[] sourceImage, String sourceMimeType) {
         UserAiConfiguration configuration = override.getUserAiConfiguration();
         String model = configuration.getDefaultModelName();
         if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(override.getModelName())) {
             model = override.getModelName();
         }
-        return executeProviderImage(configuration.getProviderCode(), configuration.getApiKey(), model,
+        byte[] image = executeProviderImage(configuration.getProviderCode(), configuration.getApiKey(), model,
                 function, prompt, sourceImage, sourceMimeType);
+        return AiExecutionResult.imageResult(function.getCode(), function.getName(), function.getCapability(),
+                model, configuration.getProviderCode(), AiCredentialOwner.USER, image);
     }
 
-    private byte[] executeWithAdminImage(AiFunctionConfiguration function, String prompt,
-                                         byte[] sourceImage, String sourceMimeType) {
+    private AiExecutionResult executeWithAdminImage(AiFunctionConfiguration function, String prompt,
+                                                    byte[] sourceImage, String sourceMimeType) {
         AdminAiConfiguration configuration = function.getAdminConfiguration();
         if (!isUsableAdminConfiguration(configuration)) {
             throw new DevelopmentException(
@@ -141,8 +143,10 @@ public class AiExecutionServiceBean implements AiExecutionService {
         String model = isConfigured(function.getAdminModelName())
                 ? function.getAdminModelName() : configuration.getDefaultModelName();
         String apiKey = aiSecretService.decrypt(configuration.getApiKeyEncrypted());
-        return executeProviderImage(configuration.getProviderCode(), apiKey, model, function,
+        byte[] image = executeProviderImage(configuration.getProviderCode(), apiKey, model, function,
                 prompt, sourceImage, sourceMimeType);
+        return AiExecutionResult.imageResult(function.getCode(), function.getName(), function.getCapability(),
+                model, configuration.getProviderCode(), AiCredentialOwner.ADMIN, image);
     }
 
     private byte[] executeProviderImage(String providerCode, String apiKey, String model,
@@ -200,19 +204,21 @@ public class AiExecutionServiceBean implements AiExecutionService {
         return TemplateHelper.processTemplate(function.getPromptTemplate(), context);
     }
 
-    private String executeWithUser(AiFunctionConfiguration function,
-                                   UserAiFunctionOverride override,
-                                   String prompt) {
+    private AiExecutionResult executeWithUser(AiFunctionConfiguration function,
+                                              UserAiFunctionOverride override,
+                                              String prompt) {
         UserAiConfiguration configuration = override.getUserAiConfiguration();
         String model = configuration.getDefaultModelName();
         if (Boolean.TRUE.equals(function.getAllowModelOverride()) && isConfigured(override.getModelName())) {
             model = override.getModelName();
         }
-        return executeProvider(configuration.getProviderCode(), configuration.getApiKey(), model,
+        String text = executeProvider(configuration.getProviderCode(), configuration.getApiKey(), model,
                 function, prompt);
+        return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
+                model, configuration.getProviderCode(), AiCredentialOwner.USER, text);
     }
 
-    private String executeWithAdmin(AiFunctionConfiguration function, String prompt) {
+    private AiExecutionResult executeWithAdmin(AiFunctionConfiguration function, String prompt) {
         AdminAiConfiguration configuration = function.getAdminConfiguration();
         if (!isUsableAdminConfiguration(configuration)) {
             throw new DevelopmentException(
@@ -221,7 +227,9 @@ public class AiExecutionServiceBean implements AiExecutionService {
         String model = isConfigured(function.getAdminModelName())
                 ? function.getAdminModelName() : configuration.getDefaultModelName();
         String apiKey = aiSecretService.decrypt(configuration.getApiKeyEncrypted());
-        return executeProvider(configuration.getProviderCode(), apiKey, model, function, prompt);
+        String text = executeProvider(configuration.getProviderCode(), apiKey, model, function, prompt);
+        return AiExecutionResult.textResult(function.getCode(), function.getName(), function.getCapability(),
+                model, configuration.getProviderCode(), AiCredentialOwner.ADMIN, text);
     }
 
     private String executeProvider(String providerCode,

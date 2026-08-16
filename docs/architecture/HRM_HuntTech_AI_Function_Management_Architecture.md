@@ -4,7 +4,7 @@
 > Платформа: CUBA Platform 7.3.  
 > Статус: целевая архитектурная спецификация.  
 > Базовый GitHub `master` при подготовке документа: `aee44f6cd726b3dbffe305a1414ac0375c93ab1e`.  
-> Связанные документы: [AI Integration](../integrations/ai/AI_INTEGRATION.md), [UI/UX Design Concept](HRM_HuntTech_UI_UX_Design_Concept.md), [Edit Screen Shared Style Contract](HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md), [XML Screen Documentation Standard](XML_Screen_Documentation_Standard.md).
+> Связанные документы: [AI Integration](../integrations/ai/AI_INTEGRATION.md), [UI/UX Design Concept](HRM_HuntTech_UI_UX_Design_Concept.md), [Edit Screen Shared Style Contract](HRM_HuntTech_Edit_Screen_Shared_Style_Contract.md), [XML Screen Documentation Standard](XML_Screen_Documentation_Standard.md), [AI User Notification Contract](HRM_HuntTech_AI_User_Notification_Contract.md).
 
 ## Business & Context Intro
 

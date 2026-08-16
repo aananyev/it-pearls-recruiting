@@ -76,8 +76,8 @@ public class ProjectLogoAiFunctionSeedContractTest {
                 "modules/global/src/com/company/hunttech/entity/ai/AiCapability.java");
         String provider = readProjectFile("modules/core/src/com/company/hunttech/core/ai/OpenAiProvider.java");
 
-        assertTrue(service.contains("byte[] executeImage("));
-        assertTrue(bean.contains("public byte[] executeImage("));
+        assertTrue(service.contains("AiExecutionResult executeImage("));
+        assertTrue(bean.contains("public AiExecutionResult executeImage("));
         assertTrue(bean.contains("validateImageCapability"));
         assertTrue(capability.contains("IMAGE_GENERATION(\"IMAGE_GENERATION\")"));
         assertTrue(provider.contains("images/edits"));
