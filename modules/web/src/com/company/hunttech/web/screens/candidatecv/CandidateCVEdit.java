@@ -39,14 +39,17 @@ import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.extractor.POITextExtractor;
+import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import javax.inject.Inject;
+import javax.swing.text.rtf.RTFEditorKit;
 import java.awt.image.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @UiController("hunttech_CandidateCV.edit")
@@ -61,6 +64,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";
     private static final String EXTENSION_DOCX = "docx";
+    private static final String EXTENSION_RTF = "rtf";
     private static final String NAVIGATION_STYLE = "borderless candidate-cv-nav-item";
     private static final String ACTIVE_NAVIGATION_STYLE =
             "borderless candidate-cv-nav-item candidate-cv-nav-item-active";
@@ -500,38 +504,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
 
             } else if (fileDescriptor.getExtension().equals(EXTENSION_DOC)) {
-                /*
-
-                POIFSFileSystem fileSystem = new POIFSFileSystem(inputStream);
-                ExtractorFactory.createExtractor(fileSystem);
-                POIOLE2TextExtractor oleTextExtractor =
-                        ExtractorFactory.createExtractor(fileSystem);
-                POITextExtractor[] embeddedExtractors =
-                        ExtractorFactory.getEmbededDocsTextExtractors(oleTextExtractor);
-
-                for (POITextExtractor textExtractor : embeddedExtractors) {
-                    if (textExtractor instanceof WordExtractor) {
-                        WordExtractor wordExtractor = (WordExtractor) textExtractor;
-                        String[] paragraphText = wordExtractor.getParagraphText();
-                        for (String paragraph : paragraphText) {
-                            textResume += paragraph;
-                        }
-                        // Display the document's header and footer text
-                        // System.out.println("Footer text: " + wordExtractor.getFooterText());
-                        // System.out.println("Header text: " + wordExtractor.getHeaderText());
-                    }
+                // Word 97-2003 (.doc): текстовый слой извлекается HWPF-экстрактором
+                // Apache POI (poi-scratchpad), так же как PDF/DOCX — в RichTextArea вкладки «Резюме».
+                try (InputStream docInputStream = fileLoader.openStream(fileDescriptor)) {
+                    WordExtractor wordExtractor = new WordExtractor(docInputStream);
+                    textResume = wordExtractor.getText();
                 }
-
-                //    POITextExtractor extractor = createExtractor(inputStream);
-                //    textResume = extractor.getText();
-
-                 */
-                notifications.create(Notifications.NotificationType.WARNING)
-                        .withDescription("Функция загрузки ." + EXTENSION_DOC + " пока не реализована.")
-                        .withCaption(messageBundle.getMessage("msgWarning"))
-                        .show();
-
-
             } else if (fileDescriptor.getExtension().equals(EXTENSION_DOCX)) {
 
                 XWPFDocument doc = new XWPFDocument(inputStream);
@@ -543,8 +521,17 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     cvTextInitialized = true;
                     candidateCVRichTextArea.setValue(textResume.replaceAll("\n", breakLine[0]));
                 }
+            } else if (fileDescriptor.getExtension().equals(EXTENSION_RTF)) {
+                // Rich Text Format (.rtf): текст извлекается встроенным в JDK RTFEditorKit
+                // (Rich-разметка отбрасывается, остаётся plain text резюме).
+                RTFEditorKit rtfEditorKit = new RTFEditorKit();
+                javax.swing.text.Document rtfDocument = rtfEditorKit.createDefaultDocument();
+                try (Reader rtfReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+                    rtfEditorKit.read(rtfReader, rtfDocument, 0);
+                }
+                textResume = rtfDocument.getText(0, rtfDocument.getLength());
             }
-        } catch (FileStorageException | IOException | IllegalArgumentException e) {
+        } catch (FileStorageException | IOException | IllegalArgumentException | javax.swing.text.BadLocationException e) {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withDescription("Ошибка распознавания документа " + fileDescriptor.getName())
                     .show();
