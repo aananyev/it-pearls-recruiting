@@ -607,7 +607,6 @@
                                           dataContainer="candidateCVDc"
                                           property="letter"
                                           height="100%"
-                                          caption="msg://msgLetter"
                                           width="100%"
                                           stylename="candidate-cv-rich-editor"/>
                             <richTextArea id="commentLetterRichTextArea"
