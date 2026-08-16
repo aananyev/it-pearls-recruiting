@@ -47,8 +47,13 @@ public class TextProcessingServiceBean implements TextProcessingService {
 
     @Override
     public String formatHtml(String rawText) {
+        return formatHtmlWithResult(rawText).getText();
+    }
+
+    @Override
+    public TextProcessingResult formatHtmlWithResult(String rawText) {
         if (rawText == null || rawText.trim().isEmpty()) {
-            return "";
+            return TextProcessingResult.localResult("");
         }
 
         try {
@@ -56,19 +61,25 @@ public class TextProcessingServiceBean implements TextProcessingService {
             context.put(PARAM_SOURCE_TEXT, rawText.trim());
             AiExecutionResult result = aiExecutionService.executeText(FUNCTION_TEXT_SMART_FORMAT_HTML, context);
             if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
-                return cleanAiHtmlOutput(result.getText().trim());
+                String cleaned = cleanAiHtmlOutput(result.getText().trim());
+                return TextProcessingResult.aiResult(cleaned, result);
             }
         } catch (RuntimeException e) {
             log.warn("AI-форматирование HTML недоступно, используется локальный типографический движок. Причина: {}", e.toString());
         }
 
-        return formatHtmlLocally(rawText);
+        return TextProcessingResult.localResult(formatHtmlLocally(rawText));
     }
 
     @Override
     public String formatPlainText(String rawText) {
+        return formatPlainTextWithResult(rawText).getText();
+    }
+
+    @Override
+    public TextProcessingResult formatPlainTextWithResult(String rawText) {
         if (rawText == null || rawText.trim().isEmpty()) {
-            return "";
+            return TextProcessingResult.localResult("");
         }
 
         try {
@@ -76,13 +87,14 @@ public class TextProcessingServiceBean implements TextProcessingService {
             context.put(PARAM_SOURCE_TEXT, rawText.trim());
             AiExecutionResult result = aiExecutionService.executeText(FUNCTION_TEXT_SMART_FORMAT_PLAIN, context);
             if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
-                return cleanAiPlainOutput(result.getText().trim());
+                String cleaned = cleanAiPlainOutput(result.getText().trim());
+                return TextProcessingResult.aiResult(cleaned, result);
             }
         } catch (RuntimeException e) {
             log.warn("AI-форматирование Plain Text недоступно, используется локальный типографический движок. Причина: {}", e.toString());
         }
 
-        return formatPlainTextLocally(rawText);
+        return TextProcessingResult.localResult(formatPlainTextLocally(rawText));
     }
 
     /**

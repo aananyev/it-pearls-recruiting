@@ -5,6 +5,7 @@ import com.company.hunttech.entity.ai.AiCapability;
 import com.company.hunttech.service.AiCredentialOwner;
 import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.AiExecutionService;
+import com.company.hunttech.service.TextProcessingResult;
 import com.company.hunttech.service.TextProcessingService;
 import com.company.hunttech.service.TextProcessingServiceBean;
 import com.haulmont.cuba.core.global.DevelopmentException;
@@ -16,12 +17,15 @@ import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
  * Контейнерный тест {@link TextProcessingServiceBean} со стабом {@link AiExecutionService}
- * и проверкой локального движка типографического форматирования в HTML и Plain Text.
+ * и проверкой соблюдения контракта AI-нотификации (USER/ADMIN API ключи, промпты из таблиц).
  */
 public class TextProcessingServiceBeanTest {
 
@@ -50,12 +54,16 @@ public class TextProcessingServiceBeanTest {
                 "<b>ОПЫТ РАБОТЫ</b><p>Java разработчик в HuntTech (2020-2024)</p><ul><li>Spring Boot</li><li>PostgreSQL</li></ul>");
 
         String input = "Опыт работы: Java разработчик в HuntTech (2020-2024)\n* Spring Boot\n* PostgreSQL";
-        String html = bean.formatHtml(input);
+        TextProcessingResult result = bean.formatHtmlWithResult(input);
 
-        assertNotNull(html);
-        assertTrue(html.contains("ОПЫТ РАБОТЫ"));
-        assertTrue(html.contains("Spring Boot"));
-        assertTrue(html.contains("PostgreSQL"));
+        assertNotNull(result);
+        assertTrue(result.isAiFormatted());
+        assertNotNull(result.getAiExecution());
+        assertEquals("test-model", result.getAiExecution().getModelName());
+        assertEquals(AiCredentialOwner.ADMIN, result.getAiExecution().getCredentialOwner());
+        assertTrue(result.getText().contains("ОПЫТ РАБОТЫ"));
+        assertTrue(result.getText().contains("Spring Boot"));
+        assertTrue(result.getText().contains("PostgreSQL"));
     }
 
     @Test
@@ -64,11 +72,14 @@ public class TextProcessingServiceBeanTest {
                 "═══ ОПЫТ РАБОТЫ ═══\nJava разработчик в HuntTech (2020-2024)\n  • Spring Boot\n  • PostgreSQL");
 
         String input = "Опыт работы: Java разработчик в HuntTech (2020-2024)\n* Spring Boot\n* PostgreSQL";
-        String plain = bean.formatPlainText(input);
+        TextProcessingResult result = bean.formatPlainTextWithResult(input);
 
-        assertNotNull(plain);
-        assertTrue(plain.contains("ОПЫТ РАБОТЫ"));
-        assertTrue(plain.contains("Spring Boot"));
+        assertNotNull(result);
+        assertTrue(result.isAiFormatted());
+        assertNotNull(result.getAiExecution());
+        assertEquals("test-model", result.getAiExecution().getModelName());
+        assertTrue(result.getText().contains("ОПЫТ РАБОТЫ"));
+        assertTrue(result.getText().contains("Spring Boot"));
     }
 
     @Test
@@ -76,16 +87,18 @@ public class TextProcessingServiceBeanTest {
         stub.setThrowException(true);
 
         String input = "Контакты\nИван Иванов\n+7 999 123-45-67\n\nОпыт работы\nJava разработчик в HuntTech\n- Spring Framework\n- PostgreSQL\n- Docker\n\nОбразование\nМГТУ им. Баумана, 2018";
-        String html = bean.formatHtml(input);
+        TextProcessingResult result = bean.formatHtmlWithResult(input);
 
-        assertNotNull(html);
-        assertTrue(html.contains("КОНТАКТЫ"));
-        assertTrue(html.contains("ОПЫТ РАБОТЫ"));
-        assertTrue(html.contains("ОБРАЗОВАНИЕ"));
-        assertTrue(html.contains("<ul"));
-        assertTrue(html.contains("<li"));
-        assertTrue(html.contains("Spring Framework"));
-        assertTrue(html.contains("МГТУ им. Баумана"));
+        assertNotNull(result);
+        assertFalse(result.isAiFormatted());
+        assertNull(result.getAiExecution());
+        assertTrue(result.getText().contains("КОНТАКТЫ"));
+        assertTrue(result.getText().contains("ОПЫТ РАБОТЫ"));
+        assertTrue(result.getText().contains("ОБРАЗОВАНИЕ"));
+        assertTrue(result.getText().contains("<ul"));
+        assertTrue(result.getText().contains("<li"));
+        assertTrue(result.getText().contains("Spring Framework"));
+        assertTrue(result.getText().contains("МГТУ им. Баумана"));
     }
 
     @Test
@@ -93,14 +106,16 @@ public class TextProcessingServiceBeanTest {
         stub.setThrowException(true);
 
         String input = "Контакты\nИван Иванов\n+7 999 123-45-67\n\nОпыт работы\nJava разработчик в HuntTech\n- Spring Framework\n- PostgreSQL\n\nНавыки\n* Java Core\n* SQL";
-        String plain = bean.formatPlainText(input);
+        TextProcessingResult result = bean.formatPlainTextWithResult(input);
 
-        assertNotNull(plain);
-        assertTrue(plain.contains("═══ КОНТАКТЫ ═══"));
-        assertTrue(plain.contains("═══ ОПЫТ РАБОТЫ ═══"));
-        assertTrue(plain.contains("═══ НАВЫКИ ═══"));
-        assertTrue(plain.contains("• Spring Framework"));
-        assertTrue(plain.contains("• Java Core"));
+        assertNotNull(result);
+        assertFalse(result.isAiFormatted());
+        assertNull(result.getAiExecution());
+        assertTrue(result.getText().contains("═══ КОНТАКТЫ ═══"));
+        assertTrue(result.getText().contains("═══ ОПЫТ РАБОТЫ ═══"));
+        assertTrue(result.getText().contains("═══ НАВЫКИ ═══"));
+        assertTrue(result.getText().contains("• Spring Framework"));
+        assertTrue(result.getText().contains("• Java Core"));
     }
 
     @Test

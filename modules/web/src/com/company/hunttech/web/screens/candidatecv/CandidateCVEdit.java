@@ -8,6 +8,7 @@ import com.company.hunttech.entity.*;
 import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.SkillAnalysisResult;
 import com.company.hunttech.service.SkillAnalysisService;
+import com.company.hunttech.service.TextProcessingResult;
 import com.company.hunttech.service.TextProcessingService;
 import com.company.hunttech.web.screens.SelectedCloseAction;
 import com.company.hunttech.web.screens.skilltree.SkillTreeBrowseCheck;
@@ -1426,15 +1427,21 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         try {
-            String formattedHtml = textProcessingService.formatHtml(currentText);
-            if (formattedHtml != null && !formattedHtml.trim().isEmpty()) {
-                candidateCVRichTextArea.setValue(formattedHtml.replaceAll("\n", breakLine[0]));
+            TextProcessingResult result = textProcessingService.formatHtmlWithResult(currentText);
+            if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
+                candidateCVRichTextArea.setValue(result.getText().replaceAll("\n", breakLine[0]));
                 setColorHighlightingCompetencies();
-                notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption("Умное форматирование")
-                        .withDescription("Текст резюме успешно структурирован и отформатирован для удобства чтения.")
-                        .withHideDelayMs(3000)
-                        .show();
+                if (result.getAiExecution() != null) {
+                    AiOperationNotifier.show(notifications, result.getAiExecution(),
+                            "Умное форматирование резюме выполнено",
+                            "Текст резюме структурирован с помощью нейросети.");
+                } else {
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption("Форматирование резюме")
+                            .withDescription("Текст резюме структурирован локальным типографическим движком.")
+                            .withHideDelayMs(3000)
+                            .show();
+                }
             }
         } catch (Exception ex) {
             notifications.create(Notifications.NotificationType.ERROR)
