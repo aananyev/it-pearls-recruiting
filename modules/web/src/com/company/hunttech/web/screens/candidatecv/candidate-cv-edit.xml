@@ -97,11 +97,11 @@
                  Все отображаемые значения привязаны к candidateCVDc, поэтому изменения picker-полей
                  сразу отражаются в sidebar без копирования данных и дополнительных loader. -->
             <vbox id="candidateCvSidebar"
-                  width="312px"
+                  width="320px"
                   height="100%"
                   spacing="true"
                   expand="candidateCvSidebarSpacer"
-                  stylename="candidate-cv-sidebar">
+                  stylename="edit-sidebar candidate-cv-sidebar">
                 <hbox id="candidateLabel"
                       width="100%"
                       spacing="false"
@@ -165,102 +165,121 @@
                 <vbox id="candidateCvSectionNavigation"
                       width="100%"
                       spacing="false"
-                      stylename="candidate-cv-navigation">
+                      stylename="job-candidate-navigation label-navigation candidate-cv-navigation">
                     <!-- Заголовок навигации «Разделы»: полоса-заголовок с двумя
                          горизонтальными inset-линиями (контракт §4.1). -->
                     <label width="100%"
                            value="msg://candidateCvNavigationTitle"
-                           stylename="candidate-cv-navigation-title"/>
+                           stylename="label-nav-title job-candidate-section-title candidate-cv-navigation-title"/>
                     <vbox id="candidateCvCandidateNavigation"
                           width="100%"
                           spacing="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvMainDataNav" caption="msg://candidateCvNavMainData" width="100%" stylename="borderless candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateCandidateMainData"/>
-                        <button id="candidateCvOriginalCvNav" caption="msg://candidateCvNavOriginalCv" width="100%" stylename="borderless candidate-cv-nav-item" invoke="navigateCandidateOriginalCv"/>
-                        <button id="candidateCvHuntTechCvNav" caption="msg://candidateCvNavHuntTechCv" width="100%" stylename="borderless candidate-cv-nav-item" invoke="navigateCandidateHuntTechCv"/>
+                        <button id="candidateCvMainDataNav" caption="msg://candidateCvNavMainData" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateCandidateMainData"/>
+                        <button id="candidateCvOriginalCvNav" caption="msg://candidateCvNavOriginalCv" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCandidateOriginalCv"/>
+                        <button id="candidateCvHuntTechCvNav" caption="msg://candidateCvNavHuntTechCv" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCandidateHuntTechCv"/>
                     </vbox>
                     <vbox id="candidateCvCvNavigation"
                           width="100%"
                           spacing="false"
                           visible="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvTextNav" caption="msg://candidateCvNavCvText" width="100%" stylename="borderless candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateCvText"/>
-                        <button id="candidateCvRecommendationNav" caption="msg://candidateCvNavCvRecommendations" width="100%" stylename="borderless candidate-cv-nav-item" invoke="navigateCvRecommendations"/>
+                        <button id="candidateCvTextNav" caption="msg://candidateCvNavCvText" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateCvText"/>
+                        <button id="candidateCvRecommendationNav" caption="msg://candidateCvNavCvRecommendations" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCvRecommendations"/>
                     </vbox>
                     <vbox id="candidateCvLetterNavigation"
                           width="100%"
                           spacing="false"
                           visible="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvLetterTemplateNav" caption="msg://candidateCvNavLetterTemplate" width="100%" visible="false" stylename="borderless candidate-cv-nav-item" invoke="navigateLetterTemplate"/>
-                        <button id="candidateCvLetterBodyNav" caption="msg://candidateCvNavLetter" width="100%" stylename="borderless candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateLetterBody"/>
-                        <button id="candidateCvLetterCommentNav" caption="msg://candidateCvNavLetterComment" width="100%" stylename="borderless candidate-cv-nav-item" invoke="navigateLetterComment"/>
-                        <button id="candidateCvLetterRecommendationNav" caption="msg://candidateCvNavLetterRecommendations" width="100%" visible="false" stylename="borderless candidate-cv-nav-item" invoke="navigateLetterRecommendations"/>
+                        <button id="candidateCvLetterTemplateNav" caption="msg://candidateCvNavLetterTemplate" width="100%" visible="false" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateLetterTemplate"/>
+                        <button id="candidateCvLetterBodyNav" caption="msg://candidateCvNavLetter" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateLetterBody"/>
+                        <button id="candidateCvLetterCommentNav" caption="msg://candidateCvNavLetterComment" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateLetterComment"/>
+                        <button id="candidateCvLetterRecommendationNav" caption="msg://candidateCvNavLetterRecommendations" width="100%" visible="false" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateLetterRecommendations"/>
                     </vbox>
                     <vbox id="candidateCvSkillNavigation"
                           width="100%"
                           spacing="false"
                           visible="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvSkillActionsNav" caption="msg://candidateCvNavSkillActions" width="100%" stylename="borderless candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateSkillActions"/>
-                        <button id="candidateCvSkillTreeNav" caption="msg://candidateCvNavSkillTree" width="100%" stylename="borderless candidate-cv-nav-item" invoke="navigateSkillTree"/>
+                        <button id="candidateCvSkillActionsNav" caption="msg://candidateCvNavSkillActions" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateSkillActions"/>
+                        <button id="candidateCvSkillTreeNav" caption="msg://candidateCvNavSkillTree" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateSkillTree"/>
                     </vbox>
                     <vbox id="candidateCvFilesNavigation"
                           width="100%"
                           spacing="false"
                           visible="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvFilesTableNav" caption="msg://candidateCvNavFiles" width="100%" stylename="borderless candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateFilesTable"/>
+                        <button id="candidateCvFilesTableNav" caption="msg://candidateCvNavFiles" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateFilesTable"/>
                     </vbox>
                 </vbox>
 
                 <vbox id="candidateCvSidebarTargetCard"
                       width="100%"
                       spacing="true"
-                      stylename="candidate-cv-sidebar-card">
-                    <!-- Заголовок «Резюме для вакансии»: полоса-заголовок, растянутая
-                         на карточку, с двумя горизонтальными inset-линиями (контракт §4.1). -->
+                      stylename="job-candidate-profile-contacts job-candidate-sidebar-card edit-sidebar-summary candidate-cv-sidebar-card">
+                    <!-- Заголовок «Резюме для вакансии»: полоса-заголовок с двумя горизонтальными inset-линиями -->
                     <label value="Резюме для вакансии"
-                           stylename="candidate-cv-sidebar-card-title"/>
-                    <vbox width="100%"
-                          spacing="false"
-                          stylename="candidate-cv-sidebar-info-row">
-                        <label value="Должность в резюме"
-                               stylename="candidate-cv-sidebar-caption"/>
-                        <label id="candidateCvSidebarResumePosition"
-                               width="100%"
-                               dataContainer="candidateCVDc"
-                               property="resumePosition"
-                               stylename="candidate-cv-sidebar-value"/>
-                    </vbox>
-                    <vbox width="100%"
-                          spacing="false"
-                          stylename="candidate-cv-sidebar-info-row">
-                        <label value="Вакансия"
-                               stylename="candidate-cv-sidebar-caption"/>
-                        <label id="candidateCvSidebarVacancy"
-                               width="100%"
-                               dataContainer="candidateCVDc"
-                               property="toVacancy"
-                               stylename="candidate-cv-sidebar-value"/>
-                    </vbox>
-                    <vbox width="100%"
-                          spacing="false"
-                          stylename="candidate-cv-sidebar-info-row">
-                        <label value="Проект"
-                               stylename="candidate-cv-sidebar-caption"/>
-                        <label id="candidateCvSidebarProject"
-                               width="100%"
-                               dataContainer="candidateCVDc"
-                               property="toVacancy.projectName"
-                               stylename="candidate-cv-sidebar-value"/>
-                    </vbox>
+                           width="100%"
+                           stylename="label-nav-title job-candidate-section-title candidate-cv-sidebar-card-title"/>
+                    <grid spacing="true" width="100%">
+                        <columns count="2"/>
+                        <rows>
+                            <row>
+                                <label value="Должность:"
+                                       stylename="small"
+                                       box.expandRatio="1"/>
+                                <label id="candidateCvSidebarResumePosition"
+                                       width="100%"
+                                       dataContainer="candidateCVDc"
+                                       property="resumePosition"
+                                       stylename="small bold"
+                                       box.expandRatio="2"/>
+                            </row>
+                            <row>
+                                <label value="Вакансия:"
+                                       stylename="small"
+                                       box.expandRatio="1"/>
+                                <label id="candidateCvSidebarVacancy"
+                                       width="100%"
+                                       dataContainer="candidateCVDc"
+                                       property="toVacancy"
+                                       stylename="small"
+                                       box.expandRatio="2"/>
+                            </row>
+                            <row>
+                                <label value="Проект:"
+                                       stylename="small"
+                                       box.expandRatio="1"/>
+                                <label id="candidateCvSidebarProject"
+                                       width="100%"
+                                       dataContainer="candidateCVDc"
+                                       property="toVacancy.projectName"
+                                       stylename="small"
+                                       box.expandRatio="2"/>
+                            </row>
+                        </rows>
+                    </grid>
+                </vbox>
+
+                <!-- Основные навыки кандидата, определенные нейросетью -->
+                <vbox id="candidateProfileSkills"
+                      width="100%"
+                      spacing="true"
+                      stylename="job-candidate-navigation label-navigation">
+                    <label value="msg://msgMainSkillsTitle"
+                           width="100%"
+                           stylename="label-nav-title job-candidate-section-title"/>
+                    <label id="candidateSkillsLabels"
+                           width="100%"
+                           htmlEnabled="true"
+                           stylename="candidate-skills-chips"/>
                 </vbox>
 
                 <vbox id="candidateCvSidebarMetaCard"
                       width="100%"
                       spacing="true"
-                      stylename="candidate-cv-sidebar-card candidate-cv-sidebar-meta">
+                      stylename="job-candidate-profile-contacts job-candidate-sidebar-card edit-sidebar-summary candidate-cv-sidebar-card candidate-cv-sidebar-meta">
                     <label id="labelLastRecrutier"
                            width="100%"
                            stylename="candidate-cv-context-meta"/>
@@ -284,7 +303,7 @@
                 <vbox id="candidateCvSidebarSpacer"
                       width="100%"
                       height="100%"
-                      stylename="candidate-cv-sidebar-spacer"/>
+                      stylename="job-candidate-sidebar-spacer edit-sidebar-spacer candidate-cv-sidebar-spacer"/>
             </vbox>
 
             <vbox id="candidateCvWorkspace"

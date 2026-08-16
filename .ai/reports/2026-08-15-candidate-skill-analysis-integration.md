@@ -6,8 +6,10 @@
 * **Перечисление уровней критичности:** `com.company.hunttech.entity.CandidateSkillPriority` (MAIN / 10, SECONDARY / 20, TERTIARY / 30)
 * **Используемый сервис анализа навыков:** `hunttech_SkillAnalysisService` (`SkillAnalysisService`)
 * **Точки интеграции в UI:**
-  * Экран редактирования резюме `hunttech_CandidateCV.edit` (`CandidateCVEdit.java`, `candidate-cv-edit.xml`), вкладка «Текст резюме» (`tabCV`), кнопка **«Сканировать навыки»** (`scanCandidateSkillsButton`).
-  * Сайдбар карточки кандидата `hunttech_JobCandidate.edit` (`JobCandidateEdit.java`, `job-candidate-edit.xml`): новый раздел **«ОСНОВНЫЕ НАВЫКИ»** (`candidateProfileSkills`) с цветными бейджами навыков кандидата.
+  * Экран редактирования резюме `hunttech_CandidateCV.edit` (`CandidateCVEdit.java`, `candidate-cv-edit.xml`):
+    * Кнопка **«Сканировать навыки»** (`scanCandidateSkillsButton`) во вкладке «Текст резюме» (`tabCV`).
+    * Улучшенная компоновка сайдбара (`edit-sidebar candidate-cv-sidebar`) в стиле Edit-форм (320px, центрированная шапка профиля, стилизованная навигация `job-candidate-navigation`, карточка целевой вакансии с 2-колоночной сеткой, блок «ОСНОВНЫЕ НАВЫКИ» с цветными бейджами).
+  * Сайдбар карточки кандидата `hunttech_JobCandidate.edit` (`JobCandidateEdit.java`, `job-candidate-edit.xml`): раздел **«ОСНОВНЫЕ НАВЫКИ»** (`candidateProfileSkills`) с цветными бейджами навыков кандидата и автообновлением при работе с резюме.
   * Сайдбар Split-View экранов `hunttech_JobCandidateTest1.browse` и `hunttech_JobCandidateTest.browse`: блок **«ОСНОВНЫЕ НАВЫКИ»** (`detailSkillsVBox`) с динамическим выводом бейджей навыков выбранного кандидата.
 * **Всплывающее уведомление:** TRAY-нотификация с подробной статистикой обнаруженных/сохраненных навыков и автоматическим скрытием через **5 секунд** (`withHideDelayMs(5000)`).
 * **Миграции базы данных:**
@@ -71,11 +73,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS IDX_HUNTTECH_CANDIDATE_SKILL_UNQ
 
 ---
 
-## 4. Отображение основных навыков в Sidebar (`JobCandidateEdit` и `JobCandidateTestBrowse`)
+## 4. Стилизация и компоновка Sidebar (`CandidateCVEdit` и `JobCandidateEdit`)
 
-1. **Раздел в сайдбаре `JobCandidateEdit`:**
-   * Стилизованный заголовок `msg://msgMainSkillsTitle` («Основные навыки») с фирменными линиями сверху и снизу (`job-candidate-section-title`).
-   * Контейнер с цветными бейджами (`chip-pills`), где основные навыки выделены маркировкой `★`, а каждый бейдж имеет уникальный оттенок из гармоничной палитры.
-2. **Раздел в Split-View экранах `JobCandidateTest1Browse` и `JobCandidateTestBrowse`:**
+1. **Сайдбар `CandidateCVEdit`:**
+   * Стилизован по каноническому контракту Edit-форм:
+     * Шапка профиля с центрированным аватаром, именем и плашкой должности.
+     * Раздел навигации с двойными линиями заголовка `job-candidate-section-title`.
+     * Карточка сведений о вакансии и проекте с аккуратной 2-колоночной сеткой `edit-sidebar-summary`.
+     * Раздел «ОСНОВНЫЕ НАВЫКИ» с цветными бейджами, мгновенно обновляемый при сканировании.
+     * Карточка метаданных с цитатой и рекрутером.
+2. **Сайдбар `JobCandidateEdit`:**
+   * Раздел «ОСНОВНЫЕ НАВЫКИ» с цветными бейджами, автообновлением при закрытии формы резюме.
+3. **Раздел в Split-View экранах:**
    * Динамическое обновление списка навыков при выборе кандидата в таблице справа.
-   * Автоматический сброс при очистке выбора.
