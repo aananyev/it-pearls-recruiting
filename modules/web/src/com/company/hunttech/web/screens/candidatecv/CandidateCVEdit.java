@@ -8,6 +8,7 @@ import com.company.hunttech.entity.*;
 import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.SkillAnalysisResult;
 import com.company.hunttech.service.SkillAnalysisService;
+import com.company.hunttech.service.TextProcessingService;
 import com.company.hunttech.web.screens.SelectedCloseAction;
 import com.company.hunttech.web.screens.skilltree.SkillTreeBrowseCheck;
 import com.company.hunttech.web.util.AiOperationNotifier;
@@ -117,9 +118,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private WebLoadService webLoadService;
     @Inject
-    private Button convertToTextButton;
-    @Inject
-    private Button showOriginalButon;
+    private TextProcessingService textProcessingService;
     @Inject
     private FileLoader fileLoader;
     @Inject
@@ -646,7 +645,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         quoteTextArea.setValue(messageBundle.getMessage("msgSalesCV"));
-        convertToTextButton.setEnabled(getEditedEntity().getTextCV() != null && !getEditedEntity().getTextCV().equals(""));
 
         if (!PersistenceHelper.isNew(getEditedEntity()) &&
                 (userSessionSource.getUserSession().getUser().getGroup().getName().equals(StdUserGroup.ACCOUNTING) ||
@@ -682,7 +680,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         // Load and decorate TEXT_CV only when a visible CV/skills workflow actually needs it.
         candidateCVRichTextArea.setValue(getEditedEntity().getTextCV() != null ?
                 getEditedEntity().getTextCV().replaceAll("\n", breakLine[0]) : null);
-        candidateCVRichTextArea.addValidator(value -> convertToTextButton.setEnabled(value != null && !value.equals("")));
         setCVRecommendation();
         setColorHighlightingCompetencies();
         // After lazy formatting/highlighting, keep the baseline equal to the visible text to avoid false dirty checks.
@@ -1402,59 +1399,94 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     Boolean flagHTML = true;
 
     public void convertToText() {
-        // Conversion is user-triggered, so initialize the lazy resume text on demand.
+        smartFormatCvText();
+    }
+
+    /**
+     * Выполняет умное AI-форматирование текста резюме с сохранением фактов, дат, контактов
+     * и структурированием разделов, списков и абзацев в RichTextArea.
+     */
+    public void smartFormatCvText() {
         ensureCvTextInitialized();
-        if (candidateCVRichTextArea.getValue() != null) {
-            if (flagHTML) {
-                String break_line = "break_line";
-
-                String str = candidateCVRichTextArea.getValue()
-                        .replaceAll("<br>", break_line + break_line)
-                        .replaceAll("<li>", "<li> - ")
-                        .replaceAll("</p>", "</p>" + break_line + break_line)
-                        .replaceAll("</li>", "</li>" + break_line)
-                        .replaceAll("</dd>", "</dd>" + break_line)
-                        .replaceAll("</dt>", "</dt>" + break_line)
-                        .replaceAll("</dl>", "</dl>" + break_line)
-                        .replaceAll("</div>", "</div>" + break_line + break_line);
-                str = Jsoup.parse(str).text().replaceAll(break_line, "<br>");
-
-                candidateCVRichTextArea.setValue(str.replaceAll("\n", breakLine[0]));
-                flagHTML = false;
-            } else {
-                candidateCVRichTextArea.setValue(getEditedEntity().getTextCV().replaceAll("\n", breakLine[0]));
-                flagHTML = true;
+        String currentText = candidateCVRichTextArea.getValue();
+        if (currentText == null || currentText.trim().isEmpty()) {
+            currentText = getEditedEntity().getTextCV();
+        }
+        if (currentText == null || currentText.trim().isEmpty()) {
+            if (textResumeStringBuffer != null) {
+                currentText = textResumeStringBuffer.toString();
             }
+        }
+        if (currentText == null || currentText.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Текст резюме пуст. Для умного форматирования заполните текст резюме.")
+                    .show();
+            return;
+        }
 
-            setColorHighlightingCompetencies();
+        try {
+            String formattedHtml = textProcessingService.formatHtml(currentText);
+            if (formattedHtml != null && !formattedHtml.trim().isEmpty()) {
+                candidateCVRichTextArea.setValue(formattedHtml.replaceAll("\n", breakLine[0]));
+                setColorHighlightingCompetencies();
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Умное форматирование")
+                        .withDescription("Текст резюме успешно структурирован и отформатирован для удобства чтения.")
+                        .withHideDelayMs(3000)
+                        .show();
+            }
+        } catch (Exception ex) {
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption("Ошибка форматирования")
+                    .withDescription("Не удалось выполнить умное форматирование текста: " + ex.getMessage())
+                    .show();
         }
     }
 
-
     @Subscribe("candidateCVRichTextArea")
     public void onCandidateCVRichTextAreaValueChange(HasValue.ValueChangeEvent<String> event) {
-        if (event.getValue() == null || event.getValue().equals("")) {
-            convertToTextButton.setEnabled(false);
-        } else {
-            convertToTextButton.setEnabled(true);
-        }
+        // Значение текста резюме изменилось
+    }
+
+    @Subscribe("cvActionsPopupButton.scanSkillsAction")
+    public void onCvActionsScanSkills(Action.ActionPerformedEvent event) {
+        scanCandidateSkills();
+    }
+
+    @Subscribe("cvActionsPopupButton.smartFormatCvAction")
+    public void onCvActionsSmartFormat(Action.ActionPerformedEvent event) {
+        smartFormatCvText();
+    }
+
+    @Subscribe("cvActionsPopupButton.rescanCvAction")
+    public void onCvActionsRescan(Action.ActionPerformedEvent event) {
+        rescanCV();
+    }
+
+    @Subscribe("cvActionsPopupButton.resumeRecognitionAction")
+    public void onCvActionsResumeRecognition(Action.ActionPerformedEvent event) {
+        resumeRecognition();
+    }
+
+    @Subscribe("cvActionsPopupButton.showOriginalAction")
+    public void onCvActionsShowOriginal(Action.ActionPerformedEvent event) {
+        showOriginalText();
     }
 
     Boolean flagOriginal = false;
 
     public void showOriginalText() {
-        // Original/highlight toggle needs the lazy TEXT_CV body only after the user requests it.
+        // Переключение между исходным текстом и цветным выделением
         ensureCvTextInitialized();
         if (flagOriginal) {
-            showOriginalButon.setCaption("Оригинальное");
             flagOriginal = false;
-
             setColorHighlightingCompetencies();
         } else {
-            showOriginalButon.setCaption("Выделение");
             flagOriginal = true;
-
-            candidateCVRichTextArea.setValue(getEditedEntity().getTextCV().replaceAll("\n", breakLine[0]));
+            if (getEditedEntity().getTextCV() != null) {
+                candidateCVRichTextArea.setValue(getEditedEntity().getTextCV().replaceAll("\n", breakLine[0]));
+            }
         }
     }
 

@@ -69,4 +69,8 @@
     <include file="260815-2-addCandidateSkillEntity.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- TextProcessingService: AI-функции умного форматирования текста в HTML и Plain Text. -->
+    <include file="260816-1-addTextProcessingAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
