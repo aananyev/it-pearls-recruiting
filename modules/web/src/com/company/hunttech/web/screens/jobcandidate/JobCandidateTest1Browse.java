@@ -381,18 +381,55 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         });
     }
 
+    private static final String GROUP_RESEARCH = "Ресерчинг";
+    private static final String GROUP_RESEARCHER = "Ресерчер";
+    private static final String GROUP_TRAINEE = "Стажер";
+    private static final String GROUP_MANAGERS = "Менеджеры";
+    private static final String GROUP_COORDINATION = "Координация";
+    private static final String GROUP_LEADERSHIP = "Руководство";
+
     /**
      * Модель команды участников работы над кандидатом.
      */
     public static class CandidateRoleTeam {
         public String authorName;
+        public java.util.Date createDate;
         public String researcherName;
+        public String researcherAction;
         public String recruiterName;
+        public String recruiterAction;
         public String coordinatorName;
+        public String coordinatorAction;
         public boolean isFree;
         public java.util.Date lastInteractionDate;
+        public String lastInteractionName;
+        public String lastEmployeeName;
         public int totalInteractions;
         public InteractionStatus status;
+    }
+
+    private boolean isUserInGroup(com.company.hunttech.entity.ExtUser user, String... targetGroups) {
+        if (user == null || user.getGroup() == null || user.getGroup().getName() == null) {
+            return false;
+        }
+        String groupName = user.getGroup().getName().trim();
+        for (String target : targetGroups) {
+            if (groupName.equalsIgnoreCase(target) || groupName.toLowerCase().contains(target.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String getEmployeeName(IteractionList il) {
+        if (il == null) return null;
+        if (il.getRecrutier() != null && il.getRecrutier().getName() != null && !il.getRecrutier().getName().trim().isEmpty()) {
+            return il.getRecrutier().getName().trim();
+        }
+        if (il.getCreatedBy() != null && !il.getCreatedBy().trim().isEmpty()) {
+            return resolveUserFullName(il.getCreatedBy());
+        }
+        return null;
     }
 
     /**
@@ -407,12 +444,15 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         }
 
         team.authorName = resolveUserFullName(candidate.getCreatedBy());
+        team.createDate = candidate.getCreateTs();
 
         List<IteractionList> list = candidate.getIteractionList();
         if (list == null || list.isEmpty()) {
             team.isFree = true;
             team.totalInteractions = 0;
             team.status = InteractionStatus.FREE;
+            team.researcherName = team.authorName;
+            team.researcherAction = "Создание карточки кандидата";
             return team;
         }
 
@@ -423,55 +463,80 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
 
         IteractionList last = sortedList.get(sortedList.size() - 1);
         team.lastInteractionDate = last.getDateIteraction();
+        team.lastInteractionName = last.getIteractionType() != null ? last.getIteractionType().getIterationName() : "Взаимодействие";
+        team.lastEmployeeName = getEmployeeName(last);
         team.status = calculateInteractionStatus(candidate);
         team.isFree = (team.status == InteractionStatus.FREE);
 
         for (IteractionList il : sortedList) {
             Iteraction type = il.getIteractionType();
-            String personName = null;
-            if (il.getRecrutier() != null && il.getRecrutier().getName() != null && !il.getRecrutier().getName().trim().isEmpty()) {
-                personName = il.getRecrutier().getName().trim();
-            } else if (il.getCreatedBy() != null) {
-                personName = resolveUserFullName(il.getCreatedBy());
-            }
-
+            String personName = getEmployeeName(il);
             if (personName == null) continue;
 
+            com.company.hunttech.entity.ExtUser recUser = il.getRecrutier();
+            boolean isResearcherGroup = isUserInGroup(recUser, GROUP_RESEARCH, GROUP_RESEARCHER, GROUP_TRAINEE);
+            boolean isManagerGroup = isUserInGroup(recUser, GROUP_MANAGERS, GROUP_COORDINATION, GROUP_LEADERSHIP);
+
+            // 1. Координатор: общение с заказчиком, передача резюме, собеседование у клиента, выход в проект
             if (type != null) {
-                // Координатор: общение с заказчиком, передача резюме, собеседование у клиента, выход в проект
                 if (Boolean.TRUE.equals(type.getSignSendToClient())
                         || Boolean.TRUE.equals(type.getSignClientInterview())
-                        || Boolean.TRUE.equals(type.getSignStartProject())) {
+                        || Boolean.TRUE.equals(type.getSignStartProject())
+                        || Boolean.TRUE.equals(type.getSignEndProject())) {
                     team.coordinatorName = personName;
+                    team.coordinatorAction = type.getIterationName();
+                } else if (isManagerGroup && team.coordinatorName == null) {
+                    team.coordinatorName = personName;
+                    team.coordinatorAction = type.getIterationName();
                 }
+            }
 
-                // Рекрутер: внутреннее собеседование, оценка навыков, выставление рейтинга
+            // 2. Рекрутер: внутреннее собеседование, оценка навыков, выставление рейтинга
+            if (type != null) {
                 if (Boolean.TRUE.equals(type.getSignOurInterview())
                         || Boolean.TRUE.equals(type.getSignFeedback())
                         || il.getRating() != null) {
                     team.recruiterName = personName;
+                    team.recruiterAction = il.getRating() != null ? ("Оценка " + il.getRating() + "★") : type.getIterationName();
+                } else if (!isResearcherGroup && !isManagerGroup && team.recruiterName == null && !Boolean.TRUE.equals(type.getSignComment())) {
+                    team.recruiterName = personName;
+                    team.recruiterAction = type.getIterationName();
                 }
+            }
 
-                // Ресерчер: поиск кандидата, первый контакт, назначение собеседования
+            // 3. Ресерчер: поиск кандидата, первый контакт, назначение собеседования
+            if (type != null) {
                 if (Boolean.TRUE.equals(type.getSignOurInterviewAssigned())
                         || Boolean.TRUE.equals(type.getSignStartCase())) {
                     if (team.researcherName == null) {
                         team.researcherName = personName;
+                        team.researcherAction = type.getIterationName();
                     }
+                } else if (isResearcherGroup && team.researcherName == null) {
+                    team.researcherName = personName;
+                    team.researcherAction = type.getIterationName();
                 }
             }
         }
 
         if (team.researcherName == null && !sortedList.isEmpty()) {
             IteractionList first = sortedList.get(0);
-            if (first.getRecrutier() != null && first.getRecrutier().getName() != null) {
-                team.researcherName = first.getRecrutier().getName().trim();
-            } else if (first.getCreatedBy() != null) {
-                team.researcherName = resolveUserFullName(first.getCreatedBy());
+            String firstPerson = getEmployeeName(first);
+            if (firstPerson != null) {
+                team.researcherName = firstPerson;
+                team.researcherAction = first.getIteractionType() != null ? first.getIteractionType().getIterationName() : "Первичный контакт";
             }
         }
         if (team.researcherName == null) {
             team.researcherName = team.authorName;
+            team.researcherAction = "Создатель карточки";
+        }
+
+        if (team.recruiterName == null && !team.isFree && team.lastEmployeeName != null) {
+            if (!team.lastEmployeeName.equalsIgnoreCase(team.researcherName)) {
+                team.recruiterName = team.lastEmployeeName;
+                team.recruiterAction = team.lastInteractionName;
+            }
         }
 
         return team;
@@ -827,38 +892,63 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         // Светофорная карточка статуса взаимодействия и участников процесса
         CandidateRoleTeam team = calculateCandidateTeam(candidate);
         StringBuilder sb = new StringBuilder();
-        sb.append("<div style='background: #f8f9fa; padding: 10px 14px; border-radius: 6px; border-left: 4px solid ")
-                .append(team.status.getColor()).append("; margin-top: 6px; font-size: 12px; line-height: 1.6;'>");
+        sb.append("<div style='background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid ")
+                .append(team.status.getColor()).append("; margin-top: 6px; font-size: 12px; line-height: 1.5;'>");
 
-        sb.append("<div><b>Статус:</b> <span style='color: ").append(team.status.getColor())
-                .append("; font-weight: bold;'>").append(team.status.getLabel()).append("</span></div>");
+        sb.append("<div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;'>")
+                .append("<span style='font-weight: 700; color: #1e293b;'>Статус:</span> ")
+                .append("<span style='color: ").append(team.status.getColor())
+                .append("; font-weight: 700; background: ").append(team.status.getBgColor())
+                .append("; padding: 2px 8px; border-radius: 4px;'>").append(team.status.getLabel()).append("</span>")
+                .append("</div>");
 
-        if (team.isFree) {
-            sb.append("<div style='margin-top: 5px;'>👤 <b>Автор карточки:</b> ")
-                    .append(team.authorName != null ? team.authorName : "—").append("</div>");
-            if (team.lastInteractionDate != null) {
-                sb.append("<div style='color: #7f8c8d; font-size: 11px;'>Посл. активность: ")
-                        .append(interactionDateFormat.format(team.lastInteractionDate)).append("</div>");
-            }
-        } else {
-            sb.append("<div style='margin-top: 6px; border-top: 1px dashed #cbd5e1; padding-top: 5px; display: flex; flex-direction: column; gap: 3px;'>");
-            if (team.researcherName != null) {
-                sb.append("<div>🔍 <b>Ресерчер:</b> ").append(team.researcherName).append("</div>");
-            }
-            if (team.recruiterName != null) {
-                sb.append("<div>👔 <b>Рекрутер:</b> ").append(team.recruiterName).append("</div>");
-            }
-            if (team.coordinatorName != null) {
-                sb.append("<div>🎯 <b>Координатор:</b> ").append(team.coordinatorName).append("</div>");
-            }
-            if (team.lastInteractionDate != null) {
-                sb.append("<div style='color: #7f8c8d; font-size: 11px; margin-top: 2px;'>Посл. активность: ")
-                        .append(interactionDateFormat.format(team.lastInteractionDate)).append("</div>");
+        sb.append("<div style='display: flex; flex-direction: column; gap: 4px; border-top: 1px dashed #cbd5e1; padding-top: 6px;'>");
+
+        sb.append("<div>👤 <b>Автор:</b> ").append(team.authorName != null ? team.authorName : "—");
+        if (team.createDate != null) {
+            sb.append(" <span style='color: #94a3b8; font-size: 11px;'>(").append(interactionDateFormat.format(team.createDate)).append(")</span>");
+        }
+        sb.append("</div>");
+
+        if (team.researcherName != null) {
+            sb.append("<div>🔍 <b>Ресерчер:</b> ").append(team.researcherName);
+            if (team.researcherAction != null) {
+                sb.append(" <span style='color: #64748b; font-size: 11px;'>• ").append(team.researcherAction).append("</span>");
             }
             sb.append("</div>");
         }
 
-        sb.append("<div style='color: #94a3b8; font-size: 10.5px; margin-top: 4px;'>Всего взаимодействий: ")
+        if (team.recruiterName != null) {
+            sb.append("<div>💼 <b>Рекрутер:</b> ").append(team.recruiterName);
+            if (team.recruiterAction != null) {
+                sb.append(" <span style='color: #64748b; font-size: 11px;'>• ").append(team.recruiterAction).append("</span>");
+            }
+            sb.append("</div>");
+        }
+
+        if (team.coordinatorName != null) {
+            sb.append("<div>🤝 <b>Координатор:</b> ").append(team.coordinatorName);
+            if (team.coordinatorAction != null) {
+                sb.append(" <span style='color: #64748b; font-size: 11px;'>• ").append(team.coordinatorAction).append("</span>");
+            }
+            sb.append("</div>");
+        }
+
+        if (team.lastInteractionDate != null) {
+            sb.append("<div style='color: #64748b; font-size: 11px; margin-top: 2px; padding-top: 4px; border-top: 1px dotted #e2e8f0;'>")
+                    .append("⏱️ <b>Посл. активность:</b> ").append(interactionDateFormat.format(team.lastInteractionDate));
+            if (team.lastInteractionName != null) {
+                sb.append(" — ").append(team.lastInteractionName);
+            }
+            if (team.lastEmployeeName != null) {
+                sb.append(" (").append(team.lastEmployeeName).append(")");
+            }
+            sb.append("</div>");
+        }
+
+        sb.append("</div>");
+
+        sb.append("<div style='color: #94a3b8; font-size: 10.5px; margin-top: 6px; text-align: right;'>Всего взаимодействий: ")
                 .append(team.totalInteractions).append("</div>");
         sb.append("</div>");
 
