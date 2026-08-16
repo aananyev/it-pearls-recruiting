@@ -57,11 +57,11 @@
             </filter>
 
             <!-- Правая панель кнопок действий (edit-toolbar-actions) -->
-            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions">
+            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions candidate-toolbar-actions">
                 <!-- Кнопка создания новой карточки кандидата -->
-                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary"/>
+                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
                 <!-- Кнопка обновления текущего списка кандидатов из БД -->
-                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary"/>
+                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary candidate-btn candidate-refresh-btn"/>
             </hbox>
         </hbox>
 

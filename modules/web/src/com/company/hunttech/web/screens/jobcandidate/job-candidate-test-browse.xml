@@ -35,11 +35,11 @@
             </vbox>
 
             <!-- Правая панель кнопок действий и поиска (edit-toolbar-actions) -->
-            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions">
+            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions candidate-toolbar-actions">
                 <textField id="searchField" inputPrompt="Поиск по ФИО..." width="240px" stylename="edit-form-control candidate-search-input"/>
-                <button id="searchButton" caption="Поиск" icon="SEARCH" stylename="primary candidate-filter-btn"/>
-                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-filter-btn"/>
-                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary candidate-filter-btn"/>
+                <button id="searchButton" caption="Поиск" icon="SEARCH" stylename="primary candidate-btn candidate-search-btn"/>
+                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
+                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary candidate-btn candidate-refresh-btn"/>
             </hbox>
         </hbox>
 

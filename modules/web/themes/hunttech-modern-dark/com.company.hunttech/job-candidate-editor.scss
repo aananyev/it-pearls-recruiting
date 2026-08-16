@@ -1191,6 +1191,83 @@
     }
   }
 
+  /* =========================================================================
+   * Фирменная стилизация кнопок реестра кандидатов (Создать, Обновить, Поиск - Dark)
+   * ========================================================================= */
+  .candidate-toolbar-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .candidate-btn {
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    height: 34px !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+
+    .v-icon {
+      font-size: 14px !important;
+      margin-right: 6px !important;
+    }
+
+    /* Кнопка "Создать кандидата" (Акцентный Primary стиль с ярким синим градиентом) */
+    &.candidate-create-btn,
+    &.primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+      color: #ffffff !important;
+      border: 1px solid #60a5fa !important;
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.4) !important;
+
+      &:hover:not(.v-disabled) {
+        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%) !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5) !important;
+        transform: translateY(-1px);
+        color: #ffffff !important;
+      }
+
+      &:active:not(.v-disabled) {
+        background: #1d4ed8 !important;
+        box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3) !important;
+        transform: translateY(0);
+      }
+    }
+
+    /* Кнопка "Обновить" (Тёмный Secondary стиль) */
+    &.candidate-refresh-btn,
+    &.secondary {
+      background: linear-gradient(180deg, #334155 0%, #1e293b 100%) !important;
+      color: #f1f5f9 !important;
+      border: 1px solid #475569 !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+
+      &:hover:not(.v-disabled) {
+        background: #475569 !important;
+        border-color: #64748b !important;
+        color: #ffffff !important;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4) !important;
+        transform: translateY(-1px);
+      }
+
+      &:active:not(.v-disabled) {
+        background: #1e293b !important;
+        transform: translateY(0);
+      }
+    }
+
+    /* Кнопка поиска */
+    &.candidate-search-btn {
+      padding: 0 14px !important;
+    }
+  }
+
   .candidate-filter-btn {
     border-radius: 6px !important;
     font-weight: 600 !important;
