@@ -17,6 +17,9 @@ import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.*;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
@@ -39,14 +42,17 @@ import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.extractor.POITextExtractor;
+import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import javax.inject.Inject;
+import javax.swing.text.rtf.RTFEditorKit;
 import java.awt.image.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @UiController("hunttech_CandidateCV.edit")
@@ -61,6 +67,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private static final String EXTENSION_PDF = "pdf";
     private static final String EXTENSION_DOC = "doc";
     private static final String EXTENSION_DOCX = "docx";
+    private static final String EXTENSION_RTF = "rtf";
     private static final String NAVIGATION_STYLE = "borderless candidate-cv-nav-item";
     private static final String ACTIVE_NAVIGATION_STYLE =
             "borderless candidate-cv-nav-item candidate-cv-nav-item-active";
@@ -82,6 +89,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private RichTextArea letterRichTextArea;
     @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private BackgroundWorker backgroundWorker;
     @Inject
     private Link HuntTechCVLink;
     @Inject
@@ -500,38 +509,12 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
 
             } else if (fileDescriptor.getExtension().equals(EXTENSION_DOC)) {
-                /*
-
-                POIFSFileSystem fileSystem = new POIFSFileSystem(inputStream);
-                ExtractorFactory.createExtractor(fileSystem);
-                POIOLE2TextExtractor oleTextExtractor =
-                        ExtractorFactory.createExtractor(fileSystem);
-                POITextExtractor[] embeddedExtractors =
-                        ExtractorFactory.getEmbededDocsTextExtractors(oleTextExtractor);
-
-                for (POITextExtractor textExtractor : embeddedExtractors) {
-                    if (textExtractor instanceof WordExtractor) {
-                        WordExtractor wordExtractor = (WordExtractor) textExtractor;
-                        String[] paragraphText = wordExtractor.getParagraphText();
-                        for (String paragraph : paragraphText) {
-                            textResume += paragraph;
-                        }
-                        // Display the document's header and footer text
-                        // System.out.println("Footer text: " + wordExtractor.getFooterText());
-                        // System.out.println("Header text: " + wordExtractor.getHeaderText());
-                    }
+                // Word 97-2003 (.doc): текстовый слой извлекается HWPF-экстрактором
+                // Apache POI (poi-scratchpad), так же как PDF/DOCX — в RichTextArea вкладки «Резюме».
+                try (InputStream docInputStream = fileLoader.openStream(fileDescriptor)) {
+                    WordExtractor wordExtractor = new WordExtractor(docInputStream);
+                    textResume = wordExtractor.getText();
                 }
-
-                //    POITextExtractor extractor = createExtractor(inputStream);
-                //    textResume = extractor.getText();
-
-                 */
-                notifications.create(Notifications.NotificationType.WARNING)
-                        .withDescription("Функция загрузки ." + EXTENSION_DOC + " пока не реализована.")
-                        .withCaption(messageBundle.getMessage("msgWarning"))
-                        .show();
-
-
             } else if (fileDescriptor.getExtension().equals(EXTENSION_DOCX)) {
 
                 XWPFDocument doc = new XWPFDocument(inputStream);
@@ -543,8 +526,17 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
                     cvTextInitialized = true;
                     candidateCVRichTextArea.setValue(textResume.replaceAll("\n", breakLine[0]));
                 }
+            } else if (fileDescriptor.getExtension().equals(EXTENSION_RTF)) {
+                // Rich Text Format (.rtf): текст извлекается встроенным в JDK RTFEditorKit
+                // (Rich-разметка отбрасывается, остаётся plain text резюме).
+                RTFEditorKit rtfEditorKit = new RTFEditorKit();
+                javax.swing.text.Document rtfDocument = rtfEditorKit.createDefaultDocument();
+                try (Reader rtfReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+                    rtfEditorKit.read(rtfReader, rtfDocument, 0);
+                }
+                textResume = rtfDocument.getText(0, rtfDocument.getLength());
             }
-        } catch (FileStorageException | IOException | IllegalArgumentException e) {
+        } catch (FileStorageException | IOException | IllegalArgumentException | javax.swing.text.BadLocationException e) {
             notifications.create(Notifications.NotificationType.ERROR)
                     .withDescription("Ошибка распознавания документа " + fileDescriptor.getName())
                     .show();
@@ -1063,6 +1055,25 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     /**
+     * Результат фонового AI-анализа навыков: статистика для итоговой нотификации,
+     * метаданные AI-выполнения (модель/собственник API) и список обнаруженных
+     * навыков для синхронизации сущности CandidateCV и контейнера на UI-потоке
+     * в {@code done()} (работа с сущностями — только в фоновом потоке {@code run()}).
+     */
+    private static final class SkillScanOutcome {
+        final String statsDescription;
+        final AiExecutionResult aiExecution;
+        final List<SkillTree> allDetectedSkills;
+
+        SkillScanOutcome(String statsDescription, AiExecutionResult aiExecution,
+                         List<SkillTree> allDetectedSkills) {
+            this.statsDescription = statsDescription;
+            this.aiExecution = aiExecution;
+            this.allDetectedSkills = allDetectedSkills;
+        }
+    }
+
+    /**
      * Выполняет анализ текста резюме с помощью сервиса SkillAnalysisService (AI Control Plane + справочник SkillTree)
      * и сохраняет распознанные навыки кандидата в сущность CandidateSkill с уровнями критичности.
      */
@@ -1111,164 +1122,200 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
         }
 
         // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт
-        // анализа — исчезающая TRAY-нотификация; по завершении — итоговая с моделью
-        // и собственником API (при классическом fallback — без AI-блока).
+        // операции — исчезающая TRAY-нотификация, показывается СРАЗУ (до «крутилки»);
+        // по завершении — итоговая с моделью и собственником API (при классическом
+        // fallback — без AI-блока).
         AiOperationNotifier.showStarted(notifications, "Запущен AI-анализ навыков резюме…", null);
 
-        try {
-            // 1. Загружаем уже существующие навыки кандидата из БД для предотвращения дублирования
-            List<CandidateSkill> existingSkills = Collections.emptyList();
-            if (!PersistenceHelper.isNew(candidate)) {
-                existingSkills = dataManager.load(CandidateSkill.class)
-                        .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate")
-                        .parameter("candidate", candidate)
-                        .view("candidateSkill-view")
-                        .list();
-            }
+        // Анализ выполняется в фоне (BackgroundTask), чтобы стартовая нотификация
+        // отрисовалась до «крутилки»: при синхронном вызове на UI-потоке обе
+        // нотификации (старт и итог) пришли бы одной пачкой в конце запроса.
+        final JobCandidate candidateForScan = candidate;
+        final String textForScan = inputText;
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, "Анализ навыков резюме…");
 
-            Set<UUID> existingSkillIds = new HashSet<>();
-            for (CandidateSkill cs : existingSkills) {
-                if (cs.getSkill() != null) {
-                    existingSkillIds.add(cs.getSkill().getId());
-                }
-            }
+        BackgroundTask<Integer, SkillScanOutcome> task =
+                new BackgroundTask<Integer, SkillScanOutcome>(240, this) {
+                    @Override
+                    public SkillScanOutcome run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        // 1. Загружаем уже существующие навыки кандидата из БД для предотвращения дублирования
+                        List<CandidateSkill> existingSkills = Collections.emptyList();
+                        if (!PersistenceHelper.isNew(candidateForScan)) {
+                            existingSkills = dataManager.load(CandidateSkill.class)
+                                    .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate")
+                                    .parameter("candidate", candidateForScan)
+                                    .view("candidateSkill-view")
+                                    .list();
+                        }
 
-            // 2. Вызываем SkillAnalysisService для каждого уровня критичности.
-            // Каждый результат несёт метаданные AI-выполнения (модель, провайдер,
-            // собственник API) — контракт пользовательской нотификации.
-            SkillAnalysisResult mainResult = skillAnalysisService.analyzeMain(inputText);
-            SkillAnalysisResult secondaryResult = skillAnalysisService.analyzeSecondary(inputText);
-            SkillAnalysisResult tertiaryResult = skillAnalysisService.analyzeTertiary(inputText);
+                        Set<UUID> existingSkillIds = new HashSet<>();
+                        for (CandidateSkill cs : existingSkills) {
+                            if (cs.getSkill() != null) {
+                                existingSkillIds.add(cs.getSkill().getId());
+                            }
+                        }
 
-            List<SkillTree> mainSkills = mainResult.getSkills();
-            List<SkillTree> secondarySkills = secondaryResult.getSkills();
-            List<SkillTree> tertiarySkills = tertiaryResult.getSkills();
-            SkillAnalysisResult allResult = null;
+                        // 2. Вызываем SkillAnalysisService для каждого уровня критичности.
+                        // Каждый результат несёт метаданные AI-выполнения (модель, провайдер,
+                        // собственник API) — контракт пользовательской нотификации.
+                        SkillAnalysisResult mainResult = skillAnalysisService.analyzeMain(textForScan);
+                        SkillAnalysisResult secondaryResult = skillAnalysisService.analyzeSecondary(textForScan);
+                        SkillAnalysisResult tertiaryResult = skillAnalysisService.analyzeTertiary(textForScan);
 
-            if (mainSkills == null) mainSkills = Collections.emptyList();
-            if (secondarySkills == null) secondarySkills = Collections.emptyList();
-            if (tertiarySkills == null) tertiarySkills = Collections.emptyList();
+                        List<SkillTree> mainSkills = mainResult.getSkills();
+                        List<SkillTree> secondarySkills = secondaryResult.getSkills();
+                        List<SkillTree> tertiarySkills = tertiaryResult.getSkills();
+                        SkillAnalysisResult allResult = null;
 
-            // Если списки по уровням пусты (например, при классическом fallback), анализируем все навыки через analyzeAll
-            if (mainSkills.isEmpty() && secondarySkills.isEmpty() && tertiarySkills.isEmpty()) {
-                allResult = skillAnalysisService.analyzeAll(inputText);
-                mainSkills = allResult.getSkills();
-                if (mainSkills == null) mainSkills = Collections.emptyList();
-            }
+                        if (mainSkills == null) mainSkills = Collections.emptyList();
+                        if (secondarySkills == null) secondarySkills = Collections.emptyList();
+                        if (tertiarySkills == null) tertiarySkills = Collections.emptyList();
 
-            // AI-метаданные для нотификации: все уровни выполняются одной функцией
-            // SKILLS_EXTRACT (модель/собственник API одинаковы) — берём первый успешный;
-            // при классическом fallback (AI недоступен) метаданные отсутствуют.
-            SkillAnalysisResult aiSourceResult = firstNonNull(mainResult, secondaryResult, tertiaryResult, allResult);
-            AiExecutionResult aiExecution = aiSourceResult == null ? null : aiSourceResult.getAiExecution();
+                        // Если списки по уровням пусты (например, при классическом fallback), анализируем все навыки через analyzeAll
+                        if (mainSkills.isEmpty() && secondarySkills.isEmpty() && tertiarySkills.isEmpty()) {
+                            allResult = skillAnalysisService.analyzeAll(textForScan);
+                            mainSkills = allResult.getSkills();
+                            if (mainSkills == null) mainSkills = Collections.emptyList();
+                        }
 
-            List<CandidateSkill> toSave = new ArrayList<>();
-            Set<UUID> processedSkillIds = new HashSet<>(existingSkillIds);
-            List<SkillTree> allDetectedSkills = new ArrayList<>();
+                        // AI-метаданные для нотификации: все уровни выполняются одной функцией
+                        // SKILLS_EXTRACT (модель/собственник API одинаковы) — берём первый успешный;
+                        // при классическом fallback (AI недоступен) метаданные отсутствуют.
+                        SkillAnalysisResult aiSourceResult = firstNonNull(mainResult, secondaryResult, tertiaryResult, allResult);
+                        AiExecutionResult aiExecution = aiSourceResult == null ? null : aiSourceResult.getAiExecution();
 
-            // Основные навыки (MAIN)
-            for (SkillTree st : mainSkills) {
-                if (st != null) {
-                    allDetectedSkills.add(st);
-                    if (processedSkillIds.add(st.getId())) {
-                        CandidateSkill cs = metadata.create(CandidateSkill.class);
-                        cs.setCandidate(candidate);
-                        cs.setSkill(st);
-                        cs.setPriority(CandidateSkillPriority.MAIN);
-                        toSave.add(cs);
+                        List<CandidateSkill> toSave = new ArrayList<>();
+                        Set<UUID> processedSkillIds = new HashSet<>(existingSkillIds);
+                        List<SkillTree> allDetectedSkills = new ArrayList<>();
+
+                        // Основные навыки (MAIN)
+                        for (SkillTree st : mainSkills) {
+                            if (st != null) {
+                                allDetectedSkills.add(st);
+                                if (processedSkillIds.add(st.getId())) {
+                                    CandidateSkill cs = metadata.create(CandidateSkill.class);
+                                    cs.setCandidate(candidateForScan);
+                                    cs.setSkill(st);
+                                    cs.setPriority(CandidateSkillPriority.MAIN);
+                                    toSave.add(cs);
+                                }
+                            }
+                        }
+
+                        // Второстепенные навыки (SECONDARY)
+                        for (SkillTree st : secondarySkills) {
+                            if (st != null) {
+                                allDetectedSkills.add(st);
+                                if (processedSkillIds.add(st.getId())) {
+                                    CandidateSkill cs = metadata.create(CandidateSkill.class);
+                                    cs.setCandidate(candidateForScan);
+                                    cs.setSkill(st);
+                                    cs.setPriority(CandidateSkillPriority.SECONDARY);
+                                    toSave.add(cs);
+                                }
+                            }
+                        }
+
+                        // Третьестепенные навыки (TERTIARY)
+                        for (SkillTree st : tertiarySkills) {
+                            if (st != null) {
+                                allDetectedSkills.add(st);
+                                if (processedSkillIds.add(st.getId())) {
+                                    CandidateSkill cs = metadata.create(CandidateSkill.class);
+                                    cs.setCandidate(candidateForScan);
+                                    cs.setSkill(st);
+                                    cs.setPriority(CandidateSkillPriority.TERTIARY);
+                                    toSave.add(cs);
+                                }
+                            }
+                        }
+
+                        int mainDetected = mainSkills.size();
+                        int secondaryDetected = secondarySkills.size();
+                        int tertiaryDetected = tertiarySkills.size();
+                        int totalDetected = mainDetected + secondaryDetected + tertiaryDetected;
+                        int savedCount = toSave.size();
+                        int existingOrDuplicate = totalDetected - savedCount;
+
+                        if (!toSave.isEmpty() && !PersistenceHelper.isNew(candidateForScan)) {
+                            CommitContext commitContext = new CommitContext(toSave);
+                            dataManager.commit(commitContext);
+                        }
+
+                        String statsDescription = String.format(
+                                "Всего обнаружено навыков: <b>%d</b><br/>" +
+                                "• Основных: <b>%d</b><br/>" +
+                                "• Второстепенных: <b>%d</b><br/>" +
+                                "• Третьестепенных: <b>%d</b><br/>" +
+                                "──────────────────────<br/>" +
+                                "✅ Сохранено новых: <b>%d</b>%s",
+                                totalDetected,
+                                mainDetected,
+                                secondaryDetected,
+                                tertiaryDetected,
+                                savedCount,
+                                (existingOrDuplicate > 0 ? "<br/>ℹ️ Уже присутствуют у кандидата: <b>" + existingOrDuplicate + "</b>" : "")
+                        );
+
+                        return new SkillScanOutcome(statsDescription, aiExecution, allDetectedSkills);
                     }
-                }
-            }
 
-            // Второстепенные навыки (SECONDARY)
-            for (SkillTree st : secondarySkills) {
-                if (st != null) {
-                    allDetectedSkills.add(st);
-                    if (processedSkillIds.add(st.getId())) {
-                        CandidateSkill cs = metadata.create(CandidateSkill.class);
-                        cs.setCandidate(candidate);
-                        cs.setSkill(st);
-                        cs.setPriority(CandidateSkillPriority.SECONDARY);
-                        toSave.add(cs);
+                    @Override
+                    public void done(SkillScanOutcome outcome) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+
+                        // Синхронизируем навыки в сущности CandidateCV и контейнере skillTreesDc для вкладки «Навыки»
+                        if (!outcome.allDetectedSkills.isEmpty()) {
+                            Set<SkillTree> currentSet = new LinkedHashSet<>(outcome.allDetectedSkills);
+                            if (getEditedEntity().getSkillTree() != null) {
+                                currentSet.addAll(getEditedEntity().getSkillTree());
+                            }
+                            getEditedEntity().setSkillTree(new ArrayList<>(currentSet));
+                            if (skillTreesDc != null) {
+                                skillTreesDc.setItems(getEditedEntity().getSkillTree());
+                            }
+                        }
+
+                        String statsDescription = outcome.statsDescription;
+                        AiExecutionResult aiExecution = outcome.aiExecution;
+                        // Контракт пользовательской нотификации: в исчезающую нотификацию добавляем
+                        // блок «какая модель + собственник API» (AI реально выполнял анализ);
+                        // при классическом fallback (AI недоступен) метаданных нет — блок не добавляется.
+                        if (aiExecution != null) {
+                            statsDescription = AiOperationNotifier.buildDescription(aiExecution, statsDescription);
+                        }
+
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption("Статистика анализа навыков")
+                                .withDescription(statsDescription)
+                                .withContentMode(ContentMode.HTML)
+                                .withHideDelayMs(5000)
+                                .show();
+
+                        initCandidateSkillsSidebar();
                     }
-                }
-            }
 
-            // Третьестепенные навыки (TERTIARY)
-            for (SkillTree st : tertiarySkills) {
-                if (st != null) {
-                    allDetectedSkills.add(st);
-                    if (processedSkillIds.add(st.getId())) {
-                        CandidateSkill cs = metadata.create(CandidateSkill.class);
-                        cs.setCandidate(candidate);
-                        cs.setSkill(st);
-                        cs.setPriority(CandidateSkillPriority.TERTIARY);
-                        toSave.add(cs);
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка анализа навыков")
+                                .withDescription("Не удалось выполнить анализ навыков: " + ex.getMessage())
+                                .show();
+                        return true;
                     }
-                }
-            }
 
-            int mainDetected = mainSkills.size();
-            int secondaryDetected = secondarySkills.size();
-            int tertiaryDetected = tertiarySkills.size();
-            int totalDetected = mainDetected + secondaryDetected + tertiaryDetected;
-            int savedCount = toSave.size();
-            int existingOrDuplicate = totalDetected - savedCount;
-
-            if (!toSave.isEmpty() && !PersistenceHelper.isNew(candidate)) {
-                CommitContext commitContext = new CommitContext(toSave);
-                dataManager.commit(commitContext);
-            }
-
-            // Синхронизируем навыки в сущности CandidateCV и контейнере skillTreesDc для вкладки «Навыки»
-            if (!allDetectedSkills.isEmpty()) {
-                Set<SkillTree> currentSet = new LinkedHashSet<>(allDetectedSkills);
-                if (getEditedEntity().getSkillTree() != null) {
-                    currentSet.addAll(getEditedEntity().getSkillTree());
-                }
-                getEditedEntity().setSkillTree(new ArrayList<>(currentSet));
-                if (skillTreesDc != null) {
-                    skillTreesDc.setItems(getEditedEntity().getSkillTree());
-                }
-            }
-
-            String statsDescription = String.format(
-                    "Всего обнаружено навыков: <b>%d</b><br/>" +
-                    "• Основных: <b>%d</b><br/>" +
-                    "• Второстепенных: <b>%d</b><br/>" +
-                    "• Третьестепенных: <b>%d</b><br/>" +
-                    "──────────────────────<br/>" +
-                    "✅ Сохранено новых: <b>%d</b>%s",
-                    totalDetected,
-                    mainDetected,
-                    secondaryDetected,
-                    tertiaryDetected,
-                    savedCount,
-                    (existingOrDuplicate > 0 ? "<br/>ℹ️ Уже присутствуют у кандидата: <b>" + existingOrDuplicate + "</b>" : "")
-            );
-
-            // Контракт пользовательской нотификации: в исчезающую нотификацию добавляем
-            // блок «какая модель + собственник API» (AI реально выполнял анализ);
-            // при классическом fallback (AI недоступен) метаданных нет — блок не добавляется.
-            if (aiExecution != null) {
-                statsDescription = AiOperationNotifier.buildDescription(aiExecution, statsDescription);
-            }
-
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Статистика анализа навыков")
-                    .withDescription(statsDescription)
-                    .withContentMode(ContentMode.HTML)
-                    .withHideDelayMs(5000)
-                    .show();
-
-            initCandidateSkillsSidebar();
-
-        } catch (Exception ex) {
-            notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption("Ошибка анализа навыков")
-                    .withDescription("Не удалось выполнить анализ навыков: " + ex.getMessage())
-                    .show();
-        }
+                    @Override
+                    public boolean handleTimeoutException() {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка анализа навыков")
+                                .withDescription("Анализ навыков превысил допустимое время выполнения.")
+                                .show();
+                        return true;
+                    }
+                };
+        backgroundWorker.handle(task).execute();
     }
 
     public void resumeRecognition() {
@@ -1475,50 +1522,82 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             return;
         }
 
-        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт операции
+        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт
+        // операции — исчезающая TRAY-нотификация, показывается СРАЗУ (до «крутилки»).
         AiOperationNotifier.showStarted(notifications, "Запущено умное форматирование резюме…", null);
 
-        try {
-            TextProcessingResult result = textProcessingService.formatHtmlWithResult(currentText);
-            if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
-                String formattedHtml = result.getText().replaceAll("\r?\n", breakLine[0]);
+        // Форматирование выполняется в фоне (BackgroundTask): при синхронном вызове
+        // на UI-потоке стартовая нотификация и итоговая пришли бы одной пачкой
+        // в конце запроса, а «крутилка» работала бы без нотификации о старте.
+        final String textToFormat = currentText;
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, "Умное форматирование резюме…");
 
-                // Подсветка компетенций и компаний в структурированном HTML
-                try {
-                    if (candidateCVFieldOpenPosition != null && candidateCVFieldOpenPosition.getValue() != null) {
-                        formattedHtml = parseCVService.colorHighlightingCompetencies(
-                                candidateCVFieldOpenPosition.getValue(), formattedHtml, "brown", "red");
-                    } else {
-                        formattedHtml = parseCVService.colorHighlightingCompetencies(formattedHtml, "brown");
+        BackgroundTask<Integer, TextProcessingResult> task =
+                new BackgroundTask<Integer, TextProcessingResult>(120, this) {
+                    @Override
+                    public TextProcessingResult run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        return textProcessingService.formatHtmlWithResult(textToFormat);
                     }
-                    formattedHtml = parseCVService.colorHighlingCompany(formattedHtml, "green");
-                } catch (Exception ignored) {
-                }
 
-                // Загружаем структурированный текст обратно в RichTextArea и в сущность CandidateCV для сохранения
-                candidateCVRichTextArea.setValue(formattedHtml);
-                getEditedEntity().setTextCV(formattedHtml);
-                cvTextInitialized = true;
-                textResumeStringBuffer = new StringBuffer(formattedHtml);
+                    @Override
+                    public void done(TextProcessingResult result) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
+                            String formattedHtml = result.getText().replaceAll("\\r?\\n", breakLine[0]);
 
-                if (result.getAiExecution() != null) {
-                    AiOperationNotifier.show(notifications, result.getAiExecution(),
-                            "Умное форматирование резюме выполнено",
-                            "Текст резюме структурирован с помощью нейросети и загружен в редактор.");
-                } else {
-                    notifications.create(Notifications.NotificationType.TRAY)
-                            .withCaption("Форматирование резюме")
-                            .withDescription("Текст резюме структурирован типографическим движком и загружен в редактор.")
-                            .withHideDelayMs(3000)
-                            .show();
-                }
-            }
-        } catch (Exception ex) {
-            notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption("Ошибка форматирования")
-                    .withDescription("Не удалось выполнить умное форматирование текста: " + ex.getMessage())
-                    .show();
-        }
+                            // Подсветка компетенций и компаний в структурированном HTML
+                            try {
+                                if (candidateCVFieldOpenPosition != null && candidateCVFieldOpenPosition.getValue() != null) {
+                                    formattedHtml = parseCVService.colorHighlightingCompetencies(
+                                            candidateCVFieldOpenPosition.getValue(), formattedHtml, "brown", "red");
+                                } else {
+                                    formattedHtml = parseCVService.colorHighlightingCompetencies(formattedHtml, "brown");
+                                }
+                                formattedHtml = parseCVService.colorHighlingCompany(formattedHtml, "green");
+                            } catch (Exception ignored) {
+                            }
+
+                            // Загружаем структурированный текст обратно в RichTextArea и в сущность CandidateCV для сохранения
+                            candidateCVRichTextArea.setValue(formattedHtml);
+                            getEditedEntity().setTextCV(formattedHtml);
+                            cvTextInitialized = true;
+                            textResumeStringBuffer = new StringBuffer(formattedHtml);
+
+                            if (result.getAiExecution() != null) {
+                                AiOperationNotifier.show(notifications, result.getAiExecution(),
+                                        "Умное форматирование резюме выполнено",
+                                        "Текст резюме структурирован с помощью нейросети и загружен в редактор.");
+                            } else {
+                                notifications.create(Notifications.NotificationType.TRAY)
+                                        .withCaption("Форматирование резюме")
+                                        .withDescription("Текст резюме структурирован типографическим движком и загружен в редактор.")
+                                        .withHideDelayMs(3000)
+                                        .show();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка форматирования")
+                                .withDescription("Не удалось выполнить умное форматирование текста: " + ex.getMessage())
+                                .show();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean handleTimeoutException() {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка форматирования")
+                                .withDescription("Умное форматирование текста превысило допустимое время выполнения.")
+                                .show();
+                        return true;
+                    }
+                };
+        backgroundWorker.handle(task).execute();
     }
 
     @Subscribe("candidateCVRichTextArea")
@@ -1570,39 +1649,86 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             return;
         }
 
-        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт операции
+        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт
+        // операции — исчезающая TRAY-нотификация, показывается СРАЗУ (до «крутилки»).
         AiOperationNotifier.showStarted(notifications, "Запущено умное форматирование сопроводительного письма…", null);
 
-        try {
-            TextProcessingResult result = textProcessingService.formatHtmlWithResult(currentText);
-            if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
-                String formattedHtml = result.getText().replaceAll("\r?\n", breakLine[0]);
-                letterRichTextArea.setValue(formattedHtml);
-                getEditedEntity().setLetter(formattedHtml);
+        // Форматирование выполняется в фоне (BackgroundTask): при синхронном вызове
+        // на UI-потоке стартовая нотификация и итоговая пришли бы одной пачкой
+        // в конце запроса, а «крутилка» работала бы без нотификации о старте.
+        final String textToFormat = currentText;
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, "Умное форматирование письма…");
 
-                if (result.getAiExecution() != null) {
-                    AiOperationNotifier.show(notifications, result.getAiExecution(),
-                            "Умное форматирование письма выполнено",
-                            "Текст сопроводительного письма структурирован с помощью нейросети и загружен в редактор.");
-                } else {
-                    notifications.create(Notifications.NotificationType.TRAY)
-                            .withCaption("Форматирование письма")
-                            .withDescription("Текст сопроводительного письма структурирован типографическим движком и загружен в редактор.")
-                            .withHideDelayMs(3000)
-                            .show();
-                }
-            }
-        } catch (Exception ex) {
-            notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption("Ошибка форматирования")
-                    .withDescription("Не удалось выполнить умное форматирование сопроводительного письма: " + ex.getMessage())
-                    .show();
-        }
+        BackgroundTask<Integer, TextProcessingResult> task =
+                new BackgroundTask<Integer, TextProcessingResult>(120, this) {
+                    @Override
+                    public TextProcessingResult run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        return textProcessingService.formatHtmlWithResult(textToFormat);
+                    }
+
+                    @Override
+                    public void done(TextProcessingResult result) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        if (result != null && result.getText() != null && !result.getText().trim().isEmpty()) {
+                            String formattedHtml = result.getText().replaceAll("\r?\n", breakLine[0]);
+                            letterRichTextArea.setValue(formattedHtml);
+                            getEditedEntity().setLetter(formattedHtml);
+
+                            if (result.getAiExecution() != null) {
+                                AiOperationNotifier.show(notifications, result.getAiExecution(),
+                                        "Умное форматирование письма выполнено",
+                                        "Текст сопроводительного письма структурирован с помощью нейросети и загружен в редактор.");
+                            } else {
+                                notifications.create(Notifications.NotificationType.TRAY)
+                                        .withCaption("Форматирование письма")
+                                        .withDescription("Текст сопроводительного письма структурирован типографическим движком и загружен в редактор.")
+                                        .withHideDelayMs(3000)
+                                        .show();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка форматирования")
+                                .withDescription("Не удалось выполнить умное форматирование сопроводительного письма: " + ex.getMessage())
+                                .show();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean handleTimeoutException() {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка форматирования")
+                                .withDescription("Умное форматирование сопроводительного письма превысило допустимое время выполнения.")
+                                .show();
+                        return true;
+                    }
+                };
+        backgroundWorker.handle(task).execute();
     }
 
     @Subscribe("letterActionsPopupButton.smartFormatLetterAction")
     public void onLetterActionsSmartFormat(Action.ActionPerformedEvent event) {
         smartFormatLetterText();
+    }
+
+    @Subscribe("skillActionsPopupButton.scanSkillsAction")
+    public void onSkillActionsScanSkills(Action.ActionPerformedEvent event) {
+        scanCandidateSkills();
+    }
+
+    @Subscribe("skillActionsPopupButton.rescanCvAction")
+    public void onSkillActionsRescan(Action.ActionPerformedEvent event) {
+        rescanCV();
+    }
+
+    @Subscribe("skillActionsPopupButton.checkSkillFromJDAction")
+    public void onSkillActionsCheckSkillFromJD(Action.ActionPerformedEvent event) {
+        checkSkillFromJD();
     }
 
     Boolean flagOriginal = false;
