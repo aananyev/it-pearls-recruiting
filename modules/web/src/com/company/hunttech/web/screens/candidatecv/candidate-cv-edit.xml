@@ -227,42 +227,42 @@
                           width="100%"
                           spacing="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvMainDataNav" caption="msg://candidateCvNavMainData" icon="font-icon:USER" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateCandidateMainData"/>
-                        <button id="candidateCvOriginalCvNav" caption="msg://candidateCvNavOriginalCv" icon="font-icon:FILE_TEXT_O" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCandidateOriginalCv"/>
-                        <button id="candidateCvHuntTechCvNav" caption="msg://candidateCvNavHuntTechCv" icon="font-icon:FILE_WORD_O" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCandidateHuntTechCv"/>
+                        <button id="candidateCvMainDataNav" caption="msg://candidateCvNavMainData" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateCandidateMainData"/>
+                        <button id="candidateCvOriginalCvNav" caption="msg://candidateCvNavOriginalCv" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCandidateOriginalCv"/>
+                        <button id="candidateCvHuntTechCvNav" caption="msg://candidateCvNavHuntTechCv" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCandidateHuntTechCv"/>
                     </vbox>
                     <vbox id="candidateCvCvNavigation"
                           width="100%"
                           spacing="false"
                           visible="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvTextNav" caption="msg://candidateCvNavCvText" icon="font-icon:ALIGN_LEFT" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateCvText"/>
-                        <button id="candidateCvRecommendationNav" caption="msg://candidateCvNavCvRecommendations" icon="font-icon:COMMENT" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCvRecommendations"/>
+                        <button id="candidateCvTextNav" caption="msg://candidateCvNavCvText" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateCvText"/>
+                        <button id="candidateCvRecommendationNav" caption="msg://candidateCvNavCvRecommendations" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateCvRecommendations"/>
                     </vbox>
                     <vbox id="candidateCvLetterNavigation"
                           width="100%"
                           spacing="false"
                           visible="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvLetterTemplateNav" caption="msg://candidateCvNavLetterTemplate" icon="font-icon:FILE_TEXT_O" width="100%" visible="false" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateLetterTemplate"/>
-                        <button id="candidateCvLetterBodyNav" caption="msg://candidateCvNavLetter" icon="font-icon:SEND" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateLetterBody"/>
-                        <button id="candidateCvLetterCommentNav" caption="msg://candidateCvNavLetterComment" icon="font-icon:COMMENT" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateLetterComment"/>
-                        <button id="candidateCvLetterRecommendationNav" caption="msg://candidateCvNavLetterRecommendations" icon="font-icon:COMMENT" width="100%" visible="false" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateLetterRecommendations"/>
+                        <button id="candidateCvLetterTemplateNav" caption="msg://candidateCvNavLetterTemplate" width="100%" visible="false" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateLetterTemplate"/>
+                        <button id="candidateCvLetterBodyNav" caption="msg://candidateCvNavLetter" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateLetterBody"/>
+                        <button id="candidateCvLetterCommentNav" caption="msg://candidateCvNavLetterComment" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateLetterComment"/>
+                        <button id="candidateCvLetterRecommendationNav" caption="msg://candidateCvNavLetterRecommendations" width="100%" visible="false" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateLetterRecommendations"/>
                     </vbox>
                     <vbox id="candidateCvSkillNavigation"
                           width="100%"
                           spacing="false"
                           visible="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvSkillActionsNav" caption="msg://candidateCvNavSkillActions" icon="font-icon:MAGIC" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateSkillActions"/>
-                        <button id="candidateCvSkillTreeNav" caption="msg://candidateCvNavSkillTree" icon="font-icon:SITEMAP" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateSkillTree"/>
+                        <button id="candidateCvSkillActionsNav" caption="msg://candidateCvNavSkillActions" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateSkillActions"/>
+                        <button id="candidateCvSkillTreeNav" caption="msg://candidateCvNavSkillTree" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item" invoke="navigateSkillTree"/>
                     </vbox>
                     <vbox id="candidateCvFilesNavigation"
                           width="100%"
                           spacing="false"
                           visible="false"
                           stylename="candidate-cv-tab-navigation">
-                        <button id="candidateCvFilesTableNav" caption="msg://candidateCvNavFiles" icon="font-icon:FOLDER_O" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateFilesTable"/>
+                        <button id="candidateCvFilesTableNav" caption="msg://candidateCvNavFiles" width="100%" stylename="borderless job-candidate-nav-item label-nav-item candidate-cv-nav-item candidate-cv-nav-item-active" invoke="navigateFilesTable"/>
                     </vbox>
                 </vbox>
 
