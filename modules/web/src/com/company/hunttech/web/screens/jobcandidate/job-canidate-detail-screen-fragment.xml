@@ -298,5 +298,15 @@
                 </vbox>
             </hbox>
         </hbox>
+        <vbox id="jobCandidateSkillsVBox" width="100%" spacing="true" margin="true,false,false,false" visible="false">
+            <label id="jobCandidateSkillsTitleLabel"
+                   align="BOTTOM_LEFT"
+                   stylename="h3"
+                   value="msg://msgMainSkillsTitle"/>
+            <label id="candidateSkillsLabels"
+                   width="100%"
+                   htmlEnabled="true"
+                   stylename="candidate-skills-chips"/>
+        </vbox>
     </layout>
 </fragment>

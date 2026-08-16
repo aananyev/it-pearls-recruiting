@@ -152,6 +152,11 @@
                 <column id="personPosition"
                         caption="msg://msgPersonPosition"
                         property="personPosition"/>
+                <column id="mainSkills"
+                        caption="msg://msgMainSkills"
+                        minimumWidth="220px">
+                    <componentRenderer/>
+                </column>
                 <column id="currentCompany"
                         caption="msg://msgCompany"
                         property="currentCompany"/>
