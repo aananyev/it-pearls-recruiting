@@ -111,7 +111,7 @@
       border-radius: 0 !important;
     }
 
-    /* Заголовок «Резюме для вакансии»: лаконичный заголовок раздела */
+    /* Заголовок «Резюме для вакансии»: лаконичный заголовок раздела, текст — ЗАГЛАВНЫМИ. */
     .candidate-cv-sidebar-card-title,
     .candidate-cv-sidebar-card-title.v-label {
       display: block;
@@ -125,6 +125,7 @@
       font-weight: 700 !important;
       line-height: 20px !important;
       letter-spacing: normal !important;
+      text-transform: uppercase !important;
       background: transparent !important;
       border: 0 !important;
       box-shadow: none !important;
@@ -184,10 +185,13 @@
       border-top: 1px solid rgba(255, 255, 255, 0.16) !important;
     }
 
-    /* Заголовок раздела навигации: полоса-заголовок с двумя горизонтальными
-     * inset-линиями (контракт HRM_HuntTech_Edit_Screen_Shared_Style_Contract §4.1). */
+    /* Заголовки разделов sidebar: полоса-заголовок с двумя горизонтальными
+     * inset-линиями (контракт HRM_HuntTech_Edit_Screen_Shared_Style_Contract §4.1).
+     * «Разделы» (навигация) и «Основные навыки» — единый стиль темы; текст — ЗАГЛАВНЫМИ. */
     .candidate-cv-navigation-title,
-    .candidate-cv-navigation-title.v-label {
+    .candidate-cv-navigation-title.v-label,
+    .candidate-cv-skills-title,
+    .candidate-cv-skills-title.v-label {
       display: block;
       width: 100% !important;
       box-sizing: border-box;
@@ -199,7 +203,7 @@
       font-weight: 700 !important;
       line-height: 21px !important;
       letter-spacing: normal !important;
-      text-transform: none !important;
+      text-transform: uppercase !important;
       background: rgba(255, 255, 255, 0.045) !important;
       border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
       box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
@@ -224,7 +228,7 @@
       font-size: 13px !important;
       font-weight: 600 !important;
       line-height: 20px !important;
-      text-align: left !important;
+      text-align: center !important;
       background: transparent !important;
       border: 0 !important;
       border-left: 3px solid transparent !important;
@@ -241,10 +245,15 @@
       width: 100%;
       min-width: 0;
       color: inherit !important;
-      text-align: left !important;
+      text-align: center !important;
       white-space: normal !important;
       overflow-wrap: anywhere;
       word-break: break-word;
+    }
+
+    .candidate-cv-nav-item.v-button .v-icon {
+      vertical-align: middle;
+      margin-right: 6px;
     }
 
     .candidate-cv-nav-item.v-button:hover,
@@ -480,6 +489,15 @@
       min-height: 38px;
       font-size: 14px;
       font-weight: 600;
+      text-align: center;
+    }
+
+    .v-button .v-icon,
+    .candidate-cv-toolbar .v-button .v-icon,
+    .candidate-cv-footer .v-button .v-icon,
+    .candidate-cv-document-card .v-button .v-icon {
+      vertical-align: middle;
+      margin-right: 6px;
     }
 
     .candidate-cv-toolbar {

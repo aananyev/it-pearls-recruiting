@@ -187,6 +187,20 @@ public class CandidateCVEditVisualContractTest {
                     controller.contains("public void " + invoke + "()"));
         }
 
+        // Тематические пиктограммы навигации (FontAwesome): каждая кнопка sidebar
+        // несёт свою иконку по смыслу раздела.
+        assertTrue(xml.contains("id=\"candidateCvMainDataNav\" caption=\"msg://candidateCvNavMainData\" icon=\"font-icon:USER\""));
+        assertTrue(xml.contains("id=\"candidateCvOriginalCvNav\" caption=\"msg://candidateCvNavOriginalCv\" icon=\"font-icon:FILE_TEXT_O\""));
+        assertTrue(xml.contains("id=\"candidateCvHuntTechCvNav\" caption=\"msg://candidateCvNavHuntTechCv\" icon=\"font-icon:FILE_WORD_O\""));
+        assertTrue(xml.contains("id=\"candidateCvTextNav\" caption=\"msg://candidateCvNavCvText\" icon=\"font-icon:ALIGN_LEFT\""));
+        assertTrue(xml.contains("id=\"candidateCvSkillActionsNav\" caption=\"msg://candidateCvNavSkillActions\" icon=\"font-icon:MAGIC\""));
+        assertTrue(xml.contains("id=\"candidateCvSkillTreeNav\" caption=\"msg://candidateCvNavSkillTree\" icon=\"font-icon:SITEMAP\""));
+        assertTrue(xml.contains("id=\"candidateCvFilesTableNav\" caption=\"msg://candidateCvNavFiles\" icon=\"font-icon:FOLDER_O\""));
+        assertTrue(xml.contains("icon=\"font-icon:REPEAT\""));
+        assertTrue(xml.contains("icon=\"font-icon:SEARCH\""));
+        assertTrue(xml.contains("icon=\"font-icon:CHECK\""));
+        assertTrue(xml.contains("icon=\"font-icon:TIMES\""));
+
         assertTrue(controller.contains("syncSidebarSectionNavigation();"));
         assertTrue(controller.contains("candidateCvCandidateNavigation.setVisible(\"tabCandidate\".equals(selectedTabName))"));
         assertTrue(controller.contains("candidateCvCvNavigation.setVisible(\"tabCV\".equals(selectedTabName))"));
@@ -331,6 +345,11 @@ public class CandidateCVEditVisualContractTest {
                 assertTrue(theme, scss.contains("line-height: 20px !important"));
                 assertTrue(theme, scss.contains("padding-top: 6px"));
                 assertTrue(theme, scss.contains("padding-bottom: 2px"));
+                // Текст внутри всех кнопок экрана выровнен по центру (nav-пункты sidebar,
+                // toolbar, footer); иконки выровнены по вертикали с отступом от текста.
+                assertTrue(theme, scss.contains("text-align: center !important"));
+                assertTrue(theme, scss.contains(".candidate-cv-nav-item.v-button .v-icon"));
+                assertTrue(theme, scss.contains("margin-right: 6px"));
             }
             assertTrue(theme, scss.contains(".candidate-cv-nav-item-active.v-button"));
             assertTrue(theme, scss.contains(".candidate-cv-tabs > .v-tabsheet-tabcontainer"));
@@ -353,9 +372,10 @@ public class CandidateCVEditVisualContractTest {
     public void sectionTitlesHaveTwoInsetLinesLikeInfoCaption() throws IOException {
         String xml = readProjectFile(SCREEN_XML);
 
-        // Оба заголовка разделов sidebar несут свои локальные классы полосы.
+        // Заголовки разделов sidebar несут свои локальные классы полосы.
         assertTrue(xml.contains("stylename=\"candidate-cv-navigation-title\""));
         assertTrue(xml.contains("stylename=\"candidate-cv-sidebar-card-title\""));
+        assertTrue(xml.contains("stylename=\"label-nav-title job-candidate-section-title candidate-cv-skills-title\""));
 
         String scss = readProjectFile(
                 "modules/web/themes/halo/com.company.hunttech/candidate-cv-editor.scss");
@@ -366,27 +386,30 @@ public class CandidateCVEditVisualContractTest {
                 ".candidate-cv-sidebar-card-title,",
                 ".candidate-cv-sidebar-info-row {");
 
-        // Полоса заголовка навигации повторяет caption инфокарточки (контракт §4.1):
-        // две горизонтальные inset-линии (белая сверху, светлая снизу) + разделитель снизу.
+        // Полоса заголовков навигации и «Основные навыки» повторяет caption инфокарточки
+        // (контракт §4.1): две горизонтальные inset-линии (белая сверху, светлая снизу)
+        // + разделитель снизу; текст — ЗАГЛАВНЫМИ.
+        assertTrue(navigationBlock.contains(".candidate-cv-skills-title,"));
         assertTrue(navigationBlock.contains("min-height: 36px !important;"));
         assertTrue(navigationBlock.contains("padding: 7px 11px !important;"));
         assertTrue(navigationBlock.contains("color: #ffb11b !important;"));
         assertTrue(navigationBlock.contains("font-size: 15px !important;"));
         assertTrue(navigationBlock.contains("font-weight: 700 !important;"));
         assertTrue(navigationBlock.contains("line-height: 21px !important;"));
-        assertTrue(navigationBlock.contains("text-transform: none !important;"));
+        assertTrue(navigationBlock.contains("text-transform: uppercase !important;"));
         assertTrue(navigationBlock.contains("background: rgba(255, 255, 255, 0.045) !important;"));
         assertTrue(navigationBlock.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;"));
         assertTrue(navigationBlock.contains("box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,"));
         assertTrue(navigationBlock.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset;"));
 
         // Заголовок «Резюме для вакансии» — лаконичный заголовок раздела без полосы-карточки
-        // (по образцу дизайна Antigravity: блок без рамки, заголовок 28px/14px/700).
+        // (по образцу дизайна Antigravity: блок без рамки, заголовок 28px/14px/700), текст — ЗАГЛАВНЫМИ.
         assertTrue(cardTitleBlock.contains("min-height: 28px !important;"));
         assertTrue(cardTitleBlock.contains("padding: 2px 0 6px 0 !important;"));
         assertTrue(cardTitleBlock.contains("margin: 0 0 8px 0 !important;"));
         assertTrue(cardTitleBlock.contains("font-size: 14px !important;"));
         assertTrue(cardTitleBlock.contains("font-weight: 700 !important;"));
+        assertTrue(cardTitleBlock.contains("text-transform: uppercase !important;"));
         assertTrue(cardTitleBlock.contains("background: transparent !important;"));
         assertTrue(cardTitleBlock.contains("border: 0 !important;"));
         assertTrue(cardTitleBlock.contains("box-shadow: none !important;"));
