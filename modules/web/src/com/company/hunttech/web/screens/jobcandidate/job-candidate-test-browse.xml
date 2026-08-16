@@ -123,12 +123,6 @@
                 
                 <!-- Верхняя полоса быстрых фильтров и счетчиков -->
                 <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="statusFilterButtons">
-                    <!-- Заголовок реестра -->
-                    <hbox spacing="true" align="MIDDLE_LEFT" stylename="filter-title-box">
-                        <label value="👤" stylename="filter-header-icon"/>
-                        <label id="tableTitleLabel" value="Реестр кандидатов" stylename="filter-header-title bold"/>
-                    </hbox>
-                    
                     <!-- Кнопки быстрых фильтров по кандидатам -->
                     <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
                         <button id="filterAllBtn" caption="Все кандидаты" stylename="primary filter-pill-btn active" icon="USERS"/>

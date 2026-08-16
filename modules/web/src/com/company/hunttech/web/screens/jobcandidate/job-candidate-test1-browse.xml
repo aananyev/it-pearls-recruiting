@@ -154,15 +154,12 @@
             <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace" expand="candidatesTableCard">
                 
                 <!-- Верхняя полоса быстрых фильтров, счетчиков и выпадающего меню действий -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-card" expand="statusFilterButtons">
-                    <!-- Заголовок реестра -->
-                    <label id="tableTitleLabel" value="👤 Реестр кандидатов" stylename="h3" align="MIDDLE_LEFT"/>
-                    
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="statusFilterButtons">
                     <!-- Кнопки быстрых фильтров по кандидатам -->
-                    <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT">
-                        <button id="filterAllBtn" caption="Все кандидаты" stylename="primary" icon="USERS"/>
-                        <button id="filterMyCandidatesBtn" caption="Мои кандидаты" stylename="secondary" icon="USER"/>
-                        <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary" icon="font-icon:ADN"/>
+                    <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                        <button id="filterAllBtn" caption="Все кандидаты" stylename="primary filter-pill-btn active" icon="USERS"/>
+                        <button id="filterMyCandidatesBtn" caption="Мои кандидаты" stylename="secondary filter-pill-btn" icon="USER"/>
+                        <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary filter-pill-btn" icon="font-icon:ADN"/>
                     </hbox>
 
                     <!-- Выпадающая кнопка действий над кандидатом как в оригинальной форме -->
