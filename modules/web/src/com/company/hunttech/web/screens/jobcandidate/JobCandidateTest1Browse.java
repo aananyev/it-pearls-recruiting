@@ -543,6 +543,38 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     }
 
     /**
+     * Формирует отображаемое ФИО кандидата: предпочитает сохранённое поле fullName,
+     * при его отсутствии собирает из secondName + firstName + middleName (порядок
+     * «Фамилия Имя Отчество» — как в NamePattern сущности).
+     *
+     * @param candidate кандидат
+     * @return строка ФИО для колонки таблицы
+     */
+    private String resolveCandidateFullName(JobCandidate candidate) {
+        if (candidate == null) {
+            return "Без имени";
+        }
+        String fullName = candidate.getFullName();
+        if (fullName != null && !fullName.trim().isEmpty()) {
+            return fullName;
+        }
+        StringBuilder sb = new StringBuilder();
+        appendNamePart(sb, candidate.getSecondName());
+        appendNamePart(sb, candidate.getFirstName());
+        appendNamePart(sb, candidate.getMiddleName());
+        return sb.length() > 0 ? sb.toString() : "Без имени";
+    }
+
+    private void appendNamePart(StringBuilder sb, String part) {
+        if (part != null && !part.trim().isEmpty()) {
+            if (sb.length() > 0) {
+                sb.append(' ');
+            }
+            sb.append(part.trim());
+        }
+    }
+
+    /**
      * Обновляет активное визуальное состояние кнопок фильтров.
      *
      * @param activeBtn кнопка, которая становится активной
@@ -582,7 +614,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         candidatesTable.addGeneratedColumn("fullName", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
-            String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
+            String name = resolveCandidateFullName(candidate);
             String sub = candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() :
                     (candidate.getEmail() != null ? candidate.getEmail() : "");
             lbl.setValue("<div><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +

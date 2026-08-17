@@ -14,8 +14,8 @@
                     view="jobCandidate-view">
             <!-- Загрузчик коллекции кандидатов ограничивает выборку 200 записями -->
             <loader id="jobCandidatesDl" maxResults="200">
-                <!-- JPQL-запрос выбирает кандидатов, сортируя по дате создания по убыванию -->
-                <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]>
+                <!-- JPQL-запрос выбирает кандидатов, сортируя по фамилии-имени-отчеству -->
+                <query><![CDATA[select e from hunttech_JobCandidate e order by e.secondName asc, e.firstName asc, e.middleName asc]]>
                     <condition>
                         <and>
                             <c:jpql>
@@ -199,18 +199,18 @@
                         <columns>
                             <!-- Генерируемая колонка для отображения миниатюры фото кандидата -->
                             <column id="avatar" caption="Фото" width="50px" sortable="false"/>
-                            <!-- Колонка отображения ФИО кандидата с сортировкой по fullName -->
-                            <column id="fullName" caption="Кандидат"/>
-                            <!-- Колонка отображения желаемой должности с сортировкой по personPosition -->
-                            <column id="personPosition" caption="Должность"/>
-                            <!-- Колонка отображения города проживания с сортировкой по cityOfResidence -->
-                            <column id="cityOfResidence" caption="Город" width="130px"/>
+                            <!-- Колонка ФИО: растягивается на всё свободное место (expandRatio), сортировка по fullName -->
+                            <column id="fullName" caption="Кандидат" expandRatio="1"/>
+                            <!-- Колонка желаемой должности с сортировкой по personPosition -->
+                            <column id="personPosition" caption="Должность" width="170px"/>
+                            <!-- Колонка города проживания с сортировкой по cityOfResidence -->
+                            <column id="cityOfResidence" caption="Город" width="120px"/>
                             <!-- Колонка текущей компании с сортировкой по currentCompany -->
-                            <column id="currentCompany" caption="Компания"/>
+                            <column id="currentCompany" caption="Компания" width="180px"/>
                             <!-- Генерируемая колонка ключевых навыков кандидата с чипами и всплывающим окном всех навыков -->
-                            <column id="mainSkills" caption="Ключевые навыки" width="220px"/>
+                            <column id="mainSkills" caption="Ключевые навыки" width="220px" sortable="false"/>
                             <!-- Компактная генерируемая колонка даты последнего взаимодействия со светофорным статусом -->
-                            <column id="lastInteractionStatus" caption="Посл. взаимодействие" width="135px"/>
+                            <column id="lastInteractionStatus" caption="Посл. взаимодействие" width="135px" sortable="false"/>
                         </columns>
                         <!-- Компонент отображения общего количества строк в таблице -->
                         <rowsCount/>
