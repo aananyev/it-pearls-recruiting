@@ -122,10 +122,34 @@
                                 </chart:serialChart>
                             </vbox>
 
-                            <vbox id="modelsPieBox" stylename="ai-chart-card" width="40%" height="100%" spacing="true">
-                                <label value="msg://modelsDistributionTitle" stylename="ai-card-header"/>
-                                <chart:pieChart id="modelsPieChart"
-                                                titleField="model"
+                            <vbox id="topUsersChartBox" stylename="ai-chart-card" width="40%" height="100%" spacing="true">
+                                <label value="msg://topUsersTitle" stylename="ai-card-header"/>
+                                <chart:serialChart id="topUsersChart"
+                                                   rotate="true"
+                                                   categoryField="userName"
+                                                   height="100%"
+                                                   width="100%">
+                                    <chart:valueAxes>
+                                        <chart:axis position="BOTTOM" title="USD ($)"/>
+                                    </chart:valueAxes>
+                                    <chart:graphs>
+                                        <chart:graph id="userCostGraph"
+                                                     type="COLUMN"
+                                                     fillAlphas="0.85"
+                                                     color="#3498db"
+                                                     valueField="cost"/>
+                                    </chart:graphs>
+                                    <chart:chartCursor cursorAlpha="0.1"/>
+                                </chart:serialChart>
+                            </vbox>
+                        </hbox>
+
+                        <!-- Charts Row 2 -->
+                        <hbox id="chartsRow2" spacing="true" width="100%" height="380px">
+                            <vbox id="functionCostBox" stylename="ai-chart-card" width="50%" height="100%" spacing="true">
+                                <label value="msg://spendByFunctionTitle" stylename="ai-card-header"/>
+                                <chart:pieChart id="functionCostChart"
+                                                titleField="functionName"
                                                 valueField="cost"
                                                 innerRadius="40%"
                                                 height="100%"
@@ -134,39 +158,23 @@
                                     <chart:balloon text="[[title]]: $[[value]] ([[percents]]%)"/>
                                 </chart:pieChart>
                             </vbox>
-                        </hbox>
 
-                        <!-- Charts Row 2 -->
-                        <hbox id="chartsRow2" spacing="true" width="100%" height="380px">
-                            <vbox id="tasksPieBox" stylename="ai-chart-card" width="50%" height="100%" spacing="true">
-                                <label value="msg://tasksDistributionTitle" stylename="ai-card-header"/>
-                                <chart:pieChart id="tasksPieChart"
-                                                titleField="functionName"
-                                                valueField="count"
-                                                innerRadius="40%"
-                                                height="100%"
-                                                width="100%">
-                                    <chart:legend position="BOTTOM" autoMargins="false"/>
-                                    <chart:balloon text="[[title]]: [[value]] ([[percents]]%)"/>
-                                </chart:pieChart>
-                            </vbox>
-
-                            <vbox id="volumeDynamicsBox" stylename="ai-chart-card" width="50%" height="100%" spacing="true">
-                                <label value="msg://callsAndTokensDynamicsTitle" stylename="ai-card-header"/>
-                                <chart:serialChart id="volumeDynamicsChart"
-                                                   categoryField="date"
+                            <vbox id="modelStatsBox" stylename="ai-chart-card" width="50%" height="100%" spacing="true">
+                                <label value="msg://modelLatencyTitle" stylename="ai-card-header"/>
+                                <chart:serialChart id="modelLatencyChart"
+                                                   categoryField="modelName"
                                                    height="100%"
                                                    width="100%">
                                     <chart:valueAxes>
-                                        <chart:axis id="callsAxis" position="LEFT" title="msg://axisCallsCount"/>
+                                        <chart:axis position="LEFT" title="msg://latencySeconds"/>
                                     </chart:valueAxes>
                                     <chart:graphs>
-                                        <chart:graph id="callsGraph"
+                                        <chart:graph id="latencyGraph"
                                                      type="COLUMN"
                                                      fillAlphas="0.8"
-                                                     valueField="calls"
-                                                     color="#27ae60"
-                                                     title="msg://axisCallsCount"/>
+                                                     color="#e67e22"
+                                                     valueField="latency"
+                                                     title="msg://avgDurationSec"/>
                                     </chart:graphs>
                                     <chart:chartCursor cursorAlpha="0.1"/>
                                 </chart:serialChart>
