@@ -113,14 +113,28 @@
 
     /* KPI Cards Grid & Containment */
     .ai-kpi-grid {
+      display: flex !important;
+      flex-direction: row !important;
       width: 100% !important;
       margin-top: 8px !important;
       margin-bottom: 12px !important;
       box-sizing: border-box !important;
 
-      .v-slot,
-      .v-horizontallayout-slot {
+      > .v-slot,
+      > .v-horizontallayout-slot {
+        flex: 1 1 0% !important;
+        width: 25% !important;
+        min-width: 0 !important;
         box-sizing: border-box !important;
+        padding: 0 6px !important;
+
+        &:first-child {
+          padding-left: 0 !important;
+        }
+
+        &:last-child {
+          padding-right: 0 !important;
+        }
       }
     }
 
