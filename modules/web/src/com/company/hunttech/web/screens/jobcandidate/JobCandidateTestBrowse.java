@@ -395,44 +395,6 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
     @Inject
     private TextField<String> searchField;
 
-    /** Кнопка фильтра Все кандидаты */
-    @Inject
-    private Button filterAllBtn;
-
-    /** Кнопка фильтра Мои кандидаты */
-    @Inject
-    private Button filterMyCandidatesBtn;
-
-    /** Кнопка фильтра С моим участием */
-    @Inject
-    private Button filterMyParticipationBtn;
-
-    private IteractionList getLastInteraction(JobCandidate candidate) {
-        if (candidate == null || candidate.getIteractionList() == null || candidate.getIteractionList().isEmpty()) {
-            return null;
-        }
-        IteractionList last = null;
-        for (IteractionList item : candidate.getIteractionList()) {
-            if (last == null) {
-                last = item;
-            } else {
-                java.util.Date d1 = item.getDateIteraction() != null ? item.getDateIteraction() : item.getCreateTs();
-                java.util.Date d2 = last.getDateIteraction() != null ? last.getDateIteraction() : last.getCreateTs();
-                if (d1 != null && (d2 == null || d1.after(d2))) {
-                    last = item;
-                }
-            }
-        }
-        return last;
-    }
-
-    private void updateFilterButtons(Button activeBtn) {
-        if (filterAllBtn != null) filterAllBtn.setStyleName("secondary filter-pill-btn");
-        if (filterMyCandidatesBtn != null) filterMyCandidatesBtn.setStyleName("secondary filter-pill-btn");
-        if (filterMyParticipationBtn != null) filterMyParticipationBtn.setStyleName("secondary filter-pill-btn");
-        if (activeBtn != null) activeBtn.setStyleName("primary filter-pill-btn active");
-    }
-
     /* ==================================================================     * Бизнес-логика извлечения зарплатных ожиданий
      * ========================================================================= */
 
@@ -477,11 +439,10 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
      * ========================================================================= */
 
     /**
-     * Инициализация экрана: генератор аватара в первой колонке и колонок реестра.
+     * Инициализация экрана: генератор аватара в первой колонке.
      */
     @Subscribe
     public void onInit(Screen.InitEvent event) {
-        // Колонка 1: Миниатюра фото кандидата (36px oval)
         candidatesTable.addGeneratedColumn("avatar", candidate -> {
             WebOvaFallbackImage avatarImg = uiComponents.create(WebOvaFallbackImage.class);
             avatarImg.setWidth("36px");
@@ -490,73 +451,9 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
             avatarImg.setOvalHeight("36px");
             avatarImg.setFallbackThemePath("icons/no-programmer.jpeg");
             avatarImg.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+            // Фото берётся из карточки кандидата, а при его отсутствии — из последнего резюме (CandidateCV)
             FileDescriptorImageHelper.setCandidateFace(avatarImg, fileLoader, resolveCandidateFace(candidate));
             return avatarImg;
-        });
-
-        // Колонка 2: Кандидат (ФИО + контакт)
-        candidatesTable.addGeneratedColumn("fullName", candidate -> {
-            Label<String> lbl = uiComponents.create(Label.NAME);
-            lbl.setHtmlEnabled(true);
-            String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
-            String sub = candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() :
-                    (candidate.getEmail() != null ? candidate.getEmail() : "");
-            lbl.setValue("<div><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
-                    (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>");
-            return lbl;
-        });
-
-        // Колонка 3: Должность
-        candidatesTable.addGeneratedColumn("personPosition", candidate -> {
-            Label<String> lbl = uiComponents.create(Label.NAME);
-            lbl.setHtmlEnabled(true);
-            String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
-            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + pos + "</span>");
-            return lbl;
-        });
-
-        // Колонка 4: Город
-        candidatesTable.addGeneratedColumn("cityOfResidence", candidate -> {
-            Label<String> lbl = uiComponents.create(Label.NAME);
-            lbl.setHtmlEnabled(true);
-            String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
-            lbl.setValue("<span style='font-size: 12px; color: #34495e;'>📍 " + city + "</span>");
-            return lbl;
-        });
-
-        // Колонка 5: Компания
-        candidatesTable.addGeneratedColumn("currentCompany", candidate -> {
-            Label<String> lbl = uiComponents.create(Label.NAME);
-            lbl.setHtmlEnabled(true);
-            String company = "-";
-            if (candidate.getCurrentCompany() != null) {
-                company = candidate.getCurrentCompany().getComanyName() != null ?
-                        candidate.getCurrentCompany().getComanyName() : candidate.getCurrentCompany().getCompanyShortName();
-            }
-            lbl.setValue("<span style='font-size: 12px; color: #34495e;'>🏢 " + (company != null ? company : "-") + "</span>");
-            return lbl;
-        });
-
-        // Колонка 6: Компактный светофорный статус взаимодействия
-        candidatesTable.addGeneratedColumn("lastInteractionStatus", candidate -> {
-            Label<String> statusLbl = uiComponents.create(Label.NAME);
-            statusLbl.setHtmlEnabled(true);
-            InteractionStatus status = calculateInteractionStatus(candidate);
-            IteractionList last = getLastInteraction(candidate);
-            String dot = status == InteractionStatus.FREE ? "🟢" :
-                    (status == InteractionStatus.MY_CANDIDATE ? "🟡" : "🔴");
-            String dateText = "нет";
-            if (last != null) {
-                java.util.Date d = last.getDateIteraction() != null ? last.getDateIteraction() : last.getCreateTs();
-                if (d != null) {
-                    dateText = interactionDateFormat.format(d);
-                }
-            }
-            statusLbl.setValue("<span style='background: " + status.getBgColor() + "; color: " + status.getColor() +
-                    "; padding: 2px 7px; border-radius: 8px; font-weight: 600; font-size: 11px; white-space: nowrap; display: inline-block;'>" +
-                    dot + " " + dateText + "</span>");
-            statusLbl.setDescription(status.getLabel() + (last != null && last.getRecrutier() != null ? " (" + last.getRecrutier().getName() + ")" : ""));
-            return statusLbl;
         });
     }
 
@@ -597,11 +494,9 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
      */
     private void clearDetailPane() {
         detailFullName.setHtmlEnabled(true);
-        detailFullName.setValue("<div style='text-align: center; font-size: 21px; font-weight: 700; color: #94a3b8;'>Выберите кандидата</div>");
-        detailPosition.setHtmlEnabled(true);
-        detailPosition.setValue("<div style='text-align: center; margin: 4px 0;'><span style='background: rgba(255, 255, 255, 0.08); color: #94a3b8; padding: 3px 10px; border-radius: 4px; font-weight: 500; font-size: 13px; display: inline-block;'>Должность</span></div>");
-        detailCity.setHtmlEnabled(true);
-        detailCity.setValue("<div style='text-align: center; font-size: 14px; font-weight: 500; color: #64748b; margin-top: 2px;'>📍 —</div>");
+        detailFullName.setValue("<div style='text-align: center; font-size: 21px; font-weight: 700; color: #7f8c8d;'>Выберите кандидата</div>");
+        detailPosition.setValue("");
+        detailCity.setValue("");
         detailPhone.setValue("-");
         detailEmail.setValue("-");
         detailTelegram.setValue("-");
@@ -626,15 +521,15 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
     private void populateDetailPane(JobCandidate candidate) {
         String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
         detailFullName.setHtmlEnabled(true);
-        detailFullName.setValue("<div style='text-align: center; font-size: 22px; font-weight: 700; color: #f8fafc; line-height: 1.3; text-shadow: 0 1px 3px rgba(0,0,0,0.5);'>" + name + "</div>");
+        detailFullName.setValue("<div style='text-align: center; font-size: 22px; font-weight: 700; color: #2c3e50; line-height: 1.3;'>" + name + "</div>");
 
         String pos = candidate.getPersonPosition() != null ? candidate.getPersonPosition().getPositionRuName() : "Специалист";
         detailPosition.setHtmlEnabled(true);
-        detailPosition.setValue("<div style='text-align: center; margin: 4px 0;'><span style='background: rgba(59, 130, 246, 0.25); color: #93c5fd; padding: 3px 12px; border-radius: 12px; font-weight: 600; font-size: 13.5px; display: inline-block; border: 1px solid rgba(96, 165, 250, 0.35);'>" + pos + "</span></div>");
+        detailPosition.setValue("<div style='text-align: center; margin: 4px 0;'><span style='background: rgba(43, 130, 201, 0.15); color: #2b82c9; padding: 3px 10px; border-radius: 4px; font-weight: 600; font-size: 14px; display: inline-block;'>" + pos + "</span></div>");
 
         String city = candidate.getCityOfResidence() != null ? candidate.getCityOfResidence().getCityRuName() : "Москва";
         detailCity.setHtmlEnabled(true);
-        detailCity.setValue("<div style='text-align: center; font-size: 14px; font-weight: 500; color: #cbd5e1; margin-top: 2px;'>📍 " + city + "</div>");
+        detailCity.setValue("<div style='text-align: center; font-size: 15px; font-weight: 500; color: #7f8c8d; margin-top: 2px;'>📍 " + city + "</div>");
 
         detailPhone.setValue(candidate.getPhone() != null ? candidate.getPhone() : "-");
         detailEmail.setValue(candidate.getEmail() != null ? candidate.getEmail() : "-");
@@ -662,57 +557,54 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         // если файла нет в хранилище — автоматический fallback без битой картинки
         FileDescriptorImageHelper.setCandidateFace(detailPic, fileLoader, resolveCandidateFace(candidate));
 
-        // Формирование блока активности на стандартном фоне сайдбара без рамки
+        // Светофорная карточка статуса взаимодействия и участников процесса
         CandidateRoleTeam team = calculateCandidateTeam(candidate);
         StringBuilder sb = new StringBuilder();
-        sb.append("<div class='candidate-activity-sidebar' style='padding: 4px 2px; font-size: 12.5px; line-height: 1.55; color: rgba(248, 250, 252, 0.85);'>");
+        sb.append("<div style='background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid ")
+                .append(team.status.getColor()).append("; margin-top: 6px; font-size: 12px; line-height: 1.5;'>");
 
-        sb.append("<div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);'>")
-                .append("<span style='font-weight: 600; color: rgba(248, 250, 252, 0.75); font-size: 12px;'>Статус:</span> ")
+        sb.append("<div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;'>")
+                .append("<span style='font-weight: 700; color: #1e293b;'>Статус:</span> ")
                 .append("<span style='color: ").append(team.status.getColor())
                 .append("; font-weight: 700; background: ").append(team.status.getBgColor())
-                .append("; padding: 2px 8px; border-radius: 4px; font-size: 11.5px;'>").append(team.status.getLabel()).append("</span>")
+                .append("; padding: 2px 8px; border-radius: 4px;'>").append(team.status.getLabel()).append("</span>")
                 .append("</div>");
 
-        sb.append("<div style='display: flex; flex-direction: column; gap: 5px;'>");
+        sb.append("<div style='display: flex; flex-direction: column; gap: 4px; border-top: 1px dashed #cbd5e1; padding-top: 6px;'>");
 
-        sb.append("<div>👤 <span style='font-weight: 600; color: rgba(248, 250, 252, 0.9);'>Автор:</span> <span style='color: rgba(248, 250, 252, 0.75);'>")
-                .append(team.authorName != null ? team.authorName : "—").append("</span>");
+        sb.append("<div>👤 <b>Автор:</b> ").append(team.authorName != null ? team.authorName : "—");
         if (team.createDate != null) {
-            sb.append(" <span style='color: rgba(255, 255, 255, 0.45); font-size: 11px;'>(").append(interactionDateFormat.format(team.createDate)).append(")</span>");
+            sb.append(" <span style='color: #94a3b8; font-size: 11px;'>(").append(interactionDateFormat.format(team.createDate)).append(")</span>");
         }
         sb.append("</div>");
 
         if (team.researcherName != null) {
-            sb.append("<div>🔍 <span style='font-weight: 600; color: rgba(248, 250, 252, 0.9);'>Ресерчер:</span> <span style='color: rgba(248, 250, 252, 0.75);'>")
-                    .append(team.researcherName).append("</span>");
+            sb.append("<div>🔍 <b>Ресерчер:</b> ").append(team.researcherName);
             if (team.researcherAction != null) {
-                sb.append(" <span style='color: rgba(255, 255, 255, 0.55); font-size: 11px;'>• ").append(team.researcherAction).append("</span>");
+                sb.append(" <span style='color: #64748b; font-size: 11px;'>• ").append(team.researcherAction).append("</span>");
             }
             sb.append("</div>");
         }
 
         if (team.recruiterName != null) {
-            sb.append("<div>💼 <span style='font-weight: 600; color: rgba(248, 250, 252, 0.9);'>Рекрутер:</span> <span style='color: rgba(248, 250, 252, 0.75);'>")
-                    .append(team.recruiterName).append("</span>");
+            sb.append("<div>💼 <b>Рекрутер:</b> ").append(team.recruiterName);
             if (team.recruiterAction != null) {
-                sb.append(" <span style='color: rgba(255, 255, 255, 0.55); font-size: 11px;'>• ").append(team.recruiterAction).append("</span>");
+                sb.append(" <span style='color: #64748b; font-size: 11px;'>• ").append(team.recruiterAction).append("</span>");
             }
             sb.append("</div>");
         }
 
         if (team.coordinatorName != null) {
-            sb.append("<div>🤝 <span style='font-weight: 600; color: rgba(248, 250, 252, 0.9);'>Координатор:</span> <span style='color: rgba(248, 250, 252, 0.75);'>")
-                    .append(team.coordinatorName).append("</span>");
+            sb.append("<div>🤝 <b>Координатор:</b> ").append(team.coordinatorName);
             if (team.coordinatorAction != null) {
-                sb.append(" <span style='color: rgba(255, 255, 255, 0.55); font-size: 11px;'>• ").append(team.coordinatorAction).append("</span>");
+                sb.append(" <span style='color: #64748b; font-size: 11px;'>• ").append(team.coordinatorAction).append("</span>");
             }
             sb.append("</div>");
         }
 
         if (team.lastInteractionDate != null) {
-            sb.append("<div style='color: rgba(248, 250, 252, 0.7); font-size: 11.5px; margin-top: 4px; padding-top: 5px; border-top: 1px dashed rgba(255, 255, 255, 0.12);'>")
-                    .append("⏱️ <span style='font-weight: 600; color: rgba(248, 250, 252, 0.9);'>Посл. активность:</span> ").append(interactionDateFormat.format(team.lastInteractionDate));
+            sb.append("<div style='color: #64748b; font-size: 11px; margin-top: 2px; padding-top: 4px; border-top: 1px dotted #e2e8f0;'>")
+                    .append("⏱️ <b>Посл. активность:</b> ").append(interactionDateFormat.format(team.lastInteractionDate));
             if (team.lastInteractionName != null) {
                 sb.append(" — ").append(team.lastInteractionName);
             }
@@ -724,7 +616,7 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
 
         sb.append("</div>");
 
-        sb.append("<div style='color: rgba(255, 255, 255, 0.45); font-size: 11px; margin-top: 6px; text-align: right;'>Всего взаимодействий: ")
+        sb.append("<div style='color: #94a3b8; font-size: 10.5px; margin-top: 6px; text-align: right;'>Всего взаимодействий: ")
                 .append(team.totalInteractions).append("</div>");
         sb.append("</div>");
 
@@ -807,35 +699,6 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
 
     @Subscribe("refreshBtn")
     public void onRefreshBtnClick(Button.ClickEvent event) {
-        jobCandidatesDl.load();
-    }
-
-    @Subscribe("filterAllBtn")
-    public void onFilterAllBtnClick(Button.ClickEvent event) {
-        updateFilterButtons(filterAllBtn);
-        jobCandidatesDl.removeParameter("createdBy");
-        jobCandidatesDl.removeParameter("recrutier");
-        jobCandidatesDl.removeParameter("recrutierName");
-        jobCandidatesDl.load();
-    }
-
-    @Subscribe("filterMyCandidatesBtn")
-    public void onFilterMyCandidatesBtnClick(Button.ClickEvent event) {
-        updateFilterButtons(filterMyCandidatesBtn);
-        jobCandidatesDl.removeParameter("recrutier");
-        jobCandidatesDl.removeParameter("recrutierName");
-        String currentLogin = userSession.getUser() != null ? userSession.getUser().getLogin() : "";
-        jobCandidatesDl.setParameter("createdBy", currentLogin);
-        jobCandidatesDl.load();
-    }
-
-    @Subscribe("filterMyParticipationBtn")
-    public void onFilterMyParticipationBtnClick(Button.ClickEvent event) {
-        updateFilterButtons(filterMyParticipationBtn);
-        jobCandidatesDl.removeParameter("createdBy");
-        jobCandidatesDl.setParameter("recrutier", userSession.getUser());
-        String currentLogin = userSession.getUser() != null ? userSession.getUser().getLogin() : "";
-        jobCandidatesDl.setParameter("recrutierName", currentLogin);
         jobCandidatesDl.load();
     }
 
