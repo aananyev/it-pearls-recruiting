@@ -1,11 +1,12 @@
 /*
  * Стили для дашбордов статистики и аналитики AI (UserAiDashboard, AdminAiDashboard).
  * Основной стиль: Halo (с адаптацией под современные стандарты UI/UX).
+ * Тёмная адаптация: hunttech-modern-dark (переменные темы $ht-*, акцент $ht-red).
  */
 @mixin ai-dashboard-styles {
 
   .ai-dashboard-root {
-    background-color: #f8fafc !important;
+    background-color: $ht-black !important;
     padding: 0 !important;
 
     .ai-scrollbox {
@@ -15,15 +16,15 @@
 
     /* Dashboard Header Banner */
     .ai-header-card {
-      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
-      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+      background: linear-gradient(135deg, lighten($ht-gray, 6%) 0%, $ht-gray 100%) !important;
+      border: 1px solid $ht-border-subtle !important;
       border-radius: 12px !important;
       padding: 18px 22px !important;
-      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04) !important;
+      box-shadow: 0 3px 12px $ht-shadow !important;
       box-sizing: border-box;
 
       .ai-page-title {
-        color: #0f172a !important;
+        color: $ht-dark !important;
         font-size: 20px !important;
         font-weight: 800 !important;
         letter-spacing: -0.3px !important;
@@ -33,29 +34,29 @@
       }
 
       .ai-page-subtitle {
-        color: #64748b !important;
+        color: $ht-muted !important;
         font-size: 13px !important;
         font-weight: 400 !important;
         margin-top: 3px !important;
       }
 
       .ai-chip-badge {
-        background: #e0f2fe !important;
-        color: #0369a1 !important;
+        background: rgba($ht-red, 0.12) !important;
+        color: $ht-red !important;
         font-size: 11px !important;
         font-weight: 700 !important;
         padding: 2px 10px !important;
         border-radius: 9999px !important;
         text-transform: uppercase !important;
         letter-spacing: 0.5px !important;
-        border: 1px solid #bae6fd !important;
+        border: 1px solid rgba($ht-red, 0.3) !important;
         white-space: nowrap !important;
         flex-shrink: 0 !important;
 
         &.badge-admin {
-          background: #f3e8ff !important;
-          color: #7e22ce !important;
-          border-color: #e9d5ff !important;
+          background: rgba(167, 139, 250, 0.15) !important;
+          color: #c4b5fd !important;
+          border-color: rgba(167, 139, 250, 0.3) !important;
         }
       }
     }
@@ -63,13 +64,13 @@
     /* Floating Filter Bar */
     .ai-dashboard-filter-bar {
       background: transparent !important;
-      border-top: 1px solid #e2e8f0 !important;
+      border-top: 1px solid $ht-border-subtle !important;
       padding-top: 12px !important;
       margin-top: 8px !important;
       box-sizing: border-box;
 
       .ai-filter-label {
-        color: #334155 !important;
+        color: $ht-dark !important;
         font-size: 13px !important;
         font-weight: 700 !important;
       }
@@ -81,32 +82,33 @@
       }
 
       .ai-action-btn {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
-        color: #ffffff !important;
+        background: $ht-red !important;
+        color: $ht-white !important;
         border: none !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
-        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3) !important;
+        box-shadow: 0 2px 6px rgba($ht-red, 0.3) !important;
         transition: all 0.2s ease-in-out !important;
 
         &:hover {
-          background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
-          box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4) !important;
+          background: darken($ht-red, 8%) !important;
+          box-shadow: 0 4px 10px rgba($ht-red, 0.4) !important;
           transform: translateY(-1px);
         }
       }
 
       .ai-secondary-btn {
-        background: #f1f5f9 !important;
-        color: #475569 !important;
-        border: 1px solid #cbd5e1 !important;
+        background: transparent !important;
+        color: $ht-muted !important;
+        border: 1px solid $ht-border-subtle !important;
         border-radius: 6px !important;
         font-weight: 500 !important;
         transition: all 0.2s ease-in-out !important;
 
         &:hover {
-          background: #e2e8f0 !important;
-          color: #1e293b !important;
+          background: $ht-gray !important;
+          color: $ht-dark !important;
+          border-color: rgba($ht-red, 0.3) !important;
         }
       }
     }
@@ -122,7 +124,6 @@
 
       > .v-slot {
         flex: 1 1 0% !important;
-        width: 25% !important;
         min-width: 0 !important;
         box-sizing: border-box !important;
         padding: 0 6px !important;
@@ -139,12 +140,12 @@
 
     .ai-kpi-card {
       width: 100% !important;
-      background: #ffffff !important;
-      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+      background: $ht-gray !important;
+      border: 1px solid $ht-border-subtle !important;
       border-radius: 12px !important;
       padding: 16px 20px !important;
       min-height: 124px !important;
-      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04) !important;
+      box-shadow: 0 3px 12px $ht-shadow !important;
       box-sizing: border-box !important;
       overflow: hidden !important;
       display: flex !important;
@@ -154,31 +155,31 @@
 
       &:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5) !important;
       }
 
       &.kpi-blue {
-        border-left: 4px solid #3b82f6 !important;
-        background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%) !important;
+        border-left: 4px solid #60a5fa !important;
+        background: linear-gradient(135deg, $ht-gray 0%, lighten($ht-gray, 4%) 100%) !important;
       }
 
       &.kpi-purple {
-        border-left: 4px solid #8b5cf6 !important;
-        background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 100%) !important;
+        border-left: 4px solid #a78bfa !important;
+        background: linear-gradient(135deg, $ht-gray 0%, lighten($ht-gray, 4%) 100%) !important;
       }
 
       &.kpi-green {
-        border-left: 4px solid #10b981 !important;
-        background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%) !important;
+        border-left: 4px solid #34d399 !important;
+        background: linear-gradient(135deg, $ht-gray 0%, lighten($ht-gray, 4%) 100%) !important;
       }
 
       &.kpi-orange {
-        border-left: 4px solid #f59e0b !important;
-        background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%) !important;
+        border-left: 4px solid #fbbf24 !important;
+        background: linear-gradient(135deg, $ht-gray 0%, lighten($ht-gray, 4%) 100%) !important;
       }
 
       .kpi-title {
-        color: #64748b !important;
+        color: $ht-muted !important;
         font-size: 11px !important;
         font-weight: 700 !important;
         text-transform: uppercase !important;
@@ -199,7 +200,7 @@
       }
 
       .kpi-value {
-        color: #0f172a !important;
+        color: $ht-dark !important;
         font-size: 24px !important;
         font-weight: 800 !important;
         line-height: 1.2 !important;
@@ -214,7 +215,7 @@
       }
 
       .kpi-sub {
-        color: #64748b !important;
+        color: $ht-muted !important;
         font-size: 12px !important;
         font-weight: 500 !important;
         display: -webkit-box !important;
@@ -281,20 +282,20 @@
     .ai-chart-card,
     .ai-table-card {
       width: 100% !important;
-      background: #ffffff !important;
-      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+      background: $ht-gray !important;
+      border: 1px solid $ht-border-subtle !important;
       border-radius: 12px !important;
       padding: 16px 20px !important;
-      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04) !important;
+      box-shadow: 0 3px 12px $ht-shadow !important;
       box-sizing: border-box !important;
       overflow: hidden !important;
 
       .ai-card-header {
-        color: #1e293b !important;
+        color: $ht-dark !important;
         font-size: 14px !important;
         font-weight: 700 !important;
         padding-bottom: 8px !important;
-        border-bottom: 1px solid #f1f5f9 !important;
+        border-bottom: 1px solid $ht-border-subtle !important;
         margin-bottom: 8px !important;
         display: block !important;
         width: 100% !important;
@@ -306,18 +307,18 @@
 
     /* Dashboard Tables */
     .ai-dashboard-table {
-      border: 1px solid #e2e8f0 !important;
+      border: 1px solid $ht-border-subtle !important;
       border-radius: 8px !important;
       overflow: hidden;
 
       .v-table-header-wrap {
-        background: #f8fafc !important;
-        border-bottom: 1px solid #e2e8f0 !important;
+        background: $ht-black !important;
+        border-bottom: 1px solid $ht-border-subtle !important;
       }
 
       .v-table-header {
         font-weight: 700 !important;
-        color: #475569 !important;
+        color: $ht-muted !important;
         font-size: 12px !important;
       }
 
@@ -326,7 +327,7 @@
         transition: background-color 0.15s ease !important;
 
         &:hover {
-          background-color: #f1f5f9 !important;
+          background-color: rgba($ht-red, 0.03) !important;
         }
       }
     }
