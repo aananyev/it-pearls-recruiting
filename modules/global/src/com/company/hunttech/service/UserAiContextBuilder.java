@@ -32,28 +32,10 @@ public final class UserAiContextBuilder {
         context.setActive(true);
         int[] remaining = new int[]{TOTAL_CONTEXT_LIMIT};
 
-        // Профессиональные сведения добавляются как данные, а не как инструкции для модели.
-        addData(context, remaining, "currentPosition", sanitize(profile.getCurrentPosition(), SHORT_FIELD_LIMIT));
-        addData(context, remaining, "functionalRole", enumName(profile.getFunctionalRole()));
-        addData(context, remaining, "seniorityLevel", enumName(profile.getSeniorityLevel()));
-        addData(context, remaining, "professionalExperienceYears", stringValue(profile.getProfessionalExperienceYears()));
-        addData(context, remaining, "recruitingExperienceYears", stringValue(profile.getRecruitingExperienceYears()));
-        addData(context, remaining, "aboutMe", sanitize(profile.getAboutMe(), 2000));
-        addData(context, remaining, "currentResponsibilities", sanitize(profile.getCurrentResponsibilities(), DEFAULT_FIELD_LIMIT));
-        addData(context, remaining, "education", sanitize(profile.getEducation(), DEFAULT_FIELD_LIMIT));
-        addData(context, remaining, "certifications", sanitize(profile.getCertifications(), DEFAULT_FIELD_LIMIT));
-        addData(context, remaining, "domainExpertise", sanitize(profile.getDomainExpertise(), DEFAULT_FIELD_LIMIT));
-        addData(context, remaining, "industries", sanitize(profile.getIndustries(), DEFAULT_FIELD_LIMIT));
-        addData(context, remaining, "recruitingSpecializations", sanitize(profile.getRecruitingSpecializations(), DEFAULT_FIELD_LIMIT));
-        addData(context, remaining, "targetRoles", sanitize(profile.getTargetRoles(), DEFAULT_FIELD_LIMIT));
-        addData(context, remaining, "candidateLevels", sanitize(profile.getCandidateLevels(), SHORT_FIELD_LIMIT));
-        addData(context, remaining, "hiringGeographies", sanitize(profile.getHiringGeographies(), 2000));
-        addData(context, remaining, "decisionPriorities", sanitize(profile.getDecisionPriorities(), DEFAULT_FIELD_LIMIT));
-        addData(context, remaining, "clientAndProjectContext", sanitize(profile.getClientAndProjectContext(), DEFAULT_FIELD_LIMIT));
-        addData(context, remaining, "professionalGoals", sanitize(profile.getProfessionalGoals(), DEFAULT_FIELD_LIMIT));
-        addData(context, remaining, "professionalInterests", sanitize(profile.getProfessionalInterests(), DEFAULT_FIELD_LIMIT));
-        addData(context, remaining, "developmentAreas", sanitize(profile.getDevelopmentAreas(), DEFAULT_FIELD_LIMIT));
-        addData(context, remaining, "currentPriorities", sanitize(profile.getCurrentPriorities(), DEFAULT_FIELD_LIMIT));
+        // 1. Стилевые предпочтения — ядро персонализации (язык, стиль, детализация,
+        //    терминология, структура, ограничения общения). Добавляются первыми, чтобы
+        //    при ограниченном бюджете (см. hunttech.ai.userContextLimit) они не были
+        //    вытеснены объёмными LOB-полями.
         addData(context, remaining, "preferredLanguage", enumName(profile.getPreferredLanguage()));
         addData(context, remaining, "responseDetailLevel", enumName(profile.getResponseDetailLevel()));
         addData(context, remaining, "communicationStyle", enumName(profile.getCommunicationStyle()));
@@ -61,7 +43,16 @@ public final class UserAiContextBuilder {
         addData(context, remaining, "preferredAnswerStructure", enumName(profile.getPreferredAnswerStructure()));
         addData(context, remaining, "communicationConstraints", sanitize(profile.getCommunicationConstraints(), 2000));
 
-        // Только это поле имеет семантику пользовательской инструкции.
+        // 2. Ключевые идентификаторы профиля.
+        addData(context, remaining, "currentPosition", sanitize(profile.getCurrentPosition(), SHORT_FIELD_LIMIT));
+        addData(context, remaining, "functionalRole", enumName(profile.getFunctionalRole()));
+        addData(context, remaining, "seniorityLevel", enumName(profile.getSeniorityLevel()));
+        addData(context, remaining, "professionalExperienceYears", stringValue(profile.getProfessionalExperienceYears()));
+        addData(context, remaining, "recruitingExperienceYears", stringValue(profile.getRecruitingExperienceYears()));
+        addData(context, remaining, "candidateLevels", sanitize(profile.getCandidateLevels(), SHORT_FIELD_LIMIT));
+
+        // 3. Пользовательские инструкции — второе ядро персонализации. Резервируют
+        //    бюджет до объёмных LOB-полей, чтобы не обрезаться при лимите.
         String customInstructions = sanitize(profile.getCustomAiInstructions(), DEFAULT_FIELD_LIMIT);
         if (customInstructions != null && remaining[0] > 0) {
             String limited = truncateByCodePoints(customInstructions, remaining[0]);
@@ -70,6 +61,24 @@ public final class UserAiContextBuilder {
                 remaining[0] -= limited.codePointCount(0, limited.length());
             }
         }
+
+        // 4. Объёмный профессиональный контекст — по убыванию релевантности
+        //    для персонализации (оставшийся бюджет).
+        addData(context, remaining, "aboutMe", sanitize(profile.getAboutMe(), 2000));
+        addData(context, remaining, "currentResponsibilities", sanitize(profile.getCurrentResponsibilities(), DEFAULT_FIELD_LIMIT));
+        addData(context, remaining, "decisionPriorities", sanitize(profile.getDecisionPriorities(), DEFAULT_FIELD_LIMIT));
+        addData(context, remaining, "targetRoles", sanitize(profile.getTargetRoles(), DEFAULT_FIELD_LIMIT));
+        addData(context, remaining, "hiringGeographies", sanitize(profile.getHiringGeographies(), 2000));
+        addData(context, remaining, "clientAndProjectContext", sanitize(profile.getClientAndProjectContext(), DEFAULT_FIELD_LIMIT));
+        addData(context, remaining, "domainExpertise", sanitize(profile.getDomainExpertise(), DEFAULT_FIELD_LIMIT));
+        addData(context, remaining, "industries", sanitize(profile.getIndustries(), DEFAULT_FIELD_LIMIT));
+        addData(context, remaining, "recruitingSpecializations", sanitize(profile.getRecruitingSpecializations(), DEFAULT_FIELD_LIMIT));
+        addData(context, remaining, "professionalGoals", sanitize(profile.getProfessionalGoals(), DEFAULT_FIELD_LIMIT));
+        addData(context, remaining, "professionalInterests", sanitize(profile.getProfessionalInterests(), DEFAULT_FIELD_LIMIT));
+        addData(context, remaining, "developmentAreas", sanitize(profile.getDevelopmentAreas(), DEFAULT_FIELD_LIMIT));
+        addData(context, remaining, "currentPriorities", sanitize(profile.getCurrentPriorities(), DEFAULT_FIELD_LIMIT));
+        addData(context, remaining, "education", sanitize(profile.getEducation(), DEFAULT_FIELD_LIMIT));
+        addData(context, remaining, "certifications", sanitize(profile.getCertifications(), DEFAULT_FIELD_LIMIT));
         return context;
     }
 

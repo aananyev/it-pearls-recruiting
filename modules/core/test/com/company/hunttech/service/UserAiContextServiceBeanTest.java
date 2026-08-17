@@ -1,7 +1,9 @@
 package com.company.hunttech.service;
 
+import com.company.hunttech.entity.AiCommunicationStyle;
 import com.company.hunttech.entity.AiFunctionalRole;
 import com.company.hunttech.entity.AiPreferredLanguage;
+import com.company.hunttech.entity.AiResponseDetailLevel;
 import com.company.hunttech.entity.UserAiProfile;
 import com.company.hunttech.service.dto.AiUserContext;
 import org.junit.Test;
@@ -101,6 +103,38 @@ public class UserAiContextServiceBeanTest {
         profile.setAboutMe(" \t ");
         AiUserContext context = service.buildContext(profile);
         assertNull(context.getProfileData().get("aboutMe"));
+    }
+
+    @Test
+    public void stylePreferencesAndInstructions_keepBudgetBeforeLargeLobFields() {
+        // При ограниченном бюджете стилевые предпочтения и пользовательские
+        // инструкции добавляются первыми и не вытесняются объёмными LOB-полями.
+        UserAiContextServiceBean service = new UserAiContextServiceBean();
+        UserAiProfile profile = activeProfile();
+        profile.setPreferredLanguage(AiPreferredLanguage.RUSSIAN);
+        profile.setCommunicationStyle(AiCommunicationStyle.DIRECT);
+        profile.setResponseDetailLevel(AiResponseDetailLevel.BRIEF);
+        profile.setCustomAiInstructions("Стиль — кратко и по делу");
+        // Объёмные LOB-поля: суммарно заметно больше общего лимита контекста.
+        profile.setCurrentResponsibilities(repeat("обязанности ", 700));
+        profile.setEducation(repeat("образование ", 700));
+        profile.setCertifications(repeat("сертификаты ", 700));
+        profile.setDomainExpertise(repeat("экспертиза ", 700));
+
+        AiUserContext context = service.buildContext(profile);
+
+        assertEquals("RUSSIAN", context.getProfileData().get("preferredLanguage"));
+        assertEquals("DIRECT", context.getProfileData().get("communicationStyle"));
+        assertEquals("BRIEF", context.getProfileData().get("responseDetailLevel"));
+        assertEquals(1, context.getCustomInstructions().size());
+        assertEquals("Стиль — кратко и по делу", context.getCustomInstructions().get(0));
+        // Объёмные поля могли усечься/выпасть — это ожидаемо при лимите,
+        // но ядро персонализации обязано выжить.
+        assertTrue(context.getProfileData().containsKey("currentResponsibilities"));
+    }
+
+    private static String repeat(String value, int times) {
+        return String.join("", java.util.Collections.nCopies(times, value));
     }
 
     private UserAiProfile activeProfile() {
