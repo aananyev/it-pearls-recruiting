@@ -14,6 +14,11 @@
       "role": "второй поток фич: Antigravity IDE (agentic IDE Google, launcher ~/bin/antigravity-ide, форвардер 127.0.0.1:18080 → 209.46.2.183); свой worktree, ветки agent/*, PR",
       "reads": [".ai/instructions/", ".ai/reports/", "PR-статусы"],
       "writes": [".ai/instructions/", "ветки agent/*", "PR с описанием"]
+    },
+    "QA-тестировщик (проверка)": {
+      "role": "проверка работы разработчиков перед PR (diff-ревью, тесты, docs), вердикт PASS/FAIL; без своего worktree и ветки; запускается как субагент агентом-разработчиком; не пишет код, не коммитит, не деплоит",
+      "reads": [".ai/instructions/", ".ai/tasks/", ".ai/reports/", "ветки agent/*", "diff/PR-статусы"],
+      "writes": [".ai/reports/qa-*.md", "PR-комментарии (вердикт QA)"]
     }
   },
   "channels": {
@@ -24,6 +29,10 @@
     "Hermes-2/Antigravity → Hermes-1": {
       "description": "Разработчики создают PR, указывают статус и что сделано",
       "actions": ["pr_created", "status_update"]
+    },
+    "QA → разработчики": {
+      "description": "QA проверяет работу перед PR: вердикт PASS/FAIL, найденные ошибки P1/P2/P3 с путями, требование исправить до PR (при FAIL работа не принимается); отчёты .ai/reports/qa-*.md",
+      "actions": ["qa_verdict", "error_fix_request", "qa_report"]
     },
     "Общий git": {
       "description": "Ветки agent/*, PR (base=master), merge только Hermes-1 после проверки и согласия пользователя",

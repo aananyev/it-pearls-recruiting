@@ -24,6 +24,7 @@ Git-протокол (не нарушать):
 Сборка и тесты:
 - Прогоны gradle СЕРИАЛИЗУЙ с другими агентами: один gradle-процесс в момент времени (общий кэш, FTS-локи, дубли jar ломают всё). Если видишь чужой gradle — жди или согласуй
 - Перед PR обязательно: ./gradlew :app-core:test --tests "<твой контрактный тест>" --tests "com.company.hunttech.core.ScreenViewIntegrityTest" + :app-web:buildScssThemes (если трогал SCSS) + docs (docs/ui/, docs/entities/) по правилам проекта
+- Перед созданием PR запусти QA-субагента: промпт — .ai/instructions/qa-subagent-prompt.md, роль и чеклист — .ai/instructions/qa-agent-brief.md (QA проверяет работу и не принимает результат при наличии ошибок); вердикт должен быть PASS, отчёт — .ai/reports/qa-*.md (упомяни его в описании PR); при FAIL — исправить и прогнать QA повторно
 - НЕ деплой и НЕ рестарт: это зона Hermes-1. Свой runtime (Tomcat/БД) не поднимай без запроса
 
 Коммуникация:
