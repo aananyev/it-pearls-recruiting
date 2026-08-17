@@ -101,7 +101,6 @@
       height: 100% !important;
     }
 
-    
     .job-candidate-sidebar .v-label {
       font-weight: normal !important;
       font-size: 13px !important;
@@ -1274,111 +1273,6 @@
     font-size: 12px !important;
     height: 32px !important;
     transition: all 0.15s ease !important;
-  }
-
-  /* =========================================================================
-   * Фирменный дизайн и изоляция счетчика строк таблицы (rowsCount)
-   * ========================================================================= */
-  .candidate-table-card {
-    display: flex !important;
-    flex-direction: column !important;
-    overflow: hidden !important;
-    padding: 0 !important;
-  }
-
-  .candidate-browse-grid,
-  .job-candidate-editor .v-table,
-  .job-candidate-editor .c-grouptable {
-    display: flex !important;
-    flex-direction: column !important;
-    position: relative !important;
-
-    /* Обёртка таблицы */
-    .v-table-table {
-      box-sizing: border-box !important;
-    }
-
-    /* Нижняя панель таблицы со счетчиком строк — изолирована от тела таблицы */
-    .c-table-bottom-bar,
-    .c-table-controls,
-    .c-table-rowcount,
-    .v-table-footer-wrap {
-      position: relative !important;
-      bottom: auto !important;
-      left: auto !important;
-      right: auto !important;
-      width: 100% !important;
-      min-height: 42px !important;
-      height: 42px !important;
-      padding: 6px 18px !important;
-      background: #f8fafc !important;
-      border-top: 1px solid #e2e8f0 !important;
-      border-bottom-left-radius: 8px !important;
-      border-bottom-right-radius: 8px !important;
-      box-sizing: border-box !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: flex-end !important;
-      z-index: 2 !important;
-      margin-top: auto !important;
-    }
-
-    /* Компонент rowsCount */
-    .c-rows-count {
-      display: inline-flex !important;
-      align-items: center !important;
-      gap: 6px !important;
-      font-size: 12px !important;
-      font-weight: 500 !important;
-      color: #64748b !important;
-      margin-left: auto !important;
-
-      /* Текст и числа */
-      .c-rows-count-text,
-      .v-label {
-        font-size: 12px !important;
-        font-weight: 600 !important;
-        color: #334155 !important;
-      }
-
-      /* Ссылки пагинации / количества */
-      .c-rows-count-link,
-      .v-button-link {
-        font-size: 12px !important;
-        font-weight: 600 !important;
-        color: #2563eb !important;
-        text-decoration: none !important;
-        padding: 2px 6px !important;
-        border-radius: 4px !important;
-        transition: all 0.15s ease !important;
-
-        &:hover {
-          color: #1d4ed8 !important;
-          background: rgba(37, 99, 235, 0.08) !important;
-          text-decoration: underline !important;
-        }
-      }
-
-      /* Кнопки перелистывания страниц */
-      .v-button {
-        height: 26px !important;
-        min-height: 26px !important;
-        line-height: 24px !important;
-        padding: 0 8px !important;
-        border-radius: 4px !important;
-        border: 1px solid #cbd5e1 !important;
-        background: #ffffff !important;
-        color: #475569 !important;
-        font-size: 11px !important;
-        transition: all 0.15s ease !important;
-
-        &:hover:not(.v-disabled) {
-          background: #f1f5f9 !important;
-          color: #1e293b !important;
-          border-color: #94a3b8 !important;
-        }
-      }
-    }
   }
 
   /* Стилизация блока «Последняя активность» в сайдбаре на стандартном фоне */
