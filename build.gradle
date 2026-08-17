@@ -42,7 +42,6 @@ cuba {
     artifact {
         group = 'com.company.hunttech'
         version = '0.148'
-        version = '0.148'
         isSnapshot = true
     }
     tomcat {
