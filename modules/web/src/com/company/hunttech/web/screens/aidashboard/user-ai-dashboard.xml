@@ -74,7 +74,7 @@
 
             <!-- Charts Section -->
             <hbox id="chartsPanel" width="100%" height="380px" stylename="ai-charts-row-60-40">
-                <vbox id="dynamicsChartBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
+                <vbox id="dynamicsChartBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true" expand="dynamicsChart">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://dailyDynamics" stylename="ai-card-header" width="100%"/>
                     </hbox>
@@ -104,7 +104,7 @@
                     </chart:serialChart>
                 </vbox>
 
-                <vbox id="functionChartBox" stylename="ai-chart-card" width="45%" height="100%" spacing="true">
+                <vbox id="functionChartBox" stylename="ai-chart-card" width="45%" height="100%" spacing="true" expand="functionPieChart">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://functionsShare" stylename="ai-card-header" width="100%"/>
                     </hbox>

@@ -100,7 +100,7 @@
                     <vbox width="100%" spacing="true">
                         <!-- Charts Row 1 -->
                         <hbox id="chartsRow1" width="100%" height="380px" stylename="ai-charts-row-60-40">
-                            <vbox id="costDynamicsBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
+                            <vbox id="costDynamicsBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true" expand="costDynamicsChart">
                                 <label value="msg://costDynamicsTitle" stylename="ai-card-header"/>
                                 <chart:serialChart id="costDynamicsChart"
                                                    categoryField="date"
@@ -122,7 +122,7 @@
                                 </chart:serialChart>
                             </vbox>
 
-                            <vbox id="topUsersChartBox" stylename="ai-chart-card" width="45%" height="100%" spacing="true">
+                            <vbox id="topUsersChartBox" stylename="ai-chart-card" width="45%" height="100%" spacing="true" expand="topUsersChart">
                                 <label value="msg://topUsersTitle" stylename="ai-card-header"/>
                                 <chart:serialChart id="topUsersChart"
                                                    rotate="true"
@@ -146,7 +146,7 @@
 
                         <!-- Charts Row 2 -->
                         <hbox id="chartsRow2" width="100%" height="380px" stylename="ai-charts-row-50-50">
-                            <vbox id="functionCostBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
+                            <vbox id="functionCostBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true" expand="functionCostChart">
                                 <label value="msg://spendByFunctionTitle" stylename="ai-card-header"/>
                                 <chart:pieChart id="functionCostChart"
                                                 titleField="functionName"
@@ -159,7 +159,7 @@
                                 </chart:pieChart>
                             </vbox>
 
-                            <vbox id="modelStatsBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
+                            <vbox id="modelStatsBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true" expand="modelLatencyChart">
                                 <label value="msg://modelLatencyTitle" stylename="ai-card-header"/>
                                 <chart:serialChart id="modelLatencyChart"
                                                    categoryField="modelName"
