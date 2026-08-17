@@ -1797,5 +1797,31 @@ rating_battery_yellow_3:before {
         height: 100% !important;
       }
     }
+
+    /* ── Hide amCharts watermark across all graphical widgets ── */
+    a[href*="amcharts.com"],
+    a[href*="amcharts"],
+    .amcharts-chart-div > a,
+    .amcharts-chart-div a,
+    .amcharts-main-div > a,
+    .amcharts-main-div a,
+    .c-chart-container a,
+    .c-chart-canvas a,
+    .v-amcharts-chart a,
+    .c-amcharts-chart a {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      position: absolute !important;
+      clip: rect(0, 0, 0, 0) !important;
+      width: 0 !important;
+      height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      font-size: 0 !important;
+      line-height: 0 !important;
+    }
 }
+
 

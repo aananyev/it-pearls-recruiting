@@ -9,7 +9,7 @@
     padding: 0 !important;
 
     .ai-scrollbox {
-      padding: 16px 20px 24px 20px !important;
+      padding: 16px 20px 32px 20px !important;
       box-sizing: border-box;
     }
 
@@ -27,13 +27,16 @@
         font-size: 20px !important;
         font-weight: 800 !important;
         letter-spacing: -0.3px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
       }
 
       .ai-page-subtitle {
         color: #64748b !important;
         font-size: 13px !important;
         font-weight: 400 !important;
-        margin-top: 2px !important;
+        margin-top: 3px !important;
       }
 
       .ai-chip-badge {
@@ -46,6 +49,8 @@
         text-transform: uppercase !important;
         letter-spacing: 0.5px !important;
         border: 1px solid #bae6fd !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
 
         &.badge-admin {
           background: #f3e8ff !important;
@@ -106,25 +111,51 @@
       }
     }
 
-    /* KPI Cards Grid */
+    /* KPI Cards Grid & Containment */
     .ai-kpi-grid {
-      box-sizing: border-box;
-      margin-top: 2px;
-      margin-bottom: 2px;
+      display: flex !important;
+      flex-direction: row !important;
+      width: 100% !important;
+      margin-top: 8px !important;
+      margin-bottom: 12px !important;
+      box-sizing: border-box !important;
+
+      > .v-slot,
+      > .v-horizontallayout-slot {
+        flex: 1 1 0% !important;
+        width: 25% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        padding: 0 6px !important;
+
+        &:first-child {
+          padding-left: 0 !important;
+        }
+
+        &:last-child {
+          padding-right: 0 !important;
+        }
+      }
     }
 
     .ai-kpi-card {
+      width: 100% !important;
       background: #ffffff !important;
-      border: 1px solid rgba(0, 0, 0, 0.07) !important;
+      border: 1px solid rgba(0, 0, 0, 0.08) !important;
       border-radius: 12px !important;
-      padding: 14px 18px !important;
-      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04) !important;
-      box-sizing: border-box;
+      padding: 16px 20px !important;
+      min-height: 124px !important;
+      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04) !important;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
       transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 
       &:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08) !important;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
       }
 
       &.kpi-blue {
@@ -153,35 +184,51 @@
         font-weight: 700 !important;
         text-transform: uppercase !important;
         letter-spacing: 0.6px !important;
-        margin-bottom: 4px !important;
-        display: block;
+        margin-bottom: 2px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+        max-width: 100% !important;
       }
 
       .kpi-icon {
-        font-size: 18px !important;
+        font-size: 20px !important;
         line-height: 1 !important;
+        flex-shrink: 0 !important;
+        margin-left: 8px !important;
       }
 
       .kpi-value {
         color: #0f172a !important;
         font-size: 24px !important;
         font-weight: 800 !important;
-        line-height: 1.15 !important;
+        line-height: 1.2 !important;
+        margin-top: 4px !important;
         margin-bottom: 4px !important;
-        display: block;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+        max-width: 100% !important;
+        letter-spacing: -0.5px !important;
       }
 
       .kpi-sub {
-        color: #94a3b8 !important;
+        color: #64748b !important;
         font-size: 12px !important;
         font-weight: 500 !important;
-        display: block;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+        max-width: 100% !important;
       }
     }
 
     /* Structured TabSheet */
     .ai-dashboard-tabsheet {
-      margin-top: 6px;
+      margin-top: 8px;
 
       .v-tabsheet-tabitem {
         font-weight: 600 !important;
@@ -189,15 +236,57 @@
       }
     }
 
+    /* Chart Rows & Proportions */
+    .ai-charts-row-60-40 {
+      display: flex !important;
+      flex-direction: row !important;
+      width: 100% !important;
+      gap: 16px !important;
+      margin-bottom: 12px !important;
+      box-sizing: border-box !important;
+
+      > .v-slot:first-child {
+        flex: 6 1 0% !important;
+        width: auto !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+      }
+
+      > .v-slot:last-child {
+        flex: 4 1 0% !important;
+        width: auto !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+      }
+    }
+
+    .ai-charts-row-50-50 {
+      display: flex !important;
+      flex-direction: row !important;
+      width: 100% !important;
+      gap: 16px !important;
+      margin-bottom: 12px !important;
+      box-sizing: border-box !important;
+
+      > .v-slot {
+        flex: 1 1 0% !important;
+        width: auto !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+      }
+    }
+
     /* Chart & Table Surfaces */
     .ai-chart-card,
     .ai-table-card {
+      width: 100% !important;
       background: #ffffff !important;
       border: 1px solid rgba(0, 0, 0, 0.08) !important;
       border-radius: 12px !important;
       padding: 16px 20px !important;
       box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04) !important;
-      box-sizing: border-box;
+      box-sizing: border-box !important;
+      overflow: hidden !important;
 
       .ai-card-header {
         color: #1e293b !important;
@@ -206,8 +295,11 @@
         padding-bottom: 8px !important;
         border-bottom: 1px solid #f1f5f9 !important;
         margin-bottom: 8px !important;
-        display: block;
-        width: 100%;
+        display: block !important;
+        width: 100% !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
       }
     }
 
