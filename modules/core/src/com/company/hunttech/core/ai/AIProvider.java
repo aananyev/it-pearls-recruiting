@@ -22,6 +22,17 @@ public interface AIProvider {
                         Map<String, Object> options);
 
     /**
+     * Выполняет синхронный запрос к модели и возвращает результат с информацией о токенах и стоимости.
+     */
+    default AiProviderResponse executeTextWithTokens(String prompt, String systemContext, String apiKey,
+                                                    String modelName, Map<String, Object> options) {
+        String text = generateText(prompt, systemContext, apiKey, modelName, options);
+        int promptTokens = prompt != null ? (prompt.length() + (systemContext != null ? systemContext.length() : 0)) / 4 : 0;
+        int completionTokens = text != null ? text.length() / 4 : 0;
+        return AiProviderResponse.ofText(text, promptTokens, completionTokens, promptTokens + completionTokens);
+    }
+
+    /**
      * Выполняет редактирование изображения (capability IMAGE_GENERATION).
      *
      * <p>Провайдер получает исходное изображение и возвращает обработанный
@@ -43,3 +54,4 @@ public interface AIProvider {
                 "Провайдер «" + getProviderCode() + "» не поддерживает IMAGE_GENERATION.");
     }
 }
+

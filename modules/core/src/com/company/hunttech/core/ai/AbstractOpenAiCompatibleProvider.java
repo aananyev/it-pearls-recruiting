@@ -44,6 +44,12 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
     @Override
     public String generateText(String prompt, String systemContext, String apiKey, String modelName,
                                Map<String, Object> options) {
+        return executeTextWithTokens(prompt, systemContext, apiKey, modelName, options).getText();
+    }
+
+    @Override
+    public AiProviderResponse executeTextWithTokens(String prompt, String systemContext, String apiKey,
+                                                    String modelName, Map<String, Object> options) {
         try {
             ObjectNode requestBody = objectMapper.createObjectNode();
             requestBody.put("model", isConfigured(modelName) ? modelName.trim() : getDefaultModel());
@@ -60,12 +66,25 @@ public abstract class AbstractOpenAiCompatibleProvider implements AIProvider {
             customizeConnection(connection);
             String responseBody = execute(connection, objectMapper.writeValueAsString(requestBody));
 
-            JsonNode content = objectMapper.readTree(responseBody)
-                    .path("choices").path(0).path("message").path("content");
+            JsonNode root = objectMapper.readTree(responseBody);
+            JsonNode content = root.path("choices").path(0).path("message").path("content");
             if (content.isMissingNode() || content.isNull() || !isConfigured(content.asText())) {
                 throw new IOException("пустой ответ: choices[0].message.content отсутствует");
             }
-            return content.asText();
+            String text = content.asText();
+
+            JsonNode usage = root.path("usage");
+            int promptTokens = usage.path("prompt_tokens").asInt(0);
+            int completionTokens = usage.path("completion_tokens").asInt(0);
+            int totalTokens = usage.path("total_tokens").asInt(0);
+
+            if (promptTokens == 0 && completionTokens == 0) {
+                promptTokens = prompt != null ? (prompt.length() + (systemContext != null ? systemContext.length() : 0)) / 4 : 0;
+                completionTokens = text.length() / 4;
+                totalTokens = promptTokens + completionTokens;
+            }
+
+            return AiProviderResponse.ofText(text, promptTokens, completionTokens, totalTokens);
         } catch (IOException e) {
             log.error("{} API request failed: {}", getProviderDisplayName(), e.getMessage(), e);
             throw new RuntimeException("Ошибка запроса к " + getProviderDisplayName() + " API: "

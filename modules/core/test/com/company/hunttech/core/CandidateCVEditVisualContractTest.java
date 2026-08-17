@@ -53,7 +53,7 @@ public class CandidateCVEditVisualContractTest {
          */
         assertEquals("59a4f65ab467b8e2b0a636d17d476644d4395e2e",
                 gitBlobSha1(readProjectBytes(ENTITY)));
-        assertEquals("e433bb937d3b817a8f985c1feec178a691ce85ce",
+        assertEquals("62df9c724150a91770ba3eef11f132209108157c",
                 gitBlobSha1(readProjectBytes(VIEWS)));
     }
 
@@ -82,7 +82,7 @@ public class CandidateCVEditVisualContractTest {
                 "textFieldIOriginalCV", "loadToCVTextArea", "originalCVLink", "fileOriginalCVField",
                 "textFieldHuntTechCV", "HuntTechCVLink", "fileCVField",
                 "candidatePic", "fileImageFaceUpload",
-                "rescanSkills", "resumeRecognitionButton", "convertToTextButton", "showOriginalButon",
+                "cvActionsPopupButton",
                 "candidateCVRichTextArea", "cvResomandation",
                 "questionLetterRichTextArea", "letterRichTextArea", "commentLetterRichTextArea",
                 "letterRecommendation", "rescanResume", "checkSkillFromJD", "skillTreesTable",
@@ -111,6 +111,24 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(xml.contains("caption=\"msg://msgLetter\""));
         assertTrue(xml.contains("caption=\"msg://msgCVSkillTree\""));
         assertTrue(xml.contains("caption=\"mainMsg://msgFiles\""));
+
+        // Тематические пиктограммы вкладок (FontAwesome) — единый визуальный язык
+        // с иконками пунктов label-навигации sidebar. Иконка ищется в диапазоне
+        // между соседними вкладками, чтобы не спутать её с иконками навигации.
+        int tabCandidateIcon = xml.indexOf("icon=\"font-icon:USER\"", xml.indexOf("id=\"tabCandidate\""));
+        int tabCvIcon = xml.indexOf("icon=\"font-icon:FILE_TEXT_O\"", xml.indexOf("id=\"tabCV\""));
+        int tabLetterIcon = xml.indexOf("icon=\"font-icon:SEND\"", xml.indexOf("id=\"tabLetter\""));
+        int tabSkillIcon = xml.indexOf("icon=\"font-icon:SITEMAP\"", xml.indexOf("id=\"tabSkillTree\""));
+        int tabFilesIcon = xml.indexOf("icon=\"font-icon:FOLDER_O\"", xml.indexOf("id=\"tabFiles\""));
+        assertTrue("Вкладка «Кандидат» должна нести пиктограмму USER",
+                tabCandidateIcon >= 0 && tabCandidateIcon < xml.indexOf("id=\"tabCV\""));
+        assertTrue("Вкладка «Резюме» должна нести пиктограмму FILE_TEXT_O",
+                tabCvIcon >= 0 && tabCvIcon < xml.indexOf("id=\"tabLetter\""));
+        assertTrue("Вкладка «Письмо» должна нести пиктограмму SEND",
+                tabLetterIcon >= 0 && tabLetterIcon < xml.indexOf("id=\"tabSkillTree\""));
+        assertTrue("Вкладка «Навыки» должна нести пиктограмму SITEMAP",
+                tabSkillIcon >= 0 && tabSkillIcon < xml.indexOf("id=\"tabFiles\""));
+        assertTrue("Вкладка «Файлы» должна нести пиктограмму FOLDER_O", tabFilesIcon >= 0);
         assertTrue(xml.contains("<dialogMode height=\"800\""));
         assertTrue(xml.contains("width=\"1200\"/>"));
 
@@ -142,7 +160,7 @@ public class CandidateCVEditVisualContractTest {
         assertComponentBinding(xml, "candidateCvSidebarVacancy", "toVacancy");
         assertComponentBinding(xml, "candidateCvSidebarProject", "toVacancy.projectName");
 
-        assertTrue(xml.contains("stylename=\"candidate-cv-sidebar\""));
+        assertTrue(xml.contains("stylename=\"edit-sidebar candidate-cv-sidebar\""));
         assertTrue(xml.contains("stylename=\"candidate-cv-workspace-shell\""));
         assertFalse(xml.contains("stylename=\"candidate-cv-context-card\""));
     }
@@ -155,15 +173,17 @@ public class CandidateCVEditVisualContractTest {
 
         int visualImage = xml.indexOf("id=\"candidatePic\"");
         int entityName = xml.indexOf("id=\"iteractionListLabelCandidate\"");
-        int navigation = xml.indexOf("id=\"candidateCvSectionNavigation\"");
         int entityDetails = xml.indexOf("id=\"candidateCvSidebarTargetCard\"");
+        int navigation = xml.indexOf("id=\"candidateCvSectionNavigation\"");
         int optionalContent = xml.indexOf("id=\"candidateCvSidebarMetaCard\"");
 
         assertTrue("Sidebar должен содержать визуальный образ сущности", visualImage >= 0);
         assertTrue("Sidebar должен содержать наименование сущности", entityName > visualImage);
-        assertTrue("Label-навигация должна идти после наименования", navigation > entityName);
-        assertTrue("Детализация должна идти после label-навигации", entityDetails > navigation);
-        assertTrue("Прочие элементы должны идти после детализации", optionalContent > entityDetails);
+        // Блок «Резюме для вакансии» (детализация) размещён НА УРОВЕНЬ ВЫШЕ label-навигации —
+        // утверждённый дизайн (комментарий в XML: «блок без рамки на уровень выше навигации»).
+        assertTrue("Детализация должна идти после наименования", entityDetails > entityName);
+        assertTrue("Label-навигация должна идти после детализации", navigation > entityDetails);
+        assertTrue("Прочие элементы должны идти после навигации", optionalContent > navigation);
 
         List<String> staticButtons = Arrays.asList(
                 "candidateCvMainDataNav", "candidateCvOriginalCvNav", "candidateCvHuntTechCvNav",
@@ -186,6 +206,20 @@ public class CandidateCVEditVisualContractTest {
             assertTrue("Отсутствует Java handler label-навигации: " + invoke,
                     controller.contains("public void " + invoke + "()"));
         }
+
+        // Тематические пиктограммы навигации (FontAwesome): каждая кнопка sidebar
+        // несёт свою иконку по смыслу раздела.
+        assertTrue(xml.contains("id=\"candidateCvMainDataNav\" caption=\"msg://candidateCvNavMainData\" icon=\"font-icon:USER\""));
+        assertTrue(xml.contains("id=\"candidateCvOriginalCvNav\" caption=\"msg://candidateCvNavOriginalCv\" icon=\"font-icon:FILE_TEXT_O\""));
+        assertTrue(xml.contains("id=\"candidateCvHuntTechCvNav\" caption=\"msg://candidateCvNavHuntTechCv\" icon=\"font-icon:FILE_WORD_O\""));
+        assertTrue(xml.contains("id=\"candidateCvTextNav\" caption=\"msg://candidateCvNavCvText\" icon=\"font-icon:ALIGN_LEFT\""));
+        assertTrue(xml.contains("id=\"candidateCvSkillActionsNav\" caption=\"msg://candidateCvNavSkillActions\" icon=\"font-icon:MAGIC\""));
+        assertTrue(xml.contains("id=\"candidateCvSkillTreeNav\" caption=\"msg://candidateCvNavSkillTree\" icon=\"font-icon:SITEMAP\""));
+        assertTrue(xml.contains("id=\"candidateCvFilesTableNav\" caption=\"msg://candidateCvNavFiles\" icon=\"font-icon:FOLDER_O\""));
+        assertTrue(xml.contains("icon=\"font-icon:REPEAT\""));
+        assertTrue(xml.contains("icon=\"font-icon:SEARCH\""));
+        assertTrue(xml.contains("icon=\"font-icon:CHECK\""));
+        assertTrue(xml.contains("icon=\"font-icon:TIMES\""));
 
         assertTrue(controller.contains("syncSidebarSectionNavigation();"));
         assertTrue(controller.contains("candidateCvCandidateNavigation.setVisible(\"tabCandidate\".equals(selectedTabName))"));
@@ -241,10 +275,18 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(xml.contains("<action id=\"open\" type=\"picker_open\"/>"));
 
         for (String invoke : Arrays.asList(
-                "loadToCVTextArea", "rescanCV", "resumeRecognition",
-                "convertToText", "showOriginalText", "checkSkillFromJD")) {
+                "loadToCVTextArea", "rescanCV", "checkSkillFromJD")) {
             assertTrue("Отсутствует invoke-контракт: " + invoke,
                     xml.contains("invoke=\"" + invoke + "\""));
+        }
+
+        // Действия toolbar «Действия» (popupButton) заменили прежние отдельные invoke-кнопки
+        // «Распознавание»/«Преобразовать»/«Исходное»: контракт сохраняется через action id.
+        for (String action : Arrays.asList(
+                "scanSkillsAction", "smartFormatCvAction", "rescanCvAction",
+                "resumeRecognitionAction", "showOriginalAction")) {
+            assertTrue("Отсутствует action popupButton: " + action,
+                    xml.contains("<action id=\"" + action + "\""));
         }
 
         assertTrue(xml.contains("dropZone=\"dropZone\""));
@@ -263,6 +305,33 @@ public class CandidateCVEditVisualContractTest {
         assertTrue(xml.contains("where k.reacrutier = :subscriber"));
         assertTrue(xml.contains("where e.positionRuName not like '%(не использовать)%'"));
         assertTrue(xml.contains("select e from sec$User e order by e.name"));
+    }
+
+    @Test
+    public void resumeRecognitionSupportsPdfDocDocxAndRtf() throws IOException {
+        String controller = readProjectFile(CONTROLLER);
+        String gradle = readProjectFile("build.gradle");
+
+        // Распознавание резюме из загруженного файла: PDF (существующий parser),
+        // DOC/DOCX (Apache POI) и RTF (встроенный в JDK RTFEditorKit) — текст каждого
+        // формата попадает в RichTextArea вкладки «Резюме» (общий код конца обработчика).
+        assertTrue(controller.contains("private static final String EXTENSION_PDF = \"pdf\";"));
+        assertTrue(controller.contains("private static final String EXTENSION_DOC = \"doc\";"));
+        assertTrue(controller.contains("private static final String EXTENSION_DOCX = \"docx\";"));
+        assertTrue(controller.contains("private static final String EXTENSION_RTF = \"rtf\";"));
+
+        // Word 97-2003 (.doc): HWPF-экстрактор Apache POI (poi-scratchpad).
+        assertTrue(controller.contains("import org.apache.poi.hwpf.extractor.WordExtractor;"));
+        assertTrue(controller.contains("new WordExtractor(docInputStream)"));
+        assertTrue(gradle.contains("poi-scratchpad:4.1.2"));
+        // Rich Text Format (.rtf): встроенный в JDK RTFEditorKit (plain text без разметки).
+        assertTrue(controller.contains("import javax.swing.text.rtf.RTFEditorKit;"));
+        assertTrue(controller.contains("new RTFEditorKit()"));
+        assertTrue(controller.contains("javax.swing.text.BadLocationException"));
+        // Заглушка «функция загрузки .doc пока не реализована» заменена реальным распознаванием.
+        assertFalse(controller.contains("пока не реализована"));
+        // Распознанный текст любого формата пишется в lazy-managed RichTextArea вкладки «Резюме».
+        assertTrue(controller.contains("candidateCVRichTextArea.setValue(textResume"));
     }
 
     @Test
@@ -300,7 +369,7 @@ public class CandidateCVEditVisualContractTest {
         String xml = readProjectFile(SCREEN_XML);
         assertTrue(xml.contains("stylename=\"candidate-cv-editor\""));
         assertTrue(xml.contains("id=\"candidateCvSidebar\""));
-        assertTrue(xml.contains("width=\"312px\""));
+        assertTrue(xml.contains("width=\"320px\""));
 
         Pattern forbiddenTopLevelSelector = Pattern.compile(
                 "(?m)^\\.(v-button|v-label|v-table|v-grid|v-tabsheet|v-textfield|v-richtextarea)\\b");
@@ -318,11 +387,38 @@ public class CandidateCVEditVisualContractTest {
             assertTrue(theme, scss.contains("width: 312px !important"));
             assertTrue(theme, scss.contains(".candidate-cv-navigation {"));
             assertTrue(theme, scss.contains(".candidate-cv-nav-item.v-button"));
-            assertTrue(theme, scss.contains("min-height: 38px !important"));
+            if (theme.equals("helium") || theme.equals("hunttech-modern-light")
+                    || theme.equals("hunttech-modern-dark")) {
+                // Дизайн Antigravity (лаконичная навигация) — приоритет, не трогаем.
+                assertTrue(theme, scss.contains("min-height: 26px !important"));
+                assertTrue(theme, scss.contains("padding: 3px 8px !important"));
+                assertTrue(theme, scss.contains("line-height: 16px !important"));
+            } else {
+                // Канон JobCandidateEdit: отступы и интервалы label-навигации 1:1.
+                assertTrue(theme, scss.contains("min-height: 27px !important"));
+                assertTrue(theme, scss.contains("padding: 3px 10px !important"));
+                assertTrue(theme, scss.contains("line-height: 20px !important"));
+                assertTrue(theme, scss.contains("padding-top: 6px"));
+                assertTrue(theme, scss.contains("padding-bottom: 2px"));
+                // Текст внутри всех кнопок экрана выровнен по центру (nav-пункты sidebar,
+                // toolbar, footer); иконки выровнены по вертикали с отступом от текста.
+                assertTrue(theme, scss.contains("text-align: center !important"));
+                assertTrue(theme, scss.contains(".candidate-cv-nav-item.v-button .v-icon"));
+                assertTrue(theme, scss.contains("margin-right: 6px"));
+            }
             assertTrue(theme, scss.contains(".candidate-cv-nav-item-active.v-button"));
             assertTrue(theme, scss.contains(".candidate-cv-tabs > .v-tabsheet-tabcontainer"));
             assertTrue(theme, scss.contains("overflow-x: auto !important"));
             assertTrue(theme, scss.contains("text-overflow: clip !important"));
+            // Тематические пиктограммы вкладок и кнопок «Загрузить»/«Очистить» (FontAwesome)
+            // присутствуют во всех темах: иконка caption, центрирование подписи кнопок,
+            // fa-upload (\f093) и fa-trash-o (\f1f8).
+            assertTrue(theme, scss.contains(".candidate-cv-tabs .v-caption .v-icon"));
+            assertTrue(theme, scss.contains(".candidate-cv-document-card .c-fileupload .v-button,"));
+            assertTrue(theme, scss.contains(".candidate-cv-document-card .c-fileupload-clear"));
+            assertTrue(theme, scss.contains("justify-content: center !important"));
+            assertTrue(theme, scss.contains("content: '\\f093'"));
+            assertTrue(theme, scss.contains("content: '\\f1f8'"));
             assertTrue(theme, scss.contains(".candidate-cv-photo-dropzone .v-upload .v-button"));
             assertTrue(theme, scss.contains(".candidate-cv-main-card .v-filterselect-input"));
             assertTrue(theme, scss.contains(".candidate-cv-main-card .c-pickerfield-layout"));
@@ -340,9 +436,11 @@ public class CandidateCVEditVisualContractTest {
     public void sectionTitlesHaveTwoInsetLinesLikeInfoCaption() throws IOException {
         String xml = readProjectFile(SCREEN_XML);
 
-        // Оба заголовка разделов sidebar несут свои локальные классы полосы.
-        assertTrue(xml.contains("stylename=\"candidate-cv-navigation-title\""));
-        assertTrue(xml.contains("stylename=\"candidate-cv-sidebar-card-title\""));
+        // Заголовки разделов sidebar несут свои локальные классы полосы
+        // (в составе общего stylename после базовых классов).
+        assertTrue(xml.contains("candidate-cv-navigation-title"));
+        assertTrue(xml.contains("candidate-cv-sidebar-card-title"));
+        assertTrue(xml.contains("stylename=\"label-nav-title job-candidate-section-title candidate-cv-skills-title\""));
 
         String scss = readProjectFile(
                 "modules/web/themes/halo/com.company.hunttech/candidate-cv-editor.scss");
@@ -353,36 +451,50 @@ public class CandidateCVEditVisualContractTest {
                 ".candidate-cv-sidebar-card-title,",
                 ".candidate-cv-sidebar-info-row {");
 
-        // Полоса заголовка навигации повторяет caption инфокарточки (контракт §4.1):
-        // две горизонтальные inset-линии (белая сверху, светлая снизу) + разделитель снизу.
+        // Полоса заголовков навигации и «Основные навыки» повторяет caption инфокарточки
+        // (контракт §4.1): две горизонтальные inset-линии (белая сверху, светлая снизу)
+        // + разделитель снизу; текст — ЗАГЛАВНЫМИ.
+        assertTrue(navigationBlock.contains(".candidate-cv-skills-title,"));
         assertTrue(navigationBlock.contains("min-height: 36px !important;"));
         assertTrue(navigationBlock.contains("padding: 7px 11px !important;"));
         assertTrue(navigationBlock.contains("color: #ffb11b !important;"));
         assertTrue(navigationBlock.contains("font-size: 15px !important;"));
         assertTrue(navigationBlock.contains("font-weight: 700 !important;"));
         assertTrue(navigationBlock.contains("line-height: 21px !important;"));
-        assertTrue(navigationBlock.contains("text-transform: none !important;"));
+        assertTrue(navigationBlock.contains("text-transform: uppercase !important;"));
         assertTrue(navigationBlock.contains("background: rgba(255, 255, 255, 0.045) !important;"));
         assertTrue(navigationBlock.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;"));
         assertTrue(navigationBlock.contains("box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,"));
         assertTrue(navigationBlock.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset;"));
 
-        // Полоса заголовка «Резюме для вакансии» растягивается на карточку (padding 14px)
-        // и несёт те же две inset-линии.
-        assertTrue(cardTitleBlock.contains("min-height: 36px !important;"));
-        assertTrue(cardTitleBlock.contains("padding: 7px 11px !important;"));
-        assertTrue(cardTitleBlock.contains("margin: -14px -14px 12px !important;"));
-        assertTrue(cardTitleBlock.contains("border-radius: 8px 8px 0 0 !important;"));
-        assertTrue(cardTitleBlock.contains("border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;"));
-        assertTrue(cardTitleBlock.contains("box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,"));
-        assertTrue(cardTitleBlock.contains("rgba(244, 244, 244, 1) 0 -1px 0 0 inset;"));
+        // Заголовок «Резюме для вакансии» — лаконичный заголовок раздела без полосы-карточки
+        // (по образцу дизайна Antigravity: блок без рамки, заголовок 28px/14px/700), текст — ЗАГЛАВНЫМИ.
+        assertTrue(cardTitleBlock.contains("min-height: 28px !important;"));
+        assertTrue(cardTitleBlock.contains("padding: 2px 0 6px 0 !important;"));
+        assertTrue(cardTitleBlock.contains("margin: 0 0 8px 0 !important;"));
+        assertTrue(cardTitleBlock.contains("font-size: 14px !important;"));
+        assertTrue(cardTitleBlock.contains("font-weight: 700 !important;"));
+        assertTrue(cardTitleBlock.contains("text-transform: uppercase !important;"));
+        assertTrue(cardTitleBlock.contains("background: transparent !important;"));
+        assertTrue(cardTitleBlock.contains("border: 0 !important;"));
+        assertTrue(cardTitleBlock.contains("box-shadow: none !important;"));
 
-        // SCSS обязан оставаться идентичным во всех 7 темах.
-        for (String theme : THEMES) {
-            String themeScss = readProjectFile(
-                    "modules/web/themes/" + theme + "/com.company.hunttech/candidate-cv-editor.scss");
-            assertEquals("candidate-cv-editor.scss должен быть идентичен: " + theme, scss, themeScss);
+        // SCSS обязан оставаться идентичным в пределах группы тем: каноническая группа
+        // (halo, havana, hover, hunttech-modern) — 1:1; Antigravity-темы (helium,
+        // hunttech-modern-light, hunttech-modern-dark) имеют собственную лаконичную
+        // навигацию (min-height 26px), поэтому сравниваются внутри своих подгрупп.
+        String canonicalScss = readProjectFile(
+                "modules/web/themes/halo/com.company.hunttech/candidate-cv-editor.scss");
+        for (String theme : Arrays.asList("havana", "hover", "hunttech-modern")) {
+            assertEquals("Канонический candidate-cv-editor.scss должен быть идентичен: " + theme,
+                    canonicalScss,
+                    readProjectFile("modules/web/themes/" + theme + "/com.company.hunttech/candidate-cv-editor.scss"));
         }
+        String lightAntigravityScss = readProjectFile(
+                "modules/web/themes/hunttech-modern-light/com.company.hunttech/candidate-cv-editor.scss");
+        assertEquals("hunttech-modern-dark должен повторять hunttech-modern-light",
+                lightAntigravityScss,
+                readProjectFile("modules/web/themes/hunttech-modern-dark/com.company.hunttech/candidate-cv-editor.scss"));
     }
 
     private String section(String text, String startMarker, String endMarker) {

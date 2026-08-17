@@ -20,6 +20,10 @@ import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.config.MenuItem;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
+import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.web.app.ui.core.settings.SettingsWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +53,7 @@ public class ExtSettingsWindow extends SettingsWindow {
     @Inject private Notifications notifications;
     @Inject private Dialogs dialogs;
     @Inject private ScreenBuilders screenBuilders;
+    @Inject private BackgroundWorker backgroundWorker;
 
     @Inject private TextField<String> smtpServer;
     @Inject private CheckBox smtpPasswordRequired;
@@ -306,22 +311,64 @@ public class ExtSettingsWindow extends SettingsWindow {
         UserAiConfiguration selected = aiConfigsTable.getSingleSelected();
         if (selected == null) return;
 
-        try {
-            // HTTP-контракт и endpoint провайдера остаются в HrmAiService, а не в UI-контроллере.
-            // Контракт пользовательской нотификации: реальный AI-вызов несёт метаданные
-            // (модель, провайдер, собственник API = личный ключ пользователя) и завершается
-            // исчезающей TRAY-нотификацией с указанием «какая модель что делала».
-            AiExecutionResult result = hrmAiService.testConnection(selected);
-            AiOperationNotifier.show(notifications, result,
-                    getMessage("msgAiConnectionSuccess"),
-                    "Провайдер «" + result.getProviderCode() + "» отвечает корректно.");
-        } catch (Exception e) {
-            notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption(getMessage("msgAiConnectionError"))
-                    .withDescription(e.getMessage())
-                    .withPosition(Notifications.Position.BOTTOM_RIGHT)
-                    .show();
-        }
+        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт
+        // операции — исчезающая TRAY-нотификация, показывается СРАЗУ (до «крутилки»);
+        // по завершении — итоговая с моделью и собственником API (личный ключ).
+        AiOperationNotifier.showStarted(notifications, "Проверка AI-подключения…", null);
+
+        // Проверка выполняется в фоне (BackgroundTask) — эталонный паттерн
+        // AI-нотификаций (CandidateCVEdit «Сканировать навыки»): нотификация о старте
+        // → «крутилка» → итоговая нотификация. При синхронном вызове на UI-потоке
+        // обе нотификации (старт и итог) пришли бы одной пачкой в конце запроса.
+        final UserAiConfiguration configuration = selected;
+        aiConfigsTestBtn.setEnabled(false);
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, "Проверка AI-подключения…");
+
+        BackgroundTask<Integer, AiExecutionResult> task =
+                new BackgroundTask<Integer, AiExecutionResult>(60, this) {
+                    @Override
+                    public AiExecutionResult run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        // HTTP-контракт и endpoint провайдера остаются в HrmAiService, а не в UI-контроллере.
+                        return hrmAiService.testConnection(configuration);
+                    }
+
+                    @Override
+                    public void done(AiExecutionResult result) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        aiConfigsTestBtn.setEnabled(true);
+                        // Контракт пользовательской нотификации: реальный AI-вызов несёт метаданные
+                        // (модель, провайдер, собственник API = личный ключ пользователя) и завершается
+                        // исчезающей TRAY-нотификацией с указанием «какая модель что делала».
+                        AiOperationNotifier.show(notifications, result,
+                                getMessage("msgAiConnectionSuccess"),
+                                "Провайдер «" + result.getProviderCode() + "» отвечает корректно.");
+                    }
+
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        aiConfigsTestBtn.setEnabled(true);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption(getMessage("msgAiConnectionError"))
+                                .withDescription(ex.getMessage())
+                                .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                                .show();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean handleTimeoutException() {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        aiConfigsTestBtn.setEnabled(true);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption(getMessage("msgAiConnectionError"))
+                                .withDescription("Проверка подключения превысила допустимое время выполнения.")
+                                .withPosition(Notifications.Position.BOTTOM_RIGHT)
+                                .show();
+                        return true;
+                    }
+                };
+        backgroundWorker.handle(task).execute();
     }
 
     private void onUserAvatarUploaded() {

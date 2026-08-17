@@ -4,11 +4,14 @@ import com.company.hunttech.entity.SkillTree;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -134,5 +137,56 @@ public class SkillNameMatcherTest {
     public void normalizeHandlesNullAndPunctuation() {
         assertEquals("", SkillNameMatcher.normalize(null));
         assertEquals("java ee", SkillNameMatcher.normalize("  Java   EE  "));
+    }
+
+    @Test
+    public void experienceYearsNameIsDetected() {
+        assertTrue(SkillNameMatcher.isExperienceYearsName("1 год"));
+        assertTrue(SkillNameMatcher.isExperienceYearsName("2 года"));
+        assertTrue(SkillNameMatcher.isExperienceYearsName("5 лет"));
+        assertTrue(SkillNameMatcher.isExperienceYearsName(" 10 лет "));
+        assertFalse(SkillNameMatcher.isExperienceYearsName(null));
+        assertFalse(SkillNameMatcher.isExperienceYearsName("Java"));
+        assertFalse(SkillNameMatcher.isExperienceYearsName("5 лет Java"));
+        assertFalse(SkillNameMatcher.isExperienceYearsName("опыт 5 лет"));
+    }
+
+    @Test
+    public void collapseExperienceYearsKeepsSingleMaxYearsSkill() {
+        SkillTree oneYear = skill("1 год");
+        SkillTree twoYears = skill("2 года");
+        SkillTree fiveYears = skill("5 лет");
+        SkillTree java = skill("Java");
+        List<SkillTree> collapsed = SkillNameMatcher.collapseExperienceYears(
+                Arrays.asList(oneYear, java, twoYears, fiveYears));
+        assertEquals(2, collapsed.size());
+        // Неопытный навык сохраняет позицию, из навыков опыта остаётся максимум.
+        assertEquals(java.getSkillName(), collapsed.get(0).getSkillName());
+        assertEquals("5 лет", collapsed.get(1).getSkillName());
+    }
+
+    @Test
+    public void collapseExperienceYearsKeepsListWithoutExperienceSkills() {
+        SkillTree java = skill("Java");
+        SkillTree spring = skill("Spring");
+        List<SkillTree> collapsed = SkillNameMatcher.collapseExperienceYears(
+                Arrays.asList(java, spring));
+        assertEquals(2, collapsed.size());
+    }
+
+    @Test
+    public void collapseExperienceYearsKeepsSingleExperienceSkillUntouched() {
+        SkillTree fiveYears = skill("5 лет");
+        SkillTree java = skill("Java");
+        List<SkillTree> collapsed = SkillNameMatcher.collapseExperienceYears(
+                Arrays.asList(java, fiveYears));
+        assertEquals(2, collapsed.size());
+        assertEquals("5 лет", collapsed.get(1).getSkillName());
+    }
+
+    @Test
+    public void collapseExperienceYearsToleratesNullAndEmpty() {
+        assertNull(SkillNameMatcher.collapseExperienceYears(null));
+        assertTrue(SkillNameMatcher.collapseExperienceYears(Collections.emptyList()).isEmpty());
     }
 }

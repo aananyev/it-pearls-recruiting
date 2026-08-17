@@ -231,6 +231,54 @@ public class SkillAnalysisServiceBeanTest {
         assertTrue(bean.analyzeAll("Текст").getSkills().isEmpty());
     }
 
+    @Test
+    public void experienceYearsCollapseToSingleMaxSkill() {
+        // Навыки опыта «1 год»…«20 лет» уже есть в справочнике dev-БД
+        // (тест-контейнер использует локальную БД) — их не создаём.
+        String javaName = uniqueName("Java");
+        createSkill(javaName, false);
+        stub.result = "[\"" + javaName + "\", \"1 год\", \"2 года\", \"5 лет\"]";
+
+        List<SkillTree> skills = bean.analyzeAll("Резюме").getSkills();
+
+        assertEquals(2, skills.size());
+        assertEquals(javaName, skills.get(0).getSkillName());
+        // Ровно один навык опыта — с максимальным (общим) стажем.
+        assertEquals("5 лет", skills.get(1).getSkillName());
+    }
+
+    @Test
+    public void experienceYearAbsentFromDictionaryIsSkippedWithWarning() {
+        // «21 год» отсутствует в справочнике (диапазон 1–20 лет): навык не
+        // возвращается, в лог пишется WARN для администратора (последующий анализ).
+        String javaName = uniqueName("Java");
+        createSkill(javaName, false);
+        stub.result = "[\"" + javaName + "\", \"21 год\"]";
+
+        List<SkillTree> skills = bean.analyzeAll("Резюме").getSkills();
+
+        assertEquals(1, skills.size());
+        assertEquals(javaName, skills.get(0).getSkillName());
+    }
+
+    @Test
+    public void fallbackCollapsesExperienceYearsToSingleMaxSkill() {
+        String javaName = uniqueName("Java");
+        String springName = uniqueName("Spring");
+        createSkill(javaName, false);
+        createSkill(springName, false);
+        stub.failure = new RuntimeException("AI недоступен");
+
+        List<SkillTree> skills = bean.analyzeAll(
+                "Владею технологиями " + javaName + " и " + springName
+                        + ". Стаж: 5 лет, ранее 2 года.").getSkills();
+
+        // Java + Spring + единственный навык опыта «5 лет» (2 года схлопнут).
+        assertEquals(3, skills.size());
+        assertTrue(skills.stream().anyMatch(s -> "5 лет".equals(s.getSkillName())));
+        assertTrue(skills.stream().noneMatch(s -> "2 года".equals(s.getSkillName())));
+    }
+
     /**
      * Стаб AI-шлюза: возвращает заданный ответ или бросает заданное исключение,
      * запоминая последний вызов. Метаданные результата фиксированы (test-model /

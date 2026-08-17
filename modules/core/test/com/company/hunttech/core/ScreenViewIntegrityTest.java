@@ -51,7 +51,8 @@ public class ScreenViewIntegrityTest {
          * чтобы отдельный view-файл не остался зарегистрирован только как app component.
          */
         ViewRepository viewRepository = AppBeans.get(ViewRepository.class);
-        assertNotNull(viewRepository.getView(UserAiProfile.class, "userAiProfile-view"));
+        Metadata metadata = AppBeans.get(Metadata.class);
+        assertNotNull(viewRepository.getView(metadata.getClassNN(UserAiProfile.class), "userAiProfile-view"));
 
         String coreProperties = readProjectFile("modules/core/src/com/company/hunttech/app.properties");
         String webProperties = readProjectFile("modules/web/src/com/company/hunttech/web-app.properties");

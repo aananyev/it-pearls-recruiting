@@ -21,6 +21,12 @@ public class AnthropicProvider extends AbstractOpenAiCompatibleProvider {
     @Override
     public String generateText(String prompt, String systemContext, String apiKey, String modelName,
                                Map<String, Object> options) {
+        return executeTextWithTokens(prompt, systemContext, apiKey, modelName, options).getText();
+    }
+
+    @Override
+    public AiProviderResponse executeTextWithTokens(String prompt, String systemContext, String apiKey,
+                                                    String modelName, Map<String, Object> options) {
         try {
             ObjectNode requestBody = objectMapper.createObjectNode();
             requestBody.put("model", isConfigured(modelName) ? modelName.trim() : getDefaultModel());
@@ -36,11 +42,21 @@ public class AnthropicProvider extends AbstractOpenAiCompatibleProvider {
             connection.setRequestProperty("x-api-key", apiKey.trim());
             connection.setRequestProperty("anthropic-version", "2023-06-01");
             String response = execute(connection, objectMapper.writeValueAsString(requestBody));
-            JsonNode text = objectMapper.readTree(response).path("content").path(0).path("text");
+            JsonNode root = objectMapper.readTree(response);
+            JsonNode text = root.path("content").path(0).path("text");
             if (text.isMissingNode() || !isConfigured(text.asText())) {
                 throw new IOException("пустой ответ: content[0].text отсутствует");
             }
-            return text.asText();
+
+            JsonNode usage = root.path("usage");
+            int promptTokens = usage.path("input_tokens").asInt(0);
+            int completionTokens = usage.path("output_tokens").asInt(0);
+            if (promptTokens == 0 && completionTokens == 0) {
+                promptTokens = prompt != null ? (prompt.length() + (systemContext != null ? systemContext.length() : 0)) / 4 : 0;
+                completionTokens = text.asText().length() / 4;
+            }
+
+            return AiProviderResponse.ofText(text.asText(), promptTokens, completionTokens, promptTokens + completionTokens);
         } catch (IOException e) {
             throw new RuntimeException("Ошибка запроса к Anthropic Claude API: " + e.getMessage(), e);
         }

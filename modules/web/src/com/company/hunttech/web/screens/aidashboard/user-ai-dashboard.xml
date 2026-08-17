@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:chart="http://schemas.haulmont.com/charts/charts.xsd"
+        caption="msg://userDashboardCaption"
+        messagesPack="com.company.hunttech.web.screens.aidashboard">
+    <data>
+        <collection id="recentCallsDc"
+                    class="com.company.hunttech.entity.ai.AiCallLog"
+                    view="ai-call-log-browse-view">
+            <loader id="recentCallsDl">
+                <query><![CDATA[select e from hunttech_AiCallLog e where e.user = :currentUser order by e.callTime desc]]></query>
+            </loader>
+        </collection>
+    </data>
+    <layout stylename="ai-dashboard-root" expand="mainScroll" spacing="true">
+        <scrollBox id="mainScroll" width="100%" height="100%" spacing="true" stylename="ai-scrollbox">
+            
+            <!-- Dashboard Header Banner & Filters -->
+            <vbox id="headerCard" width="100%" spacing="true" stylename="ai-header-card">
+                <hbox width="100%" spacing="true" alignment="MIDDLE_LEFT">
+                    <vbox spacing="false" width="100%" expand="dashboardSubtitle">
+                        <hbox spacing="true" alignment="MIDDLE_LEFT">
+                            <label value="msg://userDashboardTitle" stylename="ai-page-title bold"/>
+                            <label value="msg://badgePersonalStats" stylename="ai-chip-badge"/>
+                        </hbox>
+                        <label id="dashboardSubtitle" value="msg://userDashboardSubtitle" stylename="ai-page-subtitle"/>
+                    </vbox>
+                </hbox>
+
+                <!-- Filter Toolbar -->
+                <hbox id="filterPanel" spacing="true" width="100%" alignment="BOTTOM_LEFT" stylename="ai-dashboard-filter-bar">
+                    <lookupField id="periodLookup" caption="msg://periodLabel" width="200px" nullOptionVisible="false"/>
+                    <dateField id="dateFromField" caption="msg://dateFrom" resolution="DAY"/>
+                    <dateField id="dateToField" caption="msg://dateTo" resolution="DAY"/>
+                    <button id="refreshBtn" caption="msg://refresh" icon="REFRESH" stylename="primary ai-action-btn"/>
+                </hbox>
+            </vbox>
+
+            <!-- KPI Cards Grid -->
+            <hbox id="kpiPanel" spacing="true" width="100%" stylename="ai-kpi-grid">
+                <vbox id="totalCallsCard" stylename="ai-kpi-card kpi-blue" width="25%" height="120px" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://totalCalls" stylename="kpi-title" width="100%"/>
+                        <label value="📞" stylename="kpi-icon"/>
+                    </hbox>
+                    <label id="totalCallsLabel" value="0" stylename="kpi-value"/>
+                    <label id="totalCallsSubLabel" value="—" stylename="kpi-sub"/>
+                </vbox>
+                <vbox id="tokensCard" stylename="ai-kpi-card kpi-purple" width="25%" height="120px" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://totalTokens" stylename="kpi-title" width="100%"/>
+                        <label value="🪙" stylename="kpi-icon"/>
+                    </hbox>
+                    <label id="tokensLabel" value="0" stylename="kpi-value"/>
+                    <label id="tokensSubLabel" value="0 in / 0 out" stylename="kpi-sub"/>
+                </vbox>
+                <vbox id="costCard" stylename="ai-kpi-card kpi-green" width="25%" height="120px" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://estimatedCost" stylename="kpi-title" width="100%"/>
+                        <label value="💵" stylename="kpi-icon"/>
+                    </hbox>
+                    <label id="costLabel" value="$ 0.00" stylename="kpi-value"/>
+                    <label id="costSubLabel" value="—" stylename="kpi-sub"/>
+                </vbox>
+                <vbox id="speedCard" stylename="ai-kpi-card kpi-orange" width="25%" height="120px" spacing="false">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://avgSpeedAndSuccess" stylename="kpi-title" width="100%"/>
+                        <label value="⚡" stylename="kpi-icon"/>
+                    </hbox>
+                    <label id="speedLabel" value="0.00 с" stylename="kpi-value"/>
+                    <label id="successRateLabel" value="100% OK" stylename="kpi-sub"/>
+                </vbox>
+            </hbox>
+
+            <!-- Charts Section -->
+            <hbox id="chartsPanel" spacing="true" width="100%" height="360px">
+                <vbox id="dynamicsChartBox" stylename="ai-chart-card" width="60%" height="100%" spacing="true">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://dailyDynamics" stylename="ai-card-header" width="100%"/>
+                    </hbox>
+                    <chart:serialChart id="dynamicsChart"
+                                       categoryField="date"
+                                       height="100%"
+                                       width="100%">
+                        <chart:valueAxes>
+                            <chart:axis position="LEFT" stackType="REGULAR" title="msg://chartCallsCount"/>
+                        </chart:valueAxes>
+                        <chart:graphs>
+                            <chart:graph id="successGraph"
+                                         type="COLUMN"
+                                         fillAlphas="0.85"
+                                         color="#27ae60"
+                                         valueField="success"
+                                         title="msg://successCalls"/>
+                            <chart:graph id="errorGraph"
+                                         type="COLUMN"
+                                         fillAlphas="0.85"
+                                         color="#e74c3c"
+                                         valueField="error"
+                                         title="msg://errorCalls"/>
+                        </chart:graphs>
+                        <chart:legend position="BOTTOM" autoMargins="false"/>
+                        <chart:chartCursor cursorAlpha="0.1"/>
+                    </chart:serialChart>
+                </vbox>
+
+                <vbox id="functionChartBox" stylename="ai-chart-card" width="40%" height="100%" spacing="true">
+                    <hbox width="100%" alignment="MIDDLE_LEFT">
+                        <label value="msg://functionsShare" stylename="ai-card-header" width="100%"/>
+                    </hbox>
+                    <chart:pieChart id="functionPieChart"
+                                    titleField="functionName"
+                                    valueField="count"
+                                    innerRadius="40%"
+                                    height="100%"
+                                    width="100%">
+                        <chart:legend position="BOTTOM" autoMargins="false"/>
+                        <chart:balloon text="[[title]]: [[value]] ([[percents]]%)"/>
+                    </chart:pieChart>
+                </vbox>
+            </hbox>
+
+            <!-- Recent Calls Table -->
+            <vbox id="recentTableBox" stylename="ai-table-card" width="100%" spacing="true">
+                <hbox width="100%" alignment="MIDDLE_LEFT">
+                    <label value="msg://recentCallsTitle" stylename="ai-card-header" alignment="MIDDLE_LEFT"/>
+                </hbox>
+                <table id="recentCallsTable" width="100%" height="280px" dataContainer="recentCallsDc" stylename="ai-dashboard-table">
+                    <columns>
+                        <column id="callTime" caption="msg://callTime"/>
+                        <column id="functionName" caption="msg://function"/>
+                        <column id="modelName" caption="msg://model"/>
+                        <column id="tokensDisplay" caption="msg://tokens"/>
+                        <column id="costDisplay" caption="msg://cost"/>
+                        <column id="durationDisplay" caption="msg://duration"/>
+                        <column id="statusDisplay" caption="msg://status"/>
+                    </columns>
+                </table>
+            </vbox>
+        </scrollBox>
+    </layout>
+</window>

@@ -157,6 +157,34 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
         refreshLastInteractionCache(event.getLoadedEntities());
         refreshCandidateCvCache(event.getLoadedEntities());
         refreshEmployeeCache(event.getLoadedEntities());
+        refreshCandidateSkillsCache(event.getLoadedEntities());
+    }
+
+    private Map<UUID, List<CandidateSkill>> candidateSkillsCache = Collections.emptyMap();
+
+    private void refreshCandidateSkillsCache(List<JobCandidate> candidates) {
+        if (candidates == null || candidates.isEmpty()) {
+            candidateSkillsCache = Collections.emptyMap();
+            return;
+        }
+
+        try {
+            List<CandidateSkill> rows = dataManager.load(CandidateSkill.class)
+                    .query("select e from hunttech_CandidateSkill e where e.candidate in :candidates order by e.priority, e.skill.skillName")
+                    .parameter("candidates", candidates)
+                    .view("candidateSkill-view")
+                    .list();
+
+            Map<UUID, List<CandidateSkill>> cache = new HashMap<>();
+            for (CandidateSkill row : rows) {
+                if (row.getCandidate() != null && row.getCandidate().getId() != null) {
+                    cache.computeIfAbsent(row.getCandidate().getId(), k -> new ArrayList<>()).add(row);
+                }
+            }
+            candidateSkillsCache = cache;
+        } catch (Exception ex) {
+            candidateSkillsCache = Collections.emptyMap();
+        }
     }
 
     private void refreshLastInteractionCache(List<JobCandidate> candidates) {
@@ -375,6 +403,34 @@ public class JobCandidateBrowse extends StandardLookup<JobCandidate> {
 //                    jobCandidatesTable.setSelected(((JobCandidate)actionPerformedAction.getSource()));
                     screen.setJobCandidate(jobCandidatesTable.getSingleSelected());
                     screen.show();
+                }));
+
+        actionsWithCandidateButton.addAction(new BaseAction("showCandidateCVListAction")
+                .withIcon(CubaIcon.FILE_TEXT_O.source())
+                .withCaption(messageBundle.getMessage("msgShowCandidateCVList"))
+                .withHandler(actionPerformedAction -> {
+                    JobCandidate candidate = jobCandidatesTable.getSingleSelected();
+                    if (candidate != null) {
+                        jobCandidatesTable.scrollTo(candidate);
+                        CandidateCVSimpleBrowse screen = screens.create(CandidateCVSimpleBrowse.class);
+                        screen.setSelectedCandidate(candidate);
+                        screen.setJobCandidate(candidate);
+                        screens.show(screen);
+                    }
+                }));
+
+        actionsWithCandidateButton.addAction(new BaseAction("showIteractionListAction")
+                .withIcon(CubaIcon.HANDSHAKE_O.source())
+                .withCaption(messageBundle.getMessage("msgShowIteractionList"))
+                .withHandler(actionPerformedAction -> {
+                    JobCandidate candidate = jobCandidatesTable.getSingleSelected();
+                    if (candidate != null) {
+                        jobCandidatesTable.scrollTo(candidate);
+                        IteractionListSimpleBrowse screen = screens.create(IteractionListSimpleBrowse.class);
+                        screen.setSelectedCandidate(candidate);
+                        screen.setJobCandidate(candidate);
+                        screens.show(screen);
+                    }
                 }));
 
         actionsWithCandidateButton.addAction(new BaseAction("separator2Action")

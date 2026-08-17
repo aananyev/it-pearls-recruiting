@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Словарный матчинг названий навыков справочника {@link SkillTree} против текста
@@ -40,6 +41,82 @@ import java.util.Set;
 public final class SkillNameMatcher {
 
     private SkillNameMatcher() {
+    }
+
+    /**
+     * Паттерн названия навыка «опыт в годах»: «1 год», «2 года», «5 лет».
+     * Применяется к нормализованному названию (нижний регистр).
+     */
+    private static final Pattern EXPERIENCE_YEARS_PATTERN =
+            Pattern.compile("^\\d+\\s*(год|года|лет)$");
+
+    /**
+     * Признак навыка «опыт в годах»: название вида {@code N год/года/лет}
+     * (например, «5 лет», «2 года»). Используется, чтобы вернуть в результате
+     * анализа только один навык опыта — соответствующий общему стажу кандидата.
+     *
+     * @param name название навыка (может быть {@code null})
+     * @return {@code true}, если название — навык опыта в годах
+     */
+    public static boolean isExperienceYearsName(String name) {
+        return name != null && EXPERIENCE_YEARS_PATTERN.matcher(normalize(name)).matches();
+    }
+
+    /**
+     * Схлопывает навыки опыта в годах до одного: если в списке несколько навыков
+     * вида «1 год», «2 года», …, оставляет один с максимальным числом лет
+     * (при равенстве — первый по порядку), остальные навыки не изменяются.
+     *
+     * <p>Страховка на случай, когда нейросеть или словарный поиск нашли несколько
+     * значений опыта из разных мест работы: в результате анализа остаётся один
+     * навык опыта — соответствующий наибольшему (общему) стажу.</p>
+     *
+     * @param skills список найденных навыков (может быть {@code null})
+     * @return новый список с единственным навыком опыта, либо исходный список
+     */
+    public static List<SkillTree> collapseExperienceYears(List<SkillTree> skills) {
+        if (skills == null || skills.size() < 2) {
+            return skills;
+        }
+        SkillTree maxExperience = null;
+        int maxYears = -1;
+        for (SkillTree skill : skills) {
+            if (skill == null || !isExperienceYearsName(skill.getSkillName())) {
+                continue;
+            }
+            int years = experienceYears(skill.getSkillName());
+            if (years > maxYears) {
+                maxYears = years;
+                maxExperience = skill;
+            }
+        }
+        if (maxExperience == null) {
+            return skills;
+        }
+        List<SkillTree> collapsed = new ArrayList<>(skills.size());
+        for (SkillTree skill : skills) {
+            if (skill != maxExperience && skill != null
+                    && isExperienceYearsName(skill.getSkillName())) {
+                continue;
+            }
+            collapsed.add(skill);
+        }
+        return collapsed;
+    }
+
+    /**
+     * Число лет из названия навыка опыта («5 лет» → 5, «2 года» → 2);
+     * при неразбираемом названии — {@code -1}.
+     */
+    private static int experienceYears(String name) {
+        String normalized = normalize(name);
+        int space = normalized.indexOf(' ');
+        String digits = space > 0 ? normalized.substring(0, space) : normalized;
+        try {
+            return Integer.parseInt(digits);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
     /**

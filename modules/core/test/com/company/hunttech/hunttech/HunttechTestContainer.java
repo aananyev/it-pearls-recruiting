@@ -25,13 +25,9 @@ public class HunttechTestContainer extends TestContainer {
                 "com.haulmont.reports",
                 "com.haulmont.bpm");
         appPropertiesFiles = Arrays.asList(
-                // List the files defined in your web.xml
-                // в параметре appPropertiesConfig контекста core-модуля
                 "com/company/hunttech/app.properties",
-                // Добавить файл из CUBA с настройками
-                // specifically for test environment. You can replace it with your own
-                // or add another one in the end.
-                "com/haulmont/cuba/testsupport/test-app.properties");
+                "com/haulmont/cuba/testsupport/test-app.properties",
+                "com/company/hunttech/test-app.properties");
         initDbProperties();
     }
 

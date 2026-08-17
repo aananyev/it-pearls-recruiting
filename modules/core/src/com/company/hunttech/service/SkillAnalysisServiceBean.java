@@ -31,7 +31,9 @@ import java.util.Map;
  *     <li>разбор ответа (устойчивый к markdown-ограждениям и построчному формату);</li>
  *     <li>сопоставление названий со справочником {@link SkillNameMatcher}: найденные
  *         навыки возвращаются, не найденные пишутся в лог (WARN) — администратор
- *         анализирует их и добавляет в {@code HUNTTECH_SKILL_TREE};</li>
+ *         анализирует их и добавляет в {@code HUNTTECH_SKILL_TREE}; навыки опыта
+ *         («1 год», «2 года», …, «N лет») схлопываются до одного — с максимальным
+ *         числом лет (общий стаж кандидата);</li>
  *     <li>при любой недоступности AI (функция не активна, нет credentials, ошибка
  *         провайдера) — бесшовный классический fallback: {@link SkillNameMatcher#matchText}
  *         ищет навыки справочника прямо в тексте; анализ не прерывается, метаданные
@@ -101,6 +103,7 @@ public class SkillAnalysisServiceBean implements SkillAnalysisService {
             Map<String, Object> context = new LinkedHashMap<>();
             context.put(PARAM_SOURCE_TEXT, normalizedText);
             context.put(PARAM_SKILL_LEVEL, skillLevel);
+            context.put("callerSource", "SkillAnalysisService (" + skillLevel + ")");
             AiExecutionResult execution = aiExecutionService.executeText(FUNCTION_SKILLS_EXTRACT, context);
             List<SkillTree> matched = matchAgainstDictionary(parseSkillNames(execution.getText()));
             return SkillAnalysisResult.of(matched, execution);
@@ -111,23 +114,41 @@ public class SkillAnalysisServiceBean implements SkillAnalysisService {
             // нотификацию «обработано ИИ» (контракт пользовательской нотификации).
             log.warn("AI-анализ навыков (уровень {}) недоступен, используется классический "
                     + "словарный поиск. Причина: {}", skillLevel, e.toString());
-            return SkillAnalysisResult.of(SkillNameMatcher.matchText(loadDictionary(), normalizedText), null);
+            return SkillAnalysisResult.of(
+                    SkillNameMatcher.collapseExperienceYears(
+                            SkillNameMatcher.matchText(loadDictionary(), normalizedText)),
+                    null);
         }
     }
 
     /**
      * Сопоставляет названия из ответа нейросети со справочником; неизвестные
-     * названия пишет в лог (WARN) для администратора.
+     * названия пишет в лог (WARN) для администратора, навыки опыта схлопывает
+     * до одного (общий стаж кандидата).
      */
     private List<SkillTree> matchAgainstDictionary(List<String> names) {
         SkillNameMatcher.Result result =
                 SkillNameMatcher.matchNames(loadDictionary(), names);
-        if (!result.getUnknown().isEmpty()) {
+        List<String> unknownExperience = new ArrayList<>();
+        List<String> unknownOther = new ArrayList<>();
+        for (String name : result.getUnknown()) {
+            if (SkillNameMatcher.isExperienceYearsName(name)) {
+                unknownExperience.add(name);
+            } else {
+                unknownOther.add(name);
+            }
+        }
+        if (!unknownExperience.isEmpty()) {
+            log.warn("AI-анализ определил опыт кандидата в годах {}, но в справочнике "
+                    + "skilltree нет навыка с такой цифрой — администратору добавить "
+                    + "его в HUNTTECH_SKILL_TREE для последующего анализа", unknownExperience);
+        }
+        if (!unknownOther.isEmpty()) {
             log.warn("AI-анализ нашёл навыки, отсутствующие в справочнике skilltree — "
                     + "администратору добавить их в HUNTTECH_SKILL_TREE: {}",
-                    result.getUnknown());
+                    unknownOther);
         }
-        return result.getMatched();
+        return SkillNameMatcher.collapseExperienceYears(result.getMatched());
     }
 
     private List<SkillTree> loadDictionary() {

@@ -35,16 +35,16 @@
             </vbox>
 
             <!-- Правая панель кнопок действий и поиска (edit-toolbar-actions) -->
-            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions">
-                <textField id="searchField" inputPrompt="Поиск по ФИО..." width="240px" stylename="edit-form-control"/>
-                <button id="searchButton" caption="Поиск" icon="SEARCH" stylename="primary"/>
-                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary"/>
-                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary"/>
+            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions candidate-toolbar-actions">
+                <textField id="searchField" inputPrompt="Поиск по ФИО..." width="240px" stylename="edit-form-control candidate-search-input"/>
+                <button id="searchButton" caption="Поиск" icon="SEARCH" stylename="primary candidate-btn candidate-search-btn"/>
+                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
+                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary candidate-btn candidate-refresh-btn"/>
             </hbox>
         </hbox>
 
         <!-- Двухпанельная разметка Split-View: Левый профильный сайдбар Edit-формы (312px) + Таблица справа -->
-        <hbox id="splitMainLayout" width="100%" height="100%" spacing="false" expand="candidatesTableBox" stylename="job-candidate-main-layout edit-screen-layout">
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="candidatesTableBox" stylename="job-candidate-main-layout edit-screen-layout">
             
             <!-- ЛЕВАЯ ПАНЕЛЬ (САЙДБАР): Выдержана в фирменном стиле Edit-форм (job-candidate-sidebar edit-sidebar) -->
             <vbox id="candidateDetailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
@@ -116,6 +116,46 @@
                         </vbox>
                     </vbox>
                 </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ ПАНЕЛЬ: Рабочая область реестра (edit-workspace) -->
+            <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace" expand="candidatesTableCard">
+                
+                <!-- Верхняя полоса быстрых фильтров и счетчиков -->
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="statusFilterButtons">
+                    <!-- Кнопки быстрых фильтров по кандидатам -->
+                    <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                        <button id="filterAllBtn" caption="Все кандидаты" stylename="primary filter-pill-btn active" icon="USERS"/>
+                        <button id="filterMyCandidatesBtn" caption="Мои кандидаты" stylename="secondary filter-pill-btn" icon="USER"/>
+                        <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary filter-pill-btn" icon="font-icon:ADN"/>
+                    </hbox>
+                </hbox>
+
+                <!-- Карточка-обёртка для таблицы кандидатов -->
+                <vbox id="candidatesTableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="candidatesTable">
+                    <!-- Таблица кандидатов отображает расширенные колонки реестра -->
+                    <groupTable id="candidatesTable"
+                                 width="100%"
+                                 height="100%"
+                                 dataContainer="jobCandidatesDc"
+                                 stylename="borderless grid candidate-browse-grid">
+                        <actions>
+                            <action id="edit" type="edit"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <!-- Колонки таблицы с привязкой к свойствам сущности для стандартной сортировки -->
+                        <columns>
+                            <column id="avatar" caption="Фото" width="50px" sortable="false"/>
+                            <column id="fullName" caption="Кандидат"/>
+                            <column id="personPosition" caption="Должность"/>
+                            <column id="cityOfResidence" caption="Город" width="130px"/>
+                            <column id="currentCompany" caption="Компания"/>
+                            <column id="mainSkills" caption="Ключевые навыки" width="220px"/>
+                            <column id="lastInteractionStatus" caption="Посл. взаимодействие" width="135px"/>
+                        </columns>
+                        <rowsCount/>
+                    </groupTable>
+                </vbox>
             </vbox>
         </hbox>
     </layout>

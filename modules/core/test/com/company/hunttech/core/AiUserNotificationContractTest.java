@@ -223,6 +223,57 @@ public class AiUserNotificationContractTest {
     }
 
     @Test
+    public void aiOperationsFollowReferencePatternWithProgressDialog() throws IOException {
+        // Эталонный паттерн (§4.1 контракта, эталон — CandidateCVEdit «Сканировать навыки»):
+        // showStarted → showProgress («крутилка») → BackgroundTask → closeProgress во всех
+        // терминальных путях (done/handleException/handleTimeoutException) → итоговая нотификация.
+        String projectEdit = read("modules/web/src/com/company/hunttech/web/screens/project/ProjectEdit.java");
+        String candidateCv = read("modules/web/src/com/company/hunttech/web/screens/candidatecv/CandidateCVEdit.java");
+        String openPosition = read("modules/web/src/com/company/hunttech/web/screens/openposition/OpenPositionEdit.java");
+        String userBrowse = read("modules/web/src/com/company/hunttech/web/screens/useraiconfiguration/UserAiConfigurationBrowse.java");
+        String extSettings = read("modules/web/src/com/company/hunttech/web/screens/extsettingswindow/ExtSettingsWindow.java");
+
+        // ProjectEdit: обе AI-операции показывают «крутилку» и закрывают её во всех путях.
+        assertTrue("ProjectEdit не показывает «крутилку»",
+                countOccurrences(projectEdit, "AiOperationNotifier.showProgress(this,") >= 2);
+        assertTrue("ProjectEdit не закрывает «крутилку» в done/exception/timeout",
+                countOccurrences(projectEdit, "AiOperationNotifier.closeProgress(progressDialog)") >= 6);
+        assertTrue("ProjectEdit не обрабатывает таймаут (закрытие крутилки)",
+                countOccurrences(projectEdit, "AiOperationNotifier.closeProgress(progressDialog);\n" +
+                        "                projectDescriptionShortButton.setEnabled(true);") >= 1);
+
+        // CandidateCVEdit: анализ навыков — эталон (старт → крутилка → итог).
+        assertTrue("CandidateCVEdit не показывает «крутилку» анализа навыков",
+                candidateCv.contains("AiOperationNotifier.showProgress(this, \"Анализ навыков резюме…\")"));
+        assertTrue("CandidateCVEdit не закрывает «крутилку» в handleException",
+                candidateCv.contains("AiOperationNotifier.closeProgress(progressDialog);\n" +
+                        "                        notifications.create(Notifications.NotificationType.ERROR)"));
+        assertTrue("CandidateCVEdit не обрабатывает таймаут анализа навыков",
+                candidateCv.contains("public boolean handleTimeoutException()"));
+
+        // OpenPositionEdit: AI-анализ требований — тот же паттерн.
+        assertTrue("OpenPositionEdit не показывает «крутилку»",
+                openPosition.contains("AiOperationNotifier.showProgress(this, \"Анализ требований вакансии…\")"));
+        assertTrue("OpenPositionEdit не обрабатывает таймаут",
+                openPosition.contains("public boolean handleTimeoutException()"));
+
+        // Диагностика testConnection в обоих экранах «Управление AI» — тоже фоновый
+        // паттерн (синхронный вызов на UI-потоке недопустим: обе нотификации одной пачкой).
+        for (String screen : new String[]{userBrowse, extSettings}) {
+            assertTrue("Экран «Управление AI» не показывает стартовую нотификацию testConnection",
+                    screen.contains("AiOperationNotifier.showStarted(notifications, \"Проверка AI-подключения…\", null)"));
+            assertTrue("Экран «Управление AI» не показывает «крутилку» testConnection",
+                    screen.contains("AiOperationNotifier.showProgress(this, \"Проверка AI-подключения…\")"));
+            assertTrue("Экран «Управление AI» не выполняет testConnection в BackgroundTask",
+                    screen.contains("new BackgroundTask<Integer, AiExecutionResult>(60, this)"));
+            assertTrue("Экран «Управление AI» не закрывает «крутилку» в done",
+                    screen.contains("AiOperationNotifier.closeProgress(progressDialog);"));
+            assertTrue("Экран «Управление AI» не обрабатывает таймаут testConnection",
+                    screen.contains("public boolean handleTimeoutException()"));
+        }
+    }
+
+    @Test
     public void screensShowDisappearingNotificationForAiOperations() throws IOException {
         String projectEdit = read("modules/web/src/com/company/hunttech/web/screens/project/ProjectEdit.java");
         String candidateCv = read("modules/web/src/com/company/hunttech/web/screens/candidatecv/CandidateCVEdit.java");

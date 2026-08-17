@@ -2,6 +2,7 @@
 <!-- Эскиз 1: Split-View (Master-Detail) Browse в теме CUBA Halo -->
 <!-- Корневой элемент: тестовый экран просмотра кандидатов Split-View -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
         caption="Тест 1: Split-View (Master-Detail)"
         messagesPack="com.company.hunttech.web.screens.jobcandidate"
         icon="TH_LIST">
@@ -14,7 +15,18 @@
             <!-- Загрузчик коллекции кандидатов ограничивает выборку 200 записями -->
             <loader id="jobCandidatesDl" maxResults="200">
                 <!-- JPQL-запрос выбирает кандидатов, сортируя по дате создания по убыванию -->
-                <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]></query>
+                <query><![CDATA[select e from hunttech_JobCandidate e order by e.createTs desc]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.createdBy like :createdBy</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select k.candidate from hunttech_IteractionList k where k.recrutier = :recrutier or k.createdBy = :recrutierName)</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
             </loader>
         </collection>
     </data>
@@ -45,11 +57,11 @@
             </filter>
 
             <!-- Правая панель кнопок действий (edit-toolbar-actions) -->
-            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions">
+            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions candidate-toolbar-actions">
                 <!-- Кнопка создания новой карточки кандидата -->
-                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary"/>
+                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
                 <!-- Кнопка обновления текущего списка кандидатов из БД -->
-                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary"/>
+                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary candidate-btn candidate-refresh-btn"/>
             </hbox>
         </hbox>
 
@@ -142,16 +154,12 @@
             <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace" expand="candidatesTableCard">
                 
                 <!-- Верхняя полоса быстрых фильтров, счетчиков и выпадающего меню действий -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-card" expand="statusFilterButtons">
-                    <!-- Заголовок реестра -->
-                    <label id="tableTitleLabel" value="👤 Реестр кандидатов" stylename="h3" align="MIDDLE_LEFT"/>
-                    
-                    <!-- Кнопки быстрых фильтров по статусам рекрутеров -->
-                    <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT">
-                        <button id="filterAllBtn" caption="Все кандидаты" stylename="primary" icon="USERS"/>
-                        <button id="filterFreeBtn" caption="🟢 Свободные" stylename="secondary"/>
-                        <button id="filterMyBtn" caption="🟡 В моей работе" stylename="secondary"/>
-                        <button id="filterOtherBtn" caption="🔴 У других" stylename="secondary"/>
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="statusFilterButtons">
+                    <!-- Кнопки быстрых фильтров по кандидатам -->
+                    <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                        <button id="filterAllBtn" caption="Все кандидаты" stylename="primary filter-pill-btn active" icon="USERS"/>
+                        <button id="filterMyCandidatesBtn" caption="Мои кандидаты" stylename="secondary filter-pill-btn" icon="USER"/>
+                        <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary filter-pill-btn" icon="font-icon:ADN"/>
                     </hbox>
 
                     <!-- Выпадающая кнопка действий над кандидатом как в оригинальной форме -->
@@ -163,8 +171,11 @@
                                  stylename="primary"
                                  align="MIDDLE_RIGHT">
                         <actions>
+                            <action id="scanSkillsAction" caption="Сканировать навыки" icon="font-icon:MAGIC"/>
                             <action id="editCandidateAction" caption="Редактировать карточку" icon="EDIT_ACTION"/>
                             <action id="createInteractionAction" caption="Добавить взаимодействие" icon="PLUS"/>
+                            <action id="showCandidateCVListAction" caption="Показать список резюме" icon="FILE_TEXT_O"/>
+                            <action id="showIteractionListAction" caption="Показать список взаимодействий" icon="HANDSHAKE_O"/>
                             <action id="sendEmailAction" caption="Отправить Email" icon="ENVELOPE"/>
                             <action id="addPersonalReserveAction" caption="В кадровый резерв" icon="SUPERSCRIPT"/>
                         </actions>
@@ -172,13 +183,13 @@
                 </hbox>
 
                 <!-- Карточка-обёртка для таблицы кандидатов -->
-                <vbox id="candidatesTableCard" width="100%" height="100%" spacing="false" stylename="edit-card" expand="candidatesTable">
+                <vbox id="candidatesTableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="candidatesTable">
                     <!-- Таблица кандидатов отображает расширенные колонки реестра -->
                     <groupTable id="candidatesTable"
                                  width="100%"
                                  height="100%"
                                  dataContainer="jobCandidatesDc"
-                                 stylename="borderless grid">
+                                 stylename="borderless grid candidate-browse-grid">
                         <actions>
                             <action id="edit" type="edit"/>
                             <action id="refresh" type="refresh"/>
@@ -195,6 +206,8 @@
                             <column id="cityOfResidence" caption="Город" width="130px"/>
                             <!-- Колонка текущей компании с сортировкой по currentCompany -->
                             <column id="currentCompany" caption="Компания"/>
+                            <!-- Генерируемая колонка ключевых навыков кандидата с чипами и всплывающим окном всех навыков -->
+                            <column id="mainSkills" caption="Ключевые навыки" width="220px"/>
                             <!-- Компактная генерируемая колонка даты последнего взаимодействия со светофорным статусом -->
                             <column id="lastInteractionStatus" caption="Посл. взаимодействие" width="135px"/>
                         </columns>

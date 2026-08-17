@@ -1,0 +1,241 @@
+/*
+ * Стили для дашбордов статистики и аналитики AI (UserAiDashboard, AdminAiDashboard).
+ * Основной стиль: HuntTech Modern.
+ */
+@mixin ai-dashboard-styles {
+
+  .ai-dashboard-root {
+    background-color: #f8fafc !important;
+    padding: 0 !important;
+
+    .ai-scrollbox {
+      padding: 16px 20px 24px 20px !important;
+      box-sizing: border-box;
+    }
+
+    /* Dashboard Header Banner */
+    .ai-header-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+      border-radius: 12px !important;
+      padding: 18px 22px !important;
+      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04) !important;
+      box-sizing: border-box;
+
+      .ai-page-title {
+        color: #0f172a !important;
+        font-size: 20px !important;
+        font-weight: 800 !important;
+        letter-spacing: -0.3px !important;
+      }
+
+      .ai-page-subtitle {
+        color: #64748b !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
+        margin-top: 2px !important;
+      }
+
+      .ai-chip-badge {
+        background: #e0f2fe !important;
+        color: #0369a1 !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        padding: 2px 10px !important;
+        border-radius: 9999px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        border: 1px solid #bae6fd !important;
+
+        &.badge-admin {
+          background: #f3e8ff !important;
+          color: #7e22ce !important;
+          border-color: #e9d5ff !important;
+        }
+      }
+    }
+
+    /* Floating Filter Bar */
+    .ai-dashboard-filter-bar {
+      background: transparent !important;
+      border-top: 1px solid #e2e8f0 !important;
+      padding-top: 12px !important;
+      margin-top: 8px !important;
+      box-sizing: border-box;
+
+      .ai-filter-label {
+        color: #334155 !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+      }
+
+      .v-filterselect,
+      .v-datefield,
+      .v-textfield {
+        border-radius: 6px !important;
+      }
+
+      .ai-action-btn {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3) !important;
+        transition: all 0.2s ease-in-out !important;
+
+        &:hover {
+          background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+          box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4) !important;
+          transform: translateY(-1px);
+        }
+      }
+
+      .ai-secondary-btn {
+        background: #f1f5f9 !important;
+        color: #475569 !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 6px !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease-in-out !important;
+
+        &:hover {
+          background: #e2e8f0 !important;
+          color: #1e293b !important;
+        }
+      }
+    }
+
+    /* KPI Cards Grid */
+    .ai-kpi-grid {
+      box-sizing: border-box;
+      margin-top: 2px;
+      margin-bottom: 2px;
+    }
+
+    .ai-kpi-card {
+      background: #ffffff !important;
+      border: 1px solid rgba(0, 0, 0, 0.07) !important;
+      border-radius: 12px !important;
+      padding: 14px 18px !important;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04) !important;
+      box-sizing: border-box;
+      transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+
+      &:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08) !important;
+      }
+
+      &.kpi-blue {
+        border-left: 4px solid #3b82f6 !important;
+        background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%) !important;
+      }
+
+      &.kpi-purple {
+        border-left: 4px solid #8b5cf6 !important;
+        background: linear-gradient(135deg, #ffffff 0%, #fbf7ff 100%) !important;
+      }
+
+      &.kpi-green {
+        border-left: 4px solid #10b981 !important;
+        background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%) !important;
+      }
+
+      &.kpi-orange {
+        border-left: 4px solid #f59e0b !important;
+        background: linear-gradient(135deg, #ffffff 0%, #fffbf0 100%) !important;
+      }
+
+      .kpi-title {
+        color: #64748b !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.6px !important;
+        margin-bottom: 4px !important;
+        display: block;
+      }
+
+      .kpi-icon {
+        font-size: 18px !important;
+        line-height: 1 !important;
+      }
+
+      .kpi-value {
+        color: #0f172a !important;
+        font-size: 24px !important;
+        font-weight: 800 !important;
+        line-height: 1.15 !important;
+        margin-bottom: 4px !important;
+        display: block;
+      }
+
+      .kpi-sub {
+        color: #94a3b8 !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        display: block;
+      }
+    }
+
+    /* Structured TabSheet */
+    .ai-dashboard-tabsheet {
+      margin-top: 6px;
+
+      .v-tabsheet-tabitem {
+        font-weight: 600 !important;
+        font-size: 13px !important;
+      }
+    }
+
+    /* Chart & Table Surfaces */
+    .ai-chart-card,
+    .ai-table-card {
+      background: #ffffff !important;
+      border: 1px solid rgba(0, 0, 0, 0.08) !important;
+      border-radius: 12px !important;
+      padding: 16px 20px !important;
+      box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04) !important;
+      box-sizing: border-box;
+
+      .ai-card-header {
+        color: #1e293b !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        padding-bottom: 8px !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+        margin-bottom: 8px !important;
+        display: block;
+        width: 100%;
+      }
+    }
+
+    /* Dashboard Tables */
+    .ai-dashboard-table {
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 8px !important;
+      overflow: hidden;
+
+      .v-table-header-wrap {
+        background: #f8fafc !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+      }
+
+      .v-table-header {
+        font-weight: 700 !important;
+        color: #475569 !important;
+        font-size: 12px !important;
+      }
+
+      .v-table-row,
+      .v-table-row-odd {
+        transition: background-color 0.15s ease !important;
+
+        &:hover {
+          background-color: #f1f5f9 !important;
+        }
+      }
+    }
+  }
+}

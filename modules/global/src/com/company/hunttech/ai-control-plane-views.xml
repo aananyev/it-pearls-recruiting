@@ -70,4 +70,31 @@
     <view entity="hunttech_UserAiFunctionOverride" name="user-ai-function-override-execution-view" extends="user-ai-function-override-browse-view">
         <property name="userAiConfiguration" view="user-ai-configuration-ai-execution-view"/>
     </view>
+
+    <!-- Журнал вызовов AI -->
+    <view entity="hunttech_AiCallLog" name="ai-call-log-browse-view" extends="_minimal">
+        <property name="user" view="_minimal"/>
+        <property name="userLogin"/>
+        <property name="userName"/>
+        <property name="callTime"/>
+        <property name="durationMs"/>
+        <property name="functionCode"/>
+        <property name="functionName"/>
+        <property name="capability"/>
+        <property name="providerCode"/>
+        <property name="modelName"/>
+        <property name="credentialOwner"/>
+        <property name="promptTokens"/>
+        <property name="completionTokens"/>
+        <property name="totalTokens"/>
+        <property name="estimatedCost"/>
+        <property name="currency"/>
+        <property name="callerSource"/>
+        <property name="status"/>
+    </view>
+    <view entity="hunttech_AiCallLog" name="ai-call-log-edit-view" extends="ai-call-log-browse-view">
+        <property name="promptText"/>
+        <property name="responseText"/>
+        <property name="errorMessage"/>
+    </view>
 </views>

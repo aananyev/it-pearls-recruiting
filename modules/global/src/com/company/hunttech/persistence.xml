@@ -66,6 +66,7 @@
         <class>com.company.hunttech.entity.ai.AdminAiConfiguration</class>
         <class>com.company.hunttech.entity.ai.AiFunctionConfiguration</class>
         <class>com.company.hunttech.entity.ai.UserAiFunctionOverride</class>
+        <class>com.company.hunttech.entity.ai.AiCallLog</class>
         <class>com.company.hunttech.entity.AccountingExpenseCategory</class>
         <class>com.company.hunttech.entity.AccountingRecipient</class>
         <class>com.company.hunttech.entity.AccountingCompanyAlias</class>
@@ -74,5 +75,6 @@
         <class>com.company.hunttech.entity.AccountingDocument</class>
         <class>com.company.hunttech.entity.AccountingDocumentEvent</class>
         <class>com.company.hunttech.entity.CandidateSkill</class>
+        <class>com.company.hunttech.entity.OpenPositionSkill</class>
     </persistence-unit>
 </persistence>

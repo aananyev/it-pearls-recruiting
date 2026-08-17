@@ -28,16 +28,18 @@ public class HrmAiServiceBean implements HrmAiService {
 
     @Override
     public String standardizeVacancyDescription(String rawText) {
-        return aiExecutionService.executeText(
-                FUNCTION_STANDARDIZE_VACANCY,
-                Collections.<String, Object>singletonMap("rawDescription", rawText)).getText();
+        Map<String, Object> ctx = new java.util.HashMap<>();
+        ctx.put("rawDescription", rawText);
+        ctx.put("callerSource", "HrmAiService (standardizeVacancyDescription)");
+        return aiExecutionService.executeText(FUNCTION_STANDARDIZE_VACANCY, ctx).getText();
     }
 
     @Override
     public String generateVacancyArtifact(String standardizedDescription, String functionCode) {
-        return aiExecutionService.executeText(
-                functionCode,
-                Collections.<String, Object>singletonMap("description", standardizedDescription)).getText();
+        Map<String, Object> ctx = new java.util.HashMap<>();
+        ctx.put("description", standardizedDescription);
+        ctx.put("callerSource", "HrmAiService (generateVacancyArtifact: " + functionCode + ")");
+        return aiExecutionService.executeText(functionCode, ctx).getText();
     }
 
     /**

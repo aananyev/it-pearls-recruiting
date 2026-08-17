@@ -246,10 +246,12 @@ layout stylename="job-candidate-editor"
 ├── hbox id="jobCandidateMainLayout" (job-candidate-main-layout)
 │   ├── vbox id="jobCandidateSidebar" width="312px" (job-candidate-sidebar)
 │   │   ├── vbox id="candidateProfileHeader" — круглое фото 176×176, ФИО, должность
-│   │   ├── vbox id="candidateNavigation" — `label-navigation` по вкладкам с active-state
+│   │   ├── vbox id="candidateSidebarQuickActions" — быстрые действия: «Создать резюме», «Создать взаимодействие»
 │   │   ├── vbox id="candidateProfileSummary" — рейтинг, город, компания, резюме
+│   │   ├── vbox id="candidateNavigation" — `label-navigation` по вкладкам с active-state
 │   │   ├── vbox id="candidateProfileContacts" — email, телефон, Telegram (linkButtons + labels)
-│   │   ├── vbox id="candidateProfileFooter" — быстрые действия: резюме, взаимодействие, HR-Мастер
+│   │   ├── vbox id="candidateProfileSkills" — основные навыки кандидата (AI chips)
+│   │   ├── vbox id="candidateProfileFooter" — действие: HR-Мастер
 │   │   └── hidden placeholders: skillBox, suggestVacancyTable, lastProjects, ...
 │   └── vbox id="jobCandidateWorkspace" (job-candidate-workspace)
 │       ├── hbox id="jobCandidateTopBar" (job-candidate-top-bar)
@@ -503,8 +505,7 @@ git checkout e246a7bc -- modules/web/themes/*/com.company.hunttech/job-candidate
 
 ## История изменений
 
-| Дата | Изменение |
-|------|-----------|
+| 2026-08-16 | Вкладка «Резюме и файлы»: добавлена выпадающая кнопка «Действия» (`skillActionsPopupButton`) с действиями «Сканировать навыки» (`scanSkillsAction`, вызов `SkillAnalysisService` в фоне с уведомлением и обновлением чипов сайдбара) и «Проверить навыки» (`checkSkillFromJDAction`). Sidebar: быстрые действия «Создать резюме» и «Создать взаимодействие» перемещены в верхнюю часть под должность кандидата над рейтингом и стилизованы в соответствии с кнопками сайдбара Split-View. Вкладка «Комментарии»: исправлено форматирование и переполнение текста чат-пузырей во всех 7 темах. В форме `JobCandidateTest1Browse` в выпадающее меню действий кандидата добавлена операция «Сканировать навыки» по всем связанным резюме кандидата с разделением навыков на 3 группы («Основные», «Второстепенные», «Прочее»). |
 | 2026-08-03 | **Дизайн-ревью компоновки JobCandidateEdit (22 файла, presentation-only)** по заданию `.team/JobCandidateEdit/design-notes.md` (P1-1…P3-14), Java-контроллер не менялся. XML: toolbar получил заголовок/описание (`jobCandidateToolbarTitleBox`, `edit-toolbar-title`/`-description`, `expand` переведён на него), русские подписи переведены на `msg://`/`mainMsg://` (+24 ключа в `messages*.properties`), секция «Социальные сети» — `height="AUTO"` + `min-height: 320px` у `socialNetworkTable`, удалены мёртвые stylename (`job-candidate-half-card`, `-contact-card`, `-positions-layout`, `-table-comments`, `-info-grid`, `-sidebar-grid`, `-name-row`), добавлены captions колонок `networkName`/`vacancy`/`iteractionType`/`recrutier`, панель комментариев — `edit-card`/`edit-form-control` вместо `well`/`large`. SCSS ×7 тем: label-навигация по эталону 27px/3px/20px (было 38px/8px/18px), убран маркер `▼`, карточки «Основного» — вертикальный стек, подписи вкладок 14px + `$v-selection-color`, поля 15px/38px, подписи строк контактов 100px, sidebar 296/284px, удалены `.job-candidate-audit-*`; `styles.scss` ×7 — порядок слоёв по контракту 6.4; контракт-тест — ассерты 27px/14px. Бизнес-логика, actions, loaders и bindings не менялись. |
 | 2026-07-29 | По визуальной проверке во внутреннем браузере на `1280×720` устранено перекрытие sidebar/workspace: Vaadin slot sidebar зафиксирован на 312px во всех темах, вкладки ограничены `112px` с ellipsis, чтобы длинные captions не выходили за границы формы. |
 | 2026-07-29 | Компоновка уточнена по контракту Edit-форм: `candidateNavigation` стоит сразу после профиля, sidebar зафиксирован как 312px, actions сохранения описаны в нижней панели, вкладки и табличные контейнеры защищены от переполнения без изменения loaders/actions/bindings. |

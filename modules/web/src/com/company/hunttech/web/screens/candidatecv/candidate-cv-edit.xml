@@ -160,12 +160,12 @@
                     </vbox>
                 </hbox>
 
-                <!-- Сведения о целевой позиции: блок «Резюме для вакансии» на уровень выше навигации -->
+                <!-- Сведения о целевой позиции: блок «Резюме для вакансии» без рамки на уровень выше навигации -->
                 <vbox id="candidateCvSidebarTargetCard"
                       width="100%"
-                      spacing="true"
-                      stylename="job-candidate-profile-contacts job-candidate-sidebar-card edit-sidebar-summary candidate-cv-sidebar-card">
-                    <!-- Заголовок «Резюме для вакансии»: полоса-заголовок с двумя горизонтальными inset-линиями -->
+                      spacing="false"
+                      stylename="job-candidate-profile-contacts edit-sidebar-summary candidate-cv-sidebar-card">
+                    <!-- Заголовок «Резюме для вакансии»: лаконичный заголовок раздела -->
                     <label value="Резюме для вакансии"
                            width="100%"
                            stylename="label-nav-title job-candidate-section-title candidate-cv-sidebar-card-title"/>
@@ -175,8 +175,8 @@
                             <row>
                                 <hbox spacing="false" width="100%">
                                     <label value="Должность:"
-                                           stylename="small"
-                                           width="75px"/>
+                                           stylename="small candidate-cv-sidebar-field-label"
+                                           width="52px"/>
                                     <label id="candidateCvSidebarResumePosition"
                                            width="100%"
                                            dataContainer="candidateCVDc"
@@ -187,8 +187,8 @@
                             <row>
                                 <hbox spacing="false" width="100%">
                                     <label value="Вакансия:"
-                                           stylename="small"
-                                           width="75px"/>
+                                           stylename="small candidate-cv-sidebar-field-label"
+                                           width="52px"/>
                                     <label id="candidateCvSidebarVacancy"
                                            width="100%"
                                            dataContainer="candidateCVDc"
@@ -199,8 +199,8 @@
                             <row>
                                 <hbox spacing="false" width="100%">
                                     <label value="Проект:"
-                                           stylename="small"
-                                           width="75px"/>
+                                           stylename="small candidate-cv-sidebar-field-label"
+                                           width="52px"/>
                                     <label id="candidateCvSidebarProject"
                                            width="100%"
                                            dataContainer="candidateCVDc"
@@ -273,7 +273,7 @@
                       stylename="job-candidate-navigation label-navigation">
                     <label value="msg://msgMainSkillsTitle"
                            width="100%"
-                           stylename="label-nav-title job-candidate-section-title"/>
+                           stylename="label-nav-title job-candidate-section-title candidate-cv-skills-title"/>
                     <label id="candidateSkillsLabels"
                            width="100%"
                            htmlEnabled="true"
@@ -316,13 +316,16 @@
                   spacing="false"
                   expand="tabSheet"
                   stylename="candidate-cv-workspace-shell">
-        <!-- Имена и порядок вкладок являются lifecycle-контрактом CandidateCVEdit.java. -->
+        <!-- Имена и порядок вкладок являются lifecycle-контрактом CandidateCVEdit.java.
+             Тематические пиктограммы вкладок совпадают с иконками пунктов label-навигации
+             sidebar (USER/FILE_TEXT_O/SEND/SITEMAP/FOLDER_O) — единый визуальный язык. -->
         <tabSheet id="tabSheet"
                   width="100%"
                   height="100%"
                   stylename="candidate-cv-tabs">
             <tab id="tabCandidate"
                  caption="msg://msgCandidate"
+                 icon="font-icon:USER"
                  expand="candidateScrolBox"
                  margin="false"
                  spacing="false">
@@ -494,6 +497,7 @@
 
             <tab id="tabCV"
                  caption="msg://msgCV"
+                 icon="font-icon:FILE_TEXT_O"
                  margin="false"
                  expand="cvVbox"
                  spacing="false">
@@ -506,44 +510,53 @@
                     <hbox spacing="true"
                           width="100%"
                           stylename="candidate-cv-toolbar">
-                        <button id="scanCandidateSkillsButton"
-                                caption="msg://msgScanCandidateSkills"
-                                icon="font-icon:MAGIC"
-                                stylename="danger"
-                                align="BOTTOM_LEFT"
-                                invoke="scanCandidateSkills"/>
-                        <button id="rescanSkills"
-                                caption="msg://msgRescanResume"
-                                align="BOTTOM_LEFT"
-                                invoke="rescanCV"/>
-                        <button id="resumeRecognitionButton"
-                                caption="msg://msgResumeRecognition"
-                                align="BOTTOM_LEFT"
-                                invoke="resumeRecognition"/>
-                        <button id="convertToTextButton"
-                                caption="msg://msgConvertToText"
-                                align="BOTTOM_LEFT"
-                                enable="false"
-                                invoke="convertToText"/>
-                        <button id="showOriginalButon"
-                                caption="msg://msgShowOriginal"
-                                align="BOTTOM_LEFT"
-                                invoke="showOriginalText"/>
+                        <!-- Выпадающая кнопка «Действия» выровнена справа -->
+                        <popupButton id="cvActionsPopupButton"
+                                     caption="msg://msgActions"
+                                     icon="font-icon:BARS"
+                                     showActionIcons="true"
+                                     align="MIDDLE_RIGHT"
+                                     stylename="primary candidate-cv-actions-btn">
+                            <actions>
+                                <action id="scanSkillsAction"
+                                        caption="msg://msgScanCandidateSkills"
+                                        icon="font-icon:MAGIC"/>
+                                <action id="smartFormatCvAction"
+                                        caption="msg://msgConvertToText"
+                                        icon="font-icon:ALIGN_LEFT"/>
+                                <action id="rescanCvAction"
+                                        caption="msg://msgRescanResume"
+                                        icon="font-icon:REPEAT"/>
+                                <action id="resumeRecognitionAction"
+                                        caption="msg://msgResumeRecognition"
+                                        icon="font-icon:USER"/>
+                                <action id="showOriginalAction"
+                                        caption="msg://msgShowOriginal"
+                                        icon="font-icon:FILE_TEXT_O"/>
+                            </actions>
+                        </popupButton>
                     </hbox>
                     <hbox id="candidateCVHBox"
-                          expand="candidateCVRichTextArea"
+                          expand="candidateCVEditorBox"
                           height="100%"
                           spacing="true"
                           width="100%"
                           stylename="candidate-cv-workspace">
-                        <richTextArea id="candidateCVRichTextArea"
-                                      width="100%"
-                                      height="100%"
-                                      box.expandRatio="4"
-                                      captionAsHtml="true"
-                                      descriptionAsHtml="true"
-                                      required="true"
-                                      stylename="candidate-cv-rich-editor"/>
+                        <vbox id="candidateCVEditorBox"
+                              spacing="true"
+                              width="100%"
+                              height="100%"
+                              box.expandRatio="4"
+                              expand="candidateCVRichTextArea"
+                              stylename="candidate-cv-card candidate-cv-editor-card">
+                            <richTextArea id="candidateCVRichTextArea"
+                                          width="100%"
+                                          height="100%"
+                                          captionAsHtml="true"
+                                          descriptionAsHtml="true"
+                                          required="true"
+                                          stylename="candidate-cv-rich-editor"/>
+                        </vbox>
                         <richTextArea id="cvResomandation"
                                       width="100%"
                                       height="100%"
@@ -556,56 +569,80 @@
 
             <tab id="tabLetter"
                  caption="msg://msgLetter"
+                 icon="font-icon:SEND"
                  margin="false"
-                 expand="letterHBox"
+                 expand="letterTabVbox"
                  spacing="false">
-                <hbox id="letterHBox"
-                      width="100%"
-                      expand="letterVbox"
+                <vbox id="letterTabVbox"
                       spacing="true"
+                      width="100%"
                       height="100%"
-                      stylename="candidate-cv-tab-content candidate-cv-workspace">
-                    <vbox id="letterVbox"
-                          spacing="true"
+                      expand="letterHBox"
+                      stylename="candidate-cv-tab-content">
+                    <hbox spacing="true"
                           width="100%"
+                          stylename="candidate-cv-toolbar">
+                        <popupButton id="letterActionsPopupButton"
+                                     caption="msg://msgActions"
+                                     icon="font-icon:BARS"
+                                     showActionIcons="true"
+                                     align="MIDDLE_RIGHT"
+                                     stylename="primary candidate-cv-actions-btn">
+                            <actions>
+                                <action id="smartFormatLetterAction"
+                                        caption="msg://msgConvertToText"
+                                        icon="font-icon:ALIGN_LEFT"/>
+                            </actions>
+                        </popupButton>
+                    </hbox>
+                    <hbox id="letterHBox"
+                          width="100%"
+                          expand="letterVbox"
+                          spacing="true"
                           height="100%"
-                          box.expandRatio="4"
-                          expand="letterRichTextArea"
-                          stylename="candidate-cv-card candidate-cv-letter-editor">
-                        <richTextArea id="questionLetterRichTextArea"
+                          stylename="candidate-cv-workspace">
+                        <vbox id="letterVbox"
+                              spacing="true"
+                              width="100%"
+                              height="100%"
+                              box.expandRatio="4"
+                              expand="letterRichTextArea"
+                              stylename="candidate-cv-card candidate-cv-letter-editor">
+                            <richTextArea id="questionLetterRichTextArea"
+                                          width="100%"
+                                          editable="false"
+                                          visible="false"
+                                          caption="msg://msgPatternLetter"
+                                          stylename="text-field-title-form candidate-cv-letter-template"
+                                          height="100%"/>
+                            <richTextArea id="letterRichTextArea"
+                                          dataContainer="candidateCVDc"
+                                          property="letter"
+                                          height="100%"
+                                          width="100%"
+                                          stylename="candidate-cv-rich-editor"/>
+                            <richTextArea id="commentLetterRichTextArea"
+                                          dataContainer="candidateCVDc"
+                                          property="commentLetter"
+                                          caption="msg://msgCommentLetter"
+                                          height="25%"
+                                          width="100%"
+                                          stylename="candidate-cv-letter-comment"/>
+                        </vbox>
+                        <richTextArea id="letterRecommendation"
                                       width="100%"
-                                      editable="false"
-                                      visible="false"
-                                      caption="msg://msgPatternLetter"
-                                      stylename="text-field-title-form candidate-cv-letter-template"
-                                      height="100%"/>
-                        <richTextArea id="letterRichTextArea"
-                                      dataContainer="candidateCVDc"
-                                      property="letter"
                                       height="100%"
-                                      caption="msg://msgLetter"
-                                      width="100%"
-                                      stylename="candidate-cv-rich-editor"/>
-                        <richTextArea id="commentLetterRichTextArea"
-                                      dataContainer="candidateCVDc"
-                                      property="commentLetter"
-                                      caption="msg://msgCommentLetter"
-                                      height="25%"
-                                      width="100%"
-                                      stylename="candidate-cv-letter-comment"/>
-                    </vbox>
-                    <richTextArea id="letterRecommendation"
-                                  width="100%"
-                                  height="100%"
-                                  stylename="borderless candidate-cv-recommendation"
-                                  visible="false"
-                                  editable="false"
-                                  box.expandRatio="1"/>
-                </hbox>
+                                      stylename="borderless candidate-cv-recommendation"
+                                      visible="false"
+                                      editable="false"
+                                      box.expandRatio="1"/>
+                    </hbox>
+                </vbox>
             </tab>
 
             <tab id="tabSkillTree"
                  caption="msg://msgCVSkillTree"
+                 icon="font-icon:SITEMAP"
                  margin="false"
                  expand="skillBox"
                  spacing="false">
@@ -615,22 +652,28 @@
                       expand="skillTreesTable"
                       spacing="true"
                       stylename="candidate-cv-tab-content">
-                    <buttonsPanel stylename="candidate-cv-toolbar">
-                        <button id="scanCandidateSkillsTreeButton"
-                                caption="msg://msgScanCandidateSkills"
-                                icon="font-icon:MAGIC"
-                                stylename="danger"
-                                align="BOTTOM_LEFT"
-                                invoke="scanCandidateSkills"/>
-                        <button id="rescanResume"
-                                caption="msg://msgRescanResume"
-                                align="BOTTOM_LEFT"
-                                invoke="rescanCV"/>
-                        <button id="checkSkillFromJD"
-                                caption="msg://msgCheckSkills"
-                                align="BOTTOM_LEFT"
-                                invoke="checkSkillFromJD"/>
-                    </buttonsPanel>
+                    <hbox spacing="true"
+                          width="100%"
+                          stylename="candidate-cv-toolbar">
+                        <popupButton id="skillActionsPopupButton"
+                                     caption="msg://msgAdditional"
+                                     icon="font-icon:BARS"
+                                     showActionIcons="true"
+                                     align="MIDDLE_RIGHT"
+                                     stylename="primary candidate-cv-actions-btn">
+                            <actions>
+                                <action id="scanSkillsAction"
+                                        caption="msg://msgScanCandidateSkills"
+                                        icon="font-icon:MAGIC"/>
+                                <action id="rescanCvAction"
+                                        caption="msg://msgRescanResume"
+                                        icon="font-icon:REPEAT"/>
+                                <action id="checkSkillFromJDAction"
+                                        caption="msg://msgCheckSkills"
+                                        icon="font-icon:CHECK_SQUARE_O"/>
+                            </actions>
+                        </popupButton>
+                    </hbox>
                     <treeDataGrid id="skillTreesTable"
                                   width="100%"
                                   height="100%"
@@ -670,6 +713,7 @@
 
             <tab id="tabFiles"
                  caption="mainMsg://msgFiles"
+                 icon="font-icon:FOLDER_O"
                  margin="false"
                  spacing="false"
                  expand="someFilesVbox">
@@ -728,9 +772,11 @@
                 <label value=""
                        box.expandRatio="1"/>
                 <button action="windowCommitAndClose"
+                        icon="font-icon:CHECK"
                         stylename="primary candidate-cv-primary-action"
                         align="MIDDLE_RIGHT"/>
                 <button action="windowClose"
+                        icon="font-icon:TIMES"
                         align="MIDDLE_RIGHT"/>
             </hbox>
         </hbox>

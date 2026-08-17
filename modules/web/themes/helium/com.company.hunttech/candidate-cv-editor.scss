@@ -103,34 +103,41 @@
     .candidate-cv-sidebar-card {
       box-sizing: border-box;
       width: 100% !important;
-      padding: 14px;
+      padding: 0 0 10px 0 !important;
       color: #f8fafc;
-      background: rgba(255, 255, 255, 0.055) !important;
-      border: 1px solid rgba(255, 255, 255, 0.18) !important;
-      border-radius: 8px;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
     }
 
-    /* Заголовок «Резюме для вакансии»: полоса-заголовок, растянутая на карточку,
-     * с двумя горизонтальными inset-линиями (контракт §4.1). */
+    /* Заголовок «Резюме для вакансии»: лаконичный заголовок раздела */
     .candidate-cv-sidebar-card-title,
     .candidate-cv-sidebar-card-title.v-label {
       display: block;
       width: 100% !important;
       box-sizing: border-box;
-      min-height: 36px !important;
-      padding: 7px 11px !important;
-      margin: -14px -14px 12px !important;
+      min-height: 28px !important;
+      padding: 2px 0 6px 0 !important;
+      margin: 0 0 8px 0 !important;
       color: #ffb11b !important;
-      font-size: 15px !important;
+      font-size: 14px !important;
       font-weight: 700 !important;
-      line-height: 21px !important;
+      line-height: 20px !important;
       letter-spacing: normal !important;
-      background: rgba(255, 255, 255, 0.045) !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
-      box-shadow: rgba(255, 255, 255, 1) 0 1px 0 0 inset,
-                  rgba(244, 244, 244, 1) 0 -1px 0 0 inset;
-      border-radius: 8px 8px 0 0 !important;
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
       white-space: normal !important;
+    }
+
+    .candidate-cv-sidebar-field-label,
+    .candidate-cv-sidebar-field-label.v-label {
+      color: rgba(248, 250, 252, 0.65) !important;
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      line-height: 18px !important;
+      white-space: nowrap !important;
     }
 
     .candidate-cv-sidebar-info-row {
@@ -164,8 +171,6 @@
       overflow-wrap: anywhere;
       word-break: break-word;
     }
-
-
 
     .candidate-cv-navigation {
       box-sizing: border-box;
@@ -205,17 +210,18 @@
       box-sizing: border-box;
       width: 100% !important;
       height: auto !important;
-      min-height: 38px !important;
-      padding: 8px 10px !important;
+      min-height: 26px !important;
+      padding: 3px 8px !important;
+      margin: 1px 0 !important;
       color: rgba(248, 250, 252, 0.82) !important;
       font-size: 13px !important;
       font-weight: 500 !important;
-      line-height: 18px !important;
+      line-height: 16px !important;
       text-align: left !important;
       background: transparent !important;
       border: 0 !important;
       border-left: 3px solid transparent !important;
-      border-radius: 0 5px 5px 0 !important;
+      border-radius: 0 4px 4px 0 !important;
       box-shadow: none !important;
       text-shadow: none !important;
       transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
@@ -226,8 +232,10 @@
       display: block;
       width: 100%;
       min-width: 0;
+      padding: 0 !important;
+      margin: 0 !important;
       color: inherit !important;
-      line-height: 18px !important;
+      line-height: 16px !important;
       text-align: left !important;
       white-space: normal !important;
       overflow-wrap: anywhere;
@@ -325,6 +333,12 @@
     .candidate-cv-tabs .v-tabsheet-tabitem-selected .v-caption {
       color: #ffb11b !important;
       border-bottom-color: #ffb11b !important;
+    }
+    // Тематическая пиктограмма вкладки: иконка FontAwesome перед подписью,
+    // выровнена по центру строки caption (line-height 48px).
+    .candidate-cv-tabs .v-caption .v-icon {
+      vertical-align: middle;
+      margin-right: 6px;
     }
 
     .candidate-cv-tabs > .v-tabsheet-content {
@@ -496,6 +510,46 @@
       white-space: normal;
       overflow-wrap: anywhere;
     }
+    // Кнопки «Загрузить»/«Очистить» файловых полей (FileUploadField рендерится как
+    // .c-fileupload): подпись выровнена по центру кнопки (вертикаль + горизонталь)
+    // и снабжена тематическими пиктограммами FontAwesome (fa-upload / fa-trash-o).
+    .candidate-cv-document-card .c-fileupload .v-button,
+    .candidate-cv-document-card .c-fileupload-clear {
+      box-sizing: border-box;
+      min-height: 38px;
+      padding: 0 14px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      text-align: center !important;
+    }
+
+    .candidate-cv-document-card .c-fileupload .v-button-wrap,
+    .candidate-cv-document-card .c-fileupload-clear .v-button-wrap {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      height: 100% !important;
+    }
+
+    // Пиктограмма «Загрузить» (fa-upload): заменяет пустой :before-трюк halo-темы.
+    .candidate-cv-document-card .c-fileupload .v-button:before {
+      content: '\f093';
+      font-family: FontAwesome;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+      font-size: 15px;
+    }
+
+    // Пиктограмма «Очистить» (fa-trash-o).
+    .candidate-cv-document-card .c-fileupload-clear:before {
+      content: '\f1f8';
+      font-family: FontAwesome;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+      font-size: 15px;
+    }
 
     .candidate-cv-photo-dropzone {
       box-sizing: border-box;
@@ -518,9 +572,9 @@
       margin: 0 auto;
       overflow: hidden;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.10) !important;
-      border: 4px solid rgba(255, 255, 255, 0.96) !important;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.30);
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
     }
 
     .candidate-cv-photo,
