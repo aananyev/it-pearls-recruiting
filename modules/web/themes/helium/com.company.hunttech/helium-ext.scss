@@ -1591,16 +1591,14 @@ rating_battery_yellow_3:before {
   }
 
   /* ── Hide amCharts watermark across all graphical widgets ── */
-  a[href*="amcharts.com"],
-  a[href*="amcharts"],
-  .amcharts-chart-div > a,
-  .amcharts-chart-div a,
-  .amcharts-main-div > a,
-  .amcharts-main-div a,
-  .c-chart-container a,
-  .c-chart-canvas a,
-  .v-amcharts-chart a,
-  .c-amcharts-chart a {
+  .amcharts-chart-div > a[href*="amcharts.com"],
+  .amcharts-chart-div a[href*="amcharts.com"],
+  .amcharts-main-div > a[href*="amcharts.com"],
+  .amcharts-main-div a[href*="amcharts.com"],
+  .c-chart-container a[href*="amcharts.com"],
+  .c-chart-canvas a[href*="amcharts.com"],
+  .v-amcharts-chart a[href*="amcharts.com"],
+  .c-amcharts-chart a[href*="amcharts.com"] {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;

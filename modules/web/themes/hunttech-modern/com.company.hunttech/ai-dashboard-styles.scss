@@ -120,8 +120,7 @@
       margin-bottom: 12px !important;
       box-sizing: border-box !important;
 
-      > .v-slot,
-      > .v-horizontallayout-slot {
+      > .v-slot {
         flex: 1 1 0% !important;
         width: 25% !important;
         min-width: 0 !important;
@@ -218,10 +217,12 @@
         color: #64748b !important;
         font-size: 12px !important;
         font-weight: 500 !important;
-        white-space: nowrap !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
         overflow: hidden !important;
         text-overflow: ellipsis !important;
-        display: block !important;
         max-width: 100% !important;
       }
     }
