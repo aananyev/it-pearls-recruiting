@@ -1109,6 +1109,111 @@
     white-space: nowrap !important;
   }
 
+  /* =========================================================================
+   * Реестр кандидатов (JobCandidateTest1Browse): блок фильтров сверху экрана
+   * ========================================================================= */
+
+  /* Панель быстрых фильтров (tableFilterBar): белая карточка в стиле edit-card */
+  .candidate-filter-bar {
+    background: #ffffff !important;
+    border: 1px solid rgba(15, 23, 42, 0.12) !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
+    margin-bottom: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Группа кнопок быстрых фильтров */
+  .filter-buttons-panel {
+    gap: 6px !important;
+  }
+
+  /* Кнопки-пилюли быстрых фильтров (stylename="primary filter-pill-btn active") */
+  .candidate-filter-bar .v-button-filter-pill-btn {
+    border-radius: 18px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 16px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    line-height: 30px !important;
+    box-sizing: border-box !important;
+    transition: background 0.15s ease, color 0.15s ease !important;
+  }
+
+  .candidate-filter-bar .v-button-filter-pill-btn.v-button-primary,
+  .candidate-filter-bar .v-button-filter-pill-btn.v-button-active {
+    background: #4d7ab2 !important;
+    border-color: #4d7ab2 !important;
+    color: #ffffff !important;
+  }
+
+  .candidate-filter-bar .v-button-filter-pill-btn.v-button-secondary {
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #475569 !important;
+  }
+
+  .candidate-filter-bar .v-button-filter-pill-btn.v-button-secondary:hover {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+  }
+
+  /* Кнопка создания кандидата в панели фильтров */
+  .candidate-create-btn {
+    height: 32px !important;
+    min-height: 32px !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    padding: 0 14px !important;
+  }
+
+  /* Generic Filter CUBA (класс платформы c-generic-filter + наш stylename) */
+  .candidate-generic-filter,
+  .c-generic-filter {
+    background: #ffffff !important;
+    border: 1px solid rgba(15, 23, 42, 0.12) !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
+    margin-bottom: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Компактные поля и кнопки внутри Generic Filter */
+  .candidate-generic-filter .v-filterselect-input,
+  .candidate-generic-filter .v-textfield,
+  .candidate-generic-filter .v-datefield-textfield,
+  .c-generic-filter .v-filterselect-input,
+  .c-generic-filter .v-textfield,
+  .c-generic-filter .v-datefield-textfield {
+    height: 32px !important;
+    min-height: 32px !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+  }
+
+  .candidate-generic-filter .v-button,
+  .c-generic-filter .v-button {
+    height: 32px !important;
+    min-height: 32px !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+  }
+
+  /* Кнопки тулбара реестра (Создать кандидата, Обновить) */
+  .candidate-toolbar-actions .candidate-btn {
+    height: 34px !important;
+    min-height: 34px !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    padding: 0 14px !important;
+  }
+
   @media (max-width: 1100px) {
     .job-candidate-editor {
       .v-slot-job-candidate-sidebar,

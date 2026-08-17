@@ -49,7 +49,8 @@
                     applyTo="candidatesTable"
                     dataLoader="jobCandidatesDl"
                     defaultMode="generic"
-                    width="100%">
+                    width="100%"
+                    stylename="candidate-generic-filter">
                 <properties include=".*"
                             exclude="id"
                             excludeRecursively="true"

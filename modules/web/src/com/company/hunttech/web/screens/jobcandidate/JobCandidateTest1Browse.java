@@ -548,10 +548,10 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
      * @param activeBtn кнопка, которая становится активной
      */
     private void updateFilterButtons(Button activeBtn) {
-        filterAllBtn.setStyleName("secondary");
-        filterMyCandidatesBtn.setStyleName("secondary");
-        filterMyParticipationBtn.setStyleName("secondary");
-        activeBtn.setStyleName("primary");
+        filterAllBtn.setStyleName("filter-pill-btn secondary");
+        filterMyCandidatesBtn.setStyleName("filter-pill-btn secondary");
+        filterMyParticipationBtn.setStyleName("filter-pill-btn secondary");
+        activeBtn.setStyleName("filter-pill-btn primary active");
     }
 
     /* =========================================================================
