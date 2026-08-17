@@ -33,15 +33,15 @@
                 </hbox>
 
                 <!-- Filter Toolbar 2-row layout -->
-                <vbox id="filterPanel" spacing="true" width="100%" stylename="ai-dashboard-filter-bar">
+                <vbox id="filterPanel" spacing="true" stylename="ai-dashboard-filter-bar">
                     <!-- Filter Row 1: Time range -->
-                    <hbox spacing="true" width="100%" alignment="BOTTOM_LEFT">
+                    <hbox spacing="true" alignment="BOTTOM_LEFT">
                         <lookupField id="periodLookup" caption="msg://periodLabel" width="200px" nullOptionVisible="false"/>
                         <dateField id="dateFromField" caption="msg://dateFrom" resolution="DAY"/>
                         <dateField id="dateToField" caption="msg://dateTo" resolution="DAY"/>
                     </hbox>
                     <!-- Filter Row 2: Entity selectors & Actions -->
-                    <hbox spacing="true" width="100%" alignment="BOTTOM_LEFT">
+                    <hbox spacing="true" alignment="BOTTOM_LEFT">
                         <lookupPickerField id="userPicker" caption="msg://userFilter" width="220px">
                             <actions>
                                 <action id="lookup" type="picker_lookup"/>
@@ -50,16 +50,14 @@
                         </lookupPickerField>
                         <lookupField id="providerLookup" caption="msg://providerFilter" width="180px"/>
                         <lookupField id="ownerLookup" caption="msg://ownerFilter" width="180px"/>
-                        <hbox id="filterButtonsBox" spacing="true" alignment="BOTTOM_LEFT">
-                            <button id="applyFilterBtn" caption="msg://apply" icon="SEARCH" stylename="primary ai-action-btn"/>
-                            <button id="resetFilterBtn" caption="msg://reset" icon="ERASER" stylename="ai-secondary-btn"/>
-                        </hbox>
+                        <button id="applyFilterBtn" caption="msg://apply" icon="SEARCH" stylename="primary ai-action-btn"/>
+                        <button id="resetFilterBtn" caption="msg://reset" icon="ERASER" stylename="ai-secondary-btn"/>
                     </hbox>
                 </vbox>
             </vbox>
 
             <!-- Top KPI Cards Grid -->
-            <hbox id="kpiPanel" spacing="true" width="100%" stylename="ai-kpi-grid">
+            <hbox id="kpiPanel" spacing="true" width="100%" expand="spendCard,activeUsersCard,totalVolumeCard,reliabilityCard" stylename="ai-kpi-grid">
                 <vbox id="spendCard" stylename="ai-kpi-card kpi-blue" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://totalSpend" stylename="kpi-title" width="100%"/>
@@ -101,7 +99,7 @@
                 <tab id="analyticsTab" caption="msg://analyticsTabTitle" icon="LINE_CHART" spacing="true">
                     <vbox width="100%" spacing="true">
                         <!-- Charts Row 1 -->
-                        <hbox id="chartsRow1" spacing="true" width="100%" height="380px" stylename="ai-charts-row-60-40">
+                        <hbox id="chartsRow1" spacing="true" width="100%" height="380px" expand="costDynamicsBox" stylename="ai-charts-row-60-40">
                             <vbox id="costDynamicsBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
                                 <label value="msg://costDynamicsTitle" stylename="ai-card-header"/>
                                 <chart:serialChart id="costDynamicsChart"
@@ -124,7 +122,7 @@
                                 </chart:serialChart>
                             </vbox>
 
-                            <vbox id="topUsersChartBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
+                            <vbox id="topUsersChartBox" stylename="ai-chart-card" width="45%" height="100%" spacing="true">
                                 <label value="msg://topUsersTitle" stylename="ai-card-header"/>
                                 <chart:serialChart id="topUsersChart"
                                                    rotate="true"
@@ -147,7 +145,7 @@
                         </hbox>
 
                         <!-- Charts Row 2 -->
-                        <hbox id="chartsRow2" spacing="true" width="100%" height="380px" stylename="ai-charts-row-50-50">
+                        <hbox id="chartsRow2" spacing="true" width="100%" height="380px" expand="functionCostBox,modelStatsBox" stylename="ai-charts-row-50-50">
                             <vbox id="functionCostBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
                                 <label value="msg://spendByFunctionTitle" stylename="ai-card-header"/>
                                 <chart:pieChart id="functionCostChart"
@@ -186,7 +184,7 @@
                 </tab>
 
                 <!-- Tab 2: User Summary Table -->
-                <tab id="usersTab" caption="msg://usersTabTitle" icon="TABLE" spacing="true">
+                <tab id="usersTab" caption="msg://userRegistryTabTitle" icon="TABLE" spacing="true">
                     <vbox id="userSummaryBox" stylename="ai-table-card" width="100%" spacing="true">
                         <hbox width="100%" alignment="MIDDLE_LEFT">
                             <label value="msg://userSummaryTitle" stylename="ai-card-header" width="100%"/>
@@ -198,7 +196,7 @@
                                 <column id="promptTokens" caption="msg://colPromptTokens" width="140px"/>
                                 <column id="completionTokens" caption="msg://colCompletionTokens" width="150px"/>
                                 <column id="totalTokens" caption="msg://colTotalTokens" width="140px"/>
-                                <column id="estimatedCost" caption="msg://colCostUsd" width="120px"/>
+                                <column id="estimatedCost" caption="msg://colCost" width="130px"/>
                                 <column id="errorCount" caption="msg://colErrors" width="100px"/>
                                 <column id="lastCallTime" caption="msg://colLastActive" width="160px"/>
                             </columns>
