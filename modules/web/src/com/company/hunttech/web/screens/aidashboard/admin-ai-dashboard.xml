@@ -50,15 +50,17 @@
                         </lookupPickerField>
                         <lookupField id="providerLookup" caption="msg://providerFilter" width="180px"/>
                         <lookupField id="ownerLookup" caption="msg://ownerFilter" width="180px"/>
-                        <button id="applyFilterBtn" caption="msg://apply" icon="SEARCH" stylename="primary ai-action-btn"/>
-                        <button id="resetFilterBtn" caption="msg://reset" icon="ERASER" stylename="ai-secondary-btn"/>
+                        <hbox id="filterButtonsBox" spacing="true" alignment="BOTTOM_LEFT">
+                            <button id="applyFilterBtn" caption="msg://apply" icon="SEARCH" stylename="primary ai-action-btn"/>
+                            <button id="resetFilterBtn" caption="msg://reset" icon="ERASER" stylename="ai-secondary-btn"/>
+                        </hbox>
                     </hbox>
                 </vbox>
             </vbox>
 
             <!-- Top KPI Cards Grid -->
             <hbox id="kpiPanel" spacing="true" width="100%" stylename="ai-kpi-grid">
-                <vbox id="spendCard" stylename="ai-kpi-card kpi-blue" width="25%" spacing="false">
+                <vbox id="spendCard" stylename="ai-kpi-card kpi-blue" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://totalSpend" stylename="kpi-title" width="100%"/>
                         <label value="💰" stylename="kpi-icon"/>
@@ -66,7 +68,7 @@
                     <label id="totalSpendLabel" value="$ 0.00" stylename="kpi-value"/>
                     <label id="spendSubLabel" value="Corp: $0 | User: $0" stylename="kpi-sub"/>
                 </vbox>
-                <vbox id="activeUsersCard" stylename="ai-kpi-card kpi-purple" width="25%" spacing="false">
+                <vbox id="activeUsersCard" stylename="ai-kpi-card kpi-purple" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://activeUsers" stylename="kpi-title" width="100%"/>
                         <label value="👥" stylename="kpi-icon"/>
@@ -74,7 +76,7 @@
                     <label id="activeUsersLabel" value="0" stylename="kpi-value"/>
                     <label id="topSpenderLabel" value="—" stylename="kpi-sub"/>
                 </vbox>
-                <vbox id="totalVolumeCard" stylename="ai-kpi-card kpi-green" width="25%" spacing="false">
+                <vbox id="totalVolumeCard" stylename="ai-kpi-card kpi-green" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://totalCallsAndTokens" stylename="kpi-title" width="100%"/>
                         <label value="📊" stylename="kpi-icon"/>
@@ -82,7 +84,7 @@
                     <label id="totalCallsLabel" value="0" stylename="kpi-value"/>
                     <label id="totalTokensLabel" value="0 токенов" stylename="kpi-sub"/>
                 </vbox>
-                <vbox id="reliabilityCard" stylename="ai-kpi-card kpi-orange" width="25%" spacing="false">
+                <vbox id="reliabilityCard" stylename="ai-kpi-card kpi-orange" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://reliabilityAndSpeed" stylename="kpi-title" width="100%"/>
                         <label value="⚠️" stylename="kpi-icon"/>
@@ -99,8 +101,8 @@
                 <tab id="analyticsTab" caption="msg://analyticsTabTitle" icon="LINE_CHART" spacing="true">
                     <vbox width="100%" spacing="true">
                         <!-- Charts Row 1 -->
-                        <hbox id="chartsRow1" spacing="true" width="100%" height="380px">
-                            <vbox id="costDynamicsBox" stylename="ai-chart-card" width="60%" height="100%" spacing="true">
+                        <hbox id="chartsRow1" spacing="true" width="100%" height="380px" stylename="ai-charts-row-60-40">
+                            <vbox id="costDynamicsBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
                                 <label value="msg://costDynamicsTitle" stylename="ai-card-header"/>
                                 <chart:serialChart id="costDynamicsChart"
                                                    categoryField="date"
@@ -122,7 +124,7 @@
                                 </chart:serialChart>
                             </vbox>
 
-                            <vbox id="topUsersChartBox" stylename="ai-chart-card" width="40%" height="100%" spacing="true">
+                            <vbox id="topUsersChartBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
                                 <label value="msg://topUsersTitle" stylename="ai-card-header"/>
                                 <chart:serialChart id="topUsersChart"
                                                    rotate="true"
@@ -145,8 +147,8 @@
                         </hbox>
 
                         <!-- Charts Row 2 -->
-                        <hbox id="chartsRow2" spacing="true" width="100%" height="380px">
-                            <vbox id="functionCostBox" stylename="ai-chart-card" width="50%" height="100%" spacing="true">
+                        <hbox id="chartsRow2" spacing="true" width="100%" height="380px" stylename="ai-charts-row-50-50">
+                            <vbox id="functionCostBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
                                 <label value="msg://spendByFunctionTitle" stylename="ai-card-header"/>
                                 <chart:pieChart id="functionCostChart"
                                                 titleField="functionName"
@@ -159,7 +161,7 @@
                                 </chart:pieChart>
                             </vbox>
 
-                            <vbox id="modelStatsBox" stylename="ai-chart-card" width="50%" height="100%" spacing="true">
+                            <vbox id="modelStatsBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
                                 <label value="msg://modelLatencyTitle" stylename="ai-card-header"/>
                                 <chart:serialChart id="modelLatencyChart"
                                                    categoryField="modelName"

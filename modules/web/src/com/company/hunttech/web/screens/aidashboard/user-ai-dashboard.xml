@@ -38,7 +38,7 @@
 
             <!-- KPI Cards Grid -->
             <hbox id="kpiPanel" spacing="true" width="100%" stylename="ai-kpi-grid">
-                <vbox id="totalCallsCard" stylename="ai-kpi-card kpi-blue" width="25%" spacing="false">
+                <vbox id="totalCallsCard" stylename="ai-kpi-card kpi-blue" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://totalCalls" stylename="kpi-title" width="100%"/>
                         <label value="📞" stylename="kpi-icon"/>
@@ -46,7 +46,7 @@
                     <label id="totalCallsLabel" value="0" stylename="kpi-value"/>
                     <label id="totalCallsSubLabel" value="—" stylename="kpi-sub"/>
                 </vbox>
-                <vbox id="tokensCard" stylename="ai-kpi-card kpi-purple" width="25%" spacing="false">
+                <vbox id="tokensCard" stylename="ai-kpi-card kpi-purple" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://totalTokens" stylename="kpi-title" width="100%"/>
                         <label value="🪙" stylename="kpi-icon"/>
@@ -54,7 +54,7 @@
                     <label id="tokensLabel" value="0" stylename="kpi-value"/>
                     <label id="tokensSubLabel" value="0 in / 0 out" stylename="kpi-sub"/>
                 </vbox>
-                <vbox id="costCard" stylename="ai-kpi-card kpi-green" width="25%" spacing="false">
+                <vbox id="costCard" stylename="ai-kpi-card kpi-green" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://estimatedCost" stylename="kpi-title" width="100%"/>
                         <label value="💵" stylename="kpi-icon"/>
@@ -62,7 +62,7 @@
                     <label id="costLabel" value="$ 0.00" stylename="kpi-value"/>
                     <label id="costSubLabel" value="—" stylename="kpi-sub"/>
                 </vbox>
-                <vbox id="speedCard" stylename="ai-kpi-card kpi-orange" width="25%" spacing="false">
+                <vbox id="speedCard" stylename="ai-kpi-card kpi-orange" spacing="false">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://avgSpeedAndSuccess" stylename="kpi-title" width="100%"/>
                         <label value="⚡" stylename="kpi-icon"/>
@@ -73,8 +73,8 @@
             </hbox>
 
             <!-- Charts Section -->
-            <hbox id="chartsPanel" spacing="true" width="100%" height="380px">
-                <vbox id="dynamicsChartBox" stylename="ai-chart-card" width="60%" height="100%" spacing="true">
+            <hbox id="chartsPanel" spacing="true" width="100%" height="380px" stylename="ai-charts-row-60-40">
+                <vbox id="dynamicsChartBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://dailyDynamics" stylename="ai-card-header" width="100%"/>
                     </hbox>
@@ -104,7 +104,7 @@
                     </chart:serialChart>
                 </vbox>
 
-                <vbox id="functionChartBox" stylename="ai-chart-card" width="40%" height="100%" spacing="true">
+                <vbox id="functionChartBox" stylename="ai-chart-card" width="100%" height="100%" spacing="true">
                     <hbox width="100%" alignment="MIDDLE_LEFT">
                         <label value="msg://functionsShare" stylename="ai-card-header" width="100%"/>
                     </hbox>
