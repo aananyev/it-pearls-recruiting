@@ -27,6 +27,7 @@ import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.ContentMode;
 import com.haulmont.cuba.gui.components.GroupTable;
+import com.haulmont.cuba.gui.components.HBoxLayout;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.PopupButton;
@@ -272,16 +273,51 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             return avatarImg;
         });
 
-        // Колонка 3: Кандидат (ФИО + контакт)
+        // Колонка 3: Кандидат (ФИО + контакт, выравнивание вправо; справа — метки пользователя)
         candidatesTable.addGeneratedColumn("fullName", candidate -> {
+            HBoxLayout box = uiComponents.create(HBoxLayout.NAME);
+            box.setWidth("100%");
+            box.setSpacing(true);
+
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setAlignment(Component.Alignment.MIDDLE_CENTER);
             String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
             String sub = candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() :
                     (candidate.getEmail() != null ? candidate.getEmail() : "");
-            lbl.setValue("<div><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
+            lbl.setValue("<div style='text-align: right;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
                     (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>");
-            return lbl;
+            box.add(lbl);
+            box.setExpandRatio(lbl, 1f);
+
+            // Метки (SignIcons), присвоенные кандидату, — в правой части поля
+            List<JobCandidateSignIcon> signIcons = dataManager.load(JobCandidateSignIcon.class)
+                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                    .parameter("jobCandidate", candidate)
+                    .view("jobCandidateSignIcon-view")
+                    .list();
+            for (JobCandidateSignIcon jcsi : signIcons) {
+                if (jcsi.getSignIcon() == null) {
+                    continue;
+                }
+                Label iconLabel = uiComponents.create(Label.class);
+                iconLabel.setIcon(jcsi.getSignIcon().getIconName());
+                iconLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+                String desc = jcsi.getSignIcon().getTitleDescription() != null
+                        ? jcsi.getSignIcon().getTitleDescription() : jcsi.getSignIcon().getTitleRu();
+                if (desc != null && !desc.trim().isEmpty()) {
+                    iconLabel.setDescription(desc);
+                }
+                String color = jcsi.getSignIcon().getIconColor();
+                if (color != null && !color.trim().isEmpty()) {
+                    color = color.trim();
+                    injectColorCss(color);
+                    iconLabel.setStyleName("pic-center-large-" + color);
+                }
+                box.add(iconLabel);
+            }
+            return box;
         });
 
         // Колонка 4: Должность
@@ -483,6 +519,21 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 .withCaption("Метка присвоена")
                 .withDescription(icon.getTitleRu() != null ? icon.getTitleRu() : "")
                 .show();
+    }
+
+    /**
+     * Инъекция CSS-правила цвета метки (иконка font-icon в цвете iconColor).
+     */
+    private void injectColorCss(String color) {
+        com.vaadin.server.Page.Styles styles = com.vaadin.server.Page.getCurrent().getStyles();
+        String style = String.format(
+                ".pic-center-large-%s {" +
+                        "color: #%s;" +
+                        "text-align: center;" +
+                        "font-size: large;" +
+                        "}",
+                color, color);
+        styles.add(style);
     }
 
     private void removeSignAction(JobCandidate jobCandidate) {
