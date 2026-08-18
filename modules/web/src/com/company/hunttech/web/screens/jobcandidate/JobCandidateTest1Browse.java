@@ -261,7 +261,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
                     .list();
             if (!list.isEmpty() && list.get(0).getSignIcon() != null) {
                 SignIcons sign = list.get(0).getSignIcon();
-                retLabel.setIcon(sign.getIconName());
+                retLabel.setIcon(resolveSignIconIcon(sign.getIconName()));
                 if (sign.getTitleDescription() != null && !sign.getTitleDescription().isEmpty()) {
                     retLabel.setDescription(sign.getTitleDescription());
                 } else if (sign.getTitleRu() != null) {
@@ -395,6 +395,24 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         initSignIconsButton();
     }
 
+    /**
+     * Имя значка в БД хранится как «font-icon:<CONSTANT>» (имя константы CubaIcon, например
+     * font-icon:REMOVE_ACTION). Передавать его в withIcon/setIcon напрямую нельзя:
+     * FontAwesomeIconProvider ищет поле в enum FontAwesome (REMOVE_ACTION там нет) и бросает
+     * InvalidCacheLoadException. Маппим через CubaIcon.valueOf(...).source(), неизвестное
+     * имя — null (значок не выводится, но экран не падает).
+     */
+    private String resolveSignIconIcon(String iconName) {
+        if (iconName == null || !iconName.startsWith("font-icon:")) {
+            return iconName;
+        }
+        try {
+            return CubaIcon.valueOf(iconName.substring("font-icon:".length())).source();
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
     private void initSignIconsButton() {
         if (signIconsButton == null) return;
         signIconsButton.removeAllActions();
@@ -402,7 +420,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         for (SignIcons icon : signIconsDc.getItems()) {
             String actId = "sign_" + (icon.getId() != null ? icon.getId().toString().replace("-", "_") : icon.getTitleRu());
             signIconsButton.addAction(new BaseAction(actId)
-                    .withIcon(icon.getIconName())
+                    .withIcon(resolveSignIconIcon(icon.getIconName()))
                     .withCaption(icon.getTitleRu() != null ? icon.getTitleRu() : "Метка")
                     .withDescription(icon.getTitleDescription())
                     .withHandler(e -> {
