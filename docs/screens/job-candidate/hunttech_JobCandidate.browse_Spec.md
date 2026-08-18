@@ -201,9 +201,9 @@ layout (expand=jobCandidatesTable)
 
 ---
 
-## 7. Модернизированный интерфейс Split-View (`JobCandidateTestBrowse` & `JobCandidateTest1Browse`)
+## 7. Модернизированный интерфейс Split-View (`JobCandidateTestBrowse` & `JobCandidateReestr`)
 
-Экранные формы реестра кандидатов с Split-View разметкой (`job-candidate-test-browse.xml` / `job-candidate-test1-browse.xml`) реализуют современную эргономику рабочего места рекрутера:
+Экранные формы реестра кандидатов с Split-View разметкой (`job-candidate-test-browse.xml` / `job-candidate-reestr.xml`) реализуют современную эргономику рабочего места рекрутера:
 
 ### 7.1 Левый профильный сайдбар (`job-candidate-sidebar`)
 - **Шапка кандидата**:

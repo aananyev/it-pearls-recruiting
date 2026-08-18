@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Эскиз 1: Split-View (Master-Detail) Browse в теме CUBA Halo -->
-<!-- Корневой элемент: тестовый экран просмотра кандидатов Split-View -->
+<!-- Реестр кандидатов: Split-View (Master-Detail) Browse в теме CUBA Halo -->
+<!-- Корневой элемент: экран реестра кандидатов Split-View -->
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
         xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
-        caption="Тест 1: Split-View (Master-Detail)"
+        caption="Реестр кандидатов"
         messagesPack="com.company.hunttech.web.screens.jobcandidate"
         icon="TH_LIST">
     <!-- Секция данных экрана: декларативные контейнеры и лоадеры -->

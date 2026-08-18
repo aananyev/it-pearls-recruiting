@@ -62,13 +62,13 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Контроллер экрана просмотра кандидатов «Split-View Halo (Test1)».
+ * Контроллер экрана «Реестр кандидатов» (Split-View Halo).
  */
-@UiController("hunttech_JobCandidateTest1.browse")
-@UiDescriptor("job-candidate-test1-browse.xml")
+@UiController("hunttech_JobCandidateReestr.browse")
+@UiDescriptor("job-candidate-reestr.xml")
 @LookupComponent("candidatesTable")
 @LoadDataBeforeShow
-public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
+public class JobCandidateReestr extends StandardLookup<JobCandidate> {
 
     private static final String QUERY_GET_JOB_CANDIDATE_SIGN_ICONS =
             "select e from hunttech_JobCandidateSignIcon e where e.jobCandidate = :jobCandidate";

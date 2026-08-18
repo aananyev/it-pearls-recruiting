@@ -7,7 +7,7 @@
 
 ### 2. Связи в интерфейсе и Навигация (UI Context & Navigation)
 Все тестовые экраны зарегистрированы в меню приложения `web-menu.xml` в группе «Подбор» (`application-hunting`):
-* **Тест 1 (Split-View):** `hunttech_JobCandidateTest1.browse` (как и базовый `hunttech_JobCandidateTest.browse`)
+* **Реестр кандидатов (Split-View):** `hunttech_JobCandidateReestr.browse` (как и базовый `hunttech_JobCandidateTest.browse`)
 * **Тест 2 (High-Density):** `hunttech_JobCandidateTest2.browse`
 * **Тест 3 (Kanban):** `hunttech_JobCandidateTest3.browse`
 * **Тест 4 (Card-Grid):** `hunttech_JobCandidateTest4.browse`
@@ -28,7 +28,7 @@
 
 | Эскиз | Screen ID | Контроллер | XML-дескриптор | Иконка |
 |---|---|---|---|---|
-| **Тест 1: Split-View (Halo)** | `hunttech_JobCandidateTest1.browse` | `JobCandidateTest1Browse` | `job-candidate-test1-browse.xml` | `TH_LIST` |
+| **Реестр кандидатов (Split-View)** | `hunttech_JobCandidateReestr.browse` | `JobCandidateReestr` | `job-candidate-reestr.xml` | `TH_LIST` |
 | **Тест 2: High-Density DataGrid** | `hunttech_JobCandidateTest2.browse` | `JobCandidateTest2Browse` | `job-candidate-test2-browse.xml` | `TABLE` |
 | **Тест 3: Kanban Pipeline** | `hunttech_JobCandidateTest3.browse` | `JobCandidateTest3Browse` | `job-candidate-test3-browse.xml` | `COLUMNS` |
 | **Тест 4: Executive Card-Grid** | `hunttech_JobCandidateTest4.browse` | `JobCandidateTest4Browse` | `job-candidate-test4-browse.xml` | `TH_LARGE` |
@@ -56,7 +56,7 @@
 
 Визуальная структура делит рабочее пространство на две панели: реестр слева (60% ширины) и подробные контакты с историей справа (40% ширины) внутри карточки `edit-card`.
 
-![Эскиз 1: Split-View](renders/JobCandidateTest1.svg)
+![Реестр кандидатов: Split-View](renders/JobCandidateReestr.svg)
 
 #### Иерархия XML-компоновки:
 ```text
@@ -194,5 +194,6 @@ layout (expand=candidatesDataGrid)
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-18 | Переименование экрана «Тест 1: Split-View (Halo)» в «Реестр кандидатов»: класс `JobCandidateTest1Browse` → `JobCandidateReestr`, screen id `hunttech_JobCandidateTest1.browse` → `hunttech_JobCandidateReestr.browse`, дескриптор `job-candidate-test1-browse.xml` → `job-candidate-reestr.xml`; обновлены пункт меню, caption окна и SCSS-комментарии. |
 | 2026-08-15 | Фикс отображения фото кандидатов (Эскиз 1/базовый): резолв `resolveCandidateFace` — `JobCandidate.fileImageFace`, при отсутствии — фото из последнего `CandidateCV`; установка через `FileDescriptorImageHelper.setCandidateFace` (fallback при отсутствии файла в хранилище). |
 | 2026-08-15 | Первичная публикация UI Spec для 5 экспериментальных тестовых эскизов реестра кандидатов с векторными SVG-схемами компоновок. |

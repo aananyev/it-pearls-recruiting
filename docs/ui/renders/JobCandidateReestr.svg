@@ -10,7 +10,7 @@
 
   <!-- Top Toolbar -->
   <rect x="15" y="15" width="970" height="50" rx="6" fill="#ffffff" filter="url(#shadow)"/>
-  <text x="30" y="46" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#1e293b">Тест 1: Split-View (Halo)</text>
+  <text x="30" y="46" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#1e293b">Реестр кандидатов (Split-View)</text>
   
   <!-- Search Field -->
   <rect x="350" y="25" width="200" height="30" rx="4" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
