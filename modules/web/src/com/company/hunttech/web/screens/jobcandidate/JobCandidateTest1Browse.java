@@ -408,9 +408,14 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
 
     @Subscribe
     public void onBeforeShow(Screen.BeforeShowEvent event) {
-        signIconsDl.load();
+        initSignIconsDataContainer();
         initSignIconsButton();
         updateSignIconsState(candidatesTable.getSingleSelected());
+    }
+
+    private void initSignIconsDataContainer() {
+        signIconsDl.setParameter("user", (ExtUser) userSession.getUser());
+        signIconsDl.load();
     }
 
     @Subscribe(id = "signIconsDc", target = Target.DATA_CONTAINER)

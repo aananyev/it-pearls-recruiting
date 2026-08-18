@@ -30,12 +30,12 @@
                 </query>
             </loader>
         </collection>
-        <!-- Коллекция справочника меток и значков -->
+        <!-- Коллекция справочника меток и значков (метки текущего пользователя) -->
         <collection id="signIconsDc"
                     class="com.company.hunttech.entity.SignIcons"
                     view="_local">
             <loader id="signIconsDl" cacheable="true">
-                <query><![CDATA[select e from hunttech_SignIcons e order by e.titleRu asc]]></query>
+                <query><![CDATA[select e from hunttech_SignIcons e where e.user = :user order by e.titleRu asc]]></query>
             </loader>
         </collection>
     </data>
