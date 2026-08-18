@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600">
   <!-- УСТАРЕВШИЙ мокап (2026-08-18): не отражает текущую колонку «Кандидат» реестра
-       (ФИО выровнено вправо + метки SignIcons справа). Актуально:
+       (ФИО слева + метки SignIcons справа). Актуально:
        docs/ui/JobCandidateTestScreens_Spec.md → «Эскиз 1 & Базовый: Split-View». -->
   <defs>
     <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
