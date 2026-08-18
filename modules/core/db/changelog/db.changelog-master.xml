@@ -92,4 +92,14 @@
     <include file="260816-4-updateTextProcessingHtmlPrompt.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Консолидированная миграция административных AI-промптов (2026-08-18):
+         создаёт таблицы AI Control Plane, если они отсутствуют (прод-снапшот
+         get_base.sh 2026-08-18 их не содержит), и загружает ВСЕ канонические
+         административные промпты AI-функций (последние редакции 260813-1..260816-5
+         + новая STANDARDIZE_VACANCY по legacy-контракту 260812-4).
+         Административные настройки, изменённые администратором, не перезаписываются.
+         Ручной деплой на прод: 260818-1-addAdminAiPromptSeed.sql. -->
+    <include file="260818-1-addAdminAiPromptSeed.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
