@@ -502,53 +502,38 @@
                             stylename="borderless job-candidate-nav-item label-nav-item"/>
                 </vbox>
 
-                <!-- Contacts -->
-                <!-- Карточка контактов в sidebar: Email, Телефон, Telegram (ссылки заполняются контроллером). -->
+                <!-- Contacts and Requisites -->
+                <!-- Блок ключевой контактной информации кандидата (стиль и состав 1:1 как в JobCandidateTestBrowse) -->
                 <vbox id="candidateProfileContacts"
                       width="100%"
                       spacing="true"
-                      stylename="job-candidate-profile-contacts job-candidate-sidebar-card edit-sidebar-summary">
-                    <!-- Элемент grid. -->
-                    <grid spacing="true" width="100%">
+                      stylename="job-candidate-navigation label-navigation">
+                    <label value="КОНТАКТЫ И РЕКВИЗИТЫ"
+                           width="100%"
+                           stylename="label-nav-title job-candidate-section-title"/>
+                    <!-- Сетка контактов для упорядоченного вывода пар "ключ-значение" -->
+                    <grid id="detailsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
                         <columns count="2"/>
                         <rows>
                             <row>
-                                <!-- Строка Email: подпись и кликабельная ссылка mailto. -->
-                                <hbox spacing="false" width="100%">
-                                    <label value="msg://msgEmail"
-                                           stylename="small"
-                                           box.expandRatio="1"/>
-                                    <!-- Ссылка mailto на email кандидата (заполняется контроллером). -->
-                                    <linkButton id="emailLinkButton"
-                                                box.expandRatio="2"
-                                                align="MIDDLE_LEFT"
-                                                stylename="small"/>
-                                </hbox>
+                                <label value="Телефон:" stylename="bold"/>
+                                <label id="detailPhone" value="-"/>
                             </row>
                             <row>
-                                <!-- Строка «Телефон»: номер из jobCandidateDc. -->
-                                <hbox spacing="false"
-                                      width="100%">
-                                    <label value="msg://msgPhone"
-                                           stylename="small"
-                                           box.expandRatio="1"/>
-                                    <!-- Телефон кандидата (свойство phone). -->
-                                    <label id="phoneLabel"
-                                           box.expandRatio="2"
-                                           stylename="small"
-                                           dataContainer="jobCandidateDc"
-                                           property="phone"/>
-                                </hbox>
+                                <label value="Email:" stylename="bold"/>
+                                <linkButton id="emailLinkButton" align="MIDDLE_LEFT" stylename="link small"/>
                             </row>
                             <row>
-                                <!-- Строка Telegram: кликабельная ссылка на профиль. -->
-                                <hbox spacing="false" width="100%">
-                                    <label value="msg://msgTelegramAccount" stylename="small" box.expandRatio="1"/>
-                                    <linkButton id="telegrammLinkButton"
-                                                box.expandRatio="2"
-                                                align="MIDDLE_LEFT"
-                                                stylename="small"/>
-                                </hbox>
+                                <label value="Telegram:" stylename="bold"/>
+                                <linkButton id="telegrammLinkButton" align="MIDDLE_LEFT" stylename="link small"/>
+                            </row>
+                            <row>
+                                <label value="Компания:" stylename="bold"/>
+                                <label id="detailCompany" value="-"/>
+                            </row>
+                            <row>
+                                <label id="detailSalaryCaption" value="Ожидания:" stylename="bold" visible="false"/>
+                                <label id="detailSalary" value="-" visible="false"/>
                             </row>
                         </rows>
                     </grid>
@@ -600,6 +585,7 @@
                           property="blockCandidate"
                           visible="false"/>
                 <!-- Скрытые поля-помощники для контроллера (телефон/email/skype/telegram и заголовки). -->
+                <label id="phoneLabel" visible="false"/>
                 <label id="mobilePhoneLabel" visible="false"/>
                 <label id="emailLabel" visible="false"/>
                 <label id="skypuLabel" visible="false"/>
