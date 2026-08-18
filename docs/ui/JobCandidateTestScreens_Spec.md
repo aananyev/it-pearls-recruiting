@@ -62,7 +62,7 @@
 ```text
 layout (spacing=true)
 ├── topToolbar (hbox, stylename="edit-toolbar")
-│   ├── label (value="Тест 1: Split-View", stylename="h2")
+│   ├── label (value="Реестр кандидатов", stylename="h2")
 │   ├── searchField (textField, inputPrompt="Поиск по ФИО...")
 │   └── buttons: searchButton (SEARCH), createCandidateBtn (stylename="primary"), refreshBtn (REFRESH)
 └── splitMainLayout (hbox, expand=candidatesTableBox)
