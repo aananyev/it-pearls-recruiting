@@ -273,12 +273,12 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             return avatarImg;
         });
 
-        // Колонка 3: Кандидат (ФИО + контакт, выравнивание вправо; справа — метки пользователя)
+        // Колонка 3: Кандидат (ФИО слева ячейки; справа — метки пользователя)
         candidatesTable.addGeneratedColumn("fullName", candidate -> {
             String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
             String sub = candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() :
                     (candidate.getEmail() != null ? candidate.getEmail() : "");
-            String textHtml = "<div style='text-align: right;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
                     (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>";
 
             // Метки (SignIcons), присвоенные кандидату, — в правой части поля
@@ -442,8 +442,26 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     @Subscribe
     public void onBeforeShow(Screen.BeforeShowEvent event) {
         initSignIconsDataContainer();
+        injectAllSignIconColors();
         initSignIconsActions();
         updateSignIconsState(candidatesTable.getSingleSelected());
+    }
+
+    /**
+     * Предварительная инъекция CSS-правил цветов всех меток пользователя.
+     * Вызывается до рендера таблицы: Page.Styles.add() во время paint генераторов
+     * может не попасть в текущий UIDL (а дедупликация INJECTED_COLORS не даст
+     * добавить правило повторно) — поэтому цвета инъектируем заранее, в onBeforeShow.
+     */
+    private void injectAllSignIconColors() {
+        if (signIconsDc == null) {
+            return;
+        }
+        for (SignIcons icon : signIconsDc.getItems()) {
+            if (icon != null && icon.getIconColor() != null && !icon.getIconColor().trim().isEmpty()) {
+                injectColorCss(icon.getIconColor().trim());
+            }
+        }
     }
 
     private void initSignIconsDataContainer() {
