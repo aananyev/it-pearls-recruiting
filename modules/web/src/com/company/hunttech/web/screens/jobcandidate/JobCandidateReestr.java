@@ -153,6 +153,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     @Inject
     private PopupButton actionsWithCandidateButton;
 
+    @Inject
+    private PopupButton signIconsButton;
+
     private final java.text.SimpleDateFormat interactionDateFormat = new java.text.SimpleDateFormat("dd.MM.yyyy");
 
     public enum InteractionStatus {
@@ -387,19 +390,14 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     }
 
     private void initSignIconsActions() {
-        if (actionsWithCandidateButton == null) return;
+        if (signIconsButton == null) return;
 
         // Удаляем ранее добавленные действия меток (чтобы не дублировались при перезагрузке)
-        for (Action action : new ArrayList<>(actionsWithCandidateButton.getActions())) {
-            String id = action.getId();
-            if (id != null && (id.startsWith("sign_") || "removeSignAction".equals(id) || "editSignIconsAction".equals(id))) {
-                actionsWithCandidateButton.removeAction(id);
-            }
-        }
+        signIconsButton.removeAllActions();
 
         for (SignIcons icon : signIconsDc.getItems()) {
             String actId = "sign_" + (icon.getId() != null ? icon.getId().toString().replace("-", "_") : icon.getTitleRu());
-            actionsWithCandidateButton.addAction(new BaseAction(actId)
+            signIconsButton.addAction(new BaseAction(actId)
                     .withIcon(icon.getIconName())
                     .withCaption(icon.getTitleRu() != null ? icon.getTitleRu() : "Метка")
                     .withDescription(icon.getTitleDescription())
@@ -411,7 +409,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                     }));
         }
 
-        actionsWithCandidateButton.addAction(new BaseAction("removeSignAction")
+        signIconsButton.addAction(new BaseAction("removeSignAction")
                 .withIcon(CubaIcon.REMOVE_ACTION.source())
                 .withCaption("Снять метку")
                 .withDescription("Снять присвоенную метку с выбранного кандидата")
@@ -422,7 +420,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                     }
                 }));
 
-        actionsWithCandidateButton.addAction(new BaseAction("editSignIconsAction")
+        signIconsButton.addAction(new BaseAction("editSignIconsAction")
                 .withCaption("Редактирование значков")
                 .withDescription("Настройка справочника значков и меток")
                 .withIcon(CubaIcon.FONTICONS.source())
@@ -440,27 +438,18 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     }
 
     private void updateSignIconsState(JobCandidate selected) {
-        if (actionsWithCandidateButton == null) return;
+        if (signIconsButton == null) return;
         boolean hasSelected = selected != null;
-        // Действия присвоения меток активны только при выбранном кандидате
-        for (Action action : actionsWithCandidateButton.getActions()) {
-            String id = action.getId();
-            if (id != null && id.startsWith("sign_")) {
-                action.setEnabled(hasSelected);
-            }
-        }
-        if (actionsWithCandidateButton.getAction("removeSignAction") != null) {
-            if (hasSelected) {
-                List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
-                        .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
-                        .parameter("jobCandidate", selected)
-                        .view("jobCandidateSignIcon-view")
-                        .cacheable(true)
-                        .list();
-                actionsWithCandidateButton.getAction("removeSignAction").setEnabled(!list.isEmpty());
-            } else {
-                actionsWithCandidateButton.getAction("removeSignAction").setEnabled(false);
-            }
+        // Кнопка меток активна только при выбранном кандидате
+        signIconsButton.setEnabled(hasSelected);
+        if (hasSelected && signIconsButton.getAction("removeSignAction") != null) {
+            List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
+                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                    .parameter("jobCandidate", selected)
+                    .view("jobCandidateSignIcon-view")
+                    .cacheable(true)
+                    .list();
+            signIconsButton.getAction("removeSignAction").setEnabled(!list.isEmpty());
         }
     }
 

@@ -164,6 +164,15 @@
                         <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary filter-pill-btn" icon="font-icon:ADN"/>
                     </hbox>
 
+                    <!-- Выпадающая кнопка присвоения меток кандидату -->
+                    <popupButton id="signIconsButton"
+                                 caption="Метки"
+                                 icon="TAGS"
+                                 showActionIcons="true"
+                                 enabled="false"
+                                 stylename="secondary"
+                                 align="MIDDLE_RIGHT"/>
+
                     <!-- Выпадающая кнопка действий над кандидатом (задачи + метки) -->
                     <popupButton id="actionsWithCandidateButton"
                                  caption="Действия"
