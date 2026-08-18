@@ -2,22 +2,32 @@ package com.company.hunttech.web.screens.jobcandidate;
 
 import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.CandidateSkill;
+import com.company.hunttech.entity.ExtUser;
 import com.company.hunttech.entity.IteractionList;
 import com.company.hunttech.entity.JobCandidate;
+import com.company.hunttech.entity.JobCandidateSignIcon;
+import com.company.hunttech.entity.SignIcons;
+import com.company.hunttech.web.screens.signicons.SignIconsBrowse;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.FileLoader;
+import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.PopupButton;
 import com.haulmont.cuba.gui.components.Table;
+import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.icons.CubaIcon;
+import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.screen.Target;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.OpenMode;
@@ -28,9 +38,9 @@ import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
+import com.vaadin.server.Page;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -44,6 +54,9 @@ import java.util.List;
 @LoadDataBeforeShow
 public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
 
+    private static final String QUERY_GET_JOB_CANDIDATE_SIGN_ICONS =
+            "select e from hunttech_JobCandidateSignIcon e where e.jobCandidate = :jobCandidate";
+
     /* =========================================================================
      * Инъекции компонентов UI и сервисов
      * ========================================================================= */
@@ -55,12 +68,21 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
     private CollectionLoader<JobCandidate> jobCandidatesDl;
 
     @Inject
+    private CollectionContainer<SignIcons> signIconsDc;
+
+    @Inject
+    private CollectionLoader<SignIcons> signIconsDl;
+
+    @Inject
     private ScreenBuilders screenBuilders;
 
     @Inject
     private UiComponents uiComponents;
     @Inject
     private FileLoader fileLoader;
+
+    @Inject
+    private Metadata metadata;
 
     @Inject
     private com.haulmont.cuba.core.global.DataManager dataManager;
@@ -108,6 +130,8 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
     private Button filterMyParticipationBtn;
     @Inject
     private PopupButton actionsWithCandidateButton;
+    @Inject
+    private PopupButton signIconsButton;
 
     private final java.text.SimpleDateFormat interactionDateFormat = new java.text.SimpleDateFormat("dd.MM.yyyy");
 
@@ -225,7 +249,33 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
             return avatarImg;
         });
 
-        // Колонка 2: Кандидат (ФИО + контакт)
+        // Колонка 2: Метка / Значок кандидата
+        candidatesTable.addGeneratedColumn("signIcon", candidate -> {
+            Label<String> retLabel = uiComponents.create(Label.NAME);
+            retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
+                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                    .parameter("jobCandidate", candidate)
+                    .view("jobCandidateSignIcon-view")
+                    .cacheable(true)
+                    .list();
+            if (!list.isEmpty() && list.get(0).getSignIcon() != null) {
+                SignIcons sign = list.get(0).getSignIcon();
+                retLabel.setIcon(sign.getIconName());
+                if (sign.getTitleDescription() != null && !sign.getTitleDescription().isEmpty()) {
+                    retLabel.setDescription(sign.getTitleDescription());
+                } else if (sign.getTitleRu() != null) {
+                    retLabel.setDescription(sign.getTitleRu());
+                }
+                if (sign.getIconColor() != null && !sign.getIconColor().trim().isEmpty()) {
+                    injectSignColorCss(sign.getIconColor());
+                    retLabel.setStyleName("sign-icon-" + sign.getIconColor().replace("#", ""));
+                }
+            }
+            return retLabel;
+        });
+
+        // Колонка 3: Кандидат (ФИО + контакт)
         candidatesTable.addGeneratedColumn("fullName", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
@@ -237,7 +287,7 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
             return lbl;
         });
 
-        // Колонка 3: Должность
+        // Колонка 4: Должность
         candidatesTable.addGeneratedColumn("personPosition", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
@@ -246,7 +296,7 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
             return lbl;
         });
 
-        // Колонка 4: Город
+        // Колонка 5: Город
         candidatesTable.addGeneratedColumn("cityOfResidence", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
@@ -255,7 +305,7 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
             return lbl;
         });
 
-        // Колонка 5: Компания
+        // Колонка 6: Компания
         candidatesTable.addGeneratedColumn("currentCompany", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
@@ -268,7 +318,7 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
             return lbl;
         });
 
-        // Колонка 6: Ключевые навыки (чипы)
+        // Колонка 7: Ключевые навыки (чипы)
         candidatesTable.addGeneratedColumn("mainSkills", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
@@ -308,7 +358,7 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
             return lbl;
         });
 
-        // Колонка 7: Статус взаимодействия
+        // Колонка 8: Статус взаимодействия
         candidatesTable.addGeneratedColumn("lastInteractionStatus", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
@@ -321,6 +371,144 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
         });
 
         updateActionsState(candidatesTable.getSingleSelected());
+        updateSignIconsState(candidatesTable.getSingleSelected());
+    }
+
+    private void injectSignColorCss(String color) {
+        if (color == null || color.trim().isEmpty()) return;
+        String clean = color.replace("#", "").trim();
+        Page page = Page.getCurrent();
+        if (page != null && page.getStyles() != null) {
+            page.getStyles().add(String.format(".v-table .sign-icon-%s .v-icon, .sign-icon-%s .v-icon { color: #%s !important; font-size: 16px; }", clean, clean, clean));
+        }
+    }
+
+    @Subscribe
+    public void onBeforeShow(Screen.BeforeShowEvent event) {
+        signIconsDl.load();
+        initSignIconsButton();
+        updateSignIconsState(candidatesTable.getSingleSelected());
+    }
+
+    @Subscribe(id = "signIconsDc", target = Target.DATA_CONTAINER)
+    public void onSignIconsDcCollectionChange(CollectionContainer.CollectionChangeEvent<SignIcons> event) {
+        initSignIconsButton();
+    }
+
+    private void initSignIconsButton() {
+        if (signIconsButton == null) return;
+        signIconsButton.removeAllActions();
+
+        for (SignIcons icon : signIconsDc.getItems()) {
+            String actId = "sign_" + (icon.getId() != null ? icon.getId().toString().replace("-", "_") : icon.getTitleRu());
+            signIconsButton.addAction(new BaseAction(actId)
+                    .withIcon(icon.getIconName())
+                    .withCaption(icon.getTitleRu() != null ? icon.getTitleRu() : "Метка")
+                    .withDescription(icon.getTitleDescription())
+                    .withHandler(e -> {
+                        JobCandidate selected = candidatesTable.getSingleSelected();
+                        if (selected != null) {
+                            setSignIcons(icon, selected);
+                        }
+                    }));
+        }
+
+        signIconsButton.addAction(new BaseAction("removeSignAction")
+                .withIcon(CubaIcon.REMOVE_ACTION.source())
+                .withCaption("Снять метку")
+                .withDescription("Снять присвоенную метку с выбранного кандидата")
+                .withHandler(e -> {
+                    JobCandidate selected = candidatesTable.getSingleSelected();
+                    if (selected != null) {
+                        removeSignAction(selected);
+                    }
+                }));
+
+        signIconsButton.addAction(new BaseAction("editSignIconsAction")
+                .withCaption("Редактирование значков")
+                .withDescription("Настройка справочника значков и меток")
+                .withIcon(CubaIcon.FONTICONS.source())
+                .withHandler(e -> {
+                    SignIconsBrowse screen = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                            .withOpenMode(OpenMode.DIALOG)
+                            .build();
+                    screen.addAfterCloseListener(closeEvent -> {
+                        signIconsDl.load();
+                        initSignIconsButton();
+                        candidatesTable.repaint();
+                    });
+                    screen.show();
+                }));
+    }
+
+    private void updateSignIconsState(JobCandidate selected) {
+        if (signIconsButton == null) return;
+        boolean hasSelected = selected != null;
+        signIconsButton.setEnabled(hasSelected);
+        if (hasSelected && signIconsButton.getAction("removeSignAction") != null) {
+            List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
+                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                    .parameter("jobCandidate", selected)
+                    .view("jobCandidateSignIcon-view")
+                    .cacheable(true)
+                    .list();
+            signIconsButton.getAction("removeSignAction").setEnabled(!list.isEmpty());
+        }
+    }
+
+    private void setSignIcons(SignIcons icon, JobCandidate jobCandidate) {
+        if (jobCandidate == null || icon == null) return;
+        List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", jobCandidate)
+                .view("jobCandidateSignIcon-view")
+                .cacheable(true)
+                .list();
+
+        if (list.isEmpty()) {
+            JobCandidateSignIcon jcsi = metadata.create(JobCandidateSignIcon.class);
+            jcsi.setJobCandidate(jobCandidate);
+            jcsi.setSignIcon(icon);
+            if (userSession.getUser() instanceof ExtUser) {
+                jcsi.setUser((ExtUser) userSession.getUser());
+            }
+            dataManager.commit(jcsi);
+        } else {
+            JobCandidateSignIcon jcsi = list.get(0);
+            jcsi.setSignIcon(icon);
+            dataManager.commit(jcsi);
+        }
+
+        candidatesTable.repaint();
+        candidatesTable.setSelected(jobCandidate);
+        updateSignIconsState(jobCandidate);
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption("Метка присвоена")
+                .withDescription(icon.getTitleRu() != null ? icon.getTitleRu() : "")
+                .show();
+    }
+
+    private void removeSignAction(JobCandidate jobCandidate) {
+        if (jobCandidate == null) return;
+        List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
+                .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                .parameter("jobCandidate", jobCandidate)
+                .view("jobCandidateSignIcon-view")
+                .cacheable(true)
+                .list();
+
+        if (!list.isEmpty()) {
+            for (JobCandidateSignIcon jcsi : list) {
+                dataManager.remove(jcsi);
+            }
+        }
+
+        candidatesTable.repaint();
+        candidatesTable.setSelected(jobCandidate);
+        updateSignIconsState(jobCandidate);
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption("Метка снята")
+                .show();
     }
 
     @Subscribe("candidatesTable")
@@ -332,6 +520,7 @@ public class JobCandidateTestBrowse extends StandardLookup<JobCandidate> {
             populateDetailPane(selected);
         }
         updateActionsState(selected);
+        updateSignIconsState(selected);
     }
 
     private void updateActionsState(JobCandidate selected) {

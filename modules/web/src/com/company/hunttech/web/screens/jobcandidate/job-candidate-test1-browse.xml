@@ -29,6 +29,14 @@
                 </query>
             </loader>
         </collection>
+        <!-- Коллекция справочника меток и значков -->
+        <collection id="signIconsDc"
+                    class="com.company.hunttech.entity.SignIcons"
+                    view="_local">
+            <loader id="signIconsDl" cacheable="true">
+                <query><![CDATA[select e from hunttech_SignIcons e order by e.titleRu asc]]></query>
+            </loader>
+        </collection>
     </data>
 
     <!-- Настройка размеров экрана при открытии в режиме диалога или lookup-окна -->
@@ -156,6 +164,15 @@
                         <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary filter-pill-btn" icon="font-icon:ADN"/>
                     </hbox>
 
+                    <!-- Выпадающая кнопка присвоения меток кандидату -->
+                    <popupButton id="signIconsButton"
+                                 caption="Метки"
+                                 icon="TAGS"
+                                 showActionIcons="true"
+                                 enabled="false"
+                                 stylename="secondary"
+                                 align="MIDDLE_RIGHT"/>
+
                     <!-- Выпадающая кнопка действий над кандидатом с пунктом Обновить -->
                     <popupButton id="actionsWithCandidateButton"
                                  caption="Действия"
@@ -193,6 +210,8 @@
                         <columns>
                             <!-- Генерируемая колонка для отображения миниатюры фото кандидата -->
                             <column id="avatar" caption="Фото" width="50px" sortable="false"/>
+                            <!-- Генерируемая колонка метки / значка кандидата -->
+                            <column id="signIcon" caption="Метка" width="55px" sortable="false"/>
                             <!-- Колонка ФИО: растягивается на всё свободное место (expandRatio), сортировка по fullName -->
                             <column id="fullName" caption="Кандидат" expandRatio="1"/>
                             <!-- Колонка желаемой должности с сортировкой по personPosition -->
