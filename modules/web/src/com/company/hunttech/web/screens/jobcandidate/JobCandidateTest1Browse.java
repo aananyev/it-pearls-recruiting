@@ -829,17 +829,50 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
 
     /**
      * Обработчик выбора строки в таблице кандидатов:
-     * синхронизирует левый сайдбар и разблокирует выпадающую кнопку действий.
+     * синхронизирует левый сайдбар и обновляет доступность действий.
      */
     @Subscribe("candidatesTable")
     public void onCandidatesTableSelection(Table.SelectionEvent<JobCandidate> event) {
         JobCandidate selected = candidatesTable.getSingleSelected();
         if (selected == null) {
             clearDetailPane();
-            actionsWithCandidateButton.setEnabled(false);
         } else {
             populateDetailPane(selected);
-            actionsWithCandidateButton.setEnabled(true);
+        }
+        updateActionsState(selected);
+    }
+
+    /**
+     * Обновляет состояние доступности действий в выпадающем меню:
+     * кнопка Действия всегда активна (содержит Обновить), а контекстные действия требуют выбранного кандидата.
+     */
+    private void updateActionsState(JobCandidate selected) {
+        if (actionsWithCandidateButton == null) return;
+        actionsWithCandidateButton.setEnabled(true);
+        boolean hasSelected = selected != null;
+        if (actionsWithCandidateButton.getAction("editCandidateAction") != null) {
+            actionsWithCandidateButton.getAction("editCandidateAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("createInteractionAction") != null) {
+            actionsWithCandidateButton.getAction("createInteractionAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("scanSkillsAction") != null) {
+            actionsWithCandidateButton.getAction("scanSkillsAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("showCandidateCVListAction") != null) {
+            actionsWithCandidateButton.getAction("showCandidateCVListAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("showIteractionListAction") != null) {
+            actionsWithCandidateButton.getAction("showIteractionListAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("sendEmailAction") != null) {
+            actionsWithCandidateButton.getAction("sendEmailAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("addPersonalReserveAction") != null) {
+            actionsWithCandidateButton.getAction("addPersonalReserveAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("refreshAction") != null) {
+            actionsWithCandidateButton.getAction("refreshAction").setEnabled(true);
         }
     }
 
@@ -1144,6 +1177,11 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
                 .newEntity()
                 .withOpenMode(OpenMode.DIALOG)
                 .show();
+    }
+
+    @Subscribe("actionsWithCandidateButton.refreshAction")
+    public void onActionsWithCandidateButtonRefreshAction(Action.ActionPerformedEvent event) {
+        jobCandidatesDl.load();
     }
 
     @Subscribe("refreshBtn")

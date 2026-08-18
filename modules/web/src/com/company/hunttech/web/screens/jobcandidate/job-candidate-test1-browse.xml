@@ -37,14 +37,14 @@
     <!-- Корневой контейнер разметки экрана с базовыми стилями темы Edit-форм и правильными отступами -->
     <layout expand="splitMainLayout" spacing="true" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
         <!-- Верхний тулбар управления в фирменном дизайне Edit-форм (edit-toolbar) -->
-        <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_CENTER" stylename="edit-toolbar" expand="filter">
-            <!-- Левый заголовочный блок с названием концепта и описанием -->
-            <vbox id="toolbarTitleBox" width="320px" spacing="false" align="MIDDLE_LEFT">
-                <label value="Тест 1: Split-View (Master-Detail)" stylename="edit-toolbar-title"/>
+        <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar" expand="filter">
+            <!-- Левый заголовочный блок с названием концепта и описанием (ровно по ширине сайдбара 312px) -->
+            <vbox id="toolbarTitleBox" width="312px" spacing="false" align="MIDDLE_LEFT">
+                <label value="Реестр кандидатов" stylename="edit-toolbar-title"/>
                 <label value="Реестр кандидатов с профильным сайдбаром" stylename="edit-toolbar-description"/>
             </vbox>
 
-            <!-- Стандартный фильтр поиска CUBA Platform со стилизацией под новую форму -->
+            <!-- Стандартный фильтр поиска CUBA Platform по ширине таблицы кандидатов -->
             <filter id="filter"
                     applyTo="candidatesTable"
                     dataLoader="jobCandidatesDl"
@@ -56,14 +56,6 @@
                             excludeRecursively="true"
                             excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,fileImageFace,priorityContact"/>
             </filter>
-
-            <!-- Правая панель кнопок действий (edit-toolbar-actions) -->
-            <hbox id="toolbarActions" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar-actions candidate-toolbar-actions">
-                <!-- Кнопка создания новой карточки кандидата -->
-                <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
-                <!-- Кнопка обновления текущего списка кандидатов из БД -->
-                <button id="refreshBtn" caption="Обновить" icon="REFRESH" stylename="secondary candidate-btn candidate-refresh-btn"/>
-            </hbox>
         </hbox>
 
         <!-- Двухпанельная разметка Split-View: Левый профильный сайдбар Edit-формы (312px) + Просторная рабочая область справа -->
@@ -156,22 +148,24 @@
                 
                 <!-- Верхняя полоса быстрых фильтров, счетчиков и выпадающего меню действий -->
                 <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="statusFilterButtons">
-                    <!-- Кнопки быстрых фильтров по кандидатам -->
+                    <!-- Кнопка создания и быстрые фильтры по кандидатам -->
                     <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                        <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
                         <button id="filterAllBtn" caption="Все кандидаты" stylename="primary filter-pill-btn active" icon="USERS"/>
                         <button id="filterMyCandidatesBtn" caption="Мои кандидаты" stylename="secondary filter-pill-btn" icon="USER"/>
                         <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary filter-pill-btn" icon="font-icon:ADN"/>
                     </hbox>
 
-                    <!-- Выпадающая кнопка действий над кандидатом как в оригинальной форме -->
+                    <!-- Выпадающая кнопка действий над кандидатом с пунктом Обновить -->
                     <popupButton id="actionsWithCandidateButton"
                                  caption="Действия"
                                  icon="BARS"
                                  showActionIcons="true"
-                                 enabled="false"
+                                 enabled="true"
                                  stylename="primary"
                                  align="MIDDLE_RIGHT">
                         <actions>
+                            <action id="refreshAction" caption="Обновить" icon="REFRESH"/>
                             <action id="scanSkillsAction" caption="Сканировать навыки" icon="font-icon:MAGIC"/>
                             <action id="editCandidateAction" caption="Редактировать карточку" icon="EDIT_ACTION"/>
                             <action id="createInteractionAction" caption="Добавить взаимодействие" icon="PLUS"/>
