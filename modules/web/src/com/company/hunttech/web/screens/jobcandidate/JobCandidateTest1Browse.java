@@ -49,7 +49,6 @@ import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
-import com.vaadin.server.Page;
 import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
@@ -153,8 +152,6 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     private Button filterMyParticipationBtn;
     @Inject
     private PopupButton actionsWithCandidateButton;
-    @Inject
-    private PopupButton signIconsButton;
 
     private final java.text.SimpleDateFormat interactionDateFormat = new java.text.SimpleDateFormat("dd.MM.yyyy");
 
@@ -272,32 +269,6 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
             return avatarImg;
         });
 
-        // Колонка 2: Метка / Значок кандидата
-        candidatesTable.addGeneratedColumn("signIcon", candidate -> {
-            Label<String> retLabel = uiComponents.create(Label.NAME);
-            retLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
-                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
-                    .parameter("jobCandidate", candidate)
-                    .view("jobCandidateSignIcon-view")
-                    .cacheable(true)
-                    .list();
-            if (!list.isEmpty() && list.get(0).getSignIcon() != null) {
-                SignIcons sign = list.get(0).getSignIcon();
-                retLabel.setIcon(sign.getIconName());
-                if (sign.getTitleDescription() != null && !sign.getTitleDescription().isEmpty()) {
-                    retLabel.setDescription(sign.getTitleDescription());
-                } else if (sign.getTitleRu() != null) {
-                    retLabel.setDescription(sign.getTitleRu());
-                }
-                if (sign.getIconColor() != null && !sign.getIconColor().trim().isEmpty()) {
-                    injectSignColorCss(sign.getIconColor());
-                    retLabel.setStyleName("sign-icon-" + sign.getIconColor().replace("#", ""));
-                }
-            }
-            return retLabel;
-        });
-
         // Колонка 3: Кандидат (ФИО + контакт)
         candidatesTable.addGeneratedColumn("fullName", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
@@ -397,19 +368,10 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
         updateSignIconsState(candidatesTable.getSingleSelected());
     }
 
-    private void injectSignColorCss(String color) {
-        if (color == null || color.trim().isEmpty()) return;
-        String clean = color.replace("#", "").trim();
-        Page page = Page.getCurrent();
-        if (page != null && page.getStyles() != null) {
-            page.getStyles().add(String.format(".v-table .sign-icon-%s .v-icon, .sign-icon-%s .v-icon { color: #%s !important; font-size: 16px; }", clean, clean, clean));
-        }
-    }
-
     @Subscribe
     public void onBeforeShow(Screen.BeforeShowEvent event) {
         initSignIconsDataContainer();
-        initSignIconsButton();
+        initSignIconsActions();
         updateSignIconsState(candidatesTable.getSingleSelected());
     }
 
@@ -420,16 +382,24 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
 
     @Subscribe(id = "signIconsDc", target = Target.DATA_CONTAINER)
     public void onSignIconsDcCollectionChange(CollectionContainer.CollectionChangeEvent<SignIcons> event) {
-        initSignIconsButton();
+        initSignIconsActions();
+        updateSignIconsState(candidatesTable.getSingleSelected());
     }
 
-    private void initSignIconsButton() {
-        if (signIconsButton == null) return;
-        signIconsButton.removeAllActions();
+    private void initSignIconsActions() {
+        if (actionsWithCandidateButton == null) return;
+
+        // Удаляем ранее добавленные действия меток (чтобы не дублировались при перезагрузке)
+        for (Action action : new ArrayList<>(actionsWithCandidateButton.getActions())) {
+            String id = action.getId();
+            if (id != null && (id.startsWith("sign_") || "removeSignAction".equals(id) || "editSignIconsAction".equals(id))) {
+                actionsWithCandidateButton.removeAction(id);
+            }
+        }
 
         for (SignIcons icon : signIconsDc.getItems()) {
             String actId = "sign_" + (icon.getId() != null ? icon.getId().toString().replace("-", "_") : icon.getTitleRu());
-            signIconsButton.addAction(new BaseAction(actId)
+            actionsWithCandidateButton.addAction(new BaseAction(actId)
                     .withIcon(icon.getIconName())
                     .withCaption(icon.getTitleRu() != null ? icon.getTitleRu() : "Метка")
                     .withDescription(icon.getTitleDescription())
@@ -441,7 +411,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
                     }));
         }
 
-        signIconsButton.addAction(new BaseAction("removeSignAction")
+        actionsWithCandidateButton.addAction(new BaseAction("removeSignAction")
                 .withIcon(CubaIcon.REMOVE_ACTION.source())
                 .withCaption("Снять метку")
                 .withDescription("Снять присвоенную метку с выбранного кандидата")
@@ -452,7 +422,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
                     }
                 }));
 
-        signIconsButton.addAction(new BaseAction("editSignIconsAction")
+        actionsWithCandidateButton.addAction(new BaseAction("editSignIconsAction")
                 .withCaption("Редактирование значков")
                 .withDescription("Настройка справочника значков и меток")
                 .withIcon(CubaIcon.FONTICONS.source())
@@ -462,7 +432,7 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
                             .build();
                     screen.addAfterCloseListener(closeEvent -> {
                         signIconsDl.load();
-                        initSignIconsButton();
+                        initSignIconsActions();
                         candidatesTable.repaint();
                     });
                     screen.show();
@@ -470,17 +440,27 @@ public class JobCandidateTest1Browse extends StandardLookup<JobCandidate> {
     }
 
     private void updateSignIconsState(JobCandidate selected) {
-        if (signIconsButton == null) return;
+        if (actionsWithCandidateButton == null) return;
         boolean hasSelected = selected != null;
-        signIconsButton.setEnabled(hasSelected);
-        if (hasSelected && signIconsButton.getAction("removeSignAction") != null) {
-            List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
-                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
-                    .parameter("jobCandidate", selected)
-                    .view("jobCandidateSignIcon-view")
-                    .cacheable(true)
-                    .list();
-            signIconsButton.getAction("removeSignAction").setEnabled(!list.isEmpty());
+        // Действия присвоения меток активны только при выбранном кандидате
+        for (Action action : actionsWithCandidateButton.getActions()) {
+            String id = action.getId();
+            if (id != null && id.startsWith("sign_")) {
+                action.setEnabled(hasSelected);
+            }
+        }
+        if (actionsWithCandidateButton.getAction("removeSignAction") != null) {
+            if (hasSelected) {
+                List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
+                        .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                        .parameter("jobCandidate", selected)
+                        .view("jobCandidateSignIcon-view")
+                        .cacheable(true)
+                        .list();
+                actionsWithCandidateButton.getAction("removeSignAction").setEnabled(!list.isEmpty());
+            } else {
+                actionsWithCandidateButton.getAction("removeSignAction").setEnabled(false);
+            }
         }
     }
 
