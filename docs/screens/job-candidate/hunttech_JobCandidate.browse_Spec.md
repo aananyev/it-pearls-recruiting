@@ -74,6 +74,7 @@ select e from hunttech_JobCandidate e order by e.secondName, e.firstName
 | `rating` | `iteractionList.rating` (через `interactionService`) |
 | `lastIteraction` | `iteractionList` (date, vacancy, comment, recrutier) |
 | `resume` | отдельный запрос `CandidateCV` по candidate |
+| `fullName` (реестр `JobCandidateReestr`) | `fullName`, `telegramName`, `email` + отдельный load `JobCandidateSignIcon` (view `jobCandidateSignIcon-view`) |
 | `personPosition` | `personPosition`, `positionList` |
 | `detailsGenerator` | полная карточка через фрагмент + доп. loaders |
 
@@ -233,12 +234,17 @@ layout (expand=jobCandidatesTable)
 - Карточка таблицы (`candidate-table-card`) с отдельным подвалом `c-table-bottom-bar` (высота 42px, фон `#f8fafc`, верхняя граница `#e2e8f0`).
 - Полная изоляция от области строк и горизонтального скроллбара, исключающая перекрытие данных.
 
+### 7.5 Колонка «Кандидат» реестра (`JobCandidateReestr`)
+- ФИО + контакт (telegram/email) выводятся с выравниванием вправо (`text-align: right`).
+- Справа в ячейке — метки `SignIcons` (связь `JobCandidateSignIcon`): `Label.setIcon(iconName)` + `pic-center-large-<iconColor>`, tooltip `titleDescription`/`titleRu`; до 4 иконок + «+N»; `order by createTs`; per-row load `cacheable(true)` (N+1, см. [JobCandidate.md](../../entities/job-candidate/JobCandidate.md) §3.4). Подробно: [JobCandidateTestScreens_Spec.md](../../ui/JobCandidateTestScreens_Spec.md) → «Эскиз 1 & Базовый».
+
 ---
 
 ## История изменений
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-18 | Реестр `JobCandidateReestr`: колонка «Кандидат» — ФИО/контакт вправо + метки `SignIcons` справа (до 4 + «+N», `order by createTs`, per-row cacheable); добавлен §7.5 |
 | 2026-08-16 | Обновлен дизайн JobCandidateTestBrowse: удален избыточный заголовок реестра, стилизованы кнопки тулбара, изолирован rowsCount, настроены светлые цвета шапки сайдбара и бесшовный блок активности |
 | 2026-08-16 | В кнопку «Действия» добавлены действия показа списка резюме и списка взаимодействий |
 | 2026-07-21 | Исправлено открытие раздела «Кандидаты»: пакетный кеш сотрудников явно загружает `workStatus.inStaff`, а генератор статуса безопасно обрабатывает null и detached-сущности |

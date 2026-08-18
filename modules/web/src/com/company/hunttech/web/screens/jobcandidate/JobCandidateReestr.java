@@ -72,7 +72,7 @@ import java.util.UUID;
 public class JobCandidateReestr extends StandardLookup<JobCandidate> {
 
     private static final String QUERY_GET_JOB_CANDIDATE_SIGN_ICONS =
-            "select e from hunttech_JobCandidateSignIcon e where e.jobCandidate = :jobCandidate";
+            "select e from hunttech_JobCandidateSignIcon e where e.jobCandidate = :jobCandidate order by e.createTs";
 
     /* =========================================================================
      * Инъекции компонентов UI и сервисов
@@ -275,6 +275,36 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
 
         // Колонка 3: Кандидат (ФИО + контакт, выравнивание вправо; справа — метки пользователя)
         candidatesTable.addGeneratedColumn("fullName", candidate -> {
+            String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
+            String sub = candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() :
+                    (candidate.getEmail() != null ? candidate.getEmail() : "");
+            String textHtml = "<div style='text-align: right;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
+                    (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>";
+
+            // Метки (SignIcons), присвоенные кандидату, — в правой части поля
+            List<JobCandidateSignIcon> signIcons = dataManager.load(JobCandidateSignIcon.class)
+                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
+                    .parameter("jobCandidate", candidate)
+                    .view("jobCandidateSignIcon-view")
+                    .cacheable(true)
+                    .list();
+            List<SignIcons> icons = new ArrayList<>();
+            for (JobCandidateSignIcon jcsi : signIcons) {
+                if (jcsi.getSignIcon() != null) {
+                    icons.add(jcsi.getSignIcon());
+                }
+            }
+
+            // Пустое состояние: только текст, выровненный вправо (без HBox-обёртки и кластера)
+            if (icons.isEmpty()) {
+                Label<String> plain = uiComponents.create(Label.NAME);
+                plain.setHtmlEnabled(true);
+                plain.setWidth("100%");
+                plain.setAlignment(Component.Alignment.MIDDLE_CENTER);
+                plain.setValue(textHtml);
+                return plain;
+            }
+
             HBoxLayout box = uiComponents.create(HBoxLayout.NAME);
             box.setWidth("100%");
             box.setSpacing(true);
@@ -283,39 +313,41 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             lbl.setHtmlEnabled(true);
             lbl.setWidth("100%");
             lbl.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
-            String sub = candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() :
-                    (candidate.getEmail() != null ? candidate.getEmail() : "");
-            lbl.setValue("<div style='text-align: right;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
-                    (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>");
+            lbl.setValue(textHtml);
             box.add(lbl);
             box.setExpandRatio(lbl, 1f);
 
-            // Метки (SignIcons), присвоенные кандидату, — в правой части поля
-            List<JobCandidateSignIcon> signIcons = dataManager.load(JobCandidateSignIcon.class)
-                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
-                    .parameter("jobCandidate", candidate)
-                    .view("jobCandidateSignIcon-view")
-                    .list();
-            for (JobCandidateSignIcon jcsi : signIcons) {
-                if (jcsi.getSignIcon() == null) {
+            // Метки: до 4 иконок, при превышении — компактный «+N» (паттерн колонки mainSkills)
+            int shown = 0;
+            int total = icons.size();
+            for (SignIcons icon : icons) {
+                if (icon.getIconName() == null) {
                     continue;
                 }
+                if (shown >= 4) {
+                    Label moreLabel = uiComponents.create(Label.NAME);
+                    moreLabel.setHtmlEnabled(true);
+                    moreLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
+                    moreLabel.setValue("<span style='font-size: 10px; color: #7f8c8d; align-self: center;'>+" + (total - shown) + "</span>");
+                    box.add(moreLabel);
+                    break;
+                }
                 Label iconLabel = uiComponents.create(Label.class);
-                iconLabel.setIcon(jcsi.getSignIcon().getIconName());
+                iconLabel.setIcon(icon.getIconName());
                 iconLabel.setAlignment(Component.Alignment.MIDDLE_CENTER);
-                String desc = jcsi.getSignIcon().getTitleDescription() != null
-                        ? jcsi.getSignIcon().getTitleDescription() : jcsi.getSignIcon().getTitleRu();
+                String desc = icon.getTitleDescription() != null
+                        ? icon.getTitleDescription() : icon.getTitleRu();
                 if (desc != null && !desc.trim().isEmpty()) {
                     iconLabel.setDescription(desc);
                 }
-                String color = jcsi.getSignIcon().getIconColor();
+                String color = icon.getIconColor();
                 if (color != null && !color.trim().isEmpty()) {
                     color = color.trim();
                     injectColorCss(color);
                     iconLabel.setStyleName("pic-center-large-" + color);
                 }
                 box.add(iconLabel);
+                shown++;
             }
             return box;
         });
@@ -521,10 +553,16 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 .show();
     }
 
+    /** Уже инъектированные цвета меток (дедупликация CSS-правил на 200+ строк). */
+    private static final Set<String> INJECTED_COLORS = new HashSet<>();
+
     /**
      * Инъекция CSS-правила цвета метки (иконка font-icon в цвете iconColor).
      */
     private void injectColorCss(String color) {
+        if (!INJECTED_COLORS.add(color)) {
+            return;
+        }
         com.vaadin.server.Page.Styles styles = com.vaadin.server.Page.getCurrent().getStyles();
         String style = String.format(
                 ".pic-center-large-%s {" +
