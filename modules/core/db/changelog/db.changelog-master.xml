@@ -110,4 +110,8 @@
     <include file="260820-2-addTelegramToSecUser.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- SmartOpenPositionIngestService: AI-функция умного парсинга описания вакансии и проекта в JSON. -->
+    <include file="260820-3-addSmartVacancyParseAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
