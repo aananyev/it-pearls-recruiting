@@ -112,8 +112,6 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private MessageBundle messageBundle;
     @Inject
-    private RichTextArea cvResomandation;
-    @Inject
     private RichTextArea letterRecommendation;
     @Inject
     private ParseCVService parseCVService;
@@ -314,7 +312,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     public void navigateCvRecommendations() {
-        navigateToSection(candidateCvCvNavigation, candidateCvRecommendationNav, cvResomandation::focus);
+        navigateToSection(candidateCvCvNavigation, candidateCvTextNav, candidateCVRichTextArea::focus);
     }
 
     public void navigateLetterTemplate() {
@@ -757,14 +755,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     private void setCVRecommendation() {
-        String text = "<ol>" +
-                "<li>Включите в резюме только самые ключевые задачи, функциональные обязанности и достижения. Не используйте закрученных словооборотов, составляйте описание тезисно и лаконично.</li>" +
-                "<li>Обязательно указывайте ваши успехи (достижения) для каждого места работы. Они должны быть конкретны, измеримы и соответствовать должности.</li>" +
-                "<li>Если вы работали на разных проектах, объедините информацию под одним названием «Проектная деятельность», а в описании можете расписать проекты подробнее.</li>" +
-                "<li>Указанные в резюме профессиональные и личностные компетенции будут являться словами-маркерами, по которым будущий работодатель сможет вас быстро идентифицировать и соотнести с должностью.</li>" +
-                "</ol>";
-
-        cvResomandation.setValue(text);
+        // Текстовый блок рекомендаций удален из интерфейса по требованию пользователя
     }
 
     private void setLetterRecommendation() {
