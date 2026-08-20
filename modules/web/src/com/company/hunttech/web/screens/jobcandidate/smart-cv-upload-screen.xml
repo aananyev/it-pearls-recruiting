@@ -22,7 +22,7 @@
                     <label value="1. ВЫБЕРИТЕ ФАЙЛ РЕЗЮМЕ ИЛИ ВСТАВЬТЕ ТЕКСТ" stylename="label-nav-title job-candidate-section-title"/>
                     
                     <tabSheet id="inputTabSheet" width="100%">
-                        <!-- Вкладка загрузки файла -->
+                        <!-- Вкладка 1: Загрузка файла -->
                         <tab id="fileTab" caption="Загрузка файла" icon="CLOUD_UPLOAD">
                             <vbox spacing="true" width="100%" margin="true,false,false,false">
                                 <label value="Перетащите файл резюме в эту область или нажмите кнопку загрузки:" stylename="edit-help"/>
@@ -37,7 +37,7 @@
                             </vbox>
                         </tab>
                         
-                        <!-- Вкладка ввода / вставки текста резюме -->
+                        <!-- Вкладка 2: Вставка текста -->
                         <tab id="textTab" caption="Вставка текста" icon="FILE_TEXT_O">
                             <vbox spacing="true" width="100%" margin="true,false,false,false">
                                 <label value="Вставьте текст резюме из буфера обмена (мессенджер, почта, документ):" stylename="edit-help"/>
@@ -54,6 +54,27 @@
                                             icon="ERASER"
                                             stylename="secondary candidate-btn"/>
                                 </hbox>
+                            </vbox>
+                        </tab>
+
+                        <!-- Вкладка 3: Загрузка по ссылке из интернета -->
+                        <tab id="urlTab" caption="Загрузка по ссылке" icon="GLOBE">
+                            <vbox spacing="true" width="100%" margin="true,false,false,false">
+                                <label value="Укажите интернет-ссылку на резюме или профиль кандидата (hh.ru, Хабр Карьера, LinkedIn, GitHub, сайт):" stylename="edit-help"/>
+                                <hbox spacing="true" width="100%" expand="urlField">
+                                    <textField id="urlField"
+                                               width="100%"
+                                               inputPrompt="https://hh.ru/resume/... или https://career.habr.com/..."/>
+                                    <button id="loadFromUrlBtn"
+                                            caption="Загрузить по ссылке"
+                                            icon="font-icon:DOWNLOAD"
+                                            stylename="primary candidate-btn candidate-smartload-btn"/>
+                                    <button id="clearUrlBtn"
+                                            caption="Очистить"
+                                            icon="ERASER"
+                                            stylename="secondary candidate-btn"/>
+                                </hbox>
+                                <label value="Поддерживаются публичные веб-страницы резюме и профилей в интернете." stylename="edit-help" css="font-size: 11px; color: #64748b;"/>
                             </vbox>
                         </tab>
                     </tabSheet>

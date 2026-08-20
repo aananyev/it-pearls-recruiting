@@ -84,6 +84,13 @@ public class SmartOpenPositionUploadScreen extends Screen {
     private Button clearTextBtn;
 
     @Inject
+    private com.haulmont.cuba.gui.components.TextField<String> urlField;
+    @Inject
+    private Button loadFromUrlBtn;
+    @Inject
+    private Button clearUrlBtn;
+
+    @Inject
     private SmartOpenPositionIngestService smartOpenPositionIngestService;
     @Inject
     private BackgroundWorker backgroundWorker;
@@ -145,8 +152,101 @@ public class SmartOpenPositionUploadScreen extends Screen {
             statusLabel.setValue("Поле текста очищено");
         });
 
+        if (clearUrlBtn != null) {
+            clearUrlBtn.addClickListener(e -> {
+                if (urlField != null) urlField.setValue("");
+                statusLabel.setValue("Поле ссылки очищено");
+            });
+        }
+
+        if (loadFromUrlBtn != null) {
+            loadFromUrlBtn.addClickListener(e -> {
+                String url = urlField != null ? urlField.getValue() : null;
+                if (url == null || url.trim().isEmpty()) {
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption("Укажите ссылку")
+                            .withDescription("Пожалуйста, введите интернет-ссылку на вакансию")
+                            .show();
+                    return;
+                }
+                statusLabel.setValue("Загрузка страницы по ссылке и AI-анализ...");
+                progressBar.setVisible(true);
+                runAsyncUrlAnalysis(url.trim());
+            });
+        }
+
         saveNewPositionBtn.addClickListener(e -> onSaveNewPositionClick());
         cancelBtn.addClickListener(e -> close(StandardOutcome.CLOSE));
+    }
+
+    private void runAsyncUrlAnalysis(String urlString) {
+        BackgroundTask<Integer, SmartOpenPositionParsedData> task = new BackgroundTask<Integer, SmartOpenPositionParsedData>(120, this) {
+            @Override
+            public SmartOpenPositionParsedData run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
+                String rawText = fetchTextFromUrl(urlString);
+                if (rawText == null || rawText.trim().isEmpty()) {
+                    throw new IllegalStateException("Не удалось извлечь текст по указанной ссылке: " + urlString);
+                }
+                return smartOpenPositionIngestService.parseVacancyText(rawText);
+            }
+
+            @Override
+            public void done(SmartOpenPositionParsedData result) {
+                progressBar.setVisible(false);
+                displayAnalysisResult(result);
+            }
+
+            @Override
+            public boolean handleException(Exception ex) {
+                progressBar.setVisible(false);
+                statusLabel.setValue("Ошибка загрузки по ссылке: " + ex.getMessage());
+                log.error("Ошибка при загрузке вакансии по URL", ex);
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withCaption("Ошибка загрузки по ссылке")
+                        .withDescription(ex.getMessage())
+                        .show();
+                return true;
+            }
+        };
+
+        backgroundWorker.handle(task).execute();
+    }
+
+    private String fetchTextFromUrl(String urlString) throws Exception {
+        if (urlString == null || urlString.trim().isEmpty()) return null;
+        String cleanUrl = urlString.trim();
+        if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+            cleanUrl = "https://" + cleanUrl;
+        }
+
+        org.jsoup.nodes.Document doc = org.jsoup.Jsoup.connect(cleanUrl)
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                .header("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
+                .referrer("https://www.google.com")
+                .timeout(20000)
+                .followRedirects(true)
+                .get();
+
+        doc.select("script, style, noscript, svg, nav, footer, header, .cookie-banner, .advertisement").remove();
+
+        String title = doc.title();
+        String mainContent = "";
+        org.jsoup.nodes.Element contentEl = doc.selectFirst("[data-qa='vacancy-description'], [data-qa='resume-block-container'], main, article, .vacancy-section, .job-description, .content, #content, body");
+        if (contentEl != null) {
+            mainContent = contentEl.text();
+        } else if (doc.body() != null) {
+            mainContent = doc.body().text();
+        } else {
+            mainContent = doc.text();
+        }
+
+        StringBuilder result = new StringBuilder();
+        if (title != null && !title.isEmpty()) {
+            result.append(title).append("\n\n");
+        }
+        result.append(mainContent);
+        return result.toString();
     }
 
     private void runAsyncFileAnalysis(File file) {

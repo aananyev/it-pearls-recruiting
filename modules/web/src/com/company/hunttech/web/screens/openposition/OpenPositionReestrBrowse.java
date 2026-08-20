@@ -128,6 +128,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private Label<String> detailExperience;
     @Inject
+    private Label<String> detailGrade;
+    @Inject
     private Label<String> detailRemoteWork;
     @Inject
     private Label<String> detailOpenClose;
@@ -462,6 +464,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             if (detailSalaryTk != null) detailSalaryTk.setValue("—");
             if (detailSalaryIe != null) detailSalaryIe.setValue("—");
             detailExperience.setValue("—");
+            if (detailGrade != null) detailGrade.setValue("—");
             detailRemoteWork.setValue("—");
             detailOpenClose.setValue("—");
             detailNumberPosition.setValue("—");
@@ -486,8 +489,17 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             FileDescriptorImageHelper.setImageSource(projectLogoPic, fileLoader, logo, "icons/briefcase.png");
         }
 
-        // Заголовки
-        detailVacancyName.setValue(position.getVacansyName() != null ? position.getVacansyName() : "—");
+        // Заголовки: должность в заголовке, проект в подзаголовке
+        String posName = "Вакансия";
+        try {
+            if (position.getPositionType() != null && position.getPositionType().getPositionRuName() != null) {
+                posName = position.getPositionType().getPositionRuName();
+            } else if (position.getVacansyName() != null) {
+                posName = position.getVacansyName();
+            }
+        } catch (Exception ignored) {
+        }
+        detailVacancyName.setValue(posName);
 
         String prjName = "—";
         String compName = "—";
@@ -545,8 +557,21 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             }
         }
 
-        // Опыт
-        detailExperience.setValue(position.getWorkExperience() != null ? position.getWorkExperience().toString() + " лет" : "Не указан");
+        // Опыт работы
+        detailExperience.setValue(position.getWorkExperience() != null ? position.getWorkExperience().toString() + " г." : "Не указан");
+
+        // Грейд
+        String gradeName = "Не указан";
+        try {
+            if (position.getGrade() != null && position.getGrade().getGradeName() != null) {
+                gradeName = position.getGrade().getGradeName();
+            }
+        } catch (Exception ignored) {
+        }
+        if (detailGrade != null) {
+            detailGrade.setValue(gradeName);
+        }
+
         detailRemoteWork.setValue(remoteStr.isEmpty() ? "Офис / Удаленно" : remoteStr);
         detailOpenClose.setValue(Boolean.TRUE.equals(position.getOpenClose()) ? "Закрыта" : "Открыта");
         detailNumberPosition.setValue(position.getNumberPosition() != null ? position.getNumberPosition() + " шт." : "1 шт.");

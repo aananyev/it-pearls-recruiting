@@ -103,6 +103,13 @@ public class SmartCvUploadScreen extends Screen {
     private Button clearTextBtn;
 
     @Inject
+    private com.haulmont.cuba.gui.components.TextField<String> urlField;
+    @Inject
+    private Button loadFromUrlBtn;
+    @Inject
+    private Button clearUrlBtn;
+
+    @Inject
     private SmartCvIngestService smartCvIngestService;
     @Inject
     private BackgroundWorker backgroundWorker;
@@ -128,6 +135,13 @@ public class SmartCvUploadScreen extends Screen {
         cvRichTextArea.setValue("");
     }
 
+    @Subscribe("clearUrlBtn")
+    public void onClearUrlBtnClick(Button.ClickEvent event) {
+        if (urlField != null) {
+            urlField.setValue("");
+        }
+    }
+
     @Subscribe("analyzeTextBtn")
     public void onAnalyzeTextBtnClick(Button.ClickEvent event) {
         String text = cvRichTextArea.getValue();
@@ -141,6 +155,99 @@ public class SmartCvUploadScreen extends Screen {
         currentFileDescriptor = null;
         currentFileBytes = null;
         startAnalysis(text);
+    }
+
+    @Subscribe("loadFromUrlBtn")
+    public void onLoadFromUrlBtnClick(Button.ClickEvent event) {
+        String url = urlField != null ? urlField.getValue() : null;
+        if (url == null || url.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Укажите ссылку")
+                    .withDescription("Пожалуйста, введите интернет-ссылку на резюме кандидата")
+                    .show();
+            return;
+        }
+        currentFileDescriptor = null;
+        currentFileBytes = null;
+        startUrlAnalysis(url.trim());
+    }
+
+    private void startUrlAnalysis(String urlString) {
+        progressBar.setVisible(true);
+        statusLabel.setValue("Загрузка страницы по ссылке и AI-анализ...");
+        previewCard.setVisible(false);
+        duplicateBox.setVisible(false);
+        missingFieldsBox.setVisible(false);
+        saveNewCandidateBtn.setVisible(false);
+        attachDuplicateBtn.setVisible(false);
+        createNewAnywayBtn.setVisible(false);
+
+        BackgroundTask<Integer, String> task =
+                new BackgroundTask<Integer, String>(120, this) {
+                    @Override
+                    public String run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
+                        String rawText = fetchTextFromUrl(urlString);
+                        if (rawText == null || rawText.trim().isEmpty()) {
+                            throw new IllegalStateException("Не удалось извлечь текст по указанной ссылке: " + urlString);
+                        }
+                        return rawText;
+                    }
+
+                    @Override
+                    public void done(String rawText) {
+                        startAnalysis(rawText);
+                    }
+
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        progressBar.setVisible(false);
+                        statusLabel.setValue("Ошибка при загрузке по ссылке: " + ex.getMessage());
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка загрузки")
+                                .withDescription(ex.getMessage())
+                                .show();
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(task).execute();
+    }
+
+    private String fetchTextFromUrl(String urlString) throws Exception {
+        if (urlString == null || urlString.trim().isEmpty()) return null;
+        String cleanUrl = urlString.trim();
+        if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+            cleanUrl = "https://" + cleanUrl;
+        }
+
+        org.jsoup.nodes.Document doc = org.jsoup.Jsoup.connect(cleanUrl)
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                .header("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
+                .referrer("https://www.google.com")
+                .timeout(20000)
+                .followRedirects(true)
+                .get();
+
+        doc.select("script, style, noscript, svg, nav, footer, header, .cookie-banner, .advertisement").remove();
+
+        String title = doc.title();
+        String mainContent = "";
+        org.jsoup.nodes.Element contentEl = doc.selectFirst("[data-qa='resume-block-container'], [data-qa='vacancy-description'], main, article, .resume-section, .content, #content, body");
+        if (contentEl != null) {
+            mainContent = contentEl.text();
+        } else if (doc.body() != null) {
+            mainContent = doc.body().text();
+        } else {
+            mainContent = doc.text();
+        }
+
+        StringBuilder result = new StringBuilder();
+        if (title != null && !title.isEmpty()) {
+            result.append(title).append("\n\n");
+        }
+        result.append(mainContent);
+        return result.toString();
     }
 
     @Subscribe("uploadField")
