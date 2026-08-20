@@ -48,30 +48,8 @@
     <dialogMode height="700" width="1100"/>
 
     <!-- Корневой контейнер разметки экрана с базовыми стилями темы Edit-форм и правильными отступами -->
-    <layout expand="splitMainLayout" spacing="true" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
-        <!-- Верхний тулбар управления в фирменном дизайне Edit-форм (edit-toolbar) -->
-        <hbox id="topToolbar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar" expand="filter">
-            <!-- Левый заголовочный блок с названием концепта и описанием (ровно по ширине сайдбара 312px) -->
-            <vbox id="toolbarTitleBox" width="312px" spacing="false" align="MIDDLE_LEFT">
-                <label value="Реестр кандидатов" stylename="edit-toolbar-title"/>
-                <label value="Реестр кандидатов с профильным сайдбаром" stylename="edit-toolbar-description"/>
-            </vbox>
-
-            <!-- Стандартный фильтр поиска CUBA Platform по ширине таблицы кандидатов -->
-            <filter id="filter"
-                    applyTo="candidatesTable"
-                    dataLoader="jobCandidatesDl"
-                    defaultMode="generic"
-                    width="100%"
-                    stylename="candidate-generic-filter">
-                <properties include=".*"
-                            exclude="id"
-                            excludeRecursively="true"
-                            excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,fileImageFace,priorityContact"/>
-            </filter>
-        </hbox>
-
-        <!-- Двухпанельная разметка Split-View: Левый профильный сайдбар Edit-формы (312px) + Просторная рабочая область справа -->
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+        <!-- Двухпанельная разметка Split-View: Левый профильный сайдбар Edit-формы (312px) от самого верха до низа + Просторная рабочая область справа -->
         <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="candidatesTableBox" stylename="job-candidate-main-layout edit-screen-layout">
             
             <!-- ЛЕВАЯ ПАНЕЛЬ (САЙДБАР): Выдержана в фирменном стиле Edit-форм (job-candidate-sidebar edit-sidebar) -->
@@ -159,6 +137,19 @@
             <!-- ПРАВАЯ ПАНЕЛЬ: Рабочая область реестра (edit-workspace) -->
             <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace" expand="candidatesTableCard">
                 
+                <!-- Стандартный фильтр поиска CUBA Platform по ширине таблицы кандидатов -->
+                <filter id="filter"
+                        applyTo="candidatesTable"
+                        dataLoader="jobCandidatesDl"
+                        defaultMode="generic"
+                        width="100%"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"
+                                exclude="id"
+                                excludeRecursively="true"
+                                excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,fileImageFace,priorityContact"/>
+                </filter>
+
                 <!-- Верхняя полоса быстрых фильтров, счетчиков и выпадающего меню действий -->
                 <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="statusFilterButtons">
                     <!-- Группа создания, редактирования, удаления, быстрой загрузки и фильтров-пилюль -->
