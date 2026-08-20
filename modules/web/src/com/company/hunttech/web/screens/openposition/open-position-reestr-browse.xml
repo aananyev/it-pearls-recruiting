@@ -276,7 +276,7 @@
                                   editorEnabled="false"
                                   headerVisible="true"
                                   contextMenuEnabled="false"
-                                  bodyRowHeight="60px"
+                                  bodyRowHeight="44px"
                                   textSelectionEnabled="false"
                                   hierarchyProperty="parentOpenPosition"
                                   selectionMode="SINGLE"
@@ -290,53 +290,15 @@
                             <action id="refresh" type="refresh"/>
                             <action id="list" type="listPrintForm"/>
                         </actions>
-                        <columns exclude="remoteWork,commandCandidate,salaryMax,cityPosition,numberPosition,workExperience,commandExperience,comment,shortDescription,templateLetter,needLetter,exercise,needExercise,skillsList,candidates,paymentsType,typeCompanyComission,typeSalaryOfResearcher,typeSalaryOfRecrutier,useTaxNDFL,internalProject,percentComissionOfCompany,percentSalaryOfResearcher,percentSalaryOfRecrutier,parentOpenPosition">
-                            <column id="folder" maximumWidth="100px" resizable="true" collapsible="false" width="100px" caption="msg://msgFolder">
-                                <componentRenderer/>
-                            </column>
-                            <column id="icon" resizable="true" collapsible="true" collapsed="true" width="70px" minimumWidth="35px" caption="msg://msgPriority"/>
-                            <column id="rating" minimumWidth="85px" maximumWidth="85px" caption="msg://msgRating">
-                                <componentRenderer/>
-                            </column>
-                            <column id="companyLogoColumn" resizable="true" collapsible="true" collapsed="true" caption="msg://msgCompany" width="70px" minimumWidth="70px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="projectLogoColumn" resizable="true" collapsible="true" collapsed="false" caption="msg://msgProject" width="70px" minimumWidth="70px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="lastOpenCloseColumn" collapsible="true" collapsed="true" sortable="true" caption="msg://msgLastOpenCloseColumn" resizable="true" maximumWidth="70px" minimumWidth="55px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="vacansyID" collapsible="true" property="vacansyID" width="80px" maximumWidth="80px" caption="msg://msgID">
-                                <componentRenderer/>
-                            </column>
-                            <column id="vacansyName" collapsible="false" property="vacansyName" resizable="true" caption="msg://msgVacancy">
-                                <componentRenderer/>
-                            </column>
-                            <column id="positionType" collapsible="true" collapsed="true" resizable="true" property="positionType" maximumWidth="300px" caption="msg://msgPositionType">
-                                <componentRenderer/>
-                            </column>
-                            <column id="projectName" collapsible="true" collapsed="true" resizable="true" property="projectName" maximumWidth="250px" caption="msg://msgProjectName">
-                                <componentRenderer/>
-                            </column>
-                            <column id="cityPositionList" collapsed="true" collapsible="true" caption="msg://msgCity" minimumWidth="60px" width="120px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="workExperience" width="65px" caption="msg://msgWorkExperience">
-                                <componentRenderer/>
-                            </column>
-                            <column id="salaryMin" sortable="true" property="salaryMin" caption="msg://msgSalary" width="130px" collapsed="false">
-                                <componentRenderer/>
-                            </column>
-                            <column id="countOpenPositions" caption="msg://msgCountOfPersonel" width="60px" collapsed="true">
-                                <componentRenderer/>
-                            </column>
-                            <column id="openClose" property="openClose" collapsed="true" caption="msg://msgStatus" width="100px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="actions" width="100px" collapsible="false" caption="msg://msgActions">
-                                <componentRenderer/>
-                            </column>
+                        <columns exclude="remoteWork,commandCandidate,salaryMax,cityPosition,commandExperience,comment,shortDescription,templateLetter,needLetter,exercise,needExercise,skillsList,candidates,paymentsType,typeCompanyComission,typeSalaryOfResearcher,typeSalaryOfRecrutier,useTaxNDFL,internalProject,percentComissionOfCompany,percentSalaryOfResearcher,percentSalaryOfRecrutier,parentOpenPosition">
+                            <column id="vacansyID" property="vacansyID" width="80px" maximumWidth="80px" caption="msg://msgID"/>
+                            <column id="vacansyName" property="vacansyName" resizable="true" caption="msg://msgVacancy"/>
+                            <column id="projectName" property="projectName" resizable="true" maximumWidth="250px" caption="msg://msgProjectName"/>
+                            <column id="positionType" property="positionType" resizable="true" maximumWidth="300px" caption="msg://msgPositionType"/>
+                            <column id="salaryMin" property="salaryMin" sortable="true" caption="msg://msgSalary" width="130px"/>
+                            <column id="workExperience" property="workExperience" width="90px" caption="msg://msgWorkExperience"/>
+                            <column id="numberPosition" property="numberPosition" caption="msg://msgCountOfPersonel" width="90px"/>
+                            <column id="openClose" property="openClose" caption="msg://msgStatus" width="100px"/>
                         </columns>
                         <rowsCount/>
                     </treeDataGrid>
