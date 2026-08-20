@@ -1,111 +1,111 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
     <item screen="hunttech_ApplicationSetup.browse" caption="mainMsg://menu_config.hunttech_ApplicationSetup.browse"
-          insertBefore="sec$User.browse" icon="ADJUST"/>
+          insertBefore="sec$User.browse" icon="COGS"/>
     <separator insertBefore="sec$User.browse"/>
     <menu id="application-calendars" icon="CALENDAR" insertBefore="application-hunting">
-        <item screen="hunttech_Interviewcalendar" icon="CALENDAR"/>
-        <item screen="hunttech_WeekInterviewCalendar" icon="CALENDAR"/>
+        <item screen="hunttech_Interviewcalendar" caption="Календарь интервью" icon="CALENDAR"/>
+        <item screen="hunttech_WeekInterviewCalendar" caption="Интервью на неделю" icon="CALENDAR_CHECK_O"/>
     </menu>
     <menu id="application-hrmasters" icon="BALANCE_SCALE" insertAfter="application-calendars">
         <item screen="hunttech_OpenPositionMaster.browse"
-              caption="mainMsg://menu_config.hunttech_OpenPositionMaster.browse" icon="PENCIL"/>
+              caption="mainMsg://menu_config.hunttech_OpenPositionMaster.browse" icon="PENCIL_SQUARE_O"/>
         <item screen="hunttech_RotatingCandidate.browse"
-              caption="mainMsg://menu_config.hunttech_RotatingCandidate.browse" icon="RECYCLE"/>
+              caption="mainMsg://menu_config.hunttech_RotatingCandidate.browse" icon="RANDOM"/>
         <item screen="hunttech_SkillsFilterJobCandidate.browse"
-              caption="mainMsg://menu_config.hunttech_SkillsFilterJobCandidate.browse" icon="SEARCH"/>
+              caption="mainMsg://menu_config.hunttech_SkillsFilterJobCandidate.browse" icon="FILTER"/>
         <item screen="hunttech_PersonelReserve.browse" caption="mainMsg://menu_config.hunttech_PersonelReserve.browse"
-              icon="EXPEDITEDSSL"/>
+              icon="SHIELD"/>
         <item screen="hunttech_TetrisCandidates" caption="mainMsg://menu_config.hunttech_TetrisCandidates"
-              icon="ROTATE_RIGHT"/>
-        <menu id="application-sending-messages" icon="font-icon:SEND">
+              icon="TH_LARGE"/>
+        <menu id="application-sending-messages" icon="SEND">
             <item screen="hunttech_InternalEmailerTemplate.browse"
-                  caption="mainMsg://menu_config.hunttech_InternalEmailer.browse" icon="ENVELOPE" openType="NEW_TAB"/>
+              caption="mainMsg://menu_config.hunttech_InternalEmailer.browse" icon="ENVELOPE" openType="NEW_TAB"/>
             <item screen="hunttech_InternalEmailTemplate.browse"
-                  caption="mainMsg://menu_config.hunttech_InternalEmailTemplate.browse" icon="ENVELOPE_SQUARE"/>
+              caption="mainMsg://menu_config.hunttech_InternalEmailTemplate.browse" icon="ENVELOPE_O"/>
             <item screen="hunttech_InternalEmailTemplateInteraction.browse"
-                  caption="mainMsg://menu_config.hunttech_InternalEmailTemplateInteraction.browse"
-                  icon="ENVELOPE_SQUARE"/>
+              caption="mainMsg://menu_config.hunttech_InternalEmailTemplateInteraction.browse"
+              icon="ENVELOPE_SQUARE"/>
         </menu>
     </menu>
     <menu id="application-outstaffing" icon="CUBES" insertAfter="application-hrmasters">
         <item screen="hunttech_OpenPositionOutstaff.browse" caption="mainMsg://msgOpenPositionOutstaff.browse"
-              icon="COMPASS"/>
+              icon="BRIEFCASE"/>
         <item screen="hunttech_LaborAgeementType.browse"
-              caption="mainMsg://menu_config.hunttech_LaborAgeementType.browse" icon="TEXT_WIDTH"/>
+              caption="mainMsg://menu_config.hunttech_LaborAgeementType.browse" icon="FILE_TEXT_O"/>
         <item screen="hunttech_LaborAgreement.browse" caption="mainMsg://menu_config.hunttech_LaborAgreement.browse"
-              icon="TEXT_HEIGHT"/>
-        <item screen="hunttech_OurCompany.browse" caption="mainMsg://msgOurCompany" icon="BUILDING_O"/>
+              icon="HANDSHAKE_O"/>
+        <item screen="hunttech_OurCompany.browse" caption="mainMsg://msgOurCompany" icon="BUILDING"/>
         <item screen="hunttech_Employee.browse" caption="mainMsg://menu_config.hunttech_Employee.browse"
-              icon="font-icon:CHILD"/>
+              icon="USERS"/>
     </menu>
     <menu id="application-recruiting" icon="COMPASS" insertAfter="application-outstaffing">
         <item screen="hunttech_OpenPositionRecruiting.browse" caption="mainMsg://msgOpenPositionRecruiting"
-              icon="COMPASS" openType="NEW_TAB"/>
+              icon="BRIEFCASE" openType="NEW_TAB"/>
     </menu>
     <menu id="massrecruitment" icon="GROUP" insertAfter="application-hrmasters">
         <item screen="hunttech_StaffCurrent.browse" caption="mainMsg://menu_config.hunttech_StaffCurrent.browse"
-              icon="font-icon:ADDRESS_BOOK_O"/>
+              icon="ADDRESS_BOOK_O"/>
         <item screen="hunttech_StaffingTable.browse" caption="mainMsg://menu_config.hunttech_StaffingTable.browse"
-              icon="GROUP"/>
+              icon="TABLE"/>
         <item screen="hunttech_ApplicationRecruitment.browse"
               caption="mainMsg://menu_config.hunttech_ApplicationRecruitment.browse" icon="FILE_TEXT"/>
-        <item screen="hunttech_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="BOOK"/>
+        <item screen="hunttech_ApplicationRecruitmentList.browse" caption="mainMsg://msgApplicationList" icon="LIST_ALT"/>
     </menu>
-    <menu id="application-hunting" icon="PRODUCT_HUNT" insertBefore="application-hadbook">
-        <item screen="hunttech_OpenPosition.browse" icon="COMPASS"/>
+    <menu id="application-hunting" icon="SEARCH" insertBefore="application-hadbook">
+        <item screen="hunttech_OpenPosition.browse" icon="BRIEFCASE"/>
         <item screen="hunttech_OpenPositionReestr.browse" caption="Реестр открытых вакансий" icon="TH_LIST"/>
         <item screen="hunttech_JobCandidate.browse" icon="USER"/>
         <item screen="hunttech_JobCandidateReestr.browse" caption="Реестр кандидатов" icon="TH_LIST"/>
-        <item screen="hunttech_CandidateCV.browse" icon="FILE_WORD_O"/>
-        <item screen="hunttech_IteractionList.browse" icon="REORDER"/>
+        <item screen="hunttech_CandidateCV.browse" icon="FILE_TEXT_O"/>
+        <item screen="hunttech_IteractionList.browse" icon="EXCHANGE"/>
     </menu>
     <menu id="application-project" icon="BUILDING" insertAfter="application-hunting">
-        <item screen="hunttech_Project.browse" icon="ARCHIVE"/>
+        <item screen="hunttech_Project.browse" icon="FOLDER_OPEN_O"/>
         <item screen="hunttech_Person.browse" icon="USER"/>
-        <item screen="hunttech_CompanyDepartament.browse" icon="GROUP"/>
+        <item screen="hunttech_CompanyDepartament.browse" icon="SITEMAP"/>
         <item screen="hunttech_Company.browse" icon="BUILDING"/>
         <item screen="hunttech_CompanyGroup.browse" icon="BUILDING_O"/>
     </menu>
-    <menu id="application-researching" icon="BOLT" insertAfter="application-project">
-        <item screen="hunttech_RecrutiesTasks.browse" icon="CLONE"/>
-        <item screen="hunttech_SubscribeCandidateAction.browse" icon="CLONE"/>
+    <menu id="application-researching" icon="SEARCH_PLUS" insertAfter="application-project">
+        <item screen="hunttech_RecrutiesTasks.browse" icon="TASKS"/>
+        <item screen="hunttech_SubscribeCandidateAction.browse" icon="USER_PLUS"/>
     </menu>
     <menu id="application-hadbook" icon="BOOK" insertAfter="application-researching">
-        <item screen="hunttech_Iteraction._tree.browse" icon="REFRESH_ACTION"/>
-        <item screen="hunttech_Specialisation.browse" icon="BULLSEYE"/>
+        <item screen="hunttech_Iteraction._tree.browse" icon="EXCHANGE"/>
+        <item screen="hunttech_Specialisation.browse" icon="GRADUATION_CAP"/>
         <item screen="hunttech_SkillTree.browse" icon="CODE_FORK"/>
-        <item screen="hunttech_Country.browse" icon="SUPPORT"/>
-        <item screen="hunttech_City.browse" icon="BANK"/>
-        <item screen="hunttech_Region.browse" icon="TENCENT_WEIBO"/>
-        <item screen="hunttech_Ownershup.browse" icon="icons/wf-user-group-button.png"/>
-        <item screen="hunttech_Position.browse" icon="OPENID"/>
-        <item screen="hunttech_FileType.browse" icon="FILE_TEXT_O"/>
+        <item screen="hunttech_Country.browse" icon="GLOBE"/>
+        <item screen="hunttech_City.browse" icon="MAP_MARKER"/>
+        <item screen="hunttech_Region.browse" icon="MAP_O"/>
+        <item screen="hunttech_Ownershup.browse" icon="TAGS"/>
+        <item screen="hunttech_Position.browse" icon="ID_CARD_O"/>
+        <item screen="hunttech_FileType.browse" icon="FILE_ARCHIVE_O"/>
         <item screen="hunttech_SocialNetworkType.browse" description="mainMsg://default.description"
-              icon="FACEBOOK_OFFICIAL"/>
+              icon="SHARE_ALT"/>
         <item screen="hunttech_Grade.browse" caption="mainMsg://menu_config.hunttech_Grade.browse"
-              icon="font-icon:LEVEL_UP"/>
-        <item screen="hunttech_Currency.browse" caption="mainMsg://menu_config.hunttech_Currency.browse" icon="DOLLAR"/>
+              icon="LEVEL_UP"/>
+        <item screen="hunttech_Currency.browse" caption="mainMsg://menu_config.hunttech_Currency.browse" icon="MONEY"/>
         <item screen="hunttech_OutstaffingRates.browse" caption="mainMsg://menu_config.hunttech_OutstaffingRates.browse"
               icon="RUBLE"/>
         <item screen="hunttech_EmployeeWorkStatus.browse"
-              caption="mainMsg://menu_config.hunttech_EmployeeWorkStatus.browse" icon="HOURGLASS_START"/>
+              caption="mainMsg://menu_config.hunttech_EmployeeWorkStatus.browse" icon="HOURGLASS_HALF"/>
         <item screen="hunttech_SignIcons.browse" caption="mainMsg://menu_config.hunttech_SignIcons.browse"
-              icon="FONTICONS"/>
+              icon="TAG"/>
     </menu>
-    <menu id="application-reports" icon="FILE_TEXT" insertAfter="application-hadbook">
+    <menu id="application-reports" icon="BAR_CHART" insertAfter="application-hadbook">
         <item bean="hunttech_MemoForCandidatesBean" beanMethod="runReport" caption="mainMsg://msgMemoForCandidates"
-              icon="COMMENT_O"/>
+              icon="PRINT"/>
         <item bean="hunttech_RunReportBean" beanMethod="runReport"
-              caption="mainMsg://menu-config.hunttech_RunReportBean.runReport" icon="USER"/>
+              caption="mainMsg://menu-config.hunttech_RunReportBean.runReport" icon="FILE_EXCEL_O"/>
         <item bean="hunttech_NumberInterviewsRecrutierRunReportBean" beanMethod="runReport"
               caption="mainMsg://menu-config.hunttech_NumberInterviewsRecrutierRunReportBean.runReport"
-              icon="ARROW_RIGHT"/>
+              icon="LINE_CHART"/>
         <item bean="hunttech_NumberInterviewsResearcherRunReportBean" beanMethod="runReport"
               caption="mainMsg://menu-config.hunttech_NumberInterviewsResearcherRunReportBean.runReport"
-              icon="ARROW_RIGHT"/>
+              icon="AREA_CHART"/>
     </menu>
-    <item screen="hunttech_CheckCandidate.browse" icon="CHECK" insertAfter="application-reports" openType="DIALOG"/>
+    <item screen="hunttech_CheckCandidate.browse" icon="CHECK_CIRCLE" insertAfter="application-reports" openType="DIALOG"/>
     <menu id="aiAdministration" caption="mainMsg://menu_config.aiAdministration" icon="MAGIC"
           insertAfter="administration">
         <item screen="hunttech_AdminAiDashboard"
@@ -113,16 +113,16 @@
         <item screen="hunttech_UserAiDashboard"
               caption="mainMsg://menu_config.hunttech_UserAiDashboard" icon="PIE_CHART"/>
         <item screen="hunttech_AiFunctionConfiguration.browse"
-              caption="mainMsg://menu_config.hunttech_AiFunctionConfiguration.browse" icon="MAGIC"/>
+              caption="mainMsg://menu_config.hunttech_AiFunctionConfiguration.browse" icon="SLIDERS"/>
         <item screen="hunttech_AiCallLog.browse"
               caption="mainMsg://menu_config.hunttech_AiCallLog.browse" icon="HISTORY"/>
         <item screen="hunttech_AdminAiConfiguration.browse"
-              caption="mainMsg://menu_config.hunttech_AdminAiConfiguration.browse" icon="LOCK"/>
+              caption="mainMsg://menu_config.hunttech_AdminAiConfiguration.browse" icon="KEY"/>
         <item screen="hunttech_UserAiFunctionOverride.browse"
-              caption="mainMsg://menu_config.hunttech_UserAiFunctionOverride.browse" icon="SLIDERS"/>
+              caption="mainMsg://menu_config.hunttech_UserAiFunctionOverride.browse" icon="ADJUST"/>
         <item screen="hunttech_VacancyPromptTemplate.browse"
               caption="mainMsg://menu_config.hunttech_VacancyPromptTemplate.browse" icon="FILE_TEXT_O"/>
         <item screen="hunttech_UserAiConfiguration.browse"
-              caption="mainMsg://menu_config.hunttech_UserAiConfiguration.browse" icon="KEY"/>
+              caption="mainMsg://menu_config.hunttech_UserAiConfiguration.browse" icon="USER_SECRET"/>
     </menu>
 </menu-config>
