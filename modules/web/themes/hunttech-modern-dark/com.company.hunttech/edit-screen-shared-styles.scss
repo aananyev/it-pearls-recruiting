@@ -760,4 +760,111 @@
       }
     }
   }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * Главное меню приложения (App Menubar, Main Menu, SideMenu)
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  .c-app-menubar,
+  .cuba-app-menubar,
+  .c-main-menu,
+  .v-menubar.c-app-menubar {
+    height: 42px !important;
+    min-height: 42px !important;
+    line-height: 42px !important;
+    border: none !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+
+    > .v-menubar-menuitem {
+      height: 34px !important;
+      min-height: 34px !important;
+      line-height: 34px !important;
+      padding: 0 12px !important;
+      margin: 0 2px !important;
+      border-radius: 6px !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.15px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      vertical-align: middle !important;
+      box-sizing: border-box !important;
+      transition: background 0.15s ease, color 0.15s ease !important;
+
+      .v-icon {
+        font-size: 14px !important;
+        line-height: 1 !important;
+        margin-right: 8px !important;
+        color: rgba($v-font-color, 0.72) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: color 0.15s ease, transform 0.15s ease !important;
+      }
+
+      .v-menubar-menuitem-caption {
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        vertical-align: middle !important;
+        display: inline-block !important;
+      }
+
+      .v-menubar-submenu-indicator {
+        margin-left: 6px !important;
+        opacity: 0.65 !important;
+        font-size: 11px !important;
+      }
+
+      &:hover:not(.v-menubar-menuitem-disabled),
+      &.v-menubar-menuitem-selected,
+      &.v-menubar-menuitem-highlight {
+        background: rgba($v-selection-color, 0.12) !important;
+        color: mix($v-font-color, $v-panel-background-color, 98%) !important;
+
+        .v-icon {
+          color: $v-selection-color !important;
+          transform: scale(1.08);
+        }
+      }
+    }
+  }
+
+  /* Боковое меню приложения SideMenu */
+  .c-sidemenu {
+    .v-side-menu-item {
+      border-radius: 6px !important;
+      margin: 2px 6px !important;
+      padding: 6px 12px !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      transition: background 0.15s ease, color 0.15s ease !important;
+
+      .v-icon {
+        font-size: 14px !important;
+        margin-right: 10px !important;
+        color: rgba($v-font-color, 0.7) !important;
+      }
+
+      &:hover {
+        background: rgba($v-selection-color, 0.08) !important;
+        color: mix($v-font-color, $v-panel-background-color, 95%) !important;
+
+        .v-icon {
+          color: $v-selection-color !important;
+        }
+      }
+
+      &.v-side-menu-item-selected {
+        background: rgba($v-selection-color, 0.16) !important;
+        color: mix($v-font-color, $v-panel-background-color, 100%) !important;
+        font-weight: 600 !important;
+
+        .v-icon {
+          color: $v-selection-color !important;
+        }
+      }
+    }
+  }
 }
