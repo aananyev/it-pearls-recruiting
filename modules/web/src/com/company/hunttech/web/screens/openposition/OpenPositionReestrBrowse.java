@@ -56,6 +56,10 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     private UserSession userSession;
     @Inject
     private FileLoader fileLoader;
+    @Inject
+    private com.haulmont.cuba.gui.UiComponents uiComponents;
+    @Inject
+    private com.haulmont.cuba.core.global.EntityStates entityStates;
 
     @Inject
     private GroupTable<OpenPosition> openPositionsTable;
@@ -121,9 +125,154 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
     @Subscribe
     public void onInit(Screen.InitEvent event) {
+        initTableColumns();
         initToolbarActions();
         initFilterPopupActions();
         initSidebarButtons();
+    }
+
+    private void initTableColumns() {
+        if (openPositionsTable == null) return;
+
+        // Колонка 1: Логотип проекта/компании (36px oval)
+        openPositionsTable.addGeneratedColumn("logo", position -> {
+            WebOvaFallbackImage logoImg = uiComponents.create(WebOvaFallbackImage.class);
+            logoImg.setWidth("36px");
+            logoImg.setHeight("36px");
+            logoImg.setOvalWidth("36px");
+            logoImg.setOvalHeight("36px");
+            logoImg.setFallbackThemePath("icons/briefcase.png");
+            logoImg.setScaleMode(com.haulmont.cuba.gui.components.Image.ScaleMode.SCALE_DOWN);
+            FileDescriptor logo = null;
+            try {
+                if (position.getProjectName() != null && entityStates.isLoaded(position.getProjectName(), "projectLogo")) {
+                    logo = position.getProjectName().getProjectLogo();
+                }
+            } catch (Exception ignored) {
+            }
+            FileDescriptorImageHelper.setImageSource(logoImg, fileLoader, logo, "icons/briefcase.png");
+            return logoImg;
+        });
+
+        // Колонка 2: Название вакансии (с подзаголовком ID / Опыт)
+        openPositionsTable.addGeneratedColumn("vacansyName", position -> {
+            String vName = position.getVacansyName() != null ? position.getVacansyName() : "Без названия";
+            String sub = position.getVacansyID() != null ? "ID: " + position.getVacansyID() : "";
+            if (position.getWorkExperience() != null) {
+                sub += (!sub.isEmpty() ? " • " : "") + "Опыт: " + position.getWorkExperience() + " г.";
+            }
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setAlignment(com.haulmont.cuba.gui.components.Component.Alignment.MIDDLE_LEFT);
+            lbl.setValue("<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + vName + "</div>" +
+                    (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>");
+            return lbl;
+        });
+
+        // Колонка 3: Проект и компания
+        openPositionsTable.addGeneratedColumn("projectName", position -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String pName = "—";
+            String comp = "—";
+            try {
+                if (position.getProjectName() != null) {
+                    pName = position.getProjectName().getProjectName() != null ? position.getProjectName().getProjectName() : "—";
+                    if (position.getProjectName().getProjectDepartment() != null
+                            && position.getProjectName().getProjectDepartment().getCompanyName() != null) {
+                        comp = position.getProjectName().getProjectDepartment().getCompanyName().getComanyName();
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+            lbl.setValue("<div style='text-align: left;'><div style='font-size: 12px; color: #34495e; font-weight: 500;'>" + pName + "</div>" +
+                    (comp != null && !comp.equals("—") ? "<div style='font-size: 10.5px; color: #94a3b8;'>" + comp + "</div>" : "") + "</div>");
+            return lbl;
+        });
+
+        // Колонка 4: Специализация
+        openPositionsTable.addGeneratedColumn("positionType", position -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String pos = "Специалист";
+            try {
+                if (position.getPositionType() != null && position.getPositionType().getPositionRuName() != null) {
+                    pos = position.getPositionType().getPositionRuName();
+                }
+            } catch (Exception ignored) {
+            }
+            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + pos + "</span>");
+            return lbl;
+        });
+
+        // Колонка 5: Зарплата
+        openPositionsTable.addGeneratedColumn("salary", position -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            if (position.getSalaryMin() != null || position.getSalaryMax() != null) {
+                StringBuilder sb = new StringBuilder();
+                if (position.getSalaryMin() != null) {
+                    sb.append(SALARY_FORMAT.format(position.getSalaryMin())).append(" ₽");
+                }
+                if (position.getSalaryMax() != null) {
+                    if (sb.length() > 0) sb.append(" — ");
+                    sb.append(SALARY_FORMAT.format(position.getSalaryMax())).append(" ₽");
+                }
+                lbl.setValue("<span style='font-size: 12px; font-weight: 600; color: #1e3a8a;'>" + sb + "</span>");
+            } else {
+                lbl.setValue("<span style='font-size: 11.5px; color: #94a3b8;'>Договорная</span>");
+            }
+            return lbl;
+        });
+
+        // Колонка 6: Требуемые навыки (чипы)
+        openPositionsTable.addGeneratedColumn("mainSkills", position -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            try {
+                if (entityStates.isLoaded(position, "skillsList") && position.getSkillsList() != null && !position.getSkillsList().isEmpty()) {
+                    StringBuilder sb = new StringBuilder("<div style='display: flex; gap: 4px; flex-wrap: wrap;'>");
+                    String[] palette = new String[]{"#38bdf8", "#4ade80", "#c084fc", "#fb923c", "#2dd4bf", "#f472b6", "#facc15", "#60a5fa"};
+                    int count = 0;
+                    for (SkillTree st : position.getSkillsList()) {
+                        if (st != null && st.getSkillName() != null && !st.getSkillName().trim().isEmpty()) {
+                            if (count >= 3) {
+                                sb.append("<span style='font-size: 10px; color: #7f8c8d; align-self: center;'>+").append(position.getSkillsList().size() - 3).append("</span>");
+                                break;
+                            }
+                            String sName = st.getSkillName().trim();
+                            String color = palette[Math.abs(sName.hashCode()) % palette.length];
+                            sb.append(String.format("<span style='background: %s18; color: %s; border: 1px solid %s44; padding: 1px 6px; border-radius: 10px; font-size: 10.5px; font-weight: 600; white-space: nowrap;'>%s</span>",
+                                    color, color, color, sName));
+                            count++;
+                        }
+                    }
+                    sb.append("</div>");
+                    lbl.setValue(sb.toString());
+                } else {
+                    lbl.setValue("<span style='color: #a0aec0; font-size: 11px;'>—</span>");
+                }
+            } catch (Exception ex) {
+                lbl.setValue("<span style='color: #a0aec0; font-size: 11px;'>—</span>");
+            }
+            return lbl;
+        });
+
+        // Колонка 7: Статус
+        openPositionsTable.addGeneratedColumn("statusBadge", position -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            boolean closed = Boolean.TRUE.equals(position.getOpenClose());
+            String bg = closed ? "rgba(239, 68, 68, 0.12)" : "rgba(34, 197, 94, 0.12)";
+            String color = closed ? "#ef4444" : "#16a34a";
+            String text = closed ? "Закрыта" : "Открыта";
+            lbl.setValue(String.format(
+                    "<span style='background: %s; color: %s; padding: 2px 8px; border-radius: 4px; font-size: 10.5px; font-weight: 600; white-space: nowrap; display: inline-block;'>%s</span>",
+                    bg, color, text
+            ));
+            return lbl;
+        });
     }
 
     @Subscribe
@@ -201,7 +350,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
         if (position == null) {
             if (projectLogoPic != null) {
-                FileDescriptorImageHelper.setImageSource(projectLogoPic, fileLoader, null, "icons/no-company.png");
+                FileDescriptorImageHelper.setImageSource(projectLogoPic, fileLoader, null, "icons/briefcase.png");
             }
             detailVacancyName.setValue("Выберите вакансию");
             detailProjectName.setValue("—");
@@ -223,30 +372,43 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
         // Логотип
         FileDescriptor logo = null;
-        if (position.getProjectName() != null) {
-            logo = position.getProjectName().getProjectLogo();
+        try {
+            if (position.getProjectName() != null && entityStates.isLoaded(position.getProjectName(), "projectLogo")) {
+                logo = position.getProjectName().getProjectLogo();
+            }
+        } catch (Exception ignored) {
         }
         if (projectLogoPic != null) {
-            FileDescriptorImageHelper.setImageSource(projectLogoPic, fileLoader, logo, "icons/no-company.png");
+            FileDescriptorImageHelper.setImageSource(projectLogoPic, fileLoader, logo, "icons/briefcase.png");
         }
 
         // Заголовки
         detailVacancyName.setValue(position.getVacansyName() != null ? position.getVacansyName() : "—");
 
-        String prjName = position.getProjectName() != null && position.getProjectName().getProjectName() != null
-                ? position.getProjectName().getProjectName() : "Без проекта";
-        detailProjectName.setValue(prjName);
-
+        String prjName = "—";
         String compName = "—";
-        if (position.getProjectName() != null && position.getProjectName().getProjectDepartment() != null
-                && position.getProjectName().getProjectDepartment().getCompanyName() != null) {
-            compName = position.getProjectName().getProjectDepartment().getCompanyName().getComanyName();
+        try {
+            if (position.getProjectName() != null) {
+                prjName = position.getProjectName().getProjectName() != null
+                        ? position.getProjectName().getProjectName() : "Без проекта";
+                if (position.getProjectName().getProjectDepartment() != null
+                        && position.getProjectName().getProjectDepartment().getCompanyName() != null) {
+                    compName = position.getProjectName().getProjectDepartment().getCompanyName().getComanyName();
+                }
+            }
+        } catch (Exception ignored) {
         }
+        detailProjectName.setValue(prjName);
         detailCompanyName.setValue(compName != null ? compName : "—");
 
         // Локация и формат работы
-        String cityStr = (position.getCities() != null && !position.getCities().isEmpty())
-                ? position.getCities().iterator().next().getCityRuName() : "Локация не указана";
+        String cityStr = "Локация не указана";
+        try {
+            if (entityStates.isLoaded(position, "cities") && position.getCities() != null && !position.getCities().isEmpty()) {
+                cityStr = position.getCities().iterator().next().getCityRuName();
+            }
+        } catch (Exception ignored) {
+        }
         String remoteStr = formatRemoteWorkString(position.getRemoteWork());
         detailLocationAndFormat.setValue(cityStr + (remoteStr.isEmpty() ? "" : " / " + remoteStr));
 
@@ -273,11 +435,14 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
         // Куратор и автор
         String pOwner = "—";
-        if (position.getProjectName() != null && position.getProjectName().getProjectOwner() != null) {
-            Person person = position.getProjectName().getProjectOwner();
-            pOwner = (person.getFirstName() != null ? person.getFirstName() : "") + " " +
-                     (person.getSecondName() != null ? person.getSecondName() : "");
-            pOwner = pOwner.trim().isEmpty() ? "—" : pOwner.trim();
+        try {
+            if (position.getProjectName() != null && position.getProjectName().getProjectOwner() != null) {
+                Person person = position.getProjectName().getProjectOwner();
+                pOwner = (person.getFirstName() != null ? person.getFirstName() : "") + " " +
+                         (person.getSecondName() != null ? person.getSecondName() : "");
+                pOwner = pOwner.trim().isEmpty() ? "—" : pOwner.trim();
+            }
+        } catch (Exception ignored) {
         }
         detailProjectOwner.setValue(pOwner);
         detailOwner.setValue(position.getOwner() != null ? position.getOwner().getName() : "—");
@@ -297,24 +462,28 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         detailIndicators.setValue(ind.toString());
 
         // Навыки
-        if (position.getSkillsList() != null && !position.getSkillsList().isEmpty()) {
-            StringBuilder sk = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 0;'>");
-            String[] palette = new String[]{"#38bdf8", "#4ade80", "#c084fc", "#fb923c", "#2dd4bf", "#f472b6", "#facc15", "#60a5fa"};
-            for (SkillTree st : position.getSkillsList()) {
-                if (st.getSkillName() != null && !st.getSkillName().trim().isEmpty()) {
-                    String skillName = st.getSkillName().trim();
-                    String color = palette[Math.abs(skillName.hashCode()) % palette.length];
-                    sk.append(String.format(
-                            "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
-                            "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
-                            "white-space: nowrap; display: inline-block;'>%s</span>",
-                            color, color, color, skillName
-                    ));
+        try {
+            if (entityStates.isLoaded(position, "skillsList") && position.getSkillsList() != null && !position.getSkillsList().isEmpty()) {
+                StringBuilder sk = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 0;'>");
+                String[] palette = new String[]{"#38bdf8", "#4ade80", "#c084fc", "#fb923c", "#2dd4bf", "#f472b6", "#facc15", "#60a5fa"};
+                for (SkillTree st : position.getSkillsList()) {
+                    if (st != null && st.getSkillName() != null && !st.getSkillName().trim().isEmpty()) {
+                        String skillName = st.getSkillName().trim();
+                        String color = palette[Math.abs(skillName.hashCode()) % palette.length];
+                        sk.append(String.format(
+                                "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                                "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                                "white-space: nowrap; display: inline-block;'>%s</span>",
+                                color, color, color, skillName
+                        ));
+                    }
                 }
+                sk.append("</div>");
+                detailSkills.setValue(sk.toString());
+            } else {
+                detailSkills.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
             }
-            sk.append("</div>");
-            detailSkills.setValue(sk.toString());
-        } else {
+        } catch (Exception ex) {
             detailSkills.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
         }
     }

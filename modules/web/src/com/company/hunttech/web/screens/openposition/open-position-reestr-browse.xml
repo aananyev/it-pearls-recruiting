@@ -24,6 +24,9 @@
                 <property name="openPositionComments" fetch="BATCH" view="_minimal"/>
                 <property name="someFiles" fetch="BATCH" view="_minimal"/>
                 <property name="cities" fetch="BATCH" view="city-picker-view"/>
+                <property name="skillsList" fetch="BATCH" view="_minimal">
+                    <property name="skillName"/>
+                </property>
             </view>
             <loader id="openPositionsDl" maxResults="100">
                 <query>
@@ -286,14 +289,13 @@
                             <action id="list" type="listPrintForm"/>
                         </actions>
                         <columns>
-                            <column id="vacansyID" caption="msg://msgID" width="70px"/>
-                            <column id="vacansyName" caption="msg://msgVacancy"/>
-                            <column id="projectName" caption="msg://msgProjectName" width="180px"/>
-                            <column id="positionType" caption="msg://msgPositionType" width="180px"/>
-                            <column id="salaryMin" caption="msg://msgSalary" width="120px"/>
-                            <column id="workExperience" caption="msg://msgWorkExperience" width="80px"/>
-                            <column id="numberPosition" caption="msg://msgCountOfPersonel" width="70px"/>
-                            <column id="openClose" caption="msg://msgStatus" width="90px"/>
+                            <column id="logo" caption="Лого" width="50px" sortable="false"/>
+                            <column id="vacansyName" caption="Вакансия" expandRatio="1"/>
+                            <column id="projectName" caption="Проект" width="170px"/>
+                            <column id="positionType" caption="Специализация" width="150px"/>
+                            <column id="salary" caption="Зарплата" width="140px"/>
+                            <column id="mainSkills" caption="Требуемые навыки" width="200px" sortable="false"/>
+                            <column id="statusBadge" caption="Статус" width="110px" sortable="false"/>
                         </columns>
                         <rowsCount/>
                     </groupTable>
