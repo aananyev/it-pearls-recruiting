@@ -176,11 +176,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     @Inject
     private PopupButton quickLoadCV;
     @Inject
-    private Button filterAllBtn;
-    @Inject
-    private Button filterMyCandidatesBtn;
-    @Inject
-    private Button filterMyParticipationBtn;
+    private PopupButton candidatesFilterPopupButton;
     @Inject
     private PopupButton signFilterButton;
     @Inject
@@ -769,7 +765,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 .build();
         screen.addAfterCloseListener(closeEvent -> {
             if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
-                onFilterAllBtnClick(null);
+                setCandidateScopeFilter("ALL", "Все кандидаты", "USERS");
                 if (screen.getCreatedCandidate() != null) {
                     candidatesTable.setSelected(screen.getCreatedCandidate());
                 }
@@ -1023,40 +1019,47 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
      * Быстрые фильтры и действия тулбара
      * ========================================================================= */
 
-    @Subscribe("filterAllBtn")
-    public void onFilterAllBtnClick(Button.ClickEvent event) {
-        updateFilterButtons(filterAllBtn);
-        jobCandidatesDl.removeParameter("createdBy");
-        jobCandidatesDl.removeParameter("recrutier");
-        jobCandidatesDl.removeParameter("recrutierName");
-        jobCandidatesDl.load();
+    @Subscribe("candidatesFilterPopupButton.filterAll")
+    public void onCandidatesFilterPopupButtonFilterAll(Action.ActionPerformedEvent event) {
+        setCandidateScopeFilter("ALL", "Все кандидаты", "USERS");
     }
 
-    @Subscribe("filterMyCandidatesBtn")
-    public void onFilterMyCandidatesBtnClick(Button.ClickEvent event) {
-        updateFilterButtons(filterMyCandidatesBtn);
-        String currentLogin = userSession.getUser() != null ? userSession.getUser().getLogin() : "";
-        jobCandidatesDl.setParameter("createdBy", currentLogin);
-        jobCandidatesDl.removeParameter("recrutier");
-        jobCandidatesDl.removeParameter("recrutierName");
-        jobCandidatesDl.load();
+    @Subscribe("candidatesFilterPopupButton.filterMyCandidates")
+    public void onCandidatesFilterPopupButtonFilterMyCandidates(Action.ActionPerformedEvent event) {
+        setCandidateScopeFilter("MY", "Мои кандидаты", "USER");
     }
 
-    @Subscribe("filterMyParticipationBtn")
-    public void onFilterMyParticipationBtnClick(Button.ClickEvent event) {
-        updateFilterButtons(filterMyParticipationBtn);
-        jobCandidatesDl.removeParameter("createdBy");
-        jobCandidatesDl.setParameter("recrutier", userSession.getUser());
-        String currentLogin = userSession.getUser() != null ? userSession.getUser().getLogin() : "";
-        jobCandidatesDl.setParameter("recrutierName", currentLogin);
-        jobCandidatesDl.load();
+    @Subscribe("candidatesFilterPopupButton.filterMyParticipation")
+    public void onCandidatesFilterPopupButtonFilterMyParticipation(Action.ActionPerformedEvent event) {
+        setCandidateScopeFilter("PARTICIPATION", "С моим участием", "font-icon:ADN");
     }
 
-    private void updateFilterButtons(Button activeBtn) {
-        filterAllBtn.setStyleName("secondary filter-pill-btn");
-        filterMyCandidatesBtn.setStyleName("secondary filter-pill-btn");
-        filterMyParticipationBtn.setStyleName("secondary filter-pill-btn");
-        activeBtn.setStyleName("primary filter-pill-btn active");
+    private void setCandidateScopeFilter(String scope, String caption, String icon) {
+        if (candidatesFilterPopupButton != null) {
+            candidatesFilterPopupButton.setCaption(caption);
+            candidatesFilterPopupButton.setIcon(icon);
+            if ("ALL".equals(scope)) {
+                candidatesFilterPopupButton.setStyleName("secondary candidate-btn candidate-filter-scope-btn");
+            } else {
+                candidatesFilterPopupButton.setStyleName("primary candidate-btn candidate-filter-scope-btn active");
+            }
+        }
+        if ("MY".equals(scope)) {
+            String currentLogin = userSession.getUser() != null ? userSession.getUser().getLogin() : "";
+            jobCandidatesDl.setParameter("createdBy", currentLogin);
+            jobCandidatesDl.removeParameter("recrutier");
+            jobCandidatesDl.removeParameter("recrutierName");
+        } else if ("PARTICIPATION".equals(scope)) {
+            jobCandidatesDl.removeParameter("createdBy");
+            jobCandidatesDl.setParameter("recrutier", userSession.getUser());
+            String currentLogin = userSession.getUser() != null ? userSession.getUser().getLogin() : "";
+            jobCandidatesDl.setParameter("recrutierName", currentLogin);
+        } else {
+            jobCandidatesDl.removeParameter("createdBy");
+            jobCandidatesDl.removeParameter("recrutier");
+            jobCandidatesDl.removeParameter("recrutierName");
+        }
+        jobCandidatesDl.load();
     }
 
     @Subscribe("createCandidateBtn")

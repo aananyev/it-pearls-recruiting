@@ -179,9 +179,17 @@
                                 <action id="loadFromClipboard" caption="Из буфера обмена..." icon="CLIPBOARD"/>
                             </actions>
                         </popupButton>
-                        <button id="filterAllBtn" caption="Все кандидаты" stylename="primary filter-pill-btn active" icon="USERS"/>
-                        <button id="filterMyCandidatesBtn" caption="Мои кандидаты" stylename="secondary filter-pill-btn" icon="USER"/>
-                        <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary filter-pill-btn" icon="font-icon:ADN"/>
+                        <popupButton id="candidatesFilterPopupButton"
+                                     caption="Все кандидаты"
+                                     icon="USERS"
+                                     showActionIcons="true"
+                                     stylename="secondary candidate-btn candidate-filter-scope-btn">
+                            <actions>
+                                <action id="filterAll" caption="Все кандидаты" icon="USERS"/>
+                                <action id="filterMyCandidates" caption="Мои кандидаты" icon="USER"/>
+                                <action id="filterMyParticipation" caption="Кандидаты с моим участием" icon="font-icon:ADN"/>
+                            </actions>
+                        </popupButton>
                     </hbox>
 
                     <!-- Выпадающий фильтр отбора кандидатов по меткам/значкам -->
