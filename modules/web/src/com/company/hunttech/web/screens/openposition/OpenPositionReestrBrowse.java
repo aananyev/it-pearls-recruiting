@@ -22,6 +22,7 @@ import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.StandardLookup;
+import com.haulmont.cuba.gui.screen.StandardOutcome;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
@@ -123,6 +124,12 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         initToolbarActions();
         initFilterPopupActions();
         initSidebarButtons();
+    }
+
+    @Subscribe
+    public void onBeforeShow(Screen.BeforeShowEvent event) {
+        openPositionsDl.setParameter("openClosePos", false);
+        openPositionsDl.load();
     }
 
     @Subscribe
@@ -325,10 +332,16 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         }
         if (smartUploadBtn != null) {
             smartUploadBtn.addClickListener(e -> {
-                notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption("Умная загрузка")
-                        .withDescription("Мастер умного создания вакансии открывается...")
-                        .show();
+                SmartOpenPositionUploadScreen screen = screenBuilders.screen(this)
+                        .withScreenClass(SmartOpenPositionUploadScreen.class)
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+                screen.addAfterCloseListener(closeEvent -> {
+                    if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+                        openPositionsDl.load();
+                    }
+                });
+                screen.show();
             });
         }
         if (editPositionToolbarBtn != null) {

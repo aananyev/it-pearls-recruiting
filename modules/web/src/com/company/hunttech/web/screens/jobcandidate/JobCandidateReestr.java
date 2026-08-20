@@ -1087,11 +1087,6 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 .show();
     }
 
-    @Subscribe("candidatesTable.create")
-    public void onCandidatesTableCreate(Action.ActionPerformedEvent event) {
-        onCreateCandidateBtnClick(null);
-    }
-
     @Subscribe("editCandidateToolbarBtn")
     public void onEditCandidateToolbarBtnClick(Button.ClickEvent event) {
         onEditCandidateBtnClick(null);
