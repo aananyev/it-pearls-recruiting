@@ -13,6 +13,7 @@ import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.FileUploadField;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.ProgressBar;
+import com.haulmont.cuba.gui.components.RichTextArea;
 import com.haulmont.cuba.gui.components.UploadField;
 import com.haulmont.cuba.gui.components.VBoxLayout;
 import com.haulmont.cuba.gui.executors.BackgroundTask;
@@ -95,6 +96,13 @@ public class SmartCvUploadScreen extends Screen {
     private Button cancelBtn;
 
     @Inject
+    private RichTextArea cvRichTextArea;
+    @Inject
+    private Button analyzeTextBtn;
+    @Inject
+    private Button clearTextBtn;
+
+    @Inject
     private SmartCvIngestService smartCvIngestService;
     @Inject
     private BackgroundWorker backgroundWorker;
@@ -113,6 +121,26 @@ public class SmartCvUploadScreen extends Screen {
 
     public JobCandidate getCreatedCandidate() {
         return createdCandidate;
+    }
+
+    @Subscribe("clearTextBtn")
+    public void onClearTextBtnClick(Button.ClickEvent event) {
+        cvRichTextArea.setValue("");
+    }
+
+    @Subscribe("analyzeTextBtn")
+    public void onAnalyzeTextBtnClick(Button.ClickEvent event) {
+        String text = cvRichTextArea.getValue();
+        if (text == null || text.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Предупреждение")
+                    .withDescription("Пожалуйста, введите или вставьте текст резюме")
+                    .show();
+            return;
+        }
+        currentFileDescriptor = null;
+        currentFileBytes = null;
+        startAnalysis(text);
     }
 
     @Subscribe("uploadField")
@@ -144,10 +172,10 @@ public class SmartCvUploadScreen extends Screen {
             return;
         }
 
-        startAnalysis();
+        startAnalysis(null);
     }
 
-    private void startAnalysis() {
+    private void startAnalysis(String directRawText) {
         progressBar.setVisible(true);
         statusLabel.setValue("Извлечение текста и AI-анализ резюме...");
         previewCard.setVisible(false);
@@ -159,12 +187,18 @@ public class SmartCvUploadScreen extends Screen {
 
         final FileDescriptor fd = currentFileDescriptor;
         final byte[] bytes = currentFileBytes;
+        final String textInput = directRawText;
 
         BackgroundTask<Integer, AnalysisOutcome> task =
                 new BackgroundTask<Integer, AnalysisOutcome>(300, this) {
                     @Override
                     public AnalysisOutcome run(TaskLifeCycle<Integer> taskLifeCycle) throws Exception {
-                        String rawText = smartCvIngestService.extractTextFromFile(fd, bytes);
+                        String rawText;
+                        if (textInput != null && !textInput.trim().isEmpty()) {
+                            rawText = textInput;
+                        } else {
+                            rawText = smartCvIngestService.extractTextFromFile(fd, bytes);
+                        }
                         SmartCvParsedData parsed = smartCvIngestService.parseCvText(rawText);
                         JobCandidate duplicate = smartCvIngestService.findDuplicate(parsed);
                         return new AnalysisOutcome(parsed, duplicate);
@@ -182,7 +216,7 @@ public class SmartCvUploadScreen extends Screen {
                     @Override
                     public boolean handleException(Exception ex) {
                         progressBar.setVisible(false);
-                        statusLabel.setValue("Ошибка при AI-анализе файла");
+                        statusLabel.setValue("Ошибка при AI-анализе");
                         notifications.create(Notifications.NotificationType.ERROR)
                                 .withCaption("Ошибка анализа")
                                 .withDescription(ex.getMessage())

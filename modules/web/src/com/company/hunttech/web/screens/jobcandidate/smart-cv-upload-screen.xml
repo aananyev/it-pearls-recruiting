@@ -17,20 +17,51 @@
         <scrollBox id="mainContentBox" width="100%" height="100%" spacing="true" orientation="vertical">
             <vbox width="100%" spacing="true">
 
-                <!-- Зона загрузки файла (Drag and Drop) -->
+                <!-- Зона загрузки файла или текста (Drag and Drop / RichTextArea) -->
                 <vbox id="uploadCard" width="100%" spacing="true" stylename="edit-card">
-                    <label value="1. ВЫБЕРИТЕ ФАЙЛ РЕЗЮМЕ" stylename="label-nav-title job-candidate-section-title"/>
-                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
-                        <upload id="uploadField"
-                                uploadButtonCaption="Загрузить файл резюме..."
-                                uploadButtonIcon="font-icon:CLOUD_UPLOAD"
-                                permittedExtensions=".pdf,.docx,.doc,.rtf,.pages,.txt"
-                                dropZone="uploadCard"
-                                dropZonePrompt="Перетащите файл резюме сюда (PDF, Word, RTF, Pages)"
-                                stylename="primary"
-                                showFileName="true"/>
-                        <progressBar id="progressBar" indeterminate="true" visible="false" align="MIDDLE_CENTER" width="150px"/>
-                        <label id="statusLabel" value="Готов к загрузке файла" align="MIDDLE_LEFT" stylename="edit-help"/>
+                    <label value="1. ВЫБЕРИТЕ ФАЙЛ РЕЗЮМЕ ИЛИ ВСТАВЬТЕ ТЕКСТ" stylename="label-nav-title job-candidate-section-title"/>
+                    
+                    <tabSheet id="inputTabSheet" width="100%">
+                        <!-- Вкладка загрузки файла -->
+                        <tab id="fileTab" caption="Загрузка файла" icon="CLOUD_UPLOAD">
+                            <vbox spacing="true" width="100%" margin="true,false,false,false">
+                                <label value="Перетащите файл резюме в эту область или нажмите кнопку загрузки:" stylename="edit-help"/>
+                                <upload id="uploadField"
+                                        uploadButtonCaption="Загрузить файл резюме..."
+                                        uploadButtonIcon="font-icon:CLOUD_UPLOAD"
+                                        permittedExtensions=".pdf,.docx,.doc,.rtf,.pages,.txt"
+                                        dropZone="uploadCard"
+                                        dropZonePrompt="Перетащите файл резюме сюда (PDF, Word, RTF, Pages, TXT)"
+                                        stylename="primary"
+                                        showFileName="true"/>
+                            </vbox>
+                        </tab>
+                        
+                        <!-- Вкладка ввода / вставки текста резюме -->
+                        <tab id="textTab" caption="Вставка текста" icon="FILE_TEXT_O">
+                            <vbox spacing="true" width="100%" margin="true,false,false,false">
+                                <label value="Вставьте текст резюме из буфера обмена (мессенджер, почта, документ):" stylename="edit-help"/>
+                                <richTextArea id="cvRichTextArea"
+                                              width="100%"
+                                              height="200px"/>
+                                <hbox spacing="true" align="MIDDLE_LEFT">
+                                    <button id="analyzeTextBtn"
+                                            caption="Распознать введенный текст"
+                                            icon="font-icon:MAGIC"
+                                            stylename="primary candidate-btn candidate-smartload-btn"/>
+                                    <button id="clearTextBtn"
+                                            caption="Очистить"
+                                            icon="ERASER"
+                                            stylename="secondary candidate-btn"/>
+                                </hbox>
+                            </vbox>
+                        </tab>
+                    </tabSheet>
+
+                    <!-- Индикатор прогресса и статус выполнения -->
+                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" margin="true,false,false,false">
+                        <progressBar id="progressBar" indeterminate="true" visible="false" align="MIDDLE_LEFT" width="200px"/>
+                        <label id="statusLabel" value="Готов к загрузке файла или текста" align="MIDDLE_LEFT" stylename="edit-help"/>
                     </hbox>
                 </vbox>
 
