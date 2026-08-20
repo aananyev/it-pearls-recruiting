@@ -45,7 +45,7 @@
                                 </c:where>
                             </c:jpql>
                             <c:jpql>
-                                <c:where>e.openClose = :openClosePos</c:where>
+                                <c:where>(e.openClose = :openClosePos or (:openClosePos = false and (e.openClose is null or e.openClose = false)))</c:where>
                             </c:jpql>
                             <c:jpql>
                                 <c:where>e.signDraft = :signDraft</c:where>
@@ -268,21 +268,13 @@
                     </hbox>
                 </hbox>
 
-                <!-- Карточка-обёртка для дерева вакансий -->
+                <!-- Карточка-обёртка для таблицы вакансий -->
                 <vbox id="positionsTableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="openPositionsTable">
-                    <treeDataGrid id="openPositionsTable"
-                                  width="100%"
-                                  height="100%"
-                                  editorEnabled="false"
-                                  headerVisible="true"
-                                  contextMenuEnabled="false"
-                                  bodyRowHeight="44px"
-                                  textSelectionEnabled="false"
-                                  hierarchyProperty="parentOpenPosition"
-                                  selectionMode="SINGLE"
-                                  reorderingAllowed="true"
-                                  dataContainer="openPositionsDc"
-                                  stylename="borderless grid candidate-browse-grid">
+                    <groupTable id="openPositionsTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="openPositionsDc"
+                                stylename="borderless grid candidate-browse-grid">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -290,18 +282,18 @@
                             <action id="refresh" type="refresh"/>
                             <action id="list" type="listPrintForm"/>
                         </actions>
-                        <columns exclude="remoteWork,commandCandidate,salaryMax,cityPosition,commandExperience,comment,shortDescription,templateLetter,needLetter,exercise,needExercise,skillsList,candidates,paymentsType,typeCompanyComission,typeSalaryOfResearcher,typeSalaryOfRecrutier,useTaxNDFL,internalProject,percentComissionOfCompany,percentSalaryOfResearcher,percentSalaryOfRecrutier,parentOpenPosition">
-                            <column id="vacansyID" property="vacansyID" width="80px" maximumWidth="80px" caption="msg://msgID"/>
-                            <column id="vacansyName" property="vacansyName" resizable="true" caption="msg://msgVacancy"/>
-                            <column id="projectName" property="projectName" resizable="true" maximumWidth="250px" caption="msg://msgProjectName"/>
-                            <column id="positionType" property="positionType" resizable="true" maximumWidth="300px" caption="msg://msgPositionType"/>
-                            <column id="salaryMin" property="salaryMin" sortable="true" caption="msg://msgSalary" width="130px"/>
-                            <column id="workExperience" property="workExperience" width="90px" caption="msg://msgWorkExperience"/>
-                            <column id="numberPosition" property="numberPosition" caption="msg://msgCountOfPersonel" width="90px"/>
-                            <column id="openClose" property="openClose" caption="msg://msgStatus" width="100px"/>
+                        <columns>
+                            <column id="vacansyID" caption="msg://msgID" width="70px"/>
+                            <column id="vacansyName" caption="msg://msgVacancy"/>
+                            <column id="projectName" caption="msg://msgProjectName" width="180px"/>
+                            <column id="positionType" caption="msg://msgPositionType" width="180px"/>
+                            <column id="salaryMin" caption="msg://msgSalary" width="120px"/>
+                            <column id="workExperience" caption="msg://msgWorkExperience" width="80px"/>
+                            <column id="numberPosition" caption="msg://msgCountOfPersonel" width="70px"/>
+                            <column id="openClose" caption="msg://msgStatus" width="90px"/>
                         </columns>
                         <rowsCount/>
-                    </treeDataGrid>
+                    </groupTable>
                 </vbox>
             </vbox>
         </hbox>

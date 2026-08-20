@@ -12,9 +12,9 @@ import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.PopupButton;
-import com.haulmont.cuba.gui.components.TreeDataGrid;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
@@ -58,7 +58,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     private FileLoader fileLoader;
 
     @Inject
-    private TreeDataGrid<OpenPosition> openPositionsTable;
+    private GroupTable<OpenPosition> openPositionsTable;
     @Inject
     private CollectionLoader<OpenPosition> openPositionsDl;
 
