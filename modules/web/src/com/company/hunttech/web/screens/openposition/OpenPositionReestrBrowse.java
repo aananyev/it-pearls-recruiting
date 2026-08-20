@@ -298,16 +298,24 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
         // Навыки
         if (position.getSkillsList() != null && !position.getSkillsList().isEmpty()) {
-            StringBuilder sk = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
+            StringBuilder sk = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 0;'>");
+            String[] palette = new String[]{"#38bdf8", "#4ade80", "#c084fc", "#fb923c", "#2dd4bf", "#f472b6", "#facc15", "#60a5fa"};
             for (SkillTree st : position.getSkillsList()) {
-                sk.append("<span style='background: #e2e8f0; color: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 11px;'>")
-                  .append(st.getSkillName())
-                  .append("</span>");
+                if (st.getSkillName() != null && !st.getSkillName().trim().isEmpty()) {
+                    String skillName = st.getSkillName().trim();
+                    String color = palette[Math.abs(skillName.hashCode()) % palette.length];
+                    sk.append(String.format(
+                            "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                            "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                            "white-space: nowrap; display: inline-block;'>%s</span>",
+                            color, color, color, skillName
+                    ));
+                }
             }
             sk.append("</div>");
             detailSkills.setValue(sk.toString());
         } else {
-            detailSkills.setValue("<span style='color: #9ca3af;'>Навыки не указаны</span>");
+            detailSkills.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
         }
     }
 
