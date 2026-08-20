@@ -151,13 +151,20 @@
                 </filter>
 
                 <!-- Верхняя полоса быстрых фильтров, счетчиков и выпадающего меню действий -->
-                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="statusFilterButtons">
-                    <!-- Группа создания, редактирования, удаления, быстрой загрузки и фильтров-пилюль -->
-                    <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
+                    <!-- Левая группа основных действий: Создать кандидата, Умная загрузка, Редактировать, Удалить -->
+                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
                         <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
+                        <button id="smartUploadBtn" caption="Умная загрузка" icon="font-icon:MAGIC" stylename="primary candidate-btn candidate-smartload-btn"/>
                         <button id="editCandidateToolbarBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn candidate-edit-btn" enabled="false"/>
                         <button id="removeCandidateToolbarBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn candidate-remove-btn" enabled="false"/>
-                        <button id="smartUploadBtn" caption="Умная загрузка" icon="font-icon:MAGIC" stylename="primary candidate-btn candidate-smartload-btn"/>
+                    </hbox>
+
+                    <!-- Распорка для выравнивания правых кнопок по правому краю -->
+                    <hbox id="toolbarSpacer" width="100%"/>
+
+                    <!-- Правая группа фильтров и сервисных действий: Быстрая загрузка, Фильтр кандидатов, Фильтр по меткам, Метки, Действия -->
+                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
                         <popupButton id="quickLoadCV"
                                      caption="Быстрая загрузка"
                                      icon="CLOUD_UPLOAD"
@@ -181,45 +188,42 @@
                                 <action id="filterMyParticipation" caption="Кандидаты с моим участием" icon="font-icon:ADN"/>
                             </actions>
                         </popupButton>
+                        <!-- Выпадающий фильтр отбора кандидатов по меткам/значкам -->
+                        <popupButton id="signFilterButton"
+                                     caption="Фильтр по меткам"
+                                     icon="FILTER"
+                                     showActionIcons="true"
+                                     stylename="secondary"
+                                     align="MIDDLE_RIGHT"/>
+                        <!-- Выпадающая кнопка присвоения меток кандидату -->
+                        <popupButton id="signIconsButton"
+                                     caption="Метки"
+                                     icon="TAGS"
+                                     showActionIcons="true"
+                                     enabled="false"
+                                     stylename="secondary"
+                                     align="MIDDLE_RIGHT"/>
+                        <!-- Выпадающая кнопка действий над кандидатом (задачи + метки) -->
+                        <popupButton id="actionsWithCandidateButton"
+                                     caption="Действия"
+                                     icon="BARS"
+                                     showActionIcons="true"
+                                     enabled="true"
+                                     stylename="primary"
+                                     align="MIDDLE_RIGHT">
+                            <actions>
+                                <action id="refreshAction" caption="Обновить" icon="REFRESH"/>
+                                <action id="findSuitableAction" caption="Подобрать вакансии" icon="SEARCH"/>
+                                <action id="scanSkillsAction" caption="Сканировать навыки" icon="font-icon:MAGIC"/>
+                                <action id="editCandidateAction" caption="Редактировать карточку" icon="EDIT_ACTION"/>
+                                <action id="createInteractionAction" caption="Добавить взаимодействие" icon="PLUS"/>
+                                <action id="showCandidateCVListAction" caption="Показать список резюме" icon="FILE_TEXT_O"/>
+                                <action id="showIteractionListAction" caption="Показать список взаимодействий" icon="HANDSHAKE_O"/>
+                                <action id="sendEmailAction" caption="Отправить Email" icon="ENVELOPE"/>
+                                <action id="addPersonalReserveAction" caption="В кадровый резерв" icon="SUPERSCRIPT"/>
+                            </actions>
+                        </popupButton>
                     </hbox>
-
-                    <!-- Выпадающий фильтр отбора кандидатов по меткам/значкам -->
-                    <popupButton id="signFilterButton"
-                                 caption="Фильтр по меткам"
-                                 icon="FILTER"
-                                 showActionIcons="true"
-                                 stylename="secondary"
-                                 align="MIDDLE_RIGHT"/>
-
-                    <!-- Выпадающая кнопка присвоения меток кандидату -->
-                    <popupButton id="signIconsButton"
-                                 caption="Метки"
-                                 icon="TAGS"
-                                 showActionIcons="true"
-                                 enabled="false"
-                                 stylename="secondary"
-                                 align="MIDDLE_RIGHT"/>
-
-                    <!-- Выпадающая кнопка действий над кандидатом (задачи + метки) -->
-                    <popupButton id="actionsWithCandidateButton"
-                                 caption="Действия"
-                                 icon="BARS"
-                                 showActionIcons="true"
-                                 enabled="true"
-                                 stylename="primary"
-                                 align="MIDDLE_RIGHT">
-                        <actions>
-                            <action id="refreshAction" caption="Обновить" icon="REFRESH"/>
-                            <action id="findSuitableAction" caption="Подобрать вакансии" icon="SEARCH"/>
-                            <action id="scanSkillsAction" caption="Сканировать навыки" icon="font-icon:MAGIC"/>
-                            <action id="editCandidateAction" caption="Редактировать карточку" icon="EDIT_ACTION"/>
-                            <action id="createInteractionAction" caption="Добавить взаимодействие" icon="PLUS"/>
-                            <action id="showCandidateCVListAction" caption="Показать список резюме" icon="FILE_TEXT_O"/>
-                            <action id="showIteractionListAction" caption="Показать список взаимодействий" icon="HANDSHAKE_O"/>
-                            <action id="sendEmailAction" caption="Отправить Email" icon="ENVELOPE"/>
-                            <action id="addPersonalReserveAction" caption="В кадровый резерв" icon="SUPERSCRIPT"/>
-                        </actions>
-                    </popupButton>
                 </hbox>
 
                 <!-- Карточка-обёртка для таблицы кандидатов -->
