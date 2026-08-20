@@ -192,20 +192,7 @@
             <!-- ПРАВАЯ ПАНЕЛЬ: Рабочая область реестра (edit-workspace candidate-reestr-workspace) -->
             <vbox id="positionsTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="positionsTableCard" margin="true,true,true,false">
 
-                <!-- Стандартный фильтр поиска CUBA Platform по ширине таблицы позиций -->
-                <filter id="filter"
-                        applyTo="openPositionsTable"
-                        dataLoader="openPositionsDl"
-                        defaultMode="generic"
-                        width="100%"
-                        stylename="candidate-generic-filter">
-                    <properties include=".*"
-                                exclude="id"
-                                excludeRecursively="true"
-                                excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
-                </filter>
-
-                <!-- Верхняя полоса быстрых фильтров, счетчиков и выпадающего меню действий -->
+                <!-- Верхняя полоса основных действий, быстрых фильтров и выпадающего меню действий -->
                 <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
 
                     <!-- Левая группа основных действий: Создать вакансию, Умная загрузка, Редактировать, Удалить -->
@@ -268,6 +255,21 @@
                         </popupButton>
                     </hbox>
                 </hbox>
+
+                <!-- Стандартный фильтр поиска CUBA Platform по ширине таблицы позиций -->
+                <filter id="filter"
+                        applyTo="openPositionsTable"
+                        dataLoader="openPositionsDl"
+                        defaultMode="generic"
+                        width="100%"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"
+                                exclude="id"
+                                excludeRecursively="true"
+                                excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                </filter>
 
                 <!-- Карточка-обёртка для таблицы вакансий -->
                 <vbox id="positionsTableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="openPositionsTable">
