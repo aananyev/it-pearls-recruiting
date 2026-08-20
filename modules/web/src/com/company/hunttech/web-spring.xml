@@ -52,6 +52,8 @@
                        value="com.company.hunttech.service.SkillAnalysisService"/>
                 <entry key="hunttech_TextProcessingService"
                        value="com.company.hunttech.service.TextProcessingService"/>
+                <entry key="hunttech_SmartCvIngestService"
+                       value="com.company.hunttech.service.SmartCvIngestService"/>
             </map>
         </property>
     </bean>

@@ -68,6 +68,28 @@
     overflow-wrap: anywhere;
   }
 
+  .edit-sidebar-title,
+  .edit-sidebar-title.v-label,
+  .candidate-sidebar-fullname,
+  .job-candidate-sidebar .candidate-sidebar-fullname,
+  .job-candidate-sidebar .edit-sidebar-title {
+    color: mix($v-font-color, $v-panel-background-color, 98%) !important;
+    font-weight: 700 !important;
+  }
+
+  .edit-sidebar-subtitle,
+  .edit-sidebar-subtitle.v-label,
+  .candidate-sidebar-position,
+  .job-candidate-sidebar .candidate-sidebar-position {
+    color: $v-selection-color !important;
+    font-weight: 600 !important;
+  }
+
+  .candidate-sidebar-city,
+  .job-candidate-sidebar .candidate-sidebar-city {
+    color: rgba($v-font-color, 0.85) !important;
+  }
+
   .label-navigation,
   .v-slot-label-navigation {
     box-sizing: border-box;

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="Умная AI-загрузка резюме"
+        messagesPack="com.company.hunttech.web.screens.jobcandidate">
+    <dialogMode width="860px" height="680px" modal="true" closeable="true" resizable="true"/>
+    <layout spacing="true" expand="mainContentBox" width="100%" height="100%" stylename="edit-screen-layout">
+        <!-- Шапка окна с заголовком и описанием -->
+        <hbox id="headerBox" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar">
+            <vbox spacing="false" width="100%">
+                <label value="Умная AI-загрузка резюме" stylename="edit-toolbar-title h2"/>
+                <label value="Автоматическое распознавание всех данных кандидата, создание резюме и проверка дубликатов"
+                       stylename="edit-toolbar-description edit-help"/>
+            </vbox>
+        </hbox>
+
+        <!-- Основная область с прокруткой -->
+        <scrollBox id="mainContentBox" width="100%" height="100%" spacing="true" orientation="vertical">
+            <vbox width="100%" spacing="true">
+
+                <!-- Зона загрузки файла (Drag and Drop) -->
+                <vbox id="uploadCard" width="100%" spacing="true" stylename="edit-card">
+                    <label value="1. ВЫБЕРИТЕ ФАЙЛ РЕЗЮМЕ" stylename="label-nav-title job-candidate-section-title"/>
+                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT">
+                        <upload id="uploadField"
+                                uploadButtonCaption="Загрузить файл резюме..."
+                                uploadButtonIcon="font-icon:CLOUD_UPLOAD"
+                                permittedExtensions=".pdf,.docx,.doc,.rtf,.pages,.txt"
+                                dropZone="uploadCard"
+                                dropZonePrompt="Перетащите файл резюме сюда (PDF, Word, RTF, Pages)"
+                                stylename="primary"
+                                showFileName="true"/>
+                        <progressBar id="progressBar" indeterminate="true" visible="false" align="MIDDLE_CENTER" width="150px"/>
+                        <label id="statusLabel" value="Готов к загрузке файла" align="MIDDLE_LEFT" stylename="edit-help"/>
+                    </hbox>
+                </vbox>
+
+                <!-- Блок предупреждения о найденном дубликате -->
+                <vbox id="duplicateBox" width="100%" spacing="true" visible="false" stylename="edit-card"
+                      css="border-left: 4px solid #f59e0b !important; background: #fffbeb !important;">
+                    <hbox spacing="true" align="MIDDLE_LEFT">
+                        <label value="⚠️ ОБНАРУЖЕН СУЩЕСТВУЮЩИЙ КАНДИДАТ В БАЗЕ" stylename="bold"
+                               css="color: #b45309 !important; font-size: 13px !important;"/>
+                    </hbox>
+                    <label id="duplicateInfoLabel" htmlEnabled="true" width="100%"/>
+                </vbox>
+
+                <!-- Блок распознанных данных кандидата -->
+                <vbox id="previewCard" width="100%" spacing="true" visible="false" stylename="edit-card">
+                    <label value="2. РАСПОЗНАННЫЕ ДАННЫЕ КАНДИДАТА" stylename="label-nav-title job-candidate-section-title"/>
+                    
+                    <hbox width="100%" spacing="true" expand="detailsGrid">
+                        <!-- Левая колонка: ФИО, Должность, Контакты -->
+                        <grid id="detailsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                            <columns count="2"/>
+                            <rows>
+                                <row>
+                                    <label value="Кандидат (ФИО):" stylename="bold"/>
+                                    <label id="previewFullName" value="-" stylename="bold" css="color: #1e3a8a;"/>
+                                </row>
+                                <row>
+                                    <label value="Желаемая должность:" stylename="bold"/>
+                                    <label id="previewPosition" value="-"/>
+                                </row>
+                                <row>
+                                    <label value="Город проживания:" stylename="bold"/>
+                                    <label id="previewCity" value="-"/>
+                                </row>
+                                <row>
+                                    <label value="Текущая компания:" stylename="bold"/>
+                                    <label id="previewCompany" value="-"/>
+                                </row>
+                                <row>
+                                    <label value="Телефон:" stylename="bold"/>
+                                    <label id="previewPhone" value="-"/>
+                                </row>
+                                <row>
+                                    <label value="Email:" stylename="bold"/>
+                                    <label id="previewEmail" value="-"/>
+                                </row>
+                                <row>
+                                    <label value="Telegram:" stylename="bold"/>
+                                    <label id="previewTelegram" value="-"/>
+                                </row>
+                                <row>
+                                    <label value="Зарплатные ожидания:" stylename="bold"/>
+                                    <label id="previewSalary" value="-"/>
+                                </row>
+                            </rows>
+                        </grid>
+                    </hbox>
+
+                    <!-- Блок ключевых навыков -->
+                    <vbox width="100%" spacing="false">
+                        <label value="Ключевые навыки:" stylename="bold" css="font-size: 11px; margin-bottom: 4px;"/>
+                        <label id="previewSkills" htmlEnabled="true" width="100%"/>
+                    </vbox>
+
+                    <!-- Саммари опыта -->
+                    <vbox id="summaryBox" width="100%" spacing="false" visible="false">
+                        <label value="Профессиональное резюме:" stylename="bold" css="font-size: 11px; margin-bottom: 4px;"/>
+                        <label id="previewSummary" width="100%" stylename="edit-help"/>
+                    </vbox>
+                </vbox>
+
+                <!-- Блок предупреждения о недостающих полях -->
+                <vbox id="missingFieldsBox" width="100%" spacing="false" visible="false" stylename="edit-card"
+                      css="border-left: 4px solid #3b82f6 !important; background: #eff6ff !important;">
+                    <label id="missingFieldsLabel" htmlEnabled="true" width="100%"/>
+                </vbox>
+
+            </vbox>
+        </scrollBox>
+
+        <!-- Нижняя панель действий -->
+        <hbox id="footerToolbar" width="100%" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar">
+            <button id="attachDuplicateBtn" caption="Добавить новую версию резюме в существующую карточку"
+                    icon="PLUS" stylename="primary" visible="false"/>
+            <button id="createNewAnywayBtn" caption="Создать нового кандидата"
+                    icon="CREATE_ACTION" stylename="secondary" visible="false"/>
+            <button id="saveNewCandidateBtn" caption="Создать карточку кандидата"
+                    icon="CREATE_ACTION" stylename="primary" visible="false"/>
+            <button id="cancelBtn" caption="Закрыть" icon="CLOSE" stylename="secondary"/>
+        </hbox>
+    </layout>
+</window>

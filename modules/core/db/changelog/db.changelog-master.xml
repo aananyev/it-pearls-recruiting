@@ -102,4 +102,8 @@
     <include file="260818-1-addAdminAiPromptSeed.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- SmartCvIngestService: AI-функция умного парсинга резюме из произвольного файла в JSON. -->
+    <include file="260820-1-addSmartCvParseAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

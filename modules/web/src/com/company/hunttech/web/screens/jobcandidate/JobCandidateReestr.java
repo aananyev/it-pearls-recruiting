@@ -22,6 +22,7 @@ import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.Dialogs;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.Screens;
@@ -30,6 +31,7 @@ import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Button;
 import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.ContentMode;
+import com.haulmont.cuba.gui.components.DialogAction;
 import com.haulmont.cuba.gui.components.GroupTable;
 import com.haulmont.cuba.gui.components.HBoxLayout;
 import com.haulmont.cuba.gui.components.Image;
@@ -49,6 +51,7 @@ import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.StandardLookup;
+import com.haulmont.cuba.gui.screen.StandardOutcome;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.Target;
 import com.haulmont.cuba.gui.screen.UiController;
@@ -118,6 +121,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private Notifications notifications;
 
     @Inject
+    private Dialogs dialogs;
+
+    @Inject
     private UserSession userSession;
 
     @Inject
@@ -164,9 +170,11 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     @Inject
     private Button createCandidateBtn;
     @Inject
-    private PopupButton quickLoadCV;
-    @Inject
     private Button editCandidateToolbarBtn;
+    @Inject
+    private Button removeCandidateToolbarBtn;
+    @Inject
+    private PopupButton quickLoadCV;
     @Inject
     private Button filterAllBtn;
     @Inject
@@ -741,8 +749,34 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     }
 
     /* =========================================================================
-     * Быстрая загрузка резюме (quickLoadCV)
+     * Быстрая и умная загрузка резюме (smartUploadBtn, quickLoadCV)
      * ========================================================================= */
+
+    @Subscribe("smartUploadBtn")
+    public void onSmartUploadBtnClick(Button.ClickEvent event) {
+        openSmartCvUploadDialog();
+    }
+
+    @Subscribe("quickLoadCV.smartLoad")
+    public void onQuickLoadCVSmartLoad(Action.ActionPerformedEvent event) {
+        openSmartCvUploadDialog();
+    }
+
+    private void openSmartCvUploadDialog() {
+        SmartCvUploadScreen screen = screenBuilders.screen(this)
+                .withScreenClass(SmartCvUploadScreen.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+        screen.addAfterCloseListener(closeEvent -> {
+            if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+                onFilterAllBtnClick(null);
+                if (screen.getCreatedCandidate() != null) {
+                    candidatesTable.setSelected(screen.getCreatedCandidate());
+                }
+            }
+        });
+        screen.show();
+    }
 
     @Subscribe("quickLoadCV.loadFromPdf")
     public void onQuickLoadCVLoadFromPdf(Action.ActionPerformedEvent event) {
@@ -863,6 +897,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         boolean hasSelected = selected != null;
         if (editCandidateToolbarBtn != null) {
             editCandidateToolbarBtn.setEnabled(hasSelected);
+        }
+        if (removeCandidateToolbarBtn != null) {
+            removeCandidateToolbarBtn.setEnabled(hasSelected);
         }
         if (actionsWithCandidateButton == null) return;
         actionsWithCandidateButton.setEnabled(true);
@@ -1033,6 +1070,27 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     @Subscribe("editCandidateToolbarBtn")
     public void onEditCandidateToolbarBtnClick(Button.ClickEvent event) {
         onEditCandidateBtnClick(null);
+    }
+
+    @Subscribe("removeCandidateToolbarBtn")
+    public void onRemoveCandidateToolbarBtnClick(Button.ClickEvent event) {
+        JobCandidate selected = candidatesTable.getSingleSelected();
+        if (selected != null) {
+            dialogs.createOptionDialog()
+                    .withCaption("Подтверждение удаления")
+                    .withMessage("Вы действительно хотите удалить кандидата " + (selected.getFullName() != null ? selected.getFullName() : "") + "?")
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES).withHandler(e -> {
+                                dataManager.remove(selected);
+                                jobCandidatesDl.load();
+                                notifications.create(Notifications.NotificationType.TRAY)
+                                        .withCaption("Кандидат удален")
+                                        .show();
+                            }),
+                            new DialogAction(DialogAction.Type.NO)
+                    )
+                    .show();
+        }
     }
 
     @Subscribe("actionsWithCandidateButton.refreshAction")
