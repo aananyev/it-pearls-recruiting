@@ -1,37 +1,60 @@
 package com.company.hunttech.web.screens.openposition;
 
 import com.company.hunttech.entity.OpenPosition;
+import com.company.hunttech.entity.Person;
+import com.company.hunttech.entity.SkillTree;
+import com.company.hunttech.web.util.FileDescriptorImageHelper;
+import com.hunttech.hrm.web.components.WebOvaFallbackImage;
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.PopupButton;
 import com.haulmont.cuba.gui.components.TreeDataGrid;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
+import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.gui.screen.Screen;
+import com.haulmont.cuba.gui.screen.StandardLookup;
 import com.haulmont.cuba.gui.screen.Subscribe;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
+import com.haulmont.cuba.security.global.UserSession;
 
 import javax.inject.Inject;
+import java.text.DecimalFormat;
 import java.util.Set;
 
 /**
  * Контроллер Split-View реестра открытых вакансий ({@code hunttech_OpenPositionReestr.browse}).
  *
- * <p>Наследует полную бизнес-логику работы с открытыми позициями и профильным сайдбаром (312px)
- * из {@link OpenPositionBrowse}, дополняя ее специализированным тулбаром быстрых фильтров и действий.</p>
+ * <p>Реализует полновысотный левый сайдбар (312px) с карточками условий, кураторов, индикаторов
+ * и навыков, а также тулбар быстрых фильтров и действий над вакансиями.</p>
  */
 @UiController("hunttech_OpenPositionReestr.browse")
 @UiDescriptor("open-position-reestr-browse.xml")
-@com.haulmont.cuba.gui.screen.LookupComponent("openPositionsTable")
+@LookupComponent("openPositionsTable")
 @LoadDataBeforeShow
-public class OpenPositionReestrBrowse extends OpenPositionBrowse {
+public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
+
+    private static final DecimalFormat SALARY_FORMAT = new DecimalFormat("#,###");
 
     @Inject
     private Notifications notifications;
+    @Inject
+    private ScreenBuilders screenBuilders;
+    @Inject
+    private DataManager dataManager;
+    @Inject
+    private UserSession userSession;
+    @Inject
+    private FileLoader fileLoader;
 
     @Inject
     private TreeDataGrid<OpenPosition> openPositionsTable;
@@ -55,10 +78,51 @@ public class OpenPositionReestrBrowse extends OpenPositionBrowse {
     @Inject
     private PopupButton actionsWithPositionButton;
 
+    // Элементы профильного сайдбара (312px)
+    @Inject
+    private WebOvaFallbackImage projectLogoPic;
+    @Inject
+    private Label<String> detailVacancyName;
+    @Inject
+    private Label<String> detailProjectName;
+    @Inject
+    private Label<String> detailCompanyName;
+    @Inject
+    private Label<String> detailLocationAndFormat;
+    @Inject
+    private Label<String> detailSalary;
+    @Inject
+    private Label<String> detailExperience;
+    @Inject
+    private Label<String> detailRemoteWork;
+    @Inject
+    private Label<String> detailOpenClose;
+    @Inject
+    private Label<String> detailNumberPosition;
+    @Inject
+    private Label<String> detailProjectOwner;
+    @Inject
+    private Label<String> detailOwner;
+    @Inject
+    private Label<String> detailCreatedBy;
+    @Inject
+    private Label<String> detailIndicators;
+    @Inject
+    private Label<String> detailRating;
+    @Inject
+    private Label<String> detailSkills;
+    @Inject
+    private Button openEditCardBtn;
+    @Inject
+    private Button suggestCandidatesBtn;
+    @Inject
+    private Button subscribeBtn;
+
     @Subscribe
     public void onInit(Screen.InitEvent event) {
         initToolbarActions();
         initFilterPopupActions();
+        initSidebarButtons();
     }
 
     @Subscribe
@@ -93,6 +157,160 @@ public class OpenPositionReestrBrowse extends OpenPositionBrowse {
         }
         if (subscribeBtn != null) {
             subscribeBtn.setEnabled(hasSelection);
+        }
+    }
+
+    private void initSidebarButtons() {
+        if (openEditCardBtn != null) {
+            openEditCardBtn.addClickListener(e -> openSelectedForEdit());
+        }
+        if (suggestCandidatesBtn != null) {
+            suggestCandidatesBtn.addClickListener(e -> {
+                OpenPosition selected = openPositionsTable.getSingleSelected();
+                if (selected != null) {
+                    screenBuilders.screen(this)
+                            .withScreenId("hunttech_Suggestjobcandidate")
+                            .withOpenMode(OpenMode.NEW_TAB)
+                            .build()
+                            .show();
+                }
+            });
+        }
+        if (subscribeBtn != null) {
+            subscribeBtn.addClickListener(e -> {
+                OpenPosition selected = openPositionsTable.getSingleSelected();
+                if (selected != null) {
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption("Подписка")
+                            .withDescription("Вы подписались на вакансию: " + (selected.getVacansyName() != null ? selected.getVacansyName() : ""))
+                            .show();
+                }
+            });
+        }
+    }
+
+    private void updateSidebarWithPosition(OpenPosition position) {
+        if (detailVacancyName == null) return;
+
+        if (position == null) {
+            if (projectLogoPic != null) {
+                FileDescriptorImageHelper.setImageSource(projectLogoPic, fileLoader, null, "icons/no-company.png");
+            }
+            detailVacancyName.setValue("Выберите вакансию");
+            detailProjectName.setValue("—");
+            detailCompanyName.setValue("—");
+            detailLocationAndFormat.setValue("—");
+            detailSalary.setValue("—");
+            detailExperience.setValue("—");
+            detailRemoteWork.setValue("—");
+            detailOpenClose.setValue("—");
+            detailNumberPosition.setValue("—");
+            detailProjectOwner.setValue("—");
+            detailOwner.setValue("—");
+            detailCreatedBy.setValue("—");
+            detailIndicators.setValue("<span style='color: #9ca3af;'>Нет данных</span>");
+            if (detailRating != null) detailRating.setValue("");
+            detailSkills.setValue("<span style='color: #9ca3af;'>Навыки не указаны</span>");
+            return;
+        }
+
+        // Логотип
+        FileDescriptor logo = null;
+        if (position.getProjectName() != null) {
+            logo = position.getProjectName().getProjectLogo();
+        }
+        if (projectLogoPic != null) {
+            FileDescriptorImageHelper.setImageSource(projectLogoPic, fileLoader, logo, "icons/no-company.png");
+        }
+
+        // Заголовки
+        detailVacancyName.setValue(position.getVacansyName() != null ? position.getVacansyName() : "—");
+
+        String prjName = position.getProjectName() != null && position.getProjectName().getProjectName() != null
+                ? position.getProjectName().getProjectName() : "Без проекта";
+        detailProjectName.setValue(prjName);
+
+        String compName = "—";
+        if (position.getProjectName() != null && position.getProjectName().getProjectDepartment() != null
+                && position.getProjectName().getProjectDepartment().getCompanyName() != null) {
+            compName = position.getProjectName().getProjectDepartment().getCompanyName().getComanyName();
+        }
+        detailCompanyName.setValue(compName != null ? compName : "—");
+
+        // Локация и формат работы
+        String cityStr = (position.getCities() != null && !position.getCities().isEmpty())
+                ? position.getCities().iterator().next().getCityRuName() : "Локация не указана";
+        String remoteStr = formatRemoteWorkString(position.getRemoteWork());
+        detailLocationAndFormat.setValue(cityStr + (remoteStr.isEmpty() ? "" : " / " + remoteStr));
+
+        // Зарплатная вилка
+        if (position.getSalaryMin() != null || position.getSalaryMax() != null) {
+            StringBuilder sb = new StringBuilder();
+            if (position.getSalaryMin() != null) {
+                sb.append(SALARY_FORMAT.format(position.getSalaryMin())).append(" ₽");
+            }
+            if (position.getSalaryMax() != null) {
+                if (sb.length() > 0) sb.append(" — ");
+                sb.append(SALARY_FORMAT.format(position.getSalaryMax())).append(" ₽");
+            }
+            detailSalary.setValue(sb.toString());
+        } else {
+            detailSalary.setValue("По договоренности");
+        }
+
+        // Опыт
+        detailExperience.setValue(position.getWorkExperience() != null ? position.getWorkExperience().toString() + " лет" : "Не указан");
+        detailRemoteWork.setValue(remoteStr.isEmpty() ? "Офис / Удаленно" : remoteStr);
+        detailOpenClose.setValue(Boolean.TRUE.equals(position.getOpenClose()) ? "Закрыта" : "Открыта");
+        detailNumberPosition.setValue(position.getNumberPosition() != null ? position.getNumberPosition() + " шт." : "1 шт.");
+
+        // Куратор и автор
+        String pOwner = "—";
+        if (position.getProjectName() != null && position.getProjectName().getProjectOwner() != null) {
+            Person person = position.getProjectName().getProjectOwner();
+            pOwner = (person.getFirstName() != null ? person.getFirstName() : "") + " " +
+                     (person.getSecondName() != null ? person.getSecondName() : "");
+            pOwner = pOwner.trim().isEmpty() ? "—" : pOwner.trim();
+        }
+        detailProjectOwner.setValue(pOwner);
+        detailOwner.setValue(position.getOwner() != null ? position.getOwner().getName() : "—");
+        detailCreatedBy.setValue(position.getCreatedBy() != null ? position.getCreatedBy() : "—");
+
+        // Индикаторы готовности
+        StringBuilder ind = new StringBuilder();
+        boolean hasDesc = position.getComment() != null && !position.getComment().trim().isEmpty();
+        boolean hasExercise = position.getExercise() != null && !position.getExercise().trim().isEmpty();
+        boolean hasTemplate = position.getTemplateLetter() != null && !position.getTemplateLetter().trim().isEmpty();
+
+        ind.append("<div style='display: flex; gap: 8px; font-size: 11px;'>");
+        ind.append(hasDesc ? "<span style='color: #16a34a;'>✓ Описание</span>" : "<span style='color: #9ca3af;'>✕ Описание</span>");
+        ind.append(hasExercise ? "<span style='color: #16a34a;'>✓ Тестовое</span>" : "<span style='color: #9ca3af;'>✕ Тестовое</span>");
+        ind.append(hasTemplate ? "<span style='color: #16a34a;'>✓ Памятка</span>" : "<span style='color: #9ca3af;'>✕ Памятка</span>");
+        ind.append("</div>");
+        detailIndicators.setValue(ind.toString());
+
+        // Навыки
+        if (position.getSkillsList() != null && !position.getSkillsList().isEmpty()) {
+            StringBuilder sk = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
+            for (SkillTree st : position.getSkillsList()) {
+                sk.append("<span style='background: #e2e8f0; color: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 11px;'>")
+                  .append(st.getSkillName())
+                  .append("</span>");
+            }
+            sk.append("</div>");
+            detailSkills.setValue(sk.toString());
+        } else {
+            detailSkills.setValue("<span style='color: #9ca3af;'>Навыки не указаны</span>");
+        }
+    }
+
+    private String formatRemoteWorkString(Integer remoteWork) {
+        if (remoteWork == null) return "";
+        switch (remoteWork) {
+            case 0: return "В офисе";
+            case 1: return "Удаленно";
+            case 2: return "Гибрид 50/50";
+            default: return "Удаленно";
         }
     }
 
