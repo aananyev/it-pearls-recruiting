@@ -655,4 +655,108 @@
     padding: 0 !important;
     border: none !important;
   }
+
+  /* Счетчик строк и пагинация над/под таблицами (rowsCount в DataGrid / TreeDataGrid / Table) */
+  .c-simplepagination,
+  .c-rows-count,
+  .v-slot-c-rows-count,
+  .c-paging,
+  .v-table-footer-container .c-rows-count,
+  .v-grid-footer-container .c-rows-count {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    line-height: 28px !important;
+    padding: 0 4px !important;
+    box-sizing: border-box !important;
+    vertical-align: middle !important;
+
+    /* Текст статуса строк (например, 1 - 100 из ...) */
+    .c-simplepagination-status,
+    .c-rows-count-label,
+    .v-label {
+      font-size: 12px !important;
+      line-height: 28px !important;
+      color: rgba($v-font-color, 0.72) !important;
+      padding: 0 6px !important;
+      white-space: nowrap !important;
+      vertical-align: middle !important;
+      margin: 0 !important;
+      height: 28px !important;
+    }
+
+    /* Кнопка ссылки подсчета общего количества (из 350) */
+    .c-simplepagination-count,
+    .c-rows-count-count,
+    .v-button-link {
+      height: 24px !important;
+      min-height: 24px !important;
+      line-height: 24px !important;
+      font-size: 12px !important;
+      padding: 0 4px !important;
+      margin: 0 !important;
+      vertical-align: middle !important;
+      color: $v-selection-color !important;
+    }
+
+    /* Стрелки пагинации влево / вправо / в начало / в конец */
+    .v-button,
+    .c-simplepagination-first,
+    .c-simplepagination-prev,
+    .c-simplepagination-next,
+    .c-simplepagination-last,
+    .c-rows-count-first,
+    .c-rows-count-prev,
+    .c-rows-count-next,
+    .c-rows-count-last {
+      height: 24px !important;
+      min-height: 24px !important;
+      max-height: 24px !important;
+      width: 24px !important;
+      min-width: 24px !important;
+      max-width: 24px !important;
+      padding: 0 !important;
+      margin: 0 2px !important;
+      border: 1px solid rgba($v-font-color, 0.14) !important;
+      border-radius: 4px !important;
+      background: rgba($v-font-color, 0.04) !important;
+      color: $v-font-color !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      vertical-align: middle !important;
+      box-sizing: border-box !important;
+      box-shadow: none !important;
+
+      .v-icon {
+        font-size: 11px !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        color: $v-font-color !important;
+      }
+
+      .v-button-wrap {
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      &:hover:not(.v-disabled) {
+        background: rgba($v-font-color, 0.09) !important;
+        border-color: rgba($v-font-color, 0.24) !important;
+      }
+
+      &.v-disabled {
+        opacity: 0.3 !important;
+        cursor: default !important;
+        background: transparent !important;
+        border-color: transparent !important;
+      }
+    }
+  }
 }
