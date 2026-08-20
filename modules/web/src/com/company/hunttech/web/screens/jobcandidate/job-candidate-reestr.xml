@@ -134,10 +134,23 @@
                 </scrollBox>
             </vbox>
 
-            <!-- ПРАВАЯ ПАНЕЛЬ: Рабочая область реестра (edit-workspace candidate-reestr-workspace) -->
-            <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="candidatesTableCard" margin="true,true,true,false">
+            <!-- ПРАВАЯ ПАНЕЛЬ: Рабочая область реестра (edit-workspace) -->
+            <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace" expand="candidatesTableCard">
                 
-                <!-- Верхняя полоса основных действий, быстрых фильтров и выпадающего меню действий -->
+                <!-- Стандартный фильтр поиска CUBA Platform по ширине таблицы кандидатов -->
+                <filter id="filter"
+                        applyTo="candidatesTable"
+                        dataLoader="jobCandidatesDl"
+                        defaultMode="generic"
+                        width="100%"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"
+                                exclude="id"
+                                excludeRecursively="true"
+                                excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,fileImageFace,priorityContact"/>
+                </filter>
+
+                <!-- Верхняя полоса быстрых фильтров, счетчиков и выпадающего меню действий -->
                 <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
                     <!-- Левая группа основных действий: Создать кандидата, Умная загрузка, Редактировать, Удалить -->
                     <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
@@ -212,21 +225,6 @@
                         </popupButton>
                     </hbox>
                 </hbox>
-
-                <!-- Стандартный фильтр поиска CUBA Platform по ширине таблицы кандидатов -->
-                <filter id="filter"
-                        applyTo="candidatesTable"
-                        dataLoader="jobCandidatesDl"
-                        defaultMode="generic"
-                        width="100%"
-                        collapsable="true"
-                        collapsed="true"
-                        stylename="candidate-generic-filter">
-                    <properties include=".*"
-                                exclude="id"
-                                excludeRecursively="true"
-                                excludeProperties="version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy,fileImageFace,priorityContact"/>
-                </filter>
 
                 <!-- Карточка-обёртка для таблицы кандидатов -->
                 <vbox id="candidatesTableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="candidatesTable">

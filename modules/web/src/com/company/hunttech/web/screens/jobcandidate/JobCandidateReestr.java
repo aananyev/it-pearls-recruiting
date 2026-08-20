@@ -92,9 +92,6 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private GroupTable<JobCandidate> candidatesTable;
 
     @Inject
-    private CollectionContainer<JobCandidate> jobCandidatesDc;
-
-    @Inject
     private CollectionLoader<JobCandidate> jobCandidatesDl;
 
     @Inject
@@ -699,7 +696,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         }
 
         jobCandidatesDl.load();
-        safeSelectCandidate(jobCandidate);
+        candidatesTable.setSelected(jobCandidate);
         updateSignIconsState(jobCandidate);
         notifications.create(Notifications.NotificationType.TRAY)
                 .withCaption("Метка присвоена")
@@ -740,25 +737,11 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         }
 
         jobCandidatesDl.load();
-        safeSelectCandidate(jobCandidate);
+        candidatesTable.setSelected(jobCandidate);
         updateSignIconsState(jobCandidate);
         notifications.create(Notifications.NotificationType.TRAY)
                 .withCaption("Метка снята")
                 .show();
-    }
-
-    private void safeSelectCandidate(JobCandidate candidate) {
-        if (candidate == null || candidatesTable == null) return;
-        try {
-            if (jobCandidatesDc.containsItem(candidate.getId())) {
-                JobCandidate itemInDc = jobCandidatesDc.getItemOrNull(candidate.getId());
-                if (itemInDc != null) {
-                    candidatesTable.setSelected(itemInDc);
-                }
-            }
-        } catch (Exception ignored) {
-            // Игнорировать, если запись отсутствует в текущем наборе данных/странице
-        }
     }
 
     /* =========================================================================
@@ -784,7 +767,10 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
                 setCandidateScopeFilter("ALL", "Все кандидаты", "USERS");
                 if (screen.getCreatedCandidate() != null) {
-                    safeSelectCandidate(screen.getCreatedCandidate());
+                    try {
+                        candidatesTable.setSelected(screen.getCreatedCandidate());
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         });
@@ -1083,22 +1069,12 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     public void onCreateCandidateBtnClick(Button.ClickEvent event) {
         screenBuilders.editor(candidatesTable)
                 .newEntity()
-                .withOpenMode(OpenMode.NEW_TAB)
+                .withOpenMode(OpenMode.DIALOG)
                 .show();
     }
 
     @Subscribe("editCandidateToolbarBtn")
     public void onEditCandidateToolbarBtnClick(Button.ClickEvent event) {
-        onEditCandidateBtnClick(null);
-    }
-
-    @Subscribe("actionsWithCandidateButton.editCandidateAction")
-    public void onActionsWithCandidateButtonEditCandidateAction(Action.ActionPerformedEvent event) {
-        onEditCandidateBtnClick(null);
-    }
-
-    @Subscribe("candidatesTable.edit")
-    public void onCandidatesTableEdit(Action.ActionPerformedEvent event) {
         onEditCandidateBtnClick(null);
     }
 
@@ -1134,7 +1110,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         if (selected != null) {
             screenBuilders.editor(candidatesTable)
                     .editEntity(selected)
-                    .withOpenMode(OpenMode.NEW_TAB)
+                    .withOpenMode(OpenMode.DIALOG)
                     .show();
         }
     }
