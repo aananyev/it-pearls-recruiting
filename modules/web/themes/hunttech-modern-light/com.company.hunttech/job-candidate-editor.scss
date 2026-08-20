@@ -1296,15 +1296,24 @@
     }
   }
 
+  /* Рабочая область реестра (отступы сверху, справа, снизу) */
+  .candidate-reestr-workspace {
+    padding-top: 10px !important;
+    padding-right: 14px !important;
+    padding-bottom: 10px !important;
+    box-sizing: border-box !important;
+  }
+
   /* Generic Filter CUBA (класс платформы c-generic-filter + наш stylename) */
   .candidate-generic-filter,
   .c-generic-filter {
     background: #ffffff !important;
     border: 1px solid rgba(15, 23, 42, 0.12) !important;
     border-radius: 8px !important;
-    padding: 8px 12px !important;
+    padding: 6px 12px !important;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
-    margin-bottom: 8px !important;
+    margin-top: 2px !important;
+    margin-bottom: 6px !important;
     box-sizing: border-box !important;
   }
 

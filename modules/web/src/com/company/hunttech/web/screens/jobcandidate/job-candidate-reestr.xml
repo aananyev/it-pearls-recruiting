@@ -134,8 +134,8 @@
                 </scrollBox>
             </vbox>
 
-            <!-- ПРАВАЯ ПАНЕЛЬ: Рабочая область реестра (edit-workspace) -->
-            <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace" expand="candidatesTableCard">
+            <!-- ПРАВАЯ ПАНЕЛЬ: Рабочая область реестра (edit-workspace candidate-reestr-workspace) -->
+            <vbox id="candidatesTableBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="candidatesTableCard" margin="true,true,true,false">
                 
                 <!-- Стандартный фильтр поиска CUBA Platform по ширине таблицы кандидатов -->
                 <filter id="filter"
