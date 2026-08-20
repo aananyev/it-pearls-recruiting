@@ -1,5 +1,6 @@
 package com.company.hunttech.web.screens.jobcandidate;
 
+import com.company.hunttech.core.ParseCVService;
 import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.CandidateSkill;
 import com.company.hunttech.entity.CandidateSkillPriority;
@@ -12,6 +13,8 @@ import com.company.hunttech.entity.SkillTree;
 import com.company.hunttech.service.AiExecutionResult;
 import com.company.hunttech.service.SkillAnalysisResult;
 import com.company.hunttech.service.SkillAnalysisService;
+import com.company.hunttech.web.screens.fragments.OnlyTextPersonPosition;
+import com.company.hunttech.web.screens.fragments.OnlyTextPersonPositionLoadPdf;
 import com.company.hunttech.web.screens.signicons.SignIconsBrowse;
 import com.company.hunttech.web.util.AiOperationNotifier;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
@@ -21,6 +24,7 @@ import com.haulmont.cuba.core.global.FileLoader;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Button;
@@ -39,13 +43,14 @@ import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.icons.CubaIcon;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.model.CollectionLoader;
-import com.haulmont.cuba.gui.screen.Target;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import com.haulmont.cuba.gui.screen.OpenMode;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.StandardLookup;
 import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.Target;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
@@ -57,8 +62,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -94,6 +101,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private ScreenBuilders screenBuilders;
 
     @Inject
+    private Screens screens;
+
+    @Inject
     private UiComponents uiComponents;
     @Inject
     private FileLoader fileLoader;
@@ -114,7 +124,13 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private SkillAnalysisService skillAnalysisService;
 
     @Inject
+    private ParseCVService parseCVService;
+
+    @Inject
     private BackgroundWorker backgroundWorker;
+
+    @Inject
+    private DataContext dataContext;
 
     @Inject
     private WebOvaFallbackImage detailPic;
@@ -146,18 +162,31 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private Button createInteractionBtn;
 
     @Inject
+    private Button createCandidateBtn;
+    @Inject
+    private PopupButton quickLoadCV;
+    @Inject
+    private Button editCandidateToolbarBtn;
+    @Inject
     private Button filterAllBtn;
     @Inject
     private Button filterMyCandidatesBtn;
     @Inject
     private Button filterMyParticipationBtn;
     @Inject
-    private PopupButton actionsWithCandidateButton;
-
+    private PopupButton signFilterButton;
     @Inject
     private PopupButton signIconsButton;
+    @Inject
+    private PopupButton actionsWithCandidateButton;
 
     private final java.text.SimpleDateFormat interactionDateFormat = new java.text.SimpleDateFormat("dd.MM.yyyy");
+
+    /** Пакетно загруженные метки кандидатов (устранение N+1). */
+    private Map<UUID, List<SignIcons>> signIconsByCandidateId = Collections.emptyMap();
+
+    /** Пакетно загруженные навыки кандидатов (устранение N+1). */
+    private Map<UUID, List<CandidateSkill>> skillsByCandidateId = Collections.emptyMap();
 
     public enum InteractionStatus {
         FREE("🟢 Свободен", "#27ae60", "rgba(39, 174, 96, 0.15)"),
@@ -258,6 +287,54 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         return null;
     }
 
+    /* =========================================================================
+     * Пакетная загрузка связанных данных (Zero N+1)
+     * ========================================================================= */
+
+    @Subscribe(id = "jobCandidatesDl", target = Target.DATA_LOADER)
+    public void onJobCandidatesDlPostLoad(CollectionLoader.PostLoadEvent<JobCandidate> event) {
+        List<JobCandidate> candidates = event.getLoadedEntities();
+        if (candidates == null || candidates.isEmpty()) {
+            signIconsByCandidateId = Collections.emptyMap();
+            skillsByCandidateId = Collections.emptyMap();
+            return;
+        }
+
+        // Пакетная загрузка SignIcons для всех видимых кандидатов (1 SQL-запрос)
+        List<JobCandidateSignIcon> allSignIcons = dataManager.load(JobCandidateSignIcon.class)
+                .query("select e from hunttech_JobCandidateSignIcon e where e.jobCandidate in :candidates order by e.createTs asc")
+                .parameter("candidates", candidates)
+                .view("jobCandidateSignIcon-view")
+                .list();
+
+        Map<UUID, List<SignIcons>> signMap = new HashMap<>();
+        for (JobCandidateSignIcon jcsi : allSignIcons) {
+            if (jcsi.getJobCandidate() != null && jcsi.getSignIcon() != null) {
+                signMap.computeIfAbsent(jcsi.getJobCandidate().getId(), k -> new ArrayList<>()).add(jcsi.getSignIcon());
+            }
+        }
+        signIconsByCandidateId = signMap;
+
+        // Пакетная загрузка CandidateSkills для всех видимых кандидатов (1 SQL-запрос)
+        List<CandidateSkill> allSkills = dataManager.load(CandidateSkill.class)
+                .query("select e from hunttech_CandidateSkill e where e.candidate in :candidates order by e.priority, e.skill.skillName")
+                .parameter("candidates", candidates)
+                .view("candidateSkill-view")
+                .list();
+
+        Map<UUID, List<CandidateSkill>> skillsMap = new HashMap<>();
+        for (CandidateSkill cs : allSkills) {
+            if (cs.getCandidate() != null) {
+                skillsMap.computeIfAbsent(cs.getCandidate().getId(), k -> new ArrayList<>()).add(cs);
+            }
+        }
+        skillsByCandidateId = skillsMap;
+    }
+
+    /* =========================================================================
+     * Инициализация колонок и жизненного цикла
+     * ========================================================================= */
+
     @Subscribe
     public void onInit(Screen.InitEvent event) {
         // Колонка 1: Миниатюра фото кандидата (36px oval)
@@ -273,7 +350,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             return avatarImg;
         });
 
-        // Колонка 3: Кандидат (ФИО слева ячейки; справа — метки пользователя)
+        // Колонка 3: Кандидат (ФИО слева ячейки; справа — метки пользователя из пакетного кэша)
         candidatesTable.addGeneratedColumn("fullName", candidate -> {
             String name = candidate.getFullName() != null ? candidate.getFullName() : "Без имени";
             String sub = candidate.getTelegramName() != null ? "@" + candidate.getTelegramName() :
@@ -281,21 +358,10 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
                     (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>";
 
-            // Метки (SignIcons), присвоенные кандидату, — в правой части поля
-            List<JobCandidateSignIcon> signIcons = dataManager.load(JobCandidateSignIcon.class)
-                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
-                    .parameter("jobCandidate", candidate)
-                    .view("jobCandidateSignIcon-view")
-                    .cacheable(true)
-                    .list();
-            List<SignIcons> icons = new ArrayList<>();
-            for (JobCandidateSignIcon jcsi : signIcons) {
-                if (jcsi.getSignIcon() != null) {
-                    icons.add(jcsi.getSignIcon());
-                }
-            }
+            // Метки кандидата берутся из предварительно сформированной пакетной карты (без N+1)
+            List<SignIcons> icons = signIconsByCandidateId.getOrDefault(candidate.getId(), Collections.emptyList());
 
-            // Пустое состояние: только текст, выровненный вправо (без HBox-обёртки и кластера)
+            // Пустое состояние: только текст
             if (icons.isEmpty()) {
                 Label<String> plain = uiComponents.create(Label.NAME);
                 plain.setHtmlEnabled(true);
@@ -317,7 +383,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             box.add(lbl);
             box.setExpandRatio(lbl, 1f);
 
-            // Метки: до 4 иконок, при превышении — компактный «+N» (паттерн колонки mainSkills)
+            // Метки: до 4 иконок, при превышении — компактный «+N»
             int shown = 0;
             int total = icons.size();
             for (SignIcons icon : icons) {
@@ -383,18 +449,14 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             return lbl;
         });
 
-        // Колонка 7: Ключевые навыки (чипы)
+        // Колонка 7: Ключевые навыки (чипы из пакетной карты без N+1)
         candidatesTable.addGeneratedColumn("mainSkills", candidate -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             try {
-                List<CandidateSkill> skills = dataManager.load(CandidateSkill.class)
-                        .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate order by e.priority, e.skill.skillName")
-                        .parameter("candidate", candidate)
-                        .view("candidateSkill-view")
-                        .list();
+                List<CandidateSkill> skills = skillsByCandidateId.getOrDefault(candidate.getId(), Collections.emptyList());
 
-                if (skills == null || skills.isEmpty()) {
+                if (skills.isEmpty()) {
                     lbl.setValue("<span style='color: #a0aec0; font-size: 11px;'>—</span>");
                     return lbl;
                 }
@@ -443,15 +505,13 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     public void onBeforeShow(Screen.BeforeShowEvent event) {
         initSignIconsDataContainer();
         injectAllSignIconColors();
+        initSignFilterPopupButton();
         initSignIconsActions();
         updateSignIconsState(candidatesTable.getSingleSelected());
     }
 
     /**
      * Предварительная инъекция CSS-правил цветов всех меток пользователя.
-     * Вызывается до рендера таблицы: Page.Styles.add() во время paint генераторов
-     * может не попасть в текущий UIDL (а дедупликация INJECTED_COLORS не даст
-     * добавить правило повторно) — поэтому цвета инъектируем заранее, в onBeforeShow.
      */
     private void injectAllSignIconColors() {
         if (signIconsDc == null) {
@@ -471,14 +531,89 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
 
     @Subscribe(id = "signIconsDc", target = Target.DATA_CONTAINER)
     public void onSignIconsDcCollectionChange(CollectionContainer.CollectionChangeEvent<SignIcons> event) {
+        initSignFilterPopupButton();
         initSignIconsActions();
         updateSignIconsState(candidatesTable.getSingleSelected());
     }
 
+    /* =========================================================================
+     * Выпадающий фильтр по меткам/значкам (signFilterButton)
+     * ========================================================================= */
+
+    private void initSignFilterPopupButton() {
+        if (signFilterButton == null) return;
+        signFilterButton.removeAllActions();
+
+        final String separator = "⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯";
+
+        for (SignIcons icons : signIconsDc.getItems()) {
+            String actId = "signFilter_" + (icons.getId() != null ? icons.getId().toString().replace("-", "_") : icons.getTitleEnd());
+            signFilterButton.addAction(new BaseAction(actId)
+                    .withIcon(icons.getIconName())
+                    .withCaption(icons.getTitleRu() != null ? icons.getTitleRu() : icons.getTitleEnd())
+                    .withDescription(icons.getTitleDescription())
+                    .withHandler(actionPerformedAction -> {
+                        setSignFilter(icons);
+                    }));
+        }
+
+        signFilterButton.addAction(new BaseAction("separator1Action")
+                .withCaption(separator));
+
+        signFilterButton.addAction(new BaseAction("removeFilterSignAction")
+                .withIcon(CubaIcon.REMOVE_ACTION.source())
+                .withCaption("Снять фильтр по меткам")
+                .withDescription("Снять фильтрацию по значкам и показать всех кандидатов")
+                .withHandler(actionPerformedAction -> {
+                    removeSignFilterAction();
+                }));
+
+        signFilterButton.addAction(new BaseAction("separator3Action")
+                .withCaption(separator));
+
+        signFilterButton.addAction(new BaseAction("editSignIconsAction")
+                .withCaption("Справочник меток...")
+                .withDescription("Настройка справочника значков и меток")
+                .withIcon(CubaIcon.FONTICONS.source())
+                .withHandler(actionPerformedAction -> {
+                    SignIconsBrowse screen = (SignIconsBrowse) screenBuilders.lookup(SignIcons.class, this)
+                            .withOpenMode(OpenMode.DIALOG)
+                            .build();
+                    screen.addAfterCloseListener(closeEvent -> {
+                        signIconsDl.load();
+                        initSignFilterPopupButton();
+                        initSignIconsActions();
+                        jobCandidatesDl.load();
+                    });
+                    screen.show();
+                }));
+    }
+
+    private void removeSignFilterAction() {
+        jobCandidatesDl.removeParameter("signIcon");
+        jobCandidatesDl.load();
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption("Фильтр по меткам снят")
+                .show();
+    }
+
+    private void setSignFilter(SignIcons icons) {
+        jobCandidatesDl.removeParameter("signIcon");
+        jobCandidatesDl.setParameter("signIcon", icons);
+        jobCandidatesDl.load();
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption("Фильтр по метке")
+                .withDescription(icons.getTitleRu() != null ? icons.getTitleRu() : "")
+                .show();
+    }
+
+    /* =========================================================================
+     * Выпадающая кнопка присвоения меток кандидату (signIconsButton)
+     * ========================================================================= */
+
     private void initSignIconsActions() {
         if (signIconsButton == null) return;
 
-        // Удаляем ранее добавленные действия меток (чтобы не дублировались при перезагрузке)
         signIconsButton.removeAllActions();
 
         for (SignIcons icon : signIconsDc.getItems()) {
@@ -516,8 +651,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                             .build();
                     screen.addAfterCloseListener(closeEvent -> {
                         signIconsDl.load();
+                        initSignFilterPopupButton();
                         initSignIconsActions();
-                        candidatesTable.repaint();
+                        jobCandidatesDl.load();
                     });
                     screen.show();
                 }));
@@ -526,16 +662,10 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     private void updateSignIconsState(JobCandidate selected) {
         if (signIconsButton == null) return;
         boolean hasSelected = selected != null;
-        // Кнопка меток активна только при выбранном кандидате
         signIconsButton.setEnabled(hasSelected);
         if (hasSelected && signIconsButton.getAction("removeSignAction") != null) {
-            List<JobCandidateSignIcon> list = dataManager.load(JobCandidateSignIcon.class)
-                    .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
-                    .parameter("jobCandidate", selected)
-                    .view("jobCandidateSignIcon-view")
-                    .cacheable(true)
-                    .list();
-            signIconsButton.getAction("removeSignAction").setEnabled(!list.isEmpty());
+            List<SignIcons> assigned = signIconsByCandidateId.getOrDefault(selected.getId(), Collections.emptyList());
+            signIconsButton.getAction("removeSignAction").setEnabled(!assigned.isEmpty());
         }
     }
 
@@ -545,7 +675,6 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
                 .parameter("jobCandidate", jobCandidate)
                 .view("jobCandidateSignIcon-view")
-                .cacheable(true)
                 .list();
 
         if (list.isEmpty()) {
@@ -562,7 +691,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             dataManager.commit(jcsi);
         }
 
-        candidatesTable.repaint();
+        jobCandidatesDl.load();
         candidatesTable.setSelected(jobCandidate);
         updateSignIconsState(jobCandidate);
         notifications.create(Notifications.NotificationType.TRAY)
@@ -571,12 +700,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 .show();
     }
 
-    /** Уже инъектированные цвета меток (дедупликация CSS-правил на 200+ строк). */
+    /** Уже инъектированные цвета меток (дедупликация CSS-правил). */
     private static final Set<String> INJECTED_COLORS = new HashSet<>();
 
-    /**
-     * Инъекция CSS-правила цвета метки (иконка font-icon в цвете iconColor).
-     */
     private void injectColorCss(String color) {
         if (!INJECTED_COLORS.add(color)) {
             return;
@@ -598,7 +724,6 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 .query(QUERY_GET_JOB_CANDIDATE_SIGN_ICONS)
                 .parameter("jobCandidate", jobCandidate)
                 .view("jobCandidateSignIcon-view")
-                .cacheable(true)
                 .list();
 
         if (!list.isEmpty()) {
@@ -607,13 +732,120 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             }
         }
 
-        candidatesTable.repaint();
+        jobCandidatesDl.load();
         candidatesTable.setSelected(jobCandidate);
         updateSignIconsState(jobCandidate);
         notifications.create(Notifications.NotificationType.TRAY)
                 .withCaption("Метка снята")
                 .show();
     }
+
+    /* =========================================================================
+     * Быстрая загрузка резюме (quickLoadCV)
+     * ========================================================================= */
+
+    @Subscribe("quickLoadCV.loadFromPdf")
+    public void onQuickLoadCVLoadFromPdf(Action.ActionPerformedEvent event) {
+        OnlyTextPersonPositionLoadPdf screen = screenBuilders.screen(this)
+                .withScreenClass(OnlyTextPersonPositionLoadPdf.class)
+                .withOpenMode(OpenMode.NEW_TAB)
+                .build();
+
+        screen.addAfterCloseListener(afterCloseEvent -> {
+            jobCandidatesDl.load();
+        });
+
+        screen.show();
+    }
+
+    @Subscribe("quickLoadCV.loadFromClipboard")
+    public void onQuickLoadCVLoadFromClipboard(Action.ActionPerformedEvent event) {
+        OnlyTextPersonPosition screenOnlytext = screenBuilders.screen(this)
+                .withScreenClass(OnlyTextPersonPosition.class)
+                .withOpenMode(OpenMode.NEW_TAB)
+                .build();
+
+        screenOnlytext.addAfterCloseListener(afterCloseEvent -> {
+            if (Boolean.TRUE.equals(screenOnlytext.getCancel())) {
+                return;
+            }
+            String textCV = screenOnlytext.getResultText();
+            if (textCV != null && !textCV.trim().isEmpty()) {
+                Screen jobCandidateEdit = screenBuilders.editor(JobCandidate.class, this)
+                        .withOpenMode(OpenMode.NEW_TAB)
+                        .withScreenClass(JobCandidateEdit.class)
+                        .withAfterCloseListener(eventAfterClose -> {
+                            jobCandidatesDl.load();
+                        })
+                        .withInitializer(e -> {
+                            selectFirstNames(textCV, e);
+                            selectMiddleNames(textCV, e);
+                            selectSecondNames(textCV, e);
+
+                            if (parseCVService != null) {
+                                e.setEmail(parseCVService.parseEmail(textCV));
+                                e.setPhone(parseCVService.parsePhone(textCV));
+                                e.setBirdhDate(parseCVService.parseDate(textCV));
+                                e.setCurrentCompany(parseCVService.parseCompany(textCV));
+                                e.setCityOfResidence(parseCVService.parseCity(textCV));
+                                e.setPersonPosition(screenOnlytext.getPersonPosition());
+                                e.setTelegramName(parseCVService.parseTelegram(textCV));
+                                e.setSkypeName(parseCVService.parseSkype(textCV));
+                            }
+
+                            CandidateCV candidateCV = metadata.create(CandidateCV.class);
+                            candidateCV.setResumePosition(e.getPersonPosition());
+                            candidateCV.setTextCV(textCV);
+                            if (userSession.getUser() instanceof ExtUser) {
+                                candidateCV.setOwner((ExtUser) userSession.getUser());
+                            }
+                            candidateCV.setCandidate(e);
+                            candidateCV.setDatePost(new Date());
+
+                            List<CandidateCV> candidateCVS = new ArrayList<>();
+                            candidateCVS.add(candidateCV);
+                            e.setCandidateCv(candidateCVS);
+                        })
+                        .build();
+                jobCandidateEdit.show();
+            }
+        });
+
+        screenOnlytext.show();
+    }
+
+    @Subscribe("quickLoadCV.loadFromWord")
+    public void onQuickLoadCVLoadFromWord(Action.ActionPerformedEvent event) {
+        onQuickLoadCVLoadFromClipboard(event);
+    }
+
+    private void selectFirstNames(String textCV, JobCandidate e) {
+        if (parseCVService == null) return;
+        List<String> namesList = parseCVService.getFirstNameList(textCV);
+        if (namesList != null && !namesList.isEmpty()) {
+            e.setFirstName(namesList.get(0));
+        }
+    }
+
+    private void selectMiddleNames(String textCV, JobCandidate e) {
+        if (parseCVService == null) return;
+        List<String> namesList = parseCVService.getMiddleNameList(textCV);
+        if (namesList != null && !namesList.isEmpty()) {
+            e.setMiddleName(namesList.get(0));
+        }
+    }
+
+    private void selectSecondNames(String textCV, JobCandidate e) {
+        if (parseCVService == null) return;
+        List<String> namesList = parseCVService.getSecondNameList(textCV);
+        if (namesList != null && !namesList.isEmpty()) {
+            e.setSecondName(namesList.get(0));
+        }
+    }
+
+    /* =========================================================================
+     * Выбор строки и обновление состояния интерфейса
+     * ========================================================================= */
 
     @Subscribe("candidatesTable")
     public void onCandidatesTableSelection(Table.SelectionEvent<JobCandidate> event) {
@@ -628,9 +860,12 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     }
 
     private void updateActionsState(JobCandidate selected) {
+        boolean hasSelected = selected != null;
+        if (editCandidateToolbarBtn != null) {
+            editCandidateToolbarBtn.setEnabled(hasSelected);
+        }
         if (actionsWithCandidateButton == null) return;
         actionsWithCandidateButton.setEnabled(true);
-        boolean hasSelected = selected != null;
         if (actionsWithCandidateButton.getAction("editCandidateAction") != null) {
             actionsWithCandidateButton.getAction("editCandidateAction").setEnabled(hasSelected);
         }
@@ -639,6 +874,9 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
         }
         if (actionsWithCandidateButton.getAction("scanSkillsAction") != null) {
             actionsWithCandidateButton.getAction("scanSkillsAction").setEnabled(hasSelected);
+        }
+        if (actionsWithCandidateButton.getAction("findSuitableAction") != null) {
+            actionsWithCandidateButton.getAction("findSuitableAction").setEnabled(hasSelected);
         }
         if (actionsWithCandidateButton.getAction("showCandidateCVListAction") != null) {
             actionsWithCandidateButton.getAction("showCandidateCVListAction").setEnabled(hasSelected);
@@ -715,11 +953,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             return;
         }
         try {
-            List<CandidateSkill> skills = dataManager.load(CandidateSkill.class)
-                    .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate order by e.priority, e.skill.skillName")
-                    .parameter("candidate", candidate)
-                    .view("candidateSkill-view")
-                    .list();
+            List<CandidateSkill> skills = skillsByCandidateId.getOrDefault(candidate.getId(), Collections.emptyList());
 
             if (skills.isEmpty()) {
                 detailSkillsLabels.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
@@ -732,7 +966,7 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 if (cs.getSkill() != null && cs.getSkill().getSkillName() != null) {
                     String skillName = cs.getSkill().getSkillName();
                     String color = palette[Math.abs(skillName.hashCode()) % palette.length];
-                    String priorityIcon = cs.getPriority() == com.company.hunttech.entity.CandidateSkillPriority.MAIN ? "★ " : "";
+                    String priorityIcon = cs.getPriority() == CandidateSkillPriority.MAIN ? "★ " : "";
                     sb.append(String.format(
                             "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
                             "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
@@ -747,6 +981,10 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             detailSkillsLabels.setValue("<span style='color: #7f8c8d; font-size: 11px;'>Навыки не определены</span>");
         }
     }
+
+    /* =========================================================================
+     * Быстрые фильтры и действия тулбара
+     * ========================================================================= */
 
     @Subscribe("filterAllBtn")
     public void onFilterAllBtnClick(Button.ClickEvent event) {
@@ -792,6 +1030,11 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                 .show();
     }
 
+    @Subscribe("editCandidateToolbarBtn")
+    public void onEditCandidateToolbarBtnClick(Button.ClickEvent event) {
+        onEditCandidateBtnClick(null);
+    }
+
     @Subscribe("actionsWithCandidateButton.refreshAction")
     public void onActionsWithCandidateButtonRefreshAction(Action.ActionPerformedEvent event) {
         jobCandidatesDl.load();
@@ -806,6 +1049,21 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                     .withOpenMode(OpenMode.DIALOG)
                     .show();
         }
+    }
+
+    @Subscribe("actionsWithCandidateButton.findSuitableAction")
+    public void onActionsWithCandidateButtonFindSuitableAction(Action.ActionPerformedEvent event) {
+        JobCandidate selected = candidatesTable.getSingleSelected();
+        if (selected == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Выберите кандидата")
+                    .withDescription("Для подбора подходящих вакансий выберите кандидата из таблицы")
+                    .show();
+            return;
+        }
+        FindSuitable findSuitable = screens.create(FindSuitable.class);
+        findSuitable.setJobCandidate(selected);
+        findSuitable.show();
     }
 
     @Subscribe("actionsWithCandidateButton.scanSkillsAction")
@@ -846,7 +1104,6 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
             return;
         }
 
-        // Контракт пользовательской нотификации («AI-нотификации 2 раза»): старт операции — исчезающая TRAY-нотификация
         AiOperationNotifier.showStarted(notifications, "Запущен AI-анализ навыков резюме…", null);
 
         final JobCandidate candidateForScan = candidate;
@@ -858,8 +1115,8 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                     @Override
                     public SkillScanOutcome run(TaskLifeCycle<Integer> taskLifeCycle) {
                         List<CandidateSkill> existingSkills = dataManager.load(CandidateSkill.class)
-                                .query("select e from hunttech_CandidateSkill e where e.candidate = :candidate")
-                                .parameter("candidate", candidateForScan)
+                                .query("select e from hunttech_CandidateSkill e where e.candidate.id = :candidateId")
+                                .parameter("candidateId", candidateForScan.getId())
                                 .view("candidateSkill-view")
                                 .list();
 
@@ -972,12 +1229,12 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
                                 .withHideDelayMs(5000)
                                 .show();
 
+                        jobCandidatesDl.load();
                         JobCandidate selected = candidatesTable.getSingleSelected();
                         if (selected != null && candidateForScan.getId() != null
                                 && candidateForScan.getId().equals(selected.getId())) {
                             updateCandidateSkillsSidebar(selected);
                         }
-                        candidatesTable.repaint();
                     }
 
                     @Override

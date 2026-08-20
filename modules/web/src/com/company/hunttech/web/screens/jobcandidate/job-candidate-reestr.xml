@@ -24,6 +24,11 @@
                             <c:jpql>
                                 <c:where>e in (select k.candidate from hunttech_IteractionList k where k.recrutier = :recrutier or k.createdBy = :recrutierName)</c:where>
                             </c:jpql>
+                            <c:jpql>
+                                <c:where>
+                                    e in (select l.jobCandidate from hunttech_JobCandidateSignIcon l where l.signIcon = :signIcon)
+                                </c:where>
+                            </c:jpql>
                         </and>
                     </condition>
                 </query>
@@ -156,13 +161,40 @@
                 
                 <!-- Верхняя полоса быстрых фильтров, счетчиков и выпадающего меню действий -->
                 <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="statusFilterButtons">
-                    <!-- Кнопка создания и быстрые фильтры по кандидатам -->
+                    <!-- Группа создания, быстрой загрузки и быстрых фильтров-пилюль слева -->
                     <hbox id="statusFilterButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
                         <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
+                        <popupButton id="quickLoadCV"
+                                     caption="Быстрая загрузка"
+                                     icon="CLOUD_UPLOAD"
+                                     showActionIcons="true"
+                                     stylename="secondary candidate-btn candidate-quickload-btn">
+                            <actions>
+                                <action id="loadFromPdf" caption="Из файла PDF..." icon="FILE_PDF_O"/>
+                                <action id="loadFromWord" caption="Из файла Word..." icon="FILE_WORD_O"/>
+                                <action id="loadFromClipboard" caption="Из буфера обмена..." icon="CLIPBOARD"/>
+                            </actions>
+                        </popupButton>
                         <button id="filterAllBtn" caption="Все кандидаты" stylename="primary filter-pill-btn active" icon="USERS"/>
                         <button id="filterMyCandidatesBtn" caption="Мои кандидаты" stylename="secondary filter-pill-btn" icon="USER"/>
                         <button id="filterMyParticipationBtn" caption="С моим участием" stylename="secondary filter-pill-btn" icon="font-icon:ADN"/>
                     </hbox>
+
+                    <!-- Группа действий над выбранной записью и фильтрации меток справа -->
+                    <button id="editCandidateToolbarBtn"
+                            caption="Редактировать"
+                            icon="EDIT_ACTION"
+                            stylename="secondary candidate-btn candidate-edit-btn"
+                            enabled="false"
+                            align="MIDDLE_RIGHT"/>
+
+                    <!-- Выпадающий фильтр отбора кандидатов по меткам/значкам -->
+                    <popupButton id="signFilterButton"
+                                 caption="Фильтр по меткам"
+                                 icon="FILTER"
+                                 showActionIcons="true"
+                                 stylename="secondary"
+                                 align="MIDDLE_RIGHT"/>
 
                     <!-- Выпадающая кнопка присвоения меток кандидату -->
                     <popupButton id="signIconsButton"
@@ -183,6 +215,7 @@
                                  align="MIDDLE_RIGHT">
                         <actions>
                             <action id="refreshAction" caption="Обновить" icon="REFRESH"/>
+                            <action id="findSuitableAction" caption="Подобрать вакансии" icon="SEARCH"/>
                             <action id="scanSkillsAction" caption="Сканировать навыки" icon="font-icon:MAGIC"/>
                             <action id="editCandidateAction" caption="Редактировать карточку" icon="EDIT_ACTION"/>
                             <action id="createInteractionAction" caption="Добавить взаимодействие" icon="PLUS"/>

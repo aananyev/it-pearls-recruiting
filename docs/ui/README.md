@@ -257,6 +257,7 @@ Cross-links в шапке Spec ↔ entity/architecture при наличии п�
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-20 | Редизайн выпадающих меню `PopupButton` («Действия», «Метки») в стиле Halo и реестре кандидатов: парящие пункты, карточка с тенью `0 10px 25px`, синхронизация по 7 темам |
 | 2026-08-18 | В каталог добавлен реестр кандидатов `hunttech_JobCandidateReestr.browse`: Split-View таблица + сайдбар, метки пользователя в колонке «Кандидат» справа |
 | 2026-08-15 | Добавлена спецификация и схемы пяти эскизов экранов просмотра кандидатов [JobCandidateTestScreens_Spec.md](JobCandidateTestScreens_Spec.md) |
 | 2026-08-13 | Добавлена спецификация серии справочных Edit-форм [DictionaryEditForms_Spec.md](DictionaryEditForms_Spec.md) (FileType, SocialNetworkType, Grade, Currency, OutstaffingRates, EmployeeWorkStatus, SignIcons); обновлён OutstaffingRatesEdit_Spec под двухпанельную композицию |

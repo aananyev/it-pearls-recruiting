@@ -195,6 +195,7 @@ layout (expand=candidatesDataGrid)
 
 | Дата | Изменение |
 |---|---|
+| 2026-08-20 | Редизайн выпадающих меню `PopupButton` («Действия», «Метки») в реестре кандидатов `JobCandidateReestr` и общих стилях Halo: белый фон карточки с тенью `0 10px 25px`, парящие пункты действий (`height: 34px`, `border-radius: 6px`, hover `background: #f1f5f9`), выравнивание кнопок тулбара `height: 32px` в тон пилюлям быстрых фильтров. Синхронизировано по 7 темам. |
 | 2026-08-19 | Колонка «Кандидат» реестра `JobCandidateReestr`: ФИО + контакт перенесены влево ячейки (`text-align: left`), метки `SignIcons` остались справа; цвета меток инъектируются заранее (`injectAllSignIconColors` в `onBeforeShow`). |
 | 2026-08-18 | Колонка «Кандидат» реестра `JobCandidateReestr`: ФИО + контакт, справа выводятся метки `SignIcons` (до 4 + «+N», `order by createTs`, `pic-center-large-<color>` с дедупликацией CSS, per-row cacheable N+1). |
 | 2026-08-18 | Переименование экрана «Тест 1: Split-View (Halo)» в «Реестр кандидатов»: класс `JobCandidateTest1Browse` → `JobCandidateReestr`, screen id `hunttech_JobCandidateTest1.browse` → `hunttech_JobCandidateReestr.browse`, дескриптор `job-candidate-test1-browse.xml` → `job-candidate-reestr.xml`; обновлены пункт меню, caption окна и SCSS-комментарии. |

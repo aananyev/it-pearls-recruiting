@@ -223,19 +223,41 @@ layout (expand=jobCandidatesTable)
 - Выравнивание от левого края без дублирующего заголовка таблицы.
 
 ### 7.3 Фирменные кнопки действий (`candidate-btn`)
-- **«Создать кандидата» (`candidate-create-btn` / `primary`)**: насыщенный градиент `linear-gradient(135deg, #2563eb, #1d4ed8)`, скругление 6px, тень `0 2px 5px rgba(37, 99, 235, 0.25)`.
-- **«Обновить» (`candidate-refresh-btn` / `secondary`)**: панельный светлый градиент `linear-gradient(180deg, #ffffff, #f8fafc)`, граница `#cbd5e1`.
-- **«Поиск» (`candidate-search-btn`)**: согласованный тулбар и поле ввода `candidate-search-input`.
+- **«Создать кандидата» (`candidate-create-btn` / `primary`)**: насыщенный синий цвет, скругление 6px, тень `0 2px 5px rgba(37, 99, 235, 0.25)`.
+- **«Быстрая загрузка» (`quickLoadCV` / `secondary`)**: выпадающее меню загрузки PDF (`OnlyTextPersonPositionLoadPdf`), Word и вставки из буфера обмена (`OnlyTextPersonPosition`) с автопарсингом ФИО, контактов и созданием резюме.
+- **«Редактировать» (`editCandidateToolbarBtn` / `secondary`)**: быстрое открытие выбранного кандидата в редакторе карточки.
+- **«Фильтр по меткам» (`signFilterButton` / `secondary`)**: выпадающий фильтр кандидатов по персональным значкам текущего пользователя, сброс фильтра и открытие `SignIconsBrowse`.
+- **«Метки» (`signIconsButton` / `secondary`)**: контекстное назначение и снятие меток выбранного кандидата.
 - **Выпадающее меню «Действия» (`actionsWithCandidateButton`)**:
+  - `refreshAction`: перезагрузка данных реестра.
+  - `findSuitableAction`: подбор подходящих вакансий (`FindSuitable`).
+  - `scanSkillsAction`: AI-сканирование навыков резюме в фоне (`SkillAnalysisService`).
+  - `editCandidateAction`: открытие редактора карточки.
+  - `createInteractionAction`: регистрация нового взаимодействия.
   - `showCandidateCVListAction`: быстрый переход к списку резюме кандидата.
-  - `showCandidateInteractionsAction`: просмотр истории взаимодействий.
+  - `showIteractionListAction`: просмотр истории взаимодействий.
+  - `sendEmailAction`: отправка email.
+  - `addPersonalReserveAction`: добавление в кадровый резерв.
 
 ### 7.4 Изоляция счетчика строк таблицы (`rowsCount`)
 - Карточка таблицы (`candidate-table-card`) с отдельным подвалом `c-table-bottom-bar` (высота 42px, фон `#f8fafc`, верхняя граница `#e2e8f0`).
 - Полная изоляция от области строк и горизонтального скроллбара, исключающая перекрытие данных.
 
-### 7.5 Колонка «Кандидат» реестра (`JobCandidateReestr`)
-- ФИО + контакт (telegram/email) выводятся слева ячейки (`text-align: left`); справа в ячейке — метки `SignIcons` (связь `JobCandidateSignIcon`): `Label.setIcon(iconName)` + `pic-center-large-<iconColor>`, tooltip `titleDescription`/`titleRu`; до 4 иконок + «+N»; `order by createTs`; per-row load `cacheable(true)` (N+1, см. [JobCandidate.md](../../entities/job-candidate/JobCandidate.md) §3.4). Подробно: [JobCandidateTestScreens_Spec.md](../../ui/JobCandidateTestScreens_Spec.md) → «Эскиз 1 & Базовый».
+### 7.5 Колонка «Кандидат» реестра (`JobCandidateReestr`) и Пакетная оптимизация (Zero N+1)
+- ФИО + контакт (telegram/email) выводятся слева ячейки (`text-align: left`); справа в ячейке — метки `SignIcons` (связь `JobCandidateSignIcon`): `Label.setIcon(iconName)` + `pic-center-large-<iconColor>`, tooltip `titleDescription`/`titleRu`; до 4 иконок + «+N».
+- **Batch PostLoad**: Метки `JobCandidateSignIcon` и навыки `CandidateSkill` загружаются единым batch-запросом в `onJobCandidatesDlPostLoad` по списку видимых кандидатов `where e.jobCandidate in :candidates`, полностью устраняя N+1 запросы при рендере и прокрутке таблицы.
+
+### 7.6 Сравнительный анализ функционала: JobCandidateBrowse vs JobCandidateReestr
+
+| Функциональный блок | `JobCandidateBrowse` (Классический) | `JobCandidateReestr` (Split-View) |
+|---|---|---|
+| **Архитектура представления** | Полноэкранный `DataGrid` (10 колонок) + раскрывающиеся строки `DetailsGenerator` (`hunttech_JobCanidateDetailScreenFragment`) | Двухпанельный `Split-View`: постоянный сайдбар профиля (312px) слева + `GroupTable` (7 колонок) справа |
+| **Просмотр данных кандидата** | Требуется клик/раскрытие строки `DetailsGenerator` или открытие полной формы редактирования | Мгновенный просмотр аватара 120×120, ФИО, должности, города, контактов, истории и навыков при выборе строки в таблице |
+| **Быстрые фильтры** | Чекбоксы: «Только мои», «С моим участием», «В работе», «Только с резюме», выпадающий фильтр по рейтингу `ratingFieldNotLower` | Сегментированные кнопки-пилюли («Все», «Мои», «С участием») + выпадающий фильтр по меткам `signFilterButton` |
+| **Метки и значки (SignIcons)** | Фильтр по значкам `signFilterButton` (диалог выбора) + вывод значка в колонку `status` | Выпадающий фильтр `signFilterButton` + выпадающая кнопка назначения `signIconsButton` + вывод до 4 цветных меток + «+N» в ячейке ФИО |
+| **Импорт резюме (Quick Load)** | Меню `quickLoadCV`: парсинг PDF (извлечение лиц), DOC/DOCX, парсинг текста из буфера обмена | Меню `quickLoadCV`: быстрая загрузка PDF (`OnlyTextPersonPositionLoadPdf`), Word и буфера обмена (`OnlyTextPersonPosition`) |
+| **AI-функции анализа** | Поиск подходящих вакансий (`findSuitable`) | AI-сканирование навыков (`scanSkillsAction` через `SkillAnalysisService`) + подбор вакансий (`findSuitableAction`) + цветные чипы навыков |
+| **Производительность** | Пакетный `PostLoad` (счётчики CV, последние взаимодействия, сущности `Employee`) | Пакетный `PostLoad` меток `JobCandidateSignIcon` и навыков `CandidateSkill` (Zero N+1) + ленивая подгрузка сайдбара по клику |
 
 ---
 
@@ -243,6 +265,7 @@ layout (expand=jobCandidatesTable)
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-20 | Реализован выпадающий фильтр по значкам `signFilterButton`, меню быстрой загрузки `quickLoadCV` (PDF, Word, буфер обмена), кнопка «Редактировать» в тулбаре, действие `findSuitableAction`, а также пакетная оптимизация загрузки меток и навыков (Zero N+1) |
 | 2026-08-19 | Реестр `JobCandidateReestr`: колонка «Кандидат» — ФИО/контакт слева ячейки (`text-align: left`), метки `SignIcons` справа (правка выравнивания, было вправо) |
 | 2026-08-18 | Реестр `JobCandidateReestr`: колонка «Кандидат» — ФИО/контакт + метки `SignIcons` справа (до 4 + «+N», `order by createTs`, per-row cacheable); добавлен §7.5 |
 | 2026-08-16 | Обновлен дизайн JobCandidateTestBrowse: удален избыточный заголовок реестра, стилизованы кнопки тулбара, изолирован rowsCount, настроены светлые цвета шапки сайдбара и бесшовный блок активности |

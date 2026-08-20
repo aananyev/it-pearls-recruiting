@@ -1198,6 +1198,104 @@
     padding: 0 14px !important;
   }
 
+  /* Выпадающие кнопки в панели фильтров реестра (Действия, Метки) */
+  .candidate-filter-bar .v-popupbutton {
+    height: 32px !important;
+    min-height: 32px !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    padding: 0 12px 0 14px !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 30px !important;
+
+    .v-button-caption {
+      display: inline-block !important;
+      vertical-align: middle !important;
+    }
+
+    .v-icon {
+      margin-right: 6px !important;
+      font-size: 13px !important;
+    }
+
+    .v-popup-indicator {
+      margin-left: 6px !important;
+      padding-left: 0 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      opacity: 0.75 !important;
+      background: none !important;
+      background-image: none !important;
+
+      &:before {
+        display: none !important;
+        content: none !important;
+      }
+
+      &:after {
+        font-family: FontAwesome !important;
+        content: "\f107" !important;
+        font-size: 12px !important;
+        line-height: 1 !important;
+      }
+    }
+  }
+
+  .candidate-filter-bar .v-popupbutton.v-button-primary {
+    background: #4d7ab2 !important;
+    border: 1px solid #4d7ab2 !important;
+    color: #ffffff !important;
+
+    .v-icon,
+    .v-button-caption,
+    .v-popup-indicator:after {
+      color: #ffffff !important;
+    }
+
+    &:hover:not(.v-disabled) {
+      background: #3d689e !important;
+      border-color: #3d689e !important;
+    }
+
+    &.v-disabled {
+      opacity: 0.5 !important;
+      cursor: default !important;
+      pointer-events: none !important;
+    }
+  }
+
+  .candidate-filter-bar .v-popupbutton.v-button-secondary {
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #475569 !important;
+
+    .v-icon,
+    .v-button-caption,
+    .v-popup-indicator:after {
+      color: #475569 !important;
+    }
+
+    &:hover:not(.v-disabled) {
+      background: #e2e8f0 !important;
+      color: #0f172a !important;
+
+      .v-icon,
+      .v-button-caption,
+      .v-popup-indicator:after {
+        color: #0f172a !important;
+      }
+    }
+
+    &.v-disabled {
+      opacity: 0.5 !important;
+      cursor: default !important;
+      pointer-events: none !important;
+    }
+  }
+
   /* Generic Filter CUBA (класс платформы c-generic-filter + наш stylename) */
   .candidate-generic-filter,
   .c-generic-filter {

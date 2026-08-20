@@ -508,4 +508,129 @@
       max-width: 250px !important;
     }
   }
+
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * PopupButton, Context Menu & Action Dropdowns (Theme-aware Modern UI)
+   * ═══════════════════════════════════════════════════════════════════════════ */
+
+  .v-popupbutton-popup,
+  .c-popupbutton-popup,
+  .c-cm-container,
+  .v-popupview-popup,
+  .v-contextmenu,
+  .v-menubar-popup {
+    background: $v-panel-background-color !important;
+    border: 1px solid rgba($v-font-color, 0.14) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.12) !important;
+    padding: 6px 4px !important;
+    min-width: 180px;
+    box-sizing: border-box !important;
+
+    .c-popupbutton-layout,
+    .v-scrollable {
+      padding: 0 !important;
+      overflow-x: hidden !important;
+    }
+  }
+
+  .c-cm-button,
+  .v-button.c-cm-button,
+  .v-popupbutton-popup .v-button,
+  .c-popupbutton-popup .v-button,
+  .v-contextmenu .gwt-MenuItem,
+  .v-menubar-popup .v-menubar-menuitem {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+    padding: 2px 12px !important;
+    margin: 1px 0 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: mix($v-font-color, $v-panel-background-color, 85%) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.15px !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    box-sizing: border-box !important;
+    transition: background 0.12s ease-in-out, color 0.12s ease-in-out, transform 0.08s ease !important;
+
+    &:after {
+      display: none !important;
+    }
+
+    .v-button-caption,
+    .c-cm-button-caption {
+      color: inherit !important;
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      line-height: 1.3 !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      flex: 1 1 auto !important;
+    }
+
+    .v-icon,
+    .c-cm-button-icon {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 18px !important;
+      min-width: 18px !important;
+      font-size: 13.5px !important;
+      margin-right: 10px !important;
+      color: rgba($v-font-color, 0.60) !important;
+      transition: color 0.12s ease-in-out, transform 0.12s ease !important;
+    }
+
+    &:hover:not(.v-disabled),
+    &.c-cm-button-selected:not(.v-disabled),
+    &.v-button-focus:not(.v-disabled),
+    &.gwt-MenuItem-selected:not(.v-disabled),
+    &.v-menubar-menuitem-selected:not(.v-disabled) {
+      background: rgba($v-selection-color, 0.10) !important;
+      color: mix($v-font-color, $v-panel-background-color, 98%) !important;
+
+      .v-icon,
+      .c-cm-button-icon {
+        color: $v-selection-color !important;
+        transform: scale(1.08);
+      }
+    }
+
+    &:active:not(.v-disabled) {
+      background: rgba($v-selection-color, 0.16) !important;
+      transform: scale(0.99);
+    }
+
+    &.v-disabled,
+    &[disabled] {
+      opacity: 0.45 !important;
+      cursor: not-allowed !important;
+      background: transparent !important;
+      color: rgba($v-font-color, 0.35) !important;
+
+      .v-icon,
+      .c-cm-button-icon {
+        color: rgba($v-font-color, 0.35) !important;
+      }
+    }
+  }
+
+  .c-cm-separator,
+  .v-menubar-separator {
+    height: 1px !important;
+    background: rgba($v-font-color, 0.12) !important;
+    margin: 4px 6px !important;
+    padding: 0 !important;
+    border: none !important;
+  }
 }

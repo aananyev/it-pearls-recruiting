@@ -317,6 +317,9 @@
 
   .v-window,
   .v-popupview-popup,
+  .v-popupbutton-popup,
+  .c-popupbutton-popup,
+  .c-cm-container,
   .v-contextmenu,
   .v-menubar-popup {
     color: $ht-text !important;
@@ -409,13 +412,19 @@
   }
 
   .v-contextmenu .gwt-MenuItem,
-  .v-menubar-popup .v-menubar-menuitem {
+  .v-menubar-popup .v-menubar-menuitem,
+  .c-cm-button,
+  .v-popupbutton-popup .v-button,
+  .c-popupbutton-popup .v-button {
     color: $ht-text !important;
     background: transparent !important;
   }
 
   .v-contextmenu .gwt-MenuItem-selected,
-  .v-menubar-popup .v-menubar-menuitem-selected {
+  .v-menubar-popup .v-menubar-menuitem-selected,
+  .c-cm-button:hover:not(.v-disabled),
+  .c-cm-button.c-cm-button-selected:not(.v-disabled),
+  .v-popupbutton-popup .v-button:hover:not(.v-disabled) {
     color: $ht-text !important;
     background: $ht-accent-soft !important;
   }
