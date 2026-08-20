@@ -6,6 +6,7 @@ import com.company.hunttech.service.SmartCvIngestResult;
 import com.company.hunttech.service.SmartCvIngestService;
 import com.company.hunttech.service.SmartCvParsedData;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.components.Button;
@@ -101,6 +102,8 @@ public class SmartCvUploadScreen extends Screen {
     private Notifications notifications;
     @Inject
     private UserSession userSession;
+    @Inject
+    private DataManager dataManager;
 
     private FileDescriptor currentFileDescriptor;
     private byte[] currentFileBytes;
@@ -124,17 +127,19 @@ public class SmartCvUploadScreen extends Screen {
         }
 
         try {
-            currentFileDescriptor = uploadField.getFileDescriptor();
-            fileUploadingAPI.putFileIntoStorage(uploadField.getFileId(), currentFileDescriptor);
-
+            // Читаем байты из временного файла ДО того, как putFileIntoStorage переместит его
             try (InputStream is = new FileInputStream(file)) {
                 currentFileBytes = is.readAllBytes();
             }
+
+            currentFileDescriptor = uploadField.getFileDescriptor();
+            fileUploadingAPI.putFileIntoStorage(uploadField.getFileId(), currentFileDescriptor);
+            currentFileDescriptor = dataManager.commit(currentFileDescriptor);
         } catch (Exception e) {
             log.error("Ошибка сохранения файла в FileStorage", e);
             notifications.create(Notifications.NotificationType.ERROR)
                     .withCaption("Ошибка")
-                    .withDescription("Не удалось сохранить файл в хранилище")
+                    .withDescription("Не удалось сохранить файл в хранилище: " + e.getMessage())
                     .show();
             return;
         }
