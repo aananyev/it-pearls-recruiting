@@ -122,7 +122,9 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private Label<String> detailLocationAndFormat;
     @Inject
-    private Label<String> detailSalary;
+    private Label<String> detailSalaryTk;
+    @Inject
+    private Label<String> detailSalaryIe;
     @Inject
     private Label<String> detailExperience;
     @Inject
@@ -152,6 +154,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
 
     /** Кэш требуемых навыков для всех видимых вакансий (Zero N+1) */
     private Map<UUID, List<OpenPositionSkill>> skillsByPositionId = Collections.emptyMap();
+    /** Кэш среднего рейтинга для всех видимых вакансий (Zero N+1) */
+    private Map<UUID, Double> avgRatingByPositionId = Collections.emptyMap();
 
     @Subscribe
     public void onInit(Screen.InitEvent event) {
@@ -166,6 +170,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         List<OpenPosition> positions = event.getLoadedEntities();
         if (positions == null || positions.isEmpty()) {
             skillsByPositionId = Collections.emptyMap();
+            avgRatingByPositionId = Collections.emptyMap();
             return;
         }
 
@@ -186,12 +191,77 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         } catch (Exception ignored) {
             skillsByPositionId = Collections.emptyMap();
         }
+
+        try {
+            Map<UUID, Double> ratingsMap = new HashMap<>();
+            List<com.haulmont.cuba.core.entity.KeyValueEntity> rows = dataManager.loadValues(
+                    "select e.openPosition.id as positionId, avg(e.rating + 1) as avgRating " +
+                    "from hunttech_OpenPositionComment e " +
+                    "where e.openPosition in :positions and e.rating is not null " +
+                    "group by e.openPosition.id")
+                    .parameter("positions", positions)
+                    .properties("positionId", "avgRating")
+                    .list();
+            for (com.haulmont.cuba.core.entity.KeyValueEntity row : rows) {
+                UUID posId = row.getValue("positionId");
+                Number avg = row.getValue("avgRating");
+                if (posId != null && avg != null) {
+                    ratingsMap.put(posId, avg.doubleValue());
+                }
+            }
+            avgRatingByPositionId = ratingsMap;
+        } catch (Exception ignored) {
+            avgRatingByPositionId = Collections.emptyMap();
+        }
     }
 
     private void initTableColumns() {
         if (openPositionsTable == null) return;
 
-        // Колонка 1: Логотип проекта/компании (36px oval)
+        // Колонка 1: Приоритет (индикатор без текста)
+        openPositionsTable.addGeneratedColumn("priority", position -> {
+            Integer p = position.getPriority();
+            String iconPath = com.company.hunttech.web.StandartPriorityVacancy.NORMAL_ICON;
+            String desc = "Обычный";
+            if (p != null) {
+                switch (p) {
+                    case -1:
+                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.DRAFT_ICON;
+                        desc = "Черновик";
+                        break;
+                    case 0:
+                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.PAUSED_ICON;
+                        desc = "Приостановлена";
+                        break;
+                    case 1:
+                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.LOW_ICON;
+                        desc = "Низкий";
+                        break;
+                    case 2:
+                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.NORMAL_ICON;
+                        desc = "Обычный";
+                        break;
+                    case 3:
+                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.HIGH_ICON;
+                        desc = "Высокий";
+                        break;
+                    case 4:
+                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.CRITICAL_ICON;
+                        desc = "Критический";
+                        break;
+                }
+            }
+            Image img = uiComponents.create(Image.class);
+            img.setWidth("18px");
+            img.setHeight("18px");
+            img.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+            img.setSource(com.haulmont.cuba.gui.components.ThemeResource.class).setPath(iconPath);
+            img.setDescription(desc);
+            img.setAlignment(Component.Alignment.MIDDLE_CENTER);
+            return img;
+        });
+
+        // Колонка 2: Логотип проекта/компании (36px oval)
         openPositionsTable.addGeneratedColumn("logo", position -> {
             WebOvaFallbackImage logoImg = uiComponents.create(WebOvaFallbackImage.class);
             logoImg.setWidth("36px");
@@ -211,7 +281,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             return logoImg;
         });
 
-        // Колонка 2: Название вакансии (с подзаголовком ID / Опыт)
+        // Колонка 3: Название вакансии (с подзаголовком ID / Опыт)
         openPositionsTable.addGeneratedColumn("vacansyName", position -> {
             String vName = position.getVacansyName() != null ? position.getVacansyName() : "Без названия";
             String sub = position.getVacansyID() != null ? "ID: " + position.getVacansyID() : "";
@@ -224,27 +294,6 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             lbl.setAlignment(Component.Alignment.MIDDLE_LEFT);
             lbl.setValue("<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + vName + "</div>" +
                     (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>");
-            return lbl;
-        });
-
-        // Колонка 3: Проект и компания
-        openPositionsTable.addGeneratedColumn("projectName", position -> {
-            Label<String> lbl = uiComponents.create(Label.NAME);
-            lbl.setHtmlEnabled(true);
-            String pName = "—";
-            String comp = "—";
-            try {
-                if (position.getProjectName() != null) {
-                    pName = position.getProjectName().getProjectName() != null ? position.getProjectName().getProjectName() : "—";
-                    if (position.getProjectName().getProjectDepartment() != null
-                            && position.getProjectName().getProjectDepartment().getCompanyName() != null) {
-                        comp = position.getProjectName().getProjectDepartment().getCompanyName().getComanyName();
-                    }
-                }
-            } catch (Exception ignored) {
-            }
-            lbl.setValue("<div style='text-align: left;'><div style='font-size: 12px; color: #34495e; font-weight: 500;'>" + pName + "</div>" +
-                    (comp != null && !comp.equals("—") ? "<div style='font-size: 10.5px; color: #94a3b8;'>" + comp + "</div>" : "") + "</div>");
             return lbl;
         });
 
@@ -263,22 +312,17 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             return lbl;
         });
 
-        // Колонка 5: Зарплата
+        // Колонка 5: Зарплата (максимальная планка по ТК / по запросу кандидата / не определено)
         openPositionsTable.addGeneratedColumn("salary", position -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
-            if (position.getSalaryMin() != null || position.getSalaryMax() != null) {
-                StringBuilder sb = new StringBuilder();
-                if (position.getSalaryMin() != null) {
-                    sb.append(SALARY_FORMAT.format(position.getSalaryMin())).append(" ₽");
-                }
-                if (position.getSalaryMax() != null) {
-                    if (sb.length() > 0) sb.append(" — ");
-                    sb.append(SALARY_FORMAT.format(position.getSalaryMax())).append(" ₽");
-                }
-                lbl.setValue("<span style='font-size: 12px; font-weight: 600; color: #1e3a8a;'>" + sb + "</span>");
+            if (position.getSalaryMax() != null) {
+                lbl.setValue("<span style='font-size: 12px; font-weight: 600; color: #1e3a8a;'>до "
+                        + SALARY_FORMAT.format(position.getSalaryMax()) + " ₽</span>");
+            } else if (Boolean.TRUE.equals(position.getSalaryCandidateRequest())) {
+                lbl.setValue("<span style='font-size: 11px; color: #4b5563;'>По запросу кандидата</span>");
             } else {
-                lbl.setValue("<span style='font-size: 11.5px; color: #94a3b8;'>Договорная</span>");
+                lbl.setValue("<span style='font-size: 11px; color: #94a3b8;'>Не определено</span>");
             }
             return lbl;
         });
@@ -415,7 +459,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             detailProjectName.setValue("—");
             detailCompanyName.setValue("—");
             detailLocationAndFormat.setValue("—");
-            detailSalary.setValue("—");
+            if (detailSalaryTk != null) detailSalaryTk.setValue("—");
+            if (detailSalaryIe != null) detailSalaryIe.setValue("—");
             detailExperience.setValue("—");
             detailRemoteWork.setValue("—");
             detailOpenClose.setValue("—");
@@ -471,19 +516,33 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         String remoteStr = formatRemoteWorkString(position.getRemoteWork());
         detailLocationAndFormat.setValue(cityStr + (remoteStr.isEmpty() ? "" : " / " + remoteStr));
 
-        // Зарплатная вилка
-        if (position.getSalaryMin() != null || position.getSalaryMax() != null) {
-            StringBuilder sb = new StringBuilder();
-            if (position.getSalaryMin() != null) {
-                sb.append(SALARY_FORMAT.format(position.getSalaryMin())).append(" ₽");
+        // Зарплата по ТК (подробная вилка)
+        if (detailSalaryTk != null) {
+            if (position.getSalaryMin() != null || position.getSalaryMax() != null) {
+                StringBuilder sb = new StringBuilder();
+                if (position.getSalaryMin() != null && position.getSalaryMax() != null) {
+                    sb.append("от ").append(SALARY_FORMAT.format(position.getSalaryMin()))
+                      .append(" до ").append(SALARY_FORMAT.format(position.getSalaryMax())).append(" ₽");
+                } else if (position.getSalaryMax() != null) {
+                    sb.append("до ").append(SALARY_FORMAT.format(position.getSalaryMax())).append(" ₽");
+                } else {
+                    sb.append("от ").append(SALARY_FORMAT.format(position.getSalaryMin())).append(" ₽");
+                }
+                detailSalaryTk.setValue(sb.toString());
+            } else if (Boolean.TRUE.equals(position.getSalaryCandidateRequest())) {
+                detailSalaryTk.setValue("По запросу кандидата");
+            } else {
+                detailSalaryTk.setValue("Не определено");
             }
-            if (position.getSalaryMax() != null) {
-                if (sb.length() > 0) sb.append(" — ");
-                sb.append(SALARY_FORMAT.format(position.getSalaryMax())).append(" ₽");
+        }
+
+        // Ставка по ИП
+        if (detailSalaryIe != null) {
+            if (position.getSalaryIE() != null) {
+                detailSalaryIe.setValue(SALARY_FORMAT.format(position.getSalaryIE()) + " ₽");
+            } else {
+                detailSalaryIe.setValue("—");
             }
-            detailSalary.setValue(sb.toString());
-        } else {
-            detailSalary.setValue("По договоренности");
         }
 
         // Опыт
@@ -519,6 +578,48 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         ind.append(hasTemplate ? "<span style='color: #16a34a;'>✓ Памятка</span>" : "<span style='color: #9ca3af;'>✕ Памятка</span>");
         ind.append("</div>");
         detailIndicators.setValue(ind.toString());
+
+        // Рейтинг вакансии (звёздочки)
+        try {
+            Double avgRating = avgRatingByPositionId.get(position.getId());
+            if (avgRating == null) {
+                avgRating = dataManager.loadValue(
+                        "select avg(e.rating + 1) from hunttech_OpenPositionComment e where e.openPosition.id = :openPositionId and e.rating is not null",
+                        Double.class)
+                        .parameter("openPositionId", position.getId())
+                        .optional()
+                        .orElse(null);
+            }
+            if (avgRating == null) {
+                avgRating = dataManager.loadValue(
+                        "select avg(e.rating + 1) from hunttech_IteractionList e where e.vacancy.id = :openPositionId and e.rating is not null",
+                        Double.class)
+                        .parameter("openPositionId", position.getId())
+                        .optional()
+                        .orElse(null);
+            }
+
+            if (avgRating != null && avgRating > 0) {
+                int rounded = (int) Math.round(avgRating);
+                if (rounded < 1) rounded = 1;
+                if (rounded > 5) rounded = 5;
+                StringBuilder sb = new StringBuilder("<div style='display: flex; align-items: center; gap: 3px; margin-top: 3px;'>");
+                for (int i = 1; i <= 5; i++) {
+                    if (i <= rounded) {
+                        sb.append("<span style='color: #f59e0b; font-size: 15px;'>★</span>");
+                    } else {
+                        sb.append("<span style='color: #cbd5e1; font-size: 15px;'>★</span>");
+                    }
+                }
+                sb.append(String.format("<span style='font-size: 12px; font-weight: 700; color: #334155; margin-left: 5px;'>%.1f</span>", avgRating));
+                sb.append("</div>");
+                detailRating.setValue(sb.toString());
+            } else {
+                detailRating.setValue("<span style='color: #9ca3af; font-size: 11px;'>Нет оценок вакансии</span>");
+            }
+        } catch (Exception ex) {
+            detailRating.setValue("<span style='color: #9ca3af; font-size: 11px;'>Нет оценок вакансии</span>");
+        }
 
         // Навыки, сгруппированные по 3 категориям (Обязательные, Желательные, Прочие)
         try {

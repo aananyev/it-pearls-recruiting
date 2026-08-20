@@ -130,8 +130,12 @@
                                 <columns count="2"/>
                                 <rows>
                                     <row>
-                                        <label value="Зарплата:" stylename="bold"/>
-                                        <label id="detailSalary" value="-" stylename="bold"/>
+                                        <label value="Вилка по ТК:" stylename="bold"/>
+                                        <label id="detailSalaryTk" value="-" stylename="bold"/>
+                                    </row>
+                                    <row>
+                                        <label value="Ставка по ИП:" stylename="bold"/>
+                                        <label id="detailSalaryIe" value="-"/>
                                     </row>
                                     <row>
                                         <label value="Опыт / Грейд:" stylename="bold"/>
@@ -290,12 +294,12 @@
                             <action id="list" type="listPrintForm"/>
                         </actions>
                         <columns>
+                            <column id="priority" caption="Приоритет" width="50px" sortable="true"/>
                             <column id="logo" caption="Лого" width="50px" sortable="false"/>
                             <column id="vacansyName" caption="Вакансия" expandRatio="1"/>
-                            <column id="projectName" caption="Проект" width="170px"/>
                             <column id="positionType" caption="Специализация" width="150px"/>
-                            <column id="salary" caption="Зарплата" width="140px"/>
-                            <column id="mainSkills" caption="Требуемые навыки" width="200px" sortable="false"/>
+                            <column id="salary" caption="Зарплата" width="150px"/>
+                            <column id="mainSkills" caption="Требуемые навыки" width="220px" sortable="false"/>
                             <column id="statusBadge" caption="Статус" width="110px" sortable="false"/>
                         </columns>
                         <rowsCount/>
