@@ -247,6 +247,7 @@
                             <actions>
                                 <action id="refreshAction" caption="Обновить" icon="REFRESH"/>
                                 <action id="openPositionAction" caption="Открыть карточку" icon="EDIT_ACTION"/>
+                                <action id="scanSkillsAction" caption="Сканировать навыки" icon="font-icon:MAGIC"/>
                                 <action id="suggestCandidatesAction" caption="Подобрать кандидатов" icon="font-icon:MAGIC"/>
                                 <action id="subscribeAction" caption="Подписаться" icon="font-icon:BELL"/>
                                 <action id="unsubscribeAction" caption="Отписаться" icon="font-icon:BELL_SLASH"/>

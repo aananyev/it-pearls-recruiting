@@ -1,21 +1,39 @@
 package com.company.hunttech.web.screens.openposition;
 
+import com.company.hunttech.service.AiExecutionResult;
+import com.company.hunttech.entity.CandidateSkillPriority;
 import com.company.hunttech.entity.OpenPosition;
+import com.company.hunttech.entity.OpenPositionSkill;
 import com.company.hunttech.entity.Person;
 import com.company.hunttech.entity.SkillTree;
+import com.company.hunttech.service.SkillAnalysisResult;
+import com.company.hunttech.service.SkillAnalysisService;
+import com.company.hunttech.web.util.AiOperationNotifier;
 import com.company.hunttech.web.util.FileDescriptorImageHelper;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
+import com.haulmont.cuba.core.entity.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.core.global.DataManager;
+import com.haulmont.cuba.core.global.EntityStates;
 import com.haulmont.cuba.core.global.FileLoader;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.core.global.View;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
+import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.Action;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.GroupTable;
+import com.haulmont.cuba.gui.components.Image;
 import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.PopupButton;
 import com.haulmont.cuba.gui.components.actions.BaseAction;
+import com.haulmont.cuba.gui.executors.BackgroundTask;
+import com.haulmont.cuba.gui.executors.BackgroundTaskHandler;
+import com.haulmont.cuba.gui.executors.BackgroundWorker;
+import com.haulmont.cuba.gui.executors.TaskLifeCycle;
 import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.LoadDataBeforeShow;
 import com.haulmont.cuba.gui.screen.LookupComponent;
@@ -24,19 +42,22 @@ import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.StandardLookup;
 import com.haulmont.cuba.gui.screen.StandardOutcome;
 import com.haulmont.cuba.gui.screen.Subscribe;
+import com.haulmont.cuba.gui.screen.Target;
 import com.haulmont.cuba.gui.screen.UiController;
 import com.haulmont.cuba.gui.screen.UiDescriptor;
 import com.haulmont.cuba.security.global.UserSession;
+import org.jsoup.Jsoup;
 
 import javax.inject.Inject;
 import java.text.DecimalFormat;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Контроллер Split-View реестра открытых вакансий ({@code hunttech_OpenPositionReestr.browse}).
  *
  * <p>Реализует полновысотный левый сайдбар (312px) с карточками условий, кураторов, индикаторов
- * и навыков, а также тулбар быстрых фильтров и действий над вакансиями.</p>
+ * и навыков (сгруппированных по 3 категориям), тулбар быстрых фильтров и действий, а также
+ * AI-сканирование 3 уровней навыков (основные, вторичные, прочие) с актуализацией в БД.</p>
  */
 @UiController("hunttech_OpenPositionReestr.browse")
 @UiDescriptor("open-position-reestr-browse.xml")
@@ -53,13 +74,19 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private DataManager dataManager;
     @Inject
+    private Metadata metadata;
+    @Inject
     private UserSession userSession;
     @Inject
     private FileLoader fileLoader;
     @Inject
-    private com.haulmont.cuba.gui.UiComponents uiComponents;
+    private UiComponents uiComponents;
     @Inject
-    private com.haulmont.cuba.core.global.EntityStates entityStates;
+    private EntityStates entityStates;
+    @Inject
+    private BackgroundWorker backgroundWorker;
+    @Inject
+    private SkillAnalysisService skillAnalysisService;
 
     @Inject
     private GroupTable<OpenPosition> openPositionsTable;
@@ -123,12 +150,42 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     @Inject
     private Button subscribeBtn;
 
+    /** Кэш требуемых навыков для всех видимых вакансий (Zero N+1) */
+    private Map<UUID, List<OpenPositionSkill>> skillsByPositionId = Collections.emptyMap();
+
     @Subscribe
     public void onInit(Screen.InitEvent event) {
         initTableColumns();
         initToolbarActions();
         initFilterPopupActions();
         initSidebarButtons();
+    }
+
+    @Subscribe(id = "openPositionsDl", target = Target.DATA_LOADER)
+    public void onOpenPositionsDlPostLoad(CollectionLoader.PostLoadEvent<OpenPosition> event) {
+        List<OpenPosition> positions = event.getLoadedEntities();
+        if (positions == null || positions.isEmpty()) {
+            skillsByPositionId = Collections.emptyMap();
+            return;
+        }
+
+        try {
+            List<OpenPositionSkill> allSkills = dataManager.load(OpenPositionSkill.class)
+                    .query("select e from hunttech_OpenPositionSkill e where e.openPosition in :positions order by e.priority, e.skill.skillName")
+                    .parameter("positions", positions)
+                    .view("openPositionSkill-view")
+                    .list();
+
+            Map<UUID, List<OpenPositionSkill>> skillsMap = new HashMap<>();
+            for (OpenPositionSkill ops : allSkills) {
+                if (ops.getOpenPosition() != null) {
+                    skillsMap.computeIfAbsent(ops.getOpenPosition().getId(), k -> new ArrayList<>()).add(ops);
+                }
+            }
+            skillsByPositionId = skillsMap;
+        } catch (Exception ignored) {
+            skillsByPositionId = Collections.emptyMap();
+        }
     }
 
     private void initTableColumns() {
@@ -142,7 +199,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             logoImg.setOvalWidth("36px");
             logoImg.setOvalHeight("36px");
             logoImg.setFallbackThemePath("icons/briefcase.png");
-            logoImg.setScaleMode(com.haulmont.cuba.gui.components.Image.ScaleMode.SCALE_DOWN);
+            logoImg.setScaleMode(Image.ScaleMode.SCALE_DOWN);
             FileDescriptor logo = null;
             try {
                 if (position.getProjectName() != null && entityStates.isLoaded(position.getProjectName(), "projectLogo")) {
@@ -164,7 +221,7 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             lbl.setWidth("100%");
-            lbl.setAlignment(com.haulmont.cuba.gui.components.Component.Alignment.MIDDLE_LEFT);
+            lbl.setAlignment(Component.Alignment.MIDDLE_LEFT);
             lbl.setValue("<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + vName + "</div>" +
                     (!sub.isEmpty() ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub + "</div>" : "") + "</div>");
             return lbl;
@@ -226,25 +283,27 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             return lbl;
         });
 
-        // Колонка 6: Требуемые навыки (чипы)
+        // Колонка 6: Требуемые навыки (чипы из пакетной карты OpenPositionSkill)
         openPositionsTable.addGeneratedColumn("mainSkills", position -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             try {
-                if (entityStates.isLoaded(position, "skillsList") && position.getSkillsList() != null && !position.getSkillsList().isEmpty()) {
+                List<OpenPositionSkill> skills = skillsByPositionId.getOrDefault(position.getId(), Collections.emptyList());
+                if (!skills.isEmpty()) {
                     StringBuilder sb = new StringBuilder("<div style='display: flex; gap: 4px; flex-wrap: wrap;'>");
                     String[] palette = new String[]{"#38bdf8", "#4ade80", "#c084fc", "#fb923c", "#2dd4bf", "#f472b6", "#facc15", "#60a5fa"};
                     int count = 0;
-                    for (SkillTree st : position.getSkillsList()) {
-                        if (st != null && st.getSkillName() != null && !st.getSkillName().trim().isEmpty()) {
+                    for (OpenPositionSkill ops : skills) {
+                        if (ops.getSkill() != null && ops.getSkill().getSkillName() != null) {
                             if (count >= 3) {
-                                sb.append("<span style='font-size: 10px; color: #7f8c8d; align-self: center;'>+").append(position.getSkillsList().size() - 3).append("</span>");
+                                sb.append("<span style='font-size: 10px; color: #7f8c8d; align-self: center;'>+").append(skills.size() - 3).append("</span>");
                                 break;
                             }
-                            String sName = st.getSkillName().trim();
+                            String sName = ops.getSkill().getSkillName().trim();
                             String color = palette[Math.abs(sName.hashCode()) % palette.length];
-                            sb.append(String.format("<span style='background: %s18; color: %s; border: 1px solid %s44; padding: 1px 6px; border-radius: 10px; font-size: 10.5px; font-weight: 600; white-space: nowrap;'>%s</span>",
-                                    color, color, color, sName));
+                            String priorityIcon = ops.getPriority() == CandidateSkillPriority.MAIN ? "★ " : "";
+                            sb.append(String.format("<span style='background: %s18; color: %s; border: 1px solid %s44; padding: 1px 6px; border-radius: 10px; font-size: 10.5px; font-weight: 600; white-space: nowrap;'>%s%s</span>",
+                                    color, color, color, priorityIcon, sName));
                             count++;
                         }
                     }
@@ -461,23 +520,89 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
         ind.append("</div>");
         detailIndicators.setValue(ind.toString());
 
-        // Навыки
+        // Навыки, сгруппированные по 3 категориям (Обязательные, Желательные, Прочие)
         try {
-            if (entityStates.isLoaded(position, "skillsList") && position.getSkillsList() != null && !position.getSkillsList().isEmpty()) {
-                StringBuilder sk = new StringBuilder("<div style='display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 0;'>");
-                String[] palette = new String[]{"#38bdf8", "#4ade80", "#c084fc", "#fb923c", "#2dd4bf", "#f472b6", "#facc15", "#60a5fa"};
-                for (SkillTree st : position.getSkillsList()) {
-                    if (st != null && st.getSkillName() != null && !st.getSkillName().trim().isEmpty()) {
-                        String skillName = st.getSkillName().trim();
-                        String color = palette[Math.abs(skillName.hashCode()) % palette.length];
-                        sk.append(String.format(
-                                "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
-                                "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
-                                "white-space: nowrap; display: inline-block;'>%s</span>",
-                                color, color, color, skillName
-                        ));
+            List<OpenPositionSkill> skills = skillsByPositionId.getOrDefault(position.getId(), Collections.emptyList());
+            if (skills.isEmpty()) {
+                skills = dataManager.load(OpenPositionSkill.class)
+                        .query("select e from hunttech_OpenPositionSkill e where e.openPosition = :openPosition order by e.priority, e.skill.skillName")
+                        .parameter("openPosition", position)
+                        .view("openPositionSkill-view")
+                        .list();
+            }
+
+            if (!skills.isEmpty()) {
+                List<OpenPositionSkill> mainSkills = new ArrayList<>();
+                List<OpenPositionSkill> secondarySkills = new ArrayList<>();
+                List<OpenPositionSkill> tertiarySkills = new ArrayList<>();
+
+                for (OpenPositionSkill ops : skills) {
+                    if (ops.getPriority() == CandidateSkillPriority.MAIN) {
+                        mainSkills.add(ops);
+                    } else if (ops.getPriority() == CandidateSkillPriority.SECONDARY) {
+                        secondarySkills.add(ops);
+                    } else {
+                        tertiarySkills.add(ops);
                     }
                 }
+
+                StringBuilder sk = new StringBuilder("<div style='display: flex; flex-direction: column; gap: 6px; padding: 2px 0;'>");
+                String[] palette = new String[]{"#38bdf8", "#4ade80", "#c084fc", "#fb923c", "#2dd4bf", "#f472b6", "#facc15", "#60a5fa"};
+
+                if (!mainSkills.isEmpty()) {
+                    sk.append("<div style='font-size: 10.5px; font-weight: 700; color: #16a34a; text-transform: uppercase; margin-top: 2px;'>Обязательные:</div>");
+                    sk.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
+                    for (OpenPositionSkill ops : mainSkills) {
+                        if (ops.getSkill() != null && ops.getSkill().getSkillName() != null) {
+                            String sName = ops.getSkill().getSkillName().trim();
+                            String color = palette[Math.abs(sName.hashCode()) % palette.length];
+                            sk.append(String.format(
+                                    "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                                    "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                                    "white-space: nowrap; display: inline-block;'>★ %s</span>",
+                                    color, color, color, sName
+                            ));
+                        }
+                    }
+                    sk.append("</div>");
+                }
+
+                if (!secondarySkills.isEmpty()) {
+                    sk.append("<div style='font-size: 10.5px; font-weight: 700; color: #3b82f6; text-transform: uppercase; margin-top: 4px;'>Желательные:</div>");
+                    sk.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
+                    for (OpenPositionSkill ops : secondarySkills) {
+                        if (ops.getSkill() != null && ops.getSkill().getSkillName() != null) {
+                            String sName = ops.getSkill().getSkillName().trim();
+                            String color = palette[Math.abs(sName.hashCode()) % palette.length];
+                            sk.append(String.format(
+                                    "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                                    "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                                    "white-space: nowrap; display: inline-block;'>%s</span>",
+                                    color, color, color, sName
+                            ));
+                        }
+                    }
+                    sk.append("</div>");
+                }
+
+                if (!tertiarySkills.isEmpty()) {
+                    sk.append("<div style='font-size: 10.5px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-top: 4px;'>Прочие:</div>");
+                    sk.append("<div style='display: flex; flex-wrap: wrap; gap: 4px;'>");
+                    for (OpenPositionSkill ops : tertiarySkills) {
+                        if (ops.getSkill() != null && ops.getSkill().getSkillName() != null) {
+                            String sName = ops.getSkill().getSkillName().trim();
+                            String color = palette[Math.abs(sName.hashCode()) % palette.length];
+                            sk.append(String.format(
+                                    "<span style='background: %s18; color: %s; border: 1px solid %s44; " +
+                                    "padding: 2px 7px; border-radius: 12px; font-size: 11px; font-weight: 600; " +
+                                    "white-space: nowrap; display: inline-block;'>%s</span>",
+                                    color, color, color, sName
+                            ));
+                        }
+                    }
+                    sk.append("</div>");
+                }
+
                 sk.append("</div>");
                 detailSkills.setValue(sk.toString());
             } else {
@@ -620,5 +745,248 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
                         priorityFilterPopupButton.setCaption("Обычный");
                     }));
         }
+
+        if (actionsWithPositionButton != null) {
+            actionsWithPositionButton.addAction(new BaseAction("refreshAction")
+                    .withCaption("Обновить")
+                    .withIcon("REFRESH")
+                    .withHandler(e -> openPositionsDl.load()));
+
+            actionsWithPositionButton.addAction(new BaseAction("openPositionAction")
+                    .withCaption("Открыть карточку")
+                    .withIcon("EDIT_ACTION")
+                    .withHandler(e -> openSelectedForEdit()));
+
+            actionsWithPositionButton.addAction(new BaseAction("scanSkillsAction")
+                    .withCaption("Сканировать навыки")
+                    .withIcon("font-icon:MAGIC")
+                    .withHandler(e -> scanOpenPositionSkills()));
+
+            actionsWithPositionButton.addAction(new BaseAction("suggestCandidatesAction")
+                    .withCaption("Подобрать кандидатов")
+                    .withIcon("font-icon:MAGIC")
+                    .withHandler(e -> {
+                        OpenPosition selected = openPositionsTable.getSingleSelected();
+                        if (selected != null) {
+                            screenBuilders.screen(this)
+                                    .withScreenId("hunttech_Suggestjobcandidate")
+                                    .withOpenMode(OpenMode.NEW_TAB)
+                                    .build()
+                                    .show();
+                        }
+                    }));
+        }
+    }
+
+    /**
+     * AI-анализ требований вакансии (основные, вторичные, прочие) с актуализацией в БД.
+     */
+    private void scanOpenPositionSkills() {
+        OpenPosition position = openPositionsTable.getSingleSelected();
+        if (position == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("ВНИМАНИЕ!")
+                    .withDescription("Вакансия не выбрана. Для анализа навыков выберите вакансию в таблице.")
+                    .show();
+            return;
+        }
+
+        // Загружаем полный текст описания вакансии
+        String rawText = position.getComment();
+        if (rawText == null || rawText.trim().isEmpty()) {
+            OpenPosition reloaded = dataManager.load(OpenPosition.class)
+                    .id(position.getId())
+                    .view(View.LOCAL)
+                    .optional()
+                    .orElse(null);
+            if (reloaded != null) {
+                rawText = reloaded.getComment() != null ? reloaded.getComment() : reloaded.getShortDescription();
+            }
+        }
+
+        if (rawText == null || rawText.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Пустое описание")
+                    .withDescription("Описание вакансии пусто. Заполните описание вакансии перед запуском анализа.")
+                    .show();
+            return;
+        }
+
+        String plainText = Jsoup.parse(rawText).text();
+        if (plainText.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Пустое описание")
+                    .withDescription("Описание вакансии не содержит читаемого текста для анализа.")
+                    .show();
+            return;
+        }
+
+        AiOperationNotifier.showStarted(notifications, "Запущен AI-анализ требований вакансии…", null);
+
+        final OpenPosition positionForScan = position;
+        final String textForScan = plainText;
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, "Анализ требований вакансии…");
+
+        BackgroundTask<Integer, VacancySkillScanOutcome> task =
+                new BackgroundTask<Integer, VacancySkillScanOutcome>(240, this) {
+                    @Override
+                    public VacancySkillScanOutcome run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        // 1. Загружаем текущие OpenPositionSkill вакансии
+                        List<OpenPositionSkill> existingSkills = dataManager.load(OpenPositionSkill.class)
+                                .query("select e from hunttech_OpenPositionSkill e where e.openPosition = :openPosition")
+                                .parameter("openPosition", positionForScan)
+                                .view("openPositionSkill-view")
+                                .list();
+
+                        Map<UUID, OpenPositionSkill> existingMap = new HashMap<>();
+                        for (OpenPositionSkill ops : existingSkills) {
+                            if (ops.getSkill() != null) {
+                                existingMap.put(ops.getSkill().getId(), ops);
+                            }
+                        }
+
+                        // 2. Сканируем 3 уровня требований через SkillAnalysisService
+                        SkillAnalysisResult mainResult = skillAnalysisService.analyzeMain(textForScan);
+                        SkillAnalysisResult secondaryResult = skillAnalysisService.analyzeSecondary(textForScan);
+                        SkillAnalysisResult tertiaryResult = skillAnalysisService.analyzeTertiary(textForScan);
+
+                        List<SkillTree> mainSkills = mainResult != null ? mainResult.getSkills() : null;
+                        List<SkillTree> secondarySkills = secondaryResult != null ? secondaryResult.getSkills() : null;
+                        List<SkillTree> tertiarySkills = tertiaryResult != null ? tertiaryResult.getSkills() : null;
+                        SkillAnalysisResult allResult = null;
+
+                        if (mainSkills == null) mainSkills = Collections.emptyList();
+                        if (secondarySkills == null) secondarySkills = Collections.emptyList();
+                        if (tertiarySkills == null) tertiarySkills = Collections.emptyList();
+
+                        if (mainSkills.isEmpty() && secondarySkills.isEmpty() && tertiarySkills.isEmpty()) {
+                            allResult = skillAnalysisService.analyzeAll(textForScan);
+                            mainSkills = allResult != null && allResult.getSkills() != null ? allResult.getSkills() : Collections.emptyList();
+                        }
+
+                        SkillAnalysisResult aiSourceResult = firstNonNull(mainResult, secondaryResult, tertiaryResult, allResult);
+                        AiExecutionResult aiExecution = aiSourceResult == null ? null : aiSourceResult.getAiExecution();
+
+                        // 3. Формируем актуальный набор распознанных навыков по уровням без дублей
+                        Map<UUID, CandidateSkillPriority> targetSkills = new LinkedHashMap<>();
+                        Map<UUID, SkillTree> targetSkillEntities = new HashMap<>();
+
+                        for (SkillTree st : mainSkills) {
+                            if (st != null && !targetSkills.containsKey(st.getId())) {
+                                targetSkills.put(st.getId(), CandidateSkillPriority.MAIN);
+                                targetSkillEntities.put(st.getId(), st);
+                            }
+                        }
+                        for (SkillTree st : secondarySkills) {
+                            if (st != null && !targetSkills.containsKey(st.getId())) {
+                                targetSkills.put(st.getId(), CandidateSkillPriority.SECONDARY);
+                                targetSkillEntities.put(st.getId(), st);
+                            }
+                        }
+                        for (SkillTree st : tertiarySkills) {
+                            if (st != null && !targetSkills.containsKey(st.getId())) {
+                                targetSkills.put(st.getId(), CandidateSkillPriority.TERTIARY);
+                                targetSkillEntities.put(st.getId(), st);
+                            }
+                        }
+
+                        // 4. Актуализация: определяем добавление, обновление и удаление лишних
+                        List<Entity> toSave = new ArrayList<>();
+                        List<Entity> toRemove = new ArrayList<>();
+                        int addedCount = 0;
+                        int updatedCount = 0;
+
+                        // Находим те, что больше не присутствуют в требованиях -> удаляем
+                        for (Map.Entry<UUID, OpenPositionSkill> entry : existingMap.entrySet()) {
+                            if (!targetSkills.containsKey(entry.getKey())) {
+                                toRemove.add(entry.getValue());
+                            }
+                        }
+
+                        // Создаем новые или обновляем приоритеты
+                        for (Map.Entry<UUID, CandidateSkillPriority> entry : targetSkills.entrySet()) {
+                            UUID skillId = entry.getKey();
+                            CandidateSkillPriority priority = entry.getValue();
+                            OpenPositionSkill existing = existingMap.get(skillId);
+
+                            if (existing == null) {
+                                OpenPositionSkill newOps = metadata.create(OpenPositionSkill.class);
+                                newOps.setOpenPosition(positionForScan);
+                                newOps.setSkill(targetSkillEntities.get(skillId));
+                                newOps.setPriority(priority);
+                                toSave.add(newOps);
+                                addedCount++;
+                            } else {
+                                if (existing.getPriority() != priority) {
+                                    existing.setPriority(priority);
+                                    toSave.add(existing);
+                                    updatedCount++;
+                                }
+                            }
+                        }
+
+                        if (!toSave.isEmpty() || !toRemove.isEmpty()) {
+                            CommitContext commitContext = new CommitContext(toSave, toRemove);
+                            dataManager.commit(commitContext);
+                        }
+
+                        int totalDetected = targetSkills.size();
+                        int removedCount = toRemove.size();
+
+                        long mainCount = targetSkills.values().stream().filter(p -> p == CandidateSkillPriority.MAIN).count();
+                        long secondaryCount = targetSkills.values().stream().filter(p -> p == CandidateSkillPriority.SECONDARY).count();
+                        long tertiaryCount = targetSkills.values().stream().filter(p -> p == CandidateSkillPriority.TERTIARY).count();
+
+                        String statsDescription = String.format(
+                                "Всего актуализировано требований: <b>%d</b><br/>" +
+                                "• Обязательных: <b>%d</b><br/>" +
+                                "• Желательных: <b>%d</b><br/>" +
+                                "• Прочих: <b>%d</b><br/>" +
+                                "Добавлено новых: <b>%d</b>, обновлено: <b>%d</b>, удалено лишних: <b>%d</b>",
+                                totalDetected, mainCount, secondaryCount, tertiaryCount,
+                                addedCount, updatedCount, removedCount
+                        );
+
+                        return new VacancySkillScanOutcome(statsDescription, aiExecution);
+                    }
+
+                    @Override
+                    public void done(VacancySkillScanOutcome outcome) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        openPositionsDl.load();
+                        OpenPosition current = openPositionsTable.getSingleSelected();
+                        if (current != null) {
+                            updateSidebarWithPosition(current);
+                        }
+                        AiOperationNotifier.show(
+                                notifications,
+                                outcome.aiExecution,
+                                "AI-анализ требований вакансии завершён",
+                                outcome.statsDescription
+                        );
+                    }
+                };
+
+        BackgroundTaskHandler<VacancySkillScanOutcome> handler =
+                backgroundWorker.handle(task);
+        handler.execute();
+    }
+
+    private static class VacancySkillScanOutcome {
+        final String statsDescription;
+        final AiExecutionResult aiExecution;
+
+        VacancySkillScanOutcome(String statsDescription, AiExecutionResult aiExecution) {
+            this.statsDescription = statsDescription;
+            this.aiExecution = aiExecution;
+        }
+    }
+
+    @SafeVarargs
+    private static <T> T firstNonNull(T... values) {
+        for (T val : values) {
+            if (val != null) return val;
+        }
+        return null;
     }
 }
