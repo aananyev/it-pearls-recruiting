@@ -106,4 +106,8 @@
     <include file="260820-1-addSmartCvParseAiFunction.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- ExtUser: добавление поля TELEGRAM для пользователей. -->
+    <include file="260820-2-addTelegramToSecUser.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

@@ -1,5 +1,6 @@
 package com.company.hunttech.web.screens.extuser;
 
+import com.company.hunttech.entity.ExtUser;
 import com.haulmont.bali.util.ParamsMap;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.gui.WindowManager;
@@ -51,6 +52,12 @@ public class ExtUserEditor extends UserEditor {
     private Label<String> emailLabel;
     @Inject
     private Label<String> positionLabel;
+    @Inject
+    private Label<String> telegramLabel;
+    @Inject
+    private Label<String> loginDetailLabel;
+    @Inject
+    private Label<String> positionDetailLabel;
 
     @Inject
     private FieldGroup contactsFieldGroup;
@@ -181,19 +188,49 @@ public class ExtUserEditor extends UserEditor {
     private void refreshProfileLabels() {
         User user = getItem();
         if (user == null) {
-            fioLabel.setValue("");
-            loginLabel.setValue("");
-            statusLabel.setValue("");
-            emailLabel.setValue("");
-            positionLabel.setValue("");
+            if (fioLabel != null) fioLabel.setValue("");
+            if (loginLabel != null) loginLabel.setValue("");
+            if (loginDetailLabel != null) loginDetailLabel.setValue("-");
+            if (statusLabel != null) statusLabel.setValue("-");
+            if (emailLabel != null) emailLabel.setValue("-");
+            if (positionLabel != null) positionLabel.setValue("");
+            if (positionDetailLabel != null) positionDetailLabel.setValue("-");
+            if (telegramLabel != null) telegramLabel.setValue("-");
             return;
         }
-        fioLabel.setValue(buildFio(user));
-        loginLabel.setValue(user.getLogin() != null ? user.getLogin() : "");
+        if (fioLabel != null) {
+            fioLabel.setValue(buildFio(user));
+        }
+        if (loginLabel != null) {
+            loginLabel.setValue(user.getLogin() != null ? user.getLogin() : "");
+        }
+        if (loginDetailLabel != null) {
+            loginDetailLabel.setValue(user.getLogin() != null ? user.getLogin() : "-");
+        }
         boolean active = Boolean.TRUE.equals(user.getActive());
-        statusLabel.setValue(active ? getMessage("msgStatusActive") : getMessage("msgStatusBlocked"));
-        emailLabel.setValue(user.getEmail() != null ? user.getEmail() : "");
-        positionLabel.setValue(user.getPosition() != null ? user.getPosition() : "");
+        if (statusLabel != null) {
+            statusLabel.setValue(active
+                    ? "<span style='color: #22c55e; font-weight: 600;'>● " + getMessage("msgStatusActive") + "</span>"
+                    : "<span style='color: #ef4444; font-weight: 600;'>● " + getMessage("msgStatusBlocked") + "</span>");
+        }
+        if (emailLabel != null) {
+            emailLabel.setValue(user.getEmail() != null && !user.getEmail().trim().isEmpty() ? user.getEmail() : "-");
+        }
+        if (positionLabel != null) {
+            positionLabel.setValue(user.getPosition() != null ? user.getPosition() : "");
+        }
+        if (positionDetailLabel != null) {
+            positionDetailLabel.setValue(user.getPosition() != null && !user.getPosition().trim().isEmpty() ? user.getPosition() : "-");
+        }
+        if (telegramLabel != null) {
+            String tg = user instanceof ExtUser ? ((ExtUser) user).getTelegram() : null;
+            if (StringUtils.isNotBlank(tg)) {
+                String cleanTg = tg.trim();
+                telegramLabel.setValue(cleanTg.startsWith("@") ? cleanTg : "@" + cleanTg);
+            } else {
+                telegramLabel.setValue("-");
+            }
+        }
     }
 
     /**
