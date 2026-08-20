@@ -1198,101 +1198,152 @@
     padding: 0 14px !important;
   }
 
-  /* Выпадающие кнопки в панели фильтров реестра (Действия, Метки) */
-  .candidate-filter-bar .v-popupbutton {
-    height: 32px !important;
-    min-height: 32px !important;
-    border-radius: 6px !important;
-    font-size: 12.5px !important;
-    font-weight: 600 !important;
-    padding: 0 12px 0 14px !important;
-    box-sizing: border-box !important;
-    display: inline-flex !important;
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * Тулбар действий и быстрых фильтров (таблицы JobCandidate и OpenPosition)
+   * Единая высота 34px и строгое вертикальное выравнивание для всех кнопок
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  .candidate-filter-bar {
+    display: flex !important;
     align-items: center !important;
-    line-height: 30px !important;
+    min-height: 46px !important;
+    box-sizing: border-box !important;
 
-    .v-button-caption {
-      display: inline-block !important;
-      vertical-align: middle !important;
-    }
-
-    .v-icon {
-      margin-right: 6px !important;
-      font-size: 13px !important;
-    }
-
-    .v-popup-indicator {
-      margin-left: 6px !important;
-      padding-left: 0 !important;
+    .filter-buttons-panel {
       display: inline-flex !important;
       align-items: center !important;
-      opacity: 0.75 !important;
-      background: none !important;
-      background-image: none !important;
+    }
 
-      &:before {
-        display: none !important;
-        content: none !important;
+    /* Все типы кнопок тулбара: обычные кнопки Button и выпадающие PopupButton */
+    .v-button,
+    .v-popupbutton,
+    .candidate-btn {
+      height: 34px !important;
+      min-height: 34px !important;
+      max-height: 34px !important;
+      line-height: 32px !important;
+      border-radius: 6px !important;
+      font-size: 12.5px !important;
+      font-weight: 600 !important;
+      padding: 0 12px !important;
+      margin: 0 2px !important;
+      box-sizing: border-box !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      vertical-align: middle !important;
+      white-space: nowrap !important;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+
+      .v-button-wrap {
+        height: 100% !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
       }
 
-      &:after {
-        font-family: FontAwesome !important;
-        content: "\f107" !important;
-        font-size: 12px !important;
+      .v-button-caption {
+        display: inline-block !important;
+        vertical-align: middle !important;
+        font-size: 12.5px !important;
+        font-weight: 600 !important;
         line-height: 1 !important;
       }
+
+      .v-icon {
+        margin-right: 6px !important;
+        font-size: 13px !important;
+        line-height: 1 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      .v-popup-indicator {
+        margin-left: 6px !important;
+        padding-left: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        opacity: 0.75 !important;
+        background: none !important;
+        background-image: none !important;
+
+        &:before {
+          display: none !important;
+          content: none !important;
+        }
+
+        &:after {
+          font-family: FontAwesome !important;
+          content: "\f107" !important;
+          font-size: 12px !important;
+          line-height: 1 !important;
+        }
+      }
     }
-  }
 
-  .candidate-filter-bar .v-popupbutton.v-button-primary {
-    background: #4d7ab2 !important;
-    border: 1px solid #4d7ab2 !important;
-    color: #ffffff !important;
-
-    .v-icon,
-    .v-button-caption,
-    .v-popup-indicator:after {
+    /* Первичные кнопки (Создать кандидата, Действия) */
+    .v-button.v-button-primary,
+    .v-button.primary,
+    .v-popupbutton.v-button-primary,
+    .v-popupbutton.primary,
+    .candidate-btn.primary {
+      background: #4d7ab2 !important;
+      border: 1px solid #4d7ab2 !important;
       color: #ffffff !important;
-    }
-
-    &:hover:not(.v-disabled) {
-      background: #3d689e !important;
-      border-color: #3d689e !important;
-    }
-
-    &.v-disabled {
-      opacity: 0.5 !important;
-      cursor: default !important;
-      pointer-events: none !important;
-    }
-  }
-
-  .candidate-filter-bar .v-popupbutton.v-button-secondary {
-    background: #f1f5f9 !important;
-    border: 1px solid #e2e8f0 !important;
-    color: #475569 !important;
-
-    .v-icon,
-    .v-button-caption,
-    .v-popup-indicator:after {
-      color: #475569 !important;
-    }
-
-    &:hover:not(.v-disabled) {
-      background: #e2e8f0 !important;
-      color: #0f172a !important;
 
       .v-icon,
       .v-button-caption,
       .v-popup-indicator:after {
-        color: #0f172a !important;
+        color: #ffffff !important;
+      }
+
+      &:hover:not(.v-disabled) {
+        background: #3d689e !important;
+        border-color: #3d689e !important;
+      }
+
+      &.v-disabled {
+        opacity: 0.5 !important;
+        cursor: default !important;
+        pointer-events: none !important;
       }
     }
 
-    &.v-disabled {
-      opacity: 0.5 !important;
-      cursor: default !important;
-      pointer-events: none !important;
+    /* Вторичные кнопки (Редактировать, Удалить, Фильтры, Метки) */
+    .v-button.v-button-secondary,
+    .v-button.secondary,
+    .v-popupbutton.v-button-secondary,
+    .v-popupbutton.secondary,
+    .candidate-btn.secondary {
+      background: #1e293b !important;
+      border: 1px solid rgba(255, 255, 255, 0.15) !important;
+      color: #e2e8f0 !important;
+
+      .v-icon,
+      .v-button-caption,
+      .v-popup-indicator:after {
+        color: #e2e8f0 !important;
+      }
+
+      &:hover:not(.v-disabled) {
+        background: #334155 !important;
+        border-color: rgba(255, 255, 255, 0.25) !important;
+        color: #ffffff !important;
+
+        .v-icon,
+        .v-button-caption,
+        .v-popup-indicator:after {
+          color: #ffffff !important;
+        }
+      }
+
+      &.v-disabled {
+        opacity: 0.5 !important;
+        cursor: default !important;
+        pointer-events: none !important;
+      }
     }
   }
 
