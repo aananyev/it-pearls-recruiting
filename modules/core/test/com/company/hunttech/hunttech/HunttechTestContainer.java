@@ -96,7 +96,8 @@ public class HunttechTestContainer extends TestContainer {
                         }
                     }
                 }
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                System.err.println("[HunttechTestContainer] Failed to heal system users (anonymous/admin): " + e.getMessage());
             }
         }
     }

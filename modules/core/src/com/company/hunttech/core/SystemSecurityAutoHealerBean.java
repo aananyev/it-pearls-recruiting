@@ -48,32 +48,43 @@ public class SystemSecurityAutoHealerBean {
         }
         int totalHealed = 0;
         try (Connection conn = dataSource.getConnection()) {
-            // 1. Восстановление пользователей anonymous и admin при soft-delete или неактивности (пароли сохраняются)
-            String healUsersSql = "UPDATE sec_user " +
-                    "SET delete_ts = NULL, deleted_by = NULL, active = true " +
-                    "WHERE login_lc IN ('anonymous', 'admin') AND (delete_ts IS NOT NULL OR active = false)";
-            try (PreparedStatement ps = conn.prepareStatement(healUsersSql)) {
-                int healedUsers = ps.executeUpdate();
-                if (healedUsers > 0) {
-                    log.info("[SystemSecurityAutoHealer] Восстановлена активность системных пользователей: {}", healedUsers);
-                    totalHealed += healedUsers;
+            boolean originalAutoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+            try {
+                // 1. Восстановление пользователей anonymous и admin при soft-delete или неактивности (пароли сохраняются)
+                String healUsersSql = "UPDATE sec_user " +
+                        "SET delete_ts = NULL, deleted_by = NULL, active = true " +
+                        "WHERE login_lc IN ('anonymous', 'admin') AND (delete_ts IS NOT NULL OR active = false)";
+                try (PreparedStatement ps = conn.prepareStatement(healUsersSql)) {
+                    int healedUsers = ps.executeUpdate();
+                    if (healedUsers > 0) {
+                        log.info("[SystemSecurityAutoHealer] Восстановлена активность системных пользователей: {}", healedUsers);
+                        totalHealed += healedUsers;
+                    }
                 }
-            }
 
-            // 2. Восстановление ролей пользователей anonymous и admin
-            String healRolesSql = "UPDATE sec_user_role " +
-                    "SET delete_ts = NULL, deleted_by = NULL " +
-                    "WHERE user_id IN (SELECT id FROM sec_user WHERE login_lc IN ('anonymous', 'admin')) " +
-                    "AND delete_ts IS NOT NULL";
-            try (PreparedStatement ps = conn.prepareStatement(healRolesSql)) {
-                int healedRoles = ps.executeUpdate();
-                if (healedRoles > 0) {
-                    log.info("[SystemSecurityAutoHealer] Восстановлены роли системных пользователей: {}", healedRoles);
-                    totalHealed += healedRoles;
+                // 2. Восстановление ролей пользователей anonymous и admin
+                String healRolesSql = "UPDATE sec_user_role " +
+                        "SET delete_ts = NULL, deleted_by = NULL " +
+                        "WHERE user_id IN (SELECT id FROM sec_user WHERE login_lc IN ('anonymous', 'admin')) " +
+                        "AND delete_ts IS NOT NULL";
+                try (PreparedStatement ps = conn.prepareStatement(healRolesSql)) {
+                    int healedRoles = ps.executeUpdate();
+                    if (healedRoles > 0) {
+                        log.info("[SystemSecurityAutoHealer] Восстановлены роли системных пользователей: {}", healedRoles);
+                        totalHealed += healedRoles;
+                    }
                 }
+
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(originalAutoCommit);
             }
-        } catch (SQLException e) {
-            log.warn("[SystemSecurityAutoHealer] Предупреждение при проверке системных пользователей: {}", e.getMessage());
+        } catch (Exception e) {
+            log.warn("[SystemSecurityAutoHealer] Ошибка при проверке и восстановлении системных пользователей: {}", e.getMessage(), e);
         }
         return totalHealed;
     }
