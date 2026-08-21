@@ -1,5 +1,6 @@
 package com.company.hunttech.web.screens.candidatecv;
 
+import java.text.SimpleDateFormat;
 import com.company.hunttech.core.ParseCVService;
 import com.company.hunttech.core.PdfParserService;
 import com.company.hunttech.core.ResumeRecognitionService;
@@ -204,6 +205,18 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private TreeDataGrid<SkillTree> skillTreesTable;
     @Inject
     private Table<SomeFiles> someFilesTable;
+    @Inject
+    private CollectionContainer<JobHistory> jobHistoriesDc;
+    @Inject
+    private CollectionLoader<JobHistory> jobHistoriesDl;
+    @Inject
+    private Table<JobHistory> jobHistoriesTable;
+    @Inject
+    private VBoxLayout candidateCvJobHistoryNavigation;
+    @Inject
+    private Button candidateCvJobHistoryTableNav;
+    @Inject
+    private Button smartParseWorkExperienceBtn;
 
     private boolean openPositionsReady;
     private boolean cvTextInitialized;
@@ -241,6 +254,9 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
         candidateCvCandidateNavigation.setVisible("tabCandidate".equals(selectedTabName));
         candidateCvCvNavigation.setVisible("tabCV".equals(selectedTabName));
+        if (candidateCvJobHistoryNavigation != null) {
+            candidateCvJobHistoryNavigation.setVisible("tabJobHistory".equals(selectedTabName));
+        }
         candidateCvLetterNavigation.setVisible("tabLetter".equals(selectedTabName));
         candidateCvSkillNavigation.setVisible("tabSkillTree".equals(selectedTabName));
         candidateCvFilesNavigation.setVisible("tabFiles".equals(selectedTabName));
@@ -249,6 +265,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             activateNavigationItem(candidateCvCandidateNavigation, candidateCvMainDataNav);
         } else if ("tabCV".equals(selectedTabName)) {
             activateNavigationItem(candidateCvCvNavigation, candidateCvTextNav);
+        } else if ("tabJobHistory".equals(selectedTabName)) {
+            activateNavigationItem(candidateCvJobHistoryNavigation, candidateCvJobHistoryTableNav);
         } else if ("tabLetter".equals(selectedTabName)) {
             activateFirstVisibleNavigationItem(candidateCvLetterNavigation);
         } else if ("tabSkillTree".equals(selectedTabName)) {
@@ -347,6 +365,158 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
 
     public void navigateFilesTable() {
         navigateToSection(candidateCvFilesNavigation, candidateCvFilesTableNav, someFilesTable::focus);
+    }
+
+    public void navigateJobHistoryTable() {
+        if (candidateCvJobHistoryNavigation != null && candidateCvJobHistoryTableNav != null && jobHistoriesTable != null) {
+            navigateToSection(candidateCvJobHistoryNavigation, candidateCvJobHistoryTableNav, jobHistoriesTable::focus);
+        }
+    }
+
+    public void refreshJobHistories() {
+        JobCandidate candidate = getEditedEntity().getCandidate();
+        if (candidate == null && candidateField != null && candidateField.getValue() != null) {
+            candidate = (JobCandidate) candidateField.getValue();
+        }
+        if (candidate != null && jobHistoriesDl != null) {
+            jobHistoriesDl.setParameter("candidate", candidate);
+            jobHistoriesDl.load();
+        } else if (jobHistoriesDc != null) {
+            jobHistoriesDc.getMutableItems().clear();
+        }
+    }
+
+    @Subscribe("candidateField")
+    public void onCandidateFieldValueChange(HasValue.ValueChangeEvent event) {
+        refreshJobHistories();
+    }
+
+    @Install(to = "jobHistoriesTable.create", subject = "initializer")
+    private void jobHistoriesTableCreateInitializer(JobHistory jobHistory) {
+        JobCandidate candidate = getEditedEntity().getCandidate();
+        if (candidate == null && candidateField != null && candidateField.getValue() != null) {
+            candidate = (JobCandidate) candidateField.getValue();
+        }
+        jobHistory.setCandidate(candidate);
+    }
+
+    @Install(to = "jobHistoriesTable.period", subject = "columnGenerator")
+    private Component jobHistoriesTablePeriodColumnGenerator(JobHistory jobHistory) {
+        Label<String> label = uiComponents.create(Label.TYPE_STRING);
+        SimpleDateFormat sdf = new SimpleDateFormat("MM.yyyy");
+        String start = jobHistory.getStartDate() != null ? sdf.format(jobHistory.getStartDate()) : "";
+        String end = jobHistory.getEndDate() != null ? sdf.format(jobHistory.getEndDate())
+                : (jobHistory.getStartDate() != null ? messageBundle.getMessage("msgJobPresentTime") : "");
+        if (start.isEmpty() && end.isEmpty()) {
+            label.setValue("—");
+        } else if (!start.isEmpty() && !end.isEmpty()) {
+            label.setValue(start + " — " + end);
+        } else {
+            label.setValue(start.isEmpty() ? end : start);
+        }
+        return label;
+    }
+
+    @Install(to = "jobHistoriesTable.companyName", subject = "columnGenerator")
+    private Component jobHistoriesTableCompanyNameColumnGenerator(JobHistory jobHistory) {
+        Label<String> label = uiComponents.create(Label.TYPE_STRING);
+        String name = jobHistory.getCurrentCompany() != null && jobHistory.getCurrentCompany().getComanyName() != null
+                ? jobHistory.getCurrentCompany().getComanyName()
+                : (jobHistory.getRawCompanyName() != null ? jobHistory.getRawCompanyName() : "—");
+        label.setValue(name);
+        label.setStyleName("bold");
+        return label;
+    }
+
+    @Install(to = "jobHistoriesTable.positionName", subject = "columnGenerator")
+    private Component jobHistoriesTablePositionNameColumnGenerator(JobHistory jobHistory) {
+        Label<String> label = uiComponents.create(Label.TYPE_STRING);
+        String pos = jobHistory.getCurrentPosition() != null && jobHistory.getCurrentPosition().getPositionRuName() != null
+                ? jobHistory.getCurrentPosition().getPositionRuName()
+                : (jobHistory.getRawPositionName() != null ? jobHistory.getRawPositionName() : "—");
+        label.setValue(pos);
+        return label;
+    }
+
+    public void smartExtractWorkExperience() {
+        JobCandidate candidate = getEditedEntity().getCandidate();
+        if (candidate == null && candidateField != null && candidateField.getValue() != null) {
+            candidate = (JobCandidate) candidateField.getValue();
+        }
+        if (candidate == null) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Кандидат не выбран")
+                    .withDescription("Сначала укажите или создайте кандидата в основных данных резюме.")
+                    .show();
+            return;
+        }
+
+        String cvText = candidateCVRichTextArea != null && candidateCVRichTextArea.getValue() != null
+                ? candidateCVRichTextArea.getValue()
+                : getEditedEntity().getTextCV();
+
+        if (cvText == null || cvText.trim().isEmpty()) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption("Резюме пусто")
+                    .withDescription("Загрузите или вставьте текст резюме перед распознаванием мест работы.")
+                    .show();
+            return;
+        }
+
+        AiOperationNotifier.showStarted(notifications, "Запущен поиск мест работы кандидата в резюме…", null);
+        final Screen progressDialog = AiOperationNotifier.showProgress(this, "Анализ мест работы и компаний…");
+        final String textToParse = cvText;
+
+        BackgroundTask<Integer, com.company.hunttech.service.SmartCvIngestResult> task =
+                new BackgroundTask<Integer, com.company.hunttech.service.SmartCvIngestResult>(120, this) {
+                    @Override
+                    public com.company.hunttech.service.SmartCvIngestResult run(TaskLifeCycle<Integer> taskLifeCycle) {
+                        com.company.hunttech.service.SmartCvParsedData parsed = smartCvIngestService.parseCvText(textToParse);
+                        if (parsed != null) {
+                            ExtUser recruiter = userSession.getUser() instanceof ExtUser ? (ExtUser) userSession.getUser() : null;
+                            return smartCvIngestService.applyParsedDataToCandidateCv(getEditedEntity(), parsed, recruiter);
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public void done(com.company.hunttech.service.SmartCvIngestResult result) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        refreshJobHistories();
+                        if (result != null && result.getStatus() == com.company.hunttech.service.SmartCvIngestResult.Status.SUCCESS) {
+                            int count = result.getParsedData() != null && result.getParsedData().getWorkExperience() != null
+                                    ? result.getParsedData().getWorkExperience().size()
+                                    : 0;
+                            notifications.create(Notifications.NotificationType.TRAY)
+                                    .withCaption("Распознавание мест работы завершено")
+                                    .withDescription("Найдено и синхронизировано мест работы: " + count)
+                                    .withHideDelayMs(4000)
+                                    .show();
+                        }
+                    }
+
+                    @Override
+                    public boolean handleException(Exception ex) {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Ошибка распознавания мест работы")
+                                .withDescription("Не удалось извлечь места работы: " + ex.getMessage())
+                                .show();
+                        return true;
+                    }
+
+                    @Override
+                    public boolean handleTimeoutException() {
+                        AiOperationNotifier.closeProgress(progressDialog);
+                        notifications.create(Notifications.NotificationType.ERROR)
+                                .withCaption("Таймаут")
+                                .withDescription("Превышено время ожидания ответа AI-модели.")
+                                .show();
+                        return true;
+                    }
+                };
+
+        backgroundWorker.handle(task).execute();
     }
 
     @Subscribe
@@ -899,6 +1069,7 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
             // Baseline text is captured from the entity so unchanged LOB fields are not rewritten on save.
             textResumeStringBuffer = new StringBuffer(getEditedEntity().getTextCV() != null ? getEditedEntity().getTextCV() : "");
         }
+        refreshJobHistories();
     }
 
     @Subscribe("fileOriginalCVField")
