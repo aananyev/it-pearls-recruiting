@@ -68,6 +68,7 @@ select e from hunttech_Ownershup e
 - `companyOwnership`
 - `comanyName`
 - `companyShortName`
+- `legalEntityName`
 - `companyGroup`
 - `companyDirector`
 - `cityOfCompany`

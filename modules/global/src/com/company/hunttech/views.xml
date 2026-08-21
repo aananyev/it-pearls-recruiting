@@ -665,6 +665,7 @@
     <view entity="hunttech_Company" name="company-edit-view" extends="_minimal">
         <property name="comanyName"/>
         <property name="companyShortName"/>
+        <property name="legalEntityName"/>
         <property name="ourClient"/>
         <property name="ourLegalEntity"/>
         <property name="companyGroup" view="companyGroup-picker-view"/>
@@ -695,6 +696,7 @@
     <view entity="hunttech_Company" name="company-picker-view" extends="_minimal">
         <property name="comanyName"/>
         <property name="companyShortName"/>
+        <property name="legalEntityName"/>
         <property name="ourClient"/>
         <property name="ourLegalEntity"/>
         <property name="fileCompanyLogo" view="_minimal"/>

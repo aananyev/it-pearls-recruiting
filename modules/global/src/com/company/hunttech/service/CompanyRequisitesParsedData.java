@@ -10,6 +10,7 @@ public class CompanyRequisitesParsedData implements Serializable {
 
     private String companyName;
     private String companyShortName;
+    private String legalEntityName;
     private String ownership;
     private String inn;
     private String kpp;
@@ -54,6 +55,14 @@ public class CompanyRequisitesParsedData implements Serializable {
 
     public void setCompanyShortName(String companyShortName) {
         this.companyShortName = companyShortName;
+    }
+
+    public String getLegalEntityName() {
+        return legalEntityName;
+    }
+
+    public void setLegalEntityName(String legalEntityName) {
+        this.legalEntityName = legalEntityName;
     }
 
     public String getOwnership() {

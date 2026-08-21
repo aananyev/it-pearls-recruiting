@@ -134,4 +134,8 @@
     <include file="260821-5-updateCompanyRequisitesAiFunctionWithGeo.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Company: добавление колонки LEGAL_ENTITY_NAME (Юридическое лицо). -->
+    <include file="260821-6-addCompanyLegalEntityName.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

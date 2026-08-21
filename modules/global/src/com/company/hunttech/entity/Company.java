@@ -41,6 +41,9 @@ public class Company extends StandardEntity {
     @Column(name = "COMPANY_SHORT_NAME", length = 80)
     protected String companyShortName;
 
+    @Column(name = "LEGAL_ENTITY_NAME", length = 255)
+    protected String legalEntityName;
+
     @Lookup(type = LookupType.DROPDOWN, actions = {})
     @OnDeleteInverse(DeletePolicy.CASCADE)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -233,6 +236,14 @@ public class Company extends StandardEntity {
 
     public void setSettlementAccount(String settlementAccount) {
         this.settlementAccount = settlementAccount;
+    }
+
+    public String getLegalEntityName() {
+        return legalEntityName;
+    }
+
+    public void setLegalEntityName(String legalEntityName) {
+        this.legalEntityName = legalEntityName;
     }
 
     public String getCorrespondentAccount() {

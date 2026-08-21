@@ -157,6 +157,7 @@ public class CompanyRequisitesIngestServiceBean implements CompanyRequisitesInge
 
                 result.setCompanyName(textOrNull(root, "companyName"));
                 result.setCompanyShortName(textOrNull(root, "companyShortName"));
+                result.setLegalEntityName(textOrNull(root, "legalEntityName"));
                 result.setOwnership(textOrNull(root, "ownership"));
                 result.setInn(textOrNull(root, "inn"));
                 result.setKpp(textOrNull(root, "kpp"));
@@ -321,6 +322,21 @@ public class CompanyRequisitesIngestServiceBean implements CompanyRequisitesInge
             company.setOkved(data.getOkved().trim());
         }
 
+        // Юридическое лицо
+        if (data.getLegalEntityName() != null && !data.getLegalEntityName().trim().isEmpty()) {
+            company.setLegalEntityName(data.getLegalEntityName().trim());
+        } else if (data.getCompanyName() != null && !data.getCompanyName().trim().isEmpty()) {
+            if (company.getLegalEntityName() == null || company.getLegalEntityName().trim().isEmpty()) {
+                company.setLegalEntityName(data.getCompanyName().trim());
+            }
+        }
+
+        // Организационно-правовая форма (Ownershup)
+        com.company.hunttech.entity.Ownershup ownership = resolveOrCreateOwnership(data.getOwnership());
+        if (ownership != null) {
+            company.setCompanyOwnership(ownership);
+        }
+
         // Гео-разбиение: Страна, Регион, Город, Адрес
         com.company.hunttech.entity.Country country = resolveOrCreateCountry(data.getCountry());
         com.company.hunttech.entity.Region region = resolveOrCreateRegion(data.getRegion(), country);
@@ -394,6 +410,68 @@ public class CompanyRequisitesIngestServiceBean implements CompanyRequisitesInge
         if (director != null) {
             company.setCompanyDirector(director);
         }
+    }
+
+    private com.company.hunttech.entity.Ownershup resolveOrCreateOwnership(String name) {
+        if (name == null || name.trim().isEmpty()) return null;
+        name = name.trim();
+        String lower = name.toLowerCase();
+
+        String shortType;
+        String longType;
+
+        if (lower.contains("ограничен") || lower.equals("ооо")) {
+            shortType = "ООО";
+            longType = "Общество с ограниченной ответственностью";
+        } else if (lower.contains("публичн") || lower.equals("пао")) {
+            shortType = "ПАО";
+            longType = "Публичное акционерное общество";
+        } else if (lower.contains("акционерн") || lower.equals("ао")) {
+            shortType = "АО";
+            longType = "Акционерное общество";
+        } else if (lower.contains("предприним") || lower.equals("ип")) {
+            shortType = "ИП";
+            longType = "Индивидуальный предприниматель";
+        } else if (lower.contains("некоммерческ") || lower.equals("ано")) {
+            shortType = "АНО";
+            longType = "Автономная некоммерческая организация";
+        } else if (lower.equals("зао") || lower.contains("закрытое акционерное")) {
+            shortType = "ЗАО";
+            longType = "Закрытое акционерное общество";
+        } else if (lower.equals("оао") || lower.contains("открытое акционерное")) {
+            shortType = "ОАО";
+            longType = "Открытое акционерное общество";
+        } else {
+            shortType = name.length() > 7 ? name.substring(0, 7).toUpperCase() : name.toUpperCase();
+            longType = name.length() > 50 ? name.substring(0, 50) : name;
+        }
+
+        try {
+            List<com.company.hunttech.entity.Ownershup> list = dataManager.load(com.company.hunttech.entity.Ownershup.class)
+                    .query("select e from hunttech_Ownershup e where lower(e.shortType) = :shortName or lower(e.longType) = :longName or lower(e.shortType) = :raw or lower(e.longType) = :raw")
+                    .parameter("shortName", shortType.toLowerCase())
+                    .parameter("longName", longType.toLowerCase())
+                    .parameter("raw", lower)
+                    .view("_minimal")
+                    .list();
+            if (list != null && !list.isEmpty()) {
+                return list.get(0);
+            }
+        } catch (Exception e) {
+            log.warn("Не удалось загрузить Ownershup из БД: {}", e.getMessage());
+        }
+
+        if (metadata != null) {
+            com.company.hunttech.entity.Ownershup o = metadata.create(com.company.hunttech.entity.Ownershup.class);
+            o.setShortType(shortType);
+            o.setLongType(longType);
+            try {
+                return dataManager.commit(o);
+            } catch (Exception e) {
+                return o;
+            }
+        }
+        return null;
     }
 
     private com.company.hunttech.entity.Country resolveOrCreateCountry(String name) {

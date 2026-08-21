@@ -40,6 +40,7 @@ public class CompanyRequisitesIngestServiceBeanTest {
                         if (args[0] == com.company.hunttech.entity.Country.class) return new com.company.hunttech.entity.Country();
                         if (args[0] == com.company.hunttech.entity.Region.class) return new com.company.hunttech.entity.Region();
                         if (args[0] == com.company.hunttech.entity.City.class) return new com.company.hunttech.entity.City();
+                        if (args[0] == com.company.hunttech.entity.Ownershup.class) return new com.company.hunttech.entity.Ownershup();
                     }
                     return null;
                 }
@@ -71,6 +72,7 @@ public class CompanyRequisitesIngestServiceBeanTest {
                         String json = "{\n" +
                                 "  \"companyName\": \"ООО Ромашка Плюс\",\n" +
                                 "  \"companyShortName\": \"Ромашка Плюс\",\n" +
+                                "  \"legalEntityName\": \"ООО «Ромашка Плюс»\",\n" +
                                 "  \"ownership\": \"ООО\",\n" +
                                 "  \"inn\": \"7701234567\",\n" +
                                 "  \"kpp\": \"770101001\",\n" +
@@ -131,6 +133,8 @@ public class CompanyRequisitesIngestServiceBeanTest {
 
         assertNotNull(data);
         assertEquals("ООО Ромашка Плюс", data.getCompanyName());
+        assertEquals("ООО «Ромашка Плюс»", data.getLegalEntityName());
+        assertEquals("ООО", data.getOwnership());
         assertEquals("7701234567", data.getInn());
         assertEquals("770101001", data.getKpp());
         assertEquals("1027700132195", data.getOgrn());
@@ -150,7 +154,9 @@ public class CompanyRequisitesIngestServiceBeanTest {
     @Test
     public void testApplyRequisitesToCompany() {
         CompanyRequisitesParsedData data = new CompanyRequisitesParsedData();
-        data.setCompanyName("АО Вектор");
+        data.setCompanyName("Вектор");
+        data.setLegalEntityName("АО «Вектор Солюшнс»");
+        data.setOwnership("АО");
         data.setInn("7801234567");
         data.setKpp("780101001");
         data.setOgrn("1037800001122");
@@ -171,6 +177,9 @@ public class CompanyRequisitesIngestServiceBeanTest {
         assertEquals("7801234567", company.getInn());
         assertEquals("780101001", company.getKpp());
         assertEquals("1037800001122", company.getOgrn());
+        assertEquals("АО «Вектор Солюшнс»", company.getLegalEntityName());
+        assertNotNull(company.getCompanyOwnership());
+        assertEquals("АО", company.getCompanyOwnership().getShortType());
         assertEquals("г. Санкт-Петербург, Невский пр-т, д. 10", company.getLegalAddress());
         assertEquals("Невский пр-т, д. 10", company.getAddressOfCompany());
         assertNotNull(company.getCityOfCompany());
@@ -183,6 +192,6 @@ public class CompanyRequisitesIngestServiceBeanTest {
         assertEquals("+7 812 555-44-33", company.getPhone());
         assertEquals("contact@vector.spb.ru", company.getEmail());
         assertEquals("https://vector.spb.ru", company.getWebsite());
-        assertEquals("АО Вектор", company.getComanyName());
+        assertEquals("Вектор", company.getComanyName());
     }
 }

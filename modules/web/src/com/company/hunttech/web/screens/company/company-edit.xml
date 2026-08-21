@@ -429,6 +429,27 @@
                                           width="100%">
                                     <vbox width="100%" spacing="true">
                                         <hbox spacing="true" width="100%">
+                                            <textField id="legalEntityNameField"
+                                                       dataContainer="companyDc"
+                                                       property="legalEntityName"
+                                                       caption="Юридическое лицо"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <lookupPickerField id="companyOwnershipRequisitesField"
+                                                               optionsContainer="companyOwnershipsDc"
+                                                               dataContainer="companyDc"
+                                                               property="companyOwnership"
+                                                               caption="Форма собственности"
+                                                               stylename="edit-form-control"
+                                                               width="100%">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                    <action id="open" type="picker_open"/>
+                                                    <action id="clear" type="picker_clear"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                        </hbox>
+                                        <hbox spacing="true" width="100%">
                                             <textField id="innField"
                                                        dataContainer="companyDc"
                                                        property="inn"
