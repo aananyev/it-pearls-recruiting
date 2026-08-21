@@ -194,4 +194,65 @@ public class CompanyRequisitesIngestServiceBeanTest {
         assertEquals("https://vector.spb.ru", company.getWebsite());
         assertEquals("Вектор", company.getComanyName());
     }
+
+    @Test
+    public void testParseAndApplyExactSampleRequisites() {
+        CompanyRequisitesParsedData data = new CompanyRequisitesParsedData();
+        data.setCompanyName("ХантТек Солюшнс");
+        data.setCompanyShortName("ООО «ХантТек»");
+        data.setLegalEntityName("Общество с ограниченной ответственностью «ХантТек Солюшнс»");
+        data.setOwnership("ООО");
+        data.setInn("7701234567");
+        data.setKpp("770101001");
+        data.setOgrn("1027700132195");
+        data.setOkpo("12345678");
+        data.setOkved("62.01");
+        data.setCountry("Россия");
+        data.setRegion("г. Москва");
+        data.setCity("Москва");
+        data.setStreetAddress("Пресненская наб., д. 12, эт. 45, оф. 2");
+        data.setLegalAddress("123112, г. Москва, Пресненская наб., д. 12, эт. 45, оф. 2");
+        data.setActualAddress("123112, г. Москва, Пресненская наб., д. 12, эт. 45, оф. 2");
+        data.setBik("044525225");
+        data.setBankName("ПАО СБЕРБАНК");
+        data.setSettlementAccount("40702810938000001234");
+        data.setCorrespondentAccount("30101810400000000225");
+        data.setPhone("+7 (495) 999-88-77");
+        data.setEmail("info@hunttech.ru");
+        data.setWebsite("https://hunttech.ru");
+        data.setDirectorLastName("Алексеев");
+        data.setDirectorFirstName("Алексей");
+        data.setDirectorMiddleName("Сергеевич");
+
+        Company company = new Company();
+        service.applyRequisitesToCompany(company, data);
+
+        assertEquals("7701234567", company.getInn());
+        assertEquals("770101001", company.getKpp());
+        assertEquals("1027700132195", company.getOgrn());
+        assertEquals("12345678", company.getOkpo());
+        assertEquals("62.01", company.getOkved());
+        assertEquals("Общество с ограниченной ответственностью «ХантТек Солюшнс»", company.getLegalEntityName());
+        assertEquals("ХантТек Солюшнс", company.getComanyName());
+        assertEquals("ООО «ХантТек»", company.getCompanyShortName());
+        assertNotNull(company.getCompanyOwnership());
+        assertEquals("ООО", company.getCompanyOwnership().getShortType());
+        assertNotNull(company.getCountryOfCompany());
+        assertEquals("Россия", company.getCountryOfCompany().getCountryRuName());
+        assertNotNull(company.getCityOfCompany());
+        assertEquals("Москва", company.getCityOfCompany().getCityRuName());
+        assertEquals("Пресненская наб., д. 12, эт. 45, оф. 2", company.getAddressOfCompany());
+        assertEquals("123112, г. Москва, Пресненская наб., д. 12, эт. 45, оф. 2", company.getLegalAddress());
+        assertEquals("044525225", company.getBik());
+        assertEquals("ПАО СБЕРБАНК", company.getBankName());
+        assertEquals("40702810938000001234", company.getSettlementAccount());
+        assertEquals("30101810400000000225", company.getCorrespondentAccount());
+        assertEquals("+7 (495) 999-88-77", company.getPhone());
+        assertEquals("info@hunttech.ru", company.getEmail());
+        assertEquals("https://hunttech.ru", company.getWebsite());
+        assertNotNull(company.getCompanyDirector());
+        assertEquals("Алексеев", company.getCompanyDirector().getSecondName());
+        assertEquals("Алексей", company.getCompanyDirector().getFirstName());
+        assertEquals("Сергеевич", company.getCompanyDirector().getMiddleName());
+    }
 }

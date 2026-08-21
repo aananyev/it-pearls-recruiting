@@ -1,104 +1,174 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
-        caption="Умная загрузка реквизитов компании"
+        caption="Умная AI-загрузка реквизитов компании"
         messagesPack="com.company.hunttech.web.screens.company"
         icon="MAGIC">
-    <dialogMode height="700" width="900" modal="true" resizable="true"/>
-    <layout expand="mainTabSheet" spacing="true" width="100%" height="100%">
-        <tabSheet id="mainTabSheet" width="100%" height="100%">
-            <!-- Вкладка 1: Загрузка из файла -->
-            <tab id="fileTab" caption="Загрузка из файла" margin="true" spacing="true" expand="fileUploadVBox">
-                <vbox id="fileUploadVBox" width="100%" height="100%" spacing="true" align="MIDDLE_CENTER">
-                    <label value="Перетащите или выберите файл с реквизитами / карточкой предприятия (PDF, DOCX, DOC, RTF, PAGES, TXT):"
-                           stylename="bold" width="100%"/>
-                    <hbox id="fileDropZone" width="100%" height="180px" stylename="candidate-dropzone-box edit-card" align="MIDDLE_CENTER">
-                        <vbox spacing="true" align="MIDDLE_CENTER" width="100%">
-                            <upload id="fileUpload"
-                                    dropZone="fileDropZone"
-                                    showFileName="true"
-                                    showClearButton="true"
-                                    fileStoragePutMode="MANUAL"
-                                    align="MIDDLE_CENTER"/>
-                            <label id="selectedFileNameLabel" value="Файл не выбран" stylename="edit-help" align="MIDDLE_CENTER"/>
-                        </vbox>
+    <dialogMode width="880px" height="720px" modal="true" closeable="true" resizable="true"/>
+    <layout spacing="true" expand="mainContentBox" width="100%" height="100%" stylename="edit-screen-layout">
+        <!-- Шапка окна с заголовком и описанием -->
+        <hbox id="headerBox" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="edit-toolbar">
+            <vbox spacing="false" width="100%">
+                <label value="Умная AI-загрузка реквизитов компании" stylename="edit-toolbar-title h2"/>
+                <label value="Автоматическое извлечение официальных реквизитов, кодов регистрации, адресов и руководства из документов, текста или URL"
+                       stylename="edit-toolbar-description edit-help"/>
+            </vbox>
+        </hbox>
+
+        <!-- Основная область с прокруткой -->
+        <scrollBox id="mainContentBox" width="100%" height="100%" spacing="true" orientation="vertical">
+            <vbox width="100%" spacing="true">
+
+                <!-- Зона загрузки файла, текста или ссылки (Шаг 1) -->
+                <vbox id="uploadCard" width="100%" spacing="true" stylename="edit-card">
+                    <label value="1. ВЫБЕРИТЕ ФАЙЛ КАРТОЧКИ ИЛИ ВСТАВЬТЕ ТЕКСТ / ССЫЛКУ" stylename="label-nav-title job-candidate-section-title"/>
+
+                    <tabSheet id="inputTabSheet" width="100%">
+                        <!-- Вкладка 1: Загрузка файла (drag-and-drop) -->
+                        <tab id="fileTab" caption="Загрузка файла" icon="CLOUD_UPLOAD">
+                            <vbox spacing="true" width="100%" margin="true,false,false,false">
+                                <label value="Перетащите файл с карточкой предприятия / реквизитами в эту область или нажмите кнопку выбора:" stylename="edit-help"/>
+                                <upload id="fileUpload"
+                                        uploadButtonCaption="Загрузить файл реквизитов..."
+                                        uploadButtonIcon="font-icon:CLOUD_UPLOAD"
+                                        permittedExtensions=".pdf,.docx,.doc,.rtf,.pages,.txt"
+                                        dropZone="uploadCard"
+                                        dropZonePrompt="Перетащите файл реквизитов сюда (PDF, Word, RTF, Pages, TXT)"
+                                        stylename="primary"
+                                        showFileName="true"/>
+                                <label id="selectedFileNameLabel" value="Файл не выбран" stylename="edit-help"/>
+                                <button id="parseFileBtn"
+                                        caption="Распознать реквизиты из файла"
+                                        icon="font-icon:MAGIC"
+                                        stylename="primary candidate-btn candidate-smartload-btn"
+                                        width="280px"/>
+                            </vbox>
+                        </tab>
+
+                        <!-- Вкладка 2: Вставка текста -->
+                        <tab id="textTab" caption="Вставка текста" icon="FILE_TEXT_O">
+                            <vbox spacing="true" width="100%" margin="true,false,false,false">
+                                <label value="Вставьте произвольный текст реквизитов или карточки организации из буфера обмена:" stylename="edit-help"/>
+                                <richTextArea id="rawRichTextArea"
+                                              width="100%"
+                                              height="180px"/>
+                                <hbox spacing="true" align="MIDDLE_LEFT">
+                                    <button id="parseTextBtn"
+                                            caption="Распознать введенный текст"
+                                            icon="font-icon:MAGIC"
+                                            stylename="primary candidate-btn candidate-smartload-btn"/>
+                                    <button id="clearTextBtn"
+                                            caption="Очистить"
+                                            icon="ERASER"
+                                            stylename="secondary candidate-btn"/>
+                                </hbox>
+                            </vbox>
+                        </tab>
+
+                        <!-- Вкладка 3: Загрузка по ссылке из интернета -->
+                        <tab id="urlTab" caption="Загрузка по ссылке" icon="GLOBE">
+                            <vbox spacing="true" width="100%" margin="true,false,false,false">
+                                <label value="Укажите интернет-ссылку на страницу компании с официальными реквизитами / контактами:" stylename="edit-help"/>
+                                <hbox spacing="true" width="100%" expand="urlField">
+                                    <textField id="urlField"
+                                               width="100%"
+                                               inputPrompt="https://company.ru/contacts или https://example.com/requisites"/>
+                                    <button id="parseUrlBtn"
+                                            caption="Загрузить и распознать"
+                                            icon="font-icon:DOWNLOAD"
+                                            stylename="primary candidate-btn candidate-smartload-btn"/>
+                                    <button id="clearUrlBtn"
+                                            caption="Очистить"
+                                            icon="ERASER"
+                                            stylename="secondary candidate-btn"/>
+                                </hbox>
+                                <label value="Поддерживаются официальные страницы контактов и реквизитов компаний в интернете."
+                                       stylename="edit-help" css="font-size: 11px; color: #64748b;"/>
+                            </vbox>
+                        </tab>
+                    </tabSheet>
+
+                    <!-- Индикатор прогресса и статус выполнения -->
+                    <hbox width="100%" spacing="true" align="MIDDLE_LEFT" margin="true,false,false,false">
+                        <progressBar id="progressBar" indeterminate="true" visible="false" align="MIDDLE_LEFT" width="200px"/>
+                        <label id="statusLabel" value="Готов к загрузке файла или текста реквизитов" align="MIDDLE_LEFT" stylename="edit-help"/>
                     </hbox>
-                    <button id="parseFileBtn" caption="Распознать реквизиты из файла" icon="MAGIC" stylename="primary" width="280px" align="MIDDLE_CENTER"/>
                 </vbox>
-            </tab>
 
-            <!-- Вкладка 2: Вставка текста -->
-            <tab id="textTab" caption="Вставка текста / Карточки" margin="true" spacing="true" expand="rawTextArea">
-                <label value="Вставьте текст реквизитов или карточки компании в поле ниже:" stylename="bold"/>
-                <textArea id="rawTextArea" width="100%" height="100%" placeholder="Вставьте реквизиты компании..."/>
-                <button id="parseTextBtn" caption="Распознать вставленный текст" icon="MAGIC" stylename="primary" width="280px"/>
-            </tab>
-
-            <!-- Вкладка 3: Загрузка по ссылке -->
-            <tab id="urlTab" caption="Ссылка из интернета" margin="true" spacing="true">
-                <vbox spacing="true" width="100%">
-                    <label value="Введите URL страницы компании с реквизитами:" stylename="bold"/>
-                    <hbox width="100%" spacing="true" expand="urlField">
-                        <textField id="urlField" width="100%" placeholder="https://example.com/contacts"/>
-                        <button id="parseUrlBtn" caption="Загрузить и распознать" icon="MAGIC" stylename="primary"/>
+                <!-- Блок предупреждения о найденной существующей организации -->
+                <vbox id="duplicateBox" width="100%" spacing="true" visible="false" stylename="edit-card"
+                      css="border-left: 4px solid #f59e0b !important; background: #fffbeb !important;">
+                    <hbox spacing="true" align="MIDDLE_LEFT">
+                        <label value="⚠️ ОБНАРУЖЕНА ОРГАНИЗАЦИЯ В БАЗЕ С ТАКИМ ИНН" stylename="bold"
+                               css="color: #b45309 !important; font-size: 13px !important;"/>
                     </hbox>
+                    <label id="duplicateInfoLabel" htmlEnabled="true" width="100%"/>
                 </vbox>
-            </tab>
-        </tabSheet>
 
-        <!-- Блок предварительного просмотра распознанных данных -->
-        <groupBox id="previewBox" caption="Результаты распознавания" width="100%" spacing="true" visible="false" stylename="edit-card" collapsable="true">
-            <scrollBox id="previewScroll" width="100%" height="250px" orientation="vertical">
-                <grid id="previewGrid" width="100%" spacing="true">
-                    <columns>
-                        <column width="140px"/>
-                        <column flex="1"/>
-                        <column width="140px"/>
-                        <column flex="1"/>
-                    </columns>
-                    <rows>
-                        <row>
-                            <label value="Организация:" stylename="bold"/>
-                            <label id="previewName" value="—"/>
-                            <label value="ИНН / КПП:" stylename="bold"/>
-                            <label id="previewInnkpp" value="—"/>
-                        </row>
-                        <row>
-                            <label value="ОГРН:" stylename="bold"/>
-                            <label id="previewOgrn" value="—"/>
-                            <label value="ОКПО / ОКВЭД:" stylename="bold"/>
-                            <label id="previewOkpoOkved" value="—"/>
-                        </row>
-                        <row>
-                            <label value="Юр. адрес:" stylename="bold"/>
-                            <label id="previewLegalAddress" value="—"/>
-                            <label value="Факт. адрес:" stylename="bold"/>
-                            <label id="previewActualAddress" value="—"/>
-                        </row>
-                        <row>
-                            <label value="Банк / БИК:" stylename="bold"/>
-                            <label id="previewBankBik" value="—"/>
-                            <label value="Р/с / К/с:" stylename="bold"/>
-                            <label id="previewAccounts" value="—"/>
-                        </row>
-                        <row>
-                            <label value="Контакты:" stylename="bold"/>
-                            <label id="previewContacts" value="—"/>
-                            <label value="Руководитель:" stylename="bold"/>
-                            <label id="previewDirector" value="—" htmlEnabled="true"/>
-                        </row>
-                    </rows>
-                </grid>
-            </scrollBox>
-        </groupBox>
+                <!-- Блок предварительного просмотра распознанных данных (Шаг 2) -->
+                <vbox id="previewCard" width="100%" spacing="true" visible="false" stylename="edit-card">
+                    <label value="2. РАСПОЗНАННЫЕ РЕКВИЗИТЫ ОРГАНИЗАЦИИ" stylename="label-nav-title job-candidate-section-title"/>
+
+                    <grid id="previewGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                        <columns>
+                            <column width="160px"/>
+                            <column flex="1"/>
+                            <column width="160px"/>
+                            <column flex="1"/>
+                        </columns>
+                        <rows>
+                            <row>
+                                <label value="Торговое имя (бренд):" stylename="bold"/>
+                                <label id="previewName" value="—" stylename="bold" css="color: #1e3a8a;"/>
+                                <label value="Юридическое лицо:" stylename="bold"/>
+                                <label id="previewLegalName" value="—" stylename="bold"/>
+                            </row>
+                            <row>
+                                <label value="ИНН / КПП:" stylename="bold"/>
+                                <label id="previewInnkpp" value="—"/>
+                                <label value="ОГРН / ОГРНИП:" stylename="bold"/>
+                                <label id="previewOgrn" value="—"/>
+                            </row>
+                            <row>
+                                <label value="ОКПО / ОКВЭД:" stylename="bold"/>
+                                <label id="previewOkpoOkved" value="—"/>
+                                <label value="ОПФ / Форма:" stylename="bold"/>
+                                <label id="previewOwnership" value="—"/>
+                            </row>
+                            <row>
+                                <label value="Страна / Регион / Город:" stylename="bold"/>
+                                <label id="previewGeo" value="—"/>
+                                <label value="Улица, дом, офис:" stylename="bold"/>
+                                <label id="previewStreetAddress" value="—"/>
+                            </row>
+                            <row>
+                                <label value="Юридический адрес:" stylename="bold"/>
+                                <label id="previewLegalAddress" value="—"/>
+                                <label value="Фактический адрес:" stylename="bold"/>
+                                <label id="previewActualAddress" value="—"/>
+                            </row>
+                            <row>
+                                <label value="Банк / БИК:" stylename="bold"/>
+                                <label id="previewBankBik" value="—"/>
+                                <label value="Счета (Р/с / К/с):" stylename="bold"/>
+                                <label id="previewAccounts" value="—"/>
+                            </row>
+                            <row>
+                                <label value="Контакты:" stylename="bold"/>
+                                <label id="previewContacts" value="—"/>
+                                <label value="Руководитель:" stylename="bold"/>
+                                <label id="previewDirector" value="—" htmlEnabled="true"/>
+                            </row>
+                        </rows>
+                    </grid>
+                </vbox>
+
+            </vbox>
+        </scrollBox>
 
         <!-- Нижняя панель действий -->
-        <hbox id="actionsBox" width="100%" spacing="true" align="MIDDLE_RIGHT">
-            <hbox expand="spacer" width="100%">
-                <label id="statusLabel" value="" stylename="bold" align="MIDDLE_LEFT"/>
-                <hbox id="spacer" width="100%"/>
-            </hbox>
+        <hbox id="footerToolbar" width="100%" spacing="true" align="MIDDLE_RIGHT" stylename="edit-toolbar">
             <button id="applyBtn" caption="Применить реквизиты" icon="CHECK" stylename="primary" enabled="false"/>
-            <button id="cancelBtn" caption="Отмена" icon="BAN"/>
+            <button id="cancelBtn" caption="Отмена" icon="BAN" stylename="secondary"/>
         </hbox>
     </layout>
 </window>
