@@ -11,6 +11,8 @@
             <view extends="iteractionList-browse-view">
                 <property name="candidate" view="_minimal">
                     <property name="fullName"/>
+                    <property name="telegramName"/>
+                    <property name="email"/>
                     <property name="personPosition" view="_minimal">
                         <property name="positionRuName"/>
                     </property>
@@ -67,7 +69,7 @@
             <vbox id="detailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
                 <scrollBox id="sidebarScrollBox" width="100%" height="100%" orientation="vertical">
                     <vbox width="100%" spacing="true">
-                        <!-- Шапка кандидата / взаимодействия -->
+                        <!-- Шапка профиля кандидата / взаимодействия -->
                         <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
                             <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
                                               align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/no-company.png" scaleMode="SCALE_DOWN"/>
@@ -78,30 +80,54 @@
                             </vbox>
                         </vbox>
 
-                        <!-- Кнопки действий сайдбара -->
-                        <vbox id="sidebarActionsCard" width="100%" spacing="true" stylename="edit-sidebar-summary">
-                            <button id="openEditCardBtn" caption="Открыть взаимодействие" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
-                            <button id="openCandidateCardBtn" caption="Открыть кандидата" icon="USER" enabled="false" width="100%"/>
+                        <!-- Кнопка перехода к редактированию -->
+                        <vbox id="sidebarActionBox" width="100%" spacing="true" stylename="edit-sidebar-actions">
+                            <button id="openEditCardBtn" caption="Открыть карточку взаимодействия" icon="EDIT_ACTION" width="100%" stylename="primary candidate-btn candidate-sidebar-btn" enabled="false"/>
+                            <button id="openCandidateCardBtn" caption="Карточка кандидата" icon="USER" width="100%" stylename="secondary candidate-btn candidate-sidebar-btn" enabled="false"/>
                         </vbox>
 
-                        <!-- Секция: Детали взаимодействия -->
-                        <vbox id="termsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="ДЕТАЛИ ВЗАИМОДЕЙСТВИЯ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
-                            <grid id="termsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
-                                <columns count="2"/>
+                        <!-- Секция: Основные данные -->
+                        <vbox id="mainDataCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ОСНОВНЫЕ ДАННЫЕ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <grid id="mainDataGrid" width="100%" spacing="true" stylename="edit-sidebar-grid">
+                                <columns>
+                                    <column width="100px"/>
+                                    <column flex="1"/>
+                                </columns>
                                 <rows>
-                                    <row><label value="Номер:" stylename="bold"/><label id="detailNumber" value="-"/></row>
-                                    <row><label value="Дата:" stylename="bold"/><label id="detailDate" value="-"/></row>
-                                    <row><label value="Рейтинг:" stylename="bold"/><label id="detailRating" htmlEnabled="true" value="-"/></row>
-                                    <row><label value="Вакансия:" stylename="bold"/><label id="detailVacancy" value="-"/></row>
-                                    <row><label value="Статус вакансии:" stylename="bold"/><label id="detailVacancyStatus" htmlEnabled="true" value="-"/></row>
-                                    <row><label value="Рекрутер:" stylename="bold"/><label id="detailRecruiter" value="-"/></row>
-                                    <row><label value="Способ связи:" stylename="bold"/><label id="detailCommMethod" value="-"/></row>
+                                    <row>
+                                        <label value="Номер:" stylename="edit-help"/>
+                                        <label id="detailNumber" value="-" stylename="bold"/>
+                                    </row>
+                                    <row>
+                                        <label value="Дата:" stylename="edit-help"/>
+                                        <label id="detailDate" value="-" stylename="bold"/>
+                                    </row>
+                                    <row>
+                                        <label value="Рейтинг:" stylename="edit-help"/>
+                                        <label id="detailRating" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Вакансия:" stylename="edit-help"/>
+                                        <label id="detailVacancy" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Статус вакансии:" stylename="edit-help"/>
+                                        <label id="detailVacancyStatus" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Рекрутер:" stylename="edit-help"/>
+                                        <label id="detailRecruiter" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Канал связи:" stylename="edit-help"/>
+                                        <label id="detailCommMethod" value="-"/>
+                                    </row>
                                 </rows>
                             </grid>
                         </vbox>
 
-                        <!-- Секция: Комментарий / содержание -->
+                        <!-- Секция: Комментарий -->
                         <vbox id="commentCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="КОММЕНТАРИЙ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
                             <label id="detailComment" htmlEnabled="true" width="100%" stylename="edit-help"/>
@@ -122,20 +148,20 @@
                     </hbox>
                     <hbox id="toolbarSpacer" width="100%"/>
                     <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
-                        <label value="С даты:" align="MIDDLE_LEFT" stylename="edit-help" css="margin-right: 4px;"/>
-                        <dateField id="dateFromField" width="115px"/>
+                        <label value="С даты:" align="MIDDLE_LEFT" stylename="edit-help"/>
+                        <dateField id="dateFromField" width="125px"/>
                         <popupButton id="filterPopupButton" caption="Все взаимодействия" icon="FILTER" stylename="secondary candidate-btn">
                             <actions>
                                 <action id="filterAll" caption="Все взаимодействия"/>
-                                <action id="filterMyOnly" caption="Только мои взаимодействия"/>
-                                <action id="filterOutstaffingOnly" caption="Только аутстаффинг"/>
+                                <action id="filterOutstaffing" caption="Аутстаффинг"/>
+                                <action id="filterLast30Days" caption="За 30 дней"/>
+                                <action id="filterLast90Days" caption="За 90 дней"/>
                             </actions>
                         </popupButton>
                         <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary candidate-btn">
                             <actions>
                                 <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
                                 <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
-                                <action id="copyCandidateSummaryAction" caption="Скопировать саммари" icon="COPY"/>
                             </actions>
                         </popupButton>
                     </hbox>
@@ -169,15 +195,14 @@
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
-                            <column id="numberIteraction" caption="№" width="70px"/>
-                            <column id="ratingStars" caption="Рейтинг" width="105px" sortable="false"/>
-                            <column id="candidate.fullName" caption="Кандидат" expandRatio="2"/>
-                            <column id="iteractionType" caption="Тип взаимодействия" expandRatio="2"/>
-                            <column id="vacancy.projectName.projectName" caption="Проект" width="160px"/>
-                            <column id="vacancy.vacansyName" caption="Вакансия" expandRatio="2"/>
-                            <column id="vacancyStatus" caption="Статус вакансии" width="120px" sortable="false"/>
-                            <column id="recrutier" caption="Рекрутер" width="140px"/>
-                            <column id="dateIteraction" caption="Дата" width="110px"/>
+                            <column id="avatar" caption="Фото" width="50px" sortable="false"/>
+                            <column id="candidate" caption="Кандидат" expandRatio="2"/>
+                            <column id="iteractionType" caption="Тип взаимодействия" width="175px"/>
+                            <column id="ratingStars" caption="Рейтинг" width="115px" sortable="false"/>
+                            <column id="vacancy" caption="Вакансия / Проект" expandRatio="2"/>
+                            <column id="vacancyStatus" caption="Статус" width="100px" sortable="false"/>
+                            <column id="recrutier" caption="Рекрутер" width="135px"/>
+                            <column id="dateIteraction" caption="Дата" width="125px"/>
                         </columns>
                         <rowsCount/>
                     </groupTable>

@@ -114,6 +114,63 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
     }
 
     private void setupTableColumns() {
+        iteractionListsTable.addGeneratedColumn("avatar", item -> {
+            HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+            retBox.setWidthFull();
+            retBox.setHeightFull();
+            retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Image image = uiComponents.create(Image.class);
+            image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+            image.setWidth("24px");
+            image.setHeight("24px");
+            image.setStyleName("circle-20px");
+            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (item != null && item.getCandidate() != null && item.getCandidate().getFileImageFace() != null) {
+                image.setSource(FileDescriptorResource.class).setFileDescriptor(item.getCandidate().getFileImageFace());
+            } else {
+                image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            }
+
+            retBox.add(image);
+            return retBox;
+        });
+
+        iteractionListsTable.addGeneratedColumn("candidate", item -> {
+            JobCandidate c = item != null ? item.getCandidate() : null;
+            String name = (c != null && c.getFullName() != null) ? c.getFullName() : "Без имени";
+            StringBuilder sub = new StringBuilder();
+            if (c != null) {
+                if (c.getCityOfResidence() != null && c.getCityOfResidence().getCityRuName() != null) {
+                    sub.append("📍 ").append(c.getCityOfResidence().getCityRuName());
+                }
+                if (c.getTelegramName() != null && !c.getTelegramName().trim().isEmpty()) {
+                    if (sub.length() > 0) sub.append(" • ");
+                    sub.append("@").append(c.getTelegramName().trim());
+                } else if (c.getEmail() != null && !c.getEmail().trim().isEmpty()) {
+                    if (sub.length() > 0) sub.append(" • ");
+                    sub.append(c.getEmail().trim());
+                }
+            }
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
+                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub.toString() + "</div>" : "") + "</div>";
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setValue(textHtml);
+            return lbl;
+        });
+
+        iteractionListsTable.addGeneratedColumn("iteractionType", item -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String typeName = (item != null && item.getIteractionType() != null && item.getIteractionType().getIterationName() != null)
+                    ? item.getIteractionType().getIterationName() : "Взаимодействие";
+            lbl.setValue("<span style='background: rgba(99, 102, 241, 0.12); color: #4f46e5; border: 1px solid rgba(99, 102, 241, 0.25); padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + typeName + "</span>");
+            return lbl;
+        });
+
         iteractionListsTable.addGeneratedColumn("ratingStars", item -> {
             HBoxLayout box = uiComponents.create(HBoxLayout.class);
             box.setWidthFull();
@@ -135,6 +192,25 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
             return box;
         });
 
+        iteractionListsTable.addGeneratedColumn("vacancy", item -> {
+            OpenPosition v = item != null ? item.getVacancy() : null;
+            if (v == null) {
+                Label<String> plain = uiComponents.create(Label.NAME);
+                plain.setHtmlEnabled(true);
+                plain.setValue("<span style='color: #94a3b8; font-size: 11px;'>—</span>");
+                return plain;
+            }
+            String vName = v.getVacansyName() != null ? v.getVacansyName() : "Вакансия";
+            String pName = v.getProjectName() != null ? v.getProjectName().getProjectName() : "";
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 12.5px;'>" + vName + "</div>" +
+                    (!pName.isEmpty() ? "<div style='font-size: 11px; color: #64748b;'>📁 " + pName + "</div>" : "") + "</div>";
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setValue(textHtml);
+            return lbl;
+        });
+
         iteractionListsTable.addGeneratedColumn("vacancyStatus", item -> {
             HBoxLayout box = uiComponents.create(HBoxLayout.class);
             box.setWidthFull();
@@ -148,9 +224,9 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
             OpenPosition vacancy = item != null ? item.getVacancy() : null;
             if (vacancy != null) {
                 if (Boolean.TRUE.equals(vacancy.getOpenClose())) {
-                    label.setValue("<span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Закрыта</span>");
+                    label.setValue("<span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600;'>Закрыта</span>");
                 } else {
-                    label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Открыта</span>");
+                    label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600;'>Открыта</span>");
                 }
             } else {
                 label.setValue("<span style='color: #cbd5e1;'>—</span>");
@@ -158,6 +234,22 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
 
             box.add(label);
             return box;
+        });
+
+        iteractionListsTable.addGeneratedColumn("recrutier", item -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String recName = (item != null && item.getRecrutier() != null) ? item.getRecrutier().getInstanceName() : "-";
+            lbl.setValue("<span style='font-size: 12px; color: #475569;'>👤 " + (recName != null ? recName : "-") + "</span>");
+            return lbl;
+        });
+
+        iteractionListsTable.addGeneratedColumn("dateIteraction", item -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String d = (item != null && item.getDateIteraction() != null) ? DATE_FORMAT.format(item.getDateIteraction()) : "-";
+            lbl.setValue("<span style='font-size: 11.5px; color: #64748b;'>📅 " + d + "</span>");
+            return lbl;
         });
     }
 

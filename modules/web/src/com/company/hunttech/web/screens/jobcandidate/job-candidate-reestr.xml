@@ -139,24 +139,14 @@
                 
                 <!-- Верхняя полоса основных действий, быстрых фильтров и выпадающего меню действий -->
                 <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
-                    <!-- Левая группа основных действий: Создать кандидата, Умная загрузка, Редактировать, Удалить -->
+                    <!-- Левая группа основных действий: Создать кандидата, Умная загрузка (с выпадающим списком форматов), Редактировать, Удалить -->
                     <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
                         <button id="createCandidateBtn" caption="Создать кандидата" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn"/>
-                        <button id="smartUploadBtn" caption="Умная загрузка" icon="font-icon:MAGIC" stylename="primary candidate-btn candidate-smartload-btn"/>
-                        <button id="editCandidateToolbarBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn candidate-edit-btn" enabled="false"/>
-                        <button id="removeCandidateToolbarBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn candidate-remove-btn" enabled="false"/>
-                    </hbox>
-
-                    <!-- Распорка для выравнивания правых кнопок по правому краю -->
-                    <hbox id="toolbarSpacer" width="100%"/>
-
-                    <!-- Правая группа фильтров и сервисных действий: Быстрая загрузка, Фильтр кандидатов, Фильтр по меткам, Метки, Действия -->
-                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
                         <popupButton id="quickLoadCV"
-                                     caption="Быстрая загрузка"
-                                     icon="CLOUD_UPLOAD"
+                                     caption="Умная загрузка"
+                                     icon="font-icon:MAGIC"
                                      showActionIcons="true"
-                                     stylename="secondary candidate-btn candidate-quickload-btn">
+                                     stylename="primary candidate-btn candidate-smartload-btn">
                             <actions>
                                 <action id="smartLoad" caption="Умная AI-загрузка резюме..." icon="font-icon:MAGIC"/>
                                 <action id="loadFromPdf" caption="Из файла PDF..." icon="FILE_PDF_O"/>
@@ -164,6 +154,15 @@
                                 <action id="loadFromClipboard" caption="Из буфера обмена..." icon="CLIPBOARD"/>
                             </actions>
                         </popupButton>
+                        <button id="editCandidateToolbarBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn candidate-edit-btn" enabled="false"/>
+                        <button id="removeCandidateToolbarBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn candidate-remove-btn" enabled="false"/>
+                    </hbox>
+
+                    <!-- Распорка для выравнивания правых кнопок по правому краю -->
+                    <hbox id="toolbarSpacer" width="100%"/>
+
+                    <!-- Правая группа фильтров и сервисных действий: Фильтр кандидатов, Фильтр по меткам, Метки, Действия -->
+                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
                         <popupButton id="candidatesFilterPopupButton"
                                      caption="Все кандидаты"
                                      icon="USERS"
@@ -177,10 +176,10 @@
                         </popupButton>
                         <!-- Выпадающий фильтр отбора кандидатов по меткам/значкам -->
                         <popupButton id="signFilterButton"
-                                     caption="Фильтр по меткам"
+                                     caption="Фильтр меток"
                                      icon="FILTER"
                                      showActionIcons="true"
-                                     stylename="secondary"
+                                     stylename="secondary candidate-btn"
                                      align="MIDDLE_RIGHT"/>
                         <!-- Выпадающая кнопка присвоения меток кандидату -->
                         <popupButton id="signIconsButton"
@@ -188,7 +187,7 @@
                                      icon="TAGS"
                                      showActionIcons="true"
                                      enabled="false"
-                                     stylename="secondary"
+                                     stylename="secondary candidate-btn"
                                      align="MIDDLE_RIGHT"/>
                         <!-- Выпадающая кнопка действий над кандидатом (задачи + метки) -->
                         <popupButton id="actionsWithCandidateButton"
@@ -196,7 +195,7 @@
                                      icon="BARS"
                                      showActionIcons="true"
                                      enabled="true"
-                                     stylename="primary"
+                                     stylename="primary candidate-btn"
                                      align="MIDDLE_RIGHT">
                             <actions>
                                 <action id="refreshAction" caption="Обновить" icon="REFRESH"/>

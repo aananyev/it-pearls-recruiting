@@ -11,6 +11,8 @@
             <view extends="candidateCV-browse-view">
                 <property name="candidate" view="_minimal">
                     <property name="fullName"/>
+                    <property name="telegramName"/>
+                    <property name="email"/>
                     <property name="personPosition" view="_minimal">
                         <property name="positionRuName"/>
                     </property>
@@ -68,37 +70,67 @@
                             </vbox>
                         </vbox>
 
-                        <!-- Кнопки действий сайдбара -->
-                        <vbox id="sidebarActionsCard" width="100%" spacing="true" stylename="edit-sidebar-summary">
-                            <button id="openEditCardBtn" caption="Открыть карточку резюме" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
-                            <button id="openCandidateCardBtn" caption="Открыть кандидата" icon="USER" enabled="false" width="100%"/>
+                        <!-- Кнопка перехода к редактированию -->
+                        <vbox id="sidebarActionBox" width="100%" spacing="true" stylename="edit-sidebar-actions">
+                            <button id="openEditCardBtn" caption="Открыть карточку резюме" icon="EDIT_ACTION" width="100%" stylename="primary candidate-btn candidate-sidebar-btn" enabled="false"/>
+                            <button id="openCandidateCardBtn" caption="Карточка кандидата" icon="USER" width="100%" stylename="secondary candidate-btn candidate-sidebar-btn" enabled="false"/>
                         </vbox>
 
-                        <!-- Секция: Сведения о резюме -->
-                        <vbox id="termsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="СВЕДЕНИЯ О РЕЗЮМЕ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
-                            <grid id="termsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
-                                <columns count="2"/>
+                        <!-- Секция: Основные данные -->
+                        <vbox id="mainDataCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ОСНОВНЫЕ ДАННЫЕ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <grid id="mainDataGrid" width="100%" spacing="true" stylename="edit-sidebar-grid">
+                                <columns>
+                                    <column width="100px"/>
+                                    <column flex="1"/>
+                                </columns>
                                 <rows>
-                                    <row><label value="Статус резюме:" stylename="bold"/><label id="detailCvReady" htmlEnabled="true" value="-"/></row>
-                                    <row><label value="Целевая вакансия:" stylename="bold"/><label id="detailToVacancy" value="-"/></row>
-                                    <row><label value="Проект:" stylename="bold"/><label id="detailProject" value="-"/></row>
-                                    <row><label value="Рекрутер / Автор:" stylename="bold"/><label id="detailOwner" value="-"/></row>
-                                    <row><label value="Дата публикации:" stylename="bold"/><label id="detailDatePost" value="-"/></row>
+                                    <row>
+                                        <label value="Готовность:" stylename="edit-help"/>
+                                        <label id="detailCvReady" value="-" stylename="bold"/>
+                                    </row>
+                                    <row>
+                                        <label value="Вакансия:" stylename="edit-help"/>
+                                        <label id="detailToVacancy" value="-" stylename="bold"/>
+                                    </row>
+                                    <row>
+                                        <label value="Проект:" stylename="edit-help"/>
+                                        <label id="detailProject" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Рекрутер:" stylename="edit-help"/>
+                                        <label id="detailOwner" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="Дата:" stylename="edit-help"/>
+                                        <label id="detailDatePost" value="-"/>
+                                    </row>
                                 </rows>
                             </grid>
                         </vbox>
 
-                        <!-- Секция: Файлы и ссылки резюме -->
+                        <!-- Секция: Файлы -->
                         <vbox id="filesCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
-                            <label value="ДОКУМЕНТЫ И ССЫЛКИ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
-                            <vbox spacing="true" width="100%" stylename="edit-sidebar-summary">
-                                <label id="detailOriginalFile" htmlEnabled="true" value="-" width="100%"/>
-                                <label id="detailHuntTechFile" htmlEnabled="true" value="-" width="100%"/>
-                            </vbox>
+                            <label value="ПРИКРЕПЛЕННЫЕ ФАЙЛЫ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <grid id="filesGrid" width="100%" spacing="true" stylename="edit-sidebar-grid">
+                                <columns>
+                                    <column width="100px"/>
+                                    <column flex="1"/>
+                                </columns>
+                                <rows>
+                                    <row>
+                                        <label value="Оригинал:" stylename="edit-help"/>
+                                        <label id="detailOriginalFile" value="-"/>
+                                    </row>
+                                    <row>
+                                        <label value="HuntTech:" stylename="edit-help"/>
+                                        <label id="detailHuntTechFile" value="-"/>
+                                    </row>
+                                </rows>
+                            </grid>
                         </vbox>
 
-                        <!-- Секция: Сопроводительное письмо / текст -->
+                        <!-- Секция: Сопроводительное письмо -->
                         <vbox id="letterCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
                             <label value="СОПРОВОДИТЕЛЬНОЕ ПИСЬМО" width="100%" stylename="label-nav-title job-candidate-section-title"/>
                             <label id="detailLetter" htmlEnabled="true" width="100%" stylename="edit-help"/>
@@ -122,8 +154,8 @@
                         <popupButton id="filterPopupButton" caption="Все резюме" icon="FILTER" stylename="secondary candidate-btn">
                             <actions>
                                 <action id="filterAll" caption="Все резюме"/>
-                                <action id="filterMyOnly" caption="Только мои резюме"/>
-                                <action id="filterWithVacancyOnly" caption="С привязкой к вакансии"/>
+                                <action id="filterMy" caption="Только мои резюме"/>
+                                <action id="filterWithVacancy" caption="С привязкой к вакансии"/>
                             </actions>
                         </popupButton>
                         <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary candidate-btn">
@@ -164,13 +196,14 @@
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
-                            <column id="cvReady" caption="Готовность" width="100px" sortable="false"/>
-                            <column id="candidate.fullName" caption="Кандидат (ФИО)" expandRatio="2"/>
-                            <column id="toVacancy.vacansyName" caption="Целевая вакансия" expandRatio="2"/>
-                            <column id="resumePosition" caption="Должность" expandRatio="1"/>
-                            <column id="originalFileColumn" caption="Оригинал" width="90px" sortable="false"/>
-                            <column id="huntTechFileColumn" caption="HuntTech" width="90px" sortable="false"/>
-                            <column id="owner" caption="Рекрутер" width="140px"/>
+                            <column id="avatar" caption="Фото" width="50px" sortable="false"/>
+                            <column id="candidate" caption="Кандидат" expandRatio="2"/>
+                            <column id="resumePosition" caption="Должность" width="160px"/>
+                            <column id="toVacancy" caption="Целевая вакансия" expandRatio="2"/>
+                            <column id="cvReady" caption="Готовность" width="105px" sortable="false"/>
+                            <column id="originalFileColumn" caption="Оригинал" width="95px" sortable="false"/>
+                            <column id="huntTechFileColumn" caption="HuntTech" width="95px" sortable="false"/>
+                            <column id="owner" caption="Рекрутер" width="135px"/>
                             <column id="datePost" caption="Дата" width="110px"/>
                         </columns>
                         <rowsCount/>

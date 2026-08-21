@@ -745,13 +745,8 @@ public class JobCandidateReestr extends StandardLookup<JobCandidate> {
     }
 
     /* =========================================================================
-     * Быстрая и умная загрузка резюме (smartUploadBtn, quickLoadCV)
+     * Быстрая и умная загрузка резюме (quickLoadCV)
      * ========================================================================= */
-
-    @Subscribe("smartUploadBtn")
-    public void onSmartUploadBtnClick(Button.ClickEvent event) {
-        openSmartCvUploadDialog();
-    }
 
     @Subscribe("quickLoadCV.smartLoad")
     public void onQuickLoadCVSmartLoad(Action.ActionPerformedEvent event) {

@@ -99,6 +99,83 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
     }
 
     private void setupTableColumns() {
+        candidateCVsTable.addGeneratedColumn("avatar", cv -> {
+            HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+            retBox.setWidthFull();
+            retBox.setHeightFull();
+            retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Image image = uiComponents.create(Image.class);
+            image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+            image.setWidth("24px");
+            image.setHeight("24px");
+            image.setStyleName("circle-20px");
+            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (cv != null && cv.getCandidate() != null && cv.getCandidate().getFileImageFace() != null) {
+                image.setSource(FileDescriptorResource.class).setFileDescriptor(cv.getCandidate().getFileImageFace());
+            } else {
+                image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            }
+
+            retBox.add(image);
+            return retBox;
+        });
+
+        candidateCVsTable.addGeneratedColumn("candidate", cv -> {
+            JobCandidate c = cv != null ? cv.getCandidate() : null;
+            String name = (c != null && c.getFullName() != null) ? c.getFullName() : "Без имени";
+            StringBuilder sub = new StringBuilder();
+            if (c != null) {
+                if (c.getCityOfResidence() != null && c.getCityOfResidence().getCityRuName() != null) {
+                    sub.append("📍 ").append(c.getCityOfResidence().getCityRuName());
+                }
+                if (c.getTelegramName() != null && !c.getTelegramName().trim().isEmpty()) {
+                    if (sub.length() > 0) sub.append(" • ");
+                    sub.append("@").append(c.getTelegramName().trim());
+                } else if (c.getEmail() != null && !c.getEmail().trim().isEmpty()) {
+                    if (sub.length() > 0) sub.append(" • ");
+                    sub.append(c.getEmail().trim());
+                }
+            }
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #2c3e50; font-size: 13px;'>" + name + "</div>" +
+                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #7f8c8d;'>" + sub.toString() + "</div>" : "") + "</div>";
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setValue(textHtml);
+            return lbl;
+        });
+
+        candidateCVsTable.addGeneratedColumn("resumePosition", cv -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String pos = (cv != null && cv.getResumePosition() != null) ? cv.getResumePosition().getPositionRuName() :
+                    (cv != null && cv.getCandidate() != null && cv.getCandidate().getPersonPosition() != null ?
+                            cv.getCandidate().getPersonPosition().getPositionRuName() : "Специалист");
+            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + (pos != null ? pos : "Специалист") + "</span>");
+            return lbl;
+        });
+
+        candidateCVsTable.addGeneratedColumn("toVacancy", cv -> {
+            com.company.hunttech.entity.OpenPosition v = cv != null ? cv.getToVacancy() : null;
+            if (v == null) {
+                Label<String> plain = uiComponents.create(Label.NAME);
+                plain.setHtmlEnabled(true);
+                plain.setValue("<span style='color: #94a3b8; font-size: 11px;'>—</span>");
+                return plain;
+            }
+            String vName = v.getVacansyName() != null ? v.getVacansyName() : "Вакансия";
+            String pName = v.getProjectName() != null ? v.getProjectName().getProjectName() : "";
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 12.5px;'>" + vName + "</div>" +
+                    (!pName.isEmpty() ? "<div style='font-size: 11px; color: #64748b;'>📁 " + pName + "</div>" : "") + "</div>";
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setValue(textHtml);
+            return lbl;
+        });
+
         candidateCVsTable.addGeneratedColumn("cvReady", cv -> {
             HBoxLayout box = uiComponents.create(HBoxLayout.class);
             box.setWidthFull();
@@ -113,9 +190,9 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
             boolean hasLetter = cv != null && cv.getId() != null && cvsWithLetter.contains(cv.getId());
 
             if (hasText || hasLetter) {
-                label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Готово</span>");
+                label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>✓ Готово</span>");
             } else {
-                label.setValue("<span style='background: #fef9c3; color: #a16207; border: 1px solid #fef08a; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Черновик</span>");
+                label.setValue("<span style='background: #fef9c3; color: #a16207; border: 1px solid #fef08a; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>✎ Черновик</span>");
             }
 
             box.add(label);
@@ -132,8 +209,8 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
             label.setHtmlEnabled(true);
             label.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-            if (cv != null && (cv.getOriginalFileCV() != null || (cv.getLinkOriginalCv() != null && !cv.getLinkOriginalCv().isEmpty()))) {
-                label.setValue("<span style='color: #16a34a; font-weight: 700;'>📄 Да</span>");
+            if (cv != null && (cv.getOriginalFileCV() != null || (cv.getLinkOriginalCv() != null && !cv.getLinkOriginalCv().trim().isEmpty()))) {
+                label.setValue("<span style='background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600;'>📄 Да</span>");
             } else {
                 label.setValue("<span style='color: #cbd5e1;'>—</span>");
             }
@@ -152,14 +229,30 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
             label.setHtmlEnabled(true);
             label.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-            if (cv != null && (cv.getFileCV() != null || (cv.getLinkHuntTechCV() != null && !cv.getLinkHuntTechCV().isEmpty()))) {
-                label.setValue("<span style='color: #2563eb; font-weight: 700;'>📄 Да</span>");
+            if (cv != null && (cv.getFileCV() != null || (cv.getLinkHuntTechCV() != null && !cv.getLinkHuntTechCV().trim().isEmpty()))) {
+                label.setValue("<span style='background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600;'>⚡ Да</span>");
             } else {
                 label.setValue("<span style='color: #cbd5e1;'>—</span>");
             }
 
             box.add(label);
             return box;
+        });
+
+        candidateCVsTable.addGeneratedColumn("owner", cv -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String ownerName = (cv != null && cv.getOwner() != null) ? cv.getOwner().getInstanceName() : "-";
+            lbl.setValue("<span style='font-size: 12px; color: #475569;'>👤 " + (ownerName != null ? ownerName : "-") + "</span>");
+            return lbl;
+        });
+
+        candidateCVsTable.addGeneratedColumn("datePost", cv -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String d = (cv != null && cv.getDatePost() != null) ? DATE_FORMAT.format(cv.getDatePost()) : "-";
+            lbl.setValue("<span style='font-size: 11.5px; color: #64748b;'>📅 " + d + "</span>");
+            return lbl;
         });
     }
 
