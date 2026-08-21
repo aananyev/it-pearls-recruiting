@@ -7,7 +7,7 @@ INSERT INTO HUNTTECH_AI_FUNCTION_CONFIGURATION (
     IS_ACTIVE, CONFIGURATION_VERSION
 )
 SELECT
-    'c3f5d7b9-2e4a-5f6b-9c8d-0a1b2c3d4e5f'::uuid,
+    'd5e7f9a1-3b4c-5d6e-8f9a-1b2c3d4e5f6a'::uuid,
     1,
     CURRENT_TIMESTAMP,
     'migration',
