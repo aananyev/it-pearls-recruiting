@@ -122,4 +122,16 @@
     <include file="260821-2-addCompanyRequisitesAiFunction.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- JobHistory: снятие NOT NULL с CURRENT_POSITION_ID и добавление полей опыта кандидата. -->
+    <include file="260821-3-addJobHistoryFields.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- SmartCvIngestService: обновление AI-функции CV_SMART_PARSE_JSON для поддержки мест работы и образования. -->
+    <include file="260821-4-updateSmartCvParseAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- CompanyRequisitesIngestService: обновление AI-функции COMPANY_REQUISITES_PARSE_JSON с гео-разбиением. -->
+    <include file="260821-5-updateCompanyRequisitesAiFunctionWithGeo.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>

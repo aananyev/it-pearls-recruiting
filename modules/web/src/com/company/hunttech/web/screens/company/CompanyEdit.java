@@ -70,11 +70,10 @@ public class CompanyEdit extends StandardEditor<Company> {
                 put("tabCompanyDepartament", "companyEditorNavDepartments");
             }});
 
-    /** Вкладки с двумя и более блоками ввода — только на них label-навигация
-     *  sidebar видима (контракт Edit-форм §3.6, эталон OpenPositionEdit):
-     *  «Информация о компании» и «Официальные реквизиты» — многоблочные. */
+    /** Вкладки с поддержкой sidebar-навигации: все 4 вкладки компании. */
     private static final Set<String> TABS_WITH_SIDEBAR_NAVIGATION =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList("tabConpanyDetails", "companyRequisitesTab")));
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+                    "tabConpanyDetails", "companyRequisitesTab", "companyDescriptionTab", "tabCompanyDepartament")));
 
     @Subscribe("mainTab")
     public void onMainTabSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
@@ -131,7 +130,15 @@ public class CompanyEdit extends StandardEditor<Company> {
 
     @Subscribe("cityOfCompanyField")
     public void onCityOfCompanyFieldValueChange(HasValue.ValueChangeEvent<City> event) {
-        City city = event.getValue();
+        handleCityChange(event.getValue());
+    }
+
+    @Subscribe("cityOfCompanyRequisitesField")
+    public void onCityOfCompanyRequisitesFieldValueChange(HasValue.ValueChangeEvent<City> event) {
+        handleCityChange(event.getValue());
+    }
+
+    private void handleCityChange(City city) {
         if (city == null) {
             return;
         }
@@ -146,7 +153,15 @@ public class CompanyEdit extends StandardEditor<Company> {
 
     @Subscribe("regionOfCompanyField")
     public void onRegionOfCompanyFieldValueChange(HasValue.ValueChangeEvent<Region> event) {
-        Region region = event.getValue();
+        handleRegionChange(event.getValue());
+    }
+
+    @Subscribe("regionOfCompanyRequisitesField")
+    public void onRegionOfCompanyRequisitesFieldValueChange(HasValue.ValueChangeEvent<Region> event) {
+        handleRegionChange(event.getValue());
+    }
+
+    private void handleRegionChange(Region region) {
         if (region == null) {
             return;
         }

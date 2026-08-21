@@ -164,6 +164,10 @@ public class CompanyRequisitesIngestServiceBean implements CompanyRequisitesInge
                 result.setOkpo(textOrNull(root, "okpo"));
                 result.setOktmo(textOrNull(root, "oktmo"));
                 result.setOkved(textOrNull(root, "okved"));
+                result.setCountry(textOrNull(root, "country"));
+                result.setRegion(textOrNull(root, "region"));
+                result.setCity(textOrNull(root, "city"));
+                result.setStreetAddress(textOrNull(root, "streetAddress"));
                 result.setLegalAddress(textOrNull(root, "legalAddress"));
                 result.setActualAddress(textOrNull(root, "actualAddress"));
                 result.setPostalAddress(textOrNull(root, "postalAddress"));
@@ -228,6 +232,12 @@ public class CompanyRequisitesIngestServiceBean implements CompanyRequisitesInge
         // Сайт
         Matcher webMatcher = Pattern.compile("(?i)https?://[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(?:/[^\\s]*)?|www\\.[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}").matcher(text);
         if (webMatcher.find()) result.setWebsite(webMatcher.group());
+
+        // Город (г. Название или город Название)
+        Matcher cityMatcher = Pattern.compile("(?i)(?:г[.]|город)\\s+([А-Яа-яЁёA-Za-z\\-]+)").matcher(text);
+        if (cityMatcher.find()) {
+            result.setCity(cityMatcher.group(1).trim());
+        }
     }
 
     @Override
@@ -242,39 +252,50 @@ public class CompanyRequisitesIngestServiceBean implements CompanyRequisitesInge
         }
 
         // Поиск в справочнике Person
-        List<Person> candidates;
-        if (!lastName.isEmpty() && !firstName.isEmpty()) {
-            candidates = dataManager.load(Person.class)
-                    .query("select p from hunttech_Person p where lower(p.secondName) = :lastName and lower(p.firstName) = :firstName")
-                    .parameter("lastName", lastName.toLowerCase())
-                    .parameter("firstName", firstName.toLowerCase())
-                    .view("person-picker-view")
-                    .list();
-        } else {
-            String queryName = !lastName.isEmpty() ? lastName : firstName;
-            candidates = dataManager.load(Person.class)
-                    .query("select p from hunttech_Person p where lower(p.secondName) like :name or lower(p.firstName) like :name")
-                    .parameter("name", "%" + queryName.toLowerCase() + "%")
-                    .view("person-picker-view")
-                    .list();
-        }
+        try {
+            List<Person> candidates;
+            if (!lastName.isEmpty() && !firstName.isEmpty()) {
+                candidates = dataManager.load(Person.class)
+                        .query("select p from hunttech_Person p where lower(p.secondName) = :lastName and lower(p.firstName) = :firstName")
+                        .parameter("lastName", lastName.toLowerCase())
+                        .parameter("firstName", firstName.toLowerCase())
+                        .view("person-picker-view")
+                        .list();
+            } else {
+                String queryName = !lastName.isEmpty() ? lastName : firstName;
+                candidates = dataManager.load(Person.class)
+                        .query("select p from hunttech_Person p where lower(p.secondName) like :name or lower(p.firstName) like :name")
+                        .parameter("name", "%" + queryName.toLowerCase() + "%")
+                        .view("person-picker-view")
+                        .list();
+            }
 
-        if (candidates != null && !candidates.isEmpty()) {
-            return candidates.get(0);
+            if (candidates != null && !candidates.isEmpty()) {
+                return candidates.get(0);
+            }
+        } catch (Exception e) {
+            log.warn("Не удалось найти Person в БД: {}", e.getMessage());
         }
 
         // Если не найден — создаем нового человека
-        Person newPerson = metadata.create(Person.class);
-        newPerson.setSecondName(lastName);
-        newPerson.setFirstName(firstName);
-        newPerson.setMiddleName(middleName);
-        if (data.getDirectorPhone() != null && !data.getDirectorPhone().trim().isEmpty()) {
-            newPerson.setPhone(data.getDirectorPhone().trim());
+        if (metadata != null) {
+            Person newPerson = metadata.create(Person.class);
+            newPerson.setSecondName(lastName);
+            newPerson.setFirstName(firstName);
+            newPerson.setMiddleName(middleName);
+            if (data.getDirectorPhone() != null && !data.getDirectorPhone().trim().isEmpty()) {
+                newPerson.setPhone(data.getDirectorPhone().trim());
+            }
+            if (data.getDirectorEmail() != null && !data.getDirectorEmail().trim().isEmpty()) {
+                newPerson.setEmail(data.getDirectorEmail().trim());
+            }
+            try {
+                return dataManager.commit(newPerson);
+            } catch (Exception e) {
+                return newPerson;
+            }
         }
-        if (data.getDirectorEmail() != null && !data.getDirectorEmail().trim().isEmpty()) {
-            newPerson.setEmail(data.getDirectorEmail().trim());
-        }
-        return dataManager.commit(newPerson);
+        return null;
     }
 
     @Override
@@ -299,11 +320,38 @@ public class CompanyRequisitesIngestServiceBean implements CompanyRequisitesInge
         if (data.getOkved() != null && !data.getOkved().trim().isEmpty()) {
             company.setOkved(data.getOkved().trim());
         }
-        if (data.getLegalAddress() != null && !data.getLegalAddress().trim().isEmpty()) {
-            company.setLegalAddress(data.getLegalAddress().trim());
+
+        // Гео-разбиение: Страна, Регион, Город, Адрес
+        com.company.hunttech.entity.Country country = resolveOrCreateCountry(data.getCountry());
+        com.company.hunttech.entity.Region region = resolveOrCreateRegion(data.getRegion(), country);
+        com.company.hunttech.entity.City city = resolveOrCreateCity(data.getCity(), region);
+
+        if (city != null) {
+            company.setCityOfCompany(city);
+            if (region == null && city.getCityRegion() != null) {
+                region = city.getCityRegion();
+            }
+        }
+        if (region != null) {
+            company.setRegionOfCompany(region);
+            if (country == null && region.getRegionCountry() != null) {
+                country = region.getRegionCountry();
+            }
+        }
+        if (country != null) {
+            company.setCountryOfCompany(country);
+        }
+
+        if (data.getStreetAddress() != null && !data.getStreetAddress().trim().isEmpty()) {
+            company.setAddressOfCompany(data.getStreetAddress().trim());
+        } else if (data.getLegalAddress() != null && !data.getLegalAddress().trim().isEmpty()) {
             if (company.getAddressOfCompany() == null || company.getAddressOfCompany().trim().isEmpty()) {
                 company.setAddressOfCompany(data.getLegalAddress().trim());
             }
+        }
+
+        if (data.getLegalAddress() != null && !data.getLegalAddress().trim().isEmpty()) {
+            company.setLegalAddress(data.getLegalAddress().trim());
         }
         if (data.getActualAddress() != null && !data.getActualAddress().trim().isEmpty()) {
             company.setActualAddress(data.getActualAddress().trim());
@@ -346,6 +394,96 @@ public class CompanyRequisitesIngestServiceBean implements CompanyRequisitesInge
         if (director != null) {
             company.setCompanyDirector(director);
         }
+    }
+
+    private com.company.hunttech.entity.Country resolveOrCreateCountry(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            name = "Россия";
+        }
+        name = name.trim();
+        try {
+            List<com.company.hunttech.entity.Country> list = dataManager.load(com.company.hunttech.entity.Country.class)
+                    .query("select e from hunttech_Country e where lower(e.countryRuName) = :name or lower(e.countryShortName) = :name")
+                    .parameter("name", name.toLowerCase())
+                    .view("country-picker-view")
+                    .list();
+            if (list != null && !list.isEmpty()) {
+                return list.get(0);
+            }
+        } catch (Exception e) {
+            log.warn("Не удалось загрузить Country из БД: {}", e.getMessage());
+        }
+        if (metadata != null) {
+            com.company.hunttech.entity.Country c = metadata.create(com.company.hunttech.entity.Country.class);
+            c.setCountryRuName(name.length() > 50 ? name.substring(0, 50) : name);
+            c.setCountryShortName(name.equalsIgnoreCase("Россия") ? "RU" : (name.length() > 2 ? name.substring(0, 2).toUpperCase() : name.toUpperCase()));
+            try {
+                return dataManager.commit(c);
+            } catch (Exception e) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    private com.company.hunttech.entity.Region resolveOrCreateRegion(String name, com.company.hunttech.entity.Country country) {
+        if (name == null || name.trim().isEmpty()) return null;
+        name = name.trim();
+        try {
+            List<com.company.hunttech.entity.Region> list = dataManager.load(com.company.hunttech.entity.Region.class)
+                    .query("select e from hunttech_Region e where lower(e.regionRuName) = :name")
+                    .parameter("name", name.toLowerCase())
+                    .view("region-browse-view")
+                    .list();
+            if (list != null && !list.isEmpty()) {
+                return list.get(0);
+            }
+        } catch (Exception e) {
+            log.warn("Не удалось загрузить Region из БД: {}", e.getMessage());
+        }
+        if (metadata != null) {
+            com.company.hunttech.entity.Region r = metadata.create(com.company.hunttech.entity.Region.class);
+            r.setRegionRuName(name.length() > 50 ? name.substring(0, 50) : name);
+            if (country != null) {
+                r.setRegionCountry(country);
+            }
+            try {
+                return dataManager.commit(r);
+            } catch (Exception e) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    private com.company.hunttech.entity.City resolveOrCreateCity(String name, com.company.hunttech.entity.Region region) {
+        if (name == null || name.trim().isEmpty()) return null;
+        name = name.trim();
+        try {
+            List<com.company.hunttech.entity.City> list = dataManager.load(com.company.hunttech.entity.City.class)
+                    .query("select e from hunttech_City e where lower(e.cityRuName) = :name")
+                    .parameter("name", name.toLowerCase())
+                    .view("city-location-view")
+                    .list();
+            if (list != null && !list.isEmpty()) {
+                return list.get(0);
+            }
+        } catch (Exception e) {
+            log.warn("Не удалось загрузить City из БД: {}", e.getMessage());
+        }
+        if (metadata != null) {
+            com.company.hunttech.entity.City c = metadata.create(com.company.hunttech.entity.City.class);
+            c.setCityRuName(name.length() > 50 ? name.substring(0, 50) : name);
+            if (region != null) {
+                c.setCityRegion(region);
+            }
+            try {
+                return dataManager.commit(c);
+            } catch (Exception e) {
+                return c;
+            }
+        }
+        return null;
     }
 
     private String textOrNull(JsonNode node, String fieldName) {

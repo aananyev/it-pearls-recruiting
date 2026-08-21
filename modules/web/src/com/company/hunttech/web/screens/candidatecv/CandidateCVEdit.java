@@ -76,6 +76,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     @Inject
     private UserSession userSession;
     @Inject
+    private com.company.hunttech.service.SmartCvIngestService smartCvIngestService;
+    @Inject
     private TextField<String> textFieldIOriginalCV;
     @Inject
     private TextField<String> textFieldHuntTechCV;
@@ -83,6 +85,8 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     private Notifications notifications;
     @Inject
     private LookupPickerField<OpenPosition> candidateCVFieldOpenPosition;
+    @Inject
+    private LookupPickerField<Position> resumePositionField;
     @Inject
     private Dialogs dialogs;
     @Inject
@@ -1310,15 +1314,91 @@ public class CandidateCVEdit extends StandardEditor<CandidateCV> {
     }
 
     public void resumeRecognition() {
-        // Recognition runs against the lazily loaded rich text area.
         ensureCvTextInitialized();
-        if (candidateCVRichTextArea.getValue() != null) {
-            machRegexpFromCV.setValue(parseCVService.parseEmail(candidateCVRichTextArea.getValue())
-                    + " "
-                    + parseCVService.parsePhone(candidateCVRichTextArea.getValue()));
+        String cvText = candidateCVRichTextArea.getValue();
+        if (cvText == null || cvText.trim().isEmpty()) {
+            cvText = getEditedEntity().getTextCV();
         }
-        // Распознавание навыков кандидата с сохранением в CandidateSkill и немедленным отображением в сайдбаре
-        scanCandidateSkills();
+
+        if (cvText != null && !cvText.trim().isEmpty()) {
+            machRegexpFromCV.setValue(parseCVService.parseEmail(cvText)
+                    + " "
+                    + parseCVService.parsePhone(cvText));
+
+            AiOperationNotifier.showStarted(notifications, "Запущен интеллектуальный парсинг резюме…", null);
+            final Screen progressDialog = AiOperationNotifier.showProgress(this, "Анализ резюме, образования и мест работы…");
+            final String textToParse = cvText;
+
+            BackgroundTask<Integer, com.company.hunttech.service.SmartCvIngestResult> task =
+                    new BackgroundTask<Integer, com.company.hunttech.service.SmartCvIngestResult>(120, this) {
+                        @Override
+                        public com.company.hunttech.service.SmartCvIngestResult run(TaskLifeCycle<Integer> taskLifeCycle) {
+                            com.company.hunttech.service.SmartCvParsedData parsed = smartCvIngestService.parseCvText(textToParse);
+                            if (parsed != null) {
+                                return smartCvIngestService.applyParsedDataToCandidateCv(
+                                        getEditedEntity(), parsed, userSession.getUser() instanceof ExtUser ? (ExtUser) userSession.getUser() : null);
+                            }
+                            return null;
+                        }
+
+                        @Override
+                        public void done(com.company.hunttech.service.SmartCvIngestResult result) {
+                            AiOperationNotifier.closeProgress(progressDialog);
+                            if (result != null && result.getStatus() == com.company.hunttech.service.SmartCvIngestResult.Status.SUCCESS) {
+                                if (result.getCandidate() != null) {
+                                    getEditedEntity().setCandidate(result.getCandidate());
+                                }
+                                if (result.getCv() != null && result.getCv().getResumePosition() != null) {
+                                    getEditedEntity().setResumePosition(result.getCv().getResumePosition());
+                                    if (resumePositionField != null) {
+                                        resumePositionField.setValue(result.getCv().getResumePosition());
+                                    }
+                                }
+
+                                initCandidateSkillsSidebar();
+
+                                com.company.hunttech.service.SmartCvParsedData parsed = result.getParsedData();
+                                if (parsed != null && parsed.getMissingPositions() != null && !parsed.getMissingPositions().isEmpty()) {
+                                    String missingList = String.join(", ", parsed.getMissingPositions());
+                                    notifications.create(Notifications.NotificationType.WARNING)
+                                            .withCaption("Внимание: новые должности!")
+                                            .withDescription("В справочнике «Должности» отсутствуют: " + missingList + ". Рекомендуется занести их в справочник.")
+                                            .withHideDelayMs(7000)
+                                            .show();
+                                } else {
+                                    notifications.create(Notifications.NotificationType.TRAY)
+                                            .withCaption("Распознавание завершено")
+                                            .withDescription("Данные кандидата, образование и места работы успешно распознаны и сохранены.")
+                                            .withHideDelayMs(3000)
+                                            .show();
+                                }
+                            }
+                        }
+
+                        @Override
+                        public boolean handleException(Exception ex) {
+                            AiOperationNotifier.closeProgress(progressDialog);
+                            notifications.create(Notifications.NotificationType.ERROR)
+                                    .withCaption("Ошибка распознавания")
+                                    .withDescription("Не удалось выполнить парсинг резюме: " + ex.getMessage())
+                                    .show();
+                            return true;
+                        }
+
+                        @Override
+                        public boolean handleTimeoutException() {
+                            AiOperationNotifier.closeProgress(progressDialog);
+                            notifications.create(Notifications.NotificationType.ERROR)
+                                    .withCaption("Ошибка распознавания")
+                                    .withDescription("Интеллектуальный парсинг резюме превысил допустимое время ожидания.")
+                                    .show();
+                            return true;
+                        }
+                    };
+            backgroundWorker.handle(task).execute();
+        } else {
+            scanCandidateSkills();
+        }
     }
 
     /**

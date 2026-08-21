@@ -35,8 +35,11 @@ public class CompanyRequisitesIngestServiceBeanTest {
                 getClass().getClassLoader(),
                 new Class<?>[]{Metadata.class},
                 (proxy, method, args) -> {
-                    if ("create".equals(method.getName()) && args != null && args.length == 1 && args[0] == Person.class) {
-                        return new Person();
+                    if ("create".equals(method.getName()) && args != null && args.length == 1) {
+                        if (args[0] == Person.class) return new Person();
+                        if (args[0] == com.company.hunttech.entity.Country.class) return new com.company.hunttech.entity.Country();
+                        if (args[0] == com.company.hunttech.entity.Region.class) return new com.company.hunttech.entity.Region();
+                        if (args[0] == com.company.hunttech.entity.City.class) return new com.company.hunttech.entity.City();
                     }
                     return null;
                 }
@@ -49,6 +52,12 @@ public class CompanyRequisitesIngestServiceBeanTest {
                     if ("commit".equals(method.getName()) && args != null && args.length >= 1) {
                         committed.set(true);
                         return args[0];
+                    }
+                    if ("load".equals(method.getName()) && args != null && args.length == 1) {
+                        return new com.haulmont.cuba.core.global.FluentLoader((Class) args[0], (DataManager) proxy);
+                    }
+                    if ("loadList".equals(method.getName())) {
+                        return Collections.emptyList();
                     }
                     return null;
                 }
@@ -69,6 +78,10 @@ public class CompanyRequisitesIngestServiceBeanTest {
                                 "  \"okpo\": \"12345678\",\n" +
                                 "  \"oktmo\": \"45300000\",\n" +
                                 "  \"okved\": \"62.01\",\n" +
+                                "  \"country\": \"Россия\",\n" +
+                                "  \"region\": \"г. Москва\",\n" +
+                                "  \"city\": \"Москва\",\n" +
+                                "  \"streetAddress\": \"ул. Ленина, д. 1\",\n" +
                                 "  \"legalAddress\": \"123456, г. Москва, ул. Ленина, д. 1\",\n" +
                                 "  \"actualAddress\": \"123456, г. Москва, ул. Ленина, д. 1\",\n" +
                                 "  \"postalAddress\": \"123456, г. Москва, а/я 10\",\n" +
@@ -121,6 +134,10 @@ public class CompanyRequisitesIngestServiceBeanTest {
         assertEquals("7701234567", data.getInn());
         assertEquals("770101001", data.getKpp());
         assertEquals("1027700132195", data.getOgrn());
+        assertEquals("Россия", data.getCountry());
+        assertEquals("г. Москва", data.getRegion());
+        assertEquals("Москва", data.getCity());
+        assertEquals("ул. Ленина, д. 1", data.getStreetAddress());
         assertEquals("044525225", data.getBik());
         assertEquals("40702810938000001234", data.getSettlementAccount());
         assertEquals("30101810400000000225", data.getCorrespondentAccount());
@@ -137,6 +154,9 @@ public class CompanyRequisitesIngestServiceBeanTest {
         data.setInn("7801234567");
         data.setKpp("780101001");
         data.setOgrn("1037800001122");
+        data.setCountry("Россия");
+        data.setCity("Санкт-Петербург");
+        data.setStreetAddress("Невский пр-т, д. 10");
         data.setLegalAddress("г. Санкт-Петербург, Невский пр-т, д. 10");
         data.setBik("044030653");
         data.setBankName("ПАО Банк ВТБ");
@@ -152,7 +172,11 @@ public class CompanyRequisitesIngestServiceBeanTest {
         assertEquals("780101001", company.getKpp());
         assertEquals("1037800001122", company.getOgrn());
         assertEquals("г. Санкт-Петербург, Невский пр-т, д. 10", company.getLegalAddress());
-        assertEquals("г. Санкт-Петербург, Невский пр-т, д. 10", company.getAddressOfCompany());
+        assertEquals("Невский пр-т, д. 10", company.getAddressOfCompany());
+        assertNotNull(company.getCityOfCompany());
+        assertEquals("Санкт-Петербург", company.getCityOfCompany().getCityRuName());
+        assertNotNull(company.getCountryOfCompany());
+        assertEquals("Россия", company.getCountryOfCompany().getCountryRuName());
         assertEquals("044030653", company.getBik());
         assertEquals("ПАО Банк ВТБ", company.getBankName());
         assertEquals("40702810100000005555", company.getSettlementAccount());

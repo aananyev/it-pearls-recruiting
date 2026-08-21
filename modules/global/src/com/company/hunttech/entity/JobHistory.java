@@ -22,8 +22,7 @@ public class JobHistory extends StandardEntity {
     protected JobCandidate candidate;
 
     @Lookup(type = LookupType.DROPDOWN, actions = "lookup")
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CURRENT_POSITION_ID")
     protected Position currentPosition;
 
@@ -36,6 +35,64 @@ public class JobHistory extends StandardEntity {
     @Temporal(TemporalType.DATE)
     @Column(name = "DATE_NEWS_POSITION")
     protected Date dateNewsPosition;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "START_DATE")
+    protected Date startDate;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "END_DATE")
+    protected Date endDate;
+
+    @Lob
+    @Column(name = "DUTIES")
+    protected String duties;
+
+    @Column(name = "RAW_POSITION_NAME", length = 255)
+    protected String rawPositionName;
+
+    @Column(name = "RAW_COMPANY_NAME", length = 255)
+    protected String rawCompanyName;
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+    public String getDuties() {
+        return duties;
+    }
+
+    public void setDuties(String duties) {
+        this.duties = duties;
+    }
+
+    public String getRawPositionName() {
+        return rawPositionName;
+    }
+
+    public void setRawPositionName(String rawPositionName) {
+        this.rawPositionName = rawPositionName;
+    }
+
+    public String getRawCompanyName() {
+        return rawCompanyName;
+    }
+
+    public void setRawCompanyName(String rawCompanyName) {
+        this.rawCompanyName = rawCompanyName;
+    }
 
     public Date getDateNewsPosition() {
         return dateNewsPosition;

@@ -77,6 +77,22 @@ select e from hunttech_Ownershup e
 - `fileCompanyLogo`
 - `companyDescription`
 - `workingConditions`
+- `inn`
+- `kpp`
+- `ogrn`
+- `okpo`
+- `oktmo`
+- `okved`
+- `legalAddress`
+- `actualAddress`
+- `postalAddress`
+- `bik`
+- `bankName`
+- `settlementAccount`
+- `correspondentAccount`
+- `phone`
+- `email`
+- `website`
 - `departamentRuName`
 - `departamentDirector`
 - `departamentHrDirector`
@@ -96,6 +112,7 @@ select e from hunttech_Ownershup e
 | Родитель | `web-menu.xml` / opener | menu / lookup |
 | Парный экран | `hunttech_Company.browse` | create / edit action |
 | Lookup targets | picker_lookup на FK-полях | `screenBuilders.lookup()` |
+| Smart Upload | `SmartCompanyRequisitesUploadScreen` | `smartUploadRequisitesBtn` диалог умной загрузки реквизитов |
 
 ---
 
@@ -106,7 +123,7 @@ select e from hunttech_Ownershup e
 | Экран | Что происходит при открытии |
 |-------|----------------------------|
 | Browse | Перед показом применяются фильтры «только наш клиент» / «только юрлицо»; после загрузки списка кэшируются текстовые описания для подсказок в колонках |
-| Edit | Для новой записи `ourClient=false`; при первом открытии вкладок лениво подгружаются адрес, описание и департаменты; sidebar-навигация «Разделы» синхронизирует активный пункт с вкладкой; title sidebar — наименование компании; логотип — `WebOvaFallbackImage` (авто-fallback `icons/no-company.png`) |
+| Edit | Для новой записи `ourClient=false`; при первом открытии вкладок лениво подгружаются адрес, описание и департаменты; sidebar-навигация «Разделы» (4 вкладки) синхронизирует активный пункт с вкладкой; title sidebar — наименование компании; логотип — `WebOvaFallbackImage` (авто-fallback `icons/no-company.png`) |
 
 ### 4.2 Скрытые вычисления
 
@@ -114,10 +131,11 @@ select e from hunttech_Ownershup e
 |------------------------|---------|
 | Логотип с подсказкой | HTML-tooltip с описанием компании из кэша |
 | Иконки ourClient / ourLegalEntity | Цвет и иконка по флагам записи |
+| Каскадный выбор адреса | При выборе города автоматически заполняются регион и страна (на вкладке Основное и Официальные реквизиты) |
 
 ### 4.3 Валидация и сохранение
 
-Стандартный commit editor'а; дополнительных BeforeCommit в Java нет.
+Стандартный commit editor'а; валидация обязательности наименования компании и города.
 
 ---
 
@@ -127,7 +145,7 @@ select e from hunttech_Ownershup e
 |---------|---------|
 | «Только наш клиент» / «Только юрлицо» | Включение чекбокса → перезагрузка списка с параметром loader |
 | Смена города в edit | Выбор города → автозаполнение региона и страны |
-
+| Кнопка «Умная загрузка реквизитов» | Открытие диалога мастера загрузки (из файлов PDF/DOCX/Pages/RTF, текста или URL) → AI-парсинг → автоматическое создание директора в справочнике Люди, автосоздание/привязка гео-справочников (Страна, Регион, Город) и заполнение всех полей реквизитов |
 
 ---
 
@@ -135,8 +153,12 @@ select e from hunttech_Ownershup e
 
 ### Структура layout
 
-- Двухпанельная компоновка `edit-screen-layout` (с 2026-08-14): sidebar 270px (логотип 176×176 + identity-title + навигация «Разделы» + spacer + hint) и workspace (toolbar + tabSheet `edit-tabs` + footer `edit-footer-actions`)
-- Вкладки: `tabConpanyDetails` (карточки `companyMainCard`/`companyAddressCard` в scrollBox), `companyDescriptionTab` (карточка описания с двумя RichTextArea), `tabCompanyDepartament` (карточка с dataGrid `departmentOfCompanyTable`)
+- Двухпанельная компоновка `edit-screen-layout`: sidebar 270px (логотип 176×176 + identity-title + навигация «Разделы» по 4 вкладкам + spacer + hint) и workspace (toolbar + tabSheet `edit-tabs` + footer `edit-footer-actions`)
+- Вкладки:
+  1. `tabConpanyDetails` (карточки «Общие сведения о компании», «Местонахождение и адрес» и «Контакты»)
+  2. `companyRequisitesTab` (панель кнопки «Умная загрузка реквизитов», карточки «Государственная регистрация и коды», «Адрес и местонахождение организации» с гео-разбиением Страна/Регион/Город/Улица, «Банковские реквизиты», «Официальные контакты»)
+  3. `companyDescriptionTab` (карточка описания с двумя RichTextArea)
+  4. `tabCompanyDepartament` (карточка с dataGrid `departmentOfCompanyTable`)
 - Footer: `windowCommitAndClose` (primary) / `windowClose` (secondary), правый нижний угол
 - Фильтр: `filter` → `companyOwnershipsLc`
 - Таблицы: `departmentOfCompanyTable`
@@ -146,7 +168,7 @@ select e from hunttech_Ownershup e
 | Элемент | Источник |
 |---------|----------|
 | Caption | `msg://` / `mainMsg://` из `com.company.hunttech.web.screens.company` |
-| Иконка окна | атрибут `icon` в XML (если задан) |
+| Иконка окна | атрибут `icon` в XML (`BUILDING`) |
 
 ---
 
@@ -154,6 +176,7 @@ select e from hunttech_Ownershup e
 
 | Дата | Изменение |
 |------|-----------|
+| 2026-08-21 | Добавлена вкладка «Официальные реквизиты», мастер «Умная загрузка реквизитов», разбиение адреса на гео-справочники Страна/Регион/Город/Улица и сквозная sidebar-навигация по 4 вкладкам |
 | 2026-08-14 | Сверка с эталоном (контракт §3.1/§3.6): пункты навигации `height: auto`, wrap-правило удалено, на одноблочных вкладках `label-navigation` скрывается (`TABS_WITH_SIDEBAR_NAVIGATION`) |
 | 2026-08-14 | Рефакторинг по контракту Edit-форм (эталон ProjectEdit): sidebar 270px, логотип `ovaFallbackImage` 176×176, навигация «Разделы», карточки `edit-card`+`showAsPanel`, footer primary/secondary, `dialogMode` 100%×100% modal; канон — [docs/ui/CompanyEdit_Spec.md](../../ui/CompanyEdit_Spec.md) |
 | 2026-06-26 | §4–5: поведение из Java простым языком (batch modernization) |

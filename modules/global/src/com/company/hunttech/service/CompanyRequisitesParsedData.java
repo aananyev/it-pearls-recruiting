@@ -17,6 +17,10 @@ public class CompanyRequisitesParsedData implements Serializable {
     private String okpo;
     private String oktmo;
     private String okved;
+    private String country;
+    private String region;
+    private String city;
+    private String streetAddress;
     private String legalAddress;
     private String actualAddress;
     private String postalAddress;
@@ -106,6 +110,38 @@ public class CompanyRequisitesParsedData implements Serializable {
 
     public void setOkved(String okved) {
         this.okved = okved;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getStreetAddress() {
+        return streetAddress;
+    }
+
+    public void setStreetAddress(String streetAddress) {
+        this.streetAddress = streetAddress;
     }
 
     public String getLegalAddress() {

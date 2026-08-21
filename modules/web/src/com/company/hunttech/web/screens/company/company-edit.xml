@@ -352,7 +352,38 @@
                                                   caption="msg://mshCompanyAddress"
                                                   stylename="edit-form-control"
                                                   width="100%"
-                                                  rows="5"/>
+                                                  rows="3"/>
+                                    </vbox>
+                                </groupBox>
+                                <!-- Карточка «Контакты компании» -->
+                                <groupBox id="companyMainContactsCard"
+                                          caption="Контакты"
+                                          stylename="edit-card"
+                                          showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          width="100%">
+                                    <vbox width="100%" spacing="true">
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="phoneMainField"
+                                                       dataContainer="companyDc"
+                                                       property="phone"
+                                                       caption="Телефон"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="emailMainField"
+                                                       dataContainer="companyDc"
+                                                       property="email"
+                                                       caption="Email"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="websiteMainField"
+                                                       dataContainer="companyDc"
+                                                       property="website"
+                                                       caption="Веб-сайт"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
                                     </vbox>
                                 </groupBox>
                             </vbox>
@@ -453,36 +484,85 @@
                                     </vbox>
                                 </groupBox>
 
-                                <!-- Карточка 2: Адреса организации -->
+                                <!-- Карточка 2: Адреса и местонахождение организации -->
                                 <groupBox id="companyRequisitesAddressCard"
-                                          caption="Адреса организации"
+                                          caption="Адрес и местонахождение организации"
                                           stylename="edit-card"
                                           showAsPanel="true"
                                           collapsable="true"
                                           collapsed="false"
                                           width="100%">
                                     <vbox width="100%" spacing="true">
+                                        <hbox spacing="true" width="100%">
+                                            <lookupPickerField id="countryOfCompanyRequisitesField"
+                                                               dataContainer="companyDc"
+                                                               optionsContainer="countryOfCompaniesDc"
+                                                               property="countryOfCompany"
+                                                               caption="Страна"
+                                                               stylename="edit-form-control"
+                                                               width="100%">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                    <action id="open" type="picker_open"/>
+                                                    <action id="clear" type="picker_clear"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                            <lookupPickerField id="regionOfCompanyRequisitesField"
+                                                               dataContainer="companyDc"
+                                                               optionsContainer="regionOfCompaniesDc"
+                                                               property="regionOfCompany"
+                                                               caption="Регион"
+                                                               stylename="edit-form-control"
+                                                               width="100%">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                    <action id="open" type="picker_open"/>
+                                                    <action id="clear" type="picker_clear"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                            <lookupPickerField id="cityOfCompanyRequisitesField"
+                                                               dataContainer="companyDc"
+                                                               optionsContainer="cityOfCompaniesDc"
+                                                               property="cityOfCompany"
+                                                               caption="Город"
+                                                               stylename="edit-form-control"
+                                                               width="100%">
+                                                <actions>
+                                                    <action id="lookup" type="picker_lookup"/>
+                                                    <action id="open" type="picker_open"/>
+                                                    <action id="clear" type="picker_clear"/>
+                                                </actions>
+                                            </lookupPickerField>
+                                        </hbox>
+                                        <textField id="addressOfCompanyRequisitesField"
+                                                   dataContainer="companyDc"
+                                                   property="addressOfCompany"
+                                                   caption="Улица, дом, строение, офис (адресная строка)"
+                                                   stylename="edit-form-control"
+                                                   width="100%"/>
                                         <textArea id="legalAddressField"
                                                   dataContainer="companyDc"
                                                   property="legalAddress"
-                                                  caption="Юридический адрес"
+                                                  caption="Полный юридический адрес"
                                                   stylename="edit-form-control"
                                                   width="100%"
                                                   rows="3"/>
-                                        <textArea id="actualAddressField"
-                                                  dataContainer="companyDc"
-                                                  property="actualAddress"
-                                                  caption="Фактический адрес"
-                                                  stylename="edit-form-control"
-                                                  width="100%"
-                                                  rows="3"/>
-                                        <textArea id="postalAddressField"
-                                                  dataContainer="companyDc"
-                                                  property="postalAddress"
-                                                  caption="Почтовый адрес"
-                                                  stylename="edit-form-control"
-                                                  width="100%"
-                                                  rows="3"/>
+                                        <hbox spacing="true" width="100%">
+                                            <textArea id="actualAddressField"
+                                                      dataContainer="companyDc"
+                                                      property="actualAddress"
+                                                      caption="Фактический адрес"
+                                                      stylename="edit-form-control"
+                                                      width="100%"
+                                                      rows="3"/>
+                                            <textArea id="postalAddressField"
+                                                      dataContainer="companyDc"
+                                                      property="postalAddress"
+                                                      caption="Почтовый адрес"
+                                                      stylename="edit-form-control"
+                                                      width="100%"
+                                                      rows="3"/>
+                                        </hbox>
                                     </vbox>
                                 </groupBox>
 

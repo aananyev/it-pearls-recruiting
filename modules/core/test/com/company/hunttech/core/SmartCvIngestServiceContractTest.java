@@ -59,5 +59,41 @@ public class SmartCvIngestServiceContractTest {
 
         assertTrue(data.getFullName().equals("Иванов Иван Иванович"));
         assertNotNull(data.getSkills());
+
+        com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto exp = new com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto();
+        exp.setCompanyName("HuntTech Solutions");
+        exp.setPositionName("Lead Developer");
+        exp.setStartDate("2021-01-15");
+        exp.setEndDate("2023-12-31");
+        exp.setDuties("Архитектура и разработка микросервисов");
+        exp.setAchievements("Запустил 5 проектов в прод");
+
+        data.setWorkExperience(java.util.Collections.singletonList(exp));
+        assertTrue(data.getWorkExperience().size() == 1);
+        assertTrue(data.getWorkExperience().get(0).getCompanyName().equals("HuntTech Solutions"));
+        assertTrue(data.getWorkExperience().get(0).getFullDescription().contains("Достижения"));
+
+        com.company.hunttech.service.dto.cv.SmartCvEducationDto edu = new com.company.hunttech.service.dto.cv.SmartCvEducationDto();
+        edu.setInstitution("МГТУ им. Н.Э. Баумана");
+        edu.setSpecialty("Информатика и вычислительная техника");
+        edu.setGraduationYear(2018);
+        edu.setDegree("Магистр");
+
+        data.setEducation(java.util.Collections.singletonList(edu));
+        assertTrue(data.getEducation().size() == 1);
+        assertTrue(data.getEducation().get(0).getFormattedSummary().contains("Баумана"));
+    }
+
+    @Test
+    public void testJobHistoryFieldsAndMigrations() throws Exception {
+        File jobHistoryMigration = new File("db/changelog/260821-3-addJobHistoryFields.xml");
+        assertTrue("Миграция 260821-3-addJobHistoryFields.xml должна существовать", jobHistoryMigration.exists());
+
+        File promptMigration = new File("db/changelog/260821-4-updateSmartCvParseAiFunction.xml");
+        assertTrue("Миграция 260821-4-updateSmartCvParseAiFunction.xml должна существовать", promptMigration.exists());
+
+        String masterContent = Files.readString(Paths.get("db/changelog/db.changelog-master.xml"));
+        assertTrue(masterContent.contains("260821-3-addJobHistoryFields.xml"));
+        assertTrue(masterContent.contains("260821-4-updateSmartCvParseAiFunction.xml"));
     }
 }

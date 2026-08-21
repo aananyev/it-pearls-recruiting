@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="260821-5-updateCompanyRequisitesAiFunctionWithGeo" author="hunttech">
+        <comment>Обновление промпта COMPANY_REQUISITES_PARSE_JSON с разбиением адреса на страну, регион, город и улицу</comment>
+        
+        <update tableName="HUNTTECH_AI_FUNCTION_CONFIGURATION">
+            <column name="SYSTEM_PROMPT" value="Ты — интеллектуальный модуль распознавания карточек организаций и реквизитов компаний HRM HuntTech. Твоя задача — внимательно изучить предоставленный текст и извлечь все официальные реквизиты юридического лица или ИП с четким разбиением адреса на составляющие. Верни строго один валидный JSON-объект следующей структуры: {&quot;companyName&quot;: &quot;Полное наименование организации&quot;, &quot;companyShortName&quot;: &quot;Краткое наименование&quot;, &quot;ownership&quot;: &quot;ООО/АО/ПАО/ИП&quot;, &quot;inn&quot;: &quot;ИНН&quot;, &quot;kpp&quot;: &quot;КПП&quot;, &quot;ogrn&quot;: &quot;ОГРН/ОГРНИП&quot;, &quot;okpo&quot;: &quot;ОКПО&quot;, &quot;oktmo&quot;: &quot;ОКТМО&quot;, &quot;okved&quot;: &quot;Код и наименование основного ОКВЭД&quot;, &quot;country&quot;: &quot;Страна (например, Россия)&quot;, &quot;region&quot;: &quot;Регион/область/край (например, г. Москва, Московская область)&quot;, &quot;city&quot;: &quot;Город/населенный пункт (например, Москва)&quot;, &quot;streetAddress&quot;: &quot;Улица, дом, строение, офис&quot;, &quot;legalAddress&quot;: &quot;Полный юридический адрес&quot;, &quot;actualAddress&quot;: &quot;Фактический адрес&quot;, &quot;postalAddress&quot;: &quot;Почтовый адрес&quot;, &quot;bik&quot;: &quot;БИК банка&quot;, &quot;bankName&quot;: &quot;Наименование банка&quot;, &quot;settlementAccount&quot;: &quot;Расчетный счет (20 цифр)&quot;, &quot;correspondentAccount&quot;: &quot;Корреспондентский счет (20 цифр)&quot;, &quot;phone&quot;: &quot;Официальный телефон&quot;, &quot;email&quot;: &quot;Официальный email&quot;, &quot;website&quot;: &quot;Сайт компании&quot;, &quot;directorLastName&quot;: &quot;Фамилия руководителя&quot;, &quot;directorFirstName&quot;: &quot;Имя руководителя&quot;, &quot;directorMiddleName&quot;: &quot;Отчество руководителя&quot;, &quot;directorPosition&quot;: &quot;Генеральный директор / Директор / Президент&quot;, &quot;directorPhone&quot;: &quot;Телефон руководителя&quot;, &quot;directorEmail&quot;: &quot;Email руководителя&quot;}. Правила: 1. Если данные отсутствуют в тексте, возвращай пустую строку &quot;&quot;. 2. Аккуратно раздели адрес на country, region, city и streetAddress. 3. Аккуратно раздели ФИО руководителя на directorLastName, directorFirstName и directorMiddleName. 4. Номера расчетных и корр. счетов извлекай только из 20 цифр без пробелов. 5. Верни только чистый JSON без markdown блоков, без кавычек ```json и без пояснений."/>
+            <column name="UPDATE_TS" valueDate="CURRENT_TIMESTAMP"/>
+            <column name="UPDATED_BY" value="migration"/>
+            <column name="CONFIGURATION_VERSION" valueNumeric="2"/>
+            <where>CODE = 'COMPANY_REQUISITES_PARSE_JSON' AND DELETE_TS IS NULL AND (SYSTEM_PROMPT IS NULL OR btrim(SYSTEM_PROMPT) = '' OR SYSTEM_PROMPT !~ '[А-Яа-яЁё]' OR (CREATED_BY = 'migration' AND COALESCE(UPDATED_BY, 'migration') = 'migration' AND COALESCE(CONFIGURATION_VERSION, 1) &lt;= 1))</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

@@ -444,10 +444,19 @@ public class SmartCvUploadScreen extends Screen {
         if (res.getStatus() == SmartCvIngestResult.Status.SUCCESS) {
             createdCandidate = res.getCandidate();
             createdCv = res.getCandidateCv();
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Кандидат успешно создан")
-                    .withDescription(createdCandidate != null ? createdCandidate.getFullName() : "")
-                    .show();
+            if (currentParsedData.getMissingPositions() != null && !currentParsedData.getMissingPositions().isEmpty()) {
+                String missing = String.join(", ", currentParsedData.getMissingPositions());
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("Внимание: новые должности!")
+                        .withDescription("В справочнике «Должности» отсутствуют: " + missing + ". Рекомендуется занести их в справочник.")
+                        .withHideDelayMs(7000)
+                        .show();
+            } else {
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Кандидат успешно создан")
+                        .withDescription(createdCandidate != null ? createdCandidate.getFullName() : "")
+                        .show();
+            }
             close(StandardOutcome.COMMIT);
         } else {
             notifications.create(Notifications.NotificationType.ERROR)
@@ -466,10 +475,19 @@ public class SmartCvUploadScreen extends Screen {
         if (res.getStatus() == SmartCvIngestResult.Status.SUCCESS) {
             createdCandidate = res.getCandidate();
             createdCv = res.getCandidateCv();
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption("Резюме прикреплено к кандидату")
-                    .withDescription(createdCandidate != null ? createdCandidate.getFullName() : "")
-                    .show();
+            if (currentParsedData.getMissingPositions() != null && !currentParsedData.getMissingPositions().isEmpty()) {
+                String missing = String.join(", ", currentParsedData.getMissingPositions());
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("Внимание: новые должности!")
+                        .withDescription("В справочнике «Должности» отсутствуют: " + missing + ". Рекомендуется занести их в справочник.")
+                        .withHideDelayMs(7000)
+                        .show();
+            } else {
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption("Резюме прикреплено к кандидату")
+                        .withDescription(createdCandidate != null ? createdCandidate.getFullName() : "")
+                        .show();
+            }
             close(StandardOutcome.COMMIT);
         } else {
             notifications.create(Notifications.NotificationType.ERROR)

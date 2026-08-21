@@ -26,9 +26,36 @@ public class SmartCvParsedData implements Serializable {
     private String currentCompany;
     private String salary;
     private List<String> skills = new ArrayList<>();
+    private List<com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto> workExperience = new ArrayList<>();
+    private List<com.company.hunttech.service.dto.cv.SmartCvEducationDto> education = new ArrayList<>();
+    private List<String> missingPositions = new ArrayList<>();
     private Integer experienceYears;
     private String summary;
     private String rawText;
+
+    public List<com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto> getWorkExperience() {
+        return workExperience != null ? workExperience : Collections.emptyList();
+    }
+
+    public void setWorkExperience(List<com.company.hunttech.service.dto.cv.SmartCvWorkExperienceDto> workExperience) {
+        this.workExperience = workExperience != null ? workExperience : new ArrayList<>();
+    }
+
+    public List<com.company.hunttech.service.dto.cv.SmartCvEducationDto> getEducation() {
+        return education != null ? education : Collections.emptyList();
+    }
+
+    public void setEducation(List<com.company.hunttech.service.dto.cv.SmartCvEducationDto> education) {
+        this.education = education != null ? education : new ArrayList<>();
+    }
+
+    public List<String> getMissingPositions() {
+        return missingPositions != null ? missingPositions : Collections.emptyList();
+    }
+
+    public void setMissingPositions(List<String> missingPositions) {
+        this.missingPositions = missingPositions != null ? missingPositions : new ArrayList<>();
+    }
 
     public String getLastName() {
         return lastName;
