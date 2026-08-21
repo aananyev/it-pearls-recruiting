@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://projectReestrCaption"
+        focusComponent="projectsTable"
+        messagesPack="com.company.hunttech.web.screens.project"
+        icon="FOLDER_OPEN_O">
+    <data readOnly="true">
+        <collection id="projectsDc"
+                    class="com.company.hunttech.entity.Project">
+            <view extends="project-browse-view">
+                <property name="projectDepartment" view="_minimal">
+                    <property name="departamentRuName"/>
+                    <property name="companyName" view="_minimal"/>
+                </property>
+                <property name="projectOwner" view="_minimal">
+                    <property name="firstName"/>
+                    <property name="secondName"/>
+                    <property name="middleName"/>
+                    <property name="phone"/>
+                    <property name="mobPhone"/>
+                    <property name="email"/>
+                    <property name="fileImageFace" view="_minimal"/>
+                    <property name="personPosition" view="_minimal"/>
+                    <property name="companyDepartment" view="_minimal"/>
+                </property>
+            </view>
+            <loader id="projectsDl">
+                <query><![CDATA[select e from hunttech_Project e order by e.projectIsClosed desc, e.projectName]]>
+                    <condition>
+                        <and>
+                            <c:jpql>
+                                <c:where>e.projectIsClosed = :projectClosed</c:where>
+                            </c:jpql>
+                            <c:jpql>
+                                <c:where>e in (select f.projectName from hunttech_OpenPosition f where not (f.openClose = :withOpenPosition) and f.projectName = e)</c:where>
+                            </c:jpql>
+                        </and>
+                    </condition>
+                </query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="700" width="1100"/>
+
+    <layout expand="splitMainLayout" spacing="false" margin="false" stylename="job-candidate-editor edit-screen-layout">
+        <split id="splitMainLayout" orientation="horizontal" pos="312px" min="260px" max="500px" width="100%" height="100%">
+            <!-- ЛЕВЫЙ САЙДБАР (312px) -->
+            <vbox id="detailPane" width="100%" height="100%" spacing="true" margin="false" stylename="edit-sidebar job-candidate-sidebar">
+                <scrollBox id="sidebarScrollBox" width="100%" height="100%" spacing="true" scrollBars="vertical">
+                    <vbox width="100%" spacing="true">
+                        <!-- Шапка профиля проекта -->
+                        <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
+                                              align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/no-company.png" scaleMode="SCALE_DOWN"/>
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <label id="detailTitle" value="Выберите проект" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER"/>
+                                <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER"/>
+                                <label id="detailLocation" value="-" width="100%" stylename="edit-help candidate-sidebar-city" align="MIDDLE_CENTER"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Кнопки действий сайдбара -->
+                        <vbox id="sidebarActionsCard" width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <button id="openEditCardBtn" caption="Открыть карточку" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
+                            <button id="createPositionForProjectBtn" caption="Открыть вакансию в проекте" icon="PLUS" enabled="false" width="100%"/>
+                        </vbox>
+
+                        <!-- Секция: Сроки и статус -->
+                        <vbox id="termsCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="СРОКИ И СТАТУС" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <grid id="termsGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row><label value="Статус проекта:" stylename="bold"/><label id="detailStatus" htmlEnabled="true" value="-"/></row>
+                                    <row><label value="Дата старта:" stylename="bold"/><label id="detailStartDate" value="-"/></row>
+                                    <row><label value="Дата окончания:" stylename="bold"/><label id="detailEndDate" value="-"/></row>
+                                    <row><label value="Вакансий в работе:" stylename="bold"/><label id="detailOpenPositionsCount" value="0" stylename="bold" css="color: #2563eb;"/></row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция: Куратор проекта -->
+                        <vbox id="curatorCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="КУРАТОР ПРОЕКТА" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <vbox spacing="false" width="100%" stylename="edit-sidebar-summary">
+                                <label id="detailCuratorName" value="-" stylename="bold" width="100%"/>
+                                <label id="detailCuratorPosition" value="-" stylename="edit-help" width="100%"/>
+                                <label id="detailCuratorDept" value="-" stylename="edit-help" width="100%"/>
+                                <label id="detailCuratorContacts" value="-" stylename="edit-help" width="100%"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Секция: Описание проекта -->
+                        <vbox id="descriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ОПИСАНИЕ ПРОЕКТА" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label id="detailDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                        </vbox>
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
+            <vbox id="workspaceBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="tableCard" margin="true,true,true,false">
+                
+                <!-- Командный тулбар -->
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
+                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                        <button id="createBtn" caption="Создать проект" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn" action="projectsTable.create"/>
+                        <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn" action="projectsTable.edit"/>
+                        <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn" action="projectsTable.remove"/>
+                    </hbox>
+                    <hbox id="toolbarSpacer" width="100%"/>
+                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
+                        <label align="MIDDLE_LEFT" value="Иерархия:" stylename="edit-help" css="margin-right: 4px;"/>
+                        <lookupField id="columnSelector" width="140px" nullOptionVisible="false" textInputAllowed="false"/>
+                        <popupButton id="filterPopupButton" caption="С открытыми вакансиями" icon="FILTER" stylename="secondary candidate-btn">
+                            <actions>
+                                <action id="filterWithOpenPositions" caption="С открытыми вакансиями"/>
+                                <action id="filterOnlyOpen" caption="Только открытые проекты"/>
+                                <action id="filterAll" caption="Все проекты"/>
+                            </actions>
+                        </popupButton>
+                        <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary candidate-btn">
+                            <actions>
+                                <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
+                                <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
+                            </actions>
+                        </popupButton>
+                    </hbox>
+                </hbox>
+
+                <!-- Generic Filter -->
+                <filter id="filter"
+                        applyTo="projectsTable"
+                        dataLoader="projectsDl"
+                        defaultMode="generic"
+                        width="100%"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"
+                                excludeProperties="projectDescription,templateLetter,openPosition,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                </filter>
+
+                <!-- Карточка таблицы с rowsCount -->
+                <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="projectsTable">
+                    <treeDataGrid id="projectsTable"
+                                  width="100%"
+                                  height="100%"
+                                  hierarchyProperty="projectTree"
+                                  dataContainer="projectsDc"
+                                  stylename="borderless grid candidate-browse-grid">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="excel" type="excelExport"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <column id="projectLogoColumn"
+                                    caption="Лого"
+                                    resizable="false"
+                                    collapsible="false"
+                                    width="60px"
+                                    minimumWidth="50px">
+                                <componentRenderer/>
+                            </column>
+                            <column id="projectName"
+                                    caption="Наименование проекта"
+                                    expandRatio="2">
+                                <componentRenderer/>
+                            </column>
+                            <column id="projectStatus"
+                                    caption="Статус"
+                                    width="110px">
+                                <componentRenderer/>
+                            </column>
+                            <column id="startProjectDate"
+                                    property="startProjectDate"
+                                    caption="Дата старта"
+                                    width="110px"/>
+                            <column id="endProjectDate"
+                                    property="endProjectDate"
+                                    caption="Дата окончания"
+                                    width="120px"/>
+                            <column id="projectDepartment"
+                                    property="projectDepartment"
+                                    caption="Департамент / Компания"
+                                    expandRatio="1"/>
+                            <column id="projectOwner"
+                                    property="projectOwner"
+                                    caption="Куратор"
+                                    width="160px"/>
+                            <column id="openPositionsCountColumn"
+                                    caption="Вакансии"
+                                    width="90px">
+                                <componentRenderer/>
+                            </column>
+                        </columns>
+                        <rowsCount/>
+                    </treeDataGrid>
+                </vbox>
+            </vbox>
+        </split>
+    </layout>
+</window>

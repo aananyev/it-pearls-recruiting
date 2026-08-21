@@ -62,9 +62,11 @@
     </menu>
     <menu id="application-project" icon="BUILDING" insertAfter="application-hunting">
         <item screen="hunttech_Project.browse" icon="FOLDER_OPEN_O"/>
+        <item screen="hunttech_ProjectReestr.browse" caption="Реестр проектов" icon="TH_LIST"/>
         <item screen="hunttech_Person.browse" icon="USER"/>
         <item screen="hunttech_CompanyDepartament.browse" icon="SITEMAP"/>
         <item screen="hunttech_Company.browse" icon="BUILDING"/>
+        <item screen="hunttech_CompanyReestr.browse" caption="Реестр компаний" icon="TH_LIST"/>
         <item screen="hunttech_CompanyGroup.browse" icon="BUILDING_O"/>
     </menu>
     <menu id="application-researching" icon="SEARCH_PLUS" insertAfter="application-project">
