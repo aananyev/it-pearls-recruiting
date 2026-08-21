@@ -74,7 +74,30 @@ public class HunttechTestContainer extends TestContainer {
         @Override
         public void after() {
             cleanupContext();
+            healSystemUsersAfterTests();
             // never stops - do not call super
+        }
+
+        private void healSystemUsersAfterTests() {
+            try {
+                if (INSTANCE.dbUrl != null && INSTANCE.dbUser != null && INSTANCE.dbPassword != null) {
+                    try (java.sql.Connection conn = java.sql.DriverManager.getConnection(
+                            INSTANCE.dbUrl, INSTANCE.dbUser, INSTANCE.dbPassword)) {
+                        try (java.sql.PreparedStatement ps = conn.prepareStatement(
+                                "UPDATE sec_user SET delete_ts = NULL, deleted_by = NULL, active = true " +
+                                "WHERE login_lc IN ('anonymous', 'admin') AND (delete_ts IS NOT NULL OR active = false)")) {
+                            ps.executeUpdate();
+                        }
+                        try (java.sql.PreparedStatement ps = conn.prepareStatement(
+                                "UPDATE sec_user_role SET delete_ts = NULL, deleted_by = NULL " +
+                                "WHERE user_id IN (SELECT id FROM sec_user WHERE login_lc IN ('anonymous', 'admin')) " +
+                                "AND delete_ts IS NOT NULL")) {
+                            ps.executeUpdate();
+                        }
+                    }
+                }
+            } catch (Exception ignored) {
+            }
         }
     }
 
