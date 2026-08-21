@@ -53,11 +53,11 @@ public class TelegramClientProvider {
     }
 
     /**
-     * Проверяет, задан ли токен и включен ли Telegram в настройках.
+     * Проверяет, задан ли токен и разрешена ли работа с Telegram в настройках приложения.
      */
     public boolean isConfigured() {
         String token = resolveBotToken();
-        return token != null && !token.trim().isEmpty() && isTelegramBotStartAllowed();
+        return isNotBlank(token) && isTelegramBotStartAllowed();
     }
 
     /**
@@ -229,7 +229,10 @@ public class TelegramClientProvider {
 
     private boolean isTelegramBotStartAllowed() {
         Boolean start = applicationSetupService.getTelegramBotStart();
-        return start != null && start;
+        if (start != null) {
+            return start;
+        }
+        return isNotBlank(resolveBotToken());
     }
 
     private boolean isNotBlank(String str) {

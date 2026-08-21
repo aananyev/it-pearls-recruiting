@@ -142,11 +142,11 @@
                                             <!-- Telegram сохраняется в userDs.telegram и позволяет загрузить аватарку по ID -->
                                             <field id="telegram" caption="msg://msgTelegram">
                                                 <!-- Контейнер для поля ввода Telegram и кнопки получения фото -->
-                                                <hbox id="telegramBox" width="100%" spacing="true" expand="telegramField">
+                                                <hbox id="telegramBox" width="100%" spacing="true" expand="telegramField" align="MIDDLE_LEFT" stylename="ext-user-telegram-box">
                                                     <!-- Поле ввода Telegram ID или username пользователя -->
-                                                    <textField id="telegramField" datasource="userDs" property="telegram" width="100%" stylename="edit-form-control"/>
+                                                    <textField id="telegramField" datasource="userDs" property="telegram" width="100%" inputPrompt="msg://msgTelegramPrompt" stylename="edit-form-control"/>
                                                     <!-- Кнопка загрузки фотографии пользователя из Telegram в профиль -->
-                                                    <button id="fetchTelegramPhotoBtn" caption="msg://msgFetchPhoto" icon="font-icon:CAMERA" invoke="fetchTelegramPhoto" stylename="ext-user-editor-primary-action"/>
+                                                    <button id="fetchTelegramPhotoBtn" caption="msg://msgFetchPhoto" icon="font-icon:CAMERA" invoke="fetchTelegramPhoto" stylename="primary ext-user-editor-primary-action telegram-fetch-photo-btn"/>
                                                 </hbox>
                                             </field>
                                         </column>

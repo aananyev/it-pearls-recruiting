@@ -253,6 +253,23 @@
       border-color: $v-selection-color !important;
     }
 
+    .ext-user-telegram-box {
+      width: 100% !important;
+      align-items: center;
+    }
+
+    .telegram-fetch-photo-btn {
+      flex: 0 0 auto !important;
+      min-width: 155px !important;
+      min-height: 32px !important;
+      height: 32px !important;
+      padding: 0 14px !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      white-space: nowrap !important;
+      box-sizing: border-box !important;
+    }
+
     // Кнопка «ОК» footer-фрагмента editWindowActions получает класс c-primary-action —
     // оформляем её как iteraction-list-primary-action (акцентная, белый текст).
     .edit-footer-actions .c-primary-action {

@@ -138,4 +138,8 @@
     <include file="260821-6-addCompanyLegalEntityName.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- ApplicationSetup: настройка и активация Telegram бота. -->
+    <include file="260821-7-configureTelegramBotSetup.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
