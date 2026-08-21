@@ -53,11 +53,11 @@
 
     <dialogMode height="700" width="1100"/>
 
-    <layout expand="splitMainLayout" spacing="false" margin="false" stylename="job-candidate-editor edit-screen-layout">
-        <split id="splitMainLayout" orientation="horizontal" pos="312px" min="260px" max="500px" width="100%" height="100%">
+    <layout expand="splitMainLayout" spacing="false" width="100%" height="100%" stylename="job-candidate-editor edit-screen-layout">
+        <hbox id="splitMainLayout" width="100%" height="100%" spacing="true" expand="workspaceBox" stylename="job-candidate-main-layout edit-screen-layout">
             <!-- ЛЕВЫЙ САЙДБАР (312px) -->
-            <vbox id="detailPane" width="100%" height="100%" spacing="true" margin="false" stylename="edit-sidebar job-candidate-sidebar">
-                <scrollBox id="sidebarScrollBox" width="100%" height="100%" spacing="true" scrollBars="vertical">
+            <vbox id="detailPane" width="312px" height="100%" spacing="true" stylename="job-candidate-sidebar edit-sidebar">
+                <scrollBox id="sidebarScrollBox" width="100%" height="100%" orientation="vertical">
                     <vbox width="100%" spacing="true">
                         <!-- Шапка профиля компании -->
                         <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
@@ -166,7 +166,7 @@
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
                             <action id="remove" type="remove"/>
-                            <action id="excel" type="excelExport"/>
+                            <action id="excel" type="excel"/>
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
@@ -213,6 +213,6 @@
                     </treeDataGrid>
                 </vbox>
             </vbox>
-        </split>
+        </hbox>
     </layout>
 </window>
