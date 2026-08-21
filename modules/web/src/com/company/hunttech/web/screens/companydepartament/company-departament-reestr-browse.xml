@@ -132,11 +132,10 @@
                         </actions>
                         <columns>
                             <column id="departamentRuName" caption="Департамент / Подразделение" expandRatio="2"/>
-                            <column id="companyName" caption="Компания" expandRatio="2"/>
                             <column id="departamentDirector" caption="Директор" expandRatio="1"/>
                             <column id="departamentHrDirector" caption="HR-директор" expandRatio="1"/>
-                            <column id="departamentNumberOfProgrammers" caption="Штат" width="100px"/>
-                            <column id="projectsCountColumn" caption="Проекты" width="100px"/>
+                            <column id="departamentNumberOfProgrammers" caption="Штат" width="120px"/>
+                            <column id="projectsCountColumn" caption="Проекты" width="110px"/>
                         </columns>
                         <rowsCount/>
                     </groupTable>

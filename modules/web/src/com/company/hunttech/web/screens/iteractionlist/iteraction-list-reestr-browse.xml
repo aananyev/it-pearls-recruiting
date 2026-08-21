@@ -153,7 +153,8 @@
                         <popupButton id="filterPopupButton" caption="Все взаимодействия" icon="FILTER" stylename="secondary candidate-btn">
                             <actions>
                                 <action id="filterAll" caption="Все взаимодействия"/>
-                                <action id="filterOutstaffing" caption="Аутстаффинг"/>
+                                <action id="filterMyOnly" caption="Только мои взаимодействия"/>
+                                <action id="filterOutstaffingOnly" caption="Только аутстаффинг"/>
                                 <action id="filterLast30Days" caption="За 30 дней"/>
                                 <action id="filterLast90Days" caption="За 90 дней"/>
                             </actions>
@@ -162,6 +163,7 @@
                             <actions>
                                 <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
                                 <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
+                                <action id="copyCandidateSummaryAction" caption="Скопировать саммари" icon="COPY"/>
                             </actions>
                         </popupButton>
                     </hbox>

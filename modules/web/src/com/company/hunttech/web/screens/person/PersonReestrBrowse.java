@@ -78,7 +78,7 @@ public class PersonReestrBrowse extends StandardLookup<Person> {
             image.setStyleName("circle-20px");
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-            if (person.getFileImageFace() != null) {
+            if (person != null && person.getFileImageFace() != null) {
                 image.setSource(FileDescriptorResource.class).setFileDescriptor(person.getFileImageFace());
             } else {
                 image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
@@ -86,6 +86,79 @@ public class PersonReestrBrowse extends StandardLookup<Person> {
 
             retBox.add(image);
             return retBox;
+        });
+
+        personsTable.addGeneratedColumn("fullName", person -> {
+            String name = (person != null && person.getInstanceName() != null) ? person.getInstanceName() : "Без имени";
+            StringBuilder sub = new StringBuilder();
+            if (person != null) {
+                String phone = person.getPhone() != null ? person.getPhone() : person.getMobPhone();
+                if (phone != null && !phone.trim().isEmpty()) {
+                    sub.append("📞 ").append(phone.trim());
+                }
+                if (person.getEmail() != null && !person.getEmail().trim().isEmpty()) {
+                    if (sub.length() > 0) sub.append(" • ");
+                    sub.append("✉ ").append(person.getEmail().trim());
+                }
+                if (person.getTelegramName() != null && !person.getTelegramName().trim().isEmpty()) {
+                    if (sub.length() > 0) sub.append(" • ");
+                    sub.append("@").append(person.getTelegramName().trim());
+                }
+            }
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 13px;'>" + name + "</div>" +
+                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #64748b;'>" + sub.toString() + "</div>" : "") + "</div>";
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setValue(textHtml);
+            return lbl;
+        });
+
+        personsTable.addGeneratedColumn("personPosition", person -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String pos = (person != null && person.getPersonPosition() != null && person.getPersonPosition().getPositionRuName() != null)
+                    ? person.getPersonPosition().getPositionRuName() : "Сотрудник";
+            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + pos + "</span>");
+            return lbl;
+        });
+
+        personsTable.addGeneratedColumn("companyDepartment", person -> {
+            if (person == null || person.getCompanyDepartment() == null) {
+                Label<String> plain = uiComponents.create(Label.NAME);
+                plain.setHtmlEnabled(true);
+                plain.setValue("<span style='color: #94a3b8; font-size: 11px;'>—</span>");
+                return plain;
+            }
+            String depName = person.getCompanyDepartment().getDepartamentRuName() != null ? person.getCompanyDepartment().getDepartamentRuName() : "";
+            String compName = (person.getCompanyDepartment().getCompanyName() != null && person.getCompanyDepartment().getCompanyName().getComanyName() != null)
+                    ? person.getCompanyDepartment().getCompanyName().getComanyName() : "";
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 12.5px;'>" +
+                    (!compName.isEmpty() ? "🏢 " + compName : (!depName.isEmpty() ? "📁 " + depName : "-")) + "</div>" +
+                    (!compName.isEmpty() && !depName.isEmpty() ? "<div style='font-size: 11px; color: #64748b;'>📁 " + depName + "</div>" : "") + "</div>";
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setValue(textHtml);
+            return lbl;
+        });
+
+        personsTable.addGeneratedColumn("cityOfResidence", person -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String city = (person != null && person.getCityOfResidence() != null && person.getCityOfResidence().getCityRuName() != null)
+                    ? person.getCityOfResidence().getCityRuName() : "—";
+            lbl.setValue("<span style='font-size: 12px; color: #334155;'>" + ("—".equals(city) ? "—" : "📍 " + city) + "</span>");
+            return lbl;
+        });
+
+        personsTable.addGeneratedColumn("positionCountry", person -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String country = (person != null && person.getPositionCountry() != null && person.getPositionCountry().getCountryRuName() != null)
+                    ? person.getPositionCountry().getCountryRuName() : "—";
+            lbl.setValue("<span style='font-size: 12px; color: #334155;'>" + ("—".equals(country) ? "—" : "🌍 " + country) + "</span>");
+            return lbl;
         });
     }
 

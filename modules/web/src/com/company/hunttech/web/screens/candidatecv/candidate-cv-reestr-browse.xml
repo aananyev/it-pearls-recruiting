@@ -154,8 +154,8 @@
                         <popupButton id="filterPopupButton" caption="Все резюме" icon="FILTER" stylename="secondary candidate-btn">
                             <actions>
                                 <action id="filterAll" caption="Все резюме"/>
-                                <action id="filterMy" caption="Только мои резюме"/>
-                                <action id="filterWithVacancy" caption="С привязкой к вакансии"/>
+                                <action id="filterMyOnly" caption="Только мои резюме"/>
+                                <action id="filterWithVacancyOnly" caption="С привязкой к вакансии"/>
                             </actions>
                         </popupButton>
                         <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary candidate-btn">

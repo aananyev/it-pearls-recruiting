@@ -145,15 +145,11 @@
                         </actions>
                         <columns>
                             <column id="personPicColumn" caption="Фото" width="50px" sortable="false"/>
-                            <column id="secondName" caption="Фамилия" expandRatio="1"/>
-                            <column id="firstName" caption="Имя" expandRatio="1"/>
-                            <column id="middleName" caption="Отчество" expandRatio="1"/>
-                            <column id="personPosition" caption="Должность" expandRatio="2"/>
-                            <column id="companyDepartment" caption="Компания / Отдел" expandRatio="2"/>
+                            <column id="fullName" caption="Сотрудник / Персона" expandRatio="2"/>
+                            <column id="personPosition" caption="Должность" width="170px"/>
+                            <column id="companyDepartment" caption="Компания / Департамент" expandRatio="2"/>
+                            <column id="cityOfResidence" caption="Город" width="130px"/>
                             <column id="positionCountry" caption="Страна" width="120px"/>
-                            <column id="cityOfResidence" caption="Город" width="120px"/>
-                            <column id="phone" caption="Телефон" width="120px"/>
-                            <column id="email" caption="Email" width="140px"/>
                         </columns>
                         <rowsCount/>
                     </groupTable>

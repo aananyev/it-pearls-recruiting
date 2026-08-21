@@ -62,6 +62,27 @@ public class CompanyGroupReestrBrowse extends StandardLookup<CompanyGroup> {
     }
 
     private void setupTableColumns() {
+        companyGroupsTable.addGeneratedColumn("companyRuGroupName", group -> {
+            String name = (group != null && group.getCompanyRuGroupName() != null) ? group.getCompanyRuGroupName() : "Без наименования";
+            List<String> list = (group != null && group.getId() != null) ? groupCompaniesCache.getOrDefault(group.getId(), Collections.emptyList()) : Collections.emptyList();
+            
+            StringBuilder sub = new StringBuilder();
+            if (!list.isEmpty()) {
+                sub.append("🏢 ").append(String.join(", ", list.subList(0, Math.min(list.size(), 3))));
+                if (list.size() > 3) {
+                    sub.append(" (+").append(list.size() - 3).append(")");
+                }
+            }
+
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 13px;'>" + name + "</div>" +
+                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #64748b;'>" + sub.toString() + "</div>" : "") + "</div>";
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setValue(textHtml);
+            return lbl;
+        });
+
         companyGroupsTable.addGeneratedColumn("companiesCountColumn", group -> {
             List<String> list = (group != null && group.getId() != null) ? groupCompaniesCache.getOrDefault(group.getId(), Collections.emptyList()) : Collections.emptyList();
             int count = list.size();

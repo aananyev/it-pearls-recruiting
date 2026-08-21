@@ -107,11 +107,11 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
             image.setStyleName("icon-no-border-20px");
             image.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-            String desc = company.getId() != null ? companyDescriptionCache.get(company.getId()) : null;
-            image.setDescription("<h4>" + (company.getComanyName() != null ? company.getComanyName() : "") + "</h4>" +
+            String desc = (company != null && company.getId() != null) ? companyDescriptionCache.get(company.getId()) : null;
+            image.setDescription("<h4>" + ((company != null && company.getComanyName() != null) ? company.getComanyName() : "") + "</h4>" +
                     (desc != null ? "<br>" + Jsoup.parse(desc).text() : ""));
 
-            if (company.getFileCompanyLogo() != null) {
+            if (company != null && company.getFileCompanyLogo() != null) {
                 image.setSource(FileDescriptorResource.class).setFileDescriptor(company.getFileCompanyLogo());
             } else {
                 image.setSource(ThemeResource.class).setPath("icons/no-company.png");
@@ -119,6 +119,28 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
 
             retBox.add(image);
             return retBox;
+        });
+
+        companiesTable.addGeneratedColumn("comanyName", company -> {
+            String name = (company != null && company.getComanyName() != null) ? company.getComanyName() : "Без наименования";
+            StringBuilder sub = new StringBuilder();
+            if (company != null) {
+                if (company.getCompanyShortName() != null && !company.getCompanyShortName().trim().isEmpty()
+                        && !company.getCompanyShortName().trim().equals(name)) {
+                    sub.append("🏷 ").append(company.getCompanyShortName().trim());
+                }
+                if (company.getCompanyGroup() != null && company.getCompanyGroup().getCompanyRuGroupName() != null) {
+                    if (sub.length() > 0) sub.append(" • ");
+                    sub.append("🌐 ").append(company.getCompanyGroup().getCompanyRuGroupName().trim());
+                }
+            }
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 13px;'>" + name + "</div>" +
+                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #64748b;'>" + sub.toString() + "</div>" : "") + "</div>";
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            lbl.setWidth("100%");
+            lbl.setValue(textHtml);
+            return lbl;
         });
 
         companiesTable.addGeneratedColumn("ourClientIconColumn", company -> {
@@ -131,8 +153,8 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
             label.setHtmlEnabled(true);
             label.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-            if (Boolean.TRUE.equals(company.getOurClient())) {
-                label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Клиент</span>");
+            if (company != null && Boolean.TRUE.equals(company.getOurClient())) {
+                label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600;'>✓ Клиент</span>");
             } else {
                 label.setValue("<span style='color: #cbd5e1; font-size: 11px;'>—</span>");
             }
@@ -151,14 +173,32 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
             label.setHtmlEnabled(true);
             label.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-            if (Boolean.TRUE.equals(company.getOurLegalEntity())) {
-                label.setValue("<span style='background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Наше ЮЛ</span>");
+            if (company != null && Boolean.TRUE.equals(company.getOurLegalEntity())) {
+                label.setValue("<span style='background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 2px 6px; border-radius: 4px; font-size: 10.5px; font-weight: 600;'>⚡ Наше ЮЛ</span>");
             } else {
                 label.setValue("<span style='color: #cbd5e1; font-size: 11px;'>—</span>");
             }
 
             box.add(label);
             return box;
+        });
+
+        companiesTable.addGeneratedColumn("cityOfCompany", company -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String city = (company != null && company.getCityOfCompany() != null && company.getCityOfCompany().getCityRuName() != null)
+                    ? company.getCityOfCompany().getCityRuName() : "—";
+            lbl.setValue("<span style='font-size: 12px; color: #334155;'>" + ("—".equals(city) ? "—" : "📍 " + city) + "</span>");
+            return lbl;
+        });
+
+        companiesTable.addGeneratedColumn("countryOfCompany", company -> {
+            Label<String> lbl = uiComponents.create(Label.NAME);
+            lbl.setHtmlEnabled(true);
+            String country = (company != null && company.getCountryOfCompany() != null && company.getCountryOfCompany().getCountryRuName() != null)
+                    ? company.getCountryOfCompany().getCountryRuName() : "—";
+            lbl.setValue("<span style='font-size: 12px; color: #334155;'>" + ("—".equals(country) ? "—" : "🌍 " + country) + "</span>");
+            return lbl;
         });
     }
 

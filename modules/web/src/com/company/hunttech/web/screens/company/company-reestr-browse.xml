@@ -169,12 +169,10 @@
                         </actions>
                         <columns>
                             <column id="companyLogoColumn" caption="Лого" width="50px" sortable="false"/>
-                            <column id="companyGroup" caption="Группа компаний" width="160px"/>
-                            <column id="comanyName" caption="Юридическое наименование" expandRatio="2"/>
-                            <column id="companyShortName" caption="Бренд / Краткое наименование" expandRatio="1"/>
-                            <column id="ourClientIconColumn" caption="Клиент" width="100px" sortable="false"/>
-                            <column id="ourCompanyIconColumn" caption="Наше ЮЛ" width="100px" sortable="false"/>
-                            <column id="cityOfCompany" caption="Город" width="130px"/>
+                            <column id="comanyName" caption="Компания / Бренд" expandRatio="3"/>
+                            <column id="ourClientIconColumn" caption="Клиент" width="95px" sortable="false"/>
+                            <column id="ourCompanyIconColumn" caption="Наше ЮЛ" width="95px" sortable="false"/>
+                            <column id="cityOfCompany" caption="Город" width="135px"/>
                             <column id="countryOfCompany" caption="Страна" width="120px"/>
                         </columns>
                         <rowsCount/>
