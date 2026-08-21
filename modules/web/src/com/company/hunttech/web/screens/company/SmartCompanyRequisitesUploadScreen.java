@@ -119,6 +119,11 @@ public class SmartCompanyRequisitesUploadScreen extends Screen {
                 dataManager.commit(uploadedFileDescriptor);
                 String text = companyRequisitesIngestService.extractTextFromFile(uploadedFileDescriptor);
                 processTextAndShowPreview(text);
+            } else {
+                setLoadingState(false, "Файл не выбран или не был загружен");
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption("Файл не найден или не был загружен")
+                        .show();
             }
         } catch (Exception e) {
             setLoadingState(false, "Ошибка распознавания");
