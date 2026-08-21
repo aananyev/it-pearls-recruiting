@@ -78,10 +78,17 @@ public class SystemSecurityAutoHealerBean {
 
                 conn.commit();
             } catch (Exception e) {
-                conn.rollback();
+                try {
+                    conn.rollback();
+                } catch (Exception rollbackEx) {
+                    e.addSuppressed(rollbackEx);
+                }
                 throw e;
             } finally {
-                conn.setAutoCommit(originalAutoCommit);
+                try {
+                    conn.setAutoCommit(originalAutoCommit);
+                } catch (Exception ignored) {
+                }
             }
         } catch (Exception e) {
             log.warn("[SystemSecurityAutoHealer] Ошибка при проверке и восстановлении системных пользователей: {}", e.getMessage(), e);
