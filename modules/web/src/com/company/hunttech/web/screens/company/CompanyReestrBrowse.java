@@ -5,6 +5,10 @@ import com.company.hunttech.entity.Project;
 import com.hunttech.hrm.gui.components.OvaFallbackImage;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
+import com.company.hunttech.service.CompanyRequisitesIngestService;
+import com.company.hunttech.service.CompanyRequisitesParsedData;
+import com.haulmont.cuba.core.global.Metadata;
+import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
 import com.haulmont.cuba.gui.UiComponents;
 import com.haulmont.cuba.gui.components.*;
@@ -46,7 +50,13 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
     @Inject
     private DataManager dataManager;
     @Inject
+    private Metadata metadata;
+    @Inject
+    private Notifications notifications;
+    @Inject
     private ScreenBuilders screenBuilders;
+    @Inject
+    private CompanyRequisitesIngestService companyRequisitesIngestService;
 
     @Inject
     private OvaFallbackImage logoPic;
@@ -235,6 +245,61 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
                         .show();
             }
         });
+    }
+
+    @Subscribe("smartUploadBtn")
+    public void onSmartUploadBtnClick(Button.ClickEvent event) {
+        openSmartCompanyUploadDialog();
+    }
+
+    public void openSmartCompanyUploadDialog() {
+        SmartCompanyRequisitesUploadScreen screen = screenBuilders.screen(this)
+                .withScreenClass(SmartCompanyRequisitesUploadScreen.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+        screen.addAfterCloseListener(closeEvent -> {
+            if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+                CompanyRequisitesParsedData data = screen.getParsedData();
+                if (data != null) {
+                    Company company = null;
+                    if (data.getInn() != null && !data.getInn().trim().isEmpty()) {
+                        company = dataManager.load(Company.class)
+                                .query("select c from hunttech_Company c where c.inn = :inn")
+                                .parameter("inn", data.getInn().trim())
+                                .view("company-edit-view")
+                                .optional()
+                                .orElse(null);
+                    }
+                    boolean isNew = false;
+                    if (company == null) {
+                        company = metadata.create(Company.class);
+                        isNew = true;
+                    }
+                    companyRequisitesIngestService.applyRequisitesToCompany(company, data);
+                    if (company.getComanyName() == null || company.getComanyName().trim().isEmpty()) {
+                        if (data.getLegalEntityName() != null && !data.getLegalEntityName().trim().isEmpty()) {
+                            company.setComanyName(data.getLegalEntityName().trim());
+                        } else if (data.getCompanyShortName() != null && !data.getCompanyShortName().trim().isEmpty()) {
+                            company.setComanyName(data.getCompanyShortName().trim());
+                        } else {
+                            company.setComanyName("Новая компания");
+                        }
+                    }
+                    Company committedCompany = dataManager.commit(company);
+                    companiesDl.load();
+                    try {
+                        companiesTable.setSelected(committedCompany);
+                        updateSidebarDetails(committedCompany);
+                    } catch (Exception ignored) {
+                    }
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption(isNew ? "Компания успешно создана" : "Реквизиты компании обновлены")
+                            .withDescription(committedCompany.getComanyName() != null ? committedCompany.getComanyName() : "")
+                            .show();
+                }
+            }
+        });
+        screen.show();
     }
 
     private void setupFilterActions() {
