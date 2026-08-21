@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        xmlns:c="http://schemas.haulmont.com/cuba/screen/jpql_condition.xsd"
+        caption="msg://companyDepartamentReestrCaption"
+        focusComponent="companyDepartamentsTable"
+        messagesPack="com.company.hunttech.web.screens.companydepartament"
+        icon="SITEMAP">
+    <data readOnly="true">
+        <collection id="companyDepartamentsDc"
+                    class="com.company.hunttech.entity.CompanyDepartament">
+            <view extends="companyDepartament-browse-view">
+                <property name="departamentRuName"/>
+                <property name="departamentNumberOfProgrammers"/>
+                <property name="companyName" view="_minimal">
+                    <property name="comanyName"/>
+                    <property name="fileCompanyLogo" view="_minimal"/>
+                </property>
+                <property name="departamentHrDirector" view="_minimal">
+                    <property name="firstName"/>
+                    <property name="secondName"/>
+                    <property name="middleName"/>
+                    <property name="phone"/>
+                    <property name="email"/>
+                </property>
+                <property name="departamentDirector" view="_minimal">
+                    <property name="firstName"/>
+                    <property name="secondName"/>
+                    <property name="middleName"/>
+                    <property name="phone"/>
+                    <property name="email"/>
+                </property>
+            </view>
+            <loader id="companyDepartamentsDl">
+                <query><![CDATA[select e from hunttech_CompanyDepartament e order by e.companyName.comanyName, e.departamentRuName]]></query>
+            </loader>
+        </collection>
+    </data>
+
+    <dialogMode height="700" width="1100"/>
+
+    <layout expand="splitMainLayout" spacing="false" margin="false" stylename="job-candidate-editor edit-screen-layout">
+        <split id="splitMainLayout" orientation="horizontal" pos="312px" min="260px" max="500px" width="100%" height="100%">
+            <!-- ЛЕВЫЙ САЙДБАР (312px) -->
+            <vbox id="detailPane" width="100%" height="100%" spacing="true" margin="false" stylename="edit-sidebar job-candidate-sidebar">
+                <scrollBox id="sidebarScrollBox" width="100%" height="100%" spacing="true" scrollBars="vertical">
+                    <vbox width="100%" spacing="true">
+                        <!-- Шапка департамента -->
+                        <vbox id="profileHeader" width="100%" spacing="true" align="TOP_CENTER" stylename="job-candidate-profile-header edit-sidebar-visual">
+                            <ovaFallbackImage id="logoPic" width="120px" height="120px" ovalWidth="120px" ovalHeight="120px"
+                                              align="TOP_CENTER" stylename="job-candidate-avatar" fallbackThemePath="icons/no-company.png" scaleMode="SCALE_DOWN"/>
+                            <vbox width="100%" spacing="false" align="MIDDLE_CENTER" stylename="edit-sidebar-identity">
+                                <label id="detailTitle" value="Выберите департамент" width="100%" stylename="edit-sidebar-title h2 candidate-sidebar-fullname" align="MIDDLE_CENTER"/>
+                                <label id="detailSubtitle" value="-" width="100%" stylename="edit-sidebar-subtitle h4 candidate-sidebar-position" align="MIDDLE_CENTER"/>
+                            </vbox>
+                        </vbox>
+
+                        <!-- Кнопки действий сайдбара -->
+                        <vbox id="sidebarActionsCard" width="100%" spacing="true" stylename="edit-sidebar-summary">
+                            <button id="openEditCardBtn" caption="Открыть карточку" icon="EDIT_ACTION" stylename="primary" enabled="false" width="100%"/>
+                        </vbox>
+
+                        <!-- Секция: Руководство и штат -->
+                        <vbox id="staffCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="РУКОВОДСТВО И ШТАТ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <grid id="staffGrid" spacing="true" width="100%" stylename="edit-sidebar-summary">
+                                <columns count="2"/>
+                                <rows>
+                                    <row><label value="Директор:" stylename="bold"/><label id="detailDirector" value="-"/></row>
+                                    <row><label value="HR-директор:" stylename="bold"/><label id="detailHrDirector" value="-"/></row>
+                                    <row><label value="Численность:" stylename="bold"/><label id="detailStaffCount" value="-" stylename="bold" css="color: #2563eb;"/></row>
+                                    <row><label value="Проектов в отделе:" stylename="bold"/><label id="detailProjectsCount" value="0" stylename="bold"/></row>
+                                </rows>
+                            </grid>
+                        </vbox>
+
+                        <!-- Секция: Описание подразделения -->
+                        <vbox id="descriptionCard" width="100%" spacing="true" stylename="job-candidate-navigation label-navigation">
+                            <label value="ОПИСАНИЕ" width="100%" stylename="label-nav-title job-candidate-section-title"/>
+                            <label id="detailDescription" htmlEnabled="true" width="100%" stylename="edit-help"/>
+                        </vbox>
+                    </vbox>
+                </scrollBox>
+            </vbox>
+
+            <!-- ПРАВАЯ РАБОЧАЯ ОБЛАСТЬ -->
+            <vbox id="workspaceBox" width="100%" height="100%" spacing="true" stylename="edit-workspace candidate-reestr-workspace" expand="tableCard" margin="true,true,true,false">
+                
+                <!-- Командный тулбар -->
+                <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
+                    <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
+                        <button id="createBtn" caption="Создать департамент" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn" action="companyDepartamentsTable.create"/>
+                        <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn" action="companyDepartamentsTable.edit"/>
+                        <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn" action="companyDepartamentsTable.remove"/>
+                    </hbox>
+                    <hbox id="toolbarSpacer" width="100%"/>
+                    <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
+                        <popupButton id="actionsPopupButton" caption="Действия" icon="BARS" stylename="primary candidate-btn">
+                            <actions>
+                                <action id="refreshAction" caption="Обновить данные" icon="REFRESH"/>
+                                <action id="excelExportAction" caption="Выгрузить в Excel" icon="FILE_EXCEL_O"/>
+                            </actions>
+                        </popupButton>
+                    </hbox>
+                </hbox>
+
+                <!-- Generic Filter -->
+                <filter id="filter"
+                        applyTo="companyDepartamentsTable"
+                        dataLoader="companyDepartamentsDl"
+                        defaultMode="generic"
+                        width="100%"
+                        collapsable="true"
+                        collapsed="true"
+                        stylename="candidate-generic-filter">
+                    <properties include=".*"
+                                excludeProperties="departamentDescription,templateLetter,projectOfDepartment,version,createTs,createdBy,updateTs,updatedBy,deleteTs,deletedBy"/>
+                </filter>
+
+                <!-- Карточка таблицы с rowsCount -->
+                <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="companyDepartamentsTable">
+                    <dataGrid id="companyDepartamentsTable"
+                              width="100%"
+                              height="100%"
+                              dataContainer="companyDepartamentsDc"
+                              stylename="borderless grid candidate-browse-grid">
+                        <actions>
+                            <action id="create" type="create"/>
+                            <action id="edit" type="edit"/>
+                            <action id="remove" type="remove"/>
+                            <action id="excel" type="excelExport"/>
+                            <action id="refresh" type="refresh"/>
+                        </actions>
+                        <columns>
+                            <column id="departamentRuName"
+                                    property="departamentRuName"
+                                    caption="Департамент / Подразделение"
+                                    expandRatio="2"/>
+                            <column id="companyName"
+                                    property="companyName"
+                                    caption="Компания"
+                                    expandRatio="2"/>
+                            <column id="departamentDirector"
+                                    property="departamentDirector"
+                                    caption="Директор"
+                                    expandRatio="1"/>
+                            <column id="departamentHrDirector"
+                                    property="departamentHrDirector"
+                                    caption="HR-директор"
+                                    expandRatio="1"/>
+                            <column id="departamentNumberOfProgrammers"
+                                    property="departamentNumberOfProgrammers"
+                                    caption="Штат"
+                                    width="100px"/>
+                            <column id="projectsCountColumn"
+                                    caption="Проекты"
+                                    width="100px">
+                                <componentRenderer/>
+                            </column>
+                        </columns>
+                        <rowsCount/>
+                    </dataGrid>
+                </vbox>
+            </vbox>
+        </split>
+    </layout>
+</window>
