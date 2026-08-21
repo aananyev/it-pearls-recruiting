@@ -7,6 +7,7 @@ import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.company.hunttech.service.CompanyRequisitesIngestService;
 import com.company.hunttech.service.CompanyRequisitesParsedData;
+import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.ScreenBuilders;
@@ -17,6 +18,8 @@ import com.haulmont.cuba.gui.model.CollectionLoader;
 import com.haulmont.cuba.gui.screen.*;
 import com.haulmont.cuba.gui.screen.LookupComponent;
 import org.jsoup.Jsoup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -27,6 +30,8 @@ import java.util.stream.Collectors;
 @LookupComponent("companiesTable")
 @LoadDataBeforeShow
 public class CompanyReestrBrowse extends StandardLookup<Company> {
+
+    private static final Logger log = LoggerFactory.getLogger(CompanyReestrBrowse.class);
 
     private static final String QUERY_COMPANY_DESCRIPTIONS_BY_IDS =
             "select e.id, e.companyDescription, e.workingConditions from hunttech_Company e where e.id in :ids";
@@ -51,6 +56,8 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
     private DataManager dataManager;
     @Inject
     private Metadata metadata;
+    @Inject
+    private Messages messages;
     @Inject
     private Notifications notifications;
     @Inject
@@ -270,6 +277,22 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
                                 .optional()
                                 .orElse(null);
                     }
+                    if (company == null) {
+                        String nameToFind = null;
+                        if (data.getLegalEntityName() != null && !data.getLegalEntityName().trim().isEmpty()) {
+                            nameToFind = data.getLegalEntityName().trim();
+                        } else if (data.getCompanyShortName() != null && !data.getCompanyShortName().trim().isEmpty()) {
+                            nameToFind = data.getCompanyShortName().trim();
+                        }
+                        if (nameToFind != null) {
+                            company = dataManager.load(Company.class)
+                                    .query("select c from hunttech_Company c where lower(c.comanyName) = lower(:name) or lower(c.companyShortName) = lower(:name)")
+                                    .parameter("name", nameToFind)
+                                    .view("company-edit-view")
+                                    .optional()
+                                    .orElse(null);
+                        }
+                    }
                     boolean isNew = false;
                     if (company == null) {
                         company = metadata.create(Company.class);
@@ -290,10 +313,11 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
                     try {
                         companiesTable.setSelected(committedCompany);
                         updateSidebarDetails(committedCompany);
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        log.warn("Failed to select or refresh company details after smart upload", e);
                     }
                     notifications.create(Notifications.NotificationType.TRAY)
-                            .withCaption(isNew ? "Компания успешно создана" : "Реквизиты компании обновлены")
+                            .withCaption(messages.getMessage(CompanyReestrBrowse.class, isNew ? "msgCompanyCreatedSuccess" : "msgCompanyUpdatedSuccess"))
                             .withDescription(committedCompany.getComanyName() != null ? committedCompany.getComanyName() : "")
                             .show();
                 }
