@@ -285,12 +285,14 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
                             nameToFind = data.getCompanyShortName().trim();
                         }
                         if (nameToFind != null) {
-                            company = dataManager.load(Company.class)
+                            List<Company> matches = dataManager.load(Company.class)
                                     .query("select c from hunttech_Company c where lower(c.comanyName) = lower(:name) or lower(c.companyShortName) = lower(:name)")
                                     .parameter("name", nameToFind)
                                     .view("company-edit-view")
-                                    .optional()
-                                    .orElse(null);
+                                    .list();
+                            if (!matches.isEmpty()) {
+                                company = matches.get(0);
+                            }
                         }
                     }
                     boolean isNew = false;
