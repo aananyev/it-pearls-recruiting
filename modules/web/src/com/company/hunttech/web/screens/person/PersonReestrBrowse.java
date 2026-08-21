@@ -105,8 +105,8 @@ public class PersonReestrBrowse extends StandardLookup<Person> {
                     sub.append("@").append(person.getTelegramName().trim());
                 }
             }
-            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 13px;'>" + name + "</div>" +
-                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #64748b;'>" + sub.toString() + "</div>" : "") + "</div>";
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 13px; white-space: normal; word-break: break-word; line-height: 1.35;'>" + name + "</div>" +
+                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #64748b; white-space: normal; word-break: break-word; line-height: 1.35;'>" + sub.toString() + "</div>" : "") + "</div>";
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             lbl.setWidth("100%");
@@ -117,9 +117,10 @@ public class PersonReestrBrowse extends StandardLookup<Person> {
         personsTable.addGeneratedColumn("personPosition", person -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
+            lbl.setWidthFull();
             String pos = (person != null && person.getPersonPosition() != null && person.getPersonPosition().getPositionRuName() != null)
                     ? person.getPersonPosition().getPositionRuName() : "Сотрудник";
-            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + pos + "</span>");
+            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block; white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + pos + "</span>");
             return lbl;
         });
 
@@ -133,9 +134,9 @@ public class PersonReestrBrowse extends StandardLookup<Person> {
             String depName = person.getCompanyDepartment().getDepartamentRuName() != null ? person.getCompanyDepartment().getDepartamentRuName() : "";
             String compName = (person.getCompanyDepartment().getCompanyName() != null && person.getCompanyDepartment().getCompanyName().getComanyName() != null)
                     ? person.getCompanyDepartment().getCompanyName().getComanyName() : "";
-            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 12.5px;'>" +
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 12.5px; white-space: normal; word-break: break-word; line-height: 1.35;'>" +
                     (!compName.isEmpty() ? "🏢 " + compName : (!depName.isEmpty() ? "📁 " + depName : "-")) + "</div>" +
-                    (!compName.isEmpty() && !depName.isEmpty() ? "<div style='font-size: 11px; color: #64748b;'>📁 " + depName + "</div>" : "") + "</div>";
+                    (!compName.isEmpty() && !depName.isEmpty() ? "<div style='font-size: 11px; color: #64748b; white-space: normal; word-break: break-word; line-height: 1.35;'>📁 " + depName + "</div>" : "") + "</div>";
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             lbl.setWidth("100%");

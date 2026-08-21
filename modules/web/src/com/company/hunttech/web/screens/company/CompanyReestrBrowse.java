@@ -134,8 +134,8 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
                     sub.append("🌐 ").append(company.getCompanyGroup().getCompanyRuGroupName().trim());
                 }
             }
-            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 13px;'>" + name + "</div>" +
-                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #64748b;'>" + sub.toString() + "</div>" : "") + "</div>";
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 13px; white-space: normal; word-break: break-word; line-height: 1.35;'>" + name + "</div>" +
+                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #64748b; white-space: normal; word-break: break-word; line-height: 1.35;'>" + sub.toString() + "</div>" : "") + "</div>";
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             lbl.setWidth("100%");

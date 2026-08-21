@@ -125,9 +125,14 @@ public class SmartCvUploadScreen extends Screen {
     private SmartCvParsedData currentParsedData;
     private JobCandidate currentDuplicateCandidate;
     private JobCandidate createdCandidate;
+    private com.company.hunttech.entity.CandidateCV createdCv;
 
     public JobCandidate getCreatedCandidate() {
         return createdCandidate;
+    }
+
+    public com.company.hunttech.entity.CandidateCV getCreatedCv() {
+        return createdCv;
     }
 
     @Subscribe("clearTextBtn")
@@ -438,9 +443,10 @@ public class SmartCvUploadScreen extends Screen {
         SmartCvIngestResult res = smartCvIngestService.createNewCandidate(currentParsedData, currentFileDescriptor, null, currentUser);
         if (res.getStatus() == SmartCvIngestResult.Status.SUCCESS) {
             createdCandidate = res.getCandidate();
+            createdCv = res.getCandidateCv();
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption("Кандидат успешно создан")
-                    .withDescription(createdCandidate.getFullName())
+                    .withDescription(createdCandidate != null ? createdCandidate.getFullName() : "")
                     .show();
             close(StandardOutcome.COMMIT);
         } else {
@@ -459,9 +465,10 @@ public class SmartCvUploadScreen extends Screen {
                 currentDuplicateCandidate.getId(), currentParsedData, currentFileDescriptor, null, currentUser);
         if (res.getStatus() == SmartCvIngestResult.Status.SUCCESS) {
             createdCandidate = res.getCandidate();
+            createdCv = res.getCandidateCv();
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption("Резюме прикреплено к кандидату")
-                    .withDescription(createdCandidate.getFullName())
+                    .withDescription(createdCandidate != null ? createdCandidate.getFullName() : "")
                     .show();
             close(StandardOutcome.COMMIT);
         } else {

@@ -154,6 +154,10 @@
                             stylename="label-nav-item label-nav-item-active"
                             caption="mainMsg://msgCompanyDetail"
                             width="100%"/>
+                    <button id="companyEditorNavRequisites"
+                            stylename="label-nav-item"
+                            caption="Официальные реквизиты"
+                            width="100%"/>
                     <button id="companyEditorNavDescription"
                             stylename="label-nav-item"
                             caption="msg://msgCompanyDescription"
@@ -349,6 +353,208 @@
                                                   stylename="edit-form-control"
                                                   width="100%"
                                                   rows="5"/>
+                                    </vbox>
+                                </groupBox>
+                            </vbox>
+                        </scrollBox>
+                    </tab>
+                    <tab id="companyRequisitesTab"
+                         caption="Официальные реквизиты"
+                         spacing="true"
+                         expand="companyRequisitesScroll"
+                         stylename="company-requisites-tab">
+                        <scrollBox id="companyRequisitesScroll"
+                                   width="100%"
+                                   height="100%"
+                                   orientation="vertical"
+                                   scrollBars="vertical"
+                                   stylename="edit-workspace edit-workspace-scroll">
+                            <vbox id="companyRequisitesContent"
+                                  width="100%"
+                                  spacing="true"
+                                  stylename="edit-workspace-content">
+                                <!-- Панель действий вкладки: кнопка Умная загрузка реквизитов -->
+                                <hbox id="requisitesToolbar"
+                                      width="100%"
+                                      spacing="true"
+                                      align="MIDDLE_LEFT"
+                                      stylename="candidate-filter-bar edit-card">
+                                    <button id="smartUploadRequisitesBtn"
+                                            caption="Умная загрузка реквизитов"
+                                            icon="MAGIC"
+                                            stylename="primary candidate-btn candidate-smartload-btn"/>
+                                    <label value="Загрузка и парсинг из файла, текста или URL с автоматическим созданием директора в справочнике Люди"
+                                           stylename="edit-help"
+                                           align="MIDDLE_LEFT"/>
+                                </hbox>
+
+                                <!-- Карточка 1: Основные юридические реквизиты -->
+                                <groupBox id="companyRequisitesMainCard"
+                                          caption="Основные юридические реквизиты"
+                                          stylename="edit-card"
+                                          showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          width="100%">
+                                    <vbox width="100%" spacing="true">
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="innField"
+                                                       dataContainer="companyDc"
+                                                       property="inn"
+                                                       caption="ИНН"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="kppField"
+                                                       dataContainer="companyDc"
+                                                       property="kpp"
+                                                       caption="КПП"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="ogrnField"
+                                                       dataContainer="companyDc"
+                                                       property="ogrn"
+                                                       caption="ОГРН / ОГРНИП"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="okpoField"
+                                                       dataContainer="companyDc"
+                                                       property="okpo"
+                                                       caption="ОКПО"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="oktmoField"
+                                                       dataContainer="companyDc"
+                                                       property="oktmo"
+                                                       caption="ОКТМО"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="okvedField"
+                                                       dataContainer="companyDc"
+                                                       property="okved"
+                                                       caption="Основной ОКВЭД"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <lookupPickerField id="companyDirectorRequisitesField"
+                                                           dataContainer="companyDc"
+                                                           optionsContainer="companyDirectorsDc"
+                                                           property="companyDirector"
+                                                           caption="Генеральный директор (справочник Люди)"
+                                                           stylename="edit-form-control"
+                                                           width="100%">
+                                            <actions>
+                                                <action id="lookup" type="picker_lookup"/>
+                                                <action id="open" type="picker_open"/>
+                                                <action id="clear" type="picker_clear"/>
+                                            </actions>
+                                        </lookupPickerField>
+                                    </vbox>
+                                </groupBox>
+
+                                <!-- Карточка 2: Адреса организации -->
+                                <groupBox id="companyRequisitesAddressCard"
+                                          caption="Адреса организации"
+                                          stylename="edit-card"
+                                          showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          width="100%">
+                                    <vbox width="100%" spacing="true">
+                                        <textArea id="legalAddressField"
+                                                  dataContainer="companyDc"
+                                                  property="legalAddress"
+                                                  caption="Юридический адрес"
+                                                  stylename="edit-form-control"
+                                                  width="100%"
+                                                  rows="3"/>
+                                        <textArea id="actualAddressField"
+                                                  dataContainer="companyDc"
+                                                  property="actualAddress"
+                                                  caption="Фактический адрес"
+                                                  stylename="edit-form-control"
+                                                  width="100%"
+                                                  rows="3"/>
+                                        <textArea id="postalAddressField"
+                                                  dataContainer="companyDc"
+                                                  property="postalAddress"
+                                                  caption="Почтовый адрес"
+                                                  stylename="edit-form-control"
+                                                  width="100%"
+                                                  rows="3"/>
+                                    </vbox>
+                                </groupBox>
+
+                                <!-- Карточка 3: Банковские реквизиты -->
+                                <groupBox id="companyRequisitesBankCard"
+                                          caption="Банковские реквизиты"
+                                          stylename="edit-card"
+                                          showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          width="100%">
+                                    <vbox width="100%" spacing="true">
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="bikField"
+                                                       dataContainer="companyDc"
+                                                       property="bik"
+                                                       caption="БИК Банка"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="bankNameField"
+                                                       dataContainer="companyDc"
+                                                       property="bankName"
+                                                       caption="Наименование банка"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="settlementAccountField"
+                                                       dataContainer="companyDc"
+                                                       property="settlementAccount"
+                                                       caption="Расчетный счет"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="correspondentAccountField"
+                                                       dataContainer="companyDc"
+                                                       property="correspondentAccount"
+                                                       caption="Корреспондентский счет"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
+                                    </vbox>
+                                </groupBox>
+
+                                <!-- Карточка 4: Официальные контакты -->
+                                <groupBox id="companyRequisitesContactsCard"
+                                          caption="Официальные контакты"
+                                          stylename="edit-card"
+                                          showAsPanel="true"
+                                          collapsable="true"
+                                          collapsed="false"
+                                          width="100%">
+                                    <vbox width="100%" spacing="true">
+                                        <hbox spacing="true" width="100%">
+                                            <textField id="phoneField"
+                                                       dataContainer="companyDc"
+                                                       property="phone"
+                                                       caption="Телефон"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="emailField"
+                                                       dataContainer="companyDc"
+                                                       property="email"
+                                                       caption="Email"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                            <textField id="websiteField"
+                                                       dataContainer="companyDc"
+                                                       property="website"
+                                                       caption="Веб-сайт"
+                                                       stylename="edit-form-control"
+                                                       width="100%"/>
+                                        </hbox>
                                     </vbox>
                                 </groupBox>
                             </vbox>

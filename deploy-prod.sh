@@ -49,7 +49,7 @@ REMOTE_DB_PORT="5432"
 DB_UPDATE_USER="cuba"
 DB_UPDATE_PASSWORD=""
 
-TOMCAT_UNPACK_DIRS="app app-core"
+TOMCAT_UNPACK_DIRS="hrm hrm-core"
 
 # Флаги CLI
 QUIET_MODE=0
@@ -724,6 +724,10 @@ create_remote_backup() {
         die "Не удалось создать каталог бэкапа на сервере."
     fi
 
+    # Каталог создан root-ом; pg_dump выполняется от postgres (su - postgres),
+    # поэтому даём postgres права на запись, иначе "Permission denied".
+    ssh_cmd "chown -R postgres:postgres '${BACKUP_REMOTE_DIR}'" >>"$LOG" 2>&1 || true
+
     info_n "Копирование WAR с ${TOMCAT_WARS_DIR} ... "
     if ! ssh_cmd "cp -a '${TOMCAT_WARS_DIR}'/*.war '${BACKUP_REMOTE_DIR}/wars/' 2>/dev/null" >>"$LOG" 2>&1; then
         fail
@@ -852,20 +856,25 @@ resolve_db_update_password() {
 write_update_db_init_gradle() {
     UPDATE_DB_INIT_GRADLE="${current_catalog}/.deploy-updateDb-init.gradle"
     cat >"$UPDATE_DB_INIT_GRADLE" <<'GRADLE_EOF'
-if (project.hasProperty('deployDbHost')) {
-    project(':app-core').tasks.named('updateDb').configure {
-        host = project.property('deployDbHost')
-        if (project.hasProperty('deployDbPort')) {
-            port = project.property('deployDbPort') as Integer
+// Init-скрипт Gradle: на верхнем уровне контекст — gradle, не project.
+// Свойства -P читаются из gradle.startParameter.projectProperties;
+// CubaDbTask не имеет свойства port: host передаётся как "host:port".
+gradle.projectsEvaluated {
+    def props = gradle.startParameter.projectProperties
+    def target = gradle.rootProject.project(':app-core')
+    target.tasks.named('updateDb').configure {
+        host = props['deployDbHost']
+        if (props.containsKey('deployDbPort')) {
+            host = props['deployDbHost'] + ':' + props['deployDbPort']
         }
-        if (project.hasProperty('deployDbName')) {
-            dbName = project.property('deployDbName')
+        if (props.containsKey('deployDbName')) {
+            dbName = props['deployDbName']
         }
-        if (project.hasProperty('deployDbUser')) {
-            dbUser = project.property('deployDbUser')
+        if (props.containsKey('deployDbUser')) {
+            dbUser = props['deployDbUser']
         }
-        if (project.hasProperty('deployDbPassword')) {
-            dbPassword = project.property('deployDbPassword')
+        if (props.containsKey('deployDbPassword')) {
+            dbPassword = props['deployDbPassword']
         }
     }
 }

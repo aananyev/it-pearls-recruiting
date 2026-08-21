@@ -156,8 +156,8 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
             }
 
             String badgeHtml = isNew ? "<span style='background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 1px 5px; border-radius: 4px; font-size: 9.5px; font-weight: 700; margin-right: 6px;'>НОВЫЙ</span>" : "";
-            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 13px;'>" + badgeHtml + name + "</div>" +
-                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #64748b;'>" + sub.toString() + "</div>" : "") + "</div>";
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 13px; white-space: normal; word-break: break-word; line-height: 1.35;'>" + badgeHtml + name + "</div>" +
+                    (sub.length() > 0 ? "<div style='font-size: 11px; color: #64748b; white-space: normal; word-break: break-word; line-height: 1.35;'>" + sub.toString() + "</div>" : "") + "</div>";
 
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
@@ -189,17 +189,19 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         projectsTable.addGeneratedColumn("projectDates", project -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
+            lbl.setWidthFull();
             String start = (project != null && project.getStartProjectDate() != null) ? DATE_FORMAT.format(project.getStartProjectDate()) : "—";
             String end = (project != null && project.getEndProjectDate() != null) ? DATE_FORMAT.format(project.getEndProjectDate()) : "—";
-            lbl.setValue("<span style='font-size: 11.5px; color: #475569;'>📅 " + start + " – " + end + "</span>");
+            lbl.setValue("<div style='font-size: 11.5px; color: #475569; white-space: normal; word-break: break-word; line-height: 1.35;'>📅 " + start + " – " + end + "</div>");
             return lbl;
         });
 
         projectsTable.addGeneratedColumn("projectOwner", project -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
+            lbl.setWidthFull();
             String ownerName = (project != null && project.getProjectOwner() != null) ? project.getProjectOwner().getInstanceName() : "-";
-            lbl.setValue("<span style='font-size: 12px; color: #475569;'>👤 " + (ownerName != null ? ownerName : "-") + "</span>");
+            lbl.setValue("<div style='font-size: 12px; color: #475569; white-space: normal; word-break: break-word; line-height: 1.35;'>👤 " + (ownerName != null ? ownerName : "-") + "</div>");
             return lbl;
         });
 

@@ -866,4 +866,25 @@
       }
     }
   }
+
+  /* Таблицы реестров (увеличение высоты строк на 20% + поддержка переноса текста) */
+  .candidate-browse-grid {
+    .v-table-cell-content {
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      min-height: 38px !important;
+      vertical-align: middle !important;
+    }
+
+    .v-table-cell-wrapper {
+      white-space: normal !important;
+      line-height: 1.35 !important;
+      word-break: break-word !important;
+    }
+
+    .v-table-row,
+    .v-table-row-odd {
+      min-height: 38px !important;
+    }
+  }
 }

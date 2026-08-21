@@ -1317,25 +1317,25 @@
     .v-popupbutton.v-button-secondary,
     .v-popupbutton.secondary,
     .candidate-btn.secondary {
-      background: #1e293b !important;
-      border: 1px solid rgba(255, 255, 255, 0.15) !important;
-      color: #e2e8f0 !important;
+      background: #f1f5f9 !important;
+      border: 1px solid #e2e8f0 !important;
+      color: #475569 !important;
 
       .v-icon,
       .v-button-caption,
       .v-popup-indicator:after {
-        color: #e2e8f0 !important;
+        color: #475569 !important;
       }
 
       &:hover:not(.v-disabled) {
-        background: #334155 !important;
-        border-color: rgba(255, 255, 255, 0.25) !important;
-        color: #ffffff !important;
+        background: #e2e8f0 !important;
+        border-color: #cbd5e1 !important;
+        color: #0f172a !important;
 
         .v-icon,
         .v-button-caption,
         .v-popup-indicator:after {
-          color: #ffffff !important;
+          color: #0f172a !important;
         }
       }
 
@@ -1358,11 +1358,11 @@
   /* Generic Filter CUBA (класс платформы c-generic-filter + наш stylename) */
   .candidate-generic-filter,
   .c-generic-filter {
-    background: #172638 !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(15, 23, 42, 0.12) !important;
     border-radius: 8px !important;
     padding: 6px 12px !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25) !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06) !important;
     margin-top: 2px !important;
     margin-bottom: 6px !important;
     box-sizing: border-box !important;
@@ -1398,6 +1398,27 @@
     font-size: 12.5px !important;
     font-weight: 600 !important;
     padding: 0 14px !important;
+  }
+
+  /* Таблица реестров кандидатов и резюме (увеличение высоты строк на 20% + поддержка многострочного переноса) */
+  .candidate-browse-grid {
+    .v-table-cell-content {
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+      min-height: 38px !important;
+      vertical-align: middle !important;
+    }
+
+    .v-table-cell-wrapper {
+      white-space: normal !important;
+      line-height: 1.35 !important;
+      word-break: break-word !important;
+    }
+
+    .v-table-row,
+    .v-table-row-odd {
+      min-height: 38px !important;
+    }
   }
 
   @media (max-width: 1100px) {

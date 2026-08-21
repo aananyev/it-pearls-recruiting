@@ -3,10 +3,14 @@ package com.company.hunttech.web.screens.company;
 import com.company.hunttech.entity.City;
 import com.company.hunttech.entity.Company;
 import com.company.hunttech.entity.Region;
+import com.company.hunttech.service.CompanyRequisitesIngestService;
+import com.company.hunttech.service.CompanyRequisitesParsedData;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.cuba.core.global.PersistenceHelper;
 import com.haulmont.cuba.core.global.ViewBuilder;
+import com.haulmont.cuba.gui.Notifications;
+import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.screen.*;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
@@ -39,11 +43,19 @@ public class CompanyEdit extends StandardEditor<Company> {
     @Inject
     private Button companyEditorNavMain;
     @Inject
+    private Button companyEditorNavRequisites;
+    @Inject
     private Button companyEditorNavDescription;
     @Inject
     private Button companyEditorNavDepartments;
     @Inject
     private VBoxLayout companyEditorSidebarNavigation;
+    @Inject
+    private Screens screens;
+    @Inject
+    private CompanyRequisitesIngestService companyRequisitesIngestService;
+    @Inject
+    private Notifications notifications;
 
     private boolean addressLoaded;
     private boolean companyDescriptionLoaded;
@@ -53,16 +65,16 @@ public class CompanyEdit extends StandardEditor<Company> {
     private static final Map<String, String> TAB_TO_NAV_BUTTON =
             Collections.unmodifiableMap(new HashMap<String, String>() {{
                 put("tabConpanyDetails", "companyEditorNavMain");
+                put("companyRequisitesTab", "companyEditorNavRequisites");
                 put("companyDescriptionTab", "companyEditorNavDescription");
                 put("tabCompanyDepartament", "companyEditorNavDepartments");
             }});
 
     /** Вкладки с двумя и более блоками ввода — только на них label-навигация
      *  sidebar видима (контракт Edit-форм §3.6, эталон OpenPositionEdit):
-     *  «Описание компании» (карточка) и «Департамент» (dataGrid) — одноблочные,
-     *  навигация скрывается целиком вместе с заголовком. */
+     *  «Информация о компании» и «Официальные реквизиты» — многоблочные. */
     private static final Set<String> TABS_WITH_SIDEBAR_NAVIGATION =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList("tabConpanyDetails")));
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList("tabConpanyDetails", "companyRequisitesTab")));
 
     @Subscribe("mainTab")
     public void onMainTabSelectedTabChange(TabSheet.SelectedTabChangeEvent event) {
@@ -160,6 +172,12 @@ public class CompanyEdit extends StandardEditor<Company> {
         mainTab.setSelectedTab("tabConpanyDetails");
     }
 
+    @Subscribe("companyEditorNavRequisites")
+    public void onCompanyEditorNavRequisitesClick(Button.ClickEvent event) {
+        setNavigationActive(companyEditorNavRequisites);
+        mainTab.setSelectedTab("companyRequisitesTab");
+    }
+
     @Subscribe("companyEditorNavDescription")
     public void onCompanyEditorNavDescriptionClick(Button.ClickEvent event) {
         setNavigationActive(companyEditorNavDescription);
@@ -172,12 +190,28 @@ public class CompanyEdit extends StandardEditor<Company> {
         mainTab.setSelectedTab("tabCompanyDepartament");
     }
 
+    @Subscribe("smartUploadRequisitesBtn")
+    public void onSmartUploadRequisitesBtnClick(Button.ClickEvent event) {
+        SmartCompanyRequisitesUploadScreen screen = screens.create(
+                SmartCompanyRequisitesUploadScreen.class,
+                OpenMode.DIALOG);
+        screen.addAfterCloseListener(afterCloseEvent -> {
+            if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
+                CompanyRequisitesParsedData data = screen.getParsedData();
+                if (data != null) {
+                    companyRequisitesIngestService.applyRequisitesToCompany(getEditedEntity(), data);
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption("Реквизиты применены")
+                            .withDescription(getEditedEntity().getComanyName() != null ? getEditedEntity().getComanyName() : "")
+                            .show();
+                }
+            }
+        });
+        screen.show();
+    }
+
     @Subscribe("mainTab")
     public void onMainTabSelectedTabChangeNav(TabSheet.SelectedTabChangeEvent event) {
-        // Отдельный обработчик смены вкладки: синхронизирует активный пункт
-        // sidebar-навигации и скрывает контейнер навигации на одноблочных
-        // вкладках (контракт §3.6); бизнес-логика ленивой загрузки — в основном
-        // методе.
         TabSheet.Tab selectedTab = event.getSelectedTab();
         if (selectedTab == null) {
             return;
@@ -199,6 +233,9 @@ public class CompanyEdit extends StandardEditor<Company> {
             case "companyEditorNavMain":
                 setNavigationActive(companyEditorNavMain);
                 break;
+            case "companyEditorNavRequisites":
+                setNavigationActive(companyEditorNavRequisites);
+                break;
             case "companyEditorNavDescription":
                 setNavigationActive(companyEditorNavDescription);
                 break;
@@ -212,6 +249,9 @@ public class CompanyEdit extends StandardEditor<Company> {
 
     private void resetNavigationActiveStyles() {
         companyEditorNavMain.removeStyleName("label-nav-item-active");
+        if (companyEditorNavRequisites != null) {
+            companyEditorNavRequisites.removeStyleName("label-nav-item-active");
+        }
         companyEditorNavDescription.removeStyleName("label-nav-item-active");
         companyEditorNavDepartments.removeStyleName("label-nav-item-active");
     }

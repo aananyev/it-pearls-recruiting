@@ -56,6 +56,10 @@
                        value="com.company.hunttech.service.SmartCvIngestService"/>
                 <entry key="hunttech_SmartOpenPositionIngestService"
                        value="com.company.hunttech.service.SmartOpenPositionIngestService"/>
+                <entry key="hunttech_TelegramIntegrationService"
+                       value="com.company.hunttech.service.TelegramIntegrationService"/>
+                <entry key="hunttech_CompanyRequisitesIngestService"
+                       value="com.company.hunttech.service.CompanyRequisitesIngestService"/>
             </map>
         </property>
     </bean>

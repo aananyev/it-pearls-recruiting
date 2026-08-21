@@ -3,6 +3,7 @@ package com.company.hunttech.web.screens.candidatecv;
 import com.company.hunttech.entity.CandidateCV;
 import com.company.hunttech.entity.JobCandidate;
 import com.hunttech.hrm.gui.components.OvaFallbackImage;
+import com.company.hunttech.web.screens.jobcandidate.SmartCvUploadScreen;
 import com.haulmont.cuba.core.entity.KeyValueEntity;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.Notifications;
@@ -150,10 +151,11 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
         candidateCVsTable.addGeneratedColumn("resumePosition", cv -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
+            lbl.setWidthFull();
             String pos = (cv != null && cv.getResumePosition() != null) ? cv.getResumePosition().getPositionRuName() :
                     (cv != null && cv.getCandidate() != null && cv.getCandidate().getPersonPosition() != null ?
                             cv.getCandidate().getPersonPosition().getPositionRuName() : "Специалист");
-            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block;'>" + (pos != null ? pos : "Специалист") + "</span>");
+            lbl.setValue("<span style='background: rgba(43, 130, 201, 0.12); color: #2b82c9; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; display: inline-block; white-space: normal; word-break: break-word; line-height: 1.35; max-width: 100%;'>" + (pos != null ? pos : "Специалист") + "</span>");
             return lbl;
         });
 
@@ -242,8 +244,9 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
         candidateCVsTable.addGeneratedColumn("owner", cv -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
+            lbl.setWidthFull();
             String ownerName = (cv != null && cv.getOwner() != null) ? cv.getOwner().getInstanceName() : "-";
-            lbl.setValue("<span style='font-size: 12px; color: #475569;'>👤 " + (ownerName != null ? ownerName : "-") + "</span>");
+            lbl.setValue("<div style='font-size: 12px; color: #475569; white-space: normal; word-break: break-word; line-height: 1.35;'>👤 " + (ownerName != null ? ownerName : "-") + "</div>");
             return lbl;
         });
 
@@ -254,6 +257,30 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
             lbl.setValue("<span style='font-size: 11.5px; color: #64748b;'>📅 " + d + "</span>");
             return lbl;
         });
+    }
+
+    @Subscribe("smartUploadBtn")
+    public void onSmartUploadBtnClick(Button.ClickEvent event) {
+        openSmartCvUploadDialog();
+    }
+
+    private void openSmartCvUploadDialog() {
+        SmartCvUploadScreen screen = screenBuilders.screen(this)
+                .withScreenClass(SmartCvUploadScreen.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+        screen.addAfterCloseListener(closeEvent -> {
+            if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+                candidateCVsDl.load();
+                if (screen.getCreatedCv() != null) {
+                    try {
+                        candidateCVsTable.setSelected(screen.getCreatedCv());
+                    } catch (Exception ignored) {
+                    }
+                }
+            }
+        });
+        screen.show();
     }
 
     @Subscribe

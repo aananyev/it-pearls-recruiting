@@ -146,6 +146,7 @@
                 <hbox id="tableFilterBar" width="100%" spacing="true" align="MIDDLE_LEFT" stylename="candidate-filter-bar edit-card" expand="toolbarSpacer">
                     <hbox id="leftActionButtons" spacing="true" align="MIDDLE_LEFT" stylename="filter-buttons-panel">
                         <button id="createBtn" caption="Создать резюме" icon="CREATE_ACTION" stylename="primary candidate-btn candidate-create-btn" action="candidateCVsTable.create"/>
+                        <button id="smartUploadBtn" caption="Умная загрузка" icon="font-icon:MAGIC" stylename="primary candidate-btn candidate-smartload-btn"/>
                         <button id="editBtn" caption="Редактировать" icon="EDIT_ACTION" stylename="secondary candidate-btn" action="candidateCVsTable.edit"/>
                         <button id="removeBtn" caption="Удалить" icon="REMOVE_ACTION" stylename="secondary candidate-btn" action="candidateCVsTable.remove"/>
                     </hbox>

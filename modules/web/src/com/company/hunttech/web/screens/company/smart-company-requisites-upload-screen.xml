@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="Умная загрузка реквизитов компании"
+        messagesPack="com.company.hunttech.web.screens.company"
+        icon="MAGIC">
+    <dialogMode height="700" width="900" modal="true" resizable="true"/>
+    <layout expand="mainTabSheet" spacing="true" width="100%" height="100%">
+        <tabSheet id="mainTabSheet" width="100%" height="100%">
+            <!-- Вкладка 1: Загрузка из файла -->
+            <tab id="fileTab" caption="Загрузка из файла" margin="true" spacing="true" expand="fileUploadVBox">
+                <vbox id="fileUploadVBox" width="100%" height="100%" spacing="true" align="MIDDLE_CENTER">
+                    <label value="Перетащите или выберите файл с реквизитами / карточкой предприятия (PDF, DOCX, DOC, RTF, PAGES, TXT):"
+                           stylename="bold" width="100%"/>
+                    <hbox id="fileDropZone" width="100%" height="180px" stylename="candidate-dropzone-box edit-card" align="MIDDLE_CENTER">
+                        <vbox spacing="true" align="MIDDLE_CENTER" width="100%">
+                            <upload id="fileUpload"
+                                    dropZone="fileDropZone"
+                                    showFileName="true"
+                                    showClearButton="true"
+                                    fileStoragePutMode="MANUAL"
+                                    align="MIDDLE_CENTER"/>
+                            <label id="selectedFileNameLabel" value="Файл не выбран" stylename="edit-help" align="MIDDLE_CENTER"/>
+                        </vbox>
+                    </hbox>
+                    <button id="parseFileBtn" caption="Распознать реквизиты из файла" icon="MAGIC" stylename="primary" width="280px" align="MIDDLE_CENTER"/>
+                </vbox>
+            </tab>
+
+            <!-- Вкладка 2: Вставка текста -->
+            <tab id="textTab" caption="Вставка текста / Карточки" margin="true" spacing="true" expand="rawTextArea">
+                <label value="Вставьте текст реквизитов или карточки компании в поле ниже:" stylename="bold"/>
+                <textArea id="rawTextArea" width="100%" height="100%" placeholder="Вставьте реквизиты компании..."/>
+                <button id="parseTextBtn" caption="Распознать вставленный текст" icon="MAGIC" stylename="primary" width="280px"/>
+            </tab>
+
+            <!-- Вкладка 3: Загрузка по ссылке -->
+            <tab id="urlTab" caption="Ссылка из интернета" margin="true" spacing="true">
+                <vbox spacing="true" width="100%">
+                    <label value="Введите URL страницы компании с реквизитами:" stylename="bold"/>
+                    <hbox width="100%" spacing="true" expand="urlField">
+                        <textField id="urlField" width="100%" placeholder="https://example.com/contacts"/>
+                        <button id="parseUrlBtn" caption="Загрузить и распознать" icon="MAGIC" stylename="primary"/>
+                    </hbox>
+                </vbox>
+            </tab>
+        </tabSheet>
+
+        <!-- Блок предварительного просмотра распознанных данных -->
+        <groupBox id="previewBox" caption="Результаты распознавания" width="100%" spacing="true" visible="false" stylename="edit-card" collapsable="true">
+            <scrollBox id="previewScroll" width="100%" height="250px" orientation="vertical">
+                <grid id="previewGrid" width="100%" spacing="true">
+                    <columns>
+                        <column width="140px"/>
+                        <column flex="1"/>
+                        <column width="140px"/>
+                        <column flex="1"/>
+                    </columns>
+                    <rows>
+                        <row>
+                            <label value="Организация:" stylename="bold"/>
+                            <label id="previewName" value="—"/>
+                            <label value="ИНН / КПП:" stylename="bold"/>
+                            <label id="previewInnkpp" value="—"/>
+                        </row>
+                        <row>
+                            <label value="ОГРН:" stylename="bold"/>
+                            <label id="previewOgrn" value="—"/>
+                            <label value="ОКПО / ОКВЭД:" stylename="bold"/>
+                            <label id="previewOkpoOkved" value="—"/>
+                        </row>
+                        <row>
+                            <label value="Юр. адрес:" stylename="bold"/>
+                            <label id="previewLegalAddress" value="—"/>
+                            <label value="Факт. адрес:" stylename="bold"/>
+                            <label id="previewActualAddress" value="—"/>
+                        </row>
+                        <row>
+                            <label value="Банк / БИК:" stylename="bold"/>
+                            <label id="previewBankBik" value="—"/>
+                            <label value="Р/с / К/с:" stylename="bold"/>
+                            <label id="previewAccounts" value="—"/>
+                        </row>
+                        <row>
+                            <label value="Контакты:" stylename="bold"/>
+                            <label id="previewContacts" value="—"/>
+                            <label value="Руководитель:" stylename="bold"/>
+                            <label id="previewDirector" value="—" htmlEnabled="true"/>
+                        </row>
+                    </rows>
+                </grid>
+            </scrollBox>
+        </groupBox>
+
+        <!-- Нижняя панель действий -->
+        <hbox id="actionsBox" width="100%" spacing="true" align="MIDDLE_RIGHT">
+            <hbox expand="spacer" width="100%">
+                <label id="statusLabel" value="" stylename="bold" align="MIDDLE_LEFT"/>
+                <hbox id="spacer" width="100%"/>
+            </hbox>
+            <button id="applyBtn" caption="Применить реквизиты" icon="CHECK" stylename="primary" enabled="false"/>
+            <button id="cancelBtn" caption="Отмена" icon="BAN"/>
+        </hbox>
+    </layout>
+</window>

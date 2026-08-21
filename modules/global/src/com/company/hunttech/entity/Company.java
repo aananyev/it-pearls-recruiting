@@ -88,6 +88,185 @@ public class Company extends StandardEntity {
     @Column(name = "WORKING_CONDITIONS")
     private String workingConditions;
 
+    @Column(name = "INN", length = 12)
+    protected String inn;
+
+    @Column(name = "KPP", length = 9)
+    protected String kpp;
+
+    @Column(name = "OGRN", length = 15)
+    protected String ogrn;
+
+    @Column(name = "OKPO", length = 10)
+    protected String okpo;
+
+    @Column(name = "OKTMO", length = 11)
+    protected String oktmo;
+
+    @Column(name = "OKVED", length = 100)
+    protected String okved;
+
+    @Lob
+    @Column(name = "LEGAL_ADDRESS")
+    protected String legalAddress;
+
+    @Lob
+    @Column(name = "ACTUAL_ADDRESS")
+    protected String actualAddress;
+
+    @Lob
+    @Column(name = "POSTAL_ADDRESS")
+    protected String postalAddress;
+
+    @Column(name = "BIK", length = 9)
+    protected String bik;
+
+    @Column(name = "BANK_NAME", length = 255)
+    protected String bankName;
+
+    @Column(name = "SETTLEMENT_ACCOUNT", length = 20)
+    protected String settlementAccount;
+
+    @Column(name = "CORRESPONDENT_ACCOUNT", length = 20)
+    protected String correspondentAccount;
+
+    @Column(name = "PHONE", length = 50)
+    protected String phone;
+
+    @Column(name = "EMAIL", length = 100)
+    protected String email;
+
+    @Column(name = "WEBSITE", length = 255)
+    protected String website;
+
+    public String getInn() {
+        return inn;
+    }
+
+    public void setInn(String inn) {
+        this.inn = inn;
+    }
+
+    public String getKpp() {
+        return kpp;
+    }
+
+    public void setKpp(String kpp) {
+        this.kpp = kpp;
+    }
+
+    public String getOgrn() {
+        return ogrn;
+    }
+
+    public void setOgrn(String ogrn) {
+        this.ogrn = ogrn;
+    }
+
+    public String getOkpo() {
+        return okpo;
+    }
+
+    public void setOkpo(String okpo) {
+        this.okpo = okpo;
+    }
+
+    public String getOktmo() {
+        return oktmo;
+    }
+
+    public void setOktmo(String oktmo) {
+        this.oktmo = oktmo;
+    }
+
+    public String getOkved() {
+        return okved;
+    }
+
+    public void setOkved(String okved) {
+        this.okved = okved;
+    }
+
+    public String getLegalAddress() {
+        return legalAddress;
+    }
+
+    public void setLegalAddress(String legalAddress) {
+        this.legalAddress = legalAddress;
+    }
+
+    public String getActualAddress() {
+        return actualAddress;
+    }
+
+    public void setActualAddress(String actualAddress) {
+        this.actualAddress = actualAddress;
+    }
+
+    public String getPostalAddress() {
+        return postalAddress;
+    }
+
+    public void setPostalAddress(String postalAddress) {
+        this.postalAddress = postalAddress;
+    }
+
+    public String getBik() {
+        return bik;
+    }
+
+    public void setBik(String bik) {
+        this.bik = bik;
+    }
+
+    public String getBankName() {
+        return bankName;
+    }
+
+    public void setBankName(String bankName) {
+        this.bankName = bankName;
+    }
+
+    public String getSettlementAccount() {
+        return settlementAccount;
+    }
+
+    public void setSettlementAccount(String settlementAccount) {
+        this.settlementAccount = settlementAccount;
+    }
+
+    public String getCorrespondentAccount() {
+        return correspondentAccount;
+    }
+
+    public void setCorrespondentAccount(String correspondentAccount) {
+        this.correspondentAccount = correspondentAccount;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
     public CompanyGroup getCompanyGroup() {
         return companyGroup;
     }

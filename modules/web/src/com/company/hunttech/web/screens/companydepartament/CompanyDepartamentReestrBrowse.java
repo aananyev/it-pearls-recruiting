@@ -79,8 +79,8 @@ public class CompanyDepartamentReestrBrowse extends StandardLookup<CompanyDepart
             String cName = (dept != null && dept.getCompanyName() != null) ?
                     (dept.getCompanyName().getComanyName() != null ? dept.getCompanyName().getComanyName() : dept.getCompanyName().getCompanyShortName()) : null;
 
-            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 13px;'>" + dName + "</div>" +
-                    (cName != null && !cName.isEmpty() ? "<div style='font-size: 11px; color: #64748b;'>🏢 " + cName + "</div>" : "") + "</div>";
+            String textHtml = "<div style='text-align: left;'><div style='font-weight: 600; color: #1e293b; font-size: 13px; white-space: normal; word-break: break-word; line-height: 1.35;'>" + dName + "</div>" +
+                    (cName != null && !cName.isEmpty() ? "<div style='font-size: 11px; color: #64748b; white-space: normal; word-break: break-word; line-height: 1.35;'>🏢 " + cName + "</div>" : "") + "</div>";
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
             lbl.setWidth("100%");
@@ -91,16 +91,18 @@ public class CompanyDepartamentReestrBrowse extends StandardLookup<CompanyDepart
         companyDepartamentsTable.addGeneratedColumn("departamentDirector", dept -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
+            lbl.setWidthFull();
             String name = (dept != null && dept.getDepartamentDirector() != null) ? dept.getDepartamentDirector().getInstanceName() : "—";
-            lbl.setValue("<span style='font-size: 12px; color: #475569;'>" + ("—".equals(name) ? "—" : "👤 " + name) + "</span>");
+            lbl.setValue("<div style='font-size: 12px; color: #475569; white-space: normal; word-break: break-word; line-height: 1.35;'>" + ("—".equals(name) ? "—" : "👤 " + name) + "</div>");
             return lbl;
         });
 
         companyDepartamentsTable.addGeneratedColumn("departamentHrDirector", dept -> {
             Label<String> lbl = uiComponents.create(Label.NAME);
             lbl.setHtmlEnabled(true);
+            lbl.setWidthFull();
             String name = (dept != null && dept.getDepartamentHrDirector() != null) ? dept.getDepartamentHrDirector().getInstanceName() : "—";
-            lbl.setValue("<span style='font-size: 12px; color: #475569;'>" + ("—".equals(name) ? "—" : "👤 " + name) + "</span>");
+            lbl.setValue("<div style='font-size: 12px; color: #475569; white-space: normal; word-break: break-word; line-height: 1.35;'>" + ("—".equals(name) ? "—" : "👤 " + name) + "</div>");
             return lbl;
         });
 

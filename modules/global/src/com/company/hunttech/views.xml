@@ -675,6 +675,22 @@
         <property name="countryOfCompany" view="country-picker-view"/>
         <property name="fileCompanyLogo" view="_minimal"/>
         <property name="departmentOfCompany" view="companyDepartament-department-child-view"/>
+        <property name="inn"/>
+        <property name="kpp"/>
+        <property name="ogrn"/>
+        <property name="okpo"/>
+        <property name="oktmo"/>
+        <property name="okved"/>
+        <property name="legalAddress"/>
+        <property name="actualAddress"/>
+        <property name="postalAddress"/>
+        <property name="bik"/>
+        <property name="bankName"/>
+        <property name="settlementAccount"/>
+        <property name="correspondentAccount"/>
+        <property name="phone"/>
+        <property name="email"/>
+        <property name="website"/>
     </view>
     <view entity="hunttech_Company" name="company-picker-view" extends="_minimal">
         <property name="comanyName"/>

@@ -114,4 +114,12 @@
     <include file="260820-3-addSmartVacancyParseAiFunction.xml"
              relativeToChangelogFile="true"/>
 
+    <!-- Company: добавление колонок официальных реквизитов компании. -->
+    <include file="260821-1-addCompanyRequisitesColumns.xml"
+             relativeToChangelogFile="true"/>
+
+    <!-- CompanyRequisitesIngestService: AI-функция парсинга реквизитов компании из карточки в JSON. -->
+    <include file="260821-2-addCompanyRequisitesAiFunction.xml"
+             relativeToChangelogFile="true"/>
+
 </databaseChangeLog>
