@@ -43,7 +43,7 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
     @Inject
     private CollectionLoader<Project> projectsDl;
     @Inject
-    private TreeDataGrid<Project> projectsTable;
+    private GroupTable<Project> projectsTable;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -53,8 +53,6 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
     @Inject
     private MessageTools messageTools;
 
-    @Inject
-    private LookupField<String> columnSelector;
     @Inject
     private PopupButton filterPopupButton;
 
@@ -95,7 +93,7 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
     @Subscribe
     public void onInit(InitEvent event) {
         initDefaultFilters();
-        initColumnSelector();
+        setupTableColumns();
         setupTableSelection();
         setupSidebarButtons();
     }
@@ -105,30 +103,100 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         projectsDl.setParameter("withOpenPosition", true);
     }
 
-    private void initColumnSelector() {
-        List<DataGrid.Column<Project>> columns = projectsTable.getColumns();
-        Map<String, String> columnsMap = columns.stream()
-                .collect(Collectors.toMap(
-                        column -> {
-                            MetaPropertyPath propertyPath = column.getPropertyPath();
-                            return propertyPath != null
-                                    ? messageTools.getPropertyCaption(propertyPath.getMetaProperty())
-                                    : column.getId();
-                        },
-                        DataGrid.Column::getId,
-                        (oldValue, newValue) -> oldValue,
-                        LinkedHashMap::new));
-        columnSelector.setOptionsMap(columnsMap);
-        if (!columns.isEmpty()) {
-            columnSelector.setValue(columns.get(1).getId()); // Default to projectName
-        }
-    }
+    private void setupTableColumns() {
+        projectsTable.addGeneratedColumn("projectLogoColumn", project -> {
+            HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+            retBox.setWidthFull();
+            retBox.setHeightFull();
+            retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
 
-    @Subscribe("columnSelector")
-    protected void onColumnSelectorValueChange(HasValue.ValueChangeEvent<String> event) {
-        if (event.getValue() != null) {
-            projectsTable.setHierarchyColumn(event.getValue());
-        }
+            Image image = uiComponents.create(Image.class);
+            image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+            image.setWidth("24px");
+            image.setHeight("24px");
+            image.setStyleName("icon-no-border-20px");
+            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (project.getProjectLogo() != null) {
+                image.setSource(FileDescriptorResource.class).setFileDescriptor(project.getProjectLogo());
+            } else {
+                image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            }
+
+            retBox.add(image);
+            return retBox;
+        });
+
+        projectsTable.addGeneratedColumn("projectName", project -> {
+            HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
+            retHBox.setWidthFull();
+            retHBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
+            retHBox.setHeightFull();
+            retHBox.setSpacing(true);
+
+            // Бейдж «Новый»
+            GregorianCalendar gregorianCalendar = new GregorianCalendar();
+            gregorianCalendar.setTime(new Date());
+            gregorianCalendar.add(Calendar.DAY_OF_MONTH, -14);
+            if (project.getStartProjectDate() != null && project.getStartProjectDate().after(gregorianCalendar.getTime())) {
+                Label newBadge = uiComponents.create(Label.class);
+                newBadge.setHtmlEnabled(true);
+                newBadge.setValue("<span style='background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 1px 6px; border-radius: 8px; font-size: 10px; font-weight: 700;'>НОВЫЙ</span>");
+                newBadge.setAlignment(Component.Alignment.MIDDLE_LEFT);
+                retHBox.add(newBadge);
+            }
+
+            Label nameLabel = uiComponents.create(Label.class);
+            nameLabel.setValue(project.getProjectName() != null ? project.getProjectName() : "");
+            nameLabel.setStyleName("bold");
+            nameLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
+            retHBox.add(nameLabel);
+            retHBox.expand(nameLabel);
+
+            return retHBox;
+        });
+
+        projectsTable.addGeneratedColumn("projectStatus", project -> {
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.setHeightFull();
+            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Label label = uiComponents.create(Label.class);
+            label.setHtmlEnabled(true);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (Boolean.TRUE.equals(project.getProjectIsClosed())) {
+                label.setValue("<span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Закрыт</span>");
+            } else {
+                label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Открыт</span>");
+            }
+
+            box.add(label);
+            return box;
+        });
+
+        projectsTable.addGeneratedColumn("openPositionsCountColumn", project -> {
+            int count = (project != null && project.getId() != null) ? openPositionCountCache.getOrDefault(project.getId(), 0) : 0;
+
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.setHeightFull();
+            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Label label = uiComponents.create(Label.class);
+            label.setHtmlEnabled(true);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (count > 0) {
+                label.setValue("<span style='background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700;'>" + count + "</span>");
+            } else {
+                label.setValue("<span style='color: #94a3b8; font-size: 11px;'>0</span>");
+            }
+
+            box.add(label);
+            return box;
+        });
     }
 
     private void setupTableSelection() {
@@ -354,107 +422,5 @@ public class ProjectReestrBrowse extends StandardLookup<Project> {
         detailCuratorDept.setValue("-");
         detailCuratorContacts.setValue("-");
         detailDescription.setValue("<span style='color: #94a3b8;'>Проект не выбран</span>");
-    }
-
-    @Install(to = "projectsTable.projectLogoColumn", subject = "columnGenerator")
-    private Component projectsTableProjectLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> event) {
-        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
-        retBox.setWidthFull();
-        retBox.setHeightFull();
-        retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Image image = uiComponents.create(Image.class);
-        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-        image.setWidth("28px");
-        image.setHeight("28px");
-        image.setStyleName("icon-no-border-20px");
-        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Project project = event.getItem();
-        if (project.getProjectLogo() != null) {
-            image.setSource(FileDescriptorResource.class).setFileDescriptor(project.getProjectLogo());
-        } else {
-            image.setSource(ThemeResource.class).setPath("icons/no-company.png");
-        }
-
-        retBox.add(image);
-        return retBox;
-    }
-
-    @Install(to = "projectsTable.projectName", subject = "columnGenerator")
-    private Component projectsTableProjectNameColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> event) {
-        HBoxLayout retHBox = uiComponents.create(HBoxLayout.class);
-        retHBox.setWidthFull();
-        retHBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
-        retHBox.setHeightFull();
-        retHBox.setSpacing(true);
-
-        Project project = event.getItem();
-
-        // Бейдж «Новый»
-        GregorianCalendar gregorianCalendar = new GregorianCalendar();
-        gregorianCalendar.setTime(new Date());
-        gregorianCalendar.add(Calendar.DAY_OF_MONTH, -14);
-        if (project.getStartProjectDate() != null && project.getStartProjectDate().after(gregorianCalendar.getTime())) {
-            Label newBadge = uiComponents.create(Label.class);
-            newBadge.setHtmlEnabled(true);
-            newBadge.setValue("<span style='background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 1px 6px; border-radius: 8px; font-size: 10px; font-weight: 700;'>НОВЫЙ</span>");
-            newBadge.setAlignment(Component.Alignment.MIDDLE_LEFT);
-            retHBox.add(newBadge);
-        }
-
-        Label nameLabel = uiComponents.create(Label.class);
-        nameLabel.setValue(project.getProjectName() != null ? project.getProjectName() : "");
-        nameLabel.setStyleName("bold");
-        nameLabel.setAlignment(Component.Alignment.MIDDLE_LEFT);
-        retHBox.add(nameLabel);
-        retHBox.expand(nameLabel);
-
-        return retHBox;
-    }
-
-    @Install(to = "projectsTable.projectStatus", subject = "columnGenerator")
-    private Component projectsTableProjectStatusColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> event) {
-        HBoxLayout box = uiComponents.create(HBoxLayout.class);
-        box.setWidthFull();
-        box.setHeightFull();
-        box.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Label label = uiComponents.create(Label.class);
-        label.setHtmlEnabled(true);
-        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        if (Boolean.TRUE.equals(event.getItem().getProjectIsClosed())) {
-            label.setValue("<span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Закрыт</span>");
-        } else {
-            label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Открыт</span>");
-        }
-
-        box.add(label);
-        return box;
-    }
-
-    @Install(to = "projectsTable.openPositionsCountColumn", subject = "columnGenerator")
-    private Component projectsTableOpenPositionsCountColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Project> event) {
-        Project project = event.getItem();
-        int count = (project != null && project.getId() != null) ? openPositionCountCache.getOrDefault(project.getId(), 0) : 0;
-
-        HBoxLayout box = uiComponents.create(HBoxLayout.class);
-        box.setWidthFull();
-        box.setHeightFull();
-        box.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Label label = uiComponents.create(Label.class);
-        label.setHtmlEnabled(true);
-        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        if (count > 0) {
-            label.setValue("<span style='background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700;'>" + count + "</span>");
-        } else {
-            label.setValue("<span style='color: #94a3b8; font-size: 11px;'>0</span>");
-        }
-
-        box.add(label);
-        return box;
     }
 }

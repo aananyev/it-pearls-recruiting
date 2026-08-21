@@ -151,11 +151,11 @@
 
                 <!-- Карточка таблицы с rowsCount -->
                 <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="candidateCVsTable">
-                    <dataGrid id="candidateCVsTable"
-                              width="100%"
-                              height="100%"
-                              dataContainer="candidateCVsDc"
-                              stylename="borderless grid candidate-browse-grid">
+                    <groupTable id="candidateCVsTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="candidateCVsDc"
+                                stylename="borderless grid candidate-browse-grid">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -164,44 +164,17 @@
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
-                            <column id="cvReady"
-                                    caption="Готовность"
-                                    width="100px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="candidateFullName"
-                                    property="candidate.fullName"
-                                    caption="Кандидат (ФИО)"
-                                    expandRatio="2"/>
-                            <column id="toVacancyName"
-                                    property="toVacancy.vacansyName"
-                                    caption="Целевая вакансия"
-                                    expandRatio="2"/>
-                            <column id="resumePosition"
-                                    property="resumePosition"
-                                    caption="Должность"
-                                    expandRatio="1"/>
-                            <column id="originalFileColumn"
-                                    caption="Оригинал"
-                                    width="90px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="huntTechFileColumn"
-                                    caption="HuntTech"
-                                    width="90px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="owner"
-                                    property="owner"
-                                    caption="Рекрутер"
-                                    width="140px"/>
-                            <column id="datePost"
-                                    property="datePost"
-                                    caption="Дата"
-                                    width="110px"/>
+                            <column id="cvReady" caption="Готовность" width="100px" sortable="false"/>
+                            <column id="candidate.fullName" caption="Кандидат (ФИО)" expandRatio="2"/>
+                            <column id="toVacancy.vacansyName" caption="Целевая вакансия" expandRatio="2"/>
+                            <column id="resumePosition" caption="Должность" expandRatio="1"/>
+                            <column id="originalFileColumn" caption="Оригинал" width="90px" sortable="false"/>
+                            <column id="huntTechFileColumn" caption="HuntTech" width="90px" sortable="false"/>
+                            <column id="owner" caption="Рекрутер" width="140px"/>
+                            <column id="datePost" caption="Дата" width="110px"/>
                         </columns>
                         <rowsCount/>
-                    </dataGrid>
+                    </groupTable>
                 </vbox>
             </vbox>
         </hbox>

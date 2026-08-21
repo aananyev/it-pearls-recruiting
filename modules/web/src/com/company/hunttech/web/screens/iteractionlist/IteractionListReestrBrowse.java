@@ -43,7 +43,7 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
     @Inject
     private CollectionLoader<IteractionList> iteractionListsDl;
     @Inject
-    private DataGrid<IteractionList> iteractionListsTable;
+    private GroupTable<IteractionList> iteractionListsTable;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -108,8 +108,57 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
             suppressDateFromReload = false;
         }
 
+        setupTableColumns();
         setupTableSelection();
         setupSidebarButtons();
+    }
+
+    private void setupTableColumns() {
+        iteractionListsTable.addGeneratedColumn("ratingStars", item -> {
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.setHeightFull();
+            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Label label = uiComponents.create(Label.class);
+            label.setHtmlEnabled(true);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Integer rating = item != null ? item.getRating() : null;
+            if (rating != null && rating > 0) {
+                label.setValue(starsAndOtherService.setStars(rating));
+            } else {
+                label.setValue("<span style='color: #cbd5e1;'>—</span>");
+            }
+
+            box.add(label);
+            return box;
+        });
+
+        iteractionListsTable.addGeneratedColumn("vacancyStatus", item -> {
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.setHeightFull();
+            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Label label = uiComponents.create(Label.class);
+            label.setHtmlEnabled(true);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            OpenPosition vacancy = item != null ? item.getVacancy() : null;
+            if (vacancy != null) {
+                if (Boolean.TRUE.equals(vacancy.getOpenClose())) {
+                    label.setValue("<span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Закрыта</span>");
+                } else {
+                    label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Открыта</span>");
+                }
+            } else {
+                label.setValue("<span style='color: #cbd5e1;'>—</span>");
+            }
+
+            box.add(label);
+            return box;
+        });
     }
 
     private Date getDefaultDateFrom() {
@@ -358,53 +407,5 @@ public class IteractionListReestrBrowse extends StandardLookup<IteractionList> {
         detailRecruiter.setValue("-");
         detailCommMethod.setValue("-");
         detailComment.setValue("<span style='color: #94a3b8;'>Запись не выбрана</span>");
-    }
-
-    @Install(to = "iteractionListsTable.ratingStars", subject = "columnGenerator")
-    private Component iteractionListsTableRatingStarsColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        HBoxLayout box = uiComponents.create(HBoxLayout.class);
-        box.setWidthFull();
-        box.setHeightFull();
-        box.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Label label = uiComponents.create(Label.class);
-        label.setHtmlEnabled(true);
-        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Integer rating = event.getItem().getRating();
-        if (rating != null && rating > 0) {
-            label.setValue(starsAndOtherService.setStars(rating));
-        } else {
-            label.setValue("<span style='color: #cbd5e1;'>—</span>");
-        }
-
-        box.add(label);
-        return box;
-    }
-
-    @Install(to = "iteractionListsTable.vacancyStatus", subject = "columnGenerator")
-    private Component iteractionListsTableVacancyStatusColumnGenerator(DataGrid.ColumnGeneratorEvent<IteractionList> event) {
-        HBoxLayout box = uiComponents.create(HBoxLayout.class);
-        box.setWidthFull();
-        box.setHeightFull();
-        box.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Label label = uiComponents.create(Label.class);
-        label.setHtmlEnabled(true);
-        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        OpenPosition vacancy = event.getItem().getVacancy();
-        if (vacancy != null) {
-            if (Boolean.TRUE.equals(vacancy.getOpenClose())) {
-                label.setValue("<span style='background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Закрыта</span>");
-            } else {
-                label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Открыта</span>");
-            }
-        } else {
-            label.setValue("<span style='color: #cbd5e1;'>—</span>");
-        }
-
-        box.add(label);
-        return box;
     }
 }

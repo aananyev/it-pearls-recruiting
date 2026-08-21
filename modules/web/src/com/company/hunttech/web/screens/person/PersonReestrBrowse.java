@@ -24,7 +24,7 @@ public class PersonReestrBrowse extends StandardLookup<Person> {
     @Inject
     private CollectionLoader<Person> personsDl;
     @Inject
-    private DataGrid<Person> personsTable;
+    private GroupTable<Person> personsTable;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -59,8 +59,34 @@ public class PersonReestrBrowse extends StandardLookup<Person> {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        setupTableColumns();
         setupTableSelection();
         setupSidebarButtons();
+    }
+
+    private void setupTableColumns() {
+        personsTable.addGeneratedColumn("personPicColumn", person -> {
+            HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+            retBox.setWidthFull();
+            retBox.setHeightFull();
+            retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Image image = uiComponents.create(Image.class);
+            image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+            image.setWidth("24px");
+            image.setHeight("24px");
+            image.setStyleName("circle-20px");
+            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (person.getFileImageFace() != null) {
+                image.setSource(FileDescriptorResource.class).setFileDescriptor(person.getFileImageFace());
+            } else {
+                image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
+            }
+
+            retBox.add(image);
+            return retBox;
+        });
     }
 
     private void setupTableSelection() {
@@ -175,30 +201,5 @@ public class PersonReestrBrowse extends StandardLookup<Person> {
         detailWhatsApp.setValue("-");
         detailCompany.setValue("-");
         detailDepartment.setValue("-");
-    }
-
-    @Install(to = "personsTable.personPicColumn", subject = "columnGenerator")
-    private Component personsTablePersonPicColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Person> event) {
-        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
-        retBox.setWidthFull();
-        retBox.setHeightFull();
-        retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Image image = uiComponents.create(Image.class);
-        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-        image.setWidth("24px");
-        image.setHeight("24px");
-        image.setStyleName("circle-20px");
-        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Person person = event.getItem();
-        if (person.getFileImageFace() != null) {
-            image.setSource(FileDescriptorResource.class).setFileDescriptor(person.getFileImageFace());
-        } else {
-            image.setSource(ThemeResource.class).setPath("icons/no-programmer.jpeg");
-        }
-
-        retBox.add(image);
-        return retBox;
     }
 }

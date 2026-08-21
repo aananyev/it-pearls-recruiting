@@ -113,8 +113,6 @@
                     </hbox>
                     <hbox id="toolbarSpacer" width="100%"/>
                     <hbox id="rightActionButtons" spacing="true" align="MIDDLE_RIGHT" stylename="filter-buttons-panel">
-                        <label align="MIDDLE_LEFT" value="Иерархия:" stylename="edit-help" css="margin-right: 4px;"/>
-                        <lookupField id="columnSelector" width="140px" nullOptionVisible="false" textInputAllowed="false"/>
                         <popupButton id="filterPopupButton" caption="С открытыми вакансиями" icon="FILTER" stylename="secondary candidate-btn">
                             <actions>
                                 <action id="filterWithOpenPositions" caption="С открытыми вакансиями"/>
@@ -146,12 +144,11 @@
 
                 <!-- Карточка таблицы с rowsCount -->
                 <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="projectsTable">
-                    <treeDataGrid id="projectsTable"
-                                  width="100%"
-                                  height="100%"
-                                  hierarchyProperty="projectTree"
-                                  dataContainer="projectsDc"
-                                  stylename="borderless grid candidate-browse-grid">
+                    <groupTable id="projectsTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="projectsDc"
+                                stylename="borderless grid candidate-browse-grid">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -160,48 +157,17 @@
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
-                            <column id="projectLogoColumn"
-                                    caption="Лого"
-                                    resizable="false"
-                                    collapsible="false"
-                                    width="60px"
-                                    minimumWidth="50px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="projectName"
-                                    caption="Наименование проекта"
-                                    expandRatio="2">
-                                <componentRenderer/>
-                            </column>
-                            <column id="projectStatus"
-                                    caption="Статус"
-                                    width="110px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="startProjectDate"
-                                    property="startProjectDate"
-                                    caption="Дата старта"
-                                    width="110px"/>
-                            <column id="endProjectDate"
-                                    property="endProjectDate"
-                                    caption="Дата окончания"
-                                    width="120px"/>
-                            <column id="projectDepartment"
-                                    property="projectDepartment"
-                                    caption="Департамент / Компания"
-                                    expandRatio="1"/>
-                            <column id="projectOwner"
-                                    property="projectOwner"
-                                    caption="Куратор"
-                                    width="160px"/>
-                            <column id="openPositionsCountColumn"
-                                    caption="Вакансии"
-                                    width="90px">
-                                <componentRenderer/>
-                            </column>
+                            <column id="projectLogoColumn" caption="Лого" width="50px" sortable="false"/>
+                            <column id="projectName" caption="Наименование проекта" expandRatio="2"/>
+                            <column id="projectStatus" caption="Статус" width="100px" sortable="false"/>
+                            <column id="startProjectDate" caption="Дата старта" width="110px"/>
+                            <column id="endProjectDate" caption="Дата окончания" width="120px"/>
+                            <column id="projectDepartment" caption="Департамент / Компания" expandRatio="1"/>
+                            <column id="projectOwner" caption="Куратор" width="160px"/>
+                            <column id="openPositionsCountColumn" caption="Вакансии" width="90px" sortable="false"/>
                         </columns>
                         <rowsCount/>
-                    </treeDataGrid>
+                    </groupTable>
                 </vbox>
             </vbox>
         </hbox>

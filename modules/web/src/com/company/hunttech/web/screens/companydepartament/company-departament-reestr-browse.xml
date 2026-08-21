@@ -118,11 +118,11 @@
 
                 <!-- Карточка таблицы с rowsCount -->
                 <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="companyDepartamentsTable">
-                    <dataGrid id="companyDepartamentsTable"
-                              width="100%"
-                              height="100%"
-                              dataContainer="companyDepartamentsDc"
-                              stylename="borderless grid candidate-browse-grid">
+                    <groupTable id="companyDepartamentsTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="companyDepartamentsDc"
+                                stylename="borderless grid candidate-browse-grid">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -131,34 +131,15 @@
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
-                            <column id="departamentRuName"
-                                    property="departamentRuName"
-                                    caption="Департамент / Подразделение"
-                                    expandRatio="2"/>
-                            <column id="companyName"
-                                    property="companyName"
-                                    caption="Компания"
-                                    expandRatio="2"/>
-                            <column id="departamentDirector"
-                                    property="departamentDirector"
-                                    caption="Директор"
-                                    expandRatio="1"/>
-                            <column id="departamentHrDirector"
-                                    property="departamentHrDirector"
-                                    caption="HR-директор"
-                                    expandRatio="1"/>
-                            <column id="departamentNumberOfProgrammers"
-                                    property="departamentNumberOfProgrammers"
-                                    caption="Штат"
-                                    width="100px"/>
-                            <column id="projectsCountColumn"
-                                    caption="Проекты"
-                                    width="100px">
-                                <componentRenderer/>
-                            </column>
+                            <column id="departamentRuName" caption="Департамент / Подразделение" expandRatio="2"/>
+                            <column id="companyName" caption="Компания" expandRatio="2"/>
+                            <column id="departamentDirector" caption="Директор" expandRatio="1"/>
+                            <column id="departamentHrDirector" caption="HR-директор" expandRatio="1"/>
+                            <column id="departamentNumberOfProgrammers" caption="Штат" width="100px"/>
+                            <column id="projectsCountColumn" caption="Проекты" width="100px"/>
                         </columns>
                         <rowsCount/>
-                    </dataGrid>
+                    </groupTable>
                 </vbox>
             </vbox>
         </hbox>

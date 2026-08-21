@@ -42,7 +42,7 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
     @Inject
     private CollectionLoader<CandidateCV> candidateCVsDl;
     @Inject
-    private DataGrid<CandidateCV> candidateCVsTable;
+    private GroupTable<CandidateCV> candidateCVsTable;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -93,8 +93,74 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
     @Subscribe
     public void onInit(InitEvent event) {
         candidateCVsDl.setMaxResults(100);
+        setupTableColumns();
         setupTableSelection();
         setupSidebarButtons();
+    }
+
+    private void setupTableColumns() {
+        candidateCVsTable.addGeneratedColumn("cvReady", cv -> {
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.setHeightFull();
+            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Label label = uiComponents.create(Label.class);
+            label.setHtmlEnabled(true);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            boolean hasText = cv != null && cv.getId() != null && cvsWithText.contains(cv.getId());
+            boolean hasLetter = cv != null && cv.getId() != null && cvsWithLetter.contains(cv.getId());
+
+            if (hasText || hasLetter) {
+                label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Готово</span>");
+            } else {
+                label.setValue("<span style='background: #fef9c3; color: #a16207; border: 1px solid #fef08a; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Черновик</span>");
+            }
+
+            box.add(label);
+            return box;
+        });
+
+        candidateCVsTable.addGeneratedColumn("originalFileColumn", cv -> {
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.setHeightFull();
+            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Label label = uiComponents.create(Label.class);
+            label.setHtmlEnabled(true);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (cv != null && (cv.getOriginalFileCV() != null || (cv.getLinkOriginalCv() != null && !cv.getLinkOriginalCv().isEmpty()))) {
+                label.setValue("<span style='color: #16a34a; font-weight: 700;'>📄 Да</span>");
+            } else {
+                label.setValue("<span style='color: #cbd5e1;'>—</span>");
+            }
+
+            box.add(label);
+            return box;
+        });
+
+        candidateCVsTable.addGeneratedColumn("huntTechFileColumn", cv -> {
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.setHeightFull();
+            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Label label = uiComponents.create(Label.class);
+            label.setHtmlEnabled(true);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (cv != null && (cv.getFileCV() != null || (cv.getLinkHuntTechCV() != null && !cv.getLinkHuntTechCV().isEmpty()))) {
+                label.setValue("<span style='color: #2563eb; font-weight: 700;'>📄 Да</span>");
+            } else {
+                label.setValue("<span style='color: #cbd5e1;'>—</span>");
+            }
+
+            box.add(label);
+            return box;
+        });
     }
 
     @Subscribe
@@ -333,74 +399,5 @@ public class CandidateCVReestrBrowse extends StandardLookup<CandidateCV> {
         detailOriginalFile.setValue("-");
         detailHuntTechFile.setValue("-");
         detailLetter.setValue("<span style='color: #94a3b8;'>Резюме не выбрано</span>");
-    }
-
-    @Install(to = "candidateCVsTable.cvReady", subject = "columnGenerator")
-    private Component candidateCVsTableCvReadyColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        HBoxLayout box = uiComponents.create(HBoxLayout.class);
-        box.setWidthFull();
-        box.setHeightFull();
-        box.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Label label = uiComponents.create(Label.class);
-        label.setHtmlEnabled(true);
-        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        CandidateCV cv = event.getItem();
-        boolean hasText = cv != null && cv.getId() != null && cvsWithText.contains(cv.getId());
-        boolean hasLetter = cv != null && cv.getId() != null && cvsWithLetter.contains(cv.getId());
-
-        if (hasText || hasLetter) {
-            label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Готово</span>");
-        } else {
-            label.setValue("<span style='background: #fef9c3; color: #a16207; border: 1px solid #fef08a; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Черновик</span>");
-        }
-
-        box.add(label);
-        return box;
-    }
-
-    @Install(to = "candidateCVsTable.originalFileColumn", subject = "columnGenerator")
-    private Component candidateCVsTableOriginalFileColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        HBoxLayout box = uiComponents.create(HBoxLayout.class);
-        box.setWidthFull();
-        box.setHeightFull();
-        box.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Label label = uiComponents.create(Label.class);
-        label.setHtmlEnabled(true);
-        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        CandidateCV cv = event.getItem();
-        if (cv.getOriginalFileCV() != null || (cv.getLinkOriginalCv() != null && !cv.getLinkOriginalCv().isEmpty())) {
-            label.setValue("<span style='color: #16a34a; font-weight: 700;'>📄 Да</span>");
-        } else {
-            label.setValue("<span style='color: #cbd5e1;'>—</span>");
-        }
-
-        box.add(label);
-        return box;
-    }
-
-    @Install(to = "candidateCVsTable.huntTechFileColumn", subject = "columnGenerator")
-    private Component candidateCVsTableHuntTechFileColumnGenerator(DataGrid.ColumnGeneratorEvent<CandidateCV> event) {
-        HBoxLayout box = uiComponents.create(HBoxLayout.class);
-        box.setWidthFull();
-        box.setHeightFull();
-        box.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Label label = uiComponents.create(Label.class);
-        label.setHtmlEnabled(true);
-        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        CandidateCV cv = event.getItem();
-        if (cv.getFileCV() != null || (cv.getLinkHuntTechCV() != null && !cv.getLinkHuntTechCV().isEmpty())) {
-            label.setValue("<span style='color: #2563eb; font-weight: 700;'>📄 Да</span>");
-        } else {
-            label.setValue("<span style='color: #cbd5e1;'>—</span>");
-        }
-
-        box.add(label);
-        return box;
     }
 }

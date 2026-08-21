@@ -155,13 +155,11 @@
 
                 <!-- Карточка таблицы с rowsCount -->
                 <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="companiesTable">
-                    <treeDataGrid id="companiesTable"
-                                  width="100%"
-                                  height="100%"
-                                  hierarchyProperty="companyGroup"
-                                  hierarchyColumn="companyGroup"
-                                  dataContainer="companiesDc"
-                                  stylename="borderless grid candidate-browse-grid">
+                    <groupTable id="companiesTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="companiesDc"
+                                stylename="borderless grid candidate-browse-grid">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -170,47 +168,17 @@
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
-                            <column id="companyLogoColumn"
-                                    caption="Лого"
-                                    resizable="false"
-                                    collapsible="false"
-                                    width="60px"
-                                    minimumWidth="50px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="companyGroup"
-                                    property="companyGroup"
-                                    caption="Группа компаний"
-                                    width="160px"/>
-                            <column id="comanyName"
-                                    property="comanyName"
-                                    caption="Юридическое наименование"
-                                    expandRatio="2"/>
-                            <column id="companyShortName"
-                                    property="companyShortName"
-                                    caption="Бренд / Краткое наименование"
-                                    expandRatio="1"/>
-                            <column id="ourClientIconColumn"
-                                    width="110px"
-                                    caption="Клиент">
-                                <componentRenderer/>
-                            </column>
-                            <column id="ourCompanyIconColumn"
-                                    width="110px"
-                                    caption="Наше ЮЛ">
-                                <componentRenderer/>
-                            </column>
-                            <column id="cityOfCompany"
-                                    property="cityOfCompany"
-                                    caption="Город"
-                                    width="130px"/>
-                            <column id="countryOfCompany"
-                                    property="countryOfCompany"
-                                    caption="Страна"
-                                    width="120px"/>
+                            <column id="companyLogoColumn" caption="Лого" width="50px" sortable="false"/>
+                            <column id="companyGroup" caption="Группа компаний" width="160px"/>
+                            <column id="comanyName" caption="Юридическое наименование" expandRatio="2"/>
+                            <column id="companyShortName" caption="Бренд / Краткое наименование" expandRatio="1"/>
+                            <column id="ourClientIconColumn" caption="Клиент" width="100px" sortable="false"/>
+                            <column id="ourCompanyIconColumn" caption="Наше ЮЛ" width="100px" sortable="false"/>
+                            <column id="cityOfCompany" caption="Город" width="130px"/>
+                            <column id="countryOfCompany" caption="Страна" width="120px"/>
                         </columns>
                         <rowsCount/>
-                    </treeDataGrid>
+                    </groupTable>
                 </vbox>
             </vbox>
         </hbox>

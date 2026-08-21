@@ -131,11 +131,11 @@
 
                 <!-- Карточка таблицы с rowsCount -->
                 <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="personsTable">
-                    <dataGrid id="personsTable"
-                              width="100%"
-                              height="100%"
-                              dataContainer="personsDc"
-                              stylename="borderless grid candidate-browse-grid">
+                    <groupTable id="personsTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="personsDc"
+                                stylename="borderless grid candidate-browse-grid">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -144,45 +144,19 @@
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
-                            <column id="personPicColumn"
-                                    caption="Фото"
-                                    resizable="false"
-                                    collapsible="false"
-                                    width="60px"
-                                    minimumWidth="50px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="secondName"
-                                    property="secondName"
-                                    caption="Фамилия"
-                                    expandRatio="1"/>
-                            <column id="firstName"
-                                    property="firstName"
-                                    caption="Имя"
-                                    expandRatio="1"/>
-                            <column id="middleName"
-                                    property="middleName"
-                                    caption="Отчество"
-                                    expandRatio="1"/>
-                            <column id="personPosition"
-                                    property="personPosition"
-                                    caption="Должность"
-                                    expandRatio="2"/>
-                            <column id="companyDepartment"
-                                    property="companyDepartment"
-                                    caption="Компания / Отдел"
-                                    expandRatio="2"/>
-                            <column id="positionCountry"
-                                    property="positionCountry"
-                                    caption="Страна"
-                                    width="120px"/>
-                            <column id="cityOfResidence"
-                                    property="cityOfResidence"
-                                    caption="Город"
-                                    width="130px"/>
+                            <column id="personPicColumn" caption="Фото" width="50px" sortable="false"/>
+                            <column id="secondName" caption="Фамилия" expandRatio="1"/>
+                            <column id="firstName" caption="Имя" expandRatio="1"/>
+                            <column id="middleName" caption="Отчество" expandRatio="1"/>
+                            <column id="personPosition" caption="Должность" expandRatio="2"/>
+                            <column id="companyDepartment" caption="Компания / Отдел" expandRatio="2"/>
+                            <column id="positionCountry" caption="Страна" width="120px"/>
+                            <column id="cityOfResidence" caption="Город" width="120px"/>
+                            <column id="phone" caption="Телефон" width="120px"/>
+                            <column id="email" caption="Email" width="140px"/>
                         </columns>
                         <rowsCount/>
-                    </dataGrid>
+                    </groupTable>
                 </vbox>
             </vbox>
         </hbox>

@@ -40,7 +40,7 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
     @Inject
     private CollectionLoader<Company> companiesDl;
     @Inject
-    private TreeDataGrid<Company> companiesTable;
+    private GroupTable<Company> companiesTable;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -87,9 +87,79 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        setupTableColumns();
         setupTableSelection();
         setupFilterActions();
         setupSidebarButtons();
+    }
+
+    private void setupTableColumns() {
+        companiesTable.addGeneratedColumn("companyLogoColumn", company -> {
+            HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
+            retBox.setWidthFull();
+            retBox.setHeightFull();
+            retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Image image = uiComponents.create(Image.class);
+            image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
+            image.setWidth("24px");
+            image.setHeight("24px");
+            image.setStyleName("icon-no-border-20px");
+            image.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            String desc = company.getId() != null ? companyDescriptionCache.get(company.getId()) : null;
+            image.setDescription("<h4>" + (company.getComanyName() != null ? company.getComanyName() : "") + "</h4>" +
+                    (desc != null ? "<br>" + Jsoup.parse(desc).text() : ""));
+
+            if (company.getFileCompanyLogo() != null) {
+                image.setSource(FileDescriptorResource.class).setFileDescriptor(company.getFileCompanyLogo());
+            } else {
+                image.setSource(ThemeResource.class).setPath("icons/no-company.png");
+            }
+
+            retBox.add(image);
+            return retBox;
+        });
+
+        companiesTable.addGeneratedColumn("ourClientIconColumn", company -> {
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.setHeightFull();
+            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Label label = uiComponents.create(Label.class);
+            label.setHtmlEnabled(true);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (Boolean.TRUE.equals(company.getOurClient())) {
+                label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Клиент</span>");
+            } else {
+                label.setValue("<span style='color: #cbd5e1; font-size: 11px;'>—</span>");
+            }
+
+            box.add(label);
+            return box;
+        });
+
+        companiesTable.addGeneratedColumn("ourCompanyIconColumn", company -> {
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.setHeightFull();
+            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Label label = uiComponents.create(Label.class);
+            label.setHtmlEnabled(true);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (Boolean.TRUE.equals(company.getOurLegalEntity())) {
+                label.setValue("<span style='background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Наше ЮЛ</span>");
+            } else {
+                label.setValue("<span style='color: #cbd5e1; font-size: 11px;'>—</span>");
+            }
+
+            box.add(label);
+            return box;
+        });
     }
 
     private void setupTableSelection() {
@@ -324,77 +394,5 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
         detailProjectsCount.setValue("0");
         detailPositionsCount.setValue("0");
         detailDescription.setValue("<span style='color: #94a3b8;'>Компания не выбрана</span>");
-    }
-
-    @Install(to = "companiesTable.companyLogoColumn", subject = "columnGenerator")
-    private Component companiesTableCompanyLogoColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Company> event) {
-        HBoxLayout retBox = uiComponents.create(HBoxLayout.class);
-        retBox.setWidthFull();
-        retBox.setHeightFull();
-        retBox.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Image image = uiComponents.create(Image.class);
-        image.setDescriptionAsHtml(true);
-        image.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-        image.setWidth("28px");
-        image.setHeight("28px");
-        image.setStyleName("icon-no-border-20px");
-        image.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Company company = event.getItem();
-        String desc = company.getId() != null ? companyDescriptionCache.get(company.getId()) : null;
-        image.setDescription("<h4>" + (company.getComanyName() != null ? company.getComanyName() : "") + "</h4>" +
-                (desc != null ? "<br>" + Jsoup.parse(desc).text() : ""));
-
-        if (company.getFileCompanyLogo() != null) {
-            image.setSource(FileDescriptorResource.class).setFileDescriptor(company.getFileCompanyLogo());
-        } else {
-            image.setSource(ThemeResource.class).setPath("icons/no-company.png");
-        }
-
-        retBox.add(image);
-        return retBox;
-    }
-
-    @Install(to = "companiesTable.ourClientIconColumn", subject = "columnGenerator")
-    private Component companiesTableOurClientIconColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Company> event) {
-        HBoxLayout box = uiComponents.create(HBoxLayout.class);
-        box.setWidthFull();
-        box.setHeightFull();
-        box.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Label label = uiComponents.create(Label.class);
-        label.setHtmlEnabled(true);
-        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        if (Boolean.TRUE.equals(event.getItem().getOurClient())) {
-            label.setValue("<span style='background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Клиент</span>");
-        } else {
-            label.setValue("<span style='color: #cbd5e1; font-size: 11px;'>—</span>");
-        }
-
-        box.add(label);
-        return box;
-    }
-
-    @Install(to = "companiesTable.ourCompanyIconColumn", subject = "columnGenerator")
-    private Component companiesTableOurCompanyIconColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<Company> event) {
-        HBoxLayout box = uiComponents.create(HBoxLayout.class);
-        box.setWidthFull();
-        box.setHeightFull();
-        box.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Label label = uiComponents.create(Label.class);
-        label.setHtmlEnabled(true);
-        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        if (Boolean.TRUE.equals(event.getItem().getOurLegalEntity())) {
-            label.setValue("<span style='background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;'>Наше ЮЛ</span>");
-        } else {
-            label.setValue("<span style='color: #cbd5e1; font-size: 11px;'>—</span>");
-        }
-
-        box.add(label);
-        return box;
     }
 }

@@ -96,11 +96,11 @@
 
                 <!-- Карточка таблицы с rowsCount -->
                 <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="companyGroupsTable">
-                    <dataGrid id="companyGroupsTable"
-                              width="100%"
-                              height="100%"
-                              dataContainer="companyGroupsDc"
-                              stylename="borderless grid candidate-browse-grid">
+                    <groupTable id="companyGroupsTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="companyGroupsDc"
+                                stylename="borderless grid candidate-browse-grid">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -109,18 +109,11 @@
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
-                            <column id="companyRuGroupName"
-                                    property="companyRuGroupName"
-                                    caption="Группа компаний / Холдинг"
-                                    expandRatio="3"/>
-                            <column id="companiesCountColumn"
-                                    caption="Компаний"
-                                    width="120px">
-                                <componentRenderer/>
-                            </column>
+                            <column id="companyRuGroupName" caption="Группа компаний / Холдинг" expandRatio="3"/>
+                            <column id="companiesCountColumn" caption="Компаний" width="120px"/>
                         </columns>
                         <rowsCount/>
-                    </dataGrid>
+                    </groupTable>
                 </vbox>
             </vbox>
         </hbox>

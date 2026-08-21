@@ -156,11 +156,11 @@
 
                 <!-- Карточка таблицы с rowsCount -->
                 <vbox id="tableCard" width="100%" height="100%" spacing="false" stylename="edit-card candidate-table-card" expand="iteractionListsTable">
-                    <dataGrid id="iteractionListsTable"
-                              width="100%"
-                              height="100%"
-                              dataContainer="iteractionListsDc"
-                              stylename="borderless grid candidate-browse-grid">
+                    <groupTable id="iteractionListsTable"
+                                width="100%"
+                                height="100%"
+                                dataContainer="iteractionListsDc"
+                                stylename="borderless grid candidate-browse-grid">
                         <actions>
                             <action id="create" type="create"/>
                             <action id="edit" type="edit"/>
@@ -169,47 +169,18 @@
                             <action id="refresh" type="refresh"/>
                         </actions>
                         <columns>
-                            <column id="numberIteraction"
-                                    property="numberIteraction"
-                                    caption="№"
-                                    width="70px"/>
-                            <column id="ratingStars"
-                                    caption="Рейтинг"
-                                    width="105px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="candidateFullName"
-                                    property="candidate.fullName"
-                                    caption="Кандидат"
-                                    expandRatio="2"/>
-                            <column id="iteractionType"
-                                    property="iteractionType"
-                                    caption="Тип взаимодействия"
-                                    expandRatio="2"/>
-                            <column id="vacancyProject"
-                                    property="vacancy.projectName.projectName"
-                                    caption="Проект"
-                                    width="160px"/>
-                            <column id="vacancyName"
-                                    property="vacancy.vacansyName"
-                                    caption="Вакансия"
-                                    expandRatio="2"/>
-                            <column id="vacancyStatus"
-                                    caption="Статус вакансии"
-                                    width="120px">
-                                <componentRenderer/>
-                            </column>
-                            <column id="recrutier"
-                                    property="recrutier"
-                                    caption="Рекрутер"
-                                    width="140px"/>
-                            <column id="dateIteraction"
-                                    property="dateIteraction"
-                                    caption="Дата"
-                                    width="110px"/>
+                            <column id="numberIteraction" caption="№" width="70px"/>
+                            <column id="ratingStars" caption="Рейтинг" width="105px" sortable="false"/>
+                            <column id="candidate.fullName" caption="Кандидат" expandRatio="2"/>
+                            <column id="iteractionType" caption="Тип взаимодействия" expandRatio="2"/>
+                            <column id="vacancy.projectName.projectName" caption="Проект" width="160px"/>
+                            <column id="vacancy.vacansyName" caption="Вакансия" expandRatio="2"/>
+                            <column id="vacancyStatus" caption="Статус вакансии" width="120px" sortable="false"/>
+                            <column id="recrutier" caption="Рекрутер" width="140px"/>
+                            <column id="dateIteraction" caption="Дата" width="110px"/>
                         </columns>
                         <rowsCount/>
-                    </dataGrid>
+                    </groupTable>
                 </vbox>
             </vbox>
         </hbox>

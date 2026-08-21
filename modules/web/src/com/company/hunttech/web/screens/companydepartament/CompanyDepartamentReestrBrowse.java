@@ -36,7 +36,7 @@ public class CompanyDepartamentReestrBrowse extends StandardLookup<CompanyDepart
     @Inject
     private CollectionLoader<CompanyDepartament> companyDepartamentsDl;
     @Inject
-    private DataGrid<CompanyDepartament> companyDepartamentsTable;
+    private GroupTable<CompanyDepartament> companyDepartamentsTable;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -68,8 +68,33 @@ public class CompanyDepartamentReestrBrowse extends StandardLookup<CompanyDepart
 
     @Subscribe
     public void onInit(InitEvent event) {
+        setupTableColumns();
         setupTableSelection();
         setupSidebarButtons();
+    }
+
+    private void setupTableColumns() {
+        companyDepartamentsTable.addGeneratedColumn("projectsCountColumn", dept -> {
+            int count = (dept != null && dept.getId() != null) ? deptProjectsCountCache.getOrDefault(dept.getId(), 0) : 0;
+
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.setHeightFull();
+            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Label label = uiComponents.create(Label.class);
+            label.setHtmlEnabled(true);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (count > 0) {
+                label.setValue("<span style='background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700;'>" + count + "</span>");
+            } else {
+                label.setValue("<span style='color: #94a3b8; font-size: 11px;'>0</span>");
+            }
+
+            box.add(label);
+            return box;
+        });
     }
 
     private void setupTableSelection() {
@@ -204,29 +229,5 @@ public class CompanyDepartamentReestrBrowse extends StandardLookup<CompanyDepart
         detailStaffCount.setValue("-");
         detailProjectsCount.setValue("0");
         detailDescription.setValue("<span style='color: #94a3b8;'>Департамент не выбран</span>");
-    }
-
-    @Install(to = "companyDepartamentsTable.projectsCountColumn", subject = "columnGenerator")
-    private Component companyDepartamentsTableProjectsCountColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<CompanyDepartament> event) {
-        CompanyDepartament dept = event.getItem();
-        int count = (dept != null && dept.getId() != null) ? deptProjectsCountCache.getOrDefault(dept.getId(), 0) : 0;
-
-        HBoxLayout box = uiComponents.create(HBoxLayout.class);
-        box.setWidthFull();
-        box.setHeightFull();
-        box.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Label label = uiComponents.create(Label.class);
-        label.setHtmlEnabled(true);
-        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        if (count > 0) {
-            label.setValue("<span style='background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700;'>" + count + "</span>");
-        } else {
-            label.setValue("<span style='color: #94a3b8; font-size: 11px;'>0</span>");
-        }
-
-        box.add(label);
-        return box;
     }
 }

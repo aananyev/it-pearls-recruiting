@@ -31,7 +31,7 @@ public class CompanyGroupReestrBrowse extends StandardLookup<CompanyGroup> {
     @Inject
     private CollectionLoader<CompanyGroup> companyGroupsDl;
     @Inject
-    private DataGrid<CompanyGroup> companyGroupsTable;
+    private GroupTable<CompanyGroup> companyGroupsTable;
     @Inject
     private UiComponents uiComponents;
     @Inject
@@ -56,8 +56,34 @@ public class CompanyGroupReestrBrowse extends StandardLookup<CompanyGroup> {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        setupTableColumns();
         setupTableSelection();
         setupSidebarButtons();
+    }
+
+    private void setupTableColumns() {
+        companyGroupsTable.addGeneratedColumn("companiesCountColumn", group -> {
+            List<String> list = (group != null && group.getId() != null) ? groupCompaniesCache.getOrDefault(group.getId(), Collections.emptyList()) : Collections.emptyList();
+            int count = list.size();
+
+            HBoxLayout box = uiComponents.create(HBoxLayout.class);
+            box.setWidthFull();
+            box.setHeightFull();
+            box.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            Label label = uiComponents.create(Label.class);
+            label.setHtmlEnabled(true);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+            if (count > 0) {
+                label.setValue("<span style='background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700;'>" + count + "</span>");
+            } else {
+                label.setValue("<span style='color: #94a3b8; font-size: 11px;'>0</span>");
+            }
+
+            box.add(label);
+            return box;
+        });
     }
 
     private void setupTableSelection() {
@@ -167,30 +193,5 @@ public class CompanyGroupReestrBrowse extends StandardLookup<CompanyGroup> {
         detailSubtitle.setValue("Холдинг / Группа компаний");
         detailCompaniesCount.setValue("0");
         detailCompaniesList.setValue("<span style='color: #94a3b8;'>Группа не выбрана</span>");
-    }
-
-    @Install(to = "companyGroupsTable.companiesCountColumn", subject = "columnGenerator")
-    private Component companyGroupsTableCompaniesCountColumnColumnGenerator(DataGrid.ColumnGeneratorEvent<CompanyGroup> event) {
-        CompanyGroup group = event.getItem();
-        List<String> list = (group != null && group.getId() != null) ? groupCompaniesCache.getOrDefault(group.getId(), Collections.emptyList()) : Collections.emptyList();
-        int count = list.size();
-
-        HBoxLayout box = uiComponents.create(HBoxLayout.class);
-        box.setWidthFull();
-        box.setHeightFull();
-        box.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        Label label = uiComponents.create(Label.class);
-        label.setHtmlEnabled(true);
-        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
-
-        if (count > 0) {
-            label.setValue("<span style='background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700;'>" + count + "</span>");
-        } else {
-            label.setValue("<span style='color: #94a3b8; font-size: 11px;'>0</span>");
-        }
-
-        box.add(label);
-        return box;
     }
 }
