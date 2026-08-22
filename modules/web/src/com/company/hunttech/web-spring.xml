@@ -62,6 +62,8 @@
                        value="com.company.hunttech.service.CompanyRequisitesIngestService"/>
                 <entry key="hunttech_CompanySearchAiService"
                        value="com.company.hunttech.service.CompanySearchAiService"/>
+                <entry key="hunttech_GeoDataEnrichmentService"
+                       value="com.company.hunttech.service.GeoDataEnrichmentService"/>
             </map>
         </property>
     </bean>
