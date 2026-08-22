@@ -134,6 +134,12 @@ public class SmartOpenPositionIngestServiceBean implements SmartOpenPositionInge
 
                 String aiText = extractCleanJson(aiRawResponse);
                 JsonNode json = objectMapper.readTree(aiText);
+                
+                // AI может вернуть массив [{...}] вместо объекта {...} — берём первый элемент
+                if (json.isArray() && json.size() > 0) {
+                    json = json.get(0);
+                }
+                
                 log.info("[SMART_VACANCY_OPENING] JSON успешно десериализован из AI-ответа: {}", json.toString());
 
                 // 1.1 Название вакансии (поддержка вариаций c/s и алиасов)
