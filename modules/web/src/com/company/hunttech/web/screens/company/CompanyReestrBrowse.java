@@ -300,7 +300,7 @@ public class CompanyReestrBrowse extends StandardLookup<Company> {
                         company = metadata.create(Company.class);
                         isNew = true;
                     }
-                    companyRequisitesIngestService.applyRequisitesToCompany(company, data);
+                    company = companyRequisitesIngestService.applyRequisitesToCompany(company, data);
                     if (company.getComanyName() == null || company.getComanyName().trim().isEmpty()) {
                         if (data.getLegalEntityName() != null && !data.getLegalEntityName().trim().isEmpty()) {
                             company.setComanyName(data.getLegalEntityName().trim());

@@ -31,5 +31,5 @@ public interface CompanyRequisitesIngestService {
     /**
      * Применение распарсенных реквизитов к объекту компании (включая привязку директора)
      */
-    void applyRequisitesToCompany(Company company, CompanyRequisitesParsedData data);
+    Company applyRequisitesToCompany(Company company, CompanyRequisitesParsedData data);
 }

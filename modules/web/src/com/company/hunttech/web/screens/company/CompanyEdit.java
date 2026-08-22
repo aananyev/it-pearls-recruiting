@@ -2,6 +2,9 @@ package com.company.hunttech.web.screens.company;
 
 import com.company.hunttech.entity.City;
 import com.company.hunttech.entity.Company;
+import com.company.hunttech.entity.Country;
+import com.company.hunttech.entity.Ownershup;
+import com.company.hunttech.entity.Person;
 import com.company.hunttech.entity.Region;
 import com.company.hunttech.service.CompanyRequisitesIngestService;
 import com.company.hunttech.service.CompanyRequisitesParsedData;
@@ -12,6 +15,8 @@ import com.haulmont.cuba.core.global.ViewBuilder;
 import com.haulmont.cuba.gui.Notifications;
 import com.haulmont.cuba.gui.Screens;
 import com.haulmont.cuba.gui.components.*;
+import com.haulmont.cuba.gui.model.CollectionLoader;
+import com.haulmont.cuba.gui.model.DataContext;
 import com.haulmont.cuba.gui.screen.*;
 import com.hunttech.hrm.web.components.WebOvaFallbackImage;
 
@@ -34,6 +39,18 @@ public class CompanyEdit extends StandardEditor<Company> {
     private FileUploadField companyLogoFileUpload;
     @Inject
     private DataManager dataManager;
+    @Inject
+    private DataContext dataContext;
+    @Inject
+    private CollectionLoader<Ownershup> companyOwnershipsLc;
+    @Inject
+    private CollectionLoader<Person> companyDirectorsLc;
+    @Inject
+    private CollectionLoader<City> cityOfCompaniesLc;
+    @Inject
+    private CollectionLoader<Region> regionOfCompaniesLc;
+    @Inject
+    private CollectionLoader<Country> countryOfCompaniesLc;
     @Inject
     private TabSheet mainTab;
     @Inject
@@ -214,10 +231,66 @@ public class CompanyEdit extends StandardEditor<Company> {
             if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
                 CompanyRequisitesParsedData data = screen.getParsedData();
                 if (data != null) {
-                    companyRequisitesIngestService.applyRequisitesToCompany(getEditedEntity(), data);
+                    Company applied = companyRequisitesIngestService.applyRequisitesToCompany(getEditedEntity(), data);
+
+                    // Перезагрузка коллекций опций на случай создания новых записей
+                    if (companyOwnershipsLc != null) companyOwnershipsLc.load();
+                    if (companyDirectorsLc != null) companyDirectorsLc.load();
+                    if (cityOfCompaniesLc != null) cityOfCompaniesLc.load();
+                    if (regionOfCompaniesLc != null) regionOfCompaniesLc.load();
+                    if (countryOfCompaniesLc != null) countryOfCompaniesLc.load();
+
+                    Company target = getEditedEntity();
+                    if (applied.getInn() != null) target.setInn(applied.getInn());
+                    if (applied.getKpp() != null) target.setKpp(applied.getKpp());
+                    if (applied.getOgrn() != null) target.setOgrn(applied.getOgrn());
+                    if (applied.getOkpo() != null) target.setOkpo(applied.getOkpo());
+                    if (applied.getOktmo() != null) target.setOktmo(applied.getOktmo());
+                    if (applied.getOkved() != null) target.setOkved(applied.getOkved());
+                    if (applied.getLegalEntityName() != null) target.setLegalEntityName(applied.getLegalEntityName());
+                    if (applied.getLegalAddress() != null) target.setLegalAddress(applied.getLegalAddress());
+                    if (applied.getActualAddress() != null) target.setActualAddress(applied.getActualAddress());
+                    if (applied.getPostalAddress() != null) target.setPostalAddress(applied.getPostalAddress());
+                    if (applied.getAddressOfCompany() != null) target.setAddressOfCompany(applied.getAddressOfCompany());
+                    if (applied.getBik() != null) target.setBik(applied.getBik());
+                    if (applied.getBankName() != null) target.setBankName(applied.getBankName());
+                    if (applied.getSettlementAccount() != null) target.setSettlementAccount(applied.getSettlementAccount());
+                    if (applied.getCorrespondentAccount() != null) target.setCorrespondentAccount(applied.getCorrespondentAccount());
+                    if (applied.getPhone() != null) target.setPhone(applied.getPhone());
+                    if (applied.getEmail() != null) target.setEmail(applied.getEmail());
+                    if (applied.getWebsite() != null) target.setWebsite(applied.getWebsite());
+
+                    if (target.getComanyName() == null || target.getComanyName().trim().isEmpty()) {
+                        if (applied.getComanyName() != null && !applied.getComanyName().trim().isEmpty()) {
+                            target.setComanyName(applied.getComanyName());
+                        }
+                    }
+                    if (target.getCompanyShortName() == null || target.getCompanyShortName().trim().isEmpty()) {
+                        if (applied.getCompanyShortName() != null && !applied.getCompanyShortName().trim().isEmpty()) {
+                            target.setCompanyShortName(applied.getCompanyShortName());
+                        }
+                    }
+
+                    // Привязка сущностей через DataContext для исключения Unfetched/Detached
+                    if (applied.getCompanyDirector() != null) {
+                        target.setCompanyDirector(dataContext.merge(applied.getCompanyDirector()));
+                    }
+                    if (applied.getCompanyOwnership() != null) {
+                        target.setCompanyOwnership(dataContext.merge(applied.getCompanyOwnership()));
+                    }
+                    if (applied.getCountryOfCompany() != null) {
+                        target.setCountryOfCompany(dataContext.merge(applied.getCountryOfCompany()));
+                    }
+                    if (applied.getRegionOfCompany() != null) {
+                        target.setRegionOfCompany(dataContext.merge(applied.getRegionOfCompany()));
+                    }
+                    if (applied.getCityOfCompany() != null) {
+                        target.setCityOfCompany(dataContext.merge(applied.getCityOfCompany()));
+                    }
+
                     notifications.create(Notifications.NotificationType.TRAY)
                             .withCaption("Реквизиты применены")
-                            .withDescription(getEditedEntity().getComanyName() != null ? getEditedEntity().getComanyName() : "")
+                            .withDescription(target.getComanyName() != null ? target.getComanyName() : (target.getLegalEntityName() != null ? target.getLegalEntityName() : ""))
                             .show();
                 }
             }

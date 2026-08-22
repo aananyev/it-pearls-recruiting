@@ -300,8 +300,11 @@ public class CompanyRequisitesIngestServiceBean implements CompanyRequisitesInge
     }
 
     @Override
-    public void applyRequisitesToCompany(Company company, CompanyRequisitesParsedData data) {
-        if (company == null || data == null) return;
+    public Company applyRequisitesToCompany(Company company, CompanyRequisitesParsedData data) {
+        if (company == null) {
+            company = metadata != null ? metadata.create(Company.class) : new Company();
+        }
+        if (data == null) return company;
 
         if (data.getInn() != null && !data.getInn().trim().isEmpty()) {
             company.setInn(data.getInn().trim());
@@ -410,6 +413,7 @@ public class CompanyRequisitesIngestServiceBean implements CompanyRequisitesInge
         if (director != null) {
             company.setCompanyDirector(director);
         }
+        return company;
     }
 
     private com.company.hunttech.entity.Ownershup resolveOrCreateOwnership(String name) {
