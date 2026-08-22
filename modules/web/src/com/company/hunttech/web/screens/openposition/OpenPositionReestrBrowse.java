@@ -220,48 +220,8 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
     private void initTableColumns() {
         if (openPositionsTable == null) return;
 
-        // Колонка 1: Приоритет (индикатор без текста)
-        openPositionsTable.addGeneratedColumn("priority", position -> {
-            Integer p = position.getPriority();
-            String iconPath = com.company.hunttech.web.StandartPriorityVacancy.NORMAL_ICON;
-            String desc = "Обычный";
-            if (p != null) {
-                switch (p) {
-                    case -1:
-                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.DRAFT_ICON;
-                        desc = "Черновик";
-                        break;
-                    case 0:
-                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.PAUSED_ICON;
-                        desc = "Приостановлена";
-                        break;
-                    case 1:
-                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.LOW_ICON;
-                        desc = "Низкий";
-                        break;
-                    case 2:
-                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.NORMAL_ICON;
-                        desc = "Обычный";
-                        break;
-                    case 3:
-                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.HIGH_ICON;
-                        desc = "Высокий";
-                        break;
-                    case 4:
-                        iconPath = com.company.hunttech.web.StandartPriorityVacancy.CRITICAL_ICON;
-                        desc = "Критический";
-                        break;
-                }
-            }
-            Image img = uiComponents.create(Image.class);
-            img.setWidth("18px");
-            img.setHeight("18px");
-            img.setScaleMode(Image.ScaleMode.SCALE_DOWN);
-            img.setSource(com.haulmont.cuba.gui.components.ThemeResource.class).setPath(iconPath);
-            img.setDescription(desc);
-            img.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            return img;
-        });
+        // Колонка 1: Приоритет (векторный индикатор с подсветкой и подсказкой)
+        openPositionsTable.addGeneratedColumn("priority", position -> renderPriorityBadge(position.getPriority()));
 
         // Колонка 2: Логотип проекта/компании (36px oval)
         openPositionsTable.addGeneratedColumn("logo", position -> {
@@ -1107,6 +1067,60 @@ public class OpenPositionReestrBrowse extends StandardLookup<OpenPosition> {
             this.statsDescription = statsDescription;
             this.aiExecution = aiExecution;
         }
+    }
+
+    private Component renderPriorityBadge(Integer priority) {
+        Label<String> lbl = uiComponents.create(Label.NAME);
+        lbl.setHtmlEnabled(true);
+        lbl.setDescriptionAsHtml(true);
+        lbl.setAlignment(Component.Alignment.MIDDLE_CENTER);
+
+        int p = priority != null ? priority : 2;
+        String html;
+        String desc;
+        switch (p) {
+            case 4: // Критический
+                desc = "<b>Критический приоритет</b><br>Требует немедленного внимания и первоочередного подбора кандидатов.";
+                html = "<div style='display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(239, 68, 68, 0.18); border: 1.5px solid #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.4); margin: 0 auto;'>"
+                        + "<svg width='11' height='11' viewBox='0 0 24 24' fill='#ef4444'><path d='M12 2L1 21h22L12 2zm0 3.5L20.3 19H3.7L12 5.5zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z'/></svg>"
+                        + "</div>";
+                break;
+            case 3: // Высокий
+                desc = "<b>Высокий приоритет</b><br>Повышенная срочность закрытия позиции.";
+                html = "<div style='display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(245, 158, 11, 0.18); border: 1.5px solid #f59e0b; box-shadow: 0 0 5px rgba(245, 158, 11, 0.35); margin: 0 auto;'>"
+                        + "<svg width='11' height='11' viewBox='0 0 24 24' fill='#f59e0b'><path d='M12 4l-7 7h4v8h6v-8h4z'/></svg>"
+                        + "</div>";
+                break;
+            case 1: // Низкий
+                desc = "<b>Низкий приоритет</b><br>Плановый фоновый подбор.";
+                html = "<div style='display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(59, 130, 246, 0.15); border: 1.5px solid #3b82f6; margin: 0 auto;'>"
+                        + "<svg width='11' height='11' viewBox='0 0 24 24' fill='#3b82f6'><path d='M12 20l7-7h-4V5H9v8H5z'/></svg>"
+                        + "</div>";
+                break;
+            case 0: // Приостановлена
+                desc = "<b>Приостановлена</b><br>Работа по вакансии временно приостановлена заказчиком.";
+                html = "<div style='display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(107, 114, 128, 0.15); border: 1.5px solid #6b7280; margin: 0 auto;'>"
+                        + "<svg width='9' height='9' viewBox='0 0 24 24' fill='#6b7280'><path d='M6 19h4V5H6v14zm8-14v14h4V5h-4z'/></svg>"
+                        + "</div>";
+                break;
+            case -1: // Черновик
+                desc = "<b>Черновик</b><br>Вакансия находится в стадии формирования и не опубликована.";
+                html = "<div style='display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(148, 163, 184, 0.15); border: 1.5px dashed #94a3b8; margin: 0 auto;'>"
+                        + "<svg width='10' height='10' viewBox='0 0 24 24' fill='#94a3b8'><path d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'/></svg>"
+                        + "</div>";
+                break;
+            case 2: // Обычный
+            default:
+                desc = "<b>Обычный приоритет</b><br>Стандартный рабочий приоритет вакансии.";
+                html = "<div style='display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); border: 1.5px solid #10b981; margin: 0 auto;'>"
+                        + "<svg width='8' height='8' viewBox='0 0 24 24' fill='#10b981'><circle cx='12' cy='12' r='10'/></svg>"
+                        + "</div>";
+                break;
+        }
+
+        lbl.setValue(html);
+        lbl.setDescription(desc);
+        return lbl;
     }
 
     @SafeVarargs
