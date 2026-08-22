@@ -191,7 +191,6 @@ public class WebProjectLogoFileUploadField extends WebFileUploadField {
             String property = containerSource.getMetaPropertyPath().getMetaProperty().getName();
             if (PROJECT_LOGO_PROPERTY.equals(property)
                     || COMPANY_LOGO_PROPERTY.equals(property)
-                    || COUNTRY_FLAG_PROPERTY.equals(property)
                     || CITY_EMBLEM_PROPERTY.equals(property)
                     || REGION_EMBLEM_PROPERTY.equals(property)) {
                 return ProcessingMode.LOGO;

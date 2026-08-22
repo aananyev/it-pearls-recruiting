@@ -42,8 +42,8 @@
                   height="100%"
                   spacing="true"
                   expand="countrySidebarSpacer">
-                <!-- Визуальный блок sidebar: круглый флаг страны 176×176 с fallback icons/dictionaries/country.png,
-                     загрузка файла и кнопка умной обработки флага. -->
+                <!-- Визуальный блок sidebar: квадратный флаг страны 176×176 с fallback icons/dictionaries/country.png
+                     и загрузкой файла флага. -->
                 <vbox id="countryVisual"
                       stylename="edit-sidebar-visual"
                       width="100%"
@@ -52,19 +52,16 @@
                     <vbox id="countryLogoPicBox"
                           spacing="false"
                           align="MIDDLE_CENTER">
-                        <ovaFallbackImage id="countryFlagFileImage"
-                                          dataContainer="countryDc"
-                                          property="fileFlag"
-                                          width="176px"
-                                          height="176px"
-                                          ovalWidth="176px"
-                                          ovalHeight="176px"
-                                          ovalBackground="#3a3e44"
-                                          fallbackThemePath="icons/dictionaries/country.png"
-                                          visible="true"
-                                          align="MIDDLE_CENTER"
-                                          stylename="dictionary-logo-image"
-                                          scaleMode="SCALE_DOWN"/>
+                        <fallbackImage id="countryFlagFileImage"
+                                       dataContainer="countryDc"
+                                       property="fileFlag"
+                                       width="176px"
+                                       height="176px"
+                                       fallbackThemePath="icons/dictionaries/country.png"
+                                       visible="true"
+                                       align="MIDDLE_CENTER"
+                                       stylename="country-flag-square-image"
+                                       scaleMode="CONTAIN"/>
                     </vbox>
                     <upload id="countryFlagFileUpload"
                             fileStoragePutMode="IMMEDIATE"
@@ -74,12 +71,6 @@
                             dropZone="countryVisual"
                             showClearButton="true"
                             property="fileFlag"/>
-                    <button id="enhanceFlagBtn"
-                            caption="msg://enhanceFlagCaption"
-                            icon="font-icon:MAGIC"
-                            stylename="secondary candidate-btn"
-                            width="100%"
-                            description="msg://enhanceFlagDescription"/>
                 </vbox>
                 <!-- Блок идентификации: название страны из контейнера.
                      Подпись типа записи убрана — название выровнено по центру
